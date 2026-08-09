@@ -9,6 +9,8 @@
   const TOKEN_COOKIE = "dd_auth_token";
   const USER_COOKIE = "dd_auth_user";
   const TOKEN_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+  const JSON_INFLIGHT = new Map();
+  const API_CACHE_PREFIX = "dd_api_cache_v243:";
 
   function normalizeText(value) {
     return String(value || "").trim();
@@ -121,6 +123,7 @@
     const status = Number(response?.status || 0);
     const contentType = normalizeText(response?.headers?.get('Content-Type')).toLowerCase();
     const cloudflareErrorType = normalizeText(response?.headers?.get('cf-error-type'));
+    const cloudflareRay = normalizeText(response?.headers?.get('cf-ray'));
     const raw = await response?.text().catch(() => '') || '';
     let data = null;
 
@@ -146,9 +149,93 @@
     error.detail = normalizeText(data?.detail);
     error.payload = data;
     error.cloudflareErrorType = cloudflareErrorType;
+    error.cloudflareRay = cloudflareRay;
     error.isCloudflareResourceLimit = resourceLimit;
-    error.isRetryable = status === 0 || status === 408 || status === 429 || status >= 500;
+    error.isRetryable = status === 0 || status === 408 || status === 429 || [500, 502, 503, 504].includes(status);
+    if (cloudflareRay && !String(error.message || '').includes(cloudflareRay)) {
+      error.message = `${error.message} Reference ${cloudflareRay}.`;
+    }
     throw error;
+  }
+
+  function cacheRead(cacheKey, { allowExpired = false } = {}) {
+    if (!cacheKey) return null;
+    try {
+      const raw = sessionStorage.getItem(`${API_CACHE_PREFIX}${cacheKey}`);
+      const parsed = JSON.parse(raw || 'null');
+      if (!parsed || typeof parsed !== 'object' || !parsed.data) return null;
+      const expiresAt = Number(parsed.expires_at || 0);
+      if (!allowExpired && expiresAt && Date.now() > expiresAt) return null;
+      return parsed.data;
+    } catch {
+      return null;
+    }
+  }
+
+  function cacheWrite(cacheKey, data, ttlMs) {
+    if (!cacheKey || !data || typeof data !== 'object') return;
+    try {
+      sessionStorage.setItem(`${API_CACHE_PREFIX}${cacheKey}`, JSON.stringify({
+        expires_at: Date.now() + Math.max(1000, Number(ttlMs || 30000)),
+        data
+      }));
+    } catch {}
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms || 0))));
+  }
+
+  async function apiJson(url, options = {}, config = {}) {
+    const method = String(options.method || 'GET').toUpperCase();
+    const safeRead = method === 'GET' || method === 'HEAD';
+    const dedupe = config.dedupe !== false && safeRead;
+    const requestKey = `${method}:${String(url)}`;
+    const cacheKey = normalizeText(config.cacheKey);
+    const cacheTtlMs = Math.max(1000, Number(config.cacheTtlMs || 30000));
+    const maxRetries = safeRead ? Math.max(0, Math.min(3, Number(config.retries ?? 2))) : 0;
+
+    if (config.preferCache && cacheKey) {
+      const cached = cacheRead(cacheKey);
+      if (cached) return { ...cached, _response_meta: { cached: true, stale: false } };
+    }
+
+    if (dedupe && JSON_INFLIGHT.has(requestKey)) return JSON_INFLIGHT.get(requestKey);
+
+    const task = (async () => {
+      let lastError = null;
+      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        try {
+          const response = await apiFetch(url, options);
+          const data = await readApiJson(response, { fallbackMessage: normalizeText(config.fallbackMessage) || 'Request failed.' });
+          if (cacheKey) cacheWrite(cacheKey, data, cacheTtlMs);
+          return { ...data, _response_meta: { cached: false, stale: false, attempt } };
+        } catch (error) {
+          lastError = error;
+          if (!safeRead || !error?.isRetryable || attempt >= maxRetries) break;
+          const backoff = [500, 1500, 4000][attempt] || 4000;
+          await delay(backoff);
+        }
+      }
+
+      if (cacheKey && config.staleOnError !== false && lastError?.isRetryable) {
+        const stale = cacheRead(cacheKey, { allowExpired: true });
+        if (stale) {
+          return {
+            ...stale,
+            _response_meta: { cached: true, stale: true, fallback_reason: lastError.code || 'temporary_service_error' }
+          };
+        }
+      }
+      throw lastError || new Error(normalizeText(config.fallbackMessage) || 'Request failed.');
+    })();
+
+    if (dedupe) JSON_INFLIGHT.set(requestKey, task);
+    try {
+      return await task;
+    } finally {
+      if (dedupe && JSON_INFLIGHT.get(requestKey) === task) JSON_INFLIGHT.delete(requestKey);
+    }
   }
 
   async function parseJson(response) {
@@ -269,6 +356,7 @@
     clearAuth,
     isLoggedIn,
     apiFetch,
+    apiJson,
     readApiJson,
     login,
     register,

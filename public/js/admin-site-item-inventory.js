@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let seedSearchText = '';
   let editingSiteInventoryId = 0;
   let inventoryTableEditMode = true;
+  let initialLoadStarted = false;
+  let seedLoadPromise = null;
+  let listLoadPromise = null;
+  const INVENTORY_DRAFT_KEY = 'dd_inventory_form_draft_v243';
 
 
   function setMessage(message, isError = false) {
@@ -24,17 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function readApiPayload(response, fallbackMessage = 'The server returned an unreadable response.') {
-    const contentType = String(response?.headers?.get?.('content-type') || '').toLowerCase();
-    const ray = String(response?.headers?.get?.('cf-ray') || '').trim();
-    const raw = await response.text();
-    if (contentType.includes('application/json')) {
-      try { return raw ? JSON.parse(raw) : {}; }
-      catch {
-        throw new Error(`${fallbackMessage} HTTP ${response.status}${ray ? ` • Cloudflare Ray ${ray}` : ''}.`);
-      }
-    }
-    const serverHint = raw && !raw.trim().startsWith('<') ? raw.trim().slice(0, 180) : '';
-    throw new Error(`${fallbackMessage} HTTP ${response.status}${ray ? ` • Cloudflare Ray ${ray}` : ''}.${serverHint ? ` ${serverHint}` : ' The server returned HTML instead of JSON.'}`);
+    return window.DDAuth.readApiJson(response, { fallbackMessage });
   }
 
   function fmtMoney(cents) {
@@ -133,9 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: JSON.stringify({ amazon_url: amazonUrl, source_type: sourceType })
       });
-      const contentType = String(response.headers.get('content-type') || '').toLowerCase();
-      const data = contentType.includes('application/json') ? await response.json() : null;
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Amazon metadata could not be loaded.');
+      const data = await readApiPayload(response, 'Amazon metadata could not be loaded.');
       applyAmazonDraft(data.draft || {}, data.warnings || []);
     } catch (error) {
       setAmazonLinkPreviewStatus(`${error.message || 'Amazon metadata could not be loaded.'} You may still paste the link into the manual form.`, true);
@@ -241,46 +233,57 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function readSeedJson(response) {
-    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
-    if (!contentType.includes('application/json')) {
-      const text = await response.text().catch(() => '');
-      throw new Error(text ? 'Inventory source dropdowns returned HTML instead of JSON.' : 'Failed to load inventory source dropdowns.');
-    }
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load inventory source dropdowns.');
-    return data;
+    return window.DDAuth.readApiJson(response, { fallbackMessage: 'Failed to load inventory source dropdowns.' });
   }
 
   async function loadSeedOptions() {
-    if (!window.DDAuth?.isLoggedIn()) return;
-    try {
-      const response = await window.DDAuth.apiFetch('/api/admin/product-resources?product_id=0&q=');
-      const data = await readSeedJson(response);
-      const rawResources = Array.isArray(data?.resources) ? data.resources : [];
-      catalogSeedOptions = rawResources.map((item) => ({
-        source_type: String(item.item_kind || item.source_type || 'other').trim() || 'other',
-        external_key: String(item.source_key || item.external_key || '').trim(),
-        item_name: String(item.name || item.item_name || '').trim(),
-        category: String(item.category || item.subcategory || '').trim(),
-        image_url: String(item.image_url || '').trim(),
-        on_hand_quantity: Number(item.on_hand_quantity || 0),
-        unit_cost_cents: Number(item.unit_cost_cents || 0),
-        stock_unit_label: String(item.stock_unit_label || 'unit').trim() || 'unit',
-        usage_unit_label: String(item.usage_unit_label || 'unit').trim() || 'unit',
-        usage_units_per_stock_unit: Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1),
-        amazon_url: String(item.amazon_url || '').trim(),
-        amazon_asin: String(item.amazon_asin || '').trim(),
-        amazon_title: String(item.amazon_title || '').trim(),
-        amazon_match_status: String(item.amazon_match_status || '').trim(),
-        supplier_name: String(item.supplier_name || '').trim(),
-        latest_order_id: String(item.latest_order_id || '').trim(),
-        latest_purchase_date: String(item.latest_purchase_date || '').trim()
-      })).filter((item) => item.external_key && item.item_name);
-      categorySeedOptions = [...new Set(catalogSeedOptions.map((item) => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-      renderSeedDropdowns();
-    } catch (error) {
-      setMessage(error.message || 'Failed to load inventory source dropdowns.', true);
-    }
+    if (!window.DDAuth?.isLoggedIn()) return null;
+    if (seedLoadPromise) return seedLoadPromise;
+    seedLoadPromise = (async () => {
+      try {
+        const data = await window.DDAuth.apiJson(
+          '/api/admin/product-resource-search?q=&limit=300',
+          { method: 'GET' },
+          {
+            fallbackMessage: 'Failed to load inventory source dropdowns.',
+            cacheKey: 'inventory-seed-resources',
+            cacheTtlMs: 120000,
+            retries: 2,
+            staleOnError: true
+          }
+        );
+        const rawResources = Array.isArray(data?.resources) ? data.resources : [];
+        catalogSeedOptions = rawResources.map((item) => ({
+          source_type: String(item.item_kind || item.source_type || 'other').trim().toLowerCase() || 'other',
+          external_key: String(item.source_key || item.external_key || '').trim(),
+          item_name: String(item.name || item.item_name || '').trim(),
+          category: String(item.category || item.subcategory || '').trim().toLowerCase(),
+          image_url: String(item.image_url || '').trim(),
+          on_hand_quantity: Number(item.on_hand_quantity || 0),
+          unit_cost_cents: Number(item.unit_cost_cents || 0),
+          stock_unit_label: String(item.stock_unit_label || 'unit').trim().toLowerCase() || 'unit',
+          usage_unit_label: String(item.usage_unit_label || 'unit').trim().toLowerCase() || 'unit',
+          usage_units_per_stock_unit: Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1),
+          amazon_url: String(item.amazon_url || '').trim(),
+          amazon_asin: String(item.amazon_asin || '').trim(),
+          amazon_title: String(item.amazon_title || '').trim(),
+          amazon_match_status: String(item.amazon_match_status || '').trim(),
+          supplier_name: String(item.supplier_name || '').trim(),
+          latest_order_id: String(item.latest_order_id || '').trim(),
+          latest_purchase_date: String(item.latest_purchase_date || '').trim()
+        })).filter((item) => item.external_key && item.item_name);
+        categorySeedOptions = [...new Set(catalogSeedOptions.map((item) => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        renderSeedDropdowns();
+        if (data?._response_meta?.stale) setMessage('The server was temporarily busy. Inventory source dropdowns are using the last saved browser copy.', true);
+        return data;
+      } catch (error) {
+        setMessage(error.message || 'Failed to load inventory source dropdowns.', true);
+        return null;
+      } finally {
+        seedLoadPromise = null;
+      }
+    })();
+    return seedLoadPromise;
   }
 
   function parseInventoryIds(text) {
@@ -453,9 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Bulk inventory cost update failed.');
-      return data;
+      return readApiPayload(response, 'Bulk inventory cost update failed.');
     } finally {
       if (button) {
         button.disabled = false;
@@ -517,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetInventoryForm() {
+    clearInventoryDraft();
     const form = document.getElementById('siteInventoryForm');
     form?.reset();
     editingSiteInventoryId = 0;
@@ -704,6 +706,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (event.key === 'Enter') { event.preventDefault(); previewAmazonLink(); }
     });
     document.getElementById('siteInventoryForm')?.addEventListener('submit', saveItem);
+    document.getElementById('siteInventoryForm')?.addEventListener('input', debounce(saveInventoryDraft, 250));
+    document.getElementById('siteInventoryForm')?.addEventListener('change', saveInventoryDraft);
     document.getElementById('siteInventoryImageUrl')?.addEventListener('input', updateSiteInventoryImagePreview);
     updateSiteInventoryImagePreview();
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
@@ -738,11 +742,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function readForm() {
     return {
       site_item_inventory_id: editingSiteInventoryId || undefined,
-      source_type: document.getElementById('siteInventorySourceType')?.value || 'other',
+      source_type: String(document.getElementById('siteInventorySourceType')?.value || 'other').trim().toLowerCase(),
       external_key: document.getElementById('siteInventoryExternalKey')?.value || '',
       item_name: document.getElementById('siteInventoryItemName')?.value || '',
       item_description: document.getElementById('siteInventoryItemDescription')?.value || '',
-      category: document.getElementById('siteInventoryCategory')?.value || '',
+      category: String(document.getElementById('siteInventoryCategory')?.value || '').trim().toLowerCase(),
       image_url: document.getElementById('siteInventoryImageUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
       amazon_url: document.getElementById('siteInventoryAmazonUrl')?.value || '',
@@ -753,19 +757,45 @@ document.addEventListener('DOMContentLoaded', () => {
       reorder_level: Number(document.getElementById('siteInventoryReorder')?.value || 0),
       preferred_reorder_quantity: Number(document.getElementById('siteInventoryPreferredReorderQty')?.value || 0),
       unit_cost_cents: dollarsToCents(document.getElementById('siteInventoryUnitCost')?.value || '0') || 0,
-      stock_unit_label: document.getElementById('siteInventoryStockUnitLabel')?.value || 'unit',
-      usage_unit_label: document.getElementById('siteInventoryUsageUnitLabel')?.value || 'unit',
+      stock_unit_label: String(document.getElementById('siteInventoryStockUnitLabel')?.value || 'unit').trim().toLowerCase() || 'unit',
+      usage_unit_label: String(document.getElementById('siteInventoryUsageUnitLabel')?.value || 'unit').trim().toLowerCase() || 'unit',
       usage_units_per_stock_unit: Math.max(1, Number(document.getElementById('siteInventoryUsageUnitsPerStock')?.value || 1) || 1),
       supplier_name: document.getElementById('siteInventorySupplierName')?.value || '',
       supplier_sku: document.getElementById('siteInventorySupplierSku')?.value || '',
       supplier_contact: document.getElementById('siteInventorySupplierContact')?.value || '',
-      reuse_status: document.getElementById('siteInventoryReuseStatus')?.value || '',
+      reuse_status: String(document.getElementById('siteInventoryReuseStatus')?.value || '').trim().toLowerCase(),
       is_on_reorder_list: document.getElementById('siteInventoryOnReorderList')?.checked ? 1 : 0,
       do_not_reorder: document.getElementById('siteInventoryDoNotReorder')?.checked ? 1 : 0,
       do_not_reuse: document.getElementById('siteInventoryDoNotReuse')?.checked ? 1 : 0,
       reorder_notes: document.getElementById('siteInventoryNotes')?.value || '',
       movement_note: document.getElementById('siteInventoryMovementNote')?.value || ''
     };
+  }
+
+  function saveInventoryDraft() {
+    try {
+      const payload = readForm();
+      if (!payload.item_name && !payload.external_key && !payload.amazon_url && !payload.source_url) return;
+      localStorage.setItem(INVENTORY_DRAFT_KEY, JSON.stringify({ saved_at: new Date().toISOString(), payload }));
+    } catch {}
+  }
+
+  function clearInventoryDraft() {
+    try { localStorage.removeItem(INVENTORY_DRAFT_KEY); } catch {}
+  }
+
+  function restoreInventoryDraft() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(INVENTORY_DRAFT_KEY) || 'null');
+      const payload = parsed?.payload;
+      if (!payload || typeof payload !== 'object') return false;
+      if (!payload.item_name && !payload.external_key && !payload.amazon_url && !payload.source_url) return false;
+      populateFormFromItem(payload);
+      setMessage('Recovered your unsaved inventory form from this browser. Review it before saving.');
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function renderMovements(movements) {
@@ -803,21 +833,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function saveItem(event) {
     event.preventDefault();
+    const saveButton = document.getElementById('siteInventorySaveButton');
+    const originalLabel = saveButton?.textContent || 'Save Inventory Item';
     try {
       const payload = readForm();
+      saveInventoryDraft();
       const isEditing = Number(payload.site_item_inventory_id || 0) > 0;
+      if (saveButton) { saveButton.disabled = true; saveButton.textContent = isEditing ? 'Saving changes…' : 'Adding item…'; }
       setMessage(isEditing ? 'Saving changes to this inventory item...' : 'Adding inventory item...');
       const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', {
         method: isEditing ? 'PATCH' : 'POST',
         body: JSON.stringify(payload)
       });
       const data = await readApiPayload(response, 'Inventory save failed.');
-      if (!response.ok || !data?.ok) throw new Error([data?.error, data?.diagnostic].filter(Boolean).join(' — ') || 'Failed to save inventory item.');
       if (data?.item) populateFormFromItem(data.item);
+      clearInventoryDraft();
       setMessage(isEditing ? 'Inventory item changes saved.' : 'Inventory item added. It remains open here for full editing.');
-      await loadList();
+      await loadList({ force: true });
     } catch (err) {
-      setMessage(err.message || 'Failed to save inventory item.', true);
+      saveInventoryDraft();
+      const retryNote = err?.isRetryable ? ' Your form is saved in this browser; wait a moment and press Save again.' : '';
+      setMessage(`${err.message || 'Failed to save inventory item.'}${retryNote}`, true);
+    } finally {
+      if (saveButton) { saveButton.disabled = false; saveButton.textContent = editingSiteInventoryId ? 'Save Changes to This Item' : originalLabel; }
     }
   }
 
@@ -863,14 +901,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (externalKeyEl) externalKeyEl.readOnly = editingSiteInventoryId > 0;
   }
 
-  async function loadList() {
-    try {
-      setMessage('Loading inventory list...');
-      const q = document.getElementById('siteInventorySearch')?.value || '';
-      const stockView = document.getElementById('siteInventoryStockView')?.value || '';
-      const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1&stock_view=${encodeURIComponent(stockView)}`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load inventory list.');
+  async function loadList({ force = false } = {}) {
+    if (listLoadPromise && !force) return listLoadPromise;
+    const task = (async () => {
+      try {
+        setMessage('Loading inventory list...');
+        const q = document.getElementById('siteInventorySearch')?.value || '';
+        const stockView = document.getElementById('siteInventoryStockView')?.value || '';
+        const cacheKey = `site-inventory:${String(q).trim().toLowerCase()}:${String(stockView).trim().toLowerCase()}`;
+        const data = await window.DDAuth.apiJson(
+          `/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1&stock_view=${encodeURIComponent(stockView)}`,
+          { method: 'GET' },
+          {
+            fallbackMessage: 'Failed to load inventory list.',
+            cacheKey,
+            cacheTtlMs: 45000,
+            retries: 2,
+            staleOnError: true
+          }
+        );
       const summary = data.summary || {};
       setValue('siteInventoryTotalItems', summary.total_items || 0);
       setValue('siteInventoryActiveItems', summary.active_items || 0);
@@ -880,7 +929,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setValue('siteInventoryReorderListCount', summary.reorder_list_items || 0);
 
       const items = Array.isArray(data.items) ? data.items : [];
-      if (!catalogSeedOptions.length) await loadSeedOptions();
       renderSeedDropdowns();
       const body = document.getElementById('siteInventoryList');
       if (!body) return;
@@ -918,10 +966,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       renderMovements(data.movements || []);
-      setMessage('');
-    } catch (err) {
-      setMessage(err.message || 'Failed to load inventory list.', true);
-    }
+      setMessage(data?._response_meta?.stale ? 'The server is temporarily busy. Showing the last saved inventory view; edits remain available and can be retried.' : '', Boolean(data?._response_meta?.stale));
+      } catch (err) {
+        setMessage(err.message || 'Failed to load inventory list.', true);
+      }
+    })();
+    listLoadPromise = task;
+    try { return await task; }
+    finally { if (listLoadPromise === task) listLoadPromise = null; }
   }
 
   async function onTableClick(event) {
@@ -948,8 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         saveRowBtn.disabled = true; saveRowBtn.textContent = 'Saving…';
         const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify(payload) });
-        const data = await response.json();
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Row update failed.');
+        const data = await readApiPayload(response, 'Row update failed.');
         setMessage(`${payload.item_name} updated.`);
         await loadList();
       } catch (error) {
@@ -1018,8 +1069,7 @@ document.addEventListener('DOMContentLoaded', () => {
             movement_note: movementNote || 'Inventory quantity / cost updated.'
           })
         });
-        const data = await response.json();
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to update inventory item.');
+        const data = await readApiPayload(response, 'Failed to update inventory item.');
         await loadList();
       } catch (error) {
         setMessage(error.message || 'Failed to update inventory item.', true);
@@ -1044,8 +1094,7 @@ document.addEventListener('DOMContentLoaded', () => {
           method: 'POST',
           body: JSON.stringify({ action, site_item_inventory_id: id, quantity: qty, note })
         });
-        const data = await response.json();
-        if (!response.ok || !data?.ok) throw new Error(data?.error || `Failed to ${action}.`);
+        const data = await readApiPayload(response, `Failed to ${action}.`);
         await loadList();
       } catch (error) {
         setMessage(error.message || `Failed to ${action}.`, true);
@@ -1059,8 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         setMessage('Deleting inventory item...');
         const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?site_item_inventory_id=${encodeURIComponent(id)}`, { method: 'DELETE' });
-        const data = await response.json();
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to delete inventory item.');
+        const data = await readApiPayload(response, 'Failed to delete inventory item.');
         await loadList();
       } catch (error) {
         setMessage(error.message || 'Failed to delete inventory item.', true);
@@ -1068,12 +1116,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  document.addEventListener('dd:admin-ready', (event) => {
-    if (!event?.detail?.ok) return;
+  function startInitialLoad() {
     render();
-    loadList();
+    if (initialLoadStarted || !window.DDAuth?.isLoggedIn()) return;
+    initialLoadStarted = true;
+    restoreInventoryDraft();
+    Promise.allSettled([loadSeedOptions(), loadList()]);
+  }
+
+  document.addEventListener('dd:admin-ready', (event) => {
+    if (event?.detail?.ok) startInitialLoad();
   });
 
   render();
-  if (window.DDAuth?.isLoggedIn()) { loadSeedOptions(); loadList(); }
+  if (window.DDAuth?.isLoggedIn()) startInitialLoad();
 });

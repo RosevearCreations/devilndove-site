@@ -19,7 +19,7 @@
     trackSearch(search_term, result_count = 0) { return post('/api/track/visit', { visitor_token, browser_session_token, path, query_string, page_title: document.title || '', page_h1: firstH1(), event_type: 'search', meta: { search_term, result_count } }); },
     trackFunnel(event_type, meta = {}) { return post('/api/track/visit', { visitor_token, browser_session_token, path, query_string, referrer: document.referrer || '', page_title: document.title || '', page_h1: firstH1(), event_type, meta }); }
   };
-  document.addEventListener('DOMContentLoaded', () => { window.DDAnalytics.trackVisit('page_view'); });
+  document.addEventListener('DOMContentLoaded', () => { if (!path.startsWith('/admin/')) window.DDAnalytics.trackVisit('page_view'); });
   if (path.includes('/checkout/')) { window.DDAnalytics.trackCart('checkout_started', { meta: { source: 'checkout_page_load' } }); }
-  window.addEventListener('beforeunload', () => { if (!/\/checkout\/confirmation\//.test(window.location.pathname)) { const cart = safeCartSummary(); if (cart.cart_count > 0) { try { navigator.sendBeacon('/api/track/cart', new Blob([JSON.stringify({ visitor_token, browser_session_token, event_type: window.location.pathname.includes('/checkout') ? 'cart_abandoned' : 'cart_active_exit', path, ...cart })], { type: 'application/json' })); } catch {} } } });
+  window.addEventListener('beforeunload', () => { if (!path.startsWith('/admin/') && !/\/checkout\/confirmation\//.test(window.location.pathname)) { const cart = safeCartSummary(); if (cart.cart_count > 0) { try { navigator.sendBeacon('/api/track/cart', new Blob([JSON.stringify({ visitor_token, browser_session_token, event_type: window.location.pathname.includes('/checkout') ? 'cart_abandoned' : 'cart_active_exit', path, ...cart })], { type: 'application/json' })); } catch {} } } });
 })();

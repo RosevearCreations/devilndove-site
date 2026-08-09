@@ -35,8 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
       setMsg('Loading product stock report...');
       const q = document.getElementById('productStockSearch')?.value || '';
       const lowOnly = document.getElementById('productStockLowOnly')?.value || '0';
-      const response = await window.DDAuth.apiFetch(`/api/admin/product-stock-report?q=${encodeURIComponent(q)}&low_only=${encodeURIComponent(lowOnly)}`);
-      const data = await response.json(); if(!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load product stock report.');
+      const url = `/api/admin/product-stock-report?q=${encodeURIComponent(q)}&low_only=${encodeURIComponent(lowOnly)}`;
+      const data = window.DDAuth.apiJson
+        ? await window.DDAuth.apiJson(url, {}, { cacheTtlMs: 30000, staleTtlMs: 300000, retries: 2 })
+        : await window.DDAuth.readApiJson(await window.DDAuth.apiFetch(url), 'Failed to load product stock report.');
       setValue('productStockTotal', data.summary?.total_products || 0); setValue('productStockLow', data.summary?.low_stock_products || 0); setValue('productStockTracked', data.summary?.tracked_products || 0); setValue('productStockLinked', data.summary?.products_with_resources || 0);
       const rows = Array.isArray(data.items) ? data.items : []; const body = document.getElementById('productStockRows'); if(!body) return;
       if(!rows.length){ body.innerHTML='<tr><td colspan="6" class="site-inventory-empty-row">No products matched the current filter.</td></tr>'; setMsg(''); return; }

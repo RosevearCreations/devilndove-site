@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutButtons = Array.from(document.querySelectorAll("[data-nav-logout]"));
   const linksWrap = document.querySelector('.nav .links');
   let floatingWidgetEl = null;
+  let lastAuthReadySignature = '';
 
   function show(el, shouldShow) { if (el) el.style.display = shouldShow ? "" : "none"; }
   function getSafeUserName(user) { return String(user?.display_name || user?.email || 'Member').trim() || 'Member'; }
@@ -101,14 +102,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function emitAuthEvents(user, session = null) {
+  function emitAuthEvents(user, session = null, { force = false } = {}) {
     const loggedIn = !!user;
     const role = String(user?.role || "").trim().toLowerCase();
     const isAdmin = loggedIn && role === 'admin';
-    document.dispatchEvent(new CustomEvent('dd:auth-ready', { detail: { ok: true, logged_in: loggedIn, user, session } }));
-    document.dispatchEvent(new CustomEvent('dd:member-access-ready', { detail: { ok: loggedIn, logged_in: loggedIn, user, session } }));
-    document.dispatchEvent(new CustomEvent('dd:members-ready', { detail: { ok: loggedIn, logged_in: loggedIn, user, session } }));
-    document.dispatchEvent(new CustomEvent('dd:admin-ready', { detail: { ok: isAdmin, logged_in: loggedIn, user, session } }));
+    const signature = `${loggedIn ? 1 : 0}:${Number(user?.user_id || 0)}:${role}`;
+    if (!force && signature === lastAuthReadySignature) return false;
+    lastAuthReadySignature = signature;
+    const detail = { ok: true, logged_in: loggedIn, user, session };
+    document.dispatchEvent(new CustomEvent('dd:auth-ready', { detail }));
+    document.dispatchEvent(new CustomEvent('dd:member-access-ready', { detail: { ...detail, ok: loggedIn } }));
+    document.dispatchEvent(new CustomEvent('dd:members-ready', { detail: { ...detail, ok: loggedIn } }));
+    document.dispatchEvent(new CustomEvent('dd:admin-ready', { detail: { ...detail, ok: isAdmin } }));
+    return true;
   }
 
   async function refreshAuthState() {
@@ -128,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await window.DDAuth.me();
       applyUi(data?.user || null);
       emitAuthEvents(data?.user || null, data?.session || null);
+      document.dispatchEvent(new CustomEvent('dd:auth-verified', { detail: { ok: true, logged_in: !!data?.user, user: data?.user || null, session: data?.session || null } }));
     } catch (error) {
       const status = Number(error?.httpStatus || 0);
       const authenticationRejected = status === 401 || status === 403;
