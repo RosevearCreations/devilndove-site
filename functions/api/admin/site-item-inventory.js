@@ -1,46 +1,9 @@
 // File: /functions/api/admin/site-item-inventory.js
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
-import { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } from "./_amazonInventoryMatches.js";
-import { ensureInventoryCostHistoryTable, recordInventoryCostHistory } from "./_inventoryCostHistory.js";
+import { recordInventoryCostHistory } from "./_inventoryCostHistory.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
-async function getTableColumnSet(db, tableName) {
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-    const rows = Array.isArray(result?.results) ? result.results : [];
-    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
-  } catch {
-    return new Set();
-  }
-}
-async function ensureUsageColumns(db) {
-  const cols = await getTableColumnSet(db, 'site_item_inventory');
-  if (!cols.has('stock_unit_label')) {
-    await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN stock_unit_label TEXT NOT NULL DEFAULT 'unit'`).run().catch(() => null);
-  }
-  if (!cols.has('usage_unit_label')) {
-    await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit'`).run().catch(() => null);
-  }
-  if (!cols.has('usage_units_per_stock_unit')) {
-    await db.prepare(`ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1`).run().catch(() => null);
-  }
-}
-
-async function ensureInventoryDescriptionSchema(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS site_inventory_item_descriptions (
-      site_inventory_item_description_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      site_item_inventory_id INTEGER NOT NULL UNIQUE,
-      item_description TEXT NOT NULL DEFAULT '',
-      updated_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE
-    )
-  `).run().catch(() => null);
-}
-
 async function saveItemDescription(db, siteItemInventoryId, description, userId = null) {
   const clean = normalizeText(description).slice(0, 600);
   if (!siteItemInventoryId) return;
@@ -53,83 +16,6 @@ async function saveItemDescription(db, siteItemInventoryId, description, userId 
       updated_by_user_id = excluded.updated_by_user_id,
       updated_at = CURRENT_TIMESTAMP
   `).bind(Number(siteItemInventoryId), clean, Number(userId || 0) || null).run().catch(() => null);
-}
-
-async function ensureSiteInventorySchema(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS site_item_inventory (
-      site_item_inventory_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      source_type TEXT NOT NULL,
-      external_key TEXT NOT NULL,
-      item_name TEXT NOT NULL,
-      category TEXT,
-      source_url TEXT,
-      amazon_url TEXT,
-      image_url TEXT,
-      on_hand_quantity INTEGER NOT NULL DEFAULT 1,
-      reserved_quantity INTEGER NOT NULL DEFAULT 0,
-      incoming_quantity INTEGER NOT NULL DEFAULT 0,
-      reorder_level INTEGER NOT NULL DEFAULT 0,
-      unit_cost_cents INTEGER NOT NULL DEFAULT 0,
-      stock_unit_label TEXT NOT NULL DEFAULT 'unit',
-      usage_unit_label TEXT NOT NULL DEFAULT 'unit',
-      usage_units_per_stock_unit REAL NOT NULL DEFAULT 1,
-      supplier_name TEXT,
-      supplier_sku TEXT,
-      supplier_contact TEXT,
-      reorder_notes TEXT,
-      preferred_reorder_quantity INTEGER NOT NULL DEFAULT 0,
-      is_on_reorder_list INTEGER NOT NULL DEFAULT 0,
-      do_not_reorder INTEGER NOT NULL DEFAULT 0,
-      do_not_reuse INTEGER NOT NULL DEFAULT 0,
-      reuse_status TEXT,
-      reservation_notes TEXT,
-      last_reorder_requested_at TEXT,
-      last_counted_at TEXT,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(source_type, external_key)
-    )
-  `).run();
-
-  const cols = await getTableColumnSet(db, 'site_item_inventory');
-  const migrations = [
-    ['source_url', `ALTER TABLE site_item_inventory ADD COLUMN source_url TEXT`],
-    ['amazon_url', `ALTER TABLE site_item_inventory ADD COLUMN amazon_url TEXT`],
-    ['image_url', `ALTER TABLE site_item_inventory ADD COLUMN image_url TEXT`],
-    ['reserved_quantity', `ALTER TABLE site_item_inventory ADD COLUMN reserved_quantity INTEGER NOT NULL DEFAULT 0`],
-    ['incoming_quantity', `ALTER TABLE site_item_inventory ADD COLUMN incoming_quantity INTEGER NOT NULL DEFAULT 0`],
-    ['unit_cost_cents', `ALTER TABLE site_item_inventory ADD COLUMN unit_cost_cents INTEGER NOT NULL DEFAULT 0`],
-    ['stock_unit_label', `ALTER TABLE site_item_inventory ADD COLUMN stock_unit_label TEXT NOT NULL DEFAULT 'unit'`],
-    ['usage_unit_label', `ALTER TABLE site_item_inventory ADD COLUMN usage_unit_label TEXT NOT NULL DEFAULT 'unit'`],
-    ['usage_units_per_stock_unit', `ALTER TABLE site_item_inventory ADD COLUMN usage_units_per_stock_unit REAL NOT NULL DEFAULT 1`],
-    ['supplier_name', `ALTER TABLE site_item_inventory ADD COLUMN supplier_name TEXT`],
-    ['supplier_sku', `ALTER TABLE site_item_inventory ADD COLUMN supplier_sku TEXT`],
-    ['supplier_contact', `ALTER TABLE site_item_inventory ADD COLUMN supplier_contact TEXT`],
-    ['preferred_reorder_quantity', `ALTER TABLE site_item_inventory ADD COLUMN preferred_reorder_quantity INTEGER NOT NULL DEFAULT 0`],
-    ['is_on_reorder_list', `ALTER TABLE site_item_inventory ADD COLUMN is_on_reorder_list INTEGER NOT NULL DEFAULT 0`],
-    ['do_not_reorder', `ALTER TABLE site_item_inventory ADD COLUMN do_not_reorder INTEGER NOT NULL DEFAULT 0`],
-    ['do_not_reuse', `ALTER TABLE site_item_inventory ADD COLUMN do_not_reuse INTEGER NOT NULL DEFAULT 0`],
-    ['reuse_status', `ALTER TABLE site_item_inventory ADD COLUMN reuse_status TEXT`],
-    ['reservation_notes', `ALTER TABLE site_item_inventory ADD COLUMN reservation_notes TEXT`],
-    ['last_reorder_requested_at', `ALTER TABLE site_item_inventory ADD COLUMN last_reorder_requested_at TEXT`],
-    ['last_counted_at', `ALTER TABLE site_item_inventory ADD COLUMN last_counted_at TEXT`],
-    ['last_seen_at', `ALTER TABLE site_item_inventory ADD COLUMN last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
-    ['created_at', `ALTER TABLE site_item_inventory ADD COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
-    ['updated_at', `ALTER TABLE site_item_inventory ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
-    ['is_active', `ALTER TABLE site_item_inventory ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`]
-  ];
-
-  for (const [name, sql] of migrations) {
-    if (!cols.has(name)) await db.prepare(sql).run().catch(() => null);
-  }
-
-  await db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_site_item_inventory_source_key_unique ON site_item_inventory(source_type, external_key)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_site_item_inventory_source ON site_item_inventory(source_type, category)`).run().catch(() => null);
-  await ensureInventoryDescriptionSchema(db).catch(() => null);
-  await ensureInventoryCostHistoryTable(db).catch(() => null);
 }
 
 function shape(row = {}) {
@@ -342,22 +228,14 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
 }
 
 async function adjustProductResourceReservations(db, { productId = 0, quantityMultiplier = 1, release = false, note = '', actorUserId = null } = {}) {
-  const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
-  const supportsConsumptionMode = resourceLinkColumns.has('consumption_mode');
-  const supportsLotSizeUnits = resourceLinkColumns.has('lot_size_units');
-
-  const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
-  const supportsUsageUnitsPerStockUnit = inventoryColumns.has('usage_units_per_stock_unit');
-  const supportsUsageUnitLabel = inventoryColumns.has('usage_unit_label');
-
   const links = normalizeResults(await db.prepare(`
     SELECT
       prl.product_resource_link_id,
       prl.resource_kind,
       prl.source_key,
       COALESCE(prl.quantity_used, 0) AS quantity_used,
-      ${supportsConsumptionMode ? `COALESCE(prl.consumption_mode, 'per_unit')` : `'per_unit' AS consumption_mode`},
-      ${supportsLotSizeUnits ? `COALESCE(prl.lot_size_units, 1)` : `1 AS lot_size_units`},
+      COALESCE(prl.consumption_mode, 'per_unit') AS consumption_mode,
+      COALESCE(prl.lot_size_units, 1) AS lot_size_units,
       sii.site_item_inventory_id,
       sii.item_name,
       sii.source_type,
@@ -366,8 +244,8 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
       COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
       COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
       COALESCE(sii.reservation_notes, '') AS reservation_notes,
-      ${supportsUsageUnitLabel ? `COALESCE(NULLIF(sii.usage_unit_label, ''), 'unit')` : `'unit' AS usage_unit_label`},
-      ${supportsUsageUnitsPerStockUnit ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit, 0), 1)` : `1 AS usage_units_per_stock_unit`}
+      COALESCE(NULLIF(sii.usage_unit_label, ''), 'unit') AS usage_unit_label,
+      COALESCE(NULLIF(sii.usage_units_per_stock_unit, 0), 1) AS usage_units_per_stock_unit
     FROM product_resource_links prl
     LEFT JOIN site_item_inventory sii
       ON sii.source_type = prl.resource_kind
@@ -554,14 +432,12 @@ async function runInventoryItemAction(db, { siteItemInventoryId = 0, action = ''
   };
 }
 
-export async function onRequestGet(context) {
+async function handleGet(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
 
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-
-  await ensureSiteInventorySchema(db);
 
   const url = new URL(request.url);
   const payload = await getItems(db, {
@@ -585,7 +461,9 @@ function buildInventorySyncNotes(row = {}, amazon = {}) {
 }
 
 async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
-  await ensureSiteInventorySchema(db);
+  // Build 243: the large Amazon match registry is loaded only for an explicit catalog-sync action,
+  // never for ordinary inventory page reads or manual edits.
+  const { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } = await import('./_amazonInventoryMatches.js');
   const normalizedTypes = [...new Set((Array.isArray(sourceTypes) ? sourceTypes : [])
     .map((value) => normalizeText(value).toLowerCase())
     .filter((value) => ['tool', 'supply'].includes(value))
@@ -706,7 +584,7 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
         sourceType,
         externalKey,
         itemName,
-        normalizeText(row.category || row.subcategory) || null,
+        normalizeText(row.category || row.subcategory).toLowerCase() || null,
         amazonUrl || null,
         amazonUrl || null,
         normalizeText(row.image_url) || null,
@@ -755,31 +633,12 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
   return summary;
 }
 
-export async function onRequestPost(context) {
+async function handlePost(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
 
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-
-  try {
-    await ensureSiteInventorySchema(db);
-  } catch (error) {
-    await captureRuntimeIncident(env, request, {
-      incident_scope: 'inventory',
-      incident_code: 'inventory_schema_check_failed',
-      severity: 'error',
-      message: 'Inventory schema compatibility check failed.',
-      details: { diagnostic: normalizeText(error?.message).slice(0, 240) },
-      related_user_id: adminUser.user_id
-    });
-    return json({
-      ok: false,
-      error: 'Inventory storage is not ready for this write.',
-      code: 'inventory_schema_check_failed',
-      diagnostic: normalizeText(error?.message).slice(0, 240)
-    }, 500);
-  }
 
   let body = {};
   try {
@@ -893,6 +752,23 @@ export async function onRequestPost(context) {
   }
 
   try {
+    const existingIdentity = await db.prepare(`
+      SELECT site_item_inventory_id, item_name, source_type, external_key
+      FROM site_item_inventory
+      WHERE COALESCE(is_active, 1) = 1
+        AND LOWER(TRIM(source_type)) = ?
+        AND external_key = ?
+      LIMIT 1
+    `).bind(sourceType, externalKey).first();
+    if (existingIdentity) {
+      return json({
+        ok: false,
+        error: `An active inventory record already exists for ${sourceType}:${externalKey}. Open inventory #${Number(existingIdentity.site_item_inventory_id || 0)} and update it instead of creating a duplicate.`,
+        code: 'inventory_identity_exists',
+        existing_item: existingIdentity
+      }, 409);
+    }
+
     const insert = await db.prepare(`
       INSERT INTO site_item_inventory (
         source_type, external_key, item_name, category, source_url, amazon_url, image_url,
@@ -906,7 +782,7 @@ export async function onRequestPost(context) {
       sourceType,
       externalKey,
       itemName,
-      normalizeText(body.category) || null,
+      normalizeText(body.category).toLowerCase() || null,
       normalizeText(body.source_url) || null,
       normalizeText(body.amazon_url) || null,
       normalizeText(body.image_url) || null,
@@ -915,8 +791,8 @@ export async function onRequestPost(context) {
       Number(body.incoming_quantity || 0),
       Number(body.reorder_level || 0),
       Number(body.unit_cost_cents || 0),
-      normalizeText(body.stock_unit_label) || 'unit',
-      normalizeText(body.usage_unit_label) || 'unit',
+      normalizeText(body.stock_unit_label).toLowerCase() || 'unit',
+      normalizeText(body.usage_unit_label).toLowerCase() || 'unit',
       Math.max(1, Number(body.usage_units_per_stock_unit || 1) || 1),
       normalizeText(body.supplier_name) || null,
       normalizeText(body.supplier_sku) || null,
@@ -926,7 +802,7 @@ export async function onRequestPost(context) {
       Number(body.is_on_reorder_list) === 1 ? 1 : 0,
       Number(body.do_not_reorder) === 1 ? 1 : 0,
       Number(body.do_not_reuse) === 1 ? 1 : 0,
-      normalizeText(body.reuse_status) || null,
+      normalizeText(body.reuse_status).toLowerCase() || null,
       normalizeText(body.reservation_notes) || null,
       Number(body.is_active) === 0 ? 0 : 1,
       normalizeText(body.last_counted_at) || null
@@ -1007,14 +883,12 @@ export async function onRequestPost(context) {
   }
 }
 
-export async function onRequestPatch(context) {
+async function handlePatch(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
 
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-
-  await ensureSiteInventorySchema(db);
 
   let body = {};
   try {
@@ -1043,7 +917,7 @@ export async function onRequestPatch(context) {
       ...body,
       item_name: normalizeText(body.item_name || existing.item_name),
       item_description: normalizeText(body.item_description ?? existing.item_description),
-      category: normalizeText(body.category ?? existing.category),
+      category: normalizeText(body.category ?? existing.category).toLowerCase(),
       source_url: normalizeText(body.source_url ?? existing.source_url),
       amazon_url: normalizeText(body.amazon_url ?? existing.amazon_url),
       image_url: normalizeText(body.image_url ?? existing.image_url),
@@ -1051,10 +925,10 @@ export async function onRequestPatch(context) {
       supplier_sku: normalizeText(body.supplier_sku ?? existing.supplier_sku),
       supplier_contact: normalizeText(body.supplier_contact ?? existing.supplier_contact),
       reorder_notes: normalizeText(body.reorder_notes ?? existing.reorder_notes),
-      reuse_status: normalizeText(body.reuse_status ?? existing.reuse_status),
+      reuse_status: normalizeText(body.reuse_status ?? existing.reuse_status).toLowerCase(),
       reservation_notes: normalizeText(body.reservation_notes ?? existing.reservation_notes),
-      stock_unit_label: normalizeText(body.stock_unit_label ?? existing.stock_unit_label) || 'unit',
-      usage_unit_label: normalizeText(body.usage_unit_label ?? existing.usage_unit_label) || 'unit',
+      stock_unit_label: normalizeText(body.stock_unit_label ?? existing.stock_unit_label).toLowerCase() || 'unit',
+      usage_unit_label: normalizeText(body.usage_unit_label ?? existing.usage_unit_label).toLowerCase() || 'unit',
       usage_units_per_stock_unit: Math.max(
         1,
         Number((body.usage_units_per_stock_unit ?? existing.usage_units_per_stock_unit) || 1) || 1
@@ -1164,7 +1038,7 @@ export async function onRequestPatch(context) {
   }
 }
 
-export async function onRequestDelete(context) {
+async function handleDelete(context) {
   const { request, env } = context;
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
@@ -1222,3 +1096,36 @@ export async function onRequestDelete(context) {
     return json({ ok: false, error: e.message || 'Failed to remove inventory item.' }, 500);
   }
 }
+
+async function runInventoryBoundary(context, operation, handler) {
+  try {
+    return await handler(context);
+  } catch (error) {
+    const { request, env } = context;
+    const message = normalizeText(error?.message || error).slice(0, 360);
+    const schemaProblem = /no such (table|column)|has no column|database schema|migration/i.test(message);
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'inventory',
+      incident_code: schemaProblem ? 'inventory_migration_required' : `inventory_${operation}_failed`,
+      severity: 'error',
+      message: schemaProblem ? 'Inventory request requires the current D1 migration.' : `Inventory ${operation} request failed.`,
+      details: { diagnostic: message },
+      related_user_id: null
+    }).catch(() => null);
+    return json({
+      ok: false,
+      error: schemaProblem
+        ? 'Inventory storage needs the current D1 migration before this operation can continue.'
+        : 'Inventory services are temporarily unavailable. Your browser can retain unsaved form data while you retry.',
+      code: schemaProblem ? 'inventory_migration_required' : `inventory_${operation}_failed`,
+      diagnostic: message,
+      retryable: !schemaProblem
+    }, schemaProblem ? 503 : 500);
+  }
+}
+
+export function onRequestGet(context) { return runInventoryBoundary(context, 'read', handleGet); }
+export function onRequestPost(context) { return runInventoryBoundary(context, 'write', handlePost); }
+export function onRequestPatch(context) { return runInventoryBoundary(context, 'update', handlePatch); }
+export function onRequestDelete(context) { return runInventoryBoundary(context, 'delete', handleDelete); }
+
