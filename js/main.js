@@ -307,6 +307,7 @@
     const socialWrap = document.getElementById('siteFooterSocialLinks');
     if (!socialWrap) return;
     socialWrap.innerHTML = socialLinksMarkup(getDefaultFooterSocialRows());
+    if (String(window.location.pathname || '').startsWith('/admin/')) return;
     try {
       const rows = await fetchFooterSocialRows();
       socialWrap.innerHTML = socialLinksMarkup(rows, { includeHub: true, includeStatus: true });
