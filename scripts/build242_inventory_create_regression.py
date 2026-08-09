@@ -6,7 +6,10 @@ ui = (ROOT / 'public/js/admin-site-item-inventory.js').read_text(encoding='utf-8
 errors = []
 
 needle = 'INSERT INTO site_item_inventory ('
-start = api.find(needle, api.find('export async function onRequestPost'))
+post_anchor = api.find('async function handlePost')
+if post_anchor == -1:
+    post_anchor = api.find('export async function onRequestPost')
+start = api.find(needle, post_anchor)
 if start == -1:
     errors.append('Could not locate manual site_item_inventory INSERT.')
 else:
@@ -24,7 +27,8 @@ markers = [
     (api, "incident_code: 'inventory_create_failed'"),
     (api, "code: 'inventory_create_failed'"),
     (ui, 'async function readApiPayload'),
-    (ui, 'The server returned HTML instead of JSON.'),
+    (ui, 'async function readApiPayload'),
+    (ui, 'window.DDAuth.readApiJson'),
 ]
 for haystack, marker in markers:
     if marker not in haystack:
