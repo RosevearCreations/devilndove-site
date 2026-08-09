@@ -1,7 +1,5 @@
 // File: /functions/api/tools.js
-// Brief description: Public read endpoint for tools. It prefers D1 catalog_items rows for
-// item_kind='tool' and falls back to the legacy JSON source so outward-facing pages,
-// search, and fallback handling share one centralized authority path during migration.
+// Build 244: D1 catalog_items is the runtime authority for tools. Legacy JSON is read-only emergency fallback only when D1 itself cannot be read.
 
 import { captureRuntimeIncident } from "./_lib/adminAudit.js";
 
@@ -72,6 +70,7 @@ export async function onRequestGet(context) {
   const warnings = [];
   let items = [];
   let authority = 'empty';
+  let d1ReadSucceeded = false;
 
   if (db) {
     try {
@@ -95,7 +94,8 @@ export async function onRequestGet(context) {
         LIMIT ?
       `).bind(query, like, like, like, like, like, like, limit).all());
       items = rows.map(normalizeFromCatalog);
-      if (items.length) authority = 'd1';
+      d1ReadSucceeded = true;
+      authority = 'd1';
     } catch (error) {
       warnings.push('d1_tool_read_failed');
       await captureRuntimeIncident(env, request, {
@@ -110,7 +110,7 @@ export async function onRequestGet(context) {
     warnings.push('d1_binding_unavailable');
   }
 
-  if (!items.length) {
+  if (!d1ReadSucceeded) {
     const fallback = await loadJsonFallback(request);
     if (fallback.items.length) {
       items = query
