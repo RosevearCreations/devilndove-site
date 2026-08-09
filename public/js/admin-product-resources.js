@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function describeUsageUnit(item) {
     const stockLabel = String(item?.stock_unit_label || 'unit').trim() || 'unit';
     const label = String(item?.usage_unit_label || item?.usage_unit_name || 'unit').trim() || 'unit';
-    const perStock = Math.max(1, Number(item?.usage_units_per_stock_unit || 1) || 1);
+    const perStock = Math.max(0.001, Number(item?.usage_units_per_stock_unit || 1) || 1);
     return { stockLabel, label, perStock };
   }
 
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const usage = describeUsageUnit(resource);
     const onHandStock = Math.max(0, Number(resource?.on_hand_quantity || 0));
     const unitCostCents = Math.max(0, Number(resource?.unit_cost_cents || 0));
-    const qtyUsed = Math.max(1, Number(link?.quantity_used || 1) || 1);
+    const qtyUsed = Math.max(0.001, Number(link?.quantity_used || 1) || 1);
     const lotSize = Math.max(1, Number(link?.lot_size_units || 1) || 1);
     const mode = String(link?.consumption_mode || 'per_unit').trim() || 'per_unit';
     const totalUsageUnits = onHandStock * usage.perStock;
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <strong>${escapeHtml(link.name || link.source_key)}</strong>
           <div class="small">${escapeHtml(link.resource_kind)} • 1 ${escapeHtml(usageMeta.stockLabel)} holds ${escapeHtml(String(usageMeta.perStock))} ${escapeHtml(usageMeta.label)}</div>
           <label class="small" style="display:block;margin-top:6px">How much per use / batch
-            <input class="input" data-link-qty="${state.selectedLinkIndex}" type="number" min="1" step="1" value="${Math.max(1, Number(link.quantity_used || 1) || 1)}" />
+            <input class="input" data-link-qty="${state.selectedLinkIndex}" type="number" min="0.001" step="0.001" value="${Math.max(0.001, Number(link.quantity_used || 1) || 1)}" />
           </label>
           <div class="small">Enter how many ${escapeHtml(usageMeta.label)} this product uses${mode === 'end_of_lot' ? ' per batch/lot' : ' per finished item'}.</div>
           <div class="small" style="margin-top:4px">Current stock ≈ ${escapeHtml(String(usagePreview.totalUsageUnits))} ${escapeHtml(usageMeta.label)} across ${escapeHtml(String(usagePreview.onHandStock))} ${escapeHtml(usageMeta.stockLabel)}.</div>
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         name: resource.name || x.source_key,
         consumption_mode: x.consumption_mode || 'per_unit',
         lot_size_units: Math.max(1, Number(x.lot_size_units || 1) || 1),
-        quantity_used: Math.max(1, Number(x.quantity_used || 1) || 1)
+        quantity_used: Math.max(0.001, Number(x.quantity_used || 1) || 1)
       };
     });
     ensureValidSelections();
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const qtyIndex = event.target.getAttribute('data-link-qty');
     if (qtyIndex != null) {
       const row = state.links[Number(qtyIndex)];
-      if (row) row.quantity_used = Math.max(1, Number(event.target.value || 1) || 1);
+      if (row) row.quantity_used = Math.max(0.001, Number(event.target.value || 0.001) || 0.001);
       renderLinkedSelect();
       return;
     }
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
           links: state.links.map((x, i) => ({
             resource_kind: x.resource_kind,
             source_key: x.source_key,
-            quantity_used: Math.max(1, Number(x.quantity_used || 1) || 1),
+            quantity_used: Math.max(0.001, Number(x.quantity_used || 1) || 1),
             usage_notes: x.usage_notes || '',
             consumption_mode: x.consumption_mode || 'per_unit',
             lot_size_units: Math.max(1, Number(x.lot_size_units || 1) || 1),

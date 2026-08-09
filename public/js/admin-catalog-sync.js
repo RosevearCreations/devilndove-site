@@ -1,7 +1,6 @@
-// Maintenance-only helper retained for reseed/recovery work after the main catalog migration completed.
-// File: /public/js/admin-catalog-sync.js
-// Brief description: Starts the staged migration of duplicated catalog JSON into D1 so search,
-// inventory, movie overlays, and admin operations can share one cleaner source of truth.
+// Build 244 maintenance helper. Tools and supplies are migration-owned D1 authorities;
+// their legacy JSON masters are emergency read-only fallbacks and cannot overwrite reviewed D1 classifications.
+// Movies and featured creations retain the older maintenance import path.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('catalogSyncAdminMount');
@@ -23,17 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
     rendered = true;
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Catalog Migration Sync</h3>
-        <p class="small" style="margin-top:0">Begin moving high-duplication JSON collections into D1 so search, inventory, future analytics, and movie overlays can share one cleaner source of truth.</p>
+        <h3 style="margin-top:0">Catalog Authority / Legacy Import</h3>
+        <p class="small" style="margin-top:0"><strong>Tools and supplies now live in D1.</strong> Build 244 migrated the legacy masters and prevents runtime JSON re-import from overwriting reviewed classifications. The JSON files remain emergency read-only fallback/reference snapshots. Movies and featured creations can still use this maintenance importer.</p>
         <div id="catalogSyncMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div class="small" style="display:grid;gap:8px;margin-bottom:12px">
-          <label><input type="checkbox" id="catalogSyncTools" checked /> Tools</label>
-          <label><input type="checkbox" id="catalogSyncSupplies" checked /> Supplies</label>
-          <label><input type="checkbox" id="catalogSyncMovies" checked /> Movies</label>
-          <label><input type="checkbox" id="catalogSyncCreations" checked /> Featured creations</label>
+          <label><input type="checkbox" checked disabled /> Tools — D1 authority (managed by migration)</label>
+          <label><input type="checkbox" checked disabled /> Supplies — D1 authority (managed by migration)</label>
+          <label><input type="checkbox" id="catalogSyncMovies" /> Movies — legacy maintenance import</label>
+          <label><input type="checkbox" id="catalogSyncCreations" /> Featured creations — legacy maintenance import</label>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" type="button" id="catalogSyncRunButton">Sync selected collections into D1</button>
+          <button class="btn" type="button" id="catalogSyncRunButton">Import selected legacy collections</button>
         </div>
         <div id="catalogSyncSummary" class="small" style="margin-top:12px">No sync run yet.</div>
       </div>`;
@@ -43,8 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function selectedKinds() {
     const kinds = [];
-    if (document.getElementById('catalogSyncTools')?.checked) kinds.push('tool');
-    if (document.getElementById('catalogSyncSupplies')?.checked) kinds.push('supply');
     if (document.getElementById('catalogSyncMovies')?.checked) kinds.push('movie');
     if (document.getElementById('catalogSyncCreations')?.checked) kinds.push('creation');
     return kinds;
@@ -75,15 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
   async function runSync() {
     try {
       const itemKinds = selectedKinds();
-      if (!itemKinds.length) throw new Error('Select at least one collection to sync.');
-      setMessage('Syncing catalog collections into D1...');
+      if (!itemKinds.length) throw new Error('Select Movies or Featured creations. Tools and supplies are already D1-authoritative.');
+      setMessage('Importing selected legacy collections into D1...');
       const response = await window.DDAuth.apiFetch('/api/admin/catalog-sync', {
         method: 'POST',
         body: JSON.stringify({ item_kinds: itemKinds })
       });
       const data = await window.DDAuth.readApiJson(response, 'Failed to sync catalog collections.');
       renderSummary(data);
-      setMessage(`Catalog sync complete. Upserted ${Number(data.total_upserted || 0)} row(s).`);
+      setMessage(`Legacy catalog import complete. Upserted ${Number(data.total_upserted || 0)} row(s). Tools/supplies were not re-imported.`);
       document.dispatchEvent(new CustomEvent('dd:catalog-synced', { detail: data }));
     } catch (error) {
       setMessage(error.message || 'Failed to sync catalog collections.', true);

@@ -179,14 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return {
       stockLabel: String(row?.stock_unit_label || 'unit').trim() || 'unit',
       usageLabel: String(row?.usage_unit_label || 'unit').trim() || 'unit',
-      perStock: Math.max(1, Number(row?.usage_units_per_stock_unit || 1) || 1)
+      perStock: Math.max(0.001, Number(row?.usage_units_per_stock_unit || 1) || 1)
     };
   }
 
   function calcUsagePreview(row) {
     const meta = describeUsageMeta(row);
     const onHandStock = Math.max(0, Number(row?.on_hand_quantity || 0));
-    const qtyUsed = Math.max(1, Number(row?.quantity_used || 1) || 1);
+    const qtyUsed = Math.max(0.001, Number(row?.quantity_used || 1) || 1);
     const lotSize = Math.max(1, Number(row?.lot_size_units || 1) || 1);
     const unitCostCents = Math.max(0, Number(row?.unit_cost_cents || 0));
     const mode = String(row?.consumption_mode || 'per_unit').trim() || 'per_unit';
@@ -229,9 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="resource-linked-card">
         <div class="resource-linked-summary">
           <div><strong>${escapeHtml(row.name)}</strong> <span class="small">(${escapeHtml(row.resource_kind)})</span></div>
-          <div class="small" style="margin:4px 0 0 0">1 ${escapeHtml(describeUsageMeta(row).stockLabel)} = ${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} ${escapeHtml(row.usage_unit_label || 'unit')}</div>
+          <div class="small" style="margin:4px 0 0 0">1 ${escapeHtml(describeUsageMeta(row).stockLabel)} = ${Math.max(0.001, Number(row.usage_units_per_stock_unit || 1) || 1)} ${escapeHtml(row.usage_unit_label || 'unit')}</div>
           <div class="grid cols-2" style="gap:8px;margin:8px 0">
-            <label class="small">Quantity used (${escapeHtml(row.usage_unit_label || 'unit')}) <input class="input mobile-inline-input" data-resource-qty="${escapeHtml(row.key)}" type="number" min="1" step="1" value="${Number(row.quantity_used || 1)}"/></label>
+            <label class="small">Quantity used (${escapeHtml(row.usage_unit_label || 'unit')}) <input class="input mobile-inline-input" data-resource-qty="${escapeHtml(row.key)}" type="number" min="0.001" step="0.001" value="${Math.max(0.001, Number(row.quantity_used || 1) || 1)}"/></label>
             <label class="small">Inventory use
               <select class="input" data-resource-mode="${escapeHtml(row.key)}">
                 <option value="per_unit" ${String(row.consumption_mode || 'per_unit') === 'per_unit' ? 'selected' : ''}>Per product</option>
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
     selectedResourcesEl.querySelectorAll('[data-resource-qty]').forEach((input) => input.addEventListener('input', () => {
       const row = selectedMap.get(input.dataset.resourceQty);
-      if (row) row.quantity_used = Math.max(1, Number(input.value || 1) || 1);
+      if (row) row.quantity_used = Math.max(0.001, Number(input.value || 0.001) || 0.001);
     }));
     selectedResourcesEl.querySelectorAll('[data-resource-mode]').forEach((input) => input.addEventListener('change', () => {
       const row = selectedMap.get(input.dataset.resourceMode);
@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const reorderPoint = Number(row.reorder_point || 0);
       const incomingQty = Number(row.incoming_quantity || 0);
       const statusBits = [qty > 0 ? `On hand: ${qty}` : 'Out of stock'];
-      statusBits.push(`1 ${row.stock_unit_label || 'unit'} = ${Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1)} ${row.usage_unit_label || 'unit'}`);
+      statusBits.push(`1 ${row.stock_unit_label || 'unit'} = ${Math.max(0.001, Number(row.usage_units_per_stock_unit || 1) || 1)} ${row.usage_unit_label || 'unit'}`);
       if (incomingQty > 0) statusBits.push(`Incoming: ${incomingQty}`);
       if (reorderPoint > 0) statusBits.push(`Reorder at ${reorderPoint}`);
       if (Number(row.is_on_reorder_list || 0) === 1) statusBits.push('On reorder list');
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!row) return;
       const key = `${resourceKind}:${sourceKey}`;
       if (selectedMap.has(key)) selectedMap.delete(key);
-      else selectedMap.set(key, { key, resource_kind: resourceKind, source_key: sourceKey, name: row.name, quantity_used: 1, usage_notes: '', consumption_mode: 'per_unit', lot_size_units: 1, stock_unit_label: row.stock_unit_label || 'unit', usage_unit_label: row.usage_unit_label || 'unit', usage_units_per_stock_unit: Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1), unit_cost_cents: Number(row.unit_cost_cents || 0), on_hand_quantity: Number(row.on_hand_quantity || 0), sort_order: selectedMap.size });
+      else selectedMap.set(key, { key, resource_kind: resourceKind, source_key: sourceKey, name: row.name, quantity_used: 1, usage_notes: '', consumption_mode: 'per_unit', lot_size_units: 1, stock_unit_label: row.stock_unit_label || 'unit', usage_unit_label: row.usage_unit_label || 'unit', usage_units_per_stock_unit: Math.max(0.001, Number(row.usage_units_per_stock_unit || 1) || 1), unit_cost_cents: Number(row.unit_cost_cents || 0), on_hand_quantity: Number(row.on_hand_quantity || 0), sort_order: selectedMap.size });
       renderSelectedResources();
       renderResourceGrid();
       renderDraftReadiness(loadedDraft);
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quantity_used: Number(row.quantity_used || 1),
         stock_unit_label: resource?.stock_unit_label || 'unit',
         usage_unit_label: resource?.usage_unit_label || 'unit',
-        usage_units_per_stock_unit: Math.max(1, Number(resource?.usage_units_per_stock_unit || 1) || 1),
+        usage_units_per_stock_unit: Math.max(0.001, Number(resource?.usage_units_per_stock_unit || 1) || 1),
         unit_cost_cents: Number(resource?.unit_cost_cents || 0),
         on_hand_quantity: Number(resource?.on_hand_quantity || 0),
         usage_notes: row.usage_notes || '',
@@ -529,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(form);
       formData.set('price_cents', String(priceCents));
       if (compareAtPriceCents !== '') formData.set('compare_at_price_cents', String(compareAtPriceCents));
-      formData.set('resource_links_json', JSON.stringify(selectedList().map((row, index) => ({ resource_kind: row.resource_kind, source_key: row.source_key, quantity_used: row.quantity_used || 1, usage_notes: row.usage_notes || '', consumption_mode: row.consumption_mode || 'per_unit', lot_size_units: Math.max(1, Number(row.lot_size_units || 1) || 1), sort_order: index }))));
+      formData.set('resource_links_json', JSON.stringify(selectedList().map((row, index) => ({ resource_kind: row.resource_kind, source_key: row.source_key, quantity_used: Math.max(0.001, Number(row.quantity_used || 1) || 1), usage_notes: row.usage_notes || '', consumption_mode: row.consumption_mode || 'per_unit', lot_size_units: Math.max(1, Number(row.lot_size_units || 1) || 1), sort_order: index }))));
       const submitButton = form.querySelector('button[type="submit"]');
       const originalText = submitButton?.textContent || 'Save partial draft';
       const existingProductId = draftProductIdInput?.value || '';
