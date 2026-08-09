@@ -1,5 +1,5 @@
 {
-  "build_label": "Build 241",
+  "build_label": "Build 243",
   "status": "ready",
   "blocker_count": 0,
   "warning_count": 0,
@@ -7,7 +7,7 @@
     {
       "code": "static_required_files",
       "status": "pass",
-      "detail": "180 required files are present.",
+      "detail": "187 required files are present.",
       "missing": []
     },
     {
@@ -50,19 +50,19 @@
     {
       "code": "static_markdown_authority",
       "status": "pass",
-      "detail": "Two Build 241 canonical authorities, scoped playbooks, computed Creative readiness, evidence export, five packaging references, guarded duplicate cleanup, visual provenance, historical archive policy, and 46 generated Startup sections agree.",
+      "detail": "Two Build 243 canonical authorities, scoped playbooks, retained CAIP/packaging references, lower-case inventory authority, historical archive policy, and 46 generated Startup sections agree.",
       "missing": []
     },
     {
       "code": "static_schema_current",
       "status": "pass",
-      "detail": "Build 174 through Build 241 schema and current migration markers were found in the correct files.",
+      "detail": "Build 174 through Build 243 schema and current migration markers were found in the correct files.",
       "missing": []
     },
     {
       "code": "static_d1_migration_compatibility",
       "status": "pass",
-      "detail": "Current and numbered Build 241 migrations are identical and contain no explicit SQL transaction statements."
+      "detail": "Current and numbered Build 243 migrations are identical and contain no explicit SQL transaction statements."
     },
     {
       "code": "static_public_pages",
@@ -282,7 +282,7 @@
     {
       "code": "static_css_balance",
       "status": "pass",
-      "detail": "CSS braces 2694/2694"
+      "detail": "CSS braces 2704/2704"
     },
     {
       "code": "static_json_parse",
