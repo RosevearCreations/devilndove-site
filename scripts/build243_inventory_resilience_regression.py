@@ -74,8 +74,10 @@ require('css/styles.css', '#siteInventorySaveButton')
 # Migration identity and required lower-case/identity controls.
 numbered = text('database_build243_inventory_resilience_case_normalization.sql')
 current = text('database_upgrade_current_pass.sql')
-if numbered != current:
-    errors.append('Build 243 numbered migration and database_upgrade_current_pass.sql differ.')
+# Historical regression: current upgrade advances on later builds. Only require byte identity
+# while Build 243 itself is still the active current migration.
+if 'build244_inventory_authority_fractional_usage' not in current and numbered != current:
+    errors.append('Build 243 numbered migration and database_upgrade_current_pass.sql differ while Build 243 is current.')
 for marker in [
     'idx_site_item_inventory_identity_lower_active',
     "site.inventory.classification_case_policy",
