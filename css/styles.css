@@ -2844,3 +2844,20 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
     justify-content:center;
   }
 }
+
+/* Build 244: fractional inventory usage and classification-review polish. */
+.inventory-operations-page .inventory-usage-help {
+  padding: 10px 12px;
+  border: 1px solid var(--border, rgba(255,255,255,.14));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface, #17191f) 88%, transparent);
+  line-height: 1.5;
+}
+.inventory-operations-page .site-inventory-row-input[data-field="source_type"] {
+  margin-top: 6px;
+  min-width: 110px;
+}
+@media (max-width: 760px) {
+  .inventory-operations-page .inventory-usage-help { font-size: .9rem; }
+  .inventory-operations-page .site-inventory-row-input[data-field="source_type"] { width: 100%; }
+}
