@@ -11,11 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let categorySeedOptions = [];
   let seedSearchText = '';
   let editingSiteInventoryId = 0;
+  let selectedCatalogItemId = 0;
   let inventoryTableEditMode = true;
   let initialLoadStarted = false;
   let seedLoadPromise = null;
   let listLoadPromise = null;
-  const INVENTORY_DRAFT_KEY = 'dd_inventory_form_draft_v243';
+  const INVENTORY_DRAFT_KEY = 'dd_inventory_form_draft_v244';
 
 
   function setMessage(message, isError = false) {
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function describeStockUsage(item = {}) {
     const stockLabel = String(item?.stock_unit_label || 'unit').trim() || 'unit';
     const usageLabel = String(item?.usage_unit_label || 'unit').trim() || 'unit';
-    const perStock = Math.max(1, Number(item?.usage_units_per_stock_unit || 1) || 1);
+    const perStock = Math.max(0.001, Number(item?.usage_units_per_stock_unit || 1) || 1);
     return { stockLabel, usageLabel, perStock };
   }
 
@@ -103,7 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventorySupplierContact', draft.supplier_contact || 'Amazon.ca');
     setInputValue('siteInventoryStockUnitLabel', draft.stock_unit_label || 'package');
     setInputValue('siteInventoryUsageUnitLabel', draft.usage_unit_label || 'unit');
-    setInputValue('siteInventoryUsageUnitsPerStock', Math.max(1, Number(draft.usage_units_per_stock_unit || 1)));
+    setInputValue('siteInventoryUsageUnitsPerStock', Math.max(0.001, Number(draft.usage_units_per_stock_unit || 1)));
+    setInputValue('siteInventoryUsageTrackingMode', draft.usage_tracking_mode || (String(draft.source_type || 'supply').toLowerCase() === 'tool' ? 'reusable' : 'exact'));
+    setInputValue('siteInventoryMinimumUsageIncrement', Math.max(0.0001, Number(draft.minimum_usage_increment || 0.001) || 0.001));
     setInputValue('siteInventoryNotes', draft.reorder_notes || '');
     setInputValue('siteInventoryMovementNote', 'Created from reviewed Amazon link metadata.');
     updateSiteInventoryImagePreview();
@@ -164,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cost = Number(item.unit_cost_cents || 0) > 0 ? ` • ${fmtMoney(item.unit_cost_cents)}` : '';
     const asin = item.amazon_asin ? ` • ASIN ${item.amazon_asin}` : '';
     const status = item.amazon_match_status ? ` • ${item.amazon_match_status}` : '';
-    return `${item.item_name || item.name || item.external_key || 'Item'} (${item.source_type || 'other'} • ${Number(item.on_hand_quantity || 0)} ${stockLabel}${cost}${asin}${status})`;
+    return `${item.item_name || item.name || item.external_key || 'Item'} [${String(item.source_type || 'other').toUpperCase()}] (${Number(item.on_hand_quantity || 0)} ${stockLabel}${cost}${asin}${status})`;
   }
 
   function renderSeedDropdowns() {
@@ -178,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sourceType = String(typeSelect?.value || 'tool').trim();
     const query = String(seedSearchText || '').trim().toLowerCase();
     const filtered = catalogSeedOptions
-      .filter((item) => !sourceType || item.source_type === sourceType)
+      .filter((item) => query ? true : (!sourceType || item.source_type === sourceType))
       .filter((item) => {
         if (!query) return true;
         const haystack = [
@@ -211,13 +214,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryCategory', item.category || '');
     setInputValue('siteInventoryImageUrl', item.image_url || '');
     updateSiteInventoryImagePreview();
-    setInputValue('siteInventoryOnHand', Math.max(1, Number(item.on_hand_quantity || 0) || 1));
+    selectedCatalogItemId = Number(item.catalog_item_id || 0) || 0;
+    setInputValue('siteInventorySourceType', item.source_type || type || 'supply');
+    setInputValue('siteInventoryOnHand', Math.max(0, Number(item.on_hand_quantity || 0) || 0));
     setInputValue('siteInventorySourceUrl', item.amazon_url || '');
     setInputValue('siteInventoryAmazonUrl', item.amazon_url || '');
     setInputValue('siteInventoryUnitCost', centsToDollarInput(item.unit_cost_cents || 0));
     setInputValue('siteInventoryStockUnitLabel', item.stock_unit_label || 'unit');
     setInputValue('siteInventoryUsageUnitLabel', item.usage_unit_label || 'unit');
-    setInputValue('siteInventoryUsageUnitsPerStock', Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1));
+    setInputValue('siteInventoryUsageUnitsPerStock', Math.max(0.001, Number(item.usage_units_per_stock_unit || 1) || 1));
+    setInputValue('siteInventoryUsageTrackingMode', item.usage_tracking_mode || (item.source_type === 'tool' ? 'reusable' : 'exact'));
+    setInputValue('siteInventoryMinimumUsageIncrement', Math.max(0.0001, Number(item.minimum_usage_increment || 0.001) || 0.001));
     setInputValue('siteInventorySupplierName', item.supplier_name || (item.amazon_url ? 'Amazon.ca' : ''));
     setInputValue('siteInventorySupplierSku', item.amazon_asin || '');
     setInputValue('siteInventorySupplierContact', item.amazon_url ? 'Amazon.ca' : '');
@@ -236,17 +243,20 @@ document.addEventListener('DOMContentLoaded', () => {
     return window.DDAuth.readApiJson(response, { fallbackMessage: 'Failed to load inventory source dropdowns.' });
   }
 
-  async function loadSeedOptions() {
+  async function loadSeedOptions({ query = '' } = {}) {
     if (!window.DDAuth?.isLoggedIn()) return null;
-    if (seedLoadPromise) return seedLoadPromise;
-    seedLoadPromise = (async () => {
+    const normalizedQuery = String(query || '').trim();
+    // Build 244: typed seed searches run server-side so all D1 catalog rows remain
+    // discoverable without loading the entire catalog into one Worker/browser request.
+    if (seedLoadPromise && !normalizedQuery) return seedLoadPromise;
+    const work = (async () => {
       try {
         const data = await window.DDAuth.apiJson(
-          '/api/admin/product-resource-search?q=&limit=300',
+          `/api/admin/product-resource-search?q=${encodeURIComponent(normalizedQuery)}&limit=${normalizedQuery ? 160 : 240}`,
           { method: 'GET' },
           {
             fallbackMessage: 'Failed to load inventory source dropdowns.',
-            cacheKey: 'inventory-seed-resources',
+            cacheKey: normalizedQuery ? `inventory-seed-resources:${normalizedQuery.toLowerCase()}` : 'inventory-seed-resources',
             cacheTtlMs: 120000,
             retries: 2,
             staleOnError: true
@@ -263,7 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
           unit_cost_cents: Number(item.unit_cost_cents || 0),
           stock_unit_label: String(item.stock_unit_label || 'unit').trim().toLowerCase() || 'unit',
           usage_unit_label: String(item.usage_unit_label || 'unit').trim().toLowerCase() || 'unit',
-          usage_units_per_stock_unit: Math.max(1, Number(item.usage_units_per_stock_unit || 1) || 1),
+          usage_units_per_stock_unit: Math.max(0.001, Number(item.usage_units_per_stock_unit || 1) || 1),
+          usage_tracking_mode: String(item.usage_tracking_mode || (String(item.item_kind || item.source_type || '').toLowerCase() === 'tool' ? 'reusable' : 'exact')).trim().toLowerCase(),
+          minimum_usage_increment: Math.max(0.0001, Number(item.minimum_usage_increment || 0.001) || 0.001),
+          catalog_item_id: Number(item.catalog_item_id || 0) || 0,
           amazon_url: String(item.amazon_url || '').trim(),
           amazon_asin: String(item.amazon_asin || '').trim(),
           amazon_title: String(item.amazon_title || '').trim(),
@@ -280,10 +293,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setMessage(error.message || 'Failed to load inventory source dropdowns.', true);
         return null;
       } finally {
-        seedLoadPromise = null;
+        if (!normalizedQuery) seedLoadPromise = null;
       }
     })();
-    return seedLoadPromise;
+    if (!normalizedQuery) seedLoadPromise = work;
+    return work;
   }
 
   function parseInventoryIds(text) {
@@ -316,10 +330,10 @@ document.addEventListener('DOMContentLoaded', () => {
       ? Object.entries(data.match_status_counts).map(([key, value]) => `${escapeHtml(key)} ${escapeHtml(String(value))}`).join(' • ')
       : '';
     el.innerHTML = `
-      <strong>Last sync result</strong>
+      <strong>Last D1 reconciliation result</strong>
       <div class="small">Scanned ${escapeHtml(String(Number(data.scanned || 0)))} • synced ${escapeHtml(String(Number(data.synced || 0)))} • inserted ${escapeHtml(String(Number(data.inserted || 0)))} • updated ${escapeHtml(String(Number(data.updated || 0)))} • failed ${escapeHtml(String(Number(data.failed || 0)))}</div>
-      <div class="small">Amazon URLs ${escapeHtml(String(Number(data.with_amazon_url || 0)))} • unit costs ${escapeHtml(String(Number(data.with_unit_cost || 0)))} • cost history rows ${escapeHtml(String(Number(data.cost_history_added || 0)))} • defaulted stock ${escapeHtml(String(Number(data.defaulted_on_hand_to_one || 0)))}</div>
-      ${statusCounts ? `<div class="small">Match statuses: ${statusCounts}</div>` : ''}
+      <div class="small">This reconciliation copies missing D1 catalog rows into inventory in small batches and fills safe descriptive fields. It does not run Amazon matching or overwrite reviewed quantities, unit conversions, or costs.</div>
+      ${statusCounts ? `<div class="small">Statuses: ${statusCounts}</div>` : ''}
       ${errors}`;
     el.style.display = 'block';
   }
@@ -522,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('siteInventoryForm');
     form?.reset();
     editingSiteInventoryId = 0;
+    selectedCatalogItemId = 0;
     const seedEl = document.getElementById('siteInventorySeedItem'); if (seedEl) seedEl.value = '';
     const categoryPresetEl = document.getElementById('siteInventoryCategoryPreset'); if (categoryPresetEl) categoryPresetEl.value = '';
     const onHandEl = document.getElementById('siteInventoryOnHand'); if (onHandEl) onHandEl.value = '1';
@@ -529,6 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
     const usageUnitEl = document.getElementById('siteInventoryUsageUnitLabel'); if (usageUnitEl) usageUnitEl.value = 'unit';
     const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
+    const trackingEl = document.getElementById('siteInventoryUsageTrackingMode'); if (trackingEl) trackingEl.value = 'exact';
+    const incrementEl = document.getElementById('siteInventoryMinimumUsageIncrement'); if (incrementEl) incrementEl.value = '0.001';
     setInventoryEditMode({});
     const sourceTypeEl = document.getElementById('siteInventorySourceType'); if (sourceTypeEl) sourceTypeEl.disabled = false;
     const externalKeyEl = document.getElementById('siteInventoryExternalKey'); if (externalKeyEl) externalKeyEl.readOnly = false;
@@ -586,25 +603,27 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="small" style="align-self:end">Choose an existing tool or supply above to prefill the form, then adjust stock, supplier, and cost details.</div>
           </div>
           <div class="grid cols-5" style="gap:12px">
-            <div><label class="small" for="siteInventoryOnHand">On Hand</label><input id="siteInventoryOnHand" type="number" min="0" step="1" value="1" /></div>
-            <div><label class="small" for="siteInventoryReservedInput">Reserved</label><input id="siteInventoryReservedInput" type="number" min="0" step="1" value="0" /></div>
-            <div><label class="small" for="siteInventoryIncomingInput">Incoming</label><input id="siteInventoryIncomingInput" type="number" min="0" step="1" value="0" /></div>
-            <div><label class="small" for="siteInventoryReorder">Reorder At</label><input id="siteInventoryReorder" type="number" min="0" step="1" value="0" /></div>
-            <div><label class="small" for="siteInventoryPreferredReorderQty">Preferred Reorder Qty</label><input id="siteInventoryPreferredReorderQty" type="number" min="0" step="1" value="0" /></div>
+            <div><label class="small" for="siteInventoryOnHand">On Hand (stock units)</label><input id="siteInventoryOnHand" type="number" min="0" step="0.001" value="1" /></div>
+            <div><label class="small" for="siteInventoryReservedInput">Reserved</label><input id="siteInventoryReservedInput" type="number" min="0" step="0.001" value="0" /></div>
+            <div><label class="small" for="siteInventoryIncomingInput">Incoming</label><input id="siteInventoryIncomingInput" type="number" min="0" step="0.001" value="0" /></div>
+            <div><label class="small" for="siteInventoryReorder">Reorder At</label><input id="siteInventoryReorder" type="number" min="0" step="0.001" value="0" /></div>
+            <div><label class="small" for="siteInventoryPreferredReorderQty">Preferred Reorder Qty</label><input id="siteInventoryPreferredReorderQty" type="number" min="0" step="0.001" value="0" /></div>
           </div>
           <div class="grid cols-6" style="gap:12px">
             <div><label class="small" for="siteInventoryUnitCost">Unit Cost (CAD)</label><input id="siteInventoryUnitCost" type="number" min="0" step="0.01" value="0.00" placeholder="33.99" /></div>
             <div><label class="small" for="siteInventoryStockUnitLabel">Stock Unit</label><input id="siteInventoryStockUnitLabel" type="text" placeholder="block, spool, bag, bottle" value="unit" /></div>
             <div><label class="small" for="siteInventoryUsageUnitLabel">Usage Unit</label><input id="siteInventoryUsageUnitLabel" type="text" placeholder="cup, wick, gram, use" value="unit" /></div>
-            <div><label class="small" for="siteInventoryUsageUnitsPerStock">Usage Units Per Stock Unit</label><input id="siteInventoryUsageUnitsPerStock" type="number" min="1" step="0.001" value="1" /></div>
+            <div><label class="small" for="siteInventoryUsageUnitsPerStock">Usage Units Per Stock Unit</label><input id="siteInventoryUsageUnitsPerStock" type="number" min="0.001" step="0.001" value="1" /></div>
             <div><label class="small" for="siteInventorySupplierName">Supplier</label><input id="siteInventorySupplierName" type="text" /></div>
             <div><label class="small" for="siteInventorySupplierSku">Supplier SKU</label><input id="siteInventorySupplierSku" type="text" /></div>
           </div>
-          <div class="grid cols-3" style="gap:12px">
+          <div class="grid cols-4" style="gap:12px">
             <div><label class="small" for="siteInventorySupplierContact">Supplier Contact</label><input id="siteInventorySupplierContact" type="text" placeholder="email or phone" /></div>
             <div><label class="small" for="siteInventoryReuseStatus">Reuse Status</label><input id="siteInventoryReuseStatus" type="text" placeholder="wash, refill, one-time use" /></div>
-            <div class="small" style="align-self:end">Examples: candle wax block = 20 cups per stock unit, wick bag = 100 wicks, PLA spool = 1000 grams.</div>
+            <div><label class="small" for="siteInventoryUsageTrackingMode">Usage Tracking</label><select id="siteInventoryUsageTrackingMode"><option value="exact">Exact measured — reduce stock</option><option value="estimated">Estimated amount — reduce stock</option><option value="log_only">Log use only — do not reduce stock</option><option value="reusable">Reusable tool/equipment — do not reduce stock</option></select></div>
+            <div><label class="small" for="siteInventoryMinimumUsageIncrement">Smallest usage increment</label><input id="siteInventoryMinimumUsageIncrement" type="number" min="0.0001" step="0.0001" value="0.001" /></div>
           </div>
+          <div class="small inventory-usage-help">Examples: a 500 g mica jar can be <strong>stock unit = jar</strong>, <strong>usage unit = gram</strong>, <strong>500 usage units per stock unit</strong>. If a few sprinkles cannot be weighed reliably, choose <strong>Log use only</strong>; the use is recorded without pretending the jar is empty. Exact or estimated usage can also be fractional.</div>
           <div class="grid cols-4" style="gap:12px">
             <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryOnReorderList" type="checkbox" /> On reorder list</label>
             <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryDoNotReorder" type="checkbox" /> Do not reorder</label>
@@ -617,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="grid cols-2" style="gap:12px">
             <div><label class="small" for="siteInventoryMovementNote">Movement Note</label><input id="siteInventoryMovementNote" type="text" placeholder="restock, count correction, incoming order..." /></div>
-            <div class="small" style="align-self:end">Full editing is available for every record. The source type and external key stay fixed after creation to protect existing product-resource links.</div>
+            <div class="small" style="align-self:end">Full editing is available for every record. The external key stays fixed after creation. Tool ↔ supply classification can be corrected here and linked catalog/product-resource rows are updated with it.</div>
           </div>
           <div class="site-inventory-form-actions"><button class="btn primary" type="submit" id="siteInventorySaveButton">Add Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
         </form>
@@ -625,8 +644,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="siteInventorySyncResult" class="small card inventory-feedback-panel" style="display:none;margin-top:12px"></div>
         <div class="grid cols-4 site-inventory-toolbar" style="gap:12px;align-items:end;margin-top:16px">
           <div><label class="small" for="siteInventorySearch">Search</label><input id="siteInventorySearch" type="text" placeholder="name, category, supplier" /></div>
-          <div><label class="small" for="siteInventoryStockView">Stock view</label><select id="siteInventoryStockView"><option value="">All items</option><option value="low">Low stock</option><option value="reorder">Reorder list</option><option value="no_reuse">Do not reuse</option><option value="inactive">Inactive</option></select></div>
-          <div class="site-inventory-toolbar-actions"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Sync tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Sync supplies</button><button class="btn primary" type="button" id="siteInventorySyncAllButton">Sync all tools + supplies</button></div>
+          <div><label class="small" for="siteInventoryStockView">Stock view</label><select id="siteInventoryStockView"><option value="">All items</option><option value="low">Low stock</option><option value="reorder">Reorder list</option><option value="no_reuse">Do not reuse</option><option value="inactive">Inactive</option><option value="tool">Tools only</option><option value="supply">Supplies only</option></select></div>
+          <div class="site-inventory-toolbar-actions"><button class="btn" type="button" id="siteInventoryRefreshButton">Refresh</button><button class="btn" type="button" id="siteInventorySyncToolsButton">Reconcile D1 tools</button><button class="btn" type="button" id="siteInventorySyncSuppliesButton">Reconcile D1 supplies</button><button class="btn primary" type="button" id="siteInventorySyncAllButton">Reconcile D1 tools + supplies</button></div>
+          <div class="small" style="grid-column:1/-1">Maintenance only: this copies missing rows from the D1 catalog authority into working inventory in small batches. It is not required after ordinary Amazon/manual entry and does not re-import the legacy JSON masters.</div>
         </div>
 
         <div class="card" style="margin-top:16px">
@@ -713,10 +733,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
     document.getElementById('siteInventoryStockView')?.addEventListener('change', loadList);
     document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); });
-    document.getElementById('siteInventorySeedSearch')?.addEventListener('input', debounce(() => {
+    document.getElementById('siteInventorySeedSearch')?.addEventListener('input', debounce(async () => {
       seedSearchText = document.getElementById('siteInventorySeedSearch')?.value || '';
+      await loadSeedOptions({ query: seedSearchText });
       renderSeedDropdowns();
-    }, 150));
+    }, 250));
     document.getElementById('siteInventorySeedItem')?.addEventListener('change', (event) => { applySeedItemByKey(event.target.value || ''); });
     document.getElementById('siteInventoryCategoryPreset')?.addEventListener('change', (event) => { if (event.target.value) setInputValue('siteInventoryCategory', event.target.value); });
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
@@ -759,7 +780,10 @@ document.addEventListener('DOMContentLoaded', () => {
       unit_cost_cents: dollarsToCents(document.getElementById('siteInventoryUnitCost')?.value || '0') || 0,
       stock_unit_label: String(document.getElementById('siteInventoryStockUnitLabel')?.value || 'unit').trim().toLowerCase() || 'unit',
       usage_unit_label: String(document.getElementById('siteInventoryUsageUnitLabel')?.value || 'unit').trim().toLowerCase() || 'unit',
-      usage_units_per_stock_unit: Math.max(1, Number(document.getElementById('siteInventoryUsageUnitsPerStock')?.value || 1) || 1),
+      usage_units_per_stock_unit: Math.max(0.001, Number(document.getElementById('siteInventoryUsageUnitsPerStock')?.value || 1) || 1),
+      usage_tracking_mode: String(document.getElementById('siteInventoryUsageTrackingMode')?.value || 'exact').trim().toLowerCase(),
+      minimum_usage_increment: Math.max(0.0001, Number(document.getElementById('siteInventoryMinimumUsageIncrement')?.value || 0.001) || 0.001),
+      catalog_item_id: selectedCatalogItemId || undefined,
       supplier_name: document.getElementById('siteInventorySupplierName')?.value || '',
       supplier_sku: document.getElementById('siteInventorySupplierSku')?.value || '',
       supplier_contact: document.getElementById('siteInventorySupplierContact')?.value || '',
@@ -815,19 +839,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function syncCatalog(sourceTypes) {
+    const totals = { ok: true, requested_types: sourceTypes, scanned: 0, synced: 0, inserted: 0, updated: 0, skipped: 0, failed: 0, errors: [] };
+    let cursor = 0;
+    let batch = 0;
     try {
-      setMessage(`Syncing ${sourceTypes.join(', ')} catalog items into inventory...`);
-      const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', {
-        method: 'POST',
-        body: JSON.stringify({ action: 'sync_catalog', source_types: sourceTypes })
-      });
-      const data = await readApiPayload(response, 'Inventory sync failed.');
-      if (!response.ok || !data?.ok) throw new Error([data?.error, data?.diagnostic].filter(Boolean).join(' — ') || 'Failed to sync catalog items.');
-      setInventorySyncResult(data);
-      setMessage(`Synced ${Number(data.synced || 0)} ${sourceTypes.join('/')} inventory items. Inserted ${Number(data.inserted || 0)}, updated ${Number(data.updated || 0)}, failed ${Number(data.failed || 0)}. ${Number(data.with_unit_cost || 0)} have Amazon unit costs.`);
-      await loadList();
+      setMessage(`Reconciling ${sourceTypes.join(', ')} from the D1 catalog authority into inventory in small batches...`);
+      while (true) {
+        batch += 1;
+        const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'sync_catalog', source_types: sourceTypes, cursor, limit: 50 })
+        });
+        const data = await readApiPayload(response, 'Inventory reconciliation failed.');
+        if (!response.ok || !data?.ok) throw new Error([data?.error, data?.diagnostic].filter(Boolean).join(' — ') || 'Failed to reconcile catalog items.');
+        ['scanned','synced','inserted','updated','skipped','failed'].forEach((key) => { totals[key] += Number(data[key] || 0); });
+        if (Array.isArray(data.errors)) totals.errors.push(...data.errors);
+        setMessage(`D1 reconciliation batch ${batch}: ${totals.synced} processed so far...`);
+        if (data.done || data.next_cursor == null) break;
+        cursor = Number(data.next_cursor || 0);
+        await new Promise((resolve) => setTimeout(resolve, 150));
+      }
+      setInventorySyncResult(totals);
+      setMessage(`D1 reconciliation complete. Processed ${totals.synced}; inserted ${totals.inserted}, safely updated ${totals.updated}, skipped ${totals.skipped}, failed ${totals.failed}.`);
+      await Promise.allSettled([loadSeedOptions(), loadList({ force: true })]);
     } catch (err) {
-      setMessage(err.message || 'Failed to sync catalog items.', true);
+      setMessage(err.message || 'Failed to reconcile D1 catalog items.', true);
     }
   }
 
@@ -848,7 +884,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await readApiPayload(response, 'Inventory save failed.');
       if (data?.item) populateFormFromItem(data.item);
       clearInventoryDraft();
-      setMessage(isEditing ? 'Inventory item changes saved.' : 'Inventory item added. It remains open here for full editing.');
+      if (data?.classification_merge) {
+        setMessage(`Classification corrected and duplicate inventory #${Number(data.classification_merge.archived_inventory_id || 0)} was consolidated into #${Number(data.classification_merge.canonical_inventory_id || 0)} without double-counting legacy default stock.`);
+      } else {
+        setMessage(isEditing ? 'Inventory item changes saved.' : 'Inventory item added. It remains open here for full editing.');
+      }
       await loadList({ force: true });
     } catch (err) {
       saveInventoryDraft();
@@ -860,6 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function populateFormFromItem(item = {}) {
+    selectedCatalogItemId = Number(item.catalog_item_id || 0) || 0;
     const mapping = {
       siteInventorySourceType: item.source_type || 'other',
       siteInventoryExternalKey: item.external_key || '',
@@ -869,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
       siteInventoryImageUrl: item.image_url || '',
       siteInventorySourceUrl: item.source_url || '',
       siteInventoryAmazonUrl: item.amazon_url || '',
-      siteInventoryOnHand: Math.max(1, Number(item.on_hand_quantity || 0) || 1),
+      siteInventoryOnHand: Math.max(0, Number(item.on_hand_quantity || 0) || 0),
       siteInventoryReservedInput: item.reserved_quantity || 0,
       siteInventoryIncomingInput: item.incoming_quantity || 0,
       siteInventoryReorder: item.reorder_level || 0,
@@ -877,7 +918,9 @@ document.addEventListener('DOMContentLoaded', () => {
       siteInventoryUnitCost: centsToDollarInput(item.unit_cost_cents || 0),
       siteInventoryStockUnitLabel: item.stock_unit_label || 'unit',
       siteInventoryUsageUnitLabel: item.usage_unit_label || 'unit',
-      siteInventoryUsageUnitsPerStock: item.usage_units_per_stock_unit || 1,
+      siteInventoryUsageUnitsPerStock: Math.max(0.001, Number(item.usage_units_per_stock_unit || 1) || 1),
+      siteInventoryUsageTrackingMode: item.usage_tracking_mode || (String(item.source_type || '').toLowerCase() === 'tool' ? 'reusable' : 'exact'),
+      siteInventoryMinimumUsageIncrement: Math.max(0.0001, Number(item.minimum_usage_increment || 0.001) || 0.001),
       siteInventorySupplierName: item.supplier_name || '',
       siteInventorySupplierSku: item.supplier_sku || '',
       siteInventorySupplierContact: item.supplier_contact || '',
@@ -897,7 +940,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInventoryEditMode(item);
     const sourceTypeEl = document.getElementById('siteInventorySourceType');
     const externalKeyEl = document.getElementById('siteInventoryExternalKey');
-    if (sourceTypeEl) sourceTypeEl.disabled = editingSiteInventoryId > 0;
+    if (sourceTypeEl) sourceTypeEl.disabled = false;
     if (externalKeyEl) externalKeyEl.readOnly = editingSiteInventoryId > 0;
   }
 
@@ -943,14 +986,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <td data-label="Image / item">
               <div class="site-inventory-grid-identity">
                 ${x.image_url ? `<a class="site-inventory-list-thumb" href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" loading="lazy"/></a>` : '<div class="site-inventory-list-thumb is-empty small">No image</div>'}
-                <div>${edit ? `<input class="site-inventory-row-input" data-field="item_name" value="${escapeHtml(x.item_name)}" aria-label="Item name"/>` : `<strong>${escapeHtml(x.item_name)}</strong>`}<div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.source_type)} · ${escapeHtml(x.external_key)}</div></div>
+                <div>${edit ? `<input class="site-inventory-row-input" data-field="item_name" value="${escapeHtml(x.item_name)}" aria-label="Item name"/>${['tool','supply'].includes(String(x.source_type||'').toLowerCase()) ? `<select class="site-inventory-row-input" data-field="source_type" aria-label="Tool or supply classification"><option value="tool" ${String(x.source_type)==='tool'?'selected':''}>tool</option><option value="supply" ${String(x.source_type)==='supply'?'selected':''}>supply</option></select>` : `<span class="small">${escapeHtml(x.source_type||'other')}</span>`}` : `<strong>${escapeHtml(x.item_name)}</strong>`}<div class="small">#${x.site_item_inventory_id} · ${escapeHtml(x.external_key)}</div></div>
               </div>
             </td>
             <td data-label="Category / supplier">
               ${edit ? `<input class="site-inventory-row-input" data-field="category" value="${escapeHtml(x.category || '')}" aria-label="Category"/><input class="site-inventory-row-input" data-field="supplier_name" value="${escapeHtml(x.supplier_name || '')}" aria-label="Supplier" placeholder="Supplier"/>` : `${escapeHtml(x.category || '—')}<div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
             </td>
-            <td data-label="On hand">${edit ? `<input class="site-inventory-row-number" data-field="on_hand_quantity" type="number" min="0" step="1" value="${Number(x.on_hand_quantity || 0)}"/>` : Number(x.on_hand_quantity || 0)}<div class="small">${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
-            <td data-label="Reorder at">${edit ? `<input class="site-inventory-row-number" data-field="reorder_level" type="number" min="0" step="1" value="${Number(x.reorder_level || 0)}"/>` : Number(x.reorder_level || 0)}<div class="small">${x.needs_reorder ? 'Needs reorder' : 'Stock okay'}</div></td>
+            <td data-label="On hand">${edit ? `<input class="site-inventory-row-number" data-field="on_hand_quantity" type="number" min="0" step="0.001" value="${Number(x.on_hand_quantity || 0)}"/>` : Number(x.on_hand_quantity || 0)}<div class="small">${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
+            <td data-label="Reorder at">${edit ? `<input class="site-inventory-row-number" data-field="reorder_level" type="number" min="0" step="0.001" value="${Number(x.reorder_level || 0)}"/>` : Number(x.reorder_level || 0)}<div class="small">${x.needs_reorder ? 'Needs reorder' : 'Stock okay'}</div></td>
             <td data-label="Unit cost">${edit ? `<input class="site-inventory-row-money" data-field="unit_cost_dollars" type="number" min="0" step="0.01" value="${escapeHtml(centsToDollarInput(x.unit_cost_cents || 0))}"/>` : fmtMoney(x.unit_cost_cents || 0)}<div class="small">CAD / ${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
             <td data-label="Status">${edit ? `<select class="site-inventory-row-input" data-field="is_active"><option value="1" ${Number(x.is_active)!==0?'selected':''}>Active</option><option value="0" ${Number(x.is_active)===0?'selected':''}>Inactive</option></select>` : (Number(x.is_active)===0?'Inactive':'Active')}<div class="small">${Number(x.linked_product_count || 0)} linked product(s)</div></td>
             <td class="site-inventory-row-actions" data-label="Actions"><div class="site-inventory-action-buttons">
@@ -958,7 +1001,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
               <button class="btn" type="button" data-open-inventory-lots="${x.site_item_inventory_id}">Lots</button>
               <button class="btn" type="button" data-adjust-action="receive" data-id="${x.site_item_inventory_id}">Receive</button>
-              <button class="btn" type="button" data-adjust-action="consume" data-id="${x.site_item_inventory_id}">Consume</button>
+              <button class="btn" type="button" data-adjust-action="consume_usage" data-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Record use</button>
               <button class="btn danger" type="button" data-delete-id="${x.site_item_inventory_id}">Delete</button>
             </div></td>
           </tr>`;
@@ -989,6 +1032,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ...original,
         site_item_inventory_id: id,
         item_name: value('item_name') || original.item_name,
+        source_type: String(value('source_type') || original.source_type || 'other').trim().toLowerCase(),
         category: value('category') || '',
         supplier_name: value('supplier_name') || '',
         on_hand_quantity: Math.max(0, Number(value('on_hand_quantity') || 0)),
@@ -1047,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const usageLabel = String(window.prompt('Usage unit label?', String(item?.usage_unit_label || 'unit')) || '').trim() || 'unit';
       const usageUnitsRaw = window.prompt(`How many ${usageLabel} are in one ${stockLabel}?`, String(Number(item?.usage_units_per_stock_unit || 1)));
       if (usageUnitsRaw === null) return;
-      const usageUnitsPerStock = Math.max(1, Number(usageUnitsRaw || 1) || 1);
+      const usageUnitsPerStock = Math.max(0.001, Number(usageUnitsRaw || 1) || 1);
       const reorderList = window.confirm('Put this item on the reorder list? Click Cancel to leave it off.');
       const doNotReuse = window.confirm('Mark this item as DO NOT REUSE? Click Cancel to leave reusable/normal.');
       const movementNote = String(window.prompt('Movement note?', 'Manual stock / cost correction') || '').trim();
@@ -1082,11 +1126,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = Number(adjustBtn.getAttribute('data-id') || 0);
       const action = String(adjustBtn.getAttribute('data-adjust-action') || '').trim();
       if (!id || !action) return;
-      const qtyRaw = window.prompt('Quantity?', '1');
+      let actionItem = {};
+      try { actionItem = JSON.parse(adjustBtn.getAttribute('data-item') || '{}'); } catch {}
+      const usageLabel = String(actionItem.usage_unit_label || 'unit').trim() || 'unit';
+      const minIncrement = Math.max(0.0001, Number(actionItem.minimum_usage_increment || 0.001) || 0.001);
+      const qtyPrompt = action === 'consume_usage'
+        ? `How many ${usageLabel} were used? Decimals are allowed (smallest configured increment ${minIncrement}).`
+        : 'Quantity?';
+      const qtyRaw = window.prompt(qtyPrompt, action === 'consume_usage' ? String(minIncrement) : '1');
       if (qtyRaw === null) return;
       const qty = Number(qtyRaw);
       if (!Number.isFinite(qty) || qty <= 0) return;
-      const defaultNotes = { reserve: 'Manual reservation', release: 'Manual reservation release', receive: 'Received stock', consume: 'Consumed in production', reorder_request: 'Manual reorder request' };
+      const defaultNotes = { reserve: 'Manual reservation', release: 'Manual reservation release', receive: 'Received stock', consume: 'Consumed in production', consume_usage: 'Recorded material use', reorder_request: 'Manual reorder request' };
       const note = String(window.prompt('Note?', defaultNotes[action] || `Inventory ${action}`) || '').trim();
       try {
         setMessage(`Running ${action}...`);
