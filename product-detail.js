@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="resource-story-body">
             <div class="small resource-kind-pill">${escapeHtml(link.resource_kind || 'resource')}</div>
             <h4>${escapeHtml(link.resource_name || link.source_key || 'Workshop item')}</h4>
-            <div class="small">Use mode: ${escapeHtml(modeLabel)} • Quantity: ${Number(link.quantity_used || 0) || 1}</div>
+            <div class="small">Use mode: ${escapeHtml(modeLabel)} • Quantity: ${Number(link.quantity_used || 0) || 0}</div>
             ${link.resource_category ? `<div class="small">${escapeHtml(link.resource_category)}${link.resource_subcategory ? ` • ${escapeHtml(link.resource_subcategory)}` : ''}</div>` : ''}
             ${link.usage_notes ? `<div class="small">${escapeHtml(link.usage_notes)}</div>` : ''}
             ${inv ? `<div class="small">Inventory: on hand ${Number(inv.on_hand_quantity || 0)} ${escapeHtml(inv.stock_unit_label || 'unit')} • 1 ${escapeHtml(inv.stock_unit_label || 'unit')} = ${Number(inv.usage_units_per_stock_unit || 1)} ${escapeHtml(inv.usage_unit_label || 'unit')}</div><div class="small">Estimated materials from this item per finished product: ${escapeHtml(formatMoney(inv.estimated_cost_per_product_cents || 0, currentProduct?.currency || 'CAD'))}${Number(inv.buildable_products || 0) ? ` • buildable from stock ≈ ${Number(inv.buildable_products || 0)}` : ''}${lowStock ? ' • low stock' : ''}</div>` : ''}

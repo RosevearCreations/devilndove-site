@@ -1,3 +1,15 @@
+# Build 244 Release Notes
+
+- Moved normal tool/supply runtime authority fully to D1: the migration carries 897 legacy master rows (399 tools + 498 supplies), preserves reviewed D1 state, and database-side populates missing operational inventory.
+- Legacy tool/supply JSON remains read-only provenance/emergency fallback; runtime Catalog Sync can no longer re-import it over reviewed D1 classifications.
+- Added editable tool↔supply classification, inline review controls and safe consolidation when a corrected target identity already exists.
+- Added fractional material usage profiles/movements with exact, estimated, log-only and reusable modes; legacy supplies default safely to log-only until their unit breakdown is reviewed.
+- Product Resources, mobile capture and Creative Project inventory posting now accept real fractional usage and convert usage units into stock-unit fractions instead of forcing a whole unit/use.
+- Added the 500 g mica / few-sprinkles workflow directly to Inventory Operations and server-side bounded catalog search so all D1 rows remain findable without loading the whole catalog.
+- Build 244 migration uses no TEMP table and no DROP TABLE, avoiding the D1 SQLITE_AUTH warning encountered by the Build 243 helper cleanup.
+- Static SEO audit remains 36/36 passed; `/assets/` remains 120/120 resolved; service-worker shell advanced to v21.
+- Build 244 is the current D1 migration boundary; `database_build244_inventory_authority_fractional_usage.sql` and `database_upgrade_current_pass.sql` are byte-identical.
+
 # Build 243 Release Notes
 
 - Reduced Inventory Operations request fan-out with one-shot startup, in-flight GET deduplication, bounded retry/backoff, stale read-only fallback and deferred noncritical admin telemetry.
