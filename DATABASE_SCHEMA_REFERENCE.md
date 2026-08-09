@@ -1,49 +1,62 @@
-# Database Schema Reference — Build 243
+# Database Schema Reference — Build 244
 
 ## Current migration boundary
 
-Build 243 is the current additive production migration:
+Build 244 is the current additive production migration:
 
-- numbered: `database_build243_inventory_resilience_case_normalization.sql`
+- numbered: `database_build244_inventory_authority_fractional_usage.sql`
 - current pass: `database_upgrade_current_pass.sql`
 
-These files are byte-identical. Build 243 assumes the Build 241 CAIP migration has already been applied. Back up production D1, apply **one** Build 243 file once, never both, then confirm ledger key `build243_inventory_resilience_case_normalization`.
+They are byte-identical. Back up production D1, apply **one** Build 244 file, never both, then confirm ledger key `build244_inventory_authority_fractional_usage`.
 
-Build 243 does not add another mutable inventory authority. It cleans and indexes the existing authorities so routine admin reads can stop probing/repairing schema at request time.
+Build 244 intentionally uses **no TEMP table and no DROP TABLE**, avoiding the D1 `SQLITE_AUTH` warning encountered by the Build 243 temporary helper cleanup.
 
-## Build 243 normalization policy
+## D1 catalog/inventory authority
 
-Database object identifiers (tables, indexes, views and triggers) are lower-case. Controlled classification values are also normalized to lower case where case has no business meaning:
+`catalog_items` is the master descriptive authority for tools/supplies. `site_item_inventory` is the operational stock/cost/reservation authority. Both are D1 tables. Legacy `/data/toolshed/toolshed_items_master.json` and `/data/supplies/supplies_items_master.json` are retained only for static provenance/emergency fallback.
 
-- product category, colour and shipping code;
-- catalog item kind/category/subcategory/type;
-- inventory source type, category, stock/usage unit labels and reuse status;
-- inventory movement source type;
-- product-resource kind;
-- persisted catalog option arrays.
+The Build 244 migration contains 897 legacy rows (399 tools + 498 supplies). Missing provenance rows are copied to `catalog_items`, then missing active catalog identities are copied database-side into `site_item_inventory`. Existing reviewed D1 rows win; the migration does not use runtime JSON re-import to overwrite them.
 
-Build 243 intentionally **does not** force human-facing product/item names, supplier names, URLs, ASIN/SKU/order identifiers, currencies, notes or other external/display values to lower case. Changing those values could damage identity, readability or third-party reconciliation.
+## Fractional usage tables
 
-## Case-duplicate inventory merge
+### `site_inventory_usage_profiles`
 
-Active `site_item_inventory` records with the same exact `external_key` and a `source_type` that differs only by case are consolidated. The oldest record remains the canonical active ID; stock/reserved/incoming quantities are aggregated. Later duplicate IDs are retained as inactive audit/history rows with `reuse_status='merged_case_duplicate'` rather than being deleted, protecting foreign-key/history references.
+One row per inventory identity:
 
-The partial unique expression index `idx_site_item_inventory_identity_lower_active` prevents a future active duplicate of that same case-insensitive source identity.
+- `usage_tracking_mode`: `exact`, `estimated`, `log_only`, or `reusable`;
+- `minimum_usage_increment REAL`;
+- notes/audit user/timestamps.
+
+Legacy tool rows without a profile default to `reusable`. Legacy supply rows without a reviewed profile default to `log_only` so an old one-unit assumption cannot empty an entire container.
+
+### `site_inventory_usage_movements`
+
+Preserves both sides of a use event:
+
+- actual `usage_quantity_delta` + usage unit;
+- resulting `stock_quantity_delta` + stock unit;
+- tracking mode / estimated flag / audit note.
+
+This allows, for example, 3 grams from a 500-gram jar to reduce aggregate stock by `3 / 500 = 0.006` jar rather than one whole jar.
+
+### `creative_project_inventory_usage_details`
+
+Sidecar evidence for Creative Project inventory postings. It records actual usage amount/unit separately from stock-unit consumption and tracking mode, preserving fractional/log-only/reusable project evidence without rewriting historical post IDs.
+
+## Tool/supply classification
+
+Database object identifiers and controlled classifications remain lower-case. Tool/supply classification is editable in Inventory Operations. Reclassification propagates to linked catalog/product-resource identities. If a target active inventory identity already exists, Build 244 can consolidate the mistaken row into the target and retain the old ID inactive for audit/history.
+
+The merge uses the greater stock/reserved/incoming counter rather than blindly summing two legacy duplicates, because many historical rows used default quantity `1`; this avoids inflating physical stock. The canonical quantity should still be owner-reviewed after a duplicate merge.
 
 ## Runtime schema rule
 
-Routine Inventory Operations, Product Resources, Product Stock and Purchase Lot requests must not create, alter or index schema. Migrations own schema. If a required current column/table is missing, the API returns a structured migration-required/unavailable response rather than attempting live DDL under user traffic.
+Routine Inventory Operations/Product Resources/Product Stock/Purchase Lot requests do not install schema. Numbered migrations own schema. Missing prerequisites return structured migration-required/unavailable JSON when the Worker runtime receives control.
 
-## Aggregate schemas
+## Aggregate schema scope
 
-All three schema files are marked current for Build 243, while their historical scopes are preserved:
+- `database_full_schema.sql` — complete supported aggregate and contains the executable Build 244 migration block.
+- `database_schema.sql` — historical/core aggregate; project fractional evidence is reflected where owned, while Site Inventory authority remains the current numbered migration/full schema.
+- `database_store_schema.sql` — scoped store aggregate; product-resource fractional quantity affinity is current, while Site Inventory authority remains the current numbered migration/full schema.
 
-- `database_full_schema.sql` — supported complete aggregate and contains the executable Build 243 normalization/index block;
-- `database_schema.sql` — legacy/core historical overlay; it does not define the full Site Inventory authority, so it carries a Build 243 scope note rather than replaying SQL against missing tables;
-- `database_store_schema.sql` — scoped store aggregate; likewise carries the Build 243 scope note because it does not own the full Site Inventory authority.
-
-`database_upgrade_current_pass.sql` is an exact copy of the numbered Build 243 migration.
-
-## Historical migrations
-
-Numbered SQL migrations remain at repository root because deployment/repair tooling addresses them by exact filename. Historical Build prose/validation belongs under `docs/archive/build-history/`. Use `AI_HANDOFF.md` for current deployment order rather than inferring the active boundary from an older release note.
+Historical numbered migrations remain at repository root for deterministic deployment/repair reference. Historical prose/validation belongs under `docs/archive/build-history/`.

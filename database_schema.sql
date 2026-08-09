@@ -1,3 +1,5 @@
+-- Build 244 scope: current migration is database_build244_inventory_authority_fractional_usage.sql; this base schema does not own site_item_inventory, so D1 catalog/inventory bulk population is applied by the numbered current migration/full schema.
+-- Build 244 current schema: D1 tool/supply authority + fractional/log-only usage.
 -- Build 243 sync: inventory request-pressure resilience, lower-case controlled classifications, case-duplicate merge and search/identity indexes; current D1 migration is Build 243.
 -- Build 233 sync: code-only bounded-login/session-retention repair; current D1 migration remains Build 230.
 -- Build 226 sync: code-only Startup Readiness loading repair; Build 225 tables and 37 seeded gates remain current.
@@ -6275,8 +6277,8 @@ CREATE TABLE IF NOT EXISTS product_material_return_audit (
   item_name TEXT,
   action_key TEXT NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 0,
-  previous_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
-  new_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
+  previous_on_hand_quantity REAL NOT NULL DEFAULT 0,
+  new_on_hand_quantity REAL NOT NULL DEFAULT 0,
   previous_reserved_quantity INTEGER NOT NULL DEFAULT 0,
   new_reserved_quantity INTEGER NOT NULL DEFAULT 0,
   note TEXT,
@@ -6957,9 +6959,9 @@ CREATE TABLE IF NOT EXISTS creative_project_inventory_posts (
   creative_work_event_id INTEGER NOT NULL,
   creative_project_material_review_id INTEGER NOT NULL,
   site_item_inventory_id INTEGER NOT NULL,
-  stock_quantity_consumed INTEGER NOT NULL,
-  previous_on_hand_quantity INTEGER NOT NULL,
-  new_on_hand_quantity INTEGER NOT NULL,
+  stock_quantity_consumed REAL NOT NULL,
+  previous_on_hand_quantity REAL NOT NULL,
+  new_on_hand_quantity REAL NOT NULL,
   posting_status TEXT NOT NULL DEFAULT 'posted',
   reversal_post_id INTEGER,
   posted_by INTEGER,
@@ -6971,6 +6973,19 @@ CREATE TABLE IF NOT EXISTS creative_project_inventory_posts (
   FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_creative_project_inventory_posts_project ON creative_project_inventory_posts(creative_work_project_id, posted_at DESC);
+-- Build 244: project-side fractional usage evidence (site inventory profile authority is in the full/current migration schema).
+CREATE TABLE IF NOT EXISTS creative_project_inventory_usage_details (
+  creative_project_inventory_post_id INTEGER PRIMARY KEY,
+  usage_quantity_consumed REAL NOT NULL DEFAULT 0,
+  usage_unit_label TEXT NOT NULL DEFAULT 'unit',
+  stock_quantity_consumed REAL NOT NULL DEFAULT 0,
+  stock_unit_label TEXT NOT NULL DEFAULT 'unit',
+  tracking_mode TEXT NOT NULL DEFAULT 'exact',
+  is_estimated INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(creative_project_inventory_post_id) REFERENCES creative_project_inventory_posts(creative_project_inventory_post_id) ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS creative_project_caip_mirrors (
   creative_project_caip_mirror_id INTEGER PRIMARY KEY AUTOINCREMENT,
   creative_work_project_id INTEGER NOT NULL,
@@ -7005,9 +7020,9 @@ CREATE TABLE IF NOT EXISTS creative_project_inventory_reversals (
   creative_project_inventory_post_id INTEGER NOT NULL UNIQUE,
   creative_work_project_id INTEGER NOT NULL,
   site_item_inventory_id INTEGER NOT NULL,
-  stock_quantity_restored INTEGER NOT NULL,
-  previous_on_hand_quantity INTEGER NOT NULL,
-  new_on_hand_quantity INTEGER NOT NULL,
+  stock_quantity_restored REAL NOT NULL,
+  previous_on_hand_quantity REAL NOT NULL,
+  new_on_hand_quantity REAL NOT NULL,
   reason TEXT NOT NULL,
   authorized_by INTEGER NOT NULL,
   authorized_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

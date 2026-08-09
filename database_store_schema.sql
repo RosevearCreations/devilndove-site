@@ -1,3 +1,5 @@
+-- Build 244 scope: D1 tool/supply authority and inventory population are applied by database_build244_inventory_authority_fractional_usage.sql/full schema; this store overlay does not own site_item_inventory.
+-- Build 244 scope note: current D1 migration is database_build244_inventory_authority_fractional_usage.sql; fractional site-inventory sidecars live in database_full_schema.sql/current migration because this store overlay does not own site_item_inventory.
 -- Build 243 sync: inventory request-pressure resilience, lower-case controlled classifications, case-duplicate merge and search/identity indexes; current D1 migration is Build 243.
 -- Build 233 sync: code-only bounded-login/session-retention repair; current D1 migration remains Build 230.
 -- Build 226 sync: code-only Startup Readiness loading repair; Build 225 tables and 37 seeded gates remain current.
@@ -462,7 +464,7 @@ CREATE TABLE IF NOT EXISTS product_resource_links (
   product_id INTEGER NOT NULL,
   resource_kind TEXT NOT NULL CHECK (resource_kind IN ('tool','supply')),
   source_key TEXT NOT NULL,
-  quantity_used INTEGER NOT NULL DEFAULT 1,
+  quantity_used REAL NOT NULL DEFAULT 1,
   usage_notes TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
