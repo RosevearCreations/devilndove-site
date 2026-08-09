@@ -1,9 +1,55 @@
 // File: /functions/api/admin/site-item-inventory.js
+// Build 244: D1 catalog authority, editable tool/supply classification, fractional usage and log-only material tracking.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { recordInventoryCostHistory } from "./_inventoryCostHistory.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
+
+function normalizeInventoryKind(value, fallback = 'other') {
+  const kind = normalizeText(value).toLowerCase();
+  return ['tool', 'supply', 'product', 'other'].includes(kind) ? kind : fallback;
+}
+function normalizeUsageTrackingMode(value, fallback = 'exact') {
+  const mode = normalizeText(value).toLowerCase();
+  return ['exact', 'estimated', 'log_only', 'reusable'].includes(mode) ? mode : fallback;
+}
+async function saveUsageProfile(db, siteItemInventoryId, { usage_tracking_mode = 'exact', minimum_usage_increment = 0.001, notes = '', user_id = null } = {}) {
+  const id = Number(siteItemInventoryId || 0);
+  if (!id) return;
+  const mode = normalizeUsageTrackingMode(usage_tracking_mode, 'exact');
+  const increment = Math.max(0.0001, Number(minimum_usage_increment || 0.001) || 0.001);
+  await db.prepare(`
+    INSERT INTO site_inventory_usage_profiles (
+      site_item_inventory_id, usage_tracking_mode, minimum_usage_increment, notes, updated_by_user_id, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(site_item_inventory_id) DO UPDATE SET
+      usage_tracking_mode=excluded.usage_tracking_mode,
+      minimum_usage_increment=excluded.minimum_usage_increment,
+      notes=excluded.notes,
+      updated_by_user_id=excluded.updated_by_user_id,
+      updated_at=CURRENT_TIMESTAMP
+  `).bind(id, mode, increment, normalizeText(notes) || null, Number(user_id || 0) || null).run();
+}
+async function logUsageMovement(db, payload = {}) {
+  await db.prepare(`
+    INSERT INTO site_inventory_usage_movements (
+      site_inventory_movement_id, site_item_inventory_id, usage_quantity_delta, usage_unit_label,
+      stock_quantity_delta, stock_unit_label, tracking_mode, is_estimated, note, actor_user_id, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+  `).bind(
+    Number(payload.site_inventory_movement_id || 0) || null,
+    Number(payload.site_item_inventory_id || 0),
+    Number(payload.usage_quantity_delta || 0),
+    normalizeText(payload.usage_unit_label).toLowerCase() || 'unit',
+    Number(payload.stock_quantity_delta || 0),
+    normalizeText(payload.stock_unit_label).toLowerCase() || 'unit',
+    normalizeUsageTrackingMode(payload.tracking_mode, 'exact'),
+    Number(payload.is_estimated) === 1 ? 1 : 0,
+    normalizeText(payload.note) || null,
+    Number(payload.actor_user_id || 0) || null
+  ).run().catch(() => null);
+}
 async function saveItemDescription(db, siteItemInventoryId, description, userId = null) {
   const clean = normalizeText(description).slice(0, 600);
   if (!siteItemInventoryId) return;
@@ -43,7 +89,9 @@ function shape(row = {}) {
     unit_cost_dollars: (Number(row.unit_cost_cents || 0) / 100).toFixed(2),
     stock_unit_label: row.stock_unit_label || 'unit',
     usage_unit_label: row.usage_unit_label || 'unit',
-    usage_units_per_stock_unit: Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1),
+    usage_units_per_stock_unit: Math.max(0.001, Number(row.usage_units_per_stock_unit || 1) || 1),
+    usage_tracking_mode: normalizeUsageTrackingMode(row.usage_tracking_mode, normalizeInventoryKind(row.source_type) === 'tool' ? 'reusable' : 'exact'),
+    minimum_usage_increment: Math.max(0.0001, Number(row.minimum_usage_increment || 0.001) || 0.001),
     supplier_name: row.supplier_name || '',
     supplier_sku: row.supplier_sku || '',
     supplier_contact: row.supplier_contact || '',
@@ -88,7 +136,7 @@ async function logMovement(db, payload = {}) {
     movementType !== originalMovementType ? `Original action: ${originalMovementType}.` : null
   ].filter(Boolean).join(' ');
 
-  await db.prepare(`
+  const result = await db.prepare(`
     INSERT INTO site_inventory_movements (
       site_item_inventory_id, source_type, external_key, item_name, movement_type,
       quantity_delta, previous_on_hand_quantity, new_on_hand_quantity,
@@ -112,6 +160,7 @@ async function logMovement(db, payload = {}) {
     note || null,
     payload.actor_user_id || null
   ).run().catch(() => null);
+  return Number(result?.meta?.last_row_id || 0);
 }
 
 async function getItems(db, { q = '', stockView = '', includeHistory = false } = {}) {
@@ -121,11 +170,15 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
     SELECT
       sii.*,
       COALESCE(siid.item_description, '') AS item_description,
+      COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+      COALESCE(siup.minimum_usage_increment, 0.001) AS minimum_usage_increment,
       COUNT(DISTINCT prl.product_id) AS linked_product_count,
       GROUP_CONCAT(DISTINCT p.name) AS linked_product_names
     FROM site_item_inventory sii
     LEFT JOIN site_inventory_item_descriptions siid
       ON siid.site_item_inventory_id = sii.site_item_inventory_id
+    LEFT JOIN site_inventory_usage_profiles siup
+      ON siup.site_item_inventory_id = sii.site_item_inventory_id
     LEFT JOIN product_resource_links prl
       ON prl.resource_kind = sii.source_type
      AND prl.source_key = sii.external_key
@@ -145,10 +198,12 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
       OR (? = 'reorder' AND COALESCE(sii.is_on_reorder_list, 0) = 1)
       OR (? = 'no_reuse' AND COALESCE(sii.do_not_reuse, 0) = 1)
       OR (? = 'inactive' AND COALESCE(sii.is_active, 1) = 0)
+      OR (? = 'tool' AND LOWER(TRIM(COALESCE(sii.source_type,''))) = 'tool')
+      OR (? = 'supply' AND LOWER(TRIM(COALESCE(sii.source_type,''))) = 'supply')
     )
     GROUP BY sii.site_item_inventory_id
     ORDER BY LOWER(COALESCE(sii.item_name, '')) ASC
-  `).bind(q, like, like, like, like, like, stockView, stockView, stockView, stockView, stockView).all().catch(() => ({ results: [] })));
+  `).bind(q, like, like, like, like, like, stockView, stockView, stockView, stockView, stockView, stockView, stockView).all().catch(() => ({ results: [] })));
 
   const summary = {
     total_items: items.length,
@@ -245,11 +300,14 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
       COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
       COALESCE(sii.reservation_notes, '') AS reservation_notes,
       COALESCE(NULLIF(sii.usage_unit_label, ''), 'unit') AS usage_unit_label,
-      COALESCE(NULLIF(sii.usage_units_per_stock_unit, 0), 1) AS usage_units_per_stock_unit
+      COALESCE(NULLIF(sii.usage_units_per_stock_unit, 0), 1) AS usage_units_per_stock_unit,
+      COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode
     FROM product_resource_links prl
     LEFT JOIN site_item_inventory sii
       ON sii.source_type = prl.resource_kind
      AND sii.external_key = prl.source_key
+    LEFT JOIN site_inventory_usage_profiles siup
+      ON siup.site_item_inventory_id = sii.site_item_inventory_id
     WHERE prl.product_id = ?
     ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
   `).bind(productId).all().catch(() => ({ results: [] })));
@@ -258,6 +316,9 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
 
   for (const link of links) {
     const requiredQty = Math.max(0, Number(link.quantity_used || 0) * Math.max(1, Number(quantityMultiplier || 1)));
+    const usagePerStock = Math.max(0.001, Number(link.usage_units_per_stock_unit || 1) || 1);
+    const stockRequired = requiredQty / usagePerStock;
+    const trackingMode = normalizeUsageTrackingMode(link.usage_tracking_mode, link.resource_kind === 'tool' ? 'reusable' : 'exact');
     const consumptionMode = String(link.consumption_mode || 'per_unit').toLowerCase();
 
     if (!link.site_item_inventory_id) {
@@ -272,7 +333,7 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
       continue;
     }
 
-    if (consumptionMode === 'story_only' || consumptionMode === 'end_of_lot' || Number(link.usage_units_per_stock_unit || 1) > 1) {
+    if (consumptionMode === 'story_only' || consumptionMode === 'end_of_lot' || ['log_only','reusable'].includes(trackingMode)) {
       results.push({
         ok: true,
         skipped_reservation: true,
@@ -281,15 +342,16 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
         external_key: link.external_key || link.source_key || '',
         item_name: link.item_name || '',
         required_quantity: requiredQty,
+        stock_quantity_required: stockRequired,
         usage_unit_label: link.usage_unit_label || 'unit',
-        usage_units_per_stock_unit: Math.max(1, Number(link.usage_units_per_stock_unit || 1) || 1),
+        usage_units_per_stock_unit: Math.max(0.001, Number(link.usage_units_per_stock_unit || 1) || 1),
         consumption_mode: consumptionMode
       });
       continue;
     }
 
     const previousReserved = Number(link.reserved_quantity || 0);
-    const newReserved = Math.max(0, previousReserved + (release ? -requiredQty : requiredQty));
+    const newReserved = Math.max(0, previousReserved + (release ? -stockRequired : stockRequired));
 
     await db.prepare(`
       UPDATE site_item_inventory
@@ -322,6 +384,7 @@ async function adjustProductResourceReservations(db, { productId = 0, quantityMu
       external_key: link.external_key || link.source_key || '',
       item_name: link.item_name || '',
       required_quantity: requiredQty,
+      stock_quantity_required: stockRequired,
       previous_reserved_quantity: previousReserved,
       new_reserved_quantity: newReserved,
       consumption_mode: consumptionMode
@@ -338,7 +401,12 @@ async function runInventoryItemAction(db, { siteItemInventoryId = 0, action = ''
   if (!id) throw new Error('site_item_inventory_id is required.');
   if (!qty) throw new Error('A quantity greater than zero is required.');
 
-  const existing = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(id).first();
+  const existing = await db.prepare(`
+    SELECT sii.*, COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode
+    FROM site_item_inventory sii
+    LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+    WHERE sii.site_item_inventory_id = ? LIMIT 1
+  `).bind(id).first();
   if (!existing) throw new Error('Inventory item not found.');
 
   const previousOnHand = Number(existing.on_hand_quantity || 0);
@@ -368,6 +436,21 @@ async function runInventoryItemAction(db, { siteItemInventoryId = 0, action = ''
       movementType = 'release';
       quantityDelta = 0;
       break;
+    case 'consume_usage': {
+      const trackingMode = normalizeUsageTrackingMode(existing.usage_tracking_mode, normalizeInventoryKind(existing.source_type) === 'tool' ? 'reusable' : 'exact');
+      const perStock = Math.max(0.001, Number(existing.usage_units_per_stock_unit || 1) || 1);
+      const stockQty = qty / perStock;
+      if (trackingMode === 'reusable' || trackingMode === 'log_only') {
+        newOnHand = previousOnHand;
+        quantityDelta = 0;
+      } else {
+        newOnHand = Math.max(0, previousOnHand - stockQty);
+        quantityDelta = newOnHand - previousOnHand;
+      }
+      movementType = 'consume';
+      auditDetails = { quantity: qty, usage_quantity: qty, usage_unit_label: existing.usage_unit_label || 'unit', stock_quantity_delta: quantityDelta, stock_unit_label: existing.stock_unit_label || 'unit', tracking_mode: trackingMode, estimated: trackingMode === 'estimated' };
+      break;
+    }
     case 'consume':
       newOnHand = Math.max(0, previousOnHand - qty);
       movementType = 'consume';
@@ -399,7 +482,7 @@ async function runInventoryItemAction(db, { siteItemInventoryId = 0, action = ''
     id
   ).run();
 
-  await logMovement(db, {
+  const movementId = await logMovement(db, {
     site_item_inventory_id: id,
     source_type: existing.source_type || null,
     external_key: existing.external_key || null,
@@ -416,7 +499,29 @@ async function runInventoryItemAction(db, { siteItemInventoryId = 0, action = ''
     actor_user_id: actorUserId || null
   });
 
-  const saved = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id = ? LIMIT 1`).bind(id).first();
+  if (String(action || '').toLowerCase() === 'consume_usage') {
+    await logUsageMovement(db, {
+      site_inventory_movement_id: movementId,
+      site_item_inventory_id: id,
+      usage_quantity_delta: -qty,
+      usage_unit_label: existing.usage_unit_label || 'unit',
+      stock_quantity_delta: quantityDelta,
+      stock_unit_label: existing.stock_unit_label || 'unit',
+      tracking_mode: auditDetails.tracking_mode || 'exact',
+      is_estimated: auditDetails.estimated ? 1 : 0,
+      note: note || `Recorded ${qty} ${existing.usage_unit_label || 'unit'} used.`,
+      actor_user_id: actorUserId
+    });
+  }
+
+  const saved = await db.prepare(`
+    SELECT sii.*,
+           COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+           COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
+    FROM site_item_inventory sii
+    LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+    WHERE sii.site_item_inventory_id=? LIMIT 1
+  `).bind(id).first();
   return {
     item: shape(saved || {}),
     audit_details: {
@@ -450,45 +555,28 @@ async function handleGet(context) {
 }
 
 
-function buildInventorySyncNotes(row = {}, amazon = {}) {
-  const parts = [];
-  if (row.notes) parts.push(String(row.notes));
-  const amazonNote = buildAmazonInventoryNote(amazon);
-  if (amazonNote) parts.push(amazonNote);
-  if (amazon.amazon_title) parts.push(`Amazon title: ${amazon.amazon_title}`);
-  if (amazon.source_order_ids_for_asin) parts.push(`Matched order ids: ${amazon.source_order_ids_for_asin}`);
-  return parts.filter(Boolean).join('\n');
-}
 
-async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
-  // Build 243: the large Amazon match registry is loaded only for an explicit catalog-sync action,
-  // never for ordinary inventory page reads or manual edits.
-  const { buildAmazonInventoryNote, extractAmazonInventoryFields, getAmazonInventoryMatch } = await import('./_amazonInventoryMatches.js');
+async function syncCatalogItemsIntoInventory(db, { sourceTypes = [], cursor = 0, limit = 80, actorUserId = null } = {}) {
+  // Build 244: D1 catalog_items is the authority. Reconciliation is intentionally
+  // lightweight and bounded; Amazon enrichment belongs to the one-item preview path.
   const normalizedTypes = [...new Set((Array.isArray(sourceTypes) ? sourceTypes : [])
-    .map((value) => normalizeText(value).toLowerCase())
+    .map((value) => normalizeInventoryKind(value, ''))
     .filter((value) => ['tool', 'supply'].includes(value))
   )];
   const requestedTypes = normalizedTypes.length ? normalizedTypes : ['tool', 'supply'];
   const placeholders = requestedTypes.map(() => '?').join(', ');
+  const safeCursor = Math.max(0, Number(cursor || 0) || 0);
+  const safeLimit = Math.max(10, Math.min(100, Number(limit || 80) || 80));
 
   const rows = normalizeResults(await db.prepare(`
-    SELECT
-      item_kind,
-      source_key,
-      name,
-      category,
-      subcategory,
-      image_url,
-      amazon_url,
-      quantity_on_hand,
-      reorder_point,
-      notes,
-      source_record_json
+    SELECT catalog_item_id,item_kind,source_key,name,category,subcategory,image_url,amazon_url,
+           quantity_on_hand,reorder_point,notes
     FROM catalog_items
     WHERE item_kind IN (${placeholders})
-      AND COALESCE(status, 'active') != 'archived'
-    ORDER BY item_kind ASC, LOWER(COALESCE(name, '')) ASC
-  `).bind(...requestedTypes).all().catch(() => ({ results: [] })));
+      AND COALESCE(status,'active') != 'archived'
+    ORDER BY item_kind ASC, catalog_item_id ASC
+    LIMIT ? OFFSET ?
+  `).bind(...requestedTypes, safeLimit, safeCursor).all());
 
   const summary = {
     requested_types: requestedTypes,
@@ -502,134 +590,79 @@ async function syncCatalogItemsIntoInventory(db, { sourceTypes = [] } = {}) {
     with_unit_cost: 0,
     cost_history_added: 0,
     defaulted_on_hand_to_one: 0,
-    match_status_counts: {},
-    errors: []
+    errors: [],
+    cursor: safeCursor,
+    next_cursor: rows.length === safeLimit ? safeCursor + rows.length : null,
+    done: rows.length < safeLimit
   };
 
   for (const row of rows) {
-    const sourceType = normalizeText(row.item_kind).toLowerCase();
+    const sourceType = normalizeInventoryKind(row.item_kind, '');
     const externalKey = normalizeText(row.source_key);
     const itemName = normalizeText(row.name) || externalKey;
-    if (!sourceType || !externalKey || !itemName) continue;
-
-    const amazonArea = sourceType === 'tool' ? 'toolshed' : 'supplies';
-    const amazonMatch = await getAmazonInventoryMatch(amazonArea, -1, itemName);
-    const amazon = extractAmazonInventoryFields(amazonMatch || row.source_record_json || {}, sourceType);
-    const amazonUrl = normalizeText(row.amazon_url || amazon.amazon_url);
-    const supplierName = normalizeText(amazon.seller_name || (amazonUrl ? 'Amazon.ca' : ''));
-    const supplierSku = normalizeText(amazon.amazon_asin);
-    const reorderNotes = buildInventorySyncNotes(row, amazon);
-    const stockUnitLabel = normalizeText(amazon.stock_unit_label) || (sourceType === 'tool' ? 'tool' : 'package');
-    const usageUnitLabel = normalizeText(amazon.usage_unit_label) || (sourceType === 'tool' ? 'use' : 'unit');
-    const usageUnitsPerStockUnit = Math.max(1, Number(amazon.usage_units_per_stock_unit || 1) || 1);
-    const unitCostCents = Math.max(0, Number(amazon.unit_cost_cents || 0) || 0);
-    const rawOnHandQuantity = Math.max(0, Number(row.quantity_on_hand || 0) || 0);
-    const onHandQuantity = Math.max(1, rawOnHandQuantity);
-    if (rawOnHandQuantity < 1) summary.defaulted_on_hand_to_one += 1;
-    const reorderPoint = Math.max(0, Number(row.reorder_point || 0) || 0);
-    const matchStatus = normalizeText(amazon.amazon_match_status || 'unmatched') || 'unmatched';
-    summary.match_status_counts[matchStatus] = (summary.match_status_counts[matchStatus] || 0) + 1;
-    if (amazonUrl) summary.with_amazon_url += 1;
-    if (unitCostCents > 0) summary.with_unit_cost += 1;
-
+    if (!['tool','supply'].includes(sourceType) || !externalKey || !itemName) { summary.skipped += 1; continue; }
+    if (normalizeText(row.amazon_url)) summary.with_amazon_url += 1;
     try {
       const existing = await db.prepare(`
-        SELECT site_item_inventory_id, unit_cost_cents, on_hand_quantity
-        FROM site_item_inventory
-        WHERE source_type = ? AND external_key = ?
-        LIMIT 1
-      `).bind(sourceType, externalKey).first().catch(() => null);
+        SELECT site_item_inventory_id,item_name,category,source_url,amazon_url,image_url,on_hand_quantity,reorder_level,is_active
+        FROM site_item_inventory WHERE LOWER(TRIM(source_type))=? AND external_key=? ORDER BY COALESCE(is_active,1) DESC, site_item_inventory_id ASC LIMIT 1
+      `).bind(sourceType, externalKey).first();
 
-      await db.prepare(`
-        INSERT INTO site_item_inventory (
-          source_type, external_key, item_name, category, source_url, amazon_url, image_url,
-          on_hand_quantity, reserved_quantity, incoming_quantity, reorder_level, unit_cost_cents,
-          stock_unit_label, usage_unit_label, usage_units_per_stock_unit,
-          supplier_name, supplier_sku, supplier_contact, reorder_notes, preferred_reorder_quantity,
-          is_on_reorder_list, do_not_reorder, do_not_reuse, reuse_status, reservation_notes,
-          is_active, last_seen_at, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, NULL, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT(source_type, external_key) DO UPDATE SET
-          item_name = excluded.item_name,
-          category = excluded.category,
-          source_url = COALESCE(NULLIF(excluded.source_url, ''), site_item_inventory.source_url),
-          amazon_url = COALESCE(NULLIF(excluded.amazon_url, ''), site_item_inventory.amazon_url),
-          image_url = COALESCE(NULLIF(excluded.image_url, ''), site_item_inventory.image_url),
-          on_hand_quantity = CASE
-            WHEN COALESCE(site_item_inventory.on_hand_quantity, 0) < 1 THEN excluded.on_hand_quantity
-            ELSE site_item_inventory.on_hand_quantity
-          END,
-          reorder_level = CASE
-            WHEN COALESCE(site_item_inventory.reorder_level, 0) = 0 THEN excluded.reorder_level
-            ELSE site_item_inventory.reorder_level
-          END,
-          unit_cost_cents = CASE
-            WHEN COALESCE(excluded.unit_cost_cents, 0) > 0 THEN excluded.unit_cost_cents
-            ELSE site_item_inventory.unit_cost_cents
-          END,
-          stock_unit_label = COALESCE(NULLIF(excluded.stock_unit_label, ''), site_item_inventory.stock_unit_label),
-          usage_unit_label = COALESCE(NULLIF(excluded.usage_unit_label, ''), site_item_inventory.usage_unit_label),
-          usage_units_per_stock_unit = CASE
-            WHEN COALESCE(excluded.usage_units_per_stock_unit, 0) > 0 THEN excluded.usage_units_per_stock_unit
-            ELSE site_item_inventory.usage_units_per_stock_unit
-          END,
-          supplier_name = COALESCE(NULLIF(excluded.supplier_name, ''), site_item_inventory.supplier_name),
-          supplier_sku = COALESCE(NULLIF(excluded.supplier_sku, ''), site_item_inventory.supplier_sku),
-          supplier_contact = COALESCE(NULLIF(excluded.supplier_contact, ''), site_item_inventory.supplier_contact),
-          reorder_notes = COALESCE(NULLIF(excluded.reorder_notes, ''), site_item_inventory.reorder_notes),
-          is_active = 1,
-          last_seen_at = CURRENT_TIMESTAMP,
-          updated_at = CURRENT_TIMESTAMP
-      `).bind(
-        sourceType,
-        externalKey,
-        itemName,
-        normalizeText(row.category || row.subcategory).toLowerCase() || null,
-        amazonUrl || null,
-        amazonUrl || null,
-        normalizeText(row.image_url) || null,
-        onHandQuantity,
-        reorderPoint,
-        unitCostCents,
-        stockUnitLabel,
-        usageUnitLabel,
-        usageUnitsPerStockUnit,
-        supplierName || null,
-        supplierSku || null,
-        amazonUrl ? 'Amazon.ca' : null,
-        reorderNotes || null
-      ).run();
-
-      const saved = await db.prepare(`
-        SELECT site_item_inventory_id, unit_cost_cents, on_hand_quantity
-        FROM site_item_inventory
-        WHERE source_type = ? AND external_key = ?
-        LIMIT 1
-      `).bind(sourceType, externalKey).first().catch(() => null);
-
-      const costHistoryId = await recordInventoryCostHistory(db, {
-        site_item_inventory_id: saved?.site_item_inventory_id || existing?.site_item_inventory_id || null,
-        source_type: sourceType,
-        external_key: externalKey,
-        item_name: itemName,
-        previous_unit_cost_cents: Number(existing?.unit_cost_cents || 0),
-        new_unit_cost_cents: unitCostCents,
-        source_kind: 'catalog_sync',
-        source_id: `${sourceType}:${externalKey}`,
-        source_reference: supplierSku || amazonUrl || null,
-        reason_note: matchStatus === 'unmatched' ? 'Catalog inventory sync' : `Catalog inventory sync from Amazon CSV ${matchStatus}`
-      }).catch(() => null);
-      if (costHistoryId) summary.cost_history_added += 1;
-
+      if (existing?.site_item_inventory_id && Number(existing.is_active ?? 1) === 0) {
+        // An owner/archive decision must not be silently reversed by maintenance reconciliation.
+        summary.skipped += 1;
+        continue;
+      }
+      if (existing?.site_item_inventory_id) {
+        await db.prepare(`
+          UPDATE site_item_inventory
+          SET item_name=COALESCE(NULLIF(?,''),item_name),
+              category=COALESCE(NULLIF(?,''),category),
+              source_url=CASE WHEN COALESCE(source_url,'')='' THEN ? ELSE source_url END,
+              amazon_url=CASE WHEN COALESCE(amazon_url,'')='' THEN ? ELSE amazon_url END,
+              image_url=CASE WHEN COALESCE(image_url,'')='' THEN ? ELSE image_url END,
+              is_active=1,last_seen_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP
+          WHERE site_item_inventory_id=?
+        `).bind(
+          itemName,
+          normalizeText(row.category || row.subcategory).toLowerCase() || null,
+          normalizeText(row.amazon_url) || null,
+          normalizeText(row.amazon_url) || null,
+          normalizeText(row.image_url) || null,
+          Number(existing.site_item_inventory_id)
+        ).run();
+        summary.updated += 1;
+      } else {
+        const initialOnHand = Math.max(0, Number(row.quantity_on_hand || 0) || 0);
+        const initialReorder = Math.max(0, Number(row.reorder_point || 0) || 0);
+        const insert = await db.prepare(`
+          INSERT INTO site_item_inventory (
+            source_type,external_key,item_name,category,source_url,amazon_url,image_url,
+            on_hand_quantity,reserved_quantity,incoming_quantity,reorder_level,unit_cost_cents,
+            stock_unit_label,usage_unit_label,usage_units_per_stock_unit,reorder_notes,is_active,
+            last_seen_at,created_at,updated_at
+          ) VALUES (?,?,?,?,?,?,?, ?,0,0,?,0, ?,?,1,?,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+        `).bind(
+          sourceType, externalKey, itemName,
+          normalizeText(row.category || row.subcategory).toLowerCase() || null,
+          normalizeText(row.amazon_url) || null,
+          normalizeText(row.amazon_url) || null,
+          normalizeText(row.image_url) || null,
+          initialOnHand, initialReorder,
+          sourceType === 'tool' ? 'tool' : 'package',
+          sourceType === 'tool' ? 'use' : 'unit',
+          normalizeText(row.notes) || null
+        ).run();
+        const newId = Number(insert?.meta?.last_row_id || 0);
+        if (newId) await saveUsageProfile(db,newId,{ usage_tracking_mode: sourceType === 'tool' ? 'reusable' : 'log_only', minimum_usage_increment: 0.001, notes: sourceType === 'tool' ? 'D1 catalog reconciliation: reusable default.' : 'D1 catalog reconciliation: log-only until unit conversion is reviewed.', user_id: actorUserId });
+        summary.inserted += 1;
+      }
       summary.synced += 1;
-      if (existing?.site_item_inventory_id) summary.updated += 1;
-      else summary.inserted += 1;
     } catch (error) {
       summary.failed += 1;
-      summary.errors.push({ source_type: sourceType, external_key: externalKey, item_name: itemName, error: String(error?.message || error || 'Sync failed') });
+      summary.errors.push({ source_type:sourceType,external_key:externalKey,item_name:itemName,error:String(error?.message||error||'Reconciliation failed') });
     }
   }
-
   return summary;
 }
 
@@ -651,7 +684,7 @@ async function handlePost(context) {
 
   if (action === 'sync_catalog') {
     const sourceTypes = Array.isArray(body.source_types) ? body.source_types : [];
-    const summary = await syncCatalogItemsIntoInventory(db, { sourceTypes });
+    const summary = await syncCatalogItemsIntoInventory(db, { sourceTypes, cursor: body.cursor, limit: body.limit, actorUserId: adminUser.user_id });
 
     await auditAdminAction(env, request, adminUser, {
       action_type: 'inventory_sync_catalog',
@@ -720,7 +753,7 @@ async function handlePost(context) {
     return json({ ok: true, results, summary, product });
   }
 
-  if (['receive', 'reserve', 'release', 'consume', 'reorder_request'].includes(action)) {
+  if (['receive', 'reserve', 'release', 'consume', 'consume_usage', 'reorder_request'].includes(action)) {
     const siteItemInventoryId = Number(body.site_item_inventory_id || 0);
     const quantity = Math.max(0, Number(body.quantity || 0));
     const note = normalizeText(body.note) || '';
@@ -743,7 +776,7 @@ async function handlePost(context) {
     return json({ ok: true, item: result.item, action, details: result.audit_details });
   }
 
-  const sourceType = normalizeText(body.source_type).toLowerCase();
+  const sourceType = normalizeInventoryKind(body.source_type, 'other');
   const externalKey = normalizeText(body.external_key);
   const itemName = normalizeText(body.item_name);
 
@@ -786,14 +819,14 @@ async function handlePost(context) {
       normalizeText(body.source_url) || null,
       normalizeText(body.amazon_url) || null,
       normalizeText(body.image_url) || null,
-      ['tool', 'supply'].includes(sourceType) ? Math.max(1, Number(body.on_hand_quantity || 0) || 0) : Number(body.on_hand_quantity || 0),
+      Math.max(0, Number(body.on_hand_quantity || 0) || 0),
       Number(body.reserved_quantity || 0),
       Number(body.incoming_quantity || 0),
       Number(body.reorder_level || 0),
       Number(body.unit_cost_cents || 0),
       normalizeText(body.stock_unit_label).toLowerCase() || 'unit',
       normalizeText(body.usage_unit_label).toLowerCase() || 'unit',
-      Math.max(1, Number(body.usage_units_per_stock_unit || 1) || 1),
+      Math.max(0.001, Number(body.usage_units_per_stock_unit || 1) || 1),
       normalizeText(body.supplier_name) || null,
       normalizeText(body.supplier_sku) || null,
       normalizeText(body.supplier_contact) || null,
@@ -809,14 +842,37 @@ async function handlePost(context) {
     ).run();
 
     const newId = Number(insert?.meta?.last_row_id || 0);
+    await saveUsageProfile(db, newId, {
+      usage_tracking_mode: body.usage_tracking_mode || (sourceType === 'tool' ? 'reusable' : 'exact'),
+      minimum_usage_increment: body.minimum_usage_increment || 0.001,
+      notes: body.usage_profile_notes || '',
+      user_id: adminUser.user_id
+    });
+    const catalogItemId = Number(body.catalog_item_id || 0);
+    if (catalogItemId && ['tool','supply'].includes(sourceType)) {
+      const catalogRow = await db.prepare(`SELECT catalog_item_id,item_kind,source_key FROM catalog_items WHERE catalog_item_id=? LIMIT 1`).bind(catalogItemId).first().catch(() => null);
+      if (catalogRow && catalogRow.item_kind !== sourceType) {
+        const conflict = await db.prepare(`SELECT catalog_item_id FROM catalog_items WHERE item_kind=? AND source_key=? AND catalog_item_id<>? LIMIT 1`).bind(sourceType,catalogRow.source_key,catalogItemId).first().catch(() => null);
+        if (conflict?.catalog_item_id) {
+          await db.prepare(`UPDATE catalog_items SET name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(itemName,normalizeText(body.category).toLowerCase() || null,Number(conflict.catalog_item_id)).run().catch(()=>null);
+          await db.prepare(`UPDATE catalog_items SET status='archived',visible_public=0,updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(catalogItemId).run().catch(()=>null);
+        } else {
+          await db.prepare(`UPDATE catalog_items SET item_kind=?,name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(sourceType,itemName,normalizeText(body.category).toLowerCase() || null,catalogItemId).run();
+        }
+      }
+    }
     if (Object.prototype.hasOwnProperty.call(body, 'item_description')) {
       await saveItemDescription(db, newId, body.item_description, adminUser.user_id);
     }
     const saved = await db.prepare(`
-      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
+      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
+             COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid
         ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN site_inventory_usage_profiles siup
+        ON siup.site_item_inventory_id = sii.site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(newId).first();
@@ -902,10 +958,12 @@ async function handlePatch(context) {
 
   try {
     const existing = await db.prepare(`
-      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
+      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
+             COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
       FROM site_item_inventory sii
-      LEFT JOIN site_inventory_item_descriptions siid
-        ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
@@ -915,6 +973,7 @@ async function handlePatch(context) {
     const merged = {
       ...existing,
       ...body,
+      source_type: normalizeInventoryKind(body.source_type ?? existing.source_type, existing.source_type || 'other'),
       item_name: normalizeText(body.item_name || existing.item_name),
       item_description: normalizeText(body.item_description ?? existing.item_description),
       category: normalizeText(body.category ?? existing.category).toLowerCase(),
@@ -930,14 +989,63 @@ async function handlePatch(context) {
       stock_unit_label: normalizeText(body.stock_unit_label ?? existing.stock_unit_label).toLowerCase() || 'unit',
       usage_unit_label: normalizeText(body.usage_unit_label ?? existing.usage_unit_label).toLowerCase() || 'unit',
       usage_units_per_stock_unit: Math.max(
-        1,
+        0.001,
         Number((body.usage_units_per_stock_unit ?? existing.usage_units_per_stock_unit) || 1) || 1
-      )
+      ),
+      usage_tracking_mode: normalizeUsageTrackingMode(body.usage_tracking_mode ?? existing.usage_tracking_mode, normalizeInventoryKind(body.source_type ?? existing.source_type) === 'tool' ? 'reusable' : 'exact'),
+      minimum_usage_increment: Math.max(0.0001, Number(body.minimum_usage_increment ?? existing.minimum_usage_increment ?? 0.001) || 0.001)
     };
+
+    if (merged.source_type !== existing.source_type) {
+      if (![existing.source_type, merged.source_type].every((value) => ['tool','supply'].includes(normalizeInventoryKind(value)))) {
+        return json({ ok:false, error:'Existing inventory classification may only be changed between tool and supply.' },400);
+      }
+      const identityConflict = await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id<>? AND COALESCE(is_active,1)=1 AND LOWER(TRIM(source_type))=? AND external_key=? LIMIT 1`).bind(id,merged.source_type,existing.external_key).first();
+      if (identityConflict?.site_item_inventory_id) {
+        // Build 244: a legacy item can exist twice only because it was classified once as a tool
+        // and once as a supply. Reclassification consolidates onto the already-canonical target
+        // instead of blocking. Use MAX for stock counters so duplicate legacy rows do not double
+        // the same physical stock merely because both used an old default quantity of 1.
+        const targetId = Number(identityConflict.site_item_inventory_id || 0);
+        const targetOnHand = Math.max(Number(identityConflict.on_hand_quantity || 0), Number(merged.on_hand_quantity || 0));
+        const targetReserved = Math.max(Number(identityConflict.reserved_quantity || 0), Number(merged.reserved_quantity || 0));
+        const targetIncoming = Math.max(Number(identityConflict.incoming_quantity || 0), Number(merged.incoming_quantity || 0));
+        const targetReorder = Math.max(Number(identityConflict.reorder_level || 0), Number(merged.reorder_level || 0));
+        await db.prepare(`UPDATE site_item_inventory SET item_name=?,category=?,source_url=COALESCE(NULLIF(?,''),source_url),amazon_url=COALESCE(NULLIF(?,''),amazon_url),image_url=COALESCE(NULLIF(?,''),image_url),on_hand_quantity=?,reserved_quantity=?,incoming_quantity=?,reorder_level=?,unit_cost_cents=CASE WHEN ?>0 THEN ? ELSE unit_cost_cents END,stock_unit_label=?,usage_unit_label=?,usage_units_per_stock_unit=?,supplier_name=COALESCE(NULLIF(?,''),supplier_name),supplier_sku=COALESCE(NULLIF(?,''),supplier_sku),updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?`)
+          .bind(merged.item_name,merged.category||null,merged.source_url||'',merged.amazon_url||'',merged.image_url||'',targetOnHand,targetReserved,targetIncoming,targetReorder,Number(merged.unit_cost_cents||0),Number(merged.unit_cost_cents||0),merged.stock_unit_label||'unit',merged.usage_unit_label||'unit',Math.max(0.001,Number(merged.usage_units_per_stock_unit||1)||1),merged.supplier_name||'',merged.supplier_sku||'',targetId).run();
+        await saveUsageProfile(db,targetId,{ usage_tracking_mode: merged.usage_tracking_mode, minimum_usage_increment: merged.minimum_usage_increment, notes: body.usage_profile_notes || 'Build 244 classification duplicate consolidated.', user_id: adminUser.user_id });
+        await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=0,reserved_quantity=0,incoming_quantity=0,is_active=0,reservation_notes=TRIM(COALESCE(reservation_notes,'') || ' Build 244: consolidated into inventory #' || ?),updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?`).bind(targetId,id).run();
+        await db.prepare(`UPDATE product_resource_links SET resource_kind=?,updated_at=CURRENT_TIMESTAMP WHERE resource_kind=? AND source_key=?`).bind(merged.source_type,existing.source_type,existing.external_key).run().catch(()=>null);
+        const catalogConflict = await db.prepare(`SELECT catalog_item_id FROM catalog_items WHERE item_kind=? AND source_key=? LIMIT 1`).bind(merged.source_type,existing.external_key).first().catch(()=>null);
+        if (catalogConflict?.catalog_item_id) {
+          await db.prepare(`UPDATE catalog_items SET name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(merged.item_name,merged.category||null,Number(catalogConflict.catalog_item_id)).run().catch(()=>null);
+          await db.prepare(`UPDATE catalog_items SET status='archived',visible_public=0,updated_at=CURRENT_TIMESTAMP WHERE item_kind=? AND source_key=?`).bind(existing.source_type,existing.external_key).run().catch(()=>null);
+        } else {
+          await db.prepare(`UPDATE catalog_items SET item_kind=?,name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE item_kind=? AND source_key=?`).bind(merged.source_type,merged.item_name,merged.category||null,existing.source_type,existing.external_key).run().catch(()=>null);
+        }
+        await logMovement(db,{site_item_inventory_id:targetId,source_type:merged.source_type,external_key:existing.external_key,item_name:merged.item_name,movement_type:'sync',quantity_delta:targetOnHand-Number(identityConflict.on_hand_quantity||0),previous_on_hand_quantity:Number(identityConflict.on_hand_quantity||0),new_on_hand_quantity:targetOnHand,previous_reserved_quantity:Number(identityConflict.reserved_quantity||0),new_reserved_quantity:targetReserved,previous_incoming_quantity:Number(identityConflict.incoming_quantity||0),new_incoming_quantity:targetIncoming,note:`Build 244: consolidated misclassified inventory #${id} into this ${merged.source_type} record without double-counting duplicate default stock.`,actor_user_id:adminUser.user_id});
+        await logMovement(db,{site_item_inventory_id:id,source_type:existing.source_type,external_key:existing.external_key,item_name:existing.item_name,movement_type:'correction',quantity_delta:-Number(existing.on_hand_quantity||0),previous_on_hand_quantity:Number(existing.on_hand_quantity||0),new_on_hand_quantity:0,previous_reserved_quantity:Number(existing.reserved_quantity||0),new_reserved_quantity:0,previous_incoming_quantity:Number(existing.incoming_quantity||0),new_incoming_quantity:0,note:`Build 244: archived after classification merge into inventory #${targetId}.`,actor_user_id:adminUser.user_id});
+        const canonical = await db.prepare(`SELECT sii.*,COALESCE(siid.item_description,'') item_description,COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) usage_tracking_mode,COALESCE(siup.minimum_usage_increment,0.001) minimum_usage_increment FROM site_item_inventory sii LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id=sii.site_item_inventory_id LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id WHERE sii.site_item_inventory_id=? LIMIT 1`).bind(targetId).first();
+        return json({ok:true,item:shape(canonical||{}),classification_merge:{archived_inventory_id:id,canonical_inventory_id:targetId,stock_merge_policy:'max_to_avoid_legacy_duplicate_double_count'} });
+      }
+      const catalogConflict = await db.prepare(`SELECT catalog_item_id FROM catalog_items WHERE item_kind=? AND source_key=? LIMIT 1`).bind(merged.source_type,existing.external_key).first().catch(()=>null);
+      await db.prepare(`UPDATE product_resource_links SET resource_kind=?,updated_at=CURRENT_TIMESTAMP WHERE resource_kind=? AND source_key=?`).bind(merged.source_type,existing.source_type,existing.external_key).run().catch(()=>null);
+      if (catalogConflict?.catalog_item_id) {
+        // Build 244: capitalization/type duplicates can legitimately leave the same source key
+        // in both catalog kinds. Keep the target-kind row canonical and archive the old-kind row.
+        await db.prepare(`UPDATE catalog_items SET name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`)
+          .bind(merged.item_name, merged.category || null, Number(catalogConflict.catalog_item_id)).run().catch(()=>null);
+        await db.prepare(`UPDATE catalog_items SET status='archived',visible_public=0,updated_at=CURRENT_TIMESTAMP WHERE item_kind=? AND source_key=?`)
+          .bind(existing.source_type,existing.external_key).run().catch(()=>null);
+      } else {
+        await db.prepare(`UPDATE catalog_items SET item_kind=?,name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE item_kind=? AND source_key=?`)
+          .bind(merged.source_type,merged.item_name,merged.category || null,existing.source_type,existing.external_key).run().catch(()=>null);
+      }
+    }
 
     await db.prepare(`
       UPDATE site_item_inventory
-      SET item_name = ?, category = ?, source_url = ?, amazon_url = ?, image_url = ?,
+      SET source_type = ?, item_name = ?, category = ?, source_url = ?, amazon_url = ?, image_url = ?,
           stock_unit_label = ?, usage_unit_label = ?, usage_units_per_stock_unit = ?,
           on_hand_quantity = ?, reserved_quantity = ?, incoming_quantity = ?, reorder_level = ?, unit_cost_cents = ?,
           supplier_name = ?, supplier_sku = ?, supplier_contact = ?, reorder_notes = ?,
@@ -945,6 +1053,7 @@ async function handlePatch(context) {
           do_not_reuse = ?, reuse_status = ?, reservation_notes = ?, last_counted_at = ?, updated_at = CURRENT_TIMESTAMP
       WHERE site_item_inventory_id = ?
     `).bind(
+      merged.source_type,
       merged.item_name,
       merged.category || null,
       merged.source_url || null,
@@ -952,7 +1061,7 @@ async function handlePatch(context) {
       merged.image_url || null,
       merged.stock_unit_label || 'unit',
       merged.usage_unit_label || 'unit',
-      Math.max(1, Number(merged.usage_units_per_stock_unit || 1) || 1),
+      Math.max(0.001, Number(merged.usage_units_per_stock_unit || 1) || 1),
       Number(merged.on_hand_quantity || 0),
       Number(merged.reserved_quantity || 0),
       Number(merged.incoming_quantity || 0),
@@ -973,9 +1082,11 @@ async function handlePatch(context) {
       id
     ).run();
 
+    await saveUsageProfile(db, id, { usage_tracking_mode: merged.usage_tracking_mode, minimum_usage_increment: merged.minimum_usage_increment, notes: body.usage_profile_notes || '', user_id: adminUser.user_id });
+
     await logMovement(db, {
       site_item_inventory_id: id,
-      source_type: existing.source_type,
+      source_type: merged.source_type,
       external_key: existing.external_key,
       item_name: merged.item_name,
       movement_type: 'update',
@@ -995,23 +1106,25 @@ async function handlePatch(context) {
     }
 
     const saved = await db.prepare(`
-      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description
+      SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
+             COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
       FROM site_item_inventory sii
-      LEFT JOIN site_inventory_item_descriptions siid
-        ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
 
     await recordInventoryCostHistory(db, {
       site_item_inventory_id: id,
-      source_type: existing.source_type,
+      source_type: merged.source_type,
       external_key: existing.external_key,
       item_name: merged.item_name,
       previous_unit_cost_cents: Number(existing.unit_cost_cents || 0),
       new_unit_cost_cents: Number(merged.unit_cost_cents || 0),
       source_kind: 'manual_inventory_update',
-      source_id: `${existing.source_type || ''}:${existing.external_key || ''}`,
+      source_id: `${merged.source_type || ''}:${existing.external_key || ''}`,
       reason_note: normalizeText(body.movement_note) || 'Manual inventory cost update.',
       changed_by_user_id: adminUser.user_id
     }).catch(() => null);
@@ -1020,9 +1133,11 @@ async function handlePatch(context) {
       action_type: 'inventory_update',
       target_type: 'inventory_item',
       target_id: id,
-      target_key: `${existing.source_type}:${existing.external_key}`,
+      target_key: `${merged.source_type}:${existing.external_key}`,
       details: {
         item_name: merged.item_name,
+        previous_source_type: existing.source_type,
+        new_source_type: merged.source_type,
         previous_on_hand_quantity: Number(existing.on_hand_quantity || 0),
         new_on_hand_quantity: Number(merged.on_hand_quantity || 0),
         previous_reserved_quantity: Number(existing.reserved_quantity || 0),
@@ -1084,7 +1199,7 @@ async function handleDelete(context) {
       action_type: 'inventory_delete',
       target_type: 'inventory_item',
       target_id: id,
-      target_key: `${existing.source_type}:${existing.external_key}`,
+      target_key: `${merged.source_type}:${existing.external_key}`,
       details: {
         item_name: existing.item_name,
         on_hand_quantity: Number(existing.on_hand_quantity || 0)

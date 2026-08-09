@@ -520,7 +520,7 @@ async function saveResourceLinks({ db, productId, resourceLinksRaw, supportsCons
       productId,
       resourceKind,
       sourceKey,
-      Math.max(1, Number(row.quantity_used || 1) || 1),
+      Math.max(0.001, Number(row.quantity_used || 1) || 1),
       normalizeText(row.usage_notes) || null,
       index
     ];

@@ -1,4 +1,4 @@
-// Build 243: bounded resource search for Inventory Operations.
+// Build 244: bounded server-side D1 resource search for Inventory Operations; keeps the full catalog searchable without loading it all at once.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { searchResources } from './_productResourcesData.js';
 

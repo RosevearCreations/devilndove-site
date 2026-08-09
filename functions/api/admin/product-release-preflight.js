@@ -443,7 +443,7 @@ async function loadInventoryContext(db, product, support) {
       resource_kind: key(row.resource_kind) || 'supply',
       source_key: text(row.source_key),
       item_name: text(row.item_name) || text(row.source_key),
-      quantity_used: Math.max(1, Number(row.quantity_used || 1)),
+      quantity_used: Math.max(0, Number(row.quantity_used || 0)),
       consumption_mode: key(row.consumption_mode) || 'per_unit',
       lot_size_units: Math.max(1, Number(row.lot_size_units || 1)),
       has_inventory_record: hasRecord,
