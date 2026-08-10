@@ -1,6 +1,6 @@
-# Build 245 current release-sequence note
+# Build 246 current release-sequence note
 
-Current sequence: back up D1 → apply `database_build245_admin_media_resilience.sql` or byte-identical current-pass once → run `BUILD245_D1_VERIFICATION.sql` → deploy the complete Build 245 package → hard-refresh shell v22 → run admin auth/media/inventory smoke checks and the retained 46-gate Startup process. Build 245 contains the Build 244 inventory/fractional transition, so do not run both Build 244 and Build 245 as separate current migrations in the same deployment pass.
+Current sequence: back up D1 → confirm Build 245 prerequisite → apply `database_build246_product_project_production_packaging.sql` or byte-identical current-pass once → run `BUILD246_D1_VERIFICATION.sql` → deploy the complete Build 246 package → hard-refresh shell v23 → run product edit/delete/SEO-image, Creative Project inventory-return, finished-production, CAIP duplicate and packaging smoke checks → continue the retained 46-gate Startup process.
 
 # Devil n Dove Prelaunch Process Playbooks — Build 240
 

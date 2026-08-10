@@ -1,6 +1,9 @@
-# Build 245 product-gallery recovery note
+# Build 246 product-media note
 
-Build 245 adds D1-backed product-media integrity recovery but does not turn historical URLs into proof that a remote image is still reachable or item-specific. After production migration, reopen known products that previously had multiple gallery images, verify all recovered supporting images physically load from R2/public media, confirm the chosen featured image remains correct, and keep real-photo/rights/mobile review requirements in this document and the D1 Image Manifest unchanged.
+Do not treat an SEO/social image as a replacement for the product gallery. Product Editor must preserve up to seven truthful supporting images, the chosen featured image and the separately selected SEO/social image. Missing item-specific imagery remains a launch/media-integrity task; representative placeholders must never masquerade as exact product evidence.
+
+
+The retained Build 245 foundation adds D1-backed product-media integrity recovery but does not turn historical URLs into proof that a remote image is still reachable or item-specific. After production migration, reopen known products that previously had multiple gallery images, verify all recovered supporting images physically load from R2/public media, confirm the chosen featured image remains correct, and keep real-photo/rights/mobile review requirements in this document and the D1 Image Manifest unchanged.
 
 > Build 240 note: `product_media_role_requirements` now provides D1-backed per-product primary/detail/scale/packaging/process role requirements, and `deployed_asset_check_results` stores deployed URL, status, content-type, dimensions, hash and performance checks. The static public audit verifies local asset paths; neither representative fallback nor generated editorial art becomes item-specific product evidence.
 

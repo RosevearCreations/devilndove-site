@@ -1,6 +1,9 @@
-# Build 245 cross-project note
+# Build 246 continuity extension
 
-The Build 240 Operational Continuity model remains specialist authority. Build 245 adds stronger admin degraded-auth handling and a schema foundation for bounded API-health observations; Cloudflare Observability/runtime incidents remain the production evidence for Worker CPU/memory/D1-overload events.
+Operational continuity now also depends on audited Creative Project deletion/inventory return, idempotent finished-product production releases, product ingredient snapshots, CAIP same-project duplicate prevention and packaging translation review evidence. Build 240 remains the origin of this specialist workstream document; current release authority is `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
+
+
+The Build 240 Operational Continuity model remains specialist authority. The retained Build 245 foundation adds stronger admin degraded-auth handling and a schema foundation for bounded API-health observations; Cloudflare Observability/runtime incidents remain the production evidence for Worker CPU/memory/D1-overload events.
 
 # Operational Continuity and Evidence — Build 240
 

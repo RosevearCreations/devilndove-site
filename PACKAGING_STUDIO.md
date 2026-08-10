@@ -1,6 +1,6 @@
-# Build 245 cross-project note
+# Build 246 current packaging note
 
-Build 245 does not change approved labeling/packaging design authority. Build 244/245 fractional inventory units can now represent small consumable amounts used by packaging/project workflows without forcing whole-container depletion; physical print/laser proof and reviewed packaging evidence remain required.
+Build 246 advances the approved labeling/packaging authority: soap ribbons are locked to `soap_reference_v2`; Product Resource ingredient/INCI profiles seed linked soap projects; curated French is draft/review evidence rather than automatic approval; and the approved visual treatment may not invent ingredients, marketing claims or net quantity. Build 244/245 fractional inventory remains retained. Physical print/wrap/laser proof and owner approval remain required.
 
 # Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 240)
 

@@ -1,4 +1,10 @@
-# Build 245 SEO/local-search review
+# Build 246 SEO/local-search review — 2026-08-10
+
+Google's current guidance continues to support the existing Devil n Dove guardrails: use descriptive titles/headings and descriptive image alt text, keep mobile content/image meaning equivalent to desktop, and keep images near relevant copy. Google Business Profile continues to describe local ranking mainly through relevance, distance and prominence/popularity and does not offer a guaranteed first-page placement. Build 246 therefore keeps the single-H1 rule, stable product/SEO image roles, descriptive real product/process media, truthful Southern Ontario wording and evidence-driven improvements rather than keyword stuffing.
+
+Current references: [Google SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide), [Google Image SEO](https://developers.google.com/search/docs/appearance/google-images), [Mobile-first indexing](https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing), and [Google Business Profile local ranking](https://support.google.com/business/answer/7091?hl=en).
+
+# Retained Build 245 SEO/local-search review
 
 Current Google guidance still supports the direction used in Devil n Dove: make the page's main title clear; use words people actually search for in prominent places such as the title and main heading; keep image filenames/alt text descriptive and images near relevant text; keep mobile content and image alt information equivalent; and treat local visibility as a function mainly of relevance, distance and prominence rather than a guaranteed first-page result. Build 245 therefore keeps the one-H1 rule, avoids keyword stuffing, preserves crawlable multi-image product evidence, and makes no unsupported same-day/no-minimum claims. Current Ontario engraving competitors continue to emphasize clear service/material examples, personalization process and direct quote/contact paths; use those patterns as usability cues, not copy.
 

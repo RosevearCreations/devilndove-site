@@ -1,15 +1,37 @@
-# Database Schema Reference — Build 245
+# Database Schema Reference — Build 246
 
 ## Current migration boundary
 
-Build 245 is the current additive production migration:
+Build 246 is the current additive production migration:
 
-- numbered: `database_build245_admin_media_resilience.sql`
+- numbered: `database_build246_product_project_production_packaging.sql`
 - current pass: `database_upgrade_current_pass.sql`
+- read-only post-migration check: `BUILD246_D1_VERIFICATION.sql`
 
-They are byte-identical. Back up production D1 and apply **one**, never both. Build 245 intentionally includes the complete Build 244 inventory-authority/fractional-usage transition so a Build 243-era database can upgrade directly; rerunning over an already-applied Build 244 database is designed to remain idempotent. Confirm ledger keys `build244_inventory_authority_fractional_usage` and `build245_admin_media_resilience`.
+The numbered/current-pass SQL files are byte-identical. Back up production D1 and apply **one**, never both. Build 245 is the prerequisite production boundary. Build 246 is additive/idempotent, uses no TEMP-table or destructive table-removal operation, and records ledger key `build246_product_project_production_packaging`.
 
-Build 245 uses **no TEMP table and no DROP TABLE**, avoiding the D1 `SQLITE_AUTH` cleanup problem exposed by the Build 243 temporary helper.
+Build 246 adds five lower-case D1 authorities: `creative_project_deletion_audit`, `product_resource_ingredient_profiles`, `product_production_runs`, `product_production_run_materials`, and `packaging_translation_reviews`. These support audited Creative Project deletion with unreversed-inventory compensation, finished-product material/ingredient release snapshots, and review-required packaging translation evidence. `database_full_schema.sql` is the supported complete fresh-install aggregate. `database_schema.sql` and `database_store_schema.sql` remain scoped overlays and explicitly point to the current Build 246 migration.
+
+## Runtime integrity rules added in Build 246
+
+- Product deletion may auto-clean only unreviewed generated Content Studio/CAIP shells; meaningful project/history/output evidence still blocks deletion.
+- Posted `product_production_runs` are protected product history.
+- Creative Project deletion returns only unreversed raw consumption, writes correction movements, and stores a deletion audit.
+- Finished Product Production Release is idempotent and stores immutable material/ingredient snapshots before the finished quantity is treated as released.
+- Same-project CAIP media duplicates are skipped at intake rather than inserted a second time.
+- Soap packaging uses reviewed Product Resource ingredient/INCI profiles and stores French draft/review evidence separately from approved copy.
+
+## Retained Build 245 foundation
+
+### Historical Build 245 migration boundary
+
+Build 245 was the previous additive production migration and remains the prerequisite for Build 246:
+
+- historical numbered file: `database_build245_admin_media_resilience.sql`
+
+At Build 245 release time its current-pass file was byte-identical; `database_upgrade_current_pass.sql` now correctly points to Build 246. Back up production D1 and apply **one**, never both. Build 245 intentionally includes the complete Build 244 inventory-authority/fractional-usage transition so a Build 243-era database can upgrade directly; rerunning over an already-applied Build 244 database is designed to remain idempotent. Confirm ledger keys `build244_inventory_authority_fractional_usage` and `build245_admin_media_resilience`.
+
+The Build 245 migration uses **no TEMP table and no DROP TABLE**, avoiding the D1 `SQLITE_AUTH` cleanup problem exposed by the Build 243 temporary helper.
 
 ## D1 catalog/inventory authority retained
 
@@ -56,8 +78,8 @@ Routine Inventory Operations, Product Resources, Product Readiness and Product I
 
 ## Aggregate schema scope
 
-- `database_full_schema.sql` — complete supported aggregate including Build 244 + Build 245 executable blocks.
-- `database_schema.sql` — scoped historical/core aggregate plus Build 245-safe definitions/settings where owned.
-- `database_store_schema.sql` — scoped store aggregate plus Build 245-safe definitions/settings where owned.
+- `database_full_schema.sql` — complete supported aggregate including Build 244 + Build 245 foundations and the Build 246 executable block.
+- `database_schema.sql` — scoped historical/core aggregate plus Build 246-safe definitions/settings where owned.
+- `database_store_schema.sql` — scoped store aggregate plus Build 246-safe definitions/settings where owned.
 
-Use `BUILD245_D1_VERIFICATION.sql` after production migration for read-only ledger/settings/count/case/media-integrity checks. Historical numbered migrations remain at root; historical prose belongs under `docs/archive/build-history/`.
+Use `BUILD246_D1_VERIFICATION.sql` after production migration for read-only Build 246 plus retained case/media-integrity checks. Historical Build 245 verification lives under `docs/archive/build-history/`. Historical numbered migrations remain at root; historical prose belongs under `docs/archive/build-history/`.

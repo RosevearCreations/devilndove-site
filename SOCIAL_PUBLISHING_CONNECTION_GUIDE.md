@@ -1,6 +1,6 @@
-# Build 245 cross-project note
+# Build 246 cross-project note
 
-Social Publishing authority is unchanged. Build 245 product-gallery recovery can surface previously linked D1 media again, but recovered URLs are not automatically approved for social/public use; existing consent, role, privacy and provider-review rules still govern publication.
+Social Publishing authority is unchanged. Build 246 preserves the recovered multi-image Product Editor gallery/featured/SEO roles and strengthens CAIP duplicate prevention, but recovered or deduplicated media is not automatically approved for social/public use; existing consent, role, privacy and provider-review rules still govern publication.
 
 # Devil n Dove Social Publishing Connection Guide — Build 230
 

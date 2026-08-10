@@ -1,4 +1,4 @@
-# Devil n Dove — Build 245
+# Devil n Dove — Build 246
 
 Devil n Dove is a Southern Ontario mixed-media artisan/workshop platform covering storefront/catalog, D1 inventory and fractional material usage, Creative Projects, CAIP media/evidence, Content Studio, labels/packaging, orders/payments, launch readiness and operations.
 
@@ -7,20 +7,20 @@ Devil n Dove is a Southern Ontario mixed-media artisan/workshop platform coverin
 - Architecture/deployment: `AI_HANDOFF.md`
 - Current status/roadmap: `PROJECT_STATUS_AND_ROADMAP.md`
 - Markdown map: `MARKDOWN_INDEX.md`
-- Production verification after migration: `BUILD245_D1_VERIFICATION.sql`
+- Production verification after migration: `BUILD246_D1_VERIFICATION.sql`
 
-## Build 245 focus
+## Build 246 focus
 
-Build 245 fixes false admin logout during temporary Cloudflare 5xx, staggers nonessential admin startup reads, adds lightweight paginated Inventory Operations with inline category/unit/usage editing, restores Product Editor supporting images from existing D1-linked media/history without deleting current gallery rows, and makes Product Readiness task drill-down/fallback usable. Build 244 D1 tool/supply authority and fractional/log-only/reusable consumption are included in the current migration.
+Build 246 repairs Product Editor update identity and SEO/social-image persistence; distinguishes empty generated Content Studio/CAIP product shells from meaningful history during product deletion; adds audited Creative Project deletion with unreversed raw-inventory return; adds idempotent Finished Product Production Release with material/ingredient snapshots; strengthens same-project CAIP media duplicate protection; and moves soap packaging toward the approved `soap_reference_v2` with INCI-backed ingredient facts plus review-required French drafts. Build 245 admin 5xx/degraded-auth and inventory/media resilience remain retained foundations.
 
-## Current schema
+### Current D1 migration
 
-Back up D1 and apply **one** of:
+Back up D1, confirm Build 245 is already applied, then apply **one** of:
 
-- `database_build245_admin_media_resilience.sql`; or
+- `database_build246_product_project_production_packaging.sql`; or
 - byte-identical `database_upgrade_current_pass.sql`.
 
-Do not apply both. Do not separately apply Build 244 immediately beforehand if production has not received it; Build 245 includes that transition. Confirm both Build 244 and Build 245 ledger keys, then run the read-only verification file.
+Do not apply both. Confirm `build246_product_project_production_packaging`, then run `BUILD246_D1_VERIFICATION.sql` before deploying matching code. Service-worker shell is v23.
 
 ## Local validation
 
@@ -28,9 +28,10 @@ Do not apply both. Do not separately apply Build 244 immediately beforehand if p
 python3 scripts/build243_inventory_resilience_regression.py
 python3 scripts/build244_inventory_authority_fractional_usage_regression.py
 python3 scripts/build245_admin_media_resilience_regression.py
+python3 scripts/build246_product_project_packaging_regression.py
 python3 scripts/build245_database_case_audit.py
-python3 scripts/build245_public_page_audit.py
-python3 scripts/build245_asset_reference_audit.py
+python3 scripts/build246_public_page_audit.py
+python3 scripts/build246_asset_reference_audit.py
 python3 scripts/predeploy_sanity_check.py
 python3 scripts/deployment_preflight_static_check.py
 python3 scripts/dark_theme_regression_check.py

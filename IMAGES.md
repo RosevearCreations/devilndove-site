@@ -1,6 +1,9 @@
-# Build 245 product-media integrity note
+# Build 246 product image-role note
 
-Product Editor now resolves up to seven unique supporting images from four D1 evidence layers in priority order: `product_images`, non-deleted linked `media_assets`, non-removed `product_media_role_assignments`, then `product_image_annotations`. Build 245 migration can restore missing `product_images` references non-destructively from those links/history. An existing selected featured image is preserved; a blank featured image may be filled from the first recovered gallery image. SEO/OG media is not a substitute for the supporting product gallery. Use `BUILD245_D1_VERIFICATION.sql` and the migration snapshot table to find products that still need media review.
+Product Editor image roles remain separate: supporting gallery, featured image and SEO/social image. Build 246 visibly marks the SEO/social image and preserves `product_seo.og_image_url` when an edit/reload temporarily omits that field; supporting gallery recovery from Build 245 remains non-destructive.
+
+
+Product Editor now resolves up to seven unique supporting images from four D1 evidence layers in priority order: `product_images`, non-deleted linked `media_assets`, non-removed `product_media_role_assignments`, then `product_image_annotations`. Build 245 migration can restore missing `product_images` references non-destructively from those links/history. An existing selected featured image is preserved; a blank featured image may be filled from the first recovered gallery image. SEO/OG media is not a substitute for the supporting product gallery. Use `BUILD246_D1_VERIFICATION.sql` (which retains the media-integrity checks) and the migration snapshot table to find products that still need media review.
 
 # Build 230 current media authority note
 

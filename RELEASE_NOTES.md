@@ -1,3 +1,16 @@
+# Build 246 — Product/Project/Production/Packaging Integrity
+
+- Fixed Product Editor selected-ID persistence and Update Product fallback.
+- Preserved and exposed the selected SEO/social image independently of featured/gallery images.
+- Product deletion can clean only empty generated Content Studio/CAIP shells; meaningful project/production/history references remain protected.
+- Creative Project deletion can return unreversed raw inventory with correction movements and immutable deletion audit.
+- Added idempotent Finished Product Production Release with fractional stock depletion plus immutable material/ingredient snapshots.
+- Added D1 label-ingredient/INCI profiles to Product Resources and seeded linked soap packaging from reviewed product facts.
+- Added review-required curated French packaging drafts and translation evidence.
+- Locked soap rendering to approved `soap_reference_v2`; removed invented pseudo-ingredient reference rows from the reference action.
+- Added same-project CAIP duplicate media skipping.
+- Current D1 migration: `database_build246_product_project_production_packaging.sql`; service-worker shell v23.
+
 # Build 245 Release Notes
 
 - Fixed the admin-refresh false-login state: cached admin identity is provisional UI continuity, explicit 401/403 is the only automatic rejection path, and temporary 5xx/timeouts retain the admin shell with a degraded-session message while all APIs remain server-authenticated.
