@@ -1,10 +1,10 @@
-# Devil n Dove Startup and Go-Live Guide — Build 244
+# Devil n Dove Startup and Go-Live Guide — Build 245
 
 This is the human-readable operating copy of all 46 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
 
 ## Operating rules
 
-1. Back up D1 and confirm the prerequisite ledger key `build241_caip_large_media_intake`. Apply `database_build244_inventory_authority_fractional_usage.sql` or the identical `database_upgrade_current_pass.sql`, not both. Confirm `build244_inventory_authority_fractional_usage` before deploying Build 244 code. Build 244 uses no TEMP/DROP helper and requires Build 243 normalization to have already completed.
+1. Back up D1 and record a recovery point. Apply `database_build245_admin_media_resilience.sql` or the byte-identical `database_upgrade_current_pass.sql`, not both. Build 245 contains the complete Build 244 inventory-authority/fractional transition, so a Build 243-era production database may move directly to Build 245; if Build 244 already ran, the retained segment is idempotent. Confirm ledger keys `build244_inventory_authority_fractional_usage` and `build245_admin_media_resilience`, then run read-only `BUILD245_D1_VERIFICATION.sql` before deploying Build 245 code. Build 245 uses no TEMP/DROP helper.
 2. Use owner-controlled test records and real Production bindings only where the gate explicitly requires a production test.
 3. Never paste secrets, passwords, access tokens, full payment data, or private customer information into gate evidence.
 4. A failed numbered step keeps the gate Failed or Blocked until the correction procedure and full retest succeed.
@@ -18,7 +18,7 @@ This is the human-readable operating copy of all 46 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 244 release records, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Build 245 release records, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
@@ -28,11 +28,11 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, Build 241 CAIP large-media regression, Build 242 inventory-create regression, Build 243 resilience regression plus Build 244 inventory-authority/fractional-use/case/public/asset audits, aggregate-schema, repeated-current-migration, Startup 46-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, Build 241 CAIP large-media regression, Build 242 inventory-create regression, Build 243 resilience regression, retained Build 244 inventory-authority/fractional-use regression, plus Build 245 admin/media-resilience/case/public/asset audits, aggregate-schema, repeated-current-migration, Startup 46-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
 4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.
-5. Confirm database_upgrade_current_pass.sql remains identical to database_build244_inventory_authority_fractional_usage.sql and the Build 244 migration contains no explicit BEGIN, COMMIT, SAVEPOINT, RELEASE or ROLLBACK statement.
-6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, schema references, release notes, changed files and validation identify Build 244 consistently while naming Build 244 as the current D1 migration.
+5. Confirm `database_upgrade_current_pass.sql` remains byte-identical to `database_build245_admin_media_resilience.sql`; the current migration must contain no explicit BEGIN/COMMIT/SAVEPOINT/RELEASE/ROLLBACK and no TEMP/DROP helper.
+6. Confirm `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, schema references, release notes, changed files and validation identify Build 245 consistently while naming Build 245 as the current D1 migration.
 7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
 8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
 9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
@@ -50,7 +50,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** The exact Build 244 archive passes every static, resilience, inventory-authority/fractional-use, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact Build 245 archive passes every static, admin-auth/media-resilience, inventory-authority/fractional-use, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, packaging-reference, documentation and Pages Functions bundle check with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -66,8 +66,8 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 
 1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
 2. Record the date, database name and safe recovery reference in the evidence notes.
-3. Confirm required prior ledger keys through build240_operational_evidence_continuity already exist, including Build 234 packaging and Build 240 continuity, then apply database_build241_caip_large_media_intake.sql or the identical database_upgrade_current_pass.sql, but not both.
-4. Confirm the ledger records build241_caip_large_media_intake; verify twenty-one workstreams, 46 Startup gates, 36 Build 241 page audits, seven mobile cards, two fallback policies, the CAIP private-media workstream, the retained packaging references/templates and unchanged mutable evidence.
+3. Confirm required historical ledger foundations are present where expected, then apply `database_build245_admin_media_resilience.sql` or byte-identical `database_upgrade_current_pass.sql`, but not both. Build 245 contains the Build 244 inventory/fractional transition and records both current ledger keys without requiring a separate Build 244 run.
+4. Confirm the ledger records `build244_inventory_authority_fractional_usage` and `build245_admin_media_resilience`; run `BUILD245_D1_VERIFICATION.sql`, verify the retained CAIP/operational-continuity foundations and 46 Startup gates, and review the media-integrity/case-duplicate queries before code deployment.
 5. Deploy the complete ZIP rather than selected files.
 6. Record the Pages deployment URL and deployment/commit identifier.
 7. Open Startup Readiness with All statuses and confirm all 46 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images, candle_top_template_proof and operational_continuity_evidence_center and caip_private_large_media_intake and open their operating routes.
@@ -87,7 +87,7 @@ Save a concise before/after record: date/time and environment; owner; tested rou
 
 Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
 
-**Pass condition:** A recoverable D1 point exists, the Build 241 migration is applied once after the required prior ledger keys, the complete deployment is live, all 46 gates, five packaging references, five new reusable templates and 20 manifest rows load, and no migration, Function, route or data-integrity error remains.
+**Pass condition:** A recoverable D1 point exists, the Build 245 migration is applied once, the Build 244 + Build 245 ledger keys and verification queries agree, the complete deployment is live, all 46 gates and retained packaging/image authorities load, and no migration, Function, route or data-integrity error remains.
 
 ### 15. Complete Post-Deploy Smoke Tests as a standalone live-verification process — **Critical**
 
@@ -101,7 +101,7 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 
 #### Test steps
 
-1. Confirm the deployment ID and Build 241 migration evidence match the package that passed Deployment Preflight.
+1. Confirm the deployment ID and Build 245 migration/verification evidence match the exact package that passed Deployment Preflight.
 2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
 3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.
 4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.
@@ -175,7 +175,7 @@ Assign one owner and open /login/. Record the starting IDs, counts, totals, time
 
 #### Test steps
 
-1. Deploy the complete Build 241 package, hard refresh to service-worker shell v19, and record the Pages deployment ID before testing.
+1. Deploy the complete Build 245 package, hard refresh to service-worker shell v22, and record the Pages deployment ID before testing.
 2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.
 3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.
 4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.
@@ -1662,5 +1662,5 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 ## Gate count and authority
 
-This guide contains 46 gates. If it differs from the D1 cockpit after deployment, use the Build 241 API definition, confirm all 46 items return, and keep the gate Failed until the status authority and guide agree.
+This guide contains 46 gates. If it differs from the D1 Startup Readiness cockpit after deployment, treat the deployed D1/API status as mutable authority, confirm all 46 items return, correct the guide/definition drift, and keep the affected gate Failed until both agree.
 

@@ -1,3 +1,7 @@
+# Build 245 cross-project note
+
+Social Publishing authority is unchanged. Build 245 product-gallery recovery can surface previously linked D1 media again, but recovered URLs are not automatically approved for social/public use; existing consent, role, privacy and provider-review rules still govern publication.
+
 # Devil n Dove Social Publishing Connection Guide — Build 230
 
 **Current version:** Build 230 (Build 210 provider queue and Build 227 read-only Meta tests retained; generated editorials remain blocked from real-product post proof)  
