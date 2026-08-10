@@ -75,13 +75,20 @@ export async function loadProducts(db, env, limit = 600) {
 export async function loadProductLinks(db, productId) {
   if (!Number(productId || 0)) return [];
   const result = await db.prepare(`
-    SELECT product_resource_link_id, product_id, resource_kind, source_key,
-           quantity_used, usage_notes, sort_order,
-           COALESCE(consumption_mode, 'per_unit') AS consumption_mode,
-           COALESCE(lot_size_units, 1) AS lot_size_units
-    FROM product_resource_links
-    WHERE product_id = ?
-    ORDER BY sort_order ASC, product_resource_link_id ASC
+    SELECT prl.product_resource_link_id, prl.product_id, prl.resource_kind, prl.source_key,
+           prl.quantity_used, prl.usage_notes, prl.sort_order,
+           COALESCE(prl.consumption_mode, 'per_unit') AS consumption_mode,
+           COALESCE(prl.lot_size_units, 1) AS lot_size_units,
+           COALESCE(prip.is_label_ingredient,0) AS is_label_ingredient,
+           COALESCE(prip.ingredient_name_en,'') AS ingredient_name_en,
+           COALESCE(prip.ingredient_name_fr,'') AS ingredient_name_fr,
+           COALESCE(prip.inci_name,'') AS inci_name,
+           COALESCE(prip.translation_review_status,'needs_review') AS translation_review_status
+    FROM product_resource_links prl
+    LEFT JOIN product_resource_ingredient_profiles prip
+      ON prip.product_resource_link_id=prl.product_resource_link_id
+    WHERE prl.product_id = ?
+    ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
   `).bind(Number(productId)).all();
   return rows(result).map((row) => {
     const shaped = {
@@ -93,7 +100,12 @@ export async function loadProductLinks(db, productId) {
       usage_notes: row.usage_notes || '',
       sort_order: Number(row.sort_order || 0),
       consumption_mode: normalizeConsumptionMode(row.consumption_mode),
-      lot_size_units: Math.max(1, number(row.lot_size_units, 1))
+      lot_size_units: Math.max(1, number(row.lot_size_units, 1)),
+      is_label_ingredient: Number(row.is_label_ingredient || 0) === 1 ? 1 : 0,
+      ingredient_name_en: row.ingredient_name_en || '',
+      ingredient_name_fr: row.ingredient_name_fr || '',
+      inci_name: row.inci_name || '',
+      translation_review_status: row.translation_review_status || 'needs_review'
     };
     return { ...shaped, preview: resourcePreview({}, shaped) };
   });

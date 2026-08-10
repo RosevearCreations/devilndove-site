@@ -75,6 +75,7 @@ async function projectDeletionPreview(db,projectId){
     (SELECT COUNT(*) FROM creative_work_events e WHERE e.creative_work_project_id=p.creative_work_project_id) event_count,
     (SELECT COUNT(*) FROM creative_work_outputs o WHERE o.creative_work_project_id=p.creative_work_project_id) output_count,
     (SELECT COUNT(*) FROM creative_work_outputs o WHERE o.creative_work_project_id=p.creative_work_project_id AND (COALESCE(o.output_status,'planned')<>'planned' OR COALESCE(o.approval_status,'needs_review')<>'needs_review' OR o.linked_record_id IS NOT NULL OR TRIM(COALESCE(o.output_url,''))<>'' OR TRIM(COALESCE(o.notes,''))<>'')) modified_output_count,
+    (SELECT COUNT(*) FROM creative_work_outputs o WHERE o.creative_work_project_id=p.creative_work_project_id AND (o.linked_record_id IS NOT NULL OR TRIM(COALESCE(o.output_url,''))<>'')) external_output_count,
     (SELECT COUNT(*) FROM creative_project_product_links x WHERE x.creative_work_project_id=p.creative_work_project_id) product_link_count,
     (SELECT COUNT(*) FROM creative_project_product_links x WHERE x.creative_work_project_id=p.creative_work_project_id AND (COALESCE(x.relationship_type,'project_output')<>'project_output' OR COALESCE(x.is_primary,0)<>1 OR TRIM(COALESCE(x.notes,''))<>'')) modified_product_link_count,
     (SELECT COUNT(*) FROM creative_project_evidence_selections x WHERE x.creative_work_project_id=p.creative_work_project_id) evidence_count,
@@ -96,27 +97,146 @@ async function projectDeletionPreview(db,projectId){
   if(!row) throw Object.assign(new Error('Creative project was not found.'),{code:'NOT_FOUND'});
 
   const blockers=[];
-  if(!['idea','planning'].includes(String(row.project_status||'idea'))) blockers.push(`Project status is ${row.project_status}; archive completed or active work instead.`);
-  if(Number(row.event_count)>0) blockers.push(`${row.event_count} timeline event(s) contain project evidence.`);
-  if(Number(row.product_link_count)>1||Number(row.modified_product_link_count)>0) blockers.push(`${row.product_link_count} product link row(s) include deliberate relationship, primary or note changes.`);
-  if(Number(row.modified_output_count)>0) blockers.push(`${row.modified_output_count} output plan row(s) contain status, approval, link, URL or notes changes.`);
-  if(Number(row.evidence_count)>0) blockers.push(`${row.evidence_count} selected evidence row(s) exist.`);
-  if(Number(row.material_review_count)>0) blockers.push(`${row.material_review_count} material review row(s) exist.`);
-  if(Number(row.inventory_post_count)>0||Number(row.inventory_reversal_count)>0) blockers.push('Inventory posting or reversal history exists and cannot be removed here.');
-  if(Number(row.content_handoff_count)>0) blockers.push(`${row.content_handoff_count} Content Studio handoff(s) exist.`);
-  if(Number(row.caip_mirror_count)>0) blockers.push(`${row.caip_mirror_count} CAIP mirror link(s) exist.`);
-  if(Number(row.profitability_count)>0||Number(row.profitability_extension_count)>0) blockers.push('Profitability work exists.');
-  if(Number(row.allocation_count)>0) blockers.push(`${row.allocation_count} product cost allocation(s) exist.`);
-  if(Number(row.knowledge_count)>0) blockers.push(`${row.knowledge_count} reviewed knowledge summary row(s) exist.`);
-  if(Number(row.stage_review_count)>0||Number(row.meaningful_workflow_event_count)>0) blockers.push('Master workflow review/history exists beyond the initial tracking link.');
-  if(row.workflow_id&&(row.workflow_status!=='planning'||(row.current_stage_key&&row.current_stage_key!=='process')||row.due_date||row.blocked_reason||row.operator_notes)) blockers.push('The master workflow contains deliberate status, stage, due-date, blocker or operator-note changes.');
+  // Build 246: a Creative Work Project is user-owned working data. Timeline, material
+  // review, costing, local output plans and inventory posting history are allowed to be
+  // deleted after an explicit confirmation because inventory is compensated first and an
+  // immutable deletion audit is retained. Only downstream/external release evidence blocks
+  // this destructive action.
+  if(Number(row.external_output_count)>0) blockers.push(`${row.external_output_count} output row(s) point to a linked/public output and must be detached or archived first.`);
+  if(Number(row.content_handoff_count)>0) blockers.push(`${row.content_handoff_count} Content Studio handoff(s) exist. Remove the downstream handoff/package first or preserve the project.`);
+  if(Number(row.caip_mirror_count)>0) blockers.push(`${row.caip_mirror_count} CAIP mirror link(s) exist. Remove the downstream CAIP mirror first or preserve the project.`);
 
   const cleanup=[];
-  if(id(row.product_id)||Number(row.product_link_count)>0) cleanup.push('the project-only pointer to the existing product (the product itself is preserved)');
-  if(Number(row.output_count)>0&&!Number(row.modified_output_count)) cleanup.push(`${row.output_count} untouched generated output-plan row(s)`);
-  if(Number(row.workflow_id)>0&&!Number(row.stage_review_count)&&!Number(row.meaningful_workflow_event_count)) cleanup.push(`empty planning workflow and ${Number(row.workflow_event_count||0)} initial link event(s)`);
-  cleanup.push('the duplicate Creative Project row');
-  return {allowed:blockers.length===0,project_id:projectId,project_key:row.project_key,project_title:row.project_title,blockers,cleanup,confirmation:`DELETE ${row.project_key}`};
+  if(id(row.product_id)||Number(row.product_link_count)>0) cleanup.push('project/product link rows (the finished product itself is preserved)');
+  if(Number(row.event_count)>0) cleanup.push(`${row.event_count} project timeline/evidence event row(s)`);
+  if(Number(row.output_count)>0) cleanup.push(`${row.output_count} project-owned output-plan row(s) without external/public output`);
+  if(Number(row.material_review_count)>0) cleanup.push(`${row.material_review_count} material review row(s) after inventory compensation`);
+  if(Number(row.evidence_count)>0) cleanup.push(`${row.evidence_count} selected project evidence row(s)`);
+  if(Number(row.profitability_count)>0||Number(row.profitability_extension_count)>0||Number(row.allocation_count)>0) cleanup.push('project-owned profitability/cost allocation rows');
+  if(Number(row.knowledge_count)>0) cleanup.push(`${row.knowledge_count} project knowledge summary row(s)`);
+  if(Number(row.workflow_id)>0) cleanup.push('the master workflow/review history after it is captured in the deletion audit');
+  if(Number(row.inventory_post_count)>0) cleanup.push(`${row.inventory_post_count} inventory post row(s); every unreversed consumption is returned to raw inventory before deletion`);
+  cleanup.push('the Creative Project record');
+  const confirmation = Number(row.inventory_post_count)>0 ? `DELETE AND RETURN ${row.project_key}` : `DELETE ${row.project_key}`;
+  return {allowed:blockers.length===0,project_id:projectId,project_key:row.project_key,project_title:row.project_title,blockers,cleanup,confirmation,
+    inventory_post_count:Number(row.inventory_post_count||0),inventory_reversal_count:Number(row.inventory_reversal_count||0)};
+}
+
+
+async function projectInventoryReturnPlan(db, projectId) {
+  const rows = await safeAll(db, `
+    SELECT p.creative_project_inventory_post_id,p.site_item_inventory_id,
+           COALESCE(p.stock_quantity_consumed,0) stock_quantity_consumed,
+           COALESCE(p.posting_status,'posted') posting_status,
+           sii.source_type,sii.external_key,sii.item_name,
+           COALESCE(sii.on_hand_quantity,0) current_on_hand_quantity,
+           COALESCE(sii.reserved_quantity,0) current_reserved_quantity,
+           COALESCE(sii.incoming_quantity,0) current_incoming_quantity,
+           COALESCE(iud.usage_quantity_consumed,p.stock_quantity_consumed,0) usage_quantity_consumed,
+           COALESCE(iud.usage_unit_label,sii.usage_unit_label,'unit') posted_usage_unit_label,
+           COALESCE(iud.stock_unit_label,sii.stock_unit_label,'unit') posted_stock_unit_label,
+           COALESCE(iud.tracking_mode,'exact') posted_tracking_mode,
+           p.creative_project_material_review_id,
+           r.creative_project_inventory_reversal_id
+    FROM creative_project_inventory_posts p
+    INNER JOIN site_item_inventory sii ON sii.site_item_inventory_id=p.site_item_inventory_id
+    LEFT JOIN creative_project_inventory_usage_details iud ON iud.creative_project_inventory_post_id=p.creative_project_inventory_post_id
+    LEFT JOIN creative_project_inventory_reversals r
+      ON r.creative_project_inventory_post_id=p.creative_project_inventory_post_id
+    WHERE p.creative_work_project_id=?1
+    ORDER BY p.creative_project_inventory_post_id ASC
+  `,[projectId]);
+  const byInventory = new Map();
+  for (const row of rows) {
+    if (row.creative_project_inventory_reversal_id || String(row.posting_status || '').toLowerCase() === 'reversed') continue;
+    const quantity = Math.max(0, Number(row.stock_quantity_consumed || 0));
+    if (!(quantity > 0)) continue;
+    const inventoryId = Number(row.site_item_inventory_id || 0);
+    if (!inventoryId) continue;
+    const current = byInventory.get(inventoryId) || {
+      site_item_inventory_id: inventoryId,
+      source_type: row.source_type || null,
+      external_key: row.external_key || null,
+      item_name: row.item_name || row.external_key || `Inventory ${inventoryId}`,
+      current_on_hand_quantity: Number(row.current_on_hand_quantity || 0),
+      restore_quantity: 0,
+      post_ids: []
+    };
+    current.restore_quantity += quantity;
+    current.post_ids.push(Number(row.creative_project_inventory_post_id || 0));
+    byInventory.set(inventoryId,current);
+  }
+  return { rows, restore_rows:[...byInventory.values()] };
+}
+
+// Build 246: return project inventory post-by-post before destructive cleanup. Each post
+// is marked reversed immediately after its guarded stock restoration. If deletion later
+// fails, a retry sees the reversal and cannot return the same stock twice.
+async function returnUnreversedProjectInventory(db, projectId, userId, projectKey) {
+  const plan=await projectInventoryReturnPlan(db,projectId);
+  const returned=[];
+  for(const post of plan.rows){
+    if(post.creative_project_inventory_reversal_id || String(post.posting_status||'').toLowerCase()==='reversed') continue;
+    const restored=Math.max(0,Number(post.stock_quantity_consumed||0));
+    if(!(restored>0)) continue;
+    const inventoryId=Number(post.site_item_inventory_id||0);
+    const postId=Number(post.creative_project_inventory_post_id||0);
+    if(!inventoryId||!postId) throw Object.assign(new Error('A project inventory post is missing its inventory identity; deletion stopped before cleanup.'),{status:409});
+
+    const live=await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,
+      COALESCE(on_hand_quantity,0) on_hand_quantity,COALESCE(reserved_quantity,0) reserved_quantity,
+      COALESCE(incoming_quantity,0) incoming_quantity,COALESCE(stock_unit_label,'unit') stock_unit_label
+      FROM site_item_inventory WHERE site_item_inventory_id=? LIMIT 1`).bind(inventoryId).first();
+    if(!live) throw Object.assign(new Error(`Inventory ${inventoryId} no longer exists; project deletion stopped without discarding the project.`),{status:409});
+    const previous=Math.max(0,Number(live.on_hand_quantity||0));
+    const next=Number((previous+restored).toFixed(6));
+    const update=await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,last_seen_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP
+      WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<0.000001`).bind(next,inventoryId,previous).run();
+    if(Number(update?.meta?.changes||0)<1){
+      throw Object.assign(new Error(`Inventory changed while returning ${live.item_name||post.item_name||inventoryId}. No project rows were deleted; reload and try again.`),{status:409});
+    }
+
+    const reason=`Creative Project ${projectKey} deleted; unreversed project consumption returned to raw inventory.`;
+    const reversalStatements=[
+      db.prepare(`INSERT INTO creative_project_inventory_reversals (
+        creative_project_inventory_post_id,creative_work_project_id,site_item_inventory_id,stock_quantity_restored,
+        previous_on_hand_quantity,new_on_hand_quantity,reason,authorized_by,authorized_at
+      ) VALUES(?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(postId,projectId,inventoryId,restored,previous,next,reason,userId),
+      db.prepare(`UPDATE creative_project_inventory_posts SET posting_status='reversed',notes=TRIM(COALESCE(notes,'') || ?)
+        WHERE creative_project_inventory_post_id=? AND LOWER(COALESCE(posting_status,'posted'))<>'reversed'`).bind(` | Reversed on project deletion: ${reason}`,postId),
+      db.prepare(`INSERT INTO site_inventory_movements(
+        site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,
+        previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,
+        previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at
+      ) VALUES(?,?,?,?, 'correction', ?,?,?,?,?,?,?,?, ?,?,CURRENT_TIMESTAMP)`).bind(
+        inventoryId,live.source_type||null,live.external_key||null,live.item_name||post.item_name||`Inventory ${inventoryId}`,restored,previous,next,
+        Number(live.reserved_quantity||0),Number(live.reserved_quantity||0),Number(live.incoming_quantity||0),Number(live.incoming_quantity||0),reason,userId
+      )
+    ];
+    if(Number(post.creative_project_material_review_id||0)>0){
+      reversalStatements.push(db.prepare(`UPDATE creative_project_material_reviews SET inventory_consumed=0 WHERE creative_project_material_review_id=?`).bind(Number(post.creative_project_material_review_id)));
+    }
+    const usageRestored=Math.max(0,Number(post.usage_quantity_consumed||0));
+    if(usageRestored>0){
+      reversalStatements.push(db.prepare(`INSERT INTO site_inventory_usage_movements(
+        site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at
+      ) VALUES(?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(
+        inventoryId,usageRestored,post.posted_usage_unit_label||'unit',restored,post.posted_stock_unit_label||live.stock_unit_label||'unit',
+        post.posted_tracking_mode||'exact',String(post.posted_tracking_mode||'').toLowerCase()==='estimated'?1:0,reason,userId
+      ));
+    }
+    try{
+      await db.batch(reversalStatements);
+    }catch(error){
+      // The project remains intact. Restore the pre-return quantity only if stock is still
+      // exactly at the value this attempt wrote; otherwise stop for manual review.
+      await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,updated_at=CURRENT_TIMESTAMP
+        WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<0.000001`).bind(previous,inventoryId,next).run().catch(()=>null);
+      throw Object.assign(new Error(`Inventory return evidence could not be committed for ${live.item_name||post.item_name||inventoryId}; the project was not deleted. ${error?.message||''}`.trim()),{status:409});
+    }
+    returned.push({creative_project_inventory_post_id:postId,site_item_inventory_id:inventoryId,item_name:live.item_name||post.item_name,restore_quantity:restored,previous_on_hand_quantity:previous,new_on_hand_quantity:next});
+  }
+  return {planned_restore_rows:plan.restore_rows,returned_posts:returned,all_inventory_posts:plan.rows};
 }
 
 async function projectDetail(db,project){
@@ -313,16 +433,31 @@ export async function onRequestPost(context){
     }
     if(action==='delete_project'){
       const deletion=await projectDeletionPreview(granted.db,projectId);
-      if(!deletion.allowed)return json({ok:false,error:'This project contains protected work and cannot be permanently deleted from Creative Automation.',deletion},409);
-      if(text(body.confirmation,180)!==deletion.confirmation)return json({ok:false,error:`Type ${deletion.confirmation} exactly to confirm this duplicate-project deletion.`,deletion},400);
-      await granted.db.batch([
-        granted.db.prepare('DELETE FROM creative_automation_workflows WHERE creative_work_project_id=?1').bind(projectId),
-        granted.db.prepare("DELETE FROM creative_work_outputs WHERE creative_work_project_id=?1 AND COALESCE(output_status,'planned')='planned' AND COALESCE(approval_status,'needs_review')='needs_review' AND linked_record_id IS NULL AND TRIM(COALESCE(output_url,''))='' AND TRIM(COALESCE(notes,''))='' ").bind(projectId),
-        granted.db.prepare("DELETE FROM creative_project_product_links WHERE creative_work_project_id=?1 AND COALESCE(relationship_type,'project_output')='project_output' AND COALESCE(is_primary,0)=1 AND TRIM(COALESCE(notes,''))='' ").bind(projectId),
-        granted.db.prepare('DELETE FROM creative_work_projects WHERE creative_work_project_id=?1').bind(projectId)
-      ]);
-      await auditAdminAction(context.env,context.request,granted.adminUser,{action_type:'creative_automation_delete_unused_project',target_type:'creative_work_project',target_id:projectId,target_key:deletion.project_key,details:{project_title:deletion.project_title,guarded_empty_project:true,cleanup:deletion.cleanup}});
-      return json({...await payload(granted.db,0),message:`Unused duplicate project “${deletion.project_title}” was permanently deleted.`});
+      if(!deletion.allowed)return json({ok:false,error:'This project has downstream/public references that must be removed or preserved before permanent deletion.',deletion},409);
+      if(text(body.confirmation,220)!==deletion.confirmation)return json({ok:false,error:`Type ${deletion.confirmation} exactly to confirm project deletion and any inventory return.`,deletion},400);
+
+      const projectRow=await safeFirst(granted.db,'SELECT * FROM creative_work_projects WHERE creative_work_project_id=?1',[projectId]);
+      const inventoryReturn=await returnUnreversedProjectInventory(granted.db,projectId,granted.adminUser.user_id,deletion.project_key);
+      const statements=[];
+      statements.push(granted.db.prepare(`INSERT INTO creative_project_deletion_audit(
+        creative_work_project_id_deleted,project_key,project_title,product_id,project_snapshot_json,
+        inventory_return_json,deletion_reason,deleted_by_user_id,deleted_at
+      ) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,CURRENT_TIMESTAMP)`).bind(
+        projectId,deletion.project_key,deletion.project_title,Number(projectRow?.product_id||0)||null,
+        JSON.stringify({project:projectRow,deletion_preview:deletion}),
+        JSON.stringify(inventoryReturn),
+        text(body.deletion_reason,1000)||'Creative Project permanently deleted by administrator.',
+        granted.adminUser.user_id
+      ));
+      // Reversal rows restrict inventory-post deletion. Their evidence is preserved in the
+      // deletion audit above before these project-owned rows are removed.
+      statements.push(granted.db.prepare('DELETE FROM creative_project_inventory_reversals WHERE creative_work_project_id=?1').bind(projectId));
+      statements.push(granted.db.prepare('DELETE FROM creative_project_inventory_posts WHERE creative_work_project_id=?1').bind(projectId));
+      statements.push(granted.db.prepare('DELETE FROM creative_automation_workflows WHERE creative_work_project_id=?1').bind(projectId));
+      statements.push(granted.db.prepare('DELETE FROM creative_work_projects WHERE creative_work_project_id=?1').bind(projectId));
+      await granted.db.batch(statements);
+      await auditAdminAction(context.env,context.request,granted.adminUser,{action_type:'creative_automation_delete_project_with_inventory_return',target_type:'creative_work_project',target_id:projectId,target_key:deletion.project_key,details:{project_title:deletion.project_title,cleanup:deletion.cleanup,inventory_return:inventoryReturn.returned_posts}});
+      return json({...await payload(granted.db,0),message:`Project “${deletion.project_title}” was deleted. ${inventoryReturn.returned_posts.length?`${inventoryReturn.returned_posts.length} raw inventory posting(s) were restored from unreversed project consumption.`:'No unreversed raw inventory consumption required restoration.'}`});
     }
     const workflow=await ensureWorkflow(granted.db,projectId,granted.adminUser.user_id);
     if(action==='ensure_workflow'){
@@ -346,6 +481,6 @@ export async function onRequestPost(context){
     return json({...await payload(granted.db,projectId),message:action==='ensure_workflow'?'Project added to the master Creative Automation workflow.':'Creative Automation workflow saved.'});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'creative_automation',incident_code:'creative_automation_save_failed',severity:'error',message:error?.message||'Creative Automation Studio could not save.',related_user_id:granted.adminUser.user_id,details:{action:text(body.action,80),project_id:id(body.project_id)}});
-    return json({ok:false,error:error?.message||'Creative Automation Studio could not save.'},error?.code==='NOT_FOUND'?404:500);
+    return json({ok:false,error:error?.message||'Creative Automation Studio could not save.'},Number(error?.status||(error?.code==='NOT_FOUND'?404:500)));
   }
 }

@@ -51,8 +51,7 @@ const PRODUCT_DETACH_RELATIONS = new Set([
 // publishing or project history disposable. These relations always block permanent removal.
 const PROTECTED_PRODUCT_REFERENCES = new Set([
   'order_items.product_id',
-  'creative_projects.product_id',
-  'content_projects.product_id',
+  'product_production_runs.product_id',
   'creative_project_cost_allocations.product_id',
   'accounting_overhead_product_allocations.product_id',
   'packaging_projects.product_id',
@@ -98,6 +97,174 @@ async function tableExists(db, tableName) {
   } catch {
     return false;
   }
+}
+
+
+async function discoverManagedProductProjectShells(db, productId) {
+  const safeReferences = [];
+  const blockingReferences = [];
+  const contentProjectIds = [];
+  const creativeProjectIds = [];
+
+  // Product approval can automatically create Content Studio + CAIP rows. Those generated
+  // shells should not make an otherwise-unused product undeletable. We only auto-clean
+  // shells that have never been reviewed, published, rendered, linked to a provider output,
+  // or deliberately edited by an operator.
+  try {
+    const contentRows = (await db.prepare(`
+      SELECT cp.*,
+        (SELECT COUNT(*) FROM content_publications pub
+          WHERE pub.content_project_id=cp.content_project_id
+            AND (
+              COALESCE(pub.content_status,'draft')<>'draft'
+              OR pub.approved_at IS NOT NULL OR pub.published_at IS NOT NULL
+              OR COALESCE(pub.copy_locked,0)<>0
+              OR TRIM(COALESCE(pub.review_notes,''))<>''
+            )) AS meaningful_publication_count,
+        (SELECT COUNT(*) FROM content_project_deliverables d
+          WHERE d.content_project_id=cp.content_project_id
+            AND (
+              COALESCE(d.approval_status,'needs_review')<>'needs_review'
+              OR d.approved_at IS NOT NULL OR d.published_at IS NOT NULL
+              OR d.social_post_queue_id IS NOT NULL
+              OR COALESCE(d.copy_locked,0)<>0
+              OR TRIM(COALESCE(d.review_notes,''))<>''
+              OR TRIM(COALESCE(d.output_url,''))<>''
+              OR TRIM(COALESCE(d.thumbnail_url,''))<>''
+            )) AS meaningful_deliverable_count,
+        (SELECT COUNT(*) FROM content_render_jobs j
+          INNER JOIN content_project_deliverables d
+            ON d.content_project_deliverable_id=j.content_project_deliverable_id
+          WHERE d.content_project_id=cp.content_project_id
+            AND (
+              COALESCE(j.render_status,'planned')<>'planned'
+              OR TRIM(COALESCE(j.output_url,''))<>''
+              OR j.completed_at IS NOT NULL
+            )) AS meaningful_render_count
+      FROM content_projects cp
+      WHERE cp.product_id=? AND LOWER(TRIM(COALESCE(cp.source_type,'')))='product'
+    `).bind(productId).all())?.results || [];
+
+    for (const row of contentRows) {
+      const meaningful = (
+        String(row.project_status || 'draft').toLowerCase() !== 'draft'
+        || String(row.review_status || 'needs_review').toLowerCase() !== 'needs_review'
+        || String(row.public_release_status || 'private').toLowerCase() !== 'private'
+        || row.approved_at != null || row.approved_by_user_id != null
+        || String(row.internal_notes || '').trim() !== ''
+        || Number(row.meaningful_publication_count || 0) > 0
+        || Number(row.meaningful_deliverable_count || 0) > 0
+        || Number(row.meaningful_render_count || 0) > 0
+      );
+      const reference = {
+        table_name: 'content_projects',
+        column_name: 'product_id',
+        count: 1,
+        on_delete: meaningful ? 'PROTECTED' : 'AUTO_CLEAN_GENERATED_SHELL',
+        cleanup_owned: meaningful ? 0 : 1,
+        detach_preserved: 0,
+        protected_history: meaningful ? 1 : 0,
+        automatically_safe: meaningful ? 0 : 1,
+        record_id: Number(row.content_project_id || 0),
+        reason: meaningful
+          ? 'Content Studio work has review/publication/render evidence.'
+          : 'Auto-generated, unreviewed product Content Studio shell.'
+      };
+      if (meaningful) blockingReferences.push(reference);
+      else {
+        contentProjectIds.push(Number(row.content_project_id || 0));
+        safeReferences.push(reference);
+      }
+    }
+  } catch {
+    // Optional legacy schemas may not have the Content Studio tables.
+  }
+
+  try {
+    const creativeRows = (await db.prepare(`
+      SELECT cp.*,
+        (SELECT COUNT(*) FROM creative_asset_recommendations r
+          WHERE r.creative_project_id=cp.creative_project_id
+            AND (COALESCE(r.recommendation_status,'needs_review')<>'needs_review' OR r.reviewed_at IS NOT NULL OR r.reviewed_by_user_id IS NOT NULL)
+        ) AS meaningful_recommendation_count,
+        (SELECT COUNT(*) FROM creative_story_evidence e
+          WHERE e.creative_project_id=cp.creative_project_id
+            AND (COALESCE(e.review_status,'needs_review')<>'needs_review' OR COALESCE(e.copy_locked,0)<>0)
+        ) AS meaningful_evidence_count,
+        (SELECT COUNT(*) FROM creative_story_segments s
+          WHERE s.creative_project_id=cp.creative_project_id
+            AND (
+              COALESCE(s.segment_status,'draft')<>'draft'
+              OR COALESCE(s.copy_locked,0)<>0
+              OR s.approved_at IS NOT NULL OR s.approved_by_user_id IS NOT NULL
+              OR TRIM(COALESCE(s.reviewer_notes,''))<>''
+            )
+        ) AS meaningful_segment_count,
+        (SELECT COUNT(*) FROM creative_policy_decisions d
+          WHERE d.creative_project_id=cp.creative_project_id
+            AND (
+              COALESCE(d.decision_status,'needs_review')<>'needs_review'
+              OR d.decided_at IS NOT NULL OR d.decided_by_user_id IS NOT NULL
+            )
+        ) AS meaningful_policy_count,
+        (SELECT COUNT(*) FROM creative_asset_derivatives d
+          WHERE d.creative_project_id=cp.creative_project_id
+            AND (
+              COALESCE(d.derivative_status,'planned')<>'planned'
+              OR TRIM(COALESCE(d.output_url,''))<>''
+              OR COALESCE(d.verification_status,'not_created')<>'not_created'
+            )
+        ) AS meaningful_derivative_count,
+        (SELECT COUNT(*) FROM creative_asset_access_grants g
+          WHERE g.creative_project_id=cp.creative_project_id
+        ) AS access_grant_count
+      FROM creative_projects cp
+      WHERE cp.product_id=? AND LOWER(TRIM(COALESCE(cp.source_type,'')))='product'
+    `).bind(productId).all())?.results || [];
+
+    for (const row of creativeRows) {
+      const meaningful = (
+        String(row.project_status || 'intake').toLowerCase() !== 'intake'
+        || String(row.governance_status || 'needs_review').toLowerCase() !== 'needs_review'
+        || String(row.lifecycle_stage || 'intake').toLowerCase() !== 'intake'
+        || row.approved_at != null || row.approved_by_user_id != null
+        || Number(row.meaningful_recommendation_count || 0) > 0
+        || Number(row.meaningful_evidence_count || 0) > 0
+        || Number(row.meaningful_segment_count || 0) > 0
+        || Number(row.meaningful_policy_count || 0) > 0
+        || Number(row.meaningful_derivative_count || 0) > 0
+        || Number(row.access_grant_count || 0) > 0
+      );
+      const reference = {
+        table_name: 'creative_projects',
+        column_name: 'product_id',
+        count: 1,
+        on_delete: meaningful ? 'PROTECTED' : 'AUTO_CLEAN_GENERATED_SHELL',
+        cleanup_owned: meaningful ? 0 : 1,
+        detach_preserved: 0,
+        protected_history: meaningful ? 1 : 0,
+        automatically_safe: meaningful ? 0 : 1,
+        record_id: Number(row.creative_project_id || 0),
+        reason: meaningful
+          ? 'CAIP project has reviewed/approved/output/access evidence.'
+          : 'Auto-generated, unreviewed product CAIP shell.'
+      };
+      if (meaningful) blockingReferences.push(reference);
+      else {
+        creativeProjectIds.push(Number(row.creative_project_id || 0));
+        safeReferences.push(reference);
+      }
+    }
+  } catch {
+    // Optional legacy schemas may not have the CAIP tables.
+  }
+
+  return {
+    safe_references: safeReferences,
+    blocking_references: blockingReferences,
+    content_project_ids: contentProjectIds.filter(Boolean),
+    creative_project_ids: creativeProjectIds.filter(Boolean)
+  };
 }
 
 async function discoverProductReferences(db, productId) {
@@ -357,10 +524,17 @@ async function prepareReviewedMaterialActions(db, { productId, actions = [], del
   };
 }
 
-async function runCleanup(db, productId, prefixStatements = []) {
+async function runCleanup(db, productId, prefixStatements = [], managedShells = null) {
   // Delete only product-owned working rows. Preserve independent uploads/media by
-  // detaching them, and never reach this function while protected history exists.
+  // detaching them. Auto-generated, unreviewed product Content Studio/CAIP shells
+  // are also product-owned automation rows and are removed before the product.
   const statements = [...prefixStatements];
+  for (const creativeProjectId of (managedShells?.creative_project_ids || [])) {
+    statements.push(db.prepare(`DELETE FROM creative_projects WHERE creative_project_id = ?`).bind(Number(creativeProjectId)));
+  }
+  for (const contentProjectId of (managedShells?.content_project_ids || [])) {
+    statements.push(db.prepare(`DELETE FROM content_projects WHERE content_project_id = ?`).bind(Number(contentProjectId)));
+  }
   const relationKeys = [...PRODUCT_OWNED_CLEANUP_RELATIONS, ...PRODUCT_DETACH_RELATIONS];
   const relationTables = relationKeys.map((key) => key.slice(0, key.lastIndexOf('.')));
   const tableSql = await loadTableSqlMap(db, relationTables);
@@ -414,11 +588,12 @@ async function handleGet(context) {
   if (!Number.isInteger(productId) || productId <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
   const product = await db.prepare(`SELECT product_id, product_number, sku, name, slug, status FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
-  const [references, materials] = await Promise.all([
+  const [references, materials, managedShells] = await Promise.all([
     discoverProductReferences(db, productId),
-    loadProductMaterialPreview(db, productId)
+    loadProductMaterialPreview(db, productId),
+    discoverManagedProductProjectShells(db, productId)
   ]);
-  const blockingReferences = references;
+  const blockingReferences = [...references, ...(managedShells.blocking_references || [])];
   const materialsRequiringReview = materialRowsRequiringReview(materials);
   return json({
     ok: true,
@@ -427,10 +602,14 @@ async function handleGet(context) {
     materials_requiring_review: materialsRequiringReview,
     material_review_required: materialsRequiringReview.length ? 1 : 0,
     deletion_allowed: blockingReferences.length ? 0 : 1,
-    references,
+    references: [...blockingReferences, ...(managedShells.safe_references || [])],
     blocking_references: blockingReferences,
-    automatically_safe_references: [],
-    cleanup_profile: 'bounded_registry_v1',
+    automatically_safe_references: managedShells.safe_references || [],
+    generated_project_shells: {
+      content_project_ids: managedShells.content_project_ids || [],
+      creative_project_ids: managedShells.creative_project_ids || []
+    },
+    cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup',
     instructions: {
       release_reservation: 'Use only for raw stock already reserved for this unfinished product. It makes stock available again without changing on-hand quantity.',
       return_on_hand: 'Use only for unused physical raw supplies that had been removed from on-hand stock and are truly available again. Enter whole stock units.'
@@ -480,8 +659,11 @@ async function handlePost(context) {
     return json({ ok: false, error: "Product not found." }, 404);
   }
 
-  const references = await discoverProductReferences(db, productId);
-  const blockingReferences = references;
+  const [references, managedShells] = await Promise.all([
+    discoverProductReferences(db, productId),
+    discoverManagedProductProjectShells(db, productId)
+  ]);
+  const blockingReferences = [...references, ...(managedShells.blocking_references || [])];
   if (blockingReferences.length) {
     const summary = blockingReferences.map((row) => `${row.count} ${row.table_name}`).join(', ');
     return json({
@@ -516,13 +698,14 @@ async function handlePost(context) {
     product: existingProduct,
     images,
     material_return_summary: materialSummary,
+    automatically_removed_generated_project_shells: managedShells.safe_references || [],
     deleted_from_storefront: true,
     r2_cleanup_note: images.length
       ? 'Image database rows were removed. Review any R2 objects separately before deleting files because media may be reused outside this product.'
       : 'No product image rows were attached.'
   };
 
-  await runCleanup(db, productId, materialPlan.statements);
+  await runCleanup(db, productId, materialPlan.statements, managedShells);
 
   if (await tableExists(db, 'product_deletion_audit')) {
     await db.prepare(`
@@ -566,7 +749,8 @@ async function handlePost(context) {
     product: existingProduct,
     deleted_media_rows: images.length,
     material_summary: materialSummary,
-    r2_cleanup_note: snapshot.r2_cleanup_note
+    r2_cleanup_note: snapshot.r2_cleanup_note,
+    automatically_removed_generated_project_shells: managedShells.safe_references || []
   });
 }
 
