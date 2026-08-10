@@ -2927,3 +2927,102 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
   .site-inventory-pagination .btn { flex: 1 1 120px; min-height: 44px; }
   .site-inventory-pagination .small { flex: 1 0 100%; text-align:center; order:-1; }
 }
+
+/* Build 246: product media identity, finished-production release, ingredient profiles, and approved packaging review polish. */
+.dd-product-image-manager-card.is-seo-image {
+  border-color: rgba(91, 174, 255, .78);
+  box-shadow: 0 0 0 2px rgba(91, 174, 255, .14);
+}
+.dd-product-image-seo-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(38, 128, 194, .2);
+  color: #eaf6ff;
+  border: 1px solid rgba(102, 190, 255, .45);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+.resource-ingredient-profile {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.035);
+}
+.product-production-release {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.14);
+}
+.product-production-release-head {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 150px;
+  gap: 16px;
+  align-items: center;
+}
+.product-production-release-head h4 { margin: 0 0 6px; }
+.product-production-release-head img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+}
+.product-production-release-controls {
+  display: grid;
+  grid-template-columns: minmax(120px,180px) auto auto;
+  gap: 10px;
+  align-items: end;
+  margin: 12px 0;
+}
+.product-production-release-controls .btn { min-height: 42px; }
+.product-production-release-preview {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.14);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.product-production-summary { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+.product-production-summary.is-ready strong { color:#b9f6cf; }
+.product-production-summary.is-blocked strong { color:#ffd2d2; }
+.product-production-blockers { margin:0; padding-left:20px; color:#ffdede; }
+.product-production-material-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 8px;
+}
+.product-production-material-grid > div,
+.product-production-ingredients {
+  display:grid;
+  gap:3px;
+  padding:8px 10px;
+  border-radius:10px;
+  background: rgba(255,255,255,.04);
+}
+.product-production-history { display:grid; gap:4px; margin-top:6px; }
+.packaging-translation-actions {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  padding:10px 0 12px;
+}
+#packagingDesignProfile:disabled {
+  opacity: .88;
+  cursor: not-allowed;
+  border-color: rgba(184,138,47,.55);
+}
+@media (max-width: 760px) {
+  .product-production-release-head { grid-template-columns: 1fr; }
+  .product-production-release-head img { max-height: 220px; }
+  .product-production-release-controls { grid-template-columns: 1fr; }
+  .product-production-release-controls .btn { width:100%; min-height:44px; }
+  .product-production-material-grid { grid-template-columns:1fr; }
+  .resource-ingredient-profile .grid.cols-3 { grid-template-columns:1fr; }
+}
