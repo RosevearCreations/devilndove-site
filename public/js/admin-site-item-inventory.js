@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let initialLoadStarted = false;
   let seedLoadPromise = null;
   let listLoadPromise = null;
+  let inventoryPage = 1;
+  const inventoryPageSize = 80;
   const INVENTORY_DRAFT_KEY = 'dd_inventory_form_draft_v244';
 
 
@@ -246,55 +248,51 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadSeedOptions({ query = '' } = {}) {
     if (!window.DDAuth?.isLoggedIn()) return null;
     const normalizedQuery = String(query || '').trim();
-    // Build 244: typed seed searches run server-side so all D1 catalog rows remain
-    // discoverable without loading the entire catalog into one Worker/browser request.
     if (seedLoadPromise && !normalizedQuery) return seedLoadPromise;
     const work = (async () => {
       try {
+        if (!normalizedQuery) {
+          const data = await window.DDAuth.apiJson(
+            '/api/admin/inventory-bootstrap',
+            { method: 'GET' },
+            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v245', cacheTtlMs: 300000, retries: 2, staleOnError: true }
+          );
+          categorySeedOptions = Array.isArray(data?.categories) ? data.categories.map((v)=>String(v||'').trim().toLowerCase()).filter(Boolean) : [];
+          unitPresetOptions = Array.isArray(data?.unit_presets) && data.unit_presets.length ? data.unit_presets : unitPresetOptions;
+          catalogSeedOptions = [];
+          renderSeedDropdowns();
+          if (data?._response_meta?.stale) setMessage('The server is temporarily busy. Inventory setup choices are using the last saved browser copy.', true);
+          return data;
+        }
+
+        // Typed search only: query the D1 catalog on demand rather than loading hundreds of rows on page startup.
         const data = await window.DDAuth.apiJson(
-          `/api/admin/product-resource-search?q=${encodeURIComponent(normalizedQuery)}&limit=${normalizedQuery ? 160 : 240}`,
+          `/api/admin/product-resource-search?q=${encodeURIComponent(normalizedQuery)}&limit=120`,
           { method: 'GET' },
-          {
-            fallbackMessage: 'Failed to load inventory source dropdowns.',
-            cacheKey: normalizedQuery ? `inventory-seed-resources:${normalizedQuery.toLowerCase()}` : 'inventory-seed-resources',
-            cacheTtlMs: 120000,
-            retries: 2,
-            staleOnError: true
-          }
+          { fallbackMessage: 'Failed to search inventory source records.', cacheKey: `inventory-seed-resources:${normalizedQuery.toLowerCase()}`, cacheTtlMs: 120000, retries: 2, staleOnError: true }
         );
         const rawResources = Array.isArray(data?.resources) ? data.resources : [];
         catalogSeedOptions = rawResources.map((item) => ({
           source_type: String(item.item_kind || item.source_type || 'other').trim().toLowerCase() || 'other',
-          external_key: String(item.source_key || item.external_key || '').trim(),
-          item_name: String(item.name || item.item_name || '').trim(),
-          category: String(item.category || item.subcategory || '').trim().toLowerCase(),
-          image_url: String(item.image_url || '').trim(),
-          on_hand_quantity: Number(item.on_hand_quantity || 0),
-          unit_cost_cents: Number(item.unit_cost_cents || 0),
-          stock_unit_label: String(item.stock_unit_label || 'unit').trim().toLowerCase() || 'unit',
-          usage_unit_label: String(item.usage_unit_label || 'unit').trim().toLowerCase() || 'unit',
+          external_key: String(item.source_key || item.external_key || '').trim(), item_name: String(item.name || item.item_name || '').trim(),
+          category: String(item.category || item.subcategory || '').trim().toLowerCase(), image_url: String(item.image_url || '').trim(),
+          on_hand_quantity: Number(item.on_hand_quantity || 0), unit_cost_cents: Number(item.unit_cost_cents || 0),
+          stock_unit_label: String(item.stock_unit_label || 'unit').trim().toLowerCase() || 'unit', usage_unit_label: String(item.usage_unit_label || 'unit').trim().toLowerCase() || 'unit',
           usage_units_per_stock_unit: Math.max(0.001, Number(item.usage_units_per_stock_unit || 1) || 1),
           usage_tracking_mode: String(item.usage_tracking_mode || (String(item.item_kind || item.source_type || '').toLowerCase() === 'tool' ? 'reusable' : 'exact')).trim().toLowerCase(),
-          minimum_usage_increment: Math.max(0.0001, Number(item.minimum_usage_increment || 0.001) || 0.001),
-          catalog_item_id: Number(item.catalog_item_id || 0) || 0,
-          amazon_url: String(item.amazon_url || '').trim(),
-          amazon_asin: String(item.amazon_asin || '').trim(),
-          amazon_title: String(item.amazon_title || '').trim(),
-          amazon_match_status: String(item.amazon_match_status || '').trim(),
-          supplier_name: String(item.supplier_name || '').trim(),
-          latest_order_id: String(item.latest_order_id || '').trim(),
-          latest_purchase_date: String(item.latest_purchase_date || '').trim()
+          minimum_usage_increment: Math.max(0.0001, Number(item.minimum_usage_increment || 0.001) || 0.001), catalog_item_id: Number(item.catalog_item_id || 0) || 0,
+          amazon_url: String(item.amazon_url || '').trim(), amazon_asin: String(item.amazon_asin || '').trim(), amazon_title: String(item.amazon_title || '').trim(), amazon_match_status: String(item.amazon_match_status || '').trim(),
+          supplier_name: String(item.supplier_name || '').trim(), latest_order_id: String(item.latest_order_id || '').trim(), latest_purchase_date: String(item.latest_purchase_date || '').trim()
         })).filter((item) => item.external_key && item.item_name);
-        categorySeedOptions = [...new Set(catalogSeedOptions.map((item) => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        // Preserve bootstrap categories while adding any categories discovered by the typed search.
+        categorySeedOptions = [...new Set([...categorySeedOptions, ...catalogSeedOptions.map((item)=>item.category).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
         renderSeedDropdowns();
-        if (data?._response_meta?.stale) setMessage('The server was temporarily busy. Inventory source dropdowns are using the last saved browser copy.', true);
+        if (data?._response_meta?.stale) setMessage('The server was temporarily busy. Inventory search is using the last saved browser copy.', true);
         return data;
       } catch (error) {
-        setMessage(error.message || 'Failed to load inventory source dropdowns.', true);
+        setMessage(error.message || 'Failed to load inventory source choices.', true);
         return null;
-      } finally {
-        if (!normalizedQuery) seedLoadPromise = null;
-      }
+      } finally { if (!normalizedQuery) seedLoadPromise = null; }
     })();
     if (!normalizedQuery) seedLoadPromise = work;
     return work;
@@ -611,8 +609,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="grid cols-6" style="gap:12px">
             <div><label class="small" for="siteInventoryUnitCost">Unit Cost (CAD)</label><input id="siteInventoryUnitCost" type="number" min="0" step="0.01" value="0.00" placeholder="33.99" /></div>
-            <div><label class="small" for="siteInventoryStockUnitLabel">Stock Unit</label><input id="siteInventoryStockUnitLabel" type="text" placeholder="block, spool, bag, bottle" value="unit" /></div>
-            <div><label class="small" for="siteInventoryUsageUnitLabel">Usage Unit</label><input id="siteInventoryUsageUnitLabel" type="text" placeholder="cup, wick, gram, use" value="unit" /></div>
+            <div><label class="small" for="siteInventoryStockUnitLabel">Stock Unit</label><input id="siteInventoryStockUnitLabel" type="text" list="siteInventoryUnitPresets" placeholder="block, spool, bag, bottle" value="unit" /></div>
+            <div><label class="small" for="siteInventoryUsageUnitLabel">Usage Unit</label><input id="siteInventoryUsageUnitLabel" type="text" list="siteInventoryUnitPresets" placeholder="cup, wick, gram, use" value="unit" /></div>
             <div><label class="small" for="siteInventoryUsageUnitsPerStock">Usage Units Per Stock Unit</label><input id="siteInventoryUsageUnitsPerStock" type="number" min="0.001" step="0.001" value="1" /></div>
             <div><label class="small" for="siteInventorySupplierName">Supplier</label><input id="siteInventorySupplierName" type="text" /></div>
             <div><label class="small" for="siteInventorySupplierSku">Supplier SKU</label><input id="siteInventorySupplierSku" type="text" /></div>
@@ -641,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="site-inventory-form-actions"><button class="btn primary" type="submit" id="siteInventorySaveButton">Add Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
         </form>
 
+        <datalist id="siteInventoryUnitPresets">${unitPresetOptions.map((value)=>`<option value="${escapeHtml(value)}"></option>`).join('')}</datalist>
         <div id="siteInventorySyncResult" class="small card inventory-feedback-panel" style="display:none;margin-top:12px"></div>
         <div class="grid cols-4 site-inventory-toolbar" style="gap:12px;align-items:end;margin-top:16px">
           <div><label class="small" for="siteInventorySearch">Search</label><input id="siteInventorySearch" type="text" placeholder="name, category, supplier" /></div>
@@ -718,6 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button>
         </div>
         <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>On hand</th><th>Reorder at</th><th>Unit cost</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
+        <div class="site-inventory-pagination" id="siteInventoryPagination" aria-live="polite"><button class="btn" type="button" id="siteInventoryPreviousPage">Previous</button><span class="small" id="siteInventoryPageStatus">Page 1</span><button class="btn" type="button" id="siteInventoryNextPage">Next</button></div>
         <div class="card site-inventory-movements-card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap site-inventory-movements-wrap"><table class="site-inventory-movements-table"><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
       </div>`;
 
@@ -730,8 +730,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryForm')?.addEventListener('change', saveInventoryDraft);
     document.getElementById('siteInventoryImageUrl')?.addEventListener('input', updateSiteInventoryImagePreview);
     updateSiteInventoryImagePreview();
-    document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', loadList);
-    document.getElementById('siteInventoryStockView')?.addEventListener('change', loadList);
+    document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', () => loadList({ force: true }));
+    document.getElementById('siteInventoryStockView')?.addEventListener('change', () => { inventoryPage = 1; loadList({ force: true }); });
     document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); });
     document.getElementById('siteInventorySeedSearch')?.addEventListener('input', debounce(async () => {
       seedSearchText = document.getElementById('siteInventorySeedSearch')?.value || '';
@@ -743,7 +743,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySyncAllButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
-    document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(loadList, 250));
+    document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(() => { inventoryPage = 1; loadList({ force: true }); }, 250));
+    document.getElementById('siteInventoryPreviousPage')?.addEventListener('click', () => { if (inventoryPage > 1) { inventoryPage -= 1; loadList({ force: true }); } });
+    document.getElementById('siteInventoryNextPage')?.addEventListener('click', () => { inventoryPage += 1; loadList({ force: true }); });
     document.getElementById('siteInventoryResetButton')?.addEventListener('click', resetInventoryForm);
     document.getElementById('siteInventoryBulkCostForm')?.addEventListener('submit', onBulkCostApply);
     document.getElementById('siteInventoryBulkPreviewButton')?.addEventListener('click', onBulkCostPreview);
@@ -951,9 +953,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setMessage('Loading inventory list...');
         const q = document.getElementById('siteInventorySearch')?.value || '';
         const stockView = document.getElementById('siteInventoryStockView')?.value || '';
-        const cacheKey = `site-inventory:${String(q).trim().toLowerCase()}:${String(stockView).trim().toLowerCase()}`;
+        const cacheKey = `site-inventory:${String(q).trim().toLowerCase()}:${String(stockView).trim().toLowerCase()}:${inventoryPage}`;
         const data = await window.DDAuth.apiJson(
-          `/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1&stock_view=${encodeURIComponent(stockView)}`,
+          `/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1&stock_view=${encodeURIComponent(stockView)}&page=${inventoryPage}&page_size=${inventoryPageSize}`,
           { method: 'GET' },
           {
             fallbackMessage: 'Failed to load inventory list.',
@@ -972,6 +974,12 @@ document.addEventListener('DOMContentLoaded', () => {
       setValue('siteInventoryReorderListCount', summary.reorder_list_items || 0);
 
       const items = Array.isArray(data.items) ? data.items : [];
+      const pagination = data.pagination || {};
+      inventoryPage = Math.max(1, Number(pagination.page || inventoryPage || 1));
+      const pageStatus = document.getElementById('siteInventoryPageStatus');
+      if (pageStatus) pageStatus.textContent = `Page ${inventoryPage} of ${Math.max(1, Number(pagination.total_pages || 1))} • ${Number(pagination.total_items ?? summary.total_items ?? items.length)} matching item(s)`;
+      const prevPage = document.getElementById('siteInventoryPreviousPage'); if (prevPage) prevPage.disabled = !pagination.has_previous;
+      const nextPage = document.getElementById('siteInventoryNextPage'); if (nextPage) nextPage.disabled = !pagination.has_next;
       renderSeedDropdowns();
       const body = document.getElementById('siteInventoryList');
       if (!body) return;
@@ -1033,9 +1041,13 @@ document.addEventListener('DOMContentLoaded', () => {
         site_item_inventory_id: id,
         item_name: value('item_name') || original.item_name,
         source_type: String(value('source_type') || original.source_type || 'other').trim().toLowerCase(),
-        category: value('category') || '',
         supplier_name: value('supplier_name') || '',
         on_hand_quantity: Math.max(0, Number(value('on_hand_quantity') || 0)),
+        stock_unit_label: String(value('stock_unit_label') || original.stock_unit_label || 'unit').trim().toLowerCase(),
+        usage_unit_label: String(value('usage_unit_label') || original.usage_unit_label || 'unit').trim().toLowerCase(),
+        usage_units_per_stock_unit: Math.max(0.001, Number(value('usage_units_per_stock_unit') || original.usage_units_per_stock_unit || 1) || 1),
+        usage_tracking_mode: String(value('usage_tracking_mode') || original.usage_tracking_mode || (String(value('source_type') || original.source_type || '').toLowerCase()==='tool'?'reusable':'exact')).trim().toLowerCase(),
+        category: String(value('category') || '').trim().toLowerCase(),
         reorder_level: Math.max(0, Number(value('reorder_level') || 0)),
         unit_cost_cents: Math.max(0, Math.round(Number(value('unit_cost_dollars') || 0) * 100)),
         is_active: Number(value('is_active')) === 0 ? 0 : 1,

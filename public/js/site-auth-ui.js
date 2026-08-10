@@ -1,21 +1,29 @@
 // File: /public/js/site-auth-ui.js
-// Build 233: temporary Worker/network failures no longer erase a valid browser session.
-// Only an explicit 401/403 authentication response clears credentials.
+// Build 245: resilient authentication UI. A temporary Worker/D1/network failure never becomes a false logout.
+// Only an explicit 401/403 clears stored credentials. Cached identity is provisional until /api/auth/me verifies it.
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
 
-  const loggedInEls = Array.from(document.querySelectorAll("[data-show-when-logged-in]"));
-  const loggedOutEls = Array.from(document.querySelectorAll("[data-show-when-logged-out]"));
-  const adminEls = Array.from(document.querySelectorAll("[data-show-when-admin]"));
-  const navUserNameEls = Array.from(document.querySelectorAll("[data-nav-user-name]"));
-  const logoutButtons = Array.from(document.querySelectorAll("[data-nav-logout]"));
+  const loggedInEls = [...document.querySelectorAll('[data-show-when-logged-in]')];
+  const loggedOutEls = [...document.querySelectorAll('[data-show-when-logged-out]')];
+  const adminEls = [...document.querySelectorAll('[data-show-when-admin]')];
+  const navUserNameEls = [...document.querySelectorAll('[data-nav-user-name]')];
+  const logoutButtons = [...document.querySelectorAll('[data-nav-logout]')];
   const linksWrap = document.querySelector('.nav .links');
   let floatingWidgetEl = null;
   let lastAuthReadySignature = '';
 
-  function show(el, shouldShow) { if (el) el.style.display = shouldShow ? "" : "none"; }
-  function getSafeUserName(user) { return String(user?.display_name || user?.email || 'Member').trim() || 'Member'; }
+  window.DDAuthUiState = window.DDAuthUiState || {
+    phase: 'checking',
+    user: window.DDAuth.getStoredUser?.() || null,
+    verified: false,
+    degraded: false,
+    last_error: null
+  };
+
+  const show = (el, yes) => { if (el) el.style.display = yes ? '' : 'none'; };
+  const safeName = (user) => String(user?.display_name || user?.email || 'Member').trim() || 'Member';
 
   function ensureFloatingWidget() {
     if (floatingWidgetEl) return floatingWidgetEl;
@@ -24,52 +32,39 @@ document.addEventListener("DOMContentLoaded", () => {
     floatingWidgetEl.className = 'dd-auth-widget card';
     floatingWidgetEl.innerHTML = `
       <div class="dd-auth-widget-head">
-        <div>
-          <div class="dd-auth-widget-title">Account</div>
-          <div class="small" id="ddAuthWidgetState">Checking session…</div>
-        </div>
+        <div><div class="dd-auth-widget-title">Account</div><div class="small" id="ddAuthWidgetState">Checking session…</div></div>
         <button class="btn" type="button" id="ddAuthWidgetToggle">Open</button>
       </div>
       <div class="dd-auth-widget-body" id="ddAuthWidgetBody" style="display:none">
         <div id="ddAuthWidgetLoggedIn" style="display:none">
           <div class="small" id="ddAuthWidgetUserLabel" style="margin-bottom:10px"></div>
           <div class="dd-auth-widget-links">
-            <a href="/members/index.html">Settings</a>
-            <a href="/members/index.html#orders">Orders</a>
+            <a href="/members/index.html">Settings</a><a href="/members/index.html#orders">Orders</a>
             <a href="/admin/index.html" id="ddAuthWidgetAdminLink" style="display:none">Admin Dashboard</a>
             <button class="btn" type="button" id="ddAuthWidgetLogout">Logout</button>
           </div>
         </div>
-        <div id="ddAuthWidgetLoggedOut" style="display:none">
-          <div class="small" style="margin-bottom:10px">You are currently logged out.</div>
-          <div class="dd-auth-widget-links">
-            <a href="/login/index.html">Login</a>
-            <a href="/register/index.html">Create account</a>
-            <a href="/account-help/index.html?mode=password">Forgot password</a>
-            <a href="/account-help/index.html?mode=email">Forgot email</a>
-          </div>
-        </div>
+        <div id="ddAuthWidgetLoggedOut" style="display:none"><div class="small" style="margin-bottom:10px">You are currently logged out.</div><div class="dd-auth-widget-links"><a href="/login/index.html">Login</a><a href="/register/index.html">Create account</a><a href="/account-help/index.html?mode=password">Forgot password</a><a href="/account-help/index.html?mode=email">Forgot email</a></div></div>
       </div>`;
     document.body.appendChild(floatingWidgetEl);
     const toggle = floatingWidgetEl.querySelector('#ddAuthWidgetToggle');
     const body = floatingWidgetEl.querySelector('#ddAuthWidgetBody');
-    const logout = floatingWidgetEl.querySelector('#ddAuthWidgetLogout');
     toggle?.addEventListener('click', () => {
-      body.style.display = body.style.display === 'none' ? 'block' : 'block';
-      if (body.style.display === 'block' && toggle.textContent === 'Open') toggle.textContent = 'Close';
-      else if (toggle.textContent === 'Close') { body.style.display = 'none'; toggle.textContent = 'Open'; }
+      const open = body.style.display === 'none';
+      body.style.display = open ? 'block' : 'none';
+      toggle.textContent = open ? 'Close' : 'Open';
     });
-    logout?.addEventListener('click', async () => {
+    floatingWidgetEl.querySelector('#ddAuthWidgetLogout')?.addEventListener('click', async () => {
       try { await window.DDAuth.logout(); } finally { window.location.href = '/'; }
     });
     return floatingWidgetEl;
   }
 
-  function applyUi(user) {
-    const loggedIn = !!user;
-    const role = String(user?.role || "").trim().toLowerCase();
+  function applyUi(user, { degraded = false } = {}) {
+    const loggedIn = Boolean(user);
+    const role = String(user?.role || '').trim().toLowerCase();
     const isAdmin = loggedIn && role === 'admin';
-    const name = getSafeUserName(user);
+    const name = safeName(user);
     loggedInEls.forEach((el) => show(el, loggedIn));
     loggedOutEls.forEach((el) => show(el, !loggedIn));
     adminEls.forEach((el) => show(el, isAdmin));
@@ -77,15 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const widget = ensureFloatingWidget();
     if (widget) {
       const state = widget.querySelector('#ddAuthWidgetState');
-      const loggedInWrap = widget.querySelector('#ddAuthWidgetLoggedIn');
-      const loggedOutWrap = widget.querySelector('#ddAuthWidgetLoggedOut');
+      if (state) state.textContent = degraded && loggedIn ? 'Session retained • verification temporarily unavailable' : (loggedIn ? `${name} • ${role || 'member'}` : 'Not logged in');
       const label = widget.querySelector('#ddAuthWidgetUserLabel');
-      const adminLink = widget.querySelector('#ddAuthWidgetAdminLink');
-      if (state) state.textContent = loggedIn ? `${name} • ${role || 'member'}` : 'Not logged in';
       if (label) label.textContent = loggedIn ? `Signed in as ${name} (${user?.email || 'no email'})` : '';
+      const adminLink = widget.querySelector('#ddAuthWidgetAdminLink');
       if (adminLink) adminLink.style.display = isAdmin ? '' : 'none';
-      show(loggedInWrap, loggedIn);
-      show(loggedOutWrap, !loggedIn);
+      show(widget.querySelector('#ddAuthWidgetLoggedIn'), loggedIn);
+      show(widget.querySelector('#ddAuthWidgetLoggedOut'), !loggedIn);
     }
     if (linksWrap) {
       let statusEl = linksWrap.querySelector('.dd-nav-status');
@@ -97,19 +90,19 @@ document.addEventListener("DOMContentLoaded", () => {
         linksWrap.appendChild(statusEl);
       }
       show(statusEl, loggedIn);
-      const nameEl = statusEl?.querySelector('[data-nav-user-name]');
+      const nameEl = statusEl.querySelector('[data-nav-user-name]');
       if (nameEl) nameEl.textContent = name;
     }
   }
 
-  function emitAuthEvents(user, session = null, { force = false } = {}) {
-    const loggedIn = !!user;
-    const role = String(user?.role || "").trim().toLowerCase();
+  function emitAuthEvents(user, session = null, { force = false, verified = false, degraded = false, error = null } = {}) {
+    const loggedIn = Boolean(user);
+    const role = String(user?.role || '').trim().toLowerCase();
     const isAdmin = loggedIn && role === 'admin';
-    const signature = `${loggedIn ? 1 : 0}:${Number(user?.user_id || 0)}:${role}`;
+    const signature = `${loggedIn ? 1 : 0}:${Number(user?.user_id || 0)}:${role}:${verified ? 1 : 0}:${degraded ? 1 : 0}`;
     if (!force && signature === lastAuthReadySignature) return false;
     lastAuthReadySignature = signature;
-    const detail = { ok: true, logged_in: loggedIn, user, session };
+    const detail = { ok: true, logged_in: loggedIn, user, session, verified, degraded, error };
     document.dispatchEvent(new CustomEvent('dd:auth-ready', { detail }));
     document.dispatchEvent(new CustomEvent('dd:member-access-ready', { detail: { ...detail, ok: loggedIn } }));
     document.dispatchEvent(new CustomEvent('dd:members-ready', { detail: { ...detail, ok: loggedIn } }));
@@ -118,62 +111,55 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function refreshAuthState() {
-    const cachedUser = window.DDAuth.getStoredUser();
-    if (cachedUser) {
-      applyUi(cachedUser);
-      emitAuthEvents(cachedUser, null);
-    }
+    const cachedUser = window.DDAuth.getStoredUser?.() || null;
+    window.DDAuthUiState = { phase: cachedUser ? 'provisional' : 'checking', user: cachedUser, verified: false, degraded: false, last_error: null };
+    applyUi(cachedUser);
+    // Queue the provisional event so other DOMContentLoaded listeners can attach first.
+    queueMicrotask(() => emitAuthEvents(cachedUser, null, { force: true, verified: false }));
+
     if (!window.DDAuth.isLoggedIn()) {
       if (!cachedUser) {
+        window.DDAuthUiState = { phase: 'signed_out', user: null, verified: false, degraded: false, last_error: null };
         applyUi(null);
-        emitAuthEvents(null, null);
+        queueMicrotask(() => emitAuthEvents(null, null, { force: true }));
       }
       return;
     }
+
     try {
       const data = await window.DDAuth.me();
-      applyUi(data?.user || null);
-      emitAuthEvents(data?.user || null, data?.session || null);
-      document.dispatchEvent(new CustomEvent('dd:auth-verified', { detail: { ok: true, logged_in: !!data?.user, user: data?.user || null, session: data?.session || null } }));
+      const user = data?.user || null;
+      window.DDAuthUiState = { phase: user ? 'verified' : 'signed_out', user, verified: Boolean(user), degraded: false, last_error: null };
+      applyUi(user);
+      emitAuthEvents(user, data?.session || null, { force: true, verified: true });
+      document.dispatchEvent(new CustomEvent('dd:auth-verified', { detail: { ok: true, logged_in: Boolean(user), user, session: data?.session || null } }));
     } catch (error) {
       const status = Number(error?.httpStatus || 0);
-      const authenticationRejected = status === 401 || status === 403;
-      if (authenticationRejected || !window.DDAuth.isLoggedIn()) {
+      if (status === 401 || status === 403 || !window.DDAuth.isLoggedIn()) {
         window.DDAuth.clearAuth();
+        window.DDAuthUiState = { phase: 'rejected', user: null, verified: false, degraded: false, last_error: error };
         applyUi(null);
-        emitAuthEvents(null, null);
+        emitAuthEvents(null, null, { force: true, error });
+        document.dispatchEvent(new CustomEvent('dd:auth-rejected', { detail: { ok: false, http_status: status, error } }));
         return;
       }
 
-      // A 5xx, Cloudflare 1102, timeout, offline response, or malformed upstream
-      // response is not proof that the session is invalid. Preserve the token and
-      // cached identity so the owner can retry after the service recovers.
-      const retainedUser = window.DDAuth.getStoredUser();
-      applyUi(retainedUser);
-      emitAuthEvents(retainedUser, null);
-      document.dispatchEvent(new CustomEvent('dd:auth-degraded', {
-        detail: {
-          ok: false,
-          session_retained: true,
-          http_status: status,
-          code: String(error?.code || 'session_verification_unavailable')
-        }
-      }));
-      const widgetState = document.getElementById('ddAuthWidgetState');
-      if (widgetState) widgetState.textContent = 'Session retained • verification temporarily unavailable';
+      const retainedUser = window.DDAuth.getStoredUser?.() || cachedUser || null;
+      window.DDAuthUiState = { phase: 'degraded', user: retainedUser, verified: false, degraded: true, last_error: error };
+      applyUi(retainedUser, { degraded: true });
+      // Force a second admin-ready event even if the cached identity is unchanged.
+      emitAuthEvents(retainedUser, null, { force: true, degraded: true, error });
+      document.dispatchEvent(new CustomEvent('dd:auth-degraded', { detail: { ok: false, session_retained: Boolean(retainedUser), user: retainedUser, http_status: status, code: String(error?.code || 'session_verification_unavailable'), ray: String(error?.cloudflareRay || '') } }));
     }
   }
 
-  logoutButtons.forEach((button) => button.addEventListener('click', async () => {
-    try { await window.DDAuth.logout(); } finally { window.location.href = '/'; }
-  }));
-
+  logoutButtons.forEach((button) => button.addEventListener('click', async () => { try { await window.DDAuth.logout(); } finally { window.location.href = '/'; } }));
   document.addEventListener('dd:auth-changed', (event) => {
-    const user = event?.detail?.logged_in ? (event?.detail?.user || window.DDAuth.getStoredUser()) : null;
+    const user = event?.detail?.logged_in ? (event?.detail?.user || window.DDAuth.getStoredUser?.()) : null;
+    window.DDAuthUiState = { phase: user ? 'provisional' : 'signed_out', user, verified: false, degraded: false, last_error: null };
     applyUi(user);
-    emitAuthEvents(user, null);
+    emitAuthEvents(user, null, { force: true });
   });
 
-  applyUi(window.DDAuth.getStoredUser());
   refreshAuthState();
 });
