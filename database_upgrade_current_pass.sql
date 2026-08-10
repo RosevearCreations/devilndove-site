@@ -1,140 +1,136 @@
--- Devil n Dove Build 246 — product/project integrity, finished-production inventory, and packaging translation review.
--- Run after Build 245. Additive/idempotent. No TEMP tables, destructive table-removal operations, or request-time schema mutations.
+-- Devil n Dove Build 247 — Packaging Studio label deletion, rose palette, Truth-layout repair, and reusable content libraries.
+-- Run after Build 246. Back up D1 first. Additive except for explicit owner-requested project deletion through the admin API.
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS creative_project_deletion_audit (
-  creative_project_deletion_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  creative_work_project_id_deleted INTEGER NOT NULL,
-  project_key TEXT NOT NULL,
-  project_title TEXT,
-  product_id INTEGER,
-  project_snapshot_json TEXT NOT NULL DEFAULT '{}',
-  inventory_return_json TEXT NOT NULL DEFAULT '{}',
-  deletion_reason TEXT,
-  deleted_by_user_id INTEGER,
-  deleted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_creative_project_deletion_audit_project
-  ON creative_project_deletion_audit(creative_work_project_id_deleted, deleted_at DESC);
-
-CREATE TABLE IF NOT EXISTS product_resource_ingredient_profiles (
-  product_resource_link_id INTEGER PRIMARY KEY,
-  is_label_ingredient INTEGER NOT NULL DEFAULT 0,
-  ingredient_name_en TEXT,
-  ingredient_name_fr TEXT,
-  inci_name TEXT,
-  label_sort_order INTEGER NOT NULL DEFAULT 0,
-  translation_review_status TEXT NOT NULL DEFAULT 'needs_review',
+CREATE TABLE IF NOT EXISTS packaging_formula_library (
+  packaging_formula_library_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  formula_key TEXT NOT NULL UNIQUE,
+  formula_name TEXT NOT NULL,
+  product_family TEXT,
+  product_identity_en TEXT,
+  product_identity_fr TEXT,
+  default_rose_asset_id TEXT,
+  default_rose_colour TEXT,
+  ingredients_json TEXT NOT NULL DEFAULT '[]',
   notes TEXT,
+  is_system INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_by_user_id INTEGER,
   updated_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY(product_resource_link_id) REFERENCES product_resource_links(product_resource_link_id) ON DELETE CASCADE,
-  FOREIGN KEY(updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_product_resource_ingredient_profiles_label
-  ON product_resource_ingredient_profiles(is_label_ingredient, label_sort_order, product_resource_link_id);
+CREATE INDEX IF NOT EXISTS idx_packaging_formula_library_active
+  ON packaging_formula_library(is_active, LOWER(formula_name));
 
-CREATE TABLE IF NOT EXISTS product_production_runs (
-  product_production_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  run_key TEXT NOT NULL UNIQUE,
-  product_id INTEGER NOT NULL,
-  output_quantity INTEGER NOT NULL DEFAULT 1,
-  output_unit_label TEXT NOT NULL DEFAULT 'unit',
-  run_status TEXT NOT NULL DEFAULT 'posted' CHECK(run_status IN ('posted','reversed','failed')),
-  material_snapshot_json TEXT NOT NULL DEFAULT '[]',
-  ingredient_snapshot_json TEXT NOT NULL DEFAULT '[]',
-  notes TEXT,
-  posted_by_user_id INTEGER,
-  posted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  reversed_by_user_id INTEGER,
-  reversed_at TEXT,
-  reversal_reason TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE RESTRICT,
-  FOREIGN KEY(posted_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
-  FOREIGN KEY(reversed_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
-);
-CREATE INDEX IF NOT EXISTS idx_product_production_runs_product
-  ON product_production_runs(product_id, run_status, posted_at DESC);
-
-CREATE TABLE IF NOT EXISTS product_production_run_materials (
-  product_production_run_material_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_production_run_id INTEGER NOT NULL,
-  product_resource_link_id INTEGER,
-  site_item_inventory_id INTEGER,
-  resource_kind TEXT NOT NULL,
-  source_key TEXT,
+CREATE TABLE IF NOT EXISTS packaging_content_library (
+  packaging_content_library_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content_key TEXT NOT NULL UNIQUE,
+  content_type TEXT NOT NULL CHECK(content_type IN ('ingredient','fragrance_oil','colourant','claim')),
   item_name TEXT NOT NULL,
-  consumption_mode TEXT NOT NULL DEFAULT 'per_unit',
-  tracking_mode TEXT NOT NULL DEFAULT 'exact',
-  usage_quantity REAL NOT NULL DEFAULT 0,
-  usage_unit_label TEXT NOT NULL DEFAULT 'unit',
-  stock_quantity_consumed REAL NOT NULL DEFAULT 0,
-  stock_unit_label TEXT NOT NULL DEFAULT 'unit',
-  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
-  is_label_ingredient INTEGER NOT NULL DEFAULT 0,
-  ingredient_name_en TEXT,
-  ingredient_name_fr TEXT,
+  text_en TEXT,
+  text_fr TEXT,
   inci_name TEXT,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY(product_production_run_id) REFERENCES product_production_runs(product_production_run_id) ON DELETE CASCADE,
-  FOREIGN KEY(product_resource_link_id) REFERENCES product_resource_links(product_resource_link_id) ON DELETE SET NULL,
-  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE SET NULL
-);
-CREATE INDEX IF NOT EXISTS idx_product_production_run_materials_run
-  ON product_production_run_materials(product_production_run_id, product_production_run_material_id);
-CREATE INDEX IF NOT EXISTS idx_product_production_run_materials_inventory
-  ON product_production_run_materials(site_item_inventory_id, created_at DESC);
-
-CREATE TABLE IF NOT EXISTS packaging_translation_reviews (
-  packaging_translation_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  packaging_project_id INTEGER NOT NULL,
-  field_key TEXT NOT NULL,
-  source_text TEXT NOT NULL DEFAULT '',
-  generated_text TEXT NOT NULL DEFAULT '',
-  generator_key TEXT NOT NULL DEFAULT 'curated_bilingual_v1',
-  review_status TEXT NOT NULL DEFAULT 'needs_review' CHECK(review_status IN ('needs_review','approved','changes_requested')),
-  reviewed_by_user_id INTEGER,
-  reviewed_at TEXT,
+  icon_name TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  is_system INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
   created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(packaging_project_id, field_key, generated_text),
-  FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE,
-  FOREIGN KEY(reviewed_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
-  FOREIGN KEY(created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_packaging_translation_reviews_project
-  ON packaging_translation_reviews(packaging_project_id, review_status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_packaging_content_library_type
+  ON packaging_content_library(content_type, is_active, LOWER(item_name));
+
+INSERT INTO packaging_formula_library(
+  formula_key,formula_name,product_family,product_identity_en,product_identity_fr,
+  default_rose_asset_id,default_rose_colour,ingredients_json,notes,is_system,is_active
+) VALUES (
+  'health-oatmeal-goat-milk-v1',
+  'Health Oatmeal & Goat Milk',
+  'Health Oatmeal & Goat Milk',
+  'Oatmeal & Goat Milk Soap',
+  'Savon à l’avoine et au lait de chèvre',
+  'rose-oatmeal-v1',
+  '#C9B18A',
+  '[{"sort_order":1,"inci_name":"Water","display_name_en":"Water","display_name_fr":"Water","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":2,"inci_name":"Glycerin","display_name_en":"Glycerin","display_name_fr":"Glycerin","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":3,"inci_name":"Sorbitol","display_name_en":"Sorbitol","display_name_fr":"Sorbitol","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":4,"inci_name":"Olive Oil","display_name_en":"Olive Oil","display_name_fr":"Olive Oil","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":5,"inci_name":"Coconut oil","display_name_en":"Coconut oil","display_name_fr":"Coconut oil","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":6,"inci_name":"Sodium Stearate","display_name_en":"Sodium Stearate","display_name_fr":"Sodium Stearate","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":7,"inci_name":"Sodium Cocoate","display_name_en":"Sodium Cocoate","display_name_fr":"Sodium Cocoate","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":8,"inci_name":"Propanediol","display_name_en":"Propanediol","display_name_fr":"Propanediol","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":9,"inci_name":"Styrene/Acrylates Copolymer","display_name_en":"Styrene/Acrylates Copolymer","display_name_fr":"Styrene/Acrylates Copolymer","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":10,"inci_name":"Avena Sativa Kernel Extract","display_name_en":"Avena Sativa Kernel Extract","display_name_fr":"Avena Sativa Kernel Extract","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":11,"inci_name":"Sodium Chloride","display_name_en":"Sodium Chloride","display_name_fr":"Sodium Chloride","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":12,"inci_name":"Butyrospermum Parkii Butter","display_name_en":"Butyrospermum Parkii Butter","display_name_fr":"Butyrospermum Parkii Butter","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":13,"inci_name":"Tetrasodium Glutamate Diacetate","display_name_en":"Tetrasodium Glutamate Diacetate","display_name_fr":"Tetrasodium Glutamate Diacetate","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":14,"inci_name":"Isoamyl Laurate","display_name_en":"Isoamyl Laurate","display_name_fr":"Isoamyl Laurate","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":15,"inci_name":"Trideceth-50","display_name_en":"Trideceth-50","display_name_fr":"Trideceth-50","organic_flag":0,"allergen_note":"","required_on_label":1},{"sort_order":16,"inci_name":"Sodium Lauryl Sulfate","display_name_en":"Sodium Lauryl Sulfate","display_name_fr":"Sodium Lauryl Sulfate","organic_flag":0,"allergen_note":"","required_on_label":1}]',
+  'Owner-provided ingredient breakdown. The source note “*Organic” is preserved here but no individual ingredient is automatically marked organic; verify the supplier/source meaning before printing or approving an organic claim.',
+  1,1
+)
+ON CONFLICT(formula_key) DO UPDATE SET
+  formula_name=excluded.formula_name,
+  product_family=excluded.product_family,
+  product_identity_en=excluded.product_identity_en,
+  product_identity_fr=excluded.product_identity_fr,
+  default_rose_asset_id=excluded.default_rose_asset_id,
+  default_rose_colour=excluded.default_rose_colour,
+  ingredients_json=excluded.ingredients_json,
+  notes=excluded.notes,
+  is_system=1,is_active=1,updated_at=CURRENT_TIMESTAMP;
+
+INSERT INTO packaging_content_library(
+  content_key,content_type,item_name,text_en,text_fr,inci_name,icon_name,metadata_json,is_system,is_active
+) VALUES
+('claim-natural-ingredients','claim','Natural Ingredients','Natural Ingredients','Ingrédients naturels',NULL,'leaf','{}',1,1),
+('claim-handmade-with-care','claim','Handmade with Care','Handmade with Care','Fait à la main avec soin',NULL,'hands','{}',1,1),
+('claim-gentle-moisturizing','claim','Gentle & Moisturizing','Gentle & Moisturizing','Doux et hydratant',NULL,'leaf','{}',1,1),
+('claim-please-recycle','claim','Please Recycle','Please Recycle','Veuillez recycler',NULL,'recycle','{}',1,1),
+('ingredient-water','ingredient','Water','Water','Water','Water',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-glycerin','ingredient','Glycerin','Glycerin','Glycerin','Glycerin',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-sorbitol','ingredient','Sorbitol','Sorbitol','Sorbitol','Sorbitol',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-olive-oil','ingredient','Olive Oil','Olive Oil','Olive Oil','Olive Oil',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-coconut-oil','ingredient','Coconut oil','Coconut oil','Coconut oil','Coconut oil',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-sodium-stearate','ingredient','Sodium Stearate','Sodium Stearate','Sodium Stearate','Sodium Stearate',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-sodium-cocoate','ingredient','Sodium Cocoate','Sodium Cocoate','Sodium Cocoate','Sodium Cocoate',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-propanediol','ingredient','Propanediol','Propanediol','Propanediol','Propanediol',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-styrene-acrylates-copolymer','ingredient','Styrene/Acrylates Copolymer','Styrene/Acrylates Copolymer','Styrene/Acrylates Copolymer','Styrene/Acrylates Copolymer',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-avena-sativa-kernel-extract','ingredient','Avena Sativa Kernel Extract','Avena Sativa Kernel Extract','Avena Sativa Kernel Extract','Avena Sativa Kernel Extract',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-sodium-chloride','ingredient','Sodium Chloride','Sodium Chloride','Sodium Chloride','Sodium Chloride',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-butyrospermum-parkii-butter','ingredient','Butyrospermum Parkii Butter','Butyrospermum Parkii Butter','Butyrospermum Parkii Butter','Butyrospermum Parkii Butter',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-tetrasodium-glutamate-diacetate','ingredient','Tetrasodium Glutamate Diacetate','Tetrasodium Glutamate Diacetate','Tetrasodium Glutamate Diacetate','Tetrasodium Glutamate Diacetate',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-isoamyl-laurate','ingredient','Isoamyl Laurate','Isoamyl Laurate','Isoamyl Laurate','Isoamyl Laurate',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-trideceth-50','ingredient','Trideceth-50','Trideceth-50','Trideceth-50','Trideceth-50',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1),
+('ingredient-sodium-lauryl-sulfate','ingredient','Sodium Lauryl Sulfate','Sodium Lauryl Sulfate','Sodium Lauryl Sulfate','Sodium Lauryl Sulfate',NULL,'{"source":"Health Oatmeal & Goat Milk owner-provided formula"}',1,1)
+ON CONFLICT(content_key) DO UPDATE SET
+  content_type=excluded.content_type,
+  item_name=excluded.item_name,
+  text_en=excluded.text_en,
+  text_fr=excluded.text_fr,
+  inci_name=excluded.inci_name,
+  icon_name=excluded.icon_name,
+  metadata_json=excluded.metadata_json,
+  is_system=1,is_active=1,updated_at=CURRENT_TIMESTAMP;
+
+-- The soap rose is selected independently from generic/custom artwork. This removes the old purple-only template fallback.
+UPDATE packaging_templates
+SET layout_json='{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":38.1,"front_style":"truth_reference_oval","design_profile":"soap_reference_v2","shape":"soap_wrap","rose_asset_mode":"palette","rear_circle_spec_mm":50,"rear_circle_render_mm":38.1,"dimension_profile":"photo_fit","bleed_in":0.125,"safe_margin_in":0.0625}',
+    updated_at=CURRENT_TIMESTAMP
+WHERE template_key='soap-ribbon-glacial-approved-v1';
+
+UPDATE packaging_templates
+SET layout_json='{"sections":["ingredients_en","front_oval","ingredients_fr","rear_seal","claims_weight","overlap"],"band_height_mm":19.05,"artboard_height_mm":50,"front_style":"truth_reference_oval","design_profile":"soap_reference_v2","shape":"soap_wrap","rose_asset_mode":"palette","rear_circle_spec_mm":50,"rear_circle_render_mm":50,"dimension_profile":"50mm_seal","bleed_in":0.125,"safe_margin_in":0.0625}',
+    updated_at=CURRENT_TIMESTAMP
+WHERE template_key='soap-ribbon-spec-50mm-seal-v1';
 
 INSERT INTO app_settings(setting_key,setting_value,is_public)
-VALUES ('site.product.generated_project_shell_delete_policy','auto_cleanup_unreviewed_v246',0)
+VALUES ('site.packaging.rose_palette_policy','botanical_palette_plus_custom_colour_v247',0)
 ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
 
 INSERT INTO app_settings(setting_key,setting_value,is_public)
-VALUES ('site.creative_project.delete_inventory_policy','compensate_unreversed_consumption_v246',0)
+VALUES ('site.packaging.library_policy','persistent_formula_ingredient_fragrance_colourant_claim_library_v247',0)
 ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
 
 INSERT INTO app_settings(setting_key,setting_value,is_public)
-VALUES ('site.product.production_release_policy','reviewed_bom_snapshot_inventory_post_v246',0)
-ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
-
-INSERT INTO app_settings(setting_key,setting_value,is_public)
-VALUES ('site.packaging.soap_design_policy','approved_soap_reference_v2',0)
-ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
-
-INSERT INTO app_settings(setting_key,setting_value,is_public)
-VALUES ('site.packaging.french_generation_policy','curated_draft_human_review_v246',0)
+VALUES ('site.packaging.project_delete_policy','typed_project_key_confirmation_v247',0)
 ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
 
 INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,destructive,applied_at,notes,created_at,updated_at)
 VALUES (
-  'build246_product_project_production_packaging',
-  'database_build246_product_project_production_packaging.sql',
+  'build247_packaging_library_truth_layout_rose_palette',
+  'database_build247_packaging_library_truth_layout_rose_palette.sql',
   NULL,'applied',0,CURRENT_TIMESTAMP,
-  'Adds audited Creative Project deletion with inventory compensation, generated product Content Studio/CAIP shell cleanup support, finished-production material/ingredient snapshots, and reviewed packaging translation evidence. No source media or business history is silently discarded.',
+  'Adds persistent packaging formula/content libraries, seeds the owner-provided Health Oatmeal & Goat Milk formula and four bilingual claim presets, removes the purple-only soap template artwork fallback, and records the typed-confirm Packaging Studio deletion policy. Actual project deletion occurs only from the explicit admin action.',
   CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
 )
 ON CONFLICT(migration_key) DO UPDATE SET

@@ -1,6 +1,19 @@
-# Devil n Dove Project Status and Roadmap — Build 246
+# Devil n Dove Project Status and Roadmap — Build 247
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
+
+## Build 247 completed work — Packaging Studio repair pass
+
+1. Added permanent label/project deletion with typed project-key confirmation and child-record cleanup.
+2. Rebuilt soap ingredient panel boundaries to match the approved Truth/reference hierarchy and prevent text from crossing the front oval.
+3. Removed the purple-only soap artwork fallback and made the selected botanical rose the actual renderer authority.
+4. Added the complete requested botanical rose palette plus arbitrary custom rose colour support.
+5. Added the requested product→rose defaults, including Health Oatmeal & Goat Milk→oatmeal/cream/beige.
+6. Added a visible Layouts & Templates gallery and retained save-as-template/repeat-job support.
+7. Added persistent formula/content libraries for soap formulas, individual ingredients, fragrance oils, colourants and claims.
+8. Seeded Health Oatmeal & Goat Milk with the owner-supplied 16-item ingredient list and preserved `*Organic` as a source/review note rather than an assumed per-ingredient flag.
+9. Seeded Natural Ingredients, Handmade with Care, Gentle & Moisturizing and Please Recycle as bilingual reusable claims.
+10. Added Build 247 migration/schema synchronization and regression/verification notes.
 
 ## Build 246 completed work — 20 repository-side advances
 

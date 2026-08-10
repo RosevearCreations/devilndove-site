@@ -1,4 +1,10 @@
-# Build 246 current packaging note
+# Build 247 current packaging note
+
+Build 247 repairs the owner-reported Packaging Studio issues around the approved/“Truth” soap reference. Soap ingredient panels now occupy clipped fixed zones outside the front oval; the French panel starts after the oval instead of underneath it. Rose artwork is selected independently from generic artwork, with detailed botanical presets for purple, lavender, red, pink, white, off-white, yellow, coral, orange, peach, green, blue, blue-green, brown, black, grey, charcoal, silver, gold, honey, copper, bronze and oatmeal/cream, plus a custom-colour generated rose. Product directions are Glacial Purple→lavender, Earth Shea & Pumice→green, Health Oatmeal & Goat Milk→oatmeal, Sea Breeze→blue-green, Charcoal→charcoal, Honey→honey-gold and Rose→red. The Layouts tab now shows the reusable template gallery.
+
+Build 247 also adds persistent `packaging_formula_library` and `packaging_content_library` tables. The first built-in formula is **Health Oatmeal & Goat Milk** using the owner-supplied 16-item ingredient breakdown. The source note `*Organic` is retained as a review note rather than guessing which ingredients are organic. The reusable content library seeds the four supplied bilingual claims and supports custom ingredients, fragrance oils and colourants. System presets are protected; custom library entries can be deactivated. Packaging projects can now be permanently deleted from the editor only after typing the exact project key; Archive remains the non-destructive choice. Apply `database_build247_packaging_library_truth_layout_rose_palette.sql` (or the byte-identical current-pass file) after backup.
+
+# Build 246 retained packaging foundation
 
 Build 246 advances the approved labeling/packaging authority: soap ribbons are locked to `soap_reference_v2`; Product Resource ingredient/INCI profiles seed linked soap projects; curated French is draft/review evidence rather than automatic approval; and the approved visual treatment may not invent ingredients, marketing claims or net quantity. Build 244/245 fractional inventory remains retained. Physical print/wrap/laser proof and owner approval remain required.
 

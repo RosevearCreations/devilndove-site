@@ -1,3 +1,10 @@
+# Build 247 schema delta
+
+- `packaging_formula_library`: reusable soap/product formulas with product identity, default rose direction and ordered structured ingredient JSON.
+- `packaging_content_library`: reusable `ingredient`, `fragrance_oil`, `colourant` and `claim` entries with bilingual/INCI/icon metadata.
+- Build 247 seeds one Health Oatmeal & Goat Milk formula, 16 ingredient library rows and four bilingual claim rows.
+- Existing `packaging_templates` soap layouts are updated to `soap_reference_v2`/`truth_reference_oval` and no longer contain a fixed purple `artwork_asset`.
+
 # Database Schema Reference — Build 246
 
 ## Current migration boundary

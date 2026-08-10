@@ -1,3 +1,14 @@
+# Build 247 — Packaging Studio Truth Layout, Rose Palette and Libraries
+
+- Added explicit **Delete label** with exact packaging-project-key confirmation; Archive remains available for non-destructive retirement.
+- Repaired the soap renderer against the approved Glacial Purple/Truth reference: English and French ingredient panels have fixed clipped zones and no longer intrude into the front oval.
+- Decoupled soap rose artwork from the old generic purple artwork path; the advanced field can no longer silently force the purple rose for soap.
+- Added 23 detailed botanical rose assets plus a custom-colour generated rose, and product defaults for Glacial Purple, Earth Shea & Pumice, Health Oatmeal & Goat Milk, Sea Breeze, Charcoal, Honey and Rose.
+- Added an in-editor reusable layout-template gallery.
+- Added persistent soap formula/content libraries for ingredients, fragrance oils, colourants and bilingual claims.
+- Seeded the owner-provided Health Oatmeal & Goat Milk formula and four reusable bilingual claim presets.
+- Added `database_build247_packaging_library_truth_layout_rose_palette.sql`; it is synchronized to `database_upgrade_current_pass.sql` and integrated into aggregate schema files.
+
 # Build 246 — Product/Project/Production/Packaging Integrity
 
 - Fixed Product Editor selected-ID persistence and Update Product fallback.
