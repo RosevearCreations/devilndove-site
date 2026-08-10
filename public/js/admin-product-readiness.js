@@ -37,7 +37,8 @@
       blocked_public_images: 'Public-use blockers',
       missing_seo: 'Missing SEO',
       missing_price: 'Missing price',
-      needs_three_images: 'Needs 3 images'
+      needs_three_images: 'Needs 3 images',
+      basic_catalog_blockers: 'Catalog basics: featured image, price, or short description'
     };
 
     function blockerKey(blocker = {}) {
@@ -70,6 +71,7 @@
       if (activeFilter === 'missing_seo') return labels.has('seo_title') || labels.has('seo_meta_description');
       if (activeFilter === 'missing_price') return labels.has('price');
       if (activeFilter === 'needs_three_images') return labels.has('image_count');
+      if (activeFilter === 'basic_catalog_blockers') return labels.has('featured_image') || labels.has('price') || labels.has('short_description');
       return true;
     }
 
@@ -187,9 +189,11 @@
     async function applyQuickRoles(productId) {
       const recommended = ['hero_front', 'detail_texture', 'scale_context', 'back_side', 'process_story', 'packaging_pickup', 'material_tool_proof'];
       setMessage(`Applying recommended image roles for product #${productId}...`);
-      const response = await window.DDAuth.apiFetch(`/api/admin/product-images?product_id=${encodeURIComponent(productId)}`);
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load product images.');
+      const data = await window.DDAuth.apiJson(
+        `/api/admin/product-images?product_id=${encodeURIComponent(productId)}`,
+        { method: 'GET' },
+        { fallbackMessage: 'Could not load product images.', cacheKey: `product-images:${productId}`, cacheTtlMs: 30000, retries: 2, staleOnError: true }
+      );
       const images = (Array.isArray(data.images) ? data.images : []).map((row, index) => ({
         ...row,
         image_role: row.image_role || recommended[index] || 'gallery_support',
@@ -197,35 +201,41 @@
         sort_order: index
       }));
       if (!images.length) throw new Error('No product images exist yet. Upload images before applying roles.');
-      const save = await window.DDAuth.apiFetch('/api/admin/product-images', { method: 'POST', body: JSON.stringify({ product_id: Number(productId), images }) });
-      const saveData = await save.json().catch(() => null);
-      if (!save.ok || !saveData?.ok) throw new Error(saveData?.error || 'Could not save image roles.');
+      await window.DDAuth.apiJson(
+        '/api/admin/product-images',
+        { method: 'POST', body: JSON.stringify({ product_id: Number(productId), images }) },
+        { fallbackMessage: 'Could not save image roles.' }
+      );
       await loadReadiness();
       setMessage(`Recommended roles saved for product #${productId}. Review consent status before publishing.`);
     }
 
-    async function loadReadiness() {
+    async function loadReadiness({ force = false } = {}) {
       try {
         setMessage('Loading product readiness preview...');
-        const response = await window.DDAuth.apiFetch(`/api/admin/product-readiness?limit=240&show_ready=${showReady ? '1' : '0'}${activeProductId ? `&product_id=${encodeURIComponent(activeProductId)}` : ''}`);
-        const data = await response.json();
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to load readiness preview.');
+        const endpoint = `/api/admin/product-readiness?limit=240&show_ready=${showReady ? '1' : '0'}${activeProductId ? `&product_id=${encodeURIComponent(activeProductId)}` : ''}`;
+        const data = await window.DDAuth.apiJson(
+          endpoint,
+          { method: 'GET' },
+          { fallbackMessage: 'Failed to load readiness preview.', cacheKey: `product-readiness:${showReady ? 1 : 0}:${activeProductId || 0}`, cacheTtlMs: 60000, retries: force ? 2 : 1, staleOnError: true }
+        );
         renderSummary(data.summary || {});
         renderRows(Array.isArray(data.products) ? data.products : []);
-        setMessage(`Readiness preview updated ${data.generated_at ? `at ${new Date(data.generated_at).toLocaleString()}` : ''}.`);
+        setMessage(data?._response_meta?.stale ? 'Server is temporarily busy. Showing the most recent saved readiness view.' : `Readiness preview updated ${data.generated_at ? `at ${new Date(data.generated_at).toLocaleString()}` : ''}.`, Boolean(data?._response_meta?.stale));
       } catch (error) {
         renderSummary({});
-        renderRows([]);
+        const target = document.getElementById('productReadinessRows');
+        if (target) target.innerHTML = `<div class="card status-note error"><strong>Readiness data is temporarily unavailable.</strong><p class="small">${esc(error.message || 'Failed to load readiness preview.')}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="productReadinessRetryInline">Retry</button><a class="btn" href="/admin/catalog/">Open Product Catalog</a></div></div>`;
+        document.getElementById('productReadinessRetryInline')?.addEventListener('click', () => loadReadiness({ force: true }));
         setMessage(error.message || 'Failed to load readiness preview.', true);
       }
     }
 
-    document.addEventListener('dd:admin-ready', (event) => {
-      if (!event?.detail?.ok) return;
-      renderShell();
-      loadReadiness();
-    });
-
     renderShell();
+    if (window.DDWhenAdminReady) {
+      window.DDWhenAdminReady(() => loadReadiness(), { delayMs: 250 });
+    } else {
+      document.addEventListener('dd:admin-access-granted', () => setTimeout(() => loadReadiness(), 250), { once: true });
+    }
   });
 })();

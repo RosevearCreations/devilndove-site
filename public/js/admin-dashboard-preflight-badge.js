@@ -1,30 +1,3 @@
 // File: /public/js/admin-dashboard-preflight-badge.js
-// Brief description: Adds latest Deployment Preflight and Release Control readiness badges to the desktop admin dashboard.
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (!window.DDAuth?.apiFetch) return;
-  const grid = document.querySelector('.admin-summary-grid') || document.querySelector('.dashboard-summary-grid');
-  if (!grid) return;
-  const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-  const cls = (status) => status === 'blocked' || status === 'fail' || status === 'not_ready' ? 'status-pill status-pill-error' : (status === 'review' || status === 'warn' ? 'status-pill status-pill-warning' : 'status-pill status-pill-success');
-  Promise.all([
-    window.DDAuth.apiFetch('/api/admin/deployment-preflight').then((r) => r.json()).catch(() => null),
-    window.DDAuth.apiFetch('/api/admin/release-control?view=phone').then((r) => r.json()).catch(() => null)
-  ]).then(([preflight, release]) => {
-    if (release?.ok) {
-      const score = Number(release.summary?.readiness_score || 0);
-      const rel = document.createElement('a');
-      rel.className = 'admin-stat admin-stat-link';
-      rel.href = '/admin/release-control/';
-      rel.innerHTML = `<div class="admin-stat-label">Deploy Score</div><div class="admin-stat-value"><span class="${cls(score >= 90 ? 'passed' : 'review')}">${esc(score)}/100</span></div><div class="small">${esc(release.summary?.dashboard_card_count || 0)} release card(s)</div>`;
-      grid.prepend(rel);
-    }
-    if (preflight?.ok) {
-      const card = document.createElement('a');
-      card.className = 'admin-stat admin-stat-link';
-      card.href = '/admin/deployment-preflight/';
-      card.innerHTML = `<div class="admin-stat-label">Preflight</div><div class="admin-stat-value"><span class="${cls(preflight.summary?.status)}">${esc(preflight.summary?.status || 'unknown')}</span></div><div class="small">${esc(preflight.summary?.blocker_count || 0)} blocker(s) · ${esc(preflight.summary?.warning_count || 0)} warning(s)</div>`;
-      grid.prepend(card);
-    }
-  }).catch(() => {});
-});
+// Build 245: expensive preflight/release badges defer until auth and load sequentially to avoid refresh fan-out.
+document.addEventListener('DOMContentLoaded',()=>{if(!window.DDAuth)return;const grid=document.querySelector('.admin-summary-grid')||document.querySelector('.dashboard-summary-grid');if(!grid)return;const esc=(v)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const cls=(s)=>['blocked','fail','not_ready'].includes(s)?'status-pill status-pill-error':(['review','warn'].includes(s)?'status-pill status-pill-warning':'status-pill status-pill-success');async function load(){try{const pre=await window.DDAuth.apiJson('/api/admin/deployment-preflight',{method:'GET'},{fallbackMessage:'Preflight temporarily unavailable.',cacheKey:'dashboard-preflight',cacheTtlMs:180000,retries:1,staleOnError:true}).catch(()=>null);if(pre?.ok){document.getElementById('adminDashboardPreflightCard')?.remove();const a=document.createElement('a');a.id='adminDashboardPreflightCard';a.className='admin-stat admin-stat-link';a.href='/admin/deployment-preflight/';a.innerHTML=`<div class="admin-stat-label">Preflight</div><div class="admin-stat-value"><span class="${cls(pre.summary?.status)}">${esc(pre.summary?.status||'unknown')}</span></div><div class="small">${esc(pre.summary?.blocker_count||0)} blocker(s) · ${esc(pre.summary?.warning_count||0)} warning(s)${pre?._response_meta?.stale?' · saved':''}</div>`;grid.prepend(a);}await new Promise(r=>setTimeout(r,250));const rel=await window.DDAuth.apiJson('/api/admin/release-control?view=phone',{method:'GET'},{fallbackMessage:'Release summary temporarily unavailable.',cacheKey:'dashboard-release-control',cacheTtlMs:180000,retries:1,staleOnError:true}).catch(()=>null);if(rel?.ok){document.getElementById('adminDashboardReleaseCard')?.remove();const score=Number(rel.summary?.readiness_score||0);const a=document.createElement('a');a.id='adminDashboardReleaseCard';a.className='admin-stat admin-stat-link';a.href='/admin/release-control/';a.innerHTML=`<div class="admin-stat-label">Deploy Score</div><div class="admin-stat-value"><span class="${cls(score>=90?'passed':'review')}">${esc(score)}/100</span></div><div class="small">${esc(rel.summary?.dashboard_card_count||0)} release card(s)${rel?._response_meta?.stale?' · saved':''}</div>`;grid.prepend(a);}}catch{}}if(window.DDWhenAdminReady)window.DDWhenAdminReady(load,{delayMs:1250});else document.addEventListener('dd:admin-access-granted',()=>setTimeout(load,1250),{once:true});});

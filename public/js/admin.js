@@ -1,84 +1,38 @@
 // File: /public/js/admin.js
-// Brief description: Handles the admin dashboard shell. It listens for the resolved
-// admin session, fills the visible admin summary placeholders, and keeps the
-// page-level admin state aligned with the shared auth UI events.
+// Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
 
-document.addEventListener("DOMContentLoaded", () => {
-  const accessMessageEl = document.getElementById("adminAccessMessage");
+document.addEventListener('DOMContentLoaded', () => {
+  const stateEl = document.getElementById('adminAuthState');
+  const userEl = document.getElementById('adminUserSummary');
+  const accessMessage = document.getElementById('adminAccessMessage');
+  if (!window.DDAuth) return;
 
-  function setAccessMessage(message, isError = false) {
-    if (!accessMessageEl) return;
-
-    accessMessageEl.textContent = message;
-    accessMessageEl.style.display = message ? "block" : "none";
-    accessMessageEl.style.color = isError ? "#b00020" : "";
+  const safeName = (u) => String(u?.display_name || u?.email || 'Administrator').trim() || 'Administrator';
+  function renderChecking() {
+    if (stateEl) stateEl.textContent = 'Checking administrator session…';
+    if (userEl) userEl.textContent = '';
+    if (accessMessage && !accessMessage.textContent) { accessMessage.textContent = 'Checking administrator session…'; accessMessage.classList.add('admin-access-checking'); }
+  }
+  function renderAdmin(user, { degraded = false, provisional = false } = {}) {
+    if (stateEl) stateEl.textContent = degraded ? 'Admin session retained — verification temporarily unavailable' : (provisional ? 'Admin session restored — verifying…' : 'Administrator session verified');
+    if (userEl) userEl.textContent = `${safeName(user)}${user?.email ? ` • ${user.email}` : ''}`;
+  }
+  function renderDenied() {
+    if (stateEl) stateEl.textContent = 'Administrator login required';
+    if (userEl) userEl.textContent = '';
   }
 
-  function setSummaryValue(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = value;
-  }
+  renderChecking();
+  const cached = window.DDAuth.getStoredUser?.();
+  if (cached && String(cached.role || '').toLowerCase() === 'admin' && window.DDAuth.isLoggedIn()) renderAdmin(cached, { provisional: true });
 
-  function titleCase(value) {
-    const text = String(value || "").trim();
-    if (!text) return "—";
-
-    return text
-      .replaceAll("_", " ")
-      .replaceAll("-", " ")
-      .replace(/\b\w/g, (ch) => ch.toUpperCase());
-  }
-
-  function renderSignedOut() {
-    setAccessMessage("Please log in with an admin account to access this page.", true);
-    setSummaryValue("summaryUsersCount", "—");
-    setSummaryValue("summaryProductsCount", "—");
-    setSummaryValue("summaryOrdersCount", "—");
-    setSummaryValue("summaryPaymentsCount", "—");
-  }
-
-  function renderSignedIn(user) {
-    setAccessMessage("");
-
-    const role = String(user?.role || "").trim().toLowerCase();
-    const label = user?.display_name || user?.email || "Admin";
-
-    document.title = `Admin Dashboard — Devil n Dove`;
-
-    const heroHeading = document.querySelector(".hero h1");
-    const heroText = document.querySelector(".hero p");
-
-    if (heroHeading) {
-      heroHeading.textContent = "Admin Dashboard";
-    }
-
-    if (heroText) {
-      heroText.textContent =
-        `${label} is signed in as ${titleCase(role || "admin")} and can manage users, products, orders, payments, and access tiers.`;
-    }
-  }
-
-  document.addEventListener("dd:admin-ready", (event) => {
-    const ok = !!event?.detail?.ok;
-    const user = event?.detail?.user || null;
-
-    if (!ok || !user) {
-      renderSignedOut();
-      return;
-    }
-
-    renderSignedIn(user);
+  document.addEventListener('dd:admin-ready', (event) => {
+    const d = event?.detail || {};
+    if (d.ok && d.user) renderAdmin(d.user, { degraded: Boolean(d.degraded), provisional: !d.verified });
   });
-
-  document.addEventListener("dd:auth-ready", (event) => {
-    const loggedIn = !!event?.detail?.logged_in;
-    const user = event?.detail?.user || null;
-
-    if (!loggedIn || !user || String(user.role || "").toLowerCase() !== "admin") {
-      renderSignedOut();
-    }
+  document.addEventListener('dd:auth-degraded', () => {
+    const user = window.DDAuth.getStoredUser?.();
+    if (user && String(user.role || '').toLowerCase() === 'admin') renderAdmin(user, { degraded: true, provisional: true });
   });
-
-  renderSignedOut();
+  document.addEventListener('dd:auth-rejected', renderDenied);
 });

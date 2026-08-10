@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     loadProduct(safeProductId).then(async (data) => {
       editingProductId = safeProductId;
-      await fillForm(data.product || {}, data.images || []);
+      await fillForm(data.product || {}, data.images || [], data.media_integrity || null);
       try { const suggestion = await fetchPriceSuggestion(safeProductId); latestPriceSuggestion = suggestion.item; } catch {}
       renderPricingInsight();
       setFormModeEdit();
@@ -516,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (value) image.src = value;
   });
 
-  async function fillForm(product, images) {
+  async function fillForm(product, images, mediaIntegrity = null) {
     const previousAutosavePause = form.dataset.autosavePaused;
     form.dataset.autosavePaused = "1";
     try {
@@ -536,6 +536,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const resolvedFeaturedImageUrl = product.featured_image_url || uniqueLoadedImages[0]?.image_url || "";
     setField("featured_image_url", resolvedFeaturedImageUrl);
     updateFeaturedImageResolution(product, resolvedFeaturedImageUrl);
+    const resolutionHint = document.getElementById('featuredImageResolutionHint');
+    if (resolutionHint && mediaIntegrity) {
+      const recovered = Math.max(0, Number(mediaIntegrity.recovered_editor_image_count || 0));
+      const linked = Math.max(0, Number(mediaIntegrity.recoverable_linked_image_count || uniqueLoadedImages.length));
+      const editorCount = Math.max(0, Number(mediaIntegrity.editor_unique_image_count || uniqueLoadedImages.length));
+      const base = resolutionHint.textContent ? `${resolutionHint.textContent} ` : '';
+      resolutionHint.textContent = `${base}${editorCount} unique image(s) loaded into the seven-slot editor; ${linked} linked image reference(s) remain recoverable${recovered ? `, including ${recovered} recovered from media/history outside the primary gallery` : ''}.`;
+    }
     setField("sort_order", product.sort_order == null ? "0" : product.sort_order);
     setField("meta_title", product.meta_title || "");
     setField("meta_description", product.meta_description || "");
@@ -792,7 +800,7 @@ document.addEventListener("DOMContentLoaded", () => {
       button.textContent = "Loading...";
       const data = await loadProduct(productId);
       editingProductId = productId;
-      await fillForm(data.product || {}, data.images || []);
+      await fillForm(data.product || {}, data.images || [], data.media_integrity || null);
       try { const suggestion = await fetchPriceSuggestion(productId); latestPriceSuggestion = suggestion.item; } catch {}
       renderPricingInsight();
       setFormModeEdit();
@@ -986,7 +994,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearMessage();
       const data = await loadProduct(productId);
       editingProductId = productId;
-      await fillForm(data.product || {}, data.images || []);
+      await fillForm(data.product || {}, data.images || [], data.media_integrity || null);
       const safeSuggestedPrice = Number(event?.detail?.suggested_price_cents || event?.detail?.recommended_price_cents || 0);
       const safeSuggestedCompare = Number(event?.detail?.suggested_compare_at_cents || event?.detail?.recommended_compare_at_cents || 0);
       latestPriceSuggestion = { ...(event?.detail || {}), suggested_price_cents: safeSuggestedPrice, suggested_compare_at_cents: safeSuggestedCompare };
@@ -1029,7 +1037,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!productId) return false;
     try {
       const data = await loadProduct(productId);
-      fillForm(data.product || data);
+      await fillForm(data.product || data, data.images || [], data.media_integrity || null);
       if (typeof fetchPriceSuggestion === 'function') fetchPriceSuggestion().catch(() => {});
       if (typeof setFormModeEdit === 'function') setFormModeEdit(productId);
       window.dispatchEvent(new CustomEvent('dd:product-editor-target', { detail: { product_id: productId, focus_field: focusField } }));
