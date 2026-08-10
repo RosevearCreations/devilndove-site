@@ -420,33 +420,55 @@ document.addEventListener("DOMContentLoaded", () => {
     row.field.select?.();
   }
 
+  function currentSeoImageUrl() {
+    return normalizeText(form?.elements?.namedItem("og_image_url")?.value || "");
+  }
+
+  function setSeoFromSlot(slotIndex) {
+    const rows = imageSlotRows();
+    const index = Number(slotIndex || 0);
+    if (!rows[index]) return;
+    const field = form?.elements?.namedItem("og_image_url");
+    if (!field) return;
+    field.value = rows[index].url;
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    renderDraftImageManager();
+    scheduleAutosave("image-seo-change");
+  }
+
   function renderDraftImageManager() {
     const grid = document.getElementById("productDraftExistingImages");
     const hint = document.getElementById("productDraftExistingImageStatus");
     if (!grid) return;
     const rows = imageSlotRows();
+    const seoImageUrl = currentSeoImageUrl();
+    const seoKey = normalizeImageKey(seoImageUrl);
     if (hint) hint.textContent = rows.length
-      ? `${rows.length}/${MAX_PRODUCT_IMAGES} saved image slot${rows.length === 1 ? "" : "s"}. Drag a card to change order. The first card becomes the featured image.`
+      ? `${rows.length}/${MAX_PRODUCT_IMAGES} saved image slot${rows.length === 1 ? "" : "s"}. Drag to reorder. The first card is featured; the purple SEO/social badge marks the saved Open Graph image.`
       : "No saved image URLs yet. Upload images or paste public URLs below.";
     if (!rows.length) {
       grid.innerHTML = '<div class="small dd-product-image-empty-card">No existing product pictures yet.</div>';
       return;
     }
-    grid.innerHTML = rows.map((row, index) => `
-      <article class="dd-product-image-manager-card ${index === 0 ? 'is-featured' : ''}" draggable="true" data-draft-image-card="${index}" data-slot-key="${escapeHtml(row.key)}">
+    grid.innerHTML = rows.map((row, index) => {
+      const isSeo = Boolean(seoKey && normalizeImageKey(row.url) === seoKey);
+      return `
+      <article class="dd-product-image-manager-card ${index === 0 ? 'is-featured' : ''} ${isSeo ? 'is-seo-image' : ''}" draggable="true" data-draft-image-card="${index}" data-slot-key="${escapeHtml(row.key)}">
         <button class="dd-product-image-manager-thumb" type="button" data-draft-image-edit="${index}" title="Click to edit this image URL">
           <img src="${escapeHtml(row.url)}" alt="${escapeHtml(index === 0 ? 'Featured product image' : `Product gallery image ${index}`)}" loading="lazy" />
         </button>
         <div class="dd-product-image-manager-meta">
-          <strong>${escapeHtml(index === 0 ? 'Featured / first' : `Gallery ${index}`)}</strong>
+          <strong>${escapeHtml(index === 0 ? 'Featured / first' : `Gallery ${index}`)} ${isSeo ? '<span class="dd-product-image-seo-badge">SEO / social</span>' : ''}</strong>
           <span class="small">${escapeHtml(row.url)}</span>
         </div>
         <div class="dd-product-image-manager-actions">
           <button class="btn" type="button" data-draft-image-edit="${index}">Edit URL</button>
           <button class="btn" type="button" data-draft-image-featured="${index}" ${index === 0 ? 'disabled' : ''}>Make first</button>
+          <button class="btn" type="button" data-draft-image-seo="${index}" ${isSeo ? 'disabled' : ''}>${isSeo ? 'SEO selected' : 'Use for SEO/social'}</button>
           <button class="btn" type="button" data-draft-image-remove="${index}">Remove</button>
         </div>
-      </article>`).join("");
+      </article>`;
+    }).join("");
   }
 
   function handleDraftImageManagerClick(event) {
@@ -458,6 +480,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const featuredButton = event.target.closest("[data-draft-image-featured]");
     if (featuredButton) {
       setFeaturedFromSlot(featuredButton.getAttribute("data-draft-image-featured"));
+      return;
+    }
+    const seoButton = event.target.closest("[data-draft-image-seo]");
+    if (seoButton) {
+      setSeoFromSlot(seoButton.getAttribute("data-draft-image-seo"));
       return;
     }
     const removeButton = event.target.closest("[data-draft-image-remove]");

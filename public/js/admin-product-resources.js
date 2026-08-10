@@ -13,7 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     links: [],
     selectedProductId: Number.isInteger(requestedProductId) && requestedProductId > 0 ? requestedProductId : 0,
     selectedLinkIndex: -1,
-    selectedAvailableKey: ''
+    selectedAvailableKey: '',
+    productionPreview: null,
+    productionHistory: [],
+    productionOutputQuantity: 1,
+    productionPosting: false
   };
   let initialLoadStarted = false;
   let rendered = false;
@@ -148,6 +152,24 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
         </div>
+
+        <section class="product-production-release" aria-labelledby="productProductionReleaseHeading">
+          <div class="product-production-release-head">
+            <div>
+              <h4 id="productProductionReleaseHeading">Finished Product Production Release</h4>
+              <p class="small">After the product's tools and supplies are saved, preview a production run. Exact/estimated consumables are deducted fractionally; reusable/log-only items remain as evidence. The run keeps an immutable ingredient/material snapshot for the finished product.</p>
+            </div>
+            <img src="/assets/visual-placeholders/product-process.svg" alt="Representative finished-product making process" loading="lazy"/>
+          </div>
+          <div class="product-production-release-controls">
+            <label class="small">Finished units made
+              <input class="input" id="productProductionOutputQuantity" type="number" min="1" step="1" value="1"/>
+            </label>
+            <button class="btn" type="button" id="productProductionPreviewButton">Preview material release</button>
+            <button class="btn primary" type="button" id="productProductionPostButton" disabled>Post finished production</button>
+          </div>
+          <div id="productProductionReleasePreview" class="product-production-release-preview small">Choose a product and preview the production release after saving its product links.</div>
+        </section>
       </div>
     `;
 
@@ -164,6 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('productResourcesAddSelectedButton')?.addEventListener('click', addSelectedAvailableItem);
     document.getElementById('productResourcesRemoveSelectedButton')?.addEventListener('click', removeSelectedLinkedItem);
+    document.getElementById('productProductionOutputQuantity')?.addEventListener('input', (event) => {
+      state.productionOutputQuantity = Math.max(1, Math.floor(Number(event.target.value || 1) || 1));
+      state.productionPreview = null;
+      renderProductionPreview();
+    });
+    document.getElementById('productProductionPreviewButton')?.addEventListener('click', previewProductionRelease);
+    document.getElementById('productProductionPostButton')?.addEventListener('click', postProductionRelease);
     mountEl.addEventListener('click', onClick);
     mountEl.addEventListener('change', onInputChange);
     mountEl.addEventListener('input', onInputChange);
@@ -290,11 +319,105 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="small" style="margin-top:4px">${mode === 'end_of_lot' ? `End-of-lot spreads ${escapeHtml(usageMeta.label)} usage across multiple finished products without per-item reservation.` : (mode === 'story_only' ? 'Story only keeps this item in the making record without touching cost or stock math.' : `Per product treats the quantity as ${escapeHtml(usageMeta.label)} used on every finished item.`)}</div>
           <div class="small">Estimated cost ${escapeHtml(formatMoney(usagePreview.costPerFinishedCents))} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • buildable now ≈ ${escapeHtml(String(Math.max(0, usagePreview.buildable)))}.</div>
           <textarea class="input" data-link-note="${state.selectedLinkIndex}" rows="2" placeholder="How was this item used for the story of this product?">${escapeHtml(link.usage_notes || '')}</textarea>
+          ${String(link.resource_kind || '').toLowerCase() === 'supply' ? `
+          <div class="resource-ingredient-profile">
+            <label class="small"><input type="checkbox" data-link-ingredient="${state.selectedLinkIndex}" ${Number(link.is_label_ingredient || 0) === 1 ? 'checked' : ''}/> Include this supply in the finished-product ingredient / label snapshot</label>
+            <div class="grid cols-3">
+              <label class="small">Ingredient name — English<input class="input" data-link-ingredient-en="${state.selectedLinkIndex}" value="${escapeHtml(link.ingredient_name_en || link.name || '')}"/></label>
+              <label class="small">Ingredient name — French<input class="input" data-link-ingredient-fr="${state.selectedLinkIndex}" value="${escapeHtml(link.ingredient_name_fr || '')}" placeholder="French draft/review"/></label>
+              <label class="small">INCI name<input class="input" data-link-inci="${state.selectedLinkIndex}" value="${escapeHtml(link.inci_name || '')}" placeholder="Required for cosmetic ingredient labels"/></label>
+            </div>
+            <div class="small">For cosmetics, INCI is the ingredient-list authority. English/French display wording is supporting product/label copy and remains reviewable.</div>
+          </div>` : ''}
         </div>
         <div class="resource-linked-actions">
           <button class="btn" type="button" data-remove-link="${state.selectedLinkIndex}">Remove</button>
         </div>
       </div>`;
+  }
+
+  function renderProductionPreview() {
+    const el = document.getElementById('productProductionReleasePreview');
+    const postButton = document.getElementById('productProductionPostButton');
+    const qtyInput = document.getElementById('productProductionOutputQuantity');
+    if (qtyInput) qtyInput.value = String(Math.max(1, Number(state.productionOutputQuantity || 1) || 1));
+    if (!el) return;
+    const preview = state.productionPreview;
+    if (!state.selectedProductId) {
+      el.innerHTML = 'Choose a product first.';
+      if (postButton) postButton.disabled = true;
+      return;
+    }
+    if (!preview) {
+      el.innerHTML = 'Save Product Links after any edits, then preview the production release. No inventory changes are made by Preview.';
+      if (postButton) postButton.disabled = true;
+      return;
+    }
+    const blockers = Array.isArray(preview.blockers) ? preview.blockers : [];
+    const materials = Array.isArray(preview.materials) ? preview.materials : [];
+    const ingredients = Array.isArray(preview.ingredients) ? preview.ingredients : [];
+    const consumables = materials.filter((row) => Number(row.stock_quantity_consumed || 0) > 0);
+    const evidenceOnly = materials.filter((row) => !(Number(row.stock_quantity_consumed || 0) > 0));
+    el.innerHTML = `
+      <div class="product-production-summary ${blockers.length ? 'is-blocked' : 'is-ready'}">
+        <strong>${blockers.length ? 'Production blocked — review the items below' : 'Ready to post finished production'}</strong>
+        <span>${escapeHtml(String(preview.output_quantity || state.productionOutputQuantity))} finished unit(s) • estimated raw-material cost ${escapeHtml(formatMoney(preview.estimated_material_cost_cents || 0))}</span>
+      </div>
+      ${blockers.length ? `<ul class="product-production-blockers">${blockers.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+      <div class="product-production-material-grid">
+        ${consumables.length ? consumables.map((row) => `<div><strong>${escapeHtml(row.item_name || row.source_key)}</strong><span>Deduct ${escapeHtml(String(row.stock_quantity_consumed))} ${escapeHtml(row.stock_unit_label || 'unit')} (${escapeHtml(String(row.usage_quantity))} ${escapeHtml(row.usage_unit_label || 'unit')})</span></div>`).join('') : '<div><strong>No measured consumables</strong><span>Only reusable/log-only evidence is linked.</span></div>'}
+        ${evidenceOnly.slice(0, 8).map((row) => `<div><strong>${escapeHtml(row.item_name || row.source_key)}</strong><span>${escapeHtml(row.resource_kind || 'resource')} • ${escapeHtml(row.tracking_mode || 'log_only')} • no stock deduction</span></div>`).join('')}
+      </div>
+      <div class="product-production-ingredients"><strong>Ingredient snapshot (${ingredients.length})</strong>${ingredients.length ? `<span>${ingredients.map((row) => escapeHtml(row.inci_name || row.ingredient_name_en || '')).filter(Boolean).join(' • ')}</span>` : '<span>No label ingredients are marked for this product yet.</span>'}</div>
+      ${state.productionHistory.length ? `<details><summary>Recent production releases (${state.productionHistory.length})</summary><div class="product-production-history">${state.productionHistory.slice(0, 10).map((row) => `<span>${escapeHtml(row.posted_at || '')} • ${escapeHtml(String(row.output_quantity || 0))} unit(s) • ${escapeHtml(row.run_status || '')}</span>`).join('')}</div></details>` : ''}
+    `;
+    if (postButton) postButton.disabled = Boolean(blockers.length || state.productionPosting || !Number(preview.ready));
+  }
+
+  async function previewProductionRelease() {
+    if (!state.selectedProductId) return setMessage('Choose a product first.', true);
+    try {
+      state.productionOutputQuantity = Math.max(1, Math.floor(Number(document.getElementById('productProductionOutputQuantity')?.value || 1) || 1));
+      setMessage('Previewing the finished-product material release…');
+      const data = await window.DDAuth.apiJson(
+        `/api/admin/product-production-release?product_id=${encodeURIComponent(state.selectedProductId)}&output_quantity=${encodeURIComponent(state.productionOutputQuantity)}`,
+        { method: 'GET' },
+        { fallbackMessage: 'Production release preview could not be loaded.', cacheKey: `product-production-preview:${state.selectedProductId}:${state.productionOutputQuantity}`, cacheTtlMs: 5000, retries: 1, staleOnError: false }
+      );
+      state.productionPreview = data.preview || null;
+      state.productionHistory = Array.isArray(data.history) ? data.history : [];
+      renderProductionPreview();
+      setMessage(state.productionPreview?.ready ? 'Production preview is ready. Review the deductions before posting.' : 'Production preview has blockers. No inventory was changed.', !state.productionPreview?.ready);
+    } catch (error) {
+      state.productionPreview = null;
+      renderProductionPreview();
+      setMessage(error.message || 'Production release preview failed.', true);
+    }
+  }
+
+  async function postProductionRelease() {
+    const preview = state.productionPreview;
+    if (!state.selectedProductId || !preview?.ready || state.productionPosting) return;
+    const outputQuantity = Math.max(1, Number(preview.output_quantity || state.productionOutputQuantity || 1));
+    if (!window.confirm(`Post ${outputQuantity} finished unit(s)? This will deduct only the reviewed exact/estimated raw materials and add the finished units to product inventory.`)) return;
+    state.productionPosting = true;
+    renderProductionPreview();
+    try {
+      const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const response = await window.DDAuth.apiFetch('/api/admin/product-production-release', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'post', product_id: state.selectedProductId, output_quantity: outputQuantity, idempotency_key: idempotencyKey })
+      });
+      const data = await readJsonResponse(response, 'Finished-product production could not be posted.');
+      setMessage(data.message || 'Finished production posted.');
+      state.productionPreview = data.preview || null;
+      await previewProductionRelease();
+    } catch (error) {
+      setMessage(error.message || 'Finished-product production failed safely. Reload the preview before trying again.', true);
+    } finally {
+      state.productionPosting = false;
+      renderProductionPreview();
+    }
   }
 
   function hydrateLinks() {
@@ -306,7 +429,11 @@ document.addEventListener('DOMContentLoaded', () => {
         name: resource.name || x.source_key,
         consumption_mode: x.consumption_mode || 'per_unit',
         lot_size_units: Math.max(1, Number(x.lot_size_units || 1) || 1),
-        quantity_used: Math.max(0.001, Number(x.quantity_used || 1) || 1)
+        quantity_used: Math.max(0.001, Number(x.quantity_used || 1) || 1),
+        is_label_ingredient: Number(x.is_label_ingredient || 0) === 1 ? 1 : 0,
+        ingredient_name_en: x.ingredient_name_en || resource.name || '',
+        ingredient_name_fr: x.ingredient_name_fr || '',
+        inci_name: x.inci_name || ''
       };
     });
     ensureValidSelections();
@@ -358,6 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hydrateLinks();
       renderResources();
       renderLinks();
+      renderProductionPreview();
       const stale = results.some((data) => data?._response_meta?.stale);
       setMessage(stale ? 'The server was temporarily busy. Showing the last saved resource list; retry when convenient.' : '', stale);
     } catch (err) {
@@ -372,6 +500,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function onProductChange(event) {
     state.selectedProductId = Number(event.target.value || 0);
+    state.productionPreview = null;
+    state.productionHistory = [];
     const url = new URL(window.location.href);
     if (state.selectedProductId > 0) url.searchParams.set('product_id', String(state.selectedProductId));
     else url.searchParams.delete('product_id');
@@ -391,6 +521,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noteIndex != null) {
       const row = state.links[Number(noteIndex)];
       if (row) row.usage_notes = String(event.target.value || '').trim();
+      return;
+    }
+    const ingredientIndex = event.target.getAttribute('data-link-ingredient');
+    if (ingredientIndex != null) {
+      const row = state.links[Number(ingredientIndex)];
+      if (row) row.is_label_ingredient = event.target.checked ? 1 : 0;
+      return;
+    }
+    const ingredientEnIndex = event.target.getAttribute('data-link-ingredient-en');
+    if (ingredientEnIndex != null) {
+      const row = state.links[Number(ingredientEnIndex)];
+      if (row) row.ingredient_name_en = String(event.target.value || '').trim();
+      return;
+    }
+    const ingredientFrIndex = event.target.getAttribute('data-link-ingredient-fr');
+    if (ingredientFrIndex != null) {
+      const row = state.links[Number(ingredientFrIndex)];
+      if (row) row.ingredient_name_fr = String(event.target.value || '').trim();
+      return;
+    }
+    const inciIndex = event.target.getAttribute('data-link-inci');
+    if (inciIndex != null) {
+      const row = state.links[Number(inciIndex)];
+      if (row) row.inci_name = String(event.target.value || '').trim();
       return;
     }
     const modeIndex = event.target.getAttribute('data-link-mode');
@@ -415,6 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const key = `${item.item_kind}::${item.source_key}`;
     const existingIndex = state.links.findIndex((x) => `${x.resource_kind}::${x.source_key}` === key);
     if (existingIndex === -1) {
+      state.productionPreview = null;
       state.links.push({
         resource_kind: item.item_kind,
         source_key: item.source_key,
@@ -424,7 +579,11 @@ document.addEventListener('DOMContentLoaded', () => {
         name: item.name,
         resource: item,
         consumption_mode: 'per_unit',
-        lot_size_units: 1
+        lot_size_units: 1,
+        is_label_ingredient: 0,
+        ingredient_name_en: item.name || '',
+        ingredient_name_fr: '',
+        inci_name: ''
       });
       state.selectedLinkIndex = state.links.length - 1;
     } else {
@@ -444,6 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function removeSelectedLinkedItem() {
     ensureValidSelections();
     if (state.selectedLinkIndex < 0) return;
+    state.productionPreview = null;
     state.links.splice(state.selectedLinkIndex, 1);
     if (state.selectedLinkIndex >= state.links.length) state.selectedLinkIndex = state.links.length - 1;
     renderResources();
@@ -489,12 +649,19 @@ document.addEventListener('DOMContentLoaded', () => {
             usage_notes: x.usage_notes || '',
             consumption_mode: x.consumption_mode || 'per_unit',
             lot_size_units: Math.max(1, Number(x.lot_size_units || 1) || 1),
+            is_label_ingredient: Number(x.is_label_ingredient || 0) === 1 ? 1 : 0,
+            ingredient_name_en: x.ingredient_name_en || '',
+            ingredient_name_fr: x.ingredient_name_fr || '',
+            inci_name: x.inci_name || '',
+            label_sort_order: i,
             sort_order: i
           }))
         })
       });
       const data = await readJsonResponse(response, 'Failed to save product links.');
-      setMessage(`Saved ${Number(data.saved_links || 0)} linked items.`);
+      state.productionPreview = null;
+      renderProductionPreview();
+      setMessage(`Saved ${Number(data.saved_links || 0)} linked items. Preview production again before posting finished inventory.`);
       await loadData({ bootstrap: true, resources: false });
     } catch (err) {
       setMessage(err.message || 'Failed to save product links.', true);

@@ -163,7 +163,7 @@
   }
 
   function deleteControl(project) {
-    return `<div class="creative-automation-delete-box"><div><strong>Accidental duplicate?</strong><small>Deletion is allowed only for an Idea/Planning project with untouched generated output rows and no timeline, product, inventory, CAIP, content, cost or review history.</small></div><button class="btn danger" id="creativeAutomationDelete" type="button" data-project-key="${esc(project.project_key || '')}">Check and delete unused duplicate</button></div>`;
+    return `<div class="creative-automation-delete-box"><div><strong>Delete this Creative Project?</strong><small>Build 246 can permanently remove project-owned timeline, material, cost and review rows. Any unreversed raw-inventory consumption is returned first. Downstream Content Studio, CAIP or external/public output references still block deletion until they are removed or preserved.</small></div><button class="btn danger" id="creativeAutomationDelete" type="button" data-project-key="${esc(project.project_key || '')}">Check delete + inventory return</button></div>`;
   }
 
   function exportControls() {
@@ -296,7 +296,7 @@
         return;
       }
       const cleanup = (preview.deletion.cleanup || []).map((item) => `• ${item}`).join('\n');
-      const typed = prompt(`This will permanently remove only the unused duplicate and its untouched generated plan.\n\n${cleanup}\n\nType exactly:\n${preview.deletion.confirmation}`, '');
+      const typed = prompt(`This will permanently remove this Creative Project and its project-owned records. Any unreversed raw-material consumption listed by the server will be returned to inventory first.\n\n${cleanup}\n\nType exactly:\n${preview.deletion.confirmation}`, '');
       if (typed !== preview.deletion.confirmation) {
         message('Deletion cancelled. The confirmation text did not match.', 'warning');
         return;
@@ -307,7 +307,7 @@
       render();
       message(data.message, 'success');
     } catch (error) {
-      message(error.message || 'The duplicate project could not be deleted.', 'error');
+      message(error.message || 'The Creative Project could not be deleted safely.', 'error');
     }
   }
 

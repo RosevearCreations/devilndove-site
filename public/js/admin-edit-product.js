@@ -819,7 +819,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (form.dataset.mode !== "edit") return;
     event.preventDefault();
     clearMessage();
-    if (!editingProductId) return setMessage("No product selected for editing.", true);
+    const submittedProductId = Number(editingProductId || form.dataset.productId || window.DDCurrentProductEditorId || 0);
+    if (!submittedProductId) return setMessage("No product selected for editing. Reload the product and try again.", true);
+    editingProductId = submittedProductId;
 
     const formData = new FormData(form);
     const parseMoney = (value) => {
@@ -1037,9 +1039,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!productId) return false;
     try {
       const data = await loadProduct(productId);
+      editingProductId = productId;
       await fillForm(data.product || data, data.images || [], data.media_integrity || null);
-      if (typeof fetchPriceSuggestion === 'function') fetchPriceSuggestion().catch(() => {});
-      if (typeof setFormModeEdit === 'function') setFormModeEdit(productId);
+      if (typeof fetchPriceSuggestion === 'function') fetchPriceSuggestion(productId).catch(() => {});
+      if (typeof setFormModeEdit === 'function') setFormModeEdit();
       window.dispatchEvent(new CustomEvent('dd:product-editor-target', { detail: { product_id: productId, focus_field: focusField } }));
       setTimeout(() => focusExactProductEditorField(focusField, focusField ? `Focused editor field: ${focusField}` : ''), 250);
       return true;

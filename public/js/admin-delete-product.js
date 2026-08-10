@@ -81,7 +81,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const recipeNote = linkedMaterials.length
         ? `\n\n${linkedMaterials.length} linked recipe/material row(s) will be removed with the duplicate. Main inventory quantities will not be changed.`
         : '';
-      if (!window.confirm(`${draftCleanup ? 'Remove duplicate draft' : 'Delete unused product'}: ${label}?\n\nThis permanently removes only this unused record. Product numbers are not reused.${recipeNote}`)) return;
+      const safeAutomation = Array.isArray(preview.automatically_safe_references) ? preview.automatically_safe_references : [];
+      const automationNote = safeAutomation.length
+        ? `\n\n${safeAutomation.length} unreviewed auto-generated Content Studio/CAIP shell row(s) are tied only to this product and will be removed with it. Reviewed or published project work would still block deletion.`
+        : '';
+      if (!window.confirm(`${draftCleanup ? 'Remove duplicate draft' : 'Delete unused product'}: ${label}?\n\nThis permanently removes only this unused record. Product numbers are not reused.${recipeNote}${automationNote}`)) return;
       const confirmationPhrase = window.prompt(`Type DELETE PRODUCT exactly to remove ${label}.`);
       if (confirmationPhrase === null) return;
       const confirmPassword = window.prompt('Enter your current admin password to authorize this permanent cleanup.');
