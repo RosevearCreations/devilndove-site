@@ -1,7 +1,7 @@
-// Build 234 - faithful soap/candle-top template engine with reusable custom sizes.
+// Build 247 - Truth-reference soap layout, full rose palette, persistent packaging libraries, and explicit label deletion.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '234';
+const BUILD = '247';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -20,6 +20,17 @@ function jsonText(value,fallback){return JSON.stringify(value&&typeof value==='o
 function bool(value){return Number(value)===1||value===true||value==='true';}
 function boundedDimension(value,fallback=50.8){return Math.min(1200,Math.max(20,number(value,fallback)));}
 function keyPart(value){return text(value,80).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'custom-template';}
+function productRosePreset(value){
+  const source=text(value,240).toLowerCase();
+  if(source.includes('glacial'))return{asset:'rose-lavender-v1',colour:'#A57BCB'};
+  if(source.includes('shea')||source.includes('pumice'))return{asset:'rose-green-v1',colour:'#6D8757'};
+  if(source.includes('oatmeal')||source.includes('goat'))return{asset:'rose-oatmeal-v1',colour:'#C9B18A'};
+  if(source.includes('sea breeze'))return{asset:'rose-blue-green-v1',colour:'#4F9599'};
+  if(source.includes('charcoal'))return{asset:'rose-charcoal-v1',colour:'#4A4A4A'};
+  if(source.includes('honey'))return{asset:'rose-honey-v1',colour:'#C28A2E'};
+  if(source.includes('rose'))return{asset:'rose-red-v1',colour:'#B23A48'};
+  return{asset:'rose-purple-v1',colour:'#8E61AA'};
+}
 
 async function access(context){
   const adminUser=await getAdminUserFromRequest(context.request,context.env);
@@ -33,6 +44,8 @@ function mapTemplate(row){return{...row,packaging_template_id:id(row.packaging_t
 function mapProject(row){return{...row,packaging_project_id:id(row.packaging_project_id),product_id:id(row.product_id)||null,packaging_template_id:id(row.packaging_template_id),claims:safeJson(row.claims_json,[]),icons:safeJson(row.icons_json,[]),theme:safeJson(row.theme_json,{}),artwork:safeJson(row.artwork_json,{})};}
 function mapVersion(row){return{...row,packaging_project_version_id:id(row.packaging_project_version_id),packaging_project_id:id(row.packaging_project_id),version_number:number(row.version_number),snapshot:safeJson(row.snapshot_json,{})};}
 function mapReference(row){return{...row,packaging_reference_source_id:id(row.packaging_reference_source_id),dimensional_summary:safeJson(row.dimensional_summary_json,{})};}
+function mapFormula(row){return{...row,packaging_formula_library_id:id(row.packaging_formula_library_id),ingredients:safeJson(row.ingredients_json,[])};}
+function mapLibraryContent(row){return{...row,packaging_content_library_id:id(row.packaging_content_library_id),metadata:safeJson(row.metadata_json,{})};}
 
 function normalizeIngredients(value=[]){
   if(!Array.isArray(value))return[];
@@ -68,7 +81,7 @@ function dimensionReview(template={}){
   if(!near(template.rear_width_mm,50,.1))warnings.push('The photo-fit profile uses a 38.1 mm rear seal because a 50 mm circle cannot physically fit inside a 38.1 mm-high artboard.');
   return{blockers,warnings,profile:layout.dimension_profile||'unspecified'};
 }
-function estimatedIngredientLines(values=[],maxChars=55){
+function estimatedIngredientLines(values=[],maxChars=27){
   let lines=0;
   for(const raw of values){
     const words=String(raw||'').trim().split(/\s+/).filter(Boolean);
@@ -104,8 +117,8 @@ function packagingRequiredFields(project={},ingredients=[],claims=[],template={}
   if(ingredients.some((row)=>Number(row.required_on_label)!==0&&!String(row.inci_name||'').trim()))missing.push('INCI name for each required ingredient row');
   if(claims.some((row)=>!String(row.claim_en||'').trim()||!String(row.claim_fr||'').trim()))missing.push('English and French text for each claim');
   const requiredIngredients=ingredients.filter((row)=>Number(row.required_on_label)!==0);
-  const enLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_en||row.inci_name),55);
-  const frLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_fr||row.inci_name),55);
+  const enLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_en||row.inci_name),27);
+  const frLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_fr||row.inci_name),26);
   if(isSoap&&enLines>8)missing.push(`English ingredient panel exceeds the tested eight-line narrow-band capacity (${enLines} estimated lines)`);
   if(isSoap&&frLines>8)missing.push(`French ingredient panel exceeds the tested eight-line narrow-band capacity (${frLines} estimated lines)`);
   const dimensions=isSoap?dimensionReview(template):{blockers:[],warnings:[isRound?'Confirm the measured lid/blank diameter, safe margin, material settings and a physical proof before approval.':'Confirm the selected template against the physical container/card dieline before approval.'],profile:template.layout?.design_profile||template.layout?.dimension_profile||'general'};
@@ -120,7 +133,12 @@ async function listData(db){
   const products=rows(await db.prepare(`SELECT product_id,product_number,sku,name,slug,status,product_category,short_description,description,weight_grams,featured_image_url FROM products WHERE COALESCE(status,'draft')<>'archived' ORDER BY LOWER(name),product_id DESC LIMIT 500`).all().catch(()=>({results:[]})));
   const inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]})));
   const reference_sources=rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key`).all()).map(mapReference);
-  return{templates,projects,products,inventory,reference_sources};
+  let formula_library=[];let content_library=[];let library_schema_ready=true;
+  try{
+    formula_library=rows(await db.prepare(`SELECT * FROM packaging_formula_library WHERE is_active=1 ORDER BY is_system DESC,LOWER(formula_name),packaging_formula_library_id`).all()).map(mapFormula);
+    content_library=rows(await db.prepare(`SELECT * FROM packaging_content_library WHERE is_active=1 ORDER BY CASE content_type WHEN 'claim' THEN 1 WHEN 'ingredient' THEN 2 WHEN 'fragrance_oil' THEN 3 WHEN 'colourant' THEN 4 ELSE 5 END,is_system DESC,LOWER(item_name),packaging_content_library_id`).all()).map(mapLibraryContent);
+  }catch{library_schema_ready=false;}
+  return{templates,projects,products,inventory,reference_sources,formula_library,content_library,library_schema_ready};
 }
 
 async function loadDetail(db,projectId){
@@ -147,9 +165,11 @@ function snapshotFromBody(body,existing={}){
   const theme=body.theme&&typeof body.theme==='object'?body.theme:safeJson(body.theme_json,existing.theme||{});
   const artwork=body.artwork&&typeof body.artwork==='object'?body.artwork:safeJson(body.artwork_json,existing.artwork||{});
   artwork.rose_asset_id=text(body.rose_asset_id||artwork.rose_asset_id||existing.rose_asset_id||'rose-purple-v1',120);
+  const requestedPackageType=text(body.package_type||existing.package_type,80)||'soap_ribbon';
+  if(requestedPackageType==='soap_ribbon'&&String(artwork.artwork_asset||'')==='/assets/packaging/artwork/soap-botanical-purple-rose-v1.png')artwork.artwork_asset='';
   return{
     packaging_template_id:id(body.packaging_template_id||existing.packaging_template_id),product_id:id(body.product_id)||null,
-    project_name:text(body.project_name||existing.project_name,180),package_type:text(body.package_type||existing.package_type,80)||'soap_ribbon',
+    project_name:text(body.project_name||existing.project_name,180),package_type:requestedPackageType,
     project_status:VALID_PROJECT_STATUSES.has(text(body.project_status,30))?text(body.project_status,30):'draft',
     collection_name:text(body.collection_name,160)||null,product_name:text(body.product_name,180),product_subtitle:text(body.product_subtitle,220)||null,
     product_identity_en:text(body.product_identity_en,180)||null,product_identity_fr:text(body.product_identity_fr,180)||null,
@@ -183,7 +203,7 @@ export async function onRequestGet(context){
   const a=await access(context);if(a.error)return a.error;
   try{
     const projectId=id(new URL(context.request.url).searchParams.get('packaging_project_id'));
-    return json({ok:true,build:BUILD,...await listData(a.db),detail:projectId?await loadDetail(a.db,projectId):null,mode:'five_adopted_sources_reference_faithful_soap_round_candle_templates_review_first'});
+    return json({ok:true,build:BUILD,...await listData(a.db),detail:projectId?await loadDetail(a.db,projectId):null,mode:'truth_reference_soap_palette_persistent_packaging_libraries_typed_delete_review_first'});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'packaging_studio',incident_code:'packaging_studio_get_failed',severity:'error',message:error?.message||'Packaging Studio failed to load.',related_user_id:a.adminUser.user_id,details:{error:String(error?.stack||error)}}).catch(()=>null);
     return json({ok:false,error:'Packaging Studio could not load. Your browser draft remains available.'},500);
@@ -195,7 +215,7 @@ export async function onRequestPost(context){
   let body={};try{body=await context.request.json()}catch{return json({ok:false,error:'Invalid JSON body.'},400)}
   const action=text(body.action,60).toLowerCase();
   try{
-    let projectId=id(body.packaging_project_id);let message='Saved.';
+    let projectId=id(body.packaging_project_id);let message='Saved.';let deletedProjectKey='';let deletedProjectName='';let deletedProjectId=0;
     if(action==='record_translation_draft'){
       if(!projectId)throw new Error('Save the packaging project before recording a French draft review.');
       const project=await a.db.prepare(`SELECT packaging_project_id FROM packaging_projects WHERE packaging_project_id=? LIMIT 1`).bind(projectId).first();
@@ -209,6 +229,45 @@ export async function onRequestPost(context){
         ) VALUES(?,?,?,?, 'curated_bilingual_v246','needs_review',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,fieldKey,sourceText,generatedText,a.adminUser.user_id).run();
       }
       message='French draft provenance recorded. Human review is still required before packaging approval.';
+    }else if(action==='save_formula_library'){
+      const formulaId=id(body.packaging_formula_library_id);
+      const formulaName=text(body.formula_name,180);if(!formulaName)throw new Error('A formula-library name is required.');
+      const ingredients=normalizeIngredients(body.structured_ingredients);if(!ingredients.length)throw new Error('Add at least one ingredient before saving a formula-library entry.');
+      const formulaKey=formulaId?'':`custom-formula-${keyPart(formulaName)}-${Date.now().toString(36)}-${crypto.randomUUID().slice(0,4)}`;
+      if(formulaId){
+        const existingFormula=await a.db.prepare(`SELECT is_system FROM packaging_formula_library WHERE packaging_formula_library_id=?`).bind(formulaId).first();
+        if(!existingFormula)throw new Error('Formula-library entry was not found.');
+        if(Number(existingFormula.is_system)===1)throw new Error('System formula presets cannot be overwritten. Save a new custom formula instead.');
+        await a.db.prepare(`UPDATE packaging_formula_library SET formula_name=?,product_family=?,product_identity_en=?,product_identity_fr=?,default_rose_asset_id=?,default_rose_colour=?,ingredients_json=?,notes=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_formula_library_id=?`).bind(formulaName,text(body.product_family,180)||null,text(body.product_identity_en,180)||null,text(body.product_identity_fr,180)||null,text(body.default_rose_asset_id,120)||null,text(body.default_rose_colour,30)||null,JSON.stringify(ingredients),text(body.notes,2000)||null,a.adminUser.user_id,formulaId).run();
+        message=`Formula library “${formulaName}” updated.`;
+      }else{
+        await a.db.prepare(`INSERT INTO packaging_formula_library (formula_key,formula_name,product_family,product_identity_en,product_identity_fr,default_rose_asset_id,default_rose_colour,ingredients_json,notes,is_system,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,0,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(formulaKey,formulaName,text(body.product_family,180)||null,text(body.product_identity_en,180)||null,text(body.product_identity_fr,180)||null,text(body.default_rose_asset_id,120)||null,text(body.default_rose_colour,30)||null,JSON.stringify(ingredients),text(body.notes,2000)||null,a.adminUser.user_id,a.adminUser.user_id).run();
+        message=`Formula library “${formulaName}” saved for reuse.`;
+      }
+    }else if(action==='delete_formula_library'){
+      const formulaId=id(body.packaging_formula_library_id);if(!formulaId)throw new Error('Formula-library entry is required.');
+      const formula=await a.db.prepare(`SELECT formula_name,is_system FROM packaging_formula_library WHERE packaging_formula_library_id=?`).bind(formulaId).first();if(!formula)throw new Error('Formula-library entry was not found.');if(Number(formula.is_system)===1)throw new Error('System formula presets cannot be deleted.');
+      await a.db.prepare(`UPDATE packaging_formula_library SET is_active=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_formula_library_id=?`).bind(a.adminUser.user_id,formulaId).run();
+      message=`Formula library “${formula.formula_name}” removed from the active library.`;
+    }else if(action==='save_content_library'){
+      const contentId=id(body.packaging_content_library_id);const contentType=text(body.content_type,40);
+      if(!new Set(['ingredient','fragrance_oil','colourant','claim']).has(contentType))throw new Error('Choose ingredient, fragrance oil, colourant, or claim.');
+      const itemName=text(body.item_name,180);if(!itemName)throw new Error('A library item name is required.');
+      const metadata=body.metadata&&typeof body.metadata==='object'?body.metadata:{};
+      if(contentId){
+        const existingContent=await a.db.prepare(`SELECT is_system FROM packaging_content_library WHERE packaging_content_library_id=?`).bind(contentId).first();if(!existingContent)throw new Error('Library item was not found.');if(Number(existingContent.is_system)===1)throw new Error('System library presets cannot be overwritten. Save a new custom item instead.');
+        await a.db.prepare(`UPDATE packaging_content_library SET content_type=?,item_name=?,text_en=?,text_fr=?,inci_name=?,icon_name=?,metadata_json=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_content_library_id=?`).bind(contentType,itemName,text(body.text_en,500)||null,text(body.text_fr,500)||null,text(body.inci_name,300)||null,text(body.icon_name,80)||null,JSON.stringify(metadata),a.adminUser.user_id,contentId).run();
+        message=`Library item “${itemName}” updated.`;
+      }else{
+        const contentKey=`custom-${contentType}-${keyPart(itemName)}-${Date.now().toString(36)}-${crypto.randomUUID().slice(0,4)}`;
+        await a.db.prepare(`INSERT INTO packaging_content_library (content_key,content_type,item_name,text_en,text_fr,inci_name,icon_name,metadata_json,is_system,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,0,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(contentKey,contentType,itemName,text(body.text_en,500)||null,text(body.text_fr,500)||null,text(body.inci_name,300)||null,text(body.icon_name,80)||null,JSON.stringify(metadata),a.adminUser.user_id,a.adminUser.user_id).run();
+        message=`Library item “${itemName}” saved for reuse.`;
+      }
+    }else if(action==='delete_content_library'){
+      const contentId=id(body.packaging_content_library_id);if(!contentId)throw new Error('Library item is required.');
+      const item=await a.db.prepare(`SELECT item_name,is_system FROM packaging_content_library WHERE packaging_content_library_id=?`).bind(contentId).first();if(!item)throw new Error('Library item was not found.');if(Number(item.is_system)===1)throw new Error('System library presets cannot be deleted.');
+      await a.db.prepare(`UPDATE packaging_content_library SET is_active=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_content_library_id=?`).bind(a.adminUser.user_id,contentId).run();
+      message=`Library item “${item.item_name}” removed from the active library.`;
     }else if(action==='save_as_template'){
       if(!projectId)throw new Error('Open a packaging project before saving a reusable template.');
       const current=await a.db.prepare('SELECT packaging_project_id FROM packaging_projects WHERE packaging_project_id=?1').bind(projectId).first();if(!current)throw new Error('Packaging project was not found.');
@@ -236,7 +295,7 @@ export async function onRequestPost(context){
       const productName=text(body.product_name||product?.name,180);if(!productName)throw new Error('A product or packaging project name is required.');
       const key=`PKG-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0,4).toUpperCase()}`;
       const template=await a.db.prepare(`SELECT * FROM packaging_templates WHERE packaging_template_id=? AND is_active=1`).bind(templateId).first();if(!template)throw new Error('Packaging template was not found.');
-      const theme=safeJson(template.theme_json,{});const layout=safeJson(template.layout_json,{});const artwork={rose_asset_id:'rose-purple-v1',badge_shape:layout.shape==='oval'?'oval':'oval',rose_style:'full_rose',top_arc_text:layout.default_top_arc_text||'',bottom_arc_text:layout.default_bottom_arc_text||'',candle_primary_text:layout.default_primary_text||'',candle_date_line_1:layout.default_date_line_1||'',candle_event_line:layout.default_event_line||'',candle_date_line_2:layout.default_date_line_2||'',artwork_asset:layout.artwork_asset||''};
+      const theme=safeJson(template.theme_json,{});const layout=safeJson(template.layout_json,{});const rosePreset=productRosePreset(body.collection_name||productName);if(template.package_type==='soap_ribbon'){theme.rose_colour=rosePreset.colour;theme.secondary_colour=rosePreset.colour;}const artwork={rose_asset_id:template.package_type==='soap_ribbon'?rosePreset.asset:'rose-purple-v1',badge_shape:layout.shape==='oval'?'oval':'oval',rose_style:'full_rose',top_arc_text:layout.default_top_arc_text||'',bottom_arc_text:layout.default_bottom_arc_text||'',candle_primary_text:layout.default_primary_text||'',candle_date_line_1:layout.default_date_line_1||'',candle_event_line:layout.default_event_line||'',candle_date_line_2:layout.default_date_line_2||'',artwork_asset:template.package_type==='soap_ribbon'?'':(layout.artwork_asset||'')};
       const result=await a.db.prepare(`INSERT INTO packaging_projects (project_key,product_id,packaging_template_id,project_name,package_type,project_status,collection_name,product_name,product_subtitle,product_identity_en,product_identity_fr,net_quantity_text,website_text,dealer_name,contact_text,made_in_canada_text,theme_json,artwork_json,compliance_status,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,'draft',?,?,?,?,?,?,?,?,?,?,?,?, 'needs_review',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(key,productId,templateId,text(body.project_name||`${productName} packaging`,180),template.package_type||'soap_ribbon',text(body.collection_name||productName,160),productName,text(body.product_subtitle||product?.short_description,220)||null,text(body.product_identity_en||productName,180),text(body.product_identity_fr,180)||null,text(body.net_quantity_text||(product?.weight_grams?`${product.weight_grams} g`:''),80)||null,text(body.website_text||'devilndove.com',220),text(body.dealer_name||'Rosevear Creations - Devil n Dove',220),text(body.contact_text||'devilndove.com/contact',300),text(body.made_in_canada_text||'Made in Canada / Fabriqué au Canada',180),JSON.stringify(theme),JSON.stringify(artwork),a.adminUser.user_id,a.adminUser.user_id).run();
       projectId=id(result.meta?.last_row_id);
       let seededIngredients=[];
@@ -351,6 +410,23 @@ export async function onRequestPost(context){
       const template=await a.db.prepare(`SELECT slt.template_id FROM packaging_projects pp JOIN soap_label_templates slt ON slt.packaging_template_id=pp.packaging_template_id WHERE pp.packaging_project_id=?`).bind(projectId).first();
       if(soap&&template)await a.db.prepare(`INSERT INTO soap_label_exports (soap_product_id,template_id,packaging_project_version_id,version,export_format,file_name,checksum,generated_by,approval_status,print_test_status,notes,generated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(soap.soap_product_id,template.template_id,versionId,text(body.version,40)||null,format,fileName,text(body.checksum,128)||null,a.adminUser.user_id,'prepared','not_tested',text(body.notes,500)||null).run();
       message='Packaging export and checksum evidence recorded.';
+    }else if(action==='delete_project'){
+      if(!projectId)throw new Error('Packaging project is required.');
+      const source=await a.db.prepare(`SELECT packaging_project_id,project_key,project_name,project_status FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first();if(!source)throw new Error('Packaging project was not found.');
+      if(text(body.confirm_project_key,180)!==String(source.project_key||''))throw new Error('Permanent deletion requires the exact packaging project key.');
+      const soap=await a.db.prepare(`SELECT soap_product_id FROM soap_products WHERE packaging_project_id=?`).bind(projectId).first();
+      const statements=[];
+      if(soap?.soap_product_id){
+        statements.push(a.db.prepare(`DELETE FROM soap_label_exports WHERE soap_product_id=?`).bind(soap.soap_product_id));
+        statements.push(a.db.prepare(`DELETE FROM soap_label_claims WHERE soap_product_id=?`).bind(soap.soap_product_id));
+        statements.push(a.db.prepare(`DELETE FROM soap_ingredients WHERE soap_product_id=?`).bind(soap.soap_product_id));
+        statements.push(a.db.prepare(`DELETE FROM soap_products WHERE soap_product_id=?`).bind(soap.soap_product_id));
+      }
+      for(const table of ['packaging_export_history','soap_label_print_tests','packaging_components','packaging_inventory_reservations','packaging_formula_source_links','packaging_release_locks','packaging_prepress_checks','packaging_translation_reviews','packaging_project_versions'])statements.push(a.db.prepare(`DELETE FROM ${table} WHERE packaging_project_id=?`).bind(projectId));
+      statements.push(a.db.prepare(`DELETE FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId));
+      await a.db.batch(statements);
+      deletedProjectKey=String(source.project_key||'');deletedProjectName=String(source.project_name||'');deletedProjectId=projectId;projectId=0;
+      message=`Packaging label/project “${deletedProjectName||deletedProjectKey}” permanently deleted.`;
     }else if(action==='archive_project'){
       if(!projectId)throw new Error('Packaging project is required.');
       await a.db.batch([
@@ -359,7 +435,8 @@ export async function onRequestPost(context){
       ]);message='Packaging project archived; versions, exports and print evidence remain.';
     }else throw new Error('Unsupported Packaging Studio action.');
     const detail=projectId?await loadDetail(a.db,projectId):null;
-    await auditAdminAction(context.env,context.request,a.adminUser,{action_type:`packaging_studio_${action}`,target_type:'packaging_project',target_id:projectId,target_key:detail?.project?.project_key||String(projectId||''),details:{review_first:true,automatic_publish:false,unified_labeling_packaging:true,component_count:detail?.component_summary?.active_count||0}});
+    const auditTargetId=projectId||deletedProjectId;const auditTargetKey=detail?.project?.project_key||deletedProjectKey||String(auditTargetId||'');
+    await auditAdminAction(context.env,context.request,a.adminUser,{action_type:`packaging_studio_${action}`,target_type:'packaging_project',target_id:auditTargetId,target_key:auditTargetKey,details:{review_first:true,automatic_publish:false,unified_labeling_packaging:true,component_count:detail?.component_summary?.active_count||0,permanent_delete:action==='delete_project',deleted_project_name:deletedProjectName||null}});
     return json({ok:true,message,build:BUILD,...await listData(a.db),detail});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'packaging_studio',incident_code:'packaging_studio_post_failed',severity:'warning',message:error?.message||'Packaging Studio save failed.',related_user_id:a.adminUser.user_id,details:{action,error:String(error?.stack||error)}}).catch(()=>null);
