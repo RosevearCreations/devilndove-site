@@ -10262,3 +10262,35 @@ ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,notes=excl
 -- Build 243 scope note: `database_store_schema.sql` does not define the complete site_item_inventory operational authority.
 -- Apply database_build243_inventory_resilience_case_normalization.sql to an existing production D1 after Build 241;
 -- the complete Build 243 normalization/index block is folded into database_full_schema.sql.
+
+-- Build 245 current-scope additions. Full product-media recovery runs in database_build245_admin_media_resilience.sql/database_full_schema.sql.
+CREATE TABLE IF NOT EXISTS product_media_integrity_snapshots (
+  product_media_integrity_snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  product_image_count INTEGER NOT NULL DEFAULT 0,
+  media_asset_count INTEGER NOT NULL DEFAULT 0,
+  role_assignment_image_count INTEGER NOT NULL DEFAULT 0,
+  annotation_image_count INTEGER NOT NULL DEFAULT 0,
+  recoverable_unique_image_count INTEGER NOT NULL DEFAULT 0,
+  featured_image_url TEXT,
+  featured_image_recoverable INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_product_media_integrity_snapshots_product_created ON product_media_integrity_snapshots(product_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS admin_api_health_observations (
+  admin_api_health_observation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  endpoint_path TEXT NOT NULL,
+  http_status INTEGER,
+  error_code TEXT,
+  cloudflare_ray TEXT,
+  duration_ms INTEGER,
+  observation_source TEXT NOT NULL DEFAULT 'server',
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_admin_api_health_observations_path_created ON admin_api_health_observations(endpoint_path,created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_api_health_observations_status_created ON admin_api_health_observations(http_status,created_at DESC);
+INSERT INTO app_settings(setting_key,setting_value,is_public) VALUES ('site.admin.auth_degraded_policy','retain_cached_admin_on_5xx_v245',0) ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
+INSERT INTO app_settings(setting_key,setting_value,is_public) VALUES ('site.product.media_integrity_policy','linked_media_recovery_v245',0) ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
+INSERT INTO app_settings(setting_key,setting_value,is_public) VALUES ('site.inventory.bootstrap_policy','lightweight_reference_bootstrap_v245',0) ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;

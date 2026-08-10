@@ -1,8 +1,12 @@
+# Build 245 current release-sequence note
+
+Current sequence: back up D1 → apply `database_build245_admin_media_resilience.sql` or byte-identical current-pass once → run `BUILD245_D1_VERIFICATION.sql` → deploy the complete Build 245 package → hard-refresh shell v22 → run admin auth/media/inventory smoke checks and the retained 46-gate Startup process. Build 245 contains the Build 244 inventory/fractional transition, so do not run both Build 244 and Build 245 as separate current migrations in the same deployment pass.
+
 # Devil n Dove Prelaunch Process Playbooks — Build 240
 
-`/admin/startup-readiness/` is the 45-gate status authority. `/admin/operational-continuity/` is the execution/evidence centre for the twenty cross-workflow foundations. A pass in one process never erases a blocker elsewhere.
+`/admin/startup-readiness/` is the 46-gate status authority. `/admin/operational-continuity/` is the execution/evidence centre for the twenty cross-workflow foundations. A pass in one process never erases a blocker elsewhere.
 
-## Build 240 release sequence
+## Retained Build 240/241 foundation sequence
 
 1. Back up D1 and retain the backup reference.
 2. Confirm prior ledger key `build240_operational_evidence_continuity`, then apply `database_build241_caip_large_media_intake.sql` or identical `database_upgrade_current_pass.sql` once.

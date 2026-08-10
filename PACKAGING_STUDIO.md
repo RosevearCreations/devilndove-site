@@ -1,3 +1,7 @@
+# Build 245 cross-project note
+
+Build 245 does not change approved labeling/packaging design authority. Build 244/245 fractional inventory units can now represent small consumable amounts used by packaging/project workflows without forcing whole-container depletion; physical print/laser proof and reviewed packaging evidence remain required.
+
 # Devil n Dove Labeling & Packaging System — Single Source of Truth (Build 240)
 
 ## Build 240 continuity additions

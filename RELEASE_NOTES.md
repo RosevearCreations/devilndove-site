@@ -1,3 +1,15 @@
+# Build 245 Release Notes
+
+- Fixed the admin-refresh false-login state: cached admin identity is provisional UI continuity, explicit 401/403 is the only automatic rejection path, and temporary 5xx/timeouts retain the admin shell with a degraded-session message while all APIs remain server-authenticated.
+- Staggered dashboard summary/Today/smoke/preflight/release reads and moved them to shared deduplicated safe-GET handling to reduce refresh-time Worker/D1 fan-out.
+- Added a lightweight Inventory Operations bootstrap and server-side pagination; inline table editing now includes classification, category, supplier, stock/usage units, conversion, tracking mode, quantity, reorder level, cost and active status.
+- Rebuilt Product Detail/Product Editor media loading around four D1 sources (`product_images`, `media_assets`, media-role assignments and annotations), deduped to seven editor slots while preserving the chosen featured image.
+- Added non-destructive migration-time gallery recovery and `product_media_integrity_snapshots`; missing linked/history image URLs can be restored without deleting current gallery rows.
+- Fixed Product Readiness blocker navigation and added a visible retry/catalog fallback instead of a blank page during temporary API failure.
+- Removed request-time schema repair from the changed hot paths and advanced service-worker shell to v22 with high-contrast responsive admin CSS.
+- Build 245 includes the complete Build 244 D1 inventory/fractional transition, uses no TEMP/DROP helper and is byte-identical to `database_upgrade_current_pass.sql`.
+- Local validation: 36/36 public SEO pages passed, 120/120 local asset references resolved, 2,509 database identifiers had zero mixed-case object identifiers, and the 109-page predeploy sanity check passed.
+
 # Build 244 Release Notes
 
 - Moved normal tool/supply runtime authority fully to D1: the migration carries 897 legacy master rows (399 tools + 498 supplies), preserves reviewed D1 state, and database-side populates missing operational inventory.

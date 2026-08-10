@@ -1,88 +1,79 @@
-# Devil n Dove Project Status and Roadmap — Build 244
+# Devil n Dove Project Status and Roadmap — Build 245
 
-This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, schema, data authority and deployment rules. This file owns current progress, risks and ordered next work.
+This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, risks and ordered next work.
 
-## Build 244 completed work — D1 inventory authority and realistic fractional consumption
+## Build 245 completed work — 20 repository-side advances
 
-1. Promoted D1 `catalog_items` to the runtime master authority for tools and supplies; legacy tool/supply JSON is now read-only provenance/emergency fallback only.
-2. Added all **897 legacy master rows** to the Build 244 migration payload: 399 tool rows and 498 supply rows.
-3. Made the migration provenance-aware so rerunning it does not recreate an old JSON classification after a reviewed D1 tool↔supply correction.
-4. Database-side populates missing `site_item_inventory` rows from active D1 tool/supply catalog rows, eliminating the need to run a large Worker sync before normal inventory work.
-5. Retained the catalog→inventory sync only as a bounded small-batch maintenance/recovery action and removed Amazon registry matching from that path.
-6. Disabled runtime tool/supply JSON re-import in Catalog Sync so stale JSON can no longer overwrite reviewed D1 classification/state.
-7. Made existing tool/supply search server-side and bounded, so all D1 rows remain discoverable without loading the complete catalog into a single page/Worker request.
-8. Added quick inline tool/supply classification editing in the Inventory Operations table plus full-edit classification control.
-9. Added linked classification propagation to `catalog_items` and `product_resource_links` when an inventory item is corrected tool↔supply.
-10. Added safe classification-duplicate consolidation when the corrected target identity already exists: target remains canonical, mistaken row is archived, and legacy default stock is not double-counted.
-11. Added `site_inventory_usage_profiles` with `exact`, `estimated`, `log_only` and `reusable` tracking modes.
-12. Added `minimum_usage_increment` so very small real-world usage can be entered without forcing whole-unit consumption.
-13. Added `site_inventory_usage_movements` so usage amount and stock-unit change are both auditable.
-14. Legacy tools without reviewed profiles default to `reusable`; legacy supplies without reviewed unit breakdowns default to `log_only` so old “1 use” assumptions cannot empty a full container.
-15. Changed inventory stock/reserved/incoming/reorder quantities and unit conversions in the UI/workflows to accept fractional values.
-16. Changed Product Resources desktop and mobile quantity-used paths to preserve fractional quantities instead of forcing at least one whole unit.
-17. Changed inventory reservation/consumption math to convert actual usage quantity through `usage_units_per_stock_unit` before changing stock.
-18. Changed Creative Project material posting/reversal to accept fractional usage amounts, preserve usage-vs-stock evidence, and support log-only/reusable tracking without false depletion.
-19. Added a clear 500 g mica example and usage guidance directly to Inventory Operations; a 3 g use can reduce one 500 g jar by 0.006 jar, while unmeasured sprinkles can be logged without reducing stock.
-20. Added Build 244 migration/regression, current schema synchronization, mobile/CSS polish and cache shell v21. Current static public SEO remains **36/36 passed**, database object identifiers remain lower-case, and **120/120 local asset references resolve**.
-
-## What “all items in one spot” means now
-
-There are two D1 tables because they solve different business problems, but **both are in the same D1 database authority**:
-
-```text
-catalog_items          = master identity/descriptive catalog
-site_item_inventory    = real operational stock/cost/reservation state
-```
-
-The old JSON files are no longer normal operational storage. Build 244 migrates their rows into D1 and populates missing operational inventory from D1 in SQL. New Amazon/manual items already enter working D1 inventory directly.
+1. Merged the complete Build 244 D1 tool/supply authority and fractional-usage transition into the user’s latest live source rather than allowing the live branch to fall behind the generated inventory work.
+2. Made the current Build 245 migration capable of upgrading a Build 243-era production D1 directly: the Build 244 transition is included and remains idempotent when already present.
+3. Retained all 897 legacy tool/supply master rows in the D1 migration path while keeping the old JSON masters read-only provenance/emergency fallback only.
+4. Replaced false admin “Please log in” behaviour on transient Cloudflare 5xx with provisional, verified and degraded auth states.
+5. Restricted automatic local-session clearing to explicit server 401/403 rejection; 5xx, timeouts and Worker-limit responses retain the cached admin identity for UI continuity while APIs remain server-authenticated.
+6. Added a shared `DDAdminAccessState` / `DDWhenAdminReady()` gate so admin modules can defer work until provisional/verified access is established instead of racing `dd:admin-ready`.
+7. Staggered dashboard summary, Today tasks, smoke badges, Deployment Preflight and Release Control reads rather than launching them all at refresh; Preflight and Release Control are now sequential rather than parallel.
+8. Routed those secondary reads through shared safe JSON handling with in-flight deduplication, bounded retry/backoff and explicitly stale read-only fallback.
+9. Added `/api/admin/inventory-bootstrap`, a small D1 reference endpoint for categories/unit presets/source types/usage modes that does not load the full catalog/Amazon registry or perform request-time DDL/PRAGMA.
+10. Added server-side Inventory Operations pagination (80 rows by default) and Previous/Next controls so a large inventory does not require one broad Worker/D1 response.
+11. Expanded inline Inventory Operations editing so category, supplier, tool/supply classification, quantity, stock unit, usage unit, usage conversion, tracking mode, reorder level, unit cost and active status can be corrected from the table.
+12. Preserved Build 244 exact/estimated/log-only/reusable fractional usage and mobile/Creative Project consumption paths while making their unit fields easier to review and edit.
+13. Rebuilt Product Detail loading to recover supporting product imagery deterministically from `product_images`, non-deleted `media_assets`, active role assignments and image annotations, deduped into the seven editor slots.
+14. Corrected Product Editor load paths so `images` and `media_integrity` are passed into the form on every reopen instead of loading only the product/SEO record.
+15. Added non-destructive migration recovery that inserts only missing gallery references and never deletes existing product images or overwrites an already-selected featured image.
+16. Added `product_media_integrity_snapshots` so products with recoverable linked/history images can be audited after migration rather than silently losing evidence.
+17. Fixed the Today-task “Product readiness blockers catalog” Open action to drill into `/admin/readiness/?filter=basic_catalog_blockers`, matching missing featured image, price and short-description blockers.
+18. Made Product Readiness render a visible Retry/Catalog fallback on temporary API failure instead of a blank page, and removed request-time schema repair from Product Readiness/Product Images live handlers.
+19. Completed a CSS/mobile drift pass on the changed admin interfaces: dark-compatible degraded-auth panels, high-contrast Inventory buttons/inputs, responsive inline-unit fields, 44 px mobile targets and stacked pagination/actions; service-worker shell advanced to **v22**.
+20. Synchronized the Build 245 numbered/current migration and aggregate schemas, added a read-only D1 verification script, lower-case database-object audit, product-media/auth regressions, public SEO/H1 audit, asset audit, canonical Markdown refresh and historical Build-doc archival.
 
 ## Current position
 
-Inventory is now much closer to the way the workshop actually behaves. A container is not automatically “one use”; one stock unit can contain hundreds or thousands of smaller usage units. Projects/products can record exact fractional consumption, estimated consumption, or a log-only use when measurement would be artificial. Tools can be reusable without depletion. Misclassified tool/supply rows are editable rather than frozen by the original JSON source.
+The live problems that triggered this pass now have direct code fixes rather than message-only fallbacks. A temporary Worker/D1 outage should no longer turn a valid cached admin identity into a false signed-out screen. Admin refresh generates less nonessential load. Inventory reference data/listing is bounded. Product gallery evidence can be recovered from existing D1 relationships rather than relying solely on whichever rows survived in `product_images`. The Product Readiness task now opens a meaningful filtered queue.
 
-Build 243 request deduplication/backoff/form recovery remains active. Build 244 additionally reduces reliance on broad catalog sync and keeps all catalog searches bounded, which further lowers Worker/D1 pressure.
+Build 245 local public SEO audit remains **36/36 passed** with zero warnings/failures and the local `/assets/...` audit remains 120/120 resolved.
+
+Build 245 does **not** claim that Cloudflare can never return another 503 or Worker 1102. It removes observed self-generated pressure and makes failures recoverable/diagnosable. Production Cloudflare Observability remains the authority for any residual Ray-ID incident.
 
 ## Known gaps and risks
 
-- Production must run the Build 244 migration before deploying code that expects usage-profile/usage-movement tables.
-- Legacy supplies intentionally default to `log_only` until reviewed. That protects stock from false depletion but means accurate costing/buildability still requires unit conversion review for important materials.
-- Existing historical tool/supply classifications inherited from old masters cannot all be safely guessed automatically. Build 244 makes correction fast and persistent; high-value inventory still needs an owner review.
-- A classification duplicate merge uses the greater stock counter rather than summing both legacy rows to avoid doubling old default “1” values. If two genuinely separate purchases were intentionally split across duplicate identities, review the canonical quantity afterward.
-- Exact usage requires meaningful units. “Sprinkle”, “dab”, “drop”, etc. can be used as estimated/log-only evidence, but cost accuracy improves when grams/ml/cm/pieces can be measured.
-- Worker/D1 platform limits can still produce temporary 503s. Build 243/244 reduce self-generated load and preserve state, but production observability remains the authority for any future Ray-ID incident.
-- CAIP private bucket binding, direct browser→R2 signing, processing providers and public-promotion executor remain incomplete production work.
-- Payment webhook exact-once/refund/concurrency, transactional email, restore rehearsal and production launch evidence remain open.
-- Exact item photography and physical packaging/laser proofs remain required where launch gates specify them.
-- First-page Google placement cannot be guaranteed; relevance, distance, prominence and measured conversions remain the SEO reality.
+- Production must back up D1 and apply Build 245 before deploying code that expects the media-integrity tables/policies. Run only the Build 245 numbered file or the byte-identical current-pass file, not both.
+- The migration can restore image URLs that still exist in linked D1 media/history, but local/static testing cannot prove that every remote R2 URL is currently reachable or that every historical image still physically exists. Known products that previously had seven images need a production reopen check.
+- `product_media_integrity_snapshots` is migration-time diagnostic evidence, not a replacement for the live gallery. A future review queue should surface products where recoverable unique media still exceeds gallery rows.
+- `admin_api_health_observations` is a schema foundation; current runtime incident/Cloudflare logs remain the actual evidence until a bounded health-observation writer is added.
+- Build 245 reduces dashboard request fan-out, but older specialist/import routes elsewhere can still contain historical schema/expensive-read patterns and should continue moving to migration-owned prerequisites.
+- Legacy supplies intentionally remain `log_only` until reviewed; accurate material costing/buildability still requires stock-unit/usage-unit conversion for important consumables.
+- Historical tool/supply classification cannot all be safely guessed automatically. The inline table makes correction persistent; a finite classification-review queue remains next work.
+- CAIP private bucket production proof, direct browser→R2 multipart signing, proxy/thumbnail/transcript processors and promotion execution remain incomplete.
+- Payment exact-once/refund/concurrency, transactional email, restore rehearsal and physical packaging/laser proofs remain Startup evidence work.
+- First-page local Google placement cannot be guaranteed. Relevance, distance, prominence, crawlability, useful content, Business Profile completeness and measured conversion evidence remain the practical direction.
 
-## Next 20 steps after Build 244
+## Next 20 steps after Build 245
 
-### P0 — deploy and clean the real inventory authority
+### P0 — deploy, prove resilience and verify recovered data
 
-1. Back up production D1 and apply `database_build244_inventory_authority_fractional_usage.sql` once; confirm ledger/settings and do not also run the identical current-pass file.
-2. Verify post-migration counts for `catalog_items`, active `site_item_inventory`, usage profiles and any archived duplicates; preserve a before/after count report.
-3. Deploy Build 244, hard-refresh to shell v21, and confirm Inventory Operations loads without JSON/HTML parsing errors or duplicate startup requests.
-4. Review the **Tools only** inventory view and correct obvious supplies misclassified as tools using the inline classification select.
-5. Review the **Supplies only** view and correct obvious reusable equipment misclassified as supplies.
-6. Add a D1-backed “classification review” queue with reviewed/unreviewed status, reviewer and note so this cleanup becomes finite and auditable rather than repeated visual checking.
-7. Add bulk classification correction for explicitly selected rows only, with preview and duplicate-impact warning before write.
-8. Add a “usage setup required” inventory view for legacy `log_only` supplies lacking reviewed stock/usage conversion.
-9. Add common unit presets/conversions for gram/kg, ml/L, cm/m, piece/package, sheet/pack, wick/spool and similar workshop materials without forcing presets on unusual items.
-10. Add container-level remaining display such as `0.994 jar ≈ 497 g remaining` so fractional stock is understandable at a glance.
+1. Back up production D1, apply `database_build245_admin_media_resilience.sql` once, and confirm both Build 244 and Build 245 ledger keys without also running the identical current-pass file.
+2. Run `BUILD245_D1_VERIFICATION.sql`; save counts for D1 catalog/inventory, usage profiles, case duplicates, media-integrity snapshots, duplicate gallery URLs and blank-featured-with-gallery results.
+3. Deploy the complete Build 245 archive, hard-refresh to service-worker shell v22, and confirm the current script cache-busters are active.
+4. Refresh several admin pages while auth is healthy and during/after a temporary 5xx if one occurs; verify the UI says session retained/degraded rather than “Please log in” unless `/api/auth/me` returns an actual 401/403.
+5. Search Cloudflare Worker/D1 Observability by any new Ray ID and record whether residual failures are CPU, memory, D1 overload or an application exception; optimize the owning endpoint rather than increasing retry pressure blindly.
+6. Reopen several known products that previously had up to seven supporting images and a featured image; verify the gallery returns, featured choice remains stable and remote images themselves load.
+7. Add an admin **Media Integrity Review** queue using the latest snapshots/live resolver for products where recoverable linked media exceeds current gallery rows or the featured image is not present in the editor gallery.
+8. Add content-hash/object-key duplicate detection for product media so the same binary cannot proliferate under slightly different URLs while preserving legitimate alternate crops/variants.
+9. Promote the public R2 `uploads/website-library/` intake into a D1-backed Website Media Library with thumbnail review, source rights, image role, descriptive alt suggestion and page/product assignment.
+10. Add bounded bulk image assignment/promotion from the Website Media Library to Product Editor/gallery with explicit preview and no silent public publication.
 
-### P1 — make material costing/project consumption operationally strong
+### P1 — finish inventory/material authority and CAIP production path
 
-11. Add usage entry directly from a product/project with quick presets (exact, estimated, log-only) and a visible before/after stock preview before posting.
-12. Add inventory-lot-aware fractional consumption so material use can be assigned to the correct purchase lot/cost basis rather than only aggregate stock.
-13. Add weighed-count correction workflow: enter measured remaining grams/ml/etc. and have the app reconcile the stock-unit fraction with an audited correction movement.
-14. Add unit-cost-per-usage-unit display (for example cost per gram/ml/cm) and feed that into product/project profitability.
-15. Add a material-usage anomaly check for suspicious events such as “1 whole 500 g jar” where historical/project context suggests a tiny amount.
-16. Add a reusable-tool maintenance/condition path so reusable does not mean “never changes”; track wear, service, replacement and retirement separately from consumption.
-17. Continue removing remaining request-time schema helpers from older specialist/import routes and move prerequisites into numbered migrations.
-18. Add D1-backed website-media-library intake for `PRODUCT_MEDIA_BUCKET/uploads/website-library/`, including thumbnails, roles, alt-text suggestions and page/product assignment.
-19. Complete CAIP private R2 production proof with real interrupted/resumed large media, then implement direct browser→R2 multipart signing and the first thumbnail/proxy provider.
-20. Complete remaining payment/email/restore/physical-proof Startup evidence and run a controlled paid fulfilment plus refund recovery before widening launch traffic.
+11. Add a D1-backed **Classification Review** queue for tool/supply records with reviewed status, reviewer/date/note and explicit bulk correction for selected rows only.
+12. Add a **Usage Setup Required** queue for `log_only` supplies missing reviewed stock/usage conversions, with common gram/kg, ml/L, cm/m, piece/package, sheet/pack and wick/spool helpers.
+13. Add weighed/physical-count reconciliation: enter actual remaining grams/ml/pieces and write an audited correction movement rather than manually replacing quantities.
+14. Add lot-aware fractional consumption and cost-per-usage-unit so product/project profitability uses the correct purchase lot/cost basis.
+15. Add reusable-tool maintenance/condition/service/retirement tracking so `reusable` means non-consumed, not maintenance-free.
+16. Complete production `CAIP_PRIVATE_MEDIA_BUCKET` liveness and a real interrupted/resumed large MOV/MP4 proof, then add direct browser→R2 multipart signing.
+17. Add the first CAIP proxy/thumbnail processor and transcript/timecode provider so large originals are not repeatedly analyzed directly.
+18. Complete payment webhook exact-once, refund/concurrency and transaction-email live evidence, plus a D1/R2 restore rehearsal.
+19. Finish physical soap/candle/laser proof gates and replace representative public/product imagery with item-specific approved photography where required.
+20. Run controlled public launch/release evidence, then track Search Console + Google Business Profile local queries/actions so SEO changes are driven by real impressions, clicks, calls and conversions.
 
 ## SEO/local-search direction each pass
 
-Continue one H1 per indexable page, distinctive titles/descriptions, canonical URLs, descriptive internal links, useful alt text, mobile parity and structured-data/visible-fact agreement. Use Ontario/Southern Ontario wording only where it matches a real offering. Maintain Business Profile facts/photos/services/hours and measure Search Console, Business Profile and conversion data rather than assuming rank.
+Continue one H1 per indexable page, clear title/main-heading alignment, useful descriptions, crawlable descriptive links, truthful image alt text near relevant copy, stable crawlable images, mobile content/alt parity and structured-data/visible-fact agreement. Use buyer language such as custom engraving, personalized gifts, handmade jewelry and Ontario/Southern Ontario only where the page genuinely provides that offer. Competitor review continues to favor clear service/material examples, visible process/quote paths, local intent and strong product imagery; do not copy claims such as same-day service or no-minimum ordering unless Devil n Dove can actually support them.

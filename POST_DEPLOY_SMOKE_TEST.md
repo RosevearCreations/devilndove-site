@@ -1,11 +1,15 @@
-# Post-Deploy Smoke Test — Build 241 current entry
+# Build 245 current smoke-test note
+
+Use the current Build 245 package and shell v22. In addition to the retained smoke suite, refresh protected admin pages and verify temporary auth 5xx produces a degraded/session-retained state rather than a false login screen; reopen known products with multiple supporting images; test the Product Readiness blocker link; and inspect any residual 503/1102 by Cloudflare Ray ID. The Startup cockpit currently carries 46 gates.
+
+# Post-Deploy Smoke Test — retained Build 241 foundation
 
 Use the complete stage procedure in `PRELAUNCH_PROCESS_PLAYBOOKS.md`. After deploying the exact package:
 
-1. Confirm domain, HTTPS, canonical routes, service-worker shell v19 and no stale asset failures.
+1. Confirm domain, HTTPS, canonical routes, service-worker shell v22 and no stale asset failures.
 2. Run public page checks: exactly one H1, unique title/description/canonical, crawlable descriptive links, useful nearby images/alt text and no phone/desktop overflow.
-3. Sign in and verify all **45** Startup gates with All statuses, including `operational_continuity_evidence_center`.
-4. Open `/admin/operational-continuity/`; confirm twenty D1 workstreams, evidence case/event creation, safe error fallback and no request-time schema creation.
+3. Sign in and verify all **46** Startup gates with All statuses, including `operational_continuity_evidence_center` and `caip_private_large_media_intake`.
+4. Open `/admin/operational-continuity/`; confirm twenty-one D1 workstreams, evidence case/event creation, safe error fallback and no request-time schema creation.
 5. Test one idempotency claim twice; the second attempt must not create a duplicate sensitive result.
 6. Test representative packaging reservation, formula link, release lock and prepress result without treating them as physical print proof.
 7. Test provider-result, notification-attempt and mobile-draft records with sanitized evidence only.

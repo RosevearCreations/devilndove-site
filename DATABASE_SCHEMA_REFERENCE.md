@@ -1,62 +1,63 @@
-# Database Schema Reference — Build 244
+# Database Schema Reference — Build 245
 
 ## Current migration boundary
 
-Build 244 is the current additive production migration:
+Build 245 is the current additive production migration:
 
-- numbered: `database_build244_inventory_authority_fractional_usage.sql`
+- numbered: `database_build245_admin_media_resilience.sql`
 - current pass: `database_upgrade_current_pass.sql`
 
-They are byte-identical. Back up production D1, apply **one** Build 244 file, never both, then confirm ledger key `build244_inventory_authority_fractional_usage`.
+They are byte-identical. Back up production D1 and apply **one**, never both. Build 245 intentionally includes the complete Build 244 inventory-authority/fractional-usage transition so a Build 243-era database can upgrade directly; rerunning over an already-applied Build 244 database is designed to remain idempotent. Confirm ledger keys `build244_inventory_authority_fractional_usage` and `build245_admin_media_resilience`.
 
-Build 244 intentionally uses **no TEMP table and no DROP TABLE**, avoiding the D1 `SQLITE_AUTH` warning encountered by the Build 243 temporary helper cleanup.
+Build 245 uses **no TEMP table and no DROP TABLE**, avoiding the D1 `SQLITE_AUTH` cleanup problem exposed by the Build 243 temporary helper.
 
-## D1 catalog/inventory authority
+## D1 catalog/inventory authority retained
 
-`catalog_items` is the master descriptive authority for tools/supplies. `site_item_inventory` is the operational stock/cost/reservation authority. Both are D1 tables. Legacy `/data/toolshed/toolshed_items_master.json` and `/data/supplies/supplies_items_master.json` are retained only for static provenance/emergency fallback.
+`catalog_items` is the master descriptive authority for tools/supplies. `site_item_inventory` is the operational stock/cost/reservation authority. Legacy tool/supply JSON remains read-only provenance/emergency fallback. Build 244/245 migration content carries 897 legacy rows (399 tools + 498 supplies), populates missing operational inventory database-side, and retains exact/estimated/log-only/reusable fractional usage through `site_inventory_usage_profiles`, `site_inventory_usage_movements` and `creative_project_inventory_usage_details`.
 
-The Build 244 migration contains 897 legacy rows (399 tools + 498 supplies). Missing provenance rows are copied to `catalog_items`, then missing active catalog identities are copied database-side into `site_item_inventory`. Existing reviewed D1 rows win; the migration does not use runtime JSON re-import to overwrite them.
+Controlled classifications and database object identifiers are lower-case. Human display names, URLs, ASINs, SKUs, order numbers and currency codes preserve meaningful/external case.
 
-## Fractional usage tables
+## Build 245 product-media integrity
 
-### `site_inventory_usage_profiles`
+### `product_media_integrity_snapshots`
 
-One row per inventory identity:
+Migration-time diagnostic evidence per product:
 
-- `usage_tracking_mode`: `exact`, `estimated`, `log_only`, or `reusable`;
-- `minimum_usage_increment REAL`;
-- notes/audit user/timestamps.
+- `product_image_count`
+- `media_asset_count`
+- `role_assignment_image_count`
+- `annotation_image_count`
+- `recoverable_unique_image_count`
+- `featured_image_url`
+- `featured_image_recoverable`
+- notes / created timestamp
 
-Legacy tool rows without a profile default to `reusable`. Legacy supply rows without a reviewed profile default to `log_only` so an old one-unit assumption cannot empty an entire container.
+This is **not** a mutable gallery authority. `product_images` remains the preferred Product Editor gallery. Build 245 can non-destructively insert missing URLs from non-deleted `media_assets`, non-removed `product_media_role_assignments` and `product_image_annotations`, deduped and limited to the first seven canonical editor positions. Existing gallery rows are never deleted and a nonblank selected featured image is never overwritten.
 
-### `site_inventory_usage_movements`
+New lookup indexes cover product image order, image annotations and role assignments.
 
-Preserves both sides of a use event:
+### `admin_api_health_observations`
 
-- actual `usage_quantity_delta` + usage unit;
-- resulting `stock_quantity_delta` + stock unit;
-- tracking mode / estimated flag / audit note.
+Schema foundation for bounded future endpoint-health evidence: path, HTTP status, error code, Cloudflare Ray, duration, source and notes. Build 245 does not claim this table replaces Cloudflare Observability or existing runtime incidents; it is available for a later bounded writer.
 
-This allows, for example, 3 grams from a 500-gram jar to reduce aggregate stock by `3 / 500 = 0.006` jar rather than one whole jar.
+## Admin degraded-auth policy
 
-### `creative_project_inventory_usage_details`
+`app_settings` includes:
 
-Sidecar evidence for Creative Project inventory postings. It records actual usage amount/unit separately from stock-unit consumption and tracking mode, preserving fractional/log-only/reusable project evidence without rewriting historical post IDs.
+- `site.admin.auth_degraded_policy = retain_cached_admin_on_5xx_v245`
+- `site.product.media_integrity_policy = linked_media_recovery_v245`
+- `site.inventory.bootstrap_policy = lightweight_reference_bootstrap_v245`
 
-## Tool/supply classification
-
-Database object identifiers and controlled classifications remain lower-case. Tool/supply classification is editable in Inventory Operations. Reclassification propagates to linked catalog/product-resource identities. If a target active inventory identity already exists, Build 244 can consolidate the mistaken row into the target and retain the old ID inactive for audit/history.
-
-The merge uses the greater stock/reserved/incoming counter rather than blindly summing two legacy duplicates, because many historical rows used default quantity `1`; this avoids inflating physical stock. The canonical quantity should still be owner-reviewed after a duplicate merge.
+The browser may retain a cached admin identity during temporary 5xx/timeouts to avoid a false signed-out UI. Server APIs remain authoritative and authenticated. Only explicit 401/403 rejection may clear the cached session automatically.
 
 ## Runtime schema rule
 
-Routine Inventory Operations/Product Resources/Product Stock/Purchase Lot requests do not install schema. Numbered migrations own schema. Missing prerequisites return structured migration-required/unavailable JSON when the Worker runtime receives control.
+Routine Inventory Operations, Product Resources, Product Readiness and Product Images reads/writes must not install schema. Numbered migrations own prerequisites. Missing prerequisites return structured migration-required/unavailable JSON when the Worker receives control.
 
 ## Aggregate schema scope
 
-- `database_full_schema.sql` — complete supported aggregate and contains the executable Build 244 migration block.
-- `database_schema.sql` — historical/core aggregate; project fractional evidence is reflected where owned, while Site Inventory authority remains the current numbered migration/full schema.
-- `database_store_schema.sql` — scoped store aggregate; product-resource fractional quantity affinity is current, while Site Inventory authority remains the current numbered migration/full schema.
+- `database_full_schema.sql` — complete supported aggregate including Build 244 + Build 245 executable blocks.
+- `database_schema.sql` — scoped historical/core aggregate plus Build 245-safe definitions/settings where owned.
+- `database_store_schema.sql` — scoped store aggregate plus Build 245-safe definitions/settings where owned.
 
-Historical numbered migrations remain at repository root for deterministic deployment/repair reference. Historical prose/validation belongs under `docs/archive/build-history/`.
+Use `BUILD245_D1_VERIFICATION.sql` after production migration for read-only ledger/settings/count/case/media-integrity checks. Historical numbered migrations remain at root; historical prose belongs under `docs/archive/build-history/`.

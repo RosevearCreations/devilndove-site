@@ -1,3 +1,7 @@
+# Build 245 cross-project note
+
+The Build 240 Operational Continuity model remains specialist authority. Build 245 adds stronger admin degraded-auth handling and a schema foundation for bounded API-health observations; Cloudflare Observability/runtime incidents remain the production evidence for Worker CPU/memory/D1-overload events.
+
 # Operational Continuity and Evidence — Build 240
 
 Build 240 converts twenty roadmap items into database-backed, operator-visible foundations at `/admin/operational-continuity/`. The page is an evidence and control centre, not proof that a live provider or physical workflow has passed.

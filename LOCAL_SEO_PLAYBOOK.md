@@ -1,3 +1,7 @@
+# Build 245 SEO/local-search review
+
+Current Google guidance still supports the direction used in Devil n Dove: make the page's main title clear; use words people actually search for in prominent places such as the title and main heading; keep image filenames/alt text descriptive and images near relevant text; keep mobile content and image alt information equivalent; and treat local visibility as a function mainly of relevance, distance and prominence rather than a guaranteed first-page result. Build 245 therefore keeps the one-H1 rule, avoids keyword stuffing, preserves crawlable multi-image product evidence, and makes no unsupported same-day/no-minimum claims. Current Ontario engraving competitors continue to emphasize clear service/material examples, personalization process and direct quote/contact paths; use those patterns as usability cues, not copy.
+
 # Local SEO and Public Content Playbook — Build 240
 
 ## Build 240 recurring audit

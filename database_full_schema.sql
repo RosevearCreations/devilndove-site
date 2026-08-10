@@ -23139,3 +23139,145 @@ INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,dest
 VALUES ('build244_inventory_authority_fractional_usage','database_build244_inventory_authority_fractional_usage.sql',NULL,'applied',0,CURRENT_TIMESTAMP,'Moves tool/supply catalog authority to D1, bulk-populates missing operational inventory from D1, retains JSON only as static fallback/provenance, and adds fractional/log-only usage profiles.',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
 ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
 
+
+-- =========================================================
+-- BUILD 245 — ADMIN SESSION RESILIENCE + PRODUCT MEDIA RECOVERY
+-- Code/schema pass after Build 244. No TEMP tables. No request-time DDL.
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS product_media_integrity_snapshots (
+  product_media_integrity_snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  product_image_count INTEGER NOT NULL DEFAULT 0,
+  media_asset_count INTEGER NOT NULL DEFAULT 0,
+  role_assignment_image_count INTEGER NOT NULL DEFAULT 0,
+  annotation_image_count INTEGER NOT NULL DEFAULT 0,
+  recoverable_unique_image_count INTEGER NOT NULL DEFAULT 0,
+  featured_image_url TEXT,
+  featured_image_recoverable INTEGER NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_product_media_integrity_snapshots_product_created
+  ON product_media_integrity_snapshots(product_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS admin_api_health_observations (
+  admin_api_health_observation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  endpoint_path TEXT NOT NULL,
+  http_status INTEGER,
+  error_code TEXT,
+  cloudflare_ray TEXT,
+  duration_ms INTEGER,
+  observation_source TEXT NOT NULL DEFAULT 'server',
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_admin_api_health_observations_path_created
+  ON admin_api_health_observations(endpoint_path, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_api_health_observations_status_created
+  ON admin_api_health_observations(http_status, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_product_images_product_sort_v245
+  ON product_images(product_id, sort_order, product_image_id);
+CREATE INDEX IF NOT EXISTS idx_product_image_annotations_product_updated_v245
+  ON product_image_annotations(product_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_product_media_role_assignments_product_updated_v245
+  ON product_media_role_assignments(product_id, updated_at DESC);
+
+-- Recover editor gallery references non-destructively. product_images is preferred, then
+-- approved/retained media_assets, role assignments, and annotation/history links. Existing
+-- gallery rows are never deleted. Missing linked URLs are restored only within the canonical
+-- first seven unique image slots for a product.
+WITH all_candidates AS (
+  SELECT product_id, image_url, COALESCE(alt_text,'') AS alt_text, COALESCE(sort_order,0) AS source_order, 0 AS source_priority
+  FROM product_images
+  WHERE TRIM(COALESCE(image_url,''))<>''
+  UNION ALL
+  SELECT product_id, public_url, COALESCE(original_filename,''), COALESCE(sort_order,0), 1
+  FROM media_assets
+  WHERE product_id IS NOT NULL AND deleted_at IS NULL AND TRIM(COALESCE(public_url,''))<>''
+  UNION ALL
+  SELECT product_id, image_url, COALESCE(notes,''), 100, 2
+  FROM product_media_role_assignments
+  WHERE COALESCE(assignment_status,'assigned')<>'removed' AND TRIM(COALESCE(image_url,''))<>''
+  UNION ALL
+  SELECT product_id, image_url, COALESCE(alt_text,''), 200, 3
+  FROM product_image_annotations
+  WHERE TRIM(COALESCE(image_url,''))<>''
+), deduped AS (
+  SELECT product_id,image_url,alt_text,source_order,source_priority,
+         ROW_NUMBER() OVER (
+           PARTITION BY product_id, LOWER(TRIM(image_url))
+           ORDER BY source_priority ASC, source_order ASC
+         ) AS duplicate_rank
+  FROM all_candidates
+), unique_candidates AS (
+  SELECT product_id,image_url,alt_text,source_order,source_priority,
+         ROW_NUMBER() OVER (
+           PARTITION BY product_id
+           ORDER BY source_priority ASC, source_order ASC, LOWER(TRIM(image_url)) ASC
+         ) - 1 AS canonical_sort_order
+  FROM deduped
+  WHERE duplicate_rank=1
+), first_seven AS (
+  SELECT * FROM unique_candidates WHERE canonical_sort_order BETWEEN 0 AND 6
+)
+INSERT INTO product_images(product_id,image_url,alt_text,sort_order,created_at)
+SELECT c.product_id,c.image_url,NULLIF(TRIM(c.alt_text),''),c.canonical_sort_order,CURRENT_TIMESTAMP
+FROM first_seven c
+WHERE NOT EXISTS (
+  SELECT 1 FROM product_images pi
+  WHERE pi.product_id=c.product_id AND LOWER(TRIM(pi.image_url))=LOWER(TRIM(c.image_url))
+);
+
+-- Preserve a chosen featured image. Only fill a blank product featured field from the first
+-- canonical gallery image after recovery.
+UPDATE products
+SET featured_image_url=(
+      SELECT pi.image_url FROM product_images pi
+      WHERE pi.product_id=products.product_id AND TRIM(COALESCE(pi.image_url,''))<>''
+      ORDER BY pi.sort_order ASC,pi.product_image_id ASC LIMIT 1
+    ),
+    updated_at=CURRENT_TIMESTAMP
+WHERE TRIM(COALESCE(featured_image_url,''))=''
+  AND EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id=products.product_id AND TRIM(COALESCE(pi.image_url,''))<>'');
+
+-- One migration-time evidence snapshot per product. This is diagnostic evidence, not a runtime
+-- source of truth for the current gallery.
+INSERT INTO product_media_integrity_snapshots(
+  product_id,product_image_count,media_asset_count,role_assignment_image_count,
+  annotation_image_count,recoverable_unique_image_count,featured_image_url,
+  featured_image_recoverable,notes,created_at
+)
+SELECT p.product_id,
+       (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id AND TRIM(COALESCE(pi.image_url,''))<>''),
+       (SELECT COUNT(*) FROM media_assets ma WHERE ma.product_id=p.product_id AND ma.deleted_at IS NULL AND TRIM(COALESCE(ma.public_url,''))<>''),
+       (SELECT COUNT(*) FROM product_media_role_assignments pmra WHERE pmra.product_id=p.product_id AND COALESCE(pmra.assignment_status,'assigned')<>'removed' AND TRIM(COALESCE(pmra.image_url,''))<>''),
+       (SELECT COUNT(*) FROM product_image_annotations pia WHERE pia.product_id=p.product_id AND TRIM(COALESCE(pia.image_url,''))<>''),
+       (SELECT COUNT(DISTINCT LOWER(TRIM(url))) FROM (
+          SELECT pi.image_url AS url FROM product_images pi WHERE pi.product_id=p.product_id
+          UNION ALL SELECT ma.public_url FROM media_assets ma WHERE ma.product_id=p.product_id AND ma.deleted_at IS NULL
+          UNION ALL SELECT pmra.image_url FROM product_media_role_assignments pmra WHERE pmra.product_id=p.product_id AND COALESCE(pmra.assignment_status,'assigned')<>'removed'
+          UNION ALL SELECT pia.image_url FROM product_image_annotations pia WHERE pia.product_id=p.product_id
+        ) WHERE TRIM(COALESCE(url,''))<>''),
+       p.featured_image_url,
+       CASE WHEN TRIM(COALESCE(p.featured_image_url,''))<>'' THEN 1 ELSE 0 END,
+       'Build 245 migration-time media integrity snapshot after non-destructive linked-image recovery.',
+       CURRENT_TIMESTAMP
+FROM products p
+WHERE NOT EXISTS (
+  SELECT 1 FROM product_media_integrity_snapshots s
+  WHERE s.product_id=p.product_id AND s.notes='Build 245 migration-time media integrity snapshot after non-destructive linked-image recovery.'
+);
+
+INSERT INTO app_settings(setting_key,setting_value,is_public) VALUES ('site.admin.auth_degraded_policy','retain_cached_admin_on_5xx_v245',0)
+ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
+INSERT INTO app_settings(setting_key,setting_value,is_public) VALUES ('site.product.media_integrity_policy','linked_media_recovery_v245',0)
+ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
+INSERT INTO app_settings(setting_key,setting_value,is_public) VALUES ('site.inventory.bootstrap_policy','lightweight_reference_bootstrap_v245',0)
+ON CONFLICT(setting_key) DO UPDATE SET setting_value=excluded.setting_value,is_public=0;
+
+INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,destructive,applied_at,notes,created_at,updated_at)
+VALUES ('build245_admin_media_resilience','database_build245_admin_media_resilience.sql',NULL,'applied',0,CURRENT_TIMESTAMP,'Retains cached admin identity during transient 5xx verification failures, moves inventory bootstrap to lightweight D1 reference data, and restores missing product gallery references from linked media/history without deleting existing gallery rows.',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;

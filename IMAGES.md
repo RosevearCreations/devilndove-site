@@ -1,3 +1,7 @@
+# Build 245 product-media integrity note
+
+Product Editor now resolves up to seven unique supporting images from four D1 evidence layers in priority order: `product_images`, non-deleted linked `media_assets`, non-removed `product_media_role_assignments`, then `product_image_annotations`. Build 245 migration can restore missing `product_images` references non-destructively from those links/history. An existing selected featured image is preserved; a blank featured image may be filled from the first recovered gallery image. SEO/OG media is not a substitute for the supporting product gallery. Use `BUILD245_D1_VERIFICATION.sql` and the migration snapshot table to find products that still need media review.
+
 # Build 230 current media authority note
 
 Creative Automation references existing media/evidence and never copies, moves, deletes or elevates its public rights. Its process-map SVG is admin-only. Real public product/story media still requires owned/consented source, accurate role/alt text, reliable URL and specialist approval. Detailed capture/replacement work lives in `IMAGES_REQUIRED.md`, which is now the required manifest for the distinct Critical `missing_launch_images` Startup gate.
