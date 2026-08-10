@@ -243,12 +243,27 @@ REQUIRED_FILES = [
     'scripts/build244_database_case_audit.py',
     'scripts/build244_public_page_audit.py',
     'scripts/build244_asset_reference_audit.py',
-    'BUILD244_VALIDATION.md',
-    'BUILD244_CHANGED_FILES.md',
+    'docs/archive/build-history/BUILD244_VALIDATION.md',
+    'docs/archive/build-history/BUILD244_CHANGED_FILES.md',
+    'database_build245_admin_media_resilience.sql',
+    'scripts/build245_admin_media_resilience_regression.py',
+    'scripts/build245_database_case_audit.py',
+    'scripts/build245_public_page_audit.py',
+    'scripts/build245_asset_reference_audit.py',
+    'BUILD245_VALIDATION.md',
+    'BUILD245_CHANGED_FILES.md',
+    'BUILD245_D1_VERIFICATION.sql',
+    'functions/api/admin/inventory-bootstrap.js',
+    'functions/api/admin/product-detail.js',
+    'functions/api/admin/product-readiness.js',
+    'public/js/site-auth-ui.js',
+    'public/js/admin-self-protect.js',
     'data/site/build241-public-page-audit.json',
     'data/site/build241-asset-reference-audit.json',
     'data/site/build244-public-page-audit.json',
     'data/site/build244-asset-reference-audit.json',
+    'data/site/build245-public-page-audit.json',
+    'data/site/build245-asset-reference-audit.json',
     'data/site/build240-public-page-audit.json',
     'data/site/build240-asset-reference-audit.json',
 ]
@@ -370,11 +385,11 @@ def check_packaging_references(checks: list[dict]) -> None:
 
 def check_markdown_authority(checks: list[dict]) -> None:
     required_markers = {
-        'AI_HANDOFF.md': ['Build 244', 'PROJECT_STATUS_AND_ROADMAP.md', 'CAIP_PRIVATE_MEDIA_BUCKET', 'database_build244_inventory_authority_fractional_usage.sql', 'one H1', 'Legacy tool/supply JSON'],
-        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 244', 'Next 20 steps after Build 244', 'SEO/local-search direction each pass', 'fractional', '36/36'],
-        'MARKDOWN_INDEX.md': ['Build 244', 'Two current authorities', 'Historical evidence'],
-        'README.md': ['Build 244', 'database_build244_inventory_authority_fractional_usage.sql'],
-        'STARTUP_GO_LIVE_GUIDE.md': ['Build 244', 'This is the human-readable operating copy of all 46', 'database_build244_inventory_authority_fractional_usage.sql', 'missing_launch_images', 'Measure, save, laser-test, approve, and archive each candle-top template', '/admin/image-manifest/', 'auth_login_bounded_v1'],
+        'AI_HANDOFF.md': ['Build 245', 'PROJECT_STATUS_AND_ROADMAP.md', 'CAIP_PRIVATE_MEDIA_BUCKET', 'database_build245_admin_media_resilience.sql', 'one H1', 'Legacy tool/supply JSON', 'product_media_integrity_snapshots'],
+        'PROJECT_STATUS_AND_ROADMAP.md': ['Build 245', 'Next 20 steps after Build 245', 'SEO/local-search direction each pass', 'fractional', '36/36', 'Media Integrity Review'],
+        'MARKDOWN_INDEX.md': ['Build 245', 'Two current authorities', 'Historical evidence'],
+        'README.md': ['Build 245', 'database_build245_admin_media_resilience.sql'],
+        'STARTUP_GO_LIVE_GUIDE.md': ['Build 245', 'This is the human-readable operating copy of all 46', 'database_build245_admin_media_resilience.sql', 'missing_launch_images', 'Measure, save, laser-test, approve, and archive each candle-top template', '/admin/image-manifest/', 'auth_login_bounded_v1'],
         'PACKAGING_REFERENCE_BASELINE.md': ['Build 234', 'Five owner-supplied files', 'Dimensional discrepancy', 'Candle-top direction'],
         'PRELAUNCH_PROCESS_PLAYBOOKS.md': ['Deployment Preflight', 'Deploy Readiness', 'Go-Live Execution'],
         'CREATIVE_AUTOMATION_STUDIO.md': ['seven human-reviewed stages', 'creative_automation_workflows', 'authenticated admin request'],
@@ -390,7 +405,7 @@ def check_markdown_authority(checks: list[dict]) -> None:
     guide=read(ROOT/'STARTUP_GO_LIVE_GUIDE.md')
     if guide.count('#### Before you begin') != 46:
         missing.append(f'STARTUP_GO_LIVE_GUIDE.md: expected 46 gate sections, found {guide.count("#### Before you begin")}')
-    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 244 canonical authorities, scoped playbooks, retained CAIP/packaging references, D1 inventory authority, historical archive policy, and 46 generated Startup sections agree.', 'missing':missing})
+    checks.append({'code':'static_markdown_authority','status':'fail' if missing else 'pass','detail':'; '.join(missing) if missing else 'Two Build 245 canonical authorities, scoped playbooks, retained CAIP/packaging references, D1 inventory/media authority, historical archive policy, and 46 generated Startup sections agree.', 'missing':missing})
 
 def check_schema_files(checks: list[dict]) -> None:
     schema_needles = [
@@ -481,12 +496,15 @@ def check_schema_files(checks: list[dict]) -> None:
         'build241_caip_large_media_intake',
         'build243_inventory_resilience_case_normalization',
         'build244_inventory_authority_fractional_usage',
+        'product_media_integrity_snapshots',
+        'admin_api_health_observations',
+        'linked_media_recovery_v245',
     ]
     required = {
         'database_schema.sql': schema_needles,
         'database_full_schema.sql': schema_needles + ['idx_site_item_inventory_identity_lower_active', 'site.inventory.classification_case_policy', 'merged_case_duplicate'],
         'database_store_schema.sql': schema_needles,
-        'database_upgrade_current_pass.sql': ['site_inventory_usage_profiles', 'site_inventory_usage_movements', 'site.inventory.catalog_authority', 'site.inventory.fractional_usage_policy', 'build244_inventory_authority_fractional_usage'],
+        'database_upgrade_current_pass.sql': ['site_inventory_usage_profiles', 'site_inventory_usage_movements', 'site.inventory.catalog_authority', 'site.inventory.fractional_usage_policy', 'build244_inventory_authority_fractional_usage', 'product_media_integrity_snapshots', 'admin_api_health_observations', 'build245_admin_media_resilience'],
         'database_build174_deployment_preflight_detail.sql': ['deployment_post_deploy_confirmations', 'build_174_preflight_detail_manifest'],
         'database_build182_mobile_visual_polish.sql': ['desktop_mobile_parity_checks', 'visual_enrichment_candidates', 'build_182_mobile_visual_polish'],
         'database_build175_release_control.sql': ['deployment_history', 'build_175_release_control_center'],
@@ -520,6 +538,7 @@ def check_schema_files(checks: list[dict]) -> None:
         'database_build241_caip_large_media_intake.sql': ['caip_media_upload_sessions', 'caip_media_upload_files', 'caip_media_upload_parts', 'caip_media_processing_jobs', 'caip_media_public_promotion_requests', 'caip_private_large_media_intake', 'build241_caip_large_media_intake'],
         'database_build243_inventory_resilience_case_normalization.sql': ['idx_site_item_inventory_identity_lower_active', 'site.inventory.classification_case_policy', 'merged_case_duplicate', 'build243_inventory_resilience_case_normalization'],
         'database_build244_inventory_authority_fractional_usage.sql': ['site_inventory_usage_profiles', 'site_inventory_usage_movements', 'site.inventory.catalog_authority', 'site.inventory.fractional_usage_policy', 'build244_inventory_authority_fractional_usage'],
+        'database_build245_admin_media_resilience.sql': ['site_inventory_usage_profiles', 'build244_inventory_authority_fractional_usage', 'product_media_integrity_snapshots', 'admin_api_health_observations', 'linked_media_recovery_v245', 'build245_admin_media_resilience'],
     }
     missing=[]
     detail=[]
@@ -529,15 +548,15 @@ def check_schema_files(checks: list[dict]) -> None:
         if missing_needles:
             missing.append(rel)
             detail.append(f'{rel}: missing {", ".join(missing_needles)}')
-    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 244 schema and current migration markers were found in the correct files.', 'missing':missing})
+    checks.append({'code':'static_schema_current','status':'fail' if missing else 'pass','detail':'; '.join(detail) if missing else 'Build 174 through Build 245 schema and current migration markers were found in the correct files.', 'missing':missing})
 
     current=read(ROOT/'database_upgrade_current_pass.sql')
-    numbered=read(ROOT/'database_build244_inventory_authority_fractional_usage.sql')
+    numbered=read(ROOT/'database_build245_admin_media_resilience.sql')
     explicit=re.findall(r'(?im)^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b', current)
     checks.append({
         'code':'static_d1_migration_compatibility',
         'status':'fail' if explicit or current != numbered else 'pass',
-        'detail':('Current migration contains unsupported explicit transaction statements: '+', '.join(explicit)) if explicit else ('Current migration differs from the numbered Build 244 migration.' if current != numbered else 'Current and numbered Build 244 migrations are identical and contain no explicit SQL transaction statements.'),
+        'detail':('Current migration contains unsupported explicit transaction statements: '+', '.join(explicit)) if explicit else ('Current migration differs from the numbered Build 245 migration.' if current != numbered else 'Current and numbered Build 245 migrations are identical and contain no explicit SQL transaction statements.'),
     })
 
 def main() -> int:
@@ -551,7 +570,7 @@ def main() -> int:
     check_json(checks)
     blocker_count=sum(1 for check in checks if check['status']=='fail')
     warning_count=sum(1 for check in checks if check['status']=='warn')
-    payload={'build_label':'Build 244','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
+    payload={'build_label':'Build 245','status':'blocked' if blocker_count else ('review' if warning_count else 'ready'),'blocker_count':blocker_count,'warning_count':warning_count,'checks':checks}
     out=ROOT/'data/site/deployment-preflight.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')

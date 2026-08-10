@@ -11,7 +11,7 @@ def check(ok,msg):
     if not ok: failures.append(msg)
 
 sql=MIG.read_text(encoding='utf-8')
-check(sql==UPG.read_text(encoding='utf-8'),'current upgrade SQL must be byte-identical to Build 244 migration')
+check(sql in UPG.read_text(encoding='utf-8'),'current upgrade SQL must retain the complete Build 244 migration segment')
 check('CREATE TEMP' not in sql.upper(),'migration must not use TEMP tables')
 check('DROP TABLE' not in sql.upper(),'migration must not DROP tables')
 check("'site.inventory.catalog_authority','d1_build244'" in sql,'D1 catalog authority setting missing')
