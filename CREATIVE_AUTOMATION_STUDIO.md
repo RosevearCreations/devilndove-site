@@ -1,3 +1,7 @@
+# Build 245 cross-project note
+
+Build 245 retains the seven-stage Creative Automation authority. Fractional inventory use from Build 244 remains current, and recovered product-media references remain evidence links rather than automatic stage approval or publication.
+
 # Devil n Dove Creative Automation Studio — Build 241
 
 Creative Automation is the master operating view for a Creative Process project. It coordinates ownership, deadlines, seven human-reviewed stages and evidence without copying or replacing specialist facts.

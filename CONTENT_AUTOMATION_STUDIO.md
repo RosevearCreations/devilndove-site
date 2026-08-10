@@ -1,3 +1,7 @@
+# Build 245 cross-project note
+
+Build 245 does not change Content Studio package authority. Product-media recovery may restore supporting Product Editor image references from existing D1-linked media/history, but Content Studio must still use reviewed/approved media and may not treat migration recovery as rights/publication approval.
+
 # Content Automation Studio — Build 241 specialist-stage pointer
 
 ## Build 241 CAIP raw-media relationship

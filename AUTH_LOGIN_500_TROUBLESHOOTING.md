@@ -1,3 +1,9 @@
+# Build 245 admin refresh / degraded-auth note
+
+Build 245 distinguishes a **rejected session** from a **temporarily unverifiable session**. `/api/auth/me` returning 401/403 is authoritative rejection and may clear cached auth. A timeout, Cloudflare HTML 5xx, Worker CPU/memory limit or D1-overload response must not display “Please log in” or clear a still-cached administrator identity. The browser may show a provisional/degraded admin shell and retry with backoff, but every protected API remains server-authenticated. Secondary dashboard requests wait for `DDWhenAdminReady()` and are staggered so auth verification is not competing with all dashboard panels at refresh.
+
+When a 5xx occurs, save the Cloudflare Ray ID and inspect Workers/D1 Observability. Do not repair D1 schema or create a new admin session based only on a 503.
+
 # Devil n Dove Login 500/503 — Build 233 Evidence-First Troubleshooting
 
 ## Confirmed facts

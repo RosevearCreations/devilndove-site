@@ -1,6 +1,10 @@
+# Build 245 current deployment note
+
+Build 245 is the current deployment boundary. The application now requires the existing D1 binding plus any already-configured public product-media R2 binding and, where CAIP private intake is enabled, `CAIP_PRIVATE_MEDIA_BUCKET`. Back up D1, apply `database_build245_admin_media_resilience.sql` or byte-identical `database_upgrade_current_pass.sql` once, run `BUILD245_D1_VERIFICATION.sql`, deploy the complete package, and hard-refresh to shell v22. A temporary `/api/auth/me` 5xx must retain the cached admin shell; only a real 401/403 represents rejected authentication.
+
 # Cloudflare Environment Checklist — Devil n Dove (Build 240)
 
-## Build 240 deployment boundary
+## Retained Build 240/241 environment foundation
 
 Build 240 adds no new secret. It requires the existing D1 binding used by admin APIs and the complete static `/assets/` tree.
 
