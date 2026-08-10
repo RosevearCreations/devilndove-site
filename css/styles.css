@@ -3026,3 +3026,54 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
   .product-production-material-grid { grid-template-columns:1fr; }
   .resource-ingredient-profile .grid.cols-3 { grid-template-columns:1fr; }
 }
+
+
+/* Build 247 Packaging Studio: reusable libraries, template gallery, full rose palette. */
+.packaging-library-section {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+}
+.packaging-library-grid,
+.packaging-template-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+}
+.packaging-library-card,
+.packaging-template-card {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  background: rgba(0,0,0,.12);
+}
+.packaging-template-card.is-active { border-color: rgba(184,138,47,.7); box-shadow: inset 0 0 0 1px rgba(184,138,47,.2); }
+.packaging-library-card > div:first-child,
+.packaging-template-card > div:first-child { min-width:0; display:grid; gap:5px; }
+.packaging-library-card strong,
+.packaging-template-card strong,
+.packaging-library-card small,
+.packaging-template-card small { overflow-wrap:anywhere; }
+.packaging-library-card-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; flex:0 0 auto; }
+.packaging-library-entry-form { display:grid; gap:10px; margin-top:8px; padding-top:12px; border-top:1px solid rgba(255,255,255,.12); }
+#packagingRoseAssetPath[readonly] { opacity:.9; cursor:default; }
+@media (max-width: 900px) {
+  .packaging-library-grid,
+  .packaging-template-grid { grid-template-columns:1fr; }
+}
+@media (max-width: 620px) {
+  .packaging-library-card,
+  .packaging-template-card { flex-direction:column; }
+  .packaging-library-card-actions { width:100%; justify-content:flex-start; }
+  .packaging-library-card-actions .btn,
+  .packaging-template-card .btn { width:100%; }
+}
