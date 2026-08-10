@@ -61,7 +61,7 @@ export async function onRequestPost({ request, env }) {
       const sourceKey = normalizeText(row.source_key);
       if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
 
-      await db.prepare(`
+      const inserted = await db.prepare(`
         INSERT INTO product_resource_links (
           product_id, resource_kind, source_key, quantity_used,
           consumption_mode, lot_size_units, usage_notes, sort_order,
@@ -77,6 +77,32 @@ export async function onRequestPost({ request, env }) {
         normalizeText(row.usage_notes) || null,
         Number(row.sort_order ?? i)
       ).run();
+      const linkId = Number(inserted?.meta?.last_row_id || 0);
+      if (linkId && resourceKind === 'supply') {
+        await db.prepare(`
+          INSERT INTO product_resource_ingredient_profiles (
+            product_resource_link_id,is_label_ingredient,ingredient_name_en,ingredient_name_fr,inci_name,
+            label_sort_order,translation_review_status,updated_by_user_id,created_at,updated_at
+          ) VALUES (?,?,?,?,?,?,'needs_review',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+          ON CONFLICT(product_resource_link_id) DO UPDATE SET
+            is_label_ingredient=excluded.is_label_ingredient,
+            ingredient_name_en=excluded.ingredient_name_en,
+            ingredient_name_fr=excluded.ingredient_name_fr,
+            inci_name=excluded.inci_name,
+            label_sort_order=excluded.label_sort_order,
+            translation_review_status='needs_review',
+            updated_by_user_id=excluded.updated_by_user_id,
+            updated_at=CURRENT_TIMESTAMP
+        `).bind(
+          linkId,
+          Number(row.is_label_ingredient || 0) === 1 ? 1 : 0,
+          normalizeText(row.ingredient_name_en) || null,
+          normalizeText(row.ingredient_name_fr) || null,
+          normalizeText(row.inci_name) || null,
+          Number(row.label_sort_order ?? i),
+          Number(adminUser.user_id || 0) || null
+        ).run();
+      }
       saved += 1;
     }
 

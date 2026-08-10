@@ -371,6 +371,11 @@ export async function onRequestPost(context) {
       .bind(product_id)
       .first();
     if (!existingProduct) return json({ ok: false, error: "Product not found." }, 404);
+    const existingSeo = await db
+      .prepare(`SELECT og_image_url FROM product_seo WHERE product_id = ? LIMIT 1`)
+      .bind(product_id)
+      .first()
+      .catch(() => null);
     // Autosave persists working fields but never changes review approval. A deliberate
     // Update Product action remains the only editor path that can start approval automation.
     if (isAutosave) review_status = String(existingProduct.review_status || "pending_review").trim().toLowerCase();
@@ -423,7 +428,8 @@ export async function onRequestPost(context) {
     });
     // sort_order zero is authoritative: products.featured_image_url mirrors the first retained image.
     const featured_image_url = String(syncedImages[0]?.image_url || resolvedFeaturedImageUrl || "").trim() || null;
-    const og_image_url = requested_og_image_url || featured_image_url;
+    // A temporarily blank editor field must not silently erase a previously reviewed SEO/social image.
+    const og_image_url = requested_og_image_url || String(existingSeo?.og_image_url || '').trim() || featured_image_url;
     const readiness = computeReadiness({
       name,
       slug,

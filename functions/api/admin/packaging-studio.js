@@ -100,16 +100,18 @@ function packagingRequiredFields(project={},ingredients=[],claims=[],template={}
   if(isSoap)checks.push(['INCI ingredient list',project.ingredients_inci],['Made in Canada wording',project.made_in_canada_text],['rose asset',project.artwork?.rose_asset_id||project.rose_asset_id]);
   if(String(project.warnings_en||project.warnings_fr||'').trim())checks.push(['English warning',project.warnings_en],['French warning',project.warnings_fr]);
   const missing=checks.filter(([,value])=>!String(value||'').trim()).map(([label])=>label);
-  if(isSoap&&!ingredients.length)missing.push('structured bilingual ingredient rows');
-  if(ingredients.some((row)=>Number(row.required_on_label)!==0&&(!String(row.inci_name||'').trim()||!String(row.display_name_en||'').trim()||!String(row.display_name_fr||'').trim())))missing.push('complete INCI/English/French text for each required ingredient row');
+  if(isSoap&&!ingredients.length)missing.push('structured INCI ingredient rows');
+  if(ingredients.some((row)=>Number(row.required_on_label)!==0&&!String(row.inci_name||'').trim()))missing.push('INCI name for each required ingredient row');
   if(claims.some((row)=>!String(row.claim_en||'').trim()||!String(row.claim_fr||'').trim()))missing.push('English and French text for each claim');
   const requiredIngredients=ingredients.filter((row)=>Number(row.required_on_label)!==0);
-  const enLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_en),55);
-  const frLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_fr),55);
+  const enLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_en||row.inci_name),55);
+  const frLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_fr||row.inci_name),55);
   if(isSoap&&enLines>8)missing.push(`English ingredient panel exceeds the tested eight-line narrow-band capacity (${enLines} estimated lines)`);
   if(isSoap&&frLines>8)missing.push(`French ingredient panel exceeds the tested eight-line narrow-band capacity (${frLines} estimated lines)`);
   const dimensions=isSoap?dimensionReview(template):{blockers:[],warnings:[isRound?'Confirm the measured lid/blank diameter, safe margin, material settings and a physical proof before approval.':'Confirm the selected template against the physical container/card dieline before approval.'],profile:template.layout?.design_profile||template.layout?.dimension_profile||'general'};
-  return{missing:[...new Set(missing)],dimension_blockers:dimensions.blockers,dimension_warnings:dimensions.warnings,dimension_profile:dimensions.profile};
+  const designProfile=String(template.layout?.design_profile||safeJson(template.layout_json,{}).design_profile||'');
+  if(isSoap&&designProfile!=='soap_reference_v2')dimensions.blockers.push('Soap ribbon must use the approved soap_reference_v2 design profile before approval.');
+  return{missing:[...new Set(missing)],dimension_blockers:[...new Set(dimensions.blockers)],dimension_warnings:dimensions.warnings,dimension_profile:dimensions.profile,design_profile:designProfile};
 }
 
 async function listData(db){
@@ -194,7 +196,20 @@ export async function onRequestPost(context){
   const action=text(body.action,60).toLowerCase();
   try{
     let projectId=id(body.packaging_project_id);let message='Saved.';
-    if(action==='save_as_template'){
+    if(action==='record_translation_draft'){
+      if(!projectId)throw new Error('Save the packaging project before recording a French draft review.');
+      const project=await a.db.prepare(`SELECT packaging_project_id FROM packaging_projects WHERE packaging_project_id=? LIMIT 1`).bind(projectId).first();
+      if(!project)throw new Error('Packaging project was not found.');
+      const drafts=Array.isArray(body.drafts)?body.drafts.slice(0,30):[];
+      for(const draft of drafts){
+        const fieldKey=text(draft?.field_key,120);const sourceText=text(draft?.source_text,4000);const generatedText=text(draft?.generated_text,4000);
+        if(!fieldKey||!generatedText)continue;
+        await a.db.prepare(`INSERT OR IGNORE INTO packaging_translation_reviews(
+          packaging_project_id,field_key,source_text,generated_text,generator_key,review_status,created_by_user_id,created_at,updated_at
+        ) VALUES(?,?,?,?, 'curated_bilingual_v246','needs_review',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,fieldKey,sourceText,generatedText,a.adminUser.user_id).run();
+      }
+      message='French draft provenance recorded. Human review is still required before packaging approval.';
+    }else if(action==='save_as_template'){
       if(!projectId)throw new Error('Open a packaging project before saving a reusable template.');
       const current=await a.db.prepare('SELECT packaging_project_id FROM packaging_projects WHERE packaging_project_id=?1').bind(projectId).first();if(!current)throw new Error('Packaging project was not found.');
       const templateName=text(body.template_name,180);if(!templateName)throw new Error('A reusable template name is required.');
@@ -204,7 +219,7 @@ export async function onRequestPost(context){
       const rearWidth=Math.max(0,Math.min(1200,number(body.rear_width_mm,0)));const rearHeight=Math.max(0,Math.min(1200,number(body.rear_height_mm,0)));
       const allowedShapes=new Set(['rectangle','round','oval','soap_wrap']);const shape=allowedShapes.has(text(body.shape,30))?text(body.shape,30):(packageType==='candle_top'||packageType==='engraved_round'?'round':'rectangle');
       const allowedProfiles=new Set(['soap_reference_v2','candle_top_wedding','candle_top_centered','round_maker_mark','general_centered','general_rectangle']);
-      const designProfile=allowedProfiles.has(text(body.design_profile,60))?text(body.design_profile,60):(shape==='round'?'candle_top_centered':'general_centered');
+      const requestedDesignProfile=allowedProfiles.has(text(body.design_profile,60))?text(body.design_profile,60):(shape==='round'?'candle_top_centered':'general_centered');const designProfile=packageType==='soap_ribbon'?'soap_reference_v2':requestedDesignProfile;
       const existingLayout=body.layout&&typeof body.layout==='object'?body.layout:{};
       const layout={...existingLayout,shape,design_profile:designProfile,bleed_mm:Math.max(0,Math.min(25,number(body.bleed_mm,2))),safe_margin_mm:Math.max(0,Math.min(50,number(body.safe_margin_mm,4)))};
       if(shape==='round')layout.diameter_mm=Math.min(width,height);
@@ -222,11 +237,38 @@ export async function onRequestPost(context){
       const key=`PKG-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0,4).toUpperCase()}`;
       const template=await a.db.prepare(`SELECT * FROM packaging_templates WHERE packaging_template_id=? AND is_active=1`).bind(templateId).first();if(!template)throw new Error('Packaging template was not found.');
       const theme=safeJson(template.theme_json,{});const layout=safeJson(template.layout_json,{});const artwork={rose_asset_id:'rose-purple-v1',badge_shape:layout.shape==='oval'?'oval':'oval',rose_style:'full_rose',top_arc_text:layout.default_top_arc_text||'',bottom_arc_text:layout.default_bottom_arc_text||'',candle_primary_text:layout.default_primary_text||'',candle_date_line_1:layout.default_date_line_1||'',candle_event_line:layout.default_event_line||'',candle_date_line_2:layout.default_date_line_2||'',artwork_asset:layout.artwork_asset||''};
-      const result=await a.db.prepare(`INSERT INTO packaging_projects (project_key,product_id,packaging_template_id,project_name,package_type,project_status,collection_name,product_name,product_subtitle,product_identity_en,product_identity_fr,net_quantity_text,website_text,dealer_name,contact_text,made_in_canada_text,theme_json,artwork_json,compliance_status,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,'draft',?,?,?,?,?,?,?,?,?,?,?,?, 'needs_review',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(key,productId,templateId,text(body.project_name||`${productName} packaging`,180),template.package_type||'soap_ribbon',text(body.collection_name||productName,160),productName,text(body.product_subtitle||product?.short_description,220)||null,text(body.product_identity_en||'Aloe Soap',180),text(body.product_identity_fr||'Savon à l’aloès',180),text(body.net_quantity_text||(product?.weight_grams?`${product.weight_grams} g`:''),80)||null,text(body.website_text||'devilndove.com',220),text(body.dealer_name||'Rosevear Creations - Devil n Dove',220),text(body.contact_text||'devilndove.com/contact',300),text(body.made_in_canada_text||'Made in Canada / Fabriqué au Canada',180),JSON.stringify(theme),JSON.stringify(artwork),a.adminUser.user_id,a.adminUser.user_id).run();
+      const result=await a.db.prepare(`INSERT INTO packaging_projects (project_key,product_id,packaging_template_id,project_name,package_type,project_status,collection_name,product_name,product_subtitle,product_identity_en,product_identity_fr,net_quantity_text,website_text,dealer_name,contact_text,made_in_canada_text,theme_json,artwork_json,compliance_status,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,'draft',?,?,?,?,?,?,?,?,?,?,?,?, 'needs_review',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(key,productId,templateId,text(body.project_name||`${productName} packaging`,180),template.package_type||'soap_ribbon',text(body.collection_name||productName,160),productName,text(body.product_subtitle||product?.short_description,220)||null,text(body.product_identity_en||productName,180),text(body.product_identity_fr,180)||null,text(body.net_quantity_text||(product?.weight_grams?`${product.weight_grams} g`:''),80)||null,text(body.website_text||'devilndove.com',220),text(body.dealer_name||'Rosevear Creations - Devil n Dove',220),text(body.contact_text||'devilndove.com/contact',300),text(body.made_in_canada_text||'Made in Canada / Fabriqué au Canada',180),JSON.stringify(theme),JSON.stringify(artwork),a.adminUser.user_id,a.adminUser.user_id).run();
       projectId=id(result.meta?.last_row_id);
+      let seededIngredients=[];
+      if(template.package_type==='soap_ribbon'&&productId){
+        seededIngredients=rows(await a.db.prepare(`
+          SELECT COALESCE(prip.inci_name,'') inci_name,
+                 COALESCE(prip.ingredient_name_en,sii.item_name,prl.source_key,'') display_name_en,
+                 COALESCE(prip.ingredient_name_fr,'') display_name_fr,
+                 COALESCE(prip.label_sort_order,prl.sort_order,0) sort_order
+          FROM product_resource_links prl
+          INNER JOIN product_resource_ingredient_profiles prip
+            ON prip.product_resource_link_id=prl.product_resource_link_id
+           AND COALESCE(prip.is_label_ingredient,0)=1
+          LEFT JOIN site_item_inventory sii
+            ON LOWER(TRIM(COALESCE(sii.source_type,'')))=LOWER(TRIM(prl.resource_kind))
+           AND sii.external_key=prl.source_key AND COALESCE(sii.is_active,1)=1
+          WHERE prl.product_id=?
+          ORDER BY COALESCE(prip.label_sort_order,prl.sort_order,0),prl.product_resource_link_id
+        `).bind(productId).all().catch(()=>({results:[]}))).map((row,index)=>({
+          sort_order:index+1,inci_name:text(row.inci_name,240),display_name_en:text(row.display_name_en,240),display_name_fr:text(row.display_name_fr,240),
+          organic_flag:0,allergen_note:null,required_on_label:1
+        }));
+        if(seededIngredients.length){
+          const inci=seededIngredients.map((row)=>row.inci_name).filter(Boolean).join(', ');
+          const en=seededIngredients.map((row)=>row.display_name_en||row.inci_name).filter(Boolean).join(', ');
+          const fr=seededIngredients.map((row)=>row.display_name_fr||row.inci_name).filter(Boolean).join(', ');
+          await a.db.prepare(`UPDATE packaging_projects SET ingredients_inci=?,ingredients_en=?,ingredients_fr=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_project_id=?`).bind(inci||null,en||null,fr||null,projectId).run();
+        }
+      }
       const created=mapProject(await a.db.prepare(`SELECT * FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first());
-      await syncSoapRecords(a.db,projectId,{...created,net_weight_g:number(product?.weight_grams)||null,structured_ingredients:[],structured_claims:[]});
-      message=template.package_type==='soap_ribbon'?'Soap-label project created from the approved reference structure.':template.package_type==='candle_top'?'Editable candle-top project created from the selected round template.':'Labeling and packaging project created from the selected business-wide template.';
+      await syncSoapRecords(a.db,projectId,{...created,net_weight_g:number(product?.weight_grams)||null,structured_ingredients:seededIngredients,structured_claims:[]});
+      message=template.package_type==='soap_ribbon'?'Soap-label project created from the approved reference structure; marked product ingredients were carried into the review draft.':template.package_type==='candle_top'?'Editable candle-top project created from the selected round template.':'Labeling and packaging project created from the selected business-wide template.';
     }else if(action==='save_project'){
       if(!projectId)throw new Error('Packaging project is required.');
       const existing=await a.db.prepare(`SELECT * FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first();if(!existing)throw new Error('Packaging project was not found.');
