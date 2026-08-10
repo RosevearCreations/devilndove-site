@@ -1,141 +1,105 @@
-# Devil n Dove AI Handoff — Build 245
+# Devil n Dove AI Handoff — Build 246
 
-This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, risks and ordered next work. Historical Build prose belongs under `docs/archive/build-history/` and does not override these two files.
+This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
-## Build 245 in one paragraph
+## Build 246 in one paragraph
 
-Build 245 retains the Build 244 D1 inventory/fractional-usage transition and fixes three production weaknesses observed in the live application: transient Cloudflare 5xx responses could make a still-valid admin session appear logged out; several admin dashboard widgets could fan out at refresh and increase Worker/D1 pressure; and Product Editor reopened with only part of the image evidence even when additional product media remained linked in `media_assets`, role assignments or annotations. Build 245 introduces provisional/verified/degraded admin-auth states, only clears local auth on an explicit 401/403, staggers secondary admin reads, uses a lightweight inventory bootstrap plus server-side inventory pagination, adds editable category/unit/usage fields in the inventory table, recovers up to seven unique editor images non-destructively from four D1 media sources, preserves a chosen featured image, and fixes the Today-task Product Readiness drill-down so it no longer opens a blank readiness view. Build 245 is a D1 migration release and intentionally includes the Build 244 transition so a production database that has Build 243 but not Build 244 can move directly to Build 245.
+Build 246 repairs the live Product Editor lifecycle and extends D1-backed production integrity. A query-opened product now retains its edit identity so **Update Product** cannot lose the selected product; the chosen SEO/social image is visibly marked and preserved server-side; product deletion distinguishes meaningful business/project history from empty auto-generated Content Studio/CAIP shells, allowing those unreviewed shells to be removed automatically while reviewed/published history still blocks destructive deletion. Creative Projects may now be deleted through an explicit audited workflow that returns only **unreversed** raw inventory consumption. Finished products that are made outside a Creative Project gain an idempotent Production Release that deducts reviewed consumables, preserves material/ingredient snapshots, records evidence-only reusable/log-only resources, and increments finished-product inventory without double-posting. Product Resources now carry optional label-ingredient/INCI profiles; linked soap packaging can seed those verified ingredient facts, use a curated French **draft** workflow with human review, and is locked to the approved `soap_reference_v2` visual direction rather than invented rough ingredient claims. CAIP skips exact same-project media duplicates instead of inserting duplicate rows.
 
 ## Current system authorities
 
 | Concern | Authority |
 |---|---|
 | Product identity and sellable facts | D1 product/catalog tables + Product Editor |
-| Product editor gallery | D1 `product_images`, recoverable from linked D1 media/history; featured field remains on `products` |
+| Product editor gallery | D1 `product_images`, recoverable from linked D1 media/history; `products.featured_image_url` remains the featured-image field |
+| Product SEO/social image | D1 `product_seo.og_image_url`; independent of the supporting gallery and preserved when the editor temporarily has no field value |
 | Tool/supply master catalog | **D1 `catalog_items`** |
-| Operational stock, reservations and movements | **D1 `site_item_inventory` + movement/usage tables** |
+| Operational stock/reservations/movements | **D1 `site_item_inventory` + movement/usage tables** |
 | Legacy tool/supply JSON | Read-only provenance/emergency fallback; never a normal mutable runtime authority |
-| Tool/supply classification | D1 lower-case `tool` / `supply`, editable through Inventory Operations |
-| Material depletion policy | `site_inventory_usage_profiles` + stock/usage unit conversion |
-| Admin browser identity during temporary 5xx | Provisional cached identity for UI continuity only; every admin API remains server-authenticated |
-| Orders/payments/refunds | Existing order/payment/refund authorities |
-| Packaging | Labeling & Packaging D1 authorities + specialist docs |
-| Creative Project process/material/time evidence | Creative Process / Creative Automation D1 tables |
+| Tool/supply classification | Lower-case D1 `tool` / `supply`, editable through Inventory Operations |
+| Material depletion policy | `site_inventory_usage_profiles` + stock/usage conversion; exact/estimated consume, log-only/reusable do not |
+| Finished-product material/ingredient history | `product_production_runs` + `product_production_run_materials` immutable snapshots |
+| Product label-ingredient mapping | `product_resource_ingredient_profiles` linked to `product_resource_links` |
+| Creative Project process/material/time evidence | Creative Automation / Creative Process D1 tables |
+| Creative Project destructive delete audit | `creative_project_deletion_audit`; unreversed project inventory is compensated before deletion |
 | Creative media, rights and story evidence | CAIP |
-| Private Creative Project originals | CAIP D1 metadata + `CAIP_PRIVATE_MEDIA_BUCKET` |
+| Private Creative Project originals | CAIP D1 metadata + private `CAIP_PRIVATE_MEDIA_BUCKET` |
+| Packaging/label project state | Labeling & Packaging D1 authorities + `PACKAGING_STUDIO.md` |
+| French label generation evidence | `packaging_translation_reviews`; machine/curated output remains a draft until human review |
 | Content packages | Content Studio |
 | Publication approval/provider reconciliation | Release Board / Social Queue / provider records |
 | Launch gates | `startup_readiness_items` + history |
 | Cross-project architecture/deployment | **This file** |
 | Current status/next steps | **`PROJECT_STATUS_AND_ROADMAP.md`** |
 
-Mutable business state belongs in D1 whenever a live table exists. JSON and Markdown may be fixtures, provenance, specialist design authority or release evidence, but must not compete with D1 as a second mutable source of truth.
+Mutable business state belongs in D1 whenever a live table exists. JSON and Markdown may be fixtures, provenance, fixed specialist design authority or release evidence, but must not compete with D1 as a second mutable source of truth.
 
-## Admin authentication and degraded-mode rule
+## Product edit, image and deletion rules
 
-Admin-page refresh follows this state model:
+1. A Product Editor opened by URL/query/focus must persist the same numeric product ID through form submission; Update must never fall back to “No product selected” when the product is visibly loaded.
+2. Gallery, featured and SEO/social image roles are distinct. The editor should show which image is the SEO/social image, and a blank client field must not erase an already-reviewed `product_seo.og_image_url`.
+3. Supporting media is non-destructive: `product_images` is preferred, with recovery from non-deleted `media_assets`, active media-role assignments and image annotations. Up to seven unique editor images are presented.
+4. Product deletion may automatically clean **unreviewed generated project shells** that contain no meaningful workflow/review/publication/evidence/output state. A meaningful Content Studio/CAIP project remains a blocking business/history reference and must be handled explicitly.
+5. Posted finished-product production history is a deletion blocker. Archive or reverse/detach according to the business workflow rather than silently discarding production evidence.
 
-```text
-cached admin identity + token
-  → provisional admin shell
-  → /api/auth/me verifies
-      200: verified admin
-      401/403: genuine rejection → clear cached auth + require login
-      5xx/timeout/Worker limit: retain cached identity → degraded admin shell + retry/backoff
-```
+## Inventory, Creative Project and finished-production rules
 
-Cached identity never grants server-side authorization. It only prevents a temporary Cloudflare/D1 outage from incorrectly rendering “Please log in” while the real server session has not been rejected. Actual admin APIs still call the server auth guard.
-
-Secondary dashboard reads must wait for `DDWhenAdminReady()` / `dd:admin-access-granted` and be staggered rather than all firing at DOMContentLoaded. Shared safe GET transport may deduplicate identical in-flight reads, use bounded retry/backoff and return clearly labeled stale read-only data. Writes are never automatically replayed.
-
-## Product-media integrity rule
-
-Product media is intentionally non-destructive. The canonical Product Editor can display at most seven unique editor images, resolved in this order:
-
-1. `product_images` — preferred gallery authority;
-2. non-deleted `media_assets` linked to the product;
-3. `product_media_role_assignments` that are not removed;
-4. `product_image_annotations` history/reference URLs.
-
-Build 245 migration backfills only missing `product_images` URLs from those D1 sources and never deletes existing gallery rows. A selected `products.featured_image_url` is preserved; only a blank featured field may be filled from the first canonical gallery image. `product_media_integrity_snapshots` records migration-time diagnostics and is not a second gallery authority. Public product structured data may expose multiple approved gallery images; SEO/OG media does not replace the supporting product gallery.
-
-## Inventory and material-usage model
-
-Both catalog and working inventory are in D1 but serve different purposes:
+The inventory model remains fractional and auditable:
 
 ```text
 D1 catalog_items
-  master identity / descriptive catalog
+  descriptive master
         ↓
 D1 site_item_inventory
-  actual on-hand/reserved/incoming/cost/unit state
+  actual stock/cost/reservation state
         ↓
 usage profile + movements
-  actual use and stock effect
+  exact/estimated/log-only/reusable effect
 ```
 
-Build 244 foundations retained by Build 245 include editable tool↔supply classification and `exact`, `estimated`, `log_only` and `reusable` usage modes. Fractional conversion prevents a small amount from consuming a whole container. Example: a 500 g jar with 3 g used records `3 / 500 = 0.006` stock units; if only “a few sprinkles” are known, `log_only` records evidence without fabricating depletion.
+A Creative Project delete may return only project consumption that has **not already been reversed**. The delete preview calculates the return, the operator uses the explicit `DELETE AND RETURN <project_key>` confirmation when inventory is involved, D1 quantities are compensated, correction movements are written, and an immutable deletion audit is saved. The finished product itself is not silently deleted; meaningful linked outputs/handoffs still block the project delete until deliberately handled.
 
-Build 245 makes the Inventory Operations hot path lighter: initial dropdown/reference data comes from `/api/admin/inventory-bootstrap`; catalog search is requested only when the operator types; the inventory list is server-paginated (default 80); and ordinary GET paths do not install schema or run PRAGMA repairs.
+A finished product made without a Creative Project uses **Finished Product Production Release** under Product Resources. Preview first. The release converts usage units to stock units, deducts only supply rows configured for exact/estimated tracking, records tools/reusable/log-only rows as evidence without depletion, blocks insufficient stock or missing active inventory, and blocks label ingredients that are marked required but have no INCI value. The POST is idempotent and uses expected-previous-quantity guards so one production event cannot normally be double-consumed by a browser retry/concurrency race. It stores immutable material and ingredient snapshots with the production run and then increments finished-product quantity.
 
-## Build 245 schema boundary
+## CAIP integrity rule
+
+Private raw Creative Project media remains separate from approved/public media. Exact fingerprint/size duplicates within the **same Creative Project** are skipped at intake instead of creating duplicate upload rows/parts. Cross-project duplicates remain warnings because one source file may legitimately support more than one project. Raw media remains immutable; derivatives, proxies, frames, transcripts and exports are separate objects.
+
+## Packaging and soap-label rule
+
+Soap ribbon design is locked to the approved `soap_reference_v2` direction. Applying the approved Glacial Purple reference changes the **visual treatment only** and must not invent formula, ingredient, claim, warning or net-quantity facts. Formula/ingredient facts come from reviewed Product Resources / production evidence.
+
+Required soap ingredient rows use INCI as the ingredient-list authority. English/French display text may be stored for clarity, but generated French is always a **draft** with provenance in `packaging_translation_reviews`; it is not automatically approved. The UI may draft common identity, warning, claim and display wording, but a human reviewer must approve wording before print/release. The renderer deliberately shows `INCI INGREDIENTS REQUIRED — DRAFT NOT FOR PRINT` when verified ingredient facts are absent rather than inventing filler text.
+
+## Admin authentication and error/fallback rule retained
+
+Build 245 degraded-auth resilience remains current: explicit 401/403 may clear the local cached session; temporary 5xx/timeouts/Worker-limit conditions retain the provisional admin shell and show degraded status. Every admin API still authenticates server-side. Safe GETs may deduplicate and use bounded retry/backoff/stale read-only continuity; writes are never automatically replayed. Cloudflare HTML failures must be detected before JSON parsing and surface HTTP status/Ray evidence rather than raw `JSON.parse` errors.
+
+## Build 246 schema boundary
 
 For production D1:
 
 1. Back up D1 / record a recovery point.
-2. Apply **one** of:
-   - `database_build245_admin_media_resilience.sql`; or
+2. Confirm Build 245 has been applied successfully.
+3. Apply **one** of:
+   - `database_build246_product_project_production_packaging.sql`; or
    - byte-identical `database_upgrade_current_pass.sql`.
-3. Do not separately apply Build 244 if production has not yet received it; Build 245 contains the complete Build 244 transition and is idempotent if Build 244 was already applied.
 4. Do not apply both current SQL files.
-5. Confirm ledger keys `build244_inventory_authority_fractional_usage` and `build245_admin_media_resilience`.
-6. Run the read-only `BUILD245_D1_VERIFICATION.sql` and review any reported case duplicates/media-integrity gaps.
-7. Deploy matching Build 245 code and hard-refresh so service-worker shell **v22** and current scripts load.
+5. Confirm ledger key `build246_product_project_production_packaging`.
+6. Run read-only `BUILD246_D1_VERIFICATION.sql`; review any missing INCI rows, duplicate active inventory identities or foreign-key failures it reports.
+7. Deploy matching Build 246 code and hard-refresh so service-worker shell **v23** and Build 246 admin scripts load.
 
-Build 245 creates `product_media_integrity_snapshots` and `admin_api_health_observations`, adds product-media lookup indexes, non-destructively restores missing gallery references from D1-linked media/history, and writes current policy settings. It uses **no TEMP tables and no DROP TABLE**. `database_full_schema.sql` contains the executable current aggregate. The scoped `database_schema.sql` and `database_store_schema.sql` contain Build 245-safe scoped definitions/settings without pretending to own full product-media authorities outside their scope.
-
-## CAIP retained architecture
-
-Private raw Creative Project media remains separate from approved/public media:
-
-```text
-Creative Project
-  → CAIP private intake
-  → D1 session/file/part/governance state
-  + CAIP_PRIVATE_MEDIA_BUCKET immutable raw binary
-  → proxy/extracted/derived work
-  → evidence/story review
-  → Content Studio / Release Board
-  → rights + consent + privacy approval
-  → approved public media / PRODUCT_MEDIA_BUCKET
-```
-
-`CAIP_PRIVATE_MEDIA_BUCKET` must remain private with no public `r2.dev` or public custom domain. General website-ready images belong in the public/product bucket intake path, not the private raw bucket.
-
-## Runtime/error-handling rules
-
-1. Schema installation belongs to numbered migrations, not routine operational requests.
-2. Only explicit 401/403 may clear a cached admin session because the server rejected it; temporary 5xx/timeouts retain the provisional shell and show degraded status.
-3. Shared admin GET transport deduplicates identical in-flight reads and uses bounded retry/backoff for temporary safe-read failures; writes are never automatically replayed.
-4. Cloudflare HTML/non-JSON failures surface HTTP status and Ray-ID diagnostics rather than raw `JSON.parse` errors.
-5. Stale browser fallback is read-only continuity, never proof of a successful write.
-6. Inventory forms keep a browser recovery draft and disable duplicate Save submission while a write is active.
-7. Expensive dashboard/status panels load after essential auth/page data and should not compete with business-critical writes.
-8. Legacy tool/supply JSON cannot overwrite reviewed D1 classifications through runtime catalog sync.
-9. Runtime incidents/health evidence must never store passwords, tokens, cookies, raw binary bodies or unnecessary personal information.
-10. Destructive/history-sensitive operations prefer reversible/archive state and audited corrections over silent deletion.
+Build 246 creates `creative_project_deletion_audit`, `product_resource_ingredient_profiles`, `product_production_runs`, `product_production_run_materials` and `packaging_translation_reviews`, plus supporting indexes/settings. It uses no TEMP-table or destructive table-removal operations. `database_full_schema.sql` is the complete supported fresh-install aggregate; `database_schema.sql` and `database_store_schema.sql` remain scoped historical/overlay schemas and must not be treated as complete fresh-install authorities.
 
 ## Public/mobile/SEO guardrails
 
-Every public pass verifies one H1, distinctive concise title, useful meta description, canonical, crawlable descriptive internal links, descriptive alt text, resolvable/crawlable media, mobile content parity and valid structured data. Admin pages remain `noindex,nofollow` and one-H1. Use real Ontario/Southern Ontario service wording naturally and keep public facts consistent with actual offers. First-page local placement is a goal, not a guarantee.
-
-Build 245 static public audit is **36/36 passed**, and the local `/assets/...` audit is **120 references with zero missing**. Product image recovery is intended to strengthen truthful multi-image product evidence, not manufacture SEO imagery.
+Every public pass verifies exactly one H1, a clear truthful title, useful meta description, canonical, crawlable descriptive internal links, descriptive alt text, resolvable/crawlable media, mobile content parity and valid structured data. Admin pages remain `noindex,nofollow` and should also retain a single H1. Use real Southern Ontario/local offer wording naturally; never create doorway pages or claim guaranteed first-page placement. Product SEO/social imagery should reflect the actual product and remain stable after edit/reload.
 
 ## Current documentation rule
 
-The two cross-project authorities are only:
+The two cross-project current authorities are only:
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 
-`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` are compatibility pointers. Specialist documents remain where they own specialist implementation/testing details. Historical Build changed-file/validation prose belongs under `docs/archive/build-history/` and is frozen evidence rather than current planning.
+`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` are compatibility pointers. Specialist documents remain where they own implementation/testing details. Historical Build release prose is archived and frozen rather than repeatedly rewritten.

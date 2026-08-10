@@ -1,3 +1,3 @@
-# Devil n Dove AI Context — Build 245 Pointer
+# Devil n Dove AI Context — Build 246 Pointer
 
-Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. They are the only cross-project current authorities. Build 245 retains Build 244 D1 inventory/fractional usage, fixes false admin logout on transient 5xx, staggers admin startup reads, adds lightweight paginated inventory loading, recovers missing Product Editor gallery references from linked D1 media/history, and fixes Product Readiness drill-down/fallback.
+Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. They are the only cross-project current authorities. Build 246 fixes Product Editor update identity and SEO/social-image persistence, safely cleans only empty generated Content Studio/CAIP product shells during product deletion, adds audited Creative Project deletion with unreversed inventory return, adds idempotent finished-product production/material/ingredient snapshots, strengthens CAIP same-project duplicate prevention, and moves soap packaging toward the approved reference with INCI-backed ingredients plus review-required French drafts.

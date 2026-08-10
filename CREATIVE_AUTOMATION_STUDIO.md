@@ -1,6 +1,9 @@
-# Build 245 cross-project note
+# Build 246 current integrity note
 
-Build 245 retains the seven-stage Creative Automation authority. Fractional inventory use from Build 244 remains current, and recovered product-media references remain evidence links rather than automatic stage approval or publication.
+Creative Project deletion now supports an explicit audited delete-and-return path. Only **unreversed** project inventory consumption is returned; correction movements and `creative_project_deletion_audit` evidence are written before project-owned rows are removed. Meaningful downstream/external output references still block deletion. Finished-product releases outside Creative Projects use the separate Product Production Release authority.
+
+
+Build 246 retains the seven-stage Creative Automation authority. Fractional inventory use from Build 244 remains current, and recovered product-media references remain evidence links rather than automatic stage approval or publication.
 
 # Devil n Dove Creative Automation Studio — Build 241
 

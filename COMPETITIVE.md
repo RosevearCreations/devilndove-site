@@ -1,4 +1,10 @@
-# Build 245 competitive/SEO directional check
+# Build 246 competitive/SEO directional check — 2026-08-10
+
+A current public review still shows useful patterns without changing Devil n Dove's evidence-first direction. Things Engraved organizes personalized gift categories around occasions and customization, while The Engraving Shoppe clearly names engraving/printing categories, materials and the path for a customer to start a custom project. The useful takeaway is not to copy their claims: Devil n Dove should keep strengthening category/material examples, customization steps, product galleries, direct custom-request paths and local/pickup/shipping clarity while only promising turnaround, minimums and services that are actually supported.
+
+Reviewed examples: [Things Engraved Canada](https://thingsengraved.com/) and [The Engraving Shoppe](https://theengravingshoppe.ca/). Google/local-search direction remains governed by the current official guidance linked from `LOCAL_SEO_PLAYBOOK.md`.
+
+# Retained Build 245 competitive/SEO directional check
 
 Fresh public review for this pass reinforces three useful patterns: Google wants a clear main title rather than several equally prominent headings; descriptive, relevant images/alt text and crawlable links remain important discovery signals; and local Business Profile visibility is mainly driven by relevance, distance and prominence. Ontario/Toronto engraving competitors prominently explain materials, personalization workflow, pricing/quote paths and local service intent. Devil n Dove should keep strengthening truthful product galleries, process clarity, custom-request paths and local wording while avoiding competitor promises (for example same-day service) that we have not independently committed to.
 

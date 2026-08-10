@@ -1,6 +1,9 @@
-# Build 245 cross-project note
+# Build 246 current product-shell note
 
-Build 245 does not change Content Studio package authority. Product-media recovery may restore supporting Product Editor image references from existing D1-linked media/history, but Content Studio must still use reviewed/approved media and may not treat migration recovery as rights/publication approval.
+Product deletion now distinguishes empty/unreviewed auto-generated Content Studio shells from meaningful reviewed/published/output history. Empty generated shells may be cleaned automatically during a confirmed product delete; meaningful Content Studio work remains a protected business/history reference.
+
+
+The retained Build 245 media-recovery foundation does not change Content Studio package authority. Product-media recovery may restore supporting Product Editor image references from existing D1-linked media/history, but Content Studio must still use reviewed/approved media and may not treat migration recovery as rights/publication approval.
 
 # Content Automation Studio — Build 241 specialist-stage pointer
 
