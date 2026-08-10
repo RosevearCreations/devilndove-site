@@ -163,28 +163,14 @@ async function logMovement(db, payload = {}) {
   return Number(result?.meta?.last_row_id || 0);
 }
 
-async function getItems(db, { q = '', stockView = '', includeHistory = false } = {}) {
+async function getItems(db, { q = '', stockView = '', includeHistory = false, page = 1, pageSize = 80 } = {}) {
+  const safePage = Math.max(1, Number(page || 1) || 1);
+  const safePageSize = Math.max(25, Math.min(150, Number(pageSize || 80) || 80));
+  const offset = (safePage - 1) * safePageSize;
   const like = `%${q}%`;
-
-  const items = normalizeResults(await db.prepare(`
-    SELECT
-      sii.*,
-      COALESCE(siid.item_description, '') AS item_description,
-      COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
-      COALESCE(siup.minimum_usage_increment, 0.001) AS minimum_usage_increment,
-      COUNT(DISTINCT prl.product_id) AS linked_product_count,
-      GROUP_CONCAT(DISTINCT p.name) AS linked_product_names
-    FROM site_item_inventory sii
-    LEFT JOIN site_inventory_item_descriptions siid
-      ON siid.site_item_inventory_id = sii.site_item_inventory_id
-    LEFT JOIN site_inventory_usage_profiles siup
-      ON siup.site_item_inventory_id = sii.site_item_inventory_id
-    LEFT JOIN product_resource_links prl
-      ON prl.resource_kind = sii.source_type
-     AND prl.source_key = sii.external_key
-    LEFT JOIN products p
-      ON p.product_id = prl.product_id
-    WHERE (
+  const filterBinds = [q, like, like, like, like, like, stockView, stockView, stockView, stockView, stockView, stockView, stockView];
+  const filterSql = `
+    (
       ? = ''
       OR LOWER(COALESCE(sii.item_name, '')) LIKE ?
       OR LOWER(COALESCE(sii.category, '')) LIKE ?
@@ -200,85 +186,77 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false } =
       OR (? = 'inactive' AND COALESCE(sii.is_active, 1) = 0)
       OR (? = 'tool' AND LOWER(TRIM(COALESCE(sii.source_type,''))) = 'tool')
       OR (? = 'supply' AND LOWER(TRIM(COALESCE(sii.source_type,''))) = 'supply')
-    )
-    GROUP BY sii.site_item_inventory_id
-    ORDER BY LOWER(COALESCE(sii.item_name, '')) ASC
-  `).bind(q, like, like, like, like, like, stockView, stockView, stockView, stockView, stockView, stockView, stockView).all().catch(() => ({ results: [] })));
+    )`;
 
+  const summaryRow = await db.prepare(`
+    SELECT
+      COUNT(*) AS total_items,
+      SUM(CASE WHEN COALESCE(sii.is_active,1)=1 THEN 1 ELSE 0 END) AS active_items,
+      SUM(CASE WHEN (COALESCE(sii.on_hand_quantity,0)+COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END) AS low_stock_items,
+      COALESCE(SUM(COALESCE(sii.reserved_quantity,0)),0) AS total_reserved,
+      COALESCE(SUM(COALESCE(sii.incoming_quantity,0)),0) AS total_incoming,
+      SUM(CASE WHEN COALESCE(sii.is_on_reorder_list,0)=1 THEN 1 ELSE 0 END) AS reorder_list_items
+    FROM site_item_inventory sii
+    LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id=sii.site_item_inventory_id
+    WHERE ${filterSql}
+  `).bind(...filterBinds).first().catch(() => null);
+
+  const items = normalizeResults(await db.prepare(`
+    WITH link_stats AS (
+      SELECT prl.resource_kind, prl.source_key,
+             COUNT(DISTINCT prl.product_id) AS linked_product_count,
+             GROUP_CONCAT(DISTINCT p.name) AS linked_product_names
+      FROM product_resource_links prl
+      LEFT JOIN products p ON p.product_id=prl.product_id
+      GROUP BY prl.resource_kind,prl.source_key
+    )
+    SELECT sii.*,COALESCE(siid.item_description,'') AS item_description,
+           COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+           COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
+           COALESCE(ls.linked_product_count,0) AS linked_product_count,
+           COALESCE(ls.linked_product_names,'') AS linked_product_names
+    FROM site_item_inventory sii
+    LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN link_stats ls ON ls.resource_kind=sii.source_type AND ls.source_key=sii.external_key
+    WHERE ${filterSql}
+    ORDER BY LOWER(COALESCE(sii.item_name,'')) ASC,sii.site_item_inventory_id ASC
+    LIMIT ? OFFSET ?
+  `).bind(...filterBinds, safePageSize, offset).all().catch(() => ({ results: [] })));
+
+  const totalItems = Number(summaryRow?.total_items || 0);
+  const totalPages = Math.max(1, Math.ceil(totalItems / safePageSize));
   const summary = {
-    total_items: items.length,
-    active_items: items.filter((row) => Number(row.is_active || 1) === 1).length,
-    low_stock_items: items.filter((row) => (Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0)) <= Number(row.reorder_level || 0)).length,
-    total_reserved: items.reduce((sum, row) => sum + Number(row.reserved_quantity || 0), 0),
-    total_incoming: items.reduce((sum, row) => sum + Number(row.incoming_quantity || 0), 0),
-    reorder_list_items: items.filter((row) => Number(row.is_on_reorder_list || 0) === 1).length
+    total_items: totalItems,
+    active_items: Number(summaryRow?.active_items || 0),
+    low_stock_items: Number(summaryRow?.low_stock_items || 0),
+    total_reserved: Number(summaryRow?.total_reserved || 0),
+    total_incoming: Number(summaryRow?.total_incoming || 0),
+    reorder_list_items: Number(summaryRow?.reorder_list_items || 0)
   };
 
   const movements = includeHistory
     ? normalizeResults(await db.prepare(`
-        SELECT
-          site_inventory_movement_id,
-          site_item_inventory_id,
-          source_type,
-          external_key,
-          item_name,
-          movement_type,
-          quantity_delta,
-          previous_on_hand_quantity,
-          new_on_hand_quantity,
-          previous_reserved_quantity,
-          new_reserved_quantity,
-          previous_incoming_quantity,
-          new_incoming_quantity,
-          note,
-          created_at
+        SELECT site_inventory_movement_id,site_item_inventory_id,source_type,external_key,item_name,movement_type,
+               quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,
+               previous_incoming_quantity,new_incoming_quantity,note,created_at
         FROM site_inventory_movements
-        ORDER BY created_at DESC, site_inventory_movement_id DESC
-        LIMIT 50
-      `).all().catch(() => ({ results: [] })))
-    : [];
-
-  const supplier_reorder_groups = items
-    .filter((row) => Number(row.do_not_reorder || 0) !== 1)
-    .filter((row) =>
-      Number(row.is_on_reorder_list || 0) === 1 ||
-      ((Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0)) <= Number(row.reorder_level || 0))
-    )
-    .reduce((acc, row) => {
-      const key = normalizeText(row.supplier_name) || 'Unassigned Supplier';
-      if (!acc[key]) {
-        acc[key] = {
-          supplier_name: key,
-          supplier_contact: row.supplier_contact || '',
-          item_count: 0,
-          estimated_total_cents: 0,
-          items: []
-        };
-      }
-
-      const suggested_quantity = Math.max(
-        1,
-        Number(row.preferred_reorder_quantity || 0) ||
-        Math.max(1, Number(row.reorder_level || 0) - (Number(row.on_hand_quantity || 0) + Number(row.incoming_quantity || 0)))
-      );
-
-      acc[key].item_count += 1;
-      acc[key].estimated_total_cents += suggested_quantity * Number(row.unit_cost_cents || 0);
-      acc[key].items.push({
-        site_item_inventory_id: Number(row.site_item_inventory_id || 0),
-        item_name: row.item_name || '',
-        suggested_quantity,
-        unit_cost_cents: Number(row.unit_cost_cents || 0)
-      });
-
-      return acc;
-    }, {});
+        ORDER BY created_at DESC,site_inventory_movement_id DESC LIMIT 50
+      `).all().catch(() => ({ results: [] }))) : [];
 
   return {
     items: items.map(shape),
     summary,
     movements,
-    supplier_reorder_groups: Object.values(supplier_reorder_groups)
+    supplier_reorder_groups: [],
+    pagination: {
+      page: Math.min(safePage,totalPages),
+      page_size: safePageSize,
+      total_items: totalItems,
+      total_pages: totalPages,
+      has_previous: safePage > 1,
+      has_next: safePage < totalPages
+    }
   };
 }
 
@@ -548,7 +526,9 @@ async function handleGet(context) {
   const payload = await getItems(db, {
     q: normalizeText(url.searchParams.get('q')).toLowerCase(),
     stockView: normalizeText(url.searchParams.get('stock_view')).toLowerCase(),
-    includeHistory: ['1', 'true', 'yes'].includes(String(url.searchParams.get('include_history') || '').toLowerCase())
+    includeHistory: ['1', 'true', 'yes'].includes(String(url.searchParams.get('include_history') || '').toLowerCase()),
+    page: Math.max(1, Number(url.searchParams.get('page') || 1) || 1),
+    pageSize: Math.max(25, Math.min(150, Number(url.searchParams.get('page_size') || 80) || 80))
   });
 
   return json({ ok: true, ...payload });

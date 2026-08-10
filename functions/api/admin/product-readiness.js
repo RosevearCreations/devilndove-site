@@ -1,71 +1,9 @@
 // File: /functions/api/admin/product-readiness.js
-// Brief description: Admin-only readiness preview endpoint for product publish blockers,
-// image-role coverage, public-use blockers, and SEO/data gaps before approve/publish clicks.
+// Build 245: migration-owned schema, bounded readiness preview, no request-time DDL/PRAGMA introspection.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
-
-function json(data, status = 200) {
-  return jsonResponse(data, status);
-}
-
-function rows(result) {
-  return Array.isArray(result?.results) ? result.results : [];
-}
-
-async function getTableColumnSet(db, tableName) {
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-    return new Set(rows(result).map((row) => String(row?.name || "").trim()).filter(Boolean));
-  } catch {
-    return new Set();
-  }
-}
-
-function col(columnSet, columnName, alias = columnName, fallback = "NULL") {
-  return columnSet.has(columnName) ? `p.${columnName}` : `${fallback} AS ${alias}`;
-}
-
-async function ensureReadinessSupportTables(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS product_seo (
-    product_id INTEGER PRIMARY KEY,
-    meta_title TEXT,
-    meta_description TEXT,
-    keywords TEXT,
-    h1_override TEXT,
-    canonical_url TEXT,
-    schema_type TEXT DEFAULT 'Product',
-    og_title TEXT,
-    og_description TEXT,
-    og_image_url TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-
-  await db.prepare(`CREATE TABLE IF NOT EXISTS product_images (
-    product_image_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_id INTEGER NOT NULL,
-    image_url TEXT NOT NULL,
-    alt_text TEXT,
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-
-  await db.prepare(`CREATE TABLE IF NOT EXISTS product_image_annotations (
-    product_image_annotation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_id INTEGER NOT NULL,
-    product_image_id INTEGER,
-    image_url TEXT,
-    alt_text TEXT,
-    image_role TEXT,
-    public_use_status TEXT DEFAULT 'internal_review',
-    width_px INTEGER,
-    height_px INTEGER,
-    image_orientation TEXT,
-    merchandising_score INTEGER,
-    first_image_score INTEGER,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-}
+const json=(data,status=200)=>jsonResponse(data,status,{"Cache-Control":"no-store"});
+const rows=(result)=>Array.isArray(result?.results)?result.results:[];
 
 function buildReadiness(row = {}) {
   const imageCount = Number(row.image_count || 0);
@@ -163,85 +101,60 @@ function summarizeProducts(products) {
   return summary;
 }
 
-export async function onRequestGet(context) {
-  const { request, env } = context;
+export async function onRequestGet({ request, env }) {
   const db = getDb(env);
-  if (!db) return json({ ok: false, error: "Database binding is missing." }, 500);
-
-  const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
-
-  await ensureReadinessSupportTables(db);
-
-  const url = new URL(request.url);
-  const productId = Number(url.searchParams.get("product_id") || 0);
-  const limit = Math.max(1, Math.min(500, Number(url.searchParams.get("limit") || 160)));
-  const showReady = String(url.searchParams.get("show_ready") || "0") === "1";
-
-  const productCols = await getTableColumnSet(db, "products");
-  const annotationCols = await getTableColumnSet(db, "product_image_annotations");
-  const imageScoreExpr = annotationCols.has("merchandising_score") ? "pia.merchandising_score" : (annotationCols.has("first_image_score") ? "pia.first_image_score" : "NULL");
-
-  const sql = `
-    SELECT
-      p.product_id,
-      ${col(productCols, "name", "name", "''")},
-      ${col(productCols, "slug", "slug", "''")},
-      ${col(productCols, "sku", "sku", "''")},
-      ${col(productCols, "status", "status", "''")},
-      ${col(productCols, "review_status", "review_status", "''")},
-      ${col(productCols, "price_cents", "price_cents", "0")},
-      ${col(productCols, "short_description", "short_description", "''")},
-      ${col(productCols, "featured_image_url", "featured_image_url", "''")},
-      ${col(productCols, "product_category", "product_category", "''")},
-      ${col(productCols, "sale_channel", "sale_channel", "''")},
-      ps.meta_title,
-      ps.meta_description,
-      COUNT(DISTINCT pi.product_image_id) AS image_count,
-      COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,''))) >= 5 THEN pi.product_image_id ELSE NULL END) AS alt_coverage_count,
-      MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has("image_orientation") ? "pia.image_orientation" : "NULL"} ELSE NULL END) AS first_image_orientation,
-      MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has("width_px") ? "pia.width_px" : "NULL"} ELSE NULL END) AS first_width_px,
-      MIN(CASE WHEN pi.sort_order = 0 THEN ${annotationCols.has("height_px") ? "pia.height_px" : "NULL"} ELSE NULL END) AS first_height_px,
-      MIN(CASE WHEN pi.sort_order = 0 THEN ${imageScoreExpr} ELSE NULL END) AS first_merchandising_score,
-      AVG(COALESCE(${imageScoreExpr}, 0)) AS average_merchandising_score,
-      SUM(CASE WHEN pi.product_image_id IS NOT NULL AND COALESCE(${annotationCols.has("image_role") ? "pia.image_role" : "''"}, '') = '' THEN 1 ELSE 0 END) AS missing_image_role_count,
-      SUM(CASE WHEN LOWER(COALESCE(${annotationCols.has("image_role") ? "pia.image_role" : "''"}, '')) = 'hero_front' THEN 1 ELSE 0 END) AS hero_image_role_count,
-      SUM(CASE WHEN LOWER(COALESCE(${annotationCols.has("image_role") ? "pia.image_role" : "''"}, '')) = 'detail_texture' THEN 1 ELSE 0 END) AS detail_image_role_count,
-      SUM(CASE WHEN LOWER(COALESCE(${annotationCols.has("image_role") ? "pia.image_role" : "''"}, '')) = 'scale_context' THEN 1 ELSE 0 END) AS scale_image_role_count,
-      SUM(CASE WHEN LOWER(COALESCE(${annotationCols.has("public_use_status") ? "pia.public_use_status" : "''"}, '')) IN ('consent_needed','blocked') THEN 1 ELSE 0 END) AS blocked_public_use_count
-    FROM products p
-    LEFT JOIN product_seo ps ON ps.product_id = p.product_id
-    LEFT JOIN product_images pi ON pi.product_id = p.product_id
-    LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
-    ${productId > 0 ? "WHERE p.product_id = ?" : ""}
-    GROUP BY p.product_id
-    ORDER BY datetime(COALESCE(p.updated_at, p.created_at, '1970-01-01')) DESC, p.product_id DESC
-    LIMIT ?`;
-
-  const statement = db.prepare(sql);
-  const result = productId > 0 ? await statement.bind(productId, limit).all() : await statement.bind(limit).all();
-  const products = rows(result).map((row) => {
-    const readiness = buildReadiness(row);
-    return {
-      product_id: Number(row.product_id || 0),
-      name: normalizeText(row.name),
-      slug: normalizeText(row.slug),
-      sku: normalizeText(row.sku),
-      status: normalizeText(row.status),
-      review_status: normalizeText(row.review_status),
-      price_cents: Number(row.price_cents || 0),
-      featured_image_url: normalizeText(row.featured_image_url),
-      readiness
-    };
-  });
-
-  const filteredProducts = showReady ? products : products.filter((product) => !product.readiness.ready);
-
-  return json({
-    ok: true,
-    products: filteredProducts,
-    summary: summarizeProducts(products),
-    generated_at: new Date().toISOString(),
-    requested_by: { user_id: adminUser.user_id, email: adminUser.email }
-  });
+  if (!db) return json({ ok:false, error:'Database binding is missing.' },500);
+  const adminUser = await getAdminUserFromRequest(request,env);
+  if (!adminUser) return json({ ok:false, error:'Unauthorized.' },401);
+  const url=new URL(request.url);
+  const productId=Number(url.searchParams.get('product_id')||0);
+  const limit=Math.max(1,Math.min(300,Number(url.searchParams.get('limit')||160)));
+  const showReady=String(url.searchParams.get('show_ready')||'0')==='1';
+  try {
+    const sql=`
+      WITH image_stats AS (
+        SELECT pi.product_id,
+               COUNT(DISTINCT pi.product_image_id) AS image_count,
+               COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,'')))>=5 THEN pi.product_image_id END) AS alt_coverage_count,
+               SUM(CASE WHEN COALESCE(NULLIF(TRIM(pia.image_role),''),'')='' THEN 1 ELSE 0 END) AS missing_image_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='hero_front' THEN 1 ELSE 0 END) AS hero_image_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='detail_texture' THEN 1 ELSE 0 END) AS detail_image_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='scale_context' THEN 1 ELSE 0 END) AS scale_image_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.public_use_status,'')) IN ('consent_needed','blocked') THEN 1 ELSE 0 END) AS blocked_public_use_count,
+               MAX(CASE WHEN pi.sort_order=0 THEN COALESCE(pia.image_orientation,'') END) AS first_image_orientation,
+               MAX(CASE WHEN pi.sort_order=0 THEN COALESCE(pia.width_px,0) END) AS first_width_px,
+               MAX(CASE WHEN pi.sort_order=0 THEN COALESCE(pia.height_px,0) END) AS first_height_px,
+               MAX(CASE WHEN pi.sort_order=0 THEN COALESCE(pia.merchandising_score,pia.first_image_score,0) END) AS first_merchandising_score,
+               AVG(COALESCE(pia.merchandising_score,pia.first_image_score,0)) AS average_merchandising_score
+        FROM product_images pi
+        LEFT JOIN product_image_annotations pia ON pia.product_image_id=pi.product_image_id
+        GROUP BY pi.product_id
+      )
+      SELECT p.product_id,p.name,p.slug,p.sku,p.status,p.review_status,p.price_cents,p.short_description,
+             p.featured_image_url,p.product_category,p.sale_channel,p.updated_at,p.created_at,
+             ps.meta_title,ps.meta_description,
+             COALESCE(i.image_count,0) AS image_count,COALESCE(i.alt_coverage_count,0) AS alt_coverage_count,
+             COALESCE(i.missing_image_role_count,0) AS missing_image_role_count,COALESCE(i.hero_image_role_count,0) AS hero_image_role_count,
+             COALESCE(i.detail_image_role_count,0) AS detail_image_role_count,COALESCE(i.scale_image_role_count,0) AS scale_image_role_count,
+             COALESCE(i.blocked_public_use_count,0) AS blocked_public_use_count,COALESCE(i.first_image_orientation,'') AS first_image_orientation,
+             COALESCE(i.first_width_px,0) AS first_width_px,COALESCE(i.first_height_px,0) AS first_height_px,
+             COALESCE(i.first_merchandising_score,0) AS first_merchandising_score,COALESCE(i.average_merchandising_score,0) AS average_merchandising_score
+      FROM products p
+      LEFT JOIN product_seo ps ON ps.product_id=p.product_id
+      LEFT JOIN image_stats i ON i.product_id=p.product_id
+      ${productId>0?'WHERE p.product_id=?':''}
+      ORDER BY datetime(COALESCE(p.updated_at,p.created_at,'1970-01-01')) DESC,p.product_id DESC
+      LIMIT ?`;
+    const stmt=db.prepare(sql);
+    const result=productId>0?await stmt.bind(productId,limit).all():await stmt.bind(limit).all();
+    const products=rows(result).map((row)=>({
+      product_id:Number(row.product_id||0),name:normalizeText(row.name),slug:normalizeText(row.slug),sku:normalizeText(row.sku),
+      status:normalizeText(row.status),review_status:normalizeText(row.review_status),price_cents:Number(row.price_cents||0),
+      short_description:normalizeText(row.short_description),featured_image_url:normalizeText(row.featured_image_url),product_category:normalizeText(row.product_category),
+      sale_channel:normalizeText(row.sale_channel),readiness:buildReadiness(row)
+    }));
+    return json({ok:true,products:showReady?products:products.filter((p)=>!p.readiness.ready),summary:summarizeProducts(products),generated_at:new Date().toISOString(),requested_by:{user_id:adminUser.user_id,email:adminUser.email}});
+  } catch(error) {
+    return json({ok:false,error:error?.message||'Failed to load product readiness preview.',code:'product_readiness_failed',hint:'Apply the current D1 migration and retry. Readiness no longer creates schema during a live request.'},500);
+  }
 }

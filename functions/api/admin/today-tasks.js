@@ -4,10 +4,6 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control':'no-store' }); }
 function rows(result){return Array.isArray(result?.results)?result.results:[];}
 async function scalar(db, sql, binds = []) { try { const row = await db.prepare(sql).bind(...binds).first(); return Number(Object.values(row || {})[0] || 0); } catch { return 0; } }
-async function ensure(db){
-  await db.prepare(`CREATE TABLE IF NOT EXISTS today_task_actions (today_task_action_id INTEGER PRIMARY KEY AUTOINCREMENT, task_key TEXT NOT NULL, task_label TEXT, action_status TEXT NOT NULL DEFAULT 'completed', notes TEXT, snooze_until TEXT, created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(()=>null);
-  await db.prepare(`ALTER TABLE today_task_actions ADD COLUMN snooze_until TEXT`).run().catch(()=>null);
-}
 async function isSuppressed(db,key){
   const row=await db.prepare(`SELECT action_status,snooze_until FROM today_task_actions WHERE task_key=? ORDER BY datetime(created_at) DESC LIMIT 1`).bind(key).first().catch(()=>null);
   if(!row) return false;
@@ -23,12 +19,11 @@ export async function onRequestGet(context) {
   if (!db) return json({ ok: false, error: 'Database binding is missing.' }, 500);
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await ensure(db);
   const url = new URL(context.request.url);
   const categoryFilter = String(url.searchParams.get('category') || '').trim();
   const minCount = Number(url.searchParams.get('min_count') || 1) || 1;
   const rawTasks = [
-    { key: 'readiness', category: 'catalog', label: 'Product readiness blockers', count: await scalar(db, `SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')!='archived' AND (COALESCE(featured_image_url,'')='' OR COALESCE(price_cents,0)<=0 OR COALESCE(short_description,'')='')`), href: '/admin/readiness/' },
+    { key: 'readiness', category: 'catalog', label: 'Product readiness blockers', count: await scalar(db, `SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')!='archived' AND (COALESCE(featured_image_url,'')='' OR COALESCE(price_cents,0)<=0 OR COALESCE(short_description,'')='')`), href: '/admin/readiness/?filter=basic_catalog_blockers' },
     { key: 'custom_requests', category: 'customers', label: 'Custom requests needing review', count: await scalar(db, `SELECT COUNT(*) FROM custom_requests WHERE COALESCE(status,'new') IN ('new','reviewing','quote_needed')`), href: '/admin/operations/#customRequestsAdminMount' },
     { key: 'orders', category: 'orders', label: 'Orders pending payment/fulfillment', count: await scalar(db, `SELECT COUNT(*) FROM orders WHERE COALESCE(order_status,'pending') IN ('pending','paid') OR COALESCE(payment_status,'pending')='pending'`), href: '/admin/orders/' },
     { key: 'inventory', category: 'inventory', label: 'Inventory needing reorder/review', count: await scalar(db, `SELECT COUNT(*) FROM site_items WHERE COALESCE(reorder_status,'') IN ('needed','requested') OR COALESCE(on_hand_quantity,0)<=COALESCE(reorder_threshold,0)`), href: '/admin/inventory-operations/' },

@@ -246,8 +246,8 @@ export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  const annotationCols = await ensureAnnotationColumns(db);
-  await ensureMediaScoreHistoryTable(db);
+  // Build 245: schema is migration-owned; GET never creates/alters tables or runs PRAGMA.
+  const annotationCols = new Set(['width_px','height_px','image_orientation','crop_x','crop_y','crop_width','crop_height','first_image_score','background_consistency_score','subject_fill_score','sharpness_score','brightness_score','contrast_score','angle_group','shot_style','merchandising_score','merchandising_override_reason','merchandising_override_note','image_role','public_use_status','consent_record_id','role_review_notes']);
 
   const product_id = Number(new URL(request.url).searchParams.get('product_id'));
   if (!Number.isInteger(product_id) || product_id <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
@@ -358,8 +358,7 @@ export async function onRequestPost(context) {
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  await ensureAnnotationColumns(db);
-  await ensureMediaScoreHistoryTable(db);
+  // Build 245: schema is migration-owned; writes fail explicitly if the current migration is missing.
 
   let body = {};
   try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
