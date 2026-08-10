@@ -1,5 +1,11 @@
 [
   {
+    "build": "Build 246",
+    "date": "2026-08-10",
+    "title": "Product lifecycle repair, reversible project materials and approved soap packaging",
+    "summary": "Repaired product edit identity and SEO-image persistence; recovered generated-shell-aware product deletion; made Creative Project material consumption reversibly return to D1 inventory; added idempotent finished-product production releases with ingredient snapshots and fractional material depletion; blocked same-project CAIP duplicate uploads; and locked soap packaging to the approved reference with curated French drafts, INCI authority and no invented ingredient/claim/quantity facts."
+  },
+  {
     "build": "Build 245",
     "date": "2026-08-09",
     "title": "Admin session resilience, bounded inventory loads and product-media recovery",
