@@ -1,7 +1,7 @@
 // Build 241 — Devil n Dove CAIP private raw-media intake helpers.
 // D1 stores metadata/state only. Binary originals remain in a dedicated private R2 binding.
 
-export const CAIP_MEDIA_INTAKE_BUILD = 'Build 241';
+export const CAIP_MEDIA_INTAKE_BUILD = 'Build 246';
 export const CAIP_PRIVATE_BUCKET_BINDING = 'CAIP_PRIVATE_MEDIA_BUCKET';
 export const CAIP_PUBLIC_BUCKET_BINDING = 'PRODUCT_MEDIA_BUCKET';
 export const DEFAULT_PART_BYTES = 32 * 1024 * 1024;
@@ -179,6 +179,12 @@ export async function createUploadSession(db, env, creativeProjectId, filesInput
     if (expectedParts > MAX_PARTS) throw new Error(`${item.filename} would exceed the 10,000-part multipart limit.`);
     const fingerprint = text(item.file_fingerprint, 180) || await hashText([item.filename,item.size,item.lastModified || item.last_modified_ms || 0,item.mime].join('|'));
     const duplicate = await db.prepare(`SELECT caip_media_upload_file_id,creative_project_id,original_filename,object_key,uploaded_at FROM caip_media_upload_files WHERE file_fingerprint=? AND file_size_bytes=? AND upload_status='uploaded' ORDER BY caip_media_upload_file_id DESC LIMIT 1`).bind(fingerprint,item.size).first().catch(()=>null);
+    // Build 246: an exact uploaded fingerprint already owned by this CAIP project is not ingested twice.
+    // Cross-project matches remain warnings because the same source file can legitimately support separate projects.
+    if (duplicate && Number(duplicate.creative_project_id || 0) === Number(project.creative_project_id || 0)) {
+      duplicates.push({ client_file_key: clientKey, current_file_id: null, possible_duplicate: duplicate, skipped_duplicate: true, duplicate_scope: 'same_project' });
+      continue;
+    }
     const objectKey = `${objectPrefix}/${objectCategory(item.mediaType)}/${fileKey}-${sanitizeFilename(item.filename)}`;
     const insert = await db.prepare(`INSERT INTO caip_media_upload_files(
       caip_media_upload_session_id,creative_project_id,client_file_key,file_key,original_filename,mime_type,media_type,media_role,
@@ -203,8 +209,10 @@ export async function createUploadSession(db, env, creativeProjectId, filesInput
     created.push(row);
     if (duplicate) duplicates.push({ client_file_key: clientKey, current_file_id: fileId, possible_duplicate: duplicate });
   }
-  await db.prepare(`INSERT INTO creative_project_events(creative_project_id,event_type,actor_user_id,details_json,created_at) VALUES(?, 'caip_private_media_session_created', ?, ?, CURRENT_TIMESTAMP)`).bind(project.creative_project_id,integer(actorUserId)||null,JSON.stringify({session_key:sessionKey,file_count:accepted.length,total_bytes:totalBytes,private_r2:true,raw_immutable:true})).run().catch(()=>null);
-  return { session: await db.prepare(`SELECT * FROM caip_media_upload_sessions WHERE caip_media_upload_session_id=?`).bind(sessionId).first(), files: created, possible_duplicates: duplicates, binding: bindingSummary(env) };
+  const createdBytes = created.reduce((sum, row) => sum + Math.max(0, numeric(row?.file_size_bytes)), 0);
+  await db.prepare(`UPDATE caip_media_upload_sessions SET total_files=?,total_bytes=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_session_id=?`).bind(created.length,createdBytes,sessionId).run();
+  await db.prepare(`INSERT INTO creative_project_events(creative_project_id,event_type,actor_user_id,details_json,created_at) VALUES(?, 'caip_private_media_session_created', ?, ?, CURRENT_TIMESTAMP)`).bind(project.creative_project_id,integer(actorUserId)||null,JSON.stringify({session_key:sessionKey,file_count:created.length,total_bytes:createdBytes,duplicates_skipped:duplicates.filter((row)=>row.skipped_duplicate).length,private_r2:true,raw_immutable:true})).run().catch(()=>null);
+  return { session: await db.prepare(`SELECT * FROM caip_media_upload_sessions WHERE caip_media_upload_session_id=?`).bind(sessionId).first(), files: created, possible_duplicates: duplicates, skipped_duplicate_count: duplicates.filter((row)=>row.skipped_duplicate).length, binding: bindingSummary(env) };
 }
 
 export async function initiateUploadFile(db, env, fileId, actorUserId) {
