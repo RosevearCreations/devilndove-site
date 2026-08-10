@@ -1,5 +1,41 @@
 [
   {
+    "build": "Build 245",
+    "date": "2026-08-09",
+    "title": "Admin session resilience, bounded inventory loads and product-media recovery",
+    "summary": "Retained cached admin UI identity during transient 5xx while preserving server-side API authorization; staggered admin startup reads; added lightweight inventory bootstrap/pagination and inline unit/category editing; recovered up to seven unique Product Editor images non-destructively from linked D1 media/history; fixed Product Readiness blocker drill-down and fallback; advanced shell to v22."
+  },
+  {
+    "build": "Build 244",
+    "date": "2026-08-09",
+    "title": "D1 inventory authority and fractional material usage",
+    "summary": "Moved legacy tool/supply runtime authority to D1, retained JSON as provenance/emergency fallback, added tool/supply correction and exact/estimated/log-only/reusable fractional usage with stock/usage unit conversion."
+  },
+  {
+    "build": "Build 243",
+    "date": "2026-08-09",
+    "title": "Inventory request-pressure resilience and lower-case controlled data",
+    "summary": "Reduced inventory request fan-out, added safe GET deduplication/backoff/stale fallback and form recovery, removed request-time schema work from hot paths, normalized controlled classifications and improved admin contrast."
+  },
+  {
+    "build": "Build 242",
+    "date": "2026-08-08",
+    "title": "Inventory create contract and structured error boundary",
+    "summary": "Fixed Site Inventory create bind mismatch and replaced Cloudflare HTML/JSON.parse ambiguity with structured inventory errors and Ray-ID diagnostics."
+  },
+  {
+    "build": "Build 241",
+    "date": "2026-08-07",
+    "title": "CAIP private large-media intake foundations",
+    "summary": "Adapted DAIP into Devil n Dove CAIP with private raw-media R2 architecture, multipart/recovery metadata, processing plans and review-only public promotion boundaries."
+  },
+  {
+    "build": "Build 240",
+    "date": "2026-08-07",
+    "title": "Operational continuity and evidence foundations",
+    "summary": "Added D1-backed production evidence, idempotency, packaging continuity, provider reconciliation, mobile recovery, asset/public-page audits and route fallback policies."
+  },
+  {
     "build": "Build 235",
     "date": "2026-08-05",
     "title": "Creative readiness, exception queue and evidence packets",
