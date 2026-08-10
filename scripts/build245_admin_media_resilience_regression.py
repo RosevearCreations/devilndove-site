@@ -9,7 +9,8 @@ def check(ok,msg):
 def txt(rel): return (ROOT/rel).read_text(encoding='utf-8')
 
 mig=txt('database_build245_admin_media_resilience.sql'); upg=txt('database_upgrade_current_pass.sql')
-check(mig==upg,'current-pass migration must be byte-identical to Build 245 migration')
+if 'build246_product_project_production_packaging' not in upg:
+    check(mig==upg,'current-pass migration must be byte-identical to Build 245 migration while Build 245 is current')
 check('CREATE TEMP' not in mig.upper(),'Build 245 migration must not use TEMP tables')
 check('DROP TABLE' not in mig.upper(),'Build 245 migration must not DROP tables')
 for needle in ['build244_inventory_authority_fractional_usage','build245_admin_media_resilience','product_media_integrity_snapshots','linked_media_recovery_v245','lightweight_reference_bootstrap_v245']:

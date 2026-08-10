@@ -10,7 +10,7 @@ import {
 const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const read=(name)=>fs.readFileSync(path.join(root,name),'utf8');
 const migration=read('database_build241_caip_large_media_intake.sql');
-assert(read('database_upgrade_current_pass.sql').includes('build244_inventory_authority_fractional_usage'),'Current-pass SQL must point at the current Build 244 migration while Build 241 remains retained history.');
+assert(/build24(?:4_inventory_authority_fractional_usage|5_admin_media_resilience|6_product_project_production_packaging)/.test(read('database_upgrade_current_pass.sql')),'Current-pass SQL must point at Build 244 or a later retained-history migration while Build 241 remains retained history.');
 assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Build 241 migration contains explicit transaction control.');
 const tables=['caip_media_intake_settings','caip_media_upload_sessions','caip_media_upload_files','caip_media_upload_parts','caip_media_processing_jobs','caip_media_public_promotion_requests'];
 for(const name of tables)assert(migration.includes(`CREATE TABLE IF NOT EXISTS ${name}`),`Build 241 migration is missing ${name}.`);
