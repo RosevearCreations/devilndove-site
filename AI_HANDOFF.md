@@ -1,8 +1,12 @@
-# Devil n Dove AI Handoff — Build 246
+# Build 247 current handoff
+
+The current migration boundary is Build 247: `database_build247_packaging_library_truth_layout_rose_palette.sql` / byte-identical `database_upgrade_current_pass.sql`. The current Packaging Studio authority includes the approved Truth-reference soap renderer, fixed ingredient zones, full rose palette/custom colour, reusable template gallery, persistent packaging formula/content libraries and typed-key label deletion. Do not reintroduce the generic purple soap artwork fallback. See `PACKAGING_STUDIO.md`, `BUILD247_CHANGED_FILES.md` and `BUILD247_VALIDATION.md`.
+
+# Devil n Dove AI Handoff — Build 247
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
-## Build 246 in one paragraph
+## Build 246 retained foundation
 
 Build 246 repairs the live Product Editor lifecycle and extends D1-backed production integrity. A query-opened product now retains its edit identity so **Update Product** cannot lose the selected product; the chosen SEO/social image is visibly marked and preserved server-side; product deletion distinguishes meaningful business/project history from empty auto-generated Content Studio/CAIP shells, allowing those unreviewed shells to be removed automatically while reviewed/published history still blocks destructive deletion. Creative Projects may now be deleted through an explicit audited workflow that returns only **unreversed** raw inventory consumption. Finished products that are made outside a Creative Project gain an idempotent Production Release that deducts reviewed consumables, preserves material/ingredient snapshots, records evidence-only reusable/log-only resources, and increments finished-product inventory without double-posting. Product Resources now carry optional label-ingredient/INCI profiles; linked soap packaging can seed those verified ingredient facts, use a curated French **draft** workflow with human review, and is locked to the approved `soap_reference_v2` visual direction rather than invented rough ingredient claims. CAIP skips exact same-project media duplicates instead of inserting duplicate rows.
 
