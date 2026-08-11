@@ -106,7 +106,8 @@ export async function onRequestPost({ request, env }) {
       saved += 1;
     }
 
-    return json({ ok: true, saved_links: saved });
+    const persistedLinks = await loadProductLinks(db, productId);
+    return json({ ok: true, saved_links: saved, links: persistedLinks });
   } catch (error) {
     return json({ ok: false, error: error?.message || 'Failed to save product links.' }, 500);
   }
