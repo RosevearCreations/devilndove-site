@@ -21,6 +21,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(value || "").trim();
   }
 
+  // Build 251: keep product-image URL identity consistent with Product Edit/API.
+  // This helper was referenced by the draft image manager but was previously
+  // missing from this bundle, causing the manager to crash before saved images
+  // could render.
+  function normalizeImageKey(url) {
+    return String(url || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[?#].*$/, "")
+      .replace(/\/+$/, "");
+  }
+
   function escapeHtml(value) {
     return String(value ?? "")
       .replaceAll("&", "&amp;")
