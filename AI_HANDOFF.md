@@ -1,8 +1,8 @@
-# Build 248 current handoff
+# Build 249 current handoff
 
-The current migration boundary is Build 248: `database_build248_packaging_source_material_templates_compliance.sql` / byte-identical `database_upgrade_current_pass.sql`. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `PACKAGING_STUDIO.md`, `BUILD248_CHANGED_FILES.md` and `BUILD248_VALIDATION.md`.
+The current migration boundary is Build 249: `database_build249_inventory_kits_components_provenance.sql` / byte-identical `database_upgrade_current_pass.sql`. Build 249 adds purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance while retaining Build 248 purchased/source-material templates and Packaging Studio compliance evidence. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `PACKAGING_STUDIO.md`, `BUILD249_CHANGED_FILES.md` and `BUILD249_VALIDATION.md`; Build 248 release evidence is archived under `docs/archive/build-history/`.
 
-# Devil n Dove AI Handoff — Build 248
+# Devil n Dove AI Handoff — Build 249
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -46,6 +46,13 @@ Mutable business state belongs in D1 whenever a live table exists. JSON and Mark
 3. Supporting media is non-destructive: `product_images` is preferred, with recovery from non-deleted `media_assets`, active media-role assignments and image annotations. Up to seven unique editor images are presented.
 4. Product deletion may automatically clean **unreviewed generated project shells** that contain no meaningful workflow/review/publication/evidence/output state. A meaningful Content Studio/CAIP project remains a blocking business/history reference and must be handled explicitly.
 5. Posted finished-product production history is a deletion blocker. Archive or reverse/detach according to the business workflow rather than silently discarding production evidence.
+
+
+## Build 249 inventory-kit and component rule
+
+A purchased kit/bundle remains a purchase/provenance inventory record until deliberately opened. `inventory_kit_templates` describes its expected child contents; `inventory_kit_template_components` defines quantity, stock/usage units, tracking mode, inventory class and optional cost-share percentage. **Open / Break Down Kit** reduces the parent kit count and releases each child as its own normal `site_item_inventory` balance. Existing child stock receives a weighted-average unit cost; newly created child rows retain their kit provenance. Reusable tools/equipment use reusable tracking and are evidence-only when later assigned to a product, while wax, fragrance, colourant, wicks and packaging can be consumed normally.
+
+`inventory_item_profiles` is the structural classification authority for raw material, consumable, packaging, reusable equipment, kit, component, finished good, sample/test material, waste/scrap and other. Lot/expiry/source-material flags are recommendations layered over the existing purchase-lot and Packaging Studio systems, not competing stock authorities. A premixed essential-oil/fragrance bottle is **one inventory item**; its supplier-listed constituent oils/INCI/allergen evidence belongs in the linked source-material record rather than being represented as six bottles that were never purchased.
 
 ## Inventory, Creative Project and finished-production rules
 
