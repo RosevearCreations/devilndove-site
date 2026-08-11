@@ -76,6 +76,17 @@ export async function loadProductLinks(db, productId) {
   if (!Number(productId || 0)) return [];
   const result = await db.prepare(`
     SELECT prl.product_resource_link_id, prl.product_id, prl.resource_kind, prl.source_key,
+           COALESCE(NULLIF(TRIM(sii.item_name), ''), NULLIF(TRIM(ci.name), ''), prl.source_key) AS resource_name,
+           COALESCE(sii.category, ci.category, '') AS resource_category,
+           COALESCE(sii.on_hand_quantity, 0) AS resource_on_hand_quantity,
+           COALESCE(sii.unit_cost_cents, 0) AS resource_unit_cost_cents,
+           COALESCE(sii.stock_unit_label, 'unit') AS resource_stock_unit_label,
+           COALESCE(sii.usage_unit_label, 'unit') AS resource_usage_unit_label,
+           COALESCE(sii.usage_units_per_stock_unit, 1) AS resource_usage_units_per_stock_unit,
+           COALESCE(siup.usage_tracking_mode,
+             CASE WHEN LOWER(TRIM(COALESCE(prl.resource_kind,'')))='tool' THEN 'reusable' ELSE 'exact' END
+           ) AS resource_usage_tracking_mode,
+           COALESCE(siup.minimum_usage_increment, 0.001) AS resource_minimum_usage_increment,
            prl.quantity_used, prl.usage_notes, prl.sort_order,
            COALESCE(prl.consumption_mode, 'per_unit') AS consumption_mode,
            COALESCE(prl.lot_size_units, 1) AS lot_size_units,
@@ -87,6 +98,26 @@ export async function loadProductLinks(db, productId) {
     FROM product_resource_links prl
     LEFT JOIN product_resource_ingredient_profiles prip
       ON prip.product_resource_link_id=prl.product_resource_link_id
+    LEFT JOIN site_item_inventory sii
+      ON sii.site_item_inventory_id = (
+        SELECT sii2.site_item_inventory_id
+        FROM site_item_inventory sii2
+        WHERE LOWER(TRIM(COALESCE(sii2.source_type, ''))) = LOWER(TRIM(COALESCE(prl.resource_kind, '')))
+          AND sii2.external_key = prl.source_key
+        ORDER BY COALESCE(sii2.is_active, 1) DESC, sii2.site_item_inventory_id DESC
+        LIMIT 1
+      )
+    LEFT JOIN site_inventory_usage_profiles siup
+      ON siup.site_item_inventory_id = sii.site_item_inventory_id
+    LEFT JOIN catalog_items ci
+      ON ci.catalog_item_id = (
+        SELECT ci2.catalog_item_id
+        FROM catalog_items ci2
+        WHERE ci2.item_kind = LOWER(TRIM(COALESCE(prl.resource_kind, '')))
+          AND ci2.source_key = prl.source_key
+        ORDER BY ci2.catalog_item_id DESC
+        LIMIT 1
+      )
     WHERE prl.product_id = ?
     ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
   `).bind(Number(productId)).all();
@@ -96,6 +127,7 @@ export async function loadProductLinks(db, productId) {
       product_id: Number(row.product_id || 0),
       resource_kind: normalizeText(row.resource_kind).toLowerCase(),
       source_key: row.source_key || '',
+      name: row.resource_name || row.source_key || '',
       quantity_used: Math.max(0, number(row.quantity_used, 0)),
       usage_notes: row.usage_notes || '',
       sort_order: Number(row.sort_order || 0),
@@ -107,7 +139,20 @@ export async function loadProductLinks(db, productId) {
       inci_name: row.inci_name || '',
       translation_review_status: row.translation_review_status || 'needs_review'
     };
-    return { ...shaped, preview: resourcePreview({}, shaped) };
+    const linkedResource = {
+      item_kind: shaped.resource_kind,
+      source_key: shaped.source_key,
+      name: shaped.name,
+      category: normalizeText(row.resource_category).toLowerCase(),
+      on_hand_quantity: Math.max(0, number(row.resource_on_hand_quantity, 0)),
+      unit_cost_cents: money(row.resource_unit_cost_cents),
+      stock_unit_label: normalizeText(row.resource_stock_unit_label).toLowerCase() || 'unit',
+      usage_unit_label: normalizeText(row.resource_usage_unit_label).toLowerCase() || 'unit',
+      usage_units_per_stock_unit: Math.max(0.001, number(row.resource_usage_units_per_stock_unit, 1)),
+      usage_tracking_mode: normalizeText(row.resource_usage_tracking_mode).toLowerCase() || (shaped.resource_kind === 'tool' ? 'reusable' : 'exact'),
+      minimum_usage_increment: Math.max(0.0001, number(row.resource_minimum_usage_increment, 0.001))
+    };
+    return { ...shaped, resource: linkedResource, preview: resourcePreview(linkedResource, shaped) };
   });
 }
 
