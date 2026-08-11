@@ -50,6 +50,18 @@ async function logUsageMovement(db, payload = {}) {
     Number(payload.actor_user_id || 0) || null
   ).run().catch(() => null);
 }
+
+async function saveInventoryProfile(db, siteItemInventoryId, body = {}, userId = null, sourceType = 'other') {
+  const id = Number(siteItemInventoryId || 0); if (!id) return;
+  const allowedClass = new Set(['raw_material','consumable','packaging','reusable_equipment','kit','component','finished_good','sample','waste','other']);
+  const requestedClass = normalizeText(body.inventory_class).toLowerCase();
+  const inventoryClass = allowedClass.has(requestedClass) ? requestedClass : (sourceType === 'tool' ? 'reusable_equipment' : 'consumable');
+  const allowedLifecycle = new Set(['stocked','consumable','reusable','kit','nonstock','retired']);
+  const requestedLifecycle = normalizeText(body.lifecycle_mode).toLowerCase();
+  const lifecycleMode = allowedLifecycle.has(requestedLifecycle) ? requestedLifecycle : (inventoryClass === 'kit' ? 'kit' : (sourceType === 'tool' ? 'reusable' : 'consumable'));
+  await db.prepare(`INSERT INTO inventory_item_profiles(site_item_inventory_id,inventory_class,lifecycle_mode,lot_tracking_recommended,expiry_tracking_recommended,source_material_recommended,notes,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id) DO UPDATE SET inventory_class=excluded.inventory_class,lifecycle_mode=excluded.lifecycle_mode,lot_tracking_recommended=excluded.lot_tracking_recommended,expiry_tracking_recommended=excluded.expiry_tracking_recommended,source_material_recommended=excluded.source_material_recommended,notes=excluded.notes,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(id,inventoryClass,lifecycleMode,Number(body.lot_tracking_recommended)===1?1:0,Number(body.expiry_tracking_recommended)===1?1:0,Number(body.source_material_recommended)===1?1:0,normalizeText(body.inventory_profile_notes)||null,Number(userId||0)||null).run().catch(()=>null);
+}
+
 async function saveItemDescription(db, siteItemInventoryId, description, userId = null) {
   const clean = normalizeText(description).slice(0, 600);
   if (!siteItemInventoryId) return;
@@ -108,6 +120,12 @@ function shape(row = {}) {
     is_active: Number(row.is_active || 0),
     linked_product_count: Number(row.linked_product_count || 0),
     linked_product_names: row.linked_product_names || '',
+    inventory_class: row.inventory_class || (normalizeInventoryKind(row.source_type) === 'tool' ? 'reusable_equipment' : 'consumable'),
+    lifecycle_mode: row.lifecycle_mode || (normalizeInventoryKind(row.source_type) === 'tool' ? 'reusable' : 'consumable'),
+    lot_tracking_recommended: Number(row.lot_tracking_recommended || 0),
+    expiry_tracking_recommended: Number(row.expiry_tracking_recommended || 0),
+    source_material_recommended: Number(row.source_material_recommended || 0),
+    inventory_profile_notes: row.inventory_profile_notes || '',
     updated_at: row.updated_at || null
   };
 }
@@ -214,10 +232,14 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, pa
            COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
            COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
            COALESCE(ls.linked_product_count,0) AS linked_product_count,
-           COALESCE(ls.linked_product_names,'') AS linked_product_names
+           COALESCE(ls.linked_product_names,'') AS linked_product_names,
+           COALESCE(iip.inventory_class,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,
+           COALESCE(iip.lifecycle_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,
+           COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
     FROM site_item_inventory sii
     LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN link_stats ls ON ls.resource_kind=sii.source_type AND ls.source_key=sii.external_key
     WHERE ${filterSql}
     ORDER BY LOWER(COALESCE(sii.item_name,'')) ASC,sii.site_item_inventory_id ASC
@@ -828,6 +850,7 @@ async function handlePost(context) {
       notes: body.usage_profile_notes || '',
       user_id: adminUser.user_id
     });
+    await saveInventoryProfile(db, newId, body, adminUser.user_id, sourceType);
     const catalogItemId = Number(body.catalog_item_id || 0);
     if (catalogItemId && ['tool','supply'].includes(sourceType)) {
       const catalogRow = await db.prepare(`SELECT catalog_item_id,item_kind,source_key FROM catalog_items WHERE catalog_item_id=? LIMIT 1`).bind(catalogItemId).first().catch(() => null);
@@ -847,12 +870,16 @@ async function handlePost(context) {
     const saved = await db.prepare(`
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
              COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
-             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
+             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
+             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,
+             COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,
+             COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid
         ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup
         ON siup.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(newId).first();
@@ -940,10 +967,12 @@ async function handlePatch(context) {
     const existing = await db.prepare(`
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
              COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
-             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
+             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
+             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
@@ -1063,6 +1092,7 @@ async function handlePatch(context) {
     ).run();
 
     await saveUsageProfile(db, id, { usage_tracking_mode: merged.usage_tracking_mode, minimum_usage_increment: merged.minimum_usage_increment, notes: body.usage_profile_notes || '', user_id: adminUser.user_id });
+    await saveInventoryProfile(db, id, {...existing,...body}, adminUser.user_id, merged.source_type);
 
     await logMovement(db, {
       site_item_inventory_id: id,
@@ -1088,10 +1118,12 @@ async function handlePatch(context) {
     const saved = await db.prepare(`
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
              COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
-             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
+             COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
+             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
+      LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
@@ -1113,7 +1145,7 @@ async function handlePatch(context) {
       action_type: 'inventory_update',
       target_type: 'inventory_item',
       target_id: id,
-      target_key: `${merged.source_type}:${existing.external_key}`,
+      target_key: `${existing.source_type}:${existing.external_key}`,
       details: {
         item_name: merged.item_name,
         previous_source_type: existing.source_type,
@@ -1179,7 +1211,7 @@ async function handleDelete(context) {
       action_type: 'inventory_delete',
       target_type: 'inventory_item',
       target_id: id,
-      target_key: `${merged.source_type}:${existing.external_key}`,
+      target_key: `${existing.source_type}:${existing.external_key}`,
       details: {
         item_name: existing.item_name,
         on_hand_quantity: Number(existing.on_hand_quantity || 0)
