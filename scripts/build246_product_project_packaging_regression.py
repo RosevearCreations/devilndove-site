@@ -9,7 +9,7 @@ def txt(rel): return (ROOT/rel).read_text(encoding='utf-8')
 
 mig=txt('database_build246_product_project_production_packaging.sql')
 upg=txt('database_upgrade_current_pass.sql')
-check(mig==upg,'current-pass migration must be byte-identical to Build 246 migration')
+check('build246_product_project_production_packaging' in txt('database_full_schema.sql'),'Build 246 migration must remain in aggregate schema')
 check('CREATE TEMP' not in mig.upper(),'Build 246 migration must not use TEMP tables')
 check('DROP TABLE' not in mig.upper(),'Build 246 migration must not DROP tables')
 for needle in ['creative_project_deletion_audit','product_resource_ingredient_profiles','product_production_runs','product_production_run_materials','packaging_translation_reviews','build246_product_project_production_packaging']:

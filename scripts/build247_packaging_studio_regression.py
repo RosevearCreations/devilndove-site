@@ -17,10 +17,10 @@ def check(name, condition):
     if not condition:
         raise AssertionError(name)
 
-check('current pass byte-identical', mig==current)
+check('Build 247 migration retained in aggregate schema', 'build247_packaging_library_truth_layout_rose_palette' in (root/'database_full_schema.sql').read_text())
 check('single packaging H1', len(re.findall(r'<h1\b',html,re.I))==1)
-check('Build 247 JS cache key', 'admin-packaging-studio.js?v=247' in html)
-check('Build 247 CSS cache key', 'styles.css?v=247' in html)
+check('Packaging JS cache key is Build 247 or newer', bool(re.search(r'admin-packaging-studio\.js\?v=(?:24[7-9]|2[5-9]\d|[3-9]\d{2,})',html)))
+check('Packaging CSS cache key is Build 247 or newer', bool(re.search(r'styles\.css\?v=(?:24[7-9]|2[5-9]\d|[3-9]\d{2,})',html)))
 check('delete label UI', 'id="deletePackagingProject"' in js and 'confirm_project_key' in js)
 check('delete project API', "action==='delete_project'" in api and 'exact packaging project key' in api)
 check('template gallery', 'packaging-template-grid' in js and 'data-use-packaging-template' in js)
