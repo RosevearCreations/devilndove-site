@@ -3121,3 +3121,6 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
 @media (max-width:620px) {
   .packaging-source-thumb { width:100%; min-width:0; max-height:190px; }
 }
+
+/* Build 249 — purchased kit / component inventory */
+.inventory-kits-admin{overflow:hidden}.inventory-kit-template-list{display:grid;gap:12px}.inventory-kit-template-card{margin:0}.inventory-kit-component-row{border:1px solid var(--border,#d8d8d8);border-radius:12px;padding:12px;margin:12px 0;background:rgba(255,255,255,.025)}.inventory-kit-help{padding:10px 12px;margin-top:12px;border-radius:10px;background:rgba(127,127,127,.08)}.inventory-kits-admin input,.inventory-kits-admin select{max-width:100%;min-width:0}.inventory-kits-admin .admin-table-wrap{overflow-x:auto}@media(max-width:900px){.inventory-kits-admin .grid.cols-6,.inventory-kits-admin .grid.cols-4,.inventory-kits-admin .grid.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.inventory-kits-admin .grid.cols-6,.inventory-kits-admin .grid.cols-4,.inventory-kits-admin .grid.cols-3{grid-template-columns:1fr}.inventory-kit-component-row{padding:10px}.inventory-kits-admin .section-heading-row{align-items:flex-start;flex-direction:column}}
