@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import sqlite3, tempfile
 root=Path(__file__).resolve().parents[1]
 checks=[]
@@ -25,7 +26,8 @@ ok('server reads links back after save', 'const persistedLinks = await loadProdu
 ok('server returns persisted links', 'links: persistedLinks' in api)
 ok('client accepts verified persisted links', 'Array.isArray(data.links)' in resources)
 ok('cache version bumped for edit product', 'admin-edit-product.js?v=250' in html)
-ok('cache version bumped for product resources', 'admin-product-resources.js?v=250' in html)
+m_resources = re.search(r'admin-product-resources\.js\?v=(\d+)', html)
+ok('cache version bumped for product resources', bool(m_resources and int(m_resources.group(1)) >= 250))
 # Migration behavior and idempotence.
 sql=(root/'database_build250_product_media_resource_usage_reliability.sql').read_text()
 with tempfile.NamedTemporaryFile(suffix='.sqlite') as f:

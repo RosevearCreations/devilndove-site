@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import json, re, subprocess, tempfile, textwrap
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -32,7 +33,8 @@ check('client/server unit presets are identical', client == server)
 
 for rel in ['admin/inventory-operations/index.html','admin/mobile-inventory/index.html','admin/products/index.html']:
     text=(ROOT/rel).read_text(encoding='utf-8')
-    check(f'{rel} cache-busts inventory bundle v252', '/public/js/admin-site-item-inventory.js?v=252' in text)
+    m = re.search(r'/public/js/admin-site-item-inventory\.js\?v=(\d+)', text)
+    check(f'{rel} cache-busts inventory bundle at v252 or newer', bool(m and int(m.group(1)) >= 252))
 
 # Run the browser bundle in a minimal DOM VM with authentication off. This exercises
 # the exact synchronous render path that previously threw before any API call.
