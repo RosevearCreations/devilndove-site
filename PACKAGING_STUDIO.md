@@ -1,3 +1,15 @@
+# Build 248 current Packaging Studio extension
+
+## Build 248 — purchased/source material templates
+
+Purchased soap bases, fragrance oils, colourants and additives are reusable **source materials**, not finished formulas. Store supplier identity/SKU/URLs, optional source image/document links, raw supplier ingredient wording, reviewed Master INCI rows, supplier allergen text, supplier benefits/claims, usage/compliance notes and verification state in the source-material library. A finished soap formula may inherit one soap base; fragrance, colourant and additive sources attach separately to the project. Source benefits/marketing text is evidence only and must enter finished label claims as unapproved draft wording until reviewed.
+
+For new cosmetics in Canada as of 2026-08-01, Packaging Studio must keep applicable expanded fragrance-allergen disclosure evidence/review before treating a label as print-ready. Rinse-off and leave-on thresholds differ; use current Health Canada guidance rather than hard-coding supplier marketing assumptions.
+
+Official review sources:
+- https://www.canada.ca/en/health-canada/services/consumer-product-safety/cosmetics/labelling/industry-guide-labelling-cosmetics.html
+- https://www.canada.ca/en/health-canada/services/consumer-product-safety/cosmetics/labelling/ingredient-labelling.html
+
 # Build 247 current packaging note
 
 Build 247 repairs the owner-reported Packaging Studio issues around the approved/“Truth” soap reference. Soap ingredient panels now occupy clipped fixed zones outside the front oval; the French panel starts after the oval instead of underneath it. Rose artwork is selected independently from generic artwork, with detailed botanical presets for purple, lavender, red, pink, white, off-white, yellow, coral, orange, peach, green, blue, blue-green, brown, black, grey, charcoal, silver, gold, honey, copper, bronze and oatmeal/cream, plus a custom-colour generated rose. Product directions are Glacial Purple→lavender, Earth Shea & Pumice→green, Health Oatmeal & Goat Milk→oatmeal, Sea Breeze→blue-green, Charcoal→charcoal, Honey→honey-gold and Rose→red. The Layouts tab now shows the reusable template gallery.

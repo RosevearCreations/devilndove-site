@@ -1,3 +1,9 @@
+# Build 248 SEO/search review — 2026-08-11
+
+Google's current generative-search guidance explicitly says the fundamentals still apply: create unique useful content, make pages crawlable, use high-quality relevant images/video, and keep ordinary supported structured data accurate. It also says Google Search does **not** need `llms.txt`, special AI markup, artificial content “chunking”, or inauthentic mentions. Devil n Dove should therefore keep the existing one-prominent-H1/title discipline, accurate Product/Offer and LocalBusiness/Organization facts where applicable, real product/process media, and evidence-led Search Console/Business Profile measurement rather than inventing an “AI SEO” layer.
+
+Current primary references: [Google generative AI optimization](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide), [title links](https://developers.google.com/search/docs/appearance/title-link), [Product structured data](https://developers.google.com/search/docs/appearance/structured-data/product), [LocalBusiness structured data](https://developers.google.com/search/docs/appearance/structured-data/local-business), and [image SEO](https://developers.google.com/search/docs/appearance/google-images).
+
 # Build 246 SEO/local-search review — 2026-08-10
 
 Google's current guidance continues to support the existing Devil n Dove guardrails: use descriptive titles/headings and descriptive image alt text, keep mobile content/image meaning equivalent to desktop, and keep images near relevant copy. Google Business Profile continues to describe local ranking mainly through relevance, distance and prominence/popularity and does not offer a guaranteed first-page placement. Build 246 therefore keeps the single-H1 rule, stable product/SEO image roles, descriptive real product/process media, truthful Southern Ontario wording and evidence-driven improvements rather than keyword stuffing.

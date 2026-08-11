@@ -1,6 +1,24 @@
-# Devil n Dove Project Status and Roadmap — Build 247
+# Devil n Dove Project Status and Roadmap — Build 248
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
+
+## Build 248 completed work — purchased source-material inheritance and compliance evidence
+
+1. Added a D1-backed **Purchased Source Material** library distinct from finished soap formulas.
+2. Added source types for `soap_base`, `fragrance_oil`, `colourant` and `additive`, each with supplier/product/SKU/source references.
+3. Added source image and supplier-document URLs so packaging operators can keep visual/document evidence beside the reusable source template without making it public product media.
+4. Added raw supplier ingredient declaration plus structured Master INCI rows with explicit review state; source wording is never silently declared verified INCI.
+5. Added reusable source allergen statement, supplier benefits/characteristics, supplier claims, usage notes and compliance notes.
+6. Added fragrance-allergen evidence rows and a review gate designed around the current Canadian 2026 expanded fragrance-allergen disclosure requirements.
+7. Seeded the owner-provided Goat’s Milk Melt & Pour base with its nine supplier ingredient names, supplier allergen statement and six supplier benefit/characteristic sections.
+8. Kept all seeded Goat’s Milk Master INCI rows in `needs_review` until actual supplier INCI evidence is verified; no plain-English ingredient name is promoted automatically.
+9. Added project/source links with source snapshots and source-role separation so one base, fragrance, colourant and additive set can be reviewed independently.
+10. Added finished-formula→source-base inheritance; a formula may inherit only a `soap_base` as its base, while fragrance/colour/additive sources remain separate project inputs.
+11. Applying a soap-base template replaces the structured base ingredient rows and supplies Master INCI draft text; supplier claim suggestions enter as unapproved drafts only.
+12. Added visual source-material cards, source image fallback artwork, attached-state badges, evidence/detail display and mobile single-column layouts.
+13. Retained Build 247 label deletion, Truth-reference rendering, fixed ingredient clipping, reusable layout templates and complete rose/custom-colour controls.
+14. Synchronized Build 248 into all aggregate schemas and kept `database_upgrade_current_pass.sql` byte-identical to the standalone migration.
+15. Consolidated repository documentation: superseded root `BUILD*.md` copies were retired into `docs/archive/build-history/`; the two canonical current authorities remain this file and `AI_HANDOFF.md`.
 
 ## Build 247 completed work — Packaging Studio repair pass
 
@@ -62,7 +80,10 @@ The Product Editor retains gallery/featured/SEO roles across reloads, and empty 
 
 ## Known gaps and risks
 
-- Build 246 must still be proven against **production D1/R2** after migration; static/synthetic tests do not prove every historical record shape.
+- Supplier/source Master INCI rows intentionally remain review-required until the actual supplier documentation is checked; marketplace/plain-English ingredient text is provenance, not automatic regulatory truth.
+- The seeded Goat’s Milk supplier allergen wording is intentionally flagged for review because the supplied statement calls itself an eight-major-allergen statement while naming seven categories and omitting milk even though the base contains goat milk; do not publish an allergen-free claim from that wording without supplier verification.
+- Fragrance-oil templates need the supplier allergen breakdown/documentation before they can pass the new packaging fragrance review gate.
+- Build 248 must still be proven against **production D1/R2** after migration; static/synthetic tests do not prove every historical record shape.
 - Product deletion intentionally remains blocked when Content Studio/CAIP/production references contain meaningful reviewed/published/history evidence. A future UI should let the owner inspect and resolve those references from one place before deletion.
 - Creative Project deletion returns unreversed raw consumption, but a separately released finished product or external output is intentionally not silently undone. Reversal/detach workflows need explicit owner actions.
 - Finished-product production reversal is schema-ready through run status fields but does not yet have the same polished audited UI as posting.
@@ -73,28 +94,28 @@ The Product Editor retains gallery/featured/SEO roles across reloads, and empty 
 - Cloudflare Worker/D1 limits can still exist independently of application optimizations; retain Ray IDs for any remaining 503/1102 incidents.
 - Local first-page search placement cannot be guaranteed. Continue measuring real query/page/Business Profile outcomes after deployment rather than relying on static SEO scores alone.
 
-## Next 20 steps after Build 246
+## Next 20 steps after Build 248
 
-1. Back up production D1, apply Build 246 once, run `BUILD246_D1_VERIFICATION.sql`, and save the resulting ledger/foreign-key/ingredient/duplicate evidence.
-2. Re-test the exact products that previously showed false Content Studio/CAIP delete blockers and verify only empty generated shells are auto-cleaned while meaningful history remains protected.
-3. Add a Product Delete Reference Inspector that lists every blocking Content Studio, CAIP, production/order/history reference with a direct Open/Resolve action before deletion.
-4. Run a Creative Project deletion test that has real fractional material posts, verify unreversed stock is returned exactly once, and verify a repeat/delete retry cannot return inventory twice.
-5. Add an audited Finished Production **reversal** UI that returns raw consumables and decrements finished quantity only when the run has not already been reversed or sold/committed downstream.
-6. Add lot-aware material selection/costing to production runs so resin, wax, fragrance, mica, wire, chain and similar stock can retain actual lot/cost provenance.
-7. Add an Inventory **Usage Setup Required** queue for historical supplies still using generic `unit`/`log_only`, prioritizing high-value/high-use materials for real stock-unit/usage-unit conversions.
-8. Add a Product Ingredient Review queue for label ingredients missing INCI, ordering, French review or required supporting facts before packaging release.
-9. Add current cosmetic/fragrance-allergen review fields/gates to the soap/cosmetic packaging workflow and keep claims from being inferred from Amazon/source descriptions.
-10. Add a Packaging French Review cockpit with source/draft/approved text side-by-side, reviewer/date/history and no publish/print approval while required translations remain unreviewed.
-11. Add a visual/reference-diff checkpoint for `soap_reference_v2` and complete a real physical soap wrap/print proof against the pre-approved label reference.
-12. Strengthen CAIP browser-side SHA-256/fingerprint capture so duplicate raw media can be recognized even when filenames change.
-13. Complete direct browser-to-private-R2 multipart signing/resume so large CAIP media avoids Worker request-body/CPU pressure.
-14. Add CAIP proxy/thumbnail/frame/audio/transcript processors and bounded processing queues with retry/dead-letter evidence.
-15. Add a Media Integrity Review queue for products where recoverable R2/D1 media roles disagree with current gallery/featured/SEO selections.
-16. Build the D1-backed Website Media Library intake for `PRODUCT_MEDIA_BUCKET/uploads/website-library/`, including thumbnail review, page/product assignment, alt text and role approval.
-17. Add a Classification Review queue for likely tool↔supply mistakes and keep all controlled classifications lower-case/case-insensitive without lower-casing human/external display values.
-18. Add a physical-count/adjustment workflow for correcting historical quantities with reason, actor, before/after values and movement evidence rather than overwriting stock silently.
-19. Deploy and measure Search Console/Business Profile/local conversion outcomes; improve titles, single H1s, copy, internal links and real product/process imagery from evidence, not keyword stuffing.
-20. Complete remaining production smoke gates: payments/refunds, email delivery, D1 restore drill, R2 private/public separation, mobile/desktop deployed screenshots, CAIP large-media interruption/recovery and controlled launch evidence.
+1. Back up production D1, apply Build 248 once, run `BUILD248_D1_VERIFICATION.sql`, and retain the ledger/foreign-key/source-template evidence.
+2. Enter the actual supplier, SKU/product URL, product image/document link and verified INCI sheet for each purchased soap base; promote Master INCI rows only after source review.
+3. Create reusable source templates for each regularly purchased fragrance oil and colourant, including supplier documentation and applicable fragrance-allergen evidence.
+4. Run a real Oatmeal & Goat Milk packaging project from source base → finished formula → added fragrance/colour → physical label and verify inherited ingredients remain editable but traceable.
+5. Add the Product Delete Reference Inspector that lists every blocking Content Studio, CAIP, production/order/history reference with direct Open/Resolve actions.
+6. Run a Creative Project deletion test with real fractional material posts and prove unreversed stock is returned exactly once.
+7. Add an audited Finished Production reversal UI with downstream sale/commit guards.
+8. Add lot-aware material selection/costing to production runs and source-material project links so supplier lot/cost provenance survives into finished production.
+9. Add an Inventory Usage Setup Required queue for historical supplies still using generic `unit`/`log_only`.
+10. Add a Product Ingredient Review queue combining missing INCI/order/source evidence/fragrance-allergen review and required French review before packaging release.
+11. Add a Packaging French Review cockpit with source/draft/approved wording side-by-side, reviewer/date/history and a hard print/publish gate.
+12. Add visual/reference-diff evidence for `soap_reference_v2` and complete a real 100% physical wrap/print proof against the approved reference.
+13. Strengthen CAIP browser-side SHA-256/fingerprint capture and cross-device rename detection.
+14. Complete direct browser-to-private-R2 multipart signing/resume for large CAIP media.
+15. Add CAIP proxy/thumbnail/frame/audio/transcript processors with bounded queues and retry/dead-letter evidence.
+16. Add a Media Integrity Review queue where D1/R2 media roles disagree with gallery/featured/SEO selections.
+17. Build the D1 Website Media Library intake with thumbnail review, assignments, alt text and role approval.
+18. Add classification review plus physical-count/adjustment workflows with reason, actor, before/after values and movements rather than silent overwrite.
+19. Deploy and measure Search Console/Business Profile/local conversion outcomes; improve descriptive titles, one prominent H1, internal links and real product/process imagery from evidence, not keyword stuffing or special “AI SEO” markup.
+20. Complete production smoke gates: payments/refunds, email delivery, D1 restore drill, R2 separation, mobile/desktop screenshots, large-media interruption/recovery and controlled launch evidence.
 
 ## SEO/local-search direction each pass
 

@@ -1152,3 +1152,11 @@ The following new SVGs are admin-only planning placeholders with descriptive alt
 - `assets/client-document-workflow-placeholder.svg`
 
 Replace each packaging placeholder with a privacy-safe photo only after the actual container/card/insert is physically produced and approved. Capture straight-on front, back/required information, scale/dimensions, closure/finish, barcode/QR destination and the complete packed-product context. Keep a neutral placeholder when no real item exists; do not imply that a concept is inventory.
+
+
+## Build 248 — purchased source-material evidence placeholder
+
+- `assets/packaging/placeholders/soap-base-source-template.svg` is an **admin-only neutral fallback** for source-material library cards when no supplier/source image has been recorded.
+- Prefer a rights-safe supplier/product photograph or our own photograph of the purchased base package, plus a supplier document URL/PDF reference where available.
+- A source-material image documents what was purchased; it is **not** a finished-product gallery, Product/Offer image, Open Graph asset, or packaging approval proof.
+- On mobile, source cards must collapse to one column without clipped evidence text or horizontal overflow.

@@ -1,3 +1,17 @@
+# Build 248 — Purchased Source Materials, Soap-Base Inheritance and 2026 Compliance Evidence
+
+- Split reusable Packaging Studio data into **Purchased Source Materials** versus **Finished Soap Formulas** so supplier facts are not confused with what Devil n Dove actually makes.
+- Added source templates for soap bases, fragrance oils, colourants and additives with supplier/product/SKU/source URLs, optional source image and supplier-document links, raw supplier ingredient wording, structured Master INCI review rows, allergen evidence, supplier benefits/claims, usage notes and verification state.
+- Seeded the owner-provided Goat’s Milk Melt & Pour base with nine source ingredient names, the supplied allergen statement and six supplier benefit/characteristic sections; Master INCI rows remain review-required until the real supplier INCI source is checked.
+- Saved finished formulas may inherit one soap-base source dependency. Fragrance, colourant and additive sources remain separate project attachments so their provenance/allergen evidence remains visible.
+- Applying a source base populates the ingredient editor; supplier claims enter only as unapproved drafts, while supplier benefits remain reusable source evidence with deliberate “add as draft claim” controls.
+- Added current Canadian fragrance-allergen review fields/gates for source fragrance oils and blocks print-readiness while an attached fragrance source remains unreviewed.
+- Added source-material cards, supplier image/document references, a neutral source-material visual fallback and responsive/mobile layouts.
+- Retained Build 247 label deletion, Truth-reference soap geometry/ingredient clipping, reusable layout templates and the full botanical/custom rose palette.
+- Updated SEO/competitive playbooks to current Google guidance: useful people-first content, accurate normal structured data and relevant imagery remain the priority; special `llms.txt`/AI markup is not required for Google Search.
+- Consolidated Markdown release history by retiring superseded root `BUILD*.md` duplicates into `docs/archive/build-history/`; `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two current cross-project authorities.
+- Current D1 migration: `database_build248_packaging_source_material_templates_compliance.sql`, byte-identical to `database_upgrade_current_pass.sql`; service-worker shell v24.
+
 # Build 247 — Packaging Studio Truth Layout, Rose Palette and Libraries
 
 - Added explicit **Delete label** with exact packaging-project-key confirmation; Archive remains available for non-destructive retirement.

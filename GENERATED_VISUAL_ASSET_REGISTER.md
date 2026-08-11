@@ -1,4 +1,4 @@
-# Devil n Dove Generated Visual Asset Register — Build 234
+# Devil n Dove Generated Visual Asset Register — Build 248
 
 This register documents generated editorial imagery and generated text-free packaging artwork in the application. D1 `/admin/image-manifest/` is the mutable public-image review authority; Labeling & Packaging versions/print tests are the production-art review authority. This file preserves immutable source intent, prompt summary, generated-use boundaries and file checksums for future maintainers.
 
@@ -64,3 +64,13 @@ This register documents generated editorial imagery and generated text-free pack
 ## Replacement and retirement rule
 
 When a generated asset is replaced, keep this register row as provenance, set its manifest status/history accurately, remove the old public reference, validate the new crop and intrinsic dimensions on phone/desktop, rerun one-H1/metadata/structured-data checks, and confirm the retired asset is not still referenced by Open Graph, feeds, queues or scheduled content.
+
+
+## Build 248 technical source-material placeholder
+
+- **Admin route:** `/admin/packaging-studio/`
+- **Asset:** `/assets/packaging/placeholders/soap-base-source-template.svg`
+- **Role:** Neutral fallback for Purchased Source Material cards when no supplier/source image is recorded.
+- **Creation mode:** Hand-authored SVG UI illustration; not a product photograph or generated product representation.
+- **Boundary:** Admin-only source/provenance cue. Never use as a public product image, Product/Offer structured-data image, Open Graph image, supplier proof, final packaging proof, or Google Business Profile photo.
+- **Replacement:** Prefer a rights-safe photo of the purchased source package plus a supplier-document reference where available; replacing this fallback must not silently promote the source image into public finished-product media.
