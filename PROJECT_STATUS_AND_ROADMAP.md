@@ -1,4 +1,4 @@
-# Devil n Dove Project Status and Roadmap — Build 250
+# Devil n Dove Project Status and Roadmap — Build 252
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
@@ -158,3 +158,11 @@ Only `AI_HANDOFF.md` and this file are cross-project current authorities. Compat
 - Saved featured/gallery/recovered product media can now reach the existing image manager instead of the manager aborting during render.
 - `/admin/products/` and `/admin/catalog/` explicitly load the corrected bundle with `?v=251` to bypass stale browser/CDN copies.
 - Product-detail remains the image authority: stored featured image first, then gallery/media/history recovery when required.
+## Build 252 — Inventory Operations unit preset runtime repair
+
+1. Fixed the Inventory Operations startup crash caused by `unitPresetOptions` being read during `render()` before it had ever been initialized.
+2. Added a local default unit list matching the inventory bootstrap API so the page can render immediately and then accept server-provided presets after load.
+3. Cache-busted the shared inventory admin bundle to `v=252` on Inventory Operations, Mobile Inventory and Products.
+4. Added a regression that verifies helper initialization precedes render use, client/server unit presets stay aligned, the initial unauthenticated render does not throw, and all affected admin pages request the current bundle.
+5. No schema/D1 change is required; the current migration boundary remains Build 250.
+
