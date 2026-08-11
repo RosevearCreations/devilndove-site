@@ -1,17 +1,17 @@
-# Devil n Dove Markdown Index — Build 249
+# Devil n Dove Markdown Index — Build 253
 
 ## Two current authorities
 
 1. `AI_HANDOFF.md` — architecture, data authority, product/project/inventory/CAIP/packaging safety, schema and deployment.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 249 work, known risks and the ordered next actions.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 253 work, known risks and the ordered next actions.
 
 A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current release pair
 
-- `BUILD249_CHANGED_FILES.md`
-- `BUILD249_VALIDATION.md`
-- read-only production SQL check: `BUILD249_D1_VERIFICATION.sql`
+- `BUILD253_CHANGED_FILES.md`
+- `BUILD253_VALIDATION.md`
+- no D1 migration is required for Build 253; Build 250 remains the current database migration boundary
 
 ## Active specialist playbooks
 

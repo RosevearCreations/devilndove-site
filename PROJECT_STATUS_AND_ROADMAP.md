@@ -1,4 +1,4 @@
-# Devil n Dove Project Status and Roadmap — Build 252
+# Devil n Dove Project Status and Roadmap — Build 253
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
@@ -165,4 +165,12 @@ Only `AI_HANDOFF.md` and this file are cross-project current authorities. Compat
 3. Cache-busted the shared inventory admin bundle to `v=252` on Inventory Operations, Mobile Inventory and Products.
 4. Added a regression that verifies helper initialization precedes render use, client/server unit presets stay aligned, the initial unauthenticated render does not throw, and all affected admin pages request the current bundle.
 5. No schema/D1 change is required; the current migration boundary remains Build 250.
+
+## Build 253 — Linked item naming and entry-reset usability
+
+1. Product-resource bootstrap now resolves linked item display names from `site_item_inventory.item_name` with `catalog_items.name` fallback instead of forcing the external/source key into the selected-link dropdown.
+2. The same bootstrap carries usage conversion metadata, protecting configured values such as 100 uses per reusable tool even when that linked item is outside the current search page.
+3. Product Resources keeps the server-provided name/resource object when a live search result is unavailable.
+4. Inventory Operations now has separate **Start New Item** and **Clear / Reset Fields** controls; the latter also clears catalog-search and Amazon-import helper inputs.
+5. Shared affected bundles are cache-busted to `v=253`. No D1 migration is required; Build 250 remains the database migration boundary.
 
