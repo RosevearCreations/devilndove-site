@@ -69,6 +69,43 @@ document.addEventListener('DOMContentLoaded', () => {
     return { usage, onHandStock, totalUsageUnits, buildable, costPerUseCents, costPerFinishedCents, mode, qtyUsed, lotSize };
   }
 
+
+  function defaultQuantityUsed(item) {
+    // A stock breakdown such as “1 tool = 100 uses” describes the inventory unit,
+    // not how many uses a finished product consumes. New product links therefore
+    // default to one use/batch unless the maker explicitly changes it.
+    return 1;
+  }
+
+  function syncVisibleLinkEditorToState() {
+    const editor = document.getElementById('productResourcesLinkedEditor');
+    if (!editor) return;
+    const qty = editor.querySelector('[data-link-qty]');
+    if (qty) {
+      const index = Number(qty.getAttribute('data-link-qty'));
+      const row = state.links[index];
+      if (row) row.quantity_used = Math.max(0.001, Number(qty.value || 1) || 1);
+    }
+    const mode = editor.querySelector('[data-link-mode]');
+    if (mode) {
+      const index = Number(mode.getAttribute('data-link-mode'));
+      const row = state.links[index];
+      if (row) row.consumption_mode = String(mode.value || 'per_unit').trim() || 'per_unit';
+    }
+    const lot = editor.querySelector('[data-link-lot]');
+    if (lot) {
+      const index = Number(lot.getAttribute('data-link-lot'));
+      const row = state.links[index];
+      if (row) row.lot_size_units = Math.max(1, Number(lot.value || 1) || 1);
+    }
+    const note = editor.querySelector('[data-link-note]');
+    if (note) {
+      const index = Number(note.getAttribute('data-link-note'));
+      const row = state.links[index];
+      if (row) row.usage_notes = String(note.value || '').trim();
+    }
+  }
+
   function formatMoney(cents) {
     const amount = Number(cents || 0) / 100;
     try {
@@ -573,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.links.push({
         resource_kind: item.item_kind,
         source_key: item.source_key,
-        quantity_used: 1,
+        quantity_used: defaultQuantityUsed(item),
         usage_notes: '',
         sort_order: state.links.length,
         name: item.name,
@@ -637,6 +674,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
+      // Capture the live editor value immediately before save. This protects against
+      // browser event ordering and makes “How much per use / batch” persist reliably
+      // even when Save is clicked directly after typing.
+      syncVisibleLinkEditorToState();
       setMessage('Saving product links...');
       const response = await window.DDAuth.apiFetch('/api/admin/product-resources', {
         method: 'POST',
@@ -659,9 +700,14 @@ document.addEventListener('DOMContentLoaded', () => {
         })
       });
       const data = await readJsonResponse(response, 'Failed to save product links.');
+      if (Array.isArray(data.links)) {
+        state.links = data.links;
+        hydrateLinks();
+        renderLinks();
+      }
       state.productionPreview = null;
       renderProductionPreview();
-      setMessage(`Saved ${Number(data.saved_links || 0)} linked items. Preview production again before posting finished inventory.`);
+      setMessage(`Saved and verified ${Number(data.saved_links || 0)} linked items. Preview production again before posting finished inventory.`);
       await loadData({ bootstrap: true, resources: false });
     } catch (err) {
       setMessage(err.message || 'Failed to save product links.', true);

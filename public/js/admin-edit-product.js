@@ -532,6 +532,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("weight_grams", product.weight_grams == null ? "" : product.weight_grams);
     setField("inventory_quantity", product.inventory_quantity == null ? "0" : product.inventory_quantity);
     setField("digital_file_url", product.digital_file_url || "");
+    // Clear stale image slots before loading this product. Previously this reset ran
+    // after the featured image had been resolved, which erased a valid image from
+    // Product Edit even though the storefront could still render it.
+    resetImageUrlFields();
     const uniqueLoadedImages = uniqueImageRows(Array.isArray(images) ? images : []);
     const resolvedFeaturedImageUrl = product.featured_image_url || uniqueLoadedImages[0]?.image_url || "";
     setField("featured_image_url", resolvedFeaturedImageUrl);
@@ -577,7 +581,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setField("sale_channel", product.sale_channel || "onsite");
 
     if (existingProductSelect) existingProductSelect.value = String(product.product_id || '');
-    resetImageUrlFields();
     const imageFields = getImageUrlFields();
     const featuredKey = normalizeImageKey(resolvedFeaturedImageUrl || '');
     const safeImages = uniqueLoadedImages
