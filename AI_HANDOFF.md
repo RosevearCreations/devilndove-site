@@ -127,3 +127,10 @@ The two cross-project current authorities are only:
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 
 `AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` are compatibility pointers. Specialist documents remain where they own implementation/testing details. Historical Build release prose is archived and frozen rather than repeatedly rewritten.
+
+## Build 251 — Product Editor image runtime repair
+
+- Fixed `ReferenceError: normalizeImageKey is not defined` in `admin-create-product.js`.
+- Saved featured/gallery/recovered product media can now reach the existing image manager instead of the manager aborting during render.
+- `/admin/products/` and `/admin/catalog/` explicitly load the corrected bundle with `?v=251` to bypass stale browser/CDN copies.
+- Product-detail remains the image authority: stored featured image first, then gallery/media/history recovery when required.
