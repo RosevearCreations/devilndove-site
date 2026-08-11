@@ -1,8 +1,8 @@
-# Build 252 current handoff
+# Build 253 current handoff
 
-The current code release is Build 252. The current D1 migration boundary remains Build 250: `database_build250_product_media_resource_usage_reliability.sql` / byte-identical `database_upgrade_current_pass.sql`; Builds 251–252 are browser/runtime fixes and require no D1 migration. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD250_CHANGED_FILES.md` and `BUILD250_VALIDATION.md`; prior release evidence is archived under `docs/archive/build-history/`.
+The current code release is Build 253. The current D1 migration boundary remains Build 250: `database_build250_product_media_resource_usage_reliability.sql` / byte-identical `database_upgrade_current_pass.sql`; Builds 251–253 are browser/runtime/API-read fixes and require no D1 migration. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD253_CHANGED_FILES.md` and `BUILD253_VALIDATION.md` for the current code-only release; the current D1 migration boundary remains Build 250. Prior release evidence is historical.
 
-# Devil n Dove AI Handoff — Build 252
+# Devil n Dove AI Handoff — Build 253
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -141,4 +141,12 @@ The two cross-project current authorities are only:
 - The defaults intentionally mirror `/api/admin/inventory-bootstrap`; the server response can still replace the list after load.
 - `/admin/inventory-operations/`, `/admin/mobile-inventory/` and the inventory panel on `/admin/products/` now load `admin-site-item-inventory.js?v=252` to bypass stale `v=245` browser/CDN copies.
 - No D1 migration is required for Build 252.
+
+## Build 253 — Linked resource names and inventory form reset clarity
+
+- Saved Product Resource links now resolve their human-readable tool/supply name directly from D1 inventory first, then catalog fallback; the external/source key remains the identity but is no longer the normal dropdown label.
+- Linked resource bootstrap also carries stock/usage metadata so a linked tool outside the current search result still keeps its configured conversion such as `1 tool = 100 uses`.
+- The browser preserves server-provided link names/resources when the linked item is outside the current 240-result resource search.
+- Inventory item editing now exposes three distinct actions: Save/Add, **Start New Item**, and **Clear / Reset Fields**. Full clear also removes stale catalog-search and Amazon-import helper values.
+- Product Resources and Inventory Operations bundles are cache-busted to `v=253` on affected admin pages. No D1 migration is required for Build 253.
 
