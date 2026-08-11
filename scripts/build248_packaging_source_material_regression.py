@@ -22,7 +22,7 @@ def check(name, condition):
         raise AssertionError(name)
 
 # Build/release wiring.
-check('current pass byte-identical',mig==current)
+check('current pass is Build 248 or newer', mig==current or b'Devil n Dove Build 249' in current)
 check('single packaging H1',len(re.findall(r'<h1\b',html,re.I))==1)
 check('Build 248 JS cache key','admin-packaging-studio.js?v=248' in html)
 check('Build 248 CSS cache key','styles.css?v=248' in html)
@@ -85,12 +85,12 @@ check('supplier document column',any(row[1]=='supplier_document_url' for row in 
 con.close()
 
 # Documentation consolidation and authority.
-check('Build 248 handoff',handoff.startswith('# Build 248 current handoff'))
-check('Build 248 roadmap',roadmap.startswith('# Devil n Dove Project Status and Roadmap — Build 248'))
+check('Build 248 handoff retained under current handoff', handoff.startswith('# Build 248 current handoff') or handoff.startswith('# Build 249 current handoff'))
+check('Build 248 roadmap retained under current roadmap', roadmap.startswith('# Devil n Dove Project Status and Roadmap — Build 248') or roadmap.startswith('# Devil n Dove Project Status and Roadmap — Build 249'))
 check('source-material roadmap','Purchased Source Material' in roadmap and 'Master INCI' in roadmap)
-check('Build 248 index',index.startswith('# Devil n Dove Markdown Index — Build 248'))
-check('two canonical authority index','Two current authorities' in index and 'Root cleanup in Build 248' in index)
-root_build_md=[p.name for p in root.glob('BUILD*.md') if p.name not in {'BUILD248_CHANGED_FILES.md','BUILD248_VALIDATION.md'}]
+check('Build 248 index retained under current index', index.startswith('# Devil n Dove Markdown Index — Build 248') or index.startswith('# Devil n Dove Markdown Index — Build 249'))
+check('two canonical authority index','Two current authorities' in index and ('Root cleanup in Build 248' in index or 'Root cleanup in Build 249' in index))
+root_build_md=[p.name for p in root.glob('BUILD*.md') if p.name not in {'BUILD248_CHANGED_FILES.md','BUILD248_VALIDATION.md','BUILD249_CHANGED_FILES.md','BUILD249_VALIDATION.md'}]
 check('no superseded root BUILD markdown',len(root_build_md)==0)
 
 print(f'Build 248 packaging/source-material regression: {sum(ok for _,ok in checks)}/{len(checks)} checks passed')
