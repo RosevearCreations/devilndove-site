@@ -151,3 +151,10 @@ Keep one clear H1 on every exposed page, concise truthful title/description/cano
 ## Documentation sanity rule
 
 Only `AI_HANDOFF.md` and this file are cross-project current authorities. Compatibility pointer files should remain short. Specialist documents own specialist implementation. Old Build changed-files/validation/verification prose belongs in `docs/archive/build-history/` and must not be treated as current work.
+
+## Build 251 — Product Editor image runtime repair
+
+- Fixed `ReferenceError: normalizeImageKey is not defined` in `admin-create-product.js`.
+- Saved featured/gallery/recovered product media can now reach the existing image manager instead of the manager aborting during render.
+- `/admin/products/` and `/admin/catalog/` explicitly load the corrected bundle with `?v=251` to bypass stale browser/CDN copies.
+- Product-detail remains the image authority: stored featured image first, then gallery/media/history recovery when required.
