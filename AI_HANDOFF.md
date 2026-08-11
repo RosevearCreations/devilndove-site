@@ -1,8 +1,8 @@
-# Build 250 current handoff
+# Build 252 current handoff
 
-The current migration boundary is Build 250: `database_build250_product_media_resource_usage_reliability.sql` / byte-identical `database_upgrade_current_pass.sql`. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD250_CHANGED_FILES.md` and `BUILD250_VALIDATION.md`; prior release evidence is archived under `docs/archive/build-history/`.
+The current code release is Build 252. The current D1 migration boundary remains Build 250: `database_build250_product_media_resource_usage_reliability.sql` / byte-identical `database_upgrade_current_pass.sql`; Builds 251–252 are browser/runtime fixes and require no D1 migration. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD250_CHANGED_FILES.md` and `BUILD250_VALIDATION.md`; prior release evidence is archived under `docs/archive/build-history/`.
 
-# Devil n Dove AI Handoff — Build 250
+# Devil n Dove AI Handoff — Build 252
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -134,3 +134,11 @@ The two cross-project current authorities are only:
 - Saved featured/gallery/recovered product media can now reach the existing image manager instead of the manager aborting during render.
 - `/admin/products/` and `/admin/catalog/` explicitly load the corrected bundle with `?v=251` to bypass stale browser/CDN copies.
 - Product-detail remains the image authority: stored featured image first, then gallery/media/history recovery when required.
+## Build 252 — Inventory Operations unit preset runtime repair
+
+- Fixed `ReferenceError: unitPresetOptions is not defined` in `admin-site-item-inventory.js`.
+- Inventory Operations now has a synchronous default unit-preset list before the async bootstrap request runs, so first render cannot crash while authentication/bootstrap data is still loading.
+- The defaults intentionally mirror `/api/admin/inventory-bootstrap`; the server response can still replace the list after load.
+- `/admin/inventory-operations/`, `/admin/mobile-inventory/` and the inventory panel on `/admin/products/` now load `admin-site-item-inventory.js?v=252` to bypass stale `v=245` browser/CDN copies.
+- No D1 migration is required for Build 252.
+
