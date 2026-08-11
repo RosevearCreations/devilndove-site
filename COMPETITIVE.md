@@ -1,3 +1,11 @@
+# Build 248 competitive direction — source transparency + real maker evidence
+
+The Packaging Studio source-material library adds a practical trust/operations advantage: we can retain what base/fragrance/colourant was purchased, the supplier evidence behind its ingredient/allergen information, and the reviewed finished formula without collapsing those into one unverifiable text field. Public pages should expose only reviewed facts that help a buyer—real ingredients/identity, care/use facts, real photography and useful process context—while supplier marketing copy stays internal unless deliberately approved.
+
+Current Google guidance supports this direction: people-first non-commodity content and high-quality relevant images remain useful for both ordinary and generative Search; Product structured data can support richer product appearances; special `llms.txt`/AI markup is not required. Continue competing on honest maker/process evidence, clear custom-order flow, accurate product facts and real media rather than generic bulk content or unsupported claims.
+
+Primary current references: https://developers.google.com/search/docs/fundamentals/ai-optimization-guide ; https://developers.google.com/search/docs/appearance/structured-data/product ; https://developers.google.com/search/docs/appearance/google-images
+
 # Build 246 competitive/SEO directional check — 2026-08-10
 
 A current public review still shows useful patterns without changing Devil n Dove's evidence-first direction. Things Engraved organizes personalized gift categories around occasions and customization, while The Engraving Shoppe clearly names engraving/printing categories, materials and the path for a customer to start a custom project. The useful takeaway is not to copy their claims: Devil n Dove should keep strengthening category/material examples, customization steps, product galleries, direct custom-request paths and local/pickup/shipping clarity while only promising turnaround, minimums and services that are actually supported.

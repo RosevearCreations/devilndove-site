@@ -1,8 +1,8 @@
-# Build 247 current handoff
+# Build 248 current handoff
 
-The current migration boundary is Build 247: `database_build247_packaging_library_truth_layout_rose_palette.sql` / byte-identical `database_upgrade_current_pass.sql`. The current Packaging Studio authority includes the approved Truth-reference soap renderer, fixed ingredient zones, full rose palette/custom colour, reusable template gallery, persistent packaging formula/content libraries and typed-key label deletion. Do not reintroduce the generic purple soap artwork fallback. See `PACKAGING_STUDIO.md`, `BUILD247_CHANGED_FILES.md` and `BUILD247_VALIDATION.md`.
+The current migration boundary is Build 248: `database_build248_packaging_source_material_templates_compliance.sql` / byte-identical `database_upgrade_current_pass.sql`. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `PACKAGING_STUDIO.md`, `BUILD248_CHANGED_FILES.md` and `BUILD248_VALIDATION.md`.
 
-# Devil n Dove AI Handoff — Build 247
+# Devil n Dove AI Handoff — Build 248
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -29,6 +29,7 @@ Build 246 repairs the live Product Editor lifecycle and extends D1-backed produc
 | Creative media, rights and story evidence | CAIP |
 | Private Creative Project originals | CAIP D1 metadata + private `CAIP_PRIVATE_MEDIA_BUCKET` |
 | Packaging/label project state | Labeling & Packaging D1 authorities + `PACKAGING_STUDIO.md` |
+| Purchased/source material authority | D1 `packaging_source_material_templates` + project/formula links; supplier evidence remains distinct from finished-product facts |
 | French label generation evidence | `packaging_translation_reviews`; machine/curated output remains a draft until human review |
 | Content packages | Content Studio |
 | Publication approval/provider reconciliation | Release Board / Social Queue / provider records |
@@ -70,6 +71,14 @@ A finished product made without a Creative Project uses **Finished Product Produ
 Private raw Creative Project media remains separate from approved/public media. Exact fingerprint/size duplicates within the **same Creative Project** are skipped at intake instead of creating duplicate upload rows/parts. Cross-project duplicates remain warnings because one source file may legitimately support more than one project. Raw media remains immutable; derivatives, proxies, frames, transcripts and exports are separate objects.
 
 ## Packaging and soap-label rule
+
+### Source-material inheritance rule
+
+A **Purchased Source Material** is not the same object as a finished soap formula. Soap bases, fragrance oils, colourants and additives keep their supplier/source identity and evidence in `packaging_source_material_templates`. A project attaches those records through `packaging_project_source_materials`, including a source snapshot for audit context. A saved finished formula may link one `soap_base` as its inherited base through `packaging_formula_source_material_links`; fragrance oils, colourants and additives remain separate project inputs so their lot/source/compliance evidence is not hidden inside the base.
+
+The supplier's ingredient wording is preserved exactly as source evidence, but it is not promoted to verified INCI merely because it appears on a marketplace/product page. Master INCI rows carry review status. Supplier benefits and claims are displayed as source evidence and can only be copied into the finished-product claim editor as **unapproved draft claims** for deliberate review. A source image or supplier document URL is reference evidence only and must not become public product media automatically.
+
+For Canadian cosmetic work, keep ingredient/allergen review current before print. As of 2026-08-01, new cosmetics are subject to Canada's expanded fragrance-allergen disclosure list when the applicable rinse-off/leave-on threshold is exceeded. The source-material model therefore keeps fragrance supplier allergen data and review status separate and blocks print-readiness when an attached fragrance source has not been reviewed. See the official Health Canada cosmetic ingredient-labelling guidance linked from Packaging Studio and `PACKAGING_STUDIO.md`.
 
 Soap ribbon design is locked to the approved `soap_reference_v2` direction. Applying the approved Glacial Purple reference changes the **visual treatment only** and must not invent formula, ingredient, claim, warning or net-quantity facts. Formula/ingredient facts come from reviewed Product Resources / production evidence.
 
