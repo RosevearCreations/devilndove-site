@@ -1,17 +1,17 @@
-# Devil n Dove Markdown Index — Build 248
+# Devil n Dove Markdown Index — Build 249
 
 ## Two current authorities
 
 1. `AI_HANDOFF.md` — architecture, data authority, product/project/inventory/CAIP/packaging safety, schema and deployment.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 248 work, known risks and the ordered next actions.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 249 work, known risks and the ordered next actions.
 
 A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current release pair
 
-- `BUILD248_CHANGED_FILES.md`
-- `BUILD248_VALIDATION.md`
-- read-only production SQL check: `BUILD248_D1_VERIFICATION.sql`
+- `BUILD249_CHANGED_FILES.md`
+- `BUILD249_VALIDATION.md`
+- read-only production SQL check: `BUILD249_D1_VERIFICATION.sql`
 
 ## Active specialist playbooks
 
@@ -27,7 +27,7 @@ A new AI/chat reads these two first. No other Markdown file overrides them.
 
 `AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` intentionally point to the two current authorities rather than duplicating mutable roadmap content.
 
-## Root cleanup in Build 248
+## Root cleanup in Build 249
 
 Superseded `BUILD*.md` files are no longer duplicated at the repository root. Their preserved copies live under `docs/archive/build-history/`. Current release evidence stays at root only for the active Build.
 

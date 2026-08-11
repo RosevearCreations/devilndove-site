@@ -1,8 +1,23 @@
-# Devil n Dove Project Status and Roadmap — Build 248
+# Devil n Dove Project Status and Roadmap — Build 249
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
-## Build 248 completed work — purchased source-material inheritance and compliance evidence
+
+## Build 249 completed work — kits, components and inventory structure
+
+1. Added purchased **Kit / Bundle** templates that can be opened into separate usable inventory components.
+2. Added component quantity/unit/tracking definitions so wax, colour, fragrance, wicks, containers and hardware remain independently usable after a kit is opened.
+3. Added reusable-equipment handling for included pitchers, molds or tools so they remain equipment rather than being consumed by a finished product.
+4. Added equal or percentage cost allocation and weighted-average child unit-cost updates.
+5. Added immutable kit-opening provenance linking the original kit purchase to each child quantity/cost release.
+6. Added general inventory classes: raw material, consumable, packaging, reusable equipment, kit, component, finished good, sample/test material, waste/scrap and other.
+7. Added lifecycle plus lot, expiry and supplier-composition/source-material recommendations in the main inventory editor.
+8. Added an inventory↔Packaging Source Material link table for future direct lot/source evidence integration without creating a second stock authority.
+9. Clarified premixed essential/fragrance oils: one purchased bottle remains one inventory item while constituent oils/INCI/allergen evidence remains inside its source-material record.
+10. Fixed the inventory-delete audit path referencing an undefined variable.
+11. Kept Build 248 Packaging Studio behavior intact; Build 248 regression remains 85/85.
+
+## Build 248 retained work — purchased source-material inheritance and compliance evidence
 
 1. Added a D1-backed **Purchased Source Material** library distinct from finished soap formulas.
 2. Added source types for `soap_base`, `fragrance_oil`, `colourant` and `additive`, each with supplier/product/SKU/source references.
@@ -94,9 +109,9 @@ The Product Editor retains gallery/featured/SEO roles across reloads, and empty 
 - Cloudflare Worker/D1 limits can still exist independently of application optimizations; retain Ray IDs for any remaining 503/1102 incidents.
 - Local first-page search placement cannot be guaranteed. Continue measuring real query/page/Business Profile outcomes after deployment rather than relying on static SEO scores alone.
 
-## Next 20 steps after Build 248
+## Next 20 steps after Build 249
 
-1. Back up production D1, apply Build 248 once, run `BUILD248_D1_VERIFICATION.sql`, and retain the ledger/foreign-key/source-template evidence.
+1. Back up production D1, confirm Build 248 is already applied, apply Build 249 once, run `BUILD249_D1_VERIFICATION.sql`, and retain the foreign-key/kit/profile evidence.
 2. Enter the actual supplier, SKU/product URL, product image/document link and verified INCI sheet for each purchased soap base; promote Master INCI rows only after source review.
 3. Create reusable source templates for each regularly purchased fragrance oil and colourant, including supplier documentation and applicable fragrance-allergen evidence.
 4. Run a real Oatmeal & Goat Milk packaging project from source base → finished formula → added fragrance/colour → physical label and verify inherited ingredients remain editable but traceable.
