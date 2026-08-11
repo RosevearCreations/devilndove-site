@@ -459,11 +459,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function hydrateLinks() {
     state.links = state.links.map((x) => {
-      const resource = state.resources.find((r) => r.item_kind === x.resource_kind && r.source_key === x.source_key) || {};
+      const resource = state.resources.find((r) => r.item_kind === x.resource_kind && r.source_key === x.source_key) || x.resource || {};
       return {
         ...x,
         resource,
-        name: resource.name || x.source_key,
+        // Saved links now carry an authoritative inventory/catalog display name.
+        // Preserve it when the linked resource is outside the current search result.
+        name: resource.name || x.name || x.source_key,
         consumption_mode: x.consumption_mode || 'per_unit',
         lot_size_units: Math.max(1, Number(x.lot_size_units || 1) || 1),
         quantity_used: Math.max(0.001, Number(x.quantity_used || 1) || 1),
