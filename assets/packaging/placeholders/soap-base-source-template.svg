@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Soap base supplier source placeholder</title>
+  <desc id="desc">Neutral placeholder showing a soap base block, supplier document sheet and ingredient list lines.</desc>
+  <rect width="1200" height="900" rx="56" fill="#f3ecdf"/>
+  <rect x="95" y="110" width="1010" height="680" rx="42" fill="#fffaf1" stroke="#4a2d59" stroke-width="10"/>
+  <path d="M180 590h390l90-190-92-150H250l-85 150z" fill="#e7d7b7" stroke="#4a2d59" stroke-width="10"/>
+  <path d="M250 250l95 95h318" fill="none" stroke="#b58b38" stroke-width="10"/>
+  <rect x="690" y="205" width="300" height="410" rx="18" fill="#fff" stroke="#4a2d59" stroke-width="9"/>
+  <path d="M920 205v92h70" fill="#eee5f3" stroke="#4a2d59" stroke-width="9"/>
+  <g stroke="#766a7e" stroke-width="8" stroke-linecap="round"><path d="M742 355h195"/><path d="M742 405h195"/><path d="M742 455h165"/><path d="M742 505h195"/><path d="M742 555h135"/></g>
+  <circle cx="315" cy="470" r="55" fill="#fffaf1" stroke="#b58b38" stroke-width="8"/>
+  <path d="M295 470l17 18 34-42" fill="none" stroke="#4a2d59" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="600" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" fill="#4a2d59">SUPPLIER SOURCE MATERIAL</text>
+  <text x="600" y="748" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#766a7e">Add product photo • INCI sheet • allergen evidence</text>
+</svg>
