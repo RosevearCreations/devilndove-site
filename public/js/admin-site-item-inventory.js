@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let rendered = false;
   let catalogSeedOptions = [];
   let categorySeedOptions = [];
+  // Render must be safe before the async inventory bootstrap returns. Keep the
+  // same defaults as /api/admin/inventory-bootstrap, then allow the API to
+  // replace/extend them after authentication.
+  let unitPresetOptions = [
+    'unit','each','piece','gram','kilogram','milligram','millilitre','litre',
+    'ounce','pound','inch','foot','metre','centimetre','jar','bottle','bag','box',
+    'package','spool','sheet','pair','set','use'
+  ];
   let seedSearchText = '';
   let editingSiteInventoryId = 0;
   let selectedCatalogItemId = 0;
@@ -255,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await window.DDAuth.apiJson(
             '/api/admin/inventory-bootstrap',
             { method: 'GET' },
-            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v245', cacheTtlMs: 300000, retries: 2, staleOnError: true }
+            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v252', cacheTtlMs: 300000, retries: 2, staleOnError: true }
           );
           categorySeedOptions = Array.isArray(data?.categories) ? data.categories.map((v)=>String(v||'').trim().toLowerCase()).filter(Boolean) : [];
           unitPresetOptions = Array.isArray(data?.unit_presets) && data.unit_presets.length ? data.unit_presets : unitPresetOptions;
