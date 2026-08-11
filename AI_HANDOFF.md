@@ -1,8 +1,8 @@
-# Build 249 current handoff
+# Build 250 current handoff
 
-The current migration boundary is Build 249: `database_build249_inventory_kits_components_provenance.sql` / byte-identical `database_upgrade_current_pass.sql`. Build 249 adds purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance while retaining Build 248 purchased/source-material templates and Packaging Studio compliance evidence. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `PACKAGING_STUDIO.md`, `BUILD249_CHANGED_FILES.md` and `BUILD249_VALIDATION.md`; Build 248 release evidence is archived under `docs/archive/build-history/`.
+The current migration boundary is Build 250: `database_build250_product_media_resource_usage_reliability.sql` / byte-identical `database_upgrade_current_pass.sql`. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD250_CHANGED_FILES.md` and `BUILD250_VALIDATION.md`; prior release evidence is archived under `docs/archive/build-history/`.
 
-# Devil n Dove AI Handoff — Build 249
+# Devil n Dove AI Handoff — Build 250
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -47,6 +47,10 @@ Mutable business state belongs in D1 whenever a live table exists. JSON and Mark
 4. Product deletion may automatically clean **unreviewed generated project shells** that contain no meaningful workflow/review/publication/evidence/output state. A meaningful Content Studio/CAIP project remains a blocking business/history reference and must be handled explicitly.
 5. Posted finished-product production history is a deletion blocker. Archive or reverse/detach according to the business workflow rather than silently discarding production evidence.
 
+
+## Build 250 Product Edit image and usage rule
+
+Product Edit must clear stale media fields **before** resolving the selected product's featured/gallery images. The editor then restores `products.featured_image_url` first and falls back to the first recoverable gallery/media image, matching the storefront's D1-backed media authority instead of showing a false “no picture” state. Product-resource “How much per use / batch” is the quantity a finished item consumes; it is independent of how many usage units one stock unit contains. New links default to **1 use**, including reusable tools configured as 1 stock item = 100+ uses. Save reads the visible field immediately before POST and the API reads the saved links back from D1 so the editor can verify the persisted fractional value.
 
 ## Build 249 inventory-kit and component rule
 
