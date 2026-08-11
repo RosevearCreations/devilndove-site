@@ -523,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = document.getElementById('siteInventoryEditState');
     const saveButton = document.getElementById('siteInventorySaveButton');
     const resetButton = document.getElementById('siteInventoryResetButton');
+    const clearButton = document.getElementById('siteInventoryClearFieldsButton');
     if (editingSiteInventoryId) {
       if (status) {
         status.hidden = false;
@@ -530,10 +531,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (saveButton) saveButton.textContent = 'Save Changes to This Item';
       if (resetButton) resetButton.textContent = 'Start New Item';
+      if (clearButton) clearButton.textContent = 'Clear / Reset Fields';
     } else {
       if (status) { status.hidden = true; status.textContent = ''; }
       if (saveButton) saveButton.textContent = 'Add Inventory Item';
-      if (resetButton) resetButton.textContent = 'Reset Form';
+      if (resetButton) resetButton.textContent = 'Start New Item';
+      if (clearButton) clearButton.textContent = 'Clear / Reset Fields';
     }
   }
 
@@ -559,6 +562,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const sourceTypeEl = document.getElementById('siteInventorySourceType'); if (sourceTypeEl) sourceTypeEl.disabled = false;
     const externalKeyEl = document.getElementById('siteInventoryExternalKey'); if (externalKeyEl) externalKeyEl.readOnly = false;
     updateSiteInventoryImagePreview();
+  }
+
+  function clearInventoryWorkspaceFields() {
+    // A deliberately explicit full clear. Start New Item resets the inventory
+    // editor; this also clears the helper/search/import fields around it so a
+    // prior Amazon URL or catalog search cannot accidentally seed the next item.
+    resetInventoryForm();
+    seedSearchText = '';
+    setInputValue('siteInventorySeedSearch', '');
+    setInputValue('siteInventoryAmazonImportUrl', '');
+    setInputValue('siteInventoryAmazonImportType', 'supply');
+    setAmazonLinkPreviewStatus('');
+    setMessage('Inventory entry fields cleared. Ready for a new item.');
+    catalogSeedOptions = [];
+    renderSeedDropdowns();
+    if (window.DDAuth?.isLoggedIn()) loadSeedOptions().then(() => renderSeedDropdowns()).catch(() => {});
+    document.getElementById('siteInventoryItemName')?.focus();
   }
 
   function render() {
@@ -654,7 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventoryMovementNote">Movement Note</label><input id="siteInventoryMovementNote" type="text" placeholder="restock, count correction, incoming order..." /></div>
             <div class="small" style="align-self:end">Full editing is available for every record. The external key stays fixed after creation. Tool ↔ supply classification can be corrected here and linked catalog/product-resource rows are updated with it.</div>
           </div>
-          <div class="site-inventory-form-actions"><button class="btn primary" type="submit" id="siteInventorySaveButton">Add Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Reset Form</button></div>
+          <div class="site-inventory-form-actions"><button class="btn primary" type="submit" id="siteInventorySaveButton">Add Inventory Item</button><button class="btn" type="button" id="siteInventoryResetButton">Start New Item</button><button class="btn" type="button" id="siteInventoryClearFieldsButton">Clear / Reset Fields</button></div>
         </form>
 
         <datalist id="siteInventoryUnitPresets">${unitPresetOptions.map((value)=>`<option value="${escapeHtml(value)}"></option>`).join('')}</datalist>
@@ -765,6 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryPreviousPage')?.addEventListener('click', () => { if (inventoryPage > 1) { inventoryPage -= 1; loadList({ force: true }); } });
     document.getElementById('siteInventoryNextPage')?.addEventListener('click', () => { inventoryPage += 1; loadList({ force: true }); });
     document.getElementById('siteInventoryResetButton')?.addEventListener('click', resetInventoryForm);
+    document.getElementById('siteInventoryClearFieldsButton')?.addEventListener('click', clearInventoryWorkspaceFields);
     document.getElementById('siteInventoryBulkCostForm')?.addEventListener('submit', onBulkCostApply);
     document.getElementById('siteInventoryBulkPreviewButton')?.addEventListener('click', onBulkCostPreview);
     document.getElementById('siteInventoryBulkScope')?.addEventListener('change', updateBulkCostScopeHelpers);
