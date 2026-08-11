@@ -29,7 +29,7 @@ for rel in ('creations/index.html','gallery/index.html'):
 css=(ROOT/'css/styles.css').read_text(encoding='utf-8')
 for token in ('.public-service-hero','.representative-fallback-badge','@media(max-width:860px)'):
     if token not in css: errors.append(f'css missing {token}')
-if not re.search(r'devilndove-shell-v(?:19|20)', (ROOT/'sw.js').read_text(encoding='utf-8')): errors.append('service worker shell v19+ missing')
+if not re.search(r'devilndove-shell-v(?:1[9]|2[0-9]|[3-9][0-9])', (ROOT/'sw.js').read_text(encoding='utf-8')): errors.append('service worker shell v19+ missing')
 if errors:
     print('Build 239 public visual test: FAIL')
     print('\n'.join(f'- {e}' for e in errors))
