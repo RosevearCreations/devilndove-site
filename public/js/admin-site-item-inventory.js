@@ -544,6 +544,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const usageUnitsEl = document.getElementById('siteInventoryUsageUnitsPerStock'); if (usageUnitsEl) usageUnitsEl.value = '1';
     const trackingEl = document.getElementById('siteInventoryUsageTrackingMode'); if (trackingEl) trackingEl.value = 'exact';
     const incrementEl = document.getElementById('siteInventoryMinimumUsageIncrement'); if (incrementEl) incrementEl.value = '0.001';
+    const classEl=document.getElementById('siteInventoryClass');if(classEl)classEl.value='consumable';
+    const lifeEl=document.getElementById('siteInventoryLifecycleMode');if(lifeEl)lifeEl.value='consumable';
+    ['siteInventoryLotRecommended','siteInventoryExpiryRecommended','siteInventorySourceMaterialRecommended'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
     setInventoryEditMode({});
     const sourceTypeEl = document.getElementById('siteInventorySourceType'); if (sourceTypeEl) sourceTypeEl.disabled = false;
     const externalKeyEl = document.getElementById('siteInventoryExternalKey'); if (externalKeyEl) externalKeyEl.readOnly = false;
@@ -621,6 +624,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventoryUsageTrackingMode">Usage Tracking</label><select id="siteInventoryUsageTrackingMode"><option value="exact">Exact measured — reduce stock</option><option value="estimated">Estimated amount — reduce stock</option><option value="log_only">Log use only — do not reduce stock</option><option value="reusable">Reusable tool/equipment — do not reduce stock</option></select></div>
             <div><label class="small" for="siteInventoryMinimumUsageIncrement">Smallest usage increment</label><input id="siteInventoryMinimumUsageIncrement" type="number" min="0.0001" step="0.0001" value="0.001" /></div>
           </div>
+          <div class="grid cols-4" style="gap:12px">
+            <div><label class="small" for="siteInventoryClass">Inventory class</label><select id="siteInventoryClass"><option value="raw_material">Raw material</option><option value="consumable">Consumable</option><option value="packaging">Packaging</option><option value="reusable_equipment">Reusable equipment</option><option value="kit">Purchased kit / bundle</option><option value="component">Component / part</option><option value="finished_good">Finished good</option><option value="sample">Sample / test material</option><option value="waste">Waste / scrap</option><option value="other">Other</option></select></div>
+            <div><label class="small" for="siteInventoryLifecycleMode">Lifecycle</label><select id="siteInventoryLifecycleMode"><option value="consumable">Consumable</option><option value="reusable">Reusable</option><option value="kit">Kit — open into components</option><option value="stocked">Stocked</option><option value="nonstock">Non-stock / reference</option><option value="retired">Retired</option></select></div>
+            <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryLotRecommended" type="checkbox"/> Track by purchase lot / batch</label>
+            <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryExpiryRecommended" type="checkbox"/> Track expiry / best-before</label>
+          </div>
+          <div class="grid cols-2" style="gap:12px"><label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventorySourceMaterialRecommended" type="checkbox"/> This item should have supplier ingredient / INCI / allergen source-material data</label><div class="small">Use this for soap bases, fragrance/essential-oil blends, colourants and other materials whose supplier composition affects a finished product or label.</div></div>
           <div class="small inventory-usage-help">Examples: a 500 g mica jar can be <strong>stock unit = jar</strong>, <strong>usage unit = gram</strong>, <strong>500 usage units per stock unit</strong>. If a few sprinkles cannot be weighed reliably, choose <strong>Log use only</strong>; the use is recorded without pretending the jar is empty. Exact or estimated usage can also be fractional.</div>
           <div class="grid cols-4" style="gap:12px">
             <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryOnReorderList" type="checkbox" /> On reorder list</label>
@@ -785,6 +795,11 @@ document.addEventListener('DOMContentLoaded', () => {
       usage_units_per_stock_unit: Math.max(0.001, Number(document.getElementById('siteInventoryUsageUnitsPerStock')?.value || 1) || 1),
       usage_tracking_mode: String(document.getElementById('siteInventoryUsageTrackingMode')?.value || 'exact').trim().toLowerCase(),
       minimum_usage_increment: Math.max(0.0001, Number(document.getElementById('siteInventoryMinimumUsageIncrement')?.value || 0.001) || 0.001),
+      inventory_class: String(document.getElementById('siteInventoryClass')?.value || 'other').trim().toLowerCase(),
+      lifecycle_mode: String(document.getElementById('siteInventoryLifecycleMode')?.value || 'stocked').trim().toLowerCase(),
+      lot_tracking_recommended: document.getElementById('siteInventoryLotRecommended')?.checked ? 1 : 0,
+      expiry_tracking_recommended: document.getElementById('siteInventoryExpiryRecommended')?.checked ? 1 : 0,
+      source_material_recommended: document.getElementById('siteInventorySourceMaterialRecommended')?.checked ? 1 : 0,
       catalog_item_id: selectedCatalogItemId || undefined,
       supplier_name: document.getElementById('siteInventorySupplierName')?.value || '',
       supplier_sku: document.getElementById('siteInventorySupplierSku')?.value || '',
@@ -923,6 +938,8 @@ document.addEventListener('DOMContentLoaded', () => {
       siteInventoryUsageUnitsPerStock: Math.max(0.001, Number(item.usage_units_per_stock_unit || 1) || 1),
       siteInventoryUsageTrackingMode: item.usage_tracking_mode || (String(item.source_type || '').toLowerCase() === 'tool' ? 'reusable' : 'exact'),
       siteInventoryMinimumUsageIncrement: Math.max(0.0001, Number(item.minimum_usage_increment || 0.001) || 0.001),
+      siteInventoryClass: item.inventory_class || (String(item.source_type||'').toLowerCase()==='tool'?'reusable_equipment':'consumable'),
+      siteInventoryLifecycleMode: item.lifecycle_mode || (String(item.source_type||'').toLowerCase()==='tool'?'reusable':'consumable'),
       siteInventorySupplierName: item.supplier_name || '',
       siteInventorySupplierSku: item.supplier_sku || '',
       siteInventorySupplierContact: item.supplier_contact || '',
@@ -935,6 +952,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const reorderEl = document.getElementById('siteInventoryOnReorderList'); if (reorderEl) reorderEl.checked = Number(item.is_on_reorder_list || 0) === 1;
     const dnrEl = document.getElementById('siteInventoryDoNotReorder'); if (dnrEl) dnrEl.checked = Number(item.do_not_reorder || 0) === 1;
     const dnuEl = document.getElementById('siteInventoryDoNotReuse'); if (dnuEl) dnuEl.checked = Number(item.do_not_reuse || 0) === 1;
+    const lotEl=document.getElementById('siteInventoryLotRecommended');if(lotEl)lotEl.checked=Number(item.lot_tracking_recommended||0)===1;
+    const expEl=document.getElementById('siteInventoryExpiryRecommended');if(expEl)expEl.checked=Number(item.expiry_tracking_recommended||0)===1;
+    const srcEl=document.getElementById('siteInventorySourceMaterialRecommended');if(srcEl)srcEl.checked=Number(item.source_material_recommended||0)===1;
     syncCategoryPresetSelection(item.category || '');
     const seedEl = document.getElementById('siteInventorySeedItem');
     if (seedEl) seedEl.value = item.external_key || '';
