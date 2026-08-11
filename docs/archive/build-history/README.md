@@ -1,11 +1,12 @@
 # Historical Build Evidence
 
-This folder contains retired Build-specific validation, changed-file, testing, lifecycle and file-manifest records through Build 233. They remain unchanged traceability evidence and must not override the two current authorities at the repository root:
+This folder contains retired Build-specific validation, changed-file, testing, lifecycle and file-manifest Markdown records. They are preserved traceability evidence only and must not override the two current cross-project authorities at the repository root:
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 
-The immediately preceding Build 234 evidence remains at the root beside the current Build 235 release files so deployment comparison stays simple. Older numbered SQL migrations remain at the root because migration order and D1 recovery depend on their stable filenames.
-## Build 240 archive pass
+## Build 248 archive rule
 
-Superseded root Build release records through Build 239 were moved here. Only `BUILD240_CHANGED_FILES.md` and `BUILD240_VALIDATION.md` remain at the root as current release evidence. Historical records cannot override `AI_HANDOFF.md` or `PROJECT_STATUS_AND_ROADMAP.md`.
+Build 248 removed superseded `BUILD*.md` duplicates from the repository root. Only the **current Build** changed-files/validation Markdown pair should remain at root. When a later Build becomes current, move the previous current release Markdown pair here rather than leaving multiple competing “current” release summaries at root.
+
+Numbered SQL migrations remain at the repository root because migration order, deployment and D1 recovery depend on their stable filenames. Specialist design/reference documents may retain an older Build number when that number identifies a fixed specialist baseline rather than current application state.
