@@ -1,7 +1,19 @@
-# Devil n Dove Project Status and Roadmap — Build 249
+# Devil n Dove Project Status and Roadmap — Build 250
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
+
+
+## Build 250 completed work — product images and per-use persistence
+
+1. Fixed Product Edit clearing the resolved featured image after load; stale image slots are now cleared before the selected product's media is resolved.
+2. Retained fallback from the stored featured image to the first recoverable product/gallery image, matching storefront media behavior.
+3. Bumped Product Edit/Product Resources asset versions to avoid stale cached JavaScript after deployment.
+4. Product Resource links now default to **1 use/batch** regardless of an inventory stock conversion such as 1 tool = 100 uses.
+5. Save now reads the live visible `How much per use / batch` input immediately before POST, protecting fractional values from browser event-order timing.
+6. Product Resources API now reloads persisted D1 links after save and returns them to the editor for save verification.
+7. Build 250 migration normalizes historical null/non-positive resource usage quantities to 1 while preserving explicit fractional and larger quantities.
+8. Added Build 250 regression coverage for media load ordering, gallery fallback, one-use defaults, fractional persistence, server read-back and cache-version changes.
 
 ## Build 249 completed work — kits, components and inventory structure
 
