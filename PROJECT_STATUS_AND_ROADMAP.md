@@ -1,9 +1,24 @@
-# Devil n Dove Project Status and Roadmap — Build 254
+# Devil n Dove Project Status and Roadmap — Build 255
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
 
 
+
+## Build 255 completed work — Packaging Material Library clarity and cross-product structured content
+
+1. Fixed Packaging Studio stale asset URLs by bumping `styles.css` and `admin-packaging-studio.js` from `v=248` to `v=255`.
+2. Rebuilt purchased/source-material cards and editor CSS with explicit responsive grid rules instead of relying on generic card styling.
+3. Made the **Material Library visible without selecting a packaging project**, so bases/oils/colours can be entered before label work begins.
+4. Added product-area and source-category metadata covering soap bases, candle wax/base blends, cosmetic bases, fragrance oils, essential-oil blends, colourants/dyes/micas, carrier oils/butters, botanicals and other additives.
+5. Added optional colour swatches for colourant/source templates.
+6. Moved source Master INCI editing into the source template itself; saving a purchased material no longer steals the current project's ingredient rows.
+7. Added **Create draft rows from supplier text** plus add/remove source ingredient row controls.
+8. Generalized base-role inheritance so a candle wax/base can act as a finished-formula base just like a soap base.
+9. Generalized the Finished Soap Formula language/workflow to **Finished Formula / Recipe** while retaining soap compatibility.
+10. Added `packaging_project_ingredients` and `packaging_project_claims` so structured label content persists for candle, bath/body and other package types, with legacy soap tables mirrored.
+11. Seeded metadata for the existing Goat's Milk Melt & Pour source and backfilled existing soap structured content into the general packaging tables.
+12. Added Build 255 D1 verification and regression coverage; Build 254 remains the runtime-hardening foundation.
 
 ## Build 254 completed work — Startup/Smoke 503 runtime hardening
 

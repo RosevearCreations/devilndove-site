@@ -1,5 +1,20 @@
 # Build 248 current Packaging Studio extension
 
+
+## Build 255 — Material Library hub
+
+The **Material Library** is now visible on `/admin/packaging-studio/` even when no packaging project is selected. Use it to define purchased materials before designing any label. Create one template for each supplier product we actually buy:
+
+- **Soap / Soap base** — melt-and-pour, goat milk, shea, clear, white, aloe and other bases.
+- **Candles / Candle wax or wax blend** — soy, paraffin, beeswax, coconut blends, gel or other purchased bases.
+- **Fragrance oil / essential-oil blend** — one purchased bottle remains one source template; list its supplier-declared constituents/INCI inside that template rather than pretending each constituent is separate inventory.
+- **Colourant / dye / mica / pigment** — keep supplier composition/INCI, optional colour swatch, usage notes and evidence with the exact purchased colour product.
+- **Carrier oil / butter, botanical/extract and other additive** — use for ingredients added after the main base.
+
+Every source template owns its own **Supplier ingredient declaration** and **Master INCI/source ingredient rows**. The source editor no longer borrows the current label project's ingredient table. Paste the supplier list and use **Create draft rows from supplier text**, then correct those draft names to supplier-verified INCI before changing verification status.
+
+When a label project is open, use a source template to attach its evidence and ingredients. A source categorized as `soap_base`, `candle_wax` or another base-role material replaces the current base ingredient rows; fragrances, colourants and additives are appended. Finished formula/recipe presets can inherit the attached base and retain separate additions. Build 255 also adds `packaging_project_ingredients` and `packaging_project_claims` so structured content is preserved for **soap, candle, bath/body and general packaging**, while legacy soap tables remain mirrored for compatibility.
+
 ## Build 248 — purchased/source material templates
 
 Purchased soap bases, fragrance oils, colourants and additives are reusable **source materials**, not finished formulas. Store supplier identity/SKU/URLs, optional source image/document links, raw supplier ingredient wording, reviewed Master INCI rows, supplier allergen text, supplier benefits/claims, usage/compliance notes and verification state in the source-material library. A finished soap formula may inherit one soap base; fragrance, colourant and additive sources attach separately to the project. Source benefits/marketing text is evidence only and must enter finished label claims as unapproved draft wording until reviewed.
