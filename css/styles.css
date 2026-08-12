@@ -3124,3 +3124,28 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
 
 /* Build 249 — purchased kit / component inventory */
 .inventory-kits-admin{overflow:hidden}.inventory-kit-template-list{display:grid;gap:12px}.inventory-kit-template-card{margin:0}.inventory-kit-component-row{border:1px solid var(--border,#d8d8d8);border-radius:12px;padding:12px;margin:12px 0;background:rgba(255,255,255,.025)}.inventory-kit-help{padding:10px 12px;margin-top:12px;border-radius:10px;background:rgba(127,127,127,.08)}.inventory-kits-admin input,.inventory-kits-admin select{max-width:100%;min-width:0}.inventory-kits-admin .admin-table-wrap{overflow-x:auto}@media(max-width:900px){.inventory-kits-admin .grid.cols-6,.inventory-kits-admin .grid.cols-4,.inventory-kits-admin .grid.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.inventory-kits-admin .grid.cols-6,.inventory-kits-admin .grid.cols-4,.inventory-kits-admin .grid.cols-3{grid-template-columns:1fr}.inventory-kit-component-row{padding:10px}.inventory-kits-admin .section-heading-row{align-items:flex-start;flex-direction:column}}
+
+/* Build 255 — Packaging Material Library hub and source-template editor. */
+.packaging-material-library-hub{overflow:hidden;padding:16px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.018));border-color:rgba(184,138,47,.34)}
+.packaging-library-heading{align-items:flex-start;gap:14px}.packaging-library-heading h4{margin:.1rem 0 .35rem}.packaging-library-heading .eyebrow{margin:0}
+.packaging-source-picker{margin:2px 0 4px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(0,0,0,.10)}
+.packaging-source-grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:stretch}
+.packaging-source-grid .packaging-source-card{display:grid;grid-template-columns:88px minmax(0,1fr);grid-template-areas:"image body" "actions actions";align-items:start;gap:12px;min-height:100%;padding:12px}
+.packaging-source-grid .packaging-source-thumb{grid-area:image;width:88px;min-width:88px;aspect-ratio:1/1;object-fit:contain;background:#f5f2ea}
+.packaging-source-card-body{grid-area:body;min-width:0;display:grid;gap:6px;align-content:start}
+.packaging-source-grid .packaging-library-card-actions{grid-area:actions;width:100%;justify-content:flex-start;padding-top:4px;border-top:1px solid rgba(255,255,255,.08)}
+.packaging-source-grid .packaging-library-card-actions .btn{flex:1 1 120px;min-width:0}
+.packaging-colour-swatch{display:inline-block;width:24px;height:24px;border-radius:999px;background:var(--swatch);border:2px solid rgba(255,255,255,.58);box-shadow:0 0 0 1px rgba(0,0,0,.28)}
+.packaging-source-editor{margin:8px 0 0!important;padding:0!important;border:1px solid rgba(184,138,47,.38)!important;background:rgba(0,0,0,.12)!important;overflow:hidden}
+.packaging-source-editor>summary{padding:13px 14px;background:rgba(184,138,47,.10);border-bottom:1px solid transparent}
+.packaging-source-editor[open]>summary{border-bottom-color:rgba(255,255,255,.10)}
+.packaging-source-editor-body{display:grid;gap:13px;padding:14px}
+.packaging-source-editor-body>.grid,.packaging-source-editor-body>label{margin-top:0!important}
+.packaging-source-editor-intro{display:grid;gap:3px;padding:10px 12px;border-left:4px solid rgba(184,138,47,.72);border-radius:8px;background:rgba(184,138,47,.065)}
+.packaging-source-editor-intro strong{font-size:.96rem}.packaging-source-editor-intro .small{color:var(--muted)}
+.packaging-source-inci-editor{margin:0}.packaging-source-inci-editor table{min-width:1040px}.packaging-source-inci-editor td{vertical-align:top}.packaging-source-inci-editor .input{min-width:135px}
+.packaging-source-colour{width:100%;min-height:44px;padding:3px}
+.packaging-material-library-hub textarea{resize:vertical;min-height:76px}
+.packaging-material-library-hub .input{max-width:100%;min-width:0}
+@media(max-width:800px){.packaging-source-grid{grid-template-columns:1fr}.packaging-material-library-hub .grid.cols-4,.packaging-material-library-hub .grid.cols-3,.packaging-material-library-hub .grid.cols-2{grid-template-columns:1fr}.packaging-source-picker{grid-template-columns:1fr}.packaging-source-inci-editor{overflow-x:auto}}
+@media(max-width:560px){.packaging-material-library-hub{padding:12px}.packaging-source-grid .packaging-source-card{grid-template-columns:64px minmax(0,1fr)}.packaging-source-grid .packaging-source-thumb{width:64px;min-width:64px}.packaging-source-grid .packaging-library-card-actions{display:grid;grid-template-columns:1fr}.packaging-source-grid .packaging-library-card-actions .btn{width:100%}.packaging-source-editor-body{padding:11px}.packaging-source-editor>summary{padding:12px}}
