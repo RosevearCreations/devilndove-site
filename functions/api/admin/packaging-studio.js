@@ -1,7 +1,7 @@
-// Build 248 - Purchased source-material templates, formula inheritance, 2026 fragrance-allergen gates, Truth-reference layout, and explicit label deletion.
+// Build 255 - Packaging Material Library hub, source-template metadata, independent Master INCI editing, and retained label controls.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '248';
+const BUILD = '255';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -49,7 +49,7 @@ function mapVersion(row){return{...row,packaging_project_version_id:id(row.packa
 function mapReference(row){return{...row,packaging_reference_source_id:id(row.packaging_reference_source_id),dimensional_summary:safeJson(row.dimensional_summary_json,{})};}
 function mapFormula(row){return{...row,packaging_formula_library_id:id(row.packaging_formula_library_id),ingredients:safeJson(row.ingredients_json,[])};}
 function mapLibraryContent(row){return{...row,packaging_content_library_id:id(row.packaging_content_library_id),metadata:safeJson(row.metadata_json,{})};}
-function mapSourceMaterial(row){return{...row,packaging_source_material_template_id:id(row.packaging_source_material_template_id),master_inci:safeJson(row.master_inci_json,[]),fragrance_allergens:safeJson(row.fragrance_allergens_json,[]),benefits:safeJson(row.benefits_json,[]),supplier_claims:safeJson(row.supplier_claims_json,[]),source_snapshot:safeJson(row.source_snapshot_json,{})};}
+function mapSourceMaterial(row){return{...row,packaging_source_material_template_id:id(row.packaging_source_material_template_id),product_family:text(row.product_family||'general',80)||'general',material_subtype:text(row.material_subtype||row.material_type||'other',80)||'other',default_role:text(row.default_role||'',40)||null,colour_hex:text(row.colour_hex||'',20)||null,master_inci:safeJson(row.master_inci_json,[]),fragrance_allergens:safeJson(row.fragrance_allergens_json,[]),benefits:safeJson(row.benefits_json,[]),supplier_claims:safeJson(row.supplier_claims_json,[]),source_snapshot:safeJson(row.source_snapshot_json,{})};}
 function normalizeSourceInci(value=[]){
   if(!Array.isArray(value))return[];
   return value.slice(0,120).map((row,index)=>({
@@ -70,7 +70,7 @@ function normalizeFragranceAllergens(value=[]){
   if(!Array.isArray(value))return[];
   return value.slice(0,100).map((row,index)=>({sort_order:index+1,inci_name:text(row?.inci_name||row?.name,300),concentration_percent:Number.isFinite(Number(row?.concentration_percent))?Number(row.concentration_percent):null,disclosure_required:bool(row?.disclosure_required)?1:0,notes:text(row?.notes,500)||null})).filter((row)=>row.inci_name);
 }
-function sourceRole(materialType){return materialType==='soap_base'?'base':materialType==='fragrance_oil'?'fragrance':materialType==='colourant'?'colourant':'additive';}
+function sourceRole(materialType,defaultRole=''){const role=String(defaultRole||'');if(['base','fragrance','colourant','additive'].includes(role))return role;return materialType==='soap_base'?'base':materialType==='fragrance_oil'?'fragrance':materialType==='colourant'?'colourant':'additive';}
 
 function normalizeIngredients(value=[]){
   if(!Array.isArray(value))return[];
@@ -170,32 +170,39 @@ async function listData(db){
   const products=rows(await db.prepare(`SELECT product_id,product_number,sku,name,slug,status,product_category,short_description,description,weight_grams,featured_image_url FROM products WHERE COALESCE(status,'draft')<>'archived' ORDER BY LOWER(name),product_id DESC LIMIT 500`).all().catch(()=>({results:[]})));
   const inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]})));
   const reference_sources=rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key`).all()).map(mapReference);
-  let formula_library=[];let content_library=[];let source_material_library=[];let library_schema_ready=true;let source_material_schema_ready=true;
+  let formula_library=[];let content_library=[];let source_material_library=[];let library_schema_ready=true;let source_material_schema_ready=true;let source_material_metadata_ready=true;
   try{
     formula_library=rows(await db.prepare(`SELECT * FROM packaging_formula_library WHERE is_active=1 ORDER BY is_system DESC,LOWER(formula_name),packaging_formula_library_id`).all()).map(mapFormula);
     content_library=rows(await db.prepare(`SELECT * FROM packaging_content_library WHERE is_active=1 ORDER BY CASE content_type WHEN 'claim' THEN 1 WHEN 'ingredient' THEN 2 WHEN 'fragrance_oil' THEN 3 WHEN 'colourant' THEN 4 ELSE 5 END,is_system DESC,LOWER(item_name),packaging_content_library_id`).all()).map(mapLibraryContent);
   }catch{library_schema_ready=false;}
   try{
-    source_material_library=rows(await db.prepare(`SELECT * FROM packaging_source_material_templates WHERE is_active=1 ORDER BY CASE material_type WHEN 'soap_base' THEN 1 WHEN 'fragrance_oil' THEN 2 WHEN 'colourant' THEN 3 ELSE 4 END,is_system DESC,LOWER(material_name),packaging_source_material_template_id`).all()).map(mapSourceMaterial);
+    try{
+      source_material_library=rows(await db.prepare(`SELECT smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_source_material_templates smt LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE smt.is_active=1 ORDER BY CASE COALESCE(smm.default_role,'') WHEN 'base' THEN 1 WHEN 'fragrance' THEN 2 WHEN 'colourant' THEN 3 ELSE 4 END,smt.is_system DESC,LOWER(smt.material_name),smt.packaging_source_material_template_id`).all()).map(mapSourceMaterial);
+    }catch{
+      source_material_metadata_ready=false;
+      source_material_library=rows(await db.prepare(`SELECT * FROM packaging_source_material_templates WHERE is_active=1 ORDER BY CASE material_type WHEN 'soap_base' THEN 1 WHEN 'fragrance_oil' THEN 2 WHEN 'colourant' THEN 3 ELSE 4 END,is_system DESC,LOWER(material_name),packaging_source_material_template_id`).all()).map(mapSourceMaterial);
+    }
     const links=rows(await db.prepare(`SELECT packaging_formula_library_id,packaging_source_material_template_id,material_role FROM packaging_formula_source_material_links ORDER BY packaging_formula_source_material_link_id`).all());
     for(const formula of formula_library){const link=links.find((row)=>Number(row.packaging_formula_library_id)===Number(formula.packaging_formula_library_id)&&String(row.material_role)==='base');if(link)formula.source_material_template_id=Number(link.packaging_source_material_template_id);}
   }catch{source_material_schema_ready=false;}
-  return{templates,projects,products,inventory,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready};
+  return{templates,projects,products,inventory,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready,source_material_metadata_ready};
 }
 
 async function loadDetail(db,projectId){
   const row=await db.prepare(`SELECT pp.*,p.sku,p.slug,p.status AS product_status,p.product_category,p.short_description,p.description,p.weight_grams,p.featured_image_url,t.template_key,t.template_name,t.package_type AS template_package_type,t.description AS template_description,t.is_system AS template_is_system,t.page_width_mm,t.page_height_mm,t.front_width_mm,t.front_height_mm,t.rear_width_mm,t.rear_height_mm,t.layout_json AS template_layout_json,t.theme_json AS template_theme_json FROM packaging_projects pp LEFT JOIN products p ON p.product_id=pp.product_id INNER JOIN packaging_templates t ON t.packaging_template_id=pp.packaging_template_id WHERE pp.packaging_project_id=?`).bind(projectId).first();
   if(!row)return null;
   const soapProduct=await db.prepare(`SELECT * FROM soap_products WHERE packaging_project_id=?`).bind(projectId).first();
-  const ingredients=soapProduct?rows(await db.prepare(`SELECT * FROM soap_ingredients WHERE soap_product_id=? ORDER BY sort_order,ingredient_id`).bind(soapProduct.soap_product_id).all()):[];
-  const claims=soapProduct?rows(await db.prepare(`SELECT * FROM soap_label_claims WHERE soap_product_id=? ORDER BY sort_order,claim_id`).bind(soapProduct.soap_product_id).all()):[];
+  let ingredients=[];let claims=[];
+  try{ingredients=rows(await db.prepare(`SELECT * FROM packaging_project_ingredients WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_ingredient_id`).bind(projectId).all());claims=rows(await db.prepare(`SELECT * FROM packaging_project_claims WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_claim_id`).bind(projectId).all());}catch{}
+  if(!ingredients.length&&soapProduct)ingredients=rows(await db.prepare(`SELECT * FROM soap_ingredients WHERE soap_product_id=? ORDER BY sort_order,ingredient_id`).bind(soapProduct.soap_product_id).all());
+  if(!claims.length&&soapProduct)claims=rows(await db.prepare(`SELECT * FROM soap_label_claims WHERE soap_product_id=? ORDER BY sort_order,claim_id`).bind(soapProduct.soap_product_id).all());
   const versions=rows(await db.prepare(`SELECT packaging_project_version_id,packaging_project_id,version_number,version_label,review_status,reviewed_by_user_id,reviewed_at,created_by_user_id,created_at,snapshot_json FROM packaging_project_versions WHERE packaging_project_id=? ORDER BY version_number DESC`).bind(projectId).all()).map(mapVersion);
   const exports=rows(await db.prepare(`SELECT * FROM packaging_export_history WHERE packaging_project_id=? ORDER BY created_at DESC,packaging_export_history_id DESC LIMIT 100`).bind(projectId).all());
   const printTests=rows(await db.prepare(`SELECT * FROM soap_label_print_tests WHERE packaging_project_id=? ORDER BY created_at DESC,print_test_id DESC LIMIT 50`).bind(projectId).all());
   const soapExports=soapProduct?rows(await db.prepare(`SELECT * FROM soap_label_exports WHERE soap_product_id=? ORDER BY generated_at DESC,export_id DESC LIMIT 100`).bind(soapProduct.soap_product_id).all()):[];
   const components=rows(await db.prepare(`SELECT pc.*,sii.item_name AS inventory_item_name,sii.on_hand_quantity,sii.reserved_quantity,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit FROM packaging_components pc LEFT JOIN site_item_inventory sii ON sii.site_item_inventory_id=pc.site_item_inventory_id WHERE pc.packaging_project_id=? AND pc.is_active=1 ORDER BY pc.packaging_component_id`).bind(projectId).all());
   let sourceMaterials=[];
-  try{sourceMaterials=rows(await db.prepare(`SELECT psm.packaging_project_source_material_id,psm.material_role,psm.sort_order,psm.source_snapshot_json,psm.review_status AS project_source_review_status,psm.notes AS project_source_notes,smt.* FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id`).bind(projectId).all()).map(mapSourceMaterial);}catch{}
+  try{sourceMaterials=rows(await db.prepare(`SELECT psm.packaging_project_source_material_id,psm.material_role,psm.sort_order,psm.source_snapshot_json,psm.review_status AS project_source_review_status,psm.notes AS project_source_notes,smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id`).bind(projectId).all()).map(mapSourceMaterial);}catch{try{sourceMaterials=rows(await db.prepare(`SELECT psm.packaging_project_source_material_id,psm.material_role,psm.sort_order,psm.source_snapshot_json,psm.review_status AS project_source_review_status,psm.notes AS project_source_notes,smt.* FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id`).bind(projectId).all()).map(mapSourceMaterial);}catch{}}
   const template=mapTemplate({...row,packaging_template_id:row.packaging_template_id,package_type:row.template_package_type,description:row.template_description,is_system:row.template_is_system,layout_json:row.template_layout_json,theme_json:row.template_theme_json});
   const project=mapProject(row);
   if(soapProduct){project.rose_asset_id=soapProduct.rose_asset_id;project.net_weight_oz=soapProduct.net_weight_oz;project.net_weight_g=soapProduct.net_weight_g;}
@@ -226,7 +233,21 @@ function snapshotFromBody(body,existing={}){
   };
 }
 
+async function syncPackagingStructuredData(db,projectId,data){
+  try{
+    if(Array.isArray(data.structured_ingredients)){
+      await db.prepare(`DELETE FROM packaging_project_ingredients WHERE packaging_project_id=?`).bind(projectId).run();
+      for(const row of data.structured_ingredients)await db.prepare(`INSERT INTO packaging_project_ingredients (packaging_project_id,sort_order,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,row.sort_order,row.inci_name,row.display_name_en,row.display_name_fr,row.organic_flag,row.allergen_note,row.required_on_label).run();
+    }
+    if(Array.isArray(data.structured_claims)){
+      await db.prepare(`DELETE FROM packaging_project_claims WHERE packaging_project_id=?`).bind(projectId).run();
+      for(const row of data.structured_claims)await db.prepare(`INSERT INTO packaging_project_claims (packaging_project_id,sort_order,claim_en,claim_fr,icon_name,is_approved,compliance_note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,row.sort_order,row.claim_en,row.claim_fr,row.icon_name,row.is_approved,row.compliance_note).run();
+    }
+  }catch(error){throw new Error('Build 255 packaging structured-content migration is required before saving ingredients/claims for all label types.');}
+}
+
 async function syncSoapRecords(db,projectId,data){
+  await syncPackagingStructuredData(db,projectId,data);
   if(data.package_type!=='soap_ribbon')return null;
   const madeParts=String(data.made_in_canada_text||'').split('/').map((value)=>text(value,120).trim()).filter(Boolean);
   await db.prepare(`INSERT INTO soap_products (packaging_project_id,product_id,product_name,product_family,soap_type,description_en,description_fr,net_weight_oz,net_weight_g,accent_colour,secondary_colour,rose_colour,rose_asset_id,website,made_in_text_en,made_in_text_fr,print_status,compliance_status,active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_project_id) DO UPDATE SET product_id=excluded.product_id,product_name=excluded.product_name,product_family=excluded.product_family,soap_type=excluded.soap_type,description_en=excluded.description_en,description_fr=excluded.description_fr,net_weight_oz=excluded.net_weight_oz,net_weight_g=excluded.net_weight_g,accent_colour=excluded.accent_colour,secondary_colour=excluded.secondary_colour,rose_colour=excluded.rose_colour,rose_asset_id=excluded.rose_asset_id,website=excluded.website,made_in_text_en=excluded.made_in_text_en,made_in_text_fr=excluded.made_in_text_fr,print_status=excluded.print_status,compliance_status=excluded.compliance_status,active=1,updated_at=CURRENT_TIMESTAMP`).bind(projectId,data.product_id,data.product_name,data.collection_name,data.product_identity_en,data.ingredients_en,data.ingredients_fr,data.net_weight_oz,data.net_weight_g,text(data.theme?.border_colour,30)||null,text(data.theme?.secondary_colour||data.theme?.accent_gold,30)||null,text(data.theme?.rose_colour,30)||null,text(data.artwork?.rose_asset_id,120)||'rose-purple-v1',data.website_text||'devilndove.com',madeParts[0]||'Made in Canada',madeParts[1]||'Fabriqué au Canada',data.project_status==='approved'?'approved':'draft',data.compliance_status).run();
@@ -247,7 +268,7 @@ export async function onRequestGet(context){
   const a=await access(context);if(a.error)return a.error;
   try{
     const projectId=id(new URL(context.request.url).searchParams.get('packaging_project_id'));
-    return json({ok:true,build:BUILD,...await listData(a.db),detail:projectId?await loadDetail(a.db,projectId):null,mode:'source_material_templates_formula_inheritance_2026_fragrance_review_truth_reference_typed_delete_review_first'});
+    return json({ok:true,build:BUILD,...await listData(a.db),detail:projectId?await loadDetail(a.db,projectId):null,mode:'material_library_all_packaging_structured_content_truth_reference_review_first'});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'packaging_studio',incident_code:'packaging_studio_get_failed',severity:'error',message:error?.message||'Packaging Studio failed to load.',related_user_id:a.adminUser.user_id,details:{error:String(error?.stack||error)}}).catch(()=>null);
     return json({ok:false,error:'Packaging Studio could not load. Your browser draft remains available.'},500);
@@ -274,10 +295,12 @@ export async function onRequestPost(context){
       }
       message='French draft provenance recorded. Human review is still required before packaging approval.';
     }else if(action==='save_source_material_template'){
+      try{await a.db.prepare(`SELECT packaging_source_material_template_id FROM packaging_source_material_metadata LIMIT 1`).first();}catch{throw new Error('Build 255 source-material metadata migration is required before saving Material Library categories.');}
       const sourceId=id(body.packaging_source_material_template_id);const materialType=text(body.material_type,40);if(!VALID_SOURCE_MATERIAL_TYPES.has(materialType))throw new Error('Choose soap base, fragrance oil, colourant, or additive.');
       const materialName=text(body.material_name,180);if(!materialName)throw new Error('A purchased/source material name is required.');
       const masterInci=normalizeSourceInci(body.master_inci);const benefits=normalizeBenefits(body.benefits);const supplierClaims=normalizeSourceClaims(body.supplier_claims);const allergens=normalizeFragranceAllergens(body.fragrance_allergens);
       const verification=VALID_SOURCE_VERIFICATION.has(text(body.verification_status,40))?text(body.verification_status,40):'needs_review';
+      const productFamily=text(body.product_family,80)||'general';const materialSubtype=text(body.material_subtype,80)||materialType;const requestedRole=text(body.default_role,40);const defaultRole=['base','fragrance','colourant','additive'].includes(requestedRole)?requestedRole:sourceRole(materialType);const colourHex=/^#[0-9a-f]{6}$/i.test(text(body.colour_hex,20))?text(body.colour_hex,20).toUpperCase():null;let savedSourceId=sourceId;
       let fragranceReview=VALID_FRAGRANCE_REVIEW.has(text(body.fragrance_allergen_review_status,50))?text(body.fragrance_allergen_review_status,50):(materialType==='fragrance_oil'?'needs_supplier_data':'not_applicable');
       if(materialType!=='fragrance_oil'&&fragranceReview==='needs_supplier_data')fragranceReview='not_applicable';
       const intendedUse=['rinse_off','leave_on','both','not_applicable'].includes(text(body.intended_use,40))?text(body.intended_use,40):(materialType==='soap_base'?'rinse_off':'not_applicable');
@@ -287,8 +310,12 @@ export async function onRequestPost(context){
         message=`Source-material template “${materialName}” updated.`;
       }else{
         const materialKey=`custom-${materialType}-${keyPart(materialName)}-${Date.now().toString(36)}-${crypto.randomUUID().slice(0,4)}`;
-        await a.db.prepare(`INSERT INTO packaging_source_material_templates (material_key,material_name,material_type,supplier_name,supplier_sku,supplier_product_name,source_url,source_image_url,supplier_document_url,source_reference,intended_use,ingredient_declaration_raw,master_inci_json,allergen_statement,fragrance_allergens_json,fragrance_allergen_review_status,benefits_json,supplier_claims_json,usage_notes,compliance_notes,verification_status,verified_by_user_id,verified_at,is_system,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?,CASE WHEN ? IN ('supplier_verified','owner_verified') THEN CURRENT_TIMESTAMP ELSE NULL END,0,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(materialKey,materialName,materialType,text(body.supplier_name,180)||null,text(body.supplier_sku,180)||null,text(body.supplier_product_name,220)||null,text(body.source_url,1000)||null,text(body.source_image_url,1000)||null,text(body.supplier_document_url,1000)||null,text(body.source_reference,500)||null,intendedUse,text(body.ingredient_declaration_raw,8000)||null,JSON.stringify(masterInci),text(body.allergen_statement,5000)||null,JSON.stringify(allergens),fragranceReview,JSON.stringify(benefits),JSON.stringify(supplierClaims),text(body.usage_notes,5000)||null,text(body.compliance_notes,5000)||null,verification,verification==='supplier_verified'||verification==='owner_verified'?a.adminUser.user_id:null,verification,a.adminUser.user_id,a.adminUser.user_id).run();
-        message=`Source-material template “${materialName}” saved for reuse.`;
+        const insertedSource=await a.db.prepare(`INSERT INTO packaging_source_material_templates (material_key,material_name,material_type,supplier_name,supplier_sku,supplier_product_name,source_url,source_image_url,supplier_document_url,source_reference,intended_use,ingredient_declaration_raw,master_inci_json,allergen_statement,fragrance_allergens_json,fragrance_allergen_review_status,benefits_json,supplier_claims_json,usage_notes,compliance_notes,verification_status,verified_by_user_id,verified_at,is_system,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?,CASE WHEN ? IN ('supplier_verified','owner_verified') THEN CURRENT_TIMESTAMP ELSE NULL END,0,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(materialKey,materialName,materialType,text(body.supplier_name,180)||null,text(body.supplier_sku,180)||null,text(body.supplier_product_name,220)||null,text(body.source_url,1000)||null,text(body.source_image_url,1000)||null,text(body.supplier_document_url,1000)||null,text(body.source_reference,500)||null,intendedUse,text(body.ingredient_declaration_raw,8000)||null,JSON.stringify(masterInci),text(body.allergen_statement,5000)||null,JSON.stringify(allergens),fragranceReview,JSON.stringify(benefits),JSON.stringify(supplierClaims),text(body.usage_notes,5000)||null,text(body.compliance_notes,5000)||null,verification,verification==='supplier_verified'||verification==='owner_verified'?a.adminUser.user_id:null,verification,a.adminUser.user_id,a.adminUser.user_id).run();
+        savedSourceId=id(insertedSource.meta?.last_row_id);message=`Source-material template “${materialName}” saved for reuse.`;
+      }
+      if(savedSourceId){
+        try{await a.db.prepare(`INSERT INTO packaging_source_material_metadata (packaging_source_material_template_id,product_family,material_subtype,default_role,colour_hex,created_at,updated_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_source_material_template_id) DO UPDATE SET product_family=excluded.product_family,material_subtype=excluded.material_subtype,default_role=excluded.default_role,colour_hex=excluded.colour_hex,updated_at=CURRENT_TIMESTAMP`).bind(savedSourceId,productFamily,materialSubtype,defaultRole,colourHex).run();}
+        catch(error){throw new Error('Build 255 source-material metadata migration is required before saving material categories.');}
       }
     }else if(action==='delete_source_material_template'){
       const sourceId=id(body.packaging_source_material_template_id);if(!sourceId)throw new Error('Source-material template is required.');
@@ -297,8 +324,8 @@ export async function onRequestPost(context){
     }else if(action==='apply_source_material_template'){
       if(!projectId)throw new Error('Save or open a packaging project before attaching a purchased/source material.');
       const sourceId=id(body.packaging_source_material_template_id);if(!sourceId)throw new Error('Choose a source-material template first.');
-      const source=await a.db.prepare(`SELECT * FROM packaging_source_material_templates WHERE packaging_source_material_template_id=? AND is_active=1`).bind(sourceId).first();if(!source)throw new Error('Source-material template was not found.');
-      const role=sourceRole(String(source.material_type||''));const reviewStatus=String(source.verification_status||'needs_review')==='blocked'?'blocked':(['supplier_verified','owner_verified'].includes(String(source.verification_status||''))?'reviewed':'needs_review');
+      let source=await a.db.prepare(`SELECT smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_source_material_templates smt LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE smt.packaging_source_material_template_id=? AND smt.is_active=1`).bind(sourceId).first().catch(()=>null);if(!source)source=await a.db.prepare(`SELECT * FROM packaging_source_material_templates WHERE packaging_source_material_template_id=? AND is_active=1`).bind(sourceId).first();if(!source)throw new Error('Source-material template was not found.');
+      const role=sourceRole(String(source.material_type||''),String(source.default_role||''));const reviewStatus=String(source.verification_status||'needs_review')==='blocked'?'blocked':(['supplier_verified','owner_verified'].includes(String(source.verification_status||''))?'reviewed':'needs_review');
       if(role==='base')await a.db.prepare(`DELETE FROM packaging_project_source_materials WHERE packaging_project_id=? AND material_role='base'`).bind(projectId).run();
       await a.db.prepare(`INSERT INTO packaging_project_source_materials (packaging_project_id,packaging_source_material_template_id,material_role,sort_order,source_snapshot_json,review_status,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_project_id,packaging_source_material_template_id,material_role) DO UPDATE SET source_snapshot_json=excluded.source_snapshot_json,review_status=excluded.review_status,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(projectId,sourceId,role,role==='base'?1:10,JSON.stringify(mapSourceMaterial(source)),reviewStatus,a.adminUser.user_id,a.adminUser.user_id).run();
       message=`Source-material template “${source.material_name}” attached to this packaging project. Review inherited ingredients and supplier evidence before approval.`;
@@ -311,9 +338,9 @@ export async function onRequestPost(context){
       const ingredients=normalizeIngredients(body.structured_ingredients);if(!ingredients.length)throw new Error('Add at least one ingredient before saving a formula-library entry.');
       const sourceMaterialTemplateId=id(body.source_material_template_id);let savedFormulaId=formulaId;
       if(sourceMaterialTemplateId){
-        const sourceBase=await a.db.prepare(`SELECT material_type,is_active FROM packaging_source_material_templates WHERE packaging_source_material_template_id=?`).bind(sourceMaterialTemplateId).first();
+        let sourceBase=await a.db.prepare(`SELECT smt.material_type,smt.is_active,smm.default_role,smm.material_subtype FROM packaging_source_material_templates smt LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE smt.packaging_source_material_template_id=?`).bind(sourceMaterialTemplateId).first().catch(()=>null);if(!sourceBase)sourceBase=await a.db.prepare(`SELECT material_type,is_active FROM packaging_source_material_templates WHERE packaging_source_material_template_id=?`).bind(sourceMaterialTemplateId).first();
         if(!sourceBase||Number(sourceBase.is_active)!==1)throw new Error('The selected source-material template is unavailable.');
-        if(String(sourceBase.material_type||'')!=='soap_base')throw new Error('A finished soap formula can inherit only a soap-base source template as its base. Add fragrance oils, colourants and additives to the project separately.');
+        if(sourceRole(String(sourceBase.material_type||''),String(sourceBase.default_role||''))!=='base')throw new Error('A finished formula can inherit only a source template classified as a base (for example soap base or candle wax). Attach fragrance oils, colourants and additives separately.');
       }
       const formulaKey=formulaId?'':`custom-formula-${keyPart(formulaName)}-${Date.now().toString(36)}-${crypto.randomUUID().slice(0,4)}`;
       if(formulaId){
@@ -508,7 +535,7 @@ export async function onRequestPost(context){
         statements.push(a.db.prepare(`DELETE FROM soap_ingredients WHERE soap_product_id=?`).bind(soap.soap_product_id));
         statements.push(a.db.prepare(`DELETE FROM soap_products WHERE soap_product_id=?`).bind(soap.soap_product_id));
       }
-      for(const table of ['packaging_export_history','soap_label_print_tests','packaging_components','packaging_inventory_reservations','packaging_project_source_materials','packaging_formula_source_links','packaging_release_locks','packaging_prepress_checks','packaging_translation_reviews','packaging_project_versions'])statements.push(a.db.prepare(`DELETE FROM ${table} WHERE packaging_project_id=?`).bind(projectId));
+      for(const table of ['packaging_project_ingredients','packaging_project_claims','packaging_export_history','soap_label_print_tests','packaging_components','packaging_inventory_reservations','packaging_project_source_materials','packaging_formula_source_links','packaging_release_locks','packaging_prepress_checks','packaging_translation_reviews','packaging_project_versions'])statements.push(a.db.prepare(`DELETE FROM ${table} WHERE packaging_project_id=?`).bind(projectId));
       statements.push(a.db.prepare(`DELETE FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId));
       await a.db.batch(statements);
       deletedProjectKey=String(source.project_key||'');deletedProjectName=String(source.project_name||'');deletedProjectId=projectId;projectId=0;
