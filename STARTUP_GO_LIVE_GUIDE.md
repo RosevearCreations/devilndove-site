@@ -1,10 +1,10 @@
-# Devil n Dove Startup and Go-Live Guide — Build 246
+# Devil n Dove Startup and Go-Live Guide — Build 254
 
-This is the human-readable operating copy of all 46 database-backed gates in `/admin/startup-readiness/`. No prior blocker has been removed. Deployment Preflight, Post-Deploy Smoke Tests, Deploy Readiness, Go-Live Execution, and Live Ops Follow-through now also have standalone gates and separate operating pages. The D1 cockpit remains the status authority. Each gate states how to prepare, test, correct a failure, save evidence, retest, and decide whether the pass condition is met.
+This is the human-readable operating copy of all 46 gates used by `/admin/startup-readiness/`. Static test instructions live in `data/site/startup-readiness-guide.json`; mutable status, owner, evidence and history remain D1 authority through the compact Startup Readiness API.
 
 ## Operating rules
 
-1. Back up D1 and record a recovery point. Confirm Build 245 is already applied, then apply `database_build246_product_project_production_packaging.sql` or the byte-identical `database_upgrade_current_pass.sql`, not both. Confirm ledger key `build246_product_project_production_packaging`, then run read-only `BUILD246_D1_VERIFICATION.sql` before deploying Build 246 code. Build 246 uses no TEMP-table or destructive table-removal helper.
+1. Back up D1 before applying the migration named by the current validation report. Apply the named migration or the byte-identical `database_upgrade_current_pass.sql`, not both.
 2. Use owner-controlled test records and real Production bindings only where the gate explicitly requires a production test.
 3. Never paste secrets, passwords, access tokens, full payment data, or private customer information into gate evidence.
 4. A failed numbered step keeps the gate Failed or Blocked until the correction procedure and full retest succeed.
@@ -18,39 +18,37 @@ This is the human-readable operating copy of all 46 database-backed gates in `/a
 ### 5. Complete Deployment Preflight as a standalone pre-deploy process — **Critical**
 
 **Inside the application:** `/admin/deployment-preflight/`  
-**External location:** Build 246 release records, current schema/migration files, Cloudflare Pages Functions bundler, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
+**External location:** Current build archive, current schema/migration files, Cloudflare Pages Functions bundle, and PRELAUNCH_PROCESS_PLAYBOOKS.md  
 **Production test:** No live binding is required, but deployed verification may still be appropriate.
 
 #### Before you begin
 
-Assign one owner and open /admin/deployment-preflight/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/deployment-preflight/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
 1. Open the Prelaunch Operations Map and confirm Deployment Preflight is stage 2, before Safe Deploy, live smoke tests, Deploy Readiness, and Go-Live Execution.
-2. Run the static predeploy, deployment-preflight, final-blocker, JavaScript syntax, Build 231 autosave/reload regression, Build 232 archived-product removal regression, Build 233 bounded-login/session-retention regression, Build 234 packaging/template/duplicate-cleanup regression, Build 241 CAIP large-media regression, Build 242 inventory-create regression, Build 243 resilience regression, retained Build 244 inventory-authority/fractional-use regression, plus retained Build 245 admin/media-resilience/case audits, Build 246 product/project/production/packaging regression and current public/asset audits, aggregate-schema, repeated-current-migration, Startup 46-gate, image-manifest seed/provenance, packaging-reference checksum, and Cloudflare Pages Functions bundle checks against the exact archive to deploy.
+2. Run the current static predeploy/deployment checks, JavaScript syntax checks, retained product/media/inventory/packaging regressions, Build 254 Startup/Smoke runtime regression, aggregate-schema test, repeated-current-migration test, Startup 46-gate integrity check, image/packaging-reference checks, and the Pages Functions bundle check against the exact archive to deploy.
 3. Confirm all public HTML pages have a viewport, distinctive title, useful meta description, one H1, crawlable canonical where applicable, valid structured data, and descriptive image alternative text.
-4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface, especially Login, Product Editor, Product Cleanup, Visual Image Manifest, Labeling & Packaging, Creative Automation and three public image bands.
-5. Confirm `database_upgrade_current_pass.sql` remains byte-identical to `database_build246_product_project_production_packaging.sql`; the current migration must contain no explicit BEGIN/COMMIT/SAVEPOINT/RELEASE/ROLLBACK and no TEMP-table/destructive table-removal helper.
-6. Confirm `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, schema references, release notes, changed files and validation identify Build 246 consistently while naming Build 246 as the current D1 migration.
-7. Confirm the five adopted packaging source files still match PACKAGING_REFERENCE_BASELINE.md and the three generated editorial assets match GENERATED_VISUAL_ASSET_REGISTER.md; generated art must not appear in Product/Offer structured data.
-8. Confirm the image manifest contains 20 active seed rows, the three generated rows retain provenance, and real-photo requirements cannot be passed by generated imagery.
-9. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
-10. If a check fails, correct the owning source file rather than editing only generated output; rerun the entire preflight from the beginning.
+4. Confirm CSS braces balance and review phone, tablet, laptop, and wide-desktop overflow for every changed interface.
+5. Confirm database_upgrade_current_pass.sql is identical to the migration named by the current validation report and that the migration remains additive/idempotent.
+6. Confirm AI_HANDOFF.md, PROJECT_STATUS_AND_ROADMAP.md, release notes, changed-files list and validation report identify the same current build and D1 migration boundary.
+7. Save the exact archive name, SHA-256, check results and unresolved warnings. Do not proceed when any blocker remains.
+8. If a check fails, correct the owning source file rather than editing only generated output; rerun the full preflight from the beginning.
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then stop before deployment, correct the owning code/schema/HTML/CSS/Markdown file, regenerate derived artifacts from their source, then rerun every preflight check against the exact rebuilt archive. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then stop before deployment, correct the owning code/schema/HTML/CSS/Markdown file, regenerate derived artifacts from their source, then rerun every preflight check against the exact rebuilt archive. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
-**Pass condition:** The exact Build 246 archive passes every static, product/project/production/packaging, retained admin-auth/media-resilience, inventory-authority/fractional-use, schema, syntax, CSS, one-H1, metadata, image-manifest, fallback, documentation and Pages Functions bundle check with zero unresolved blocker.
+**Pass condition:** The exact current build archive passes static, schema, syntax, CSS, one-H1, metadata, media, fallback, packaging-reference, documentation and Pages Functions checks with zero unresolved blocker.
 
 ### 10. Back up D1, apply the current migration, and deploy the complete build — **Critical**
 
@@ -60,34 +58,33 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/deployment-preflight/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/deployment-preflight/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
 1. Open Cloudflare D1 and record the current Time Travel bookmark or approved recovery point before changing the schema.
 2. Record the date, database name and safe recovery reference in the evidence notes.
-3. Confirm required historical ledger foundations through Build 245 are present where expected, then apply `database_build246_product_project_production_packaging.sql` or byte-identical `database_upgrade_current_pass.sql`, but not both.
-4. Confirm the ledger records the retained Build 244/245 foundations plus `build246_product_project_production_packaging`; run `BUILD246_D1_VERIFICATION.sql`, verify the retained CAIP/operational-continuity foundations and 46 Startup gates, and review INCI, duplicate-active-inventory and foreign-key diagnostics before code deployment.
-5. Deploy the complete ZIP rather than selected files.
-6. Record the Pages deployment URL and deployment/commit identifier.
-7. Open Startup Readiness with All statuses and confirm all 46 gates load without removing prior owner, evidence or history records; explicitly locate missing_launch_images, candle_top_template_proof and operational_continuity_evidence_center and caip_private_large_media_intake and open their operating routes.
-8. Confirm the manifest loads from D1 rather than Unsynced fallback and preserves the three generated-editorial provenance rows.
-9. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
-10. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.
+3. Confirm the prior Build 250 migration boundary is already applied, then apply database_build254_startup_smoke_runtime_hardening.sql or the identical database_upgrade_current_pass.sql, but not both. Builds 251–253 required no D1 migration.
+4. Confirm the migration ledger records Build 254 and the Startup Readiness and Post-Deploy Smoke storage tables/indexes are available.
+5. Deploy the complete ZIP rather than selected files and record the Pages deployment URL/identifier.
+6. Open Startup Readiness with All statuses and confirm all 46 gates load from the compact status API without losing browser-only recovery data.
+7. Open Post-Deploy Smoke Tests and confirm stored results load without request-time schema creation.
+8. Continue to the standalone Post-Deploy Smoke Tests; do not treat successful upload as a passed live deployment.
+9. Stop and restore the previous deployment or D1 recovery point if any critical migration, Function, route or data-integrity error appears.
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then restore the pre-change D1 backup or previous Pages deployment, correct the failed migration/build file, then redeploy the complete package. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then restore the pre-change D1 backup or previous Pages deployment, correct the failed migration/build file, then redeploy the complete package. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
-**Pass condition:** A recoverable D1 point exists, Build 246 is applied once on the Build 245 prerequisite, the migration ledger/verification queries agree, the complete deployment is live, all 46 gates and retained packaging/image authorities load, and no migration, Function, route or data-integrity error remains.
+**Pass condition:** A recoverable D1 point exists, the Build 254 migration is applied once after the Build 250 boundary, the complete deployment is live, all 46 readiness gates load, smoke-test storage is reachable, and no migration, Function, route or data-integrity error remains.
 
 ### 15. Complete Post-Deploy Smoke Tests as a standalone live-verification process — **Critical**
 
@@ -97,11 +94,11 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/post-deploy-smoke-tests/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
-1. Confirm the deployment ID and Build 246 migration/verification evidence match the exact package that passed Deployment Preflight.
+1. Confirm the deployment ID and current build/migration evidence match the package that passed Deployment Preflight.
 2. Open the production home, handmade-jewelry, gift-card, shop, one product detail, contact, policies, login and password-recovery pages while signed out; record HTTP and visual results.
 3. Confirm the three generated WebP illustrations load at phone and desktop sizes, disclose editorial use, preserve one H1, and are absent from Product/Offer structured data and real-product galleries.
 4. Sign in with an owner-controlled administrator and test Startup Readiness, Visual Image Manifest, Creative Automation Studio, Labeling & Packaging, Client Documents, Orders and the Prelaunch Operations Map.
@@ -115,15 +112,15 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then stop promotion, record the exact live route and result, correct or roll back the deployment, then repeat the full smoke suite across public, auth, admin, API, fallback and device checks. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then stop promotion, record the exact live route and result, correct or roll back the deployment, then repeat the full smoke suite across public, auth, admin, API, fallback and device checks. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The exact production deployment passes all critical public, authentication, admin, API, fallback, mobile/desktop and SEO smoke checks with current evidence and no unresolved critical result.
 
@@ -135,7 +132,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/deployment-preflight/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/deployment-preflight/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -149,15 +146,15 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct the binding or encrypted Production variable in Cloudflare, verify Preview and Production are not crossed, then repeat one safe read and write. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct the binding or encrypted Production variable in Cloudflare, verify Preview and Production are not crossed, then repeat one safe read and write. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The production domain, D1, R2, payment, email, and required application bindings are present in the correct environment and pass safe connectivity checks without exposing secrets.
 
@@ -171,11 +168,11 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /login/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /login/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
-1. Deploy the complete Build 246 package, hard refresh to service-worker shell v23, and record the Pages deployment ID before testing.
+1. Deploy the complete current package, hard refresh to service-worker shell v19, and record the Pages deployment ID before testing.
 2. Open a private browser window, open Developer Tools → Network, enable Preserve log, and load /login/ without storing the password in evidence.
 3. Open /api/auth/login in a separate tab and confirm HTTP 200 JSON reports response_profile auth_login_bounded_v1 and diagnostic_mode binding_only; a normal GET must not run full schema discovery.
 4. Submit an owner-controlled administrator login and confirm POST /api/auth/login returns HTTP 200 JSON, X-DD-Auth-Profile auth_login_bounded_v1, a session cookie, the correct role and the expected redirect. Never copy the token into evidence.
@@ -192,15 +189,15 @@ Assign one owner and open /login/. Record the starting IDs, counts, totals, time
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then inspect the exact /api/auth/login or /api/auth/me Cloudflare invocation outcome, keep login POST on the bounded two-operation D1 path, preserve browser credentials for temporary 5xx/network failures, clear them only after a real 401/403 decision, repair reset-token/email delivery separately, and invalidate only owner-controlled test sessions before retesting. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then inspect the exact /api/auth/login or /api/auth/me Cloudflare invocation outcome, keep login POST on the bounded two-operation D1 path, preserve browser credentials for temporary 5xx/network failures, clear them only after a real 401/403 decision, repair reset-token/email delivery separately, and invalidate only owner-controlled test sessions before retesting. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Bounded login, session verification, temporary-503 retention, logout, reset, one-time token use, deliberate expiry, and logout-all work in production with no exceeded-resource outcome and no continued access after an explicit invalidation.
 
@@ -212,7 +209,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/members/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/members/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -231,15 +228,15 @@ Assign one owner and open /admin/members/. Record the starting IDs, counts, tota
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then enforce the missing role check inside the server endpoint, keep product-removal reference checks bounded and registry-backed, treat editor/media audit rows as product-owned cleanup rather than protected business history, keep order/accounting/customer/packaging/project history blocking, reconcile any test inventory through audited movements, and do not rely on hidden buttons. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then enforce the missing role check inside the server endpoint, keep product-removal reference checks bounded and registry-backed, treat editor/media audit rows as product-owned cleanup rather than protected business history, keep order/accounting/customer/packaging/project history blocking, reconcile any test inventory through audited movements, and do not rely on hidden buttons. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every sensitive action is enforced on the server; lower roles receive 401/403; an unused archived product passes the bounded preflight and is removed with its reviewed inventory action exactly once; protected-history products remain archived; and successful actions are attributable in audit history without a Worker resource-limit event.
 
@@ -251,7 +248,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/runtime-incidents/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/runtime-incidents/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -269,15 +266,15 @@ Assign one owner and open /admin/runtime-incidents/. Record the starting IDs, co
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then identify the exact Cloudflare invocation outcome and failing route, reduce CPU/memory and unnecessary D1/automation work, return structured sanitized JSON where the Worker can respond, suppress raw HTML in the browser, preserve a clearly labelled local recovery copy, redeploy, then repeat load/autosave/queued-edit/reload/recovery tests while checking exceededCpu and exceededMemory logs. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then identify the exact Cloudflare invocation outcome and failing route, reduce CPU/memory and unnecessary D1/automation work, return structured sanitized JSON where the Worker can respond, suppress raw HTML in the browser, preserve a clearly labelled local recovery copy, redeploy, then repeat load/autosave/queued-edit/reload/recovery tests while checking exceededCpu and exceededMemory logs. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Expected failures are visible, sanitized and recoverable; product reload/autosave preserves the newest edit without raw HTML or JSON.parse text; the controlled run adds no exceeded-resource event; and fallback states never present a browser copy as an authoritative save.
 
@@ -291,7 +288,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/products/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/products/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -304,15 +301,15 @@ Assign one owner and open /admin/products/. Record the starting IDs, counts, tot
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then remove incomplete products from the launch group, restore them to Draft/Archived, and re-freeze the finite product/SKU list with an owner. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then remove incomplete products from the launch group, restore them to Draft/Archived, and re-freeze the finite product/SKU list with an owner. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** A finite opening-day product list is recorded, owned, and protected from unrelated draft work.
 
@@ -324,7 +321,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /shop/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /shop/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -339,15 +336,15 @@ Assign one owner and open /shop/. Record the starting IDs, counts, totals, times
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then repair the product slug/facts/media authority, clear stale fallback assumptions, and retest direct, refreshed, copied and mobile URLs. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then repair the product slug/facts/media authority, clear stale fallback assumptions, and retest direct, refreshed, copied and mobile URLs. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every launch product opens from its card, returns current facts, and displays all approved unique storefront images without broken routes or stale fallback content.
 
@@ -359,7 +356,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/release-preflight/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/release-preflight/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -373,15 +370,15 @@ Assign one owner and open /admin/release-preflight/. Record the starting IDs, co
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct required product facts in their owning product/inventory/media/packaging records and rerun the full product preflight. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct required product facts in their owning product/inventory/media/packaging records and rerun the full product preflight. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every opening-day product is green for required preflight checks and has a final human review of the public page.
 
@@ -393,7 +390,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/catalog-media/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/catalog-media/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -407,15 +404,15 @@ Assign one owner and open /admin/catalog-media/. Record the starting IDs, counts
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then replace or block unapproved/broken media, correct role/order/alt text, regenerate required derivatives, and confirm public R2 delivery. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then replace or block unapproved/broken media, correct role/order/alt text, regenerate required derivatives, and confirm public R2 delivery. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every launch product has an approved featured image, supporting media where available, documented rights, useful alt text, and reliable public delivery.
 
@@ -427,7 +424,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/image-manifest/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/image-manifest/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -446,15 +443,15 @@ Assign one owner and open /admin/image-manifest/. Record the starting IDs, count
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then use the D1 Visual Image Manifest and IMAGES_REQUIRED capture guide, replace every real-photo requirement with accurate rights-cleared media, keep generated art limited to disclosed editorial slots, save phone/desktop evidence, and retest every launch route. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then use the D1 Visual Image Manifest and IMAGES_REQUIRED capture guide, replace every real-photo requirement with accurate rights-cleared media, keep generated art limited to disclosed editorial slots, save phone/desktop evidence, and retest every launch route. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The D1 Visual Image Manifest and item-specific Catalog Media evidence show approved, accurate, rights-cleared responsive final imagery for every launch product and indexable launch route; no required real-photo row is passed with generated art; no missing, broken, fallback, duplicate substitute or planning placeholder remains; and phone/desktop review history is complete.
 
@@ -468,7 +465,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/products/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/products/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -483,15 +480,15 @@ Assign one owner and open /admin/products/. Record the starting IDs, counts, tot
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct the server-side pricing or component-set rule, remove unsafe promotions, and repeat boundary values plus a tampered-browser request. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct the server-side pricing or component-set rule, remove unsafe promotions, and repeat boundary values plus a tampered-browser request. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Displayed and server-calculated prices, discounts, quantity tiers, sets, and final payment totals match approved business rules.
 
@@ -503,7 +500,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/orders/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/orders/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -517,15 +514,15 @@ Assign one owner and open /admin/orders/. Record the starting IDs, counts, total
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then repair the idempotency key, settlement transaction or compensating movement workflow; reconcile the test SKU to its counted quantity before repeating. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then repair the idempotency key, settlement transaction or compensating movement workflow; reconcile the test SKU to its counted quantity before repeating. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** A successful payment consumes the correct quantity once, retries are idempotent, and failed or expired payment attempts do not leave stock consumed.
 
@@ -537,7 +534,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/products/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/products/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -552,15 +549,15 @@ Assign one owner and open /admin/products/. Record the starting IDs, counts, tot
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct reservation/transaction boundaries and component availability, reconcile every affected component, then rerun simultaneous final-unit attempts. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct reservation/transaction boundaries and component availability, reconcile every affected component, then rerun simultaneous final-unit attempts. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Set availability is component-limited, reservations are visible, zero availability is enforced, and simultaneous final-unit attempts cannot oversell.
 
@@ -572,7 +569,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/inventory-operations/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/inventory-operations/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -587,15 +584,15 @@ Assign one owner and open /admin/inventory-operations/. Record the starting IDs,
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct separate lot quantities, dates, allocation and cost evidence, quarantine uncertain stock, and apply the reviewed physical total through the inventory workflow. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct separate lot quantities, dates, allocation and cost evidence, quarantine uncertain stock, and apply the reviewed physical total through the inventory workflow. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every launch material has traceable purchase evidence, physical quantity, lot status, and a reviewed cost suitable for margin calculation.
 
@@ -607,7 +604,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /checkout/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /checkout/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -621,15 +618,15 @@ Assign one owner and open /checkout/. Record the starting IDs, counts, totals, t
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then stop checkout for the affected destination/product rule, have the owner/accountant correct the tax mapping, and rerun saved expected-versus-actual scenarios including refunds. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then stop checkout for the affected destination/product rule, have the owner/accountant correct the tax mapping, and rerun saved expected-versus-actual scenarios including refunds. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every accepted destination and product type produces the reviewed tax result, and refunds reverse the correct tax amount.
 
@@ -641,7 +638,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /pickup/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /pickup/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -656,15 +653,15 @@ Assign one owner and open /pickup/. Record the starting IDs, counts, totals, tim
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then hide unsupported destinations or pickup promises, correct rate/weight/dimension/policy data, and repeat a physical pack plus checkout test. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then hide unsupported destinations or pickup promises, correct rate/weight/dimension/policy data, and repeat a physical pack plus checkout test. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every accepted address can be fulfilled at the displayed cost and timeframe, pickup instructions are accurate, and physical packaging protects the product.
 
@@ -678,7 +675,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/webhook-events/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/webhook-events/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -693,15 +690,15 @@ Assign one owner and open /admin/webhook-events/. Record the starting IDs, count
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct the live endpoint, signing secret, subscribed events or idempotency handling; reconcile the rehearsal order before resending only the safe test event. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct the live endpoint, signing secret, subscribed events or idempotency handling; reconcile the rehearsal order before resending only the safe test event. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** A live payment settles once, its signed webhook is verified, duplicate delivery has no duplicate effect, and failed/cancelled sessions remain recoverable.
 
@@ -713,7 +710,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/orders/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/orders/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -727,15 +724,15 @@ Assign one owner and open /admin/orders/. Record the starting IDs, counts, total
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct provider/order/inventory/tax/accounting/email steps as separate observable records, reverse duplicates with audited compensating entries, then replay the webhook safely. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct provider/order/inventory/tax/accounting/email steps as separate observable records, reverse duplicates with audited compensating entries, then replay the webhook safely. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Cancellation and refund actions are idempotent, financially traceable, communicate clearly, and restore only the inventory that should return to sale.
 
@@ -747,7 +744,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /checkout/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /checkout/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -762,15 +759,15 @@ Assign one owner and open /checkout/. Record the starting IDs, counts, totals, t
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then remove PayPal from every public surface until live capture, cancellation, webhook and refund evidence exists, or correct and retest the entire provider flow. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then remove PayPal from every public surface until live capture, cancellation, webhook and refund evidence exists, or correct and retest the entire provider flow. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Customers either receive a completely working PayPal option or see no PayPal option or promise anywhere on the live site.
 
@@ -782,7 +779,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/accounting/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/accounting/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -795,15 +792,15 @@ Assign one owner and open /admin/accounting/. Record the starting IDs, counts, t
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct account mappings with the owner/accountant, post balanced correcting entries instead of rewriting closed history, and rerun reconciliation/export checks. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct account mappings with the owner/accountant, post balanced correcting entries instead of rewriting closed history, and rerun reconciliation/export checks. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Opening transactions can be reconciled and exported accurately, sensitive exports are authorized, and any temporary manual accounting controls are documented.
 
@@ -817,7 +814,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/live-ops-followthrough/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/live-ops-followthrough/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -831,15 +828,15 @@ Assign one owner and open /admin/live-ops-followthrough/. Record the starting ID
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct the provider secret, sender/domain, template data or retry state; resend only to owner-controlled addresses and confirm the outbox/provider IDs. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct the provider secret, sender/domain, template data or retry state; resend only to owner-controlled addresses and confirm the outbox/provider IDs. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Essential messages arrive with correct facts and links, failures are observable, and a safe resend or support path exists.
 
@@ -851,7 +848,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /contact/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /contact/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -865,15 +862,15 @@ Assign one owner and open /contact/. Record the starting IDs, counts, totals, ti
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct every public contact channel and owner schedule, answer the rehearsal request, and document escalation plus expected response time. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct every public contact channel and owner schedule, answer the rehearsal request, and document escalation plus expected response time. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Customers can reach the business, receive acknowledgement, and obtain order/product help through monitored channels with realistic response expectations.
 
@@ -885,7 +882,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /terms/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /terms/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -899,15 +896,15 @@ Assign one owner and open /terms/. Record the starting IDs, counts, totals, time
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then remove contradictory promises, correct policy and checkout/product wording together, obtain owner/legal review where needed, and repeat every footer/checkout link test. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then remove contradictory promises, correct policy and checkout/product wording together, obtain owner/legal review where needed, and repeat every footer/checkout link test. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** All customer-facing policies are findable before payment, internally consistent, dated, and aligned with the way the business will actually operate.
 
@@ -921,7 +918,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/packaging/soap-labels/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/packaging/soap-labels/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -935,15 +932,15 @@ Assign one owner and open /admin/packaging/soap-labels/. Record the starting IDs
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then block the label/product, correct the authoritative formula and INCI/bilingual facts, supersede stale drafts, and repeat ingredient/claim review. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then block the label/product, correct the authoritative formula and INCI/bilingual facts, supersede stale drafts, and repeat ingredient/claim review. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The label content reflects the actual formula and reviewed bilingual/legal facts; no ingredient or claim is inferred from artwork or supplier advertising.
 
@@ -955,7 +952,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/packaging/soap-labels/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/packaging/soap-labels/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -970,15 +967,15 @@ Assign one owner and open /admin/packaging/soap-labels/. Record the starting IDs
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then keep the version unapproved, correct layout/overflow/scale/material issues, save a new version, and repeat a measured 100%-scale wrap test with proof. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then keep the version unapproved, correct layout/overflow/scale/material issues, save a new version, and repeat a measured 100%-scale wrap test with proof. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Each launch soap has a saved, physically measured, wrapped, passed, approved, and archived label version linked to its exact structured source data.
 
@@ -990,7 +987,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/packaging-studio/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/packaging-studio/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1009,15 +1006,15 @@ Assign one owner and open /admin/packaging-studio/. Record the starting IDs, cou
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then keep the candle-top version unapproved, remeasure the physical blank, correct template size/safe area/centred wording or material settings, save a new version, and repeat the physical laser or print proof. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then keep the candle-top version unapproved, remeasure the physical blank, correct template size/safe area/centred wording or material settings, save a new version, and repeat the physical laser or print proof. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every launch candle top or engraved round uses a saved exact-size reusable template with editable wording, centred static brand elements, an archived export/checksum, and a passed physical proof on the intended blank and production method.
 
@@ -1029,7 +1026,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/startup-readiness/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/startup-readiness/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1043,15 +1040,15 @@ Assign one owner and open /admin/startup-readiness/. Record the starting IDs, co
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then stop sale when required, correct the notification/change record using the authoritative formula/label facts, and save the submitted acknowledgement/reference. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then stop sale when required, correct the notification/change record using the authoritative formula/label facts, and save the submitted acknowledgement/reference. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Every applicable cosmetic has an owner, prepared/submitted notification evidence, and a documented process for later formula or business-detail changes.
 
@@ -1063,7 +1060,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/packaging-studio/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/packaging-studio/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1077,15 +1074,15 @@ Assign one owner and open /admin/packaging-studio/. Record the starting IDs, cou
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then reject the file as a production master, correct dieline/bleed/font/colour/output settings with the printer, and repeat preflight plus physical proof. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then reject the file as a production master, correct dieline/bleed/font/colour/output settings with the printer, and repeat preflight plus physical proof. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The chosen printer and material reproduce the approved dimensions, type, colour, bleed, and cut safely using an archived export and documented settings.
 
@@ -1099,7 +1096,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/site-analytics/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/site-analytics/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1113,15 +1110,15 @@ Assign one owner and open /admin/site-analytics/. Record the starting IDs, count
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then disable the affected tag/event, correct consent gating and deduplication without sending personal/sensitive data, then retest debug and production streams. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then disable the affected tag/event, correct consent gating and deduplication without sending personal/sensitive data, then retest debug and production streams. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Public and commerce activity is observable once, privacy boundaries are respected, and analytics values can be reconciled to a test transaction.
 
@@ -1133,7 +1130,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /sitemap.xml. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /sitemap.xml. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1147,15 +1144,15 @@ Assign one owner and open /sitemap.xml. Record the starting IDs, counts, totals,
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct robots/canonical/sitemap/status/redirect/template data, request validation where appropriate, and recheck the live URL after deployment. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct robots/canonical/sitemap/status/redirect/template data, request validation where appropriate, and recheck the live URL after deployment. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Search Console owns the production property, the sitemap/canonical system is correct, and representative public pages are crawlable without critical index or security errors.
 
@@ -1169,7 +1166,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/creative-assets/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/creative-assets/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1188,15 +1185,15 @@ Assign one owner and open /admin/creative-assets/. Record the starting IDs, coun
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then keep the raw-media workflow private and unapproved, correct the private R2 binding/upload-session/part/checksum/governance failure, resume or restart only the affected unfinished upload, verify the immutable raw object and D1 metadata chain, then repeat the processing-plan and public-promotion review without exposing the private original. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then keep the raw-media workflow private and unapproved, correct the private R2 binding/upload-session/part/checksum/governance failure, resume or restart only the affected unfinished upload, verify the immutable raw object and D1 metadata chain, then repeat the processing-plan and public-promotion review without exposing the private original. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The dedicated private R2 binding is proven live; multipart interruption/recovery works without restarting completed parts; completed originals remain private and immutable; secure review is authenticated/no-store; planned processors do not claim nonexistent outputs; and public promotion remains rights/consent/privacy/review gated with no automatic public copy.
 
@@ -1210,7 +1207,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /contact/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /contact/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1224,15 +1221,15 @@ Assign one owner and open /contact/. Record the starting IDs, counts, totals, ti
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then correct the owner-approved business facts/photos/categories/hours in the profile and website, then verify the public listing while signed out. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then correct the owner-approved business facts/photos/categories/hours in the profile and website, then verify the public listing while signed out. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The Business Profile is complete, accurate, consistent with the website, actively maintained, and supported by real local proof and customer trust.
 
@@ -1244,7 +1241,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/local-seo-review/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/local-seo-review/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1259,15 +1256,15 @@ Assign one owner and open /admin/local-seo-review/. Record the starting IDs, cou
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then rewrite thin/duplicate or misleading visible copy and metadata, keep structured data aligned, repair internal links/images, and revalidate the deployed page. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then rewrite thin/duplicate or misleading visible copy and metadata, keep structured data aligned, repair internal links/images, and revalidate the deployed page. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** All indexable pages pass the one-H1 and metadata audit, structured data matches visible facts, and important pages are discoverable through descriptive crawlable links.
 
@@ -1279,7 +1276,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/post-deploy-smoke-tests/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1294,15 +1291,15 @@ Assign one owner and open /admin/post-deploy-smoke-tests/. Record the starting I
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then fix the source CSS/HTML/JavaScript issue at the failing viewport or input method, then rerun the entire customer journey on a real device and keyboard. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then fix the source CSS/HTML/JavaScript issue at the failing viewport or input method, then rerun the entire customer journey on a real device and keyboard. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Critical customer journeys work on target devices and keyboard, no blocking accessibility or overlap defect remains, and performance evidence is recorded.
 
@@ -1314,7 +1311,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/social-publishing/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/social-publishing/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1331,15 +1328,15 @@ Assign one owner and open /admin/social-publishing/. Record the starting IDs, co
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then keep publishing manual/disabled, correct Meta/provider IDs, roles, scopes, token validity or callback settings, then rerun read-only identity tests before one reviewed post. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then keep publishing manual/disabled, correct Meta/provider IDs, roles, scopes, token validity or callback settings, then rerun read-only identity tests before one reviewed post. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Unapproved providers remain disabled and honestly labelled; any enabled provider publishes only after deliberate review with observable success/failure evidence.
 
@@ -1353,7 +1350,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/deployment-preflight/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/deployment-preflight/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1367,15 +1364,15 @@ Assign one owner and open /admin/deployment-preflight/. Record the starting IDs,
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then discard the unsafe test restore, correct the backup/media/config/runbook gap, create a fresh isolated target, and repeat while measuring recovery time. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then discard the unsafe test restore, correct the backup/media/config/runbook gap, create a fresh isolated target, and repeat while measuring recovery time. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** A tested operator can restore database, media, deployment, and required configuration within an acceptable time using documented steps.
 
@@ -1387,7 +1384,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/orders/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/orders/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1401,15 +1398,15 @@ Assign one owner and open /admin/orders/. Record the starting IDs, counts, total
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then pause launch, reconcile the rehearsal order across payment/stock/tax/email/accounting/packaging, correct the failing source workflow, then use a new order. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then pause launch, reconcile the rehearsal order across payment/stock/tax/email/accounting/packaging, correct the failing source workflow, then use a new order. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** One real order completes end to end with correct product, money, stock, communication, packaging, fulfilment, and reconciliable records.
 
@@ -1421,7 +1418,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/orders/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/orders/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1434,15 +1431,15 @@ Assign one owner and open /admin/orders/. Record the starting IDs, counts, total
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then reconcile provider refund, credit note, customer notice, stock disposition, tax and accounting records; correct duplicate/missing effects before a new rehearsal. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then reconcile provider refund, credit note, customer notice, stock disposition, tax and accounting records; correct duplicate/missing effects before a new rehearsal. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** A separate refund/cancellation can be completed safely, communicated clearly, reconciled, and repeated webhook delivery cannot duplicate its effects.
 
@@ -1454,7 +1451,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/deploy-readiness/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/deploy-readiness/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1469,15 +1466,15 @@ Assign one owner and open /admin/deploy-readiness/. Record the starting IDs, cou
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then set the promotion decision to Blocked, link it to the exact open Startup or smoke result, correct and retest that source gate, then rebuild the final evidence-backed decision. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then set the promotion decision to Blocked, link it to the exact open Startup or smoke result, correct and retest that source gate, then rebuild the final evidence-backed decision. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** A named owner has recorded an evidence-backed promotion decision for the exact live build, no Critical Startup gate or smoke result remains open, and rollback/stop conditions are ready.
 
@@ -1489,7 +1486,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/operational-continuity/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/operational-continuity/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1509,15 +1506,15 @@ Assign one owner and open /admin/operational-continuity/. Record the starting ID
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then keep the affected workstream open or blocked, record the exact missing evidence or duplicate/fallback failure, correct the authoritative workflow, then repeat the full case and attach safe evidence. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then keep the affected workstream open or blocked, record the exact missing evidence or duplicate/fallback failure, correct the authoritative workflow, then repeat the full case and attach safe evidence. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** All twenty-one workstreams have an owner/status, critical live cases have evidence, duplicate operations are prevented, fallbacks do not imply success, and no active stop condition remains.
 
@@ -1529,7 +1526,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/startup-readiness/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/startup-readiness/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1542,15 +1539,15 @@ Assign one owner and open /admin/startup-readiness/. Record the starting IDs, co
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then assign the missing owner/coverage, document phone-accessible stop and rollback steps, and rehearse the handoff or escalation. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then assign the missing owner/coverage, document phone-accessible stop and rollback steps, and rehearse the handoff or escalation. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** Each launch responsibility has an owner and the team has clear monitoring, escalation, rollback, and temporary-stop instructions.
 
@@ -1562,7 +1559,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/go-live-execution/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/go-live-execution/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1578,15 +1575,15 @@ Assign one owner and open /admin/go-live-execution/. Record the starting IDs, co
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then pause the affected public action, preserve timestamps and evidence, use the approved rollback/product-hide/checkout-stop control, correct the source gate, then obtain a new Deploy Readiness decision before retrying. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then pause the affected public action, preserve timestamps and evidence, use the approved rollback/product-hide/checkout-stop control, correct the source gate, then obtain a new Deploy Readiness decision before retrying. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The approved limited storefront is opened by a named operator, the exact actions and public results are recorded, immediate monitoring is active, and the opening remains reversible.
 
@@ -1598,7 +1595,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/startup-readiness/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/startup-readiness/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1612,15 +1609,15 @@ Assign one owner and open /admin/startup-readiness/. Record the starting IDs, co
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then pause or roll back sales, close the failed critical/high gate with evidence, reduce opening scope if needed, and restart only through the recorded owner decision. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then pause or roll back sales, close the failed critical/high gate with evidence, reduce opening scope if needed, and restart only through the recorded owner decision. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The store opens through a monitored, reversible, low-risk release with no unresolved critical blocker and a clear pause/rollback path.
 
@@ -1632,7 +1629,7 @@ Repeat the failed step first, then repeat the entire gate from a clean browser/s
 
 #### Before you begin
 
-Assign one owner and open /admin/live-ops-followthrough/. Record the starting IDs, counts, totals, timestamps, browser/device, environment, and expected result before changing anything. Use owner-controlled test data and never place passwords, access tokens, full payment data, or private customer information in evidence.
+Assign one owner and open /admin/live-ops-followthrough/. Record starting IDs/counts/totals, timestamps, browser/device, environment, and expected result before changing anything. Never place secrets or private customer/payment data in evidence.
 
 #### Test steps
 
@@ -1648,19 +1645,19 @@ Assign one owner and open /admin/live-ops-followthrough/. Record the starting ID
 
 #### If any step fails: correction procedure
 
-Do not mark the gate Complete. Set Failed or Blocked and identify the exact numbered step, actual result, request/order/product/event ID, safe log reference, and affected environment. Then activate the stop condition, protect affected customers, reconcile each money/stock/message record, reopen related Startup gates, and resume only after corrected live evidence is stable. Preserve history with audited corrections or new versions instead of silently rewriting financial, inventory, approval, or customer evidence.
+Do not mark the gate Complete. Set Failed or Blocked, identify the exact failed step and safe evidence reference, then activate the stop condition, protect affected customers, reconcile each money/stock/message record, reopen related Startup gates, and resume only after corrected live evidence is stable. Preserve history rather than silently rewriting financial, inventory, approval, or customer evidence.
 
 #### Evidence to save
 
-Save a concise before/after record: date/time and environment; owner; tested route and external console; non-secret record/event/deployment IDs; expected versus actual result for every numbered step; screenshots or approved evidence links; correction made; final rerun result; and confirmation that the stated pass condition is now true.
+Save date/time and environment; owner; tested route/external console; non-secret record/event/deployment IDs; expected versus actual result; approved proof links; correction made; final rerun result; and confirmation the pass condition is true.
 
 #### Retest and reopening rule
 
-Repeat the failed step first, then repeat the entire gate from a clean browser/session or fresh owner-controlled record. Reopen this gate after any related deployment, credential rotation, schema change, provider-version change, policy change, or material data correction.
+Repeat the failed step first, then the entire gate from a clean browser/session or fresh owner-controlled record. Reopen after related deployments, credential rotations, schema/provider changes, policy changes, or material data corrections.
 
 **Pass condition:** The first live operating window is reconciled across customer, money, stock, communication, fulfilment, accounting and incident records, with every anomaly owned and no active stop condition.
 
 ## Gate count and authority
 
-This guide contains 46 gates. If it differs from the D1 Startup Readiness cockpit after deployment, treat the deployed D1/API status as mutable authority, confirm all 46 items return, correct the guide/definition drift, and keep the affected gate Failed until both agree.
+This guide contains 46 gates. If D1 returns fewer status rows, the browser keeps all 46 instructions visible and marks the missing statuses unsynced/degraded until the database is corrected.
 

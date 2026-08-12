@@ -1,10 +1,10 @@
-# Build 246 current smoke-test note
+# Build 254 current smoke-test note
 
-After Build 246 migration/deploy, first verify: admin refresh retains a valid session; a query-opened product updates successfully; gallery/featured/SEO-social image roles persist after reload; an affected product delete preview distinguishes empty generated shells from meaningful history; a test Creative Project with unreversed material use returns stock exactly once on confirmed delete; a small finished-product production release deducts the intended fractional raw materials once and stores ingredient/material snapshots; same-project CAIP duplicate intake is skipped; and soap packaging remains `soap_reference_v2` with no invented ingredient claims and review-required French drafts. Retain Cloudflare Ray IDs for any 5xx/1102.
+After Build 254 migration/deploy, first verify: authenticated Startup Readiness GET returns compact JSON rather than a webpage; browser-only readiness changes synchronize in one batch; the complete 46-gate guide remains visible from the browser asset; Post-Deploy Smoke Tests GET returns structured JSON and no request-time DDL is attempted; Quick Run remains limited to same-origin URLs; and handled D1/runtime failures return structured diagnostic JSON. Then retain the Build 250–253 product media, per-use/batch, kit/component, inventory runtime and linked-item regression checks. Retain Cloudflare Ray IDs and Pages Function logs for any residual 5xx/1102.
 
 ## Retained Build 245 auth/media-resilience smoke note
 
-Retain the Build 245 auth/media-resilience assertions when testing the current Build 246 package and shell v23. In addition to the retained smoke suite, refresh protected admin pages and verify temporary auth 5xx produces a degraded/session-retained state rather than a false login screen; reopen known products with multiple supporting images; test the Product Readiness blocker link; and inspect any residual 503/1102 by Cloudflare Ray ID. The Startup cockpit currently carries 46 gates.
+Retain the established auth/media-resilience assertions when testing the current Build 254 package. In addition to the retained smoke suite, refresh protected admin pages and verify temporary auth 5xx produces a degraded/session-retained state rather than a false login screen; reopen known products with multiple supporting images; test the Product Readiness blocker link; and inspect any residual 503/1102 by Cloudflare Ray ID. The Startup cockpit currently carries 46 gates.
 
 ## Post-Deploy Smoke Test — retained Build 241 foundation
 
@@ -108,7 +108,7 @@ Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resoluti
 ## Build 222 smoke test — Soap Label Studio and Startup Readiness
 
 1. Open `/admin/` and confirm **Startup Readiness Guide** and **Soap Label Studio** cards are visible.
-2. Open `/admin/startup-readiness/`; confirm all 37 gates render and direct links work.
+2. Open `/admin/startup-readiness/`; confirm all 46 gates render and direct links work.
 3. Open `/admin/packaging/soap-labels/`; confirm the approved Glacial Purple reference loads without a broken image.
 4. Create a disposable soap-label project using the photo-fit profile.
 5. Add, reorder and remove English/French ingredient and claim rows; save and reload from D1.
@@ -121,7 +121,7 @@ Local tests cannot prove Cloudflare D1/R2 bindings, remote public media resoluti
 12. Review runtime incidents and admin audit evidence for deliberate failures and successful approval.
 # Build 227 focused smoke tests — historical
 
-1. Open `/admin/startup-readiness/`; confirm All statuses is selected, all 37 gates render, and each gate expands to Before you begin, Test steps, Correction, Evidence, Retest and Pass condition.
+1. Open `/admin/startup-readiness/`; confirm All statuses is selected, all 46 gates render, and each gate expands to Before you begin, Test steps, Correction, Evidence, Retest and Pass condition.
 2. Set a temporary search/filter that returns no rows, select Show all gates, and confirm the complete list returns.
 3. Open `/admin/packaging-studio/`; create an owner-controlled non-soap project, select a general template, save, reload, and confirm the generic SVG preview remains.
 4. Open Components & Cost; link an inventory item, confirm name/SKU/cost/supplier suggestions, save, reload, and verify component count and estimated per-unit cost.

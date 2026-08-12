@@ -1,6 +1,6 @@
-# Build 246 current release-sequence note
+# Build 254 current release-sequence note
 
-Current sequence: back up D1 → confirm Build 245 prerequisite → apply `database_build246_product_project_production_packaging.sql` or byte-identical current-pass once → run `BUILD246_D1_VERIFICATION.sql` → deploy the complete Build 246 package → hard-refresh shell v23 → run product edit/delete/SEO-image, Creative Project inventory-return, finished-production, CAIP duplicate and packaging smoke checks → continue the retained 46-gate Startup process.
+Current sequence: back up D1 → confirm the Build 250 migration boundary is already present → apply `database_build254_startup_smoke_runtime_hardening.sql` **or** byte-identical `database_upgrade_current_pass.sql` once → run `BUILD254_D1_VERIFICATION.sql` → deploy the complete Build 254 package → hard-refresh the affected admin pages so the `v=254` Startup Readiness and Post-Deploy Smoke Test scripts load → synchronize browser-only Startup Readiness changes → run the post-deploy smoke checks → continue the retained 46-gate Startup process. Builds 251–253 required no D1 migration.
 
 # Devil n Dove Prelaunch Process Playbooks — Build 240
 
@@ -9,14 +9,14 @@ Current sequence: back up D1 → confirm Build 245 prerequisite → apply `datab
 ## Retained Build 240/241 foundation sequence
 
 1. Back up D1 and retain the backup reference.
-2. Confirm prior ledger key `build240_operational_evidence_continuity`, then apply `database_build241_caip_large_media_intake.sql` or identical `database_upgrade_current_pass.sql` once.
+2. Confirm the Build 250 migration boundary is present, then apply the migration named by the current validation report (Build 254: `database_build254_startup_smoke_runtime_hardening.sql`) or the byte-identical `database_upgrade_current_pass.sql` once, not both.
 3. Deploy the complete package and hard-refresh to `devilndove-shell-v19`.
 4. Confirm all 46 Startup gates, including `operational_continuity_evidence_center`.
 5. Open Operational Continuity and verify the twenty-one workstreams, thirty-six public audit rows, seven mobile cards and honest degraded fallback.
 6. Run the public-page audit, predeploy sanity, deployment preflight, retained regression tests and live smoke suite.
 7. Record expected/actual evidence in D1; never infer live/provider/physical success from local static checks.
 
-This document separates the release journey into distinct processes. A pass in one process never erases a blocker in another. `/admin/startup-readiness/` remains the 45-gate status authority; this playbook explains where to click, what to prove, what to save, and what to do when a stage fails.
+This document separates the release journey into distinct processes. A pass in one process never erases a blocker in another. `/admin/startup-readiness/` remains the 46-gate status authority; this playbook explains where to click, what to prove, what to save, and what to do when a stage fails.
 
 ## Process order
 

@@ -1,8 +1,20 @@
-# Devil n Dove Project Status and Roadmap — Build 253
+# Devil n Dove Project Status and Roadmap — Build 254
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
 
+
+
+## Build 254 completed work — Startup/Smoke 503 runtime hardening
+
+1. Reduced `/api/admin/startup-readiness` from a full embedded 46-gate guide response to compact mutable D1 status/history only (`startup_status_v2`).
+2. Single readiness saves now return one compact patch; browser-only recovery uses one bounded `sync_items` batch instead of one full-guide POST/reload per gate.
+3. The full 46-gate guide is now maintained in `data/site/startup-readiness-guide.json`, synchronized to the browser fallback and generated `STARTUP_GO_LIVE_GUIDE.md`.
+4. Removed request-time `CREATE TABLE` from Post-Deploy Smoke Tests; Build 254 migration owns smoke storage/index creation.
+5. Smoke quick-run is bounded to same-origin URLs and stores collected results with one D1 batch.
+6. Both admin UIs now report structured 503/degraded conditions and load cache-busted `v=254` assets.
+7. Updated stale Startup foundation instructions to current migration/build-neutral language while retaining all 46 gates and browser recovery.
+8. Build 254 regression passes 16/16; retained Builds 249–253 regressions and current public/asset audits remain green.
 
 ## Build 250 completed work — product images and per-use persistence
 

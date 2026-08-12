@@ -1,3 +1,9 @@
+# Build 254 — Startup Readiness and Post-Deploy Smoke runtime hardening
+
+- Replaced the CPU-heavy full-guide Startup API response with compact D1 status/history payloads and patch/batch synchronization.
+- Moved Post-Deploy Smoke schema creation from request handlers into the Build 254 migration and added structured degraded/error handling.
+- Added same-origin bounded smoke quick-runs, D1 batch result writes, current 46-gate static guide authority, and v254 cache busts.
+
 # Build 248 — Purchased Source Materials, Soap-Base Inheritance and 2026 Compliance Evidence
 
 - Split reusable Packaging Studio data into **Purchased Source Materials** versus **Finished Soap Formulas** so supplier facts are not confused with what Devil n Dove actually makes.
