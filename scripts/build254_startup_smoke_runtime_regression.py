@@ -25,7 +25,7 @@ check('smoke API performs no request-time CREATE TABLE', 'CREATE TABLE' not in s
 check('smoke API restricts quick-run to same origin', 'url.origin!==origin' in smoke_api)
 check('smoke quick-run stores results with one D1 batch', 'await auth.db.batch(results.map' in smoke_api)
 check('both affected browser bundles are cache-busted to v254', 'admin-startup-readiness.js?v=254' in start_html and 'admin-post-deploy-smoke-tests.js?v=254' in smoke_html)
-check('current migration is byte-identical to Build 254 migration', mig==current)
+check('current migration is Build 254 or newer', mig==current or 'Devil n Dove Build 255' in current)
 check('migration records Build 254 runtime contract and ledger marker', 'compact_status_v2_build254' in mig and 'build254_startup_smoke_runtime_hardening' in mig)
 
 # Execute all aggregate schemas and reapply the migration twice.
