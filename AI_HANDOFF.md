@@ -1,8 +1,8 @@
-# Build 254 current handoff
+# Build 255 current handoff
 
-The current code release is Build 254. The current D1 migration is `database_build254_startup_smoke_runtime_hardening.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after the Build 250 boundary; Builds 251–253 required no D1 migration. Build 254 hardens Startup Readiness and Post-Deploy Smoke Tests by moving the 46-gate guide out of the Worker request path, returning only compact mutable D1 status/history data, batching browser-recovery synchronization, removing request-time DDL from smoke tests, and guaranteeing structured handled failures. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD254_CHANGED_FILES.md` and `BUILD254_VALIDATION.md` for the current release evidence. Build 254 is the active migration after the Build 250 boundary; Builds 251–253 required no D1 migration. Prior release evidence is historical.
+The current code release is Build 255. The current D1 migration is `database_build255_packaging_material_library_hub.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after Build 254. Build 255 makes the Packaging Studio Material Library visible without opening a packaging project, fixes stale Packaging Studio CSS/JavaScript cache versions, gives each purchased source its own independent Master INCI editor, adds product-family/source-category metadata for soap bases, candle waxes, fragrance/essential-oil blends, colourants/micas/dyes and additives, and preserves structured ingredients/claims for every packaging type through general packaging project tables. Build 254 remains the Startup Readiness/Post-Deploy Smoke runtime foundation. See `BUILD255_CHANGED_FILES.md` and `BUILD255_VALIDATION.md` for current release evidence; prior release notes are historical.
 
-# Devil n Dove AI Handoff — Build 254
+# Devil n Dove AI Handoff — Build 255
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -29,7 +29,7 @@ Build 246 repairs the live Product Editor lifecycle and extends D1-backed produc
 | Creative media, rights and story evidence | CAIP |
 | Private Creative Project originals | CAIP D1 metadata + private `CAIP_PRIVATE_MEDIA_BUCKET` |
 | Packaging/label project state | Labeling & Packaging D1 authorities + `PACKAGING_STUDIO.md` |
-| Purchased/source material authority | D1 `packaging_source_material_templates` + project/formula links; supplier evidence remains distinct from finished-product facts |
+| Purchased/source material authority | D1 `packaging_source_material_templates` + `packaging_source_material_metadata` + project/formula links; supplier evidence remains distinct from finished-product facts |
 | French label generation evidence | `packaging_translation_reviews`; machine/curated output remains a draft until human review |
 | Content packages | Content Studio |
 | Publication approval/provider reconciliation | Release Board / Social Queue / provider records |
@@ -48,6 +48,10 @@ Mutable business state belongs in D1 whenever a live table exists. JSON and Mark
 5. Posted finished-product production history is a deletion blocker. Archive or reverse/detach according to the business workflow rather than silently discarding production evidence.
 
 
+
+## Build 255 Packaging Material Library rule
+
+`/admin/packaging-studio/` must expose the Material Library even when no label project is selected. A purchased material template owns its own supplier identity, family/subtype, base/fragrance/colourant/additive role, optional colour swatch, raw supplier declaration, structured Master INCI/source ingredient rows, allergen evidence, supplier benefits/claims and review state. **Do not require the current label project's ingredient table to create a source template.** `packaging_source_material_metadata` provides flexible classification without changing the original Build 248 source-type CHECK constraint. `packaging_project_ingredients` and `packaging_project_claims` are the general structured-content authority for soap, candle, bath/body and other packaging; soap-specific tables remain compatibility mirrors. Packaging Studio HTML must load cache-busted `styles.css?v=255` and `admin-packaging-studio.js?v=255`.
 
 ## Build 254 Startup Readiness / Smoke runtime rule
 
