@@ -1,8 +1,8 @@
-# Build 253 current handoff
+# Build 254 current handoff
 
-The current code release is Build 253. The current D1 migration boundary remains Build 250: `database_build250_product_media_resource_usage_reliability.sql` / byte-identical `database_upgrade_current_pass.sql`; Builds 251–253 are browser/runtime/API-read fixes and require no D1 migration. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD253_CHANGED_FILES.md` and `BUILD253_VALIDATION.md` for the current code-only release; the current D1 migration boundary remains Build 250. Prior release evidence is historical.
+The current code release is Build 254. The current D1 migration is `database_build254_startup_smoke_runtime_hardening.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after the Build 250 boundary; Builds 251–253 required no D1 migration. Build 254 hardens Startup Readiness and Post-Deploy Smoke Tests by moving the 46-gate guide out of the Worker request path, returning only compact mutable D1 status/history data, batching browser-recovery synchronization, removing request-time DDL from smoke tests, and guaranteeing structured handled failures. Build 250 repairs Product Edit media recovery and strengthens product-resource per-use/batch persistence while retaining Build 249 purchased-kit/component inventory, weighted cost allocation, inventory classification and kit-opening provenance. Packaging Studio now separates purchased/source material templates from finished formulas: a soap base can carry supplier identity, source links, source image/document references, raw supplier ingredient wording, reviewed Master INCI rows, allergen evidence, supplier benefits/claims and verification status; finished formulas inherit a soap base and then add fragrance, colourant and other source materials separately. Supplier marketing text is evidence, not an automatically approved consumer claim. See `BUILD254_CHANGED_FILES.md` and `BUILD254_VALIDATION.md` for the current release evidence. Build 254 is the active migration after the Build 250 boundary; Builds 251–253 required no D1 migration. Prior release evidence is historical.
 
-# Devil n Dove AI Handoff — Build 253
+# Devil n Dove AI Handoff — Build 254
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -47,6 +47,11 @@ Mutable business state belongs in D1 whenever a live table exists. JSON and Mark
 4. Product deletion may automatically clean **unreviewed generated project shells** that contain no meaningful workflow/review/publication/evidence/output state. A meaningful Content Studio/CAIP project remains a blocking business/history reference and must be handled explicitly.
 5. Posted finished-product production history is a deletion blocker. Archive or reverse/detach according to the business workflow rather than silently discarding production evidence.
 
+
+
+## Build 254 Startup Readiness / Smoke runtime rule
+
+The 46-gate **instruction guide is static release data** in `data/site/startup-readiness-guide.json` and the browser bundle. D1 remains authority only for mutable readiness status, owner, due date, evidence, blocked reason and history. `/api/admin/startup-readiness` must use the compact `startup_status_v2` contract and must not rebuild/return the full guide or Markdown report after each save. Browser-only recovery changes synchronize with one bounded `sync_items` batch, and successful saves return compact patches. `/api/admin/post-deploy-smoke-tests` must never create schema during GET/POST; Build 254 installs its table/indexes through D1 migration. Quick-run URLs are same-origin only and result inserts are batched.
 
 ## Build 250 Product Edit image and usage rule
 
