@@ -18,8 +18,8 @@ export async function onRequestGet(context){
       LEFT JOIN media_assets ma ON ma.media_asset_id=a.media_asset_id AND ma.deleted_at IS NULL
       LEFT JOIN managed_media_metadata mm ON mm.media_asset_id=ma.media_asset_id
       LEFT JOIN managed_content_blocks cb ON cb.media_content_slot_id=s.media_content_slot_id
-      WHERE s.page_path=? AND s.is_active=1
-      ORDER BY s.media_content_slot_id
+      WHERE s.page_path IN ('@site', ?) AND s.is_active=1
+      ORDER BY CASE WHEN s.page_path='@site' THEN 0 ELSE 1 END,s.media_content_slot_id
       LIMIT 350
     `).bind(path).all();
     const images=[]; const content=[];
