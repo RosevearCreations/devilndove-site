@@ -1,17 +1,18 @@
-# Devil n Dove Markdown Index — Build 253
+# Devil n Dove Markdown Index — Build 256
 
 ## Two current authorities
 
 1. `AI_HANDOFF.md` — architecture, data authority, product/project/inventory/CAIP/packaging safety, schema and deployment.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 253 work, known risks and the ordered next actions.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 256 work, known risks and the ordered next actions.
 
 A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current release pair
 
-- `BUILD253_CHANGED_FILES.md`
-- `BUILD253_VALIDATION.md`
-- no D1 migration is required for Build 253; Build 250 remains the current database migration boundary
+- `BUILD256_CHANGED_FILES.md`
+- `BUILD256_VALIDATION.md`
+- `BUILD256_D1_VERIFICATION.sql`
+- Build 256 requires `database_build256_media_content_studio.sql` (or the byte-identical `database_upgrade_current_pass.sql`) after Build 255.
 
 ## Active specialist playbooks
 
@@ -34,3 +35,7 @@ Superseded `BUILD*.md` files are no longer duplicated at the repository root. Th
 ## Historical rule
 
 Superseded Build release notes/changed-files/validation/verification records belong under `docs/archive/build-history/`. Fixed specialist source/reference documents may retain an older Build label when that label identifies the specialist design authority rather than current application state.
+## Build 256 specialist implementation authority
+
+- `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md` — permanent scope/acceptance criteria for the Media & Content Management Studio. It supplements, but does not replace, the two canonical current project files.
+

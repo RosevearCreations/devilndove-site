@@ -1,3 +1,7 @@
+## Build 256 — Media & Content Management Studio
+
+Build 256 adds `managed_media_metadata`, `media_content_slots`, `media_content_assignments`, `managed_content_blocks`, and `media_content_change_audit`. Existing `media_assets` remains the physical/public media record; the new tables add owner-authored metadata, explicit page placement, selected page-text publication and audit history without creating a second R2 inventory. `media_content_assignments` permits only one active media assignment per page slot. Public page manifests are bounded D1 reads and never enumerate R2; explicit admin R2 sync only registers media assets and never creates assignments.
+
 # Build 247 schema delta
 
 - `packaging_formula_library`: reusable soap/product formulas with product identity, default rose direction and ordered structured ingredient JSON.

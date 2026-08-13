@@ -1,3 +1,11 @@
+## Build 256 — Amazon-assisted source templates and soap reference-v3 layout
+
+Material Library can now create a **review-first draft** from an exact Amazon product URL. The preview attempts to fill purchased/source product identity, Amazon/brand supplier, ASIN/SKU, source URL/image, likely source category, colour swatch, exposed ingredient/allergen wording and Amazon product-detail bullets. Nothing is saved automatically. Review supplier/manufacturer INCI/SDS/allergen documentation and then use **Save material template**.
+
+Soap labels use `soap_reference_v3`: five fixed zones keep English ingredients, the front oval/artwork, French ingredients, the rear seal and claims/net weight independent. Ingredient and claim copy is clipped to its assigned zone. The Preview tab includes an alignment explanation and approved-reference link.
+
+Artwork/media management is now linked to `/admin/media-content-studio/`; the next packaging-media phase is a direct managed-artwork picker instead of manual asset paths.
+
 # Build 248 current Packaging Studio extension
 
 

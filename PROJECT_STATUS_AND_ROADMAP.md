@@ -1,9 +1,35 @@
-# Devil n Dove Project Status and Roadmap — Build 255
+# Devil n Dove Project Status and Roadmap — Build 256
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
 
 
+
+## Build 256 completed work — Amazon source drafts, aligned soap labels, Media & Content Studio
+
+1. Added **Create draft from Amazon link** directly inside Packaging Studio Material Library for soap bases, candle wax, fragrance/essential-oil blends, colourants and micas/pigments.
+2. Amazon preview now infers material family/category, supplier/brand, ASIN/SKU, source URL, product image, likely colour swatch, exposed ingredient/allergen text and product-detail bullets; all imported fields remain `needs_review` until deliberately saved and verified.
+3. Rebuilt the soap-ribbon renderer as `soap_reference_v3` with five fixed non-overlapping zones matching the approved reference hierarchy: English ingredients, front oval/artwork, French ingredients, rear seal, claims/net weight.
+4. Added SVG clipping and a horizontal print-preview shell so long English/French ingredient lists and claims cannot bleed into neighbouring zones.
+5. Added a clear soap alignment guide in Preview with a direct link to the approved reference image.
+6. Implemented `/admin/media-content-studio/` with a numbered owner workflow: inspect/register a public page, choose/upload public media, edit media metadata/uses, then assign images or draft/publish text for exact page locations.
+7. Added D1 authorities `managed_media_metadata`, `media_content_slots`, `media_content_assignments`, `managed_content_blocks` and `media_content_change_audit`.
+8. Added explicit safe placement precedence: page inspection, uploads, metadata edits and R2 sync never change a live placement. Only an explicit assignment can replace one occupied slot, and removing it returns the page to authored/catalog content.
+9. Added public per-page media/content manifest plus a lightweight runtime to apply only explicit assignments/published text, including a short MutationObserver window for dynamically rendered page elements.
+10. Added page inspection for existing `<img>` elements, CSS image backgrounds and selected main/article text. The inspection runs only when an administrator requests it and registers stable selectors without publishing.
+11. Added public media upload, metadata, alt/caption/tags, focal point, attribution/license/consent fields, assignment-state filtering, existing-use reporting, archive protection and server-side safe-delete recheck.
+12. Added explicit bounded public-R2 sync in Media Studio; normal storefront requests never list R2.
+13. Added same-key **Replace image file, keep placements** workflow with password step-up and public-manifest cache busting.
+14. Installed the public Media Studio runtime on 56 existing non-admin HTML entry points and added direct Dashboard/Packaging Studio navigation to the new Studio.
+15. Preserved the supplied Media & Content Management Studio specification under `docs/media-content/` as the implementation authority; future gallery/version/rollback maturity remains tracked there.
+
+### Highest-value next work after Build 256
+
+- Live-deploy Build 256 and verify the D1 migration, Amazon preview behavior and Media Studio page inspection against production Cloudflare Pages/R2.
+- Register a small representative page set first (Home, About/Story, Shop/collections, FAQ/support and one landing page), deliberately assign one reversible image/text override, then verify removal returns to authored content.
+- Continue the attached Media Studio specification with reusable managed galleries (general, before/after, process, technique, evidence, materials, packaging, workshop/event), drag/reorder and publication rules.
+- Add media replacement version history/rollback and richer audit/history UI after the core placement model is proven live.
+- Integrate the managed Artwork filter directly into Packaging Studio pickers so label art can be selected without manual asset paths.
 
 ## Build 255 completed work — Packaging Material Library clarity and cross-product structured content
 
