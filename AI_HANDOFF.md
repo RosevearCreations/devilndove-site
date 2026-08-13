@@ -1,8 +1,8 @@
-# Build 256 current handoff
+# Build 257 current handoff
 
-The current code release is Build 256. The current D1 migration is `database_build256_media_content_studio.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after Build 255. Build 256 adds Amazon-assisted Purchased/Source Material drafts in Packaging Studio, locks the soap ribbon preview to a five-zone `soap_reference_v3` layout, and introduces `/admin/media-content-studio/` as the production-safe public media/page-content authority. The Studio uses explicit D1 page slots and assignments; inspection, upload, metadata changes and R2 synchronization never reassign authored public media automatically. Public pages read a compact per-path D1 manifest and preserve authored HTML whenever no explicit assignment or published text override exists. See `BUILD256_CHANGED_FILES.md`, `BUILD256_VALIDATION.md`, and `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md`.
+The current code release is Build 257. The current D1 migration boundary remains Build 256: `database_build256_media_content_studio.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after Build 255. Build 257 tightens `/admin/media-content-studio/` into a **static website presentation authority only**. Product/catalog media, inventory, supplies, tools and their dynamic grids are excluded at both browser and API-query layers. The Studio no longer requires typed URLs; it loads a curated static-page catalog and provides direct sitewide controls for Header/Navigation, Footer and backgrounds plus page/section controls such as Home Banner/Hero, About, Gallery, Showcase/Creations and Workshop/Workroom. Public pages continue to use the Build 256 bounded D1 manifest and preserve authored content whenever no explicit assignment or published text override exists. See `BUILD257_CHANGED_FILES.md`, `BUILD257_VALIDATION.md`, and `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md`.
 
-# Devil n Dove AI Handoff — Build 256
+# Devil n Dove AI Handoff — Build 257
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -51,6 +51,12 @@ Mutable business state belongs in D1 whenever a live table exists. JSON and Mark
 5. Posted finished-product production history is a deletion blocker. Archive or reverse/detach according to the business workflow rather than silently discarding production evidence.
 
 
+
+## Build 257 static Media Studio scope and page-directory rule
+
+`/admin/media-content-studio/` is **not** a Product Editor, inventory editor, supply editor or tool editor. Those specialist records remain owned by Product Editor / Inventory Operations. Build 257 therefore excludes `product_id` media, media typed/sourced as product/inventory/supply/tool, and R2 keys under product/inventory/supply/tool prefixes from Media Studio API results. The browser also ignores dynamic product/catalog/inventory mounts when inspecting a static page shell. Do not reintroduce these specialist records merely because they share the underlying `media_assets` table.
+
+Administrators should not type page URLs for normal use. `public/data/media-content-page-catalog.json` is the curated owner-facing directory of known editable static/public presentation pages. It is validated against real static `index.html` entries by `scripts/build_media_content_page_catalog.py`. Shared Header/Navigation, Footer and Site Background assignments use the special internal page path `@site`; the public manifest returns those shared assignments first and page-specific assignments second so an explicit page override can win. Friendly labels must be shown in the UI; raw paths/keys remain implementation detail. Media Studio assets and the public runtime are cache-busted to `v=257`. Build 257 is code-only and does not advance the D1 migration boundary beyond Build 256.
 
 ## Build 256 Media & Content Studio / Packaging rule
 
