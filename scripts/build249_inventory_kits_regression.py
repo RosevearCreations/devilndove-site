@@ -32,7 +32,7 @@ ok('main inventory exposes lot/expiry/source-material flags', all(x in inv for x
 ok('essential oil wording explains premixed blend', 'premixed essential-oil blend' in pack)
 ok('delete audit no longer references undefined merged variable in delete block', 'target_key: `${merged.source_type}:${existing.external_key}`' not in api)
 current=(ROOT/'database_upgrade_current_pass.sql').read_text()
-ok('current migration is Build 249 or newer', current==(ROOT/'database_build249_inventory_kits_components_provenance.sql').read_text() or 'Build 250' in current)
+ok('current migration is Build 249 or newer', current==(ROOT/'database_build249_inventory_kits_components_provenance.sql').read_text() or bool(re.search(r'Build (?:25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,})',current)))
 
 with tempfile.NamedTemporaryFile(suffix='.db') as tmp:
     db=sqlite3.connect(tmp.name)

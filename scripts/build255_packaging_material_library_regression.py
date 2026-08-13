@@ -17,8 +17,8 @@ handoff=(ROOT/'AI_HANDOFF.md').read_text()
 roadmap=(ROOT/'PROJECT_STATUS_AND_ROADMAP.md').read_text()
 
 check('Packaging Studio has one H1', len(re.findall(r'<h1\b',html,re.I))==1)
-check('Packaging Studio cache-busts CSS to v255', '/css/styles.css?v=255' in html)
-check('Packaging Studio cache-busts JS to v255', '/public/js/admin-packaging-studio.js?v=255' in html)
+check('Packaging Studio cache-busts CSS at Build 255 or newer', bool(re.search(r'/css/styles\.css\?v=(?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})',html)))
+check('Packaging Studio cache-busts JS at Build 255 or newer', bool(re.search(r'/public/js/admin-packaging-studio\.js\?v=(?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})',html)))
 check('API reports Build 255', "const BUILD = '255'" in api)
 check('Material Library is available without a selected project', 'You do not need a project to build the Material Library.' in js and 'standalone:true' in js)
 check('Material Library gives explicit product-family choices', all(x in js for x in ['Soap','Candles','Bath & body','Home fragrance','Cosmetic / body','General']))
@@ -41,10 +41,10 @@ check('API reads general structured ingredients and claims with legacy soap fall
 check('API maps source metadata to browser', all(x in api for x in ['product_family:text(row.product_family','material_subtype:text(row.material_subtype','default_role:text(row.default_role','colour_hex:text(row.colour_hex']))
 check('API source library has migration-safe fallback', 'source_material_metadata_ready=false' in api and 'LEFT JOIN packaging_source_material_metadata' in api)
 check('Source template save requires metadata migration before mutating old source row', 'Build 255 source-material metadata migration is required before saving Material Library categories.' in api)
-check('Current migration is byte-identical to Build 255 migration', mig==current)
+check('Build 255 migration is retained after newer current migrations', 'build255_packaging_material_library_hub' in mig and ('build255_packaging_material_library_hub' in full))
 check('Packaging docs explain where soap/candle/oil/colour data belongs', all(x in docs for x in ['Build 255 — Material Library hub','Soap base','Candle wax','essential-oil','Master INCI']))
-check('Canonical handoff identifies Build 255', handoff.startswith('# Build 255 current handoff'))
-check('Canonical roadmap identifies Build 255', roadmap.startswith('# Devil n Dove Project Status and Roadmap — Build 255'))
+check('Canonical handoff identifies Build 255 or newer', bool(re.match(r'# Build (?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,}) current handoff',handoff)))
+check('Canonical roadmap identifies Build 255 or newer', bool(re.match(r'# Devil n Dove Project Status and Roadmap — Build (?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})',roadmap)))
 
 # JS syntax.
 for f in ['public/js/admin-packaging-studio.js','functions/api/admin/packaging-studio.js']:

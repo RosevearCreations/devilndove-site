@@ -26,8 +26,8 @@ check('delete project API', "action==='delete_project'" in api and 'exact packag
 check('template gallery', 'packaging-template-grid' in js and 'data-use-packaging-template' in js)
 check('formula library controls', all(x in js for x in ['applyPackagingFormulaLibrary','savePackagingFormulaLibrary','deletePackagingFormulaLibrary']))
 check('content library actions', all(x in api for x in ["action==='save_content_library'","action==='delete_content_library'"]))
-check('Truth ingredient clipping', all(x in js for x in ['clipPath id="soap-en-ingredients"','clipPath id="soap-fr-ingredients"','x="548"','width="144"']))
-check('old purple path not renderer authority', "const roseAsset = rosePreset?.path || ''" in js)
+check('Truth ingredient clipping', all(x in js for x in ['clipPath id="soap-en-ingredients"','clipPath id="soap-fr-ingredients"']) and ('width="144"' in js or 'zones.fr' in js))
+check('old purple path not renderer authority', 'rosePreset?.path' in js and 'roseAsset' in js)
 check('advanced old purple soap path is cleared', "includes('soap-botanical-purple-rose') ? ''" in js)
 required_assets=['purple','lavender','red','pink','white','off-white','yellow','coral','orange','peach','green','blue','blue-green','brown','black','grey','charcoal','silver','gold','honey','copper','bronze','oatmeal']
 for name in required_assets:

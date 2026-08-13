@@ -12,7 +12,7 @@ def check(ok,msg):
 
 sql=MIG.read_text(encoding='utf-8')
 current_sql=UPG.read_text(encoding='utf-8')
-if not any(tag in current_sql for tag in ['Build 249','Build 248','build246_product_project_production_packaging','build245_admin_media_resilience']):
+if not any(tag in current_sql for tag in ['Build 256','Build 255','Build 254','Build 253','Build 252','Build 251','Build 250','Build 249','Build 248','build246_product_project_production_packaging','build245_admin_media_resilience']):
     check(sql in current_sql,'current upgrade SQL must retain/advance beyond the complete Build 244 migration segment')
 check('CREATE TEMP' not in sql.upper(),'migration must not use TEMP tables')
 check('DROP TABLE' not in sql.upper(),'migration must not DROP tables')
