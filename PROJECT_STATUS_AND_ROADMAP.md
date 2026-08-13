@@ -1,9 +1,33 @@
-# Devil n Dove Project Status and Roadmap — Build 256
+# Devil n Dove Project Status and Roadmap — Build 257
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
 
 
+
+
+## Build 257 completed work — Static-only Media Studio and automatic site directory
+
+1. Narrowed `/admin/media-content-studio/` to **static website presentation content only**; finished-product media, product/catalog records, inventory, supplies, tools and their specialist images are excluded from Media Studio search/results.
+2. Enforced that boundary server-side: product-linked media, blocked source types and product/inventory/supply/tool R2 prefixes are filtered from media queries and cannot be assigned through this Studio.
+3. Removed the normal manual page-path workflow and added `public/data/media-content-page-catalog.json`, a curated directory of 29 known static/public pages validated against the real application filesystem.
+4. Added friendly quick choices for **Home, About, Gallery, Showcase / Creations and Workshop / Workroom**, plus the remaining landing, guide, contact, gift, event and policy pages.
+5. Added first-class shared-site controls for **Header & Navigation, Footer and Site Backgrounds**, plus a direct **Home Banner / Hero** control. Shared placements use internal `@site` authority rather than requiring duplicate edits on every page.
+6. Added section filtering for Banner/Hero, Main Content, Gallery/Showcase, Backgrounds, Header/Nav and Footer so owners can focus on the presentation area being changed.
+7. Hardened page inspection to ignore dynamic catalog/product/inventory mounts such as gallery/shop grids; only the static presentation shell is registered for Media Studio editing.
+8. Updated the public manifest to merge shared `@site` assignments with the current page, applying page-specific overrides after shared defaults.
+9. Removed the Product media type and `products/` R2 sync prefix from this Studio while leaving Product Editor and Inventory Operations unchanged.
+10. Added responsive Build 257 directory/site-area CSS, cache-busted Media Studio/public runtime assets to `v=257`, and added a catalog filesystem audit.
+11. Build 257 is **code-only**. The current D1 migration boundary remains Build 256; no Build 257 migration should be applied.
+12. Build 257 focused regression passes 37/37; Build 256 Media/Packaging regression remains 52/52 after the scope refinement.
+
+### Highest-value next work after Build 257
+
+- Deploy Build 257 and verify the curated page directory plus Header/Footer/Background shared assignments on one reversible test page.
+- Continue the Media Studio specialist specification with reusable managed galleries (general, process, technique, evidence, materials, packaging, workshop/event) while continuing to exclude Product Editor and Inventory Operations data.
+- Add a visual page/section preview or thumbnail chooser after the static slot model is proven live, so selecting “About → Maker Story” is even more visual.
+- Add media replacement version history/rollback and richer audit/history UI.
+- Integrate the managed Artwork filter directly into Packaging Studio pickers without exposing product/inventory media there.
 
 ## Build 256 completed work — Amazon source drafts, aligned soap labels, Media & Content Studio
 
@@ -23,7 +47,7 @@ This is the **second canonical current project file**. `AI_HANDOFF.md` owns arch
 14. Installed the public Media Studio runtime on 56 existing non-admin HTML entry points and added direct Dashboard/Packaging Studio navigation to the new Studio.
 15. Preserved the supplied Media & Content Management Studio specification under `docs/media-content/` as the implementation authority; future gallery/version/rollback maturity remains tracked there.
 
-### Highest-value next work after Build 256
+### Historical next-work list recorded at Build 256
 
 - Live-deploy Build 256 and verify the D1 migration, Amazon preview behavior and Media Studio page inspection against production Cloudflare Pages/R2.
 - Register a small representative page set first (Home, About/Story, Shop/collections, FAQ/support and one landing page), deliberately assign one reversible image/text override, then verify removal returns to authored content.
