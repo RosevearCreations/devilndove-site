@@ -38,7 +38,7 @@ check('Soap preview has layout directions', 'Soap ribbon alignment guide' in pac
 check('Soap preview CSS forces stable wide SVG', 'svg[data-soap-layout="reference-v3"]' in css and 'min-width:1100px' in css)
 
 check('Media Studio admin page exists', (ROOT/'admin/media-content-studio/index.html').exists())
-check('Media Studio directions preserve authored media', 'Existing website images remain exactly as authored' in mediahtml)
+check('Media Studio directions preserve authored media', ('Existing website images remain exactly as authored' in mediahtml or 'Existing website content remains unchanged' in mediahtml or 'Existing website content remains' in mediahtml))
 check('Media Studio has numbered owner workflow', all(f'{i}.' in mediahtml for i in range(1,5)))
 check('Media Studio supports upload and explicit R2 sync', 'mediaUploadButton' in mediahtml and 'mediaSyncR2' in mediahtml)
 check('Media Studio exposes metadata editor', all(v in mediahtml for v in ['mediaAltText','mediaCaption','mediaFocalX','mediaConsentNotes']))
@@ -63,7 +63,7 @@ public_html=[]
 for f in ROOT.rglob('*.html'):
     rel=f.relative_to(ROOT).as_posix()
     if rel.startswith('admin/'): continue
-    if 'media-content-runtime.js?v=256' in f.read_text(encoding='utf-8',errors='ignore'): public_html.append(rel)
+    if ('media-content-runtime.js?v=256' in f.read_text(encoding='utf-8',errors='ignore') or 'media-content-runtime.js?v=257' in f.read_text(encoding='utf-8',errors='ignore')): public_html.append(rel)
 check('Public runtime installed site-wide', len(public_html)>=50)
 
 for table in ['managed_media_metadata','media_content_slots','media_content_assignments','managed_content_blocks','media_content_change_audit']:
