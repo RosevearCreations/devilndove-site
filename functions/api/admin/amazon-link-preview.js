@@ -1,4 +1,4 @@
-// Build 218 — review-first Amazon link metadata preview for inventory creation.
+// Build 256 — review-first Amazon link preview for inventory and Packaging Studio source-material templates.
 import { auditAdminAction, getAdminUserFromRequest, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
 function json(data, status = 200) {
@@ -27,6 +27,26 @@ function pickMeta(html, names = []) {
     }
   }
   return '';
+}
+
+async function readBoundedText(response, maxBytes = 2500000) {
+  const length = Number(response?.headers?.get?.('content-length') || 0);
+  if (Number.isFinite(length) && length > maxBytes) throw new Error('Amazon page is too large to preview safely. Use manual entry for this item.');
+  if (!response?.body?.getReader) return String(await response.text()).slice(0, maxBytes);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let total = 0; let text = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value?.byteLength || 0;
+      if (total > maxBytes) { try { await reader.cancel(); } catch {} throw new Error('Amazon page is too large to preview safely. Use manual entry for this item.'); }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+    return text;
+  } finally { try { reader.releaseLock(); } catch {} }
 }
 
 function extractAsin(url) {
@@ -86,6 +106,107 @@ function inferCategory(title = '', description = '') {
   return rules.find(([, pattern]) => pattern.test(haystack))?.[0] || '';
 }
 
+
+function flattenVisibleText(html = '') {
+  return decodeHtml(String(html || '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(?:p|div|li|tr|h[1-6]|section|table)>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*\n+/g, '\n'))
+    .slice(0, 180000);
+}
+
+function labeledBlock(text = '', labels = [], stopLabels = []) {
+  const source = String(text || '');
+  for (const label of labels) {
+    const escaped = String(label).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = source.match(new RegExp(`(?:^|\\n|\\b)${escaped}\\s*:?\\s*([\\s\\S]{1,2200})`, 'i'));
+    if (!match?.[1]) continue;
+    let block = match[1];
+    const stops = stopLabels.length ? stopLabels : ['Directions', 'Description', 'About this item', 'Product information', 'Technical details', 'Safety information', 'Important information', 'Legal Disclaimer', 'Manufacturer'];
+    let stopAt = block.length;
+    for (const stop of stops) {
+      const escapedStop = String(stop).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const stopMatch = block.match(new RegExp(`(?:\\n|\\b)${escapedStop}\\s*:?`, 'i'));
+      if (stopMatch?.index != null && stopMatch.index > 4) stopAt = Math.min(stopAt, stopMatch.index);
+    }
+    block = block.slice(0, stopAt).replace(/\s*\n\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    if (block.length >= 3) return block.slice(0, 1400);
+  }
+  return '';
+}
+
+function inferPackagingMaterial(title = '', description = '') {
+  const haystack = `${title} ${description}`.toLowerCase();
+  if (/\bsoap\b.*\bbase\b|\bmelt\s*(?:&|and)?\s*pour\b|\bglycerin(?:e)?\s+soap\s+base\b/.test(haystack)) {
+    return { product_family: 'soap', material_subtype: 'soap_base', intended_use: 'rinse_off', colour_hex: '#C9B18A' };
+  }
+  if (/\bessential\s+oil\b/.test(haystack)) {
+    return { product_family: 'soap', material_subtype: 'essential_oil_blend', intended_use: 'both', colour_hex: '#D9C87A' };
+  }
+  if (/\bfragrance\s+oil\b|\bfragrance\b.*\boil\b/.test(haystack)) {
+    return { product_family: 'general', material_subtype: 'fragrance_oil', intended_use: 'both', colour_hex: '#CFA9C8' };
+  }
+  if (/\bmica\b|\bpigment\b/.test(haystack)) {
+    return { product_family: 'general', material_subtype: 'mica', intended_use: 'not_applicable', colour_hex: '#A57BCB' };
+  }
+  if (/\bsoap\s+dye\b|\bcandle\s+dye\b|\bcolourant\b|\bcolorant\b|\bliquid\s+color\b|\bliquid\s+colour\b/.test(haystack)) {
+    return { product_family: 'general', material_subtype: 'colourant', intended_use: 'not_applicable', colour_hex: '#A57BCB' };
+  }
+  if (/\bcandle\b.*\bwax\b|\bsoy\s+wax\b|\bparaffin\b|\bbeeswax\b|\bcoconut\s+wax\b/.test(haystack)) {
+    return { product_family: 'candle', material_subtype: 'candle_wax', intended_use: 'not_applicable', colour_hex: '#F0E7CF' };
+  }
+  if (/\bshea\s+butter\b|\bcocoa\s+butter\b|\bcarrier\s+oil\b|\bjojoba\b/.test(haystack)) {
+    return { product_family: 'bath_body', material_subtype: 'carrier_oil_butter', intended_use: 'both', colour_hex: '#D7BE8A' };
+  }
+  return { product_family: 'general', material_subtype: 'other', intended_use: 'not_applicable', colour_hex: '#C9B18A' };
+}
+
+
+function inferColourHex(value = '', fallback = '#C9B18A') {
+  const haystack = String(value || '').toLowerCase();
+  const colours = [
+    ['charcoal', '#4A4A4A'], ['black', '#222222'], ['white', '#F6F3EA'], ['cream', '#E7D9B8'], ['beige', '#C9B18A'],
+    ['lavender', '#A57BCB'], ['purple', '#8E61AA'], ['pink', '#D986A5'], ['red', '#B23A48'], ['coral', '#D96C5F'],
+    ['orange', '#D9822B'], ['yellow', '#D8B33C'], ['gold', '#C28A2E'], ['silver', '#A9ADB5'], ['copper', '#B87333'], ['bronze', '#8C6B3E'],
+    ['blue green', '#4F9599'], ['blue-green', '#4F9599'], ['teal', '#4F9599'], ['blue', '#4F79A7'], ['green', '#6D8757'], ['brown', '#755744']
+  ];
+  return colours.find(([name]) => haystack.includes(name))?.[1] || fallback;
+}
+
+function amazonFeatureBullets(html = '') {
+  const block = String(html || '').match(/<div[^>]+id=["']feature-bullets["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] || '';
+  const values = [];
+  for (const match of block.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)) {
+    const value = decodeHtml(match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')).trim();
+    if (value && !/make sure this fits/i.test(value) && !values.includes(value)) values.push(value.slice(0, 1200));
+    if (values.length >= 12) break;
+  }
+  return values;
+}
+
+function ingredientDraftRows(raw = '') {
+  const source = normalizeText(raw);
+  if (!source || source.length > 1400) return [];
+  const normalized = source.replace(/\s*[•·]\s*/g, ',').replace(/\s*;\s*/g, ',');
+  const pieces = normalized.split(',').map((part) => normalizeText(part.replace(/^ingredients?\s*:?\s*/i, ''))).filter(Boolean);
+  if (pieces.length < 2 || pieces.length > 60) return [];
+  return pieces.slice(0, 60).map((name, index) => ({
+    sort_order: index + 1,
+    inci_name: name.slice(0, 300),
+    display_name_en: name.slice(0, 300),
+    display_name_fr: '',
+    organic_flag: 0,
+    allergen_note: 'Imported from Amazon page text; verify against the supplier/manufacturer INCI or SDS before label approval.',
+    required_on_label: 1,
+    verification_status: 'needs_review'
+  }));
+}
+
 export async function onRequestPost(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return json({ ok: false, error: 'Admin access required.' }, 401);
@@ -115,25 +236,56 @@ export async function onRequestPost(context) {
 
   const asin = extractAsin(resolved) || extractAsin(supplied);
   const canonicalUrl = asin ? `https://www.amazon.ca/dp/${asin}` : resolved.toString();
-  const html = await response.text().catch(() => '');
+  let html = '';
+  try { html = await readBoundedText(response); } catch (error) { return json({ ok: false, error: error.message || 'Amazon response could not be read safely.', asin, canonical_url: canonicalUrl }, 502); }
   if (!response.ok || !html) {
     return json({ ok: false, error: `Amazon returned ${response.status || 'an empty response'}. The link remains usable for manual entry.`, asin, canonical_url: canonicalUrl }, 502);
   }
 
   const product = findJsonLdProducts(html)[0] || {};
   const title = normalizeText(product.name || pickMeta(html, ['og:title', 'twitter:title']) || textFromHtml(html, 'productTitle')).replace(/\s*:\s*Amazon\.ca.*$/i, '').slice(0, 300);
-  const description = normalizeText(product.description || pickMeta(html, ['og:description', 'description']) || textFromHtml(html, 'feature-bullets')).slice(0, 1200);
+  const description = normalizeText(product.description || pickMeta(html, ['og:description', 'description']) || textFromHtml(html, 'feature-bullets')).slice(0, 2400);
   const imageValue = product.image || pickMeta(html, ['og:image', 'twitter:image']);
   const imageUrl = Array.isArray(imageValue) ? imageValue[0] : normalizeText(imageValue);
   const brand = normalizeText(typeof product.brand === 'object' ? product.brand?.name : product.brand).slice(0, 120);
   const sku = normalizeText(product.sku || product.mpn || asin).slice(0, 120);
   const category = normalizeText(product.category || inferCategory(title, description)).toLowerCase().slice(0, 120);
 
+  const visibleText = flattenVisibleText(html);
+  const ingredientDeclaration = labeledBlock(visibleText, ['Ingredients', 'Ingredient list', 'INCI', 'Ingredients List']);
+  const allergenStatement = labeledBlock(visibleText, ['Allergens', 'Allergen information', 'Allergen Information'], ['Ingredients', 'Directions', 'Description', 'About this item', 'Product information']);
+  const packagingHint = inferPackagingMaterial(title, `${description} ${visibleText.slice(0, 12000)}`);
+  packagingHint.colour_hex = inferColourHex(`${title} ${description}`, packagingHint.colour_hex);
+  const featureBullets = amazonFeatureBullets(html);
+  const packagingSourceDraft = {
+    material_name: title || (asin ? `Amazon material ${asin}` : 'Amazon source material'),
+    supplier_product_name: title,
+    supplier_name: brand ? `Amazon.ca / ${brand}` : 'Amazon.ca',
+    supplier_sku: sku,
+    source_url: canonicalUrl,
+    source_image_url: imageUrl,
+    supplier_document_url: '',
+    product_family: packagingHint.product_family,
+    material_subtype: packagingHint.material_subtype,
+    intended_use: packagingHint.intended_use,
+    colour_hex: packagingHint.colour_hex,
+    ingredient_declaration_raw: ingredientDeclaration,
+    master_inci: ingredientDraftRows(ingredientDeclaration),
+    allergen_statement: allergenStatement,
+    benefits: featureBullets.map((body, index) => ({ sort_order: index + 1, title: `Amazon product detail ${index + 1}`, body, label_candidate: 0 })),
+    supplier_claims: [],
+    usage_notes: description,
+    compliance_notes: 'Amazon-assisted draft only. Verify the exact purchased product, supplier/manufacturer documentation, INCI, allergens, intended use and concentration before using this record for a finished label.',
+    verification_status: 'needs_review',
+    fragrance_allergen_review_status: ['fragrance_oil','essential_oil_blend'].includes(packagingHint.material_subtype) ? 'needs_supplier_data' : 'not_applicable'
+  };
+
   const warnings = [];
   if (!asin) warnings.push('ASIN could not be identified from this URL.');
   if (!title) warnings.push('Amazon did not expose a product title to the preview request.');
   if (!imageUrl) warnings.push('Amazon did not expose a usable product image.');
-  warnings.push('Review all imported fields, purchase price, quantity, and tool/consumable classification before saving.');
+  if (!ingredientDeclaration) warnings.push('No reliable ingredient section was exposed by the Amazon page. Paste the supplier/manufacturer ingredient or INCI list manually before saving the source template.');
+  warnings.push('Amazon data is a review-first convenience only. Verify the exact purchased item and supplier/manufacturer documentation before saving or printing.');
 
   const draft = {
     source_type: normalizeText(body.source_type).toLowerCase() === 'tool' ? 'tool' : 'supply',
@@ -161,5 +313,5 @@ export async function onRequestPost(context) {
     details: { canonical_url: canonicalUrl, fields_found: Object.entries(draft).filter(([, value]) => Boolean(value)).map(([key]) => key), warnings }
   }).catch(() => null);
 
-  return json({ ok: true, draft, asin, canonical_url: canonicalUrl, warnings, source: 'amazon_page_metadata_review_required' });
+  return json({ ok: true, draft, packaging_source_draft: packagingSourceDraft, asin, canonical_url: canonicalUrl, warnings, source: 'amazon_page_metadata_review_required' });
 }
