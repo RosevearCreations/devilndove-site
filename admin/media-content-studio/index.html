@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Media & Content Management Studio — Devil n Dove Admin</title>
   <meta name="robots" content="noindex,nofollow"/>
-  <link rel="stylesheet" href="/css/styles.css?v=256"/>
+  <link rel="stylesheet" href="/css/styles.css?v=257"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
 </head>
 <body data-admin-page="media-content-studio">
@@ -17,52 +17,71 @@
 
     <section class="hero media-studio-hero">
       <div>
-        <p class="eyebrow">Build 256 • Public media, page images, artwork and owner-editable text</p>
+        <p class="eyebrow">Build 257 • Static website presentation only</p>
         <h1>Media & Content Management Studio</h1>
-        <p>Manage public images and selected page text without changing HTML. Existing website images remain exactly as authored until we explicitly assign a replacement to one exact placement.</p>
-        <div class="media-studio-hero-actions"><a class="btn" href="/admin/catalog-media/">Open product media tools</a><a class="btn" href="/admin/packaging-studio/">Open Packaging Studio</a></div>
+        <p>Edit the website's static images, banners, backgrounds and owner-editable text. Product photos, finished products, inventory, supplies and tools are intentionally excluded because those records already have their own specialist editors.</p>
+        <div class="media-studio-hero-actions"><a class="btn" href="/admin/packaging-studio/">Open Packaging Studio</a><a class="btn" href="/admin/content-studio/">Open Content Studio</a></div>
       </div>
-      <div class="card media-studio-safety"><strong>Safe by design</strong><p class="small">Inspecting a page, syncing R2, editing alt text, or uploading a similarly named file does <b>not</b> change the live website. Only <b>Assign selected image</b> or <b>Publish text</b> changes a registered public placement.</p></div>
+      <div class="card media-studio-safety"><strong>Clear ownership</strong><p class="small">This Studio is for the public site's presentation layer. It will not search or edit product records, inventory items, supplies, tools, or their attached media. Existing website content remains unchanged until we explicitly assign an image or publish text.</p></div>
     </section>
 
     <section class="card media-page-inspector">
-      <div class="section-heading-row"><div><h2>1. Choose a public page</h2><p class="small">Enter a public path such as <code>/</code>, <code>/about/</code>, <code>/shop/</code> or a landing page. Inspect discovers image/background/text locations; Register makes those locations editable but does not publish changes.</p></div><button class="btn" id="mediaRefreshStudio" type="button">Refresh Studio</button></div>
-      <div class="media-page-path-row"><label><span class="small">Public page path</span><input class="input" id="mediaPagePath" value="/" placeholder="/about/"/></label><button class="btn primary" id="mediaInspectPage" type="button">Inspect page</button><button class="btn" id="mediaRegisterSlots" type="button" disabled>Register inspected slots</button><button class="btn" id="mediaOpenPublicPage" type="button">Open public page</button></div>
-      <div class="media-page-chips" id="mediaKnownPages" aria-label="Already registered pages"></div>
-      <div class="small" id="mediaInspectorStatus">Choose a page and click Inspect page. Nothing is changed on the public page during inspection.</div>
-      <details class="media-inspection-details"><summary>Show inspected locations before registering</summary><div id="mediaInspectionPreview" class="media-inspection-preview"><p class="small">No page inspected yet.</p></div></details>
+      <div class="section-heading-row"><div><h2>1. Choose the website area to edit</h2><p class="small">No URL typing is required. Choose a known static page or a shared site area, then scan it for editable images, backgrounds and text. Dynamic product/inventory content is ignored during scanning.</p></div><button class="btn" id="mediaRefreshStudio" type="button">Refresh Studio</button></div>
+
+      <div class="media-sitewide-area-grid" aria-label="Common website areas">
+        <button class="media-area-card" type="button" data-sitewide-area="header"><strong>Header & Navigation</strong><span>Logo, brand text and shared navigation presentation</span></button>
+        <button class="media-area-card" type="button" data-page-path="/" data-section="banner"><strong>Home Banner / Hero</strong><span>Main homepage hero image and hero text</span></button>
+        <button class="media-area-card" type="button" data-sitewide-area="background"><strong>Site Backgrounds</strong><span>Shared presentation backgrounds and textures</span></button>
+        <button class="media-area-card" type="button" data-sitewide-area="footer"><strong>Footer</strong><span>Shared footer presentation and footer text</span></button>
+      </div>
+
+      <div class="media-page-directory-row">
+        <label><span class="small">Static page</span><select class="input" id="mediaPageSelect"><option value="/">Loading page directory…</option></select></label>
+        <label><span class="small">Show locations from</span><select class="input" id="mediaSectionFilter"><option value="all">All static areas</option><option value="banner">Banner / Hero</option><option value="content">Main content</option><option value="gallery">Gallery / Showcase</option><option value="background">Backgrounds</option><option value="header">Header / Navigation</option><option value="footer">Footer</option></select></label>
+        <button class="btn primary" id="mediaInspectPage" type="button">Scan selected area</button>
+        <button class="btn" id="mediaRegisterSlots" type="button" disabled>Make scanned locations editable</button>
+        <button class="btn" id="mediaOpenPublicPage" type="button">Open public page</button>
+      </div>
+      <input id="mediaPagePath" type="hidden" value="/"/>
+      <input id="mediaInspectPath" type="hidden" value="/"/>
+
+      <div class="media-common-pages" id="mediaCommonPages" aria-label="Common static pages"></div>
+      <div class="media-directory-summary" id="mediaDirectorySummary"></div>
+      <div class="small" id="mediaInspectorStatus">Choose a static page or shared area above. Nothing changes on the public website during scanning.</div>
+      <details class="media-inspection-details"><summary>Review scanned static locations before making them editable</summary><div id="mediaInspectionPreview" class="media-inspection-preview"><p class="small">No area scanned yet.</p></div></details>
     </section>
 
     <div id="mediaStudioMessage" class="card small" hidden></div>
 
     <div class="media-studio-workspace">
       <section class="card media-library-panel">
-        <div class="section-heading-row"><div><h2>2. Media Library</h2><p class="small">Select an image to edit metadata and assign it to a page location.</p></div><button class="btn" id="mediaReloadLibrary" type="button">Reload</button></div>
+        <div class="section-heading-row"><div><h2>2. Static Site Media Library</h2><p class="small">Only public site-presentation media is shown here. Product photos, product-linked assets, inventory, supplies and tools are filtered out on the server.</p></div><button class="btn" id="mediaReloadLibrary" type="button">Reload</button></div>
         <div class="media-library-filters">
-          <input class="input" id="mediaSearch" type="search" placeholder="Search file, product, alt text or tags"/>
-          <select class="input" id="mediaTypeFilter"><option value="">All media types</option><option>photo</option><option>product</option><option>artwork</option><option>logo</option><option>background</option><option>banner</option><option>packaging</option><option>icon</option><option>proof</option><option>process</option><option>technique</option><option>evidence</option><option>materials</option><option>review</option><option>blog</option><option>other</option></select>
+          <input class="input" id="mediaSearch" type="search" placeholder="Search static image, artwork, alt text or tags"/>
+          <select class="input" id="mediaTypeFilter"><option value="">All site media types</option><option>photo</option><option>artwork</option><option>logo</option><option>background</option><option>banner</option><option>packaging</option><option>icon</option><option>proof</option><option>process</option><option>technique</option><option>evidence</option><option>materials</option><option>review</option><option>blog</option><option>other</option></select>
           <select class="input" id="mediaAssignmentFilter"><option value="">All assignment states</option><option value="assigned">Assigned</option><option value="unassigned">Unassigned</option></select>
         </div>
-        <div class="media-upload-box"><strong>Upload a new public image</strong><p class="small">Upload only public-approved media. Uploading does not assign it anywhere.</p><div class="media-upload-row"><input class="input" id="mediaUploadFile" type="file" accept="image/*"/><select class="input" id="mediaUploadScope"><option value="general">General public</option><option value="brand">Brand</option><option value="creation">Creative approved</option><option value="social">Social</option></select><button class="btn" id="mediaUploadButton" type="button">Upload to library</button></div></div>
-        <div id="mediaLibraryGrid" class="media-library-grid"><p class="small">Loading media…</p></div>
-        <div class="media-r2-sync-box"><details><summary><strong>R2 library maintenance</strong> — explicit sync only</summary><p class="small">Use this only when files were placed into public R2 outside the website. Sync registers a bounded page of objects; it never changes assignments or authored metadata.</p><div class="media-upload-row"><select class="input" id="mediaR2Prefix"><option value="">Approved public root</option><option value="products/">products/</option><option value="brand/">brand/</option><option value="uploads/">uploads/</option><option value="packaging/">packaging/</option><option value="artwork/">artwork/</option><option value="backgrounds/">backgrounds/</option><option value="banners/">banners/</option><option value="galleries/">galleries/</option><option value="blog/">blog/</option></select><button class="btn" id="mediaSyncR2" type="button">Sync one R2 page</button></div><div class="small" id="mediaR2Status"></div></details></div>
+        <div class="media-library-boundary"><strong>Not shown here:</strong> finished-product pictures, product/catalog media, inventory items, supplies, tools and tool photos. Use their existing admin screens for those records.</div>
+        <div class="media-upload-box"><strong>Upload a new public site image</strong><p class="small">Use this for a banner, background, static page photo, artwork, proof image or similar site presentation asset. Uploading does not assign it anywhere.</p><div class="media-upload-row"><input class="input" id="mediaUploadFile" type="file" accept="image/*"/><select class="input" id="mediaUploadScope"><option value="general">General public</option><option value="brand">Brand</option><option value="creation">Approved showcase/process</option><option value="social">Social</option></select><button class="btn" id="mediaUploadButton" type="button">Upload to site library</button></div></div>
+        <div id="mediaLibraryGrid" class="media-library-grid"><p class="small">Loading static site media…</p></div>
+        <div class="media-r2-sync-box"><details><summary><strong>R2 site-media maintenance</strong> — explicit sync only</summary><p class="small">Only public presentation prefixes are available here. Product, inventory, supply and tool prefixes are intentionally unavailable.</p><div class="media-upload-row"><select class="input" id="mediaR2Prefix"><option value="" selected disabled>Choose site-media folder…</option><option value="brand/">brand/</option><option value="uploads/">uploads/</option><option value="creations/">creations/</option><option value="packaging/">packaging/</option><option value="artwork/">artwork/</option><option value="backgrounds/">backgrounds/</option><option value="banners/">banners/</option><option value="galleries/">galleries/</option><option value="blog/">blog/</option></select><button class="btn" id="mediaSyncR2" type="button">Sync one R2 page</button></div><div class="small" id="mediaR2Status"></div></details></div>
       </section>
 
       <aside class="card media-editor-panel">
-        <div class="section-heading-row"><div><h2>3. Selected media</h2><p class="small">Metadata belongs to the media itself. Placement is controlled separately below.</p></div><span class="media-selected-id" id="mediaSelectedId">No selection</span></div>
-        <div id="mediaSelectedEmpty" class="media-selected-empty">Click a thumbnail in the Media Library.</div>
+        <div class="section-heading-row"><div><h2>3. Selected site media</h2><p class="small">Edit the selected static site's image metadata, then assign it to one exact website location.</p></div><span class="media-selected-id" id="mediaSelectedId">No selection</span></div>
+        <div id="mediaSelectedEmpty" class="media-selected-empty">Click a static-site thumbnail in the Media Library.</div>
         <div id="mediaSelectedEditor" hidden>
           <div class="media-selected-preview"><img id="mediaSelectedPreview" alt="Selected media preview"/></div>
           <div class="media-selected-meta small" id="mediaSelectedTechnical"></div>
-          <div class="media-replace-box"><strong>Replace this image file but keep every placement</strong><p class="small">Use this when we have a better version of the same photo/artwork. The R2 key, metadata and page assignments stay attached. For safety, password confirmation is required and the replacement must use the same file format.</p><div class="media-upload-row"><input class="input" id="mediaReplaceFile" type="file" accept="image/*"/><span class="small">Same JPG/PNG/WebP/SVG format</span><button class="btn" id="mediaReplaceButton" type="button">Replace file, keep placements</button></div></div>
+          <div class="media-replace-box"><strong>Replace this site image file but keep every placement</strong><p class="small">Use this when we have a better version of the same banner/photo/artwork. The R2 key, metadata and site assignments stay attached.</p><div class="media-upload-row"><input class="input" id="mediaReplaceFile" type="file" accept="image/*"/><span class="small">Same JPG/PNG/WebP/SVG format</span><button class="btn" id="mediaReplaceButton" type="button">Replace file, keep placements</button></div></div>
           <div class="media-form-grid">
             <label><span class="small">Display name</span><input class="input" id="mediaDisplayName"/></label>
-            <label><span class="small">Media type</span><select class="input" id="mediaEditorType"><option>photo</option><option>product</option><option>artwork</option><option>logo</option><option>background</option><option>banner</option><option>packaging</option><option>icon</option><option>proof</option><option>process</option><option>technique</option><option>evidence</option><option>materials</option><option>review</option><option>blog</option><option>other</option></select></label>
+            <label><span class="small">Media type</span><select class="input" id="mediaEditorType"><option>photo</option><option>artwork</option><option>logo</option><option>background</option><option>banner</option><option>packaging</option><option>icon</option><option>proof</option><option>process</option><option>technique</option><option>evidence</option><option>materials</option><option>review</option><option>blog</option><option>other</option></select></label>
             <label class="media-span-2"><span class="small">Alt text</span><input class="input" id="mediaAltText" placeholder="Describe what is visibly shown and why it matters here"/></label>
             <label><span class="small">Image title</span><input class="input" id="mediaImageTitle"/></label><label><span class="small">Tags (comma separated)</span><input class="input" id="mediaTags"/></label>
             <label class="media-span-2"><span class="small">Caption</span><textarea class="input" id="mediaCaption" rows="2"></textarea></label>
             <label class="media-span-2"><span class="small">Description / internal context</span><textarea class="input" id="mediaDescription" rows="3"></textarea></label>
-            <label><span class="small">Search keywords</span><input class="input" id="mediaSearchKeywords"/></label><label><span class="small">Source type</span><input class="input" id="mediaSourceType" placeholder="uploaded / product / project / packaging"/></label>
+            <label><span class="small">Search keywords</span><input class="input" id="mediaSearchKeywords"/></label><label><span class="small">Source type</span><input class="input" id="mediaSourceType" placeholder="uploaded / brand / artwork / approved project"/></label>
             <label><span class="small">Focal point X (0–1)</span><input class="input" id="mediaFocalX" type="number" min="0" max="1" step="0.01" value="0.5"/></label><label><span class="small">Focal point Y (0–1)</span><input class="input" id="mediaFocalY" type="number" min="0" max="1" step="0.01" value="0.5"/></label>
             <label class="media-span-2 media-check"><input id="mediaDecorative" type="checkbox"/> Decorative image (public alt text will be empty)</label>
             <label><span class="small">Attribution / creator</span><input class="input" id="mediaAttribution"/></label><label><span class="small">Captured/created date</span><input class="input" id="mediaCapturedAt" type="date"/></label>
@@ -71,20 +90,20 @@
           <div class="media-editor-actions"><button class="btn primary" id="mediaSaveMetadata" type="button">Save media metadata</button><button class="btn" id="mediaArchive" type="button">Archive if unassigned</button><button class="btn danger" id="mediaDelete" type="button">Delete if safe</button></div>
           <hr/>
           <h3>Where should this image be used?</h3>
-          <p class="small">Choose one registered image/background slot on the selected public page. Occupied slots show ✓ and the current image name. Replacing one occupied slot changes only that placement.</p>
-          <select class="input" id="mediaAssignmentTarget"><option value="">Choose a page image slot…</option></select>
+          <p class="small">Choose one registered static image/background slot on the selected page or shared site area. Occupied slots show ✓ and the current image name.</p>
+          <select class="input" id="mediaAssignmentTarget"><option value="">Choose a static site image slot…</option></select>
           <button class="btn primary media-full-button" id="mediaAssignSelected" type="button">Assign selected image to this exact placement</button>
-          <h3>Existing uses</h3><div id="mediaExistingUses" class="media-existing-uses"><p class="small">No active assignments.</p></div>
+          <h3>Existing uses</h3><div id="mediaExistingUses" class="media-existing-uses"><p class="small">No active site assignments.</p></div>
         </div>
       </aside>
     </div>
 
     <section class="card media-page-slots-panel">
-      <div class="section-heading-row"><div><h2>4. Page Images & Editable Text</h2><p class="small">Registered locations for the current page. Image slots can be assigned from the selected library item. Text changes are saved as drafts until we explicitly publish them.</p></div><span class="small" id="mediaCurrentPageLabel">Page: /</span></div>
-      <div id="mediaPageSlots" class="media-page-slots"><p class="small">Inspect/register a page to begin.</p></div>
+      <div class="section-heading-row"><div><h2>4. Static Images & Editable Text</h2><p class="small">Only static presentation locations are shown. Dynamic product, inventory, tool and supply content is deliberately ignored. Text stays draft-only until Publish is pressed.</p></div><span class="small" id="mediaCurrentPageLabel">Page: Home</span></div>
+      <div id="mediaPageSlots" class="media-page-slots"><p class="small">Choose a page or shared area above to begin.</p></div>
     </section>
 
-    <section class="card media-studio-next-sections"><h2>Studio views</h2><p class="small">This first integrated Studio uses one media library with filtered views instead of separate databases.</p><div class="media-view-chips"><button class="btn mediaPresetFilter" data-type="product">Products</button><button class="btn mediaPresetFilter" data-type="artwork">Artwork</button><button class="btn mediaPresetFilter" data-type="packaging">Packaging / Labels</button><button class="btn mediaPresetFilter" data-type="background">Backgrounds</button><button class="btn mediaPresetFilter" data-type="banner">Banners</button><button class="btn mediaPresetFilter" data-type="proof">Reviews / Proof</button><button class="btn mediaPresetFilter" data-type="process">Process</button><button class="btn mediaPresetFilter" data-type="technique">Technique</button><button class="btn mediaPresetFilter" data-type="evidence">Evidence</button><button class="btn mediaPresetFilter" data-type="">All media</button></div></section>
+    <section class="card media-studio-next-sections"><h2>Quick media views</h2><p class="small">These are presentation/media categories only—never inventory or product records.</p><div class="media-view-chips"><button class="btn mediaPresetFilter" data-type="artwork">Artwork</button><button class="btn mediaPresetFilter" data-type="packaging">Packaging / Labels</button><button class="btn mediaPresetFilter" data-type="background">Backgrounds</button><button class="btn mediaPresetFilter" data-type="banner">Banners</button><button class="btn mediaPresetFilter" data-type="proof">Reviews / Proof</button><button class="btn mediaPresetFilter" data-type="process">Process</button><button class="btn mediaPresetFilter" data-type="technique">Technique</button><button class="btn mediaPresetFilter" data-type="evidence">Evidence</button><button class="btn mediaPresetFilter" data-type="">All static site media</button></div></section>
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
@@ -92,6 +111,6 @@
   <script src="/public/js/auth.js"></script><script src="/public/js/admin-route-usage.js"></script>
   <script src="/public/js/site-auth-ui.js?v=245"></script><script src="/public/js/site-analytics.js"></script>
   <script src="/public/js/admin-self-protect.js?v=245"></script><script src="/public/js/admin.js?v=245"></script>
-  <script src="/public/js/admin-media-content-studio.js?v=256"></script>
+  <script src="/public/js/admin-media-content-studio.js?v=257"></script>
 </body>
 </html>
