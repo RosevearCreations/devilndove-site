@@ -1,8 +1,8 @@
-# Build 255 current handoff
+# Build 256 current handoff
 
-The current code release is Build 255. The current D1 migration is `database_build255_packaging_material_library_hub.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after Build 254. Build 255 makes the Packaging Studio Material Library visible without opening a packaging project, fixes stale Packaging Studio CSS/JavaScript cache versions, gives each purchased source its own independent Master INCI editor, adds product-family/source-category metadata for soap bases, candle waxes, fragrance/essential-oil blends, colourants/micas/dyes and additives, and preserves structured ingredients/claims for every packaging type through general packaging project tables. Build 254 remains the Startup Readiness/Post-Deploy Smoke runtime foundation. See `BUILD255_CHANGED_FILES.md` and `BUILD255_VALIDATION.md` for current release evidence; prior release notes are historical.
+The current code release is Build 256. The current D1 migration is `database_build256_media_content_studio.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after Build 255. Build 256 adds Amazon-assisted Purchased/Source Material drafts in Packaging Studio, locks the soap ribbon preview to a five-zone `soap_reference_v3` layout, and introduces `/admin/media-content-studio/` as the production-safe public media/page-content authority. The Studio uses explicit D1 page slots and assignments; inspection, upload, metadata changes and R2 synchronization never reassign authored public media automatically. Public pages read a compact per-path D1 manifest and preserve authored HTML whenever no explicit assignment or published text override exists. See `BUILD256_CHANGED_FILES.md`, `BUILD256_VALIDATION.md`, and `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md`.
 
-# Devil n Dove AI Handoff — Build 255
+# Devil n Dove AI Handoff — Build 256
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
 
@@ -30,6 +30,9 @@ Build 246 repairs the live Product Editor lifecycle and extends D1-backed produc
 | Private Creative Project originals | CAIP D1 metadata + private `CAIP_PRIVATE_MEDIA_BUCKET` |
 | Packaging/label project state | Labeling & Packaging D1 authorities + `PACKAGING_STUDIO.md` |
 | Purchased/source material authority | D1 `packaging_source_material_templates` + `packaging_source_material_metadata` + project/formula links; supplier evidence remains distinct from finished-product facts |
+| Public managed media metadata | D1 `media_assets` + `managed_media_metadata` |
+| Explicit page image/background placements | D1 `media_content_slots` + active `media_content_assignments` |
+| Owner-published static page text overrides | D1 `managed_content_blocks`; authored HTML remains fallback |
 | French label generation evidence | `packaging_translation_reviews`; machine/curated output remains a draft until human review |
 | Content packages | Content Studio |
 | Publication approval/provider reconciliation | Release Board / Social Queue / provider records |
@@ -48,6 +51,12 @@ Mutable business state belongs in D1 whenever a live table exists. JSON and Mark
 5. Posted finished-product production history is a deletion blocker. Archive or reverse/detach according to the business workflow rather than silently discarding production evidence.
 
 
+
+## Build 256 Media & Content Studio / Packaging rule
+
+`/admin/media-content-studio/` is the owner-facing authority for public media metadata, explicit page placements and selected editable page text. D1 tables `managed_media_metadata`, `media_content_slots`, `media_content_assignments`, `managed_content_blocks` and `media_content_change_audit` are the mutable authority. A normal public page must never enumerate R2. The browser requests `/api/public-media-content-manifest?path=...`, which reads only bounded D1 rows. R2 listing is allowed only through the explicit bounded admin Sync action and must preserve assignments and authored metadata. Existing authored/catalog media always remains in place unless an administrator explicitly assigns a managed media item to one exact registered slot. Safe delete performs a server-side active-assignment recheck.
+
+Packaging Studio Build 256 adds a review-first **Create draft from Amazon link** action for soap bases, waxes, essential/fragrance oils, colourants and micas. Amazon-derived data is a convenience draft, never an approval authority: supplier/manufacturer INCI/SDS/allergen evidence must be reviewed before the source template is marked verified. Soap ribbon rendering uses `soap_reference_v3`, with fixed English ingredient, front oval/artwork, French ingredient, rear seal and claims/net-weight zones; ingredient/claim text is clipped inside its own zone. Packaging Studio and Media Studio load `v=256` assets.
 
 ## Build 255 Packaging Material Library rule
 
