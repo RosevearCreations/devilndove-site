@@ -1,4 +1,4 @@
-// Devil n Dove Build 257 — static-site Media & Content Management Studio.
+// Devil n Dove Build 258 — static-site Media & Content Management Studio.
 // Product, inventory, supplies and tools are intentionally excluded from this workspace.
 (()=>{
   'use strict';
@@ -66,7 +66,7 @@
 
   async function loadCatalog(){
     try{
-      const response=await fetch('/public/data/media-content-page-catalog.json?v=257',{cache:'no-store'});
+      const response=await fetch('/public/data/media-content-page-catalog.json?v=258',{cache:'no-store'});
       if(!response.ok)throw new Error('Page directory unavailable.');
       state.catalog=await response.json();
     }catch{
@@ -246,12 +246,23 @@
   async function inspectPage(){
     const path=inspectPathValue();
     if(blockedPath(path)){msg('That page is not a static Media Studio target. Product, tools, supplies, account and transactional pages use their own editors.','error');return;}
-    id('mediaInspectorStatus').textContent='Scanning static page presentation without changing it…'; let frame=null;
+    id('mediaInspectorStatus').textContent='Building a secure read-only scan of the selected static page…'; let frame=null;
     try{
+      const response=await fetch(path,{credentials:'same-origin',cache:'no-store',headers:{Accept:'text/html'}});
+      if(!response.ok)throw new Error(`The public page returned HTTP ${response.status}.`);
+      const raw=await response.text();
+      if(!raw||raw.length>2_000_000)throw new Error('The public page could not be scanned safely because its HTML was empty or unexpectedly large.');
+      const parsed=new DOMParser().parseFromString(raw,'text/html');
+      if(!parsed?.documentElement)throw new Error('The public page HTML could not be parsed.');
+      parsed.querySelectorAll('script,iframe,frame,object,embed,form,noscript').forEach(node=>node.remove());
+      parsed.querySelectorAll('meta[http-equiv]').forEach(node=>{if(String(node.getAttribute('http-equiv')||'').toLowerCase()==='content-security-policy')node.remove();});
+      let base=parsed.querySelector('base');
+      if(!base){base=parsed.createElement('base');parsed.head?.prepend(base);}
+      if(base)base.setAttribute('href',new URL(path,location.origin).href);
       frame=document.createElement('iframe');frame.setAttribute('aria-hidden','true');frame.setAttribute('sandbox','allow-same-origin');frame.style.cssText='position:fixed;left:-12000px;top:0;width:1440px;height:1000px;opacity:0;pointer-events:none;';document.body.appendChild(frame);
-      const loaded=new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(new Error('Page scan timed out.')),12000);frame.onload=()=>{clearTimeout(timeout);resolve();};frame.onerror=()=>{clearTimeout(timeout);reject(new Error('The public page could not be loaded for scanning.'));};});
-      frame.src=path; await loaded; await new Promise(resolve=>setTimeout(resolve,250));
-      const doc=frame.contentDocument;if(!doc)throw new Error('The public page could not be read.');const win=frame.contentWindow,found=[];
+      const loaded=new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(new Error('Read-only page scan timed out.')),12000);frame.onload=()=>{clearTimeout(timeout);resolve();};frame.onerror=()=>{clearTimeout(timeout);reject(new Error('The read-only page copy could not be prepared.'));};});
+      frame.srcdoc='<!doctype html>'+parsed.documentElement.outerHTML; await loaded; await new Promise(resolve=>setTimeout(resolve,250));
+      const doc=frame.contentDocument;if(!doc)throw new Error('The read-only page copy could not be read.');const win=frame.contentWindow,found=[];
 
       let imageIndex=0;
       for(const el of Array.from(doc.querySelectorAll('img[src]')).slice(0,220)){
