@@ -1,4 +1,23 @@
-# Devil n Dove Project Status and Roadmap — Build 258
+# Devil n Dove Project Status and Roadmap — Build 259
+
+## Build 259 completed work — explicit visual website slots
+
+1. Replaced Media Studio page scanning/registration with a deployment-seeded static site slot catalog.
+2. Instrumented 29 known public/static areas with stable image, background and text slot selectors; current count is 454 active canonical slots including shared site positions.
+3. Preserved existing authored images as defaults. Collections, Creations and Art/Gallery explicitly default to their existing imagery.
+4. Added branded SVG placeholders only where a visual position had no appropriate existing image.
+5. Added admin-only `Edit image` / `Replace placeholder` / `Edit text` deep links on managed public content.
+6. Rebuilt `/admin/media-content-studio/` as a website map + direct slot editor; removed Scan selected area and Make scanned locations editable workflow.
+7. Added inline image picker/upload-and-use workflow, Use original/default, text draft/publish/unpublish, metadata, replacement, archive and safe-delete controls.
+8. Removed Media Studio public runtime from excluded shop/product, inventory, supplies, tools, account, checkout and admin routes.
+9. Hardened Media Studio API filtering for product/catalog/finished-product/inventory/supply/tool media and associated R2 key patterns/roles.
+10. Added Build 259 D1 migration to deactivate older scan-derived slots for canonical pages and seed the explicit slot definitions without deleting historical assignments/audit records.
+
+### Highest-value next work after Build 259
+
+- Deploy Build 259, apply the migration, then verify Home, About, Collections, Creations and Art/Gallery one slot at a time.
+- Continue the original Media Studio specification with reusable managed galleries (Process, Technique, Evidence, Materials, Packaging, Workshop/Event), version history/rollback and media-health scoring without reintroducing product/inventory records into this Studio.
+- Gradually replace intentional SVG placeholders with real workshop/site photography through Media Studio rather than source edits.
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
@@ -266,4 +285,3 @@ Only `AI_HANDOFF.md` and this file are cross-project current authorities. Compat
 3. Product Resources keeps the server-provided name/resource object when a live search result is unavailable.
 4. Inventory Operations now has separate **Start New Item** and **Clear / Reset Fields** controls; the latter also clears catalog-search and Amazon-import helper inputs.
 5. Shared affected bundles are cache-busted to `v=253`. No D1 migration is required; Build 250 remains the database migration boundary.
-
