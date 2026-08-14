@@ -1,5 +1,23 @@
-# Devil n Dove Project Status and Roadmap — Build 260
+# Devil n Dove Project Status and Roadmap — Build 261
 
+## Build 261 completed work — Packaging components, claims, inventory-source reuse and label fit
+
+1. Replaced the wide Packaging Components table with responsive component cards; the first field is a type-to-search Inventory selector.
+2. Selecting an inventory item reuses its name, SKU/reference, supplier, stock status and unit cost while preserving the packaging quantity/waste fields as project-specific data.
+3. Reworked Material Library to use Inventory first. Existing linked source templates open directly; otherwise saved inventory/source metadata pre-fills a source template. Amazon is collapsed into an explicit fallback only for missing evidence.
+4. Going forward, an Amazon-reviewed inventory source material preserves the `packaging_source_draft` returned during Inventory entry into the existing Packaging Source Material tables and links it back to that inventory item. This prevents repeated Amazon retrieval for the same purchased material.
+5. Moved the reusable bilingual Claims database into the Claims tab with visible leaf/hands/recycle/heart icons, Add-to-label actions, and a simple custom-claim editor.
+6. Rebuilt current label claim rows as responsive cards rather than a wide row table.
+7. Tightened the soap ribbon SVG to `soap_reference_v3`: bounded ingredient clips, wrapped family/title text, smaller identity/subtitle text, four compressed bilingual claims, and a protected net-quantity strip above the decorative bottom rule.
+8. Cache-bumped Packaging Studio and the shared Inventory editor to Build 261.
+9. Build 261 is code-only. The current D1 migration remains Build 259.
+
+### Highest-value next work after Build 261
+
+- Deploy and test Components & Cost with a real packaging supply already in Inventory, then reload the packaging project to confirm the BOM values persist.
+- Open one existing soap-base inventory item in Material Library. If it already has a linked source template, confirm it opens without Amazon; otherwise use the saved inventory facts and add/verify supplier INCI evidence once.
+- Print the corrected soap ribbon at Actual Size / 100% and record the print-test result, especially long ingredient lists and the claims/net-weight panel.
+- Continue Media Studio production verification from Build 260 independently; no Media Studio behavior changed in Build 261.
 
 ## Build 260 completed work — Media Studio 503/runtime hardening
 
