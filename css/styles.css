@@ -3177,3 +3177,28 @@ body[data-admin-page="creative-assets"] .caip-placeholder{color:#f8fafc}
 @media(max-width:980px){.media-slot-studio-layout{grid-template-columns:1fr}.media-site-map-panel{position:static;max-height:none}.media-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-slot-upload-card{grid-template-columns:1fr 1fr}.media-metadata-layout{grid-template-columns:1fr}.media-picker-controls{grid-template-columns:1fr 1fr}.media-visual-slot-card{grid-template-columns:180px minmax(0,1fr)}}
 @media(max-width:640px){.media-page-editor-head,.media-slot-card-head{display:grid}.media-visual-slot-card{grid-template-columns:1fr}.media-slot-thumb img{max-height:260px}.media-library-grid{grid-template-columns:1fr 1fr}.media-slot-upload-card,.media-picker-controls{grid-template-columns:1fr}.media-library-card-actions .btn{width:100%}.media-managed-hero-visual{min-width:0;max-width:none}.media-inline-admin-edit{font-size:.68rem}}
 .media-inline-highlight{outline:3px solid rgba(231,201,120,.9)!important;outline-offset:5px;box-shadow:0 0 0 10px rgba(184,138,47,.12)!important}
+
+/* Build 261 — Packaging components, reusable claims and inventory-first material workflow */
+.packaging-component-list,.packaging-claim-editor-list{display:grid;gap:12px;margin-top:12px}
+.packaging-component-card,.packaging-claim-editor-row{min-width:0;padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03);overflow:hidden}
+.packaging-component-card-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;margin-bottom:12px}
+.packaging-component-card-top>div{min-width:0}.packaging-component-card-top strong,.packaging-component-card-top .small{overflow-wrap:anywhere}
+.packaging-component-card .row-order,.packaging-claim-editor-row .row-order{display:grid;place-items:center;min-width:34px;height:34px;border-radius:999px;background:rgba(184,138,47,.16);border:1px solid rgba(184,138,47,.38);font-weight:800}
+.packaging-component-card-grid{display:grid;grid-template-columns:minmax(250px,1.5fr) repeat(3,minmax(140px,1fr));gap:10px;align-items:end}
+.packaging-component-inventory{grid-column:span 2}.packaging-component-notes{grid-column:span 2}
+.packaging-component-card label,.packaging-claim-editor-grid label{min-width:0;display:grid;gap:6px}
+.packaging-component-card .input,.packaging-claim-editor-row .input{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.packaging-claim-editor-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:10px;align-items:start}
+.packaging-claim-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(184,138,47,.35);background:rgba(184,138,47,.08)}
+.packaging-claim-icon svg{width:24px;height:24px;display:block}
+.packaging-claim-editor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-width:0}
+.packaging-claim-note{grid-column:span 2}
+.packaging-claim-library-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}
+.packaging-claim-library-card>div{min-width:0}.packaging-claim-library-card p{overflow-wrap:anywhere}
+.packaging-inventory-material-import,.packaging-amazon-material-import{display:grid;gap:10px;padding:14px;border:1px solid rgba(184,138,47,.45);border-radius:14px;background:linear-gradient(135deg,rgba(184,138,47,.10),rgba(255,255,255,.02));margin-bottom:14px}
+.packaging-inventory-material-import{border-color:rgba(91,171,115,.48);background:linear-gradient(135deg,rgba(91,171,115,.11),rgba(255,255,255,.02))}
+details.packaging-amazon-material-import>summary{cursor:pointer;font-weight:800;line-height:1.4}
+details.packaging-amazon-material-import[open]>summary{margin-bottom:10px}
+.packaging-svg-preview svg[data-soap-layout="reference-v3"]{min-width:1080px;width:1080px;max-width:none}
+@media(max-width:980px){.packaging-component-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.packaging-component-inventory,.packaging-component-notes{grid-column:1/-1}.packaging-claim-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.packaging-claim-note{grid-column:1/-1}}
+@media(max-width:640px){.packaging-component-card-top{grid-template-columns:auto minmax(0,1fr)}.packaging-component-card-top .btn{grid-column:1/-1;width:100%}.packaging-component-card-grid{grid-template-columns:1fr}.packaging-component-inventory,.packaging-component-notes{grid-column:auto}.packaging-claim-editor-row{grid-template-columns:auto minmax(0,1fr)}.packaging-claim-editor-row>.btn{grid-column:1/-1;width:100%}.packaging-claim-editor-grid{grid-column:1/-1;grid-template-columns:1fr}.packaging-claim-note{grid-column:auto}.packaging-claim-library-card{grid-template-columns:auto minmax(0,1fr)}.packaging-claim-library-card .btn{grid-column:1/-1;width:100%}}
