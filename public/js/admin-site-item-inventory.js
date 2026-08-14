@@ -1,6 +1,6 @@
 // File: /public/js/admin-site-item-inventory.js
 // Brief description: Admin editor for tools and supplies inventory, reorder queues,
-// do-not-reuse flags, supplier details, item images, movement history, and bulk cost updates.
+// do-not-reuse flags, supplier/source details, packaging-source capture, movement history, and bulk cost updates.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('siteInventoryAdminMount');
@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let seedSearchText = '';
   let editingSiteInventoryId = 0;
   let selectedCatalogItemId = 0;
+  let lastAmazonPackagingSourceDraft = null;
   let inventoryTableEditMode = true;
   let initialLoadStarted = false;
   let seedLoadPromise = null;
@@ -96,9 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
     el.classList.toggle('is-success', Boolean(message && !isError));
   }
 
-  function applyAmazonDraft(draft = {}, warnings = []) {
+  function applyAmazonDraft(draft = {}, warnings = [], packagingSourceDraft = null) {
     if (!draft || typeof draft !== 'object') return;
     resetInventoryForm();
+    lastAmazonPackagingSourceDraft = packagingSourceDraft && typeof packagingSourceDraft === 'object' ? packagingSourceDraft : null;
     setInputValue('siteInventorySourceType', draft.source_type || 'supply');
     setInputValue('siteInventoryExternalKey', draft.external_key || '');
     setInputValue('siteInventoryItemName', draft.item_name || '');
@@ -117,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryUsageUnitsPerStock', Math.max(0.001, Number(draft.usage_units_per_stock_unit || 1)));
     setInputValue('siteInventoryUsageTrackingMode', draft.usage_tracking_mode || (String(draft.source_type || 'supply').toLowerCase() === 'tool' ? 'reusable' : 'exact'));
     setInputValue('siteInventoryMinimumUsageIncrement', Math.max(0.0001, Number(draft.minimum_usage_increment || 0.001) || 0.001));
+    const sourceMaterialEl = document.getElementById('siteInventorySourceMaterialRecommended');
+    if (sourceMaterialEl && lastAmazonPackagingSourceDraft && String(lastAmazonPackagingSourceDraft.material_subtype || 'other') !== 'other') sourceMaterialEl.checked = true;
     setInputValue('siteInventoryNotes', draft.reorder_notes || '');
     setInputValue('siteInventoryMovementNote', 'Created from reviewed Amazon link metadata.');
     updateSiteInventoryImagePreview();
@@ -141,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ amazon_url: amazonUrl, source_type: sourceType })
       });
       const data = await readApiPayload(response, 'Amazon metadata could not be loaded.');
-      applyAmazonDraft(data.draft || {}, data.warnings || []);
+      applyAmazonDraft(data.draft || {}, data.warnings || [], data.packaging_source_draft || null);
     } catch (error) {
       setAmazonLinkPreviewStatus(`${error.message || 'Amazon metadata could not be loaded.'} You may still paste the link into the manual form.`, true);
     } finally {
@@ -546,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form?.reset();
     editingSiteInventoryId = 0;
     selectedCatalogItemId = 0;
+    lastAmazonPackagingSourceDraft = null;
     const seedEl = document.getElementById('siteInventorySeedItem'); if (seedEl) seedEl.value = '';
     const categoryPresetEl = document.getElementById('siteInventoryCategoryPreset'); if (categoryPresetEl) categoryPresetEl.value = '';
     const onHandEl = document.getElementById('siteInventoryOnHand'); if (onHandEl) onHandEl.value = '1';
@@ -829,6 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
       lot_tracking_recommended: document.getElementById('siteInventoryLotRecommended')?.checked ? 1 : 0,
       expiry_tracking_recommended: document.getElementById('siteInventoryExpiryRecommended')?.checked ? 1 : 0,
       source_material_recommended: document.getElementById('siteInventorySourceMaterialRecommended')?.checked ? 1 : 0,
+      packaging_source_draft: lastAmazonPackagingSourceDraft,
       catalog_item_id: selectedCatalogItemId || undefined,
       supplier_name: document.getElementById('siteInventorySupplierName')?.value || '',
       supplier_sku: document.getElementById('siteInventorySupplierSku')?.value || '',
@@ -946,6 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function populateFormFromItem(item = {}) {
+    lastAmazonPackagingSourceDraft = null;
     selectedCatalogItemId = Number(item.catalog_item_id || 0) || 0;
     const mapping = {
       siteInventorySourceType: item.source_type || 'other',
