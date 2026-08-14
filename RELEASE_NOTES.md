@@ -1,3 +1,13 @@
+# Build 260 — Media Studio bounded bootstrap and library loading
+
+- Fixed the Media Studio GET path that could return HTTP 503 while opening Home by removing the all-in-one slots + 180-media + usage bootstrap.
+- Added explicit `mode=page`, `mode=media`, and `mode=uses` GET paths.
+- Site media now loads only when an image picker is opened, 48 records at a time with keyset pagination.
+- Removed per-row assignment-count correlation from the media-list query; exact uses load only for the selected image.
+- Kept Product/Inventory/Supply/Tool exclusions unchanged.
+- Handled Media Studio errors now return structured 500 JSON instead of ambiguous application-generated 503 responses.
+- Code-only release; D1 migration remains Build 259.
+
 # Build 254 — Startup Readiness and Post-Deploy Smoke runtime hardening
 
 - Replaced the CPU-heavy full-guide Startup API response with compact D1 status/history payloads and patch/batch synchronization.
