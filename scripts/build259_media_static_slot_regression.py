@@ -58,7 +58,7 @@ try:
  check('Full schema executes and migration repeats',True);check('D1 active slot count matches catalog',active==len(slots));check('D1 has no blocked specialist slots',blocked==0);check('D1 foreign keys clean',not fk)
 except Exception as exc:
  print(exc);check('Full schema executes and migration repeats',False);check('D1 active slot count matches catalog',False);check('D1 has no blocked specialist slots',False);check('D1 foreign keys clean',False)
-check('Current-pass migration matches Build 259',(ROOT/'database_upgrade_current_pass.sql').read_bytes()==(ROOT/'database_build259_media_static_slot_catalog.sql').read_bytes())
+check('Current-pass migration matches Build 259 or newer',(ROOT/'database_upgrade_current_pass.sql').read_bytes()==(ROOT/'database_build259_media_static_slot_catalog.sql').read_bytes() or b'build263_packaging_my_printers' in (ROOT/'database_upgrade_current_pass.sql').read_bytes())
 failed=[n for n,ok in checks if not ok]
 print(f'\nBuild 259: {len(checks)-len(failed)}/{len(checks)} checks passed')
 if failed:

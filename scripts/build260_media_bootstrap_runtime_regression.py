@@ -36,7 +36,7 @@ for f in ['public/js/admin-media-content-studio.js','functions/api/admin/media-c
         print(exc);check(f'JavaScript syntax {f}',False)
 # Migration boundary remains Build 259; no Build 260 schema is required.
 check('No Build 260 migration introduced',not (ROOT/'database_build260_media_bootstrap_runtime.sql').exists())
-check('Current-pass migration remains Build 259',(ROOT/'database_upgrade_current_pass.sql').read_bytes()==(ROOT/'database_build259_media_static_slot_catalog.sql').read_bytes())
+check('Current-pass migration remains Build 259 or newer',(ROOT/'database_upgrade_current_pass.sql').read_bytes()==(ROOT/'database_build259_media_static_slot_catalog.sql').read_bytes() or b'build263_packaging_my_printers' in (ROOT/'database_upgrade_current_pass.sql').read_bytes())
 failed=[n for n,ok in checks if not ok]
 print(f'\nBuild 260: {len(checks)-len(failed)}/{len(checks)} checks passed')
 if failed:

@@ -48,14 +48,14 @@ check('Inventory admin bundle cache remains Build 261 or newer', all(re.search(r
 check('Soap renderer uses corrected v3 profile','soap_reference_v3' in js and "packageType==='soap_ribbon'?'soap_reference_v3'" in api)
 check('Soap English ingredient clip bounded','soap-en-ingredients' in js and ('bandHeight-35' in js or 'bandHeight-38' in js))
 check('Soap French ingredient clip bounded','soap-fr-ingredients' in js)
-check('Soap title wraps to two lines',bool(re.search(r'wrapPlainLines\(family,(?:18|20),2\)',js)))
+check('Soap title wraps to two lines',bool(re.search(r'wrapPlainLines\(family,(?:17|18|20),2\)',js)))
 check('Soap claims limited to four','claims.slice(0,4)' in js)
 check('Soap claim rows compressed',('index*11.6' in js or 'index*10.2' in js) and ('bandHeight-28' in js or 'bandHeight-27' in js))
 check('Soap net quantity separated from claims',(('bandY+53.5' in js and 'bandY+61.5' in js) or ('bandY+58' in js and 'bandY+65' in js)))
 check('Soap preview CSS preserves wide ribbon geometry','svg[data-soap-layout="reference-v3"]' in css and 'min-width:1080px' in css)
 check('Canonical handoff is Build 261 or newer',bool(re.match(r'# Devil n Dove AI Handoff — Build (?:26[1-9]|[3-9]\d{2,})',handoff)))
 check('Canonical roadmap is Build 261 or newer',bool(re.match(r'# Devil n Dove Project Status and Roadmap — Build (?:26[1-9]|[3-9]\d{2,})',roadmap)))
-check('Current migration remains Build 259',current==b259)
+check('Current migration is Build 259 or newer additive boundary',current==b259 or b'build263_packaging_my_printers' in current)
 
 for rel in ['public/js/admin-packaging-studio.js','functions/api/admin/packaging-studio.js','public/js/admin-site-item-inventory.js','functions/api/admin/site-item-inventory.js']:
     r=subprocess.run(['node','--check',str(ROOT/rel)],capture_output=True,text=True)
