@@ -1,0 +1,44 @@
+{
+  "version": 257,
+  "description": "Curated public/static pages for Media & Content Management Studio. Operational, account, product, inventory, tools and supplies screens are intentionally excluded.",
+  "groups": [
+    {"key":"core","label":"Core website","pages":[
+      {"path":"/","label":"Home","description":"Homepage hero, introductory sections, static cards and page imagery"},
+      {"path":"/about/","label":"About","description":"Maker story, workshop story, static images and text"},
+      {"path":"/gallery/","label":"Gallery","description":"Gallery page shell, headings, proof imagery and static presentation"},
+      {"path":"/creations/","label":"Showcase / Creations","description":"Showcase page shell and static presentation around the live creations feed"},
+      {"path":"/workshop-journal/","label":"Workshop / Workroom Journal","description":"Workshop stories, care guides and maker-journal presentation"},
+      {"path":"/collections/","label":"Collections","description":"Static collection-page presentation and supporting content"},
+      {"path":"/contact/","label":"Contact","description":"Contact-page static text and imagery"},
+      {"path":"/gift-cards/","label":"Gift Cards","description":"Gift-card page presentation and static supporting content"},
+      {"path":"/events/","label":"Events & Markets","description":"Event-page static content and imagery"},
+      {"path":"/socials/","label":"Social Hub","description":"Public social-hub presentation"}
+    ]},
+    {"key":"landing","label":"Landing pages","pages":[
+      {"path":"/custom-candle-making-ontario/","label":"Custom Candle Making","description":"Candle-making landing page"},
+      {"path":"/custom-soap-making-ontario/","label":"Custom Soap Making","description":"Soap-making landing page"},
+      {"path":"/custom-gifts-southern-ontario/","label":"Custom Gifts","description":"Custom-gift landing page"},
+      {"path":"/handmade-jewelry-ontario/","label":"Handmade Jewelry","description":"Handmade-jewelry landing page"},
+      {"path":"/laser-engraving-ontario/","label":"Laser Engraving","description":"Laser-engraving landing page"},
+      {"path":"/polymer-clay-earrings-ontario/","label":"Polymer Clay Earrings","description":"Polymer-clay landing page"},
+      {"path":"/vintage-finds-ontario/","label":"Vintage Finds","description":"Vintage/collectible landing page"},
+      {"path":"/workshop-made-gifts-ontario/","label":"Workshop-Made Gifts","description":"Workshop-made gift landing page"}
+    ]},
+    {"key":"stories","label":"Stories & guides","pages":[
+      {"path":"/workshop-journal/story/","label":"Workshop Journal Story","description":"Long-form workshop story"},
+      {"path":"/workshop-journal/coin-and-spoon-ring-care/","label":"Coin & Spoon Ring Care","description":"Care-guide page"},
+      {"path":"/workshop-journal/polymer-clay-earring-care/","label":"Polymer Clay Earring Care","description":"Care-guide page"},
+      {"path":"/workshop-journal/handmade-vintage-sourced-guide/","label":"Handmade / Vintage / Sourced Guide","description":"Customer guidance page"},
+      {"path":"/marketplaces/","label":"Marketplace Guide","description":"Sales-channel explanation page"},
+      {"path":"/pickup/","label":"Local Pickup","description":"Pickup information page"},
+      {"path":"/movies/","label":"Movie Shelf","description":"Public movie-collection presentation"}
+    ]},
+    {"key":"policy","label":"Policies & disclosures","pages":[
+      {"path":"/privacy/","label":"Privacy Policy","description":"Public privacy-policy page"},
+      {"path":"/terms/","label":"Terms of Use & Sale","description":"Public terms page"},
+      {"path":"/data-deletion/","label":"Data Deletion","description":"Public data-deletion instructions"},
+      {"path":"/social-connections/","label":"Social Connection Disclosure","description":"Public social-platform disclosure"}
+    ]}
+  ],
+  "excluded_prefixes": ["/admin/","/shop/","/tools/","/toolshed/","/supplies/","/cart/","/checkout/","/login/","/register/","/members/","/search/","/account-help/","/bootstrap-admin/","/custom-request/order/","/custom-request/pay/","/custom-request/quote/","/custom-request/consent/"]
+}
