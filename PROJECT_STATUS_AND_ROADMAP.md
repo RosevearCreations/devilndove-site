@@ -1,4 +1,24 @@
-# Devil n Dove Project Status and Roadmap — Build 259
+# Devil n Dove Project Status and Roadmap — Build 260
+
+
+## Build 260 completed work — Media Studio 503/runtime hardening
+
+1. Split the authenticated Media Studio GET into three bounded modes: page slots, media-library pages and selected-media uses.
+2. Opening or changing Home/About/etc. now loads only that page's explicit slots; it no longer retrieves the media library or media-use data at startup.
+3. The site-media library loads only after **Choose image** and is limited to 48 records per request, with keyset **Load more** pagination.
+4. Removed the per-media correlated assignment-count query from library search. Usage locations are requested only when **Details / uses** is opened for one selected image.
+5. Removed the Build 259 `limit=180` bootstrap and the parallel multi-query `Promise.all` request path.
+6. Kept the server-side exclusion of Product/finished-product, inventory, supply and tool media unchanged.
+7. Cache-bumped only the Media Studio admin bundle/catalog request to `v=260`. The public slot runtime remains Build 259 because its behavior did not change.
+8. Handled Media Studio query/update exceptions now return structured HTTP 500 JSON with explicit error codes instead of being mislabeled as 503, making a true Cloudflare platform 503 distinguishable.
+9. Build 260 is code-only; the D1 migration boundary remains Build 259.
+
+### Highest-value next work after Build 260
+
+- Deploy Build 260 and confirm `/api/admin/media-content-studio?mode=page&path=/` returns normally before opening the image picker.
+- Then open one Home image slot and confirm `mode=media&limit=48` loads the library; use **Load more** only if required.
+- If a platform-generated 503 remains on the small `mode=page` request, capture the exact Cloudflare Ray ID/function log because the former heavy bootstrap will no longer be in that request path.
+- Continue the original Media Studio specification with reusable managed galleries, version history/rollback and media-health scoring after the production endpoint is stable.
 
 ## Build 259 completed work — explicit visual website slots
 
