@@ -1,7 +1,7 @@
-// Build 255 - Packaging Material Library hub, source-template metadata, independent Master INCI editing, and retained label controls.
+// Build 261 - Inventory-first Packaging Studio source reuse, reusable claims, component metadata and corrected soap-label profile.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '255';
+const BUILD = '261';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -50,6 +50,21 @@ function mapReference(row){return{...row,packaging_reference_source_id:id(row.pa
 function mapFormula(row){return{...row,packaging_formula_library_id:id(row.packaging_formula_library_id),ingredients:safeJson(row.ingredients_json,[])};}
 function mapLibraryContent(row){return{...row,packaging_content_library_id:id(row.packaging_content_library_id),metadata:safeJson(row.metadata_json,{})};}
 function mapSourceMaterial(row){return{...row,packaging_source_material_template_id:id(row.packaging_source_material_template_id),product_family:text(row.product_family||'general',80)||'general',material_subtype:text(row.material_subtype||row.material_type||'other',80)||'other',default_role:text(row.default_role||'',40)||null,colour_hex:text(row.colour_hex||'',20)||null,master_inci:safeJson(row.master_inci_json,[]),fragrance_allergens:safeJson(row.fragrance_allergens_json,[]),benefits:safeJson(row.benefits_json,[]),supplier_claims:safeJson(row.supplier_claims_json,[]),source_snapshot:safeJson(row.source_snapshot_json,{})};}
+
+function metadataText(meta, keys=[]){
+  if(!meta||typeof meta!=='object')return'';
+  for(const key of keys){const value=meta[key];if(Array.isArray(value))return value.map((item)=>typeof item==='string'?item:(item?.name||item?.title||'')).filter(Boolean).join(', ');if(value&&typeof value==='object')continue;if(String(value||'').trim())return text(value,8000);}
+  return'';
+}
+function mapPackagingInventory(row={}){
+  const meta=safeJson(row.catalog_source_record_json,{});
+  return{
+    site_item_inventory_id:id(row.site_item_inventory_id),source_type:text(row.source_type,40),external_key:text(row.external_key,180),item_name:text(row.item_name,300),category:text(row.category,180),
+    source_url:text(row.source_url,1000),amazon_url:text(row.amazon_url,1000),image_url:text(row.image_url,1000),on_hand_quantity:number(row.on_hand_quantity),reserved_quantity:number(row.reserved_quantity),unit_cost_cents:Math.max(0,Math.round(number(row.unit_cost_cents))),stock_unit_label:text(row.stock_unit_label,80)||'unit',usage_unit_label:text(row.usage_unit_label,80)||'unit',usage_units_per_stock_unit:Math.max(.001,number(row.usage_units_per_stock_unit,1)),supplier_name:text(row.supplier_name||row.catalog_brand,180),supplier_sku:text(row.supplier_sku,180),
+    item_description:text(row.item_description||row.catalog_short_description||row.catalog_notes,1200),packaging_source_material_template_id:id(row.packaging_source_material_template_id)||null,source_material_link_role:text(row.source_material_link_role,40)||null,
+    captured_ingredients:metadataText(meta,['ingredients','ingredient_list','ingredient_declaration','ingredient_declaration_raw','inci','master_inci']),captured_allergens:metadataText(meta,['allergens','allergen_statement','allergen_information']),captured_benefits:metadataText(meta,['benefits','features','key_features']),captured_claims:metadataText(meta,['claims','claim_suggestions'])
+  };
+}
 function normalizeSourceInci(value=[]){
   if(!Array.isArray(value))return[];
   return value.slice(0,120).map((row,index)=>({
@@ -160,7 +175,7 @@ function packagingRequiredFields(project={},ingredients=[],claims=[],template={}
   if(isSoap&&frLines>8)missing.push(`French ingredient panel exceeds the tested eight-line narrow-band capacity (${frLines} estimated lines)`);
   const dimensions=isSoap?dimensionReview(template):{blockers:[],warnings:[isRound?'Confirm the measured lid/blank diameter, safe margin, material settings and a physical proof before approval.':'Confirm the selected template against the physical container/card dieline before approval.'],profile:template.layout?.design_profile||template.layout?.dimension_profile||'general'};
   const designProfile=String(template.layout?.design_profile||safeJson(template.layout_json,{}).design_profile||'');
-  if(isSoap&&designProfile!=='soap_reference_v2')dimensions.blockers.push('Soap ribbon must use the approved soap_reference_v2 design profile before approval.');
+  if(isSoap&&!['soap_reference_v2','soap_reference_v3'].includes(designProfile))dimensions.blockers.push('Soap ribbon must use the approved soap_reference_v3 design profile before approval.');
   return{missing:[...new Set(missing)],dimension_blockers:[...new Set(dimensions.blockers)],dimension_warnings:dimensions.warnings,dimension_profile:dimensions.profile,design_profile:designProfile};
 }
 
@@ -168,7 +183,12 @@ async function listData(db){
   const templates=rows(await db.prepare(`SELECT * FROM packaging_templates WHERE is_active=1 ORDER BY CASE WHEN template_key='soap-ribbon-glacial-approved-v1' THEN 0 WHEN template_key='soap-ribbon-spec-50mm-seal-v1' THEN 1 ELSE 2 END,is_system DESC,LOWER(template_name)`).all()).map(mapTemplate);
   const projects=rows(await db.prepare(`SELECT pp.*,p.sku,p.slug,p.status AS product_status,p.featured_image_url,sp.print_status AS soap_print_status FROM packaging_projects pp LEFT JOIN products p ON p.product_id=pp.product_id LEFT JOIN soap_products sp ON sp.packaging_project_id=pp.packaging_project_id ORDER BY pp.updated_at DESC,pp.packaging_project_id DESC`).all()).map(mapProject);
   const products=rows(await db.prepare(`SELECT product_id,product_number,sku,name,slug,status,product_category,short_description,description,weight_grams,featured_image_url FROM products WHERE COALESCE(status,'draft')<>'archived' ORDER BY LOWER(name),product_id DESC LIMIT 500`).all().catch(()=>({results:[]})));
-  const inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]})));
+  let inventory=[];
+  try{
+    inventory=rows(await db.prepare(`SELECT sii.site_item_inventory_id,sii.source_type,sii.external_key,sii.item_name,sii.category,sii.source_url,sii.amazon_url,sii.image_url,sii.on_hand_quantity,sii.reserved_quantity,sii.unit_cost_cents,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit,sii.supplier_name,sii.supplier_sku,d.item_description,ci.brand AS catalog_brand,ci.short_description AS catalog_short_description,ci.notes AS catalog_notes,ci.source_record_json AS catalog_source_record_json,isml.packaging_source_material_template_id,isml.link_role AS source_material_link_role FROM site_item_inventory sii LEFT JOIN site_inventory_item_descriptions d ON d.site_item_inventory_id=sii.site_item_inventory_id LEFT JOIN catalog_items ci ON ci.item_kind=sii.source_type AND ci.source_key=sii.external_key LEFT JOIN inventory_source_material_links isml ON isml.inventory_source_material_link_id=(SELECT x.inventory_source_material_link_id FROM inventory_source_material_links x WHERE x.site_item_inventory_id=sii.site_item_inventory_id ORDER BY CASE x.link_role WHEN 'soap_base' THEN 1 WHEN 'fragrance' THEN 2 WHEN 'colourant' THEN 3 WHEN 'additive' THEN 4 ELSE 5 END,x.inventory_source_material_link_id LIMIT 1) WHERE COALESCE(sii.is_active,1)=1 AND LOWER(COALESCE(sii.source_type,''))<>'tool' ORDER BY LOWER(sii.item_name) LIMIT 1000`).all()).map(mapPackagingInventory);
+  }catch{
+    inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,source_url,amazon_url,image_url,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND LOWER(COALESCE(source_type,''))<>'tool' ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]}))).map(mapPackagingInventory);
+  }
   const reference_sources=rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key`).all()).map(mapReference);
   let formula_library=[];let content_library=[];let source_material_library=[];let library_schema_ready=true;let source_material_schema_ready=true;let source_material_metadata_ready=true;
   try{
@@ -316,6 +336,14 @@ export async function onRequestPost(context){
       if(savedSourceId){
         try{await a.db.prepare(`INSERT INTO packaging_source_material_metadata (packaging_source_material_template_id,product_family,material_subtype,default_role,colour_hex,created_at,updated_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_source_material_template_id) DO UPDATE SET product_family=excluded.product_family,material_subtype=excluded.material_subtype,default_role=excluded.default_role,colour_hex=excluded.colour_hex,updated_at=CURRENT_TIMESTAMP`).bind(savedSourceId,productFamily,materialSubtype,defaultRole,colourHex).run();}
         catch(error){throw new Error('Build 255 source-material metadata migration is required before saving material categories.');}
+      
+        const inventoryId=id(body.site_item_inventory_id);
+        if(inventoryId){
+          const inventoryRow=await a.db.prepare(`SELECT site_item_inventory_id,item_name FROM site_item_inventory WHERE site_item_inventory_id=? AND COALESCE(is_active,1)=1`).bind(inventoryId).first();
+          if(!inventoryRow)throw new Error('The selected inventory item is no longer available.');
+          const linkRole=materialSubtype==='soap_base'?'soap_base':defaultRole==='fragrance'?'fragrance':defaultRole==='colourant'?'colourant':defaultRole==='additive'?'additive':'source_material';
+          await a.db.prepare(`DELETE FROM inventory_source_material_links WHERE site_item_inventory_id=? AND link_role=? AND packaging_source_material_template_id<>?`).bind(inventoryId,linkRole,savedSourceId).run().catch(()=>null);await a.db.prepare(`INSERT INTO inventory_source_material_links(site_item_inventory_id,packaging_source_material_template_id,link_role,notes,created_by_user_id,created_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id,packaging_source_material_template_id,link_role) DO UPDATE SET notes=excluded.notes`).bind(inventoryId,savedSourceId,linkRole,'Linked from Packaging Studio; reuse inventory source metadata before external re-import.',a.adminUser.user_id).run().catch(()=>null);
+        }
       }
     }else if(action==='delete_source_material_template'){
       const sourceId=id(body.packaging_source_material_template_id);if(!sourceId)throw new Error('Source-material template is required.');
@@ -390,8 +418,8 @@ export async function onRequestPost(context){
       const frontWidth=boundedDimension(body.front_width_mm,width);const frontHeight=boundedDimension(body.front_height_mm,height);
       const rearWidth=Math.max(0,Math.min(1200,number(body.rear_width_mm,0)));const rearHeight=Math.max(0,Math.min(1200,number(body.rear_height_mm,0)));
       const allowedShapes=new Set(['rectangle','round','oval','soap_wrap']);const shape=allowedShapes.has(text(body.shape,30))?text(body.shape,30):(packageType==='candle_top'||packageType==='engraved_round'?'round':'rectangle');
-      const allowedProfiles=new Set(['soap_reference_v2','candle_top_wedding','candle_top_centered','round_maker_mark','general_centered','general_rectangle']);
-      const requestedDesignProfile=allowedProfiles.has(text(body.design_profile,60))?text(body.design_profile,60):(shape==='round'?'candle_top_centered':'general_centered');const designProfile=packageType==='soap_ribbon'?'soap_reference_v2':requestedDesignProfile;
+      const allowedProfiles=new Set(['soap_reference_v2','soap_reference_v3','candle_top_wedding','candle_top_centered','round_maker_mark','general_centered','general_rectangle']);
+      const requestedDesignProfile=allowedProfiles.has(text(body.design_profile,60))?text(body.design_profile,60):(shape==='round'?'candle_top_centered':'general_centered');const designProfile=packageType==='soap_ribbon'?'soap_reference_v3':requestedDesignProfile;
       const existingLayout=body.layout&&typeof body.layout==='object'?body.layout:{};
       const layout={...existingLayout,shape,design_profile:designProfile,bleed_mm:Math.max(0,Math.min(25,number(body.bleed_mm,2))),safe_margin_mm:Math.max(0,Math.min(50,number(body.safe_margin_mm,4)))};
       if(shape==='round')layout.diameter_mm=Math.min(width,height);

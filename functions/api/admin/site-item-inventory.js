@@ -76,6 +76,48 @@ async function saveItemDescription(db, siteItemInventoryId, description, userId 
   `).bind(Number(siteItemInventoryId), clean, Number(userId || 0) || null).run().catch(() => null);
 }
 
+
+function packagingKeyPart(value) {
+  return normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 90) || 'source';
+}
+
+async function persistPackagingSourceDraft(db, siteItemInventoryId, body = {}, userId = null) {
+  const inventoryId = Number(siteItemInventoryId || 0);
+  const draft = body?.packaging_source_draft;
+  if (!inventoryId || Number(body?.source_material_recommended) !== 1 || !draft || typeof draft !== 'object') return null;
+  const materialName = normalizeText(draft.material_name || draft.supplier_product_name || body.item_name).slice(0, 220);
+  if (!materialName) return null;
+
+  // Never overwrite a source record that may already contain owner/supplier-reviewed INCI data.
+  const linked = await db.prepare(`SELECT packaging_source_material_template_id FROM inventory_source_material_links WHERE site_item_inventory_id=? ORDER BY inventory_source_material_link_id LIMIT 1`).bind(inventoryId).first().catch(() => null);
+  if (linked?.packaging_source_material_template_id) return Number(linked.packaging_source_material_template_id);
+
+  const subtype = normalizeText(draft.material_subtype || 'other').toLowerCase() || 'other';
+  const productFamily = normalizeText(draft.product_family || 'general').toLowerCase() || 'general';
+  const coreType = subtype === 'soap_base' ? 'soap_base' : (['fragrance_oil','essential_oil_blend'].includes(subtype) ? 'fragrance_oil' : (['colourant','colourant_dye','mica','mica_pigment'].includes(subtype) ? 'colourant' : 'additive'));
+  const defaultRole = ['soap_base','candle_wax','wax_blend'].includes(subtype) ? 'base' : (['fragrance_oil','essential_oil_blend'].includes(subtype) ? 'fragrance' : (['colourant','colourant_dye','mica','mica_pigment'].includes(subtype) ? 'colourant' : 'additive'));
+  const linkRole = subtype === 'soap_base' ? 'soap_base' : (defaultRole === 'base' ? 'source_material' : defaultRole);
+  const intended = ['rinse_off','leave_on','both','not_applicable'].includes(normalizeText(draft.intended_use).toLowerCase()) ? normalizeText(draft.intended_use).toLowerCase() : 'not_applicable';
+  const fragranceReview = ['not_applicable','needs_supplier_data','needs_review','reviewed'].includes(normalizeText(draft.fragrance_allergen_review_status).toLowerCase()) ? normalizeText(draft.fragrance_allergen_review_status).toLowerCase() : 'not_applicable';
+  const materialKey = `inventory-${inventoryId}-${packagingKeyPart(materialName)}`;
+  const masterInci = Array.isArray(draft.master_inci) ? draft.master_inci.slice(0, 120) : [];
+  const benefits = Array.isArray(draft.benefits) ? draft.benefits.slice(0, 30) : [];
+  const supplierClaims = Array.isArray(draft.supplier_claims) ? draft.supplier_claims.slice(0, 30) : [];
+  const fragranceAllergens = Array.isArray(draft.fragrance_allergens) ? draft.fragrance_allergens.slice(0, 120) : [];
+
+  const inserted = await db.prepare(`INSERT INTO packaging_source_material_templates (
+      material_key,material_name,material_type,supplier_name,supplier_sku,supplier_product_name,source_url,source_image_url,supplier_document_url,source_reference,intended_use,
+      ingredient_declaration_raw,master_inci_json,allergen_statement,fragrance_allergens_json,fragrance_allergen_review_status,benefits_json,supplier_claims_json,usage_notes,compliance_notes,
+      verification_status,is_system,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`)
+    .bind(materialKey,materialName,coreType,normalizeText(draft.supplier_name || body.supplier_name)||null,normalizeText(draft.supplier_sku || body.supplier_sku)||null,normalizeText(draft.supplier_product_name || materialName)||null,normalizeText(draft.source_url || body.source_url || body.amazon_url)||null,normalizeText(draft.source_image_url || body.image_url)||null,normalizeText(draft.supplier_document_url)||null,'Captured during Inventory source review; reuse in Packaging Studio before any external re-import.',intended,normalizeText(draft.ingredient_declaration_raw)||null,JSON.stringify(masterInci),normalizeText(draft.allergen_statement)||null,JSON.stringify(fragranceAllergens),fragranceReview,JSON.stringify(benefits),JSON.stringify(supplierClaims),normalizeText(draft.usage_notes)||null,normalizeText(draft.compliance_notes)||null,'needs_review',Number(userId||0)||null,Number(userId||0)||null).run().catch(() => null);
+  const sourceId = Number(inserted?.meta?.last_row_id || 0);
+  if (!sourceId) return null;
+  await db.prepare(`INSERT INTO packaging_source_material_metadata(packaging_source_material_template_id,product_family,material_subtype,default_role,colour_hex,created_at,updated_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_source_material_template_id) DO UPDATE SET product_family=excluded.product_family,material_subtype=excluded.material_subtype,default_role=excluded.default_role,colour_hex=excluded.colour_hex,updated_at=CURRENT_TIMESTAMP`).bind(sourceId,productFamily,subtype,defaultRole,normalizeText(draft.colour_hex)||null).run().catch(()=>null);
+  await db.prepare(`INSERT INTO inventory_source_material_links(site_item_inventory_id,packaging_source_material_template_id,link_role,notes,created_by_user_id,created_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id,packaging_source_material_template_id,link_role) DO UPDATE SET notes=excluded.notes`).bind(inventoryId,sourceId,linkRole,'Created from source metadata already reviewed during Inventory entry.',Number(userId||0)||null).run().catch(()=>null);
+  return sourceId;
+}
+
 function shape(row = {}) {
   const onHand = Number(row.on_hand_quantity || 0);
   const reserved = Number(row.reserved_quantity || 0);
@@ -867,6 +909,7 @@ async function handlePost(context) {
     if (Object.prototype.hasOwnProperty.call(body, 'item_description')) {
       await saveItemDescription(db, newId, body.item_description, adminUser.user_id);
     }
+    await persistPackagingSourceDraft(db, newId, body, adminUser.user_id).catch(() => null);
     const saved = await db.prepare(`
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
              COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
@@ -1114,6 +1157,7 @@ async function handlePatch(context) {
     if (Object.prototype.hasOwnProperty.call(body, 'item_description')) {
       await saveItemDescription(db, id, merged.item_description, adminUser.user_id);
     }
+    await persistPackagingSourceDraft(db, id, {...body,item_name:merged.item_name,supplier_name:merged.supplier_name,supplier_sku:merged.supplier_sku,source_url:merged.source_url,amazon_url:merged.amazon_url,image_url:merged.image_url}, adminUser.user_id).catch(() => null);
 
     const saved = await db.prepare(`
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
