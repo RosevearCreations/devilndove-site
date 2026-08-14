@@ -19,7 +19,7 @@ roadmap=(ROOT/'PROJECT_STATUS_AND_ROADMAP.md').read_text()
 check('Packaging Studio has one H1', len(re.findall(r'<h1\b',html,re.I))==1)
 check('Packaging Studio cache-busts CSS at Build 255 or newer', bool(re.search(r'/css/styles\.css\?v=(?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})',html)))
 check('Packaging Studio cache-busts JS at Build 255 or newer', bool(re.search(r'/public/js/admin-packaging-studio\.js\?v=(?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})',html)))
-check('API reports Build 255', "const BUILD = '255'" in api)
+check('API reports Build 255 or newer', bool(re.search(r"const BUILD = '(?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})'",api)))
 check('Material Library is available without a selected project', 'You do not need a project to build the Material Library.' in js and 'standalone:true' in js)
 check('Material Library gives explicit product-family choices', all(x in js for x in ['Soap','Candles','Bath & body','Home fragrance','Cosmetic / body','General']))
 check('Material Library gives explicit source categories', all(x in js for x in ['Soap base','Candle wax / wax blend','Fragrance oil / blend','Essential-oil blend','Colourant / dye','Mica / pigment','Carrier oil / butter','Botanical / extract']))
@@ -43,7 +43,7 @@ check('API source library has migration-safe fallback', 'source_material_metadat
 check('Source template save requires metadata migration before mutating old source row', 'Build 255 source-material metadata migration is required before saving Material Library categories.' in api)
 check('Build 255 migration is retained after newer current migrations', 'build255_packaging_material_library_hub' in mig and ('build255_packaging_material_library_hub' in full))
 check('Packaging docs explain where soap/candle/oil/colour data belongs', all(x in docs for x in ['Build 255 — Material Library hub','Soap base','Candle wax','essential-oil','Master INCI']))
-check('Canonical handoff identifies Build 255 or newer', bool(re.match(r'# Build (?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,}) current handoff',handoff)))
+check('Canonical handoff identifies Build 255 or newer', bool(re.match(r'# Devil n Dove AI Handoff — Build (?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})',handoff)))
 check('Canonical roadmap identifies Build 255 or newer', bool(re.match(r'# Devil n Dove Project Status and Roadmap — Build (?:25[5-9]|2[6-9][0-9]|[3-9][0-9]{2,})',roadmap)))
 
 # JS syntax.

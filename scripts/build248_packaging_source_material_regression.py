@@ -85,7 +85,7 @@ check('supplier document column',any(row[1]=='supplier_document_url' for row in 
 con.close()
 
 # Documentation consolidation and authority.
-check('Build 248 handoff retained under current handoff', bool(re.match(r'# Build (?:248|249|25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,}) current handoff',handoff)))
+check('Build 248 handoff retained under current handoff', bool(re.match(r'# Devil n Dove AI Handoff — Build (?:248|249|25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,})',handoff)))
 check('Build 248 roadmap retained under current roadmap', bool(re.match(r'# Devil n Dove Project Status and Roadmap — Build (?:248|249|25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,})',roadmap)))
 check('source-material roadmap','Purchased Source Material' in roadmap and 'Master INCI' in roadmap)
 check('Build 248 index retained under current index', bool(re.match(r'# Devil n Dove Markdown Index — Build (?:248|249|25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,})',index)))
