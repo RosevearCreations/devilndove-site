@@ -7,7 +7,7 @@ const TARGET_ATTRS = new Set(["src","background-image","textContent"]);
 const APPROVED_R2_PREFIXES = ["brand/","creations/","social/","uploads/","public/","packaging/","artwork/","backgrounds/","banners/","galleries/","blog/"];
 const BLOCKED_MEDIA_PREFIXES = ["products/","inventory/","supplies/","tools/","toolshed/"];
 const BLOCKED_PAGE_PREFIXES = ["/admin","/shop","/tools","/toolshed","/supplies","/cart","/checkout","/login","/register","/members","/search","/account-help","/bootstrap-admin","/custom-request","/custom-request/order","/custom-request/pay","/custom-request/quote","/custom-request/consent"];
-const BLOCKED_SOURCE_TYPES = new Set(["product","products","inventory","supply","supplies","tool","tools"]);
+const BLOCKED_SOURCE_TYPES = new Set(["product","products","catalog","finished_product","finished-product","inventory","supply","supplies","tool","tools"]);
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -78,12 +78,19 @@ async function mediaList(db, query = {}) {
     WHERE ma.deleted_at IS NULL
       AND ma.product_id IS NULL
       AND LOWER(COALESCE(mm.media_type,'photo')) <> 'product'
-      AND LOWER(COALESCE(mm.source_type,'')) NOT IN ('product','products','inventory','supply','supplies','tool','tools')
+      AND LOWER(COALESCE(mm.source_type,'')) NOT IN ('product','products','catalog','finished_product','finished-product','inventory','supply','supplies','tool','tools')
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'products/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'inventory/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'supplies/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'tools/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'toolshed/%'
+      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/products/%'
+      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/inventory/%'
+      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/supplies/%'
+      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/tools/%'
+      AND LOWER(COALESCE(ma.variant_role,'')) NOT IN ('featured','product','product_gallery','gallery_product')
+      AND LOWER(COALESCE(ma.annotation_notes,'')) NOT LIKE '%product_editor%'
+      AND LOWER(COALESCE(ma.annotation_notes,'')) NOT LIKE '%inventory%'
       AND (?=1 OR mm.archived_at IS NULL)
       AND (?='' OR LOWER(COALESCE(mm.media_type,'photo'))=?)
       AND (?='' OR LOWER(COALESCE(mm.display_name,ma.original_filename,ma.object_key,'')) LIKE ? OR LOWER(COALESCE(mm.alt_text,'')) LIKE ? OR LOWER(COALESCE(mm.tags_json,'')) LIKE ?)
@@ -135,7 +142,7 @@ export async function onRequestGet(context) {
     ]);
     return json({ok:true,requested_by:adminUser,page_path:path,media,slots,pages:rows(pagesResult),media_uses:rows(usesResult)});
   } catch (error) {
-    return json({ok:false,error:"Media & Content Studio data could not be loaded. Confirm the Build 256 schema is installed and the Build 257 code is deployed.",detail:String(error?.message||error)},503);
+    return json({ok:false,error:"Media & Content Studio data could not be loaded. Confirm the Build 256 base schema and Build 259 static-slot migration are installed.",detail:String(error?.message||error)},503);
   }
 }
 
