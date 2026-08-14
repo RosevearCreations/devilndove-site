@@ -15,9 +15,9 @@ catalog=json.loads(txt(Path('public/data/media-content-page-catalog.json')))
 pages=[p for g in catalog['groups'] for p in g['pages']]
 paths={p['path'] for p in pages}
 
-check('Build 257 Studio assets cache-busted', 'styles.css?v=257' in html and 'admin-media-content-studio.js?v=257' in html)
+check('Build 257 Studio assets cache-busted', ('styles.css?v=257' in html or 'styles.css?v=258' in html) and ('admin-media-content-studio.js?v=257' in html or 'admin-media-content-studio.js?v=258' in html))
 check('Manual public path textbox removed', 'type="hidden" value="/"' in html and 'Public page path' not in html)
-check('Automatic static page selector present', 'id="mediaPageSelect"' in html and 'media-content-page-catalog.json?v=257' in js)
+check('Automatic static page selector present', 'id="mediaPageSelect"' in html and ('media-content-page-catalog.json?v=257' in js or 'media-content-page-catalog.json?v=258' in js))
 check('Core friendly pages listed', all(p in paths for p in ['/','/about/','/gallery/','/creations/','/workshop-journal/']))
 check('Core labels include Gallery, Showcase and Workroom', all(x in txt(Path('public/data/media-content-page-catalog.json')) for x in ['"Gallery"','"Showcase / Creations"','"Workshop / Workroom Journal"']))
 check('Product/tools/supplies routes excluded from catalog', all(p not in paths for p in ['/shop/','/shop/product/','/tools/','/supplies/','/toolshed/']))
