@@ -1,7 +1,7 @@
-// Build 261 - Inventory-first Packaging Studio source reuse, reusable claims, component metadata and corrected soap-label profile.
+// Build 262 - Active source templates, source-derived reusable content, printer inventory profiles and refined soap-label geometry.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '261';
+const BUILD = '262';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -23,6 +23,22 @@ function jsonText(value,fallback){return JSON.stringify(value&&typeof value==='o
 function bool(value){return Number(value)===1||value===true||value==='true';}
 function boundedDimension(value,fallback=50.8){return Math.min(1200,Math.max(20,number(value,fallback)));}
 function keyPart(value){return text(value,80).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'custom-template';}
+async function syncSourceMaterialReusableContent(db,sourceId,materialName,materialType,materialSubtype,masterInci,verification,userId){
+  if(!sourceId)return;
+  const prefix=`source-material-${sourceId}-`;
+  await db.prepare(`UPDATE packaging_content_library SET is_active=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE content_key LIKE ?`).bind(userId,`${prefix}%`).run().catch(()=>null);
+  const seen=new Set();
+  for(const row of (Array.isArray(masterInci)?masterInci:[]).slice(0,100)){
+    const inci=text(row?.inci_name||row?.display_name_en||row?.display_name_fr,300);if(!inci)continue;const normalized=inci.toLowerCase();if(seen.has(normalized))continue;seen.add(normalized);
+    const contentKey=`${prefix}ingredient-${keyPart(inci)}`;const itemName=text(row?.display_name_en||inci,180)||inci;const metadata={auto_generated:1,source_material_template_id:sourceId,source_material_name:materialName,source_material_type:materialType,source_material_subtype:materialSubtype,verification_status:verification,allergen_note:text(row?.allergen_note,500)||'',required_on_label:Number(row?.required_on_label)!==0?1:0};
+    await db.prepare(`INSERT INTO packaging_content_library(content_key,content_type,item_name,text_en,text_fr,inci_name,icon_name,metadata_json,is_system,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,'ingredient',?,?,?,?,NULL,?,0,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(content_key) DO UPDATE SET item_name=excluded.item_name,text_en=excluded.text_en,text_fr=excluded.text_fr,inci_name=excluded.inci_name,metadata_json=excluded.metadata_json,is_active=1,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(contentKey,itemName,text(row?.display_name_en,500)||itemName,text(row?.display_name_fr,500)||null,inci,JSON.stringify(metadata),userId,userId).run().catch(()=>null);
+  }
+  const reusableType=materialType==='fragrance_oil'?'fragrance_oil':materialType==='colourant'?'colourant':'';
+  if(reusableType){
+    const contentKey=`${prefix}${reusableType}`;const metadata={auto_generated:1,source_material_template_id:sourceId,source_material_name:materialName,source_material_type:materialType,source_material_subtype:materialSubtype,verification_status:verification};
+    await db.prepare(`INSERT INTO packaging_content_library(content_key,content_type,item_name,text_en,text_fr,inci_name,icon_name,metadata_json,is_system,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,NULL,NULL,?,0,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(content_key) DO UPDATE SET content_type=excluded.content_type,item_name=excluded.item_name,text_en=excluded.text_en,metadata_json=excluded.metadata_json,is_active=1,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(contentKey,reusableType,materialName,materialName,null,JSON.stringify(metadata),userId,userId).run().catch(()=>null);
+  }
+}
 function productRosePreset(value){
   const source=text(value,240).toLowerCase();
   if(source.includes('glacial'))return{asset:'rose-lavender-v1',colour:'#A57BCB'};
@@ -189,6 +205,8 @@ async function listData(db){
   }catch{
     inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,source_url,amazon_url,image_url,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND LOWER(COALESCE(source_type,''))<>'tool' ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]}))).map(mapPackagingInventory);
   }
+  let printers=[];
+  try{printers=rows(await db.prepare(`SELECT sii.site_item_inventory_id,sii.item_name,sii.category,sii.source_type,sii.supplier_name,sii.supplier_sku FROM site_item_inventory sii LEFT JOIN site_inventory_item_descriptions d ON d.site_item_inventory_id=sii.site_item_inventory_id WHERE COALESCE(sii.is_active,1)=1 AND (LOWER(COALESCE(sii.item_name,'')) LIKE '%printer%' OR LOWER(COALESCE(sii.category,'')) LIKE '%printer%' OR LOWER(COALESCE(d.item_description,'')) LIKE '%printer%') ORDER BY LOWER(sii.item_name) LIMIT 100`).all());}catch{}
   const reference_sources=rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key`).all()).map(mapReference);
   let formula_library=[];let content_library=[];let source_material_library=[];let library_schema_ready=true;let source_material_schema_ready=true;let source_material_metadata_ready=true;
   try{
@@ -205,7 +223,7 @@ async function listData(db){
     const links=rows(await db.prepare(`SELECT packaging_formula_library_id,packaging_source_material_template_id,material_role FROM packaging_formula_source_material_links ORDER BY packaging_formula_source_material_link_id`).all());
     for(const formula of formula_library){const link=links.find((row)=>Number(row.packaging_formula_library_id)===Number(formula.packaging_formula_library_id)&&String(row.material_role)==='base');if(link)formula.source_material_template_id=Number(link.packaging_source_material_template_id);}
   }catch{source_material_schema_ready=false;}
-  return{templates,projects,products,inventory,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready,source_material_metadata_ready};
+  return{templates,projects,products,inventory,printers,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready,source_material_metadata_ready};
 }
 
 async function loadDetail(db,projectId){
@@ -344,6 +362,7 @@ export async function onRequestPost(context){
           const linkRole=materialSubtype==='soap_base'?'soap_base':defaultRole==='fragrance'?'fragrance':defaultRole==='colourant'?'colourant':defaultRole==='additive'?'additive':'source_material';
           await a.db.prepare(`DELETE FROM inventory_source_material_links WHERE site_item_inventory_id=? AND link_role=? AND packaging_source_material_template_id<>?`).bind(inventoryId,linkRole,savedSourceId).run().catch(()=>null);await a.db.prepare(`INSERT INTO inventory_source_material_links(site_item_inventory_id,packaging_source_material_template_id,link_role,notes,created_by_user_id,created_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id,packaging_source_material_template_id,link_role) DO UPDATE SET notes=excluded.notes`).bind(inventoryId,savedSourceId,linkRole,'Linked from Packaging Studio; reuse inventory source metadata before external re-import.',a.adminUser.user_id).run().catch(()=>null);
         }
+        await syncSourceMaterialReusableContent(a.db,savedSourceId,materialName,materialType,materialSubtype,masterInci,verification,a.adminUser.user_id);
       }
     }else if(action==='delete_source_material_template'){
       const sourceId=id(body.packaging_source_material_template_id);if(!sourceId)throw new Error('Source-material template is required.');
