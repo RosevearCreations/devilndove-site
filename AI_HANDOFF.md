@@ -1,20 +1,22 @@
-# Build 259 current handoff
+# Devil n Dove AI Handoff — Build 260
 
-The current code release is **Build 259**. The current D1 migration is `database_build259_media_static_slot_catalog.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after the Build 256 Media Studio base schema (Builds 257 and 258 were code-only). Build 259 replaces the scan/register Media Studio workflow with an explicit deployment-seeded static-site slot catalog. Products, finished-product media, inventory, supplies and tools remain outside this Studio.
+This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
+
+## Current release and migration boundary
+
+The current code release is **Build 260**. The current D1 migration remains **Build 259**: `database_build259_media_static_slot_catalog.sql`, byte-identical to `database_upgrade_current_pass.sql`. Build 260 is code-only and does not add or change schema.
+
+## Build 260 Media Studio request-budget rule
+
+`/admin/media-content-studio/` must not bootstrap page slots, the media library and selected-media usage in one Worker request. Opening or changing a website area loads only that area's explicit D1 slots (`mode=page`). The public site-media picker loads only when an image slot is opened (`mode=media`), in bounded keyset-paginated pages of 48 records. Existing-use details load only for the selected image (`mode=uses`). Do not reintroduce the Build 259 `limit=180` all-in-one bootstrap or per-row assignment-count correlation. Handled Media Studio code/D1 exceptions return structured HTTP 500 JSON; reserve HTTP 503 interpretation for true service/platform failures rather than masking application errors as service unavailability.
+
+The media picker remains limited to static/public site media. Product/finished-product, inventory, supply and tool media continue to belong to their specialist editors and remain excluded server-side.
 
 ## Build 259 explicit site-slot rule
 
-`/admin/media-content-studio/` is a visual website-presentation editor. `public/data/media-content-slot-catalog.json` is the owner-facing authority for known static page slots. Public HTML contains stable `data-media-slot`, `data-media-background-slot` and `data-content-slot` attributes. Existing authored images/text remain the default; only explicit D1 assignments/published overrides replace them. Empty visual opportunities use branded SVG placeholders under `assets/placeholders/media-content/`. Admin-only public-page edit links deep-link directly to the exact Media Studio slot. There is no page scanning, iframe inspection, or browser slot registration in the Build 259 workflow.
+`/admin/media-content-studio/` is a visual website-presentation editor. `public/data/media-content-slot-catalog.json` is the owner-facing authority for known static page slots. Public HTML contains stable `data-media-slot`, `data-media-background-slot` and `data-content-slot` attributes. Existing authored images/text remain the default; only explicit D1 assignments/published overrides replace them. Empty visual opportunities use branded SVG placeholders under `assets/placeholders/media-content/`. Admin-only public-page edit links deep-link directly to the exact Media Studio slot. There is no page scanning, iframe inspection, or browser slot registration in the current workflow.
 
-The Build 259 catalog contains 29 static/public page areas plus shared `@site` positions and explicitly excludes shop/product, inventory, supplies, tools, account, checkout and admin routes. Dynamic product/catalog grids on Gallery/Creations are not Media Studio content. Collections, Creations and Art/Gallery use their existing site imagery as the default managed visuals.
-
-# Build 257 current handoff
-
-The current code release is Build 258. The current D1 migration boundary remains Build 256: `database_build256_media_content_studio.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after Build 255. Build 258 fixes Media Studio inspection under the site-wide anti-framing CSP without weakening security: the selected static page is fetched same-origin, sanitized into a script-free `srcdoc` copy, and inspected there. The global `_headers` policy remains `X-Frame-Options: DENY` plus CSP `frame-ancestors 'none'`. Build 257's static-only scope, curated page directory, and product/inventory/tool/supply exclusions remain authoritative.
-
-# Devil n Dove AI Handoff — Build 257
-
-This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose under `docs/archive/build-history/` is frozen evidence and does not override these two files.
+The catalog contains 29 static/public page areas plus shared `@site` positions and explicitly excludes shop/product, inventory, supplies, tools, account, checkout and admin routes. Dynamic product/catalog grids on Gallery/Creations are not Media Studio content. Collections, Creations and Art/Gallery use their existing site imagery as the default managed visuals.
 
 ## Build 246 retained foundation
 
