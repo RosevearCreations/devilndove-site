@@ -1,10 +1,16 @@
-# Devil n Dove AI Handoff — Build 260
+# Devil n Dove AI Handoff — Build 261
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 260**. The current D1 migration remains **Build 259**: `database_build259_media_static_slot_catalog.sql`, byte-identical to `database_upgrade_current_pass.sql`. Build 260 is code-only and does not add or change schema.
+The current code release is **Build 261**. The current D1 migration remains **Build 259**: `database_build259_media_static_slot_catalog.sql`, byte-identical to `database_upgrade_current_pass.sql`. Builds 260–261 are code-only and do not add or change schema.
+
+## Build 261 Packaging Studio inventory/claims/layout rule
+
+Packaging Studio is inventory-first. Components & Cost must start with a type-to-search Inventory selector and reuse saved item name, SKU, supplier and unit cost instead of asking the owner to duplicate those facts. Material Library must first look for an existing `inventory_source_material_links` source template and then reuse current inventory/source metadata; Amazon is only a fallback for missing source evidence. New Amazon-linked inventory source-material entries preserve the returned packaging source draft into the existing Packaging Source Material tables so later label work does not require another marketplace fetch. Older inventory records may contain only the basic Amazon URL/image/name because earlier builds discarded the packaging-specific preview payload; those records can still seed a source template from current inventory facts and receive supplier/INCI evidence manually.
+
+The Claims tab is the owner-facing reusable claim library. `packaging_content_library` remains the D1 authority for bilingual claim text and icons; claim presets are added to a label explicitly and remain subject to review. Components are responsive cards rather than a wide table. Soap labels render with the corrected `soap_reference_v3` geometry: bounded English/French ingredient clips, a wrapped two-line front family/title, a compressed four-claim panel, and a separate net-quantity band so text cannot cross the decorative rules.
 
 ## Build 260 Media Studio request-budget rule
 
