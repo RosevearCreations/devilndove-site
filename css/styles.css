@@ -3202,3 +3202,15 @@ details.packaging-amazon-material-import[open]>summary{margin-bottom:10px}
 .packaging-svg-preview svg[data-soap-layout="reference-v3"]{min-width:1080px;width:1080px;max-width:none}
 @media(max-width:980px){.packaging-component-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.packaging-component-inventory,.packaging-component-notes{grid-column:1/-1}.packaging-claim-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.packaging-claim-note{grid-column:1/-1}}
 @media(max-width:640px){.packaging-component-card-top{grid-template-columns:auto minmax(0,1fr)}.packaging-component-card-top .btn{grid-column:1/-1;width:100%}.packaging-component-card-grid{grid-template-columns:1fr}.packaging-component-inventory,.packaging-component-notes{grid-column:auto}.packaging-claim-editor-row{grid-template-columns:auto minmax(0,1fr)}.packaging-claim-editor-row>.btn{grid-column:1/-1;width:100%}.packaging-claim-editor-grid{grid-column:1/-1;grid-template-columns:1fr}.packaging-claim-note{grid-column:auto}.packaging-claim-library-card{grid-template-columns:auto minmax(0,1fr)}.packaging-claim-library-card .btn{grid-column:1/-1;width:100%}}
+
+/* Build 262 — compact Material Library, reusable-content dropdown, and printer/sheet planner. */
+.packaging-source-active-card{margin-top:.75rem;min-height:4rem}
+.packaging-source-active-card .packaging-library-card{margin:0}
+.packaging-active-library-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:center}
+.packaging-library-entry-form{margin-top:1rem;border:1px solid var(--border,#d8d2c8);border-radius:.75rem;padding:.85rem;background:rgba(255,255,255,.45)}
+.packaging-library-entry-form>summary{cursor:pointer;font-weight:700}
+.packaging-printer-callout,.packaging-sheet-plan{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;border:1px solid var(--border,#d8d2c8);border-radius:.75rem;padding:.85rem 1rem;margin:.75rem 0;background:rgba(255,255,255,.5)}
+.packaging-printer-callout strong,.packaging-sheet-plan strong{min-width:12rem}
+.packaging-sheet-plan span{font-size:.92rem;opacity:.88}
+.packaging-source-picker select,.packaging-library-section select{max-width:100%}
+@media (max-width:760px){.packaging-active-library-card{grid-template-columns:1fr}.packaging-printer-callout,.packaging-sheet-plan{display:block}.packaging-printer-callout>*+*,.packaging-sheet-plan>*+*{display:block;margin-top:.35rem}}
