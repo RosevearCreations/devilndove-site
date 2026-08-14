@@ -1,7 +1,7 @@
-// Build 262 - Active source templates, source-derived reusable content, printer inventory profiles and refined soap-label geometry.
+// Build 263 - My Printers-only label profiles, default label printer, and tighter soap oval composition.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '262';
+const BUILD = '263';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -66,6 +66,8 @@ function mapReference(row){return{...row,packaging_reference_source_id:id(row.pa
 function mapFormula(row){return{...row,packaging_formula_library_id:id(row.packaging_formula_library_id),ingredients:safeJson(row.ingredients_json,[])};}
 function mapLibraryContent(row){return{...row,packaging_content_library_id:id(row.packaging_content_library_id),metadata:safeJson(row.metadata_json,{})};}
 function mapSourceMaterial(row){return{...row,packaging_source_material_template_id:id(row.packaging_source_material_template_id),product_family:text(row.product_family||'general',80)||'general',material_subtype:text(row.material_subtype||row.material_type||'other',80)||'other',default_role:text(row.default_role||'',40)||null,colour_hex:text(row.colour_hex||'',20)||null,master_inci:safeJson(row.master_inci_json,[]),fragrance_allergens:safeJson(row.fragrance_allergens_json,[]),benefits:safeJson(row.benefits_json,[]),supplier_claims:safeJson(row.supplier_claims_json,[]),source_snapshot:safeJson(row.source_snapshot_json,{})};}
+
+function mapPrinterProfile(row={}){return{...row,packaging_printer_profile_id:id(row.packaging_printer_profile_id),name:text(row.profile_name,180),paper:text(row.paper_stock,180)||'Letter 8.5 × 11 in',margin_mm:Math.max(0,number(row.margin_mm,0)),gap_mm:Math.max(0,number(row.gap_mm,0)),scale_percent:Math.max(1,number(row.scale_percent,100)),auto_rotate:Number(row.auto_rotate)!==0,is_default_label:Number(row.is_default_label)===1,is_active:Number(row.is_active)!==0,settings_note:text(row.settings_note,1000)||''};}
 
 function metadataText(meta, keys=[]){
   if(!meta||typeof meta!=='object')return'';
@@ -205,8 +207,8 @@ async function listData(db){
   }catch{
     inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,source_url,amazon_url,image_url,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND LOWER(COALESCE(source_type,''))<>'tool' ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]}))).map(mapPackagingInventory);
   }
-  let printers=[];
-  try{printers=rows(await db.prepare(`SELECT sii.site_item_inventory_id,sii.item_name,sii.category,sii.source_type,sii.supplier_name,sii.supplier_sku FROM site_item_inventory sii LEFT JOIN site_inventory_item_descriptions d ON d.site_item_inventory_id=sii.site_item_inventory_id WHERE COALESCE(sii.is_active,1)=1 AND (LOWER(COALESCE(sii.item_name,'')) LIKE '%printer%' OR LOWER(COALESCE(sii.category,'')) LIKE '%printer%' OR LOWER(COALESCE(d.item_description,'')) LIKE '%printer%') ORDER BY LOWER(sii.item_name) LIMIT 100`).all());}catch{}
+  let printers=[];let printers_schema_ready=true;
+  try{printers=rows(await db.prepare(`SELECT * FROM packaging_printer_profiles WHERE is_active=1 ORDER BY is_default_label DESC,LOWER(profile_name),packaging_printer_profile_id`).all()).map(mapPrinterProfile);}catch{printers_schema_ready=false;}
   const reference_sources=rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key`).all()).map(mapReference);
   let formula_library=[];let content_library=[];let source_material_library=[];let library_schema_ready=true;let source_material_schema_ready=true;let source_material_metadata_ready=true;
   try{
@@ -223,7 +225,7 @@ async function listData(db){
     const links=rows(await db.prepare(`SELECT packaging_formula_library_id,packaging_source_material_template_id,material_role FROM packaging_formula_source_material_links ORDER BY packaging_formula_source_material_link_id`).all());
     for(const formula of formula_library){const link=links.find((row)=>Number(row.packaging_formula_library_id)===Number(formula.packaging_formula_library_id)&&String(row.material_role)==='base');if(link)formula.source_material_template_id=Number(link.packaging_source_material_template_id);}
   }catch{source_material_schema_ready=false;}
-  return{templates,projects,products,inventory,printers,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready,source_material_metadata_ready};
+  return{templates,projects,products,inventory,printers,printers_schema_ready,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready,source_material_metadata_ready};
 }
 
 async function loadDetail(db,projectId){
@@ -536,6 +538,19 @@ export async function onRequestPost(context){
       const snapshot=body.snapshot&&typeof body.snapshot==='object'?body.snapshot:mapProject(project);
       await a.db.prepare(`INSERT INTO packaging_project_versions (packaging_project_id,version_number,version_label,snapshot_json,svg_markup,review_status,created_by_user_id,created_at) VALUES (?,?,?,?,?,'needs_review',?,CURRENT_TIMESTAMP)`).bind(projectId,next,text(body.version_label,160)||`Version ${next}`,JSON.stringify({...snapshot,checksum:text(body.checksum,128)||null}),text(body.svg_markup,180000)||null,a.adminUser.user_id).run();
       message=`Packaging version ${next} saved for print and compliance review.`;
+    }else if(action==='save_printer_profile'){
+      try{await a.db.prepare(`SELECT packaging_printer_profile_id FROM packaging_printer_profiles LIMIT 1`).first();}catch{throw new Error('Build 263 printer-profile migration is required before using My Printers.');}
+      const profileName=text(body.profile_name,180);if(!profileName)throw new Error('A My Printers name is required.');
+      const isDefault=Number(body.is_default_label)===1?1:0;if(isDefault)await a.db.prepare(`UPDATE packaging_printer_profiles SET is_default_label=0,updated_at=CURRENT_TIMESTAMP WHERE is_active=1`).run();
+      await a.db.prepare(`INSERT INTO packaging_printer_profiles(profile_name,paper_stock,margin_mm,gap_mm,scale_percent,auto_rotate,settings_note,is_default_label,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(profile_name) DO UPDATE SET paper_stock=excluded.paper_stock,margin_mm=excluded.margin_mm,gap_mm=excluded.gap_mm,scale_percent=excluded.scale_percent,auto_rotate=excluded.auto_rotate,settings_note=excluded.settings_note,is_default_label=excluded.is_default_label,is_active=1,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(profileName,text(body.paper_stock,180)||'Letter 8.5 × 11 in',Math.max(0,number(body.margin_mm,0)),Math.max(0,number(body.gap_mm,0)),Math.max(1,number(body.scale_percent,100)),Number(body.auto_rotate)!==0?1:0,text(body.settings_note,1000)||null,isDefault,a.adminUser.user_id,a.adminUser.user_id).run();
+      if(!isDefault){const count=number((await a.db.prepare(`SELECT COUNT(*) AS c FROM packaging_printer_profiles WHERE is_active=1 AND is_default_label=1`).first())?.c,0);if(!count)await a.db.prepare(`UPDATE packaging_printer_profiles SET is_default_label=1,updated_at=CURRENT_TIMESTAMP WHERE packaging_printer_profile_id=(SELECT packaging_printer_profile_id FROM packaging_printer_profiles WHERE is_active=1 ORDER BY packaging_printer_profile_id LIMIT 1)`).run();}
+      message=`Printer “${profileName}” saved in My Printers${isDefault?' as the default label printer':''}.`;
+    }else if(action==='delete_printer_profile'){
+      try{await a.db.prepare(`SELECT packaging_printer_profile_id FROM packaging_printer_profiles LIMIT 1`).first();}catch{throw new Error('Build 263 printer-profile migration is required before using My Printers.');}
+      const profileId=id(body.packaging_printer_profile_id);const profileName=text(body.profile_name,180);let row=null;if(profileId)row=await a.db.prepare(`SELECT * FROM packaging_printer_profiles WHERE packaging_printer_profile_id=? AND is_active=1`).bind(profileId).first();else if(profileName)row=await a.db.prepare(`SELECT * FROM packaging_printer_profiles WHERE profile_name=? AND is_active=1`).bind(profileName).first();if(!row)throw new Error('The selected My Printers profile was not found.');
+      await a.db.prepare(`UPDATE packaging_printer_profiles SET is_active=0,is_default_label=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_printer_profile_id=?`).bind(a.adminUser.user_id,row.packaging_printer_profile_id).run();
+      const defaultCount=number((await a.db.prepare(`SELECT COUNT(*) AS c FROM packaging_printer_profiles WHERE is_active=1 AND is_default_label=1`).first())?.c,0);if(!defaultCount)await a.db.prepare(`UPDATE packaging_printer_profiles SET is_default_label=1,updated_at=CURRENT_TIMESTAMP WHERE packaging_printer_profile_id=(SELECT packaging_printer_profile_id FROM packaging_printer_profiles WHERE is_active=1 ORDER BY packaging_printer_profile_id LIMIT 1)`).run();
+      message=`Printer “${row.profile_name}” removed from My Printers.`;
     }else if(action==='save_print_test'){
       if(!projectId)throw new Error('Packaging project is required.');
       const versionId=id(body.packaging_project_version_id)||null;
