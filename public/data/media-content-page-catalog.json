@@ -1,5 +1,5 @@
 {
-  "version": 257,
+  "version": 258,
   "description": "Curated public/static pages for Media & Content Management Studio. Operational, account, product, inventory, tools and supplies screens are intentionally excluded.",
   "groups": [
     {"key":"core","label":"Core website","pages":[
