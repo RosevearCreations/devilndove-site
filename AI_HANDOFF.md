@@ -1,10 +1,18 @@
-# Devil n Dove AI Handoff — Build 261
+# Devil n Dove AI Handoff — Build 262
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 261**. The current D1 migration remains **Build 259**: `database_build259_media_static_slot_catalog.sql`, byte-identical to `database_upgrade_current_pass.sql`. Builds 260–261 are code-only and do not add or change schema.
+The current code release is **Build 262**. The current D1 migration remains **Build 259**: `database_build259_media_static_slot_catalog.sql`, byte-identical to `database_upgrade_current_pass.sql`. Builds 260–262 are code-only and do not add or change schema.
+
+## Build 262 Packaging Studio library / print-layout rule
+
+Material Library is selection-driven: show the source-template dropdown and only the active template, never every template expanded at once. Saving a source-material template synchronizes its Master INCI rows into the reusable `packaging_content_library` ingredient choices; fragrance/essential-oil and colourant source templates also become reusable dropdown entries. Preserve the source template as the supplier evidence authority and do not duplicate it manually.
+
+Print Test uses Devil n Dove printer profiles rather than attempting direct operating-system printer control. Candidate printer names come from Printer inventory and prior print-test history; per-browser saved profiles retain Letter paper, margin, gap, scale and auto-rotation preferences. `sheetPlan()` must test portrait/landscape and optional 90-degree rotation and choose the arrangement with the highest count on 8.5 × 11 inch paper without silently shrinking exact-size labels. The system print dialog remains the final printer selector.
+
+The current soap ribbon geometry intentionally places **French ingredients left of the oval and English ingredients right of the oval**. Claims begin lower in their panel, the net-weight separator/line sits lower to free claim space, the centre title is wrapped and centered relative to the botanical rose, and the small circular brand seal is enlarged with smaller lettering. Ingredient text remains clipped inside the printable safe zones.
 
 ## Build 261 Packaging Studio inventory/claims/layout rule
 
