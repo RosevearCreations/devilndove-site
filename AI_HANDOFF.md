@@ -1,3 +1,13 @@
+# Build 259 current handoff
+
+The current code release is **Build 259**. The current D1 migration is `database_build259_media_static_slot_catalog.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after the Build 256 Media Studio base schema (Builds 257 and 258 were code-only). Build 259 replaces the scan/register Media Studio workflow with an explicit deployment-seeded static-site slot catalog. Products, finished-product media, inventory, supplies and tools remain outside this Studio.
+
+## Build 259 explicit site-slot rule
+
+`/admin/media-content-studio/` is a visual website-presentation editor. `public/data/media-content-slot-catalog.json` is the owner-facing authority for known static page slots. Public HTML contains stable `data-media-slot`, `data-media-background-slot` and `data-content-slot` attributes. Existing authored images/text remain the default; only explicit D1 assignments/published overrides replace them. Empty visual opportunities use branded SVG placeholders under `assets/placeholders/media-content/`. Admin-only public-page edit links deep-link directly to the exact Media Studio slot. There is no page scanning, iframe inspection, or browser slot registration in the Build 259 workflow.
+
+The Build 259 catalog contains 29 static/public page areas plus shared `@site` positions and explicitly excludes shop/product, inventory, supplies, tools, account, checkout and admin routes. Dynamic product/catalog grids on Gallery/Creations are not Media Studio content. Collections, Creations and Art/Gallery use their existing site imagery as the default managed visuals.
+
 # Build 257 current handoff
 
 The current code release is Build 258. The current D1 migration boundary remains Build 256: `database_build256_media_content_studio.sql` / byte-identical `database_upgrade_current_pass.sql`, applied after Build 255. Build 258 fixes Media Studio inspection under the site-wide anti-framing CSP without weakening security: the selected static page is fetched same-origin, sanitized into a script-free `srcdoc` copy, and inspected there. The global `_headers` policy remains `X-Frame-Options: DENY` plus CSP `frame-ancestors 'none'`. Build 257's static-only scope, curated page directory, and product/inventory/tool/supply exclusions remain authoritative.
