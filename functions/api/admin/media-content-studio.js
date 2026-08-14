@@ -64,47 +64,45 @@ async function changeAudit(db, adminUser, payload = {}) {
 async function mediaList(db, query = {}) {
   const q = normalizeText(query.q).toLowerCase();
   const mediaType = normalizeText(query.media_type).toLowerCase();
-  const assignment = normalizeText(query.assignment).toLowerCase();
   const includeArchived = bool(query.include_archived);
-  const limit = Math.max(1, Math.min(250, n(query.limit, 120)));
+  const limit = Math.max(1, Math.min(72, n(query.limit, 48)));
+  const beforeId = Math.max(0, n(query.before_id, 0));
+  // Build 260: keep the picker query intentionally small. Assignment/use details are
+  // loaded only for the selected image instead of being correlated across every row.
   const result = await db.prepare(`
     SELECT ma.media_asset_id,ma.product_id,ma.object_key,ma.public_url,ma.original_filename,ma.mime_type,ma.file_size_bytes,
            ma.width_px,ma.height_px,ma.created_at,ma.updated_at,ma.deleted_at,
            mm.display_name,mm.alt_text,mm.image_title,mm.caption,mm.description,mm.tags_json,mm.search_keywords,mm.media_type,
-           mm.decorative,mm.focal_x,mm.focal_y,mm.attribution,mm.license_notes,mm.consent_notes,mm.captured_at,mm.source_type,mm.archived_at,
-           (SELECT COUNT(*) FROM media_content_assignments a INNER JOIN media_content_slots s ON s.media_content_slot_id=a.media_content_slot_id WHERE a.media_asset_id=ma.media_asset_id AND a.active=1 AND s.page_path NOT LIKE '/shop%' AND s.page_path NOT LIKE '/tools%' AND s.page_path NOT LIKE '/toolshed%' AND s.page_path NOT LIKE '/supplies%' AND s.page_path NOT LIKE '/admin%' AND s.page_path NOT LIKE '/cart%' AND s.page_path NOT LIKE '/checkout%' AND s.page_path NOT LIKE '/members%' AND s.page_path NOT LIKE '/search%') AS assignment_count
+           mm.decorative,mm.focal_x,mm.focal_y,mm.attribution,mm.license_notes,mm.consent_notes,mm.captured_at,mm.source_type,mm.archived_at
     FROM media_assets ma
     LEFT JOIN managed_media_metadata mm ON mm.media_asset_id=ma.media_asset_id
     WHERE ma.deleted_at IS NULL
       AND ma.product_id IS NULL
       AND LOWER(COALESCE(mm.media_type,'photo')) <> 'product'
-      AND LOWER(COALESCE(mm.source_type,'')) NOT IN ('product','products','catalog','finished_product','finished-product','inventory','supply','supplies','tool','tools')
+      AND LOWER(COALESCE(mm.source_type,'')) NOT IN ('product','products','inventory','supply','supplies','tool','tools')
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'products/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'inventory/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'supplies/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'tools/%'
       AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE 'toolshed/%'
-      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/products/%'
-      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/inventory/%'
-      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/supplies/%'
-      AND LOWER(COALESCE(ma.object_key,'')) NOT LIKE '%/tools/%'
-      AND LOWER(COALESCE(ma.variant_role,'')) NOT IN ('featured','product','product_gallery','gallery_product')
-      AND LOWER(COALESCE(ma.annotation_notes,'')) NOT LIKE '%product_editor%'
-      AND LOWER(COALESCE(ma.annotation_notes,'')) NOT LIKE '%inventory%'
       AND (?=1 OR mm.archived_at IS NULL)
       AND (?='' OR LOWER(COALESCE(mm.media_type,'photo'))=?)
+      AND (?=0 OR ma.media_asset_id < ?)
       AND (?='' OR LOWER(COALESCE(mm.display_name,ma.original_filename,ma.object_key,'')) LIKE ? OR LOWER(COALESCE(mm.alt_text,'')) LIKE ? OR LOWER(COALESCE(mm.tags_json,'')) LIKE ?)
-      AND (?='' OR (?='assigned' AND EXISTS(SELECT 1 FROM media_content_assignments ax WHERE ax.media_asset_id=ma.media_asset_id AND ax.active=1)) OR (?='unassigned' AND NOT EXISTS(SELECT 1 FROM media_content_assignments au WHERE au.media_asset_id=ma.media_asset_id AND au.active=1)))
-    ORDER BY COALESCE(mm.updated_at,ma.updated_at,ma.created_at) DESC,ma.media_asset_id DESC
+    ORDER BY ma.media_asset_id DESC
     LIMIT ?
-  `).bind(includeArchived, mediaType, mediaType, q, `%${q}%`, `%${q}%`, `%${q}%`, assignment, assignment, assignment, limit).all();
-  return rows(result).map((r) => ({
+  `).bind(includeArchived, mediaType, mediaType, beforeId, beforeId, q, `%${q}%`, `%${q}%`, `%${q}%`, limit + 1).all();
+  const found = rows(result);
+  const hasMore = found.length > limit;
+  const visible = hasMore ? found.slice(0, limit) : found;
+  const media = visible.map((r) => ({
     ...r,
     media_asset_id:n(r.media_asset_id), product_id:r.product_id==null?null:n(r.product_id), file_size_bytes:n(r.file_size_bytes), width_px:r.width_px==null?null:n(r.width_px), height_px:r.height_px==null?null:n(r.height_px),
-    decorative:bool(r.decorative), focal_x:r.focal_x==null?0.5:n(r.focal_x,0.5), focal_y:r.focal_y==null?0.5:n(r.focal_y,0.5), assignment_count:n(r.assignment_count),
+    decorative:bool(r.decorative), focal_x:r.focal_x==null?0.5:n(r.focal_x,0.5), focal_y:r.focal_y==null?0.5:n(r.focal_y,0.5),
     tags:safeJson(r.tags_json,[]), media_type:r.media_type||"photo", display_name:r.display_name||r.original_filename||r.object_key,
     public_url:versionUrl(r.public_url,r.updated_at)
   }));
+  return { media, has_more:hasMore, next_before_id:hasMore && media.length ? media[media.length-1].media_asset_id : null };
 }
 
 async function pageSlots(db, pagePath) {
@@ -129,20 +127,26 @@ export async function onRequestGet(context) {
   const { db, adminUser } = auth;
   const url = new URL(context.request.url);
   const path = cleanPath(url.searchParams.get("path") || "/");
+  const mode = normalizeText(url.searchParams.get("mode") || "page").toLowerCase();
   try {
-    const selectedMediaId = n(url.searchParams.get("media_id"));
-    const usesPromise = selectedMediaId > 0
-      ? db.prepare(`SELECT a.media_content_assignment_id,s.media_content_slot_id,s.page_path,s.slot_key,s.slot_label,s.slot_type FROM media_content_assignments a INNER JOIN media_content_slots s ON s.media_content_slot_id=a.media_content_slot_id WHERE a.media_asset_id=? AND a.active=1 AND s.is_active=1 AND s.page_path NOT LIKE '/shop%' AND s.page_path NOT LIKE '/tools%' AND s.page_path NOT LIKE '/toolshed%' AND s.page_path NOT LIKE '/supplies%' AND s.page_path NOT LIKE '/admin%' AND s.page_path NOT LIKE '/cart%' AND s.page_path NOT LIKE '/checkout%' AND s.page_path NOT LIKE '/members%' AND s.page_path NOT LIKE '/search%' ORDER BY s.page_path,s.slot_label LIMIT 250`).bind(selectedMediaId).all()
-      : Promise.resolve({results:[]});
-    const [media, slots, pagesResult, usesResult] = await Promise.all([
-      mediaList(db, Object.fromEntries(url.searchParams.entries())),
-      pageSlots(db, path),
-      db.prepare(`SELECT page_path,COUNT(*) AS slot_count,SUM(CASE WHEN slot_type='text' THEN 1 ELSE 0 END) AS text_count FROM media_content_slots WHERE is_active=1 GROUP BY page_path ORDER BY page_path LIMIT 250`).all(),
-      usesPromise
-    ]);
-    return json({ok:true,requested_by:adminUser,page_path:path,media,slots,pages:rows(pagesResult),media_uses:rows(usesResult)});
+    // Build 260: the slot-driven Studio no longer bootstraps page slots, the whole
+    // media library and media-use details in one request. Each view is bounded and
+    // loaded only when the owner opens it.
+    if (mode === "media") {
+      const result = await mediaList(db, Object.fromEntries(url.searchParams.entries()));
+      return json({ok:true,requested_by:adminUser,media:result.media,has_more:result.has_more,next_before_id:result.next_before_id});
+    }
+    if (mode === "uses") {
+      const selectedMediaId = n(url.searchParams.get("media_id"));
+      if (selectedMediaId <= 0) return json({ok:false,error:"Select a media item first."},400);
+      const usesResult = await db.prepare(`SELECT a.media_content_assignment_id,s.media_content_slot_id,s.page_path,s.slot_key,s.slot_label,s.slot_type FROM media_content_assignments a INNER JOIN media_content_slots s ON s.media_content_slot_id=a.media_content_slot_id WHERE a.media_asset_id=? AND a.active=1 AND s.is_active=1 AND s.page_path NOT LIKE '/shop%' AND s.page_path NOT LIKE '/tools%' AND s.page_path NOT LIKE '/toolshed%' AND s.page_path NOT LIKE '/supplies%' AND s.page_path NOT LIKE '/admin%' AND s.page_path NOT LIKE '/cart%' AND s.page_path NOT LIKE '/checkout%' AND s.page_path NOT LIKE '/members%' AND s.page_path NOT LIKE '/search%' ORDER BY s.page_path,s.slot_label LIMIT 120`).bind(selectedMediaId).all();
+      return json({ok:true,requested_by:adminUser,media_uses:rows(usesResult)});
+    }
+    if (isBlockedPagePath(path)) return json({ok:false,error:"That route is managed by its specialist editor, not Media Studio."},400);
+    const slots = await pageSlots(db, path);
+    return json({ok:true,requested_by:adminUser,page_path:path,slots});
   } catch (error) {
-    return json({ok:false,error:"Media & Content Studio data could not be loaded. Confirm the Build 256 base schema and Build 259 static-slot migration are installed.",detail:String(error?.message||error)},503);
+    return json({ok:false,error:"Media & Content Studio data could not be loaded.",error_code:"media_studio_query_failed",detail:String(error?.message||error),mode},500);
   }
 }
 
@@ -261,6 +265,6 @@ export async function onRequestPost(context) {
 
     return json({ok:false,error:"Unknown Media Studio action."},400);
   } catch (error) {
-    return json({ok:false,error:"Media & Content Studio operation failed.",detail:String(error?.message||error)},503);
+    return json({ok:false,error:"Media & Content Studio operation failed.",error_code:"media_studio_update_failed",detail:String(error?.message||error)},500);
   }
 }
