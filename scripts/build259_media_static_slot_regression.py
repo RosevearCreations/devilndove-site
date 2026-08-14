@@ -9,7 +9,7 @@ def txt(p): return (ROOT/p).read_text(encoding='utf-8',errors='ignore')
 html=txt(Path('admin/media-content-studio/index.html'));js=txt(Path('public/js/admin-media-content-studio.js'));runtime=txt(Path('public/js/media-content-runtime.js'));api=txt(Path('functions/api/admin/media-content-studio.js'));css=txt(Path('css/styles.css'))
 reg=json.loads(txt(Path('public/data/media-content-slot-catalog.json')))
 pages=[p for g in reg['groups'] for p in g['pages']]; slots=list(reg['sitewide'])+[s for p in pages for s in p['slots']]
-check('Build 259 admin assets cache-busted','styles.css?v=259' in html and 'admin-media-content-studio.js?v=259' in html)
+check('Build 259 admin assets cache-busted','styles.css?v=259' in html and ('admin-media-content-studio.js?v=259' in html or 'admin-media-content-studio.js?v=260' in html))
 check('Scanner workflow removed from admin screen','Scan selected area' not in html and 'Make scanned locations editable' not in html and 'mediaInspectPage' not in html)
 check('Scanner workflow removed from admin JavaScript','inspectPage' not in js and 'registerSlots' not in js and 'srcdoc' not in js)
 check('Explicit slot catalog version 259',reg.get('version')==259)
