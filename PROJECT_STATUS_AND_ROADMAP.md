@@ -1,10 +1,26 @@
-# Devil n Dove Project Status and Roadmap — Build 257
+# Devil n Dove Project Status and Roadmap — Build 258
 
 This is the **second canonical current project file**. `AI_HANDOFF.md` owns architecture, data authority, fallback and deployment rules. This file owns current progress, known risks and the ordered next work.
 
 
 
 
+
+## Build 258 completed work — CSP-safe Media Studio page inspection
+
+1. Fixed the browser `frame-ancestors 'none'` violation triggered when Media Studio tried to frame a live Devil n Dove page for inspection.
+2. Kept the global anti-framing policy unchanged (`X-Frame-Options: DENY` and CSP `frame-ancestors 'none'`).
+3. Media Studio now fetches the selected same-origin static page as HTML, rejects empty/unexpectedly large responses, strips scripts/forms/frames/objects/embeds/noscript, and builds a hidden script-free `srcdoc` copy for selector/background inspection.
+4. A `<base>` element points the inert copy at the selected public URL so linked CSS/images resolve for layout/background discovery without running the page's JavaScript.
+5. Cache-bumped the Media Studio page/script/catalog to Build 258.
+6. Build 258 is code-only; the D1 migration boundary remains Build 256.
+7. Build 258 focused regression passes 14/14 and Build 257 static-directory regression remains 37/37.
+
+### Highest-value next work after Build 258
+
+- Deploy Build 258 and confirm Home/About/Gallery scans no longer create CSP frame-ancestor console errors.
+- Continue the managed Gallery/Process/Technique/Evidence collection work after the secure page-inspection path is confirmed live.
+- Add version history/rollback for managed image replacement.
 
 ## Build 257 completed work — Static-only Media Studio and automatic site directory
 
