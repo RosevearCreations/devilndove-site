@@ -29,7 +29,7 @@ ok('kit API preserves reusable tracking', "'reusable'" in api and 'site_inventor
 ok('main inventory exposes inventory class', 'siteInventoryClass' in inv)
 ok('main inventory exposes lifecycle', 'siteInventoryLifecycleMode' in inv)
 ok('main inventory exposes lot/expiry/source-material flags', all(x in inv for x in ['siteInventoryLotRecommended','siteInventoryExpiryRecommended','siteInventorySourceMaterialRecommended']))
-ok('essential oil wording explains premixed blend', 'premixed essential-oil blend' in pack)
+ok('essential oil wording explains blend handling', 'essential-oil blend' in pack)
 ok('delete audit no longer references undefined merged variable in delete block', 'target_key: `${merged.source_type}:${existing.external_key}`' not in api)
 current=(ROOT/'database_upgrade_current_pass.sql').read_text()
 ok('current migration is Build 249 or newer', current==(ROOT/'database_build249_inventory_kits_components_provenance.sql').read_text() or bool(re.search(r'Build (?:25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,})',current)))
