@@ -1,10 +1,17 @@
-# Devil n Dove AI Handoff — Build 262
+# Devil n Dove AI Handoff — Build 263
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 262**. The current D1 migration remains **Build 259**: `database_build259_media_static_slot_catalog.sql`, byte-identical to `database_upgrade_current_pass.sql`. Builds 260–262 are code-only and do not add or change schema.
+The current code release is **Build 263**. The current D1 migration is **Build 263**: `database_build263_packaging_my_printers_label_alignment.sql`, byte-identical to `database_upgrade_current_pass.sql`. It is additive and follows the Build 259 media-slot boundary; Builds 260–262 were code-only.
+
+
+## Build 263 My Printers / soap-oval alignment rule
+
+Packaging Studio printer selection comes **only** from persistent `packaging_printer_profiles` (the owner-facing **My Printers** list). Never scan Inventory, tools, supplies, printer parts or print-test history to populate the label-printer dropdown. One active My Printers profile may be marked `is_default_label=1`; the Print Test screen should auto-load its Letter paper, margin, gap, scale, rotation and settings note. The operating-system print dialog remains the final physical output step.
+
+The soap front oval keeps the botanical rose on the left and a deliberately left-justified wording block immediately beside it. The wording block is positioned as a visual unit with the rose rather than centered independently in the oval. Preserve the bounded two-line family/product hierarchy and keep clear space before the inner circular maker seal.
 
 ## Build 262 Packaging Studio library / print-layout rule
 
