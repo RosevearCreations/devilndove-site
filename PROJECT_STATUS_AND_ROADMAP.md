@@ -1,4 +1,21 @@
-# Devil n Dove Project Status and Roadmap — Build 261
+# Devil n Dove Project Status and Roadmap — Build 262
+
+## Build 262 completed work — active material templates, reusable source ingredients, printer profiles and soap print fit
+
+1. Changed Material Library so the source-template dropdown is the primary navigator and only the active template is expanded/edited.
+2. Changed Individual Ingredients / Fragrance-Essential-Oil Blends / Colourants into a dropdown-driven reusable library instead of an always-expanded card list.
+3. Saving a source-material template now synchronizes its Master INCI rows into reusable ingredient records; saved fragrance/essential-oil and colourant source templates also become reusable choices automatically.
+4. Added Print Test printer-profile selection from printer inventory, prior print tests and locally saved profiles with paper, margin, gap, scale and auto-rotation settings. Browser printing still uses the operating-system print dialog for the final physical printer selection.
+5. Added a Letter-sheet packing planner that evaluates portrait/landscape and optional 90-degree label rotation, then uses the highest-count exact-size arrangement on 8.5 × 11 inch paper.
+6. Refined `soap_reference_v3`: French ingredients now print left of the oval and English ingredients right; ingredient clips are tighter; claims start lower and are more compressed; the weight separator/net-quantity line is lower; the centre title wraps/centres against the rose; and the small circular seal is enlarged with smaller wording.
+7. Cache-bumped Packaging Studio CSS/JavaScript to Build 262. Build 262 is code-only; the D1 migration boundary remains Build 259.
+
+### Highest-value next work after Build 262
+
+- Deploy and hard-refresh Packaging Studio, then confirm one long soap-base template shows only its active source card and that its INCI rows appear in the reusable ingredient dropdown after save.
+- Save profiles for the printers actually used in the workshop, enter each printer's realistic non-printable margin, and run the optimized Letter-sheet test before recording a production print test.
+- Print the most crowded soap label at Actual Size / 100% and verify the left French ingredients, centre rose/title/seal, right English ingredients and lowered claims/net-weight strip on the physical label stock.
+- Continue Media Studio production verification independently; Build 262 changes only Packaging Studio and its API.
 
 ## Build 261 completed work — Packaging components, claims, inventory-source reuse and label fit
 
