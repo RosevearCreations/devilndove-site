@@ -7791,6 +7791,27 @@ CREATE TABLE IF NOT EXISTS soap_label_print_tests (
 );
 CREATE INDEX IF NOT EXISTS idx_soap_label_print_tests_project ON soap_label_print_tests(packaging_project_id, created_at DESC);
 
+-- Build 263: My Printers is the only Packaging Studio printer source.
+CREATE TABLE IF NOT EXISTS packaging_printer_profiles (
+  packaging_printer_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  profile_name TEXT NOT NULL UNIQUE,
+  paper_stock TEXT NOT NULL DEFAULT 'Letter 8.5 × 11 in',
+  margin_mm REAL NOT NULL DEFAULT 0,
+  gap_mm REAL NOT NULL DEFAULT 0,
+  scale_percent REAL NOT NULL DEFAULT 100,
+  auto_rotate INTEGER NOT NULL DEFAULT 1 CHECK(auto_rotate IN (0,1)),
+  settings_note TEXT,
+  is_default_label INTEGER NOT NULL DEFAULT 0 CHECK(is_default_label IN (0,1)),
+  is_active INTEGER NOT NULL DEFAULT 1 CHECK(is_active IN (0,1)),
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_printer_profiles_active_default ON packaging_printer_profiles(is_active,is_default_label,profile_name);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_packaging_printer_profiles_one_default ON packaging_printer_profiles(is_default_label) WHERE is_active=1 AND is_default_label=1;
+
+
 -- Exact photo-match profile: the overall artboard and front oval follow the approved image/spec.
 -- The rear seal is 38.1 mm so it fits the 38.1 mm artboard. A separate 50 mm profile is seeded below because the supplied specification contains a physical conflict between a 38.1 mm artboard and a 50 mm rear circle.
 INSERT OR IGNORE INTO packaging_templates (

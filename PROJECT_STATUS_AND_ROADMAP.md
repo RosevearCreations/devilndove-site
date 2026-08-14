@@ -1,4 +1,18 @@
-# Devil n Dove Project Status and Roadmap — Build 262
+# Devil n Dove Project Status and Roadmap — Build 263
+
+## Build 263 completed work — My Printers-only label output and tighter oval composition
+
+1. Removed Inventory and print-test-history discovery from Packaging Studio printer selection. The Print Test dropdown now contains only persistent **My Printers** records.
+2. Added `packaging_printer_profiles` with paper, margin, gap, scale, auto-rotation, settings notes, active state and one `Default for labels` flag.
+3. Added Save/Remove My Printer controls and automatic loading of the default label-printer settings.
+4. Moved the soap front wording block closer to the botanical rose and changed the block to left justification while keeping the combined rose/text composition balanced inside the oval.
+5. Bumped Packaging Studio assets/API to Build 263. Build 263 requires the additive `database_build263_packaging_my_printers_label_alignment.sql` migration.
+
+### Highest-value next work after Build 263
+
+- Add the two real workshop printers to **My Printers**, mark the normal label printer as default, and enter its measured non-printable margin/settings.
+- Hard-refresh Packaging Studio and confirm no Inventory/tool/printer-part names appear in the Print Test dropdown.
+- Print one crowded soap label at Actual Size / 100% and verify that the left-justified wording block now sits close enough to the rose without colliding with the maker seal.
 
 ## Build 262 completed work — active material templates, reusable source ingredients, printer profiles and soap print fit
 
