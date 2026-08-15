@@ -1,4 +1,23 @@
-# Devil n Dove Project Status and Roadmap — Build 263
+# Devil n Dove Project Status and Roadmap — Build 264
+
+## Build 264 completed work — editable Home/Shop, movie metadata, project-first CAIP and merchandising order
+
+1. Media Studio Website Areas no longer clips Collections/lower entries; Shop static presentation is now part of the managed site-content catalog while product/inventory/supply/tool records remain excluded. The catalog now contains 30 owner-facing areas and 543 explicit static slots.
+2. Home now has two additional editable visuals; all six What-we-make cards expose title, description, destination and background colour; all three Build-182 visual-polish tiles expose kicker, heading, message and colour.
+3. Category links from Home open filtered Shop results at the top of the Shop experience, ahead of Recently Viewed and explanatory/support sections while an active intent/filter exists. Shop hero/content/collection/policy presentation fields are Media-Studio editable.
+4. Storefront product imagery now uses full-frame `contain` presentation so edited product photos are not unintentionally cropped to a corner/side.
+5. Added `/admin/public-display-order/` with separate pin/rank authority for Home Featured, Art/Gallery and Creations. Existing fallback ordering remains when no explicit priority is saved.
+6. Added review-first TMDB movie lookup. Search + movie/credits/external-ID/video detail can fill empty title/year/genre/director/cast/runtime/studio/IMDb/poster/trailer/synopsis fields while preserving physical-copy facts. Requires encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`.
+7. Research/experiment/content Creative Projects now automatically get productless CAIP workspaces. Creative Process can record Inventory usage directly, allocate per-use cost, save an internal content/research/project-development cost purpose, and jump straight to CAIP raw-media upload for the selected project.
+8. Productless projects retain material-usage/cost-analysis outputs and can proceed through reviewed evidence to the existing Content Studio/social-package handoff without inventing a sellable product.
+9. Added additive D1 migration `database_build264_content_project_merchandising.sql`; `database_upgrade_current_pass.sql` is byte-identical.
+
+### Highest-value next work after Build 264
+
+1. Production-test one existing research/experiment project: confirm CAIP workspace, upload one disposable video/photo fixture, record one consumable and one reusable Inventory use, then create a reviewed Content Studio handoff.
+2. Set `TMDB_READ_ACCESS_TOKEN` in the production Pages secrets and test two known movie titles before batch-filling the movie shelf.
+3. Use Public Display Order to pin/rank a small Home Featured/Gallery/Creations fixture and verify each surface is independent.
+4. Continue expanding Media Studio only for genuinely static/public presentation slots; keep product, inventory, supplies and tools in specialist editors.
 
 ## Build 263 completed work — My Printers-only label output and tighter oval composition
 

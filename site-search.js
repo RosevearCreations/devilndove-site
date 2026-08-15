@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     summaryEl.textContent = `${results.length} result(s) found${query ? ` for “${query}”` : ''}.${notice ? ` ${notice}` : ''}`;
     resultsEl.innerHTML = results.map((row) => `
       <article class="card">
-        ${row.image ? `<img src="${escapeHtml(row.image)}" alt="${escapeHtml(row.name)}" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px;margin-bottom:12px"/>` : ''}
+        ${row.image ? `<img src="${escapeHtml(row.image)}" alt="${escapeHtml(row.name)}" style="width:100%;aspect-ratio:16/10;object-fit:contain;border-radius:12px;margin-bottom:12px"/>` : ''}
         <div class="small">${escapeHtml(row.type)}</div>
         <h2 style="font-size:1.05rem;margin:8px 0">${escapeHtml(row.name)}</h2>
         <p class="small" style="min-height:3.2em">${escapeHtml(row.summary || 'No summary available.')}</p>
