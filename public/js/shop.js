@@ -1,5 +1,5 @@
 // File: /public/js/shop.js
-// Brief description: Loads storefront products with advanced search, pricing filters,
+// Brief description: Loads storefront products with Build 264 filtered-arrival layout, advanced search, pricing filters,
 // collection landing cards, and client-side snapshot fallback so the shop stays usable when the live endpoint drifts.
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const statusEl = document.getElementById("shopStatus");
   const collectionsEl = document.getElementById('shopCollectionsMount');
   const policyEl = document.getElementById('shopPolicyFaqMount');
+  const resultsSection = document.getElementById('shopResultsSection');
+  const resultsHomeParent = resultsSection?.parentNode || null;
+  const resultsHomeNext = resultsSection?.nextSibling || null;
+  let focusedArrivalHandled = false;
+  const initialFocusProducts = new URLSearchParams(window.location.search).get('focus')==='products';
   const SNAPSHOT_KEY = 'dd_shop_snapshot_v3';
 
   function show(el) { if (el) el.style.display = ""; }
@@ -82,6 +87,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       missing_proof_image: String(document.getElementById('shopProofImageFilter')?.value || '').trim()
     };
   }
+  function hasActiveShopIntent() { return Object.values(readFilters()).some((value)=>String(value||'').trim()!==''); }
+  function placeResultsForIntent() {
+    if (!resultsSection) return;
+    const hero=document.querySelector('.hero.public-service-hero');
+    if (hasActiveShopIntent() && hero?.parentNode) {
+      hero.insertAdjacentElement('afterend',resultsSection);
+      resultsSection.classList.add('shop-filter-arrival');
+    } else if (resultsHomeParent) {
+      if (resultsHomeNext && resultsHomeNext.parentNode===resultsHomeParent) resultsHomeParent.insertBefore(resultsSection,resultsHomeNext);
+      else resultsHomeParent.appendChild(resultsSection);
+      resultsSection.classList.remove('shop-filter-arrival');
+    }
+  }
   function buildUrl() {
     const filters = readFilters();
     const url = new URL('/api/products', window.location.origin);
@@ -107,10 +125,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     ];
     collectionsEl.innerHTML = `
       <section class="card">
-        <h2 style="margin-top:0">Browse by collection direction</h2>
-        <p class="small" style="margin-top:0">This helps move the shop toward clearer collection-style landing sections for handmade work, vintage stock, collectibles, oddities, and external-listing inventory instead of making every visit start with a blank search.</p>
+        <h2 style="margin-top:0" data-content-slot="shop.text.collections.heading">Browse by collection direction</h2>
+        <p class="small" style="margin-top:0" data-content-slot="shop.text.collections.body">This helps move the shop toward clearer collection-style landing sections for handmade work, vintage stock, collectibles, oddities, and external-listing inventory instead of making every visit start with a blank search.</p>
         <div class="shop-collection-card-grid">
-          ${originCards.map((card) => `<div class="shop-collection-card"><strong>${escapeHtml(card.title)}</strong><p class="small">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse ${escapeHtml(card.key)}</button></div>`).join('')}
+          ${originCards.map((card) => `<div class="shop-collection-card" data-color-slot="shop.collection.${escapeHtml(card.key)}.color"><strong data-content-slot="shop.collection.${escapeHtml(card.key)}.heading">${escapeHtml(card.title)}</strong><p class="small" data-content-slot="shop.collection.${escapeHtml(card.key)}.body">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse ${escapeHtml(card.key)}</button></div>`).join('')}
         </div>
         <div class="shop-filter-pill-groups">
           <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No categories yet.'}</div></div>
@@ -133,11 +151,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!policyEl) return;
     policyEl.innerHTML = `
       <section class="card">
-        <h2 style="margin-top:0">Shipping, custom order timing, and quick FAQ</h2>
+        <h2 style="margin-top:0" data-content-slot="shop.text.policy.heading">Shipping, custom order timing, and quick FAQ</h2>
         <div class="customer-welcome-grid">
-          <div><strong>Shipping clarity</strong><p class="small">Product pages and the cart now keep shipping-required information visible sooner so shoppers know whether an item is shipped from Devil n Dove directly or linked out to an external marketplace listing.</p></div>
-          <div><strong>Custom timing</strong><p class="small">Custom, personalized, or made-to-order timing should be confirmed before payment. This is especially important for one-off craft work and workshop-led experiments.</p></div>
-          <div><strong>Returns, pickup & support</strong><p class="small">Questions about delivery, pickup timing, collectible-condition notes, or custom-order fit should route through the contact flow quickly so shoppers do not need to hunt for help after comparing items.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/contact/">Contact</a><a class="btn" href="/marketplaces/">Marketplace guide</a><a class="btn" href="/pickup/">Local pickup</a></div></div><div><strong>Process, provenance & workshop story</strong><p class="small">Gallery, About, Creations, Collections, the marketplace guide, and the events page help buyers move from one listing into the wider maker story, local market context, provenance notes for vintage/collectible stock, and future process-video content.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/gallery/">Gallery</a><a class="btn" href="/about/">About</a><a class="btn" href="/creations/">Creations</a><a class="btn" href="/collections/">Collections</a><a class="btn" href="/events/">Events</a></div></div>
+          <div><strong data-content-slot="shop.text.policy.1.heading">Shipping clarity</strong><p class="small" data-content-slot="shop.text.policy.1.body">Product pages and the cart now keep shipping-required information visible sooner so shoppers know whether an item is shipped from Devil n Dove directly or linked out to an external marketplace listing.</p></div>
+          <div><strong data-content-slot="shop.text.policy.2.heading">Custom timing</strong><p class="small" data-content-slot="shop.text.policy.2.body">Custom, personalized, or made-to-order timing should be confirmed before payment. This is especially important for one-off craft work and workshop-led experiments.</p></div>
+          <div><strong data-content-slot="shop.text.policy.3.heading">Returns, pickup & support</strong><p class="small" data-content-slot="shop.text.policy.3.body">Questions about delivery, pickup timing, collectible-condition notes, or custom-order fit should route through the contact flow quickly so shoppers do not need to hunt for help after comparing items.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/contact/">Contact</a><a class="btn" href="/marketplaces/">Marketplace guide</a><a class="btn" href="/pickup/">Local pickup</a></div></div><div><strong data-content-slot="shop.text.policy.4.heading">Process, provenance & workshop story</strong><p class="small" data-content-slot="shop.text.policy.4.body">Gallery, About, Creations, Collections, the marketplace guide, and the events page help buyers move from one listing into the wider maker story, local market context, provenance notes for vintage/collectible stock, and future process-video content.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn" href="/gallery/">Gallery</a><a class="btn" href="/about/">About</a><a class="btn" href="/creations/">Creations</a><a class="btn" href="/collections/">Collections</a><a class="btn" href="/events/">Events</a></div></div>
         </div>
       </section>`;
   }
@@ -286,6 +304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return products;
   }
   async function loadProducts() {
+    placeResultsForIntent();
     const url = buildUrl();
     hide(errorEl); hide(emptyEl); hide(productsEl); show(loadingEl); setStatus('');
     try {
@@ -296,6 +315,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load products.');
       renderPayload(data);
       writeFiltersToUrl();
+      placeResultsForIntent();
+      if(!focusedArrivalHandled && initialFocusProducts){focusedArrivalHandled=true;setTimeout(()=>resultsSection?.scrollIntoView({behavior:'smooth',block:'start'}),30);}
       saveSnapshot(url, { data });
     } catch (error) {
       const cached = loadSnapshot(url);
