@@ -1,11 +1,21 @@
-# Devil n Dove AI Handoff — Build 263
+# Devil n Dove AI Handoff — Build 264
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 263**. The current D1 migration is **Build 263**: `database_build263_packaging_my_printers_label_alignment.sql`, byte-identical to `database_upgrade_current_pass.sql`. It is additive and follows the Build 259 media-slot boundary; Builds 260–262 were code-only.
+The current code release is **Build 264**. The current D1 migration is **Build 264**: `database_build264_content_project_merchandising.sql`, byte-identical to `database_upgrade_current_pass.sql`. It is additive and follows Build 263. Build 264 adds public merchandising priorities, project-first CAIP/cost context, and the final 543-slot Home/Shop Media Studio catalog. The TMDB movie metadata helper additionally requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
 
+
+## Build 264 content, movie, merchandising and project-first CAIP rule
+
+1. `/admin/media-content-studio/` is a static-site presentation editor. The Website Areas panel must never clip its lower entries. Shop static presentation is editable, but individual Product/Inventory/Supply/Tool records remain under their specialist editors.
+2. Home `What we make, find, and experiment with` has six editable cards (title, body, destination link and background colour), three editable visuals, and three editable Build-182 visual-polish tiles. Filtered Home category links route directly to Shop product results, which move above the explanatory/support sections while a filter is active.
+3. Product/storefront imagery uses full-frame `contain` presentation rather than cropping edited images to fill cards.
+4. `/admin/public-display-order/` is the owner authority for explicit Home Featured, Art/Gallery and Creations ordering. Pin + lower rank wins. This is an editorial merchandising choice, not an inferred popularity metric.
+5. Movie metadata can be filled from TMDB through `/admin/movies/`. Search/preview are server-side; the normal behavior fills blank metadata only. UPC/edition/physical-cover/value/collection notes remain Devil n Dove facts and are not replaced unless explicitly requested.
+6. Every Creative Process project can own a CAIP workspace even with no sellable product. Research/experiment/content projects can upload raw media through CAIP, record direct Inventory usage/cost, assign an internal cost purpose, select reviewed evidence, and then create the normal Content Studio/social package handoff. Reusable/log-only resources can contribute per-use cost without reducing stock; consumables use the existing inventory conversion/posting rules.
+7. Build 264 does not automatically publish or treat raw CAIP media as public. Review/privacy/rights/evidence gates remain authoritative.
 
 ## Build 263 My Printers / soap-oval alignment rule
 
