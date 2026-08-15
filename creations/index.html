@@ -26,7 +26,7 @@
 
     .catalog-grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:16px; margin-top:16px; }
     .creation-card{ background:#fff; border:1px solid #e7e7e7; border-radius:18px; overflow:hidden; display:flex; flex-direction:column; }
-    .creation-card img{ width:100%; aspect-ratio: 4/3; object-fit:cover; background:#f4f4f4; }
+    .creation-card img{ width:100%; aspect-ratio: 4/3; object-fit:contain; object-position:center; background:#f4f4f4; }
     .creation-body{ padding:14px; display:flex; flex-direction:column; gap:10px; height:100%; }
     .meta-line{ display:flex; gap:8px; flex-wrap:wrap; }
     .pill{ display:inline-flex; align-items:center; padding:5px 9px; border-radius:999px; background:#f7f1f9; color:#7b4f86; font-size:.78rem; border:1px solid #ead8f2; }
@@ -194,7 +194,7 @@
 </div>
 <script src="/js/main.js"></script><script src="/public/js/seo-page-overrides.js"></script>
 <script>
-    const DATA_URL = '/api/creations';
+    const DATA_URL = '/api/creations?surface=creations';
     const DATA_FALLBACK_URL = '/data/itemsforsale/itemsforsale_items_master.json';
     const FALLBACK_ASSET_ORIGIN = 'https://assets.devilndove.com';
     const FALLBACK_ASSET_PREFIX = 'Itemsforsale';

@@ -3214,3 +3214,28 @@ details.packaging-amazon-material-import[open]>summary{margin-bottom:10px}
 .packaging-sheet-plan span{font-size:.92rem;opacity:.88}
 .packaging-source-picker select,.packaging-library-section select{max-width:100%}
 @media (max-width:760px){.packaging-active-library-card{grid-template-columns:1fr}.packaging-printer-callout,.packaging-sheet-plan{display:block}.packaging-printer-callout>*+*,.packaging-sheet-plan>*+*{display:block;margin-top:.35rem}}
+
+/* Build 264 — Media Studio scroll, full-frame storefront imagery, editable Home card visuals. */
+.media-site-map-panel{max-height:calc(100dvh - 28px)!important;overflow-y:auto!important;overflow-x:hidden;scrollbar-gutter:stable;padding-bottom:44px}
+.media-site-map-panel .media-page-map{padding-bottom:28px}
+.what-we-make-visuals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;min-width:min(520px,48vw)}
+.what-we-make-visuals picture,.what-we-make-visuals figure{margin:0;min-width:0}
+.what-we-make-visuals img{display:block;width:100%;height:150px;object-fit:contain;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.1);border-radius:12px}
+.what-we-make-card{transition:background-color .18s ease,border-color .18s ease,transform .18s ease}
+.media-slot-card.color{border-left:3px solid rgba(214,120,214,.6)}
+.media-slot-card.link{border-left:3px solid rgba(96,196,255,.6)}
+.media-slot-color-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:9px;align-items:center;margin-top:10px}.media-slot-color-row input[type=color]{width:72px;height:44px;padding:2px}
+/* Product/catalog photography should show the complete edited frame rather than crop it. */
+.shop-card-main-image img,.shop-card-thumb img,.product-detail-main-image img,.featured-creation-media img,.creation-card img,.item.card .thumb img,.item.card img[data-creation-image],.recently-viewed-grid img{object-fit:contain!important;object-position:center!important;background:rgba(245,242,234,.08)}
+.shop-card-main-image,.featured-creation-media{background:rgba(245,242,234,.06)}
+.shop-filter-arrival{border-color:rgba(231,201,120,.55);box-shadow:0 0 0 2px rgba(184,138,47,.08)}
+@media(max-width:900px){.what-we-make-visuals{min-width:0;width:100%}.section-heading-row{align-items:start}.media-site-map-panel{max-height:none!important;overflow:visible!important;padding-bottom:0}}
+@media(max-width:640px){.what-we-make-visuals{grid-template-columns:1fr 1fr 1fr}.what-we-make-visuals img{height:105px}}
+/* Build 264 — explicit public merchandising order */
+.public-display-order-list{display:grid;gap:10px}.public-display-order-row{display:grid;grid-template-columns:72px minmax(180px,1fr) 100px 110px minmax(180px,1fr);gap:12px;align-items:center;margin:0}.public-display-order-thumb{width:72px;height:72px;border:1px solid var(--line,#ccc);border-radius:10px;overflow:hidden;display:grid;place-items:center}.public-display-order-thumb img{width:100%;height:100%;object-fit:contain;background:#fff}.public-display-order-main{display:grid;gap:3px}.public-display-order-row label{min-width:0}.public-display-order-row input{max-width:100%}@media(max-width:850px){.public-display-order-row{grid-template-columns:64px 1fr}.public-display-order-row label{grid-column:1/-1}.public-display-order-thumb{width:64px;height:64px}}
+/* Build 264 — movie metadata import */
+.movie-tmdb-results{display:grid;gap:8px;max-height:360px;overflow:auto}.movie-tmdb-result{display:grid;grid-template-columns:46px 1fr;gap:10px;align-items:center;text-align:left;width:100%;margin:0}.movie-tmdb-result span:last-child{display:grid;gap:3px}.movie-tmdb-poster{width:46px;height:64px;border-radius:6px;overflow:hidden;background:rgba(127,127,127,.12)}.movie-tmdb-poster img{width:100%;height:100%;object-fit:contain}
+/* Build 264 — project-as-content inventory/CAIP workflow */
+.creative-direct-inventory{margin:12px 0;padding:14px}.creative-direct-inventory .grid{align-items:end}.creative-cost-context{display:grid;grid-template-columns:minmax(180px,1fr) minmax(220px,2fr) auto;gap:10px;align-items:end;margin-bottom:14px}@media(max-width:800px){.creative-cost-context{grid-template-columns:1fr}}
+/* Build 264 final — Website Areas must never clip the lower Collections/site-map entries. Use page scrolling instead of a nested sticky scroller. */
+.media-site-map-panel{position:static!important;max-height:none!important;height:auto!important;overflow:visible!important;padding-bottom:18px!important}.media-site-map-panel .media-page-map{max-height:none!important;overflow:visible!important;padding-bottom:8px!important}
