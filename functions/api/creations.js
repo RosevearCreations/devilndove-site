@@ -20,6 +20,10 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+async function tableExists(db, tableName) {
+  return Boolean(await db.prepare("SELECT 1 ok FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(tableName).first().catch(() => null));
+}
+
 function slugify(value) {
   return normalizeText(value)
     .toLowerCase()
@@ -234,6 +238,8 @@ export async function onRequestGet(context) {
   const db = env.DB || env.DD_DB;
   const url = new URL(request.url);
   const query = normalizeText(url.searchParams.get("q")).toLowerCase();
+  const requestedSurface = normalizeText(url.searchParams.get("surface")).toLowerCase();
+  const surface = ["gallery","creations"].includes(requestedSurface) ? requestedSurface : "creations";
   const like = `%${query}%`;
   const limit = Math.max(1, Math.min(Number(url.searchParams.get("limit") || 250), 500));
   const warnings = [];
@@ -245,39 +251,33 @@ export async function onRequestGet(context) {
 
   if (db) {
     try {
+      const hasDisplayPriority = await tableExists(db, 'public_display_priorities');
       const rows = normalizeResults(
         await db
-          .prepare(`
+          .prepare(hasDisplayPriority ? `
             SELECT
-              catalog_item_id,
-              source_key,
-              slug,
-              name,
-              category,
-              subcategory,
-              item_type,
-              short_description,
-              notes,
-              image_url,
-              source_record_json,
-              updated_at
-            FROM catalog_items
-            WHERE item_kind = 'creation'
-              AND COALESCE(visible_public, 1) = 1
-              AND COALESCE(status, 'active') = 'active'
+              c.catalog_item_id,c.source_key,c.slug,c.name,c.category,c.subcategory,c.item_type,c.short_description,c.notes,c.image_url,c.source_record_json,c.updated_at
+            FROM catalog_items c
+            LEFT JOIN public_display_priorities d
+              ON d.surface_key=? AND d.record_type='creation' AND d.record_id=c.catalog_item_id
+            WHERE c.item_kind = 'creation'
+              AND COALESCE(c.visible_public, 1) = 1
+              AND COALESCE(c.status, 'active') = 'active'
               AND (
-                ? = ''
-                OR LOWER(COALESCE(name, '')) LIKE ?
-                OR LOWER(COALESCE(category, '')) LIKE ?
-                OR LOWER(COALESCE(subcategory, '')) LIKE ?
-                OR LOWER(COALESCE(item_type, '')) LIKE ?
-                OR LOWER(COALESCE(short_description, '')) LIKE ?
-                OR LOWER(COALESCE(notes, '')) LIKE ?
+                ? = '' OR LOWER(COALESCE(c.name, '')) LIKE ? OR LOWER(COALESCE(c.category, '')) LIKE ?
+                OR LOWER(COALESCE(c.subcategory, '')) LIKE ? OR LOWER(COALESCE(c.item_type, '')) LIKE ?
+                OR LOWER(COALESCE(c.short_description, '')) LIKE ? OR LOWER(COALESCE(c.notes, '')) LIKE ?
               )
-            ORDER BY COALESCE(sort_order, 0) ASC, LOWER(COALESCE(name, '')) ASC
+            ORDER BY COALESCE(d.is_pinned,0) DESC,COALESCE(d.priority_rank,9999) ASC,COALESCE(c.sort_order,0) ASC,LOWER(COALESCE(c.name,'')) ASC
             LIMIT ?
+          ` : `
+            SELECT catalog_item_id,source_key,slug,name,category,subcategory,item_type,short_description,notes,image_url,source_record_json,updated_at
+            FROM catalog_items
+            WHERE item_kind = 'creation' AND COALESCE(visible_public,1)=1 AND COALESCE(status,'active')='active'
+              AND (?='' OR LOWER(COALESCE(name,'')) LIKE ? OR LOWER(COALESCE(category,'')) LIKE ? OR LOWER(COALESCE(subcategory,'')) LIKE ? OR LOWER(COALESCE(item_type,'')) LIKE ? OR LOWER(COALESCE(short_description,'')) LIKE ? OR LOWER(COALESCE(notes,'')) LIKE ?)
+            ORDER BY COALESCE(sort_order,0) ASC,LOWER(COALESCE(name,'')) ASC LIMIT ?
           `)
-          .bind(query, like, like, like, like, like, like, limit)
+          .bind(...(hasDisplayPriority ? [surface,query,like,like,like,like,like,like,limit] : [query,like,like,like,like,like,like,limit]))
           .all()
       );
 

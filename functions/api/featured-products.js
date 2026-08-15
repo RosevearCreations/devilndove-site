@@ -26,7 +26,21 @@ export async function onRequestGet(context) {
   const url = new URL(request.url);
   const limit = positiveInt(url.searchParams.get('limit'), 6, 12);
   try {
-    const productRows = rows(await db.prepare(`
+    const hasDisplayPriority = await tableExists(db, 'public_display_priorities');
+    const productRows = rows(await db.prepare(hasDisplayPriority ? `
+      SELECT p.product_id, p.slug, p.name, p.product_category, p.short_description, p.price_cents, p.currency,
+             p.featured_image_url, p.merchandise_origin, p.sale_channel, p.inventory_tracking, p.inventory_quantity,
+             p.requires_shipping, p.created_at, p.updated_at
+      FROM products p
+      LEFT JOIN public_display_priorities d
+        ON d.surface_key='home_featured' AND d.record_type='product' AND d.record_id=p.product_id
+      WHERE COALESCE(p.status,'active') = 'active'
+        AND COALESCE(p.review_status,'published') IN ('approved','published','')
+      ORDER BY COALESCE(d.is_pinned,0) DESC, COALESCE(d.priority_rank,9999) ASC,
+               COALESCE(p.sort_order, 999999) ASC,
+               datetime(COALESCE(p.updated_at, p.created_at, CURRENT_TIMESTAMP)) DESC, p.product_id DESC
+      LIMIT ?
+    ` : `
       SELECT product_id, slug, name, product_category, short_description, price_cents, currency,
              featured_image_url, merchandise_origin, sale_channel, inventory_tracking, inventory_quantity,
              requires_shipping, created_at, updated_at
@@ -34,8 +48,7 @@ export async function onRequestGet(context) {
       WHERE COALESCE(status,'active') = 'active'
         AND COALESCE(review_status,'published') IN ('approved','published','')
       ORDER BY COALESCE(sort_order, 999999) ASC,
-               datetime(COALESCE(updated_at, created_at, CURRENT_TIMESTAMP)) DESC,
-               product_id DESC
+               datetime(COALESCE(updated_at, created_at, CURRENT_TIMESTAMP)) DESC, product_id DESC
       LIMIT ?
     `).bind(limit).all());
     const ids = productRows.map((row) => Number(row.product_id || 0)).filter(Boolean);
