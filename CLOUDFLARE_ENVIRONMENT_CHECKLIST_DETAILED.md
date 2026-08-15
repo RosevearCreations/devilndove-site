@@ -1,3 +1,15 @@
+# Build 264 current deployment note
+
+Build 264 is the current deployment boundary. Back up production D1, confirm Build 263 is already applied, then apply `database_build264_content_project_merchandising.sql` **or** the byte-identical `database_upgrade_current_pass.sql` once (not both) and run `BUILD264_D1_VERIFICATION.sql`. Deploy the complete archive and hard-refresh the affected admin/public pages.
+
+Build 264 adds one external metadata secret for the optional Movie helper:
+
+| Variable / secret | Required | Purpose |
+|---|---|---|
+| `TMDB_READ_ACCESS_TOKEN` | Required only to use TMDB Movie import | TMDB API Read Access Token used server-side for Movie search/details/credits/external IDs. Save as an encrypted Production secret; never expose it in browser JavaScript or commit it to the repository. |
+
+The application reads the token only inside `/api/admin/movies`. Without it, ordinary manual Movie Catalog editing continues to work and the TMDB helper returns a configuration message. Cloudflare Pages secrets are available to Functions through `context.env`; changing a secret requires a deployment before the Function can use the new value. Before enabling the token on the commercial Devil n Dove site, review/obtain the applicable TMDB commercial-use permission and implement the attribution/branding required by the provider. The integration is intentionally optional so manual Movie Catalog editing remains available without TMDB.
+
 # Build 246 current deployment note
 
 Build 246 is the current deployment boundary. Keep the existing D1 binding, public/product-media R2 binding and private `CAIP_PRIVATE_MEDIA_BUCKET` where CAIP intake is enabled. Back up D1, confirm Build 245 is already applied, apply `database_build246_product_project_production_packaging.sql` or byte-identical `database_upgrade_current_pass.sql` once, run `BUILD246_D1_VERIFICATION.sql`, deploy the complete package, and hard-refresh to shell v23. Build 245 degraded-auth rules remain: a temporary `/api/auth/me` 5xx retains the cached admin shell; only a real 401/403 represents rejected authentication. Build 246 adds no new secret variable/binding requirement.

@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ? `<img
              src="${escapeHtml(imageUrl)}"
              alt="${name}"
-             style="width:90px;height:90px;object-fit:cover;border-radius:10px"
+             style="width:90px;height:90px;object-fit:contain;border-radius:10px"
            />`
         : `<div
              style="width:90px;height:90px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd;border-radius:10px"
