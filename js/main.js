@@ -361,7 +361,7 @@
     section.id = 'visualPolishStrip';
     section.className = 'visual-polish-strip';
     section.setAttribute('aria-label', meta.kicker || 'Visual polish notes');
-    section.innerHTML = meta.bullets.map((bullet, index) => `<article class="visual-tile"><div class="visual-kicker">${escapeHtml(index === 0 ? meta.kicker : (index === 1 ? 'Mobile friendly' : 'Polished fallback'))}</div><h2>${escapeHtml(index === 0 ? meta.heading : (index === 1 ? 'Phone and desktop ready' : 'Fast, clear, accessible'))}</h2><p class="small">${escapeHtml(bullet)}</p></article>`).join('');
+    section.innerHTML = meta.bullets.map((bullet, index) => { const key=`home.visual-polish.${index+1}`; return `<article class="visual-tile" data-color-slot="${key}.color" data-visual-polish-card="${index+1}"><div class="visual-kicker" data-content-slot="${key}.kicker">${escapeHtml(index === 0 ? meta.kicker : (index === 1 ? 'Mobile friendly' : 'Polished fallback'))}</div><h2 data-content-slot="${key}.heading">${escapeHtml(index === 0 ? meta.heading : (index === 1 ? 'Phone and desktop ready' : 'Fast, clear, accessible'))}</h2><p class="small" data-content-slot="${key}.body">${escapeHtml(bullet)}</p></article>`; }).join('');
     anchor.parentNode.insertBefore(section, anchor.nextSibling);
   }
 
