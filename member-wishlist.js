@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!rows.length) body.innerHTML = '<tr><td colspan="4" style="padding:8px">No wishlist items saved yet.</td></tr>';
       else body.innerHTML = rows.map((row) => `
         <tr>
-          <td style="padding:8px;border-bottom:1px solid #ddd">${row.featured_image_url ? `<img src="${escapeHtml(row.featured_image_url)}" alt="${escapeHtml(row.name || '')}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;margin-bottom:6px"/>` : ''}<strong>${escapeHtml(row.name || '')}</strong><div class="small">${escapeHtml(row.short_description || '')}</div></td>
+          <td style="padding:8px;border-bottom:1px solid #ddd">${row.featured_image_url ? `<img src="${escapeHtml(row.featured_image_url)}" alt="${escapeHtml(row.name || '')}" style="width:48px;height:48px;object-fit:contain;border-radius:8px;display:block;margin-bottom:6px"/>` : ''}<strong>${escapeHtml(row.name || '')}</strong><div class="small">${escapeHtml(row.short_description || '')}</div></td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(money(row.price_cents, row.currency))}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(row.created_at || '')}</td>
           <td style="padding:8px;border-bottom:1px solid #ddd"><a class="btn" href="/shop/product/?slug=${encodeURIComponent(row.slug || '')}">View</a> <button class="btn" type="button" data-remove-wishlist="${row.product_id}">Remove</button></td>

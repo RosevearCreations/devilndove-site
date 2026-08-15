@@ -90,11 +90,11 @@
 
     if (!isFullGiftPage) {
       mount.innerHTML = `
-        <section class="card storefront-gift-card-card storefront-gift-card-compact">
+        <section class="card storefront-gift-card-card storefront-gift-card-compact" data-color-slot="shop.giftcard.color">
           <div>
             <span class="badge">Gift cards</span>
-            <h2 style="margin:6px 0 0 0">Gift cards for handmade picks</h2>
-            <p class="small" style="margin:6px 0 0 0">Keep gift cards on their own page so the shop can stay focused on product browsing.</p>
+            <h2 data-content-slot="shop.giftcard.heading" style="margin:6px 0 0 0">Gift cards for handmade picks</h2>
+            <p class="small" data-content-slot="shop.giftcard.body" style="margin:6px 0 0 0">Keep gift cards on their own page so the shop can stay focused on product browsing.</p>
           </div>
           <div class="storefront-gift-card-compact-actions">
             ${saved ? `<div class="small">Saved draft: ${escapeHtml(centsToMoney(saved.amount_cents || 0, saved.currency || 'CAD'))} for ${escapeHtml(saved.recipient_name || saved.recipient_email || 'recipient')}</div>` : ''}
