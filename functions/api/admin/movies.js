@@ -4,6 +4,28 @@ function json(data, status = 200) {
   return jsonResponse(data, status, { "Cache-Control": "no-store" });
 }
 
+
+function tmdbToken(env) {
+  return normalizeText(env?.TMDB_READ_ACCESS_TOKEN || env?.TMDB_API_READ_ACCESS_TOKEN);
+}
+async function tmdbGet(env, path, params = {}) {
+  const token = tmdbToken(env);
+  if (!token) throw new Error('TMDB_READ_ACCESS_TOKEN is not configured in Cloudflare secrets.');
+  const url = new URL(`https://api.themoviedb.org/3${path}`);
+  for (const [key,value] of Object.entries(params)) if (value !== '' && value != null) url.searchParams.set(key, String(value));
+  const response = await fetch(url.toString(), { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.status_message || `TMDB request failed (${response.status}).`);
+  return data || {};
+}
+function tmdbYear(value) { const m = String(value || '').match(/^(\d{4})/); return m ? Number(m[1]) : null; }
+function tmdbPoster(path) { return path ? `https://image.tmdb.org/t/p/w780${path}` : ''; }
+function tmdbTrailer(videos) {
+  const rows = Array.isArray(videos?.results) ? videos.results : [];
+  const pick = rows.find(v => v?.site === 'YouTube' && v?.type === 'Trailer' && v?.official) || rows.find(v => v?.site === 'YouTube' && v?.type === 'Trailer') || rows.find(v => v?.site === 'YouTube');
+  return pick?.key ? `https://www.youtube.com/watch?v=${encodeURIComponent(pick.key)}` : '';
+}
+
 function safeNumber(value) {
   if (value == null || value === "") return null;
   const n = Number(value);
@@ -329,6 +351,39 @@ export async function onRequestPost(context) {
       body = await request.json();
     } catch {
       return json({ ok: false, error: "Invalid JSON body." }, 400);
+    }
+
+    const action = normalizeText(body.action).toLowerCase();
+    if (action === 'tmdb_search') {
+      const query = normalizeText(body.query || body.title);
+      if (!query) return json({ ok:false, error:'Enter a movie title to search TMDB.' }, 400);
+      const data = await tmdbGet(env, '/search/movie', { query, primary_release_year: safeNumber(body.year) || '', include_adult: 'false', language: 'en-CA', page: 1 });
+      const results = (Array.isArray(data.results) ? data.results : []).slice(0,12).map(row => ({
+        tmdb_id: Number(row.id || 0), title: normalizeText(row.title), original_title: normalizeText(row.original_title),
+        release_year: tmdbYear(row.release_date), summary: normalizeText(row.overview), poster_url: tmdbPoster(row.poster_path), popularity: Number(row.popularity || 0)
+      }));
+      return json({ ok:true, action, results, source:'TMDB' });
+    }
+    if (action === 'tmdb_preview') {
+      const tmdbId = Number(body.tmdb_id || 0);
+      if (!Number.isInteger(tmdbId) || tmdbId <= 0) return json({ ok:false, error:'Choose a valid TMDB movie result.' }, 400);
+      const [movie,credits,external,videos] = await Promise.all([
+        tmdbGet(env, `/movie/${tmdbId}`, { language:'en-CA' }),
+        tmdbGet(env, `/movie/${tmdbId}/credits`, { language:'en-CA' }),
+        tmdbGet(env, `/movie/${tmdbId}/external_ids`),
+        tmdbGet(env, `/movie/${tmdbId}/videos`, { language:'en-CA' })
+      ]);
+      const cast=(Array.isArray(credits.cast)?credits.cast:[]).slice().sort((a,b)=>Number(a.order||999)-Number(b.order||999)).slice(0,15).map(x=>normalizeText(x.name)).filter(Boolean);
+      const directors=(Array.isArray(credits.crew)?credits.crew:[]).filter(x=>normalizeText(x.job).toLowerCase()==='director').map(x=>normalizeText(x.name)).filter(Boolean);
+      const studios=(Array.isArray(movie.production_companies)?movie.production_companies:[]).slice(0,5).map(x=>normalizeText(x.name)).filter(Boolean);
+      const preview={
+        title:normalizeText(movie.title), original_title:normalizeText(movie.original_title), sort_title:normalizeText(movie.title),
+        summary:normalizeText(movie.overview), release_year:tmdbYear(movie.release_date), genre:(movie.genres||[]).map(x=>normalizeText(x.name)).filter(Boolean).join(', '),
+        director_names:[...new Set(directors)].join(', '), actor_names:[...new Set(cast)].join(', '), runtime_minutes:safeNumber(movie.runtime),
+        studio_name:[...new Set(studios)].join(', '), imdb_id:normalizeText(external.imdb_id), alternate_identifier:`tmdb:${tmdbId}`,
+        trailer_url:tmdbTrailer(videos), front_image_url:tmdbPoster(movie.poster_path), metadata_source:'TMDB + manual physical-copy overlay', metadata_status:'partially_enriched'
+      };
+      return json({ ok:true, action, tmdb_id:tmdbId, preview, source:'TMDB' });
     }
 
     const upc = normalizeText(body.upc);

@@ -3,10 +3,10 @@ import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normali
 const DEFAULT_PUBLIC_BASE = "https://assets.devilndove.com";
 const MEDIA_TYPES = new Set(["photo","artwork","logo","background","banner","packaging","icon","proof","process","technique","evidence","materials","review","blog","other"]);
 const SLOT_TYPES = new Set(["image","background","text"]);
-const TARGET_ATTRS = new Set(["src","background-image","textContent"]);
+const TARGET_ATTRS = new Set(["src","background-image","textContent","href","background-color"]);
 const APPROVED_R2_PREFIXES = ["brand/","creations/","social/","uploads/","public/","packaging/","artwork/","backgrounds/","banners/","galleries/","blog/"];
 const BLOCKED_MEDIA_PREFIXES = ["products/","inventory/","supplies/","tools/","toolshed/"];
-const BLOCKED_PAGE_PREFIXES = ["/admin","/shop","/tools","/toolshed","/supplies","/cart","/checkout","/login","/register","/members","/search","/account-help","/bootstrap-admin","/custom-request","/custom-request/order","/custom-request/pay","/custom-request/quote","/custom-request/consent"];
+const BLOCKED_PAGE_PREFIXES = ["/admin","/shop/product","/tools","/toolshed","/supplies","/cart","/checkout","/login","/register","/members","/search","/account-help","/bootstrap-admin","/custom-request","/custom-request/order","/custom-request/pay","/custom-request/quote","/custom-request/consent"];
 const BLOCKED_SOURCE_TYPES = new Set(["product","products","catalog","finished_product","finished-product","inventory","supply","supplies","tool","tools"]);
 
 function json(data, status = 200) { return jsonResponse(data, status); }
@@ -116,7 +116,7 @@ async function pageSlots(db, pagePath) {
     LEFT JOIN managed_media_metadata mm ON mm.media_asset_id=a.media_asset_id
     LEFT JOIN managed_content_blocks cb ON cb.media_content_slot_id=s.media_content_slot_id
     WHERE s.page_path=? AND s.is_active=1
-    ORDER BY CASE s.slot_type WHEN 'image' THEN 1 WHEN 'background' THEN 2 ELSE 3 END,s.media_content_slot_id
+    ORDER BY CASE s.slot_type WHEN 'image' THEN 1 WHEN 'background' THEN 2 ELSE 3 END,s.media_content_slot_id,s.media_content_slot_id
     LIMIT 350
   `).bind(pagePath).all();
   return rows(result).map((r)=>({...r,media_content_slot_id:n(r.media_content_slot_id),media_asset_id:r.media_asset_id==null?null:n(r.media_asset_id),media_content_assignment_id:r.media_content_assignment_id==null?null:n(r.media_content_assignment_id),published:bool(r.published),protected_static:bool(r.protected_static),decorative:bool(r.decorative),is_required:bool(r.is_required)}));
@@ -216,8 +216,8 @@ export async function onRequestPost(context) {
     if (action === "save_content_block") {
       const slotId=n(body.media_content_slot_id); const slot=await db.prepare(`SELECT * FROM media_content_slots WHERE media_content_slot_id=? AND is_active=1 AND slot_type='text'`).bind(slotId).first(); if(!slot)return json({ok:false,error:"Editable text slot not found."},404);
       const draft=String(body.draft_text??'').slice(0,12000); const publish=bool(body.publish);
-      await db.prepare(`INSERT INTO managed_content_blocks(media_content_slot_id,page_path,slot_key,block_type,draft_text,published_text,published,protected_static,created_by_user_id,updated_by_user_id,created_at,updated_at,published_at) VALUES(?,?,?,'text',?,?,?,0,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CASE WHEN ?=1 THEN CURRENT_TIMESTAMP ELSE NULL END) ON CONFLICT(media_content_slot_id) DO UPDATE SET draft_text=excluded.draft_text,published_text=CASE WHEN excluded.published=1 THEN excluded.published_text ELSE managed_content_blocks.published_text END,published=CASE WHEN excluded.published=1 THEN 1 ELSE managed_content_blocks.published END,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP,published_at=CASE WHEN excluded.published=1 THEN CURRENT_TIMESTAMP ELSE managed_content_blocks.published_at END`)
-        .bind(slotId,slot.page_path,slot.slot_key,draft,draft,publish,adminUser.user_id,adminUser.user_id,publish).run();
+      await db.prepare(`INSERT INTO managed_content_blocks(media_content_slot_id,page_path,slot_key,block_type,draft_text,published_text,published,protected_static,created_by_user_id,updated_by_user_id,created_at,updated_at,published_at) VALUES(?,?,?,?,?,?,?,0,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CASE WHEN ?=1 THEN CURRENT_TIMESTAMP ELSE NULL END) ON CONFLICT(media_content_slot_id) DO UPDATE SET draft_text=excluded.draft_text,published_text=CASE WHEN excluded.published=1 THEN excluded.published_text ELSE managed_content_blocks.published_text END,published=CASE WHEN excluded.published=1 THEN 1 ELSE managed_content_blocks.published END,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP,published_at=CASE WHEN excluded.published=1 THEN CURRENT_TIMESTAMP ELSE managed_content_blocks.published_at END`)
+        .bind(slotId,slot.page_path,slot.slot_key,slot.slot_type||'text',draft,draft,publish,adminUser.user_id,adminUser.user_id,publish).run();
       await changeAudit(db,adminUser,{action_type:publish?"publish_text":"save_text_draft",media_content_slot_id:slotId,page_path:slot.page_path,new_value:{text:draft}});
       return json({ok:true,message:publish?"Text published for this exact page slot.":"Draft saved. The public page is unchanged until Publish is used.",slots:await pageSlots(db,slot.page_path)});
     }
