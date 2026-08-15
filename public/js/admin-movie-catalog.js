@@ -41,6 +41,36 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let items = [];
+  const tmdbResults = document.getElementById("tmdbMovieResults");
+  const tmdbTitle = document.getElementById("tmdbMovieSearchTitle");
+  const tmdbYear = document.getElementById("tmdbMovieSearchYear");
+  const tmdbReplace = document.getElementById("tmdbReplacePopulated");
+
+  async function movieAction(payload) {
+    const response = await fetch('/api/admin/movies', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin', body:JSON.stringify(payload) });
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) throw new Error([data?.error,data?.details].filter(Boolean).join(' — ') || `TMDB request failed (${response.status}).`);
+    return data;
+  }
+  function fillFromTmdb(preview = {}) {
+    const replace = !!tmdbReplace?.checked;
+    Object.entries(preview).forEach(([key,value]) => {
+      const el=fields[key]; if(!el || value == null || value === '') return;
+      if(replace || !String(el.value||'').trim()) el.value=value;
+    });
+    renderPreview(currentFormPayload());
+  }
+  async function previewTmdb(tmdbId) {
+    try { setMessage('Loading TMDB movie details…'); const data=await movieAction({action:'tmdb_preview',tmdb_id:tmdbId}); fillFromTmdb(data.preview||{}); setMessage('TMDB metadata filled. Review the physical-copy fields and save when correct.'); }
+    catch(error){setMessage(error.message,true);}
+  }
+  async function searchTmdb() {
+    const query=String(tmdbTitle?.value||fields.title?.value||'').trim(); if(!query)return setMessage('Enter a title to search TMDB.',true);
+    try { setMessage('Searching TMDB…'); const data=await movieAction({action:'tmdb_search',query,year:tmdbYear?.value||fields.release_year?.value||''}); const results=data.results||[];
+      if(tmdbResults)tmdbResults.innerHTML=results.length?results.map(r=>`<button type="button" class="movie-tmdb-result card" data-tmdb-id="${Number(r.tmdb_id||0)}"><span class="movie-tmdb-poster">${r.poster_url?`<img src="${esc(r.poster_url)}" alt="">`:''}</span><span><strong>${esc(r.title||'Untitled')}</strong><small>${esc([r.release_year,r.original_title&&r.original_title!==r.title?r.original_title:''].filter(Boolean).join(' · '))}</small></span></button>`).join(''):'<p class="small">No TMDB matches found.</p>';
+      tmdbResults?.querySelectorAll('[data-tmdb-id]').forEach(btn=>btn.addEventListener('click',()=>previewTmdb(btn.dataset.tmdbId))); setMessage(`TMDB returned ${results.length} possible match(es).`);
+    } catch(error){setMessage(error.message,true);}
+  }
 
   function setMessage(text, isError = false) {
     if (!messageEl) return;
@@ -61,13 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderPreview(item = {}) {
     if (previewFront) {
       previewFront.innerHTML = item.front_image_url
-        ? `<img src="${esc(item.front_image_url)}" alt="Front cover preview" style="display:block;width:100%;height:100%;object-fit:cover">`
+        ? `<img src="${esc(item.front_image_url)}" alt="Front cover preview" style="display:block;width:100%;height:100%;object-fit:contain">`
         : `<div class="small" style="padding:10px">Front cover pending</div>`;
     }
 
     if (previewBack) {
       previewBack.innerHTML = item.back_image_url
-        ? `<img src="${esc(item.back_image_url)}" alt="Back cover preview" style="display:block;width:100%;height:100%;object-fit:cover">`
+        ? `<img src="${esc(item.back_image_url)}" alt="Back cover preview" style="display:block;width:100%;height:100%;object-fit:contain">`
         : `<div class="small" style="padding:10px">Back cover pending</div>`;
     }
 
@@ -194,6 +224,8 @@ document.addEventListener("DOMContentLoaded", () => {
     searchEl._ddMovieTimer = setTimeout(loadMovies, 250);
   });
 
+  document.getElementById('tmdbMovieSearchButton')?.addEventListener('click', searchTmdb);
+  tmdbTitle?.addEventListener('keydown',(event)=>{if(event.key==='Enter'){event.preventDefault();searchTmdb();}});
   form.addEventListener("submit", saveMovie);
   renderPreview({});
   loadMovies();

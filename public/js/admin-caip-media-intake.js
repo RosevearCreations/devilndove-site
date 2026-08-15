@@ -1,16 +1,17 @@
-// Build 241 — CAIP private large-media intake UI with resumable multipart recovery.
+// Build 264 — CAIP private large-media intake UI; accepts productless Creative Process project workspaces.
 (() => {
   const mount = document.getElementById('caipMediaIntakeMount');
   if (!mount) return;
   const LS_PROJECT = 'dd_caip_media_project_v1';
   const LS_SESSION = 'dd_caip_media_session_v1';
   const state = { data: null, pendingFiles: [], localFileMap: new Map(), paused: new Set(), busy: false, online: navigator.onLine };
+  const URL_PROJECT = Number(new URLSearchParams(location.search).get('creative_project_id') || 0);
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
   const fmtBytes = (value) => { const bytes = Math.max(0,num(value)); if (!bytes) return '0 B'; const units=['B','KB','MB','GB','TB']; const i=Math.min(units.length-1,Math.floor(Math.log(bytes)/Math.log(1024))); return `${(bytes/(1024**i)).toFixed(i?1:0)} ${units[i]}`; };
   const pct = (a,b) => b > 0 ? Math.min(100,Math.round((a/b)*100)) : 0;
   const human = (value) => String(value || '').replace(/_/g,' ').replace(/\b\w/g,(m)=>m.toUpperCase());
-  const projectId = () => Number(document.getElementById('caipMediaProject')?.value || state.data?.selected_project_id || localStorage.getItem(LS_PROJECT) || 0);
+  const projectId = () => Number(document.getElementById('caipMediaProject')?.value || state.data?.selected_project_id || URL_PROJECT || localStorage.getItem(LS_PROJECT) || 0);
   const api = async (body=null, project=projectId()) => {
     const url = `/api/admin/caip-media-intake${project ? `?creative_project_id=${encodeURIComponent(project)}` : ''}`;
     const response = await DDAuth.apiFetch(url, body ? {method:'POST',body:JSON.stringify(body)} : undefined);
@@ -93,7 +94,7 @@
   }
   function bindPending(){document.querySelectorAll('[data-remove-pending]').forEach((button)=>button.onclick=()=>{const key=button.dataset.removePending;state.pendingFiles=state.pendingFiles.filter((x)=>x.clientKey!==key);state.localFileMap.delete(key);const target=document.getElementById('caipPendingFiles');if(target)target.innerHTML=pendingRows();bindPending();});}
   async function refresh(project=projectId()) { const data=await api(null,project); state.data=data; if(data.selected_project_id)localStorage.setItem(LS_PROJECT,String(data.selected_project_id)); render(); }
-  async function load(){try{state.data=await api(null,Number(localStorage.getItem(LS_PROJECT)||0));render();}catch(error){fallback(error.message);}}
+  async function load(){try{state.data=await api(null,URL_PROJECT||Number(localStorage.getItem(LS_PROJECT)||0));render();}catch(error){fallback(error.message);}}
 
   async function createSessionAndUpload() {
     if(state.busy)return; const project=projectId(); if(!project)return setMsg('Choose a Creative Project first.',true); if(!state.pendingFiles.length)return setMsg('Choose one or more media files first.',true);
