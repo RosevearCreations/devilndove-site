@@ -24,6 +24,18 @@
         </div>
 
         <div>
+          <div class="card movie-import-panel" style="margin-bottom:12px">
+            <h3 style="margin-top:0">Fill movie metadata from TMDB</h3>
+            <p class="small">Search by title/year, choose the correct film, then fill empty metadata fields. UPC, disc format/edition, our cover images, value and collection notes remain under our control.</p>
+            <p class="small"><strong>Licensing note:</strong> TMDB integration is optional and stays disabled until a token is configured. Use it in production only after the applicable TMDB licence/commercial-use and attribution requirements have been reviewed and approved.</p>
+            <div class="grid cols-3" style="gap:10px">
+              <label><span class="small">Movie title</span><input id="tmdbMovieSearchTitle" placeholder="Movie title"></label>
+              <label><span class="small">Year (optional)</span><input id="tmdbMovieSearchYear" type="number" min="1880" max="2100"></label>
+              <button class="btn" id="tmdbMovieSearchButton" type="button">Search TMDB</button>
+            </div>
+            <label class="checkbox-row" style="margin-top:8px"><input id="tmdbReplacePopulated" type="checkbox"><span>Replace fields that already contain metadata (off is safest)</span></label>
+            <div id="tmdbMovieResults" class="movie-tmdb-results" style="margin-top:10px"></div>
+          </div>
           <div class="card" style="margin-bottom:12px">
             <div class="grid cols-2" style="gap:12px">
               <div>
@@ -299,5 +311,5 @@
     </div>
 
     <div class="footer card" style="margin-top:18px"></div></div><script src="/js/main.js"></script><script src="/public/js/auth.js"></script><script src="/public/js/admin-route-usage.js"></script><script src="/public/js/site-auth-ui.js?v=245"></script><script src="/public/js/site-analytics.js"></script><script src="/public/js/admin-self-protect.js?v=245"></script>
-  <script src="/public/js/admin-movie-catalog.js"></script>
+  <script src="/public/js/admin-movie-catalog.js?v=264"></script>
 </body></html>
