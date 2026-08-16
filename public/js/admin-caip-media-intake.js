@@ -1,4 +1,4 @@
-// Build 264 — CAIP private large-media intake UI; accepts productless Creative Process project workspaces.
+// Build 265 — CAIP private-media upload diagnostics, productless project safety and broader media intake.
 (() => {
   const mount = document.getElementById('caipMediaIntakeMount');
   if (!mount) return;
@@ -16,7 +16,7 @@
     const url = `/api/admin/caip-media-intake${project ? `?creative_project_id=${encodeURIComponent(project)}` : ''}`;
     const response = await DDAuth.apiFetch(url, body ? {method:'POST',body:JSON.stringify(body)} : undefined);
     const data = await response.json().catch(()=>null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || `CAIP media intake failed (${response.status}).`);
+    if (!response.ok || !data?.ok) { const suffix=[data?.error_code,data?.stage].filter(Boolean).join(' / '); const error=new Error(`${data?.error || `CAIP media intake failed (${response.status}).`}${suffix?` [${suffix}]`:''}`); error.code=data?.error_code||''; error.stage=data?.stage||''; throw error; }
     return data;
   };
   const setMsg = (text='',error=false) => { const el=document.getElementById('caipMediaMessage'); if(!el)return; el.hidden=!text; el.textContent=text; el.className=`content-studio-message ${error?'error':'success'}`; };
@@ -104,17 +104,20 @@
       const payload={action:'create_session',creative_project_id:project,upload_device:`${navigator.platform||'browser'} / ${navigator.userAgent.slice(0,160)}`,source_note:document.getElementById('caipSourceNote')?.value||'',media_role:defaultRole,privacy_state:defaultPrivacy,consent_state:defaultConsent,rights_status:defaultRights,files:state.pendingFiles.map(({clientKey,file})=>({client_key:clientKey,name:file.name,type:file.type,size:file.size,lastModified:file.lastModified,media_role:defaultRole,privacy_state:defaultPrivacy,consent_state:defaultConsent,rights_status:defaultRights}))};
       const data=await api(payload,project); state.data=data; const created=(data.result?.files||[]); const byClient=new Map(created.map((f)=>[f.client_file_key,f])); if(data.result?.session?.session_key)localStorage.setItem(LS_SESSION,data.result.session.session_key);
       const pending=[...state.pendingFiles]; state.pendingFiles=[]; render();
-      for(const item of pending){const serverFile=byClient.get(item.clientKey);if(serverFile)await uploadFile(serverFile,item.file);}
-      await refresh(project); setMsg('Private upload session completed as far as possible. Review any failed/recoverable file rows.',false);
+      const failures=[]; let started=0;
+      for(const item of pending){const serverFile=byClient.get(item.clientKey);if(!serverFile)continue;try{await uploadFile(serverFile,item.file);started+=1;}catch(error){failures.push(`${item.file.name}: ${error.message}`);}}
+      await refresh(project);
+      if(failures.length)setMsg(`${started} file(s) completed; ${failures.length} file(s) need attention. ${failures.join(' | ')}`,true);
+      else setMsg('Private upload session completed. Review the uploaded files and governance before promotion.',false);
     } catch(error){setMsg(error.message||'Upload session failed.',true);}
     finally{state.busy=false; await refresh(project).catch(()=>{});}
   }
 
-  async function initiate(fileId){const data=await api({action:'initiate_file',caip_media_upload_file_id:fileId});state.data=data;return (data.files||[]).find((f)=>num(f.caip_media_upload_file_id)===num(fileId))||data.result?.file;}
+  async function initiate(fileId){const data=await api({action:'initiate_file',caip_media_upload_file_id:fileId});state.data=data;return {file:(data.files||[]).find((f)=>num(f.caip_media_upload_file_id)===num(fileId))||data.result?.file,direct_upload:Boolean(data.result?.direct_upload)};}
   async function uploadFile(serverFile,file){
     const fileId=num(serverFile.caip_media_upload_file_id); if(!fileId||!file)return;
     if(file.name!==serverFile.original_filename||file.size!==num(serverFile.file_size_bytes))throw new Error(`Selected file does not match ${serverFile.original_filename} (${fmtBytes(serverFile.file_size_bytes)}).`);
-    state.paused.delete(fileId); const initiated=await initiate(fileId); const parts=(state.data?.parts||[]).filter((p)=>num(p.caip_media_upload_file_id)===fileId).sort((a,b)=>num(a.part_number)-num(b.part_number)); const queue=parts.filter((p)=>p.part_status!=='uploaded');
+    state.paused.delete(fileId); const initiated=await initiate(fileId); if(initiated.direct_upload){const response=await DDAuth.apiFetch(`/api/admin/caip-media-upload-direct?file_id=${encodeURIComponent(fileId)}`,{method:'PUT',headers:{'Content-Type':file.type||'application/octet-stream'},body:file});const result=await response.json().catch(()=>null);if(!response.ok||!result?.ok)throw new Error(`${result?.error||'Direct private-R2 upload failed.'}${result?.error_code?` [${result.error_code}]`:''}`);await refresh();return;} const parts=(state.data?.parts||[]).filter((p)=>num(p.caip_media_upload_file_id)===fileId).sort((a,b)=>num(a.part_number)-num(b.part_number)); const queue=parts.filter((p)=>p.part_status!=='uploaded');
     const concurrency=Math.min(2,queue.length||1); let next=0; let failed=null;
     const worker=async()=>{while(next<queue.length&&!failed&&!state.paused.has(fileId)){const part=queue[next++];const blob=file.slice(num(part.byte_start),num(part.byte_end));try{const response=await DDAuth.apiFetch(`/api/admin/caip-media-upload-part?file_id=${encodeURIComponent(fileId)}&part_number=${encodeURIComponent(part.part_number)}`,{method:'PUT',headers:{'Content-Type':'application/octet-stream','Content-Length':String(blob.size)},body:blob});const result=await response.json().catch(()=>null);if(!response.ok||!result?.ok)throw new Error(result?.error||`Part ${part.part_number} failed.`);const row=document.querySelector(`[data-file-row="${fileId}"]`);if(row){const progress=row.querySelector('progress');const strong=row.querySelector('.caip-upload-progress strong');const span=row.querySelector('.caip-upload-progress span');const bytes=Math.min(file.size,(num(result.uploaded_parts))*num(serverFile.part_size_bytes));const percent=pct(bytes,file.size);if(progress)progress.value=percent;if(strong)strong.textContent=`${percent}%`;if(span)span.textContent=`${fmtBytes(bytes)} / ${fmtBytes(file.size)}`;}}catch(error){failed=error;}}};
     await Promise.all(Array.from({length:concurrency},worker)); if(state.paused.has(fileId)){await refresh();return;} if(failed)throw failed;
