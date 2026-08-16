@@ -2,6 +2,13 @@
 -- Apply after Build 263. Idempotent and non-destructive.
 PRAGMA foreign_keys = ON;
 
+-- Repair an older production-schema drift: customer_documents.refund_id
+-- references payment_refunds.refund_id, so the parent key must be UNIQUE.
+-- Current aggregate schemas define refund_id as INTEGER PRIMARY KEY; this
+-- index restores the same parent-key guarantee on older D1 databases.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_payment_refunds_refund_id
+ON payment_refunds(refund_id);
+
 CREATE TABLE IF NOT EXISTS public_display_priorities (
   public_display_priority_id INTEGER PRIMARY KEY AUTOINCREMENT,
   surface_key TEXT NOT NULL,
@@ -16,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public_display_priorities (
   UNIQUE(surface_key,record_type,record_id),
   FOREIGN KEY(updated_by) REFERENCES users(user_id) ON DELETE SET NULL
 );
+
 CREATE INDEX IF NOT EXISTS idx_public_display_priorities_surface ON public_display_priorities(surface_key,is_pinned DESC,priority_rank,record_type,record_id);
 
 CREATE TABLE IF NOT EXISTS creative_project_cost_context (
@@ -46,10 +54,13 @@ ON CONFLICT(creative_work_project_id,creative_project_id) DO UPDATE SET mirrored
 -- Research/content projects still need material usage and cost analysis outputs.
 INSERT OR IGNORE INTO creative_work_outputs(creative_work_project_id,output_key,output_label,output_group)
 SELECT creative_work_project_id,'material_usage','Material usage report','operations' FROM creative_work_projects WHERE LOWER(COALESCE(project_type,'')) IN ('content_only','education','research','archive');
+
 INSERT OR IGNORE INTO creative_work_outputs(creative_work_project_id,output_key,output_label,output_group)
 SELECT creative_work_project_id,'cost_analysis','Cost analysis','operations' FROM creative_work_projects WHERE LOWER(COALESCE(project_type,'')) IN ('content_only','education','research','archive');
 
 -- Build 264 explicit static edit locations, including Home card messages/links/colours and Shop presentation.
+
+-- Media/content slot seed batch 1 of 4 (split for Cloudflare D1 statement-size limits).
 INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_selector,target_attribute,source_snapshot,source_alt_snapshot,is_required,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES
   ('@site','site.header.logo','Header / Devil n Dove logo','image','.nav .brand img','src','/assets/logo-clear.png','Devil n Dove logo',1,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('@site','site.header.background','Header / navigation background','background','.nav','background-image','','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
@@ -263,7 +274,11 @@ INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_s
   ('/shop','shop.text.clearer.4.heading','Shop / Clearer way / Shop digital work','text','[data-content-slot="shop.text.clearer.4.heading"]','textContent','Shop digital work','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/shop','shop.text.clearer.4.body','Shop / Clearer way / Shop digital work message','text','[data-content-slot="shop.text.clearer.4.body"]','textContent','Choose digital when you want printables, files, or downloadable extras.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/shop','shop.background.clearer','Shop / Clearer-way section background','background','[data-media-background-slot="shop.background.clearer"]','background-image','','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-  ('/shop','shop.text.available.heading','Shop / Available Products heading','text','[data-content-slot="shop.text.available.heading"]','textContent','Available Products','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+  ('/shop','shop.text.available.heading','Shop / Available Products heading','text','[data-content-slot="shop.text.available.heading"]','textContent','Available Products','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+ON CONFLICT(page_path,slot_key) DO UPDATE SET slot_label=excluded.slot_label,slot_type=excluded.slot_type,target_selector=excluded.target_selector,target_attribute=excluded.target_attribute,source_snapshot=excluded.source_snapshot,source_alt_snapshot=excluded.source_alt_snapshot,is_required=excluded.is_required,is_active=1,updated_at=CURRENT_TIMESTAMP;;
+
+-- Media/content slot seed batch 2 of 4 (split for Cloudflare D1 statement-size limits).
+INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_selector,target_attribute,source_snapshot,source_alt_snapshot,is_required,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES
   ('/shop','shop.text.available.body','Shop / Available Products message','text','[data-content-slot="shop.text.available.body"]','textContent','This storefront is connected to the active product system and now supports richer search and SEO-ready product data.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/shop','shop.background.available','Shop / Available Products background','background','[data-media-background-slot="shop.background.available"]','background-image','','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/shop','shop.text.collections.heading','Shop / Browse by collection direction heading','text','[data-content-slot="shop.text.collections.heading"]','textContent','Browse by collection direction','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
@@ -431,7 +446,11 @@ INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_s
   ('/vintage-finds-ontario','vintage-finds-ontario.text.heading.6','Vintage Finds / Heading: Related Devil n Dove searches','text','[data-content-slot="vintage-finds-ontario.text.heading.6"]','textContent','Related Devil n Dove searches','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/vintage-finds-ontario','vintage-finds-ontario.text.heading.6.body','Vintage Finds / Text after Related Devil n Dove searches','text','[data-content-slot="vintage-finds-ontario.text.heading.6.body"]','textContent','These pages help customers and search engines find the right part of the workshop without hiding important details behind one generic page.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/vintage-finds-ontario','vintage-finds-ontario.text.heading.7','Vintage Finds / Heading: Vintage condition photo','text','[data-content-slot="vintage-finds-ontario.text.heading.7"]','textContent','Vintage condition photo','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-  ('/vintage-finds-ontario','vintage-finds-ontario.text.heading.7.body','Vintage Finds / Text after Vintage condition photo','text','[data-content-slot="vintage-finds-ontario.text.heading.7.body"]','textContent','Replace with honest condition-detail photos for vintage finds.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+  ('/vintage-finds-ontario','vintage-finds-ontario.text.heading.7.body','Vintage Finds / Text after Vintage condition photo','text','[data-content-slot="vintage-finds-ontario.text.heading.7.body"]','textContent','Replace with honest condition-detail photos for vintage finds.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+ON CONFLICT(page_path,slot_key) DO UPDATE SET slot_label=excluded.slot_label,slot_type=excluded.slot_type,target_selector=excluded.target_selector,target_attribute=excluded.target_attribute,source_snapshot=excluded.source_snapshot,source_alt_snapshot=excluded.source_alt_snapshot,is_required=excluded.is_required,is_active=1,updated_at=CURRENT_TIMESTAMP;;
+
+-- Media/content slot seed batch 3 of 4 (split for Cloudflare D1 statement-size limits).
+INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_selector,target_attribute,source_snapshot,source_alt_snapshot,is_required,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES
   ('/workshop-made-gifts-ontario','workshop-made-gifts-ontario.hero.image','Workshop-Made Gifts / Hero image','image','[data-media-slot="workshop-made-gifts-ontario.hero.image"]','src','/assets/visual-placeholders/product-process.svg','Workshop gift process placeholder',1,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/workshop-made-gifts-ontario','workshop-made-gifts-ontario.image.1','Workshop-Made Gifts / Workshop gift process placeholder','image','[data-media-slot="workshop-made-gifts-ontario.image.1"]','src','/assets/visual-placeholders/product-process.svg','Workshop gift process placeholder',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/workshop-made-gifts-ontario','workshop-made-gifts-ontario.section.visual.1','Workshop-Made Gifts / workshop-made gifts Southern Ontario search clarity visual','image','[data-media-slot="workshop-made-gifts-ontario.section.visual.1"]','src','/assets/placeholders/media-content/workshop-made-gifts-ontario-section-visual-1.svg','Placeholder for workshop-made gifts Southern Ontario search clarity',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
@@ -589,12 +608,16 @@ INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_s
   ('/social-connections','social-connections.text.heading.3','Social Connection Disclosure / Heading: Review-first publishing','text','[data-content-slot="social-connections.text.heading.3"]','textContent','Review-first publishing','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/social-connections','social-connections.text.heading.3.body','Social Connection Disclosure / Text after Review-first publishing','text','[data-content-slot="social-connections.text.heading.3.body"]','textContent','Eligible products may create internal draft packages, but drafts remain unpublished until reviewed. Media rights, privacy, product facts, destination, caption, links, and platform status must be checked before publishing.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/social-connections','social-connections.text.heading.4','Social Connection Disclosure / Heading: Data handled','text','[data-content-slot="social-connections.text.heading.4"]','textContent','Data handled','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-  ('/social-connections','social-connections.text.heading.4.body','Social Connection Disclosure / Text after Data handled','text','[data-content-slot="social-connections.text.heading.4.body"]','textContent','The integration may store provider name, account and Page/channel identifiers, granted scopes, encrypted tokens, expiry times, connection status, post identifiers, timestamps, errors, and aggregate performance results. Tokens must remain server-side.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+  ('/social-connections','social-connections.text.heading.4.body','Social Connection Disclosure / Text after Data handled','text','[data-content-slot="social-connections.text.heading.4.body"]','textContent','The integration may store provider name, account and Page/channel identifiers, granted scopes, encrypted tokens, expiry times, connection status, post identifiers, timestamps, errors, and aggregate performance results. Tokens must remain server-side.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+ON CONFLICT(page_path,slot_key) DO UPDATE SET slot_label=excluded.slot_label,slot_type=excluded.slot_type,target_selector=excluded.target_selector,target_attribute=excluded.target_attribute,source_snapshot=excluded.source_snapshot,source_alt_snapshot=excluded.source_alt_snapshot,is_required=excluded.is_required,is_active=1,updated_at=CURRENT_TIMESTAMP;;
+
+-- Media/content slot seed batch 4 of 4 (split for Cloudflare D1 statement-size limits).
+INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_selector,target_attribute,source_snapshot,source_alt_snapshot,is_required,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES
   ('/social-connections','social-connections.text.heading.5','Social Connection Disclosure / Heading: Disconnecting','text','[data-content-slot="social-connections.text.heading.5"]','textContent','Disconnecting','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/social-connections','social-connections.text.heading.5.body','Social Connection Disclosure / Text after Disconnecting','text','[data-content-slot="social-connections.text.heading.5.body"]','textContent','Connections can be revoked through the social platform and, when the in-app controls are completed, through Devil n Dove. See Data Deletion Instructions for removal requests.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/social-connections','social-connections.text.heading.6','Social Connection Disclosure / Heading: Registered callback URLs','text','[data-content-slot="social-connections.text.heading.6"]','textContent','Registered callback URLs','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
   ('/social-connections','social-connections.text.heading.6.body','Social Connection Disclosure / Text after Registered callback URLs','text','[data-content-slot="social-connections.text.heading.6.body"]','textContent','These endpoints are present so provider dashboards can validate exact HTTPS redirect locations. They do not publish content by themselves.','',0,1,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-ON CONFLICT(page_path,slot_key) DO UPDATE SET slot_label=excluded.slot_label,slot_type=excluded.slot_type,target_selector=excluded.target_selector,target_attribute=excluded.target_attribute,source_snapshot=excluded.source_snapshot,source_alt_snapshot=excluded.source_alt_snapshot,is_required=excluded.is_required,is_active=1,updated_at=CURRENT_TIMESTAMP;
+ON CONFLICT(page_path,slot_key) DO UPDATE SET slot_label=excluded.slot_label,slot_type=excluded.slot_type,target_selector=excluded.target_selector,target_attribute=excluded.target_attribute,source_snapshot=excluded.source_snapshot,source_alt_snapshot=excluded.source_alt_snapshot,is_required=excluded.is_required,is_active=1,updated_at=CURRENT_TIMESTAMP;;
 
 INSERT INTO managed_content_blocks(media_content_slot_id,page_path,slot_key,block_type,draft_text,published_text,published,protected_static,created_by_user_id,updated_by_user_id,created_at,updated_at)
 SELECT s.media_content_slot_id,s.page_path,s.slot_key,'text',COALESCE(s.source_snapshot,''),COALESCE(s.source_snapshot,''),0,0,NULL,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
