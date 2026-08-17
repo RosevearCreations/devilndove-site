@@ -1,16 +1,16 @@
--- RETIRED SAFETY STUB — Devil n Dove Build 207
+-- RETIRED SAFETY STUB — production auth migration already completed
 --
--- Do NOT use this file as a migration.
--- The currently selected Devil n Dove D1 database was verified to contain the
--- current `users` and `sessions` tables and no legacy `members` table. A former
--- Build 204 version of this filename attempted a multi-statement migration and
--- is retained only so old documentation or bookmarks cannot lead to a destructive
--- schema change.
+-- Current production authority: `users` + `sessions`.
+-- Production intentionally retains `members_legacy` + `member_sessions_legacy`
+-- because historical `blog_posts.author_member_id` and `blog_comments.member_id`
+-- still reference `members_legacy`. Do NOT rerun the old rename/backfill migration,
+-- do NOT recreate `members`/`member_sessions`, and do NOT drop the legacy tables
+-- until blog ownership is migrated with an explicit data-preserving migration.
 --
--- For the separate POST /api/auth/login 500, collect only the safe response code
--- and matching Cloudflare Function log. Do not alter D1 schema until a verified
--- error identifies a specific missing/invalid column or query.
+-- This filename is retained only so older documentation/bookmarks cannot trigger
+-- a destructive or duplicate auth migration. Use database_auth_runtime_diagnostics.sql
+-- for evidence-only checks.
 
 SELECT
-  'RETIRED_BUILD207_NO_SCHEMA_ACTION' AS code,
-  'No auth migration was run. Use database_auth_runtime_diagnostics.sql and AUTH_LOGIN_500_TROUBLESHOOTING.md for evidence only.' AS message;
+  'RETIRED_AUTH_MIGRATION_ALREADY_APPLIED' AS code,
+  'users/sessions are current. Legacy member tables remain for blog FK compatibility; no schema mutation was performed by this file.' AS message;
