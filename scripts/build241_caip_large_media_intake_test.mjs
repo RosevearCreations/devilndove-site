@@ -10,7 +10,7 @@ import {
 const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const read=(name)=>fs.readFileSync(path.join(root,name),'utf8');
 const migration=read('database_build241_caip_large_media_intake.sql');
-assert(/build24(?:4_inventory_authority_fractional_usage|5_admin_media_resilience|6_product_project_production_packaging)/.test(read('database_upgrade_current_pass.sql')),'Current-pass SQL must point at Build 244 or a later retained-history migration while Build 241 remains retained history.');
+assert(/Build 264|build264_content_project_merchandising/i.test(read('database_upgrade_current_pass.sql')),'Current-pass SQL must retain the Build 264 broad migration boundary while Build 241 remains retained history.');
 assert(!/^\s*(BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|RELEASE(?:\s+SAVEPOINT)?|ROLLBACK)\b/im.test(migration),'Build 241 migration contains explicit transaction control.');
 const tables=['caip_media_intake_settings','caip_media_upload_sessions','caip_media_upload_files','caip_media_upload_parts','caip_media_processing_jobs','caip_media_public_promotion_requests'];
 for(const name of tables)assert(migration.includes(`CREATE TABLE IF NOT EXISTS ${name}`),`Build 241 migration is missing ${name}.`);
@@ -48,6 +48,7 @@ class FakeBucket {
   async createMultipartUpload(key){const uploadId=`upload-${++this.uploadSeq}`;return {uploadId,key};}
   resumeMultipartUpload(key,uploadId){return new FakeMultipart(this,key,uploadId);}
   async head(key){return this.objects.get(key)||null;}
+  async put(){}
 }
 
 const base=new DatabaseSync(':memory:');
@@ -57,7 +58,7 @@ base.exec("INSERT INTO users(email,password_hash,display_name,role) VALUES('buil
 base.exec("INSERT INTO creative_projects(creative_project_key,source_type,source_id,project_title,project_status,governance_status) VALUES('cp-build241','manual','build241-test','Build 241 CAIP test','active','needs_review')");
 const projectId=Number(base.prepare("SELECT creative_project_id FROM creative_projects WHERE creative_project_key='cp-build241'").get().creative_project_id);
 const db=new D1Db(base);
-const fileSize=40*1024*1024;
+const fileSize=100*1024*1024;
 const bucket=new FakeBucket(fileSize);
 const env={CAIP_PRIVATE_MEDIA_BUCKET:bucket};
 const created=await createUploadSession(db,env,projectId,[{name:'Workshop Progress 01.mp4',type:'video/mp4',size:fileSize,lastModified:123456,media_role:'during'}],1,{upload_device:'test-browser',privacy_state:'private',rights_status:'needs_review'});
@@ -68,7 +69,7 @@ const fileId=Number(created.files[0].caip_media_upload_file_id);
 const initiated=await initiateUploadFile(db,env,fileId,1);
 assert(initiated.file.r2_upload_id,'Initiation must store the multipart upload ID server-side.');
 const partRows=base.prepare('SELECT * FROM caip_media_upload_parts WHERE caip_media_upload_file_id=? ORDER BY part_number').all(fileId);
-assert.equal(partRows.length,2,'40 MiB test video should use two 32 MiB parts.');
+assert.equal(partRows.length,4,'100 MiB test video should use four 32 MiB parts.');
 for(const part of partRows) await recordUploadedPart(db,fileId,Number(part.part_number),{etag:`etag-${part.part_number}`},1);
 await completeUploadFile(db,env,fileId,1);
 const uploaded=base.prepare('SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=?').get(fileId);

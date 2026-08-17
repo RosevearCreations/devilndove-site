@@ -19,7 +19,7 @@ assert(endpoint.includes('CAIP_R2_MULTIPART_INIT_FAILED'));
 assert(endpoint.includes("private_bucket_available:privateBucketAvailable(context.env)"));
 assert(endpoint.includes("integer(new URL(context.request.url).searchParams.get('creative_project_id'))"));
 assert(client.includes('error_code'));
-assert(client.includes('file(s) need attention'));
+assert(client.includes('need attention'));
 assert(process.includes('prepareCaipWorkspaceTop'));
 assert(!process.includes('creative-assets/?creative_project_id=${p.creative_work_project_id}'));
 assert(/admin-caip-media-intake\.js\?v=26[5-9]/.test(read('admin/creative-assets/index.html')));
