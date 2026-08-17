@@ -1,102 +1,220 @@
-// File: /public/js/custom-request-payment.js
-// Brief description: Loads a private approved custom request payment link, shows the connected order, and prepares Stripe/PayPal/Square/manual checkout handoffs when available.
+// File: /functions/api/custom-request-payment.js
+// Brief description: Public token endpoint for approved custom request payment links. It exposes reviewed payment details, records readiness notes, and prepares Stripe/PayPal/Square checkout handoffs for connected order records.
 
-document.addEventListener('DOMContentLoaded', () => {
-  const mount = document.getElementById('customRequestPaymentMount');
-  if (!mount) return;
-  const token = new URLSearchParams(window.location.search).get('token') || '';
-  const esc = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+import { onRequestPost as prepareCheckoutPayment } from './checkout-prepare-payment.js';
 
-  function showMessage(text, isError = false) {
-    const el = document.getElementById('paymentLinkMessage');
-    if (!el) return;
-    el.textContent = text || '';
-    el.style.display = text ? 'block' : 'none';
-    el.style.color = isError ? '#b00020' : '#0a7a2f';
-  }
-
-  async function prepareCheckout(provider) {
-    try {
-      showMessage(`Preparing ${provider} checkout...`);
-      const response = await fetch('/api/custom-request-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, action: 'prepare_checkout', provider })
-      });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not prepare checkout.');
-      if (data.checkout?.redirect_url) {
-        showMessage('Checkout is ready. Opening the secure provider page...');
-        window.location.href = data.checkout.redirect_url;
-        return;
-      }
-      showMessage(data.message || 'Payment checkout record prepared for manual follow-up.');
-    } catch (error) {
-      showMessage(error.message || 'Could not prepare checkout.', true);
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin'
     }
-  }
+  });
+}
 
-  function providerButtons(payment) {
-    const providers = Array.isArray(payment.provider_options) && payment.provider_options.length ? payment.provider_options : ['stripe', 'paypal', 'square', 'manual'];
-    return `<div class="custom-request-actions" style="margin-top:12px">${providers.map((provider) => `<button class="btn small" type="button" data-prepare-provider="${esc(provider)}">Prepare ${esc(provider).replace(/^./, (letter) => letter.toUpperCase())}</button>`).join('')}</div>`;
-  }
+function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
+function clean(value, limit = 1200) {
+  const text = String(value || '').trim();
+  return text.length > limit ? text.slice(0, limit).trim() : text;
+}
+function money(cents, currency = 'CAD') {
+  const amount = Number(cents || 0) / 100;
+  try { return amount.toLocaleString('en-CA', { style: 'currency', currency }); }
+  catch { return `${amount.toFixed(2)} ${currency}`; }
+}
 
-  function checkoutHistory(payment) {
-    const records = Array.isArray(payment.checkout_records) ? payment.checkout_records : [];
-    if (!records.length) return '<p class="small">No checkout handoff has been prepared yet.</p>';
-    return `<div class="small" style="margin-top:10px">${records.slice(0, 6).map((row) => `${esc(row.updated_at || '')} • ${esc(row.provider || '')} • ${esc(row.checkout_status || '')}${row.redirect_url ? ' • redirect ready' : ''}`).join('<br>')}</div>`;
-  }
+async function ensureColumn(db, tableName, columnName, definition) {
+  const info = await db.prepare(`PRAGMA table_info(${tableName})`).all().catch(() => ({ results: [] }));
+  const exists = rows(info).some((row) => String(row.name || '').toLowerCase() === String(columnName).toLowerCase());
+  if (!exists) await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${definition}`).run().catch(() => null);
+}
 
-  function render(payment) {
-    mount.innerHTML = `<div class="quote-preview-card">
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">${esc(payment.quote_title || 'Custom request payment')}</h2><p class="small">For ${esc(payment.customer_name || 'customer')} • ${esc(payment.request_type || 'payment')}</p></div>
-        <span class="status-note">${esc(payment.link_status || 'active')}</span>
-      </div>
-      <div class="quote-preview-total"><span>Approved payment request</span><strong>${esc(payment.amount_label || '—')}</strong></div>
-      <div class="quote-preview-breakdown small"><div>Tax included/allocated: <strong>${esc(payment.tax_label || '—')}</strong></div><div>Provider route: <strong>${esc(payment.provider || 'manual review')}</strong></div><div>Order: <strong>${esc(payment.order_number || 'reviewed custom order')}</strong></div><div>Order status: <strong>${esc(payment.order_status || 'pending')}</strong> / payment <strong>${esc(payment.payment_status || 'pending')}</strong></div></div>
-      <h3>Scope note</h3>
-      <pre class="quote-preview-scope">${esc(payment.scope_notes || 'No scope note is attached.')}</pre>
-      <p class="small">${esc(payment.safety_note || '')}</p>
-      <h3>Checkout options</h3>
-      <p class="small">Choose a payment handoff only after the quote/order details look right. Stripe and PayPal redirect when configured; Square/manual records are kept for review and follow-up.</p>
-      ${providerButtons(payment)}
-      ${checkoutHistory(payment)}
-      ${payment.ready_at ? `<div class="status-note">Readiness already recorded: ${esc(payment.ready_at)}</div><p class="small">${esc(payment.customer_note || '')}</p>` : `<label class="small">Optional note before payment<textarea id="paymentCustomerNote" class="input" rows="4" placeholder="Pickup, shipping, timing, or payment question"></textarea></label><button class="btn primary" type="button" id="paymentReadyButton">I am ready for final payment instructions</button>`}
-      <div id="paymentLinkMessage" class="small" style="display:none;margin-top:10px"></div>
-    </div>`;
-    mount.querySelectorAll('[data-prepare-provider]').forEach((button) => button.addEventListener('click', () => prepareCheckout(button.getAttribute('data-prepare-provider') || 'manual')));
-    document.getElementById('paymentReadyButton')?.addEventListener('click', async () => {
-      try {
-        const response = await fetch('/api/custom-request-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, customer_note: document.getElementById('paymentCustomerNote')?.value || '' })
-        });
-        const data = await response.json().catch(() => null);
-        if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not save readiness note.');
-        showMessage(data.message || 'Payment readiness note saved.');
-      } catch (error) {
-        showMessage(error.message || 'Could not save readiness note.', true);
-      }
+async function ensureSchema(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_links (
+    custom_request_payment_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    payment_request_draft_id INTEGER,
+    quote_draft_id INTEGER,
+    payment_link_key TEXT NOT NULL UNIQUE,
+    link_token TEXT NOT NULL UNIQUE,
+    link_status TEXT NOT NULL DEFAULT 'active',
+    link_url_path TEXT NOT NULL,
+    request_type TEXT NOT NULL DEFAULT 'deposit',
+    amount_cents INTEGER NOT NULL DEFAULT 0,
+    tax_cents INTEGER NOT NULL DEFAULT 0,
+    currency TEXT NOT NULL DEFAULT 'CAD',
+    customer_name TEXT,
+    customer_email TEXT,
+    provider TEXT NOT NULL DEFAULT 'manual_review',
+    provider_reference TEXT,
+    approval_notes TEXT,
+    customer_viewed_at TEXT,
+    customer_ready_at TEXT,
+    customer_note TEXT,
+    approved_by_user_id INTEGER,
+    approved_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run();
+  await ensureColumn(db, 'custom_request_payment_links', 'provider', "provider TEXT NOT NULL DEFAULT 'manual_review'");
+  await ensureColumn(db, 'custom_request_payment_links', 'provider_reference', 'provider_reference TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_viewed_at', 'customer_viewed_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_ready_at', 'customer_ready_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_note', 'customer_note TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'viewed_at', 'viewed_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'ready_to_pay_at', 'ready_to_pay_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'customer_ready_note', 'customer_ready_note TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'order_id', 'order_id INTEGER');
+  await ensureColumn(db, 'custom_request_payment_links', 'payment_id', 'payment_id INTEGER');
+  await ensureColumn(db, 'custom_request_payment_links', 'external_share_status', "external_share_status TEXT NOT NULL DEFAULT 'gate_pending'");
+  await ensureColumn(db, 'custom_request_payment_links', 'gate_status', "gate_status TEXT NOT NULL DEFAULT 'pending'");
+  await ensureColumn(db, 'custom_request_payment_links', 'preferred_provider', "preferred_provider TEXT NOT NULL DEFAULT 'manual'");
+  await ensureColumn(db, 'custom_request_payment_links', 'checkout_redirect_url', 'checkout_redirect_url TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'expired_at', 'expired_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'voided_at', 'voided_at TEXT');
+  await ensureColumn(db, 'custom_request_payment_links', 'lifecycle_note', 'lifecycle_note TEXT');
+  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_checkout_records (
+    custom_request_payment_checkout_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    custom_request_id INTEGER NOT NULL,
+    payment_link_id INTEGER,
+    order_id INTEGER,
+    payment_id INTEGER,
+    provider TEXT NOT NULL DEFAULT 'manual',
+    checkout_status TEXT NOT NULL DEFAULT 'prepared',
+    provider_order_id TEXT,
+    provider_payment_id TEXT,
+    redirect_url TEXT,
+    mode TEXT,
+    source_payload_json TEXT DEFAULT '{}',
+    created_by_user_id INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_checkout_records_request ON custom_request_payment_checkout_records(custom_request_id, provider, checkout_status, updated_at)`).run().catch(() => null);
+}
+
+
+async function loadLink(db, token) {
+  await ensureSchema(db);
+  const link = await db.prepare(`SELECT * FROM custom_request_payment_links WHERE link_token=? LIMIT 1`).bind(token).first();
+  if (!link) return null;
+  if (['void','expired'].includes(String(link.link_status || '').toLowerCase())) return null;
+  if (link.expired_at || link.voided_at) return null;
+  if (String(link.external_share_status || 'share_allowed').toLowerCase() !== 'share_allowed') return null;
+  if (String(link.gate_status || 'passed').toLowerCase() !== 'passed') return null;
+  await db.prepare(`UPDATE custom_request_payment_links SET link_status=CASE WHEN link_status='active' THEN 'viewed' ELSE link_status END, customer_viewed_at=COALESCE(customer_viewed_at,CURRENT_TIMESTAMP), viewed_at=COALESCE(viewed_at,CURRENT_TIMESTAMP), updated_at=CURRENT_TIMESTAMP WHERE custom_request_payment_link_id=?`).bind(Number(link.custom_request_payment_link_id || 0)).run().catch(() => null);
+  const quote = await db.prepare(`SELECT title, scope_notes, quote_total_cents FROM custom_request_quote_drafts WHERE custom_request_quote_draft_id=? LIMIT 1`).bind(Number(link.quote_draft_id || 0)).first().catch(() => null);
+  const order = Number(link.order_id || 0) ? await db.prepare(`SELECT order_id, order_number, order_status, payment_status, payment_method, total_cents, currency FROM orders WHERE order_id=? LIMIT 1`).bind(Number(link.order_id || 0)).first().catch(() => null) : null;
+  const checkoutRecords = rows(await db.prepare(`SELECT provider, checkout_status, provider_order_id, provider_payment_id, redirect_url, mode, updated_at FROM custom_request_payment_checkout_records WHERE payment_link_id=? ORDER BY datetime(updated_at) DESC`).bind(Number(link.custom_request_payment_link_id || 0)).all().catch(() => ({ results: [] })));
+  return {
+    payment_link_key: link.payment_link_key || '',
+    link_status: link.link_status || 'active',
+    request_type: link.request_type || 'deposit',
+    amount_cents: Number(link.amount_cents || 0),
+    amount_label: money(link.amount_cents, link.currency || 'CAD'),
+    tax_cents: Number(link.tax_cents || 0),
+    tax_label: money(link.tax_cents, link.currency || 'CAD'),
+    currency: link.currency || 'CAD',
+    customer_name: link.customer_name || '',
+    customer_email: link.customer_email || '',
+    quote_title: quote?.title || 'Custom Devil n Dove request',
+    scope_notes: quote?.scope_notes || '',
+    approval_notes: link.approval_notes || '',
+    provider: link.provider || 'manual_review',
+    provider_reference: link.provider_reference || '',
+    ready_at: link.customer_ready_at || link.ready_to_pay_at || '',
+    customer_note: link.customer_note || link.customer_ready_note || '',
+    order_id: Number(link.order_id || 0) || null,
+    order_number: order?.order_number || '',
+    order_status: order?.order_status || '',
+    payment_status: order?.payment_status || '',
+    checkout_records: checkoutRecords,
+    provider_options: ['stripe','paypal','square','manual'],
+    safety_note: 'This is an approved Devil n Dove payment request page connected to a reviewed order. Stripe or PayPal can redirect when configured; Square/manual records stay pending until confirmed.'
+  };
+}
+
+export async function onRequestGet(context) {
+  const db = context.env.DB || context.env.DD_DB;
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
+  const token = clean(new URL(context.request.url).searchParams.get('token'), 160);
+  if (!token || !token.startsWith('pay_')) return json({ ok: false, error: 'A valid payment token is required.' }, 400);
+  const link = await loadLink(db, token);
+  if (!link) return json({ ok: false, error: 'Payment link not found or no longer active.' }, 404);
+  return json({ ok: true, payment: link });
+}
+
+async function prepareProviderCheckout(context, db, link, provider) {
+  const safeProvider = ['stripe', 'paypal', 'square', 'manual'].includes(provider) ? provider : 'manual';
+  const orderId = Number(link.order_id || 0);
+  if (!orderId) throw new Error('This payment link is not connected to a reviewed order yet.');
+  let prepData = null;
+  if (['stripe','paypal','square','manual'].includes(safeProvider)) {
+    const prepRequest = new Request(context.request.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId, provider: safeProvider })
     });
+    const prepResponse = await prepareCheckoutPayment({ request: prepRequest, env: context.env });
+    prepData = await prepResponse.json().catch(() => null);
+    if (!prepResponse.ok || !prepData?.ok) throw new Error(prepData?.error || `Could not prepare ${safeProvider} checkout.`);
   }
+  const prep = prepData?.payment_preparation || {};
+  const stub = prep.payment_stub || {};
+  const insert = await db.prepare(`INSERT INTO custom_request_payment_checkout_records (custom_request_id, payment_link_id, order_id, payment_id, provider, checkout_status, provider_order_id, provider_payment_id, redirect_url, mode, source_payload_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+    Number(link.custom_request_id || 0),
+    Number(link.custom_request_payment_link_id || 0),
+    orderId,
+    Number(stub.payment_id || link.payment_id || 0) || null,
+    safeProvider,
+    prep.redirect_url ? 'redirect_created' : (safeProvider === 'manual' ? 'manual_ready' : 'prepared_pending'),
+    prep.provider_order_id || stub.provider_order_id || null,
+    prep.provider_payment_id || stub.provider_payment_id || null,
+    prep.redirect_url || null,
+    prep.mode || stub.mode || 'pending',
+    JSON.stringify(prepData || {})
+  ).run();
+  await db.prepare(`UPDATE custom_request_payment_links SET provider=?, preferred_provider=?, payment_id=COALESCE(?, payment_id), checkout_redirect_url=COALESCE(?, checkout_redirect_url), updated_at=CURRENT_TIMESTAMP WHERE custom_request_payment_link_id=?`).bind(
+    safeProvider,
+    safeProvider,
+    Number(stub.payment_id || link.payment_id || 0) || null,
+    prep.redirect_url || null,
+    Number(link.custom_request_payment_link_id || 0)
+  ).run().catch(() => null);
+  return {
+    checkout_record_id: Number(insert?.meta?.last_row_id || 0) || null,
+    provider: safeProvider,
+    redirect_url: prep.redirect_url || null,
+    mode: prep.mode || 'prepared',
+    payment_stub: stub
+  };
+}
 
-  async function load() {
-    if (!token) {
-      mount.innerHTML = '<p class="small">Missing payment token.</p>';
-      return;
-    }
-    mount.innerHTML = '<p class="small">Loading payment link...</p>';
+
+export async function onRequestPost(context) {
+  const db = context.env.DB || context.env.DD_DB;
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
+  let body = {};
+  try { body = await context.request.json(); } catch { body = {}; }
+  const token = clean(body.token, 160);
+  if (!token || !token.startsWith('pay_')) return json({ ok: false, error: 'A valid payment token is required.' }, 400);
+  await ensureSchema(db);
+  const link = await db.prepare(`SELECT * FROM custom_request_payment_links WHERE link_token=? LIMIT 1`).bind(token).first();
+  if (!link || ['void','expired'].includes(String(link.link_status || '').toLowerCase()) || link.expired_at || link.voided_at) return json({ ok: false, error: 'Payment link not found or no longer active.' }, 404);
+  if (String(link.external_share_status || 'share_allowed').toLowerCase() !== 'share_allowed' || String(link.gate_status || 'passed').toLowerCase() !== 'passed') return json({ ok: false, error: 'This payment link has not passed the required admin share gates yet.' }, 403);
+  const action = clean(body.action || 'ready_to_pay', 60).toLowerCase();
+  if (action === 'prepare_checkout') {
     try {
-      const response = await fetch(`/api/custom-request-payment?token=${encodeURIComponent(token)}`, { headers: { Accept: 'application/json' } });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Payment link could not be loaded.');
-      render(data.payment || {});
+      const checkout = await prepareProviderCheckout(context, db, link, clean(body.provider || 'manual', 30).toLowerCase());
+      return json({ ok: true, message: checkout.redirect_url ? 'Checkout redirect prepared.' : 'Payment checkout record prepared. We will confirm final payment instructions.', checkout });
     } catch (error) {
-      mount.innerHTML = `<p class="small" style="color:#b00020">${esc(error.message || 'Payment link could not be loaded.')}</p>`;
+      return json({ ok: false, error: String(error?.message || error || 'Could not prepare checkout.') }, 502);
     }
   }
-
-  load();
-});
+  const note = clean(body.customer_note, 1000);
+  await db.prepare(`UPDATE custom_request_payment_links SET link_status='ready_to_pay', customer_ready_at=CURRENT_TIMESTAMP, ready_to_pay_at=CURRENT_TIMESTAMP, customer_note=?, customer_ready_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_payment_link_id=?`).bind(note || null, note || null, Number(link.custom_request_payment_link_id || 0)).run();
+  return json({ ok: true, message: 'Payment readiness note saved. Devil n Dove still needs to send or confirm the final payment method.' });
+}

@@ -1,653 +1,826 @@
-// File: /public/js/product-detail.js
-// Brief description: Renders one storefront product with SEO-aware media handling,
-// richer maker-story output, cart support, wishlist saving, and back-in-stock requests.
+import { ensureProductOffersSchema, getBundleDetails, getQuantityPriceTiers } from './_lib/productOffers.js';
+import { captureRuntimeIncident } from './_lib/adminAudit.js';
+// File: /functions/api/product-detail.js
+// Brief description: Returns one active storefront product with images, SEO fields,
+// linked making-story resources, and stock/trust summaries for the product detail page.
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const loadingEl = document.getElementById("productLoading");
-  const errorEl = document.getElementById("productError");
-  const detailEl = document.getElementById("productDetail");
-  const productTypeEl = document.getElementById("productType");
-  const productNameEl = document.getElementById("productName");
-  const productPriceEl = document.getElementById("productPrice");
-  const productShortDescriptionEl = document.getElementById("productShortDescription");
-  const productKeywordTagsEl = document.getElementById("productKeywordTags");
-  const pageH1El = document.getElementById("pageH1");
-  const pageIntroEl = document.getElementById("pageIntro");
-  const productSkuEl = document.getElementById("productSku");
-  const productShippingEl = document.getElementById("productShipping");
-  const productTaxClassEl = document.getElementById("productTaxClass");
-  const productInventoryEl = document.getElementById("productInventory");
-  const productDescriptionEl = document.getElementById("productDescription");
-  const productQuickFactsCardEl = document.getElementById("productQuickFactsCard");
-  const productQuickFactsEl = document.getElementById("productQuickFacts");
-  const productVideoCardEl = document.getElementById("productVideoCard");
-  const productVideoMountEl = document.getElementById("productVideoMount");
-  const productStoryCardEl = document.getElementById("productStoryCard");
-  const productPublicStoryCardEl = document.getElementById("productPublicStoryCard");
-  const productPublicStoryKickerEl = document.getElementById("productPublicStoryKicker");
-  const productPublicStoryBodyEl = document.getElementById("productPublicStoryBody");
-  const productPublicStoryListEl = document.getElementById("productPublicStoryList");
-  const productStorySummaryEl = document.getElementById("productStorySummary");
-  const productResourcesStoryEl = document.getElementById("productResourcesStory");
-  const productMainImageWrapEl = document.getElementById("productMainImageWrap");
-  const productGalleryEl = document.getElementById("productGallery");
-  const productQuantityEl = document.getElementById("productQuantity");
-  const addToCartButton = document.getElementById("addToCartButton");
-  const addToCartMessageEl = document.getElementById("addToCartMessage");
-  const productWishlistButton = document.getElementById("productWishlistButton");
-  const productBackInStockButton = document.getElementById("productBackInStockButton");
-  const productInterestGuestWrap = document.getElementById("productInterestGuestWrap");
-  const productInterestEmail = document.getElementById("productInterestEmail");
-  const productInterestMessageEl = document.getElementById("productInterestMessage");
-  const productTrustListEl = document.getElementById("productTrustList");
-  const productTrustSummaryEl = document.getElementById("productTrustSummary");
-  const productPolicySummaryEl = document.getElementById("productPolicySummary");
-  const productPolicyListEl = document.getElementById("productPolicyList");
-  const productMarketplaceCardEl = document.getElementById("productMarketplaceCard");
-  const productMarketplaceSummaryEl = document.getElementById("productMarketplaceSummary");
-  const productMarketplaceLinksEl = document.getElementById("productMarketplaceLinks");
-  const productProcessSummaryEl = document.getElementById("productProcessSummary");
-  const productProcessLinksEl = document.getElementById("productProcessLinks");
-  const productReviewsCardEl = document.getElementById("productReviewsCard");
-  const productReviewsSummaryEl = document.getElementById("productReviewsSummary");
-  const productReviewsListEl = document.getElementById("productReviewsList");
-  const productRelatedProofCardEl = document.getElementById("productRelatedProofCard");
-  const productRelatedProofSummaryEl = document.getElementById("productRelatedProofSummary");
-  const productCandleSoapSafetyCardEl = document.getElementById('productCandleSoapSafetyCard');
-  const productCandleSoapSummaryEl = document.getElementById('productCandleSoapSummary');
-  const productCandleSoapDetailsEl = document.getElementById('productCandleSoapDetails');
-  const productRelatedProofListEl = document.getElementById("productRelatedProofList");
-  let currentProduct = null;
-  let currentTrustSummary = null;
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+  });
+}
 
-  function show(el) { if (el) el.style.display = ""; }
-  function hide(el) { if (el) el.style.display = "none"; }
-  function setCartMessage(message, isError = false) {
-    if (!addToCartMessageEl) return;
-    addToCartMessageEl.textContent = message;
-    addToCartMessageEl.style.display = "block";
-    addToCartMessageEl.style.color = isError ? "#b00020" : "#0a7a2f";
+function normalizeResults(result) {
+  return Array.isArray(result?.results) ? result.results : [];
+}
+
+
+function normalizePublicUseStatus(value) {
+  const clean = String(value || '').trim().toLowerCase();
+  return ['internal_review', 'product_page_ok', 'social_ok', 'all_public_ok', 'consent_needed', 'blocked'].includes(clean) ? clean : 'internal_review';
+}
+
+function isPublicConsentSafe(row = {}) {
+  const status = String(row.consent_status || '').trim().toLowerCase();
+  const scope = String(row.consent_scope || '').trim().toLowerCase();
+  if (Number(row.consent_public_use_allowed || row.public_use_allowed || 0) === 1) return true;
+  return ['granted', 'not_required'].includes(status) && ['product_page', 'website_gallery', 'all_public'].includes(scope);
+}
+
+function imageRoleGroup(role, variantRole = '') {
+  const cleanRole = String(role || '').trim().toLowerCase();
+  if (cleanRole === 'hero_front') return 'featured';
+  if (['detail_texture', 'back_side'].includes(cleanRole)) return 'detail';
+  if (cleanRole === 'scale_context') return 'scale';
+  if (cleanRole === 'process_story') return 'process';
+  if (cleanRole === 'packaging_pickup') return 'packaging';
+  if (cleanRole === 'material_tool_proof') return 'proof';
+  const legacy = String(variantRole || '').trim().toLowerCase();
+  if (['detail', 'hero', 'featured'].includes(legacy)) return legacy === 'detail' ? 'detail' : 'featured';
+  return 'gallery';
+}
+
+function parseColorNamesJson(value, fallbackColor = '') {
+  let parsed = [];
+  try {
+    const raw = JSON.parse(String(value || '[]'));
+    parsed = Array.isArray(raw) ? raw : [];
+  } catch {}
+  const values = parsed.map((item) => String(item || '').trim()).filter(Boolean);
+  if (fallbackColor && !values.some((entry) => entry.toLowerCase() === String(fallbackColor).trim().toLowerCase())) values.unshift(String(fallbackColor).trim());
+  return values;
+}
+
+function splitFilterValues(...values) {
+  const seen = new Set();
+  const output = [];
+  values.forEach((value) => {
+    if (value == null) return;
+    let parsed = value;
+    if (typeof value === 'string') {
+      const text = value.trim();
+      if (!text) return;
+      if ((text.startsWith('[') && text.endsWith(']')) || (text.startsWith('{') && text.endsWith('}'))) {
+        try { parsed = JSON.parse(text); } catch { parsed = text; }
+      }
+    }
+    const list = Array.isArray(parsed) ? parsed : String(parsed || '').split(/[|,;/\n]+/);
+    list.map((entry) => String(entry || '').trim()).filter(Boolean).forEach((entry) => {
+      const key = entry.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      output.push(entry);
+    });
+  });
+  return output;
+}
+
+function filterText(values) {
+  return (Array.isArray(values) ? values : splitFilterValues(values)).join(', ');
+}
+
+const SCHEMA_CACHE_MS = 5 * 60 * 1000;
+const schemaColumnCache = new Map();
+
+const PRODUCT_COLUMN_CANDIDATES = [
+  'product_id', 'product_number', 'slug', 'sku', 'name', 'product_category', 'color_name',
+  'color_names_json', 'shipping_code', 'review_status', 'short_description', 'description',
+  'product_type', 'status', 'merchandise_origin', 'sale_channel', 'external_listing_url',
+  'external_listing_label', 'condition_summary', 'era_label', 'sourcing_notes', 'price_cents',
+  'compare_at_price_cents', 'currency', 'taxable', 'tax_class_id', 'requires_shipping',
+  'weight_grams', 'inventory_tracking', 'inventory_quantity', 'on_hand_quantity',
+  'digital_file_url', 'featured_image_url', 'material_tags', 'materials_json', 'primary_material', 'material', 'process_tags', 'making_process', 'process_notes', 'locality_label', 'local_pickup_note', 'sort_order', 'created_at', 'updated_at'
+];
+const TAX_COLUMN_CANDIDATES = ['tax_class_id', 'code', 'name', 'rate_percent', 'tax_rate'];
+const SEO_COLUMN_CANDIDATES = [
+  'product_id', 'meta_title', 'meta_description', 'keywords', 'h1_override', 'canonical_url',
+  'schema_type', 'og_title', 'og_description', 'og_image_url'
+];
+
+function safeIdentifier(value) {
+  const text = String(value || '').trim();
+  return /^[A-Za-z_][A-Za-z0-9_]*$/.test(text) ? text : '';
+}
+
+function sqlString(value) {
+  return `'${String(value || '').replace(/'/g, "''")}'`;
+}
+
+async function getTableColumnSet(db, tableName) {
+  const safeTable = safeIdentifier(tableName);
+  if (!safeTable) return new Set();
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${safeTable})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    const names = rows.map((row) => String(row?.name || '').trim()).filter((name) => safeIdentifier(name));
+    if (names.length) return new Set(names);
+  } catch {
+    // Fall through to the SELECT * sample fallback below.
   }
-  function clearCartMessage() { if (addToCartMessageEl) { addToCartMessageEl.textContent = ""; addToCartMessageEl.style.display = "none"; } }
-  function setInterestMessage(message, isError = false) {
-    if (!productInterestMessageEl) return;
-    productInterestMessageEl.textContent = message;
-    productInterestMessageEl.style.display = message ? "block" : "none";
-    productInterestMessageEl.style.color = isError ? "#b00020" : "#0a7a2f";
-  }
-  function escapeHtml(value) { return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
-  function formatMoney(cents, currency = "CAD") { const amount = Number(cents || 0) / 100; try { return new Intl.NumberFormat(undefined, { style: "currency", currency: currency || "CAD" }).format(amount); } catch { return `${amount.toFixed(2)} ${currency || "CAD"}`; } }
-  function yesNo(value) { return Number(value) === 1 ? "Yes" : "No"; }
 
-  function normalizeProductImages(product, images) {
-    const output = [];
-    const push = (entry) => {
-      const imageUrl = String(typeof entry === 'string' ? entry : entry?.image_url || '').trim();
-      if (!imageUrl) return;
-      if (output.some((row) => row.image_url.toLowerCase() === imageUrl.toLowerCase())) return;
-      output.push(typeof entry === 'object' ? { ...entry, image_url: imageUrl } : { image_url: imageUrl, alt_text: product?.name || 'Product image' });
+  try {
+    const sample = await db.prepare(`SELECT * FROM ${safeTable} LIMIT 1`).first();
+    return new Set(Object.keys(sample || {}).filter((name) => safeIdentifier(name)));
+  } catch {
+    return new Set();
+  }
+}
+
+async function getVerifiedTableColumnSet(db, tableName, candidateColumns = []) {
+  const safeTable = safeIdentifier(tableName);
+  if (!safeTable) return new Set();
+  const cacheKey = `${safeTable}:strict:${candidateColumns.join(',')}`;
+  const cached = schemaColumnCache.get(cacheKey);
+  if (cached && Date.now() - cached.cachedAt < SCHEMA_CACHE_MS) return new Set(cached.columns);
+
+  // Build 130: use only columns proven by D1 table metadata/sample rows.
+  // Do not add candidate columns to the returned set. D1/SQLite will throw if a query
+  // references a missing optional column such as p.merchandise_origin.
+  const columns = await getTableColumnSet(db, safeTable);
+  schemaColumnCache.set(cacheKey, { cachedAt: Date.now(), columns: Array.from(columns) });
+  return columns;
+}
+
+function selectColumn(columns, alias, columnName, fallbackSql, outputName = columnName) {
+  return columns.has(columnName) ? `${alias}.${columnName} AS ${outputName}` : `${fallbackSql} AS ${outputName}`;
+}
+
+function taxRateExpression(taxColumns) {
+  const parts = [];
+  if (taxColumns.has('rate_percent')) parts.push('tc.rate_percent');
+  if (taxColumns.has('tax_rate')) parts.push('tc.tax_rate');
+  return parts.length ? `COALESCE(${parts.join(', ')}, 0) AS tax_rate` : '0 AS tax_rate';
+}
+
+function inventoryQuantityExpression(productColumns) {
+  const parts = [];
+  if (productColumns.has('inventory_quantity')) parts.push('p.inventory_quantity');
+  if (productColumns.has('on_hand_quantity')) parts.push('p.on_hand_quantity');
+  return parts.length ? `COALESCE(${parts.join(', ')}, 0) AS inventory_quantity` : '0 AS inventory_quantity';
+}
+
+function buildProductDetailSql({ productColumns, taxColumns, seoColumns, hasTaxJoin, hasSeoJoin }) {
+  const joins = [];
+  if (hasTaxJoin) joins.push('LEFT JOIN tax_classes tc ON p.tax_class_id = tc.tax_class_id');
+  if (hasSeoJoin) joins.push('LEFT JOIN product_seo ps ON ps.product_id = p.product_id');
+  const where = productColumns.has('status') ? `p.slug = ? AND p.status = 'active'` : 'p.slug = ?';
+  const taxSelects = hasTaxJoin
+    ? [
+        selectColumn(taxColumns, 'tc', 'code', "''", 'tax_class_code'),
+        selectColumn(taxColumns, 'tc', 'name', "''", 'tax_class_name'),
+        taxRateExpression(taxColumns)
+      ]
+    : ["'' AS tax_class_code", "'' AS tax_class_name", '0 AS tax_rate'];
+  const seoSelects = hasSeoJoin
+    ? [
+        selectColumn(seoColumns, 'ps', 'meta_title', "''"),
+        selectColumn(seoColumns, 'ps', 'meta_description', "''"),
+        selectColumn(seoColumns, 'ps', 'keywords', "''"),
+        selectColumn(seoColumns, 'ps', 'h1_override', "''"),
+        selectColumn(seoColumns, 'ps', 'canonical_url', "''"),
+        selectColumn(seoColumns, 'ps', 'schema_type', sqlString('Product')),
+        selectColumn(seoColumns, 'ps', 'og_title', "''"),
+        selectColumn(seoColumns, 'ps', 'og_description', "''"),
+        selectColumn(seoColumns, 'ps', 'og_image_url', "''")
+      ]
+    : [
+        "'' AS meta_title", "'' AS meta_description", "'' AS keywords", "'' AS h1_override",
+        "'' AS canonical_url", "'Product' AS schema_type", "'' AS og_title", "'' AS og_description", "'' AS og_image_url"
+      ];
+  const selectList = [
+    selectColumn(productColumns, 'p', 'product_id', 'NULL'),
+    selectColumn(productColumns, 'p', 'slug', "''"),
+    selectColumn(productColumns, 'p', 'sku', "''"),
+    selectColumn(productColumns, 'p', 'name', sqlString('Untitled product')),
+    selectColumn(productColumns, 'p', 'product_category', "''"),
+    selectColumn(productColumns, 'p', 'short_description', "''"),
+    selectColumn(productColumns, 'p', 'description', "''"),
+    selectColumn(productColumns, 'p', 'product_type', sqlString('physical')),
+    selectColumn(productColumns, 'p', 'status', sqlString('active')),
+    selectColumn(productColumns, 'p', 'color_name', "''"),
+    selectColumn(productColumns, 'p', 'color_names_json', sqlString('[]')),
+    selectColumn(productColumns, 'p', 'merchandise_origin', sqlString('handmade')),
+    selectColumn(productColumns, 'p', 'sale_channel', sqlString('onsite')),
+    selectColumn(productColumns, 'p', 'external_listing_url', "''"),
+    selectColumn(productColumns, 'p', 'external_listing_label', "''"),
+    selectColumn(productColumns, 'p', 'condition_summary', "''"),
+    selectColumn(productColumns, 'p', 'era_label', "''"),
+    selectColumn(productColumns, 'p', 'sourcing_notes', "''"),
+    selectColumn(productColumns, 'p', 'material_tags', "''"),
+    selectColumn(productColumns, 'p', 'materials_json', "''"),
+    selectColumn(productColumns, 'p', 'primary_material', "''"),
+    selectColumn(productColumns, 'p', 'material', "''"),
+    selectColumn(productColumns, 'p', 'process_tags', "''"),
+    selectColumn(productColumns, 'p', 'making_process', "''"),
+    selectColumn(productColumns, 'p', 'process_notes', "''"),
+    selectColumn(productColumns, 'p', 'locality_label', "''"),
+    selectColumn(productColumns, 'p', 'local_pickup_note', "''"),
+    selectColumn(productColumns, 'p', 'price_cents', '0'),
+    selectColumn(productColumns, 'p', 'compare_at_price_cents', 'NULL'),
+    selectColumn(productColumns, 'p', 'currency', sqlString('CAD')),
+    selectColumn(productColumns, 'p', 'taxable', '1'),
+    selectColumn(productColumns, 'p', 'tax_class_id', 'NULL'),
+    selectColumn(productColumns, 'p', 'requires_shipping', '0'),
+    selectColumn(productColumns, 'p', 'weight_grams', 'NULL'),
+    selectColumn(productColumns, 'p', 'inventory_tracking', '0'),
+    inventoryQuantityExpression(productColumns),
+    selectColumn(productColumns, 'p', 'digital_file_url', "''"),
+    selectColumn(productColumns, 'p', 'featured_image_url', "''"),
+    selectColumn(productColumns, 'p', 'sort_order', '0'),
+    selectColumn(productColumns, 'p', 'created_at', "''"),
+    selectColumn(productColumns, 'p', 'updated_at', "''"),
+    ...taxSelects,
+    ...seoSelects
+  ];
+  return `
+    SELECT
+      ${selectList.join(',\n      ')}
+    FROM products p
+    ${joins.join('\n    ')}
+    WHERE ${where}
+    LIMIT 1
+  `;
+}
+
+async function handleProductDetailRequest(context) {
+  const { request, env } = context;
+  const db = env.DB || env.DD_DB;
+  const url = new URL(request.url);
+  const slug = String(url.searchParams.get('slug') || '').trim().toLowerCase();
+
+  if (!slug) return json({ ok: false, error: 'A valid slug is required.' }, 400);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
+
+  const productColumns = await getVerifiedTableColumnSet(db, 'products', PRODUCT_COLUMN_CANDIDATES);
+  if (!productColumns.has('slug')) {
+    return json({ ok: false, error: 'Product database schema is missing the slug column.' }, 503);
+  }
+
+  const taxColumns = await getVerifiedTableColumnSet(db, 'tax_classes', TAX_COLUMN_CANDIDATES);
+  const seoColumns = await getVerifiedTableColumnSet(db, 'product_seo', SEO_COLUMN_CANDIDATES);
+  const hasTaxJoin = productColumns.has('tax_class_id') && taxColumns.has('tax_class_id');
+  const hasSeoJoin = seoColumns.has('product_id');
+  const productSql = buildProductDetailSql({ productColumns, taxColumns, seoColumns, hasTaxJoin, hasSeoJoin });
+
+  let product = null;
+  try {
+    product = await db.prepare(productSql).bind(slug).first();
+  } catch (error) {
+    return json({
+      ok: false,
+      error: 'Product detail is temporarily unavailable because the product schema is out of sync.',
+      detail: String(error?.message || error || 'Unknown product detail error')
+    }, 503);
+  }
+
+
+  if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
+  product.color_names = parseColorNamesJson(product.color_names_json, product.color_name || '');
+  product.color_names_text = product.color_names.join(', ');
+  product.proof_materials = splitFilterValues(product.material_tags, product.materials_json, product.primary_material, product.material, product.product_category);
+  product.proof_material = filterText(product.proof_materials);
+  product.proof_processes = splitFilterValues(product.process_tags, product.making_process, product.process_notes);
+  product.proof_process = filterText(product.proof_processes);
+  product.proof_localities = splitFilterValues(product.locality_label, product.local_pickup_note, product.sourcing_notes);
+  product.proof_locality = filterText(product.proof_localities);
+
+  // Build 223: product detail must remain usable when optional offer tables are not yet
+  // present in production. Optional sections now degrade independently instead of taking
+  // the entire product page offline.
+  const section_warnings = [];
+  let quantity_price_tiers = [];
+  let bundle = { is_bundle: 0, settings: null, components: [], available_quantity: null };
+  try {
+    await ensureProductOffersSchema(db);
+    quantity_price_tiers = await getQuantityPriceTiers(db, product.product_id);
+    bundle = await getBundleDetails(db, product.product_id);
+  } catch (error) {
+    section_warnings.push(`offers_unavailable: ${String(error?.message || error || 'unknown error')}`);
+  }
+
+  if (Number(bundle?.is_bundle || 0) === 1) {
+    product.inventory_tracking = 1;
+    product.inventory_quantity = Math.max(0, Number(bundle.available_quantity || 0));
+    product.is_bundle = 1;
+  } else {
+    product.is_bundle = 0;
+    const reserved = await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`)
+      .bind(product.product_id).first().catch((error)=>{
+        section_warnings.push(`set_reservations_unavailable: ${String(error?.message || error || 'unknown error')}`);
+        return {reserved_quantity:0};
+      });
+    product.reserved_for_sets = Math.max(0, Number(reserved?.reserved_quantity || 0));
+    if (Number(product.inventory_tracking || 0) === 1) product.inventory_quantity = Math.max(0, Number(product.inventory_quantity || 0) - product.reserved_for_sets);
+  }
+
+  const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
+  const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
+  const productImageColumns = await getTableColumnSet(db, 'product_images');
+  const imageAnnotationColumns = await getTableColumnSet(db, 'product_image_annotations');
+  const mediaConsentColumns = await getTableColumnSet(db, 'media_consent_records');
+  const mediaAssetColumns = await getTableColumnSet(db, 'media_assets');
+  const hasImageAnnotationJoin = imageAnnotationColumns.has('product_image_id');
+  const hasConsentJoin = hasImageAnnotationJoin && imageAnnotationColumns.has('consent_record_id') && mediaConsentColumns.has('consent_record_id');
+  const piaColumn = (columnName, fallbackSql = 'NULL') => hasImageAnnotationJoin && imageAnnotationColumns.has(columnName) ? `pia.${columnName} AS ${columnName}` : `${fallbackSql} AS ${columnName}`;
+  const mcrColumn = (columnName, fallbackSql = 'NULL', outputName = columnName) => hasConsentJoin && mediaConsentColumns.has(columnName) ? `mcr.${columnName} AS ${outputName}` : `${fallbackSql} AS ${outputName}`;
+  const hasConsumptionMode = resourceLinkColumns.has('consumption_mode');
+  const hasLotSizeUnits = resourceLinkColumns.has('lot_size_units');
+  const usageUnitsExpr = inventoryColumns.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1`;
+  const usageUnitLabelExpr = inventoryColumns.has('usage_unit_label') ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : `'unit'`;
+  const stockUnitLabelExpr = inventoryColumns.has('stock_unit_label') ? `COALESCE(NULLIF(sii.stock_unit_label,''),'unit')` : `'unit'`;
+  const unitCostExpr = inventoryColumns.has('unit_cost_cents') ? `COALESCE(sii.unit_cost_cents,0)` : (inventoryColumns.has('cost_cents') ? `COALESCE(sii.cost_cents,0)` : `0`);
+
+  let images = [];
+  const imageSourceCounts = { product_images: 0, media_assets_enriched: 0, featured_fallback: 0 };
+  const hasProductImageSource = productImageColumns.has('product_id') && productImageColumns.has('image_url');
+
+  if (hasProductImageSource) {
+    try {
+      const imageOrderParts = [];
+      if (productImageColumns.has('sort_order')) imageOrderParts.push('COALESCE(pi.sort_order, 0) ASC');
+      if (productImageColumns.has('product_image_id')) imageOrderParts.push('pi.product_image_id ASC');
+      if (!imageOrderParts.length) imageOrderParts.push('pi.image_url ASC');
+      const baseAltExpression = productImageColumns.has('alt_text') ? 'NULLIF(pi.alt_text, \'\')' : 'NULL';
+      const annotatedAltExpression = hasImageAnnotationJoin && imageAnnotationColumns.has('alt_text') ? 'NULLIF(pia.alt_text, \'\')' : 'NULL';
+
+      images = normalizeResults(await db.prepare(`
+        SELECT ${selectColumn(productImageColumns, 'pi', 'product_image_id', 'NULL')},
+               ${selectColumn(productImageColumns, 'pi', 'product_id', String(Number(product.product_id || 0)))},
+               ${selectColumn(productImageColumns, 'pi', 'image_url', `''`)},
+               COALESCE(${annotatedAltExpression}, ${baseAltExpression}, ${sqlString(product.name || 'Product image')}) AS alt_text,
+               ${selectColumn(productImageColumns, 'pi', 'sort_order', '0')},
+               ${selectColumn(productImageColumns, 'pi', 'created_at', `''`)},
+               ${piaColumn('product_image_annotation_id', 'NULL')},
+               ${piaColumn('image_title', `''`)},
+               ${piaColumn('caption', `''`)},
+               ${piaColumn('focal_point_x', 'NULL')},
+               ${piaColumn('focal_point_y', 'NULL')},
+               ${piaColumn('annotation_notes', `''`)},
+               ${piaColumn('image_role', `''`)},
+               ${piaColumn('public_use_status', `'internal_review'`)},
+               ${piaColumn('consent_record_id', 'NULL')},
+               ${mcrColumn('consent_status', `''`)},
+               ${mcrColumn('consent_scope', `''`)},
+               ${mcrColumn('public_use_allowed', '0', 'consent_public_use_allowed')},
+               '' AS variant_role
+        FROM product_images pi
+        ${hasImageAnnotationJoin ? `LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id` : ``}
+        ${hasConsentJoin ? `LEFT JOIN media_consent_records mcr ON mcr.consent_record_id = pia.consent_record_id` : ``}
+        WHERE pi.product_id = ?
+          AND TRIM(COALESCE(pi.image_url, '')) <> ''
+        ORDER BY ${imageOrderParts.join(', ')}
+        LIMIT 20
+      `).bind(product.product_id).all());
+      imageSourceCounts.product_images = images.length;
+    } catch (error) {
+      section_warnings.push(`product_images_unavailable: ${String(error?.message || error || 'unknown error')}`);
+      images = [];
+    }
+  } else {
+    section_warnings.push('product_images_unavailable: product_images table or required columns are missing');
+  }
+
+  // Media assets are an optional enrichment source. Query them separately so a missing
+  // legacy column (for example deleted_at or variant_role) can never collapse the whole
+  // product gallery to the featured-image fallback.
+  if (images.length && mediaAssetColumns.has('product_id') && mediaAssetColumns.has('public_url')) {
+    try {
+      const assetOrderParts = [];
+      if (mediaAssetColumns.has('sort_order')) assetOrderParts.push('COALESCE(sort_order, 0) ASC');
+      if (mediaAssetColumns.has('media_asset_id')) assetOrderParts.push('media_asset_id ASC');
+      if (!assetOrderParts.length) assetOrderParts.push('public_url ASC');
+      const deletedWhere = mediaAssetColumns.has('deleted_at') ? 'AND deleted_at IS NULL' : '';
+      const assetRows = normalizeResults(await db.prepare(`
+        SELECT ${selectColumn(mediaAssetColumns, 'media_assets', 'media_asset_id', 'NULL')},
+               ${selectColumn(mediaAssetColumns, 'media_assets', 'public_url', `''`)},
+               ${selectColumn(mediaAssetColumns, 'media_assets', 'variant_role', `''`)},
+               ${selectColumn(mediaAssetColumns, 'media_assets', 'sort_order', '0')}
+        FROM media_assets
+        WHERE product_id = ?
+          AND TRIM(COALESCE(public_url, '')) <> ''
+          ${deletedWhere}
+        ORDER BY ${assetOrderParts.join(', ')}
+        LIMIT 50
+      `).bind(product.product_id).all());
+      const assetByUrl = new Map(assetRows.map((row) => [String(row.public_url || '').trim().toLowerCase(), row]));
+      images = images.map((row) => {
+        const match = assetByUrl.get(String(row.image_url || '').trim().toLowerCase());
+        if (!match) return row;
+        imageSourceCounts.media_assets_enriched += 1;
+        return { ...row, variant_role: row.variant_role || match.variant_role || '' };
+      });
+    } catch (error) {
+      section_warnings.push(`media_asset_enrichment_unavailable: ${String(error?.message || error || 'unknown error')}`);
+    }
+  }
+
+
+  let image_annotations = [];
+  if (hasImageAnnotationJoin) {
+    image_annotations = normalizeResults(await db.prepare(`
+      SELECT ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'product_image_annotation_id', 'NULL')},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'product_id', 'NULL')},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'product_image_id', 'NULL')},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'image_url', `''`)},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'alt_text', `''`)},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'image_title', `''`)},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'caption', `''`)},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'image_role', `''`)},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'public_use_status', `'internal_review'`)},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'consent_record_id', 'NULL')},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'focal_point_x', 'NULL')},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'focal_point_y', 'NULL')},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'annotation_notes', `''`)},
+             ${selectColumn(imageAnnotationColumns, 'product_image_annotations', 'updated_at', `''`)}
+      FROM product_image_annotations
+      WHERE product_id = ?
+      ORDER BY product_image_annotation_id ASC
+    `).bind(product.product_id).all().catch(() => ({ results: [] })));
+  }
+
+
+  // Reconcile annotation-only rows, preserve the featured image, and de-duplicate by URL.
+  // This is intentionally separate from the SQL query so legacy schema differences do not
+  // prevent the seven-image storefront gallery from rendering.
+  const annotationById = new Map();
+  const annotationByUrl = new Map();
+  image_annotations.forEach((row) => {
+    const id = Number(row.product_image_id || 0);
+    const urlKey = String(row.image_url || '').trim().toLowerCase();
+    if (id) annotationById.set(id, row);
+    if (urlKey) annotationByUrl.set(urlKey, row);
+  });
+
+  const mergedImageRows = [];
+  const imageIndexByUrl = new Map();
+  const mergeImage = (candidate = {}, preferFirst = false) => {
+    const imageUrl = String(candidate.image_url || '').trim();
+    if (!imageUrl) return;
+    const key = imageUrl.toLowerCase();
+    const existingIndex = imageIndexByUrl.get(key);
+    if (existingIndex != null) {
+      const existing = mergedImageRows[existingIndex];
+      mergedImageRows[existingIndex] = {
+        ...candidate,
+        ...existing,
+        image_url: imageUrl,
+        alt_text: existing.alt_text || candidate.alt_text || product.name || 'Product image',
+        image_title: existing.image_title || candidate.image_title || '',
+        caption: existing.caption || candidate.caption || '',
+        image_role: existing.image_role || candidate.image_role || '',
+        public_use_status: existing.public_use_status || candidate.public_use_status || 'internal_review',
+        variant_role: existing.variant_role || candidate.variant_role || ''
+      };
+      return;
+    }
+    const next = {
+      ...candidate,
+      image_url: imageUrl,
+      alt_text: candidate.alt_text || product.name || 'Product image',
+      sort_order: Number(candidate.sort_order || 0)
     };
-    push(product?.featured_image_url || product?.og_image_url || '');
-    (Array.isArray(images) ? images : []).forEach(push);
-    (Array.isArray(product?.images) ? product.images : []).forEach(push);
-    (Array.isArray(product?.image_urls) ? product.image_urls : []).forEach(push);
-    return output;
-  }
-
-  function renderMainImage(product, images) {
-    if (!productMainImageWrapEl) return;
-    const safeImages = normalizeProductImages(product, images);
-    const mainRow = safeImages[0] || null;
-    const mainImageUrl = String(mainRow?.image_url || '').trim();
-    const caption = String(mainRow?.caption || '').trim();
-    if (!mainImageUrl) {
-      productMainImageWrapEl.innerHTML = `<div class="product-detail-main-image product-detail-no-image"><span class="small">No Image</span></div>`;
-      return;
+    if (preferFirst) {
+      mergedImageRows.unshift(next);
+      imageIndexByUrl.clear();
+      mergedImageRows.forEach((row, index) => imageIndexByUrl.set(String(row.image_url || '').trim().toLowerCase(), index));
+    } else {
+      imageIndexByUrl.set(key, mergedImageRows.length);
+      mergedImageRows.push(next);
     }
-    productMainImageWrapEl.innerHTML = `
-      <div class="product-detail-main-image">
-        <img src="${escapeHtml(mainImageUrl)}" alt="${escapeHtml(mainRow?.alt_text || product.name || 'Product image')}" data-product-detail-main-image />
-        <div class="product-detail-image-meta">
-          <span class="small" data-product-detail-image-count>${safeImages.length > 1 ? `Image 1 of ${safeImages.length}` : 'Featured image'}</span>
-          <span class="small" data-product-detail-caption ${caption ? '' : 'hidden'}>${escapeHtml(caption)}</span>
-        </div>
-      </div>`;
-  }
+  };
 
-  function renderGallery(images, productName) {
-    if (!productGalleryEl) return;
-    const safeImages = normalizeProductImages(currentProduct || {}, images);
-    if (!safeImages.length) { productGalleryEl.innerHTML = ""; return; }
-    productGalleryEl.innerHTML = `<div class="product-detail-thumbs">${safeImages.map((image, index) => `
-      <button class="product-detail-thumb ${index === 0 ? 'is-active' : ''}" type="button" data-product-detail-thumb="${escapeHtml(image.image_url || '')}" data-caption="${escapeHtml(image.caption || '')}" data-alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}" data-image-index="${index + 1}" aria-label="Show ${escapeHtml(productName)} image ${index + 1} of ${safeImages.length}">
-        <img src="${escapeHtml(image.image_url || "")}" alt="${escapeHtml(image.alt_text || `${productName} image ${index + 1}`)}" title="${escapeHtml(image.image_title || image.caption || '')}" loading="lazy" />
-      </button>`).join("")}</div>`;
-    productGalleryEl.querySelectorAll('[data-product-detail-thumb]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const main = document.querySelector('[data-product-detail-main-image]');
-        const captionEl = document.querySelector('[data-product-detail-caption]');
-        const imageUrl = String(button.getAttribute('data-product-detail-thumb') || '').trim();
-        if (main && imageUrl) {
-          main.src = imageUrl;
-          main.alt = String(button.getAttribute('data-alt') || `${productName} product image`).trim();
-        }
-        const caption = String(button.getAttribute('data-caption') || '').trim();
-        if (captionEl) {
-          captionEl.textContent = caption;
-          captionEl.hidden = !caption;
-        }
-        const countEl = document.querySelector('[data-product-detail-image-count]');
-        const imageIndex = Number(button.getAttribute('data-image-index') || 1);
-        if (countEl) countEl.textContent = safeImages.length > 1 ? `Image ${imageIndex} of ${safeImages.length}` : 'Featured image';
-        productGalleryEl.querySelectorAll('.product-detail-thumb').forEach((thumb) => thumb.classList.remove('is-active'));
-        button.classList.add('is-active');
-      });
+  images.forEach((row) => {
+    const annotation = annotationById.get(Number(row.product_image_id || 0)) || annotationByUrl.get(String(row.image_url || '').trim().toLowerCase()) || {};
+    mergeImage({ ...row, ...annotation, image_url: row.image_url || annotation.image_url || '' });
+  });
+  image_annotations.forEach((row) => mergeImage(row));
+
+  const featuredUrl = String(product.featured_image_url || '').trim();
+  if (featuredUrl) {
+    const featuredKey = featuredUrl.toLowerCase();
+    const existingFeatured = mergedImageRows.find((row) => String(row.image_url || '').trim().toLowerCase() === featuredKey) || {};
+    if (imageIndexByUrl.has(featuredKey)) {
+      const existingIndex = imageIndexByUrl.get(featuredKey);
+      mergedImageRows.splice(existingIndex, 1);
+      imageIndexByUrl.clear();
+      mergedImageRows.forEach((row, index) => imageIndexByUrl.set(String(row.image_url || '').trim().toLowerCase(), index));
+    } else {
+      imageSourceCounts.featured_fallback = 1;
+    }
+    mergeImage({
+      ...existingFeatured,
+      image_url: featuredUrl,
+      alt_text: existingFeatured.alt_text || product.name || 'Product image',
+      image_role: existingFeatured.image_role || 'hero_front',
+      public_use_status: existingFeatured.public_use_status || 'product_page_ok',
+      variant_role: existingFeatured.variant_role || 'featured',
+      sort_order: -1
+    }, true);
+  }
+  images = mergedImageRows.slice(0, 20);
+
+  let resource_links = [];
+  try {
+    resource_links = normalizeResults(await db.prepare(`
+    SELECT prl.product_resource_link_id, prl.product_id, prl.resource_kind, prl.source_key, prl.quantity_used,
+           prl.usage_notes, prl.sort_order,
+           ${hasConsumptionMode ? `COALESCE(prl.consumption_mode,'per_unit')` : `'per_unit'`} AS consumption_mode,
+           ${hasLotSizeUnits ? `COALESCE(prl.lot_size_units,1)` : `1`} AS lot_size_units,
+           ci.name AS resource_name, ci.image_url AS resource_image_url, ci.category AS resource_category,
+           ci.subcategory AS resource_subcategory, ci.short_description AS resource_short_description,
+           sii.site_item_inventory_id, sii.on_hand_quantity, sii.reserved_quantity, sii.incoming_quantity,
+           sii.reorder_level, sii.is_on_reorder_list, sii.do_not_reorder, sii.do_not_reuse, sii.reuse_status,
+           ${usageUnitLabelExpr} AS usage_unit_label,
+           ${stockUnitLabelExpr} AS stock_unit_label,
+           ${usageUnitsExpr} AS usage_units_per_stock_unit,
+           ${unitCostExpr} AS unit_cost_cents
+    FROM product_resource_links prl
+    LEFT JOIN catalog_items ci ON ci.item_kind = prl.resource_kind AND ci.source_key = prl.source_key
+    LEFT JOIN site_item_inventory sii ON sii.source_type = prl.resource_kind AND sii.external_key = prl.source_key
+    WHERE prl.product_id = ?
+    ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
+    `).bind(product.product_id).all()).map((row) => {
+    const usageUnitsPerStockUnit = Math.max(1, Number(row.usage_units_per_stock_unit || 1) || 1);
+    const onHand = Number(row.on_hand_quantity || 0);
+    const reserved = Number(row.reserved_quantity || 0);
+    const incoming = Number(row.incoming_quantity || 0);
+    const quantityUsed = Math.max(0, Number(row.quantity_used || 0));
+    const lotSizeUnits = Math.max(1, Number(row.lot_size_units || 1) || 1);
+    const mode = String(row.consumption_mode || 'per_unit').toLowerCase();
+    const totalUsageUnits = onHand * usageUnitsPerStockUnit;
+    const estimatedCostPerProductCents = mode === 'story_only'
+      ? 0
+      : mode === 'end_of_lot'
+        ? Math.round(Number(row.unit_cost_cents || 0) / lotSizeUnits)
+        : Math.round((Number(row.unit_cost_cents || 0) / usageUnitsPerStockUnit) * Math.max(1, quantityUsed || 1));
+    const buildableProducts = mode === 'story_only'
+      ? 0
+      : mode === 'end_of_lot'
+        ? Math.floor(onHand * lotSizeUnits)
+        : (quantityUsed > 0 ? Math.floor(totalUsageUnits / quantityUsed) : 0);
+    return {
+      product_resource_link_id: Number(row.product_resource_link_id || 0),
+      product_id: Number(row.product_id || 0),
+      resource_kind: row.resource_kind || '',
+      source_key: row.source_key || '',
+      quantity_used: quantityUsed,
+      usage_notes: row.usage_notes || '',
+      sort_order: Number(row.sort_order || 0),
+      consumption_mode: mode,
+      lot_size_units: lotSizeUnits,
+      resource_name: row.resource_name || row.source_key || '',
+      resource_image_url: row.resource_image_url || '',
+      resource_category: row.resource_category || '',
+      resource_subcategory: row.resource_subcategory || '',
+      resource_short_description: row.resource_short_description || '',
+      inventory: row.site_item_inventory_id ? {
+        site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+        on_hand_quantity: onHand,
+        reserved_quantity: reserved,
+        incoming_quantity: incoming,
+        reorder_level: Number(row.reorder_level || 0),
+        is_on_reorder_list: Number(row.is_on_reorder_list || 0),
+        do_not_reorder: Number(row.do_not_reorder || 0),
+        do_not_reuse: Number(row.do_not_reuse || 0),
+        reuse_status: row.reuse_status || '',
+        usage_unit_label: row.usage_unit_label || 'unit',
+        stock_unit_label: row.stock_unit_label || 'unit',
+        usage_units_per_stock_unit: usageUnitsPerStockUnit,
+        unit_cost_cents: Number(row.unit_cost_cents || 0),
+        total_usage_units_available: totalUsageUnits,
+        estimated_cost_per_product_cents: estimatedCostPerProductCents,
+        buildable_products: buildableProducts
+      } : null
+    };
     });
+  } catch (error) {
+    section_warnings.push(`product_resources_unavailable: ${String(error?.message || error || 'unknown error')}`);
+    resource_links = [];
   }
 
+  const resource_summary = {
+    total_linked_items: resource_links.length,
+    linked_tools: resource_links.filter((row) => row.resource_kind === 'tool').length,
+    linked_supplies: resource_links.filter((row) => row.resource_kind === 'supply').length,
+    low_stock_items: resource_links.filter((row) => row.inventory && ((Number(row.inventory.on_hand_quantity || 0) - Number(row.inventory.reserved_quantity || 0) + Number(row.inventory.incoming_quantity || 0)) <= Number(row.inventory.reorder_level || 0))).length,
+    estimated_cost_per_product_cents: resource_links.reduce((sum, row) => sum + Number(row.inventory?.estimated_cost_per_product_cents || 0), 0)
+  };
 
-  function titleCaseLabel(value) {
-    return String(value || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()).trim();
-  }
+  const storefront_images = images.filter((row) => {
+    const publicUseStatus = normalizePublicUseStatus(row.public_use_status);
+    if (['blocked', 'consent_needed'].includes(publicUseStatus)) return false;
+    if (Number(row.consent_record_id || 0) > 0 && !isPublicConsentSafe(row)) return false;
+    return true;
+  }).map((row) => {
+    const imageUrl = row.image_url || '';
+    const publicUseStatus = normalizePublicUseStatus(row.public_use_status);
+    const role = row.image_role || '';
+    const group = imageRoleGroup(role, row.variant_role || '');
+    return {
+      product_image_id: Number(row.product_image_id || 0),
+      image_url: imageUrl,
+      alt_text: row.alt_text || product.name || '',
+      image_title: row.image_title || '',
+      caption: row.caption || '',
+      variant_role: row.variant_role || '',
+      image_role: role,
+      image_group: group,
+      public_use_status: publicUseStatus,
+      public_reuse_ready: ['product_page_ok', 'all_public_ok', 'social_ok'].includes(publicUseStatus) || !row.product_image_annotation_id ? 1 : 0,
+      annotation_notes: row.annotation_notes || '',
+      sort_order: Number(row.sort_order || 0),
+      variant_urls: imageUrl ? {
+        original: imageUrl,
+        thumb: imageUrl,
+        medium: imageUrl,
+        large: imageUrl,
+        webp: imageUrl
+      } : null
+    };
+  });
 
-  function renderPublicProductStory(product, storyNotes, resourceLinks, images) {
-    if (!productPublicStoryCardEl || !productPublicStoryBodyEl || !productPublicStoryListEl) return;
-    const notes = storyNotes && typeof storyNotes === 'object' ? storyNotes : {};
-    const origin = String(product?.merchandise_origin || 'handmade').toLowerCase();
-    const originLabel = titleCaseLabel(origin || 'handmade');
-    const resourceCount = Array.isArray(resourceLinks) ? resourceLinks.length : 0;
-    const imageCount = Array.isArray(images) ? images.length : 0;
-    const hasVintageNotes = ['vintage', 'collectible', 'sourced', 'antique', 'oddity'].some((token) => origin.includes(token)) || String(product?.condition_summary || product?.era_label || product?.sourcing_notes || '').trim();
-    const storyBody = String(notes.story_body || notes.story_summary || '').trim()
-      || String(product?.sourcing_notes || '').trim()
-      || String(product?.short_description || product?.description || '').trim()
-      || (hasVintageNotes
-        ? 'This item is listed with condition, era, and sourcing notes so buyers can understand what makes the piece different before deciding.'
-        : 'This item is part of the Devil n Dove workshop story: a real small-shop piece with materials, photos, and process notes added as the listing becomes more complete.');
-    const points = [];
-    if (notes.process_notes) points.push(notes.process_notes);
-    if (product?.condition_summary) points.push(`Condition: ${product.condition_summary}`);
-    if (product?.era_label) points.push(`Era / style note: ${product.era_label}`);
-    if (resourceCount) points.push(`${resourceCount} linked workshop tool/supply record${resourceCount === 1 ? '' : 's'} help explain what went into this piece.`);
-    if (imageCount) points.push(`${imageCount} product image${imageCount === 1 ? '' : 's'} are available for buyer review.`);
-    if (notes.care_notes) points.push(`Care note: ${notes.care_notes}`);
-    if (!points.length) points.push('More making notes can be added from the admin workflow as this listing moves from draft to publish-ready.');
-
-    show(productPublicStoryCardEl);
-    if (productPublicStoryKickerEl) productPublicStoryKickerEl.textContent = `${originLabel} • Devil n Dove workshop note`;
-    productPublicStoryBodyEl.innerHTML = escapeHtml(storyBody).replaceAll('\n', '<br>');
-    productPublicStoryListEl.innerHTML = points.slice(0, 6).map((point) => `<li>${escapeHtml(point)}</li>`).join('');
-  }
-
-  function renderResourceStory(resourceLinks, resourceSummary) {
-    if (!productStoryCardEl || !productResourcesStoryEl || !productStorySummaryEl) return;
-    const links = Array.isArray(resourceLinks) ? resourceLinks : [];
-    if (!links.length) {
-      hide(productStoryCardEl);
-      productResourcesStoryEl.innerHTML = '';
-      productStorySummaryEl.textContent = '';
-      return;
-    }
-    show(productStoryCardEl);
-    const summary = resourceSummary || {};
-    productStorySummaryEl.textContent = `${Number(summary.linked_tools || 0)} tools • ${Number(summary.linked_supplies || 0)} supplies • Estimated materials per product ${formatMoney(Number(summary.estimated_cost_per_product_cents || 0), currentProduct?.currency || 'CAD')}${Number(summary.low_stock_items || 0) ? ` • ${Number(summary.low_stock_items)} linked items are low in stock` : ''}`;
-    productResourcesStoryEl.innerHTML = links.map((link) => {
-      const inv = link.inventory || null;
-      const lowStock = !!(inv && ((Number(inv.on_hand_quantity || 0) - Number(inv.reserved_quantity || 0) + Number(inv.incoming_quantity || 0)) <= Number(inv.reorder_level || 0)));
-      const modeLabel = link.consumption_mode === 'end_of_lot' ? 'end of lot' : (link.consumption_mode === 'story_only' ? 'story only' : 'per product');
-      return `
-        <article class="resource-story-card">
-          <div class="resource-story-media">${link.resource_image_url ? `<img src="${escapeHtml(link.resource_image_url)}" alt="${escapeHtml(link.resource_name || link.source_key)}" loading="lazy"/>` : `<div class="resource-story-placeholder">${escapeHtml(link.resource_kind || 'item')}</div>`}</div>
-          <div class="resource-story-body">
-            <div class="small resource-kind-pill">${escapeHtml(link.resource_kind || 'resource')}</div>
-            <h4>${escapeHtml(link.resource_name || link.source_key || 'Workshop item')}</h4>
-            <div class="small">Use mode: ${escapeHtml(modeLabel)} • Quantity: ${Number(link.quantity_used || 0) || 1}</div>
-            ${link.resource_category ? `<div class="small">${escapeHtml(link.resource_category)}${link.resource_subcategory ? ` • ${escapeHtml(link.resource_subcategory)}` : ''}</div>` : ''}
-            ${link.usage_notes ? `<div class="small">${escapeHtml(link.usage_notes)}</div>` : ''}
-            ${inv ? `<div class="small">Inventory: on hand ${Number(inv.on_hand_quantity || 0)} ${escapeHtml(inv.stock_unit_label || 'unit')} • 1 ${escapeHtml(inv.stock_unit_label || 'unit')} = ${Number(inv.usage_units_per_stock_unit || 1)} ${escapeHtml(inv.usage_unit_label || 'unit')}</div><div class="small">Estimated materials from this item per finished product: ${escapeHtml(formatMoney(inv.estimated_cost_per_product_cents || 0, currentProduct?.currency || 'CAD'))}${Number(inv.buildable_products || 0) ? ` • buildable from stock ≈ ${Number(inv.buildable_products || 0)}` : ''}${lowStock ? ' • low stock' : ''}</div>` : ''}
-          </div>
-        </article>`;
-    }).join('');
-  }
-
-  function renderPolicySupport(product, trustSummary, resourceLinks) {
-    if (!productPolicySummaryEl || !productPolicyListEl) return;
-    const requiresShipping = Number(product?.requires_shipping || 0) === 1;
-    const inventoryQty = Number(product?.inventory_quantity || 0);
-    const reviewCount = Number(trustSummary?.review_count || 0);
-    const points = [];
-    points.push(requiresShipping
-      ? 'Shipping-required pieces show shipping status before checkout so buyers can compare physical items against no-shipping listings sooner.'
-      : 'This listing is marked as a no-shipping or digital-style item so buyers do not have to wait until checkout to understand fulfillment style.');
-    points.push(inventoryQty > 0
-      ? `Current tracked stock shows ${inventoryQty} available right now, which helps set expectation before checkout.`
-      : 'If stock is low or unavailable, buyers can use wishlist and back-in-stock tools instead of guessing.');
-    points.push('Custom, personalized, or made-to-order timing should be confirmed before payment so one-off workshop projects are not mistaken for ready-to-ship stock.');
-    if (String(product?.merchandise_origin || 'handmade').toLowerCase() !== 'handmade') points.push('Vintage, collectible, antique, or found items should be described with plain condition notes so wear, patina, or age are visible before purchase.');
-    if (String(product?.sale_channel || 'onsite').toLowerCase() === 'external_only') points.push('This item is routed to an external listing instead of direct on-site checkout.');
-    points.push('Questions about fit, finish, delivery, pickup, or workshop-specific details can be routed through Contact quickly if a listing needs clarification.');
-    if (reviewCount > 0) points.push(`This item also has buyer feedback on the page, which gives shoppers another trust signal before they commit.`);
-    if ((resourceLinks?.length || 0) > 0) points.push('The making-story section shows workshop context, tools, and supplies instead of presenting the product as a faceless catalog item.');
-    productPolicySummaryEl.textContent = requiresShipping
-      ? 'Key policy notes stay closer to the product so shipped pieces, custom timing, and support expectations are clearer before checkout.'
-      : 'Key policy notes stay closer to the product so delivery style, custom timing, and support expectations are clearer before checkout.';
-    productPolicyListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
-  }
-
-  function safeHttpsUrl(value) {
-    try { const url = new URL(String(value || '').trim()); return url.protocol === 'https:' ? url.toString() : ''; } catch { return ''; }
-  }
-
-  function renderQuickFacts(product, storyNotes, listingProfile) {
-    if (!productQuickFactsCardEl || !productQuickFactsEl) return;
-    const profile = listingProfile && typeof listingProfile === 'object' ? listingProfile : {};
-    const story = storyNotes && typeof storyNotes === 'object' ? storyNotes : {};
-    const materials = String(profile.materials_text || product?.proof_material || product?.material_tags || product?.primary_material || product?.material || '').trim();
-    const process = String(product?.proof_process || story.process_notes || '').trim();
-    const rows = [
-      ['Best for', profile.best_for_text],
-      ['Materials', materials],
-      ['Finish / condition', profile.finish_text || product?.condition_summary],
-      ['Size / dimensions', profile.dimensions_text || (Number(product?.weight_grams || 0) > 0 ? `${Number(product.weight_grams)} g` : '')],
-      ['Care', profile.care_summary || story.care_notes],
-      ['Availability', profile.availability_note || (Number(product?.inventory_tracking || 0) === 1 ? (Number(product?.inventory_quantity || 0) > 0 ? 'Current stock shown above.' : 'Follow this item for restock or availability.') : '')],
-      ['Shipping / pickup', profile.shipping_pickup_note || story.local_pickup_note],
-      ['Handmade note', profile.handmade_variation_note || (String(product?.merchandise_origin || '').toLowerCase() === 'handmade' ? 'Each handmade piece may have small, honest variations in pattern, placement, or finish.' : '')]
-    ].filter(([, value]) => String(value || '').trim());
-    if (!rows.length) { hide(productQuickFactsCardEl); productQuickFactsEl.innerHTML = ''; return; }
-    productQuickFactsEl.innerHTML = rows.map(([label, value]) => `<div class="product-quick-fact"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`).join('');
-    show(productQuickFactsCardEl);
-    const videoUrl = safeHttpsUrl(profile.product_video_url);
-    if (!productVideoCardEl || !productVideoMountEl) return;
-    if (!videoUrl) { hide(productVideoCardEl); productVideoMountEl.innerHTML = ''; return; }
-    const file = videoUrl.toLowerCase();
-    productVideoMountEl.innerHTML = /\.(mp4|webm|ogg)(?:\?|$)/.test(file)
-      ? `<video controls preload="metadata" playsinline src="${escapeHtml(videoUrl)}">Your browser cannot play this video. <a href="${escapeHtml(videoUrl)}" target="_blank" rel="noopener">Open the video</a>.</video>`
-      : `<a class="btn" href="${escapeHtml(videoUrl)}" target="_blank" rel="noopener">Open approved product video</a>`;
-    show(productVideoCardEl);
-  }
-
-  function renderVisualProofModules(images) {
-    const root = document.getElementById('productVisualProofModules');
-    if (!root) return;
-    const safeImages = Array.isArray(images) ? images : [];
-    const slots = [
-      ['process', ['process_story','process'], 'Process'],
-      ['scale', ['scale_context','scale'], 'Scale'],
-      ['materials', ['material_tool_proof','detail_texture','close_up'], 'Materials'],
-      ['care', ['packaging_pickup','packaging','back_side','back_or_side'], 'Care']
-    ];
-    slots.forEach(([slot, roles, label]) => {
-      const figure = root.querySelector(`[data-product-proof-slot="${slot}"]`);
-      const match = safeImages.find((image) => roles.includes(String(image?.image_role || '').toLowerCase()));
-      if (!figure || !match?.image_url) return;
-      const image = figure.querySelector('img');
-      const note = figure.querySelector('figcaption span');
-      if (image) { image.src = match.image_url; image.alt = match.alt_text || `${label} view for ${currentProduct?.name || 'product'}`; image.classList.add('is-approved-product-proof'); }
-      if (note) note.textContent = match.caption || `${label} view from this listing.`;
-      figure.classList.add('has-approved-product-proof');
+  // Build 194: explicit buyer-facing photo roles are stored separately from raw gallery rows.
+  try {
+    const roleRows = normalizeResults(await db.prepare(`
+      SELECT role_key, product_image_id, image_url
+      FROM product_media_role_assignments
+      WHERE product_id = ? AND COALESCE(assignment_status,'assigned') = 'assigned'
+    `).bind(product.product_id).all());
+    const roleMap = new Map();
+    roleRows.forEach((row) => {
+      const key = Number(row.product_image_id || 0) ? `id:${Number(row.product_image_id || 0)}` : `url:${String(row.image_url || '').trim()}`;
+      if (key) roleMap.set(key, String(row.role_key || '').trim());
     });
-  }
-
-  function renderProcessLinks(product, resourceLinks) {
-    if (!productProcessSummaryEl || !productProcessLinksEl) return;
-    const hasStory = (resourceLinks?.length || 0) > 0;
-    productProcessSummaryEl.textContent = hasStory
-      ? 'This listing already includes workshop-story details. These links help shoppers move from a single product into the wider maker/process story.'
-      : 'Not every listing has full process links yet, so these shortcuts help buyers see the broader workshop story, gallery, and maker pages.';
-    const links = [
-      { href: '/gallery/', label: 'Gallery & media' },
-      { href: '/workshop-journal/', label: 'Workshop Journal' },
-      { href: '/about/', label: 'About the workshop' },
-      { href: '/creations/', label: 'Creations overview' },
-      { href: '/events/', label: 'Events & markets' },
-      { href: '/pickup/', label: 'Local pickup' },
-      { href: '/contact/', label: 'Ask about custom timing' },
-    ];
-    productProcessLinksEl.innerHTML = links.map((link) => `<a class="btn" href="${link.href}">${escapeHtml(link.label)}</a>`).join('');
-  }
-
-  function renderMarketplaceSupport(product) {
-    if (!productMarketplaceCardEl || !productMarketplaceSummaryEl || !productMarketplaceLinksEl) return;
-    const origin = String(product?.merchandise_origin || 'handmade').trim().toLowerCase();
-    const saleChannel = String(product?.sale_channel || 'onsite').trim().toLowerCase();
-    const externalUrl = String(product?.external_listing_url || '').trim();
-    const externalLabel = String(product?.external_listing_label || 'External listing').trim() || 'External listing';
-    const notes = [];
-    if (origin && origin !== 'handmade') notes.push(`This is listed as a ${origin} or pre-built item rather than a workshop-made piece.`);
-    if (product?.era_label) notes.push(`Era / period: ${product.era_label}.`);
-    if (product?.condition_summary) notes.push(`Condition: ${product.condition_summary}.`);
-    if (product?.sourcing_notes) notes.push(product.sourcing_notes);
-    if (saleChannel === 'external_only') notes.push('This item is currently being sold through an external listing channel instead of direct Devil n Dove checkout.');
-    if (saleChannel === 'hybrid') notes.push('This item can stay visible on Devil n Dove while also linking out to an external marketplace listing.');
-    if (!notes.length && !externalUrl) {
-      hide(productMarketplaceCardEl);
-      productMarketplaceLinksEl.innerHTML = '';
-      productMarketplaceSummaryEl.textContent = '';
-      return;
-    }
-    show(productMarketplaceCardEl);
-    productMarketplaceSummaryEl.textContent = notes.join(' ');
-    const links = [];
-    if (externalUrl) links.push(`<a class="btn" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(externalLabel)}</a>`);
-    if (saleChannel !== 'external_only') links.push(`<a class="btn" href="/contact/">Ask about pickup / availability</a>`);
-    links.push(`<a class="btn" href="/collections/">Collections guide</a>`);
-    links.push(`<a class="btn" href="/pickup/">Local pickup</a>`);
-    if (origin !== 'handmade' || saleChannel !== 'onsite') links.push(`<a class="btn" href="/marketplaces/">Marketplace guide</a>`);
-    if (origin !== 'handmade' || saleChannel !== 'onsite') links.push(`<a class="btn" href="/events/">Events & markets</a>`);
-    productMarketplaceLinksEl.innerHTML = links.join('');
-  }
-
-  function renderTrustSummary(product, trustSummary, images, resourceLinks) {
-    currentTrustSummary = trustSummary || null;
-    if (!productTrustListEl || !productTrustSummaryEl) return;
-    const points = [];
-    if ((trustSummary?.image_count || 0) > 1) points.push(`Multiple product photos are shown for this listing.`);
-    else if ((trustSummary?.image_count || 0) === 1) points.push(`At least one real product photo is shown for this listing.`);
-    if (resourceLinks?.length) points.push(`This item includes a maker-story block with the tools and supplies used.`);
-    if (Number(product.inventory_tracking || 0) === 1) points.push(`Inventory is tracked for this product so stock status is clearer.`);
-    if (Number(product.compare_at_price_cents || 0) > Number(product.price_cents || 0)) points.push(`A compare-at price is available for context.`);
-    const origin = String(product?.merchandise_origin || 'handmade').toLowerCase();
-    productTrustSummaryEl.textContent = `Product trust signals: ${(trustSummary?.image_count || 0)} image(s), ${resourceLinks?.length || 0} linked making-story item(s), and ${trustSummary?.in_stock ? 'current stock available' : 'stock can be followed with alerts'}${origin !== 'handmade' ? ' with provenance-style notes for a non-handmade item' : ''}.`;
-    productTrustListEl.innerHTML = points.map((point) => `<li>${escapeHtml(point)}</li>`).join('');
-  }
-
-  function renderRelatedProducts(relatedProducts) {
-    if (!productRelatedProofCardEl || !productRelatedProofListEl || !productRelatedProofSummaryEl) return;
-    const rows = Array.isArray(relatedProducts) ? relatedProducts : [];
-    if (!rows.length) {
-      hide(productRelatedProofCardEl);
-      productRelatedProofListEl.innerHTML = '';
-      productRelatedProofSummaryEl.textContent = '';
-      return;
-    }
-    show(productRelatedProofCardEl);
-    productRelatedProofSummaryEl.textContent = 'These pieces share material, process, locality, or product-proof wording with the current listing.';
-    productRelatedProofListEl.innerHTML = rows.map((row) => `<a class="card" href="/shop/product/?slug=${encodeURIComponent(row.slug || '')}" style="text-decoration:none;color:inherit"><div>${row.featured_image_url ? `<img src="${escapeHtml(row.featured_image_url)}" alt="${escapeHtml(row.name || 'Related product')}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px"/>` : '<div class="resource-story-placeholder">Related</div>'}</div><strong style="display:block;margin-top:8px">${escapeHtml(row.name || 'Related piece')}</strong><span class="small">${escapeHtml(row.product_category || '')}</span><br><span class="small">${escapeHtml(formatMoney(row.price_cents || 0, row.currency || 'CAD'))}</span></a>`).join('');
-  }
-
-  function renderReviews(reviews, reviewSummary) {
-    if (!productReviewsCardEl || !productReviewsSummaryEl || !productReviewsListEl) return;
-    const rows = Array.isArray(reviews) ? reviews : [];
-    if (!rows.length) {
-      hide(productReviewsCardEl);
-      productReviewsListEl.innerHTML = '';
-      productReviewsSummaryEl.textContent = '';
-      return;
-    }
-    show(productReviewsCardEl);
-    productReviewsSummaryEl.textContent = `${Number(reviewSummary?.review_count || rows.length)} approved review(s) • average rating ${Number(reviewSummary?.average_rating || 0).toFixed(2)} / 5`;
-    productReviewsListEl.innerHTML = rows.map((row) => `
-      <article class="card" style="margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
-          <strong>${escapeHtml(row.reviewer_name || 'Devil n Dove customer')}</strong>
-          <span class="small">${'★'.repeat(Math.max(1, Number(row.rating || 0)))}${Number(row.is_featured || 0) === 1 ? ' • Featured' : ''}</span>
-        </div>
-        <div class="small" style="margin-top:4px">${escapeHtml(row.review_kind || 'testimonial')} • ${escapeHtml(row.created_at || '')}</div>
-        <div style="margin-top:8px">${escapeHtml(row.review_text || '')}</div>
-      </article>`).join('');
-  }
-
-
-  function renderCandleSoapSpec(spec) {
-    if (!productCandleSoapSafetyCardEl || !productCandleSoapSummaryEl || !productCandleSoapDetailsEl) return;
-    if (!spec || typeof spec !== 'object') {
-      hide(productCandleSoapSafetyCardEl);
-      return;
-    }
-    const parts = [spec.product_kind, spec.scent_profile ? `Scent: ${spec.scent_profile}` : '', spec.wax_or_base ? `Base: ${spec.wax_or_base}` : '', spec.batch_number ? `Batch: ${spec.batch_number}` : ''].filter(Boolean);
-    productCandleSoapSummaryEl.textContent = parts.length ? parts.join(' • ') : 'Safety, scent, batch, and ingredient notes are available for this candle or soap item.';
-    const detailRows = [
-      ['Colour notes', spec.colour_notes],
-      ['Ingredients', spec.ingredient_notes],
-      ['Allergen / safety notes', spec.allergen_safety_notes || spec.safety_notes],
-      ['Label weight', spec.label_weight],
-      ['Batch recall notes', spec.batch_recall_notes]
-    ].filter(([, value]) => String(value || '').trim());
-    productCandleSoapDetailsEl.innerHTML = detailRows.length
-      ? detailRows.map(([label, value]) => `<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>`).join('')
-      : '<div>No extra safety notes have been added yet.</div>';
-    show(productCandleSoapSafetyCardEl);
-  }
-
-  function renderProduct(product, images, resourceLinks, resourceSummary, trustSummary, reviews, reviewSummary, storyNotes, relatedProducts, candleSoapSpec, listingProfile) {
-    currentProduct = product || null;
-    try { window.DDAnalytics?.trackFunnel?.('product_view', { source: 'product_detail', product_id: currentProduct?.product_id || null, slug: currentProduct?.slug || '' }); } catch {}
-    if (productTypeEl) {
-      const badges = [product.product_type || ''];
-      if (product.merchandise_origin) badges.push(product.merchandise_origin);
-      if (product.sale_channel && product.sale_channel !== 'onsite') badges.push(product.sale_channel.replace('_', ' '));
-      if (Array.isArray(product.color_names) && product.color_names.length) badges.push(`Colours: ${product.color_names.join(', ')}`);
-      productTypeEl.textContent = badges.filter(Boolean).join(' • ');
-    }
-    if (productNameEl) productNameEl.textContent = product.name || "";
-    if (pageH1El) pageH1El.textContent = product.h1_override || product.name || 'Product Details';
-    if (pageIntroEl) pageIntroEl.textContent = product.meta_description || product.short_description || 'View the full details for this Devil n Dove item.';
-    if (productPriceEl) productPriceEl.textContent = formatMoney(product.price_cents, product.currency);
-    if (productShortDescriptionEl) productShortDescriptionEl.textContent = product.short_description || product.meta_description || "No short description available.";
-    if (productKeywordTagsEl) productKeywordTagsEl.textContent = product.keywords ? `Keywords: ${product.keywords}` : '';
-    if (productSkuEl) productSkuEl.textContent = product.sku || "—";
-    if (productShippingEl) productShippingEl.textContent = yesNo(product.requires_shipping);
-    if (productTaxClassEl) productTaxClassEl.textContent = product.tax_class_name || product.tax_class_code || "—";
-    if (productInventoryEl) {
-      const tracking = Number(product.inventory_tracking) === 1;
-      const quantity = Number(product.inventory_quantity || 0);
-      productInventoryEl.textContent = tracking ? String(quantity) : "Not tracked";
-    }
-    if (productDescriptionEl) {
-      const description = String(product.description || "").trim();
-      productDescriptionEl.innerHTML = description ? `<p>${escapeHtml(description).replaceAll("\n", "<br>")}</p>` : `<p class="small">No full description available.</p>`;
-    }
-    renderMainImage(product, images);
-    renderGallery(images, product.name || "Product");
-    renderQuickFacts(product, storyNotes, listingProfile);
-    renderVisualProofModules(images);
-    try { window.DDRecentlyViewed?.add?.(product); } catch {}
-    renderResourceStory(resourceLinks, resourceSummary);
-    renderReviews(reviews, reviewSummary);
-    renderTrustSummary(product, trustSummary, images, resourceLinks);
-    renderPolicySupport(product, trustSummary, resourceLinks);
-    renderMarketplaceSupport(product);
-    renderProcessLinks(product, resourceLinks);
-    renderRelatedProducts(relatedProducts);
-    renderCandleSoapSpec(candleSoapSpec);
-    if (addToCartButton) {
-      const externalOnly = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only';
-      addToCartButton.style.display = externalOnly ? 'none' : '';
-    }
-    if (productQuantityEl) {
-      productQuantityEl.style.display = String(product.sale_channel || 'onsite').toLowerCase() === 'external_only' ? 'none' : '';
-    }
-    if (productInterestGuestWrap) productInterestGuestWrap.style.display = Number(product.inventory_quantity || 0) > 0 ? 'none' : 'block';
-  }
-
-  async function readJsonResponse(response, fallbackMessage) {
-    const rawText = await response.text();
-    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
-    if (rawText.trim().startsWith('<')) {
-      throw new Error(`${fallbackMessage} The server returned an HTML page instead of JSON, so the product API route may be falling through to the static site.`);
-    }
-    try { return JSON.parse(rawText); }
-    catch { throw new Error(`${fallbackMessage} Product data was not valid JSON.`); }
-  }
-
-  async function loadProductFallbackFromProducts(slug) {
-    const cleanSlug = String(slug || '').trim().toLowerCase();
-    // Build 223: the first lookup uses the slug-aware catalog search. If an older
-    // deployed products endpoint does not search slugs, retry the complete active
-    // catalog before declaring the product unavailable.
-    const paths = [
-      `/api/products?q=${encodeURIComponent(cleanSlug)}`,
-      '/api/products'
-    ];
-    let lastError = null;
-    for (const path of paths) {
-      try {
-        const response = await fetch(path, { method: 'GET', headers: { Accept: 'application/json' } });
-        const data = await readJsonResponse(response, 'Fallback shop lookup failed.');
-        if (!response.ok || !data.ok) throw new Error(data.error || 'Fallback shop lookup failed.');
-        const rows = Array.isArray(data.products) ? data.products : [];
-        const match = rows.find((row) => String(row.slug || '').trim().toLowerCase() === cleanSlug) || null;
-        if (match) return match;
-      } catch (error) {
-        lastError = error;
-      }
-    }
-    if (lastError) console.warn('Product detail fallback warning:', lastError);
-    return null;
-  }
-
-  async function loadProduct() {
-    hide(errorEl);
-    hide(detailEl);
-    show(loadingEl);
-    try {
-      const url = new URL(window.location.href);
-      const slug = String(url.searchParams.get("slug") || "").trim();
-      if (!slug) throw new Error("No product slug was provided.");
-      const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { method: "GET", headers: { Accept: "application/json" } });
-      let data = null;
-      let detailError = null;
-      try {
-        data = await readJsonResponse(response, "Failed to load product detail.");
-        if (!response.ok || !data?.ok) {
-          detailError = new Error(data?.error || `Failed to load product detail (HTTP ${response.status}).`);
-        }
-      } catch (error) {
-        detailError = error;
-      }
-
-      // Build 223: a valid JSON 503 previously bypassed the fallback because only JSON
-      // parse failures entered the fallback branch. Any failed detail response now tries
-      // the public catalog before showing an error page.
-      if (detailError) {
-        const fallbackProduct = await loadProductFallbackFromProducts(slug);
-        if (!fallbackProduct) throw detailError;
-        console.warn('Extended product detail was unavailable; rendering the catalog fallback.', detailError);
-        data = {
-          ok: true,
-          product: fallbackProduct,
-          images: Array.isArray(fallbackProduct.images) ? fallbackProduct.images : (Array.isArray(fallbackProduct.image_urls) ? fallbackProduct.image_urls.map((image_url) => ({ image_url, alt_text: fallbackProduct.name || 'Product image' })) : []),
-          storefront_images: Array.isArray(fallbackProduct.images) ? fallbackProduct.images : [],
-          resource_links: [],
-          resource_summary: {},
-          trust_summary: { image_count: Number(fallbackProduct.image_count || 0), in_stock: Number(fallbackProduct.inventory_quantity || 0) > 0 },
-          reviews: [],
-          review_summary: {},
-          story_notes: {},
-          related_products: [],
-          quantity_price_tiers: [],
-          bundle: null,
-          warning: detailError.message,
-          fallback_mode: 'public_catalog'
-        };
-      }
-      if (!data?.ok) throw new Error(data?.error || "Failed to load product.");
-      renderProduct(data.product || {}, data.storefront_images || data.images || [], data.resource_links || [], data.resource_summary || {}, data.trust_summary || {}, data.reviews || [], data.review_summary || {}, data.story_notes || {}, data.related_products || [], data.candle_soap_spec || null, data.listing_profile || null);
-      document.title = `${data.product?.meta_title || data.product?.name || "Product"} — Devil n Dove`;
-      const resolvedDescription = data.product?.meta_description || data.product?.short_description || 'View product details from Devil n Dove.';
-      const resolvedCanonical = data.product?.canonical_url || window.location.href;
-      const resolvedImage = (data.images || []).map((row) => row.image_url).find(Boolean) || data.product?.featured_image_url || 'https://devilndove.com/assets/logo-clear.png';
-      const desc = document.querySelector('meta[name="description"]'); if (desc) desc.setAttribute('content', resolvedDescription);
-      const canon = document.querySelector('link[rel="canonical"]'); if (canon) canon.setAttribute('href', resolvedCanonical);
-      [['meta[property="og:title"]', document.title], ['meta[property="og:description"]', resolvedDescription], ['meta[property="og:url"]', resolvedCanonical], ['meta[property="og:image"]', resolvedImage], ['meta[name="twitter:title"]', document.title], ['meta[name="twitter:description"]', resolvedDescription], ['meta[name="twitter:image"]', resolvedImage]].forEach(([selector, value]) => {
-        const el = document.querySelector(selector);
-        if (el && value) el.setAttribute('content', value);
-      });
-      if (data.product) {
-        const schema = {
-          '@context': 'https://schema.org',
-          '@type': data.product.schema_type || 'Product',
-          name: data.product.name,
-          description: data.product.meta_description || data.product.short_description || data.product.description || '',
-          sku: data.product.sku || undefined,
-          image: (data.images || []).map((row) => row.image_url).filter(Boolean),
-          offers: { '@type': 'Offer', priceCurrency: data.product.currency || 'CAD', price: (Number(data.product.price_cents || 0) / 100).toFixed(2), availability: Number(data.product.inventory_quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: String(data.product.sale_channel || 'onsite').toLowerCase() === 'external_only' && data.product.external_listing_url ? data.product.external_listing_url : resolvedCanonical }
-        };
-        let script = document.getElementById('productStructuredData');
-        if (!script) { script = document.createElement('script'); script.type = 'application/ld+json'; script.id = 'productStructuredData'; document.head.appendChild(script); }
-        script.textContent = JSON.stringify(schema);
-      }
-      show(detailEl);
-    } catch (error) {
-      if (errorEl) errorEl.textContent = error.message || 'Failed to load product.';
-      show(errorEl);
-    } finally {
-      hide(loadingEl);
-    }
-  }
-
-  async function saveWishlist() {
-    if (!window.DDAuth?.isLoggedIn()) {
-      setInterestMessage('Please log in to save wishlist items.', true);
-      return;
-    }
-    if (!currentProduct?.product_id) return;
-    try {
-      const response = await window.DDAuth.apiFetch('/api/member/wishlist', { method: 'POST', body: JSON.stringify({ product_id: currentProduct.product_id }) });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save wishlist item.');
-      setInterestMessage(data.message || 'Saved to wishlist.');
-    } catch (error) {
-      setInterestMessage(error.message || 'Failed to save wishlist item.', true);
-    }
-  }
-
-  async function requestBackInStock() {
-    if (!currentProduct?.product_id) return;
-    const email = String(productInterestEmail?.value || '').trim();
-    if (!window.DDAuth?.isLoggedIn() && !email) {
-      setInterestMessage('Please enter an email address for stock alerts.', true);
-      return;
-    }
-    try {
-      const response = await window.DDAuth.apiFetch('/api/product-interest', { method: 'POST', body: JSON.stringify({ product_id: currentProduct.product_id, request_type: 'back_in_stock', email }) });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || 'Failed to save stock alert.');
-      setInterestMessage(data.message || 'Back-in-stock request saved.');
-    } catch (error) {
-      setInterestMessage(error.message || 'Failed to save stock alert.', true);
-    }
-  }
-
-  if (addToCartButton) {
-    addToCartButton.addEventListener("click", () => {
-      clearCartMessage();
-      if (!window.DDCart) return setCartMessage("Cart is not available right now.", true);
-      if (!currentProduct || !currentProduct.product_id) return setCartMessage("Product is not ready to add to cart.", true);
-      if (String(currentProduct.sale_channel || 'onsite').toLowerCase() === 'external_only') {
-        return setCartMessage('This item currently routes to an external listing instead of on-site checkout.', true);
-      }
-      const quantity = Number(productQuantityEl?.value || 1);
-      if (!Number.isInteger(quantity) || quantity <= 0) return setCartMessage("Please enter a valid quantity.", true);
-      try {
-        window.DDCart.addToCart(currentProduct, quantity);
-        try { window.DDAnalytics?.trackCart?.('add_to_cart', { meta: { source: 'product_detail', product_id: currentProduct.product_id, quantity } }); } catch {}
-        setCartMessage("Added to cart successfully.");
-        if (productQuantityEl) productQuantityEl.value = "1";
-      } catch (error) {
-        setCartMessage(error.message || "Failed to add item to cart.", true);
+    const publicRole = { main:'hero_front', close_up:'detail_texture', scale:'scale_context', back_or_side:'back_side', process:'process_story', packaging:'packaging_pickup', social_share:'social_share' };
+    storefront_images.forEach((image) => {
+      const role = roleMap.get(`id:${Number(image.product_image_id || 0)}`) || roleMap.get(`url:${String(image.image_url || '').trim()}`) || '';
+      if (role && publicRole[role]) {
+        image.image_role = publicRole[role];
+        image.image_group = imageRoleGroup(image.image_role, image.variant_role || '');
       }
     });
+  } catch {}
+
+  const image_summary = {
+    raw_count: images.length,
+    storefront_count: storefront_images.length,
+    has_multiple_images: storefront_images.length > 1,
+    source_counts: imageSourceCounts,
+    warnings: section_warnings.filter((warning) => String(warning || '').includes('image') || String(warning || '').includes('media_asset'))
+  };
+
+  const image_groups = {
+    featured: storefront_images.find((row) => row.image_url === product.featured_image_url) || storefront_images.find((row) => row.image_group === 'featured') || storefront_images[0] || null,
+    detail: storefront_images.filter((row) => row.image_group === 'detail'),
+    scale: storefront_images.filter((row) => row.image_group === 'scale'),
+    process: storefront_images.filter((row) => row.image_group === 'process'),
+    packaging: storefront_images.filter((row) => row.image_group === 'packaging'),
+    proof: storefront_images.filter((row) => row.image_group === 'proof'),
+    gallery: storefront_images.filter((row) => !['featured', 'detail', 'scale', 'process', 'packaging', 'proof'].includes(row.image_group)),
+    annotated: storefront_images.filter((row) => row.caption || row.annotation_notes || row.image_title)
+  };
+
+  const build_summary = {
+    buildable_units_from_resources: resource_links.length
+      ? resource_links.reduce((minUnits, row) => {
+          const possibleUnits = row.inventory?.buildable_products;
+          if (possibleUnits == null || possibleUnits < 0) return minUnits;
+          return minUnits == null ? possibleUnits : Math.min(minUnits, possibleUnits);
+        }, null)
+      : null,
+    resource_shortage_links: resource_links.filter((row) => row.inventory && Number(row.inventory.buildable_products || 0) < 1 && row.consumption_mode !== 'story_only').length
+  };
+
+
+  let story_notes = {};
+  try {
+    const storyTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_story_public_notes' LIMIT 1`).first();
+    if (storyTable) {
+      story_notes = await db.prepare(`
+        SELECT product_story_public_note_id, product_id, story_heading, story_summary, story_body,
+               process_notes, care_notes, local_pickup_note, display_status, updated_at
+        FROM product_story_public_notes
+        WHERE product_id = ? AND COALESCE(display_status,'draft') IN ('approved','published')
+        ORDER BY datetime(updated_at) DESC, product_story_public_note_id DESC
+        LIMIT 1
+      `).bind(product.product_id).first().catch(() => ({})) || {};
+    }
+  } catch {}
+
+  let listing_profile = null;
+  try {
+    listing_profile = await db.prepare(`
+      SELECT product_listing_profile_id, product_id, best_for_text, materials_text, finish_text,
+             dimensions_text, care_summary, handmade_variation_note, availability_note,
+             shipping_pickup_note, product_video_url, profile_status, updated_at
+      FROM product_listing_profiles
+      WHERE product_id = ? AND COALESCE(profile_status,'draft') IN ('approved','published')
+      ORDER BY datetime(COALESCE(updated_at,created_at,CURRENT_TIMESTAMP)) DESC
+      LIMIT 1
+    `).bind(product.product_id).first().catch(() => null);
+  } catch {}
+
+  const candle_soap_spec = await db.prepare(`SELECT * FROM custom_candle_soap_product_specs WHERE product_id = ? ORDER BY custom_candle_soap_product_spec_id DESC LIMIT 1`).bind(product.product_id).first().catch(() => null);
+
+  const trust_summary = {
+    has_multiple_images: storefront_images.length > 1,
+    has_maker_story: resource_links.length > 0,
+    can_request_back_in_stock: Number(product.inventory_tracking || 0) === 1,
+    in_stock: Number(product.inventory_quantity || 0) > 0,
+    image_count: storefront_images.length
+  };
+
+  async function relatedProductsByProof() {
+    const fields = ['material_tags', 'materials_json', 'primary_material', 'material', 'product_category', 'process_tags', 'making_process', 'process_notes', 'locality_label', 'local_pickup_note', 'sourcing_notes'].filter((field) => productColumns.has(field));
+    if (!fields.length) return [];
+    const tokens = [
+      ...(Array.isArray(product.proof_materials) ? product.proof_materials : []),
+      ...(Array.isArray(product.proof_processes) ? product.proof_processes : []),
+      ...(Array.isArray(product.proof_localities) ? product.proof_localities : [])
+    ].map((item) => String(item || '').trim().toLowerCase()).filter((item) => item.length >= 3).slice(0, 8);
+    if (!tokens.length) return [];
+    const clauses = [];
+    const binds = [];
+    tokens.forEach((token) => {
+      const parts = fields.map((field) => `LOWER(COALESCE(p.${field}, '')) LIKE ?`);
+      clauses.push(`(${parts.join(' OR ')})`);
+      fields.forEach(() => binds.push(`%${token}%`));
+    });
+    const statusClause = productColumns.has('status') ? `AND p.status='active'` : '';
+    const imageColumn = productColumns.has('featured_image_url') ? 'p.featured_image_url' : "''";
+    const priceColumn = productColumns.has('price_cents') ? 'p.price_cents' : '0';
+    const currencyColumn = productColumns.has('currency') ? 'p.currency' : "'CAD'";
+    const rows = normalizeResults(await db.prepare(`
+      SELECT p.product_id, p.slug, p.name, p.product_category, ${imageColumn} AS featured_image_url, ${priceColumn} AS price_cents, ${currencyColumn} AS currency,
+             (${clauses.map((clause) => `CASE WHEN ${clause} THEN 1 ELSE 0 END`).join(' + ')}) AS proof_match_score
+      FROM products p
+      WHERE p.product_id <> ? ${statusClause} AND (${clauses.join(' OR ')})
+      ORDER BY proof_match_score DESC, p.updated_at DESC, p.product_id DESC
+      LIMIT 6
+    `).bind(...binds, Number(product.product_id || 0), ...binds).all().catch(() => ({ results: [] })));
+    return rows.map((row) => ({
+      product_id: Number(row.product_id || 0),
+      slug: row.slug || '',
+      name: row.name || '',
+      product_category: row.product_category || '',
+      featured_image_url: row.featured_image_url || '',
+      price_cents: Number(row.price_cents || 0),
+      currency: row.currency || 'CAD',
+      proof_match_score: Number(row.proof_match_score || 0),
+      proof_match_note: 'Related by material, process, locality, or product proof tags.'
+    }));
   }
-  productWishlistButton?.addEventListener('click', saveWishlist);
-  productBackInStockButton?.addEventListener('click', requestBackInStock);
 
-  await loadProduct();
-});
+  let reviews = [];
+  let review_summary = { review_count: 0, average_rating: 0 };
+  try {
+    const reviewsTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_reviews' LIMIT 1`).first();
+    if (reviewsTable) {
+      const reviewRows = normalizeResults(await db.prepare(`
+        SELECT product_review_id, product_id, reviewer_name, rating, review_text, review_kind, is_featured, created_at
+        FROM product_reviews
+        WHERE status = 'approved' AND product_id = ?
+        ORDER BY is_featured DESC, created_at DESC, product_review_id DESC
+        LIMIT 12
+      `).bind(product.product_id).all());
+      reviews = reviewRows.map((row) => ({
+        product_review_id: Number(row.product_review_id || 0),
+        product_id: Number(row.product_id || 0),
+        reviewer_name: row.reviewer_name || 'Devil n Dove customer',
+        rating: Number(row.rating || 0),
+        review_text: row.review_text || '',
+        review_kind: row.review_kind || 'testimonial',
+        is_featured: Number(row.is_featured || 0),
+        created_at: row.created_at || null
+      }));
+      review_summary = {
+        review_count: reviews.length,
+        average_rating: reviews.length ? Number((reviews.reduce((sum, row) => sum + Number(row.rating || 0), 0) / reviews.length).toFixed(2)) : 0
+      };
+    }
+  } catch {}
+
+  const related_products = await relatedProductsByProof();
+  return json({ ok: true, product, images, image_annotations, storefront_images, image_groups, image_summary, resource_links, resource_summary, build_summary, trust_summary, story_notes, listing_profile, candle_soap_spec, reviews, review_summary, related_products, quantity_price_tiers, bundle, warnings: section_warnings });
+}
 
 
-// Build 167: add safety/label helper if candle or soap specs are present in the rendered API payload.
-document.addEventListener('dd:product-detail-rendered', (event) => {
-  const product = event.detail?.product || event.detail || {};
-  const specs = product.candle_soap_specs || product.candle_soap_spec || product.soap_specs || null;
-  if (!specs) return;
-  const mount = document.querySelector('#productCandleSoapSafetyMount') || document.querySelector('#productDetailMeta') || document.querySelector('.product-detail-content');
-  if (!mount || document.getElementById('productCandleSoapSafetyBlock')) return;
-  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
-  const el = document.createElement('details');
-  el.id = 'productCandleSoapSafetyBlock';
-  el.className = 'card candle-soap-safety-accordion';
-  el.innerHTML = `<summary><strong>Candle / soap safety notes</strong></summary><div class="small"><p><strong>Scent/base:</strong> ${esc(specs.scent_profile || specs.wax_base || specs.soap_base || 'See listing notes')}</p><p><strong>Ingredients:</strong> ${esc(specs.ingredient_notes || 'Ingredient details pending review.')}</p><p><strong>Allergen/safety:</strong> ${esc(specs.allergen_safety_notes || specs.safety_notes || 'Follow normal candle/soap safety and patch-test handmade products.')}</p><p><strong>Batch:</strong> ${esc(specs.batch_number || 'Unassigned')}</p></div>`;
-  mount.appendChild(el);
-});
+export async function onRequestGet(context) {
+  try {
+    return await handleProductDetailRequest(context);
+  } catch (error) {
+    await captureRuntimeIncident(context.env, context.request, {
+      incident_scope: 'public_product_detail',
+      incident_code: 'product_detail_unhandled_failure',
+      severity: 'error',
+      message: 'Public product detail failed and required the catalog fallback.',
+      details: { error: String(error?.stack || error?.message || error || 'Unknown product detail error') }
+    }).catch(() => false);
+    return json({
+      ok: false,
+      error: 'Product detail is temporarily unavailable, but the page can try the shop fallback.',
+      detail: String(error?.message || error || 'Unknown product detail error')
+    }, 503);
+  }
+}
