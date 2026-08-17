@@ -2,12 +2,8 @@
 -- Apply after Build 263. Idempotent and non-destructive.
 PRAGMA foreign_keys = ON;
 
--- Repair an older production-schema drift: customer_documents.refund_id
--- references payment_refunds.refund_id, so the parent key must be UNIQUE.
--- Current aggregate schemas define refund_id as INTEGER PRIMARY KEY; this
--- index restores the same parent-key guarantee on older D1 databases.
-CREATE UNIQUE INDEX IF NOT EXISTS uq_payment_refunds_refund_id
-ON payment_refunds(refund_id);
+-- Older live databases that still use payment_refund_id must first run
+-- database_build266_live_payment_refund_compatibility.sql.
 
 CREATE TABLE IF NOT EXISTS public_display_priorities (
   public_display_priority_id INTEGER PRIMARY KEY AUTOINCREMENT,
