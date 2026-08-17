@@ -1,10 +1,28 @@
-# Devil n Dove AI Handoff — Build 269
+# Devil n Dove AI Handoff — Build 271
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 269**. The retained broad D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`), and Build 269 adds one focused CAIP migration that must be applied afterward: `database_build269_caip_social_project_dedupe_integrity.sql`. Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–268 were CAIP/runtime hardening releases; Build 269 adds the content-fingerprint/recovery-lineage columns and indexes. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
+The current code release is **Build 271**. Build 271 is a CAIP operator-clarity/navigation release with no new D1 schema; it continues to require the Build 269 CAIP migration. Build 270 remains the recovery-state presentation hardening immediately underneath it. The retained broad D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`), and Build 269 adds one focused CAIP migration that must be applied afterward: `database_build269_caip_social_project_dedupe_integrity.sql`. Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–268 were CAIP/runtime hardening releases; Build 269 adds the content-fingerprint/recovery-lineage columns and indexes. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
+
+
+## Build 271 CAIP operator clarity
+
+- The Creative projects sidebar now has an **Open CAIP project** selector sourced from `creative_projects`, so standalone/social projects without a Content Studio package remain selectable.
+- The Content Studio selector is explicitly secondary and is used only for create/refresh from `content_projects`.
+- Derivative plans are no longer truncated to six display rows; the full list is scrollable and pending plans sort first.
+- A new operator guide explains upload vs safe probe vs immutable derivative plan vs plan approval vs evidence vs story structure.
+- A derivative plan remains optional and does not render or publish media.
+- No Build 271 D1 migration is required; Build 269 remains the focused CAIP schema boundary.
+
+## Build 270 CAIP recovery-state presentation
+
+- Multipart integrity failures remain preserved for audit but are separated from normal project media.
+- Historical 87%/105-of-121 progress is labeled as non-running forensic state.
+- **Re-upload source safely** creates the new recovery row/R2 key; the damaged multipart object is never resumed.
+- Once a newer canonical recovery exists, the older failed row collapses out of the normal API view.
+- No Build 270 D1 migration is required; Build 269 remains the CAIP schema boundary.
 
 ## Build 269 CAIP standalone/social intake, dedupe and integrity rule
 
