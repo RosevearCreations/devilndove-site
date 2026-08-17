@@ -50,5 +50,5 @@ assert(client.includes('CAIP media audit & duplicate cleanup'));
 assert(client.includes('Archive redundant rows'));
 assert(client.includes('Archive + delete'));
 assert(client.includes('Refresh duplicate audit'));
-assert(/admin-caip-media-intake\.js\?v=26[7-9]/.test(read('admin/creative-assets/index.html')));
+assert(/admin-caip-media-intake\.js\?v=(?:26[7-9]|27[01])/.test(read('admin/creative-assets/index.html')));
 console.log('Build 267 CAIP registration reconciliation and safe duplicate cleanup checks: PASS');

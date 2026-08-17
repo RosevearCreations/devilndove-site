@@ -63,5 +63,5 @@ const client=read('public/js/admin-schema-drift-report.js');
 assert(client.includes('Run full live D1 audit'));
 assert(client.includes('Download additive repair preview SQL'));
 assert(read('admin/operations/index.html').includes('admin-schema-drift-report.js?v=268'));
-assert(/admin-caip-media-intake\.js\?v=26[8-9]/.test(read('admin/creative-assets/index.html')));
+assert(/admin-caip-media-intake\.js\?v=(?:26[8-9]|27[01])/.test(read('admin/creative-assets/index.html')));
 console.log('Build 268 full schema audit + CAIP compatibility/recovery checks: PASS');
