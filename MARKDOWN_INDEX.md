@@ -1,18 +1,19 @@
-# Devil n Dove Markdown Index — Build 256
+# Devil n Dove Markdown Index — Build 269
 
 ## Two current authorities
 
 1. `AI_HANDOFF.md` — architecture, data authority, product/project/inventory/CAIP/packaging safety, schema and deployment.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — completed Build 256 work, known risks and the ordered next actions.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — current completed work, known risks and the ordered next actions.
 
 A new AI/chat reads these two first. No other Markdown file overrides them.
 
 ## Current release pair
 
-- `BUILD256_CHANGED_FILES.md`
-- `BUILD256_VALIDATION.md`
-- `BUILD256_D1_VERIFICATION.sql`
-- Build 256 requires `database_build256_media_content_studio.sql` (or the byte-identical `database_upgrade_current_pass.sql`) after Build 255.
+- `BUILD269_CHANGED_FILES.md`
+- `BUILD269_VALIDATION.md`
+- `BUILD269_D1_VERIFICATION.sql`
+- Build 269 requires focused additive migration `database_build269_caip_social_project_dedupe_integrity.sql` **after** the retained broad Build 264 migration boundary (`database_upgrade_current_pass.sql`).
+- `docs/creative-asset-intelligence-platform/17_Standalone_Social_Project_Workflow.md` is the specialist workflow for productless/social CAIP projects.
 
 ## Active specialist playbooks
 

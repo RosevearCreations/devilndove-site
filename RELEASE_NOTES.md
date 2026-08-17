@@ -417,7 +417,7 @@ Apply `database_build210_social_publishing_product_automation.sql` in D1 if desi
 
 ## Known separate incident
 
-The login `POST /api/auth/login` 500 remains evidence-first. Do not run a legacy auth migration; capture the sanitized response or matching Function log before changing login code or D1 schema.
+Production auth maintenance completed on 2026-08-17: `users`/`sessions` are the current authority, while `members_legacy`/`member_sessions_legacy` remain intentionally because historical blog foreign keys still depend on `members_legacy`. Do not rerun the old auth migration or drop the legacy tables; capture sanitized Function/D1 evidence before any further auth schema change.
 
 
 # Build 212 — Social platform policy and callback prerequisites

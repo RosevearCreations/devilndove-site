@@ -1,3 +1,33 @@
+# Database Schema Reference — Build 269
+
+## Current migration and production-parity boundary
+
+Build 269 is the current **focused CAIP** migration and is applied after the retained broad Build 264 boundary:
+
+- broad/current-pass boundary: `database_upgrade_current_pass.sql` (Build 264; intentionally retained)
+- focused CAIP migration: `database_build269_caip_social_project_dedupe_integrity.sql`
+- post-migration verification: `BUILD269_D1_VERIFICATION.sql`
+
+`database_full_schema.sql` is the complete supported fresh-install aggregate. Build 269 also synchronizes `database_schema.sql` and `database_store_schema.sql` for the CAIP additions and the 2026-08-17 auth/blog compatibility state. The focused Build 269 migration is **not** copied over `database_upgrade_current_pass.sql`; production applies it after the retained Build 264 broad boundary.
+
+## 2026-08-17 auth/blog production-parity maintenance
+
+Production authentication now uses `users` and `sessions`. The live migration preserved historical member IDs and session data while retiring the old auth names to `members_legacy` and `member_sessions_legacy`. Historical `blog_posts.author_member_id` and `blog_comments.member_id` still reference `members_legacy`, so those compatibility tables are preservation dependencies rather than current auth authorities.
+
+Rules:
+
+- new auth/session writes use only `users` / `sessions`;
+- never recreate active `members` / `member_sessions` auth tables;
+- never drop `members_legacy` / `member_sessions_legacy` while blog foreign keys or historical evidence still depend on them;
+- the retired `database_auth_legacy_to_current_repair*.sql` files are safety stubs and must not mutate production;
+- fresh aggregate schemas retain the legacy/blog compatibility tables so a rebuild does not silently erase the production dependency graph.
+
+## Build 269 CAIP schema delta
+
+`caip_media_upload_files` adds `content_fingerprint`, `content_fingerprint_version`, and `recovery_of_file_id`, plus indexes for strong content-fingerprint lookup and recovery lineage. Multipart completion is fail-closed against actual persisted part rows and exact byte totals; duplicate handling is performed before binary transfer wherever a strong or transitional fingerprint match is available.
+
+---
+
 ## Build 256 — Media & Content Management Studio
 
 Build 256 adds `managed_media_metadata`, `media_content_slots`, `media_content_assignments`, `managed_content_blocks`, and `media_content_change_audit`. Existing `media_assets` remains the physical/public media record; the new tables add owner-authored metadata, explicit page placement, selected page-text publication and audit history without creating a second R2 inventory. `media_content_assignments` permits only one active media assignment per page slot. Public page manifests are bounded D1 reads and never enumerate R2; explicit admin R2 sync only registers media assets and never creates assignments.

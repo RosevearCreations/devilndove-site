@@ -1,4 +1,27 @@
-# Devil n Dove Project Status and Roadmap — Build 267
+# Devil n Dove Project Status and Roadmap — Build 269
+
+## Build 269 completed work — CAIP standalone/social media intake integrity and duplicate prevention
+
+1. Added strong, bounded `sample_sha256_v1` content fingerprints for selected local media. The browser reads only start/middle/end samples plus exact size, so renamed copies can be recognized without reading a 4–12 GB file into memory. Legacy `file_fingerprint` remains compatibility metadata only.
+2. Same-project intake now classifies files before binary transfer as **skip existing**, **registration only**, **resume existing**, **clean recovery**, or **new upload**. This stops the historical pattern where the same source created a new D1/R2 identity on every retry/session.
+3. Added `content_fingerprint`, `content_fingerprint_version`, and `recovery_of_file_id` through additive migration `database_build269_caip_social_project_dedupe_integrity.sql`, plus bounded indexes for project dedupe/recovery.
+4. Added bounded R2 fingerprint backfill for already-uploaded objects. It HEAD-verifies size and reads only three small ranges per object, allowing existing Project 23 footage to enter the stronger dedupe system without full download/re-upload.
+5. Fixed the multipart completion defect that allowed `EDSS9755.MOV` to finalize at 105/121 parts. CAIP now proves actual part-row count, uploaded/ETag count, distinct range and byte total **before** R2 complete; a bad plan is marked `[CAIP_MULTIPART_INCOMPLETE]` and R2 complete is never called.
+6. After multipart complete, CAIP requires exact R2 HEAD size before promoting the file or creating a Creative Asset. Truncated/finalized objects are recovery-only and are no longer offered as resumable uploads.
+7. Part-plan creation is batched into bounded D1 statements instead of one D1 write per 32 MiB part, reducing request pressure for 300–400 part camera videos.
+8. Recovery rows preserve the original strong/legacy fingerprint and record `recovery_of_file_id`; old integrity-failed R2 objects remain unchanged for audit.
+9. Added a standalone/social CAIP progress summary that keeps Inventory/cost authority in Creative Process and shows the next path through raw intake → evidence review → story structure → Content Studio handoff without requiring a physical Product.
+10. Updated the CAIP authoritative Markdown and added `17_Standalone_Social_Project_Workflow.md`, Build 269 validation/release evidence, and read-only D1 verification SQL.
+
+### Highest-value next work after Build 269
+
+1. Back up production D1 and apply `database_build269_caip_social_project_dedupe_integrity.sql`.
+2. Deploy Build 269, open Project 23, and use **Strengthen existing fingerprints** in bounded passes until the count reaches zero for complete uploaded rows that still exist in R2.
+3. Re-select `EDSS9755.MOV`; CAIP should create/reuse a **clean recovery** upload rather than IDs 20/40/59/78, then refuse completion unless all 121 parts and 4,045,838,240 bytes are proven.
+4. Continue the remaining standalone/social footage. Re-selecting already-ingested footage should show skip/reuse behavior with zero duplicate binary transfer.
+5. When wanted footage is complete, advance this project into evidence selection: process/technique/material/mistake/repair/outcome/efficiency evidence, then reviewed story segments and Content Studio/social-package handoff.
+6. After real project evidence is organized, implement the first verified proxy/frame/audio/transcript processing adapter rather than expanding placeholder AI claims.
+
 
 ## Build 267 completed work — CAIP registration recovery and duplicate reconciliation
 
@@ -390,3 +413,7 @@ Only `AI_HANDOFF.md` and this file are cross-project current authorities. Compat
 3. Product Resources keeps the server-provided name/resource object when a live search result is unavailable.
 4. Inventory Operations now has separate **Start New Item** and **Clear / Reset Fields** controls; the latter also clears catalog-search and Amazon-import helper inputs.
 5. Shared affected bundles are cache-busted to `v=253`. No D1 migration is required; Build 250 remains the database migration boundary.
+
+## 2026-08-17 D1 production-parity note
+
+Current auth authority is `users` + `sessions`. Production retains `members_legacy` + `member_sessions_legacy` solely for preserved historical/blog dependencies; `blog_posts.author_member_id` and `blog_comments.member_id` reference `members_legacy`. Do not rerun the retired legacy auth migration and do not drop those compatibility tables until blog ownership is explicitly migrated. Build 269 aggregate schemas and verification now encode this parity state.

@@ -45,8 +45,71 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at TEXT NOT NULL,
   ip_address TEXT,
   user_agent TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+
+
+-- =========================================================
+-- PRODUCTION AUTH LEGACY / BLOG COMPATIBILITY — 2026-08-17
+-- =========================================================
+-- `users` / `sessions` are the current authentication authority.
+-- These legacy member tables are retained only because historical blog rows still
+-- reference member IDs. Do not use them for new authentication/session writes and
+-- do not drop them until blog author/comment ownership is migrated deliberately.
+CREATE TABLE IF NOT EXISTS members_legacy (
+  member_id INTEGER PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  display_name TEXT,
+  role TEXT NOT NULL DEFAULT 'member',
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS member_sessions_legacy (
+  session_id TEXT PRIMARY KEY,
+  member_id INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TEXT NOT NULL,
+  ip_hash TEXT,
+  user_agent TEXT,
+  FOREIGN KEY (member_id) REFERENCES members_legacy(member_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_member_sessions_legacy_member_id
+  ON member_sessions_legacy(member_id);
+
+CREATE TABLE IF NOT EXISTS blog_posts (
+  post_id INTEGER PRIMARY KEY,
+  slug TEXT NOT NULL UNIQUE,
+  title TEXT NOT NULL,
+  body_markdown TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'draft',
+  author_member_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  published_at TEXT,
+  updated_at TEXT,
+  FOREIGN KEY (author_member_id) REFERENCES members_legacy(member_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+
+CREATE TABLE IF NOT EXISTS blog_comments (
+  comment_id INTEGER PRIMARY KEY,
+  post_id INTEGER NOT NULL,
+  member_id INTEGER,
+  guest_name TEXT,
+  guest_email TEXT,
+  body TEXT NOT NULL,
+  is_approved INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (post_id) REFERENCES blog_posts(post_id) ON DELETE CASCADE,
+  FOREIGN KEY (member_id) REFERENCES members_legacy(member_id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_blog_comments_post_id ON blog_comments(post_id);
 
 CREATE TABLE IF NOT EXISTS admin_logs (
   log_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -10635,6 +10698,9 @@ CREATE TABLE IF NOT EXISTS caip_media_upload_files (
   uploaded_bytes INTEGER NOT NULL DEFAULT 0,
   etag TEXT,
   file_fingerprint TEXT,
+  content_fingerprint TEXT,
+  content_fingerprint_version TEXT,
+  recovery_of_file_id INTEGER,
   checksum_algorithm TEXT,
   checksum_value TEXT,
   checksum_status TEXT NOT NULL DEFAULT 'pending' CHECK (checksum_status IN ('pending','client_supplied','verified','mismatch','not_available')),
@@ -10658,6 +10724,14 @@ CREATE TABLE IF NOT EXISTS caip_media_upload_files (
 CREATE INDEX IF NOT EXISTS idx_caip_media_files_session ON caip_media_upload_files(caip_media_upload_session_id,upload_status,caip_media_upload_file_id);
 CREATE INDEX IF NOT EXISTS idx_caip_media_files_project ON caip_media_upload_files(creative_project_id,privacy_state,rights_status,created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_caip_media_files_fingerprint ON caip_media_upload_files(file_fingerprint,file_size_bytes,upload_status);
+CREATE INDEX IF NOT EXISTS idx_caip_media_files_content_fingerprint ON caip_media_upload_files(creative_project_id,content_fingerprint,file_size_bytes,upload_status);
+CREATE INDEX IF NOT EXISTS idx_caip_media_files_recovery ON caip_media_upload_files(recovery_of_file_id,caip_media_upload_file_id);
+
+INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,destructive,applied_at,notes,created_at,updated_at)
+VALUES('build269_caip_social_project_dedupe_integrity','database_build269_caip_social_project_dedupe_integrity.sql',NULL,'applied',0,CURRENT_TIMESTAMP,
+'Adds bounded content-sample fingerprints, recovery lineage, duplicate-safe CAIP intake, and multipart completion integrity metadata for standalone/social project media.',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+
 
 CREATE TABLE IF NOT EXISTS caip_media_upload_parts (
   caip_media_upload_part_id INTEGER PRIMARY KEY AUTOINCREMENT,
