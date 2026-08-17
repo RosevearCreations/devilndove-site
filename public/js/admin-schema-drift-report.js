@@ -1,76 +1,40 @@
-// File: /public/js/admin-schema-drift-report.js
-// Brief description: Operations panel for D1 schema drift checks by table/column.
-
+// Build 268 — Operations panel for lightweight and full read-only D1 schema drift checks.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('schemaDriftAdminMount');
   if (!mount || !window.DDAuth) return;
+  let lastFullAudit = null;
 
-  function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
-  function pill(status) {
-    const clean = String(status || 'unknown').toLowerCase();
-    const cls = clean === 'pass' || clean === 'ok' ? 'ok' : (clean === 'fail' ? 'danger' : 'warn');
-    return `<span class="admin-status-pill ${cls}">${esc(clean)}</span>`;
-  }
-  function setMessage(text, isError = false) {
-    const el = document.getElementById('schemaDriftMessage');
-    if (!el) return;
-    el.style.display = text ? 'block' : 'none';
-    el.style.color = isError ? '#b00020' : '#14532d';
-    el.textContent = text || '';
-  }
-  async function readJson(response, fallback) {
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) throw new Error(data?.error || fallback || 'Request failed.');
-    return data;
-  }
-  function list(values) {
-    const items = Array.isArray(values) ? values.filter(Boolean) : [];
-    return items.length ? items.map((item) => `<code>${esc(item)}</code>`).join(' ') : '<span class="small">—</span>';
-  }
-  function render(data) {
-    const results = document.getElementById('schemaDriftResults');
-    if (!results) return;
-    const summary = data.summary || {};
-    const tables = Array.isArray(data.tables) ? data.tables : [];
-    results.innerHTML = `
-      <div class="release-sanity-summary" style="margin-top:10px">
-        <div>${pill(summary.status)} <strong>${esc(data.generated_at || '')}</strong></div>
-        <div class="small">Pass ${esc(summary.pass_count || 0)} • Warn ${esc(summary.warning_count || 0)} • Fail ${esc(summary.fail_count || 0)}</div>
-      </div>
-      <div class="admin-table-wrap" style="margin-top:10px"><table><thead><tr><th>Status</th><th>Table</th><th>Missing required</th><th>Missing recommended</th><th>Why it matters</th></tr></thead><tbody>
-        ${tables.map((row) => `
-          <tr>
-            <td>${pill(row.status)}</td>
-            <td><strong>${esc(row.table)}</strong><div class="small">${esc(row.area || '')} • ${esc(String(row.column_count || 0))} live column(s)</div></td>
-            <td>${list(row.missing_required)}</td>
-            <td>${list(row.missing_recommended)}</td>
-            <td>${esc(row.why || '')}</td>
-          </tr>
-        `).join('') || '<tr><td colspan="5">No schema drift results returned.</td></tr>'}
-      </tbody></table></div>
-      <details style="margin-top:10px"><summary>Raw drift report</summary><pre class="small" style="white-space:pre-wrap">${esc(JSON.stringify(data, null, 2))}</pre></details>`;
-  }
-  async function load() {
-    try {
-      setMessage('Checking D1 schema drift...');
-      const includeOptional = document.getElementById('schemaDriftIncludeOptional')?.checked ? '1' : '0';
-      const data = await readJson(await window.DDAuth.apiFetch(`/api/admin/schema-drift-report?include_optional=${includeOptional}`), 'Schema drift report is unavailable.');
-      render(data);
-      setMessage('Schema drift report loaded.');
-    } catch (error) {
-      setMessage(error.message || 'Failed to load schema drift report.', true);
-    }
+  const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+  function pill(status){const clean=String(status||'unknown').toLowerCase();const cls=['pass','ok'].includes(clean)?'ok':clean==='fail'?'danger':'warn';return `<span class="admin-status-pill ${cls}">${esc(clean)}</span>`;}
+  function setMessage(text,isError=false){const el=document.getElementById('schemaDriftMessage');if(!el)return;el.style.display=text?'block':'none';el.style.color=isError?'#b00020':'#14532d';el.textContent=text||'';}
+  async function readJson(response,fallback){const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok)throw new Error(data?.detail||data?.error||fallback||'Request failed.');return data;}
+  function list(values){const items=Array.isArray(values)?values.filter(Boolean):[];return items.length?items.map((item)=>`<code>${esc(typeof item==='string'?item:JSON.stringify(item))}</code>`).join(' '):'<span class="small">—</span>';}
+  function downloadText(name,textValue,type='text/plain'){const blob=new Blob([String(textValue||'')],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+
+  function renderQuick(data){
+    const results=document.getElementById('schemaDriftResults');if(!results)return;const summary=data.summary||{};const tables=Array.isArray(data.tables)?data.tables:[];
+    results.innerHTML=`<div class="release-sanity-summary" style="margin-top:10px"><div>${pill(summary.status)} <strong>${esc(data.generated_at||'')}</strong></div><div class="small">Pass ${esc(summary.pass_count||0)} • Warn ${esc(summary.warning_count||0)} • Fail ${esc(summary.fail_count||0)}</div></div><div class="admin-table-wrap" style="margin-top:10px"><table><thead><tr><th>Status</th><th>Table</th><th>Missing required</th><th>Missing recommended</th><th>Why it matters</th></tr></thead><tbody>${tables.map((row)=>`<tr><td>${pill(row.status)}</td><td><strong>${esc(row.table)}</strong><div class="small">${esc(row.area||'')} • ${esc(String(row.column_count||0))} live column(s)</div></td><td>${list(row.missing_required)}</td><td>${list(row.missing_recommended)}</td><td>${esc(row.why||'')}</td></tr>`).join('')||'<tr><td colspan="5">No schema drift results returned.</td></tr>'}</tbody></table></div><details style="margin-top:10px"><summary>Raw drift report</summary><pre class="small" style="white-space:pre-wrap">${esc(JSON.stringify(data,null,2))}</pre></details>`;
   }
 
-  mount.innerHTML = `
-    <div class="card" style="margin-top:18px">
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">D1 Schema Drift Report</h2><p class="small" style="margin:8px 0 0 0">Compares live D1 tables against the columns the current build expects. Required missing columns are blockers; recommended missing columns explain degraded features.</p></div>
-        <button class="btn primary" type="button" id="schemaDriftRunButton">Run schema drift check</button>
-      </div>
-      <label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="schemaDriftIncludeOptional" /> Include optional nice-to-have columns in raw report</label>
-      <div id="schemaDriftMessage" class="small" style="display:none;margin-top:10px"></div>
-      <div id="schemaDriftResults"></div>
-    </div>`;
-  document.getElementById('schemaDriftRunButton')?.addEventListener('click', load);
+  function renderFull(data){
+    lastFullAudit=data;const results=document.getElementById('schemaDriftResults');if(!results)return;const s=data.summary||{};const critical=data.critical_missing||[];const missingTables=data.missing_tables||[];const missingCols=data.missing_columns||[];const badParents=data.invalid_foreign_key_parents||[];const fk=data.foreign_key_check||{};const qc=data.quick_check||{};
+    results.innerHTML=`
+      <div class="release-sanity-summary" style="margin-top:10px"><div>${pill(s.status)} <strong>Full production-schema audit</strong></div><div class="small">Canonical ${esc(data.canonical?.table_count||0)} tables / ${esc(data.canonical?.column_count||0)} columns • Live ${esc(data.live?.table_count||0)} tables / ${esc(data.live?.column_count||0)} columns</div></div>
+      <div class="admin-grid-3" style="margin-top:10px"><div class="card"><strong>${esc(s.missing_table_count||0)}</strong><div class="small">Missing tables</div></div><div class="card"><strong>${esc(s.missing_column_count||0)}</strong><div class="small">Missing columns</div></div><div class="card"><strong>${esc(s.invalid_foreign_key_parent_count||0)}</strong><div class="small">Invalid FK parent keys</div></div></div>
+      <div class="card" style="margin-top:10px"><strong>Database integrity</strong><p class="small">Quick check: ${pill(qc.status)} &nbsp; Foreign-key check: ${pill(fk.status)}</p>${fk.error?`<p class="small" style="color:#b00020">${esc(fk.error)}</p>`:''}</div>
+      ${critical.length?`<div class="card" style="margin-top:10px;border-color:#b00020"><h3>Critical current-feature drift</h3><div class="admin-table-wrap"><table><thead><tr><th>Table</th><th>Missing column</th><th>Expected type</th></tr></thead><tbody>${critical.map(x=>`<tr><td>${esc(x.table)}</td><td><code>${esc(x.column)}</code></td><td>${esc(x.expected_type||'')}</td></tr>`).join('')}</tbody></table></div></div>`:''}
+      <div class="admin-table-wrap" style="margin-top:10px"><table><thead><tr><th>Area</th><th>Count</th><th>Examples</th></tr></thead><tbody><tr><td>Missing tables</td><td>${missingTables.length}</td><td>${list(missingTables.slice(0,12))}</td></tr><tr><td>Missing columns</td><td>${missingCols.length}</td><td>${list(missingCols.slice(0,12).map(x=>`${x.table}.${x.column}`))}</td></tr><tr><td>Missing indexes</td><td>${esc(s.missing_index_count||0)}</td><td>${list((data.missing_indexes||[]).slice(0,8).map(x=>x.name))}</td></tr><tr><td>Missing foreign keys</td><td>${esc(s.missing_foreign_key_count||0)}</td><td>${list((data.missing_foreign_keys||[]).slice(0,8).map(x=>`${x.child_table}.${x.child_column}→${x.parent_table}.${x.parent_column}`))}</td></tr><tr><td>Invalid FK parents</td><td>${badParents.length}</td><td>${list(badParents.slice(0,8).map(x=>`${x.child_table}→${x.parent_table}(${(x.parent_columns||[]).join(',')})`))}</td></tr></tbody></table></div>
+      <div class="caip-media-actions" style="margin-top:12px"><button class="btn" id="schemaFullDownloadJson" type="button">Download full audit JSON</button><button class="btn secondary" id="schemaFullDownloadSql" type="button">Download additive repair preview SQL</button></div>
+      <p class="small">The repair preview is intentionally conservative. It never generates DROP TABLE, DELETE, destructive renames, or automatic table rebuilds. Missing primary keys, foreign keys, unsafe NOT NULL columns, and UNIQUE constraints remain manual-review items.</p>
+      <details style="margin-top:10px"><summary>Manual-review items (${esc(data.additive_repair_preview?.manual_review_count||0)})</summary><pre class="small" style="white-space:pre-wrap;max-height:420px;overflow:auto">${esc(JSON.stringify(data.additive_repair_preview?.manual_review||[],null,2))}</pre></details>
+      <details style="margin-top:10px"><summary>Full audit report</summary><pre class="small" style="white-space:pre-wrap;max-height:520px;overflow:auto">${esc(JSON.stringify(data,null,2))}</pre></details>`;
+    document.getElementById('schemaFullDownloadJson')?.addEventListener('click',()=>downloadText('devilndove-live-schema-audit.json',JSON.stringify(data,null,2),'application/json'));
+    document.getElementById('schemaFullDownloadSql')?.addEventListener('click',()=>downloadText('devilndove-additive-schema-repair-preview.sql',data.additive_repair_preview?.sql||''));
+  }
+
+  async function loadQuick(){try{setMessage('Checking critical D1 schema drift...');const includeOptional=document.getElementById('schemaDriftIncludeOptional')?.checked?'1':'0';const data=await readJson(await window.DDAuth.apiFetch(`/api/admin/schema-drift-report?include_optional=${includeOptional}`),'Schema drift report is unavailable.');renderQuick(data);setMessage('Critical schema drift report loaded.');}catch(error){setMessage(error.message||'Failed to load schema drift report.',true);}}
+  async function loadFull(){try{setMessage('Running read-only full D1 schema audit. This checks every canonical table/column/index/foreign-key definition and may take a little longer...');const data=await readJson(await window.DDAuth.apiFetch('/api/admin/schema-full-audit'),'Full live schema audit is unavailable.');renderFull(data);setMessage(`Full read-only audit completed: ${data.summary?.missing_column_count||0} missing column(s), ${data.summary?.missing_table_count||0} missing table(s).`,data.summary?.status==='fail');}catch(error){setMessage(error.message||'Full live schema audit failed.',true);}}
+
+  mount.innerHTML=`<div class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">D1 Schema Drift & Full Live Audit</h2><p class="small" style="margin:8px 0 0 0">The quick check covers high-risk application tables. The full audit is read-only and compares the entire live D1 structure against the current canonical schema before any repair is attempted.</p></div><div class="caip-media-actions"><button class="btn" type="button" id="schemaDriftRunButton">Quick critical check</button><button class="btn primary" type="button" id="schemaFullAuditButton">Run full live D1 audit</button></div></div><label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="schemaDriftIncludeOptional" /> Include optional nice-to-have columns in quick report</label><div id="schemaDriftMessage" class="small" style="display:none;margin-top:10px"></div><div id="schemaDriftResults"></div></div>`;
+  document.getElementById('schemaDriftRunButton')?.addEventListener('click',loadQuick);document.getElementById('schemaFullAuditButton')?.addEventListener('click',loadFull);
 });
