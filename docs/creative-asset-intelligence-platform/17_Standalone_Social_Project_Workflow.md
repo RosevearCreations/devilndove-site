@@ -1,7 +1,16 @@
 # 17 — Standalone / Social CAIP Project Workflow
 
-**Implementation boundary:** Build 269  
+**Implementation boundary:** Build 271  
 **Use case:** a Creative Process project that may consume inventory/materials and produce social/editorial content without creating a physical sellable end product.
+
+
+## Build 271 operator clarity
+
+- **Open CAIP project** lists every CAIP project, including standalone/social projects with no Content Studio package.
+- The separate **Content Studio package** selector is only for creating/refreshing Content Studio-backed CAIP records.
+- Derivative plans are no longer clipped to six rows; every plan is reachable in a bounded scroll region with pending plans shown first.
+- The screen explains that upload, safe probe, immutable plan, plan approval, evidence review and story structure are distinct stages.
+- A derivative plan is optional; do not create or approve one for every source merely because it was uploaded.
 
 ## Authority model
 
