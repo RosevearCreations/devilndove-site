@@ -1,6 +1,6 @@
 # 16 — Devil n Dove CAIP Private Raw Media Intake
 
-**Implementation boundary:** Build 241  
+**Implementation boundary:** Build 269 (Build 241 foundation, Builds 265–268 recovery hardening)  
 **Authority:** This document rewrites the Rosie Dazzlers DAIP large-media design for Devil n Dove CAIP.  
 **Primary operating route:** `/admin/creative-assets/`  
 **Schema:** `database_build241_caip_large_media_intake.sql`
@@ -232,11 +232,46 @@ PRIVATE RAW
 
 Secure review uses the existing authenticated, no-store CAIP review path and resolves the private bucket binding for private CAIP objects.
 
-## Duplicate handling
+## Duplicate handling — Build 269
 
-Build 241 computes a stable browser-metadata fingerprint from filename, byte size, last modified time, and MIME type when no stronger fingerprint is supplied. It warns about an already-uploaded candidate with the same fingerprint/size. It does not silently delete or deduplicate evidence.
+Build 269 performs duplicate-safe preflight **before raw binary transfer**. The browser reads at most three bounded samples from the selected local file (start, middle, end; normally 1 MiB each), SHA-256 hashes each sample, and then SHA-256 hashes the versioned descriptor containing exact file size plus sample offsets/lengths/hashes. The stored version key is:
 
-A later enhancement should add true client SHA-256 streaming for smaller files and a chunked/native fingerprint path for very large files without forcing an entire multi-gigabyte object into browser memory.
+```text
+sample_sha256_v1
+```
+
+This fingerprint does not depend on filename or modified time, so a renamed/copy-named version of the same binary can still match. The older `file_fingerprint` remains as a compatibility fallback and is explicitly treated as metadata identity rather than content proof.
+
+Same-project classification is authoritative for upload behavior:
+
+```text
+registered strong match     → skip binary upload
+R2 binary complete, asset missing → registration only
+active matching upload      → resume existing attempt
+latest integrity-failed match → create clean recovery row + new R2 key
+no active match             → new upload
+```
+
+CAIP may reuse one stored binary through multiple evidence/story/content references. Duplicate prevention means **store the binary once**, not **use the footage only once**.
+
+Existing canonical/complete R2 objects can be backfilled to `sample_sha256_v1` through bounded R2 range reads. Backfill verifies R2 HEAD size first and processes a small bounded batch per request. It never downloads the whole multi-gigabyte object into Worker memory.
+
+The sample fingerprint is a duplicate-prevention signal, not a definitive archival checksum. Physical private-R2 deletion remains more conservative: no linked CAIP/downstream references and equal `checksum_status='verified'` whole-object checksum are still required.
+
+## Multipart completion integrity — Build 269
+
+Before R2 multipart `complete()` is called, CAIP now requires all of the following from actual D1 part rows:
+
+- recorded part-row count equals `expected_parts`;
+- uploaded+ETag part count equals `expected_parts`;
+- distinct uploaded part count equals `expected_parts`;
+- first uploaded part is 1;
+- last uploaded part is `expected_parts`;
+- sum of uploaded part sizes equals `file_size_bytes`.
+
+If any condition fails, CAIP writes `[CAIP_MULTIPART_INCOMPLETE]`, records the actual uploaded counts/bytes, marks the file failed, and **does not call R2 complete**. After a valid complete, CAIP performs R2 HEAD and requires exact object size before changing the file to `uploaded` or creating a Creative Asset. A post-complete mismatch is retained as `[CAIP_R2_SIZE_MISMATCH]` and requires clean source re-upload rather than registration retry.
+
+Part-plan persistence is batched in bounded D1 statements rather than issuing one request query for every 32 MiB part.
 
 ## Operator workflow
 
@@ -244,14 +279,15 @@ A later enhancement should add true client SHA-256 streaming for smaller files a
 2. Open CAIP → **Private Raw Media Intake**.
 3. Select/drop a batch of media.
 4. Choose media role and default governance states.
-5. Create the D1 upload session.
-6. Start multipart upload.
-7. Pause/retry/resume as needed; after a full restart, reselect the same file if the browser requests it.
-8. Complete and verify the R2 object.
-9. Review the new internal-only CAIP asset and secure preview.
-10. Correct role/privacy/consent/rights as evidence permits.
-11. Review processing plans; do not treat planned jobs as generated outputs.
-12. Request public promotion only when appropriate; use Release Board/provider workflows for actual publication.
+5. Let Build 269 calculate bounded content fingerprints and classify duplicate/resume/recovery/new files before binary transfer.
+6. Create/reuse the necessary D1 upload records.
+7. Start multipart upload only for new/recovery/resumable bytes.
+8. Pause/retry/resume as needed; after a full restart, reselect the same file if the browser requests it.
+9. Complete and verify the R2 object.
+10. Review the new internal-only CAIP asset and secure preview.
+11. Correct role/privacy/consent/rights as evidence permits.
+12. Review processing plans; do not treat planned jobs as generated outputs.
+13. Request public promotion only when appropriate; use Release Board/provider workflows for actual publication.
 
 ## Production setup required before binary upload
 
@@ -276,4 +312,4 @@ The repository leaves this example commented in `wrangler.toml` so deploying the
 
 ## Acceptance boundary
 
-Build 241 code can be accepted locally when schema/idempotency tests, one-H1/noindex checks, JavaScript syntax, CSS containment, and aggregate/current migration tests pass. The Startup gate remains open until the real production private R2 binding, multipart interruption/recovery, authenticated review, privacy review, phone/desktop behavior, and evidence recording are proven on the deployed environment.
+Build 269 code can be accepted locally when schema/idempotency tests, one-H1/noindex checks, JavaScript syntax, CSS containment, and aggregate/current migration tests pass. The Startup gate remains open until the real production private R2 binding, multipart interruption/recovery, authenticated review, privacy review, phone/desktop behavior, and evidence recording are proven on the deployed environment.

@@ -37,3 +37,26 @@
 16. Add archive/export manifest with checksums and restore rehearsal.
 
 No roadmap item is considered delivered merely because its schema or queue record exists.
+
+## Build 269 delivered
+
+- bounded content-sample fingerprints before binary transfer;
+- renamed-file same-project duplicate prevention;
+- explicit skip / registration-only / resume / clean-recovery / new classification;
+- recovery lineage with new R2 object identity;
+- multipart completion guard that proves expected rows, ETags, contiguous range and byte total before R2 finalize;
+- exact R2 HEAD size verification after finalize;
+- bounded D1 part-plan batching;
+- bounded strong-fingerprint backfill for already-uploaded private R2 objects;
+- standalone/social CAIP progress context linking Creative Process inventory/cost authority to raw intake → evidence → story → Content Studio handoff.
+
+## Next CAIP priorities after Build 269
+
+1. Apply Build 269 D1 migration and backfill strong fingerprints for the current standalone/social project in bounded batches.
+2. Re-upload only the integrity-failed `EDSS9755.MOV` source through the clean recovery row and verify 121/121 parts + exact R2 size.
+3. Archive stale duplicate recovery rows after the canonical R2 objects are verified; do not physically delete uncertain binaries.
+4. Finish the remaining raw footage with duplicate-safe preflight.
+5. Move the project into CAIP evidence selection: mark useful process/mistake/repair/technique/outcome evidence and review rights/privacy.
+6. Build story segments/timecode references from reviewed evidence.
+7. Create the reviewed Content Studio/social-package handoff for the productless project.
+8. Then add real proxy/frame/audio/transcript processing providers; do not mark planned jobs complete until provider output is verified.

@@ -1,6 +1,6 @@
 # Creative Asset Intelligence Platform (CAIP) — Authoritative Design Specification
 
-**Current implementation:** Build 241 private raw-media intake + retained Build 201–208/230 asset intelligence, rights/evidence, derivative planning, secure review, catalog bridge, and release preflight.  
+**Current implementation:** Build 269 duplicate-safe private raw-media intake + retained CAIP asset intelligence, rights/evidence, derivative planning, secure review, catalog bridge, project-first inventory context, and release preflight.  
 **Primary route:** `/admin/creative-assets/`  
 **Business roadmap:** `../../PROJECT_STATUS_AND_ROADMAP.md`  
 **Technical handoff:** `../../AI_HANDOFF.md`
@@ -12,7 +12,22 @@ CAIP is Devil n Dove's governed creative-media and evidence layer. It is designe
 CAIP now has **two source paths**:
 
 1. **Existing source references** from catalog/Content Studio remain reference-first and are not copied or reordered by CAIP.
-2. **New raw Creative Project media** may intentionally enter through Build 241 Private Raw Media Intake and become the canonical immutable private original in a dedicated R2 bucket.
+2. **New raw Creative Project media** may intentionally enter through Build 269 Private Raw Media Intake and become the canonical immutable private original in a dedicated R2 bucket.
+
+
+## Build 269 operating rule — standalone/social projects
+
+A Creative Project does **not** need a physical sellable end product. A content-only, education, research, archive, experiment, or other productless Creative Process project can own a CAIP workspace, record inventory/material usage and internal project costs in Creative Process, upload private media in CAIP, select reviewed evidence, build story structure, and hand a reviewed package to Content Studio. CAIP must never fabricate a product merely to make this path work.
+
+Build 269 adds a duplicate-safe intake boundary before binary transfer:
+
+- the browser computes `sample_sha256_v1` from bounded start/middle/end samples plus exact file size;
+- same-project strong matches are classified as **skip existing**, **registration only**, **resume existing**, **clean recovery**, or **new upload**;
+- legacy filename/size/modified/MIME fingerprints remain fallback compatibility only;
+- a finalized/truncated R2 object is never resumed or blessed as complete; it requires a new recovery object;
+- existing uploaded R2 objects can receive the stronger fingerprint through bounded ranged reads without downloading or re-uploading the whole original.
+
+The content-sample fingerprint is a high-confidence duplicate-prevention identifier, not a substitute for a definitive whole-file checksum when legal/archive-grade binary equivalence is required. Physical duplicate-R2 deletion still requires the existing verified-checksum and no-downstream-reference safeguards.
 
 ## Authority boundaries
 

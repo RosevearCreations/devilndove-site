@@ -34,3 +34,16 @@
 ## Acceptance rule
 
 Build 241 code may pass local regression without declaring the live Startup gate complete. Production acceptance requires the real binding and real interruption/recovery evidence.
+
+## Build 269 acceptance additions
+
+1. Apply `database_build269_caip_social_project_dedupe_integrity.sql` after the retained Build 264 migration boundary.
+2. Select the same local file twice in one project; the second selection must not create another physical upload row/object.
+3. Rename a local copy without changing its bytes; after strong fingerprints exist, CAIP must still identify it as the same source.
+4. Select a different same-size file; a different sample fingerprint must not be skipped as duplicate.
+5. Create a multipart fixture with fewer actual part rows than `expected_parts`; `completeUploadFile()` must reject it and the fake/real R2 complete call count must remain zero.
+6. Verify a valid multipart fixture reaches R2 complete only after row/count/ETag/byte checks and is marked uploaded only after exact HEAD size.
+7. Verify an integrity-failed prior attempt creates a new recovery row/key and preserves `recovery_of_file_id`.
+8. Backfill strong fingerprints from existing R2 in bounded batches and verify no whole multi-GB object is read into Worker memory.
+9. Confirm a content-only/productless Creative Project shows project/inventory context, raw-media stage, evidence stage, story stage and handoff stage without requiring a product.
+10. Keep physical duplicate-object deletion gated on verified whole-object checksum + no downstream references.

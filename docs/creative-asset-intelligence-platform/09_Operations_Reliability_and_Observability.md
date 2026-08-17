@@ -47,3 +47,11 @@ Planned proxy/frame/audio/transcript jobs record job key, provider key, status, 
 ## Retention
 
 Build 241 intentionally does not auto-delete completed raw originals. A later retention/archive policy must define backup, legal/privacy deletion, supersession and evidence requirements before destructive workers are added.
+
+## Build 269 integrity and duplicate observability
+
+`file_fingerprint` is now documented as a legacy metadata fingerprint. `content_fingerprint` + `content_fingerprint_version=sample_sha256_v1` is the preferred duplicate-prevention identity. Existing complete R2 rows can be upgraded in bounded batches with targeted HEAD + ranged GET calls.
+
+Multipart completion must fail closed. `[CAIP_MULTIPART_INCOMPLETE]` means R2 `complete()` was blocked before finalization because D1 did not prove every expected part/byte. `[CAIP_R2_SIZE_MISMATCH]` means a finalized R2 object does not equal expected size and must not be registered as valid media. Both conditions require explicit recovery; neither may be turned into success by overwriting D1 expected counters.
+
+Recovery screens collapse historical attempts by content fingerprint when available and prefer a linked/verified canonical row or the newest active recovery rather than an older stale `uploading` row.

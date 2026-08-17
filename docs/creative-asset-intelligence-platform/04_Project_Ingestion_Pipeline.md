@@ -57,3 +57,11 @@ Processing jobs begin `planned` with provider `not_configured`. The presence of 
 ## Public handoff
 
 A completed private asset can enter a reviewed public-promotion request if it is not blocked/revoked. The request itself never creates or publishes public media. Public delivery stays with Release Board/provider workflows.
+
+## Build 269 duplicate-safe ingestion gate
+
+Before D1 creates a new physical upload identity, CAIP calculates a bounded `sample_sha256_v1` content fingerprint in the browser and repeats duplicate classification server-side. A same-project match is classified as skip, registration-only, resume, clean recovery, or new. Filename is no longer authoritative when an exact size + strong content fingerprint match exists.
+
+A clean recovery preserves lineage through `recovery_of_file_id` and always receives a new `file_key`, `object_key`, and R2 multipart identity. Integrity-failed completed R2 objects are retained for audit and cannot be resumed.
+
+The ingest → complete transition is guarded by actual part rows/counts/bytes before R2 complete and by exact R2 HEAD size after complete.
