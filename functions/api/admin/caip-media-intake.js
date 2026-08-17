@@ -2,7 +2,7 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
   CAIP_MEDIA_INTAKE_BUILD, abortUploadFile, assertCaipMediaIntakeSchema, completeUploadFile,
-  createUploadSession, initiateUploadFile, listCaipMediaIntake, requestPublicPromotion, retryUploadedFileRegistration,
+  createUploadSession, createSafeReplacementUpload, initiateUploadFile, listCaipMediaIntake, requestPublicPromotion, retryUploadedFileRegistration,
   safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup
 } from '../_lib/caipMediaIntake.js';
 
@@ -47,6 +47,7 @@ export async function onRequestPost(context){
     else if(action==='complete_file') result=await completeUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='abort_file') result=await abortUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='retry_registration') result=await retryUploadedFileRegistration(state.db,context.env,fileId,state.adminUser.user_id);
+    else if(action==='create_safe_replacement') result=await createSafeReplacementUpload(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='audit_duplicates') result=await listCaipDuplicateAudit(state.db,projectId);
     else if(action==='cleanup_duplicate_group') result=await cleanupCaipDuplicateGroup(state.db,context.env,projectId,body.canonical_file_id,body.duplicate_file_ids,state.adminUser.user_id,{delete_private_r2_copy:Boolean(body.delete_private_r2_copy)});
     else if(action==='update_governance') result=await updateUploadFileGovernance(state.db,fileId,body,state.adminUser.user_id);

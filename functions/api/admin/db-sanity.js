@@ -39,7 +39,7 @@ const EXPECTED_TABLES = {
   site_page_views: ['site_page_view_id'],
   site_search_events: ['site_search_event_id'],
   payments: ['payment_id'],
-  payment_refunds: ['payment_refund_id'],
+  payment_refunds: ['refund_id'],
   payment_disputes: ['payment_dispute_id'],
   media_assets: ['media_asset_id'],
   product_image_annotations: ['product_image_annotation_id'],
