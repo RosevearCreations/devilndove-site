@@ -1,11 +1,18 @@
-# Devil n Dove AI Handoff — Build 264
+# Devil n Dove AI Handoff — Build 267
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 264**. The current D1 migration is **Build 264**: `database_build264_content_project_merchandising.sql`, byte-identical to `database_upgrade_current_pass.sql`. It is additive and follows Build 263. Build 264 adds public merchandising priorities, project-first CAIP/cost context, and the final 543-slot Home/Shop Media Studio catalog. The TMDB movie metadata helper additionally requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
+The current code release is **Build 267**. The normal D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`). Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–267 are CAIP/runtime hardening releases and do not add another schema migration. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
 
+## Build 267 CAIP reconciliation and duplicate-cleanup rule
+
+1. A verified private R2 object is the binary authority. A later D1/CAIP metadata-registration or screen-refresh failure must never force that binary to upload again.
+2. `Retry CAIP registration` is metadata-only. It may relink an already-created `creative_assets` row, promote an older failed intake row to uploaded when R2 HEAD verifies the expected size, and tolerate absent optional technical-observation/processing-plan tables.
+3. The intake POST response keeps a successful requested action successful even if rebuilding the full recovery screen later fails; that later condition is returned as `refresh_warning`, not HTTP 400.
+4. The CAIP Media Audit groups **probable** duplicates by project + stored intake fingerprint + file size. Archiving duplicate recovery rows is review-driven and non-destructive to R2. Physical R2 deletion is allowed only when the redundant row has no linked CAIP/downstream references **and** both canonical and redundant copies have the same verified content checksum. Metadata fingerprints alone are not sufficient for binary deletion.
+5. Archived duplicate rows stay in D1 for audit history and are hidden from normal Project Upload Recovery. Never enumerate the whole private R2 bucket merely to clean one project; reconcile against bounded D1 project rows and targeted R2 HEAD/delete calls.
 
 ## Build 264 content, movie, merchandising and project-first CAIP rule
 
