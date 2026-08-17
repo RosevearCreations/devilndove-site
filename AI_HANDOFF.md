@@ -1,10 +1,21 @@
-# Devil n Dove AI Handoff — Build 267
+# Devil n Dove AI Handoff — Build 269
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 267**. The normal D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`). Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–267 are CAIP/runtime hardening releases and do not add another schema migration. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
+The current code release is **Build 269**. The retained broad D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`), and Build 269 adds one focused CAIP migration that must be applied afterward: `database_build269_caip_social_project_dedupe_integrity.sql`. Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–268 were CAIP/runtime hardening releases; Build 269 adds the content-fingerprint/recovery-lineage columns and indexes. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
+
+## Build 269 CAIP standalone/social intake, dedupe and integrity rule
+
+1. Productless Creative Process projects are first-class CAIP workspaces. A social/content/research project may use Inventory and incur internal project cost without ever producing a sellable Product. Creative Process remains inventory/cost authority; CAIP remains private-media/evidence/story authority; Content Studio remains handoff/package authority.
+2. `caip_media_upload_files.file_fingerprint` is a **legacy metadata fingerprint**. Build 269 adds `content_fingerprint`, `content_fingerprint_version` and `recovery_of_file_id`. The preferred duplicate-prevention identifier is `sample_sha256_v1`, derived from exact file size plus bounded start/middle/end SHA-256 samples. It is filename-independent and memory-bounded; it is not a whole-object legal/archive checksum.
+3. Same-project intake must classify a selected source before binary transfer: registered match → skip; uploaded binary without asset → registration-only; active match → resume; latest integrity-failed match → create a new recovery row/object; otherwise → new upload. One raw binary may support many evidence/story/content references.
+4. Multipart `complete()` is forbidden until actual D1 part rows prove: row count, uploaded+ETag count and distinct count all equal `expected_parts`; first part is 1; last part is expected; and uploaded byte sum equals `file_size_bytes`. `[CAIP_MULTIPART_INCOMPLETE]` is a fail-closed condition and must never be repaired by merely copying expected counters into uploaded counters.
+5. After valid R2 complete, exact R2 HEAD size is required before `upload_status='uploaded'` and before Creative Asset registration. `[CAIP_R2_SIZE_MISMATCH]` means clean source re-upload is required; `Retry CAIP registration` is only for a verified complete private object.
+6. Existing complete private R2 uploads may be upgraded to `sample_sha256_v1` through small bounded HEAD + ranged-read batches. This is the preferred way to strengthen Project 23 and other existing footage without re-uploading multi-gigabyte originals.
+7. Physical redundant-R2 deletion remains stricter than intake dedupe: require no linked CAIP/downstream references and equal **verified whole-object checksum**. Sample fingerprints alone never authorize deletion.
+8. Build 269's CAIP screen exposes the project-first path: Project/Inventory context → Raw Media → Evidence Review → Story Structure → Content Studio Handoff. It does not claim proxy/transcript/AI provider work is complete when only plans exist.
 
 ## Build 267 CAIP reconciliation and duplicate-cleanup rule
 
@@ -224,3 +235,7 @@ The two cross-project current authorities are only:
 - Inventory item editing now exposes three distinct actions: Save/Add, **Start New Item**, and **Clear / Reset Fields**. Full clear also removes stale catalog-search and Amazon-import helper values.
 - Product Resources and Inventory Operations bundles are cache-busted to `v=253` on affected admin pages. No D1 migration is required for Build 253.
 
+
+## 2026-08-17 D1 production-parity note
+
+Current auth authority is `users` + `sessions`. Production retains `members_legacy` + `member_sessions_legacy` solely for preserved historical/blog dependencies; `blog_posts.author_member_id` and `blog_comments.member_id` reference `members_legacy`. Do not rerun the retired legacy auth migration and do not drop those compatibility tables until blog ownership is explicitly migrated. Build 269 aggregate schemas and verification now encode this parity state.
