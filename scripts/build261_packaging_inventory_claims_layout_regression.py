@@ -55,7 +55,7 @@ check('Soap net quantity separated from claims',(('bandY+53.5' in js and 'bandY+
 check('Soap preview CSS preserves wide ribbon geometry','svg[data-soap-layout="reference-v3"]' in css and 'min-width:1080px' in css)
 check('Canonical handoff is Build 261 or newer',bool(re.match(r'# Devil n Dove AI Handoff — Build (?:26[1-9]|[3-9]\d{2,})',handoff)))
 check('Canonical roadmap is Build 261 or newer',bool(re.match(r'# Devil n Dove Project Status and Roadmap — Build (?:26[1-9]|[3-9]\d{2,})',roadmap)))
-check('Current migration is Build 259 or newer additive boundary',current==b259 or b'build263_packaging_my_printers' in current)
+check('Current migration is Build 259 or newer additive boundary',current==b259 or b'build263_packaging_my_printers' in current or b'Build 264' in current)
 
 for rel in ['public/js/admin-packaging-studio.js','functions/api/admin/packaging-studio.js','public/js/admin-site-item-inventory.js','functions/api/admin/site-item-inventory.js']:
     r=subprocess.run(['node','--check',str(ROOT/rel)],capture_output=True,text=True)
