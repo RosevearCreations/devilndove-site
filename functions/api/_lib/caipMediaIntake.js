@@ -1,7 +1,7 @@
 // Build 241 — Devil n Dove CAIP private raw-media intake helpers.
 // D1 stores metadata/state only. Binary originals remain in a dedicated private R2 binding.
 
-export const CAIP_MEDIA_INTAKE_BUILD = 'Build 266';
+export const CAIP_MEDIA_INTAKE_BUILD = 'Build 267';
 export const CAIP_PRIVATE_BUCKET_BINDING = 'CAIP_PRIVATE_MEDIA_BUCKET';
 export const CAIP_PUBLIC_BUCKET_BINDING = 'PRODUCT_MEDIA_BUCKET';
 export const DEFAULT_PART_BYTES = 32 * 1024 * 1024;
@@ -81,7 +81,23 @@ async function hashText(value) {
 function bucketBinding(env) {
   return env?.CAIP_PRIVATE_MEDIA_BUCKET || null;
 }
+async function tableExists(db, tableName) {
+  try { return Boolean(await db.prepare(`SELECT 1 ok FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(String(tableName||'')).first()); } catch { return false; }
+}
+async function tableColumns(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${String(tableName||'').replace(/[^A-Za-z0-9_]/g,'')})`).all();
+    return new Set(rows(result).map((row)=>String(row.name||'')));
+  } catch { return new Set(); }
+}
+async function safeCount(db, sql, ...binds) {
+  try { const row = await db.prepare(sql).bind(...binds).first(); return numeric(row?.count_value || row?.c || 0); } catch { return 0; }
+}
 export function privateBucketAvailable(env) {
+  const bucket = bucketBinding(env);
+  return Boolean(bucket && typeof bucket.head === 'function' && typeof bucket.put === 'function');
+}
+function multipartBucketAvailable(env) {
   const bucket = bucketBinding(env);
   return Boolean(bucket && typeof bucket.createMultipartUpload === 'function' && typeof bucket.resumeMultipartUpload === 'function');
 }
@@ -134,6 +150,7 @@ function collapseRecoveryFiles(input) {
   const priority = { uploaded:0, uploading:1, paused:2, waiting:3, initiating:4, failed:5, archived:8, aborted:9 };
   const best = new Map();
   for (const row of input || []) {
+    if (text(row?.upload_status).toLowerCase()==='archived') continue;
     const fingerprint = text(row?.file_fingerprint,180);
     const key = fingerprint ? `${integer(row.creative_project_id)}|${fingerprint}|${numeric(row.file_size_bytes)}` : `id:${integer(row.caip_media_upload_file_id)}`;
     const current = best.get(key);
@@ -333,14 +350,14 @@ async function createCanonicalPrivateAsset(db, file, head, actorUserId) {
   ).run();
   const asset = await db.prepare(`SELECT * FROM creative_assets WHERE creative_project_id=? AND asset_key=? LIMIT 1`).bind(file.creative_project_id,assetKey).first();
   await db.prepare(`UPDATE caip_media_upload_files SET creative_asset_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(asset?.creative_asset_id||null,file.caip_media_upload_file_id).run();
-  if (asset?.creative_asset_id) {
+  if (asset?.creative_asset_id && await tableExists(db,'creative_asset_technical_observations')) {
     await db.prepare(`INSERT INTO creative_asset_technical_observations(
       creative_project_id,creative_asset_id,observation_key,source_snapshot_fingerprint,storage_provider,bucket_name,object_key,observed_public_url,mime_type,file_size_bytes,etag,uploaded_at,probe_status,probe_scope,evidence_json,observed_at,created_at,updated_at
     ) VALUES(?,?, 'caip_private_upload_v1',?,'r2_private_caip','CAIP_PRIVATE_MEDIA_BUCKET',?,NULL,?,?,?,CURRENT_TIMESTAMP,'complete','private_upload_completion',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
     ON CONFLICT(creative_asset_id,observation_key) DO UPDATE SET source_snapshot_fingerprint=excluded.source_snapshot_fingerprint,storage_provider=excluded.storage_provider,bucket_name=excluded.bucket_name,object_key=excluded.object_key,mime_type=excluded.mime_type,file_size_bytes=excluded.file_size_bytes,etag=excluded.etag,uploaded_at=CURRENT_TIMESTAMP,probe_status='complete',probe_scope='private_upload_completion',evidence_json=excluded.evidence_json,observed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP`).bind(
       file.creative_project_id,asset.creative_asset_id,sourceFingerprint,file.object_key,file.mime_type||head?.httpMetadata?.contentType||null,numeric(head?.size||file.file_size_bytes),text(head?.etag,300)||null,
-      JSON.stringify({raw_original:true,immutable:true,public_url:null,private_binding:'CAIP_PRIVATE_MEDIA_BUCKET',upload_file_id:file.caip_media_upload_file_id,verification:'r2_multipart_complete_and_head'})
-    ).run();
+      JSON.stringify({raw_original:true,immutable:true,public_url:null,private_binding:'CAIP_PRIVATE_MEDIA_BUCKET',upload_file_id:file.caip_media_upload_file_id,verification:'r2_verified_private_upload'})
+    ).run().catch(()=>null);
   }
   return asset;
 }
@@ -404,15 +421,28 @@ export async function completeDirectUploadFile(db, env, fileId, actorUserId, hea
 
 export async function retryUploadedFileRegistration(db, env, fileId, actorUserId) {
   await assertCaipMediaIntakeSchema(db);
-  const file = await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(integer(fileId)).first();
+  let file = await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(integer(fileId)).first();
   if (!file) throw new Error('CAIP upload file was not found.');
-  if (file.upload_status !== 'uploaded') throw new Error('Only a verified uploaded file can retry CAIP registration.');
   if (integer(file.creative_asset_id)) return { file, creative_asset_id:integer(file.creative_asset_id), already_registered:true };
-  if (!privateBucketAvailable(env)) throw new Error('Private CAIP R2 binding is unavailable; registration cannot verify the stored object.');
-  const verified = await bucketBinding(env).head(file.object_key);
-  if (!verified) throw new Error('The private R2 object is missing; CAIP registration cannot continue.');
-  if (numeric(verified.size) !== numeric(file.file_size_bytes)) throw new Error(`Stored R2 object size mismatch: expected ${numeric(file.file_size_bytes)} bytes but R2 reports ${numeric(verified.size)}.`);
-  return finalizeVerifiedPrivateUpload(db,file,verified,actorUserId,'registration_retry_existing_r2_v1');
+  if (!privateBucketAvailable(env)) return { file, registration_pending:true, diagnostic_code:'CAIP_PRIVATE_BUCKET_UNAVAILABLE', registration_warning:'The private CAIP R2 binding is unavailable, so the stored object cannot be verified yet. No binary was re-uploaded.' };
+  const verified = await bucketBinding(env).head(file.object_key).catch(()=>null);
+  if (!verified) return { file, registration_pending:true, diagnostic_code:'CAIP_R2_OBJECT_MISSING', registration_warning:'The D1 intake row exists, but the expected private R2 object was not found. Keep the row for audit; reselect the original local file only if this object truly needs to be uploaded again.' };
+  if (numeric(verified.size) !== numeric(file.file_size_bytes)) return { file, registration_pending:true, diagnostic_code:'CAIP_R2_SIZE_MISMATCH', registration_warning:`The private R2 object exists but its size does not match D1 (expected ${numeric(file.file_size_bytes)} bytes; R2 reports ${numeric(verified.size)}). No binary was changed.` };
+  // Older failed rows may already have a complete binary in R2. Promote the intake row to uploaded before metadata repair.
+  if (file.upload_status !== 'uploaded') {
+    await db.prepare(`UPDATE caip_media_upload_files SET upload_status='uploaded',uploaded_parts=expected_parts,uploaded_bytes=file_size_bytes,etag=COALESCE(?,etag),uploaded_at=COALESCE(uploaded_at,CURRENT_TIMESTAMP),last_error=NULL,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(text(verified.etag,300)||null,integer(actorUserId)||null,file.caip_media_upload_file_id).run();
+    file = await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(file.caip_media_upload_file_id).first();
+  }
+  // If an earlier registration created the creative asset but failed before linking the intake row, reconnect it rather than inserting another asset.
+  if (await tableExists(db,'creative_assets')) {
+    const existing = await db.prepare(`SELECT creative_asset_id FROM creative_assets WHERE creative_project_id=? AND asset_key=? LIMIT 1`).bind(file.creative_project_id,`private-upload-${file.file_key}`).first().catch(()=>null);
+    if (integer(existing?.creative_asset_id)) {
+      await db.prepare(`UPDATE caip_media_upload_files SET creative_asset_id=?,last_error=NULL,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(integer(existing.creative_asset_id),file.caip_media_upload_file_id).run();
+      const linked = await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=?`).bind(file.caip_media_upload_file_id).first();
+      return { file:linked, creative_asset_id:integer(existing.creative_asset_id), relinked_existing_asset:true, registration_pending:false };
+    }
+  }
+  return finalizeVerifiedPrivateUpload(db,file,verified,actorUserId,'registration_retry_existing_r2_v2');
 }
 
 export async function abortUploadFile(db, env, fileId, actorUserId) {
@@ -421,7 +451,7 @@ export async function abortUploadFile(db, env, fileId, actorUserId) {
   if (!file) throw new Error('CAIP upload file was not found.');
   if (file.upload_status === 'uploaded') throw new Error('Uploaded raw originals are immutable and cannot be deleted from this control. Archive or supersede downstream references instead.');
   if (text(file.r2_upload_id)) {
-    if (!privateBucketAvailable(env)) throw new Error('Private CAIP R2 binding is unavailable, so the active multipart upload cannot be aborted safely.');
+    if (!multipartBucketAvailable(env)) throw new Error('Private CAIP R2 binding is unavailable for multipart operations, so the active multipart upload cannot be aborted safely.');
     const upload = bucketBinding(env).resumeMultipartUpload(file.object_key,file.r2_upload_id);
     await upload.abort();
   }
@@ -449,7 +479,9 @@ export async function updateUploadFileGovernance(db,fileId,patch,actorUserId) {
 }
 
 export async function queueDefaultProcessingPlans(db,file,asset,actorUserId) {
-  if (!asset?.creative_asset_id) return [];
+  if (!asset?.creative_asset_id || !(await tableExists(db,'caip_media_processing_jobs'))) return [];
+  const cols = await tableColumns(db,'caip_media_processing_jobs');
+  if (!cols.has('job_key') || !cols.has('job_type')) return [];
   const jobs = ['metadata','thumbnail'];
   if (file.media_type === 'video') jobs.push('proxy_video','frame_extract','audio_extract','transcript');
   if (file.media_type === 'audio') jobs.push('transcript');
@@ -457,9 +489,9 @@ export async function queueDefaultProcessingPlans(db,file,asset,actorUserId) {
   for (const type of jobs) {
     const key = `caip-${file.file_key}-${type}`;
     const outputPrefix = type === 'proxy_video' ? `${outputRoot}/proxy/video/` : type === 'thumbnail' ? `${outputRoot}/derived/thumbnails/` : type === 'frame_extract' ? `${outputRoot}/extracted/frames/${file.file_key}/` : type === 'audio_extract' ? `${outputRoot}/extracted/audio/` : type === 'transcript' ? `${outputRoot}/extracted/transcripts/` : `${outputRoot}/manifests/`;
-    await db.prepare(`INSERT INTO caip_media_processing_jobs(creative_project_id,creative_asset_id,caip_media_upload_file_id,job_key,job_type,job_status,provider_key,input_object_key,output_prefix,requested_by_user_id,created_at,updated_at) VALUES(?,?,?,?,?,'planned','not_configured',?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(job_key) DO NOTHING`).bind(file.creative_project_id,asset.creative_asset_id,file.caip_media_upload_file_id,key,type,file.object_key,outputPrefix,integer(actorUserId)||null).run();
+    await db.prepare(`INSERT INTO caip_media_processing_jobs(creative_project_id,creative_asset_id,caip_media_upload_file_id,job_key,job_type,job_status,provider_key,input_object_key,output_prefix,requested_by_user_id,created_at,updated_at) VALUES(?,?,?,?,?,'planned','not_configured',?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(job_key) DO NOTHING`).bind(file.creative_project_id,asset.creative_asset_id,file.caip_media_upload_file_id,key,type,file.object_key,outputPrefix,integer(actorUserId)||null).run().catch(()=>null);
   }
-  return rows(await db.prepare(`SELECT * FROM caip_media_processing_jobs WHERE caip_media_upload_file_id=? ORDER BY caip_media_processing_job_id`).bind(file.caip_media_upload_file_id).all());
+  try { return rows(await db.prepare(`SELECT * FROM caip_media_processing_jobs WHERE caip_media_upload_file_id=? ORDER BY caip_media_processing_job_id`).bind(file.caip_media_upload_file_id).all()); } catch { return []; }
 }
 
 export async function requestPublicPromotion(db,fileId,destinationRole,actorUserId) {
@@ -475,6 +507,80 @@ export async function requestPublicPromotion(db,fileId,destinationRole,actorUser
   ).run();
   await db.prepare(`INSERT INTO creative_project_events(creative_project_id,event_type,actor_user_id,details_json,created_at) VALUES(?, 'caip_public_promotion_requested', ?, ?, CURRENT_TIMESTAMP)`).bind(file.creative_project_id,integer(actorUserId)||null,JSON.stringify({upload_file_id:file.caip_media_upload_file_id,creative_asset_id:file.creative_asset_id,request_key:requestKey,no_copy_created:true})).run().catch(()=>null);
   return db.prepare(`SELECT * FROM caip_media_public_promotion_requests WHERE request_key=?`).bind(requestKey).first();
+}
+
+export async function listCaipDuplicateAudit(db, creativeProjectId) {
+  await assertCaipMediaIntakeSchema(db);
+  const projectId = integer(creativeProjectId);
+  if (!projectId) return { groups:[], duplicate_rows:0, reclaimable_rows:0 };
+  const result = await db.prepare(`
+    SELECT * FROM (
+      SELECT f.*,
+        COUNT(*) OVER (PARTITION BY f.creative_project_id,f.file_fingerprint,f.file_size_bytes) AS duplicate_count,
+        ROW_NUMBER() OVER (PARTITION BY f.creative_project_id,f.file_fingerprint,f.file_size_bytes ORDER BY
+          CASE WHEN f.creative_asset_id IS NOT NULL THEN 0 ELSE 1 END,
+          CASE f.upload_status WHEN 'uploaded' THEN 0 WHEN 'uploading' THEN 1 WHEN 'paused' THEN 2 WHEN 'waiting' THEN 3 WHEN 'failed' THEN 4 WHEN 'aborted' THEN 8 WHEN 'archived' THEN 9 ELSE 7 END,
+          f.caip_media_upload_file_id DESC
+        ) AS duplicate_rank
+      FROM caip_media_upload_files f
+      WHERE f.creative_project_id=? AND COALESCE(f.file_fingerprint,'')<>'' AND f.upload_status<>'archived'
+    ) ranked
+    WHERE duplicate_count>1
+    ORDER BY file_fingerprint,file_size_bytes,duplicate_rank,caip_media_upload_file_id DESC
+    LIMIT 500
+  `).bind(projectId).all();
+  const grouped = new Map();
+  for (const row of rows(result)) {
+    const key = `${text(row.file_fingerprint,180)}|${numeric(row.file_size_bytes)}`;
+    if (!grouped.has(key)) grouped.set(key,{ group_key:key,fingerprint:text(row.file_fingerprint,180),file_size_bytes:numeric(row.file_size_bytes),rows:[] });
+    grouped.get(key).rows.push(row);
+  }
+  const groups=[]; let reclaimable=0;
+  for (const group of grouped.values()) {
+    group.rows.sort((a,b)=>numeric(a.duplicate_rank)-numeric(b.duplicate_rank));
+    group.canonical_file_id=integer(group.rows[0]?.caip_media_upload_file_id);
+    group.duplicate_file_ids=group.rows.slice(1).map((row)=>integer(row.caip_media_upload_file_id)).filter(Boolean);
+    const canonicalChecksum = text(group.rows[0]?.checksum_status).toLowerCase()==='verified' ? text(group.rows[0]?.checksum_value,300) : '';
+    group.reclaimable_file_ids=group.rows.slice(1).filter((row)=>!integer(row.creative_asset_id) && canonicalChecksum && text(row?.checksum_status).toLowerCase()==='verified' && text(row?.checksum_value,300)===canonicalChecksum).map((row)=>integer(row.caip_media_upload_file_id));
+    group.physical_delete_requires_verified_checksum = true;
+    reclaimable += group.reclaimable_file_ids.length;
+    groups.push(group);
+  }
+  return { groups, duplicate_rows:groups.reduce((sum,g)=>sum+g.duplicate_file_ids.length,0), reclaimable_rows:reclaimable };
+}
+
+export async function cleanupCaipDuplicateGroup(db, env, creativeProjectId, canonicalFileId, duplicateFileIds, actorUserId, options={}) {
+  await assertCaipMediaIntakeSchema(db);
+  const projectId=integer(creativeProjectId), canonicalId=integer(canonicalFileId);
+  const requested=[...new Set((Array.isArray(duplicateFileIds)?duplicateFileIds:[]).map(integer).filter((id)=>id&&id!==canonicalId))].slice(0,100);
+  if (!projectId || !canonicalId || !requested.length) throw new Error('Choose a duplicate group and at least one redundant upload row.');
+  const canonical=await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? AND creative_project_id=? LIMIT 1`).bind(canonicalId,projectId).first();
+  if (!canonical) throw new Error('The canonical CAIP upload row was not found.');
+  if (!text(canonical.file_fingerprint,180)) throw new Error('The canonical upload does not have a fingerprint and cannot be used for duplicate cleanup.');
+  let canonicalHead=null;
+  if (options.delete_private_r2_copy) {
+    if (!privateBucketAvailable(env)) throw new Error('Private CAIP R2 binding is unavailable; redundant R2 objects cannot be checked safely.');
+    canonicalHead=await bucketBinding(env).head(canonical.object_key);
+    if (!canonicalHead || numeric(canonicalHead.size)!==numeric(canonical.file_size_bytes)) throw new Error('The canonical private R2 object could not be verified. No duplicate objects were deleted.');
+  }
+  const results=[];
+  for (const duplicateId of requested) {
+    const row=await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? AND creative_project_id=? LIMIT 1`).bind(duplicateId,projectId).first();
+    if (!row) { results.push({file_id:duplicateId,status:'missing'}); continue; }
+    if (text(row.file_fingerprint,180)!==text(canonical.file_fingerprint,180) || numeric(row.file_size_bytes)!==numeric(canonical.file_size_bytes)) { results.push({file_id:duplicateId,status:'not_same_fingerprint'}); continue; }
+    const processing=await safeCount(db,`SELECT COUNT(*) c FROM caip_media_processing_jobs WHERE caip_media_upload_file_id=?`,duplicateId);
+    const promotions=await safeCount(db,`SELECT COUNT(*) c FROM caip_media_public_promotion_requests WHERE caip_media_upload_file_id=?`,duplicateId);
+    const hasAsset=Boolean(integer(row.creative_asset_id));
+    let r2Deleted=false;
+    const verifiedSameChecksum = text(canonical.checksum_status).toLowerCase()==='verified' && text(row.checksum_status).toLowerCase()==='verified' && text(canonical.checksum_value,300) && text(canonical.checksum_value,300)===text(row.checksum_value,300);
+    if (options.delete_private_r2_copy && verifiedSameChecksum && !hasAsset && processing===0 && promotions===0 && text(row.object_key)!==text(canonical.object_key)) {
+      const head=await bucketBinding(env).head(row.object_key).catch(()=>null);
+      if (head && numeric(head.size)===numeric(row.file_size_bytes)) { await bucketBinding(env).delete(row.object_key); r2Deleted=true; }
+    }
+    await db.prepare(`UPDATE caip_media_upload_files SET upload_status='archived',last_error=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(`Archived duplicate of CAIP upload #${canonicalId}.${r2Deleted?' Redundant private R2 object deleted.':' Private R2 object retained.'}`,integer(actorUserId)||null,duplicateId).run();
+    results.push({file_id:duplicateId,status:'archived',creative_asset_id:integer(row.creative_asset_id)||null,processing_refs:processing,promotion_refs:promotions,verified_same_checksum:verifiedSameChecksum,r2_deleted:r2Deleted,r2_retained:!r2Deleted});
+  }
+  return { canonical_file_id:canonicalId,results,archived_count:results.filter((r)=>r.status==='archived').length,r2_deleted_count:results.filter((r)=>r.r2_deleted).length };
 }
 
 export function safeUploadFileForClient(file) {
