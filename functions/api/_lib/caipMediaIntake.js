@@ -1,7 +1,7 @@
 // Build 241 — Devil n Dove CAIP private raw-media intake helpers.
 // D1 stores metadata/state only. Binary originals remain in a dedicated private R2 binding.
 
-export const CAIP_MEDIA_INTAKE_BUILD = 'Build 267';
+export const CAIP_MEDIA_INTAKE_BUILD = 'Build 268';
 export const CAIP_PRIVATE_BUCKET_BINDING = 'CAIP_PRIVATE_MEDIA_BUCKET';
 export const CAIP_PUBLIC_BUCKET_BINDING = 'PRODUCT_MEDIA_BUCKET';
 export const DEFAULT_PART_BYTES = 32 * 1024 * 1024;
@@ -328,16 +328,36 @@ async function refreshSessionProgress(db, sessionId, actorUserId = null) {
   await db.prepare(`UPDATE caip_media_upload_sessions SET session_status=?,total_files=?,total_bytes=?,uploaded_bytes=?,updated_by_user_id=COALESCE(?,updated_by_user_id),updated_at=CURRENT_TIMESTAMP,completed_at=CASE WHEN ?='complete' THEN COALESCE(completed_at,CURRENT_TIMESTAMP) ELSE completed_at END WHERE caip_media_upload_session_id=?`).bind(status,numeric(stats?.total_files),numeric(stats?.total_bytes),numeric(stats?.uploaded_bytes),integer(actorUserId)||null,status,integer(sessionId)).run();
 }
 
+async function insertMediaAssetCompat(db, file, head, actorUserId) {
+  if (!(await tableExists(db,'media_assets'))) throw new Error('Required media_assets table is missing from live D1. Run the full schema audit before repairing production.');
+  const cols = await tableColumns(db,'media_assets');
+  if (!cols.has('media_asset_id') || !cols.has('object_key')) throw new Error('media_assets is missing its required media_asset_id/object_key columns. Run the full schema audit before repairing production.');
+  const project = await db.prepare(`SELECT product_id FROM creative_projects WHERE creative_project_id=? LIMIT 1`).bind(file.creative_project_id).first();
+  const values = {
+    product_id: integer(project?.product_id)||null,
+    storage_provider: 'r2_private_caip',
+    bucket_name: 'CAIP_PRIVATE_MEDIA_BUCKET',
+    object_key: file.object_key,
+    public_url: null,
+    original_filename: file.original_filename,
+    mime_type: file.mime_type||head?.httpMetadata?.contentType||null,
+    file_size_bytes: numeric(head?.size||file.file_size_bytes),
+    created_by_user_id: integer(actorUserId)||null,
+    variant_role: file.media_role||'miscellaneous',
+    annotation_notes: 'Private CAIP raw original. No public URL. Raw object is immutable.',
+    sort_order: 0
+  };
+  const insertCols = Object.keys(values).filter((name)=>cols.has(name));
+  const bindValues = insertCols.map((name)=>values[name]);
+  const sql = `INSERT INTO media_assets(${insertCols.map((name)=>`"${name}"`).join(',')}) VALUES(${insertCols.map(()=>'?').join(',')})`;
+  const inserted = await db.prepare(sql).bind(...bindValues).run();
+  return integer(inserted?.meta?.last_row_id);
+}
+
 async function createCanonicalPrivateAsset(db, file, head, actorUserId) {
   const existingMedia = await db.prepare(`SELECT * FROM media_assets WHERE object_key=? LIMIT 1`).bind(file.object_key).first();
   let mediaAssetId = integer(existingMedia?.media_asset_id);
-  if (!mediaAssetId) {
-    const project = await db.prepare(`SELECT product_id FROM creative_projects WHERE creative_project_id=? LIMIT 1`).bind(file.creative_project_id).first();
-    const inserted = await db.prepare(`INSERT INTO media_assets(product_id,storage_provider,bucket_name,object_key,public_url,original_filename,mime_type,file_size_bytes,created_by_user_id,created_at,updated_at,variant_role,annotation_notes) VALUES(?, 'r2_private_caip','CAIP_PRIVATE_MEDIA_BUCKET',?,NULL,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?,?)`).bind(
-      integer(project?.product_id)||null,file.object_key,file.original_filename,file.mime_type||head?.httpMetadata?.contentType||null,numeric(head?.size||file.file_size_bytes),integer(actorUserId)||null,file.media_role||'miscellaneous','Private CAIP raw original. No public URL. Raw object is immutable.'
-    ).run();
-    mediaAssetId = integer(inserted?.meta?.last_row_id);
-  }
+  if (!mediaAssetId) mediaAssetId = await insertMediaAssetCompat(db,file,head,actorUserId);
   const assetKey = `private-upload-${file.file_key}`;
   const sourceFingerprint = file.checksum_value || file.file_fingerprint || text(head?.etag,300) || assetKey;
   const sourceSafety = file.consent_state === 'public_allowed' && file.rights_status === 'public_allowed' ? 'public_allowed' : file.rights_status === 'blocked' ? 'blocked' : file.rights_status === 'internal_only' ? 'internal_only' : 'needs_review';
@@ -427,7 +447,12 @@ export async function retryUploadedFileRegistration(db, env, fileId, actorUserId
   if (!privateBucketAvailable(env)) return { file, registration_pending:true, diagnostic_code:'CAIP_PRIVATE_BUCKET_UNAVAILABLE', registration_warning:'The private CAIP R2 binding is unavailable, so the stored object cannot be verified yet. No binary was re-uploaded.' };
   const verified = await bucketBinding(env).head(file.object_key).catch(()=>null);
   if (!verified) return { file, registration_pending:true, diagnostic_code:'CAIP_R2_OBJECT_MISSING', registration_warning:'The D1 intake row exists, but the expected private R2 object was not found. Keep the row for audit; reselect the original local file only if this object truly needs to be uploaded again.' };
-  if (numeric(verified.size) !== numeric(file.file_size_bytes)) return { file, registration_pending:true, diagnostic_code:'CAIP_R2_SIZE_MISMATCH', registration_warning:`The private R2 object exists but its size does not match D1 (expected ${numeric(file.file_size_bytes)} bytes; R2 reports ${numeric(verified.size)}). No binary was changed.` };
+  if (numeric(verified.size) !== numeric(file.file_size_bytes)) {
+    const warning=`The private R2 object exists but its size does not match D1 (expected ${numeric(file.file_size_bytes)} bytes; R2 reports ${numeric(verified.size)}). No binary was changed.`;
+    await db.prepare(`UPDATE caip_media_upload_files SET uploaded_bytes=?,last_error=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(numeric(verified.size),`[CAIP_R2_SIZE_MISMATCH] ${warning}`,integer(actorUserId)||null,file.caip_media_upload_file_id).run().catch(()=>null);
+    const refreshed=await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=?`).bind(file.caip_media_upload_file_id).first().catch(()=>file);
+    return { file:refreshed||file, registration_pending:true, diagnostic_code:'CAIP_R2_SIZE_MISMATCH', registration_warning:warning, safe_replacement_available:true };
+  }
   // Older failed rows may already have a complete binary in R2. Promote the intake row to uploaded before metadata repair.
   if (file.upload_status !== 'uploaded') {
     await db.prepare(`UPDATE caip_media_upload_files SET upload_status='uploaded',uploaded_parts=expected_parts,uploaded_bytes=file_size_bytes,etag=COALESCE(?,etag),uploaded_at=COALESCE(uploaded_at,CURRENT_TIMESTAMP),last_error=NULL,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(text(verified.etag,300)||null,integer(actorUserId)||null,file.caip_media_upload_file_id).run();
@@ -443,6 +468,55 @@ export async function retryUploadedFileRegistration(db, env, fileId, actorUserId
     }
   }
   return finalizeVerifiedPrivateUpload(db,file,verified,actorUserId,'registration_retry_existing_r2_v2');
+}
+
+
+export async function createSafeReplacementUpload(db, env, fileId, actorUserId) {
+  await assertCaipMediaIntakeSchema(db);
+  const old = await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(integer(fileId)).first();
+  if (!old) throw new Error('CAIP upload file was not found.');
+  if (!privateBucketAvailable(env)) throw new Error('Private CAIP R2 binding is unavailable; the incomplete object cannot be verified safely.');
+  const existing = await bucketBinding(env).head(old.object_key).catch(()=>null);
+  if (!existing) throw new Error('The expected private R2 object no longer exists. Use a normal new upload instead of replacement recovery.');
+  if (numeric(existing.size) === numeric(old.file_size_bytes)) throw new Error('The private R2 object now matches the expected size. Retry CAIP registration instead of creating a replacement upload.');
+
+  const project = await projectRow(db,old.creative_project_id);
+  const sessionKey = `caip-recovery-${project.creative_project_id}-${crypto.randomUUID()}`;
+  const objectPrefix = `projects/${project.creative_project_id}/raw`;
+  const sessionResult = await db.prepare(`INSERT INTO caip_media_upload_sessions(
+    creative_project_id,session_key,session_status,storage_profile,object_prefix,transport_mode,preferred_direct_transport,
+    part_size_bytes,parallel_parts,upload_device,source_note,total_files,total_bytes,uploaded_bytes,created_by_user_id,updated_by_user_id,created_at,updated_at
+  ) VALUES(?,?,'ready','private_r2',?,'worker_streamed_multipart_v1','direct_s3_presigned_multipart_future',?,?,?,?,1,?,0,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(
+    project.creative_project_id,sessionKey,objectPrefix,DEFAULT_PART_BYTES,2,text(old.upload_device,180)||null,
+    `Safe replacement for incomplete CAIP upload #${integer(old.caip_media_upload_file_id)}. Original partial R2 object retained unchanged.`,numeric(old.file_size_bytes),integer(actorUserId)||null,integer(actorUserId)||null
+  ).run();
+  const sessionId=integer(sessionResult?.meta?.last_row_id);
+  const fileKey=crypto.randomUUID();
+  const useDirect=numeric(old.file_size_bytes)<=DIRECT_UPLOAD_MAX_BYTES;
+  const partBytes=useDirect?numeric(old.file_size_bytes):choosePartSize(old.file_size_bytes);
+  const expectedParts=useDirect?1:safePartCount(old.file_size_bytes,partBytes);
+  const replacementFingerprint=`${text(old.file_fingerprint,180)||old.file_key}:recovery:${fileKey}`;
+  const objectKey=`${objectPrefix}/${objectCategory(old.media_type)}/${fileKey}-${sanitizeFilename(old.original_filename)}`;
+  const insert=await db.prepare(`INSERT INTO caip_media_upload_files(
+    caip_media_upload_session_id,creative_project_id,client_file_key,file_key,original_filename,mime_type,media_type,media_role,
+    file_size_bytes,last_modified_ms,capture_at,upload_device,upload_status,storage_provider,bucket_alias,object_key,
+    part_size_bytes,expected_parts,uploaded_parts,uploaded_bytes,file_fingerprint,checksum_algorithm,checksum_status,
+    privacy_state,consent_state,rights_status,created_by_user_id,updated_by_user_id,created_at,updated_at,last_error
+  ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?, 'waiting','r2_private_caip','CAIP_PRIVATE_MEDIA_BUCKET',?,?,?,0,0,?,'SHA-256','pending',?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?)`).bind(
+    sessionId,old.creative_project_id,crypto.randomUUID(),fileKey,old.original_filename,old.mime_type||null,old.media_type,old.media_role,
+    numeric(old.file_size_bytes),numeric(old.last_modified_ms)||null,old.capture_at||null,old.upload_device||null,
+    objectKey,partBytes,expectedParts,replacementFingerprint,old.privacy_state,old.consent_state,old.rights_status,
+    integer(actorUserId)||null,integer(actorUserId)||null,`Replacement upload for incomplete source row #${integer(old.caip_media_upload_file_id)}. Original partial R2 object preserved.`
+  ).run();
+  const replacementId=integer(insert?.meta?.last_row_id);
+  for(let partNumber=1;partNumber<=expectedParts;partNumber+=1){
+    const start=(partNumber-1)*partBytes; const end=Math.min(numeric(old.file_size_bytes),start+partBytes);
+    await db.prepare(`INSERT INTO caip_media_upload_parts(caip_media_upload_file_id,part_number,byte_start,byte_end,part_size_bytes,part_status,created_at,updated_at) VALUES(?,?,?,?,?,'waiting',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(replacementId,partNumber,start,end,end-start).run();
+  }
+  await db.prepare(`UPDATE caip_media_upload_files SET last_error=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(`[CAIP_R2_SIZE_MISMATCH_PRESERVED] Partial private R2 object retained (${numeric(existing.size)} of ${numeric(old.file_size_bytes)} bytes). Replacement upload #${replacementId} created under a new R2 key.`,integer(actorUserId)||null,old.caip_media_upload_file_id).run().catch(()=>null);
+  const replacement=await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=?`).bind(replacementId).first();
+  await db.prepare(`INSERT INTO creative_project_events(creative_project_id,event_type,actor_user_id,details_json,created_at) VALUES(?, 'caip_incomplete_upload_replacement_created', ?, ?, CURRENT_TIMESTAMP)`).bind(old.creative_project_id,integer(actorUserId)||null,JSON.stringify({original_upload_file_id:old.caip_media_upload_file_id,replacement_upload_file_id:replacementId,original_object_key:old.object_key,replacement_object_key:objectKey,original_r2_bytes:numeric(existing.size),expected_bytes:numeric(old.file_size_bytes),original_preserved:true})).run().catch(()=>null);
+  return { file:replacement, original_file_id:integer(old.caip_media_upload_file_id), replacement_file_id:replacementId, original_object_preserved:true, replacement_object_key:objectKey };
 }
 
 export async function abortUploadFile(db, env, fileId, actorUserId) {

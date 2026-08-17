@@ -48,6 +48,7 @@ Build 125 keeps Amazon order/cost data private, adds admin review/apply controls
 ## Build 129 admin endpoints
 
 - `/api/admin/schema-drift-report` checks live D1 tables/columns against the current build expectations.
+- `/api/admin/schema-full-audit` performs the Build 268 read-only full production D1 audit against the canonical aggregate schema and previews additive-only repair SQL.
 - `/api/admin/public-api-health` tests public JSON endpoints after deploys.
 - `/api/admin/amazon-purchase-import` imports pasted Amazon CSV rows into private D1 staging.
 - `/api/admin/runtime-incidents` now supports cleanup of old resolved/ignored incidents.
