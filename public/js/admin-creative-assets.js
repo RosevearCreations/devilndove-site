@@ -1,5 +1,5 @@
-// Build 202 — CAIP admin workspace: source-safe intelligence, metadata probes,
-// immutable derivative planning, and authenticated secure-review grants.
+// Build 271 — CAIP operator clarity: standalone-project selection, explained workflow,
+// full derivative-plan access, source-safe probes, and authenticated secure-review grants.
 (() => {
   const mount = document.getElementById('creativeAssetIntelligenceMount');
   if (!mount) return;
@@ -65,6 +65,15 @@
     return `<option value="">Choose a Content Studio project…</option>${options}`;
   }
 
+  function projectOptions() {
+    const options = state.projects.map((project) => {
+      const standalone = !num(project.content_project_id);
+      const title = project.product_name || project.project_title || project.creative_project_key || `CAIP project ${num(project.creative_project_id)}`;
+      return `<option value="${num(project.creative_project_id)}">${esc(title)}${standalone ? ' — standalone/social' : ''}</option>`;
+    }).join('');
+    return `<option value="">Choose a CAIP project…</option>${options}`;
+  }
+
   function projectsList() {
     if (!state.projects.length) return '<div class="content-empty-state">No CAIP projects yet. Choose an approved Content Studio package and create its reference-only intelligence record.</div>';
     return state.projects.map((project) => `<button class="caip-project-row ${num(state.detail?.project?.creative_project_id) === num(project.creative_project_id) ? 'is-active' : ''}" type="button" data-open-project="${num(project.creative_project_id)}"><strong>${esc(project.product_name || project.project_title)}</strong><small>${num(project.asset_count)} assets · ${num(project.evidence_count)} evidence records · ${esc(statusText(project.governance_status))}</small></button>`).join('');
@@ -122,17 +131,53 @@
     </article>`;
   }
 
+  function workflowGuide(detail) {
+    const ops = state.operations || {};
+    const assets = array(detail.assets);
+    const observations = array(ops.observations);
+    const derivatives = array(ops.derivatives);
+    const evidence = array(detail.evidence);
+    const segments = array(detail.segments);
+    const probed = new Set(observations.map((item) => num(item.creative_asset_id)).filter(Boolean)).size;
+    const approvedPlans = derivatives.filter((item) => text(item.derivative_status) === 'approved_plan').length;
+    const approvedEvidence = evidence.filter((item) => ['approved','reviewed','accepted'].includes(text(item.review_status).toLowerCase())).length;
+    const approvedSegments = segments.filter((item) => text(item.segment_status).toLowerCase() === 'approved').length;
+    const next = evidence.length
+      ? 'Review evidence and story structure. Create or approve derivative plans only for source assets you actually intend to reuse in an output.'
+      : 'Finish reviewing the useful source assets, then begin evidence selection. A derivative plan is optional until you know how a source asset will be reused.';
+    const step = (number, title, metric, copy) => `<article><span class="caip-workflow-number">${number}</span><div><strong>${esc(title)}</strong><b>${esc(metric)}</b><small>${esc(copy)}</small></div></article>`;
+    return `<section class="card caip-workflow-guide"><div class="section-title-row"><div><p class="eyebrow">What you have actually done</p><h3>Where you are in CAIP</h3><p class="small">CAIP separates storing evidence from deciding how it may be used. Uploading, probing, planning and approving a plan are four different actions; none of them publishes anything.</p></div></div>
+      <div class="caip-workflow-guide-grid">
+        ${step(1,'Private source registered',`${assets.length} asset${assets.length===1?'':'s'}`,'The canonical private media is recorded as a CAIP asset. Registration does not make it public.')}
+        ${step(2,'Safe probe',`${probed}/${assets.length || 0} observed`,'Reads trusted metadata and the bound R2 object header. It does not watch, edit or interpret the footage.')}
+        ${step(3,'Immutable derivative plan',`${derivatives.length} plan${derivatives.length===1?'':'s'}`,'Records a future output recipe such as vertical social video or thumbnail. No derivative file is rendered.')}
+        ${step(4,'Internal plan approval',`${approvedPlans}/${derivatives.length || 0} approved`,'Says the recipe is acceptable to execute later. It still does not render, publish or change the raw original.')}
+        ${step(5,'Evidence review',`${approvedEvidence}/${evidence.length || 0} approved`,'You decide which source-backed facts, process moments and lessons are safe and useful for the story.')}
+        ${step(6,'Story structure',`${approvedSegments}/${segments.length || 0} approved`,'Reviewed evidence is organized into a narrative before Content Studio and release approval.')}
+      </div>
+      <p class="small caip-workflow-next"><strong>Recommended next move:</strong> ${esc(next)}</p>
+      <p class="small"><strong>You do not need a derivative plan for every uploaded file.</strong> Keep footage as evidence until you know it deserves a specific future output.</p>
+    </section>`;
+  }
+
   function operationsPanel() {
     const ops = state.operations || {};
     const derivatives = array(ops.derivatives);
+    const orderedDerivatives = [...derivatives].sort((a, b) => {
+      const aPending = text(a.derivative_status) === 'planned' ? 0 : 1;
+      const bPending = text(b.derivative_status) === 'planned' ? 0 : 1;
+      return aPending - bPending || num(b.creative_asset_derivative_id) - num(a.creative_asset_derivative_id);
+    });
+    const pendingPlans = orderedDerivatives.filter((item) => text(item.derivative_status) === 'planned').length;
     const grants = array(ops.access_grants);
     const providers = array(ops.provider_profiles);
     const jobs = array(ops.probe_jobs);
-    return `<section class="card caip-operations-card"><div class="section-title-row"><div><h3>Media operations — plan and verify</h3><p class="small">Build 202 records metadata and immutable planning only. No output file has been rendered, copied, or published unless a later verified provider records it.</p></div><span class="${statusClass('disabled')}">providers disabled</span></div>
+    const derivativeRows = orderedDerivatives.map((item) => `<div class="caip-ops-row"><div><strong>${esc(item.recipe_name)}</strong><small>${esc(item.original_filename || item.asset_key)} · ${esc(item.aspect_ratio || '')}</small></div><span class="${statusClass(item.derivative_status)}">${esc(statusText(item.derivative_status))}</span>${item.derivative_status === 'planned' ? `<button class="btn small" type="button" data-approve-derivative="${num(item.creative_asset_derivative_id)}">Approve plan</button>` : ''}</div>`).join('');
+    return `<section class="card caip-operations-card"><div class="section-title-row"><div><h3>Media operations — plan and verify</h3><p class="small">These are preparation records. A safe probe does not analyze visual content, and a derivative plan does not create an output file.</p></div><span class="${statusClass('disabled')}">providers disabled</span></div>
       ${state.reviewLink ? `<div class="content-studio-message info">A 30-minute, administrator-bound review link was created. <a href="${esc(state.reviewLink)}" target="_blank" rel="noopener noreferrer">Open secure review</a></div>` : ''}
       <div class="caip-ops-grid">
         <article><h4>Probe runs</h4><p class="small">${jobs.length} recorded · only catalog metadata and bound R2 object headers are inspected.</p>${jobs.slice(0, 4).map((job) => `<div class="caip-ops-row"><strong>${esc(job.original_filename || job.asset_key)}</strong><span class="${statusClass(job.job_status)}">${esc(statusText(job.job_status))}</span></div>`).join('') || '<p class="small">No probe has run yet.</p>'}</article>
-        <article><h4>Derivative plans</h4><p class="small">${derivatives.length} plan(s) · output status remains honest.</p>${derivatives.slice(0, 6).map((item) => `<div class="caip-ops-row"><div><strong>${esc(item.recipe_name)}</strong><small>${esc(item.original_filename || item.asset_key)} · ${esc(item.aspect_ratio || '')}</small></div><span class="${statusClass(item.derivative_status)}">${esc(statusText(item.derivative_status))}</span>${item.derivative_status === 'planned' ? `<button class="btn small" type="button" data-approve-derivative="${num(item.creative_asset_derivative_id)}">Approve plan</button>` : ''}</div>`).join('') || '<p class="small">No derivative plans yet.</p>'}</article>
+        <article class="caip-derivative-plan-panel"><h4>Derivative plans</h4><p class="small">${derivatives.length} total · ${pendingPlans} awaiting approval. Planned items are shown first. Scroll to review every plan.</p><div class="caip-ops-scroll" tabindex="0" role="region" aria-label="All derivative plans">${derivativeRows || '<p class="small">No derivative plans yet.</p>'}</div></article>
         <article><h4>Secure review grants</h4><p class="small">Tokens are stored only as hashes and require the issuing administrator’s session.</p>${grants.slice(0, 5).map((grant) => `<div class="caip-ops-row"><div><strong>${esc(grant.grant_key)}</strong><small>Expires ${esc(grant.expires_at || 'unknown')} · ${num(grant.access_count)}/${num(grant.max_access_count)} views</small></div><span class="${statusClass(grant.revoked_at ? 'revoked' : 'active')}">${grant.revoked_at ? 'revoked' : 'active'}</span>${grant.revoked_at ? '' : `<button class="btn small danger" type="button" data-revoke-grant="${num(grant.creative_asset_access_grant_id)}">Revoke</button>`}</div>`).join('') || '<p class="small">No secure review grants created.</p>'}</article>
       </div>
       <details class="caip-provider-register"><summary>Provider and cost-control registry</summary><p class="small">No secrets are stored here. Every provider is disabled until a separately reviewed adapter, environment secret, consent rules, budget caps, output verification, and failure recovery exist.</p>${providers.map((provider) => `<div class="caip-ops-row"><div><strong>${esc(provider.display_name)}</strong><small>${esc(provider.capability_key)} · ${esc(provider.endpoint_policy)}</small></div><span class="${statusClass(provider.lifecycle_status)}">${esc(statusText(provider.lifecycle_status))}</span></div>`).join('')}</details>
@@ -160,6 +205,7 @@
       <section class="card caip-detail-hero"><div><p class="eyebrow">${esc(project.creative_project_key || 'CAIP project')}</p><h2>${esc(project.product_name || project.project_title)}</h2><p>${esc(project.factual_summary || 'Factual summary is available in Content Studio and source records.')}</p></div><div class="caip-project-actions"><button class="btn" type="button" data-approve-caip>Approve internal record</button><button class="btn secondary" type="button" data-download-manifest>Download manifest</button></div></section>
       <div class="caip-metric-grid"><article><strong>${num(counts.assets)}</strong><span>source references</span></article><article><strong>${num(counts.public_allowed)}</strong><span>public-cleared upstream</span></article><article><strong>${num(counts.evidence)}</strong><span>evidence records</span></article><article><strong>${num(counts.approved_segments)}</strong><span>approved segments</span></article></div>
       ${policyGrid(detail)}
+      ${workflowGuide(detail)}
       ${operationsPanel()}
       <section class="caip-assets-section"><div class="section-title-row"><div><h3>Canonical source assets</h3><p class="small">Run a metadata/R2 header probe, then create an immutable plan only after review. No source file is altered by these controls.</p></div></div><div class="caip-asset-grid">${array(detail.assets).map(assetCard).join('') || '<div class="content-empty-state">No source assets are linked yet.</div>'}</div></section>
       ${recommendationsSection(detail)}
@@ -170,10 +216,13 @@
 
   function render() {
     const currentContentId = num(state.detail?.project?.content_project_id);
+    const currentProjectId = num(state.detail?.project?.creative_project_id);
     mount.innerHTML = `${requestedProductId ? `<div class="card caip-product-bridge"><strong>Catalog product ${esc(String(requestedProductId))}</strong><span class="small">CAIP opened from the catalog media workspace. ${state.detail?.project ? 'Its linked creative intelligence record is selected below.' : 'No linked CAIP record exists yet; choose a reviewed Content Studio package to create one.'}</span><a class="btn secondary" href="/admin/catalog-media/?product_id=${encodeURIComponent(requestedProductId)}#product-media-workflow">Return to media workspace</a></div>` : ''}<div class="caip-page-grid">
-      <aside class="card caip-sidebar"><h2>Creative projects</h2><p class="small">Sync an approved Content Studio package into CAIP. Existing source media stays in place.</p><label>Content Studio package<select class="input" id="caipContentProject">${contentOptions()}</select></label><div class="caip-sidebar-actions"><button class="btn" type="button" id="caipSync">Create or refresh CAIP</button><button class="btn secondary" type="button" id="caipRefresh">Refresh list</button></div><div class="caip-project-list">${projectsList()}</div></aside>
+      <aside class="card caip-sidebar"><h2>Creative projects</h2><p class="small">Open any CAIP project here, including standalone/social projects that have no Content Studio package or physical product.</p><label>Open CAIP project<select class="input" id="caipProjectSelect">${projectOptions()}</select></label><div class="caip-sidebar-actions"><button class="btn secondary" type="button" id="caipRefresh">Refresh list</button></div><details class="caip-sync-panel"><summary>Create / refresh from Content Studio</summary><p class="small">This second selector is only for Content Studio-backed projects. Standalone projects are opened from the CAIP-project selector above.</p><label>Content Studio package<select class="input" id="caipContentProject">${contentOptions()}</select></label><button class="btn" type="button" id="caipSync">Create or refresh CAIP</button></details><div class="caip-project-list">${projectsList()}</div></aside>
       <main class="caip-main"><div id="caipMessage" class="content-studio-message" hidden></div>${renderDetail()}</main>
     </div>`;
+    const selectedProject = $('#caipProjectSelect');
+    if (selectedProject && currentProjectId) selectedProject.value = String(currentProjectId);
     const selected = $('#caipContentProject');
     if (selected && currentContentId) selected.value = String(currentContentId);
     bind();
@@ -213,6 +262,14 @@
   }
 
   function bind() {
+    $('#caipProjectSelect')?.addEventListener('change', () => {
+      const projectId = num($('#caipProjectSelect')?.value);
+      if (!projectId) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set('creative_project_id', String(projectId));
+      history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}${url.hash || '#creativeAssetIntelligenceMount'}`);
+      load(projectId);
+    });
     $('#caipSync')?.addEventListener('click', () => {
       const contentProjectId = num($('#caipContentProject')?.value);
       if (!contentProjectId) return message('Choose a Content Studio package first.', 'error');
@@ -240,7 +297,7 @@
       const id = num(button.dataset.saveSegment);
       perform({ action: 'update_segment', creative_project_id: num(state.detail?.project?.creative_project_id), creative_story_segment_id: id, title: inputValue('data-segment-title', id), segment_status: inputValue('data-segment-status', id), evidence_keys: inputValue('data-segment-evidence', id), narrative_text: inputValue('data-segment-body', id), reviewer_notes: inputValue('data-segment-notes', id), copy_locked: checked('data-segment-lock', id) ? 1 : 0 }, 'Story segment saved.');
     }));
-    $$('[data-approve-derivative]').forEach((button) => button.addEventListener('click', () => perform({ action: 'approve_derivative_plan', creative_project_id: num(state.detail?.project?.creative_project_id), creative_asset_derivative_id: num(button.dataset.approveDerivative) }, 'Derivative plan approved internally. No provider has been scheduled.')));
+    $$('[data-approve-derivative]').forEach((button) => button.addEventListener('click', () => perform({ action: 'approve_derivative_plan', creative_project_id: num(state.detail?.project?.creative_project_id), creative_asset_derivative_id: num(button.dataset.approveDerivative) }, 'Derivative plan approved internally. This only approves the future recipe; no file was rendered or published.')));
     $$('[data-revoke-grant]').forEach((button) => button.addEventListener('click', () => perform({ action: 'revoke_secure_review_link', creative_project_id: num(state.detail?.project?.creative_project_id), creative_asset_access_grant_id: num(button.dataset.revokeGrant) }, 'Secure review grant revoked.')));
   }
 
