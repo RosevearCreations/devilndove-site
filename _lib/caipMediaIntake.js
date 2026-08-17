@@ -1,7 +1,7 @@
 // Build 241 — Devil n Dove CAIP private raw-media intake helpers.
 // D1 stores metadata/state only. Binary originals remain in a dedicated private R2 binding.
 
-export const CAIP_MEDIA_INTAKE_BUILD = 'Build 269';
+export const CAIP_MEDIA_INTAKE_BUILD = 'Build 270';
 export const CONTENT_FINGERPRINT_VERSION = 'sample_sha256_v1';
 export const CONTENT_SAMPLE_BYTES = 1024 * 1024;
 export const CAIP_PRIVATE_BUCKET_BINDING = 'CAIP_PRIVATE_MEDIA_BUCKET';
