@@ -1,3 +1,18 @@
+## Build 271 — CAIP operator clarity and complete plan access
+
+- Added an **Open CAIP project** selector sourced from all Creative Projects, including standalone/social CAIP projects with no Content Studio package.
+- Moved Content Studio package selection into an explicit create/refresh subsection so the two identities are no longer confused.
+- Removed the six-plan display cap; all derivative plans are reachable in a bounded scroll region and pending plans sort first.
+- Added plain-language CAIP stage guidance explaining private upload, safe probe, immutable derivative plan, internal plan approval, evidence review and story structure.
+- Clarified that derivative plans are optional and that plan approval does not render or publish media.
+- No D1 migration; Build 269 remains the CAIP schema boundary.
+
+## Build 270 — CAIP integrity-failure presentation hardening
+
+- Preserved failed multipart rows now appear under **Source replacement required**, separate from normal project media.
+- Historical percentages such as 105/121 are explicitly labeled as non-running forensic state.
+- Recovery still creates a fresh R2 multipart upload; no Build 270 schema migration is required.
+
 # Build 260 — Media Studio bounded bootstrap and library loading
 
 - Fixed the Media Studio GET path that could return HTTP 503 while opening Home by removing the all-in-one slots + 180-media + usage bootstrap.

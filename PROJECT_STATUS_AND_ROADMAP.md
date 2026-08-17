@@ -1,4 +1,21 @@
-# Devil n Dove Project Status and Roadmap — Build 269
+# Devil n Dove Project Status and Roadmap — Build 271
+
+## Build 271 completed — CAIP operator clarity and project navigation
+
+1. Standalone/social CAIP projects now appear in a real **Open CAIP project** dropdown rather than only in the project-row panel.
+2. Content Studio package selection is visibly separated as a create/refresh action and no longer masquerades as the CAIP-project selector.
+3. Derivative plans show the complete list in a bounded scrollbar instead of `slice(0, 6)`; pending plans sort first.
+4. The CAIP workspace now explains what upload, safe probe, immutable plan, internal plan approval, evidence review and story structure actually mean.
+5. Operator guidance states that derivative planning is optional per asset and that no probe/plan/approval action publishes or renders a file.
+6. No D1 migration is required; Build 269 remains the focused CAIP schema boundary.
+
+
+## Build 270 completed work — CAIP recovery-state clarity
+
+1. Separated preserved multipart integrity failures from current project media/upload recovery rows.
+2. Labeled integrity-failed progress as historical R2 state, not a running upload.
+3. Kept **Re-upload source safely** as the sole repair path; old damaged multipart objects remain immutable forensic records.
+4. No D1 schema change; Build 269 migration remains authoritative.
 
 ## Build 269 completed work — CAIP standalone/social media intake integrity and duplicate prevention
 
