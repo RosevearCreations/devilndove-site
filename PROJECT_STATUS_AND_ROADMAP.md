@@ -1,4 +1,21 @@
-# Devil n Dove Project Status and Roadmap — Build 264
+# Devil n Dove Project Status and Roadmap — Build 267
+
+## Build 267 completed work — CAIP registration recovery and duplicate reconciliation
+
+1. Retry CAIP registration now works strictly from an existing private R2 object and no longer re-uploads the binary. Older failed/uploading rows are promoted to uploaded when targeted R2 HEAD verifies the expected object size.
+2. If an earlier retry already created the canonical `creative_assets` row but failed before linking `caip_media_upload_files.creative_asset_id`, Build 267 relinks it instead of creating another asset.
+3. Optional technical-observation and processing-plan schema drift no longer blocks the canonical private CAIP asset. These downstream records are best-effort and can be repaired later.
+4. Successful CAIP POST actions no longer become HTTP 400 merely because the subsequent screen-state refresh fails; the response returns `refresh_warning` instead.
+5. Direct upload is idempotent around R2: if the correct-size binary is already present, registration continues without another PUT. If R2 storage succeeds but later metadata work fails, the endpoint returns `binary_stored=true` and `registration_pending=true` instead of telling the browser that the binary upload failed.
+6. Added **CAIP media audit & duplicate cleanup** to Creative Assets. Probable duplicate intake rows are grouped by project/fingerprint/size; the owner can archive redundant D1 recovery rows. Physical private-R2 deletion is offered only for redundant rows with no linked downstream references and an equal verified content checksum. Nothing is deleted automatically.
+7. Added read-only `BUILD267_CAIP_PROJECT23_AUDIT.sql` for the current Project 23 investigation. Build 267 is code-only; no new D1 migration is required.
+
+### Highest-value next work after Build 267
+
+- Deploy Build 267 and retry registration on one Project 23 row that already shows 100% uploaded. It should return a registration result or a specific pending diagnostic without another binary upload.
+- Open the new duplicate audit, archive obvious redundant recovery rows first **without R2 deletion**, and confirm the recovery list becomes clean.
+- Only use physical R2 duplicate deletion when Build 267 marks the copy checksum-verified and unreferenced. Keep uncertain/private originals.
+- After Project 23 is reconciled, continue the CAIP evidence → Content Studio/social-package workflow.
 
 ## Build 264 completed work — editable Home/Shop, movie metadata, project-first CAIP and merchandising order
 
