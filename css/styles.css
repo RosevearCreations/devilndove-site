@@ -3239,3 +3239,12 @@ details.packaging-amazon-material-import[open]>summary{margin-bottom:10px}
 .creative-direct-inventory{margin:12px 0;padding:14px}.creative-direct-inventory .grid{align-items:end}.creative-cost-context{display:grid;grid-template-columns:minmax(180px,1fr) minmax(220px,2fr) auto;gap:10px;align-items:end;margin-bottom:14px}@media(max-width:800px){.creative-cost-context{grid-template-columns:1fr}}
 /* Build 264 final — Website Areas must never clip the lower Collections/site-map entries. Use page scrolling instead of a nested sticky scroller. */
 .media-site-map-panel{position:static!important;max-height:none!important;height:auto!important;overflow:visible!important;padding-bottom:18px!important}.media-site-map-panel .media-page-map{max-height:none!important;overflow:visible!important;padding-bottom:8px!important}
+
+/* Build 267 — CAIP duplicate audit and safe reconciliation */
+.caip-media-cleanup-card{margin:18px 0;min-width:0;background:#151b2f;color:#eef2ff;border-color:#34405f}
+.caip-duplicate-audit{display:grid;gap:12px;margin-top:12px}
+.caip-duplicate-group{display:grid;gap:10px;padding:13px;border:1px solid #455273;border-radius:12px;background:#1c2540;min-width:0}
+.caip-duplicate-group .section-title-row{align-items:flex-start;gap:10px;flex-wrap:wrap}
+.caip-duplicate-rows{display:grid;gap:5px}
+.caip-duplicate-rows>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid #34405f;overflow-wrap:anywhere}
+@media(max-width:700px){.caip-duplicate-rows>div{display:grid;gap:4px}.caip-media-cleanup-card .caip-media-actions{display:grid;grid-template-columns:1fr}.caip-media-cleanup-card .btn{width:100%;justify-content:center}}
