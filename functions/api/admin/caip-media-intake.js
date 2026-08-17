@@ -3,21 +3,23 @@ import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getD
 import {
   CAIP_MEDIA_INTAKE_BUILD, abortUploadFile, assertCaipMediaIntakeSchema, completeUploadFile,
   createUploadSession, createSafeReplacementUpload, initiateUploadFile, listCaipMediaIntake, requestPublicPromotion, retryUploadedFileRegistration,
-  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup
+  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup, backfillCaipContentFingerprints, setUploadFileContentFingerprint
 } from '../_lib/caipMediaIntake.js';
 
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
 function integer(value){const n=Number(value||0);return Number.isInteger(n)&&n>0?n:0;}
 async function access(context){const adminUser=await getAdminUserFromRequest(context.request,context.env);if(!adminUser)return{error:json({ok:false,error:'Admin access required.'},401)};const db=getDb(context.env);if(!db)return{error:json({ok:false,error:'Database binding is not configured.'},500)};return{adminUser,db};}
-function scrub(data){if(!data)return data;const clone=JSON.parse(JSON.stringify(data));for(const file of clone.files||[])delete file.r2_upload_id;return clone;}
+function scrub(data){if(!data)return data;const clone=JSON.parse(JSON.stringify(data));const walk=(value)=>{if(!value||typeof value!=='object')return;if(Array.isArray(value)){for(const item of value)walk(item);return;}delete value.r2_upload_id;for(const item of Object.values(value))walk(item);};walk(clone);return clone;}
 function intakeErrorCode(error,action=''){
   const message=String(error?.message||error||'').toLowerCase();
+  if(message.includes('build 269 caip media schema')||message.includes('build 269 caip fingerprint columns')) return 'CAIP_BUILD269_MIGRATION_REQUIRED';
   if(message.includes('schema is not installed')) return 'CAIP_MEDIA_SCHEMA_MISSING';
   if(message.includes('valid caip creative project')||message.includes('creative project first')) return 'CAIP_PROJECT_INVALID';
   if(message.includes('private caip r2 binding')||message.includes('caip_private_media_bucket')) return 'CAIP_PRIVATE_BUCKET_UNAVAILABLE';
   if(message.includes('multipart initialization failed')) return 'CAIP_R2_MULTIPART_INIT_FAILED';
   if(message.includes('accepted image, video, or audio')) return 'CAIP_MEDIA_TYPE_REJECTED';
   if(message.includes('foreign key')) return 'CAIP_D1_FOREIGN_KEY_ERROR';
+  if(message.includes('finalized/incomplete r2 integrity failure')||message.includes('caip_multipart_incomplete')) return 'CAIP_REUPLOAD_REQUIRED';
   if(message.includes('no such column')||message.includes('no such table')) return 'CAIP_D1_SCHEMA_DRIFT';
   return action?`CAIP_${String(action).toUpperCase()}_FAILED`:'CAIP_MEDIA_INTAKE_FAILED';
 }
@@ -43,12 +45,14 @@ export async function onRequestPost(context){
     await assertCaipMediaIntakeSchema(state.db);
     let result={};
     if(action==='create_session'){ if(!privateBucketAvailable(context.env)) throw new Error('Private CAIP R2 binding is unavailable. Bind the private R2 bucket as CAIP_PRIVATE_MEDIA_BUCKET in the Production Pages environment and redeploy before uploading.'); result=await createUploadSession(state.db,context.env,projectId,body.files,state.adminUser.user_id,{upload_device:body.upload_device,source_note:body.source_note,media_role:body.media_role,privacy_state:body.privacy_state,consent_state:body.consent_state,rights_status:body.rights_status}); }
+    else if(action==='set_content_fingerprint') result={file:await setUploadFileContentFingerprint(state.db,fileId,body.content_fingerprint,body.content_fingerprint_version,state.adminUser.user_id)};
     else if(action==='initiate_file') result=await initiateUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='complete_file') result=await completeUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='abort_file') result=await abortUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='retry_registration') result=await retryUploadedFileRegistration(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='create_safe_replacement') result=await createSafeReplacementUpload(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='audit_duplicates') result=await listCaipDuplicateAudit(state.db,projectId);
+    else if(action==='backfill_content_fingerprints') result=await backfillCaipContentFingerprints(state.db,context.env,projectId,state.adminUser.user_id,{limit:body.limit});
     else if(action==='cleanup_duplicate_group') result=await cleanupCaipDuplicateGroup(state.db,context.env,projectId,body.canonical_file_id,body.duplicate_file_ids,state.adminUser.user_id,{delete_private_r2_copy:Boolean(body.delete_private_r2_copy)});
     else if(action==='update_governance') result=await updateUploadFileGovernance(state.db,fileId,body,state.adminUser.user_id);
     else if(action==='request_public_promotion') result=await requestPublicPromotion(state.db,fileId,body.destination_role,state.adminUser.user_id);
