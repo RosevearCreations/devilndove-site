@@ -3248,3 +3248,22 @@ details.packaging-amazon-material-import[open]>summary{margin-bottom:10px}
 .caip-duplicate-rows{display:grid;gap:5px}
 .caip-duplicate-rows>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid #34405f;overflow-wrap:anywhere}
 @media(max-width:700px){.caip-duplicate-rows>div{display:grid;gap:4px}.caip-media-cleanup-card .caip-media-actions{display:grid;grid-template-columns:1fr}.caip-media-cleanup-card .btn{width:100%;justify-content:center}}
+
+/* Build 271 — CAIP operator clarity: standalone-project selection and full derivative-plan access. */
+.caip-sync-panel{border:1px dashed var(--line,#ddd);border-radius:10px;padding:10px;display:grid;gap:9px}
+.caip-sync-panel summary{cursor:pointer;font-weight:700}
+.caip-sync-panel label{display:grid;gap:5px}
+.caip-workflow-guide{display:grid;gap:14px}
+.caip-workflow-guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.caip-workflow-guide-grid article{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;padding:12px;border:1px solid var(--line,#ddd);border-radius:12px;background:rgba(255,255,255,.025)}
+.caip-workflow-guide-grid article>div{display:grid;gap:4px;min-width:0}
+.caip-workflow-guide-grid b{font-size:.84rem}
+.caip-workflow-number{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;font-weight:800;background:rgba(124,92,154,.18);border:1px solid rgba(124,92,154,.36)}
+.caip-workflow-next{padding:10px 12px;border-left:4px solid var(--accent,#8b4c75);background:rgba(124,92,154,.08);border-radius:8px}
+.caip-derivative-plan-panel{min-height:0}
+.caip-ops-scroll{display:grid;gap:8px;max-height:420px;overflow-y:auto;overscroll-behavior:contain;padding-right:5px;scrollbar-gutter:stable}
+.caip-ops-scroll:focus-visible{outline:2px solid var(--accent,#8b4c75);outline-offset:3px;border-radius:8px}
+body[data-admin-page="creative-assets"] .caip-workflow-guide-grid article,
+body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;color:#f8fafc;border-color:#455273}
+@media(max-width:980px){.caip-workflow-guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.caip-workflow-guide-grid{grid-template-columns:1fr}.caip-ops-scroll{max-height:360px}}
