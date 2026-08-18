@@ -1,3 +1,7 @@
+# Creative Automation Build 273 workflow note
+
+Build 273 keeps one standalone Creative Process project identity from project facts/Inventory through CAIP private media/evidence and into Content Studio deliverables. Content Studio now creates/refreshes its package from that existing project and attaches it to the existing CAIP workspace; it must not create a second Gray Hair/standalone project. The Automatic Output Blueprint is a cross-authority destination/status view, not a media renderer. See the two canonical authorities for current ordered work.
+
 # Build 246 current integrity note
 
 Creative Project deletion now supports an explicit audited delete-and-return path. Only **unreversed** project inventory consumption is returned; correction movements and `creative_project_deletion_audit` evidence are written before project-owned rows are removed. Meaningful downstream/external output references still block deletion. Finished-product releases outside Creative Projects use the separate Product Production Release authority.
