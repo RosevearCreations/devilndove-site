@@ -1,11 +1,22 @@
-# Devil n Dove AI Handoff — Build 271
+# Devil n Dove AI Handoff — Build 273
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 271**. Build 271 is a CAIP operator-clarity/navigation release with no new D1 schema; it continues to require the Build 269 CAIP migration. Build 270 remains the recovery-state presentation hardening immediately underneath it. The retained broad D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`), and Build 269 adds one focused CAIP migration that must be applied afterward: `database_build269_caip_social_project_dedupe_integrity.sql`. Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–268 were CAIP/runtime hardening releases; Build 269 adds the content-fingerprint/recovery-lineage columns and indexes. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
+The current code release is **Build 273**. Build 273 is a code/documentation-only CAIP → Creative Process → Content Studio workflow consolidation release; it adds no D1 schema and continues to require the Build 269 CAIP migration. Builds 270–272 remain the recovery-presentation, operator-clarity and intake-readiness hardening underneath it. The retained broad D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`), and Build 269 adds one focused CAIP migration that must be applied afterward: `database_build269_caip_social_project_dedupe_integrity.sql`. Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–268 were CAIP/runtime hardening releases; Build 269 adds the content-fingerprint/recovery-lineage columns and indexes. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
 
+
+
+## Build 273 Creative Process / CAIP / Content Studio bridge rule
+
+1. A standalone/social Creative Process project is one project identity. **Do not create a second project in Content Studio.** Content Studio now lists existing `creative_work_projects`, creates/refreshes a package with `content_projects.source_type=creative_project`, and attaches that package to the existing CAIP row whose identity remains `creative_projects.source_type=creative_work_project`.
+2. Content Studio may create a **draft** package before timeline evidence is selected so already-uploaded CAIP media becomes visible as private/reference-only archive rows. Evidence/story approval and public release remain separate human gates.
+3. Creative Process is Inventory/time/cost/project-fact authority; CAIP is private source-media, technical observation, evidence, story and derivative-plan authority; Content Studio is channel-deliverable/package authority. The Automatic Output Blueprint is a destination/status dashboard across those authorities, not a renderer.
+4. Inventory selection in Creative Process is type-searchable. Filtering changes presentation only; posting still uses the existing inventory ID, unit-conversion, reusable/log-only and reversal rules.
+5. Standalone Content Studio copy is project-journal/evidence-first and must not invent a sellable product, force local SEO wording into unrelated personal/social projects, or imply a transformation/outcome not supported by reviewed evidence.
+6. Private CAIP originals stay private/reference-only in Content Studio. A missing public URL is not an upload failure and must be represented by a visual placeholder until a reviewed public derivative/promotion exists.
+7. Current high-value CAIP work after Build 273 is footage review with timecode evidence, transcript/proxy provider verification, story-spine generation from approved evidence, and then reviewed release/calendar/analytics handoff.
 
 ## Build 271 CAIP operator clarity
 
@@ -257,3 +268,10 @@ The two cross-project current authorities are only:
 ## 2026-08-17 D1 production-parity note
 
 Current auth authority is `users` + `sessions`. Production retains `members_legacy` + `member_sessions_legacy` solely for preserved historical/blog dependencies; `blog_posts.author_member_id` and `blog_comments.member_id` reference `members_legacy`. Do not rerun the retired legacy auth migration and do not drop those compatibility tables until blog ownership is explicitly migrated. Build 269 aggregate schemas and verification now encode this parity state.
+
+## Build 272 — CAIP intake readiness guard
+- CAIP private upload now exposes a prerequisite/readiness contract before `create_session`.
+- Required production D1 columns: `caip_media_upload_files.content_fingerprint`, `content_fingerprint_version`, and `recovery_of_file_id` (Build 269 migration).
+- Required Production Pages R2 binding: `CAIP_PRIVATE_MEDIA_BUCKET`.
+- If readiness is false, the operator UI disables **Select and Upload** and names the exact prerequisite rather than allowing a generic POST 400.
+- Build 272 has no new schema migration; it depends on `database_build269_caip_social_project_dedupe_integrity.sql` being applied once to production D1.

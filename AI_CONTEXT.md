@@ -1,3 +1,3 @@
-# Devil n Dove AI Context — Build 248 Pointer
+# Devil n Dove AI Context — Build 273 Pointer
 
-Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. They are the only cross-project current authorities. Build 248 retains all Build 246 product/project/production/CAIP integrity work and adds the Packaging Studio repair pass: approved Truth-reference soap spacing/clipping, rose artwork decoupled from the old purple path, full requested botanical rose palette plus custom colour, reusable layout gallery, persistent formula/ingredient/fragrance/colourant/claim libraries, the Health Oatmeal & Goat Milk seed formula, four bilingual claims, and exact-key label/project deletion.
+Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. They are the only cross-project current authorities. Build 273 consolidates the standalone Creative Process → existing CAIP → Content Studio path, searchable Creative Process Inventory selection, and a CAIP-aware Automatic Output Blueprint. It adds no D1 schema; Build 269 remains the focused CAIP migration boundary after retained broad Build 264.
