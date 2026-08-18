@@ -1,7 +1,7 @@
 // Build 241 — Devil n Dove CAIP private raw-media intake helpers.
 // D1 stores metadata/state only. Binary originals remain in a dedicated private R2 binding.
 
-export const CAIP_MEDIA_INTAKE_BUILD = 'Build 270';
+export const CAIP_MEDIA_INTAKE_BUILD = 'Build 272';
 export const CONTENT_FINGERPRINT_VERSION = 'sample_sha256_v1';
 export const CONTENT_SAMPLE_BYTES = 1024 * 1024;
 export const CAIP_PRIVATE_BUCKET_BINDING = 'CAIP_PRIVATE_MEDIA_BUCKET';
@@ -214,6 +214,38 @@ export async function assertCaipMediaIntakeSchema(db) {
   } catch {
     throw new Error('Build 241 CAIP media schema is not installed. Back up D1 and apply database_build241_caip_large_media_intake.sql before using private media intake.');
   }
+}
+
+
+export async function getCaipMediaIntakeReadiness(db, env = {}) {
+  const requiredColumns=['content_fingerprint','content_fingerprint_version','recovery_of_file_id'];
+  const readiness={
+    schema_base_ready:false,
+    build269_schema_ready:false,
+    missing_columns:[],
+    private_bucket_ready:privateBucketAvailable(env),
+    upload_ready:false,
+    required_migration:'database_build269_caip_social_project_dedupe_integrity.sql',
+    build:CAIP_MEDIA_INTAKE_BUILD
+  };
+  try {
+    await assertCaipMediaIntakeSchema(db);
+    readiness.schema_base_ready=true;
+    const cols=await tableColumns(db,'caip_media_upload_files');
+    readiness.missing_columns=requiredColumns.filter((name)=>!cols.has(name));
+    readiness.build269_schema_ready=readiness.missing_columns.length===0;
+  } catch (error) {
+    readiness.schema_error=text(error?.message||error,800)||'CAIP media schema check failed.';
+  }
+  readiness.upload_ready=Boolean(readiness.schema_base_ready&&readiness.build269_schema_ready&&readiness.private_bucket_ready);
+  readiness.message=!readiness.schema_base_ready
+    ? 'CAIP base media tables are missing.'
+    : !readiness.build269_schema_ready
+      ? `Build 269 CAIP intake columns are missing: ${readiness.missing_columns.join(', ')}.`
+      : !readiness.private_bucket_ready
+        ? 'Private CAIP R2 binding CAIP_PRIVATE_MEDIA_BUCKET is unavailable.'
+        : 'CAIP duplicate-safe private upload prerequisites are ready.';
+  return readiness;
 }
 
 async function projectRow(db, creativeProjectId) {

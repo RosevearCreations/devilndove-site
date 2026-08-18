@@ -1,9 +1,9 @@
-// Build 199 — Content Automation Studio shared helpers.
+// Build 273 — Content Automation Studio shared helpers with Creative Process/CAIP bridge clarity.
 // The studio is deliberately review-first: it creates a structured archive and
 // rendering/copy plans from factual product data, but never auto-publishes or
 // deletes original media.
 
-export const CONTENT_STUDIO_BUILD = 'Build 199';
+export const CONTENT_STUDIO_BUILD = 'Build 273';
 
 function text(value, max = 0) {
   const cleaned = String(value ?? '').trim();
@@ -64,9 +64,11 @@ function normalizeApprovalStatus(value) {
 }
 
 function inferredMediaType(row = {}) {
+  const declared = text(row.media_type).toLowerCase();
   const mime = text(row.mime_type).toLowerCase();
-  const source = text(row.source_url || row.image_url || row.public_url).toLowerCase();
-  if (mime.startsWith('video/') || /\.(mp4|m4v|mov|webm|avi)(?:[?#]|$)/.test(source)) return 'video';
+  const source = text(row.source_url || row.image_url || row.public_url || row.original_filename).toLowerCase();
+  if (declared === 'video' || mime.startsWith('video/') || /\.(mp4|m4v|mov|webm|avi)(?:[?#]|$)/.test(source)) return 'video';
+  if (declared === 'audio' || mime.startsWith('audio/')) return 'audio';
   return 'image';
 }
 
@@ -112,9 +114,10 @@ function scoreReason(row = {}, index = 0) {
 }
 
 function mediaArchiveKey(row = {}, index = 0) {
+  if (numeric(row.creative_asset_id)) return `caip-asset-${numeric(row.creative_asset_id)}`;
   if (numeric(row.product_image_id)) return `product-image-${numeric(row.product_image_id)}`;
   if (numeric(row.media_asset_id)) return `media-asset-${numeric(row.media_asset_id)}`;
-  return `url-${stableHash(`${row.source_url || row.public_url || row.image_url || ''}-${index}`)}`;
+  return `url-${stableHash(`${row.source_url || row.public_url || row.image_url || row.original_filename || ''}-${index}`)}`;
 }
 
 function filenameFromUrl(url, fallback) {
@@ -131,7 +134,7 @@ function filenameFromUrl(url, fallback) {
 
 function buildArchivePath(projectKey, row, index) {
   const type = inferredMediaType(row);
-  const filename = filenameFromUrl(row.source_url || row.public_url || row.image_url, `${type}-${index + 1}`)
+  const filename = (text(row.original_filename) || filenameFromUrl(row.source_url || row.public_url || row.image_url, `${type}-${index + 1}`))
     .replace(/[^a-zA-Z0-9._-]+/g, '-');
   return `content-projects/${projectKey}/source/${type}s/${String(index + 1).padStart(3, '0')}-${filename}`;
 }
@@ -204,6 +207,46 @@ function shortVideoScript(facts, variation, channel) {
   ].join('\n');
 }
 
+function standaloneCaptionFor(facts, variation, channel) {
+  const hooks = [
+    `A documented moment from ${facts.name}.`,
+    `${facts.name}: the process, choices, and result.`,
+    `One part of the ${facts.name} story.`,
+    `What happened during ${facts.name}.`,
+    `A reviewed project moment from Devil n Dove.`
+  ];
+  const hook = hooks[variation % hooks.length];
+  const body = clip(facts.shortDescription, 300);
+  const cta = channel === 'youtube' ? 'Watch the reviewed project story for the full context.' : 'Follow the reviewed project story for the full context.';
+  return `${hook}\n\n${body}\n\n${cta}\n\n#DevilNDove #ProjectJournal`;
+}
+
+function standaloneLongVideoScript(facts) {
+  return [
+    `0:00–0:10 — Opening: use the strongest reviewed result or context shot from ${facts.name}.`,
+    `0:10–0:35 — Why this project exists: ${clip(facts.shortDescription, 320)}`,
+    `0:35–1:30 — Process: use only reviewed CAIP evidence and source moments that directly support the narration.`,
+    `1:30–2:10 — Result / lesson: ${clip(facts.storySummary || facts.description, 520)}`,
+    `2:10–2:30 — Closing: state the reviewed lesson, next step, or project conclusion without inventing a product, medical claim, or outcome not supported by the evidence.`
+  ].join('\n\n');
+}
+
+function standaloneShortVideoScript(facts, variation, channel) {
+  const starts = [
+    `Open on the clearest reviewed result or context shot from ${facts.name}.`,
+    `Start with one reviewed process moment, then reveal its context.`,
+    `Use a factual before/process/after sequence only when CAIP evidence supports all three stages.`,
+    `Lead with the project question, then show one evidence-backed answer.`,
+    `Lead with a reviewed lesson and show the source moment that supports it.`
+  ];
+  return [
+    `0:00–0:03 — ${starts[variation % starts.length]}`,
+    `0:03–0:14 — Factual overlay: “${clip(facts.shortDescription, 110)}”`,
+    `0:14–0:24 — Use two to four reviewed source moments; do not treat an immutable derivative plan as proof of what the media shows.`,
+    `0:24–0:30 — Close with a soft ${channel} call to action and keep the project private until human approval.`
+  ].join('\n');
+}
+
 function makeAssetPlan(projectKey, preferredMedia, format, limit = 6) {
   const assets = preferredMedia.slice(0, limit).map((item, index) => ({
     archive_key: item.archive_key,
@@ -218,6 +261,10 @@ function makeAssetPlan(projectKey, preferredMedia, format, limit = 6) {
 
 function deliverableSpecs(project, facts, assets) {
   const projectKey = project.content_project_key;
+  const standalone = project.source_type === 'creative_project';
+  const channelCaption = (variation, channel) => standalone ? standaloneCaptionFor(facts, variation, channel) : captionFor(facts, variation, channel);
+  const longScript = standalone ? standaloneLongVideoScript(facts) : longVideoScript(facts);
+  const shortScript = (variation, channel) => standalone ? standaloneShortVideoScript(facts, variation, channel) : shortVideoScript(facts, variation, channel);
   const approved = assets.filter((asset) => asset.is_selected && asset.safety_status !== 'blocked');
   const usable = approved.length ? approved : assets.filter((asset) => asset.safety_status !== 'blocked');
   const hasPublicCleared = usable.some((asset) => asset.safety_status === 'public_allowed');
@@ -225,37 +272,42 @@ function deliverableSpecs(project, facts, assets) {
   const items = [];
 
   items.push({
-    key: 'youtube-long-video', channel: 'youtube', type: 'long_video', title: `Making ${facts.name}: workshop to finished piece`,
-    caption: captionFor(facts, 0, 'youtube'), script: longVideoScript(facts), body: '', aspect: '16:9', duration: 150,
+    key: 'youtube-long-video', channel: 'youtube', type: 'long_video', title: standalone ? `${facts.name}: project story` : `Making ${facts.name}: workshop to finished piece`,
+    caption: channelCaption(0, 'youtube'), script: longScript, body: '', aspect: '16:9', duration: 150,
     assetPlan: makeAssetPlan(projectKey, usable, '16:9', 12), status: baseStatus
   });
 
   for (let index = 1; index <= 3; index += 1) {
     items.push({
       key: `facebook-video-${index}`, channel: 'facebook', type: 'short_video', title: `${facts.name} — Facebook cut ${index}`,
-      caption: captionFor(facts, index, 'facebook'), script: shortVideoScript(facts, index, 'Facebook'), body: '', aspect: '9:16', duration: 30,
+      caption: channelCaption(index, 'facebook'), script: shortScript(index, 'Facebook'), body: '', aspect: '9:16', duration: 30,
       assetPlan: makeAssetPlan(projectKey, usable.slice(index - 1), '9:16', 6), status: baseStatus
     });
   }
   for (let index = 1; index <= 5; index += 1) {
     items.push({
       key: `instagram-reel-${index}`, channel: 'instagram', type: 'short_video', title: `${facts.name} — Reel ${index}`,
-      caption: captionFor(facts, index + 3, 'instagram'), script: shortVideoScript(facts, index + 3, 'Instagram Reel'), body: '', aspect: '9:16', duration: 25,
+      caption: channelCaption(index + 3, 'instagram'), script: shortScript(index + 3, 'Instagram Reel'), body: '', aspect: '9:16', duration: 25,
       assetPlan: makeAssetPlan(projectKey, usable.slice(index - 1), '9:16', 6), status: baseStatus
     });
   }
   for (let index = 1; index <= 5; index += 1) {
     items.push({
       key: `tiktok-${index}`, channel: 'tiktok', type: 'short_video', title: `${facts.name} — TikTok ${index}`,
-      caption: captionFor(facts, index + 8, 'tiktok'), script: shortVideoScript(facts, index + 8, 'TikTok'), body: '', aspect: '9:16', duration: 25,
+      caption: channelCaption(index + 8, 'tiktok'), script: shortScript(index + 8, 'TikTok'), body: '', aspect: '9:16', duration: 25,
       assetPlan: makeAssetPlan(projectKey, usable.slice(index - 1), '9:16', 6), status: baseStatus
     });
   }
 
-  const title = clip(`${facts.name} | ${facts.category} | Devil n Dove`, 60);
-  const meta = clip(`${facts.shortDescription} Explore this ${facts.category} from Devil n Dove in ${facts.location}.`, 155);
-  const imageAlt = usable.slice(0, 8).map((asset, index) => `${facts.name} — ${index === 0 ? 'finished front view' : `workshop detail ${index + 1}`}`);
-  const blogBody = [
+  const title = clip(standalone ? `${facts.name} | Project Journal | Devil n Dove` : `${facts.name} | ${facts.category} | Devil n Dove`, 60);
+  const meta = clip(standalone ? `${facts.shortDescription} A reviewed Devil n Dove project journal built from source evidence.` : `${facts.shortDescription} Explore this ${facts.category} from Devil n Dove in ${facts.location}.`, 155);
+  const imageAlt = usable.slice(0, 8).map((asset, index) => standalone ? `${facts.name} — reviewed project media ${index + 1}` : `${facts.name} — ${index === 0 ? 'finished front view' : `workshop detail ${index + 1}`}`);
+  const blogBody = standalone ? [
+    `# Project journal: ${facts.name}`, '', facts.shortDescription, '',
+    facts.storySummary || `This draft is based on the Creative Process project record and should be expanded only with reviewed CAIP evidence.`, '',
+    `## Evidence-backed process\n\nUse approved CAIP evidence and reviewed source moments to explain what happened.`, '',
+    `## Result and lessons\n\nState only conclusions supported by the reviewed project record. Do not invent a product listing or unsupported claim.`
+  ].join('\n') : [
     `# From workshop to finished piece: ${facts.name}`,
     '',
     facts.shortDescription,
@@ -269,20 +321,22 @@ function deliverableSpecs(project, facts, assets) {
 
   items.push({
     key: 'website-gallery', channel: 'website', type: 'gallery', title: `${facts.name} — website gallery set`,
-    caption: '', script: '', body: `Selected project media prepared for the product gallery and Workshop Journal. Keep only factual captions and approved public-use media.`, aspect: '1:1 / 4:3', duration: 0,
+    caption: '', script: '', body: standalone ? `Selected reviewed project media prepared for a Project Journal/gallery. Keep factual captions and approved public-use media only.` : `Selected project media prepared for the product gallery and Workshop Journal. Keep only factual captions and approved public-use media.`, aspect: '1:1 / 4:3', duration: 0,
     assetPlan: makeAssetPlan(projectKey, usable, 'website-gallery', 10), status: hasPublicCleared ? 'ready_for_review' : 'needs_media_review'
   });
+  if (!standalone) {
   items.push({
     key: 'google-business-profile-photos', channel: 'google_business_profile', type: 'photo_pack', title: `${facts.name} — Google Business Profile photo set`,
     caption: `${facts.name} from the Devil n Dove workshop in ${facts.location}.`, script: '', body: `Prepare five truthful photos with factual filenames and captions. Manual upload and final Google Business Profile review are required.`, aspect: '1:1 / 4:3', duration: 0,
     assetPlan: makeAssetPlan(projectKey, usable, 'google-business-profile', 5), status: hasPublicCleared ? 'ready_for_review' : 'needs_media_review'
   });
+  }
   items.push({
-    key: 'seo-assets', channel: 'seo', type: 'seo_pack', title: `${facts.name} — SEO page assets`, caption: '', script: '', body: JSON.stringify({ meta_title: title, meta_description: meta, suggested_image_alt_text: imageAlt, suggested_slug: slug(facts.name), canonical_rule: 'Use the existing canonical product URL; do not create a duplicate page for the same item.' }, null, 2), aspect: 'text', duration: 0,
+    key: 'seo-assets', channel: 'seo', type: 'seo_pack', title: `${facts.name} — SEO page assets`, caption: '', script: '', body: JSON.stringify({ meta_title: title, meta_description: meta, suggested_image_alt_text: imageAlt, suggested_slug: slug(facts.name), canonical_rule: standalone ? 'Use one reviewed Project Journal/story URL if this project is ever published; do not create thin duplicate pages for each social output.' : 'Use the existing canonical product URL; do not create a duplicate page for the same item.' }, null, 2), aspect: 'text', duration: 0,
     assetPlan: makeAssetPlan(projectKey, usable, 'seo-image', 8), status: hasPublicCleared ? 'ready_for_review' : 'needs_media_review'
   });
   items.push({
-    key: 'blog-article', channel: 'blog', type: 'blog_article', title: `From workshop to finished piece: ${facts.name}`,
+    key: 'blog-article', channel: 'blog', type: 'blog_article', title: standalone ? `Project journal: ${facts.name}` : `From workshop to finished piece: ${facts.name}`,
     caption: '', script: '', body: blogBody, aspect: 'article', duration: 0,
     assetPlan: makeAssetPlan(projectKey, usable, 'article-hero', 6), status: hasPublicCleared ? 'ready_for_review' : 'needs_media_review'
   });
@@ -293,7 +347,7 @@ function deliverableSpecs(project, facts, assets) {
   });
   items.push({
     key: 'caption-bundle', channel: 'social', type: 'caption_bundle', title: `${facts.name} — caption bundle`,
-    caption: captionFor(facts, 1, 'social'), script: '', body: `Generated captions for the planned social pieces are stored on each individual deliverable. Edit each one before approval.`, aspect: 'text', duration: 0,
+    caption: channelCaption(1, 'social'), script: '', body: `Generated captions for the planned social pieces are stored on each individual deliverable. Edit each one before approval.`, aspect: 'text', duration: 0,
     assetPlan: makeAssetPlan(projectKey, usable, 'caption-reference', 5), status: 'ready_for_review'
   });
   return items;
@@ -530,6 +584,12 @@ async function archiveSourceMedia(db, project, mediaRows, actorUserId) {
         source_width_px: numeric(source.width_px),
         source_height_px: numeric(source.height_px),
         merchandising_score: numeric(source.merchandising_score || source.first_image_score),
+        caip_creative_asset_id: numeric(source.creative_asset_id) || null,
+        caip_creative_project_id: numeric(source.creative_project_id) || null,
+        private_object_key: text(source.private_object_key) || null,
+        raw_private_source: numeric(source.creative_asset_id) ? true : false,
+        manual_caption: text(source.manual_caption, 1800) || null,
+        manual_tags: Array.isArray(source.manual_tags) ? source.manual_tags : safeJson(source.manual_tags_json, []),
         build: CONTENT_STUDIO_BUILD
       })
     ).run();
@@ -625,6 +685,57 @@ export async function createOrRefreshContentProjectForProduct(db, productId, act
 }
 
 
+
+async function caipMediaForCreativeWorkProject(db, creativeWorkProjectId) {
+  try {
+    const result = await db.prepare(`
+      SELECT cp.creative_project_id, ca.creative_asset_id, ca.media_asset_id, ca.source_url,
+        ca.logical_archive_path, ca.source_safety_status, ca.rights_status, ca.asset_status,
+        ca.media_type, ca.original_filename, ca.mime_type, ca.sort_order, ca.is_source_selected,
+        ca.is_source_featured, ca.manual_tags_json, ca.manual_caption, ca.source_metadata_json
+      FROM creative_projects cp
+      JOIN creative_assets ca ON ca.creative_project_id=cp.creative_project_id
+      WHERE cp.source_type='creative_work_project' AND cp.source_id=? AND ca.asset_status<>'archived'
+      ORDER BY ca.is_source_featured DESC, ca.is_source_selected DESC, ca.sort_order, ca.creative_asset_id
+    `).bind(String(creativeWorkProjectId)).all();
+    return rows(result).map((row, index) => {
+      const metadata = safeJson(row.source_metadata_json, {});
+      const safety = text(row.source_safety_status).toLowerCase();
+      const consent = text(metadata.consent_state).toLowerCase();
+      return {
+        creative_project_id: numeric(row.creative_project_id),
+        creative_asset_id: numeric(row.creative_asset_id),
+        media_asset_id: numeric(row.media_asset_id) || null,
+        source_url: text(row.source_url) || null,
+        original_filename: text(row.original_filename) || `caip-asset-${numeric(row.creative_asset_id)}`,
+        mime_type: text(row.mime_type) || null,
+        media_type: text(row.media_type) || 'image',
+        image_role: text(metadata.media_role) || 'project_evidence',
+        public_use_status: safety === 'public_allowed' ? 'all_public_ok' : safety === 'blocked' ? 'blocked' : 'internal_review',
+        consent_status: consent || 'needs_review',
+        consent_scope: safety === 'public_allowed' ? 'all_public' : 'internal',
+        public_use_allowed: safety === 'public_allowed' ? 1 : 0,
+        merchandising_score: numeric(row.is_source_selected) ? 72 : 55,
+        sort_order: numeric(row.sort_order) || index,
+        private_object_key: text(metadata.object_key || row.logical_archive_path),
+        manual_caption: text(row.manual_caption, 1800) || null,
+        manual_tags_json: row.manual_tags_json || '[]'
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function attachContentProjectToExistingCreativeWorkCaip(db, creativeWorkProjectId, contentProjectId) {
+  try {
+    await db.prepare(`UPDATE creative_projects SET content_project_id=?, updated_at=CURRENT_TIMESTAMP WHERE source_type='creative_work_project' AND source_id=?`).bind(Number(contentProjectId), String(creativeWorkProjectId)).run();
+    return await db.prepare(`SELECT creative_project_id FROM creative_projects WHERE source_type='creative_work_project' AND source_id=? LIMIT 1`).bind(String(creativeWorkProjectId)).first();
+  } catch {
+    return null;
+  }
+}
+
 export async function createOrRefreshContentProjectForCreativeProject(db, creativeProject, evidenceRows = [], actorUserId, options = {}) {
   await ensureContentAutomationSchema(db);
   const sourceId = String(creativeProject?.creative_work_project_id || creativeProject?.project_id || '');
@@ -658,26 +769,29 @@ export async function createOrRefreshContentProjectForCreativeProject(db, creati
     JSON.stringify(policy), actorUserId || null
   ).run();
   const project = await db.prepare(`SELECT * FROM content_projects WHERE source_type='creative_project' AND source_id=? LIMIT 1`).bind(sourceId).first();
-  const mediaRows = (Array.isArray(evidenceRows) ? evidenceRows : []).filter((row) => text(row?.media_url)).map((row, index) => ({
+  const caipRows = await caipMediaForCreativeWorkProject(db, sourceId);
+  const evidenceMedia = (Array.isArray(evidenceRows) ? evidenceRows : []).filter((row) => text(row?.media_url)).map((row, index) => ({
     source_url: text(row.media_url),
     original_filename: filenameFromUrl(row.media_url, `creative-evidence-${index + 1}`),
     mime_type: null,
     image_role: text(row.evidence_role || row.event_type || 'process'),
-    public_use_status: Number(row.is_public_candidate || 0) === 1 ? 'internal_review' : 'internal_review',
+    public_use_status: 'internal_review',
     consent_status: 'needs_review',
-    sort_order: index,
+    sort_order: caipRows.length + index,
     merchandising_score: 55
   }));
+  const mediaRows = [...caipRows, ...evidenceMedia];
   const archivedCount = await archiveSourceMedia(db, project, mediaRows, actorUserId);
+  const caipLink = await attachContentProjectToExistingCreativeWorkCaip(db, sourceId, project.content_project_id);
   const assets = await getProjectMedia(db, project.content_project_id);
   const facts = {
     name, category, shortDescription: clip(summary, 420), description: summary, materials: '',
     origin: 'creative project', storySummary: text(creativeProject?.story_angle || creativeProject?.objective || summary),
-    location: 'Southern Ontario', factualSummary: clip(summary, 1200)
+    location: '', factualSummary: clip(summary, 1200)
   };
   const deliverablesCreated = await writeDeliverables(db, project, facts, assets, actorUserId, Boolean(options.refresh_copy));
-  await writeProjectEvent(db, project.content_project_id, 'creative_project_linked', actorUserId, { creative_work_project_id: Number(sourceId), content_only_project: true });
-  return { project, facts, archived_count: archivedCount, deliverables_created: deliverablesCreated };
+  await writeProjectEvent(db, project.content_project_id, 'creative_project_linked', actorUserId, { creative_work_project_id: Number(sourceId), content_only_project: true, caip_creative_project_id: numeric(caipLink?.creative_project_id) || null, caip_media_count: caipRows.length });
+  return { project, facts, archived_count: archivedCount, deliverables_created: deliverablesCreated, caip_creative_project_id: numeric(caipLink?.creative_project_id) || null, caip_media_count: caipRows.length };
 }
 
 export async function getContentProjectDetail(db, projectId) {
@@ -691,7 +805,13 @@ export async function getContentProjectDetail(db, projectId) {
     acc[item.channel_key] = (acc[item.channel_key] || 0) + 1;
     return acc;
   }, {});
-  return { project, media, deliverables, events, counts };
+  let creativeProcessProject = null;
+  let caipProject = null;
+  if (project.source_type === 'creative_project' && numeric(project.source_id)) {
+    creativeProcessProject = await db.prepare(`SELECT creative_work_project_id,project_key,project_title,project_type,project_status FROM creative_work_projects WHERE creative_work_project_id=? LIMIT 1`).bind(numeric(project.source_id)).first().catch(()=>null);
+    caipProject = await db.prepare(`SELECT creative_project_id,project_title,governance_status,lifecycle_stage FROM creative_projects WHERE source_type='creative_work_project' AND source_id=? LIMIT 1`).bind(String(project.source_id)).first().catch(()=>null);
+  }
+  return { project, media, deliverables, events, counts, creative_process_project: creativeProcessProject, caip_project: caipProject };
 }
 
 export async function listContentStudioProjects(db) {
@@ -720,7 +840,20 @@ export async function listContentStudioProjects(db) {
     ORDER BY updated_at DESC, product_id DESC
     LIMIT 160
   `).all().catch(() => ({ results: [] })));
-  return { projects, approved_products: approvedProducts };
+  const creativeProjects = rows(await db.prepare(`
+    SELECT cwp.creative_work_project_id,cwp.project_key,cwp.project_title,cwp.project_type,cwp.project_status,cwp.updated_at,
+      cp.content_project_id,cp.review_status AS content_review_status,cp.public_release_status,
+      caip.creative_project_id AS caip_creative_project_id,
+      (SELECT COUNT(*) FROM creative_assets a WHERE a.creative_project_id=caip.creative_project_id AND a.asset_status<>'archived') AS caip_asset_count,
+      (SELECT COUNT(*) FROM creative_project_evidence_selections es WHERE es.creative_work_project_id=cwp.creative_work_project_id AND es.selected=1) AS selected_evidence_count
+    FROM creative_work_projects cwp
+    LEFT JOIN content_projects cp ON cp.source_type='creative_project' AND cp.source_id=CAST(cwp.creative_work_project_id AS TEXT)
+    LEFT JOIN creative_projects caip ON caip.source_type='creative_work_project' AND caip.source_id=CAST(cwp.creative_work_project_id AS TEXT)
+    WHERE cwp.project_status<>'archived'
+    ORDER BY cwp.updated_at DESC,cwp.creative_work_project_id DESC
+    LIMIT 120
+  `).all().catch(() => ({ results: [] })));
+  return { projects, approved_products: approvedProducts, creative_projects: creativeProjects };
 }
 
 export async function updateContentProject(db, projectId, patch, actorUserId) {
