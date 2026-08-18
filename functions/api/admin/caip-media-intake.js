@@ -3,7 +3,7 @@ import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getD
 import {
   CAIP_MEDIA_INTAKE_BUILD, abortUploadFile, assertCaipMediaIntakeSchema, completeUploadFile,
   createUploadSession, createSafeReplacementUpload, initiateUploadFile, listCaipMediaIntake, requestPublicPromotion, retryUploadedFileRegistration,
-  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup, backfillCaipContentFingerprints, setUploadFileContentFingerprint
+  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup, backfillCaipContentFingerprints, setUploadFileContentFingerprint, getCaipMediaIntakeReadiness
 } from '../_lib/caipMediaIntake.js';
 
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
@@ -29,8 +29,9 @@ export async function onRequestGet(context){
   const projectId=integer(new URL(context.request.url).searchParams.get('creative_project_id'));
   try{
     const data=await listCaipMediaIntake(state.db,projectId,context.env);
+    const readiness=await getCaipMediaIntakeReadiness(state.db,context.env);
     const duplicate_audit=projectId?await listCaipDuplicateAudit(state.db,projectId).catch(()=>({groups:[],duplicate_rows:0,reclaimable_rows:0,audit_warning:'Duplicate audit could not be loaded.'})):null;
-    return json({ok:true,build:CAIP_MEDIA_INTAKE_BUILD,...scrub(data),duplicate_audit:scrub(duplicate_audit)});
+    return json({ok:true,build:CAIP_MEDIA_INTAKE_BUILD,...scrub(data),readiness:scrub(readiness),duplicate_audit:scrub(duplicate_audit)});
   }
   catch(error){await captureRuntimeIncident(context.env,context.request,{incident_scope:'caip_media_intake',incident_code:'caip_media_intake_get_failed',severity:'warning',message:error?.message||'CAIP media intake could not load.',related_user_id:state.adminUser.user_id,details:{error:String(error?.message||error)}});return json({ok:false,error:error?.message||'CAIP media intake could not load.',mode:'degraded_no_false_success'},500);}
 }
@@ -44,7 +45,7 @@ export async function onRequestPost(context){
   try{
     await assertCaipMediaIntakeSchema(state.db);
     let result={};
-    if(action==='create_session'){ if(!privateBucketAvailable(context.env)) throw new Error('Private CAIP R2 binding is unavailable. Bind the private R2 bucket as CAIP_PRIVATE_MEDIA_BUCKET in the Production Pages environment and redeploy before uploading.'); result=await createUploadSession(state.db,context.env,projectId,body.files,state.adminUser.user_id,{upload_device:body.upload_device,source_note:body.source_note,media_role:body.media_role,privacy_state:body.privacy_state,consent_state:body.consent_state,rights_status:body.rights_status}); }
+    if(action==='create_session'){ const readiness=await getCaipMediaIntakeReadiness(state.db,context.env); if(!readiness.build269_schema_ready) throw new Error(`Build 269 CAIP media schema is not installed. Missing columns: ${readiness.missing_columns.join(', ')||'unknown'}. Back up D1 and apply ${readiness.required_migration} before adding more raw media.`); if(!readiness.private_bucket_ready) throw new Error('Private CAIP R2 binding is unavailable. Bind the private R2 bucket as CAIP_PRIVATE_MEDIA_BUCKET in the Production Pages environment and redeploy before uploading.'); result=await createUploadSession(state.db,context.env,projectId,body.files,state.adminUser.user_id,{upload_device:body.upload_device,source_note:body.source_note,media_role:body.media_role,privacy_state:body.privacy_state,consent_state:body.consent_state,rights_status:body.rights_status}); }
     else if(action==='set_content_fingerprint') result={file:await setUploadFileContentFingerprint(state.db,fileId,body.content_fingerprint,body.content_fingerprint_version,state.adminUser.user_id)};
     else if(action==='initiate_file') result=await initiateUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='complete_file') result=await completeUploadFile(state.db,context.env,fileId,state.adminUser.user_id);

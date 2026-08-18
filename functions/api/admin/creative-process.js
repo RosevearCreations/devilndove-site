@@ -1,9 +1,9 @@
-// Build 244 — project-first Creative Process Engine with fractional/log-only material usage posting and no request-time schema DDL.
+// Build 273 — project-first Creative Process Engine with searchable inventory and explicit CAIP/Content Studio output context.
 import { createOrRefreshContentProjectForCreativeProject, createOrRefreshContentProjectForProduct, ensureContentAutomationSchema } from '../_lib/contentAutomationStudio.js';
 import { ensureCreativeAssetIntelligenceSchema, syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '264';
+const BUILD = '273';
 const OUTPUTS = [
   ['youtube_video','YouTube video','video'], ['youtube_shorts','YouTube Shorts','video'],
   ['instagram_reels','Instagram Reels','social'], ['tiktok_videos','TikToks','social'],
@@ -35,6 +35,63 @@ async function listProjects(db){
     GROUP BY p.creative_work_project_id ORDER BY p.updated_at DESC, p.creative_work_project_id DESC`).all();
   return rows.results||[];
 }
+async function outputWorkflowContext(db,id){
+  const context={
+    caip_project_id:null,
+    caip_assets:0,
+    caip_probed_assets:0,
+    caip_evidence:0,
+    caip_approved_evidence:0,
+    caip_story_segments:0,
+    caip_approved_story_segments:0,
+    caip_derivative_plans:0,
+    caip_approved_derivative_plans:0,
+    content_project_id:null,
+    content_project_status:null,
+    content_review_status:null,
+    content_deliverables:0,
+    content_approved_deliverables:0,
+    content_channels:{}
+  };
+  try{
+    const caip=await db.prepare(`SELECT cp.creative_project_id
+      FROM creative_projects cp
+      WHERE cp.source_type='creative_work_project' AND cp.source_id=?1
+      ORDER BY cp.creative_project_id DESC LIMIT 1`).bind(String(id)).first();
+    const caipId=num(caip?.creative_project_id);
+    if(caipId){
+      context.caip_project_id=caipId;
+      const counts=await db.prepare(`SELECT
+        (SELECT COUNT(*) FROM creative_assets WHERE creative_project_id=?1 AND asset_status='active') caip_assets,
+        (SELECT COUNT(DISTINCT creative_asset_id) FROM creative_asset_technical_observations WHERE creative_project_id=?1) caip_probed_assets,
+        (SELECT COUNT(*) FROM creative_story_evidence WHERE creative_project_id=?1) caip_evidence,
+        (SELECT COUNT(*) FROM creative_story_evidence WHERE creative_project_id=?1 AND review_status='approved') caip_approved_evidence,
+        (SELECT COUNT(*) FROM creative_story_segments WHERE creative_project_id=?1) caip_story_segments,
+        (SELECT COUNT(*) FROM creative_story_segments WHERE creative_project_id=?1 AND segment_status='approved') caip_approved_story_segments,
+        (SELECT COUNT(*) FROM creative_derivative_recipes WHERE creative_project_id=?1 AND COALESCE(recipe_status,'draft')<>'retired') caip_derivative_plans,
+        (SELECT COUNT(*) FROM creative_derivative_recipes WHERE creative_project_id=?1 AND recipe_status='approved') caip_approved_derivative_plans`).bind(caipId).first();
+      Object.assign(context,counts||{});
+    }
+  }catch(_err){ /* CAIP is optional for older databases. */ }
+  try{
+    const cp=await db.prepare(`SELECT content_project_id,project_status,review_status
+      FROM content_projects WHERE source_type='creative_project' AND source_id=?1 LIMIT 1`).bind(String(id)).first();
+    const contentId=num(cp?.content_project_id);
+    if(contentId){
+      context.content_project_id=contentId;
+      context.content_project_status=cp.project_status||null;
+      context.content_review_status=cp.review_status||null;
+      const rows=await db.prepare(`SELECT channel_key,COUNT(*) deliverable_count,
+        SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) approved_count
+        FROM content_project_deliverables WHERE content_project_id=?1 GROUP BY channel_key ORDER BY channel_key`).bind(contentId).all();
+      const list=rows.results||[];
+      context.content_deliverables=list.reduce((sum,row)=>sum+Number(row.deliverable_count||0),0);
+      context.content_approved_deliverables=list.reduce((sum,row)=>sum+Number(row.approved_count||0),0);
+      context.content_channels=Object.fromEntries(list.map(row=>[row.channel_key,{deliverables:Number(row.deliverable_count||0),approved:Number(row.approved_count||0)}]));
+    }
+  }catch(_err){ /* Content Studio is optional for older databases. */ }
+  return context;
+}
 async function detail(db,id){
   const project=await db.prepare(`SELECT * FROM creative_work_projects WHERE creative_work_project_id=?1`).bind(id).first();
   if(!project) return null;
@@ -53,7 +110,8 @@ async function detail(db,id){
   const reversals=await db.prepare(`SELECT * FROM creative_project_inventory_reversals WHERE creative_work_project_id=?1 ORDER BY authorized_at DESC`).bind(id).all();
   const summaries=await db.prepare(`SELECT * FROM creative_project_knowledge_summaries WHERE creative_work_project_id=?1 ORDER BY summary_type`).bind(id).all();
   const costContext=await db.prepare(`SELECT * FROM creative_project_cost_context WHERE creative_work_project_id=?1`).bind(id).first().catch(()=>null);
-  return {project,events:events.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{}};
+  const outputContext=await outputWorkflowContext(db,id);
+  return {project,events:events.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},output_media_context:outputContext};
 }
 async function seedOutputs(db,id,projectType='maker_project'){
   const productless=['content_only','education','research','archive'].includes(String(projectType||'').toLowerCase());
@@ -182,7 +240,6 @@ export async function onRequestPost(context){
     }else if(action==='create_content_handoff'){
       if(!projectId) throw new Error('Project is required.');
       const current=await detail(access.db,projectId); if(!current) throw new Error('Project was not found.');
-      if(!current.selected_evidence.length) throw new Error('Select at least one reviewed timeline entry first.');
       const primary=current.linked_products.find(row=>Number(row.is_primary)===1)||current.linked_products[0];
       let contentProjectId=null;
       await ensureContentAutomationSchema(access.db);
@@ -194,8 +251,9 @@ export async function onRequestPost(context){
         contentProjectId=created?.project?.content_project_id||null;
       }
       const pkg={build:BUILD,creative_work_project_id:projectId,project_key:current.project.project_key,project_title:current.project.project_title,summary:current.project.summary,objective:current.project.objective,story_angle:current.project.story_angle,primary_product_id:primary?.product_id||null,evidence:current.selected_evidence.map(row=>({event_id:row.creative_work_event_id,type:row.event_type,title:row.event_title,notes:row.event_notes,media_url:row.media_url,role:row.evidence_role})),lessons:current.selected_evidence.filter(row=>['lesson','mistake','repair','result'].includes(row.event_type)).map(row=>row.event_notes||row.event_title)};
-      await access.db.prepare(`INSERT INTO creative_project_content_handoffs (creative_work_project_id,content_project_id,handoff_status,evidence_count,package_json,created_by) VALUES (?1,?2,'ready_for_review',?3,?4,?5)`).bind(projectId,contentProjectId,current.selected_evidence.length,JSON.stringify(pkg),access.adminUser.user_id).run();
-      message=primary?.product_id?'Reviewed evidence package created and linked to a product-backed Content Studio project.':'Reviewed evidence package created as a content-only Content Studio project. No store product is required.';
+      const handoffStatus=current.selected_evidence.length?'ready_for_review':'draft';
+      await access.db.prepare(`INSERT INTO creative_project_content_handoffs (creative_work_project_id,content_project_id,handoff_status,evidence_count,package_json,created_by) VALUES (?1,?2,?3,?4,?5,?6)`).bind(projectId,contentProjectId,handoffStatus,current.selected_evidence.length,JSON.stringify(pkg),access.adminUser.user_id).run();
+      message=current.selected_evidence.length?(primary?.product_id?'Reviewed evidence package created and linked to a product-backed Content Studio project.':'Reviewed evidence package created as a content-only Content Studio project. No store product is required.'):'Draft Content Studio package created from this existing Creative Process project and its CAIP media. Select/mirror reviewed evidence before approving story copy or release.';
     }else if(action==='post_material_inventory'){
       const eventId=num(body.creative_work_event_id); const inventoryId=num(body.site_item_inventory_id); const usageQuantity=Math.max(0,Number(body.usage_quantity_consumed ?? body.stock_quantity_consumed ?? 0)||0);
       if(!projectId||!eventId||!inventoryId||usageQuantity<=0) throw new Error('Project, approved material, inventory item and a usage amount greater than zero are required.');
