@@ -1,3 +1,3 @@
-# Known Gaps and Risks — Current Pointer
+# Known Gaps and Risks compatibility pointer — Build 273
 
-The authoritative current gaps/risks are in `PROJECT_STATUS_AND_ROADMAP.md` (**Build 246**). Read that file after `AI_HANDOFF.md`. Current priorities include production verification of product deletion/reference cleanup, Creative Project inventory-return deletion, finished-production reversal/lot costing, ingredient/INCI/French review, physical approved-soap-label proof, CAIP hashing/R2 processing, media integrity review, inventory usage/classification cleanup, deployed SEO measurement and final provider/restore/mobile launch evidence. This pointer remains for compatibility only.
+Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. Those are the only current authorities. The ordered Build 273 risks include production verification of the standalone Content Studio bridge, CAIP timecode/evidence review, verified proxy/transcript providers, story generation from approved evidence, release/calendar/analytics handoff, and continuing production mobile/SEO/schema verification. This filename remains only for compatibility.

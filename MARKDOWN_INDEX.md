@@ -1,42 +1,31 @@
-# Devil n Dove Markdown Index — Build 269
+# Devil n Dove Markdown Index — Build 273
 
-## Two current authorities
+## Only two mutable current authorities
 
-1. `AI_HANDOFF.md` — architecture, data authority, product/project/inventory/CAIP/packaging safety, schema and deployment.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — current completed work, known risks and the ordered next actions.
+1. `AI_HANDOFF.md` — architecture, data authority, safety, schema/migration boundaries and continuity rules.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — current release status, known risks and ordered next work.
 
-A new AI/chat reads these two first. No other Markdown file overrides them.
+**New AI/chat rule:** read those two first. No Build validation note, specialist design document, archived roadmap, or compatibility filename may override them.
 
-## Current release pair
+## Specialist references (read when the task needs them)
 
-- `BUILD269_CHANGED_FILES.md`
-- `BUILD269_VALIDATION.md`
-- `BUILD269_D1_VERIFICATION.sql`
-- Build 269 requires focused additive migration `database_build269_caip_social_project_dedupe_integrity.sql` **after** the retained broad Build 264 migration boundary (`database_upgrade_current_pass.sql`).
-- `docs/creative-asset-intelligence-platform/17_Standalone_Social_Project_Workflow.md` is the specialist workflow for productless/social CAIP projects.
-
-## Active specialist playbooks
-
-- CAIP: `docs/creative-asset-intelligence-platform/README.md`, especially private raw-media intake.
+- CAIP: `docs/creative-asset-intelligence-platform/README.md`, `10_Delivery_Roadmap.md`, `18_Operator_Workflow_Guide.md`.
 - Creative/content: `CREATIVE_AUTOMATION_STUDIO.md`, `CONTENT_AUTOMATION_STUDIO.md`.
+- Media management: `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md`.
 - Packaging: `PACKAGING_STUDIO.md`, `PACKAGING_REFERENCE_BASELINE.md`, `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`.
 - Launch/release: `STARTUP_GO_LIVE_GUIDE.md`, `PRELAUNCH_PROCESS_PLAYBOOKS.md`, `LIVE_TESTING_GUIDE.md`, `POST_DEPLOY_SMOKE_TEST.md`, `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md`.
-- Visuals/product media: `IMAGES_REQUIRED.md`, `GENERATED_VISUAL_ASSET_REGISTER.md`, `IMAGES.md`, D1 Product Media + `/admin/image-manifest/`.
 - SEO/market: `LOCAL_SEO_PLAYBOOK.md`, `COMPETITIVE.md`.
-- Data/operations: `DATABASE_SCHEMA_REFERENCE.md`, `OPERATIONAL_CONTINUITY_BUILD240.md`, `REPO_RULES.md`, `REPO_BASE_GUIDE.md`, `AMAZON_MATCHING_NOTES.md`.
+- Data/operations: `DATABASE_SCHEMA_REFERENCE.md`, `OPERATIONAL_CONTINUITY_BUILD240.md`, `REPO_RULES.md`, `REPO_BASE_GUIDE.md`.
 
-## Compatibility pointers
+## Retired / historical material
 
-`AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` intentionally point to the two current authorities rather than duplicating mutable roadmap content.
+- `BUILD*.md`, `BUILD*_D1_VERIFICATION.sql` and similar release artifacts are **evidence for that build only**. They are not current project direction after a newer build exists.
+- `docs/archive/build-history/` is historical evidence.
+- `AI_CONTEXT.md`, `NEW_CHAT_STATUS.md`, `DEVELOPMENT_ROADMAP.md` and `KNOWN_GAPS_AND_RISKS.md` are compatibility pointers only.
+- Specialist CAIP documents preserve detailed design/rationale; their “next work” sections defer to the two current authorities whenever they conflict.
 
-## Root cleanup in Build 249
+## Current migration boundary
 
-Superseded `BUILD*.md` files are no longer duplicated at the repository root. Their preserved copies live under `docs/archive/build-history/`. Current release evidence stays at root only for the active Build.
-
-## Historical rule
-
-Superseded Build release notes/changed-files/validation/verification records belong under `docs/archive/build-history/`. Fixed specialist source/reference documents may retain an older Build label when that label identifies the specialist design authority rather than current application state.
-## Build 256 specialist implementation authority
-
-- `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md` — permanent scope/acceptance criteria for the Media & Content Management Studio. It supplements, but does not replace, the two canonical current project files.
-
+- Broad retained migration: Build 264 `database_upgrade_current_pass.sql`.
+- Focused CAIP schema after it: Build 269 `database_build269_caip_social_project_dedupe_integrity.sql`.
+- Builds 270–273 add no D1 schema.

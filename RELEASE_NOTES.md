@@ -1,3 +1,15 @@
+## Build 273 — CAIP / Creative Process / Content Studio workflow consolidation
+
+- Added type-to-search Inventory selection in Creative Process direct usage and reviewed timeline-material posting.
+- Content Studio now lists existing Creative Process projects, accepts `creative_project_id`, and creates/refreshes a package from the existing project instead of requiring a duplicate Gray Hair/standalone project.
+- Existing standalone CAIP identity is preserved and linked to the Content Studio package; private CAIP media is archived as reference-only media identity, not copied/publicized.
+- Creative Process may create a draft Content Studio package before timeline evidence is selected; evidence/story/public-release approval remains separate.
+- Automatic Output Blueprint now shows CAIP assets/probes/evidence/story/derivative plans and Content Studio deliverables as the feed behind each destination. It is explicitly not a renderer or publisher.
+- Standalone deliverable templates use evidence/project-journal language and avoid product/listing/irrelevant local SEO assumptions.
+- Responsive CSS hardening added for search, bridge panels, long filenames and output controls.
+- Markdown continuity reduced to two mutable authorities: `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
+- No D1 migration; Build 269 remains the focused CAIP schema boundary.
+
 ## Build 271 — CAIP operator clarity and complete plan access
 
 - Added an **Open CAIP project** selector sourced from all Creative Projects, including standalone/social CAIP projects with no Content Studio package.
@@ -467,3 +479,9 @@ Added authorized inventory reversals, cost-template application, revenue-percent
 - Added authenticated Amazon metadata preview with ASIN/canonical-link extraction and safe fallbacks.
 - Added mobile-responsive import controls and explicit no-auto-create safeguards.
 - Consolidated Markdown authority around `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
+
+### Build 272 — CAIP intake readiness diagnostics
+- Added server/client prerequisite checks for Build 269 duplicate-safe D1 columns and private CAIP R2 binding.
+- Prevents Select and Upload from beginning when required production prerequisites are missing.
+- Surfaces exact missing-column/migration guidance instead of a generic HTTP 400.
+- No new D1 migration; Build 269 remains the required additive CAIP migration.
