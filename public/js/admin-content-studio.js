@@ -1,10 +1,10 @@
-// Build 199 — Content Automation Studio admin workspace.
+// Build 273 — Content Studio: Creative Process project bridge, CAIP media references, and package clarity.
 // Keeps content generation factual and review-first; no external publishing or media deletion occurs here.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('contentAutomationStudioMount');
   if (!mount || !window.DDAuth) return;
 
-  const state = { projects: [], products: [], detail: null, busy: false };
+  const state = { projects: [], products: [], creativeProjects: [], detail: null, requestedCreativeProjectId: 0, busy: false };
   const esc = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const plain = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
   const parseJson = (value, fallback = {}) => { try { return JSON.parse(value || ''); } catch { return fallback; } };
@@ -28,18 +28,29 @@ document.addEventListener('DOMContentLoaded', () => {
     return data;
   }
 
-  async function load(projectId = '') {
+  function applyData(data, keepDetail = true) {
+    if (Array.isArray(data?.projects)) state.projects = data.projects;
+    if (Array.isArray(data?.approved_products)) state.products = data.approved_products;
+    if (Array.isArray(data?.creative_projects)) state.creativeProjects = data.creative_projects;
+    if (data?.requested_creative_project_id) state.requestedCreativeProjectId = Number(data.requested_creative_project_id || 0);
+    if (Object.prototype.hasOwnProperty.call(data || {}, 'detail')) state.detail = data.detail || (keepDetail ? state.detail : null);
+  }
+
+  async function load(projectId = '', creativeProjectId = 0) {
     message('Loading content projects…');
-    const endpoint = projectId ? `/api/admin/content-studio?project_id=${encodeURIComponent(projectId)}` : '/api/admin/content-studio';
+    let endpoint = '/api/admin/content-studio';
+    if (projectId) endpoint += `?project_id=${encodeURIComponent(projectId)}`;
+    else if (creativeProjectId) endpoint += `?creative_project_id=${encodeURIComponent(creativeProjectId)}`;
     try {
       const response = await window.DDAuth.apiFetch(endpoint);
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Could not load the Content Automation Studio.');
-      state.projects = Array.isArray(data.projects) ? data.projects : [];
-      state.products = Array.isArray(data.approved_products) ? data.approved_products : [];
-      state.detail = data.detail || (projectId ? null : state.detail);
+      applyData(data, !projectId && !creativeProjectId);
+      if ((projectId || creativeProjectId) && !data.detail) state.detail = null;
       render();
-      message(state.detail ? 'Content package loaded.' : 'Choose an approved product or an existing content package.', 'success');
+      if (state.detail) message('Content package loaded.', 'success');
+      else if (creativeProjectId) message('Creative Process project found. Create its Content Studio package here; do not create a duplicate project.', 'success');
+      else message('Choose an existing Creative Process project, approved product, or content package.', 'success');
     } catch (error) {
       render();
       message(error.message || 'Could not load the Content Automation Studio.', 'error');
@@ -70,6 +81,20 @@ document.addEventListener('DOMContentLoaded', () => {
       return `<option value="${esc(productId)}">${esc(label)}</option>`;
     }).join('');
     return `<option value="">Choose an approved finished product…</option>${options}`;
+  }
+
+  function creativeProjectOptions() {
+    const options = state.creativeProjects.map((project) => {
+      const hasPackage = Number(project.content_project_id || 0) > 0;
+      const media = Number(project.caip_asset_count || 0);
+      const evidence = Number(project.selected_evidence_count || 0);
+      return `<option value="${esc(project.creative_work_project_id)}">${esc(project.project_title || project.project_key || 'Creative Project')} — ${media} CAIP asset${media===1?'':'s'} • ${evidence} selected evidence${hasPackage?' • package exists':''}</option>`;
+    }).join('');
+    return `<option value="">Choose an existing Creative Process project…</option>${options}`;
+  }
+
+  function creativeProjectPanel() {
+    return `<div class="content-source-panel"><h3>Creative Process projects</h3><p class="small">Use this for Gray Hair and other standalone/social projects. This creates or refreshes a Content Studio package from the existing project—it does <strong>not</strong> create another Creative Project.</p><label><span class="small">Find project</span><input class="input" type="search" id="contentCreativeProjectSearch" placeholder="Type Gray Hair, project key, or project type…"/></label><label><span class="small">Existing Creative Process project</span><select class="input" id="contentCreativeProjectSelect">${creativeProjectOptions()}</select></label><button class="btn primary" type="button" id="createCreativeProjectPackage">Create / refresh package from this project</button></div>`;
   }
 
   function projectList() {
@@ -159,8 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<section class="content-studio-detail">
       <div class="content-studio-detail-header card">
         <div><p class="eyebrow">${esc(project.content_project_key || '')}</p><h2>${esc(project.project_title || 'Content package')}</h2><p class="small">${project.source_type==='creative_project'?'Content-only Creative Project: no storefront product is required. ':''}Source references are archived without moving or deleting original files. Every public asset remains review-first.</p></div>
-        <div class="content-studio-toolbar"><a class="btn secondary" href="/admin/creative-assets/?content_project_id=${esc(project.content_project_id)}">Open CAIP</a>${project.product_id?'<button class="btn" type="button" id="refreshContentArchive">Refresh archive and preserve edits</button><button class="btn" type="button" id="refreshContentCopy">Refresh only unlocked factual copy</button>':'<a class="btn" href="/admin/creative-process/">Refresh from Creative Process</a>'}<button class="btn secondary" type="button" id="downloadContentManifest">Download project manifest</button></div>
+        <div class="content-studio-toolbar">${detail.caip_project?.creative_project_id?`<a class="btn secondary" href="/admin/creative-assets/?creative_project_id=${esc(detail.caip_project.creative_project_id)}">Open CAIP</a>`:`<a class="btn secondary" href="/admin/creative-assets/?content_project_id=${esc(project.content_project_id)}">Open CAIP</a>`}${project.product_id?'<button class="btn" type="button" id="refreshContentArchive">Refresh archive and preserve edits</button><button class="btn" type="button" id="refreshContentCopy">Refresh only unlocked factual copy</button>':'<button class="btn" type="button" id="refreshCreativeProjectPackage">Refresh from Creative Process + CAIP</button>'}<button class="btn secondary" type="button" id="downloadContentManifest">Download project manifest</button></div>
       </div>
+      ${project.source_type==='creative_project'?`<section class="card content-source-bridge"><div><h3>Existing Creative Process source</h3><p class="small">${esc(detail.creative_process_project?.project_title || project.project_title)} remains the project authority. CAIP holds the private source media; Content Studio holds deliverables. Creating this package never creates a second Creative Process project.</p></div><div class="content-source-bridge-metrics"><span>${Number(detail.media?.length||0)} archived references</span><span>${detail.caip_project?.creative_project_id?`CAIP #${esc(detail.caip_project.creative_project_id)}`:'CAIP link pending'}</span></div></section>`:''}
       <div class="content-metric-grid">${deliverableSummary(detail)}</div>
       <section class="card content-project-settings">
         <h3>Project review controls</h3>
@@ -187,17 +213,21 @@ document.addEventListener('DOMContentLoaded', () => {
       <section class="content-studio-layout">
         <aside class="card content-studio-sidebar">
           <h2>Create or open a content package</h2>
-          <p class="small">The studio creates one source-linked package per approved product. Content-only packages are created from Creative Process and remain separate from store inventory.</p>
-          <label><span class="small">Approved finished product</span><select class="input" id="contentStudioProductSelect">${productOptions()}</select></label>
-          <button class="btn primary" type="button" id="createContentProject">Create / refresh content package</button>
+          ${creativeProjectPanel()}
+          <hr/>
+          <div class="content-source-panel"><h3>Approved finished products</h3><p class="small">Use this route only when the source is a finished catalog product.</p><label><span class="small">Approved finished product</span><select class="input" id="contentStudioProductSelect">${productOptions()}</select></label><button class="btn" type="button" id="createContentProject">Create / refresh product package</button></div>
           <hr/>
           <h3>Existing packages</h3>
+          <label><span class="small">Filter packages</span><input class="input" type="search" id="contentPackageSearch" placeholder="Type package or project name…"/></label>
           <div class="content-project-list">${projectList()}</div>
         </aside>
         <main class="content-studio-main">${detailView(detail)}</main>
       </section>`;
     const select = byId('contentStudioProductSelect');
     if (select && selectedProduct) select.value = String(selectedProduct);
+    const creativeSelect = byId('contentCreativeProjectSelect');
+    const sourceCreativeId = Number(detail?.creative_process_project?.creative_work_project_id || state.requestedCreativeProjectId || 0);
+    if (creativeSelect && sourceCreativeId) creativeSelect.value = String(sourceCreativeId);
     bind();
   }
 
@@ -221,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
       project_status: byId('contentProjectStatus')?.value || 'draft', review_status: byId('contentProjectApproval')?.value || 'needs_review',
       public_release_status: byId('contentProjectRelease')?.value || 'private', internal_notes: byId('contentProjectNotes')?.value || ''
     });
-    state.projects = data.projects || state.projects; state.products = data.approved_products || state.products; state.detail = data.detail || state.detail; render(); message('Project controls saved.', 'success');
+    applyData(data); render(); message('Project controls saved.', 'success');
   }
 
   async function saveMedia(mediaId) {
@@ -233,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
       is_featured: inputChecked('[data-media-featured]', mediaId) ? 1 : 0,
       safety_status: inputValue('[data-media-safety]', mediaId)
     });
-    state.projects = data.projects || state.projects; state.products = data.approved_products || state.products; state.detail = data.detail || state.detail; render(); message('Archive media selection saved. This did not change the original source file.', 'success');
+    applyData(data); render(); message('Archive media selection saved. This did not change the original source file.', 'success');
   }
 
   async function saveDeliverable(deliverableId) {
@@ -247,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
       script_text: inputValue('[data-deliverable-script]', deliverableId), body_content: inputValue('[data-deliverable-body]', deliverableId),
       review_notes: inputValue('[data-deliverable-notes]', deliverableId), copy_locked: 1
     });
-    state.projects = data.projects || state.projects; state.products = data.approved_products || state.products; state.detail = data.detail || state.detail; render(); message('Deliverable saved. Edited text is now protected from automatic copy refresh.', 'success');
+    applyData(data); render(); message('Deliverable saved. Edited text is now protected from automatic copy refresh.', 'success');
   }
 
   async function downloadManifest() {
@@ -266,28 +296,52 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  async function createOrRefreshCreativeProjectPackage(projectId, refreshCopy = false) {
+    const id = Number(projectId || 0);
+    if (!id) throw new Error('Choose an existing Creative Process project first.');
+    message('Linking the existing Creative Process project, CAIP media references, and Content Studio outputs…');
+    const data = await request({ action: 'create_from_creative_project', creative_work_project_id: id, refresh_copy: refreshCopy ? 1 : 0 });
+    applyData(data, false);
+    state.requestedCreativeProjectId = id;
+    render();
+    message(`Content package ready. ${Number(data.result?.caip_media_count||0)} CAIP source reference${Number(data.result?.caip_media_count||0)===1?'':'s'} linked; ${Number(data.result?.evidence_count||0)} reviewed timeline evidence entr${Number(data.result?.evidence_count||0)===1?'y':'ies'} included.`, 'success');
+  }
+
+  function filterSelectOptions(select, query) {
+    if (!select) return;
+    const q = plain(query).toLowerCase();
+    Array.from(select.options).forEach((option, index) => { if (index === 0) { option.hidden = false; return; } option.hidden = q && !plain(option.textContent).toLowerCase().includes(q); });
+  }
+
   function bind() {
+    byId('createCreativeProjectPackage')?.addEventListener('click', () => createOrRefreshCreativeProjectPackage(byId('contentCreativeProjectSelect')?.value).catch((error) => message(error.message, 'error')));
+    byId('refreshCreativeProjectPackage')?.addEventListener('click', () => createOrRefreshCreativeProjectPackage(state.detail?.creative_process_project?.creative_work_project_id || state.detail?.project?.source_id).catch((error) => message(error.message, 'error')));
+    byId('contentCreativeProjectSearch')?.addEventListener('input', (event) => filterSelectOptions(byId('contentCreativeProjectSelect'), event.target.value));
+    byId('contentPackageSearch')?.addEventListener('input', (event) => { const q=plain(event.target.value).toLowerCase(); mount.querySelectorAll('[data-open-project]').forEach((node)=>{ node.hidden = Boolean(q) && !plain(node.textContent).toLowerCase().includes(q); }); });
     byId('createContentProject')?.addEventListener('click', async () => {
       const productId = byId('contentStudioProductSelect')?.value || '';
       if (!productId) return message('Choose an approved finished product first.', 'error');
-      try { message('Creating the source-linked archive and review package…'); const data = await request({ action: 'create_project', product_id: Number(productId) }); state.projects = data.projects || []; state.products = data.approved_products || []; state.detail = data.detail || null; render(); message('Content package created. Review media safety and each deliverable before publishing.', 'success'); }
+      try { message('Creating the source-linked archive and review package…'); const data = await request({ action: 'create_project', product_id: Number(productId) }); applyData(data, false); render(); message('Content package created. Review media safety and each deliverable before publishing.', 'success'); }
       catch (error) { message(error.message || 'Could not create the content package.', 'error'); }
     });
     mount.querySelectorAll('[data-open-project]').forEach((button) => button.addEventListener('click', () => load(button.dataset.openProject)));
     byId('saveContentProject')?.addEventListener('click', () => saveProject().catch((error) => message(error.message, 'error')));
     byId('refreshContentArchive')?.addEventListener('click', async () => {
-      try { const productId = Number(state.detail?.project?.product_id || 0); if (!productId) throw new Error('This package is not linked to a product source.'); message('Refreshing archive references while preserving our choices…'); const data = await request({ action: 'refresh_archive', product_id: productId }); state.projects = data.projects || []; state.products = data.approved_products || []; state.detail = data.detail || null; render(); message('Archive refreshed without deleting original media or replacing edited copy.', 'success'); } catch (error) { message(error.message, 'error'); }
+      try { const productId = Number(state.detail?.project?.product_id || 0); if (!productId) throw new Error('This package is not linked to a product source.'); message('Refreshing archive references while preserving our choices…'); const data = await request({ action: 'refresh_archive', product_id: productId }); applyData(data, false); render(); message('Archive refreshed without deleting original media or replacing edited copy.', 'success'); } catch (error) { message(error.message, 'error'); }
     });
     byId('refreshContentCopy')?.addEventListener('click', async () => {
-      try { const productId = Number(state.detail?.project?.product_id || 0); if (!productId) throw new Error('This package is not linked to a product source.'); message('Refreshing only unlocked factual copy…'); const data = await request({ action: 'refresh_archive', product_id: productId, refresh_copy: 1 }); state.projects = data.projects || []; state.products = data.approved_products || []; state.detail = data.detail || null; render(); message('Unlocked factual copy refreshed. Manually edited deliverables stayed protected.', 'success'); } catch (error) { message(error.message, 'error'); }
+      try { const productId = Number(state.detail?.project?.product_id || 0); if (!productId) throw new Error('This package is not linked to a product source.'); message('Refreshing only unlocked factual copy…'); const data = await request({ action: 'refresh_archive', product_id: productId, refresh_copy: 1 }); applyData(data, false); render(); message('Unlocked factual copy refreshed. Manually edited deliverables stayed protected.', 'success'); } catch (error) { message(error.message, 'error'); }
     });
     byId('downloadContentManifest')?.addEventListener('click', () => downloadManifest().catch((error) => message(error.message, 'error')));
     mount.querySelectorAll('[data-save-media]').forEach((button) => button.addEventListener('click', () => saveMedia(button.dataset.saveMedia).catch((error) => message(error.message, 'error'))));
     mount.querySelectorAll('[data-save-deliverable]').forEach((button) => button.addEventListener('click', () => saveDeliverable(button.dataset.saveDeliverable).catch((error) => message(error.message, 'error'))));
     mount.querySelectorAll('[data-copy-caption]').forEach((button) => button.addEventListener('click', () => { const value = inputValue('[data-deliverable-caption]', button.dataset.copyCaption); if (!value) return message('This deliverable has no caption to copy.', 'error'); navigator.clipboard?.writeText(value).then(() => message('Caption copied.', 'success')).catch(() => window.prompt('Copy caption:', value)); }));
-    mount.querySelectorAll('[data-send-social]').forEach((button) => button.addEventListener('click', async () => { try { const data = await request({ action: 'send_to_social_queue', content_project_id: state.detail.project.content_project_id, content_project_deliverable_id: Number(button.dataset.sendSocial) }); state.projects = data.projects || state.projects; state.products = data.approved_products || state.products; state.detail = data.detail || state.detail; render(); message('Approved finished file added to the existing social review queue.', 'success'); } catch (error) { message(error.message, 'error'); } }));
+    mount.querySelectorAll('[data-send-social]').forEach((button) => button.addEventListener('click', async () => { try { const data = await request({ action: 'send_to_social_queue', content_project_id: state.detail.project.content_project_id, content_project_deliverable_id: Number(button.dataset.sendSocial) }); applyData(data); render(); message('Approved finished file added to the existing social review queue.', 'success'); } catch (error) { message(error.message, 'error'); } }));
   }
 
   render();
-  load();
+  const initial = new URLSearchParams(location.search);
+  const initialProjectId = initial.get('project_id') || '';
+  const initialCreativeProjectId = Number(initial.get('creative_project_id') || initial.get('creative_work_project_id') || 0);
+  load(initialProjectId, initialCreativeProjectId);
 });
