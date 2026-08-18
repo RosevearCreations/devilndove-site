@@ -60,3 +60,23 @@ No roadmap item is considered delivered merely because its schema or queue recor
 6. Build story segments/timecode references from reviewed evidence.
 7. Create the reviewed Content Studio/social-package handoff for the productless project.
 8. Then add real proxy/frame/audio/transcript processing providers; do not mark planned jobs complete until provider output is verified.
+
+## Build 273 delivered
+
+- Existing Creative Process projects are selectable directly in Content Studio; standalone packages no longer require a duplicate project.
+- Existing standalone CAIP identity is attached to the Content Studio package rather than recreated under a competing source identity.
+- Existing CAIP assets are archived into Content Studio as private/reference-only media records, including video/audio identity.
+- Creative Process Inventory selectors are searchable.
+- Automatic Output Blueprint exposes the live CAIP → evidence/story/derivative → Content Studio connection and clearly states that it does not render or publish media.
+- Content-only deliverable templates use evidence/project-journal language rather than product/listing/local-shopping assumptions.
+
+## Next CAIP priorities after Build 273
+
+1. Production acceptance with the Gray Hair standalone project and its existing CAIP workspace.
+2. Video/proxy review UI with in/out timecode evidence markers and evidence roles.
+3. First verified proxy/frame/audio/transcript provider adapter with bounded resource/cost handling.
+4. Transcript/timecode-linked evidence review and reviewed story-segment drafting.
+5. Content Studio refresh from approved evidence/story; derivatives only when a real deliverable needs them.
+6. Release-board/calendar scheduling and post-release analytics feedback after human approval.
+7. Physical duplicate-R2 reclamation only with whole-object checksum + reference safeguards.
+

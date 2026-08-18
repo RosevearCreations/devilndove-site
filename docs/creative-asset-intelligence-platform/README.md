@@ -1,4 +1,8 @@
 # Creative Asset Intelligence Platform (CAIP) — Authoritative Design Specification
+## Build 273 current operating boundary
+
+For standalone/social projects, one Creative Process project owns the identity. CAIP holds private source media/evidence/story; Content Studio creates/refreshes a package from that **existing** project and attaches it to the existing CAIP row. Do not create a second project because a package is missing. Creative Process Inventory selectors are searchable, and its Automatic Output Blueprint now reports the CAIP/Content Studio records feeding each destination; it remains a checklist, not a renderer/publisher. Private CAIP media remains reference-only until reviewed public promotion/derivative work exists.
+
 
 **Current implementation:** Build 271 duplicate-safe private raw-media intake + standalone-project navigation + operator workflow guidance + complete derivative-plan access, with retained CAIP asset intelligence, rights/evidence, derivative planning, secure review, catalog bridge, project-first inventory context, and release preflight.  
 **Primary route:** `/admin/creative-assets/`  

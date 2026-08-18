@@ -1,7 +1,21 @@
 # 18 — CAIP Operator Workflow Guide
 
-**Implementation boundary:** Build 271  
+**Implementation boundary:** Build 273  
 **Audience:** owner/operator using CAIP for a standalone/social Creative Project with private photo/video footage.
+
+
+## Build 273: how Gray Hair reaches Content Studio
+
+Do **not** create another Gray Hair project. Open Content Studio and use **Creative Process projects** to choose the existing project. **Create / refresh package from this project** creates/updates the Content Studio package, attaches it to the existing standalone CAIP project, and imports CAIP media as private/reference-only archive rows. It may create a draft package before timeline evidence is selected; this does not approve story claims or make media public.
+
+The Creative Process **Automatic Output Blueprint** is a cross-system destination dashboard:
+
+- Creative Process contributes project facts, time, Inventory and cost;
+- CAIP contributes source assets, probes, reviewed evidence, story segments and derivative recipes;
+- Content Studio contributes channel deliverables;
+- Release/publication stays separately review-controlled.
+
+A planned output or immutable derivative recipe does not mean media was watched, rendered or published.
 
 ## The short version
 
@@ -92,3 +106,13 @@ All derivative plans must remain reachable. Build 271 removes the six-row presen
 - **Plan created** does not mean derivative rendered.
 - **Plan approved** does not mean published.
 - **Provider disabled** means no external rendering is currently being claimed.
+
+## Build 272 upload-prerequisite rule
+
+Before **Select and Upload** is enabled, CAIP must verify all three production prerequisites:
+
+1. the Build 241 private-media tables are present;
+2. the Build 269 duplicate-safe columns (`content_fingerprint`, `content_fingerprint_version`, `recovery_of_file_id`) are present on `caip_media_upload_files`; and
+3. the Production Pages environment exposes the private R2 binding `CAIP_PRIVATE_MEDIA_BUCKET`.
+
+A missing prerequisite is an operator/configuration state, not a media-transfer failure. The UI must disable the upload action and name the exact missing prerequisite before any intake session or R2 transfer begins. Build 272 adds this readiness contract after a production `create_session` request returned HTTP 400 while the page itself remained usable.
