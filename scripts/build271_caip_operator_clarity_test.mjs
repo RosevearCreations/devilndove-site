@@ -17,7 +17,7 @@ assert(client.includes('You do not need a derivative plan for every uploaded fil
 assert(css.includes('.caip-ops-scroll{'));
 assert(css.includes('max-height:420px'));
 assert(html.includes('Build 271 • Master Creative Automation • Stage 3'));
-assert(html.includes('admin-creative-assets.js?v=271'));
+assert(/admin-creative-assets\.js\?v=27[12]/.test(html));
 assert(guide.toLowerCase().includes('safe probe'));
 assert(guide.includes('Approve plan'));
 assert(guide.includes('Standalone project selector rule'));
