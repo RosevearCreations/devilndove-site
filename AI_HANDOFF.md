@@ -1,4 +1,4 @@
-# Devil n Dove AI Handoff — Build 274
+# Devil n Dove AI Handoff — Build 275
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
@@ -301,3 +301,13 @@ Current auth authority is `users` + `sessions`. Production retains `members_lega
 - Required Production Pages R2 binding: `CAIP_PRIVATE_MEDIA_BUCKET`.
 - If readiness is false, the operator UI disables **Select and Upload** and names the exact prerequisite rather than allowing a generic POST 400.
 - Build 272 has no new schema migration; it depends on `database_build269_caip_social_project_dedupe_integrity.sql` being applied once to production D1.
+
+## Build 275 — Packaging source inheritance and label presentation repair
+
+Packaging Studio now treats an attached purchased/source base as the project ingredient authority at apply time, not merely as browser-only source evidence. Applying a source material such as the Goat’s Milk soap base synchronizes its reviewed `master_inci` rows into `packaging_project_ingredients`, updates project INCI/English/French fallback strings, and preserves supplier claim suggestions only as unapproved draft claims. The Ingredients tab includes **Reload from attached base** for older projects whose source was attached before this repair.
+
+French packaging support remains draft-only and human-reviewed. The browser can now reconstruct structured rows from an attached base (or, as a final fallback, the INCI text field) before creating a French draft, and the curated helper includes common Goat’s Milk soap display wording. INCI remains the ingredient-list authority; generated French is never legal/compliance approval.
+
+Soap title typography now uses the same script stack used by the Rosevear Creations / Devil n Dove brand wording, with bold weight for the main soap identity. Claim icons/text have additional horizontal separation in both the editor and rendered label. Product rose direction now exposes a visual quick palette of actual botanical rose assets (white, pink, cream, yellow, coral, orange, peach, green, blue, brown, black, grey, silver, gold, copper and bronze) in addition to named product presets and the advanced asset selector.
+
+Build 275 requires **no D1 migration**; it changes how existing Packaging Studio tables are populated and rendered. Cache-bust Packaging Studio CSS/JS to `v=275`.
