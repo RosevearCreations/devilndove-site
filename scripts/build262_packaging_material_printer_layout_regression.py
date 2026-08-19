@@ -21,7 +21,9 @@ ck('sheetPlan(template,profile' in js and 'rotated' in js and 'orientation' in j
 ck('id="printProfileGap" type="number" value="0"' in js and 'num(profile.gap_mm,0)' in js,'Default label gap is zero for maximum sheet yield')
 ck('<th>Printer</th>' in js and 'test.printer_name' in js,'Print-test history records printer name')
 ck('const LETTER_MM = { width: 215.9, height: 279.4 };' in js,'Letter paper dimensions are explicit')
-ck(bool(re.search(r'admin-packaging-studio\.js\?v=(?:262|263)',html)) and bool(re.search(r'styles\.css\?v=(?:262|263)',html)),'Packaging Studio assets are cache-busted to v262 or newer')
+def cache_version(pattern):
+    match=re.search(pattern,html); return int(match.group(1)) if match else 0
+ck(cache_version(r'admin-packaging-studio\.js\?v=(\d+)')>=262 and cache_version(r'styles\.css\?v=(\d+)')>=262,'Packaging Studio assets are cache-busted to v262 or newer')
 ck('.packaging-printer-callout' in css and '.packaging-sheet-plan' in css,'Printer/profile layout CSS exists')
 
 # Soap print geometry checks.

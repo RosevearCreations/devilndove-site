@@ -89,8 +89,8 @@ check('Build 248 handoff retained under current handoff', bool(re.match(r'# Devi
 check('Build 248 roadmap retained under current roadmap', bool(re.match(r'# Devil n Dove Project Status and Roadmap — Build (?:248|249|25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,})',roadmap)))
 check('source-material roadmap','Purchased Source Material' in roadmap and 'Master INCI' in roadmap)
 check('Build 248 index retained under current index', bool(re.match(r'# Devil n Dove Markdown Index — Build (?:248|249|25[0-9]|2[6-9][0-9]|[3-9][0-9]{2,})',index)))
-check('two canonical authority index','Two current authorities' in index and ('Root cleanup in Build 248' in index or 'Root cleanup in Build 249' in index))
-check('historical Build 248 documentation authority remains indexed','Two current authorities' in index)
+check('two canonical authority index',('Only two mutable current authorities' in index or 'Two current authorities' in index) and 'AI_HANDOFF.md' in index and 'PROJECT_STATUS_AND_ROADMAP.md' in index)
+check('historical Build 248 documentation authority remains indexed','BUILD*.md' in index and 'historical' in index.lower())
 
 print(f'Build 248 packaging/source-material regression: {sum(ok for _,ok in checks)}/{len(checks)} checks passed')
 print('migration sha256',hashlib.sha256(mig).hexdigest())

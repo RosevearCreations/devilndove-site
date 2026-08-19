@@ -20,9 +20,11 @@ def check(name, cond):
     checks.append((name,bool(cond)))
     if not cond: raise AssertionError(name)
 
-check('Packaging Studio CSS cache is Build 261 or newer',bool(re.search(r'/css/styles\.css\?v=(?:26[1-9]|[3-9]\d{2,})',html)))
-check('Packaging Studio JS cache is Build 261 or newer',bool(re.search(r'/public/js/admin-packaging-studio\.js\?v=(?:26[1-9]|[3-9]\d{2,})',html)))
-check('Packaging API reports Build 261 or newer',bool(re.search(r"const BUILD = '(?:26[1-9]|[3-9]\d{2,})'",api)))
+def version_at_least(pattern, text, minimum):
+    match=re.search(pattern,text); return bool(match and int(match.group(1))>=minimum)
+check('Packaging Studio CSS cache is Build 261 or newer',version_at_least(r'/css/styles\.css\?v=(\d+)',html,261))
+check('Packaging Studio JS cache is Build 261 or newer',version_at_least(r'/public/js/admin-packaging-studio\.js\?v=(\d+)',html,261))
+check('Packaging API reports Build 261 or newer',version_at_least(r"const BUILD = '(\d+)'",api,261))
 check('Components use responsive card list','packaging-component-list' in js and 'packaging-component-card' in js)
 check('Components no longer depend on wide table header', 'id="packagingComponentRows" class="packaging-component-list"' in js)
 check('Inventory search is first component field','Inventory item — type to search' in js and 'data-field="inventory_search"' in js)
@@ -53,8 +55,8 @@ check('Soap claims limited to four','claims.slice(0,4)' in js)
 check('Soap claim rows compressed',('index*11.6' in js or 'index*10.2' in js) and ('bandHeight-28' in js or 'bandHeight-27' in js))
 check('Soap net quantity separated from claims',(('bandY+53.5' in js and 'bandY+61.5' in js) or ('bandY+58' in js and 'bandY+65' in js)))
 check('Soap preview CSS preserves wide ribbon geometry','svg[data-soap-layout="reference-v3"]' in css and 'min-width:1080px' in css)
-check('Canonical handoff is Build 261 or newer',bool(re.match(r'# Devil n Dove AI Handoff — Build (?:26[1-9]|[3-9]\d{2,})',handoff)))
-check('Canonical roadmap is Build 261 or newer',bool(re.match(r'# Devil n Dove Project Status and Roadmap — Build (?:26[1-9]|[3-9]\d{2,})',roadmap)))
+check('Canonical handoff is Build 261 or newer',version_at_least(r'# Devil n Dove AI Handoff — Build (\d+)',handoff,261))
+check('Canonical roadmap is Build 261 or newer',version_at_least(r'# Devil n Dove Project Status and Roadmap — Build (\d+)',roadmap,261))
 check('Current migration is Build 259 or newer additive boundary',current==b259 or b'build263_packaging_my_printers' in current or b'Build 264' in current)
 
 for rel in ['public/js/admin-packaging-studio.js','functions/api/admin/packaging-studio.js','public/js/admin-site-item-inventory.js','functions/api/admin/site-item-inventory.js']:
