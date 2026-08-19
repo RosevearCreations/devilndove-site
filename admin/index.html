@@ -5,9 +5,10 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
   <title>Admin Dashboard — Devil n Dove</title>
+  <meta name="robots" content="noindex,nofollow"/>
   <link href="/css/styles.css" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
-  <meta content="Devil n Dove admin launch dashboard for members, products, orders, accounting, analytics, operations, and movies." name="description"/>
+  <meta content="Devil n Dove admin operations dashboard for creative projects, catalog, inventory, content, releases, accounting, analytics, and site operations." name="description"/>
 </head>
 <body>
   <div class="container admin-shell">
@@ -76,17 +77,23 @@
       <a class="card department-card" href="/admin/public-display-order/"><h2>Public Display Order</h2><p class="small">Pin and rank the Home featured creations, Art/Gallery and Creations surfaces.</p></a>
       <a class="card department-card" href="/admin/movies/"><h2>Movies</h2><p class="small">Manual movie metadata overlay and shelf editing tools.</p></a>
       <a class="card department-card" href="/admin/mobile-product/"><h2>Phone Capture</h2><p class="small">Phone-first product capture and draft intake workflow.</p></a>
-      <a class="card department-card" href="/admin/prelaunch/"><h2>Prelaunch Operations Map</h2><p class="small">Use Product Preflight, Deployment Preflight, Safe Deploy, Smoke Tests, Deploy Readiness, Go-Live and Live Ops in the correct separate stages.</p></a>
-      <a class="card department-card" href="/admin/deployment-preflight/"><h2>Deployment Preflight</h2><p class="small">Run D1 migration safety, one-H1, CSS, JSON, and local SEO checks before deploy.</p></a>
-      <a class="card department-card" href="/admin/release-control/"><h2>Release Control</h2><p class="small">Track deployment history, manifest comparison, screenshot evidence, mobile saved views, and LocalBusiness schema.</p></a>
-      <a class="card department-card" href="/admin/deploy-readiness/"><h2>Deploy Readiness</h2><p class="small">Review the final promote-live checklist, score drilldowns, manifest paths, recall copy, and release blockers.</p></a>
-      <a class="card department-card" href="/admin/promotion-control/"><h2>Promotion Control</h2><p class="small">Run the final go-live gate for QA safe applies, marketplace gates, recall release locks, LocalBusiness bakes, provider/R2 checks, and incident watch.</p></a>
-      <a class="card department-card" href="/admin/go-live-execution/"><h2>Go-Live Execution</h2><p class="small">Apply approved final controls, check direct endpoint gates, render SEO visuals, and queue post-promotion watching.</p></a>
-      <a class="card department-card" href="/admin/live-ops-followthrough/"><h2>Live Ops Follow-through</h2><p class="small">Signed evidence downloads, recall upload requests, QA blocker counts, marketplace overrides, and final SEO refresh rows.</p></a>
+      <a class="card department-card startup-highlight-card" href="/admin/prelaunch/"><h2>Release &amp; Go-Live Center</h2><p class="small">Primary guided release path: validate the build, prove deployment safety, review blockers, promote deliberately, then verify live operations. Advanced stage tools remain available below.</p></a>
       <a class="card department-card" href="/admin/visual-polish/"><h2>Visual Polish & Mobile Parity</h2><p class="small">Desktop website polish, mobile parity, visual enrichment candidates, fallback rows, CSS drift, and structured-data queues.</p></a>
       <a class="card department-card" href="/admin/application-sanity/"><h2>Application Sanity Check</h2><p class="small">Full application state, value-added roadmap, desktop/mobile checks, SEO criteria, visual enrichment ideas, and next-step sanity planning.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/media-content-studio/"><h2>Media &amp; Content Management Studio</h2><p class="small">Select public images, see exactly where they are used, explicitly replace one placement, manage metadata, register page image/text slots, and publish owner-approved page copy without editing source HTML.</p></a><a class="card department-card" href="/admin/image-manifest/"><h2>Visual Image Manifest</h2><p class="small">Track every missing image, real-photo requirement, generated editorial asset, rights approval, final URL, alt text, and phone/desktop evidence.</p></a><a class="card department-card" href="/admin/visual-enrichment-studio/"><h2>Visual Enrichment Studio</h2><p class="small">Use the specialist media picker, screenshot pairs, visual diffs, alt-text suggestions, seasonal campaigns, and low-bandwidth controls.</p></a><a class="card department-card" href="/admin/creative-automation/"><h2>Creative Automation Studio</h2><p class="small">One master process for project documentation, materials and cost, CAIP evidence, complete content packages, channel approvals, controlled release, results and repurposing.</p></a><a class="card department-card" href="/admin/release-preflight/"><h2>Product Release Preflight</h2><p class="small">Read-only product-by-product checklist across catalog facts, media permissions, Content Studio, CAIP evidence, and Release Board conditions.</p></a>
+      <a class="card department-card startup-highlight-card" href="/admin/media-content-studio/"><h2>Website Media &amp; Content Studio</h2><p class="small">Public-site presentation authority: edit approved page images/text placements, metadata and reusable site slots. It does not manage a Creative Project timeline, private CAIP footage or story evidence.</p></a><a class="card department-card" href="/admin/image-manifest/"><h2>Visual Image Manifest</h2><p class="small">Track every missing image, real-photo requirement, generated editorial asset, rights approval, final URL, alt text, and phone/desktop evidence.</p></a><a class="card department-card" href="/admin/visual-enrichment-studio/"><h2>Visual Enrichment Studio</h2><p class="small">Use the specialist media picker, screenshot pairs, visual diffs, alt-text suggestions, seasonal campaigns, and low-bandwidth controls.</p></a><a class="card department-card startup-highlight-card" href="/admin/creative-automation/"><h2>Creative Project Workflow</h2><p class="small">Project/process authority: concept, planned vs actual materials, costs, CAIP source media/evidence/story, Content Studio packages, approvals, results and repurposing. Use this for maker and content-only projects.</p></a><a class="card department-card" href="/admin/release-preflight/"><h2>Product Release Preflight</h2><p class="small">Read-only product-by-product checklist across catalog facts, media permissions, Content Studio, CAIP evidence, and Release Board conditions.</p></a>
     </div>
+    <details class="card admin-advanced-tools" style="margin-top:18px">
+      <summary><strong>Advanced release tools</strong> — individual stages behind Release &amp; Go-Live Center</summary>
+      <p class="small">These tools are intentionally separate because they answer different release questions. Most day-to-day use should start in Release &amp; Go-Live Center.</p>
+      <div class="admin-compact-tool-grid">
+        <a href="/admin/deployment-preflight/"><strong>1. Pre-Deploy Validation</strong><small>D1 migration safety, one-H1, CSS/JSON and SEO checks.</small></a>
+        <a href="/admin/release-control/"><strong>2. Release Evidence</strong><small>Manifest, deployment history, screenshots and release proof.</small></a>
+        <a href="/admin/deploy-readiness/"><strong>3. Promote / Hold Decision</strong><small>Final blocker review and promotion decision.</small></a>
+        <a href="/admin/promotion-control/"><strong>4. Promotion Gate</strong><small>Apply the approved live-promotion controls.</small></a>
+        <a href="/admin/go-live-execution/"><strong>5. Go-Live Actions</strong><small>Execute final approved actions and direct endpoint checks.</small></a>
+        <a href="/admin/live-ops-followthrough/"><strong>6. Live Ops Follow-through</strong><small>Post-promotion evidence, blockers, overrides and monitoring.</small></a>
+      </div>
+    </details>
 
     <div class="card" style="margin-top:18px">
       <h2 style="margin-top:0">Mobile-first ideas to move up next</h2>
