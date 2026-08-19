@@ -1,7 +1,7 @@
-// Build 263 - My Printers-only label profiles, default label printer, and tighter soap oval composition.
+// Build 275 - Persistent source ingredient inheritance, packaging translation recovery, and rose/title layout refinements.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '263';
+const BUILD = '275';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -376,8 +376,31 @@ export async function onRequestPost(context){
       let source=await a.db.prepare(`SELECT smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_source_material_templates smt LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE smt.packaging_source_material_template_id=? AND smt.is_active=1`).bind(sourceId).first().catch(()=>null);if(!source)source=await a.db.prepare(`SELECT * FROM packaging_source_material_templates WHERE packaging_source_material_template_id=? AND is_active=1`).bind(sourceId).first();if(!source)throw new Error('Source-material template was not found.');
       const role=sourceRole(String(source.material_type||''),String(source.default_role||''));const reviewStatus=String(source.verification_status||'needs_review')==='blocked'?'blocked':(['supplier_verified','owner_verified'].includes(String(source.verification_status||''))?'reviewed':'needs_review');
       if(role==='base')await a.db.prepare(`DELETE FROM packaging_project_source_materials WHERE packaging_project_id=? AND material_role='base'`).bind(projectId).run();
-      await a.db.prepare(`INSERT INTO packaging_project_source_materials (packaging_project_id,packaging_source_material_template_id,material_role,sort_order,source_snapshot_json,review_status,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_project_id,packaging_source_material_template_id,material_role) DO UPDATE SET source_snapshot_json=excluded.source_snapshot_json,review_status=excluded.review_status,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(projectId,sourceId,role,role==='base'?1:10,JSON.stringify(mapSourceMaterial(source)),reviewStatus,a.adminUser.user_id,a.adminUser.user_id).run();
-      message=`Source-material template “${source.material_name}” attached to this packaging project. Review inherited ingredients and supplier evidence before approval.`;
+      const mappedSource=mapSourceMaterial(source);
+      await a.db.prepare(`INSERT INTO packaging_project_source_materials (packaging_project_id,packaging_source_material_template_id,material_role,sort_order,source_snapshot_json,review_status,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_project_id,packaging_source_material_template_id,material_role) DO UPDATE SET source_snapshot_json=excluded.source_snapshot_json,review_status=excluded.review_status,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(projectId,sourceId,role,role==='base'?1:10,JSON.stringify(mappedSource),reviewStatus,a.adminUser.user_id,a.adminUser.user_id).run();
+      const inherited=normalizeIngredients(mappedSource.master_inci||[]);
+      if(inherited.length){
+        let merged=inherited;
+        if(role!=='base'){
+          const existing=rows(await a.db.prepare(`SELECT sort_order,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label FROM packaging_project_ingredients WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_ingredient_id`).bind(projectId).all());
+          const seen=new Set(existing.map((row)=>String(row.inci_name||row.display_name_en||'').trim().toLowerCase()).filter(Boolean));
+          merged=[...existing,...inherited.filter((row)=>{const key=String(row.inci_name||row.display_name_en||'').trim().toLowerCase();if(!key||seen.has(key))return false;seen.add(key);return true;})];
+        }
+        await a.db.prepare(`DELETE FROM packaging_project_ingredients WHERE packaging_project_id=?`).bind(projectId).run();
+        for(const [index,row] of merged.entries())await a.db.prepare(`INSERT INTO packaging_project_ingredients (packaging_project_id,sort_order,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,index+1,row.inci_name,row.display_name_en,row.display_name_fr,row.organic_flag,row.allergen_note,row.required_on_label).run();
+        const inci=merged.map((row)=>text(row.inci_name,300)).filter(Boolean).join(', ');
+        const en=merged.map((row)=>text(row.display_name_en||row.inci_name,500)).filter(Boolean).join(', ');
+        const fr=merged.map((row)=>text(row.display_name_fr||row.inci_name,500)).filter(Boolean).join(', ');
+        await a.db.prepare(`UPDATE packaging_projects SET ingredients_inci=?,ingredients_en=?,ingredients_fr=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_project_id=?`).bind(inci||null,en||null,fr||null,a.adminUser.user_id,projectId).run();
+      }
+      const inheritedClaims=normalizeClaims((mappedSource.supplier_claims||[]).map((row)=>({...row,is_approved:0,compliance_note:text(row.compliance_note,800)||`Inherited from supplier/source template “${source.material_name}”; review before approval.`})));
+      if(inheritedClaims.length){
+        const existingClaims=rows(await a.db.prepare(`SELECT claim_en,claim_fr FROM packaging_project_claims WHERE packaging_project_id=?`).bind(projectId).all());
+        const claimKeys=new Set(existingClaims.map((row)=>`${String(row.claim_en||'').trim().toLowerCase()}|${String(row.claim_fr||'').trim().toLowerCase()}`));
+        const maxRow=await a.db.prepare(`SELECT COALESCE(MAX(sort_order),0) AS max_sort FROM packaging_project_claims WHERE packaging_project_id=?`).bind(projectId).first();let nextSort=Number(maxRow?.max_sort||0);
+        for(const row of inheritedClaims){const key=`${String(row.claim_en||'').trim().toLowerCase()}|${String(row.claim_fr||'').trim().toLowerCase()}`;if(claimKeys.has(key))continue;claimKeys.add(key);nextSort+=1;await a.db.prepare(`INSERT INTO packaging_project_claims (packaging_project_id,sort_order,claim_en,claim_fr,icon_name,is_approved,compliance_note,created_at,updated_at) VALUES (?,?,?,?,?,0,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,nextSort,row.claim_en,row.claim_fr,row.icon_name,row.compliance_note).run();}
+      }
+      message=`Source-material template “${source.material_name}” attached and its reviewed ingredient composition synchronized to this packaging project; supplier claim suggestions were added only as unapproved drafts. Review bilingual display wording and supplier evidence before approval.`;
     }else if(action==='detach_source_material_template'){
       if(!projectId)throw new Error('Packaging project is required.');const sourceId=id(body.packaging_source_material_template_id);if(!sourceId)throw new Error('Source-material template is required.');
       await a.db.prepare(`DELETE FROM packaging_project_source_materials WHERE packaging_project_id=? AND packaging_source_material_template_id=?`).bind(projectId,sourceId).run();message='Source-material link removed from this project. Existing draft ingredient/claim rows were left unchanged for deliberate review.';
