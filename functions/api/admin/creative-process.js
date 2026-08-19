@@ -1,9 +1,9 @@
-// Build 273 — project-first Creative Process Engine with searchable inventory and explicit CAIP/Content Studio output context.
+// Build 274 — Creative Process lifecycle clarity, auditable timeline corrections, and inventory-safe concept-to-content workflow.
 import { createOrRefreshContentProjectForCreativeProject, createOrRefreshContentProjectForProduct, ensureContentAutomationSchema } from '../_lib/contentAutomationStudio.js';
 import { ensureCreativeAssetIntelligenceSchema, syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '273';
+const BUILD = '274';
 const OUTPUTS = [
   ['youtube_video','YouTube video','video'], ['youtube_shorts','YouTube Shorts','video'],
   ['instagram_reels','Instagram Reels','social'], ['tiktok_videos','TikToks','social'],
@@ -30,7 +30,7 @@ async function listProjects(db){
     COUNT(DISTINCT o.creative_work_output_id) output_count,
     SUM(CASE WHEN o.output_status='complete' THEN 1 ELSE 0 END) completed_output_count
     FROM creative_work_projects p
-    LEFT JOIN creative_work_events e ON e.creative_work_project_id=p.creative_work_project_id
+    LEFT JOIN creative_work_events e ON e.creative_work_project_id=p.creative_work_project_id AND COALESCE(e.entry_status,'active')='active'
     LEFT JOIN creative_work_outputs o ON o.creative_work_project_id=p.creative_work_project_id
     GROUP BY p.creative_work_project_id ORDER BY p.updated_at DESC, p.creative_work_project_id DESC`).all();
   return rows.results||[];
@@ -95,12 +95,13 @@ async function outputWorkflowContext(db,id){
 async function detail(db,id){
   const project=await db.prepare(`SELECT * FROM creative_work_projects WHERE creative_work_project_id=?1`).bind(id).first();
   if(!project) return null;
-  const events=await db.prepare(`SELECT * FROM creative_work_events WHERE creative_work_project_id=?1 ORDER BY occurred_at DESC, creative_work_event_id DESC`).bind(id).all();
+  const events=await db.prepare(`SELECT * FROM creative_work_events WHERE creative_work_project_id=?1 AND COALESCE(entry_status,'active')='active' ORDER BY occurred_at DESC, creative_work_event_id DESC`).bind(id).all();
+  const voidedEvents=await db.prepare(`SELECT * FROM creative_work_events WHERE creative_work_project_id=?1 AND entry_status='voided' ORDER BY voided_at DESC, creative_work_event_id DESC`).bind(id).all().catch(()=>({results:[]}));
   const outputs=await db.prepare(`SELECT * FROM creative_work_outputs WHERE creative_work_project_id=?1 ORDER BY output_group, creative_work_output_id`).bind(id).all();
-  const totals=await db.prepare(`SELECT COALESCE(SUM(duration_minutes),0) tracked_minutes, COALESCE(SUM(material_cost_cents),0) tracked_material_cost_cents FROM creative_work_events WHERE creative_work_project_id=?1`).bind(id).first();
+  const totals=await db.prepare(`SELECT COALESCE(SUM(duration_minutes),0) tracked_minutes, COALESCE(SUM(material_cost_cents),0) tracked_material_cost_cents FROM creative_work_events WHERE creative_work_project_id=?1 AND COALESCE(entry_status,'active')='active'`).bind(id).first();
   const linked=await db.prepare(`SELECT l.creative_project_product_link_id,l.product_id,l.relationship_type,l.is_primary,l.notes,p.product_number,p.name,p.slug,p.sku,p.status,p.review_status,p.featured_image_url FROM creative_project_product_links l JOIN products p ON p.product_id=l.product_id WHERE l.creative_work_project_id=?1 ORDER BY l.is_primary DESC,p.updated_at DESC,p.product_id DESC`).bind(id).all();
-  const evidence=await db.prepare(`SELECT s.*,e.event_type,e.event_title,e.event_notes,e.media_url,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents FROM creative_project_evidence_selections s JOIN creative_work_events e ON e.creative_work_event_id=s.creative_work_event_id WHERE s.creative_work_project_id=?1 AND s.selected=1 ORDER BY e.occurred_at,e.creative_work_event_id`).bind(id).all();
-  const materials=await db.prepare(`SELECT e.creative_work_event_id,e.event_title,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents,r.creative_project_material_review_id,r.review_status,r.actual_quantity,r.waste_quantity,r.reusable_quantity,r.approved_cost_cents,r.review_notes,r.inventory_consumed,ip.creative_project_inventory_post_id,ip.site_item_inventory_id,ip.stock_quantity_consumed,ip.previous_on_hand_quantity,ip.new_on_hand_quantity,ip.posting_status,ip.posted_at,COALESCE(iud.usage_quantity_consumed,ip.stock_quantity_consumed,0) usage_quantity_consumed,COALESCE(iud.usage_unit_label,'unit') usage_unit_label,COALESCE(iud.tracking_mode,'exact') usage_tracking_mode FROM creative_work_events e LEFT JOIN creative_project_material_reviews r ON r.creative_work_event_id=e.creative_work_event_id AND r.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_inventory_posts ip ON ip.creative_project_material_review_id=r.creative_project_material_review_id LEFT JOIN creative_project_inventory_usage_details iud ON iud.creative_project_inventory_post_id=ip.creative_project_inventory_post_id WHERE e.creative_work_project_id=?1 AND TRIM(COALESCE(e.material_name,''))<>'' ORDER BY e.occurred_at,e.creative_work_event_id`).bind(id).all();
+  const evidence=await db.prepare(`SELECT s.*,e.event_type,e.event_title,e.event_notes,e.media_url,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents FROM creative_project_evidence_selections s JOIN creative_work_events e ON e.creative_work_event_id=s.creative_work_event_id WHERE s.creative_work_project_id=?1 AND s.selected=1 AND COALESCE(e.entry_status,'active')='active' ORDER BY e.occurred_at,e.creative_work_event_id`).bind(id).all();
+  const materials=await db.prepare(`SELECT e.creative_work_event_id,e.event_title,e.material_name,e.material_quantity,e.material_unit,e.material_cost_cents,r.creative_project_material_review_id,r.review_status,r.actual_quantity,r.waste_quantity,r.reusable_quantity,r.approved_cost_cents,r.review_notes,r.inventory_consumed,ip.creative_project_inventory_post_id,ip.site_item_inventory_id,ip.stock_quantity_consumed,ip.previous_on_hand_quantity,ip.new_on_hand_quantity,ip.posting_status,ip.posted_at,COALESCE(iud.usage_quantity_consumed,ip.stock_quantity_consumed,0) usage_quantity_consumed,COALESCE(iud.usage_unit_label,'unit') usage_unit_label,COALESCE(iud.tracking_mode,'exact') usage_tracking_mode FROM creative_work_events e LEFT JOIN creative_project_material_reviews r ON r.creative_work_event_id=e.creative_work_event_id AND r.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_inventory_posts ip ON ip.creative_project_material_review_id=r.creative_project_material_review_id LEFT JOIN creative_project_inventory_usage_details iud ON iud.creative_project_inventory_post_id=ip.creative_project_inventory_post_id WHERE e.creative_work_project_id=?1 AND COALESCE(e.entry_status,'active')='active' AND TRIM(COALESCE(e.material_name,''))<>'' ORDER BY e.occurred_at,e.creative_work_event_id`).bind(id).all();
   const profitability=await db.prepare(`SELECT p.*,COALESCE(x.channel_fee_percent,0) channel_fee_percent,COALESCE(x.fixed_channel_fee_cents,p.channel_fee_cents,0) fixed_channel_fee_cents FROM creative_project_profitability p LEFT JOIN creative_project_profitability_extensions x ON x.creative_work_project_id=p.creative_work_project_id WHERE p.creative_work_project_id=?1`).bind(id).first();
   const handoffs=await db.prepare(`SELECT creative_project_content_handoff_id,content_project_id,handoff_status,evidence_count,created_at FROM creative_project_content_handoffs WHERE creative_work_project_id=?1 ORDER BY creative_project_content_handoff_id DESC`).bind(id).all();
   const inventoryItems=await db.prepare(`SELECT sii.site_item_inventory_id,sii.item_name,sii.source_type,sii.on_hand_quantity,sii.reserved_quantity,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit,sii.unit_cost_cents,sii.do_not_reuse,sii.is_active,COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) usage_tracking_mode,COALESCE(siup.minimum_usage_increment,0.001) minimum_usage_increment FROM site_item_inventory sii LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id WHERE sii.is_active=1 ORDER BY LOWER(sii.item_name),sii.site_item_inventory_id`).all().catch(()=>({results:[]}));
@@ -111,7 +112,7 @@ async function detail(db,id){
   const summaries=await db.prepare(`SELECT * FROM creative_project_knowledge_summaries WHERE creative_work_project_id=?1 ORDER BY summary_type`).bind(id).all();
   const costContext=await db.prepare(`SELECT * FROM creative_project_cost_context WHERE creative_work_project_id=?1`).bind(id).first().catch(()=>null);
   const outputContext=await outputWorkflowContext(db,id);
-  return {project,events:events.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},output_media_context:outputContext};
+  return {project,events:events.results||[],voided_events:voidedEvents.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},output_media_context:outputContext};
 }
 async function seedOutputs(db,id,projectType='maker_project'){
   const productless=['content_only','education','research','archive'].includes(String(projectType||'').toLowerCase());
@@ -187,6 +188,33 @@ async function postInventoryUsage(db,{projectId,eventId,inventoryId,usageQuantit
   return {item,trackingMode,perStock,stockQuantity,previous,next,allocatedCostCents:Math.max(0,Math.round(Number(item.unit_cost_cents||0)*(usageQuantity/perStock)))};
 }
 
+async function reverseInventoryPost(db,{projectId,postId,reason,userId}){
+  const why=text(reason,500);
+  if(!projectId||!postId||why.length<8) throw new Error('A posted inventory record and a clear reversal reason of at least 8 characters are required.');
+  const post=await db.prepare(`SELECT ip.*,i.*,COALESCE(iud.usage_quantity_consumed,ip.stock_quantity_consumed,0) usage_quantity_consumed,COALESCE(iud.usage_unit_label,i.usage_unit_label,'unit') posted_usage_unit_label,COALESCE(iud.tracking_mode,'exact') posted_tracking_mode FROM creative_project_inventory_posts ip JOIN site_item_inventory i ON i.site_item_inventory_id=ip.site_item_inventory_id LEFT JOIN creative_project_inventory_usage_details iud ON iud.creative_project_inventory_post_id=ip.creative_project_inventory_post_id WHERE ip.creative_project_inventory_post_id=?1 AND ip.creative_work_project_id=?2`).bind(postId,projectId).first();
+  if(!post) throw new Error('The inventory posting was not found.');
+  if(post.posting_status==='reversed') return {post,alreadyReversed:true,restored:0};
+  const prior=await db.prepare(`SELECT creative_project_inventory_reversal_id FROM creative_project_inventory_reversals WHERE creative_project_inventory_post_id=?1`).bind(postId).first();
+  if(prior) throw new Error('This inventory posting already has a reversal.');
+  const previous=Math.max(0,Number(post.on_hand_quantity||0));
+  const restored=Math.max(0,Number(post.stock_quantity_consumed||0));
+  const next=previous+restored;
+  await db.batch([
+    db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?2,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?1 AND on_hand_quantity=?3`).bind(post.site_item_inventory_id,next,previous),
+    db.prepare(`INSERT INTO site_inventory_movements (site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?1,?2,?3,?4,'adjustment',?5,?6,?7,?8,?8,?9,?9,?10,?11,CURRENT_TIMESTAMP)`).bind(post.site_item_inventory_id,post.source_type||null,post.external_key||null,post.item_name,restored,previous,next,Number(post.reserved_quantity||0),Number(post.incoming_quantity||0),`Creative Project ${projectId} inventory reversal. Reason: ${why}`,userId),
+    db.prepare(`INSERT INTO creative_project_inventory_reversals (creative_project_inventory_post_id,creative_work_project_id,site_item_inventory_id,stock_quantity_restored,previous_on_hand_quantity,new_on_hand_quantity,reason,authorized_by) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)`).bind(postId,projectId,post.site_item_inventory_id,restored,previous,next,why,userId),
+    db.prepare(`UPDATE creative_project_inventory_posts SET posting_status='reversed',notes=TRIM(COALESCE(notes,'') || ?2) WHERE creative_project_inventory_post_id=?1`).bind(postId,` | Reversed: ${why}`),
+    db.prepare(`UPDATE creative_project_material_reviews SET inventory_consumed=0 WHERE creative_project_material_review_id=?1`).bind(post.creative_project_material_review_id)
+  ]);
+  const usageRestored=Math.max(0,Number(post.usage_quantity_consumed||0));
+  if(usageRestored>0) await db.prepare(`INSERT INTO site_inventory_usage_movements (site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,CURRENT_TIMESTAMP)`).bind(post.site_item_inventory_id,usageRestored,post.posted_usage_unit_label||'unit',restored,post.stock_unit_label||'unit',post.posted_tracking_mode||'exact',post.posted_tracking_mode==='estimated'?1:0,`Creative Project ${projectId} usage reversal. Reason: ${why}`,userId).run();
+  return {post,alreadyReversed:false,restored,next};
+}
+
+async function activeInventoryPostForEvent(db,projectId,eventId){
+  return db.prepare(`SELECT creative_project_inventory_post_id,posting_status FROM creative_project_inventory_posts WHERE creative_work_project_id=?1 AND creative_work_event_id=?2 ORDER BY creative_project_inventory_post_id DESC LIMIT 1`).bind(projectId,eventId).first();
+}
+
 export async function onRequestPost(context){
   const access=await requireAdmin(context); if(access.error) return access.error;
   let body={}; try{body=await context.request.json();}catch{}
@@ -213,7 +241,51 @@ export async function onRequestPost(context){
       if(!projectId) throw new Error('Project is required.');
       const title=text(body.event_title,180); if(!title) throw new Error('Event title is required.');
       await access.db.prepare(`INSERT INTO creative_work_events (creative_work_project_id,event_type,event_title,event_notes,occurred_at,duration_minutes,material_name,material_quantity,material_unit,material_cost_cents,media_url,is_public_candidate,created_by) VALUES (?1,?2,?3,?4,COALESCE(?5,CURRENT_TIMESTAMP),?6,?7,?8,?9,?10,?11,?12,?13)`).bind(projectId,text(body.event_type,50)||'note',title,text(body.event_notes),text(body.occurred_at,40)||null,Math.max(0,Number(body.duration_minutes||0)),text(body.material_name,180)||null,Number(body.material_quantity||0)||null,text(body.material_unit,40)||null,Math.max(0,Number(body.material_cost_cents||0)),text(body.media_url,1000)||null,Number(body.is_public_candidate||0)===1?1:0,access.adminUser.user_id).run();
-      message='Timeline entry added.';
+      message='Timeline entry added. Planned material fields are estimates only; inventory is unchanged until actual usage is explicitly posted.';
+    }else if(action==='update_event'){
+      const eventId=num(body.creative_work_event_id); if(!projectId||!eventId) throw new Error('Project timeline entry is required.');
+      const event=await access.db.prepare(`SELECT * FROM creative_work_events WHERE creative_work_project_id=?1 AND creative_work_event_id=?2 AND COALESCE(entry_status,'active')='active'`).bind(projectId,eventId).first();
+      if(!event) throw new Error('The active timeline entry was not found.');
+      const post=await activeInventoryPostForEvent(access.db,projectId,eventId);
+      if(post&&post.posting_status!=='reversed') throw new Error('This entry has posted inventory. Use Correct actual usage or Remove / undo entry so the inventory ledger is reversed safely before changing material details.');
+      const title=text(body.event_title,180); if(!title) throw new Error('Event title is required.');
+      await access.db.prepare(`UPDATE creative_work_events SET event_type=?3,event_title=?4,event_notes=?5,occurred_at=COALESCE(?6,occurred_at),duration_minutes=?7,material_name=?8,material_quantity=?9,material_unit=?10,material_cost_cents=?11,media_url=?12,is_public_candidate=?13 WHERE creative_work_project_id=?1 AND creative_work_event_id=?2`).bind(projectId,eventId,text(body.event_type,50)||event.event_type,title,text(body.event_notes),text(body.occurred_at,40)||null,Math.max(0,Number(body.duration_minutes||0)),text(body.material_name,180)||null,Number(body.material_quantity||0)||null,text(body.material_unit,40)||null,Math.max(0,Number(body.material_cost_cents||0)),text(body.media_url,1000)||null,Number(body.is_public_candidate||0)===1?1:0).run();
+      message='Timeline entry updated. Planned material values still do not change inventory.';
+    }else if(action==='void_event'){
+      const eventId=num(body.creative_work_event_id); const reason=text(body.reason,500);
+      if(!projectId||!eventId||reason.length<8) throw new Error('Choose an active timeline entry and provide a clear reason of at least 8 characters.');
+      const event=await access.db.prepare(`SELECT * FROM creative_work_events WHERE creative_work_project_id=?1 AND creative_work_event_id=?2 AND COALESCE(entry_status,'active')='active'`).bind(projectId,eventId).first();
+      if(!event) throw new Error('The active timeline entry was not found.');
+      const post=await activeInventoryPostForEvent(access.db,projectId,eventId);
+      let reversal=null;
+      if(post&&post.posting_status!=='reversed') reversal=await reverseInventoryPost(access.db,{projectId,postId:Number(post.creative_project_inventory_post_id),reason:`Voided timeline entry: ${reason}`,userId:access.adminUser.user_id});
+      await access.db.batch([
+        access.db.prepare(`UPDATE creative_work_events SET entry_status='voided',void_reason=?3,voided_by=?4,voided_at=CURRENT_TIMESTAMP WHERE creative_work_project_id=?1 AND creative_work_event_id=?2`).bind(projectId,eventId,reason,access.adminUser.user_id),
+        access.db.prepare(`UPDATE creative_project_evidence_selections SET selected=0,review_notes=TRIM(COALESCE(review_notes,'') || ?3),reviewed_by=?4,reviewed_at=CURRENT_TIMESTAMP WHERE creative_work_project_id=?1 AND creative_work_event_id=?2`).bind(projectId,eventId,` | Removed because timeline entry was voided: ${reason}`,access.adminUser.user_id)
+      ]);
+      message=reversal&&!reversal.alreadyReversed?`Timeline entry removed from the active project and ${reversal.restored} stock unit(s) restored through an audited reversal.`:'Timeline entry removed from the active project. Its history is preserved in Voided / corrected history.';
+    }else if(action==='correct_inventory_use'){
+      const eventId=num(body.creative_work_event_id); const corrected=Math.max(0,Number(body.usage_quantity_consumed||0)||0); const reason=text(body.reason,500);
+      if(!projectId||!eventId||corrected<=0||reason.length<8) throw new Error('Choose a posted usage entry, enter the corrected actual amount, and provide a clear reason of at least 8 characters.');
+      const event=await access.db.prepare(`SELECT * FROM creative_work_events WHERE creative_work_project_id=?1 AND creative_work_event_id=?2 AND COALESCE(entry_status,'active')='active'`).bind(projectId,eventId).first();
+      if(!event) throw new Error('The active inventory-use timeline entry was not found.');
+      const oldPost=await access.db.prepare(`SELECT * FROM creative_project_inventory_posts WHERE creative_work_project_id=?1 AND creative_work_event_id=?2 AND posting_status<>'reversed' ORDER BY creative_project_inventory_post_id DESC LIMIT 1`).bind(projectId,eventId).first();
+      if(!oldPost) throw new Error('No active inventory posting exists for this entry. You can edit the planned timeline entry directly instead.');
+      const item=await access.db.prepare(`SELECT sii.*,COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) usage_tracking_mode FROM site_item_inventory sii LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id WHERE sii.site_item_inventory_id=?1 AND sii.is_active=1`).bind(oldPost.site_item_inventory_id).first();
+      if(!item) throw new Error('The linked inventory item is no longer active. Reactivate or replace it before correcting this posting.');
+      const perStock=Math.max(0.001,Number(item.usage_units_per_stock_unit||1)||1);
+      const trackingMode=['exact','estimated','log_only','reusable'].includes(String(item.usage_tracking_mode||'').toLowerCase())?String(item.usage_tracking_mode).toLowerCase():'exact';
+      const correctedStock=['log_only','reusable'].includes(trackingMode)?0:(corrected/perStock);
+      const stockAfterReversal=Math.max(0,Number(item.on_hand_quantity||0))+Math.max(0,Number(oldPost.stock_quantity_consumed||0));
+      if(correctedStock>stockAfterReversal+1e-9) throw new Error(`The corrected amount would require ${correctedStock} ${item.stock_unit_label||'stock units'}, but only ${stockAfterReversal} would be available after reversing the original posting.`);
+      await reverseInventoryPost(access.db,{projectId,postId:Number(oldPost.creative_project_inventory_post_id),reason:`Corrected usage: ${reason}`,userId:access.adminUser.user_id});
+      await access.db.prepare(`UPDATE creative_work_events SET entry_status='voided',void_reason=?3,voided_by=?4,voided_at=CURRENT_TIMESTAMP WHERE creative_work_project_id=?1 AND creative_work_event_id=?2`).bind(projectId,eventId,`Superseded by corrected inventory usage. ${reason}`,access.adminUser.user_id).run();
+      const allocatedCost=Math.max(0,Math.round(Number(item.unit_cost_cents||0)*(corrected/perStock)));
+      const created=await access.db.prepare(`INSERT INTO creative_work_events(creative_work_project_id,event_type,event_title,event_notes,occurred_at,duration_minutes,material_name,material_quantity,material_unit,material_cost_cents,media_url,is_public_candidate,created_by) VALUES(?1,'material',?2,?3,CURRENT_TIMESTAMP,?4,?5,?6,?7,?8,?9,0,?10)`).bind(projectId,`Corrected: Used ${item.item_name}`,`Corrected inventory usage. Reason: ${reason}`,Math.max(0,Number(event.duration_minutes||0)),item.item_name,corrected,item.usage_unit_label||'unit',allocatedCost,event.media_url||null,access.adminUser.user_id).run();
+      const newEventId=num(created.meta?.last_row_id);
+      await access.db.prepare(`INSERT INTO creative_project_material_reviews(creative_work_project_id,creative_work_event_id,review_status,actual_quantity,waste_quantity,reusable_quantity,approved_cost_cents,review_notes,inventory_consumed,reviewed_by,reviewed_at) VALUES(?1,?2,'approved',?3,0,0,?4,?5,0,?6,CURRENT_TIMESTAMP)`).bind(projectId,newEventId,corrected,allocatedCost,`Corrected from event ${eventId}. ${reason}`,access.adminUser.user_id).run();
+      const posted=await postInventoryUsage(access.db,{projectId,eventId:newEventId,inventoryId:Number(oldPost.site_item_inventory_id),usageQuantity:corrected,userId:access.adminUser.user_id,notes:`Correction of event ${eventId}. ${reason}`});
+      message=`Inventory usage corrected to ${corrected} ${posted.item.usage_unit_label||'unit'}. The original entry was reversed and preserved in audit history.`;
     }else if(action==='update_output'){
       if(!projectId||!num(body.creative_work_output_id)) throw new Error('Project output is required.');
       await access.db.prepare(`UPDATE creative_work_outputs SET output_status=?3,approval_status=?4,linked_record_type=?5,linked_record_id=?6,output_url=?7,notes=?8,updated_at=CURRENT_TIMESTAMP WHERE creative_work_project_id=?1 AND creative_work_output_id=?2`).bind(projectId,num(body.creative_work_output_id),text(body.output_status,40)||'planned',text(body.approval_status,40)||'needs_review',text(body.linked_record_type,80)||null,num(body.linked_record_id)||null,text(body.output_url,1000)||null,text(body.notes)).run();
@@ -274,27 +346,9 @@ export async function onRequestPost(context){
       if(!projectId) throw new Error('Project is required.'); const purpose=text(body.cost_purpose,60)||'research_experiment'; const allowed=new Set(['content_marketing','research_experiment','product_development','education_training','internal_other']); if(!allowed.has(purpose)) throw new Error('Choose a valid internal cost purpose.');
       await access.db.prepare(`INSERT INTO creative_project_cost_context(creative_work_project_id,cost_purpose,internal_notes,updated_by,updated_at) VALUES(?1,?2,?3,?4,CURRENT_TIMESTAMP) ON CONFLICT(creative_work_project_id) DO UPDATE SET cost_purpose=excluded.cost_purpose,internal_notes=excluded.internal_notes,updated_by=excluded.updated_by,updated_at=CURRENT_TIMESTAMP`).bind(projectId,purpose,text(body.internal_notes,1000)||null,access.adminUser.user_id).run(); message='Internal project cost purpose saved.';
     }else if(action==='reverse_material_inventory'){
-      const postId=num(body.creative_project_inventory_post_id);
-      const reason=text(body.reason,500);
-      if(!projectId||!postId||reason.length<8) throw new Error('A posted inventory record and a clear reversal reason are required.');
-      const post=await access.db.prepare(`SELECT ip.*,i.*,COALESCE(iud.usage_quantity_consumed,ip.stock_quantity_consumed,0) usage_quantity_consumed,COALESCE(iud.usage_unit_label,i.usage_unit_label,'unit') posted_usage_unit_label,COALESCE(iud.tracking_mode,'exact') posted_tracking_mode FROM creative_project_inventory_posts ip JOIN site_item_inventory i ON i.site_item_inventory_id=ip.site_item_inventory_id LEFT JOIN creative_project_inventory_usage_details iud ON iud.creative_project_inventory_post_id=ip.creative_project_inventory_post_id WHERE ip.creative_project_inventory_post_id=?1 AND ip.creative_work_project_id=?2`).bind(postId,projectId).first();
-      if(!post) throw new Error('The inventory posting was not found.');
-      if(post.posting_status==='reversed') throw new Error('This inventory posting has already been reversed.');
-      const prior=await access.db.prepare(`SELECT creative_project_inventory_reversal_id FROM creative_project_inventory_reversals WHERE creative_project_inventory_post_id=?1`).bind(postId).first();
-      if(prior) throw new Error('This inventory posting already has a reversal.');
-      const previous=Math.max(0,Number(post.on_hand_quantity||0));
-      const restored=Math.max(0,Number(post.stock_quantity_consumed||0));
-      const next=previous+restored;
-      await access.db.batch([
-        access.db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?2,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?1 AND on_hand_quantity=?3`).bind(post.site_item_inventory_id,next,previous),
-        access.db.prepare(`INSERT INTO site_inventory_movements (site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?1,?2,?3,?4,'adjustment',?5,?6,?7,?8,?8,?9,?9,?10,?11,CURRENT_TIMESTAMP)`).bind(post.site_item_inventory_id,post.source_type||null,post.external_key||null,post.item_name,restored,previous,next,Number(post.reserved_quantity||0),Number(post.incoming_quantity||0),`Creative Project ${projectId} inventory reversal. Reason: ${reason}`,access.adminUser.user_id),
-        access.db.prepare(`INSERT INTO creative_project_inventory_reversals (creative_project_inventory_post_id,creative_work_project_id,site_item_inventory_id,stock_quantity_restored,previous_on_hand_quantity,new_on_hand_quantity,reason,authorized_by) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)`).bind(postId,projectId,post.site_item_inventory_id,restored,previous,next,reason,access.adminUser.user_id),
-        access.db.prepare(`UPDATE creative_project_inventory_posts SET posting_status='reversed',notes=TRIM(COALESCE(notes,'') || ?2) WHERE creative_project_inventory_post_id=?1`).bind(postId,` | Reversed: ${reason}`),
-        access.db.prepare(`UPDATE creative_project_material_reviews SET inventory_consumed=0 WHERE creative_project_material_review_id=?1`).bind(post.creative_project_material_review_id)
-      ]);
-      const usageRestored=Math.max(0,Number(post.usage_quantity_consumed||0));
-      if(usageRestored>0) await access.db.prepare(`INSERT INTO site_inventory_usage_movements (site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,CURRENT_TIMESTAMP)`).bind(post.site_item_inventory_id,usageRestored,post.posted_usage_unit_label||'unit',restored,post.stock_unit_label||'unit',post.posted_tracking_mode||'exact',post.posted_tracking_mode==='estimated'?1:0,`Creative Project ${projectId} usage reversal. Reason: ${reason}`,access.adminUser.user_id).run();
-      message=restored>0?`Inventory reversal posted: ${restored} ${post.stock_unit_label||'unit'} restored to ${post.item_name}.`:`Usage-only reversal recorded for ${post.item_name}; no stock quantity required restoration.`;
+      const postId=num(body.creative_project_inventory_post_id); const reason=text(body.reason,500);
+      const reversed=await reverseInventoryPost(access.db,{projectId,postId,reason,userId:access.adminUser.user_id});
+      message=reversed.alreadyReversed?'This inventory posting was already reversed.':(reversed.restored>0?`Inventory reversal posted: ${reversed.restored} ${reversed.post.stock_unit_label||'unit'} restored to ${reversed.post.item_name}.`:`Usage-only reversal recorded for ${reversed.post.item_name}; no stock quantity required restoration.`);
     }else if(action==='apply_cost_template'){
       const templateId=num(body.creative_project_cost_template_id);
       if(!projectId||!templateId) throw new Error('Project and cost template are required.');
