@@ -3288,3 +3288,25 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .content-project-row{min-width:0}.content-project-row span,.content-project-row small{overflow-wrap:anywhere}
 @media(max-width:980px){.creative-output-context-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-source-bridge{grid-template-columns:1fr}.content-source-bridge-metrics{text-align:left;grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.creative-output-context-grid{grid-template-columns:1fr}.creative-output-bridge-links{display:grid;grid-template-columns:1fr}.creative-output-bridge-links>span{display:none}.content-source-bridge-metrics{grid-template-columns:1fr}.creative-direct-inventory .grid.cols-3{grid-template-columns:1fr}.creative-direct-inventory .btn,.content-source-panel .btn{width:100%;justify-content:center}.content-project-list{max-height:360px}}
+
+/* Build 274 — Creative Process lifecycle clarity, auditable corrections, and dashboard consolidation. */
+.creative-lifecycle-guide{display:grid;gap:14px}
+.creative-lifecycle-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.creative-lifecycle-steps article{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-content:start;padding:12px;border:1px solid var(--line,#ddd);border-radius:12px;min-width:0;background:rgba(255,255,255,.025)}
+.creative-lifecycle-steps article>b{grid-row:1/3;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(124,92,154,.16);border:1px solid rgba(124,92,154,.35)}
+.creative-lifecycle-steps article strong,.creative-lifecycle-steps article p{min-width:0}.creative-lifecycle-steps article p{margin:0;line-height:1.45;overflow-wrap:anywhere}
+.creative-lifecycle-steps article.is-current{border-color:var(--accent,#8b4c75);box-shadow:0 0 0 2px rgba(139,76,117,.10)}
+.creative-entry-edit,.creative-voided-history{margin-top:10px;border-top:1px solid var(--line,#ddd);padding-top:8px}
+.creative-entry-edit summary,.creative-voided-history summary,.admin-advanced-tools summary{cursor:pointer;font-weight:700}
+.creative-entry-edit .creative-process-links{align-items:end}.creative-entry-edit .input{max-width:100%;min-width:0}
+.creative-event.is-voided{opacity:.78;border-style:dashed}
+.creative-material-review-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 14px}
+.creative-material-review-guide span{padding:9px;border:1px solid var(--line,#ddd);border-radius:9px;min-width:0;overflow-wrap:anywhere}
+.creative-reversal-box{display:grid;gap:7px;margin-top:10px;padding:10px;border:1px solid var(--line,#ddd);border-radius:10px;min-width:0}
+.creative-reversal-box .input,.creative-reversal-box .btn{max-width:100%}
+.admin-advanced-tools{min-width:0}.admin-advanced-tools>summary{padding:4px 0}
+.admin-compact-tool-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.admin-compact-tool-grid a{display:grid;gap:4px;padding:11px;border:1px solid var(--line,#ddd);border-radius:10px;text-decoration:none;min-width:0}
+.admin-compact-tool-grid a small{overflow-wrap:anywhere}
+@media(max-width:980px){.creative-lifecycle-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-compact-tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.creative-lifecycle-steps,.creative-material-review-guide,.admin-compact-tool-grid{grid-template-columns:1fr}.creative-entry-edit .creative-process-links{display:grid;grid-template-columns:1fr}.creative-entry-edit .btn,.creative-reversal-box .btn{width:100%;justify-content:center}}
