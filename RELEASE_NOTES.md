@@ -489,3 +489,10 @@ Added authorized inventory reversals, cost-template application, revenue-percent
 - Prevents Select and Upload from beginning when required production prerequisites are missing.
 - Surfaces exact missing-column/migration guidance instead of a generic HTTP 400.
 - No new D1 migration; Build 269 remains the required additive CAIP migration.
+
+## Build 275 — Packaging Studio ingredient / French / rose repair
+- Persist source-template Master INCI rows into structured project ingredients when applying a base.
+- Add attached-base reload recovery and stronger French draft reconstruction.
+- Keep inherited supplier claims unapproved and review-first.
+- Increase claim icon spacing, use brand script for the bold soap identity, and expose a larger actual-rose direction palette.
+- No D1 migration; Packaging Studio assets cache-busted to v275.

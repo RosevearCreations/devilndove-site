@@ -1,4 +1,11 @@
-# Devil n Dove Project Status and Roadmap — Build 274
+# Devil n Dove Project Status and Roadmap — Build 275
+
+## Build 275 completed — Packaging Studio source inheritance and label refinements
+
+- Goat’s Milk/source-base templates now persist their reviewed Master INCI into Structured Ingredient Rows instead of leaving that state browser-only.
+- French draft generation can recover rows from the attached base and now exposes clearer Translate/Draft actions.
+- Claim icon spacing, bold brand-script soap title treatment, and an expanded actual-rose colour direction palette are included.
+- No D1 migration is required; Build 274 remains the latest schema change.
 
 ## Build 274 completed — Creative Process lifecycle, inventory corrections and Admin workflow consolidation
 
@@ -457,3 +464,17 @@ Only `AI_HANDOFF.md` and this file are cross-project current authorities. Compat
 ## 2026-08-17 D1 production-parity note
 
 Current auth authority is `users` + `sessions`. Production retains `members_legacy` + `member_sessions_legacy` solely for preserved historical/blog dependencies; `blog_posts.author_member_id` and `blog_comments.member_id` reference `members_legacy`. Do not rerun the retired legacy auth migration and do not drop those compatibility tables until blog ownership is explicitly migrated. Build 269 aggregate schemas and verification now encode this parity state.
+
+## Build 275 — Packaging Studio source/translation/rose repair
+
+Completed in this pass:
+1. Source-material application now persists reviewed source `master_inci` rows into the current packaging project instead of relying on a browser-only copy.
+2. Added **Reload from attached base** so older labels can repair blank structured ingredient rows without recreating the source template.
+3. French draft generation now reconstructs missing structured rows from the attached base/INCI fallback and includes common Goat’s Milk soap wording; human review remains mandatory.
+4. Supplier claim suggestions inherited from a source remain unapproved drafts and are deduplicated when reapplying a source.
+5. Increased claim icon/text horizontal separation in the label renderer and claim editor.
+6. Changed the main soap identity/title to the same brand script family used by Rosevear Creations / Devil n Dove while retaining bold emphasis.
+7. Expanded Product rose direction with an actual botanical-rose quick palette: white, pink, cream, yellow, coral, orange, peach, green, blue, brown, black, grey, silver, gold, copper and bronze.
+8. Packaging Studio CSS/JS cache-busted to Build 275. No D1 migration is required.
+
+Next Packaging Studio work should focus on physical-print acceptance of these visual adjustments, translation-review ergonomics, and source/formula provenance—not another parallel label authority.

@@ -998,3 +998,15 @@ During every future packaging change:
 3. Update `DATABASE_SCHEMA_REFERENCE.md`, aggregate schemas, current migration, `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `DEVELOPMENT_ROADMAP.md`, `KNOWN_GAPS_AND_RISKS.md`, and the build validation record.
 4. Re-run exact-dimension, one-H1, CSS, JavaScript, local-reference, schema, XML/SVG, and ZIP-integrity checks.
 5. Never describe an untested browser PDF, label, formula, claim, or notification as production/legal approval.
+
+## Build 275 — Source-template ingredient persistence, French draft recovery and rose palette
+
+- Applying a purchased/source **base** now writes its reviewed Master INCI rows into `packaging_project_ingredients` immediately. This fixes the prior state where the Material Library could show a populated Goat’s Milk source while the Structured Ingredient Rows were blank after reload.
+- Reapplying a base intentionally replaces the project structured ingredient set with that base composition. Non-base source materials append only INCI rows that are not already present.
+- The Ingredients tab exposes **Reload from attached base** for repairing older drafts created before this persistence behavior.
+- Supplier/source claims remain separate evidence and, when inherited, are inserted only as **unapproved draft claims** with review notes.
+- **Translate to French / generate draft** can reconstruct structured rows from the attached source base before drafting. It remains a curated helper, not compliance approval; INCI remains the label ingredient authority.
+- The soap identity/title uses the same script font stack as the Rosevear Creations and Devil n Dove label marks with bold weight.
+- Claim icon/text horizontal spacing was increased to prevent the icon ring/stroke from touching the first letters of claim copy.
+- Product rose direction now includes a visual palette of real botanical rose assets for white, pink, off-white/cream, yellow, coral, orange, peach, green, blue, brown, black, grey, silver, gold, copper and bronze, while retaining named product directions and custom vector colour.
+- No D1 migration is required for Build 275.
