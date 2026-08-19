@@ -1,5 +1,7 @@
 # Creative Automation Build 273 workflow note
 
+> **Build 274 authority note:** Creative Process now distinguishes planned material estimates from actual posted inventory, supports audited edit/void/correct usage, and exposes one lifecycle for maker and content-only projects. Current sequencing and migration authority live in `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
+
 Build 273 keeps one standalone Creative Process project identity from project facts/Inventory through CAIP private media/evidence and into Content Studio deliverables. Content Studio now creates/refreshes its package from that existing project and attaches it to the existing CAIP workspace; it must not create a second Gray Hair/standalone project. The Automatic Output Blueprint is a cross-authority destination/status view, not a media renderer. See the two canonical authorities for current ordered work.
 
 # Build 246 current integrity note
