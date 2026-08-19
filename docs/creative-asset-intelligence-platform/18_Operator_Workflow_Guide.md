@@ -1,5 +1,7 @@
 # 18 — CAIP Operator Workflow Guide
 
+> **Build 274 authority note:** Creative Process now distinguishes planned material estimates from actual posted inventory, supports audited edit/void/correct usage, and exposes one lifecycle for maker and content-only projects. Current sequencing and migration authority live in `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
+
 **Implementation boundary:** Build 273  
 **Audience:** owner/operator using CAIP for a standalone/social Creative Project with private photo/video footage.
 
