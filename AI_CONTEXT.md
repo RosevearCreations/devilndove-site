@@ -1,3 +1,3 @@
-# Devil n Dove AI Context — Build 273 Pointer
+# Devil n Dove AI Context — Build 274 Pointer
 
-Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. They are the only cross-project current authorities. Build 273 consolidates the standalone Creative Process → existing CAIP → Content Studio path, searchable Creative Process Inventory selection, and a CAIP-aware Automatic Output Blueprint. It adds no D1 schema; Build 269 remains the focused CAIP migration boundary after retained broad Build 264.
+Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. They are the only cross-project current authorities. Build 274 clarifies one Creative Process lifecycle for maker and content-only work, separates planned material estimates from actual Inventory posting, and adds audited edit/void/correct usage. It requires focused migration `database_build274_creative_process_lifecycle_corrections.sql` after the retained Build 269 CAIP migration boundary.

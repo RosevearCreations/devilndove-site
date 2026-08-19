@@ -1,12 +1,38 @@
-# Devil n Dove AI Handoff — Build 273
+# Devil n Dove AI Handoff — Build 274
 
 This is the **first of two canonical current project files**. Read this first for architecture, data authority, safety, schema and deployment. Read `PROJECT_STATUS_AND_ROADMAP.md` second for current status, known risks and the ordered next work. Historical Build prose is evidence only and does not override these two files.
 
 ## Current release and migration boundary
 
-The current code release is **Build 273**. Build 273 is a code/documentation-only CAIP → Creative Process → Content Studio workflow consolidation release; it adds no D1 schema and continues to require the Build 269 CAIP migration. Builds 270–272 remain the recovery-presentation, operator-clarity and intake-readiness hardening underneath it. The retained broad D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`), and Build 269 adds one focused CAIP migration that must be applied afterward: `database_build269_caip_social_project_dedupe_integrity.sql`. Older production databases that still used `payment_refund_id` also require the one-time **Build 266 refund compatibility repair** before Build 264 can complete. Builds 265–268 were CAIP/runtime hardening releases; Build 269 adds the content-fingerprint/recovery-lineage columns and indexes. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
+The current code release is **Build 274**. Build 274 adds one focused Creative Process migration after Build 269: `database_build274_creative_process_lifecycle_corrections.sql`. It adds auditable `active` / `voided` timeline-entry state so mistaken inventory-use entries can be corrected or removed from active project calculations without deleting ledger history. The retained broad D1 feature-migration boundary remains **Build 264** (`database_upgrade_current_pass.sql`); Build 269 remains the CAIP dedupe/integrity migration and Build 274 follows it. Builds 270–273 are code/documentation workflow hardening. Older production databases that still used `payment_refund_id` also require the one-time Build 266 refund compatibility repair before Build 264 can complete. The TMDB movie helper still requires the encrypted Cloudflare secret `TMDB_READ_ACCESS_TOKEN`; the token must never be returned to browser code.
 
+## Build 274 Creative Process lifecycle and correction rule
 
+1. Creative Process has one explicit lifecycle for maker and content-only work: **Concept & estimate → Do & document → Review actual materials → CAIP media/evidence → Story/Content Studio → Complete/archive**. Content-only work may consume inventory and incur cost without ever creating a sellable Product.
+2. Material/ingredient quantity and cost entered in a normal timeline event are **planning/estimate facts only**. They never alter Inventory. Inventory changes only after a reviewed material is explicitly posted or the operator uses the clearly labeled “Actual inventory used now” shortcut and confirms the material was physically used.
+3. Posted inventory is audit data. Never hard-delete a posted usage row. `void_event` reverses any active inventory post through the existing compensating movement/reversal tables, unselects the event as evidence, then marks the timeline event `voided`. `correct_inventory_use` reverses the original post, voids the superseded event and creates/posts a new corrected event.
+4. Active timeline totals, evidence selection and material-review queues exclude voided events. Voided/corrected entries remain visible in collapsed history for forensic/accounting continuity.
+5. Timeline editing is allowed while an event has no active inventory post. If inventory has been posted, use the correction/undo path first so material facts and stock ledgers cannot diverge.
+6. The Admin Dashboard keeps **Website Media & Content Studio** separate from **Creative Project Workflow** because they have different authorities: the former owns static/public site placements; the latter coordinates Creative Process → CAIP → Content Studio. Release tooling is surfaced primarily through **Release & Go-Live Center**, while individual deployment stages remain available as advanced tools.
+7. Public SEO remains people-first/evidence-first. Admin workflow pages are `noindex`; content-only stories must not invent products, transformations, local intent or unsupported outcomes.
+
+## Build 274 timeline-entry operator meaning
+
+Use timeline entries for meaningful project decisions/stages, not for every click or tiny action. Recommended semantics:
+
+- `idea`: initial concept, question or possible direction.
+- `research`: source/vendor/technique investigation or experiment assumptions.
+- `planning`: planned recipe/material/tool/cost/time decision.
+- `setup`: physical workspace/preparation before making/filming.
+- `process`: an actual making/testing/filming step.
+- `mistake`: failed attempt, defect, safety/quality issue or unexpected result.
+- `repair`: correction/recovery after a mistake or failed attempt.
+- `milestone`: meaningful checkpoint worth preserving.
+- `result`: observed output/outcome; a content-only result may simply be footage/findings rather than a Product.
+- `lesson`: reviewed learning or recommendation for the next project.
+- `material`: generated by the direct actual-inventory shortcut; it represents real physical usage, not a plan.
+
+**Reviewed timeline materials** are a three-stage control: (1) the timeline material is the plan/estimate; (2) material review records the actual quantity, waste/reusable amount and approved cost without changing stock; (3) explicit posting maps that reviewed material to a real Inventory row and records the stock/usage movement. The direct actual-use shortcut combines those stages only when the operator confirms the material has already been physically used.
 
 ## Build 273 Creative Process / CAIP / Content Studio bridge rule
 
