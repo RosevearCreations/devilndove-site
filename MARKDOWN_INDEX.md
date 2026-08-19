@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 273
+# Devil n Dove Markdown Index — Build 274
 
 ## Only two mutable current authorities
 
@@ -29,3 +29,4 @@
 - Broad retained migration: Build 264 `database_upgrade_current_pass.sql`.
 - Focused CAIP schema after it: Build 269 `database_build269_caip_social_project_dedupe_integrity.sql`.
 - Builds 270–273 add no D1 schema.
+- Focused Creative Process lifecycle/correction schema after Build 269: Build 274 `database_build274_creative_process_lifecycle_corrections.sql`.

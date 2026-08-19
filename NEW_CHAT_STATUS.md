@@ -1,3 +1,3 @@
-# New Chat Status — Build 273 Pointer
+# New Chat Status — Build 274 Pointer
 
-Start with `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md`. Do not create duplicate standalone/social projects merely because no Content Studio package exists: Build 273 creates/refreshes the package from the existing Creative Process project and attaches it to the existing CAIP workspace. Build 273 is code/documentation-only; current CAIP schema still requires `database_build269_caip_social_project_dedupe_integrity.sql` after the retained Build 264 migration boundary.
+Start with `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md`. Creative Process now follows Concept/Estimate → Do/Document → Review Actual Materials → CAIP Media/Evidence → Content Studio → Complete/Archive. Do not hard-delete posted inventory usage: Build 274 reverses stock through audit movements and voids/supersedes timeline events. Standalone/content-only projects may consume Inventory without creating a sellable Product. Apply `database_build274_creative_process_lifecycle_corrections.sql` after Build 269.

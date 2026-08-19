@@ -1,3 +1,7 @@
+
+## Build 274 — Creative Process lifecycle correction boundary
+
+Build 274 adds `database_build274_creative_process_lifecycle_corrections.sql` after Build 269. `creative_work_events` gains `entry_status`, `void_reason`, `voided_by`, and `voided_at` plus a project/status index. Posted material usage is never hard-deleted: corrections/voids reverse stock through existing compensating inventory tables and preserve the superseded timeline event for audit. Current project direction remains in `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
 # Database Schema Reference — Build 269
 
 ## Current migration and production-parity boundary

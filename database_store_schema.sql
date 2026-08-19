@@ -7635,6 +7635,8 @@ CREATE TABLE IF NOT EXISTS creative_work_events (
  duration_minutes INTEGER NOT NULL DEFAULT 0, material_name TEXT, material_quantity REAL, material_unit TEXT,
  material_cost_cents INTEGER NOT NULL DEFAULT 0, media_url TEXT, is_public_candidate INTEGER NOT NULL DEFAULT 0,
  created_by INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ entry_status TEXT NOT NULL DEFAULT 'active' CHECK (entry_status IN ('active','voided')),
+ void_reason TEXT, voided_by INTEGER, voided_at TEXT,
  FOREIGN KEY(creative_work_project_id) REFERENCES creative_work_projects(creative_work_project_id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS creative_work_outputs (
@@ -7646,6 +7648,7 @@ CREATE TABLE IF NOT EXISTS creative_work_outputs (
 );
 CREATE INDEX IF NOT EXISTS idx_creative_work_projects_status ON creative_work_projects(project_status);
 CREATE INDEX IF NOT EXISTS idx_creative_work_events_project ON creative_work_events(creative_work_project_id,occurred_at);
+CREATE INDEX IF NOT EXISTS idx_creative_work_events_project_status ON creative_work_events(creative_work_project_id,entry_status,occurred_at DESC,creative_work_event_id DESC);
 CREATE INDEX IF NOT EXISTS idx_creative_work_outputs_project ON creative_work_outputs(creative_work_project_id,output_status);
 
 -- Devil n Dove Build 214
@@ -10981,3 +10984,9 @@ INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,dest
 VALUES('build256_media_content_studio','database_build256_media_content_studio.sql',NULL,'applied',0,CURRENT_TIMESTAMP,
 'Adds managed media metadata, explicit page/image/text slots, safe assignments, published text overrides and audit history. Public page requests use bounded D1 manifests; R2 enumeration remains explicit admin-only.',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
 ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+
+
+-- Devil n Dove Build 274 — current aggregate schema marker.
+INSERT INTO schema_migration_ledger (migration_key,file_name,applied_at,notes)
+VALUES ('build274_creative_process_lifecycle_corrections','database_build274_creative_process_lifecycle_corrections.sql',CURRENT_TIMESTAMP,'Adds auditable active/voided Creative Process timeline state and inventory correction/undo support.')
+ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,notes=excluded.notes;
