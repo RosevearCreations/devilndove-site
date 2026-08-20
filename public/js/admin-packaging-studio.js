@@ -1,4 +1,4 @@
-// Build 276 - Inventory-linked ingredient identity, two-panel INCI capacity, and wider claim spacing.
+// Build 277 - Restore dedicated French + English ingredient panels, strengthen claim spacing, and retain Build 276 Inventory traceability/overflow safety.
 (() => {
   const STORAGE_KEY = 'dd_packaging_studio_local_draft_v5';
   const state = { projects: [], templates: [], products: [], inventory: [], printers: [], printersSchemaReady: true, referenceSources: [], formulaLibrary: [], contentLibrary: [], sourceMaterialLibrary: [], librarySchemaReady: true, sourceMaterialSchemaReady: true, sourceMaterialMetadataReady: true, detail: null, loading: false, activeTab: 'product', activeSourceMaterialId: 0, activeContentLibraryId: 0 };
@@ -304,18 +304,27 @@
   }
 
   function ribbonIngredientLayout(items = []) {
+    // Build 277: each language owns one ingredient panel. Keep the adaptive font/line
+    // strategy from Build 276, but never use the second language panel as overflow.
     const attempts = [
-      {maxChars:31, perColumn:11, fontSize:4.55, lineHeight:4.55},
-      {maxChars:34, perColumn:12, fontSize:4.15, lineHeight:4.2},
-      {maxChars:38, perColumn:13, fontSize:3.8, lineHeight:3.9}
+      {maxChars:30, maxLines:9, fontSize:4.25, lineHeight:4.35},
+      {maxChars:34, maxLines:10, fontSize:3.85, lineHeight:4.0},
+      {maxChars:38, maxLines:11, fontSize:3.55, lineHeight:3.7}
     ];
     for (const option of attempts) {
       const lines = wrapIngredientDeclaration(items, option.maxChars);
-      if (lines.length <= option.perColumn * 2) return {...option, lines, overflow:false};
+      if (lines.length <= option.maxLines) return {...option, lines, overflow:false};
     }
     const option = attempts[attempts.length - 1];
     const lines = wrapIngredientDeclaration(items, option.maxChars);
-    return {...option, lines, overflow:lines.length > option.perColumn * 2};
+    return {...option, lines, overflow:lines.length > option.maxLines};
+  }
+
+  function ingredientItemsFromText(value = '') {
+    return String(value || '')
+      .split(/(?:\r?\n|•|,|;)+/)
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
 
   function ingredientLineMarkup(lines = [], x, y, lineHeight, size) {
@@ -468,13 +477,20 @@
     const family=data.packagingCollection||'Glacial Purple';const typeEn=data.packagingIdentityEn||data.packagingProductName||'PRODUCT IDENTITY REQUIRED';
     const structuredIngredients=Array.isArray(data.structured_ingredients)?data.structured_ingredients:[];
     const requiredIngredients=structuredIngredients.filter((row)=>Number(row.required_on_label)!==0);
-    const missingIngredientDraft='INCI INGREDIENTS REQUIRED — DRAFT NOT FOR PRINT';
-    const inciFromRows=requiredIngredients.map((row)=>String(row.inci_name||'').trim()).filter(Boolean);
-    const inciFallback=String(data.packagingInci||'').split(/[,;\n]+/).map((value)=>value.trim()).filter(Boolean);
-    const declarationItems=inciFromRows.length?inciFromRows:(inciFallback.length?inciFallback:[missingIngredientDraft]);
-    const ingredientLayout=ribbonIngredientLayout(declarationItems);
-    const leftIngredientLines=ingredientLayout.lines.slice(0,ingredientLayout.perColumn);
-    const rightIngredientLines=ingredientLayout.lines.slice(ingredientLayout.perColumn,ingredientLayout.perColumn*2);
+    const missingIngredientDraft='INGREDIENTS REQUIRED — DRAFT NOT FOR PRINT';
+    const englishFromRows=requiredIngredients.map((row)=>String(row.display_name_en||row.inci_name||'').trim()).filter(Boolean);
+    const frenchFromRows=requiredIngredients.map((row)=>{
+      const explicit=String(row.display_name_fr||'').trim();
+      if(explicit)return explicit;
+      const source=String(row.display_name_en||row.inci_name||'').trim();
+      return source?curatedFrenchDraft(source):'';
+    }).filter(Boolean);
+    const englishFallback=ingredientItemsFromText(data.packagingIngredientsEn||data.packagingInci);
+    const frenchFallback=ingredientItemsFromText(data.packagingIngredientsFr||data.packagingInci).map((item)=>curatedFrenchDraft(item));
+    const englishItems=englishFromRows.length?englishFromRows:(englishFallback.length?englishFallback:[missingIngredientDraft]);
+    const frenchItems=frenchFromRows.length?frenchFromRows:(frenchFallback.length?frenchFallback:[missingIngredientDraft]);
+    const englishLayout=ribbonIngredientLayout(englishItems);
+    const frenchLayout=ribbonIngredientLayout(frenchItems);
     const claims=Array.isArray(data.structured_claims)&&data.structured_claims.length?data.structured_claims:(claimRowsFromDom().length?claimRowsFromDom():[]);
     const topLabel=artwork.top_arc_text||'Rosevear Creations';const bottomLabel=artwork.bottom_arc_text||'MADE IN CANADA';const centreMark=artwork.centre_mark||'♥';
     const rosePreset=rosePresetById(artwork.rose_asset_id);const roseAsset=rosePreset?.path||'';
@@ -484,7 +500,7 @@
     const roseArtwork=roseAsset?`<image href="${xml(roseAsset)}" x="205" y="${centreY-62}" width="126" height="124" preserveAspectRatio="xMidYMid meet"/>`:roseVector(268,centreY,.62,rose);
     const frontOuter=artwork.badge_shape==='scalloped'?`<path d="${scallopedOvalPath(zones.front.cx,centreY,zones.front.rx,frontRy)}" fill="${background}" stroke="${gold}" stroke-width="4"/>`:`<ellipse cx="${zones.front.cx}" cy="${centreY}" rx="${zones.front.rx}" ry="${frontRy}" fill="${background}" stroke="${gold}" stroke-width="4"/>`;
     const damaskId='soap-reference-damask-v3';
-    const claimMarkup=claims.slice(0,4).map((claim,index)=>{const y=bandY+14+index*10.2;const enText=String(claim.claim_en||'');const frText=String(claim.claim_fr||'');const enSize=fontSize(enText,23,4.15,3.05);const frSize=fontSize(frText,27,3.65,2.8);const textX=zones.claims.x+35;return `${iconSvg(claim.icon_name,zones.claims.x+8,y+1.2,secondary)}<text x="${textX}" y="${y}" font-size="${enSize}" font-weight="700" class="pkg-copy">${xml(enText)}</text><text x="${textX}" y="${y+4.35}" font-size="${frSize}" class="pkg-copy">${xml(frText)}</text>`;}).join('');
+    const claimMarkup=claims.slice(0,4).map((claim,index)=>{const y=bandY+14+index*12.0;const enText=String(claim.claim_en||'');const frText=String(claim.claim_fr||'');const enSize=fontSize(enText,21,4.0,2.95);const frSize=fontSize(frText,24,3.5,2.7);const iconX=zones.claims.x+12;const textX=zones.claims.x+44;return `${iconSvg(claim.icon_name,iconX,y+1.2,secondary)}<text x="${textX}" y="${y}" font-size="${enSize}" font-weight="700" class="pkg-copy">${xml(enText)}</text><text x="${textX}" y="${y+4.35}" font-size="${frSize}" class="pkg-copy">${xml(frText)}</text>`;}).join('');
     const frontTextX=340;const familyLines=wrapPlainLines(family,17,2);const familyStart=centreY+(familyLines.length>1?-8:-3);const familyMarkup=familyLines.map((line,index)=>`<text x="${frontTextX}" y="${familyStart+index*8.4}" text-anchor="start" font-size="${fontSize(line,17,9.8,7.5)}" class="pkg-script">${xml(line)}</text>`).join('');const typeLines=wrapPlainLines(typeEn,20,2);const typeStart=centreY+17-(typeLines.length-1)*4;const typeMarkup=typeLines.map((line,index)=>`<text x="${frontTextX}" y="${typeStart+index*8.5}" text-anchor="start" font-size="${fontSize(line,20,9.7,6.9)}" font-weight="700" class="pkg-brand-title">${xml(line)}</text>`).join('');
     const website=String(data.packagingWebsite||'devilndove.com');
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMm}mm" height="${heightMm}mm" viewBox="0 0 1100 ${height}" role="img" aria-label="${xml(family)} ${xml(typeEn)} continuous soap ribbon label" data-soap-layout="reference-v3">
@@ -503,7 +519,7 @@
       <rect x="2" y="${bandY+2}" width="1096" height="${bandHeight-4}" rx="4" fill="none" stroke="${border}" stroke-width="3"/>
       <line x1="2" y1="${bandY+8}" x2="1098" y2="${bandY+8}" stroke="${gold}" stroke-width="1.7"/><line x1="2" y1="${bandY+bandHeight-8}" x2="1098" y2="${bandY+bandHeight-8}" stroke="${gold}" stroke-width="1.7"/>
       <g class="pkg-zone-line"><line x1="174" y1="${bandY+12}" x2="174" y2="${bandY+bandHeight-12}"/><line x1="558" y1="${bandY+12}" x2="558" y2="${bandY+bandHeight-12}"/><line x1="722" y1="${bandY+12}" x2="722" y2="${bandY+bandHeight-12}"/><line x1="862" y1="${bandY+12}" x2="862" y2="${bandY+bandHeight-12}"/></g>
-      ${rightIngredientLines.length||ingredientLayout.overflow?`<text x="${zones.en.x}" y="${bandY+14}" font-size="5.4" font-weight="700" class="pkg-copy">CONTINUED / SUITE :</text><g clip-path="url(#soap-en-ingredients)">${ingredientLineMarkup(rightIngredientLines,zones.en.x,bandY+20,ingredientLayout.lineHeight,ingredientLayout.fontSize)}</g>${ingredientLayout.overflow?`<text x="${zones.en.x}" y="${bandY+bandHeight-11}" font-size="4.1" font-weight="700" fill="#8B1E1E">EXTENDED INCI LABEL REQUIRED</text>`:''}`:''}
+      <text x="${zones.en.x}" y="${bandY+14}" font-size="5.4" font-weight="700" class="pkg-copy">INGREDIENTS:</text><g clip-path="url(#soap-en-ingredients)">${ingredientLineMarkup(englishLayout.lines.slice(0,englishLayout.maxLines),zones.en.x,bandY+20,englishLayout.lineHeight,englishLayout.fontSize)}</g>${englishLayout.overflow?`<text x="${zones.en.x}" y="${bandY+bandHeight-11}" font-size="3.65" font-weight="700" fill="#8B1E1E">EXTENDED LABEL REQUIRED</text>`:''}
       <g>
         ${frontOuter}<ellipse cx="${zones.front.cx}" cy="${centreY}" rx="${zones.front.rx-7}" ry="${frontRy-6}" fill="none" stroke="${border}" stroke-width="1.7"/><ellipse cx="${zones.front.cx}" cy="${centreY}" rx="${zones.front.rx-12}" ry="${frontRy-11}" fill="none" stroke="${gold}" stroke-width="1" stroke-dasharray="2 4"/>
         ${roseArtwork}
@@ -516,7 +532,7 @@
         <circle cx="510" cy="${centreY-5}" r="28" fill="${background}" stroke="${border}" stroke-width="1.7"/><circle cx="510" cy="${centreY-5}" r="22" fill="none" stroke="${gold}" stroke-width="1"/>
         <text x="510" y="${centreY-13}" text-anchor="middle" font-size="3.55" font-weight="700" class="pkg-copy">DEVILNDOVE.COM</text><path d="M502 ${centreY-2}q8-9 16 0q-8 9-16 0z" fill="none" stroke="${border}" stroke-width="1"/><text x="510" y="${centreY+12}" text-anchor="middle" font-size="3.65" class="pkg-copy">HANDMADE</text>
       </g>
-      <text x="${zones.fr.x}" y="${bandY+14}" font-size="5.4" font-weight="700" class="pkg-copy">INGREDIENTS / INGRÉDIENTS :</text><g clip-path="url(#soap-fr-ingredients)">${ingredientLineMarkup(leftIngredientLines,zones.fr.x,bandY+20,ingredientLayout.lineHeight,ingredientLayout.fontSize)}</g>
+      <text x="${zones.fr.x}" y="${bandY+14}" font-size="5.4" font-weight="700" class="pkg-copy">INGRÉDIENTS :</text><g clip-path="url(#soap-fr-ingredients)">${ingredientLineMarkup(frenchLayout.lines.slice(0,frenchLayout.maxLines),zones.fr.x,bandY+20,frenchLayout.lineHeight,frenchLayout.fontSize)}</g>${frenchLayout.overflow?`<text x="${zones.fr.x}" y="${bandY+bandHeight-11}" font-size="3.65" font-weight="700" fill="#8B1E1E">ÉTIQUETTE ÉTENDUE REQUISE</text>`:''}
       <g><circle cx="${zones.rear.cx}" cy="${centreY}" r="${zones.rear.r}" fill="${background}" stroke="${secondary}" stroke-width="3.2"/><circle cx="${zones.rear.cx}" cy="${centreY}" r="${zones.rear.r-5}" fill="none" stroke="${gold}" stroke-width="1.6"/>
         <text x="${zones.rear.cx}" y="${centreY-25}" text-anchor="middle" font-size="9.2" class="pkg-script">Rosevear Creations</text><text x="${zones.rear.cx}" y="${centreY-12}" text-anchor="middle" font-size="7.2" class="pkg-script">- Devil n Dove -</text>
         <line x1="${zones.rear.cx-28}" y1="${centreY-4}" x2="${zones.rear.cx+28}" y2="${centreY-4}" stroke="${gold}" stroke-width=".8"/><text x="${zones.rear.cx}" y="${centreY-1}" text-anchor="middle" font-size="5.4" fill="${gold}">${xml(centreMark)}</text>
@@ -601,7 +617,13 @@
     if (isSoap && Math.abs(num(template.rear_width_mm) - 50) > .1) warnings.push('Photo-fit profile uses a 38.1 mm rear seal because 50 mm cannot fit inside a 38.1 mm-high artboard.');
     if (isSoap && ingredients.some((row) => row.allergen_note)) warnings.push('At least one ingredient includes an allergen note; verify current Health Canada fragrance-allergen requirements.');
     if (claims.some((row) => !row.is_approved)) warnings.push('One or more claims are not marked approved.');
-    if (isSoap) { const inciLayout=ribbonIngredientLayout(ingredients.filter((row)=>Number(row.required_on_label)!==0).map((row)=>row.inci_name).filter(Boolean)); if(inciLayout.overflow) missing.push(['Extended ingredient label required for full INCI', false]); }
+    if (isSoap) {
+      const requiredRows=ingredients.filter((row)=>Number(row.required_on_label)!==0);
+      const enLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_en||row.inci_name).filter(Boolean));
+      const frLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_fr||curatedFrenchDraft(row.display_name_en||row.inci_name)||row.inci_name).filter(Boolean));
+      if(enLayout.overflow||frLayout.overflow) missing.push(['Extended bilingual ingredient label required for complete English and French lists', false]);
+      if(requiredRows.some((row)=>!String(row.display_name_fr||'').trim())) warnings.push('One or more French ingredient names are using a generated/fallback preview. Review and save the French ingredient wording before print approval.');
+    }
     if (isSoap && claims.length > 4) warnings.push('Only the first four claim rows fit the standard claims panel; remove, combine or move additional claims after review.');
     if (isRound) warnings.push('Round laser/print preview: confirm the measured lid or blank diameter, safe margin, material settings and a physical proof before production.');
     else if (!isSoap) warnings.push('General packaging preview: verify category-specific legal fields, physical dieline, barcode/QR destination and material fit before approval.');
