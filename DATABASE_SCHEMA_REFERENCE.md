@@ -1,18 +1,23 @@
-
-## Build 274 — Creative Process lifecycle correction boundary
-
-Build 274 adds `database_build274_creative_process_lifecycle_corrections.sql` after Build 269. `creative_work_events` gains `entry_status`, `void_reason`, `voided_by`, and `voided_at` plus a project/status index. Posted material usage is never hard-deleted: corrections/voids reverse stock through existing compensating inventory tables and preserve the superseded timeline event for audit. Current project direction remains in `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
-# Database Schema Reference — Build 269
+# Database Schema Reference — Build 276
 
 ## Current migration and production-parity boundary
 
-Build 269 is the current **focused CAIP** migration and is applied after the retained broad Build 264 boundary:
+The retained broad/current-pass migration remains Build 264. Focused additive migrations are applied after it in release order:
 
 - broad/current-pass boundary: `database_upgrade_current_pass.sql` (Build 264; intentionally retained)
-- focused CAIP migration: `database_build269_caip_social_project_dedupe_integrity.sql`
-- post-migration verification: `BUILD269_D1_VERIFICATION.sql`
+- focused CAIP integrity/dedupe: `database_build269_caip_social_project_dedupe_integrity.sql`
+- Creative Process correction lifecycle: `database_build274_creative_process_lifecycle_corrections.sql`
+- Packaging ingredient Inventory-reference support: `database_build276_packaging_inventory_inci_capacity.sql`
 
-`database_full_schema.sql` is the complete supported fresh-install aggregate. Build 269 also synchronizes `database_schema.sql` and `database_store_schema.sql` for the CAIP additions and the 2026-08-17 auth/blog compatibility state. The focused Build 269 migration is **not** copied over `database_upgrade_current_pass.sql`; production applies it after the retained Build 264 broad boundary.
+Use the matching read-only `BUILD269_D1_VERIFICATION.sql`, `BUILD274_D1_VERIFICATION.sql`, and `BUILD276_D1_VERIFICATION.sql` after those focused migrations. `database_full_schema.sql`, `database_schema.sql`, `database_store_schema.sql`, and `functions/api/_lib/fullSchemaRequirements.js` are synchronized through Build 276 for fresh-install/runtime parity. Focused migrations are **not** copied over `database_upgrade_current_pass.sql`; production applies them after the retained Build 264 broad boundary.
+
+## Build 276 Packaging schema delta
+
+`packaging_project_ingredients` gains nullable `site_item_inventory_id` plus `idx_packaging_project_ingredients_inventory`. The field is deliberately **reference-only**: Packaging Studio resolves source/INCI identity through Inventory/Material Library but does not create Inventory movements or change stock. Aggregate schema authorities and `fullSchemaRequirements.js` are synchronized to Build 276.
+
+## Build 274 Creative Process schema delta
+
+`creative_work_events` gains `entry_status`, `void_reason`, `voided_by`, and `voided_at` plus a project/status index. Posted material usage is never hard-deleted: corrections/voids reverse stock through existing compensating inventory tables and preserve superseded timeline history for audit.
 
 ## 2026-08-17 auth/blog production-parity maintenance
 

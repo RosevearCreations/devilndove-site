@@ -1,4 +1,23 @@
-# Devil n Dove Project Status and Roadmap — Build 275
+# Devil n Dove Project Status and Roadmap — Build 276
+
+
+## Build 276 completed — Inventory-linked label ingredients and full-INCI ribbon capacity
+
+- Structured Packaging Studio ingredient rows can now point to the real Devil n Dove Inventory item for identity/source traceability. This is reference-only; Packaging Studio never consumes or reserves stock. Structured rows have Move up / Move down controls; row order is the reviewed printed INCI order and does not imply an Inventory quantity.
+- The Ingredients tab has a typable **Add ingredient/source from Inventory** control. Inventory items with linked Material Library templates import their reviewed Master INCI; an untemplated item such as mica can still be linked as a draft but blocks approval until its INCI is verified.
+- Applying a soap base, fragrance/essential-oil blend, colourant or additive propagates the source Inventory ID onto inherited constituent INCI rows, so one purchased blend may legitimately back several ingredient rows.
+- Soap-ribbon ingredient rendering now uses both side panels as one ordered INCI declaration rather than duplicating English and French ingredient lists. The renderer progressively compacts within tested limits and blocks approval when an extended label is required instead of silently clipping ingredients.
+- Packaging guidance explicitly distinguishes `Parfum` from marketing wording such as “Essential Oil scent”; required fragrance-allergen disclosure remains separate and review-gated.
+- Claims received another horizontal icon/text spacing increase in both the editor and exact-size SVG.
+- Build 276 adds `database_build276_packaging_inventory_inci_capacity.sql` and `BUILD276_D1_VERIFICATION.sql`.
+
+### Ordered next work after Build 276
+
+1. Production-test the Goat’s Milk soap label: reapply the linked base, add the real mica Inventory item, save/reload, and confirm the Inventory link/INCI persists without any stock movement.
+2. Verify the essential-oil source template has reviewed fragrance-allergen data. Decide deliberately whether that fragrance mixture is printed as its constituent INCI rows or as `Parfum` plus individually required allergens; do not use “Essential Oil scent” as the legal ingredient name.
+3. Print the longer two-panel INCI declaration at 100% size. If Build 276 flags overflow, design/test an extended/peel-back ingredient-label template rather than reducing text below an acceptable physical proof size.
+4. Continue the Creative Process/CAIP next work: first-class video review, exact timecode evidence markers, story-segment drafting and reviewed Content Studio handoff.
+5. Continue production CSS/mobile/SEO verification and replacement of intentional visual placeholders with approved real evidence through the correct media authority.
 
 ## Build 275 completed — Packaging Studio source inheritance and label refinements
 

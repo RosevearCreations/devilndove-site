@@ -1,3 +1,12 @@
+## Build 276 — Packaging ingredient Inventory links and long-INCI label handling
+
+- Structured Packaging Studio ingredient rows can reference real Devil n Dove Inventory items for source identity and traceability without changing stock.
+- Added type-to-search Inventory ingredient insertion; linked Material Library templates import reviewed Master INCI rows. Packaging Studio requests no usage quantity and creates no Inventory movement; row arrows control reviewed printed INCI order only.
+- Soap-ribbon labels now render one ordered INCI declaration across both side panels, with explicit overflow blocking instead of clipping.
+- Added current Canadian fragrance-declaration guidance in the operator UI: use `Parfum` where appropriate, while retaining individually required fragrance-allergen disclosure.
+- Increased claims icon/text spacing again.
+- Adds `database_build276_packaging_inventory_inci_capacity.sql`; run `BUILD276_D1_VERIFICATION.sql` after migration.
+
 
 ## Build 274 — Creative Process lifecycle correction boundary
 

@@ -24052,6 +24052,7 @@ CREATE TABLE IF NOT EXISTS packaging_project_ingredients (
   packaging_project_ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
   packaging_project_id INTEGER NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 1,
+  site_item_inventory_id INTEGER,
   inci_name TEXT,
   display_name_en TEXT,
   display_name_fr TEXT,
@@ -24063,6 +24064,7 @@ CREATE TABLE IF NOT EXISTS packaging_project_ingredients (
   FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_packaging_project_ingredients_project ON packaging_project_ingredients(packaging_project_id,sort_order,packaging_project_ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_packaging_project_ingredients_inventory ON packaging_project_ingredients(site_item_inventory_id,packaging_project_id,sort_order);
 CREATE TABLE IF NOT EXISTS packaging_project_claims (
   packaging_project_claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
   packaging_project_id INTEGER NOT NULL,
@@ -25308,3 +25310,9 @@ ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='ap
 INSERT INTO schema_migration_ledger (migration_key,file_name,applied_at,notes)
 VALUES ('build274_creative_process_lifecycle_corrections','database_build274_creative_process_lifecycle_corrections.sql',CURRENT_TIMESTAMP,'Adds auditable active/voided Creative Process timeline state and inventory correction/undo support.')
 ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,notes=excluded.notes;
+
+
+-- Build 276 — Packaging ingredient Inventory traceability and long-INCI application support.
+INSERT INTO schema_migration_ledger (migration_key,file_name,status,destructive,applied_at,notes,updated_at)
+VALUES ('build276_packaging_inventory_inci_capacity','database_build276_packaging_inventory_inci_capacity.sql','applied',0,CURRENT_TIMESTAMP,'Reference-only Inventory links for structured packaging ingredients; no stock movements are created by Packaging Studio.',CURRENT_TIMESTAMP)
+ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;

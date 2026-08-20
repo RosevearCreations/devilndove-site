@@ -10650,3 +10650,43 @@ INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,dest
 VALUES('build256_media_content_studio','database_build256_media_content_studio.sql',NULL,'applied',0,CURRENT_TIMESTAMP,
 'Adds managed media metadata, explicit page/image/text slots, safe assignments, published text overrides and audit history. Public page requests use bounded D1 manifests; R2 enumeration remains explicit admin-only.',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
 ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+
+
+-- Build 255/276 parity — general structured packaging content authority retained in aggregate schemas.
+CREATE TABLE IF NOT EXISTS packaging_project_ingredients (
+  packaging_project_ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 1,
+  site_item_inventory_id INTEGER,
+  inci_name TEXT,
+  display_name_en TEXT,
+  display_name_fr TEXT,
+  organic_flag INTEGER NOT NULL DEFAULT 0,
+  allergen_note TEXT,
+  required_on_label INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_project_ingredients_project ON packaging_project_ingredients(packaging_project_id,sort_order,packaging_project_ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_packaging_project_ingredients_inventory ON packaging_project_ingredients(site_item_inventory_id,packaging_project_id,sort_order);
+CREATE TABLE IF NOT EXISTS packaging_project_claims (
+  packaging_project_claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  packaging_project_id INTEGER NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 1,
+  claim_en TEXT,
+  claim_fr TEXT,
+  icon_name TEXT,
+  is_approved INTEGER NOT NULL DEFAULT 0,
+  compliance_note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(packaging_project_id) REFERENCES packaging_projects(packaging_project_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_packaging_project_claims_project ON packaging_project_claims(packaging_project_id,sort_order,packaging_project_claim_id);
+
+
+-- Build 276 — Packaging ingredient Inventory traceability and long-INCI application support.
+INSERT INTO schema_migration_ledger (migration_key,file_name,status,destructive,applied_at,notes,updated_at)
+VALUES ('build276_packaging_inventory_inci_capacity','database_build276_packaging_inventory_inci_capacity.sql','applied',0,CURRENT_TIMESTAMP,'Reference-only Inventory links for structured packaging ingredients; no stock movements are created by Packaging Studio.',CURRENT_TIMESTAMP)
+ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;

@@ -2,7 +2,7 @@
 
 Material Library can now create a **review-first draft** from an exact Amazon product URL. The preview attempts to fill purchased/source product identity, Amazon/brand supplier, ASIN/SKU, source URL/image, likely source category, colour swatch, exposed ingredient/allergen wording and Amazon product-detail bullets. Nothing is saved automatically. Review supplier/manufacturer INCI/SDS/allergen documentation and then use **Save material template**.
 
-Soap labels use `soap_reference_v3`: five fixed zones keep English ingredients, the front oval/artwork, French ingredients, the rear seal and claims/net weight independent. Ingredient and claim copy is clipped to its assigned zone. The Preview tab includes an alignment explanation and approved-reference link.
+Soap labels use `soap_reference_v3`. **Build 276 supersedes the older English-left/French-right ingredient wording in historical sections below:** the two ingredient-side zones now carry one ordered INCI declaration, beginning with `INGREDIENTS / INGRÉDIENTS` and continuing with `CONTINUED / SUITE` only when required. The ingredient list itself is INCI and is not duplicated in English/French. Ingredient and claim copy remains bounded to its assigned zone; if the complete INCI cannot fit legibly within the tested ribbon capacity, print approval is blocked and an extended compliant ingredient-label method is required. Historical sections are retained as design/build evidence, not current rendering authority.
 
 Artwork/media management is now linked to `/admin/media-content-studio/`; the next packaging-media phase is a direct managed-artwork picker instead of manual asset paths.
 
@@ -192,6 +192,10 @@ This creates:
 The band itself must remain exactly 0.75 inch high throughout the full 11-inch length.
 
 ---
+
+### Build 276 current segment interpretation
+
+The historical segment names below describe the original physical zones. Current rendering uses the first and third ingredient zones as **INCI part 1** and **INCI continuation**, not separate English and French ingredient declarations. This Build 276 rule is authoritative.
 
 ## 3. Label Segment Order
 
@@ -1010,3 +1014,15 @@ During every future packaging change:
 - Claim icon/text horizontal spacing was increased to prevent the icon ring/stroke from touching the first letters of claim copy.
 - Product rose direction now includes a visual palette of real botanical rose assets for white, pink, off-white/cream, yellow, coral, orange, peach, green, blue, brown, black, grey, silver, gold, copper and bronze, while retaining named product directions and custom vector colour.
 - No D1 migration is required for Build 275.
+
+
+## Build 276 — Inventory-linked ingredient identity and long-INCI ribbon handling
+
+- `packaging_project_ingredients.site_item_inventory_id` is a **reference-only** link to the purchased/stock item that supplied an ingredient or blend. Packaging Studio must never consume, reserve or decrement Inventory through this field. Actual usage belongs in Creative Process/production.
+- The Ingredients tab offers a typable Inventory search. If the selected item already has an `inventory_source_material_links` record, its source template Master INCI can be imported. A linked item without verified INCI remains a draft and cannot become print-ready.
+- Applying a source-material template copies its linked Inventory ID to all inherited constituent rows. This allows one purchased Goat’s Milk base or one essential-oil blend to remain one Inventory item while its full supplier-declared composition remains represented on the label.
+- The soap renderer no longer duplicates the ingredient declaration as English and French lists. Ingredient names use INCI and are rendered once across the two ribbon ingredient panels: **INGREDIENTS / INGRÉDIENTS** followed by **CONTINUED / SUITE** when needed.
+- The renderer uses progressively denser but bounded line fitting. If the complete verified INCI exceeds the tested two-panel capacity, preview/readiness explicitly requires an extended/peel-back or other compliant extended ingredient panel; it must never silently omit ingredients.
+- Fragrance/essential-oil mixtures may use `Parfum` when that declaration is appropriate for the formulation/source evidence. Keep the detailed internal source composition and supplier allergen evidence. Fragrance allergens that meet the current Canadian disclosure threshold remain individually disclosable outside `Parfum`. Do not use “Essential Oil scent” as a substitute INCI declaration.
+- Claim icon/text separation is wider again in Build 276.
+- Schema migration: `database_build276_packaging_inventory_inci_capacity.sql`. Verification: `BUILD276_D1_VERIFICATION.sql`.
