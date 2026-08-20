@@ -122,6 +122,26 @@ async function pageSlots(db, pagePath) {
   return rows(result).map((r)=>({...r,media_content_slot_id:n(r.media_content_slot_id),media_asset_id:r.media_asset_id==null?null:n(r.media_asset_id),media_content_assignment_id:r.media_content_assignment_id==null?null:n(r.media_content_assignment_id),published:bool(r.published),protected_static:bool(r.protected_static),decorative:bool(r.decorative),is_required:bool(r.is_required)}));
 }
 
+async function visualPlanSlots(db) {
+  // Build 278: bounded site-wide visual checklist. This is intentionally limited to the
+  // explicit public/static image/background slot catalog; product/inventory specialist media
+  // remains outside Media Studio.
+  const result = await db.prepare(`
+    SELECT s.media_content_slot_id,s.page_path,s.slot_key,s.slot_label,s.slot_type,s.source_snapshot,s.source_alt_snapshot,s.is_required,s.is_active,
+           a.media_content_assignment_id,a.media_asset_id,ma.public_url,ma.original_filename,mm.display_name
+    FROM media_content_slots s
+    LEFT JOIN media_content_assignments a ON a.media_content_slot_id=s.media_content_slot_id AND a.active=1
+    LEFT JOIN media_assets ma ON ma.media_asset_id=a.media_asset_id AND ma.deleted_at IS NULL
+    LEFT JOIN managed_media_metadata mm ON mm.media_asset_id=a.media_asset_id
+    WHERE s.is_active=1 AND s.slot_type IN ('image','background')
+      AND s.page_path NOT LIKE '/admin%' AND s.page_path NOT LIKE '/shop/product%'
+      AND s.page_path NOT LIKE '/tools%' AND s.page_path NOT LIKE '/toolshed%' AND s.page_path NOT LIKE '/supplies%'
+    ORDER BY CASE WHEN s.is_required=1 THEN 0 ELSE 1 END,s.page_path,CASE s.slot_type WHEN 'image' THEN 1 ELSE 2 END,s.media_content_slot_id
+    LIMIT 250
+  `).all();
+  return rows(result).map((r)=>({...r,media_content_slot_id:n(r.media_content_slot_id),media_asset_id:r.media_asset_id==null?null:n(r.media_asset_id),media_content_assignment_id:r.media_content_assignment_id==null?null:n(r.media_content_assignment_id),is_required:bool(r.is_required)}));
+}
+
 export async function onRequestGet(context) {
   const auth = await access(context); if (auth.error) return auth.error;
   const { db, adminUser } = auth;
@@ -135,6 +155,10 @@ export async function onRequestGet(context) {
     if (mode === "media") {
       const result = await mediaList(db, Object.fromEntries(url.searchParams.entries()));
       return json({ok:true,requested_by:adminUser,media:result.media,has_more:result.has_more,next_before_id:result.next_before_id});
+    }
+    if (mode === "visual_plan") {
+      const visualSlots = await visualPlanSlots(db);
+      return json({ok:true,requested_by:adminUser,visual_slots:visualSlots});
     }
     if (mode === "uses") {
       const selectedMediaId = n(url.searchParams.get("media_id"));
