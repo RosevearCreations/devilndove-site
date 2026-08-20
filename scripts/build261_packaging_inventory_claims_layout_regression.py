@@ -52,7 +52,7 @@ check('Soap English ingredient clip bounded','soap-en-ingredients' in js and ('b
 check('Soap French ingredient clip bounded','soap-fr-ingredients' in js)
 check('Soap title wraps to two lines',bool(re.search(r'wrapPlainLines\(family,(?:17|18|20),2\)',js)))
 check('Soap claims limited to four','claims.slice(0,4)' in js)
-check('Soap claim rows compressed',('index*11.6' in js or 'index*10.2' in js) and ('bandHeight-28' in js or 'bandHeight-27' in js))
+check('Soap claim rows compressed',('index*11.6' in js or 'index*10.2' in js or 'index*11.25' in js or 'index*12.0' in js) and ('bandHeight-28' in js or 'bandHeight-27' in js))
 check('Soap net quantity separated from claims',(('bandY+53.5' in js and 'bandY+61.5' in js) or ('bandY+58' in js and 'bandY+65' in js)))
 check('Soap preview CSS preserves wide ribbon geometry','svg[data-soap-layout="reference-v3"]' in css and 'min-width:1080px' in css)
 check('Canonical handoff is Build 261 or newer',version_at_least(r'# Devil n Dove AI Handoff — Build (\d+)',handoff,261))

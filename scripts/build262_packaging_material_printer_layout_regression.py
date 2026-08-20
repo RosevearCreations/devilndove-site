@@ -27,8 +27,8 @@ ck(cache_version(r'admin-packaging-studio\.js\?v=(\d+)')>=262 and cache_version(
 ck('.packaging-printer-callout' in css and '.packaging-sheet-plan' in css,'Printer/profile layout CSS exists')
 
 # Soap print geometry checks.
-ck((("fr:{x:20" in js and "en:{x:570" in js) or ('INGREDIENTS / INGRÉDIENTS :' in js and 'CONTINUED / SUITE :' in js)),'Ingredient declaration uses both side panels around the oval')
-ck('bandY+14+index*10.2' in js,'Claims start lower and use compressed vertical spacing')
+ck((("fr:{x:20" in js and "en:{x:570" in js) or ('INGREDIENTS / INGRÉDIENTS :' in js and 'CONTINUED / SUITE :' in js) or ('>INGREDIENTS:</text>' in js and '>INGRÉDIENTS :</text>' in js)),'Ingredient declaration uses both side panels around the oval')
+ck(('bandY+14+index*10.2' in js or 'bandY+14+index*12.0' in js),'Claims start lower and use bounded non-overlapping vertical spacing')
 ck('bandY+58' in js and 'bandY+65' in js,'Weight separator and weight line are lowered')
 ck(('const frontTextX=428' in js and 'text-anchor="middle"' in js) or ('const frontTextX=340' in js and 'text-anchor="start"' in js),'Front title hierarchy remains intentionally aligned with rose/artwork')
 ck('r="28"' in js and 'font-size="3.55"' in js,'Small inner circle enlarged and wording reduced')

@@ -31,8 +31,8 @@ ck('French draft can reconstruct missing structured rows', 'ensureStructuredIngr
 ck('French action is clearly labelled', 'Translate to French / generate draft' in js and 'Draft French' in js)
 ck('Goat Milk curated French wording exists', 'Lait de chèvre' in js and 'Glycérine végétale' in js and 'Hydroxyde de sodium' in js)
 ck('Main soap identity uses brand script and bold weight', 'pkg-brand-title' in js and 'font-weight="700" class="pkg-brand-title"' in js and "font-family:'Brush Script MT','Segoe Script',cursive" in js)
-ck('Claim renderer has extra horizontal icon/text separation', ('const textX=zones.claims.x+27' in js or 'const textX=zones.claims.x+35' in js) and 'zones.claims.x+8' in js)
-ck('Claim editor spacing CSS increased', ('.packaging-claim-editor-row{gap:14px}' in css or '.packaging-claim-editor-row{gap:18px}' in css) and ('.packaging-claim-icon{width:42px;height:42px}' in css or '.packaging-claim-icon{width:44px;height:44px}' in css))
+ck('Claim renderer has extra horizontal icon/text separation', (('const textX=zones.claims.x+27' in js and 'zones.claims.x+8' in js) or ('const textX=zones.claims.x+35' in js and 'zones.claims.x+8' in js) or ('const textX=zones.claims.x+44' in js and 'const iconX=zones.claims.x+12' in js)))
+ck('Claim editor spacing CSS increased', (('.packaging-claim-editor-row{gap:14px}' in css or '.packaging-claim-editor-row{gap:18px}' in css or '.packaging-claim-editor-row{column-gap:24px;row-gap:18px}' in css) and ('.packaging-claim-icon{width:42px;height:42px}' in css or '.packaging-claim-icon{width:44px;height:44px}' in css or '.packaging-claim-icon{width:46px;height:46px}' in css)))
 ck('Actual rose quick palette exists', 'Actual rose quick palette' in js and 'packaging-rose-direction-palette' in js)
 expected={
 'generic-white':'white','soft-pink':'pink','warm-cream':'off-white','sunshine-yellow':'yellow','coral':'coral','orange':'orange','peach':'peach','botanical-green':'green','ocean-blue':'blue','cocoa-brown':'brown','midnight-black':'black','soft-grey':'grey','metallic-silver':'silver','metallic-gold':'gold','copper':'copper','bronze':'bronze'}

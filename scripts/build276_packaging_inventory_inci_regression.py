@@ -25,6 +25,7 @@ def ver(pattern,text):
 ck('Packaging API is Build 276+', ver(r"const BUILD = '(\d+)'",api)>=276)
 ck('Packaging JS cache is Build 276+', ver(r'admin-packaging-studio\.js\?v=(\d+)',html)>=276)
 ck('Packaging CSS cache is Build 276+', ver(r'styles\.css\?v=(\d+)',html)>=276)
+client_build=ver(r'admin-packaging-studio\.js\?v=(\d+)',html)
 
 # Inventory identity is reference-only: linked for traceability, never stock consumption.
 ck('Structured ingredients carry Inventory reference', 'site_item_inventory_id' in js and 'site_item_inventory_id' in api)
@@ -39,19 +40,32 @@ ck('Structured ingredient persistence writes Inventory reference', 'INSERT INTO 
 ck('Purchased/source material inheritance propagates Inventory identity', 'linkedInventoryId' in api and 'site_item_inventory_id:linkedInventoryId' in api)
 ck('Canonical INCI summary derives from structured rows', 'structured_ingredients' in api and 'ingredients_inci' in api and 'inci_name' in api)
 
-# Long-INCI behavior: one ordered INCI list, two physical panels, fail closed on overflow.
+# Long ingredient behavior. Build 276 introduced fail-closed capacity protection; Build 277
+# intentionally restores dedicated English/French panels while preserving that safety.
 ck('Ribbon has adaptive INCI layout helper', 'function ribbonIngredientLayout' in js and 'function wrapIngredientDeclaration' in js)
-ck('Ribbon uses one bilingual heading for INCI declaration', 'INGREDIENTS / INGRÉDIENTS :' in js)
-ck('Ribbon second panel is continuation, not duplicated translation', 'CONTINUED / SUITE :' in js)
-ck('Overflow is visible rather than clipped silently', 'EXTENDED INCI LABEL REQUIRED' in js)
-ck('Frontend blocks approval when full INCI exceeds tested ribbon capacity', 'Extended ingredient label required for full INCI' in js)
-ck('Server blocks over-capacity ribbon declaration', 'tested two-panel ribbon capacity' in api and 'extended/peel-back label' in api)
+if client_build >= 277:
+    ck('Build 277 restores dedicated English ingredient panel', '>INGREDIENTS:</text>' in js)
+    ck('Build 277 restores dedicated French ingredient panel', '>INGRÉDIENTS :</text>' in js)
+    ck('Build 277 retires continuation heading', 'CONTINUED / SUITE :' not in js)
+    ck('Overflow is visible rather than clipped silently', 'EXTENDED LABEL REQUIRED' in js and 'ÉTIQUETTE ÉTENDUE REQUISE' in js)
+    ck('Frontend blocks approval when either bilingual list exceeds capacity', 'Extended bilingual ingredient label required for complete English and French lists' in js)
+    ck('Server blocks over-capacity bilingual declarations', 'Complete bilingual ingredient declarations exceed the tested dedicated-panel capacity' in api and 'extended/peel-back label' in api)
+else:
+    ck('Ribbon uses one bilingual heading for INCI declaration', 'INGREDIENTS / INGRÉDIENTS :' in js)
+    ck('Ribbon second panel is continuation, not duplicated translation', 'CONTINUED / SUITE :' in js)
+    ck('Overflow is visible rather than clipped silently', 'EXTENDED INCI LABEL REQUIRED' in js)
+    ck('Frontend blocks approval when full INCI exceeds tested ribbon capacity', 'Extended ingredient label required for full INCI' in js)
+    ck('Server blocks over-capacity ribbon declaration', 'tested two-panel ribbon capacity' in api and 'extended/peel-back label' in api)
 ck('Ingredient guidance mentions Parfum not marketing shorthand', 'Parfum' in js and 'Essential Oil scent' in js)
 ck('Fragrance guidance preserves allergen disclosure warning', 'fragrance allergens' in js.lower())
 
-# Claims spacing.
-ck('Claim renderer has Build 276 horizontal separation', 'const textX=zones.claims.x+35' in js and 'zones.claims.x+8' in js)
-ck('Claim editor spacing is increased', '.packaging-claim-editor-row{gap:18px}' in css and '.packaging-claim-icon{width:44px;height:44px}' in css)
+# Claims spacing. Build 277 widens the prior Build 276 separation further.
+if client_build >= 277:
+    ck('Claim renderer retains and widens horizontal separation', 'const iconX=zones.claims.x+12' in js and 'const textX=zones.claims.x+44' in js)
+    ck('Claim editor spacing is increased further', '.packaging-claim-editor-row{column-gap:24px;row-gap:18px}' in css and '.packaging-claim-icon{width:46px;height:46px}' in css)
+else:
+    ck('Claim renderer has Build 276 horizontal separation', 'const textX=zones.claims.x+35' in js and 'zones.claims.x+8' in js)
+    ck('Claim editor spacing is increased', '.packaging-claim-editor-row{gap:18px}' in css and '.packaging-claim-icon{width:44px;height:44px}' in css)
 
 # Migration/schema parity.
 ck('Build 276 migration adds reference column', 'ADD COLUMN site_item_inventory_id INTEGER' in migration)
