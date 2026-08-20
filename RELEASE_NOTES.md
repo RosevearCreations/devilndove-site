@@ -1,3 +1,11 @@
+## Build 277 — Bilingual ingredient panels restored + claim clearance
+
+- Restored separate English and French ingredient lists on soap ribbons at owner request.
+- Retained Build 276 Inventory-reference-only ingredient links and ordering controls.
+- Added fail-closed per-language capacity checks; neither language may be silently clipped.
+- Increased printed claim icon/text spacing and row separation, plus wider claim-editor horizontal gaps.
+- No D1 migration; Build 276 remains the Packaging schema boundary.
+
 ## Build 276 — Packaging ingredient Inventory links and long-INCI label handling
 
 - Structured Packaging Studio ingredient rows can reference real Devil n Dove Inventory items for source identity and traceability without changing stock.

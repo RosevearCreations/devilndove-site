@@ -1,4 +1,4 @@
-# Database Schema Reference — Build 276
+# Database Schema Reference — Build 277
 
 ## Current migration and production-parity boundary
 
@@ -10,6 +10,10 @@ The retained broad/current-pass migration remains Build 264. Focused additive mi
 - Packaging ingredient Inventory-reference support: `database_build276_packaging_inventory_inci_capacity.sql`
 
 Use the matching read-only `BUILD269_D1_VERIFICATION.sql`, `BUILD274_D1_VERIFICATION.sql`, and `BUILD276_D1_VERIFICATION.sql` after those focused migrations. `database_full_schema.sql`, `database_schema.sql`, `database_store_schema.sql`, and `functions/api/_lib/fullSchemaRequirements.js` are synchronized through Build 276 for fresh-install/runtime parity. Focused migrations are **not** copied over `database_upgrade_current_pass.sql`; production applies them after the retained Build 264 broad boundary.
+
+## Build 277 code-only schema note
+
+Build 277 changes Packaging Studio rendering/readiness only: separate English/French ingredient panels and wider claim spacing. It adds no table, column or index. **Build 276 remains the Packaging schema migration boundary** and `functions/api/_lib/fullSchemaRequirements.js` correctly remains at schema build 276.
 
 ## Build 276 Packaging schema delta
 

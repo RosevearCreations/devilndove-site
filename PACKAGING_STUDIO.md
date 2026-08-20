@@ -2,7 +2,7 @@
 
 Material Library can now create a **review-first draft** from an exact Amazon product URL. The preview attempts to fill purchased/source product identity, Amazon/brand supplier, ASIN/SKU, source URL/image, likely source category, colour swatch, exposed ingredient/allergen wording and Amazon product-detail bullets. Nothing is saved automatically. Review supplier/manufacturer INCI/SDS/allergen documentation and then use **Save material template**.
 
-Soap labels use `soap_reference_v3`. **Build 276 supersedes the older English-left/French-right ingredient wording in historical sections below:** the two ingredient-side zones now carry one ordered INCI declaration, beginning with `INGREDIENTS / INGRÉDIENTS` and continuing with `CONTINUED / SUITE` only when required. The ingredient list itself is INCI and is not duplicated in English/French. Ingredient and claim copy remains bounded to its assigned zone; if the complete INCI cannot fit legibly within the tested ribbon capacity, print approval is blocked and an extended compliant ingredient-label method is required. Historical sections are retained as design/build evidence, not current rendering authority.
+Soap labels use `soap_reference_v3`. **Build 277 restores the owner-requested bilingual ingredient presentation:** the left ingredient zone is a dedicated French `INGRÉDIENTS` panel and the right ingredient zone is a dedicated English `INGREDIENTS` panel. Structured ingredient rows drive both lists, French wording remains review-required, and neither list may be silently clipped. If either complete language declaration cannot fit legibly within its tested panel capacity, print approval is blocked and an extended reviewed label method is required. Historical sections are retained as design/build evidence, not current rendering authority.
 
 Artwork/media management is now linked to `/admin/media-content-studio/`; the next packaging-media phase is a direct managed-artwork picker instead of manual asset paths.
 
@@ -193,9 +193,9 @@ The band itself must remain exactly 0.75 inch high throughout the full 11-inch l
 
 ---
 
-### Build 276 current segment interpretation
+### Build 277 current segment interpretation
 
-The historical segment names below describe the original physical zones. Current rendering uses the first and third ingredient zones as **INCI part 1** and **INCI continuation**, not separate English and French ingredient declarations. This Build 276 rule is authoritative.
+The historical segment names below again match the current physical presentation: the first ingredient zone is the **French ingredient declaration** and the third ingredient zone is the **English ingredient declaration**. Build 276's one-list continuation mode is retired. Build 277 is authoritative.
 
 ## 3. Label Segment Order
 
@@ -1026,3 +1026,13 @@ During every future packaging change:
 - Fragrance/essential-oil mixtures may use `Parfum` when that declaration is appropriate for the formulation/source evidence. Keep the detailed internal source composition and supplier allergen evidence. Fragrance allergens that meet the current Canadian disclosure threshold remain individually disclosable outside `Parfum`. Do not use “Essential Oil scent” as a substitute INCI declaration.
 - Claim icon/text separation is wider again in Build 276.
 - Schema migration: `database_build276_packaging_inventory_inci_capacity.sql`. Verification: `BUILD276_D1_VERIFICATION.sql`.
+
+
+## Build 277 — Owner-requested bilingual ingredient panels and claim clearance
+
+- Restored dedicated English and French ingredient declarations on the soap ribbon. English uses `INGREDIENTS`; French uses `INGRÉDIENTS`.
+- The Structured Ingredient table remains the authority. English uses `display_name_en` with INCI fallback; French uses reviewed `display_name_fr`, with the translation helper allowed only to create a draft. Print readiness requires saved French wording for required rows.
+- Each language is line-fitted independently. If either complete list exceeds the tested panel capacity, the preview shows an extended-label warning and approval is blocked instead of dropping the tail of the list.
+- Build 276 Inventory links remain **identity/traceability only**. Packaging Studio still has no quantity, reserve, consume or stock-movement behavior.
+- Claim spacing is widened again in both places that matter: the SVG claim panel has a larger horizontal icon-to-text gap plus non-overlapping row centres, and the Claims editor has a larger column gap.
+- No D1 migration is required. Build 276 remains the Packaging schema boundary.

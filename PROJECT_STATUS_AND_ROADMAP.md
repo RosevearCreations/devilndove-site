@@ -1,5 +1,20 @@
-# Devil n Dove Project Status and Roadmap — Build 276
+# Devil n Dove Project Status and Roadmap — Build 277
 
+
+## Build 277 completed — bilingual ingredient panels restored and claims separated further
+
+- Restored the owner-requested soap-ribbon presentation: one dedicated English `INGREDIENTS` panel and one dedicated French `INGRÉDIENTS` panel.
+- Retained Build 276 structured-ingredient Inventory traceability, manual printed-order controls and no Inventory quantity/consumption behavior in Packaging Studio.
+- French ingredient wording is now part of print readiness; generated French remains a draft until reviewed/saved.
+- Each language is fitted independently. If either complete list exceeds its tested panel capacity, approval fails closed and an extended/peel-back/other reviewed extended presentation is required rather than clipping.
+- Increased printed claim icon-to-copy spacing and claim-row separation again; editor cards also use larger horizontal gaps.
+- No Build 277 D1 migration. Build 276 remains the Packaging schema boundary.
+
+### Ordered next Packaging work after Build 277
+
+1. Print the current bilingual ribbon at 100% and physically verify English/French ingredient readability plus claim-icon clearance.
+2. If either ingredient panel overflows for real formulas, design and physically test an extended/peel-back bilingual ingredient template rather than shrinking below legible proof size.
+3. Continue supplier/INCI/French/fragrance-allergen review ergonomics and the future CAIP footage-review work already listed below.
 
 ## Build 276 completed — Inventory-linked label ingredients and full-INCI ribbon capacity
 
