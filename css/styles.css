@@ -3338,3 +3338,10 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .packaging-ingredient-row-actions{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
 .packaging-ingredient-row-actions .btn{min-width:34px;padding-inline:8px}
 @media(max-width:760px){.packaging-ingredient-row-actions{flex-wrap:wrap}.packaging-ingredient-row-actions .danger{flex-basis:100%}}
+
+/* Build 277 — owner-requested bilingual ingredient panels and extra claim separation. */
+.packaging-claim-editor-row{column-gap:24px;row-gap:18px}
+.packaging-claim-editor-icon{padding-inline:4px 10px}
+.packaging-claim-icon{width:46px;height:46px}
+.packaging-claim-icon svg{width:25px;height:25px}
+@media(max-width:640px){.packaging-claim-editor-row{column-gap:18px;row-gap:16px}}
