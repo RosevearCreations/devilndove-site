@@ -27,6 +27,6 @@ assert.match(dashboard,/Advanced release tools/);
 assert.match(migration,/ADD COLUMN entry_status/);
 assert.match(full,/entry_status TEXT NOT NULL DEFAULT 'active'/);
 assert.match(store,/entry_status TEXT NOT NULL DEFAULT 'active'/);
-assert.match(manifest,/"schema_build":274/);
+assert.match(manifest,/"schema_build":27[4-9]|"schema_build":[3-9][0-9]{2,}/);
 assert.match(manifest,/"void_reason"/);
 console.log('Build 274 Creative Process lifecycle / correction / dashboard consolidation checks: PASS');

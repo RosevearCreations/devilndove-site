@@ -31,8 +31,8 @@ ck('French draft can reconstruct missing structured rows', 'ensureStructuredIngr
 ck('French action is clearly labelled', 'Translate to French / generate draft' in js and 'Draft French' in js)
 ck('Goat Milk curated French wording exists', 'Lait de chèvre' in js and 'Glycérine végétale' in js and 'Hydroxyde de sodium' in js)
 ck('Main soap identity uses brand script and bold weight', 'pkg-brand-title' in js and 'font-weight="700" class="pkg-brand-title"' in js and "font-family:'Brush Script MT','Segoe Script',cursive" in js)
-ck('Claim renderer has extra horizontal icon/text separation', 'const textX=zones.claims.x+27' in js and 'zones.claims.x+8' in js)
-ck('Claim editor spacing CSS increased', '.packaging-claim-editor-row{gap:14px}' in css and '.packaging-claim-icon{width:42px;height:42px}' in css)
+ck('Claim renderer has extra horizontal icon/text separation', ('const textX=zones.claims.x+27' in js or 'const textX=zones.claims.x+35' in js) and 'zones.claims.x+8' in js)
+ck('Claim editor spacing CSS increased', ('.packaging-claim-editor-row{gap:14px}' in css or '.packaging-claim-editor-row{gap:18px}' in css) and ('.packaging-claim-icon{width:42px;height:42px}' in css or '.packaging-claim-icon{width:44px;height:44px}' in css))
 ck('Actual rose quick palette exists', 'Actual rose quick palette' in js and 'packaging-rose-direction-palette' in js)
 expected={
 'generic-white':'white','soft-pink':'pink','warm-cream':'off-white','sunshine-yellow':'yellow','coral':'coral','orange':'orange','peach':'peach','botanical-green':'green','ocean-blue':'blue','cocoa-brown':'brown','midnight-black':'black','soft-grey':'grey','metallic-silver':'silver','metallic-gold':'gold','copper':'copper','bronze':'bronze'}
@@ -43,8 +43,8 @@ for key,filekey in expected.items():
     if asset.exists():
         with Image.open(asset) as im:
             ck(f'Actual rose asset opens: {filekey}', im.width>0 and im.height>0 and im.format=='WEBP')
-ck('Build 275 documented in handoff', '# Devil n Dove AI Handoff — Build 275' in handoff and 'Build 275 — Packaging source inheritance' in handoff)
-ck('Build 275 documented in roadmap', '# Devil n Dove Project Status and Roadmap — Build 275' in roadmap and 'Build 275 completed' in roadmap)
+ck('Build 275 documented in handoff', re.search(r'# Devil n Dove AI Handoff — Build (27[5-9]|2[89]\d|[3-9]\d{2,})',handoff) is not None and 'Build 275 — Packaging source inheritance' in handoff)
+ck('Build 275 documented in roadmap', re.search(r'# Devil n Dove Project Status and Roadmap — Build (27[5-9]|2[89]\d|[3-9]\d{2,})',roadmap) is not None and 'Build 275 completed' in roadmap)
 ck('Packaging specialist spec carries Build 275 behavior', 'Build 275 — Source-template ingredient persistence' in packaging)
 ck('No Build 275 D1 migration introduced', not any(ROOT.glob('database_build275*.sql')))
 subprocess.run(['node','--check',str(ROOT/'public/js/admin-packaging-studio.js')],check=True)

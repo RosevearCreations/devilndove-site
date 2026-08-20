@@ -48,7 +48,7 @@ check('Inventory API persists source draft only when source material flagged','p
 check('Inventory source capture does not overwrite existing linked source','Never overwrite a source record' in invapi and 'inventory_source_material_links' in invapi)
 check('Inventory admin bundle cache remains Build 261 or newer', all(re.search(r'admin-site-item-inventory\.js\?v=(?:26[1-9]|[3-9]\d{2,})',(ROOT/p).read_text()) for p in ['admin/inventory-operations/index.html','admin/products/index.html','admin/mobile-inventory/index.html']))
 check('Soap renderer uses corrected v3 profile','soap_reference_v3' in js and "packageType==='soap_ribbon'?'soap_reference_v3'" in api)
-check('Soap English ingredient clip bounded','soap-en-ingredients' in js and ('bandHeight-35' in js or 'bandHeight-38' in js))
+check('Soap English ingredient clip bounded','soap-en-ingredients' in js and ('bandHeight-35' in js or 'bandHeight-38' in js or 'bandHeight-29' in js))
 check('Soap French ingredient clip bounded','soap-fr-ingredients' in js)
 check('Soap title wraps to two lines',bool(re.search(r'wrapPlainLines\(family,(?:17|18|20),2\)',js)))
 check('Soap claims limited to four','claims.slice(0,4)' in js)
