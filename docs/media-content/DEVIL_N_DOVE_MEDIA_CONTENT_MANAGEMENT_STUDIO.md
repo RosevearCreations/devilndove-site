@@ -30,6 +30,13 @@ The long-term result should be that Devil n Dove can regularly refresh its visua
 
 ---
 
+## Build 278 implemented owner workflow
+
+The current public/static-page editing experience intentionally uses **one page-wide administrator Edit switch**, not permanently visible Edit tags. When Edit is OFF the owner sees a clean customer-like preview. When Edit is ON, exact image/text/link/colour locations are outlined and their Media Studio links become visible. The switch is created only after administrator readiness is confirmed and does not weaken server-side authorization.
+
+The Studio also exposes a live **Editable image spaces & outstanding artwork** plan. It merges current D1 assignments with the explicit deployment catalog and carries recommended dimensions/aspect/mobile-safe guidance for all 139 visual slots. The static baseline checklist is `IMAGE_SPACE_REQUIREMENTS.md` / `.csv`; live D1 status in the Admin Studio is the operational truth after assignments are made. Product/catalog, Inventory, supply and tool media remain outside this Studio.
+
+
 # 2. Core Safety Principle
 
 ## Existing public media must be protected
