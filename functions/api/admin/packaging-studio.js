@@ -1,7 +1,7 @@
-// Build 276 - Packaging ingredient Inventory traceability and long-INCI readiness.
+// Build 277 - Bilingual ingredient-panel restoration, Inventory traceability, and long-list readiness.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '276';
+const BUILD = '277';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -186,8 +186,11 @@ function packagingRequiredFields(project={},ingredients=[],claims=[],template={}
   if(ingredients.some((row)=>Number(row.required_on_label)!==0&&!String(row.inci_name||'').trim()))missing.push('INCI name for each required ingredient row');
   if(claims.some((row)=>!String(row.claim_en||'').trim()||!String(row.claim_fr||'').trim()))missing.push('English and French text for each claim');
   const requiredIngredients=ingredients.filter((row)=>Number(row.required_on_label)!==0);
-  const inciLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.inci_name),38);
-  if(isSoap&&inciLines>26)missing.push(`Full INCI declaration exceeds the tested two-panel ribbon capacity (${inciLines} estimated lines); use an extended/peel-back label or other compliant extended ingredient panel rather than clipping ingredients`);
+  if(isSoap&&requiredIngredients.some((row)=>!String(row.display_name_en||row.inci_name||'').trim()))missing.push('English display name for each required ingredient row');
+  if(isSoap&&requiredIngredients.some((row)=>!String(row.display_name_fr||'').trim()))missing.push('French display name for each required ingredient row');
+  const englishLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_en||row.inci_name),38);
+  const frenchLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_fr),38);
+  if(isSoap&&(englishLines>11||frenchLines>11))missing.push(`Complete bilingual ingredient declarations exceed the tested dedicated-panel capacity (English ${englishLines} lines; French ${frenchLines} lines); use an extended/peel-back label or other reviewed extended ingredient presentation rather than clipping either language`);
   const dimensions=isSoap?dimensionReview(template):{blockers:[],warnings:[isRound?'Confirm the measured lid/blank diameter, safe margin, material settings and a physical proof before approval.':'Confirm the selected template against the physical container/card dieline before approval.'],profile:template.layout?.design_profile||template.layout?.dimension_profile||'general'};
   const designProfile=String(template.layout?.design_profile||safeJson(template.layout_json,{}).design_profile||'');
   if(isSoap&&!['soap_reference_v2','soap_reference_v3'].includes(designProfile))dimensions.blockers.push('Soap ribbon must use the approved soap_reference_v3 design profile before approval.');
