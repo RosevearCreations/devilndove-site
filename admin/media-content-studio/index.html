@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Media & Content Management Studio — Devil n Dove Admin</title>
   <meta name="robots" content="noindex,nofollow"/>
-  <link rel="stylesheet" href="/css/styles.css?v=264?v=259"/>
+  <link rel="stylesheet" href="/css/styles.css?v=278"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
 </head>
 <body data-admin-page="media-content-studio">
@@ -17,9 +17,9 @@
 
     <section class="hero media-studio-hero">
       <div>
-        <p class="eyebrow">Build 264 • Visual slot editor</p>
+        <p class="eyebrow">Build 278 • Visual slot editor + page-wide preview editing</p>
         <h1>Media & Content Management Studio</h1>
-        <p>Choose a website area, then edit the images, backgrounds and text already assigned to that page. There is no page scanning and no slot registration. The editable locations are built into the site.</p>
+        <p>Choose a website area, then manage the images, backgrounds and text assigned to that page. Public pages now use one page-wide Edit switch, so individual edit badges stay hidden until you intentionally turn editing on.</p>
       </div>
       <div class="card media-studio-safety"><strong>Website presentation only</strong><p class="small">Products, finished-product photos, inventory, supplies and tools are not part of this Studio. Their specialist admin screens remain the authority for those records.</p></div>
     </section>
@@ -47,6 +47,21 @@
         <div class="media-slot-board" id="mediaSlotBoard"><p class="small">Loading Home locations…</p></div>
       </main>
     </div>
+
+
+    <section class="card media-image-plan-panel" id="mediaImagePlanPanel">
+      <div class="section-heading-row media-image-plan-heading">
+        <div><p class="eyebrow">Build 278 image plan</p><h2>Editable image spaces & outstanding artwork</h2><p class="small">A live D1-aware checklist of every public/static image and background location. Recommended dimensions come from the explicit page-slot catalog. Product, Inventory, supply and tool images remain in their specialist editors.</p></div>
+        <div class="media-image-plan-actions" role="group" aria-label="Image requirement filters">
+          <button class="btn mediaImagePlanFilter active" data-image-plan-filter="outstanding" type="button">Outstanding</button>
+          <button class="btn mediaImagePlanFilter" data-image-plan-filter="required" type="button">Required first</button>
+          <button class="btn mediaImagePlanFilter" data-image-plan-filter="all" type="button">All 139 spaces</button>
+          <button class="btn" id="mediaDownloadImagePlan" type="button">Download CSV</button>
+        </div>
+      </div>
+      <div class="media-image-plan-summary" id="mediaImagePlanSummary"><span>Loading the live image checklist…</span></div>
+      <div class="media-image-plan-board" id="mediaImagePlanBoard"><p class="small">Loading editable image locations…</p></div>
+    </section>
 
     <section class="card media-picker-panel" id="mediaPickerPanel" hidden>
       <div class="section-heading-row">
@@ -95,7 +110,7 @@
       <h2>How this Studio works</h2>
       <div class="grid cols-3">
         <div><strong>Existing image</strong><p class="small">The image already in the page is the default. Assigning a new image overrides only that slot.</p></div>
-        <div><strong>SVG placeholder</strong><p class="small">A branded placeholder marks a visual location that still needs a real photo or artwork. Admins get an Edit image link on the public page.</p></div>
+        <div><strong>SVG placeholder</strong><p class="small">A branded placeholder marks a visual location that still needs a real photo or artwork. Admins can turn on the single page-wide Edit switch on the public page, then choose the exact placeholder to replace.</p></div>
         <div><strong>Use original/default</strong><p class="small">Removing a Studio assignment immediately returns that location to the authored/default image or text.</p></div>
       </div>
     </section>
@@ -106,6 +121,6 @@
   <script src="/public/js/auth.js"></script><script src="/public/js/admin-route-usage.js"></script>
   <script src="/public/js/site-auth-ui.js?v=245"></script><script src="/public/js/site-analytics.js"></script>
   <script src="/public/js/admin-self-protect.js?v=245"></script><script src="/public/js/admin.js?v=245"></script>
-  <script src="/public/js/admin-media-content-studio.js?v=264"></script>
+  <script src="/public/js/admin-media-content-studio.js?v=278"></script>
 </body>
 </html>
