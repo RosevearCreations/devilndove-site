@@ -1,7 +1,7 @@
-// Build 275 - Persistent source ingredient inheritance, packaging translation recovery, and rose/title layout refinements.
+// Build 276 - Packaging ingredient Inventory traceability and long-INCI readiness.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
-const BUILD = '275';
+const BUILD = '276';
 const VALID_PROJECT_STATUSES = new Set(['draft','review','approved','archived']);
 const VALID_COMPLIANCE = new Set(['needs_review','ready_for_review','approved','blocked']);
 const VALID_VERSION_REVIEW = new Set(['needs_review','approved','changes_requested','blocked']);
@@ -109,13 +109,14 @@ function normalizeIngredients(value=[]){
   if(!Array.isArray(value))return[];
   return value.slice(0,80).map((row,index)=>({
     sort_order:index+1,
+    site_item_inventory_id:id(row?.site_item_inventory_id)||null,
     inci_name:text(row?.inci_name,300)||null,
     display_name_en:text(row?.display_name_en,500)||null,
     display_name_fr:text(row?.display_name_fr,500)||null,
     organic_flag:bool(row?.organic_flag)?1:0,
     allergen_note:text(row?.allergen_note,500)||null,
     required_on_label:row?.required_on_label===false||Number(row?.required_on_label)===0?0:1
-  })).filter((row)=>row.inci_name||row.display_name_en||row.display_name_fr);
+  })).filter((row)=>row.inci_name||row.display_name_en||row.display_name_fr||row.site_item_inventory_id);
 }
 function normalizeClaims(value=[]){
   if(!Array.isArray(value))return[];
@@ -139,19 +140,17 @@ function dimensionReview(template={}){
   if(!near(template.rear_width_mm,50,.1))warnings.push('The photo-fit profile uses a 38.1 mm rear seal because a 50 mm circle cannot physically fit inside a 38.1 mm-high artboard.');
   return{blockers,warnings,profile:layout.dimension_profile||'unspecified'};
 }
-function estimatedIngredientLines(values=[],maxChars=27){
-  let lines=0;
-  for(const raw of values){
-    const words=String(raw||'').trim().split(/\s+/).filter(Boolean);
-    if(!words.length)continue;
-    let current='• ';
-    for(const word of words){
-      const next=current.trim()==='•'?`• ${word}`:`${current} ${word}`;
-      if(next.length>maxChars&&current.trim()!=='•'){lines+=1;current=`  ${word}`;}
-      else current=next;
+function estimatedIngredientLines(values=[],maxChars=38){
+  const clean=values.map((value)=>String(value||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  let lines=0;let current='';
+  clean.forEach((value,index)=>{
+    const token=`${value}${index<clean.length-1?',':''}`;
+    for(const word of token.split(/\s+/).filter(Boolean)){
+      const next=current?`${current} ${word}`:word;
+      if(current&&next.length>maxChars){lines+=1;current=word;}else current=next;
     }
-    if(current.trim())lines+=1;
-  }
+  });
+  if(current)lines+=1;
   return lines;
 }
 function packagingRequiredFields(project={},ingredients=[],claims=[],template={},sourceMaterials=[]){
@@ -187,10 +186,8 @@ function packagingRequiredFields(project={},ingredients=[],claims=[],template={}
   if(ingredients.some((row)=>Number(row.required_on_label)!==0&&!String(row.inci_name||'').trim()))missing.push('INCI name for each required ingredient row');
   if(claims.some((row)=>!String(row.claim_en||'').trim()||!String(row.claim_fr||'').trim()))missing.push('English and French text for each claim');
   const requiredIngredients=ingredients.filter((row)=>Number(row.required_on_label)!==0);
-  const enLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_en||row.inci_name),27);
-  const frLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.display_name_fr||row.inci_name),26);
-  if(isSoap&&enLines>8)missing.push(`English ingredient panel exceeds the tested eight-line narrow-band capacity (${enLines} estimated lines)`);
-  if(isSoap&&frLines>8)missing.push(`French ingredient panel exceeds the tested eight-line narrow-band capacity (${frLines} estimated lines)`);
+  const inciLines=estimatedIngredientLines(requiredIngredients.map((row)=>row.inci_name),38);
+  if(isSoap&&inciLines>26)missing.push(`Full INCI declaration exceeds the tested two-panel ribbon capacity (${inciLines} estimated lines); use an extended/peel-back label or other compliant extended ingredient panel rather than clipping ingredients`);
   const dimensions=isSoap?dimensionReview(template):{blockers:[],warnings:[isRound?'Confirm the measured lid/blank diameter, safe margin, material settings and a physical proof before approval.':'Confirm the selected template against the physical container/card dieline before approval.'],profile:template.layout?.design_profile||template.layout?.dimension_profile||'general'};
   const designProfile=String(template.layout?.design_profile||safeJson(template.layout_json,{}).design_profile||'');
   if(isSoap&&!['soap_reference_v2','soap_reference_v3'].includes(designProfile))dimensions.blockers.push('Soap ribbon must use the approved soap_reference_v3 design profile before approval.');
@@ -258,32 +255,36 @@ function snapshotFromBody(body,existing={}){
   artwork.rose_asset_id=text(body.rose_asset_id||artwork.rose_asset_id||existing.rose_asset_id||'rose-purple-v1',120);
   const requestedPackageType=text(body.package_type||existing.package_type,80)||'soap_ribbon';
   if(requestedPackageType==='soap_ribbon'&&String(artwork.artwork_asset||'')==='/assets/packaging/artwork/soap-botanical-purple-rose-v1.png')artwork.artwork_asset='';
+  const structuredIngredients=normalizeIngredients(body.structured_ingredients);
+  const structuredInci=structuredIngredients.filter((row)=>Number(row.required_on_label)!==0).map((row)=>text(row.inci_name,300)).filter(Boolean).join(', ');
   return{
     packaging_template_id:id(body.packaging_template_id||existing.packaging_template_id),product_id:id(body.product_id)||null,
     project_name:text(body.project_name||existing.project_name,180),package_type:requestedPackageType,
     project_status:VALID_PROJECT_STATUSES.has(text(body.project_status,30))?text(body.project_status,30):'draft',
     collection_name:text(body.collection_name,160)||null,product_name:text(body.product_name,180),product_subtitle:text(body.product_subtitle,220)||null,
     product_identity_en:text(body.product_identity_en,180)||null,product_identity_fr:text(body.product_identity_fr,180)||null,
-    ingredients_inci:text(body.ingredients_inci,8000)||null,ingredients_en:text(body.ingredients_en,8000)||null,ingredients_fr:text(body.ingredients_fr,8000)||null,
+    ingredients_inci:structuredInci||text(body.ingredients_inci,8000)||null,ingredients_en:text(body.ingredients_en,8000)||null,ingredients_fr:text(body.ingredients_fr,8000)||null,
     net_quantity_text:text(body.net_quantity_text,80)||null,net_weight_oz:number(body.net_weight_oz,0)||null,net_weight_g:number(body.net_weight_g,0)||null,
     website_text:text(body.website_text,220)||null,dealer_name:text(body.dealer_name,220)||null,dealer_address:text(body.dealer_address,500)||null,contact_text:text(body.contact_text,300)||null,made_in_canada_text:text(body.made_in_canada_text,180)||null,
     claims,warnings_en:text(body.warnings_en,2000)||null,warnings_fr:text(body.warnings_fr,2000)||null,icons,theme,artwork,
     print_notes:text(body.print_notes,3000)||null,compliance_status:VALID_COMPLIANCE.has(text(body.compliance_status,40))?text(body.compliance_status,40):'needs_review',
-    structured_ingredients:normalizeIngredients(body.structured_ingredients),structured_claims:normalizeClaims(body.structured_claims)
+    structured_ingredients:structuredIngredients,structured_claims:normalizeClaims(body.structured_claims)
   };
 }
 
 async function syncPackagingStructuredData(db,projectId,data){
   try{
     if(Array.isArray(data.structured_ingredients)){
+      const inventoryIds=[...new Set(data.structured_ingredients.map((row)=>id(row.site_item_inventory_id)).filter(Boolean))];
+      for(const inventoryId of inventoryIds){const inventoryRow=await db.prepare(`SELECT site_item_inventory_id FROM site_item_inventory WHERE site_item_inventory_id=? AND COALESCE(is_active,1)=1`).bind(inventoryId).first();if(!inventoryRow)throw new Error(`Ingredient Inventory reference #${inventoryId} is no longer active.`);}
       await db.prepare(`DELETE FROM packaging_project_ingredients WHERE packaging_project_id=?`).bind(projectId).run();
-      for(const row of data.structured_ingredients)await db.prepare(`INSERT INTO packaging_project_ingredients (packaging_project_id,sort_order,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,row.sort_order,row.inci_name,row.display_name_en,row.display_name_fr,row.organic_flag,row.allergen_note,row.required_on_label).run();
+      for(const row of data.structured_ingredients)await db.prepare(`INSERT INTO packaging_project_ingredients (packaging_project_id,sort_order,site_item_inventory_id,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,row.sort_order,row.site_item_inventory_id,row.inci_name,row.display_name_en,row.display_name_fr,row.organic_flag,row.allergen_note,row.required_on_label).run();
     }
     if(Array.isArray(data.structured_claims)){
       await db.prepare(`DELETE FROM packaging_project_claims WHERE packaging_project_id=?`).bind(projectId).run();
       for(const row of data.structured_claims)await db.prepare(`INSERT INTO packaging_project_claims (packaging_project_id,sort_order,claim_en,claim_fr,icon_name,is_approved,compliance_note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,row.sort_order,row.claim_en,row.claim_fr,row.icon_name,row.is_approved,row.compliance_note).run();
     }
-  }catch(error){throw new Error('Build 255 packaging structured-content migration is required before saving ingredients/claims for all label types.');}
+  }catch(error){if(String(error?.message||'').includes('Inventory reference'))throw error;throw new Error('Build 276 packaging ingredient/Inventory-link migration is required before saving structured ingredients and claims.');}
 }
 
 async function syncSoapRecords(db,projectId,data){
@@ -378,16 +379,18 @@ export async function onRequestPost(context){
       if(role==='base')await a.db.prepare(`DELETE FROM packaging_project_source_materials WHERE packaging_project_id=? AND material_role='base'`).bind(projectId).run();
       const mappedSource=mapSourceMaterial(source);
       await a.db.prepare(`INSERT INTO packaging_project_source_materials (packaging_project_id,packaging_source_material_template_id,material_role,sort_order,source_snapshot_json,review_status,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(packaging_project_id,packaging_source_material_template_id,material_role) DO UPDATE SET source_snapshot_json=excluded.source_snapshot_json,review_status=excluded.review_status,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(projectId,sourceId,role,role==='base'?1:10,JSON.stringify(mappedSource),reviewStatus,a.adminUser.user_id,a.adminUser.user_id).run();
-      const inherited=normalizeIngredients(mappedSource.master_inci||[]);
+      const linkedInventory=await a.db.prepare(`SELECT isml.site_item_inventory_id FROM inventory_source_material_links isml JOIN site_item_inventory sii ON sii.site_item_inventory_id=isml.site_item_inventory_id WHERE isml.packaging_source_material_template_id=? AND COALESCE(sii.is_active,1)=1 ORDER BY isml.inventory_source_material_link_id DESC LIMIT 1`).bind(sourceId).first().catch(()=>null);
+      const linkedInventoryId=id(linkedInventory?.site_item_inventory_id)||null;
+      const inherited=normalizeIngredients(mappedSource.master_inci||[]).map((row)=>({...row,site_item_inventory_id:linkedInventoryId}));
       if(inherited.length){
         let merged=inherited;
         if(role!=='base'){
-          const existing=rows(await a.db.prepare(`SELECT sort_order,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label FROM packaging_project_ingredients WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_ingredient_id`).bind(projectId).all());
+          const existing=rows(await a.db.prepare(`SELECT sort_order,site_item_inventory_id,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label FROM packaging_project_ingredients WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_ingredient_id`).bind(projectId).all());
           const seen=new Set(existing.map((row)=>String(row.inci_name||row.display_name_en||'').trim().toLowerCase()).filter(Boolean));
           merged=[...existing,...inherited.filter((row)=>{const key=String(row.inci_name||row.display_name_en||'').trim().toLowerCase();if(!key||seen.has(key))return false;seen.add(key);return true;})];
         }
         await a.db.prepare(`DELETE FROM packaging_project_ingredients WHERE packaging_project_id=?`).bind(projectId).run();
-        for(const [index,row] of merged.entries())await a.db.prepare(`INSERT INTO packaging_project_ingredients (packaging_project_id,sort_order,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,index+1,row.inci_name,row.display_name_en,row.display_name_fr,row.organic_flag,row.allergen_note,row.required_on_label).run();
+        for(const [index,row] of merged.entries())await a.db.prepare(`INSERT INTO packaging_project_ingredients (packaging_project_id,sort_order,site_item_inventory_id,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,index+1,row.site_item_inventory_id,row.inci_name,row.display_name_en,row.display_name_fr,row.organic_flag,row.allergen_note,row.required_on_label).run();
         const inci=merged.map((row)=>text(row.inci_name,300)).filter(Boolean).join(', ');
         const en=merged.map((row)=>text(row.display_name_en||row.inci_name,500)).filter(Boolean).join(', ');
         const fr=merged.map((row)=>text(row.display_name_fr||row.inci_name,500)).filter(Boolean).join(', ');
@@ -486,7 +489,8 @@ export async function onRequestPost(context){
       let seededIngredients=[];
       if(template.package_type==='soap_ribbon'&&productId){
         seededIngredients=rows(await a.db.prepare(`
-          SELECT COALESCE(prip.inci_name,'') inci_name,
+          SELECT sii.site_item_inventory_id,
+                 COALESCE(prip.inci_name,'') inci_name,
                  COALESCE(prip.ingredient_name_en,sii.item_name,prl.source_key,'') display_name_en,
                  COALESCE(prip.ingredient_name_fr,'') display_name_fr,
                  COALESCE(prip.label_sort_order,prl.sort_order,0) sort_order
@@ -500,7 +504,7 @@ export async function onRequestPost(context){
           WHERE prl.product_id=?
           ORDER BY COALESCE(prip.label_sort_order,prl.sort_order,0),prl.product_resource_link_id
         `).bind(productId).all().catch(()=>({results:[]}))).map((row,index)=>({
-          sort_order:index+1,inci_name:text(row.inci_name,240),display_name_en:text(row.display_name_en,240),display_name_fr:text(row.display_name_fr,240),
+          sort_order:index+1,site_item_inventory_id:id(row.site_item_inventory_id)||null,inci_name:text(row.inci_name,240),display_name_en:text(row.display_name_en,240),display_name_fr:text(row.display_name_fr,240),
           organic_flag:0,allergen_note:null,required_on_label:1
         }));
         if(seededIngredients.length){
