@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 277
+# Devil n Dove Markdown Index — Build 278
 
 ## Only two mutable current authorities
 
@@ -11,7 +11,7 @@
 
 - CAIP: `docs/creative-asset-intelligence-platform/README.md`, `10_Delivery_Roadmap.md`, `18_Operator_Workflow_Guide.md`.
 - Creative/content: `CREATIVE_AUTOMATION_STUDIO.md`, `CONTENT_AUTOMATION_STUDIO.md`.
-- Media management: `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md`.
+- Media management: `docs/media-content/DEVIL_N_DOVE_MEDIA_CONTENT_MANAGEMENT_STUDIO.md`, `docs/media-content/IMAGE_SPACE_REQUIREMENTS.md` and `.csv`.
 - Packaging: `PACKAGING_STUDIO.md`, `PACKAGING_REFERENCE_BASELINE.md`, `DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md`.
 - Launch/release: `STARTUP_GO_LIVE_GUIDE.md`, `PRELAUNCH_PROCESS_PLAYBOOKS.md`, `LIVE_TESTING_GUIDE.md`, `POST_DEPLOY_SMOKE_TEST.md`, `CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md`.
 - SEO/market: `LOCAL_SEO_PLAYBOOK.md`, `COMPETITIVE.md`.
@@ -32,3 +32,4 @@
 - Packaging ingredient Inventory-reference schema: Build 276 `database_build276_packaging_inventory_inci_capacity.sql`.
 - Builds 270–273 add no D1 schema.
 - Build 275 Packaging Studio fixes require no D1 migration; they use the existing packaging/source-material tables.
+- Builds 277–278 require no D1 migration; Build 278 changes Media Studio/public edit presentation and adds the visual requirements catalog/report.

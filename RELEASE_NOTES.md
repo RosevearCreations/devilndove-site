@@ -1,3 +1,10 @@
+# Build 278 — Page-wide Media Edit Mode & Image Requirements
+
+- Administrator public-page editing now uses one page-wide Edit switch; individual badges are hidden in clean preview mode.
+- Media & Content Studio now has a live D1-aware checklist of 139 editable visual locations with recommended sizes and CSV export.
+- Added static image-space requirements Markdown/CSV reports.
+- No D1 migration.
+
 ## Build 277 — Bilingual ingredient panels restored + claim clearance
 
 - Restored separate English and French ingredient lists on soap ribbons at owner request.

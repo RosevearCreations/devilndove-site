@@ -1,4 +1,20 @@
-# Devil n Dove Project Status and Roadmap — Build 277
+# Devil n Dove Project Status and Roadmap — Build 278
+
+
+## Build 278 completed — page-wide edit mode and live image backlog
+
+- Replaced always-visible public-page per-slot Edit badges with one administrator-only **Admin page preview / Edit page** switch. Edit OFF is a clean customer-like preview; Edit ON reveals the exact managed image/text/link/colour locations.
+- Added a live D1-aware **Editable image spaces & outstanding artwork** section to Media & Content Studio with Outstanding, Required first and All filters plus CSV export.
+- The explicit visual catalog now carries recommended dimensions/aspect/format/mobile-safe guidance for every visual slot. Baseline inventory is 139 visual spaces: 71 images and 68 backgrounds.
+- Deployment baseline backlog: **6 P1 required placeholder heroes**, **23 P2 recommended placeholder visuals**, **68 P3 optional blank backgrounds**, and **42 authored/default locations**. Live Admin counts supersede these numbers once D1 overrides are assigned.
+- Added `docs/media-content/IMAGE_SPACE_REQUIREMENTS.md` and `.csv` as a production checklist. No Build 278 D1 migration is required.
+
+### Ordered next Media Studio work after Build 278
+
+1. Replace the six P1 required hero placeholders first; then work through P2 page visuals with real workshop/project/product-adjacent evidence appropriate to each public page.
+2. Treat P3 backgrounds as optional polish, not mandatory work. Add them only where they improve hierarchy/readability and do not compete with copy.
+3. Production-test the page-wide edit switch on desktop/mobile and confirm turning Edit OFF removes every badge/outline without changing published D1 overrides.
+4. Continue the existing CAIP video-review/timecode evidence work and Packaging/Creative Process physical workflow testing; do not create a second media authority.
 
 
 ## Build 277 completed — bilingual ingredient panels restored and claims separated further
