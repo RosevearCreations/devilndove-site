@@ -1,6 +1,6 @@
 {
-  "version": 264,
-  "description": "Build 264 explicit site-content slots: Home cards/visual polish, Shop presentation, links and colours.",
+  "version": 278,
+  "description": "Build 278 explicit static page slot catalog with recommended visual dimensions and page-wide edit-mode support.",
   "sitewide": [
     {
       "page_path": "@site",
@@ -12,7 +12,14 @@
       "source_snapshot": "/assets/logo-clear.png",
       "source_alt_snapshot": "Devil n Dove logo",
       "section": "header",
-      "is_required": 1
+      "is_required": 1,
+      "recommended_width_px": 1080,
+      "recommended_height_px": 1080,
+      "recommended_aspect": "1:1",
+      "recommended_format": "Transparent PNG or WebP",
+      "recommended_use": "Brand/logo artwork; preserve transparent background and generous clear space.",
+      "mobile_safe_area": "Keep the full mark inside the canvas with about 8% clear padding on every edge.",
+      "baseline_visual_status": "authored_default"
     },
     {
       "page_path": "@site",
@@ -24,7 +31,14 @@
       "source_snapshot": "",
       "source_alt_snapshot": "",
       "section": "header",
-      "is_required": 0
+      "is_required": 0,
+      "recommended_width_px": 1920,
+      "recommended_height_px": 480,
+      "recommended_aspect": "4:1",
+      "recommended_format": "WebP preferred",
+      "recommended_use": "Navigation/header background; decorative, low-detail image or texture.",
+      "mobile_safe_area": "Keep important detail in the centre 70%; left/right edges may crop on narrow screens.",
+      "baseline_visual_status": "optional_enhancement"
     },
     {
       "page_path": "@site",
@@ -36,7 +50,14 @@
       "source_snapshot": "",
       "source_alt_snapshot": "",
       "section": "background",
-      "is_required": 0
+      "is_required": 0,
+      "recommended_width_px": 1920,
+      "recommended_height_px": 1200,
+      "recommended_aspect": "8:5",
+      "recommended_format": "WebP preferred",
+      "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+      "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+      "baseline_visual_status": "optional_enhancement"
     },
     {
       "page_path": "@site",
@@ -48,7 +69,14 @@
       "source_snapshot": "",
       "source_alt_snapshot": "",
       "section": "footer",
-      "is_required": 0
+      "is_required": 0,
+      "recommended_width_px": 1920,
+      "recommended_height_px": 600,
+      "recommended_aspect": "16:5",
+      "recommended_format": "WebP preferred",
+      "recommended_use": "Footer background; decorative image or subtle texture that remains readable behind text.",
+      "mobile_safe_area": "Keep important detail in the centre 70%; expect horizontal and vertical cropping.",
+      "baseline_visual_status": "optional_enhancement"
     }
   ],
   "groups": [
@@ -72,7 +100,14 @@
               "source_snapshot": "/assets/images/site/home-hero-products.webp",
               "source_alt_snapshot": "Devil n Dove handmade jewelry and mixed-media workshop collection",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/",
@@ -84,7 +119,14 @@
               "source_snapshot": "/assets/images/site/workshop-creative-paths.webp",
               "source_alt_snapshot": "Representative Devil n Dove workshop workbench showing mixed creative materials and in-progress pieces",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/",
@@ -96,7 +138,14 @@
               "source_snapshot": "/assets/images/site/home-workshop-preview.webp",
               "source_alt_snapshot": "Workshop process photo",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/",
@@ -108,7 +157,14 @@
               "source_snapshot": "/assets/placeholders/media-content/home-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Made in our workshop, one step at a time",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/",
@@ -120,7 +176,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/",
@@ -132,7 +195,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/",
@@ -144,7 +214,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/",
@@ -336,7 +413,14 @@
               "source_snapshot": "/assets/placeholders/media-content/home-what-we-make-2.svg",
               "source_alt_snapshot": "Editable workshop category visual 2",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/",
@@ -348,7 +432,14 @@
               "source_snapshot": "/assets/placeholders/media-content/home-what-we-make-3.svg",
               "source_alt_snapshot": "Editable workshop category visual 3",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/",
@@ -800,7 +891,14 @@
               "source_snapshot": "/assets/images/site/about-real-workshop.webp",
               "source_alt_snapshot": "Devil n Dove maker and workshop story",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/about",
@@ -812,7 +910,14 @@
               "source_snapshot": "/assets/images/site/about-real-workshop.webp",
               "source_alt_snapshot": "Devil n Dove maker and workshop story",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/about",
@@ -824,7 +929,14 @@
               "source_snapshot": "/assets/mainpage-collage.webp",
               "source_alt_snapshot": "Workshop and product collage",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/about",
@@ -836,7 +948,14 @@
               "source_snapshot": "/assets/mark.png",
               "source_alt_snapshot": "Devil n Dove mark",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1080,
+              "recommended_height_px": 1080,
+              "recommended_aspect": "1:1",
+              "recommended_format": "Transparent PNG or WebP",
+              "recommended_use": "Brand/logo artwork; preserve transparent background and generous clear space.",
+              "mobile_safe_area": "Keep the full mark inside the canvas with about 8% clear padding on every edge.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/about",
@@ -848,7 +967,14 @@
               "source_snapshot": "/assets/placeholders/media-content/about-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for What we do",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/about",
@@ -1036,7 +1162,14 @@
               "source_snapshot": "/assets/images/site/gallery-item-specific-collage.webp",
               "source_alt_snapshot": "Collage of Devil n Dove finished work and workshop process",
               "section": "content",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/gallery",
@@ -1048,7 +1181,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/gallery",
@@ -1060,7 +1200,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/gallery",
@@ -1072,7 +1219,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/gallery",
@@ -1140,7 +1294,14 @@
               "source_snapshot": "/assets/images/site/creation-in-progress.webp",
               "source_alt_snapshot": "Creative process photo",
               "section": "content",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/creations",
@@ -1152,7 +1313,14 @@
               "source_snapshot": "/assets/placeholders/media-content/creations-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Handmade, vintage, and collectible trust guide",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/creations",
@@ -1164,7 +1332,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/creations",
@@ -1176,7 +1351,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/creations",
@@ -1188,7 +1370,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/creations",
@@ -1292,7 +1481,14 @@
               "source_snapshot": "/assets/images/site/workshop-journal-storytelling.webp",
               "source_alt_snapshot": "Representative Devil n Dove workshop journal and maker story photo",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/workshop-journal",
@@ -1304,7 +1500,14 @@
               "source_snapshot": "/assets/images/site/workshop-creative-paths.webp",
               "source_alt_snapshot": "Representative Devil n Dove workshop tools, materials and creative paths",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/workshop-journal",
@@ -1316,7 +1519,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Why this journal exists",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/workshop-journal",
@@ -1328,7 +1538,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal",
@@ -1340,7 +1557,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal",
@@ -1352,7 +1576,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal",
@@ -1564,7 +1795,14 @@
               "source_snapshot": "/assets/images/site/collection-overview.webp",
               "source_alt_snapshot": "Collection overview photo",
               "section": "content",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/collections",
@@ -1576,7 +1814,14 @@
               "source_snapshot": "/assets/placeholders/media-content/collections-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Why this page exists",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/collections",
@@ -1588,7 +1833,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/collections",
@@ -1600,7 +1852,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/collections",
@@ -1612,7 +1871,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/collections",
@@ -1812,7 +2078,14 @@
               "source_snapshot": "/assets/images/site/about-real-workshop.webp",
               "source_alt_snapshot": "Devil n Dove maker and workshop story photograph",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/contact",
@@ -1824,7 +2097,14 @@
               "source_snapshot": "/assets/images/site/about-real-workshop.webp",
               "source_alt_snapshot": "Devil n Dove maker and workshop story photograph",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/contact",
@@ -1836,7 +2116,14 @@
               "source_snapshot": "/assets/placeholders/media-content/contact-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Where to find us",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/contact",
@@ -1928,7 +2215,14 @@
               "source_snapshot": "/assets/images/site/gift-card-mockup.webp",
               "source_alt_snapshot": "Devil n Dove gift card artwork mockup",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/gift-cards",
@@ -1940,7 +2234,14 @@
               "source_snapshot": "/assets/images/site/gift-card-mockup.webp",
               "source_alt_snapshot": "Devil n Dove gift-card artwork mockup",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/gift-cards",
@@ -1952,7 +2253,14 @@
               "source_snapshot": "/assets/placeholders/media-content/gift-cards-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Good for flexible handmade gifting",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/gift-cards",
@@ -1964,7 +2272,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/gift-cards",
@@ -1976,7 +2291,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/gift-cards",
@@ -1988,7 +2310,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/gift-cards",
@@ -2092,7 +2421,14 @@
               "source_snapshot": "/assets/images/site/events-display-collage.webp",
               "source_alt_snapshot": "Representative Devil n Dove market and product display collage",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/events",
@@ -2104,7 +2440,14 @@
               "source_snapshot": "/assets/images/site/events-display-collage.webp",
               "source_alt_snapshot": "Representative Devil n Dove market and product display collage",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/events",
@@ -2116,7 +2459,14 @@
               "source_snapshot": "/assets/placeholders/media-content/events-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Good follow-up pages",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/events",
@@ -2128,7 +2478,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/events",
@@ -2140,7 +2497,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/events",
@@ -2152,7 +2516,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/events",
@@ -2292,7 +2663,14 @@
               "source_snapshot": "/assets/placeholders/media-content/socials-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Follow Devil n Dove",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "required_replacement"
             },
             {
               "page_path": "/socials",
@@ -2304,7 +2682,14 @@
               "source_snapshot": "/assets/images/site/social-content-workbench.webp",
               "source_alt_snapshot": "Social content workbench photo",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/socials",
@@ -2316,7 +2701,14 @@
               "source_snapshot": "/assets/placeholders/media-content/socials-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Follow Devil n Dove",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/socials",
@@ -2328,7 +2720,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/socials",
@@ -2340,7 +2739,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/socials",
@@ -2352,7 +2758,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/socials",
@@ -2480,7 +2893,14 @@
               "source_snapshot": "/assets/images/site/shop-item-specific-collage.webp",
               "source_alt_snapshot": "Devil n Dove handmade, vintage, soap, candle, and jewelry collection",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/shop",
@@ -2492,7 +2912,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/shop",
@@ -2636,7 +3063,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/shop",
@@ -2672,7 +3106,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/shop",
@@ -2960,7 +3401,14 @@
               "source_snapshot": "/assets/images/site/shop-item-specific-collage.webp",
               "source_alt_snapshot": "Devil n Dove handmade, vintage, soap, candle, and jewelry collection",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/shop",
@@ -2972,7 +3420,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/shop",
@@ -3106,7 +3561,14 @@
               "source_snapshot": "/assets/images/site/candle-product-mockup.webp",
               "source_alt_snapshot": "Representative round candle-top and custom candle presentation",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/custom-candle-making-ontario",
@@ -3118,7 +3580,14 @@
               "source_snapshot": "/assets/images/site/candle-product-mockup.webp",
               "source_alt_snapshot": "Representative round candle-top and custom candle presentation",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/custom-candle-making-ontario",
@@ -3130,7 +3599,14 @@
               "source_snapshot": "/assets/placeholders/media-content/custom-candle-making-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Helpful details for candle requests",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/custom-candle-making-ontario",
@@ -3142,7 +3618,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/custom-candle-making-ontario",
@@ -3154,7 +3637,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/custom-candle-making-ontario",
@@ -3306,7 +3796,14 @@
               "source_snapshot": "/assets/images/site/soap-product-mockup.webp",
               "source_alt_snapshot": "Glacial Purple custom soap label and packaging presentation",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/custom-soap-making-ontario",
@@ -3318,7 +3815,14 @@
               "source_snapshot": "/assets/images/site/soap-product-mockup.webp",
               "source_alt_snapshot": "Glacial Purple custom soap label and packaging presentation",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/custom-soap-making-ontario",
@@ -3330,7 +3834,14 @@
               "source_snapshot": "/assets/placeholders/media-content/custom-soap-making-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Helpful details for soap requests",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/custom-soap-making-ontario",
@@ -3342,7 +3853,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/custom-soap-making-ontario",
@@ -3354,7 +3872,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/custom-soap-making-ontario",
@@ -3506,7 +4031,14 @@
               "source_snapshot": "/assets/images/site/custom-gift-process-before-after.webp",
               "source_alt_snapshot": "Representative Devil n Dove custom gift process in the workshop",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/custom-gifts-southern-ontario",
@@ -3518,7 +4050,14 @@
               "source_snapshot": "/assets/images/site/custom-gift-process-before-after.webp",
               "source_alt_snapshot": "Custom gift process photo",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/custom-gifts-southern-ontario",
@@ -3530,7 +4069,14 @@
               "source_snapshot": "/assets/placeholders/media-content/custom-gifts-southern-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Southern Ontario custom gifts search clarity",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/custom-gifts-southern-ontario",
@@ -3542,7 +4088,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/custom-gifts-southern-ontario",
@@ -3554,7 +4107,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/custom-gifts-southern-ontario",
@@ -3566,7 +4126,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/custom-gifts-southern-ontario",
@@ -3754,7 +4321,14 @@
               "source_snapshot": "/assets/images/site/handmade-jewelry-product-mockup.webp",
               "source_alt_snapshot": "Close representative view of Devil n Dove handmade jewelry",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/handmade-jewelry-ontario",
@@ -3766,7 +4340,14 @@
               "source_snapshot": "/assets/images/site/handmade-jewelry-product-mockup.webp",
               "source_alt_snapshot": "Close representative view of Devil n Dove handmade jewelry",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/handmade-jewelry-ontario",
@@ -3778,7 +4359,14 @@
               "source_snapshot": "/assets/placeholders/media-content/handmade-jewelry-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for handmade jewelry Ontario search clarity",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/handmade-jewelry-ontario",
@@ -3790,7 +4378,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/handmade-jewelry-ontario",
@@ -3802,7 +4397,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/handmade-jewelry-ontario",
@@ -3814,7 +4416,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/handmade-jewelry-ontario",
@@ -4002,7 +4611,14 @@
               "source_snapshot": "/assets/images/site/laser-project-mockup.webp",
               "source_alt_snapshot": "Representative Devil n Dove laser engraving and finishing process",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/laser-engraving-ontario",
@@ -4014,7 +4630,14 @@
               "source_snapshot": "/assets/images/site/laser-project-mockup.webp",
               "source_alt_snapshot": "Representative Devil n Dove laser engraving and finishing process",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/laser-engraving-ontario",
@@ -4026,7 +4649,14 @@
               "source_snapshot": "/assets/placeholders/media-content/laser-engraving-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for laser engraved gifts Ontario search clarity",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/laser-engraving-ontario",
@@ -4038,7 +4668,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/laser-engraving-ontario",
@@ -4050,7 +4687,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/laser-engraving-ontario",
@@ -4062,7 +4706,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/laser-engraving-ontario",
@@ -4250,7 +4901,14 @@
               "source_snapshot": "/assets/images/site/polymer-clay-product-mockup.webp",
               "source_alt_snapshot": "Representative polymer clay jewelry and earring detail",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/polymer-clay-earrings-ontario",
@@ -4262,7 +4920,14 @@
               "source_snapshot": "/assets/images/site/polymer-clay-product-mockup.webp",
               "source_alt_snapshot": "Representative polymer clay jewelry and earring detail",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/polymer-clay-earrings-ontario",
@@ -4274,7 +4939,14 @@
               "source_snapshot": "/assets/placeholders/media-content/polymer-clay-earrings-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for polymer clay earrings Ontario search clarity",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/polymer-clay-earrings-ontario",
@@ -4286,7 +4958,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/polymer-clay-earrings-ontario",
@@ -4298,7 +4977,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/polymer-clay-earrings-ontario",
@@ -4310,7 +4996,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/polymer-clay-earrings-ontario",
@@ -4498,7 +5191,14 @@
               "source_snapshot": "/assets/images/site/vintage-tools-mockup.webp",
               "source_alt_snapshot": "Representative vintage tools, materials, and condition details",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/vintage-finds-ontario",
@@ -4510,7 +5210,14 @@
               "source_snapshot": "/assets/images/site/vintage-tools-mockup.webp",
               "source_alt_snapshot": "Representative vintage tools, materials, and condition details",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/vintage-finds-ontario",
@@ -4522,7 +5229,14 @@
               "source_snapshot": "/assets/placeholders/media-content/vintage-finds-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for vintage finds Ontario search clarity",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/vintage-finds-ontario",
@@ -4534,7 +5248,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/vintage-finds-ontario",
@@ -4546,7 +5267,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/vintage-finds-ontario",
@@ -4558,7 +5286,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/vintage-finds-ontario",
@@ -4746,7 +5481,14 @@
               "source_snapshot": "/assets/visual-placeholders/product-process.svg",
               "source_alt_snapshot": "Workshop gift process placeholder",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/workshop-made-gifts-ontario",
@@ -4758,7 +5500,14 @@
               "source_snapshot": "/assets/visual-placeholders/product-process.svg",
               "source_alt_snapshot": "Workshop gift process placeholder",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/workshop-made-gifts-ontario",
@@ -4770,7 +5519,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-made-gifts-ontario-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for workshop-made gifts Southern Ontario search clarity",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/workshop-made-gifts-ontario",
@@ -4782,7 +5538,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-made-gifts-ontario",
@@ -4794,7 +5557,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-made-gifts-ontario",
@@ -4806,7 +5576,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-made-gifts-ontario",
@@ -5000,7 +5777,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-story-hero-image.svg",
               "source_alt_snapshot": "Workshop Journal Story visual",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "required_replacement"
             },
             {
               "page_path": "/workshop-journal/story",
@@ -5012,7 +5796,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/story",
@@ -5056,7 +5847,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-coin-and-spoon-ring-care-hero-image.svg",
               "source_alt_snapshot": "Coin & Spoon Ring Care visual",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "required_replacement"
             },
             {
               "page_path": "/workshop-journal/coin-and-spoon-ring-care",
@@ -5068,7 +5866,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-coin-and-spoon-ring-care-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Before wearing",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/workshop-journal/coin-and-spoon-ring-care",
@@ -5080,7 +5885,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/coin-and-spoon-ring-care",
@@ -5092,7 +5904,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/coin-and-spoon-ring-care",
@@ -5104,7 +5923,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/coin-and-spoon-ring-care",
@@ -5268,7 +6094,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-polymer-clay-earring-care-hero-image.svg",
               "source_alt_snapshot": "Polymer Clay Earring Care visual",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "required_replacement"
             },
             {
               "page_path": "/workshop-journal/polymer-clay-earring-care",
@@ -5280,7 +6113,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-polymer-clay-earring-care-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Wear and storage",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/workshop-journal/polymer-clay-earring-care",
@@ -5292,7 +6132,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/polymer-clay-earring-care",
@@ -5304,7 +6151,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/polymer-clay-earring-care",
@@ -5316,7 +6170,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/polymer-clay-earring-care",
@@ -5480,7 +6341,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-handmade-vintage-sourced-guide-hero-image.svg",
               "source_alt_snapshot": "Handmade / Vintage / Sourced Guide visual",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "required_replacement"
             },
             {
               "page_path": "/workshop-journal/handmade-vintage-sourced-guide",
@@ -5492,7 +6360,14 @@
               "source_snapshot": "/assets/placeholders/media-content/workshop-journal-handmade-vintage-sourced-guide-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for Handmade",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/workshop-journal/handmade-vintage-sourced-guide",
@@ -5504,7 +6379,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/handmade-vintage-sourced-guide",
@@ -5516,7 +6398,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/handmade-vintage-sourced-guide",
@@ -5528,7 +6417,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/workshop-journal/handmade-vintage-sourced-guide",
@@ -5692,7 +6588,14 @@
               "source_snapshot": "/assets/placeholders/media-content/marketplaces-hero-image.svg",
               "source_alt_snapshot": "Marketplace Guide visual",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "required_replacement"
             },
             {
               "page_path": "/marketplaces",
@@ -5704,7 +6607,14 @@
               "source_snapshot": "/assets/placeholders/media-content/marketplaces-section-visual-1.svg",
               "source_alt_snapshot": "Placeholder for How to read our listings",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "recommended_replacement"
             },
             {
               "page_path": "/marketplaces",
@@ -5716,7 +6626,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/marketplaces",
@@ -5728,7 +6645,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/marketplaces",
@@ -5904,7 +6828,14 @@
               "source_snapshot": "/assets/images/site/pickup-package-mockup.webp",
               "source_alt_snapshot": "Representative Devil n Dove order prepared for local pickup",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/pickup",
@@ -5916,7 +6847,14 @@
               "source_snapshot": "/assets/images/site/pickup-package-mockup.webp",
               "source_alt_snapshot": "Representative Devil n Dove order prepared for local pickup",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/pickup",
@@ -5928,7 +6866,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/pickup",
@@ -5940,7 +6885,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/pickup",
@@ -5952,7 +6904,14 @@
               "source_snapshot": "",
               "source_alt_snapshot": "",
               "section": "background",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1920,
+              "recommended_height_px": 1200,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred",
+              "recommended_use": "Section/page background; use a low-contrast image that can tolerate cover-cropping.",
+              "mobile_safe_area": "Keep important detail in the centre 65–70%; all edges may crop on mobile/desktop.",
+              "baseline_visual_status": "optional_enhancement"
             },
             {
               "page_path": "/pickup",
@@ -6068,7 +7027,14 @@
               "source_snapshot": "/assets/banner-spicing-it-up.webp",
               "source_alt_snapshot": "Devil n Dove banner artwork",
               "section": "banner",
-              "is_required": 1
+              "is_required": 1,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Hero/banner image; strong subject, enough negative space for responsive cropping.",
+              "mobile_safe_area": "Keep the main subject in the centre 70%; avoid critical detail at the outer 15%.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/movies",
@@ -6080,7 +7046,14 @@
               "source_snapshot": "/assets/banner-spicing-it-up.webp",
               "source_alt_snapshot": "Devil n Dove banner artwork",
               "section": "content",
-              "is_required": 0
+              "is_required": 0,
+              "recommended_width_px": 1600,
+              "recommended_height_px": 1000,
+              "recommended_aspect": "8:5",
+              "recommended_format": "WebP preferred (JPEG acceptable for photos)",
+              "recommended_use": "Content/section visual; landscape image designed to crop responsively.",
+              "mobile_safe_area": "Keep the key subject in the centre 80%; avoid text baked into the image.",
+              "baseline_visual_status": "authored_default"
             },
             {
               "page_path": "/movies",
