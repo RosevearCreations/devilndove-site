@@ -3319,3 +3319,22 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 @media(max-width:640px){.packaging-translation-actions{display:grid;grid-template-columns:1fr}.packaging-translation-actions .btn{width:100%}}
 
 .packaging-rose-direction-wrap{display:grid;gap:10px;margin:12px 0 16px}.packaging-rose-direction-wrap>div:first-child{display:grid;gap:3px}.packaging-rose-direction-palette{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-gutter:stable}.packaging-rose-direction{appearance:none;flex:0 0 94px;display:grid;gap:6px;justify-items:center;padding:8px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.035);color:inherit;cursor:pointer}.packaging-rose-direction img{width:68px;height:58px;object-fit:contain;border-radius:8px;background:#f7f2e8}.packaging-rose-direction span{font-size:.72rem;line-height:1.15;text-align:center}.packaging-rose-direction:hover,.packaging-rose-direction:focus-visible,.packaging-rose-direction.is-active{border-color:rgba(232,190,105,.9);box-shadow:0 0 0 2px rgba(232,190,105,.12);outline:none}
+
+/* Build 276 — Inventory-linked ingredient identity, longer INCI declaration, and wider claim spacing. */
+.packaging-claim-editor-row{gap:18px}
+.packaging-claim-editor-icon{padding-inline:2px 6px}
+.packaging-claim-icon{width:44px;height:44px}
+.packaging-ingredient-inventory-add{display:grid;gap:10px;margin:12px 0 14px;padding:13px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03);min-width:0}
+.packaging-ingredient-inventory-add>div:first-child{display:grid;gap:4px}
+.packaging-ingredient-inventory-add-row{display:grid;grid-template-columns:minmax(260px,1fr) auto;gap:9px;align-items:end;min-width:0}
+.packaging-ingredient-inventory-add-row .input{min-width:0;width:100%}
+.packaging-ingredient-row-editor table{min-width:1460px}
+.packaging-ingredient-inventory-cell{min-width:280px}
+.packaging-ingredient-inventory-cell .input{min-width:250px}
+.packaging-ingredient-inventory-cell small{display:block;margin-top:4px;max-width:34ch;white-space:normal;line-height:1.35}
+@media(max-width:640px){.packaging-ingredient-inventory-add-row{grid-template-columns:1fr}.packaging-ingredient-inventory-add-row .btn{width:100%;justify-content:center}.packaging-ingredient-inventory-add{padding:11px}}
+
+/* Build 276: ordered INCI row controls */
+.packaging-ingredient-row-actions{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
+.packaging-ingredient-row-actions .btn{min-width:34px;padding-inline:8px}
+@media(max-width:760px){.packaging-ingredient-row-actions{flex-wrap:wrap}.packaging-ingredient-row-actions .danger{flex-basis:100%}}
