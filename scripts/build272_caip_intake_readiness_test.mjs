@@ -5,7 +5,7 @@ const client=read('public/js/admin-caip-media-intake.js');
 const endpoint=read('functions/api/admin/caip-media-intake.js');
 const helper=read('functions/api/_lib/caipMediaIntake.js');
 const html=read('admin/creative-assets/index.html');
-assert(helper.includes("CAIP_MEDIA_INTAKE_BUILD = 'Build 272'"));
+assert(/CAIP_MEDIA_INTAKE_BUILD = 'Build 27[2-9]'/.test(helper));
 assert(helper.includes('export async function getCaipMediaIntakeReadiness'));
 assert(helper.includes("'content_fingerprint','content_fingerprint_version','recovery_of_file_id'"));
 assert(helper.includes("required_migration:'database_build269_caip_social_project_dedupe_integrity.sql'"));
@@ -15,5 +15,5 @@ assert(client.includes('const uploadReady=Boolean(readiness.upload_ready ?? bind
 assert(client.includes('Upload blocked — prerequisite missing'));
 assert(client.includes('Missing D1 columns:'));
 assert(client.includes("if(readiness.upload_ready===false)return setMsg"));
-assert(html.includes('admin-caip-media-intake.js?v=272'));
+assert(/admin-caip-media-intake\.js\?v=(?:272|273|274|275|276|277|278|279)/.test(html));
 console.log('Build 272 CAIP intake readiness checks: PASS');

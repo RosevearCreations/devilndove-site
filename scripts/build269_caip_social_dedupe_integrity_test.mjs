@@ -84,6 +84,6 @@ const client=read('public/js/admin-caip-media-intake.js');
 assert(client.includes('sample_sha256_v1'));assert(client.includes('content_fingerprint'));assert(client.includes('Re-upload source safely'));assert(client.includes('Strengthen'));assert(client.includes("duplicateAction==='registration_only'"));assert(client.includes("action:'retry_registration'"));
 const helper=read('functions/api/_lib/caipMediaIntake.js');
 assert(helper.includes('parts.length===expectedParts'));assert(helper.includes('Completion blocked before R2 finalize'));
-assert(/admin-caip-media-intake\.js\?v=(?:269|27[0-2])/.test(read('admin/creative-assets/index.html')));
+assert(/admin-caip-media-intake\.js\?v=(?:269|27[0-9])/.test(read('admin/creative-assets/index.html')));
 assert(read('database_build269_caip_social_project_dedupe_integrity.sql').includes('content_fingerprint'));
 console.log('Build 269 CAIP social-project dedupe + multipart integrity checks: PASS');

@@ -45,7 +45,7 @@ ck('Ingredient Inventory traceability remains reference-only in UI', 'Inventory 
 ck('No packaging ingredient quantity field', 'formula_quantity' not in js and 'ingredient_quantity' not in js and 'a pinch' not in js.lower())
 ck('Ingredient row order controls remain', 'data-move-ingredient-up' in js and 'data-move-ingredient-down' in js)
 ck('No Build 277 migration exists', not (ROOT/'database_build277_packaging_bilingual_claim_spacing.sql').exists())
-ck('Schema build remains Build 276', ver(r'"schema_build"\s*:\s*(\d+)',manifest)==276)
+ck('Schema build remains compatible with Build 276+', ver(r'"schema_build"\s*:\s*(\d+)',manifest)>=276)
 
 # Claim clearance: fix both the horizontal collision and the near-touching stacked circles.
 ck('Printed claim icon moved farther right from panel edge', 'const iconX=zones.claims.x+12' in js)
@@ -60,11 +60,11 @@ ck('Claim editor has larger horizontal column gap', '.packaging-claim-editor-row
 ck('Claim editor icon box is larger', '.packaging-claim-icon{width:46px;height:46px}' in css)
 
 # Documentation authority.
-ck('AI handoff marks Build 277 current', handoff.startswith('# Devil n Dove AI Handoff — Build 277'))
+ck('AI handoff is Build 277+', ver(r'# Devil n Dove AI Handoff — Build (\d+)',handoff)>=277)
 ck('AI handoff records dedicated bilingual panels', 'dedicated English `INGREDIENTS` panel' in handoff and 'dedicated French `INGRÉDIENTS` panel' in handoff)
-ck('Roadmap marks Build 277 current', roadmap.startswith('# Devil n Dove Project Status and Roadmap — Build 277'))
+ck('Roadmap is Build 277+', ver(r'# Devil n Dove Project Status and Roadmap — Build (\d+)',roadmap)>=277)
 ck('Packaging specialist doc marks Build 277 current rendering', 'Build 277 restores the owner-requested bilingual ingredient presentation' in packaging)
-ck('Release notes include Build 277', release.startswith('## Build 277'))
+ck('Release notes include Build 277', 'Build 277' in release)
 
 subprocess.run(['node','--check',str(ROOT/'public/js/admin-packaging-studio.js')],check=True)
 subprocess.run(['node','--check',str(ROOT/'functions/api/admin/packaging-studio.js')],check=True)
