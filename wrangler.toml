@@ -2,10 +2,8 @@ name = "devilndove-site"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
 
-# Build 279 — keep production Pages Function invocation logs available for CPU/error diagnosis.
-[observability]
-enabled = true
-head_sampling_rate = 1
+# Build 280 hotfix — Pages projects do not accept the Workers-only [observability] block.
+# Use Cloudflare Pages/Functions Logs in the dashboard or `wrangler pages deployment tail` for diagnostics.
 
 [[d1_databases]]
 binding = "DB"
