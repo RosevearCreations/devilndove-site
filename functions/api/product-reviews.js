@@ -2,18 +2,11 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 }
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
-async function tableExists(db, tableName) {
-  try {
-    const row = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`).bind(tableName).first();
-    return !!row;
-  } catch { return false; }
-}
 
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = env.DB || env.DD_DB;
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
-  if (!(await tableExists(db, 'product_reviews'))) return json({ ok: true, reviews: [], summary: { average_rating: 0, review_count: 0 } });
   const url = new URL(request.url);
   const productId = Number(url.searchParams.get('product_id') || 0);
   const featuredOnly = ['1', 'true', 'yes'].includes(String(url.searchParams.get('featured_only') || '').toLowerCase());

@@ -1,53 +1,30 @@
+// Build 279 — lightweight public analytics. Migrations own schema; routine visits never run DDL/PRAGMA probes.
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff'
+    }
   });
 }
 
-function normalizeText(value) {
-  return String(value || "").trim();
+function text(value, max = 0) {
+  const clean = String(value ?? '').trim();
+  return max > 0 ? clean.slice(0, max) : clean;
 }
 
-function toHex(buffer) {
-  return Array.from(new Uint8Array(buffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-async function sha256Hex(input) {
-  const encoded = new TextEncoder().encode(String(input || ""));
-  return toHex(await crypto.subtle.digest("SHA-256", encoded));
-}
-
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
-async function tableExists(db, tableName) {
-  const row = await db.prepare(
-    `SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`
-  ).bind(tableName).first().catch(() => null);
-  return !!row?.name;
-}
-
-async function ensureColumn(db, tableName, columnName, definition) {
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-    const columns = Array.isArray(result?.results) ? result.results : [];
-    if (columns.some((row) => row?.name === columnName)) return;
-    await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${definition}`).run();
-  } catch {
-    // Visit tracking must never block public pages. If an older D1 install cannot self-heal,
-    // the outer fallback returns ok/skipped rather than breaking the storefront.
-  }
+function number(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function parseUtm(queryString, referrer) {
   const out = { utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '', utm_term: '' };
   try {
     const params = new URLSearchParams(String(queryString || '').replace(/^\?/, ''));
-    for (const key of Object.keys(out)) out[key] = normalizeText(params.get(key)).slice(0, 180);
+    for (const key of Object.keys(out)) out[key] = text(params.get(key), 180);
   } catch {}
   if (!out.utm_source && referrer) {
     try {
@@ -61,236 +38,123 @@ function parseUtm(queryString, referrer) {
   return out;
 }
 
-async function getSessionUser(env, token) {
-  if (!token || !env.DB) return null;
-  const hasUsers = await tableExists(env.DB, "users");
-  const hasSessions = await tableExists(env.DB, "sessions");
-  if (!hasUsers || !hasSessions) return null;
-
-  return env.DB.prepare(`
-    SELECT s.session_id, s.user_id, u.email, u.display_name, u.role, u.is_active
-    FROM sessions s
-    INNER JOIN users u ON u.user_id = s.user_id
-    WHERE (s.session_token = ? OR s.token = ?)
-      AND s.expires_at > datetime('now')
-    LIMIT 1
-  `).bind(token, token).first().catch(() => null);
+function referrerHost(referrer) {
+  if (!referrer) return '';
+  try { return new URL(referrer).hostname.slice(0, 240); } catch { return ''; }
 }
 
 export async function onRequestPost(context) {
+  const { request, env } = context;
+  if (!env.DB) return json({ ok: true, skipped: true, reason: 'analytics_db_unavailable' });
+
+  let body;
+  try { body = await request.json(); }
+  catch { return json({ ok: true, skipped: true, reason: 'invalid_json' }); }
+
+  const path = text(body?.path || '/', 500) || '/';
+  // Admin has dedicated operational telemetry. Do not spend public-analytics CPU on admin navigation.
+  if (path === '/admin' || path.startsWith('/admin/')) {
+    return json({ ok: true, skipped: true, reason: 'admin_path' });
+  }
+
+  const userAgent = text(request.headers.get('User-Agent'), 500);
+  if (/bot|crawl|spider|preview|wget|curl|headless/i.test(userAgent)) {
+    return json({ ok: true, skipped: true, reason: 'automated_client' });
+  }
+
+  const visitorToken = text(body?.visitor_token, 180) || crypto.randomUUID();
+  const sessionToken = text(body?.browser_session_token, 180) || crypto.randomUUID();
+  const queryString = text(body?.query_string, 1200);
+  const referrer = text(body?.referrer || request.headers.get('Referer'), 800);
+  const pageTitle = text(body?.page_title, 320);
+  const pageH1 = text(body?.page_h1, 320);
+  const eventType = text(body?.event_type || 'page_view', 80).toLowerCase() || 'page_view';
+  const durationMs = Number.isFinite(Number(body?.duration_ms)) ? Math.max(0, Math.round(number(body.duration_ms))) : null;
+  let metaJson = null;
+  if (body?.meta && typeof body.meta === 'object') {
+    try { metaJson = JSON.stringify(body.meta).slice(0, 2400); } catch {}
+  }
+  const country = text(request.headers.get('CF-IPCountry'), 12);
+  const utm = parseUtm(queryString, referrer);
+  const host = referrerHost(referrer);
+
   try {
-    const { request, env } = context;
+    // One upsert replaces existence-check + insert/update and intentionally avoids IP hashing.
+    const visitor = await env.DB.prepare(`
+      INSERT INTO site_visitors (
+        visitor_token, country, user_agent, referrer_host,
+        first_seen_at, last_seen_at, visit_count, is_bot
+      ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, 0)
+      ON CONFLICT(visitor_token) DO UPDATE SET
+        last_seen_at = CURRENT_TIMESTAMP,
+        visit_count = COALESCE(site_visitors.visit_count, 0) + 1,
+        country = COALESCE(NULLIF(excluded.country, ''), site_visitors.country),
+        user_agent = COALESCE(NULLIF(excluded.user_agent, ''), site_visitors.user_agent),
+        referrer_host = COALESCE(NULLIF(excluded.referrer_host, ''), site_visitors.referrer_host)
+      RETURNING site_visitor_id
+    `).bind(visitorToken, country || null, userAgent || null, host || null).first();
 
-    if (!env.DB) {
-      return json({ ok: true, skipped: true, reason: "No DB binding for visit tracking." });
-    }
+    const visitorId = Number(visitor?.site_visitor_id || 0);
+    if (!visitorId) return json({ ok: true, skipped: true, reason: 'visitor_upsert_unavailable' });
 
-    const requiredTables = [
-      "site_visitors",
-      "site_visitor_sessions",
-      "site_page_views"
-    ];
-
-    for (const tableName of requiredTables) {
-      const exists = await tableExists(env.DB, tableName);
-      if (!exists) {
-        return json({ ok: true, skipped: true, reason: `Missing analytics table: ${tableName}` });
-      }
-    }
-
-    for (const tableName of ['site_visitor_sessions', 'site_page_views']) {
-      await ensureColumn(env.DB, tableName, 'utm_source', 'utm_source TEXT');
-      await ensureColumn(env.DB, tableName, 'utm_medium', 'utm_medium TEXT');
-      await ensureColumn(env.DB, tableName, 'utm_campaign', 'utm_campaign TEXT');
-      await ensureColumn(env.DB, tableName, 'utm_content', 'utm_content TEXT');
-      await ensureColumn(env.DB, tableName, 'utm_term', 'utm_term TEXT');
-    }
-
-    let body = {};
-    try {
-      body = await request.json();
-    } catch {
-      body = {};
-    }
-
-    const visitor_token = normalizeText(body.visitor_token) || crypto.randomUUID();
-    const browser_session_token = normalizeText(body.browser_session_token) || crypto.randomUUID();
-    const path = normalizeText(body.path || new URL(request.url).pathname) || "/";
-    const query_string = normalizeText(body.query_string);
-    const referrer = normalizeText(body.referrer || request.headers.get("Referer"));
-    const utm = parseUtm(query_string, referrer);
-    const page_title = normalizeText(body.page_title);
-    const page_h1 = normalizeText(body.page_h1);
-    const event_type = normalizeText(body.event_type || "page_view") || "page_view";
-    const duration_ms = Number.isFinite(Number(body.duration_ms)) ? Number(body.duration_ms) : null;
-    const meta_json = body.meta ? JSON.stringify(body.meta).slice(0, 5000) : null;
-    const user_agent = normalizeText(request.headers.get("User-Agent"));
-    const ip = normalizeText(request.headers.get("CF-Connecting-IP"));
-    const ip_hash = ip ? await sha256Hex(ip) : null;
-    const country = normalizeText(request.headers.get("CF-IPCountry"));
-    const region = normalizeText(request.headers.get("CF-Region"));
-    const city = normalizeText(request.headers.get("CF-IPCity"));
-    const referrer_host = referrer ? (() => {
-      try { return new URL(referrer).hostname; } catch { return ""; }
-    })() : "";
-    const is_bot = /bot|crawl|spider|preview|wget|curl/i.test(user_agent) ? 1 : 0;
-
-    const token = getBearerToken(request);
-    const sessionUser = await getSessionUser(env, token);
-    const user_id = Number(sessionUser?.user_id || 0) || null;
-
-    let visitor = await env.DB.prepare(`
-      SELECT site_visitor_id
-      FROM site_visitors
-      WHERE visitor_token = ?
-      LIMIT 1
-    `).bind(visitor_token).first().catch(() => null);
-
-    if (!visitor) {
-      const insert = await env.DB.prepare(`
-        INSERT INTO site_visitors (
-          visitor_token, ip_hash, country, region, city, user_agent, referrer_host,
-          first_seen_at, last_seen_at, visit_count, is_bot
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?)
-      `).bind(
-        visitor_token, ip_hash, country || null, region || null, city || null,
-        user_agent || null, referrer_host || null, is_bot
-      ).run();
-
-      visitor = { site_visitor_id: Number(insert?.meta?.last_row_id || 0) };
-    } else {
-      await env.DB.prepare(`
-        UPDATE site_visitors
-        SET
-          last_seen_at = CURRENT_TIMESTAMP,
-          visit_count = COALESCE(visit_count,0)+1,
-          ip_hash = COALESCE(?, ip_hash),
-          country = COALESCE(NULLIF(?, ''), country),
-          region = COALESCE(NULLIF(?, ''), region),
-          city = COALESCE(NULLIF(?, ''), city),
-          user_agent = COALESCE(NULLIF(?, ''), user_agent),
-          referrer_host = COALESCE(NULLIF(?, ''), referrer_host)
-        WHERE site_visitor_id = ?
-      `).bind(
-        ip_hash, country, region, city, user_agent, referrer_host,
-        Number(visitor.site_visitor_id || 0)
-      ).run();
-    }
-
-    let visitorSession = await env.DB.prepare(`
-      SELECT site_visitor_session_id
-      FROM site_visitor_sessions
-      WHERE site_visitor_id = ? AND session_token = ?
-      LIMIT 1
+    const pageIncrement = eventType === 'page_view' ? 1 : 0;
+    const checkoutIncrement = path.includes('/checkout') ? 1 : 0;
+    const session = await env.DB.prepare(`
+      INSERT INTO site_visitor_sessions (
+        site_visitor_id, session_token, user_id, entry_path, last_path, country,
+        utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+        started_at, last_seen_at, page_view_count, event_count,
+        is_checkout_started, is_abandoned_cart
+      ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 1, ?, 0)
+      ON CONFLICT(site_visitor_id, session_token) DO UPDATE SET
+        last_path = excluded.last_path,
+        country = COALESCE(NULLIF(excluded.country, ''), site_visitor_sessions.country),
+        utm_source = COALESCE(NULLIF(excluded.utm_source, ''), site_visitor_sessions.utm_source),
+        utm_medium = COALESCE(NULLIF(excluded.utm_medium, ''), site_visitor_sessions.utm_medium),
+        utm_campaign = COALESCE(NULLIF(excluded.utm_campaign, ''), site_visitor_sessions.utm_campaign),
+        utm_content = COALESCE(NULLIF(excluded.utm_content, ''), site_visitor_sessions.utm_content),
+        utm_term = COALESCE(NULLIF(excluded.utm_term, ''), site_visitor_sessions.utm_term),
+        last_seen_at = CURRENT_TIMESTAMP,
+        page_view_count = COALESCE(site_visitor_sessions.page_view_count, 0) + excluded.page_view_count,
+        event_count = COALESCE(site_visitor_sessions.event_count, 0) + 1,
+        is_checkout_started = CASE WHEN excluded.is_checkout_started = 1 THEN 1 ELSE site_visitor_sessions.is_checkout_started END
+      RETURNING site_visitor_session_id
     `).bind(
-      Number(visitor.site_visitor_id || 0),
-      browser_session_token
-    ).first().catch(() => null);
+      visitorId, sessionToken, path, path, country || null,
+      utm.utm_source || null, utm.utm_medium || null, utm.utm_campaign || null, utm.utm_content || null, utm.utm_term || null,
+      pageIncrement, checkoutIncrement
+    ).first();
 
-    if (!visitorSession) {
-      const insertSession = await env.DB.prepare(`
-        INSERT INTO site_visitor_sessions (
-          site_visitor_id, session_token, user_id, entry_path, last_path, country,
-          utm_source, utm_medium, utm_campaign, utm_content, utm_term,
-          started_at, last_seen_at, page_view_count, event_count,
-          is_checkout_started, is_abandoned_cart
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, 1, ?, 0)
-      `).bind(
-        Number(visitor.site_visitor_id || 0),
-        browser_session_token,
-        user_id,
-        path,
-        path,
-        country || null,
-        utm.utm_source || null,
-        utm.utm_medium || null,
-        utm.utm_campaign || null,
-        utm.utm_content || null,
-        utm.utm_term || null,
-        event_type === "page_view" ? 1 : 0,
-        path.includes("/checkout") ? 1 : 0
-      ).run();
-
-      visitorSession = { site_visitor_session_id: Number(insertSession?.meta?.last_row_id || 0) };
-    } else {
-      await env.DB.prepare(`
-        UPDATE site_visitor_sessions
-        SET
-          user_id = COALESCE(?, user_id),
-          last_path = ?,
-          country = COALESCE(NULLIF(?, ''), country),
-          utm_source = COALESCE(NULLIF(?, ''), utm_source),
-          utm_medium = COALESCE(NULLIF(?, ''), utm_medium),
-          utm_campaign = COALESCE(NULLIF(?, ''), utm_campaign),
-          utm_content = COALESCE(NULLIF(?, ''), utm_content),
-          utm_term = COALESCE(NULLIF(?, ''), utm_term),
-          last_seen_at = CURRENT_TIMESTAMP,
-          page_view_count = page_view_count + ?,
-          event_count = event_count + 1,
-          is_checkout_started = CASE WHEN ? = 1 THEN 1 ELSE is_checkout_started END
-        WHERE site_visitor_session_id = ?
-      `).bind(
-        user_id,
-        path,
-        country,
-        utm.utm_source,
-        utm.utm_medium,
-        utm.utm_campaign,
-        utm.utm_content,
-        utm.utm_term,
-        event_type === "page_view" ? 1 : 0,
-        path.includes("/checkout") ? 1 : 0,
-        Number(visitorSession.site_visitor_session_id || 0)
-      ).run();
-    }
+    const visitorSessionId = Number(session?.site_visitor_session_id || 0) || null;
 
     await env.DB.prepare(`
       INSERT INTO site_page_views (
         site_visitor_id, site_visitor_session_id, user_id, path, query_string,
         referrer, page_title, page_h1, event_type, duration_ms, meta_json,
         utm_source, utm_medium, utm_campaign, utm_content, utm_term, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `).bind(
-      Number(visitor.site_visitor_id || 0),
-      Number(visitorSession.site_visitor_session_id || 0),
-      user_id,
-      path,
-      query_string || null,
-      referrer || null,
-      page_title || null,
-      page_h1 || null,
-      event_type,
-      duration_ms,
-      meta_json,
-      utm.utm_source || null,
-      utm.utm_medium || null,
-      utm.utm_campaign || null,
-      utm.utm_content || null,
-      utm.utm_term || null
+      visitorId, visitorSessionId, path,
+      queryString || null, referrer || null, pageTitle || null, pageH1 || null,
+      eventType, durationMs, metaJson,
+      utm.utm_source || null, utm.utm_medium || null, utm.utm_campaign || null, utm.utm_content || null, utm.utm_term || null
     ).run();
 
-    const searchTableExists = await tableExists(env.DB, "site_search_events");
-    if (searchTableExists && event_type === "search" && body.meta && typeof body.meta === "object") {
+    // Legacy callers may still use DDAnalytics.trackSearch(). Search-page code normally writes directly to /api/site-search-event.
+    if (eventType === 'search' && body?.meta && typeof body.meta === 'object') {
       await env.DB.prepare(`
         INSERT INTO site_search_events (
           site_visitor_id, site_visitor_session_id, user_id, search_term, result_count, path, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ) VALUES (?, ?, NULL, ?, ?, ?, CURRENT_TIMESTAMP)
       `).bind(
-        Number(visitor.site_visitor_id || 0),
-        Number(visitorSession.site_visitor_session_id || 0),
-        user_id,
-        normalizeText(body.meta.search_term),
-        Number(body.meta.result_count || 0),
-        path
+        visitorId, visitorSessionId,
+        text(body.meta.search_term, 200), Math.max(0, Math.round(number(body.meta.result_count))), path
       ).run().catch(() => null);
     }
 
-    return json({ ok: true, visitor_token, browser_session_token, country, event_type, path });
+    return json({ ok: true, visitor_token: visitorToken, browser_session_token: sessionToken, event_type: eventType, path });
   } catch (error) {
-    return json({
-      ok: true,
-      skipped: true,
-      reason: String(error?.message || error)
-    });
+    // Analytics is explicitly fail-open: public/admin business actions must never depend on it.
+    return json({ ok: true, skipped: true, reason: 'analytics_write_unavailable' });
   }
 }

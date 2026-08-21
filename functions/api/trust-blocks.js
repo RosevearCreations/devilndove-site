@@ -36,21 +36,6 @@ function contextAliases(context) {
   return Array.from(aliases).slice(0, 8);
 }
 
-async function tableExists(db, tableName) {
-  const safeTableName = clean(tableName);
-  if (!safeTableName) return false;
-
-  try {
-    const row = await db
-      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1")
-      .bind(safeTableName)
-      .first();
-
-    return Boolean(row?.name);
-  } catch {
-    return false;
-  }
-}
 
 function buildOptionalFilters({ itemKind, locality, productSlug }) {
   const extraWhere = [];
@@ -103,7 +88,7 @@ export async function onRequestGet(context) {
   const locality = clean(url.searchParams.get("locality") || "").toLowerCase();
   const productSlug = clean(url.searchParams.get("product_slug") || "").toLowerCase();
 
-  if (!db || !(await tableExists(db, "trust_block_items"))) {
+  if (!db) {
     return json({
       ok: true,
       authority: "fallback_empty",
@@ -155,8 +140,16 @@ export async function onRequestGet(context) {
     .prepare(query)
     .bind(...aliases, ...extraBindings, limit)
     .all()
-    .catch(() => ({ results: [] }));
+    .catch(() => null);
 
+  if (!result) {
+    return json({
+      ok: true,
+      authority: "fallback_empty",
+      items: [],
+      summary: { item_count: 0, context: contextKey, item_kind: itemKind, locality, product_slug: productSlug }
+    });
+  }
   const itemRows = rows(result);
 
   return json({

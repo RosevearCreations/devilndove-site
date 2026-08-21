@@ -1,7 +1,7 @@
 // Build 241 — Devil n Dove CAIP private raw-media intake helpers.
 // D1 stores metadata/state only. Binary originals remain in a dedicated private R2 binding.
 
-export const CAIP_MEDIA_INTAKE_BUILD = 'Build 272';
+export const CAIP_MEDIA_INTAKE_BUILD = 'Build 279';
 export const CONTENT_FINGERPRINT_VERSION = 'sample_sha256_v1';
 export const CONTENT_SAMPLE_BYTES = 1024 * 1024;
 export const CAIP_PRIVATE_BUCKET_BINDING = 'CAIP_PRIVATE_MEDIA_BUCKET';
@@ -12,6 +12,10 @@ export const MIN_PART_BYTES = 5 * 1024 * 1024;
 export const MAX_PART_BYTES = 5 * 1024 * 1024 * 1024;
 export const MAX_PARTS = 10000;
 export const MAX_OBJECT_BYTES = 5 * 1024 * 1024 * 1024 * 1024;
+
+// Build 279: successful immutable schema capabilities are cached per isolate. Missing schema is never cached, so a newly applied migration can recover without a redeploy.
+let caipBaseSchemaVerified = false;
+let caipBuild269SchemaVerified = false;
 
 function text(value, max = 0) {
   const clean = String(value ?? '').trim();
@@ -207,10 +211,13 @@ export function resolveCaipBucket(env, storageProvider = '', bucketAlias = '') {
 }
 
 export async function assertCaipMediaIntakeSchema(db) {
+  if (caipBaseSchemaVerified) return true;
   try {
     await db.prepare(`SELECT caip_media_upload_session_id FROM caip_media_upload_sessions LIMIT 1`).all();
     await db.prepare(`SELECT caip_media_upload_file_id FROM caip_media_upload_files LIMIT 1`).all();
     await db.prepare(`SELECT caip_media_upload_part_id FROM caip_media_upload_parts LIMIT 1`).all();
+    caipBaseSchemaVerified = true;
+    return true;
   } catch {
     throw new Error('Build 241 CAIP media schema is not installed. Back up D1 and apply database_build241_caip_large_media_intake.sql before using private media intake.');
   }
@@ -231,9 +238,15 @@ export async function getCaipMediaIntakeReadiness(db, env = {}) {
   try {
     await assertCaipMediaIntakeSchema(db);
     readiness.schema_base_ready=true;
-    const cols=await tableColumns(db,'caip_media_upload_files');
-    readiness.missing_columns=requiredColumns.filter((name)=>!cols.has(name));
-    readiness.build269_schema_ready=readiness.missing_columns.length===0;
+    if (caipBuild269SchemaVerified) {
+      readiness.missing_columns=[];
+      readiness.build269_schema_ready=true;
+    } else {
+      const cols=await tableColumns(db,'caip_media_upload_files');
+      readiness.missing_columns=requiredColumns.filter((name)=>!cols.has(name));
+      readiness.build269_schema_ready=readiness.missing_columns.length===0;
+      if (readiness.build269_schema_ready) caipBuild269SchemaVerified=true;
+    }
   } catch (error) {
     readiness.schema_error=text(error?.message||error,800)||'CAIP media schema check failed.';
   }
@@ -463,13 +476,18 @@ export async function uploadedPartState(db, fileId) {
 }
 
 export async function recordUploadedPart(db, fileId, partNumber, uploadedPart, actorUserId) {
-  const part = await db.prepare(`SELECT p.*,f.caip_media_upload_session_id FROM caip_media_upload_parts p JOIN caip_media_upload_files f ON f.caip_media_upload_file_id=p.caip_media_upload_file_id WHERE p.caip_media_upload_file_id=? AND p.part_number=? LIMIT 1`).bind(integer(fileId),integer(partNumber)).first();
+  const part = await db.prepare(`SELECT p.caip_media_upload_part_id,p.part_status,p.part_size_bytes,f.caip_media_upload_session_id,f.expected_parts FROM caip_media_upload_parts p JOIN caip_media_upload_files f ON f.caip_media_upload_file_id=p.caip_media_upload_file_id WHERE p.caip_media_upload_file_id=? AND p.part_number=? LIMIT 1`).bind(integer(fileId),integer(partNumber)).first();
   if (!part) throw new Error('Multipart part record was not found.');
   await db.prepare(`UPDATE caip_media_upload_parts SET part_status='uploaded',etag=?,attempt_count=attempt_count+1,last_error=NULL,uploaded_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_part_id=?`).bind(text(uploadedPart?.etag,300)||null,part.caip_media_upload_part_id).run();
   const totals = await db.prepare(`SELECT COUNT(*) uploaded_parts,COALESCE(SUM(part_size_bytes),0) uploaded_bytes FROM caip_media_upload_parts WHERE caip_media_upload_file_id=? AND part_status='uploaded'`).bind(integer(fileId)).first();
-  await db.prepare(`UPDATE caip_media_upload_files SET upload_status='uploading',uploaded_parts=?,uploaded_bytes=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(numeric(totals?.uploaded_parts),numeric(totals?.uploaded_bytes),integer(actorUserId)||null,integer(fileId)).run();
-  await refreshSessionProgress(db, part.caip_media_upload_session_id, actorUserId);
-  return uploadedPartState(db,fileId);
+  const uploadedParts=numeric(totals?.uploaded_parts); const uploadedBytes=numeric(totals?.uploaded_bytes);
+  await db.prepare(`UPDATE caip_media_upload_files SET upload_status='uploading',uploaded_parts=?,uploaded_bytes=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE caip_media_upload_file_id=?`).bind(uploadedParts,uploadedBytes,integer(actorUserId)||null,integer(fileId)).run();
+  // Session-wide aggregation is useful, but doing it after every 32 MiB part multiplies work hundreds of times. Refresh periodically and at the file boundary.
+  if (uploadedParts >= numeric(part.expected_parts) || integer(partNumber) % 8 === 0) {
+    await refreshSessionProgress(db, part.caip_media_upload_session_id, actorUserId);
+  }
+  const file=await db.prepare(`SELECT caip_media_upload_file_id,caip_media_upload_session_id,creative_project_id,upload_status,uploaded_parts,uploaded_bytes,expected_parts,file_size_bytes FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(integer(fileId)).first();
+  return { file };
 }
 
 export async function recordPartFailure(db, fileId, partNumber, message) {
@@ -599,7 +617,6 @@ export async function completeUploadFile(db, env, fileId, actorUserId) {
 
 
 export async function completeDirectUploadFile(db, env, fileId, actorUserId, head = null) {
-  await assertCaipMediaIntakeSchema(db);
   const file = await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(integer(fileId)).first();
   if (!file) throw new Error('CAIP upload file was not found.');
   if (file.upload_status === 'uploaded' && file.creative_asset_id) return { file, already_complete:true };

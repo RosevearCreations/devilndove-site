@@ -14,10 +14,24 @@ function json(data, status = 200) {
 }
 
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
+const FEATURED_SCHEMA_CACHE_MS = 5 * 60 * 1000;
+let featuredSchemaCache = null;
 function clean(value) { return String(value || '').trim(); }
 function positiveInt(value, fallback, max) { const num = Number(value); return Number.isInteger(num) && num > 0 ? Math.min(num, max) : fallback; }
-async function tableExists(db, tableName) { return Boolean(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(tableName).first().catch(() => null)); }
-async function tableColumns(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } }
+async function schemaCapabilities(db) {
+  if (featuredSchemaCache && Date.now() - featuredSchemaCache.cachedAt < FEATURED_SCHEMA_CACHE_MS) return featuredSchemaCache.value;
+  const tableRows = rows(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('public_display_priorities','product_image_annotations','media_consent_records')").all().catch(() => ({ results: [] })));
+  const names = new Set(tableRows.map((row) => String(row?.name || '')));
+  const annotationColumns = names.has('product_image_annotations')
+    ? new Set(rows(await db.prepare('PRAGMA table_info(product_image_annotations)').all().catch(() => ({ results: [] }))).map((row) => String(row?.name || '').trim()).filter(Boolean))
+    : new Set();
+  const consentColumns = names.has('media_consent_records')
+    ? new Set(rows(await db.prepare('PRAGMA table_info(media_consent_records)').all().catch(() => ({ results: [] }))).map((row) => String(row?.name || '').trim()).filter(Boolean))
+    : new Set();
+  const value = { hasDisplayPriority:names.has('public_display_priorities'), hasAnnotations:names.has('product_image_annotations'), hasConsent:names.has('media_consent_records'), annotationColumns, consentColumns };
+  featuredSchemaCache = { cachedAt:Date.now(), value };
+  return value;
+}
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -26,7 +40,8 @@ export async function onRequestGet(context) {
   const url = new URL(request.url);
   const limit = positiveInt(url.searchParams.get('limit'), 6, 12);
   try {
-    const hasDisplayPriority = await tableExists(db, 'public_display_priorities');
+    const capabilities = await schemaCapabilities(db);
+    const { hasDisplayPriority, hasAnnotations, hasConsent, annotationColumns, consentColumns } = capabilities;
     const productRows = rows(await db.prepare(hasDisplayPriority ? `
       SELECT p.product_id, p.slug, p.name, p.product_category, p.short_description, p.price_cents, p.currency,
              p.featured_image_url, p.merchandise_origin, p.sale_channel, p.inventory_tracking, p.inventory_quantity,
@@ -54,9 +69,6 @@ export async function onRequestGet(context) {
     const ids = productRows.map((row) => Number(row.product_id || 0)).filter(Boolean);
     // Build 207: never use an image that the product-media review has explicitly
     // blocked or marked consent-needed. A linked consent record must authorize public use.
-    const [hasAnnotations, hasConsent] = await Promise.all([tableExists(db, 'product_image_annotations'), tableExists(db, 'media_consent_records')]);
-    const annotationColumns = hasAnnotations ? await tableColumns(db, 'product_image_annotations') : new Set();
-    const consentColumns = hasConsent ? await tableColumns(db, 'media_consent_records') : new Set();
     const canJoinAnnotations = annotationColumns.has('product_image_id');
     const canJoinConsent = canJoinAnnotations && annotationColumns.has('consent_record_id') && consentColumns.has('consent_record_id');
     const annotationStatus = canJoinAnnotations && annotationColumns.has('public_use_status') ? "COALESCE(pia.public_use_status,'internal_review')" : "'internal_review'";
