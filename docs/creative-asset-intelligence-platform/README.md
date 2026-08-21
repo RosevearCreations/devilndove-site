@@ -123,3 +123,7 @@ Read `16_Private_Raw_Media_Intake.md` for the Devil n Dove rewrite of the suppli
 4. `13_Media_Operations_Secure_Review.md` for technical observations, derivative plans and secure review.
 5. `14_Catalog_Media_CAIP_Bridge.md` and `15_Product_Release_Preflight.md` for catalog/release relationships.
 6. `../../AI_HANDOFF.md` and `../../PROJECT_STATUS_AND_ROADMAP.md` for deployment and current priorities.
+
+## Build 279 CPU hardening note
+
+CAIP upload integrity rules are unchanged, but the Worker-streamed multipart fallback is less expensive: successful schema readiness is cached per isolate, individual part responses are narrow, session-wide progress aggregation runs every eighth part or at the file boundary, and selected control-plane actions return compact file updates until the final canonical refresh. Never weaken the exact expected-parts/ETag/contiguous-range/byte-total guard or the post-completion R2 HEAD-size check to save CPU.

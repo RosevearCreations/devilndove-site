@@ -80,3 +80,8 @@ No roadmap item is considered delivered merely because its schema or queue recor
 6. Release-board/calendar scheduling and post-release analytics feedback after human approval.
 7. Physical duplicate-R2 reclamation only with whole-object checksum + reference safeguards.
 
+
+
+## Build 279 runtime efficiency boundary
+
+The Worker-streamed multipart fallback is now bounded more aggressively without changing integrity. Future provider/direct-R2 work should reduce Worker transit further, but must preserve duplicate-safe intake, immutable source identity and exact completion verification. Monitor Cloudflare CPU/error outcomes after deployment before increasing automated CAIP batch work.
