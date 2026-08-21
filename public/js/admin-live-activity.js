@@ -1,13 +1,11 @@
 // File: /public/js/admin-live-activity.js
-// Brief description: Loads and refreshes the short live activity feed on the admin dashboard.
+// Build 279 — loads the short live activity feed once; refresh is manual to avoid idle Worker polling.
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!window.DDAuth) return;
 
   const mount = document.getElementById("adminLiveActivityMount");
   if (!mount) return;
-
-  let timer = null;
 
   function esc(v) {
     return String(v ?? "")
@@ -39,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="admin-toolbar">
           <div>
             <h3 style="margin:0">Live Activity</h3>
-            <div class="small">Recent searches, visitor sessions, cart events, orders, and webhook updates.</div>
+            <div class="small">Recent searches, visitor sessions, orders, and webhook updates. Refresh is manual so an idle admin tab does not generate Worker traffic.</div>
           </div>
           <button class="btn" type="button" id="adminLiveRefreshButton">Refresh Live Feed</button>
         </div>
@@ -77,7 +75,5 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener('dd:admin-ready', (event) => {
     if (!event?.detail?.ok) return;
     load();
-    if (timer) clearInterval(timer);
-    timer = setInterval(load, 30000);
   });
 });

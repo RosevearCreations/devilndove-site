@@ -1,5 +1,5 @@
 // File: /public/js/admin-dashboard-summary.js
-// Build 245: dashboard summary waits for admin access and uses shared dedupe/backoff/stale-cache handling.
+// Build 279: dashboard summary waits for admin access and uses shared dedupe/backoff/stale-cache handling.
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
   const refreshButton = document.getElementById('refreshAdminSummary');
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadSummary({force=false}={}) {
     if(isLoading&&!force)return; isLoading=true; const original=refreshButton?.textContent||'Refresh Summary';
     try { setMessage('Loading dashboard summary…'); if(refreshButton){refreshButton.disabled=true;refreshButton.textContent='Loading…';}
-      const d=await window.DDAuth.apiJson('/api/admin/dashboard-summary',{method:'GET'},{fallbackMessage:'Dashboard summary is temporarily unavailable.',cacheKey:'admin-dashboard-summary',cacheTtlMs:60000,retries:2,staleOnError:true});
+      const d=await window.DDAuth.apiJson('/api/admin/dashboard-summary?view=compact',{method:'GET'},{fallbackMessage:'Dashboard summary is temporarily unavailable.',cacheKey:'admin-dashboard-summary',cacheTtlMs:120000,retries:0,staleOnError:true});
       renderSummary(d.summary||{}); setMessage(d?._response_meta?.stale?'Server is temporarily busy. Showing the most recent saved dashboard summary.':'',Boolean(d?._response_meta?.stale));
     } catch(e){renderEmpty();setMessage(e.message||'Failed to load dashboard summary.',true);} finally{isLoading=false;if(refreshButton){refreshButton.disabled=false;refreshButton.textContent=original;}}
   }

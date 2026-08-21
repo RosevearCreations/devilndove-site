@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchJsonState(`/api/admin/accounting-item-costing?month=${encodeURIComponent(month)}`, 'Failed loading costing snapshot.'),
       fetchJsonState('/api/admin/mobile-product-drafts?status=draft&limit=12', 'Failed loading draft products.'),
       fetchJsonState('/api/admin/accounting-summary', 'Failed loading accounting records.'),
-      fetchJsonState('/api/admin/dashboard-summary', 'Failed loading site health snapshot.'),
+      fetchJsonState('/api/admin/dashboard-summary?view=mobile_health', 'Failed loading site health snapshot.'),
       fetchJsonState('/api/admin/today-tasks', 'Failed loading today task queue.')
     ]);
 
