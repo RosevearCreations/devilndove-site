@@ -1,5 +1,26 @@
-# Devil n Dove Project Status and Roadmap — Build 278
+# Devil n Dove Project Status and Roadmap — Build 279
 
+
+
+## Build 279 completed — Worker efficiency and go-live hardening
+
+- Replaced heavy public visit tracking with bounded fail-open analytics: no request-time schema repair/introspection, no IP hash, admin excluded, bots skipped cheaply, visitor/session UPSERTs, and same-path page views limited to once per 15 minutes per browser session.
+- Reduced checkout telemetry amplification: one checkout-start event, recovery writes throttled to once/minute during editing, and a final unload beacon.
+- Removed 30-second Admin Live Activity polling; smoke/release readiness cards now load only when requested. Dashboard summary reads are split into compact desktop and mobile-health projections with no automatic retry on those calls.
+- Shared admin GET retry logic now refuses to retry Cloudflare resource-limit/CPU failures automatically.
+- Removed routine schema probes from SEO overrides, Product Reviews and Trust Blocks; Featured Products caches optional schema capabilities for five minutes per isolate.
+- Reduced CAIP multipart control-plane/part overhead without relaxing integrity: every eighth part updates session-wide totals, individual part responses are narrow, schema readiness is cached, compact action responses avoid repeated whole-project reloads, and the final multipart completion guard still proves all expected rows/ETags/bytes plus exact R2 HEAD size.
+- Enabled Workers Logs at 100% invocation sampling in `wrangler.toml`; tracing remains off and the compatibility date is intentionally unchanged.
+- Synced fresh `database_full_schema.sql` analytics UTM definitions and regenerated `fullSchemaRequirements.js` as Build 279. No new production D1 migration is required.
+
+### Required post-deploy validation before another major feature pass
+
+1. Deploy Build 279 and hard-refresh admin/public pages.
+2. Run `BUILD279_D1_VERIFICATION.sql`; production should already have the Build 151 UTM columns plus Build 269 CAIP columns.
+3. In Cloudflare Production metrics, monitor a representative 24 hours. Acceptance: **0 Exceeded CPU Time Limits**, 0 script/memory errors, and materially fewer idle/admin analytics requests.
+4. Use Workers Logs to group any slow/error invocation by pathname before changing code. Do not infer CPU root cause from wall time alone.
+5. Verify checkout, cart, product pages, SEO overrides, testimonials/trust, Admin summary, Live Activity manual refresh and one CAIP small upload/resume.
+6. After stability is verified, resume the existing highest-value functional roadmap: CAIP video/timecode evidence review, reviewed story construction, Content Studio handoff, Packaging physical proofs, and Media Studio P1/P2 artwork replacement.
 
 ## Build 278 completed — page-wide edit mode and live image backlog
 

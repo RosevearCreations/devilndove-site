@@ -1,3 +1,14 @@
+# Build 279 — Worker Efficiency & Go-Live Hardening
+
+- Lightweight fail-open public analytics; no request-time analytics DDL/schema introspection or IP hashing; admin excluded and repeat page views throttled.
+- Checkout-recovery and analytics events throttled/deduplicated.
+- Removed 30-second Live Activity polling and automatic Dashboard smoke/preflight/release loads.
+- Scoped Dashboard summary APIs and prevented retry amplification on Cloudflare resource-limit failures.
+- Removed repeated schema probes from several public hot paths and cached Featured Products schema capabilities.
+- Slimmed CAIP multipart per-part/control-plane work while retaining exact part/byte/R2 integrity gates.
+- Enabled Workers Logs in Wrangler configuration; compatibility date unchanged.
+- Fresh full schema now explicitly includes analytics UTM columns and the live schema manifest is regenerated for Build 279. No new production D1 migration.
+
 # Build 278 — Page-wide Media Edit Mode & Image Requirements
 
 - Administrator public-page editing now uses one page-wide Edit switch; individual badges are hidden in clean preview mode.

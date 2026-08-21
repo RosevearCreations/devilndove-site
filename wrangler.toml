@@ -2,6 +2,11 @@ name = "devilndove-site"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
 
+# Build 279 — keep production Pages Function invocation logs available for CPU/error diagnosis.
+[observability]
+enabled = true
+head_sampling_rate = 1
+
 [[d1_databases]]
 binding = "DB"
 database_name = "devilndove-prod"
