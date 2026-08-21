@@ -1,6 +1,6 @@
-// Build 241 — streams one bounded CAIP multipart part into the private R2 binding.
+// Build 279 — CPU-hardened bounded CAIP multipart part path; schema readiness is established by the control plane before binary transfer.
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { assertCaipMediaIntakeSchema, privateBucketAvailable, recordPartFailure, recordUploadedPart } from '../_lib/caipMediaIntake.js';
+import { privateBucketAvailable, recordPartFailure, recordUploadedPart } from '../_lib/caipMediaIntake.js';
 
 const MAX_FALLBACK_PART_BYTES=256*1024*1024;
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
@@ -15,7 +15,6 @@ export async function onRequestPut(context){
   const params=new URL(request.url).searchParams;const fileId=integer(params.get('file_id')||params.get('caip_media_upload_file_id'));const partNumber=integer(params.get('part_number'));
   if(!fileId||!partNumber||!request.body)return json({ok:false,error:'File ID, part number, and request body are required.'},400);
   try{
-    await assertCaipMediaIntakeSchema(db);
     if(!privateBucketAvailable(env))throw new Error('CAIP_PRIVATE_MEDIA_BUCKET is not configured.');
     const row=await db.prepare(`SELECT f.*,p.caip_media_upload_part_id,p.byte_start,p.byte_end,p.part_size_bytes,p.part_status FROM caip_media_upload_files f JOIN caip_media_upload_parts p ON p.caip_media_upload_file_id=f.caip_media_upload_file_id WHERE f.caip_media_upload_file_id=? AND p.part_number=? LIMIT 1`).bind(fileId,partNumber).first();
     if(!row)throw new Error('Multipart file/part record was not found.');

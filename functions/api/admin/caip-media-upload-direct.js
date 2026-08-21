@@ -1,6 +1,6 @@
-// Build 267 — idempotent direct CAIP upload; verified R2 binary success is never downgraded by later metadata repair.
+// Build 279 — CPU-hardened idempotent direct CAIP upload; verified R2 binary success is never downgraded by later metadata repair.
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { assertCaipMediaIntakeSchema, completeDirectUploadFile, DIRECT_UPLOAD_MAX_BYTES, privateBucketAvailable } from '../_lib/caipMediaIntake.js';
+import { completeDirectUploadFile, DIRECT_UPLOAD_MAX_BYTES, privateBucketAvailable } from '../_lib/caipMediaIntake.js';
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
 function integer(value){const n=Number(value||0);return Number.isInteger(n)&&n>0?n:0;}
 function sameOrigin(request){const origin=request.headers.get('Origin');if(!origin)return true;try{return new URL(origin).host===new URL(request.url).host;}catch{return false;}}
@@ -11,7 +11,7 @@ export async function onRequestPut(context){
   const db=getDb(env);if(!db)return json({ok:false,error:'Database binding is not configured.'},500);
   const fileId=integer(new URL(request.url).searchParams.get('file_id')); if(!fileId||!request.body)return json({ok:false,error:'File ID and request body are required.'},400);
   try{
-    await assertCaipMediaIntakeSchema(db); if(!privateBucketAvailable(env))throw new Error('CAIP_PRIVATE_MEDIA_BUCKET is not configured.');
+    if(!privateBucketAvailable(env))throw new Error('CAIP_PRIVATE_MEDIA_BUCKET is not configured.');
     const row=await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(fileId).first();
     if(!row)throw new Error('CAIP upload file was not found.'); if(row.upload_status==='uploaded' && Number(row.creative_asset_id||0)>0)return json({ok:true,already_complete:true,file:row}); if(row.upload_status==='aborted')throw new Error('Upload has been aborted.');
     const expected=Number(row.file_size_bytes||0); if(expected<=0||expected>DIRECT_UPLOAD_MAX_BYTES)throw new Error('This file must use the multipart upload path.');

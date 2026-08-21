@@ -60,6 +60,10 @@ export async function onRequestPost(context){
     else throw new Error('Unsupported CAIP media-intake action.');
     const resolvedProject=projectId||integer(result?.file?.creative_project_id)||integer(result?.session?.creative_project_id)||integer(result?.creative_asset?.creative_project_id)||integer(result?.creative_project_id);
     await auditAdminAction(context.env,context.request,state.adminUser,{action_type:`caip_media_${action}`,target_type:'creative_project',target_id:resolvedProject||null,target_key:result?.session?.session_key||result?.request_key||null,details:{action,creative_project_id:resolvedProject||null,upload_file_id:fileId||null,private_raw:true,public_copy_created:false}}).catch(()=>null);
+    const compactResponse=Boolean(body.compact_response)&&['set_content_fingerprint','initiate_file','complete_file'].includes(action);
+    if(compactResponse){
+      return json({ok:true,build:CAIP_MEDIA_INTAKE_BUILD,message:'CAIP private-media action completed.',result:scrub({files:[safeUploadFileForClient(result?.file)],...result}),compact_response:true});
+    }
     let data={}; let refresh_warning=null; let duplicate_audit=null;
     try {
       data=await listCaipMediaIntake(state.db,resolvedProject,context.env);
