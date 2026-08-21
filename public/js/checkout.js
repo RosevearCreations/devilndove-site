@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const giftCardMessageEl = document.getElementById("giftCardMessage");
 
   const CART_KEY = "dd_cart";
+  const RECOVERY_WRITE_KEY = 'dd_checkout_recovery_v279';
+  const RECOVERY_WRITE_WINDOW_MS = 60 * 1000;
   const CHECKOUT_FORM_KEY = "dd_checkout_form";
   const CONFIRMATION_KEY = "dd_last_order_confirmation";
 
@@ -318,26 +320,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function captureRecoveryLead() {
+  async function captureRecoveryLead({ force = false, beacon = false } = {}) {
     try {
       const formData = readFormData();
       if (!isValidEmail(formData.customer_email)) return;
-      const cartSummary = calculateCartSummary(getCartItems());
+      const cartItems = getCartItems();
+      const cartSummary = calculateCartSummary(cartItems);
       if (cartSummary.subtotal_cents <= 0) return;
-      await fetch('/api/checkout-recovery-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_email: formData.customer_email,
-          customer_name: formData.customer_name,
-          browser_session_token: window.DDAnalytics?.browser_session_token || '',
-          visitor_token: window.DDAnalytics?.visitor_token || '',
-          checkout_path: '/checkout/',
-          cart_count: getCartItems().reduce((sum, item) => sum + Number(item.quantity || 0), 0),
-          cart_value_cents: cartSummary.subtotal_cents,
-          currency: 'CAD'
-        })
-      });
+      const now = Date.now();
+      if (!force) {
+        try {
+          const last = Number(sessionStorage.getItem(RECOVERY_WRITE_KEY) || 0);
+          if (last && now - last < RECOVERY_WRITE_WINDOW_MS) return;
+        } catch {}
+      }
+      const payload = {
+        customer_email: formData.customer_email,
+        customer_name: formData.customer_name,
+        browser_session_token: window.DDAnalytics?.browser_session_token || '',
+        visitor_token: window.DDAnalytics?.visitor_token || '',
+        checkout_path: '/checkout/',
+        cart_count: cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
+        cart_value_cents: cartSummary.subtotal_cents,
+        currency: 'CAD'
+      };
+      if (beacon && navigator.sendBeacon) {
+        navigator.sendBeacon('/api/checkout-recovery-lead', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+      } else {
+        await fetch('/api/checkout-recovery-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify(payload)
+        });
+      }
+      try { sessionStorage.setItem(RECOVERY_WRITE_KEY, String(now)); } catch {}
     } catch {}
   }
 
@@ -442,10 +459,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fillFormFromSavedData();
   renderSummary();
-  try { window.DDAnalytics?.trackCart?.('checkout_started', { meta: { source: 'checkout_ready' } }); } catch {}
+  // Build 279: site-analytics records checkout_started once; do not duplicate that Worker event here.
   bindAutoSaveAndRecovery();
 
   form?.addEventListener("submit", handleSubmit);
   giftCardButtonEl?.addEventListener('click', applyGiftCard);
-  window.addEventListener('beforeunload', () => { captureRecoveryLead(); });
+  window.addEventListener('beforeunload', () => { captureRecoveryLead({ force: true, beacon: true }); });
 });

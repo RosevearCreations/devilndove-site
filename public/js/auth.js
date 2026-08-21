@@ -212,7 +212,8 @@
           return { ...data, _response_meta: { cached: false, stale: false, attempt } };
         } catch (error) {
           lastError = error;
-          if (!safeRead || !error?.isRetryable || attempt >= maxRetries) break;
+          // Build 279: never amplify Cloudflare CPU/resource-limit failures with automatic retries.
+          if (!safeRead || error?.isCloudflareResourceLimit || !error?.isRetryable || attempt >= maxRetries) break;
           const backoff = [500, 1500, 4000][attempt] || 4000;
           await delay(backoff);
         }
