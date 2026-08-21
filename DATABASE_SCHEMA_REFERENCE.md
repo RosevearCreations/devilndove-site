@@ -1,4 +1,4 @@
-# Database Schema Reference — Build 277
+# Database Schema Reference — Build 279
 
 ## Current migration and production-parity boundary
 
@@ -9,7 +9,11 @@ The retained broad/current-pass migration remains Build 264. Focused additive mi
 - Creative Process correction lifecycle: `database_build274_creative_process_lifecycle_corrections.sql`
 - Packaging ingredient Inventory-reference support: `database_build276_packaging_inventory_inci_capacity.sql`
 
-Use the matching read-only `BUILD269_D1_VERIFICATION.sql`, `BUILD274_D1_VERIFICATION.sql`, and `BUILD276_D1_VERIFICATION.sql` after those focused migrations. `database_full_schema.sql`, `database_schema.sql`, `database_store_schema.sql`, and `functions/api/_lib/fullSchemaRequirements.js` are synchronized through Build 276 for fresh-install/runtime parity. Focused migrations are **not** copied over `database_upgrade_current_pass.sql`; production applies them after the retained Build 264 broad boundary.
+Use the matching read-only `BUILD269_D1_VERIFICATION.sql`, `BUILD274_D1_VERIFICATION.sql`, and `BUILD276_D1_VERIFICATION.sql` after those focused migrations. `database_full_schema.sql` and `functions/api/_lib/fullSchemaRequirements.js` are synchronized through Build 279 for fresh-install/runtime parity; scoped overlay schemas remain valid for their intended surfaces. Build 279 makes analytics UTM columns explicit in the full fresh schema rather than depending on request-time DDL. Focused migrations are **not** copied over `database_upgrade_current_pass.sql`; production applies them after the retained Build 264 broad boundary.
+
+## Build 279 no-migration schema-authority note
+
+Build 279 adds **no production D1 migration**. Production should already have `site_visitor_sessions` and `site_page_views` UTM columns from the older Build 151 compatibility path. The heavy analytics endpoint that used to check/add those columns on every visit is retired. The complete fresh schema now declares the UTM columns directly, and `fullSchemaRequirements.js` is regenerated as schema Build 279. Run `BUILD279_D1_VERIFICATION.sql` before deployment to confirm live parity; if a required column is unexpectedly absent, stop and repair deliberately rather than restoring request-time self-healing.
 
 ## Build 277 code-only schema note
 

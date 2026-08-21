@@ -579,6 +579,11 @@ CREATE TABLE IF NOT EXISTS site_visitor_sessions (
   entry_path TEXT,
   last_path TEXT,
   country TEXT,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_content TEXT,
+  utm_term TEXT,
   started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   page_view_count INTEGER NOT NULL DEFAULT 0,
@@ -603,6 +608,11 @@ CREATE TABLE IF NOT EXISTS site_page_views (
   event_type TEXT NOT NULL DEFAULT 'page_view',
   duration_ms INTEGER,
   meta_json TEXT,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_content TEXT,
+  utm_term TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (site_visitor_id) REFERENCES site_visitors(site_visitor_id) ON DELETE SET NULL,
   FOREIGN KEY (site_visitor_session_id) REFERENCES site_visitor_sessions(site_visitor_session_id) ON DELETE SET NULL,
@@ -2413,7 +2423,8 @@ CREATE TABLE IF NOT EXISTS custom_request_conversion_events (
 );
 CREATE INDEX IF NOT EXISTS idx_custom_request_conversion_events_request ON custom_request_conversion_events(custom_request_id, created_at);
 
--- Runtime APIs self-heal these attribution/support columns when older D1 installs are missing them.
+-- Build 279 schema authority note: where analytics tables are defined, attribution columns belong in the schema rather than routine request-time DDL.
+-- Legacy production databases received these columns through the earlier Build 151 compatibility path; routine analytics requests no longer run DDL/PRAGMA self-healing.
 -- custom_requests: utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token
 -- site_visitor_sessions/site_page_views: utm_source, utm_medium, utm_campaign, utm_content, utm_term
 -- accounting_hst_gst_reviews: remittance_evidence_url, reminder_date

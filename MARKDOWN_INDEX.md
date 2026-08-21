@@ -1,4 +1,4 @@
-# Devil n Dove Markdown Index — Build 278
+# Devil n Dove Markdown Index — Build 279
 
 ## Only two mutable current authorities
 
@@ -32,4 +32,4 @@
 - Packaging ingredient Inventory-reference schema: Build 276 `database_build276_packaging_inventory_inci_capacity.sql`.
 - Builds 270–273 add no D1 schema.
 - Build 275 Packaging Studio fixes require no D1 migration; they use the existing packaging/source-material tables.
-- Builds 277–278 require no D1 migration; Build 278 changes Media Studio/public edit presentation and adds the visual requirements catalog/report.
+- Builds 277–279 require no new production D1 migration. Build 279 is Worker CPU/go-live hardening and fresh-schema analytics authority synchronization; Build 278 is Media Studio/public edit presentation and the visual requirements catalog/report.

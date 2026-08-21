@@ -1369,7 +1369,8 @@ CREATE TABLE IF NOT EXISTS custom_request_conversion_events (
 );
 CREATE INDEX IF NOT EXISTS idx_custom_request_conversion_events_request ON custom_request_conversion_events(custom_request_id, created_at);
 
--- Runtime APIs self-heal these attribution/support columns when older D1 installs are missing them.
+-- Build 279 schema authority note: where analytics tables are defined, attribution columns belong in the schema rather than routine request-time DDL.
+-- Legacy production databases received these columns through the earlier Build 151 compatibility path; routine analytics requests no longer run DDL/PRAGMA self-healing.
 -- custom_requests: utm_source, utm_medium, utm_campaign, utm_content, utm_term, visitor_token, browser_session_token
 -- site_visitor_sessions/site_page_views: utm_source, utm_medium, utm_campaign, utm_content, utm_term
 -- accounting_hst_gst_reviews: remittance_evidence_url, reminder_date
