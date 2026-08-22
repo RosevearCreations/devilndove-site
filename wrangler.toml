@@ -1,23 +1,22 @@
-name = "devilndove-site"
+name = "devilndove-site-dev"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
 
-# Build 280 hotfix — Pages projects do not accept the Workers-only [observability] block.
-# Use Cloudflare Pages/Functions Logs in the dashboard or `wrangler pages deployment tail` for diagnostics.
+# DEV ENVIRONMENT ONLY.
+# Cloudflare Pages projects do not accept the Workers-only [observability] block.
+# Use Cloudflare Pages/Functions Logs or `wrangler pages deployment tail`.
 
 [[d1_databases]]
 binding = "DB"
-database_name = "devilndove-prod"
-database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"
+database_name = "devilndove-dev"
+database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
 
 [[r2_buckets]]
 binding = "PRODUCT_MEDIA_BUCKET"
-bucket_name = "devilndove-toolshed-images"
-preview_bucket_name = "devilndove-toolshed-images"
+bucket_name = "devilndove-toolshed-images-dev"
+preview_bucket_name = "devilndove-toolshed-images-dev"
 
-# Build 241 optional/private CAIP raw-media binding.
-# Create the private R2 bucket first, keep public access disabled, then uncomment this binding.
 [[r2_buckets]]
 binding = "CAIP_PRIVATE_MEDIA_BUCKET"
- bucket_name = "devilndove-caip-media"
-preview_bucket_name = "devilndove-caip-media"
+bucket_name = "devilndove-caip-media-dev"
+preview_bucket_name = "devilndove-caip-media-dev"
