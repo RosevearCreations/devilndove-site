@@ -1,0 +1,12 @@
+# Local development secrets
+.dev.vars*
+.env*
+
+# Wrangler local databases, logs, caches, and generated test files
+.wrangler/
+
+# Local Node dependencies
+node_modules/
+
+# Temporary schema safety backups
+database_full_schema.before_*.sql

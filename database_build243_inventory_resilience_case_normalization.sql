@@ -7,7 +7,7 @@
 -- Keep the oldest row as the canonical active record, aggregate stock quantities into it, and retain
 -- later rows as inactive audit/history records instead of deleting referenced inventory IDs.
 DROP TABLE IF EXISTS _build243_inventory_case_merge;
-CREATE TEMP TABLE _build243_inventory_case_merge AS
+CREATE TABLE _build243_inventory_case_merge AS
 SELECT
   duplicate.site_item_inventory_id AS duplicate_id,
   canonical.canonical_id
