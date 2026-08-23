@@ -1,13 +1,15 @@
-// Devil n Dove Build 283 Admin module runtime bridge.
-// Only modules with an explicit runtime entry may activate. Packaging is the
-// first such module. All other Admin routes remain classification/shadow only.
+// Devil n Dove Build 284 Admin module runtime bridge.
+// Packaging remains the only actively loadable module. Build 284 also registers
+// lazy owner-side read services for its declared Catalog, Inventory and Content contracts.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
 import { validateModuleContracts } from './dd-module-contracts.mjs';
+import { registerDefaultModuleServices } from './dd-module-service-adapters.mjs';
 
 const registry = createModuleRegistry(DD_MODULE_DEFINITIONS);
 const contractValidation = validateModuleContracts(DD_MODULE_DEFINITIONS);
+const serviceRegistration = registerDefaultModuleServices(registry);
 const CLASSIFICATION_USER = Object.freeze({ role: 'admin' });
 
 let currentResolution = null;
@@ -20,6 +22,10 @@ function classifyPath(pathname) {
 
 function authenticatedAdmin(user) {
   return Boolean(user && String(user.role || '').toLowerCase() === 'admin');
+}
+
+function missingRuntimeServices(definition) {
+  return (definition?.consumes || []).filter((contractId) => !registry.service(contractId));
 }
 
 function annotateAdminLinks(root = document) {
@@ -43,7 +49,7 @@ function setResolution(definition, mode) {
   document.documentElement.dataset.ddModuleMode = mode;
 }
 
-function dispatchResolution(definition, mode) {
+function dispatchResolution(definition, mode, extra = {}) {
   document.dispatchEvent(new CustomEvent('dd:module-resolved', {
     detail: Object.freeze({
       mode,
@@ -51,8 +57,10 @@ function dispatchResolution(definition, mode) {
       moduleLabel: definition?.label || null,
       pathname: window.location.pathname,
       contractsOk: contractValidation.ok,
+      servicesOk: serviceRegistration.ok,
       runtimeEntry: definition?.entry || null,
       state: definition ? registry.state(definition.id) : null,
+      ...extra,
     }),
   }));
 }
@@ -95,6 +103,13 @@ async function resolveVerifiedAdmin(user) {
   if (!contractValidation.ok) {
     setResolution(definition, 'activation-blocked-contracts');
     dispatchResolution(definition, 'activation-blocked-contracts');
+    return definition;
+  }
+
+  const missingServices = missingRuntimeServices(definition);
+  if (missingServices.length) {
+    setResolution(definition, 'activation-blocked-services');
+    dispatchResolution(definition, 'activation-blocked-services', { missingServices: Object.freeze([...missingServices]) });
     return definition;
   }
 
@@ -164,21 +179,26 @@ window.addEventListener('pagehide', () => {
 if (!contractValidation.ok) {
   console.warn('[DD modules] contract catalog validation failed', [...contractValidation.errors]);
 }
+if (!serviceRegistration.ok) {
+  console.warn('[DD modules] default module service registration failed', [...serviceRegistration.missing]);
+}
 
 const runtimeApi = Object.freeze({
   mode: 'runtime',
-  build: 283,
+  build: 284,
   registry,
   definitions: registry.list(),
   contractValidation,
+  serviceRegistration,
   classifyPath,
   resolveForUser: (pathname, user) => registry.resolve(pathname, user),
   getCurrent: () => currentResolution,
   getActiveModuleId: () => activeModuleId,
   getModuleState: (moduleId) => registry.state(moduleId),
+  service: (name) => registry.service(name),
+  getServiceIds: () => Object.freeze([...serviceRegistration.available]),
   annotateAdminLinks: () => annotateAdminLinks(document),
 });
 
 window.DDModuleRuntime = runtimeApi;
-// Compatibility alias for Build 282 diagnostics while the runtime transition begins.
 window.DDModuleShadow = runtimeApi;

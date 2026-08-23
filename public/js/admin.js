@@ -1,6 +1,6 @@
 // File: /public/js/admin.js
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
-// Build 283: load the module runtime bridge. Only explicitly converted modules may activate; all other routes remain shadow-only.
+// Build 284: module runtime includes lazy owner-side read services for converted module contracts.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -38,5 +38,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=283')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=284')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
