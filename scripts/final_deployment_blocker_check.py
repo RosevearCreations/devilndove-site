@@ -164,7 +164,11 @@ def js_syntax():
                 result = subprocess.run(
                     ['node','--input-type=module','--check'], cwd=ROOT,
                     input=path.read_text(encoding='utf-8', errors='replace'),
-                    capture_output=True, text=True, timeout=12
+                    capture_output=True,
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace',
+                    timeout=12
                 )
             else:
                 result = subprocess.run(['node','--check',str(path)], cwd=ROOT, capture_output=True, text=True, timeout=12)
