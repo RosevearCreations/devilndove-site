@@ -1,6 +1,6 @@
 // Build 286 - narrow Packaging-owned GET bootstrap for the active modular runtime.
 // Bulk Catalog and Inventory collections are intentionally excluded; those come from owner contracts.
-import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from './_lib/adminAudit.js';
+import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
 const BUILD = 286;
 

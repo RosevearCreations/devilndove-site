@@ -42,6 +42,12 @@ for name in js_files:
 print("PASS: Build 286 JavaScript syntax")
 
 bootstrap = read("functions/api/admin/packaging-bootstrap.js")
+if "from '../_lib/adminAudit.js';" not in bootstrap:
+    fail("Packaging bootstrap adminAudit import does not resolve from functions/api/admin")
+if not (ROOT / "functions/api/_lib/adminAudit.js").is_file():
+    fail("Packaging bootstrap adminAudit dependency is missing")
+print("PASS: Packaging bootstrap Function import resolves")
+
 if "module_boundary" not in bootstrap or "bulk_catalog_rows: 0" not in bootstrap or "bulk_inventory_rows: 0" not in bootstrap:
     fail("narrow bootstrap boundary markers are missing")
 if "SELECT product_id,product_number,sku,name,slug,status,product_category" in bootstrap:
@@ -211,7 +217,11 @@ if "legacy-endpoint-fallback" not in module or "rollback GET" not in module:
     fail("explicit legacy rollback behavior is missing")
 print("PASS: rollback GET remains explicit and observable")
 
-result = run(["git", "diff", "--name-only", "HEAD^", "HEAD"])
+result = run([
+    "git", "diff", "--name-only",
+    "125a4a6b77485b582d93ca30504b2333b7cb3476",
+    "HEAD"
+])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
