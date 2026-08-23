@@ -1,6 +1,6 @@
 // File: /public/js/admin.js
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
-// Build 285: Packaging consumes owner-side read contracts through the active module bridge; other Admin modules remain unchanged.
+// Build 286: Packaging uses a narrow Packaging-owned GET bootstrap plus owner read contracts; other Admin modules remain unchanged.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -38,5 +38,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=285')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=286')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));

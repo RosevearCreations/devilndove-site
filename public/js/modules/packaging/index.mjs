@@ -1,10 +1,11 @@
-// Devil n Dove Build 285 Packaging module lifecycle + real contract consumption.
-// Existing Packaging UI and write APIs remain intact. While Packaging is active,
-// the legacy GET bootstrap response is contractized so Catalog and Inventory data
-// come from their owner services, with the legacy response retained only as fallback.
+// Devil n Dove Build 286 Packaging module lifecycle + API boundary cleanup.
+// Active Packaging GET bootstrap requests use the narrow Packaging-owned endpoint first.
+// Catalog, Inventory and Content collections come from owner contracts. Legacy broad GET
+// remains rollback-only; Packaging POST/write requests continue to the existing endpoint.
 
 const PACKAGING_ROUTE_PREFIX = '/admin/packaging-studio';
-const PACKAGING_BOOTSTRAP_PATH = '/api/admin/packaging-studio';
+const LEGACY_PACKAGING_BOOTSTRAP_PATH = '/api/admin/packaging-studio';
+const NARROW_PACKAGING_BOOTSTRAP_PATH = '/api/admin/packaging-bootstrap';
 const REQUIRED_CONTRACTS = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
 
 let state = 'registered';
@@ -18,8 +19,15 @@ let refreshObserver = null;
 let refreshScheduled = false;
 let refreshTriggered = false;
 let availableContentMedia = Object.freeze([]);
+
+const contractCache = {
+  catalog: { ready: false, rows: Object.freeze([]) },
+  inventory: { ready: false, rows: Object.freeze([]) },
+  contentMedia: { ready: false, rows: Object.freeze([]) },
+};
+
 let bootstrapStatus = Object.freeze({
-  build: 285,
+  build: 286,
   contractized: false,
   catalogSource: 'not-read',
   inventorySource: 'not-read',
@@ -27,6 +35,9 @@ let bootstrapStatus = Object.freeze({
   catalogCount: 0,
   inventoryCount: 0,
   contentMediaCount: 0,
+  serverBootstrapSource: 'not-read',
+  bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
+  legacyEndpointBypassed: false,
   fallbackReasons: Object.freeze([]),
 });
 
@@ -70,36 +81,70 @@ async function read(serviceId, options = {}) {
   const result = await service.list(options);
   emit('dd:packaging-contract-read', {
     moduleId: 'packaging',
-    build: 285,
+    build: 286,
     contractId: serviceId,
     count: Number(result?.count || 0),
   });
   return result;
 }
 
-function requestPath(input) {
-  const raw = typeof input === 'string' ? input : String(input?.url || '');
-  if (!raw) return '';
+function rawRequestUrl(input) {
+  return typeof input === 'string' ? input : String(input?.url || '');
+}
+
+function requestUrl(input) {
+  const raw = rawRequestUrl(input);
+  if (!raw) return null;
   try {
-    return new URL(raw, globalThis.location?.origin || 'https://devilndove.invalid').pathname;
+    return new URL(raw, globalThis.location?.origin || 'https://devilndove.invalid');
   } catch {
-    return raw.split(/[?#]/, 1)[0] || '';
+    return null;
   }
+}
+
+function requestPath(input) {
+  return requestUrl(input)?.pathname || rawRequestUrl(input).split(/[?#]/, 1)[0] || '';
+}
+
+function requestMethod(input, init = {}) {
+  return String(init?.method || input?.method || 'GET').toUpperCase();
 }
 
 function isPackagingBootstrapRequest(input, init = {}) {
-  const method = String(init?.method || input?.method || 'GET').toUpperCase();
-  return method === 'GET' && requestPath(input) === PACKAGING_BOOTSTRAP_PATH;
+  return requestMethod(input, init) === 'GET' && requestPath(input) === LEGACY_PACKAGING_BOOTSTRAP_PATH;
 }
 
-function resultValue(settled, legacyRows, label, fallbackReasons) {
+function narrowBootstrapUrl(input) {
+  const parsed = requestUrl(input);
+  if (!parsed) return NARROW_PACKAGING_BOOTSTRAP_PATH;
+  return `${NARROW_PACKAGING_BOOTSTRAP_PATH}${parsed.search || ''}`;
+}
+
+function cacheValue(key, rows) {
+  const clean = Object.freeze([...(Array.isArray(rows) ? rows : [])]);
+  contractCache[key] = { ready: true, rows: clean };
+  return clean;
+}
+
+function resolvedContract(settled, cacheKey, label, legacyRows, fallbackReasons) {
   if (settled?.status === 'fulfilled' && Array.isArray(settled.value?.rows)) {
-    return { rows: settled.value.rows, count: Number(settled.value.count || settled.value.rows.length || 0), source: 'contract' };
+    const rows = cacheValue(cacheKey, settled.value.rows);
+    return { rows, count: Number(settled.value.count ?? rows.length), source: 'contract' };
   }
+
   const reason = String(settled?.reason?.message || settled?.reason || `${label} contract unavailable`);
   fallbackReasons.push(`${label}: ${reason}`);
-  const rows = Array.isArray(legacyRows) ? legacyRows : [];
-  return { rows, count: rows.length, source: 'legacy-fallback' };
+
+  const cached = contractCache[cacheKey];
+  if (cached?.ready) {
+    return { rows: cached.rows, count: cached.rows.length, source: 'session-cache' };
+  }
+
+  if (Array.isArray(legacyRows)) {
+    return { rows: Object.freeze([...legacyRows]), count: legacyRows.length, source: 'legacy-endpoint-fallback' };
+  }
+
+  return { rows: Object.freeze([]), count: 0, source: 'contract-unavailable' };
 }
 
 function ensureContractStatusPanel() {
@@ -121,11 +166,11 @@ function renderContractStatus() {
   const panel = ensureContractStatusPanel();
   if (!panel) return;
   if (!bootstrapStatus.contractized) {
-    panel.textContent = 'Modular data: Packaging is active; waiting for Catalog, Inventory and Content contract reads.';
+    panel.textContent = 'Modular data: Packaging is active; waiting for the narrow Packaging bootstrap and owner contracts.';
     return;
   }
   const fallback = bootstrapStatus.fallbackReasons.length ? ` Fallback: ${bootstrapStatus.fallbackReasons.join(' | ')}` : '';
-  panel.textContent = `Modular data active — Catalog ${bootstrapStatus.catalogCount} (${bootstrapStatus.catalogSource}); Inventory ${bootstrapStatus.inventoryCount} (${bootstrapStatus.inventorySource}); Content media ${bootstrapStatus.contentMediaCount} (${bootstrapStatus.contentMediaSource}).${fallback}`;
+  panel.textContent = `Modular data active — Packaging bootstrap ${bootstrapStatus.serverBootstrapSource}; Catalog ${bootstrapStatus.catalogCount} (${bootstrapStatus.catalogSource}); Inventory ${bootstrapStatus.inventoryCount} (${bootstrapStatus.inventorySource}); Content media ${bootstrapStatus.contentMediaCount} (${bootstrapStatus.contentMediaSource}).${fallback}`;
 }
 
 function syntheticJsonResponse(response, payload) {
@@ -141,15 +186,26 @@ function syntheticJsonResponse(response, payload) {
   });
 }
 
-async function contractizeBootstrapResponse(response) {
-  if (!response?.ok) return response;
-  let legacy;
-  try {
-    legacy = await response.clone().json();
-  } catch {
-    return response;
-  }
-  if (!legacy?.ok) return response;
+async function readJsonResponse(response) {
+  if (!response) return null;
+  try { return await response.clone().json(); }
+  catch { return null; }
+}
+
+async function fetchLegacyBootstrap(input, init) {
+  if (!originalApiFetch || !bridgeAuthOwner) return { response: null, payload: null };
+  const response = await originalApiFetch.call(bridgeAuthOwner, input, init);
+  const payload = response?.ok ? await readJsonResponse(response) : null;
+  return { response, payload };
+}
+
+async function contractizeBootstrapResponse(serverResponse, serverPayload, {
+  input,
+  init,
+  serverBootstrapSource,
+  legacyEndpointBypassed,
+} = {}) {
+  if (!serverResponse?.ok || !serverPayload?.ok) return serverResponse;
 
   const [catalogResult, inventoryResult, mediaResult] = await Promise.allSettled([
     readCatalog({ limit: 500 }),
@@ -157,14 +213,41 @@ async function contractizeBootstrapResponse(response) {
     readContentMedia({ mediaType: 'artwork', limit: 72 }),
   ]);
 
+  const needsLegacyData = [catalogResult, inventoryResult, mediaResult].some((settled, index) => {
+    if (settled?.status === 'fulfilled' && Array.isArray(settled.value?.rows)) return false;
+    const key = ['catalog', 'inventory', 'contentMedia'][index];
+    return !contractCache[key]?.ready;
+  });
+
+  let legacyPayload = null;
+  let usedLegacyEndpointForData = false;
+  if (needsLegacyData && serverBootstrapSource !== 'legacy-endpoint-fallback') {
+    try {
+      const fallback = await fetchLegacyBootstrap(input, init);
+      if (fallback.response?.ok && fallback.payload?.ok) {
+        legacyPayload = fallback.payload;
+        usedLegacyEndpointForData = true;
+      }
+    } catch (error) {
+      console.warn('[DD Packaging] rollback GET was unavailable', error);
+    }
+  } else if (serverBootstrapSource === 'legacy-endpoint-fallback') {
+    legacyPayload = serverPayload;
+  }
+
   const fallbackReasons = [];
-  const catalog = resultValue(catalogResult, legacy.products, 'Catalog', fallbackReasons);
-  const inventory = resultValue(inventoryResult, legacy.inventory, 'Inventory', fallbackReasons);
-  const contentMedia = resultValue(mediaResult, legacy.content_media, 'Content media', fallbackReasons);
+  const catalog = resolvedContract(catalogResult, 'catalog', 'Catalog', legacyPayload?.products, fallbackReasons);
+  const inventory = resolvedContract(inventoryResult, 'inventory', 'Inventory', legacyPayload?.inventory, fallbackReasons);
+  const contentMedia = resolvedContract(mediaResult, 'contentMedia', 'Content media', legacyPayload?.content_media, fallbackReasons);
   availableContentMedia = Object.freeze([...(contentMedia.rows || [])]);
 
+  const effectiveServerSource = usedLegacyEndpointForData
+    ? 'packaging-bootstrap-with-legacy-data-fallback'
+    : serverBootstrapSource;
+  const effectiveLegacyBypass = Boolean(legacyEndpointBypassed && !usedLegacyEndpointForData);
+
   bootstrapStatus = Object.freeze({
-    build: 285,
+    build: 286,
     contractized: true,
     catalogSource: catalog.source,
     inventorySource: inventory.source,
@@ -172,55 +255,89 @@ async function contractizeBootstrapResponse(response) {
     catalogCount: catalog.count,
     inventoryCount: inventory.count,
     contentMediaCount: contentMedia.count,
+    serverBootstrapSource: effectiveServerSource,
+    bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
+    legacyEndpointBypassed: effectiveLegacyBypass,
     fallbackReasons: Object.freeze([...fallbackReasons]),
   });
   renderContractStatus();
 
   const payload = {
-    ...legacy,
+    ...serverPayload,
     products: catalog.rows,
     inventory: inventory.rows,
     content_media: contentMedia.rows,
     module_contracts: {
-      build: 285,
+      build: 286,
       catalog_read: catalog.source,
       inventory_read: inventory.source,
       content_media: contentMedia.source,
+      packaging_bootstrap: effectiveServerSource,
+      legacy_endpoint_bypassed: effectiveLegacyBypass,
       fallback_reasons: [...fallbackReasons],
     },
   };
 
   emit('dd:packaging-contract-bootstrap', {
     moduleId: 'packaging',
-    build: 285,
+    build: 286,
     catalogSource: catalog.source,
     inventorySource: inventory.source,
     contentMediaSource: contentMedia.source,
     catalogCount: catalog.count,
     inventoryCount: inventory.count,
     contentMediaCount: contentMedia.count,
+    serverBootstrapSource: effectiveServerSource,
+    legacyEndpointBypassed: effectiveLegacyBypass,
     fallbackCount: fallbackReasons.length,
   });
 
-  return syntheticJsonResponse(response, payload);
+  return syntheticJsonResponse(serverResponse, payload);
 }
 
 function installBootstrapBridge() {
   if (bridgedApiFetch) return true;
   const auth = globalThis.DDAuth;
   if (!auth || typeof auth.apiFetch !== 'function') return false;
+
   bridgeAuthOwner = auth;
   originalApiFetch = auth.apiFetch;
-  bridgedApiFetch = async function ddPackagingContractApiFetch(input, init) {
-    const response = await originalApiFetch.call(bridgeAuthOwner, input, init);
-    if (state !== 'active' || !isPackagingBootstrapRequest(input, init)) return response;
+  bridgedApiFetch = async function ddPackagingBoundaryApiFetch(input, init) {
+    if (state !== 'active' || !isPackagingBootstrapRequest(input, init)) {
+      return originalApiFetch.call(bridgeAuthOwner, input, init);
+    }
+
+    let serverResponse = null;
+    let serverPayload = null;
+    let serverBootstrapSource = 'packaging-bootstrap';
+    let legacyEndpointBypassed = true;
+
     try {
-      return await contractizeBootstrapResponse(response);
+      serverResponse = await originalApiFetch.call(bridgeAuthOwner, narrowBootstrapUrl(input), init);
+      serverPayload = serverResponse?.ok ? await readJsonResponse(serverResponse) : null;
+      if (!serverResponse?.ok || !serverPayload?.ok) throw new Error(serverPayload?.error || `Narrow Packaging bootstrap HTTP ${serverResponse?.status || 0}`);
     } catch (error) {
-      console.warn('[DD Packaging] contractized bootstrap failed; legacy response retained', error);
-      return response;
+      console.warn('[DD Packaging] narrow bootstrap unavailable; using rollback GET', error);
+      const fallback = await fetchLegacyBootstrap(input, init);
+      serverResponse = fallback.response;
+      serverPayload = fallback.payload;
+      serverBootstrapSource = 'legacy-endpoint-fallback';
+      legacyEndpointBypassed = false;
+    }
+
+    try {
+      return await contractizeBootstrapResponse(serverResponse, serverPayload, {
+        input,
+        init,
+        serverBootstrapSource,
+        legacyEndpointBypassed,
+      });
+    } catch (error) {
+      console.warn('[DD Packaging] contractized bootstrap failed; server response retained', error);
+      return serverResponse;
     }
   };
+
   auth.apiFetch = bridgedApiFetch;
   return true;
 }
@@ -277,7 +394,7 @@ function scheduleContractRefresh() {
 function installBrowserFacade() {
   if (typeof window === 'undefined') return;
   window.DDPackagingContracts = Object.freeze({
-    build: 285,
+    build: 286,
     requiredContracts: REQUIRED_CONTRACTS,
     readCatalog,
     readInventory,
@@ -290,10 +407,11 @@ function installBrowserFacade() {
 
 export const metadata = Object.freeze({
   id: 'packaging',
-  build: 285,
+  build: 286,
   routePrefix: PACKAGING_ROUTE_PREFIX,
+  bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
   requiredContracts: REQUIRED_CONTRACTS,
-  behaviorMode: 'contract-consumer-bridge',
+  behaviorMode: 'api-boundary-cleanup-bridge',
 });
 
 export async function readCatalog(options = {}) { return read('catalog-read', options); }
@@ -301,18 +419,17 @@ export async function readInventory(options = {}) { return read('inventory-read'
 export async function readContentMedia(options = {}) { return read('content-media', options); }
 
 export async function onLoad({ registry, definition } = {}) {
-  if (definition?.id !== 'packaging') {
-    throw new Error('Packaging module loaded with the wrong module definition.');
-  }
+  if (definition?.id !== 'packaging') throw new Error('Packaging module loaded with the wrong module definition.');
   bindServices(registry);
   state = 'loaded';
   setDomState('loaded');
   installBrowserFacade();
   emit('dd:packaging-module-loaded', {
     moduleId: 'packaging',
-    build: 285,
+    build: 286,
     contracts: REQUIRED_CONTRACTS,
     servicesReady: true,
+    bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
   });
 }
 
@@ -332,12 +449,13 @@ export async function onActivate(context = {}) {
   scheduleContractRefresh();
   emit('dd:module-active', {
     moduleId: 'packaging',
-    build: 285,
+    build: 286,
     pathname,
     activationCount,
     contracts: REQUIRED_CONTRACTS,
     servicesReady: true,
-    contractConsumerBridge: true,
+    apiBoundaryCleanupBridge: true,
+    bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
   });
 }
 
@@ -350,7 +468,7 @@ export async function onDeactivate(context = {}) {
   setDomState('inactive');
   emit('dd:module-inactive', {
     moduleId: 'packaging',
-    build: 285,
+    build: 286,
     previousState: previous,
     reason: String(context.reason || 'route-lifecycle'),
   });
@@ -360,13 +478,15 @@ export async function onDeactivate(context = {}) {
 export function getStatus() {
   return Object.freeze({
     moduleId: 'packaging',
-    build: 285,
+    build: 286,
     state,
     activationCount,
     lastContext,
     servicesReady: Boolean(services && REQUIRED_CONTRACTS.every((id) => services[id])),
     bridgeInstalled: Boolean(bridgedApiFetch),
     bootstrapContractized: Boolean(bootstrapStatus.contractized),
+    bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
+    legacyEndpointBypassed: Boolean(bootstrapStatus.legacyEndpointBypassed),
     requiredContracts: REQUIRED_CONTRACTS,
   });
 }
