@@ -1,6 +1,7 @@
-// Devil n Dove Build 284 Admin module runtime bridge.
-// Packaging remains the only actively loadable module. Build 284 also registers
-// lazy owner-side read services for its declared Catalog, Inventory and Content contracts.
+// Devil n Dove Build 285 Admin module runtime bridge.
+// Packaging remains the only actively loadable module. Its declared Catalog,
+// Inventory and Content read services are registered lazily and are now consumed
+// by the Packaging compatibility bridge after verified activation.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
@@ -185,7 +186,7 @@ if (!serviceRegistration.ok) {
 
 const runtimeApi = Object.freeze({
   mode: 'runtime',
-  build: 284,
+  build: 285,
   registry,
   definitions: registry.list(),
   contractValidation,
