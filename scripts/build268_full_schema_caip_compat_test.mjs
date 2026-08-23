@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { retryUploadedFileRegistration, createSafeReplacementUpload } from '../functions/api/_lib/caipMediaIntake.js';
 import { FULL_SCHEMA_REQUIREMENTS } from '../functions/api/_lib/fullSchemaRequirements.js';
 
-const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=(p)=>fs.readFileSync(path.join(root,p),'utf8');
 class D1Statement{constructor(stmt){this.stmt=stmt;this.args=[];}bind(...args){this.args=args;return this;}async run(){const r=this.stmt.run(...this.args);return{success:true,meta:{changes:Number(r.changes),last_row_id:Number(r.lastInsertRowid||0)}};}async first(){return this.stmt.get(...this.args)||null;}async all(){return{success:true,results:this.stmt.all(...this.args)}}}
 class D1Db{constructor(db){this.db=db;}prepare(sql){return new D1Statement(this.db.prepare(sql));}}

@@ -17,7 +17,7 @@
 - removal/caching of public schema probes;
 - CAIP per-part/request reductions;
 - unchanged exact multipart integrity gates and R2 HEAD verification;
-- Workers Logs configuration;
+- Cloudflare Pages/Functions logging strategy; Workers-only `[observability]` remains intentionally absent;
 - Build 279 cache busting;
 - fresh full-schema analytics UTM authority;
 - all aggregate schema files execute with zero foreign-key violations;

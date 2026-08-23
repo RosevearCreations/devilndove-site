@@ -91,8 +91,8 @@ check('Multipart completion verifies R2 HEAD', 'const head=await bucket.head(fil
 check('R2 HEAD size must match D1', 'numeric(head.size)!==expectedBytes' in caip)
 
 # Observability/config
-check('Workers Logs enabled in Wrangler', '[observability]' in wrangler and 'enabled = true' in wrangler)
-check('Workers Logs capture invocation baseline', 'head_sampling_rate = 1' in wrangler)
+check('Pages Functions logging strategy configured', 'pages_build_output_dir = "."' in wrangler and 'wrangler pages deployment tail' in wrangler)
+check('Workers-only observability block absent from Pages config', re.search(r'(?m)^\s*\[observability\]\s*$', wrangler) is None)
 check('Compatibility date deliberately unchanged', 'compatibility_date = "2026-04-08"' in wrangler)
 
 # Cache-busting

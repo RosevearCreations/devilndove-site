@@ -29,7 +29,7 @@
 
 ## Cloudflare configuration
 
-- `wrangler.toml` — Workers Logs enabled at 100% head sampling; no tracing or compatibility-date change.
+- `wrangler.toml` — retains the Cloudflare Pages configuration and existing D1/R2 bindings; the Workers-only `[observability]` block remains intentionally absent. Use Pages/Functions Logs or `wrangler pages deployment tail`; compatibility date remains unchanged.
 
 ## Schema authority
 

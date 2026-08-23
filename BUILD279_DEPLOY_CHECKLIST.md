@@ -23,8 +23,8 @@ Build 279's `wrangler.toml` intentionally:
 
 - keeps `compatibility_date = "2026-04-08"` unchanged;
 - keeps existing D1/R2 bindings unchanged;
-- enables Workers Logs with `head_sampling_rate = 1`;
-- does **not** enable the tracing beta.
+- uses Cloudflare Pages/Functions logging rather than the Workers-only `[observability]` block;
+- does **not** add Workers-only tracing/observability configuration.
 
 After deployment, confirm the Cloudflare project still shows the expected bindings because Wrangler configuration is part of the Pages project configuration authority.
 
@@ -38,7 +38,7 @@ After deployment, confirm the Cloudflare project still shows the expected bindin
 6. Open Shop/Product and confirm Featured Products, product reviews/trust blocks and SEO overrides still render/fail safely.
 7. Open checkout; confirm cart/order functions still work and checkout recovery is throttled.
 8. On CAIP, use a small file or existing resumable test to confirm duplicate-safe intake and final registration.
-9. Open Cloudflare Observability/Logs and confirm Production Function invocation logs are available.
+9. Open Cloudflare Pages/Functions logs, or use `wrangler pages deployment tail`, and confirm Production Function invocation logs are available.
 
 ## 24-hour gate
 

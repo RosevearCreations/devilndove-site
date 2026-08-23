@@ -220,7 +220,8 @@ CREATE TABLE IF NOT EXISTS tax_classes (
   tax_rate REAL NOT NULL DEFAULT 0.13,
   rate_percent REAL NOT NULL DEFAULT 13,
   is_active INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS products (
@@ -268,6 +269,8 @@ CREATE TABLE IF NOT EXISTS products (
   capture_last_saved_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  publish_readiness_score INTEGER,
+  image_quality_score INTEGER,
   FOREIGN KEY (tax_class_id) REFERENCES tax_classes(tax_class_id),
   FOREIGN KEY (capture_created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
   FOREIGN KEY (capture_updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
@@ -539,14 +542,16 @@ CREATE TABLE IF NOT EXISTS notification_outbox (
   related_order_id INTEGER,
   related_payment_id INTEGER,
   payload_json TEXT,
-  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled')),
+  status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','retry','sent','failed','cancelled', 'suppressed')),
   attempt_count INTEGER NOT NULL DEFAULT 0,
   last_attempt_at TEXT,
   next_attempt_at TEXT,
   provider_message_id TEXT,
   error_text TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  related_product_id INTEGER,
+  metadata_json TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at);
 CREATE INDEX IF NOT EXISTS idx_notification_outbox_order_payment ON notification_outbox(related_order_id, related_payment_id);
@@ -1163,7 +1168,8 @@ CREATE TABLE IF NOT EXISTS general_ledger_accounts (
   tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS accounting_vendors (
@@ -1197,7 +1203,15 @@ CREATE TABLE IF NOT EXISTS accounting_expenses (
   reference_number TEXT,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  vendor TEXT,
+  category TEXT,
+  description TEXT,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  receipt_url TEXT,
+  created_by_user_id INTEGER REFERENCES users(user_id) ON DELETE SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_expenses_vendor ON accounting_expenses(vendor_id, vendor_name, expense_date DESC);
 CREATE INDEX IF NOT EXISTS idx_accounting_expenses_recurring ON accounting_expenses(recurring_expense_rule_id, expense_date DESC);
@@ -1252,7 +1266,21 @@ CREATE TABLE IF NOT EXISTS accounting_writeoffs (
   reason_code TEXT NOT NULL DEFAULT 'other',
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  writeoff_type TEXT NOT NULL,
+  description TEXT,
+  amount_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  gl_account_code TEXT,
+  product_id INTEGER,
+  quantity REAL,
+  reference_number TEXT,
+  total_amount REAL,
+  tax_amount REAL,
+  ledger_code TEXT,
+  ledger_name TEXT,
+  status TEXT,
+  created_by_user_id INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS product_costs (
@@ -1262,7 +1290,14 @@ CREATE TABLE IF NOT EXISTS product_costs (
   effective_date TEXT,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  product_id INTEGER NOT NULL,
+  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  currency TEXT NOT NULL DEFAULT 'CAD',
+  vendor TEXT,
+  created_by_user_id INTEGER,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 
@@ -1996,7 +2031,12 @@ CREATE TABLE IF NOT EXISTS social_post_queue (
   utm_source TEXT,
   utm_medium TEXT,
   utm_campaign TEXT,
-  utm_url TEXT
+  utm_url TEXT,
+  privacy_status TEXT DEFAULT 'needs_review',
+  privacy_notes TEXT,
+  media_consent_required INTEGER DEFAULT 1,
+  customer_media_present INTEGER DEFAULT 0,
+  approved_for_public_post INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS social_caption_templates (
@@ -2226,7 +2266,12 @@ CREATE TABLE IF NOT EXISTS custom_requests (
   status TEXT NOT NULL DEFAULT 'new',
   admin_notes TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_content TEXT,
+  utm_term TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_custom_requests_status ON custom_requests(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_custom_requests_email ON custom_requests(email, created_at);
@@ -2255,7 +2300,12 @@ CREATE TABLE IF NOT EXISTS trust_block_items (
   approved_by_user_id INTEGER,
   approved_at TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  source_product_review_id INTEGER,
+  status TEXT NOT NULL DEFAULT 'draft',
+  approved_for_public_use INTEGER NOT NULL DEFAULT 0,
+  privacy_review_status TEXT NOT NULL DEFAULT 'needs_review',
+  internal_notes TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_trust_block_items_public ON trust_block_items(block_status, is_public, display_context, sort_order);
 CREATE INDEX IF NOT EXISTS idx_trust_block_items_product ON trust_block_items(related_product_id, related_product_slug);
@@ -2311,7 +2361,9 @@ CREATE TABLE IF NOT EXISTS accounting_hst_gst_reviews (
   reviewed_at TEXT,
   notes TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  remittance_evidence_url TEXT,
+  reminder_date TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_accounting_hst_gst_reviews_period ON accounting_hst_gst_reviews(period_month, review_status);
 
@@ -25422,3 +25474,299 @@ ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,notes=excl
 INSERT INTO schema_migration_ledger (migration_key,file_name,status,destructive,applied_at,notes,updated_at)
 VALUES ('build276_packaging_inventory_inci_capacity','database_build276_packaging_inventory_inci_capacity.sql','applied',0,CURRENT_TIMESTAMP,'Reference-only Inventory links for structured packaging ingredients; no stock movements are created by Packaging Studio.',CURRENT_TIMESTAMP)
 ON CONFLICT(migration_key) DO UPDATE SET file_name=excluded.file_name,status='applied',destructive=0,notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+
+
+-- ===== FRESH-INSTALL SCHEMA PARITY RESTORATIONS 2026-08-22 =====
+-- Restores current application tables discovered in Production but
+-- absent from the canonical fresh-install schema.
+-- Intentionally excludes __sql_test and search_query_terms.
+
+-- ============================================================================
+-- Devil n Dove fresh-install schema parity repair candidate
+-- Generated from captured Production sqlite_schema
+--
+-- INTENTIONALLY EXCLUDED:
+--   __sql_test          - test artifact
+--   search_query_terms  - no current application/repository usage
+--
+-- DO NOT APPLY TO PRODUCTION.
+-- This file is generated for canonical/fresh-install validation first.
+-- ============================================================================
+
+-- TABLE: accounting_order_records
+CREATE TABLE IF NOT EXISTS accounting_order_records (
+      accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL UNIQUE,
+      order_number TEXT NOT NULL,
+      entry_status TEXT NOT NULL DEFAULT 'open' CHECK (entry_status IN ('open','partially_paid','paid','refunded','cancelled','archived')),
+      customer_name TEXT,
+      customer_email TEXT,
+      currency TEXT NOT NULL DEFAULT 'CAD',
+      subtotal_cents INTEGER NOT NULL DEFAULT 0,
+      discount_cents INTEGER NOT NULL DEFAULT 0,
+      shipping_cents INTEGER NOT NULL DEFAULT 0,
+      tax_cents INTEGER NOT NULL DEFAULT 0,
+      total_cents INTEGER NOT NULL DEFAULT 0,
+      amount_paid_cents INTEGER NOT NULL DEFAULT 0,
+      amount_outstanding_cents INTEGER NOT NULL DEFAULT 0,
+      revenue_cents INTEGER NOT NULL DEFAULT 0,
+      tax_liability_cents INTEGER NOT NULL DEFAULT 0,
+      source_order_status TEXT,
+      source_payment_status TEXT,
+      notes TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+    );
+
+-- TABLE: admin_command_center_cards
+CREATE TABLE IF NOT EXISTS admin_command_center_cards (   admin_command_center_card_id INTEGER PRIMARY KEY AUTOINCREMENT,   card_key TEXT NOT NULL UNIQUE,   card_label TEXT NOT NULL,   card_area TEXT NOT NULL DEFAULT 'daily_ops',   card_status TEXT NOT NULL DEFAULT 'active',   priority_rank INTEGER NOT NULL DEFAULT 100,   desktop_status TEXT NOT NULL DEFAULT 'prepared',   mobile_status TEXT NOT NULL DEFAULT 'prepared',   primary_route TEXT,   metric_label TEXT,   metric_value INTEGER NOT NULL DEFAULT 0,   action_label TEXT,   action_route TEXT,   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: admin_command_center_daily_snapshots
+CREATE TABLE IF NOT EXISTS admin_command_center_daily_snapshots (   admin_command_center_daily_snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,   build_label TEXT NOT NULL DEFAULT 'Build 185',   snapshot_status TEXT NOT NULL DEFAULT 'review',   total_products INTEGER NOT NULL DEFAULT 0,   ready_products INTEGER NOT NULL DEFAULT 0,   blocked_products INTEGER NOT NULL DEFAULT 0,   open_orders INTEGER NOT NULL DEFAULT 0,   open_recalls INTEGER NOT NULL DEFAULT 0,   seo_pages_needing_review INTEGER NOT NULL DEFAULT 0,   visual_items_needing_review INTEGER NOT NULL DEFAULT 0,   marketplace_items_blocked INTEGER NOT NULL DEFAULT 0,   performance_items_over_budget INTEGER NOT NULL DEFAULT 0,   summary_json TEXT DEFAULT '{}',   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: checkout_recovery_leads
+CREATE TABLE IF NOT EXISTS checkout_recovery_leads (
+    checkout_recovery_lead_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    browser_session_token TEXT,
+    visitor_token TEXT,
+    customer_email TEXT,
+    customer_name TEXT,
+    cart_count INTEGER NOT NULL DEFAULT 0,
+    cart_value_cents INTEGER NOT NULL DEFAULT 0,
+    currency TEXT NOT NULL DEFAULT 'CAD',
+    checkout_path TEXT,
+    checkout_state_json TEXT,
+    status TEXT NOT NULL DEFAULT 'open',
+    last_recovery_email_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(browser_session_token, customer_email)
+  );
+
+-- TABLE: conversion_funnel_scorecard_rows
+CREATE TABLE IF NOT EXISTS conversion_funnel_scorecard_rows (   conversion_funnel_scorecard_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   funnel_step TEXT NOT NULL UNIQUE,   step_label TEXT NOT NULL,   step_order INTEGER NOT NULL DEFAULT 100,   source_kind TEXT NOT NULL DEFAULT 'manual_or_analytics_import',   event_count INTEGER NOT NULL DEFAULT 0,   previous_step_count INTEGER NOT NULL DEFAULT 0,   conversion_rate_percent REAL NOT NULL DEFAULT 0,   dropoff_note TEXT,   review_status TEXT NOT NULL DEFAULT 'needs_tracking',   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: css_drift_overlap_review_rows
+CREATE TABLE IF NOT EXISTS css_drift_overlap_review_rows (   css_drift_overlap_review_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   review_key TEXT NOT NULL UNIQUE,   selector_or_area TEXT NOT NULL,   review_kind TEXT NOT NULL DEFAULT 'css_drift',   desktop_status TEXT NOT NULL DEFAULT 'static_pass',   mobile_status TEXT NOT NULL DEFAULT 'static_pass',   risk_level TEXT NOT NULL DEFAULT 'watch',   recommended_fix TEXT,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: customer_engagement_runs
+CREATE TABLE IF NOT EXISTS customer_engagement_runs (
+    customer_engagement_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_type TEXT NOT NULL DEFAULT 'automation',
+    actor_user_id INTEGER,
+    summary_json TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: customer_story_builder_rows
+CREATE TABLE IF NOT EXISTS customer_story_builder_rows (   customer_story_builder_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   story_key TEXT NOT NULL UNIQUE,   story_label TEXT NOT NULL,   source_kind TEXT NOT NULL DEFAULT 'product_story_or_order',   source_record_id INTEGER,   consent_status TEXT NOT NULL DEFAULT 'needs_review',   trust_block_status TEXT NOT NULL DEFAULT 'candidate',   social_snippet_status TEXT NOT NULL DEFAULT 'draft_needed',   public_page_target TEXT,   story_summary TEXT,   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: desktop_mobile_surface_audit_rows
+CREATE TABLE IF NOT EXISTS desktop_mobile_surface_audit_rows (   desktop_mobile_surface_audit_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   surface_key TEXT NOT NULL UNIQUE,   route_path TEXT NOT NULL,   surface_label TEXT NOT NULL,   desktop_status TEXT NOT NULL DEFAULT 'prepared',   mobile_status TEXT NOT NULL DEFAULT 'prepared',   touch_target_status TEXT NOT NULL DEFAULT 'needs_live_device_check',   overflow_status TEXT NOT NULL DEFAULT 'static_pass',   fallback_status TEXT NOT NULL DEFAULT 'has_readable_fallback',   next_best_action TEXT,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: gift_card_delivery_audit
+CREATE TABLE IF NOT EXISTS gift_card_delivery_audit (   gift_card_delivery_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,   gift_card_id INTEGER,   audience TEXT NOT NULL DEFAULT 'recipient',   notification_kind TEXT NOT NULL,   destination TEXT,   notification_outbox_id INTEGER,   notification_dispatch_log_id INTEGER,   actor_user_id INTEGER,   action_type TEXT NOT NULL DEFAULT 'queued',   details_json TEXT,   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP );
+
+-- TABLE: gift_card_redemptions
+CREATE TABLE IF NOT EXISTS gift_card_redemptions (
+    gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gift_card_id INTEGER NOT NULL,
+    order_id INTEGER,
+    redeemed_amount_cents INTEGER NOT NULL DEFAULT 0,
+    redeemed_by_email TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: gift_cards
+CREATE TABLE IF NOT EXISTS gift_cards (
+    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    currency TEXT NOT NULL DEFAULT 'CAD',
+    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
+    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
+    issued_to_email TEXT,
+    issued_to_name TEXT,
+    note TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    expires_at TEXT,
+    last_redeemed_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  , purchaser_email TEXT, purchaser_name TEXT, recipient_email TEXT, recipient_name TEXT, recipient_note TEXT, purchaser_user_id INTEGER, order_id INTEGER, purchase_source TEXT);
+
+-- TABLE: inventory_job_costing_value_rows
+CREATE TABLE IF NOT EXISTS inventory_job_costing_value_rows (   inventory_job_costing_value_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   costing_key TEXT NOT NULL UNIQUE,   costing_label TEXT NOT NULL,   source_kind TEXT NOT NULL DEFAULT 'inventory_or_product',   product_id INTEGER,   inventory_item_id INTEGER,   material_cost_cents INTEGER NOT NULL DEFAULT 0,   labour_cost_cents INTEGER NOT NULL DEFAULT 0,   packaging_cost_cents INTEGER NOT NULL DEFAULT 0,   marketplace_fee_cents INTEGER NOT NULL DEFAULT 0,   suggested_price_cents INTEGER NOT NULL DEFAULT 0,   margin_status TEXT NOT NULL DEFAULT 'needs_review',   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: local_seo_value_scorecard_rows
+CREATE TABLE IF NOT EXISTS local_seo_value_scorecard_rows (   local_seo_value_scorecard_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   page_path TEXT NOT NULL UNIQUE,   target_phrase TEXT NOT NULL,   search_console_status TEXT NOT NULL DEFAULT 'needs_import',   google_business_profile_status TEXT NOT NULL DEFAULT 'manual_review',   ranking_check_status TEXT NOT NULL DEFAULT 'needs_manual_check',   content_freshness_status TEXT NOT NULL DEFAULT 'needs_refresh_review',   image_proof_status TEXT NOT NULL DEFAULT 'needs_approved_images',   score INTEGER NOT NULL DEFAULT 0,   next_best_action TEXT,   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: maker_gallery_value_rows
+CREATE TABLE IF NOT EXISTS maker_gallery_value_rows (   maker_gallery_value_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   gallery_key TEXT NOT NULL UNIQUE,   gallery_label TEXT NOT NULL,   proof_kind TEXT NOT NULL DEFAULT 'before_after_or_process',   source_route TEXT,   public_use_status TEXT NOT NULL DEFAULT 'needs_approved_media',   consent_status TEXT NOT NULL DEFAULT 'needs_review',   before_image_url TEXT,   after_image_url TEXT,   story_note TEXT,   professional_value TEXT,   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: markdown_consolidation_runs
+CREATE TABLE IF NOT EXISTS markdown_consolidation_runs (   markdown_consolidation_run_id INTEGER PRIMARY KEY AUTOINCREMENT,   build_label TEXT NOT NULL DEFAULT 'Build 186',   run_status TEXT NOT NULL DEFAULT 'prepared',   canonical_file_count INTEGER NOT NULL DEFAULT 2,   supporting_file_count INTEGER NOT NULL DEFAULT 0,   retired_reference_count INTEGER NOT NULL DEFAULT 0,   summary_json TEXT DEFAULT '{}',   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: markdown_file_status_rows
+CREATE TABLE IF NOT EXISTS markdown_file_status_rows (   markdown_file_status_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   file_path TEXT NOT NULL UNIQUE,   file_role TEXT NOT NULL DEFAULT 'supporting_reference',   keep_active INTEGER NOT NULL DEFAULT 1,   canonical_replacement TEXT,   owner_note TEXT,   last_review_build TEXT NOT NULL DEFAULT 'Build 186',   review_status TEXT NOT NULL DEFAULT 'reviewed',   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP );
+
+-- TABLE: member_wishlists
+CREATE TABLE IF NOT EXISTS member_wishlists (
+    member_wishlist_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, product_id)
+  );
+
+-- TABLE: mobile_quick_product_add_checks
+CREATE TABLE IF NOT EXISTS mobile_quick_product_add_checks (   mobile_quick_product_add_check_id INTEGER PRIMARY KEY AUTOINCREMENT,   check_key TEXT NOT NULL UNIQUE,   check_label TEXT NOT NULL,   mobile_status TEXT NOT NULL DEFAULT 'needs_live_test',   desktop_status TEXT NOT NULL DEFAULT 'prepared',   failure_recovery_status TEXT NOT NULL DEFAULT 'fallback_needed',   autosave_status TEXT NOT NULL DEFAULT 'needs_review',   image_role_prompt_status TEXT NOT NULL DEFAULT 'needs_review',   route_path TEXT NOT NULL DEFAULT '/admin/mobile-product/',   next_best_action TEXT,   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: newsletter_subscribers
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+      subscriber_id  INTEGER PRIMARY KEY,
+      email          TEXT NOT NULL UNIQUE,
+      is_confirmed   INTEGER NOT NULL DEFAULT 0,
+      created_at     TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      confirmed_at   TEXT,
+      unsubscribed_at TEXT
+    );
+
+-- TABLE: next_step_sanity_rows
+CREATE TABLE IF NOT EXISTS next_step_sanity_rows (   next_step_sanity_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   step_key TEXT NOT NULL UNIQUE,   step_label TEXT NOT NULL,   step_group TEXT NOT NULL DEFAULT 'next_20',   priority_rank INTEGER NOT NULL DEFAULT 100,   expected_value TEXT,   target_surface TEXT,   current_status TEXT NOT NULL DEFAULT 'queued',   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: notification_cooldown_rules
+CREATE TABLE IF NOT EXISTS notification_cooldown_rules (
+    notification_cooldown_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL UNIQUE,
+    cooldown_hours INTEGER NOT NULL DEFAULT 24,
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: notification_dispatch_log
+CREATE TABLE IF NOT EXISTS notification_dispatch_log (
+    notification_dispatch_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_outbox_id INTEGER,
+    notification_kind TEXT,
+    destination TEXT,
+    status TEXT NOT NULL DEFAULT 'queued',
+    provider_message_id TEXT,
+    error_text TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: notification_exclusions
+CREATE TABLE IF NOT EXISTS notification_exclusions (
+    notification_exclusion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    notification_kind TEXT NOT NULL,
+    destination TEXT,
+    product_id INTEGER,
+    order_id INTEGER,
+    reason TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: performance_budget_value_rows
+CREATE TABLE IF NOT EXISTS performance_budget_value_rows (   performance_budget_value_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   route_path TEXT NOT NULL UNIQUE,   target_total_kb INTEGER NOT NULL DEFAULT 900,   target_image_kb INTEGER NOT NULL DEFAULT 650,   target_js_kb INTEGER NOT NULL DEFAULT 250,   current_total_kb INTEGER NOT NULL DEFAULT 0,   current_image_kb INTEGER NOT NULL DEFAULT 0,   current_js_kb INTEGER NOT NULL DEFAULT 0,   budget_status TEXT NOT NULL DEFAULT 'needs_measurement',   low_bandwidth_status TEXT NOT NULL DEFAULT 'supported',   reduced_motion_status TEXT NOT NULL DEFAULT 'supported',   next_best_action TEXT,   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: product_interest_requests
+CREATE TABLE IF NOT EXISTS product_interest_requests (
+    product_interest_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    request_type TEXT NOT NULL,
+    user_id INTEGER,
+    email TEXT,
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'open',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: product_publish_overrides
+CREATE TABLE IF NOT EXISTS product_publish_overrides (
+    product_publish_override_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    actor_user_id INTEGER,
+    override_note TEXT,
+    publish_readiness_score INTEGER,
+    image_quality_score INTEGER,
+    ready_check_notes TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: product_readiness_scoreboard_snapshots
+CREATE TABLE IF NOT EXISTS product_readiness_scoreboard_snapshots (   product_readiness_scoreboard_snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,   build_label TEXT NOT NULL DEFAULT 'Build 185',   product_id INTEGER,   product_name TEXT,   product_slug TEXT,   readiness_score INTEGER NOT NULL DEFAULT 0,   missing_image_roles INTEGER NOT NULL DEFAULT 0,   missing_alt_text INTEGER NOT NULL DEFAULT 0,   missing_price INTEGER NOT NULL DEFAULT 0,   missing_story INTEGER NOT NULL DEFAULT 0,   missing_shipping INTEGER NOT NULL DEFAULT 0,   marketplace_blockers INTEGER NOT NULL DEFAULT 0,   inventory_blockers INTEGER NOT NULL DEFAULT 0,   readiness_status TEXT NOT NULL DEFAULT 'needs_review',   recommended_next_action TEXT,   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: product_reviews
+CREATE TABLE IF NOT EXISTS product_reviews (
+    product_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER,
+    order_id INTEGER,
+    user_id INTEGER,
+    reviewer_name TEXT,
+    reviewer_email TEXT,
+    rating INTEGER NOT NULL DEFAULT 5,
+    review_text TEXT,
+    review_kind TEXT NOT NULL DEFAULT 'testimonial',
+    status TEXT NOT NULL DEFAULT 'pending_review',
+    is_featured INTEGER NOT NULL DEFAULT 0,
+    admin_notes TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- TABLE: product_social_automation_settings
+CREATE TABLE IF NOT EXISTS product_social_automation_settings (   settings_id INTEGER PRIMARY KEY CHECK (settings_id = 1),   auto_queue_enabled INTEGER NOT NULL DEFAULT 0,   auto_queue_on_review_status TEXT NOT NULL DEFAULT 'approved',   require_active_product INTEGER NOT NULL DEFAULT 1,   require_featured_image INTEGER NOT NULL DEFAULT 1,   default_platforms_json TEXT NOT NULL DEFAULT '["facebook","instagram","pinterest"]',   caption_template_key TEXT NOT NULL DEFAULT 'new_product',   default_hashtags TEXT NOT NULL DEFAULT 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada',   default_utm_campaign TEXT NOT NULL DEFAULT 'new_product',   notes TEXT,   updated_by_user_id INTEGER,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP );
+
+-- TABLE: unified_customer_member_history_rows
+CREATE TABLE IF NOT EXISTS unified_customer_member_history_rows (   unified_customer_member_history_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   customer_key TEXT NOT NULL UNIQUE,   customer_label TEXT,   email_hash TEXT,   order_count INTEGER NOT NULL DEFAULT 0,   gift_card_count INTEGER NOT NULL DEFAULT 0,   custom_request_count INTEGER NOT NULL DEFAULT 0,   recall_match_count INTEGER NOT NULL DEFAULT 0,   proof_approval_count INTEGER NOT NULL DEFAULT 0,   latest_activity_at TEXT,   history_status TEXT NOT NULL DEFAULT 'needs_unified_view',   created_by_user_id INTEGER,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: value_enhancement_execution_rows
+CREATE TABLE IF NOT EXISTS value_enhancement_execution_rows (   value_enhancement_execution_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   enhancement_key TEXT NOT NULL UNIQUE,   enhancement_label TEXT NOT NULL,   business_value TEXT,   app_surface TEXT,   desktop_status TEXT NOT NULL DEFAULT 'prepared',   mobile_status TEXT NOT NULL DEFAULT 'prepared',   seo_status TEXT NOT NULL DEFAULT 'aligned',   data_owner TEXT NOT NULL DEFAULT 'D1_or_static_json_under_review',   implementation_status TEXT NOT NULL DEFAULT 'active_tracking',   priority_rank INTEGER NOT NULL DEFAULT 100,   next_best_action TEXT,   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- TABLE: visual_graphic_placeholder_rows
+CREATE TABLE IF NOT EXISTS visual_graphic_placeholder_rows (   visual_graphic_placeholder_row_id INTEGER PRIMARY KEY AUTOINCREMENT,   placeholder_key TEXT NOT NULL UNIQUE,   page_path TEXT NOT NULL,   image_slot_label TEXT NOT NULL,   placeholder_asset_url TEXT NOT NULL,   alt_text TEXT NOT NULL,   desktop_status TEXT NOT NULL DEFAULT 'visible_placeholder',   mobile_status TEXT NOT NULL DEFAULT 'visible_placeholder',   replacement_status TEXT NOT NULL DEFAULT 'awaiting_approved_media',   h1_change_allowed INTEGER NOT NULL DEFAULT 0,   performance_budget_status TEXT NOT NULL DEFAULT 'lazy_loaded_svg',   created_at TEXT DEFAULT CURRENT_TIMESTAMP,   updated_at TEXT DEFAULT CURRENT_TIMESTAMP,   notes TEXT );
+
+-- INDEX: idx_accounting_order_records_customer_email
+CREATE INDEX IF NOT EXISTS idx_accounting_order_records_customer_email ON accounting_order_records(customer_email, created_at DESC);
+
+-- INDEX: idx_accounting_order_records_status
+CREATE INDEX IF NOT EXISTS idx_accounting_order_records_status ON accounting_order_records(entry_status, created_at DESC);
+
+-- INDEX: idx_admin_command_center_cards_priority
+CREATE INDEX IF NOT EXISTS idx_admin_command_center_cards_priority ON admin_command_center_cards(card_status, priority_rank);
+
+-- INDEX: idx_admin_command_center_snapshots_build
+CREATE INDEX IF NOT EXISTS idx_admin_command_center_snapshots_build ON admin_command_center_daily_snapshots(build_label, created_at);
+
+-- INDEX: idx_conversion_funnel_scorecard_order
+CREATE INDEX IF NOT EXISTS idx_conversion_funnel_scorecard_order ON conversion_funnel_scorecard_rows(step_order, review_status);
+
+-- INDEX: idx_local_seo_value_scorecard_score
+CREATE INDEX IF NOT EXISTS idx_local_seo_value_scorecard_score ON local_seo_value_scorecard_rows(score, page_path);
+
+-- INDEX: idx_markdown_file_status_role
+CREATE INDEX IF NOT EXISTS idx_markdown_file_status_role ON markdown_file_status_rows(file_role, keep_active);
+
+-- INDEX: idx_member_wishlists_user_created
+CREATE INDEX IF NOT EXISTS idx_member_wishlists_user_created ON member_wishlists(user_id, created_at DESC);
+
+-- INDEX: idx_performance_budget_value_status
+CREATE INDEX IF NOT EXISTS idx_performance_budget_value_status ON performance_budget_value_rows(budget_status, route_path);
+
+-- INDEX: idx_product_readiness_scoreboard_status
+CREATE INDEX IF NOT EXISTS idx_product_readiness_scoreboard_status ON product_readiness_scoreboard_snapshots(readiness_status, readiness_score);
+
+-- INDEX: idx_product_reviews_admin_status
+CREATE INDEX IF NOT EXISTS idx_product_reviews_admin_status ON product_reviews(status, is_featured, created_at);
+
+-- INDEX: idx_value_enhancement_execution_priority
+CREATE INDEX IF NOT EXISTS idx_value_enhancement_execution_priority ON value_enhancement_execution_rows(priority_rank, implementation_status);
+
+-- INDEX: idx_visual_placeholder_page
+CREATE INDEX IF NOT EXISTS idx_visual_placeholder_page ON visual_graphic_placeholder_rows(page_path, replacement_status);
