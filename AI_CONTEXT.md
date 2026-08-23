@@ -1,11 +1,13 @@
-# Devil n Dove AI Context — Build 279 Pointer
+# Devil n Dove AI Context — Development Build 281 Pointer
 
-Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. They are the only cross-project current authorities. Build 274 clarifies one Creative Process lifecycle for maker and content-only work, separates planned material estimates from actual Inventory posting, and adds audited edit/void/correct usage. It requires focused migration `database_build274_creative_process_lifecycle_corrections.sql` after the retained Build 269 CAIP migration boundary.
+Production is intentionally frozen on **Build 280** while the Development application begins a new modular architecture line. The Development baseline was created from the same working Build 280 application and uses isolated Development Pages/D1/R2 resources.
 
+Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second for existing business/domain authority. For the Development architecture direction introduced after the Production split, also read `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md` and `docs/architecture/MODULE_OWNERSHIP_RULES.md`.
 
-Build 276 added reference-only Inventory links for Packaging ingredients. Build 277 restores separate English/French ingredient panels and widens claim spacing again. Build 276 remains the Packaging schema boundary.
+Build 281 is a **passive modular-foundation build**. It adds the module registry/lifecycle contract, initial domain definitions, ownership rules and local inventory/validation tooling. It does not wire existing pages into the loader, does not change D1 schema, does not change Cloudflare bindings, and does not modify Production.
 
-Build 279 adds an admin-only page-wide public Edit switch and a live Media Studio checklist for all 139 static visual slots; no D1 migration is required.
+The target platform remains one Devil n Dove application with one shared data model and explicit independently loadable domain modules: Public, Catalog, Inventory, Creative Projects, CAIP, Packaging, Content, Marketing, Accounting and Administration. App Core is limited to genuine cross-cutting infrastructure.
 
+The mandatory runtime rule is two-gate activation: a module must be authorized for the current identity **and** actually required by the active route/workflow. Hidden UI is never authorization; server-side protected APIs remain authoritative. Inactive modules must not start idle polling or expensive background work.
 
-Build 279 hardens Cloudflare runtime efficiency before go-live: lightweight/fail-open analytics, no idle Live Activity polling, opt-in release checks, bounded retries, slimmer CAIP multipart work and Workers Logs enabled. No new production D1 migration is required.
+Build 281 intentionally leaves every module runtime entry point unconnected. Build 280 behavior is the compatibility baseline. Future extraction must be incremental, tested in Development, and reversible in Git.
