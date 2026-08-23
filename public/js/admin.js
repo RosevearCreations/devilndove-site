@@ -1,5 +1,6 @@
 // File: /public/js/admin.js
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
+// Build 282: load the compatibility-only module shadow resolver. It classifies routes but never activates a module.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -36,3 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
+
+void import('/public/js/core/dd-admin-module-shadow.mjs?v=282')
+  .catch((error) => console.warn('[DD modules] shadow resolver unavailable', error));
