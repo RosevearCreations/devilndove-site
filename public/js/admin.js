@@ -1,6 +1,6 @@
 // File: /public/js/admin.js
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
-// Build 282: load the compatibility-only module shadow resolver. It classifies routes but never activates a module.
+// Build 283: load the module runtime bridge. Only explicitly converted modules may activate; all other routes remain shadow-only.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -38,5 +38,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-shadow.mjs?v=282')
-  .catch((error) => console.warn('[DD modules] shadow resolver unavailable', error));
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=283')
+  .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
