@@ -6,6 +6,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "9a4dde6b974e0a4885b4fb91fa83e4cb6c666f20"
+FINAL = "70902c5144e91964e42dbf113931bcd5edcde2f8"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD287_CHANGED_FILES.md",
@@ -135,7 +136,7 @@ if '"125a4a6b77485b582d93ca30504b2333b7cb3476",\n    "HEAD"' in build286_test:
     fail("Build 286 regression still compares its historical boundary to future HEAD")
 print("PASS: Build 286 historical regression boundary is pinned")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
+result = run(["git", "diff", "--name-only", BASE, FINAL])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}

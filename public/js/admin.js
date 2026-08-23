@@ -1,6 +1,6 @@
 // File: /public/js/admin.js
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
-// Build 287: Packaging composes the proven Build 286 API boundary with a Content-owned artwork picker.
+// Build 288: Packaging retires the legacy broad GET from the active runtime while preserving narrow reads and writes.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -38,5 +38,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=287')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=288')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
