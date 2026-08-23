@@ -1,7 +1,7 @@
-// Devil n Dove Build 286 Admin module runtime bridge.
-// Packaging remains the only actively loadable module. Its declared Catalog,
-// Inventory and Content read services remain lazy; the Packaging module now routes
-// healthy GET bootstrap traffic through a narrow Packaging-owned server boundary.
+// Devil n Dove Build 287 Admin module runtime bridge.
+// Packaging remains the only actively loadable module. Its Build 287 runtime composes
+// the proven Build 286 API boundary with a Content-owned artwork picker while all
+// other Admin modules remain shadow-classified only.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
@@ -186,7 +186,7 @@ if (!serviceRegistration.ok) {
 
 const runtimeApi = Object.freeze({
   mode: 'runtime',
-  build: 286,
+  build: 287,
   registry,
   definitions: registry.list(),
   contractValidation,

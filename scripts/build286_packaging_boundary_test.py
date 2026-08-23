@@ -220,7 +220,7 @@ print("PASS: rollback GET remains explicit and observable")
 result = run([
     "git", "diff", "--name-only",
     "125a4a6b77485b582d93ca30504b2333b7cb3476",
-    "HEAD"
+    "9a4dde6b974e0a4885b4fb91fa83e4cb6c666f20"
 ])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
