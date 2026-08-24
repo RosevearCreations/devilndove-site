@@ -1,6 +1,8 @@
 // Devil n Dove Build 316 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
+export const BUILD = 316;
+
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
   'inventory-read': '/api/admin/contracts/inventory-read',
