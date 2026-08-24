@@ -5,6 +5,7 @@
 // Build 303: Core runtime reports Build 302 umbrella application-module classification without changing domain activation.
 // Build 304: Core activates the Commerce & Operations umbrella runtime for Catalog routes only.
 // Build 305: Commerce & Operations extends to Inventory through the existing inventory-read authority.
+// Build 306: Inventory write-side contract readiness is exposed without moving mutation authority.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -42,5 +43,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=305')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=306')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
