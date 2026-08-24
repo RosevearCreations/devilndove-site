@@ -1,7 +1,7 @@
-// Devil n Dove Build 300 Packaging save stabilization.
-// Wraps only Save Project: after the native Build 298 write succeeds, perform one fresh
-// native read and verify persisted claims/core fields before the mature editor is allowed
-// to show success. Other Packaging actions pass straight through unchanged.
+// Devil n Dove Build 300 Packaging save + preview stabilization.
+// Save Project is verified by a fresh native read-back before success is shown.
+// Soap Product / variant also keeps the rendered English identity synchronized only
+// while that identity is still default/derived; explicit owner identity edits win.
 (() => {
   const BUILD = 300;
   const baseClient = globalThis.DDPackagingClient;
@@ -15,8 +15,12 @@
   let verifiedSaveCount = 0;
   let failedVerificationCount = 0;
   let lastVerification = null;
+  let previewBindCount = 0;
+  let identitySyncCount = 0;
+  let lastPreviewReason = '';
 
   const text = (value) => String(value ?? '').trim();
+  const byId = (name) => document.getElementById(name);
 
   function normalizeClaims(rows) {
     return (Array.isArray(rows) ? rows : [])
@@ -153,8 +157,65 @@
     return originalRequest(body, projectId);
   }
 
+  function bindPreviewIdentity() {
+    const product = byId('packagingProductName');
+    const identity = byId('packagingIdentityEn');
+    if (!product || !identity || product.dataset.build300PreviewBound === 'true') return;
+
+    product.dataset.build300PreviewBound = 'true';
+    identity.dataset.build300PreviewBound = 'true';
+    previewBindCount += 1;
+
+    let previousProduct = text(product.value);
+    const initialIdentity = text(identity.value);
+    identity.dataset.build300DerivedIdentity = (!initialIdentity || initialIdentity === previousProduct) ? 'true' : 'false';
+    let internalSync = false;
+
+    const syncFromProduct = (reason) => {
+      const nextProduct = text(product.value);
+      const currentIdentity = text(identity.value);
+      const derived = identity.dataset.build300DerivedIdentity === 'true' || !currentIdentity || currentIdentity === previousProduct;
+      if (derived && currentIdentity !== nextProduct) {
+        internalSync = true;
+        identity.value = product.value;
+        identity.dataset.build300DerivedIdentity = 'true';
+        identitySyncCount += 1;
+        lastPreviewReason = reason;
+        identity.dispatchEvent(new Event('input', { bubbles: true }));
+        internalSync = false;
+      }
+      previousProduct = nextProduct;
+    };
+
+    product.addEventListener('input', () => syncFromProduct('product-input'));
+    product.addEventListener('change', () => syncFromProduct('product-change'));
+    identity.addEventListener('input', () => {
+      if (internalSync) return;
+      const currentIdentity = text(identity.value);
+      const currentProduct = text(product.value);
+      identity.dataset.build300DerivedIdentity = (!currentIdentity || currentIdentity === currentProduct) ? 'true' : 'false';
+      lastPreviewReason = 'identity-owner-edit';
+    });
+
+    if (text(byId('packagingType')?.value) === 'soap_ribbon') {
+      const subtitleLabel = byId('packagingSubtitle')?.closest('label')?.querySelector('.small');
+      if (subtitleLabel) subtitleLabel.textContent = 'Front tagline (saved metadata; not printed on soap ribbon)';
+    }
+  }
+
+  function watchEditor() {
+    const main = byId('packagingStudioMain');
+    if (!main || typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(() => bindPreviewIdentity());
+    observer.observe(main, { childList: true, subtree: true });
+    bindPreviewIdentity();
+  }
+
   function getStatus() {
     const base = originalGetStatus() || {};
+    const product = text(byId('packagingProductName')?.value);
+    const identity = text(byId('packagingIdentityEn')?.value);
+    const previewText = text(byId('packagingSvgPreview')?.textContent);
     return Object.freeze({
       ...base,
       stabilizationBuild: BUILD,
@@ -162,6 +223,13 @@
       verifiedSaveCount,
       failedVerificationCount,
       lastVerification,
+      previewBindCount,
+      identitySyncCount,
+      identityIsDerived: byId('packagingIdentityEn')?.dataset.build300DerivedIdentity === 'true',
+      previewContainsIdentity: Boolean(identity && previewText.includes(identity)),
+      productValue: product,
+      identityValue: identity,
+      lastPreviewReason,
       build298NativeClientPreserved: true,
       build299BrowserControllerLoaded: false,
     });
@@ -181,6 +249,14 @@
       verifiedSaveCount,
       failedVerificationCount,
       lastVerification,
+      previewBindCount,
+      identitySyncCount,
+      identityIsDerived: byId('packagingIdentityEn')?.dataset.build300DerivedIdentity === 'true',
+      previewContainsIdentity: Boolean(text(byId('packagingIdentityEn')?.value) && text(byId('packagingSvgPreview')?.textContent).includes(text(byId('packagingIdentityEn')?.value))),
+      lastPreviewReason,
     }),
   });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchEditor, { once: true });
+  else watchEditor();
 })();
