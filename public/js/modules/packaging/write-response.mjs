@@ -1,9 +1,12 @@
 // Devil n Dove Build 289 Packaging write-response bridge.
+// Build 296 adds an explicit callable transport handle without changing the proven
+// Build 289 gateway or Build 291 domain write authority.
 // Active Packaging POSTs keep their legacy UI path but are transported through the
 // Build 289 gateway, which delegates the mature write logic without broad response
 // enumeration. GET handling remains owned by the Build 286/288 read stack.
 
 const BUILD = 289;
+const CLIENT_TRANSPORT_BUILD = 296;
 const LEGACY_PACKAGING_PATH = '/api/admin/packaging-studio';
 const WRITE_GATEWAY_PATH = '/api/admin/packaging-write';
 
@@ -85,6 +88,13 @@ export function createPackagingWriteResponseBridge({ onWrite = null } = {}) {
     return true;
   }
 
+  async function transport(input, init) {
+    if (state !== 'armed' || typeof bridgedApiFetch !== 'function') {
+      throw new Error('Packaging write transport requires the armed Build 289 bridge.');
+    }
+    return bridgedApiFetch(input, init);
+  }
+
   function disarm() {
     if (authOwner && bridgedApiFetch && authOwner.apiFetch === bridgedApiFetch && previousApiFetch) {
       authOwner.apiFetch = previousApiFetch;
@@ -99,8 +109,10 @@ export function createPackagingWriteResponseBridge({ onWrite = null } = {}) {
   function getStatus() {
     return Object.freeze({
       build: BUILD,
+      clientTransportBuild: CLIENT_TRANSPORT_BUILD,
       state,
       armed: state === 'armed',
+      transportReady: Boolean(state === 'armed' && bridgedApiFetch),
       writeResponseDecoupled: true,
       legacyWritePath: LEGACY_PACKAGING_PATH,
       gatewayPath: WRITE_GATEWAY_PATH,
@@ -110,11 +122,12 @@ export function createPackagingWriteResponseBridge({ onWrite = null } = {}) {
     });
   }
 
-  return Object.freeze({ arm, disarm, getStatus });
+  return Object.freeze({ arm, disarm, transport, getStatus });
 }
 
 export const metadata = Object.freeze({
   build: BUILD,
+  clientTransportBuild: CLIENT_TRANSPORT_BUILD,
   legacyWritePath: LEGACY_PACKAGING_PATH,
   gatewayPath: WRITE_GATEWAY_PATH,
   behaviorMode: 'packaging-write-response-bridge',
