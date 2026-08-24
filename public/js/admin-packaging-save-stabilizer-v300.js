@@ -296,8 +296,9 @@
       ? `${audit.rendered_claim_count}/${audit.preview_claim_target_count} printable claim(s) rendered.`
       : `${audit.rendered_claim_count}/${audit.preview_claim_target_count} printable claim(s) found in SVG.`;
     const modePart = previewMode === 'fit' ? 'Full ribbon fitted to view.' : 'Detail view may require horizontal scrolling.';
+    const nextStatus = `${savePart} ${claimPart} ${modePart}`;
 
-    status.textContent = `${savePart} ${claimPart} ${modePart}`;
+    if (status.textContent !== nextStatus) status.textContent = nextStatus;
     controls.style.borderColor = audit.preview_claims_match_dom ? 'rgba(85,190,126,.48)' : 'rgba(220,103,103,.6)';
     controls.style.background = audit.preview_claims_match_dom ? 'rgba(85,190,126,.07)' : 'rgba(220,103,103,.08)';
   }
@@ -376,7 +377,12 @@
     if (!main || typeof MutationObserver === 'undefined') return;
 
     bindPreviewAuditEvents();
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((mutations) => {
+      const meaningful = mutations.some((mutation) => {
+        const target = mutation?.target;
+        return !target?.closest?.('[data-build300-preview-controls]');
+      });
+      if (!meaningful) return;
       bindPreviewIdentity();
       ensurePreviewControls();
       schedulePreviewAudit('editor-render');
