@@ -4,190 +4,71 @@
 
 Build 298 cuts the mature Packaging editor over to a native browser client facade. After cutover, normal editor load, Refresh and Save no longer emit the retired Packaging Studio compatibility path internally.
 
-## Apply the two-file activation cutover
+## Completed Development proof — 2026-08-24
 
-From local `dev` after pulling the current staged Build 298 support commits:
-
-```bash
-python scripts/apply_build298_packaging_native_client_cutover.py
-```
-
-Expected:
+Build 298 is **complete in Development** on activation commit:
 
 ```text
-PASS: mature Packaging editor now uses DDPackagingClient without naming the retired route
-PASS: Packaging page now loads Build 298 native client before the mature editor
-No server, schema, binding, R2, or Production resource was contacted.
+d3fa66c37665797d303a3a44f40015dd81fdf7aa
+Build 298 activate native Packaging client cutover
 ```
 
-Inspect the surgical diff:
+The Development Pages project `devilndove-site-dev` deployed source `d3fa66c` as its active deployment. No real Devil n Dove Production resource was contacted.
 
-```bash
-git diff -- public/js/admin-packaging-studio.js admin/packaging-studio/index.html
-```
+### Local activation and regression
 
-The editor diff must be limited to the Build 298 header plus the `api()` helper. The page diff must only add the Build 298 native client script and bump the editor cache key to `v=298`.
+The surgical two-file cutover changed only:
 
-## Local regression
+- `public/js/admin-packaging-studio.js`: Build 298 header plus the `api()` helper now delegates to `DDPackagingClient.request(body, projectId)` and contains no `/api/admin/packaging-studio` literal;
+- `admin/packaging-studio/index.html`: loads `/public/js/admin-packaging-native-client-v298.js?v=298` before the mature editor and advances the editor cache key to `v=298`.
 
-```bash
-python scripts/build298_packaging_native_client_cutover_test.py
-```
+The Build 298 regression passed after its pre-commit boundary check was corrected to combine committed Build 298 support files with the two intentionally local activation files. The application/runtime checks themselves passed before that bookkeeping fix and remained unchanged.
 
-Expected final lines:
+Expected/confirmed local result:
 
 ```text
+PASS: Build 298 JavaScript syntax
+PASS: Build 298 browser launcher exposes native Packaging semantics only
+PASS: Build 298 native client reads bootstrap + owner contracts and writes native gateway directly
+PASS: mature editor has no retired endpoint name and consumes DDPackagingClient
+PASS: Build 298 native client is loaded before the mature editor
+PASS: Build 297 completed parity boundary is pinned historically
+PASS: Build 297 defense runtime and 293/286 read + 292/291 write authorities are unchanged
+PASS: exact Build 298 changed-file boundary across committed + local activation changes
+PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change
 BUILD 298 PACKAGING NATIVE CLIENT CUTOVER: PASS
 No Cloudflare resource was contacted.
 ```
 
-The regression proves:
+### Live native read proof
 
-- Build 298 JavaScript syntax;
-- native client only names `/api/admin/packaging-bootstrap` and `/api/admin/packaging-write`;
-- mature editor contains no `/api/admin/packaging-studio` literal;
-- mature editor delegates Packaging requests to `DDPackagingClient.request()`;
-- page order is Build 297 defense -> Build 298 native client -> mature editor;
-- Build 297 completed parity is pinned historically;
-- Build 297 runtime and server read/write authorities are unchanged;
-- exact Build 298 changed-file boundary;
-- no SQL/schema, Cloudflare binding/config, R2, or Production change.
-
-## Commit and deploy to Development
-
-After the regression passes:
-
-```bash
-git add \
-  public/js/admin-packaging-studio.js \
-  admin/packaging-studio/index.html
-
-git commit -m "Build 298 activate native Packaging client cutover"
-git push origin dev
-```
-
-Then verify only the Development Pages project:
-
-```bash
-npx --yes wrangler@latest pages deployment list \
-  --project-name devilndove-site-dev | head -n 20
-```
-
-The newest source should be the activation commit you just pushed.
-
-## Live initial-load proof
-
-1. Open Development `/admin/packaging-studio/` as administrator.
-2. DevTools -> Network.
-3. Clear Network and disable Preserve Log.
-4. Hard refresh.
-
-Expected physical Packaging request:
+Development Packaging Studio loaded projects normally. Initial load plus Refresh produced:
 
 ```text
-GET /api/admin/packaging-bootstrap -> 200
+client_build                  298
+client_state                  ready
+native_client                 true
+owner_contracts_ready         true
+native_bootstrap_path         /api/admin/packaging-bootstrap
+native_write_path             /api/admin/packaging-write
+legacy_route_named_by_client  false
+native_read_count             2
+native_read_status            200
+native_read_error             ""
+build297_gate_replays         0
+build297_gate_blocks          0
+build297_transport_ready      true
 ```
 
-There must be no normal-runtime request to `/api/admin/packaging-studio`.
+This proves the mature editor is using the Build 298 native client for normal reads and Build 297 compatibility startup handling is idle.
 
-Run:
+### Live native write proof
 
-```javascript
-(() => {
-  const client = window.DDPackagingClient?.getStatus?.();
-  const defense = window.DDPackagingStartupGate?.getStatus?.();
-  const runtime = window.DDPackagingContracts?.getStatus?.();
-  console.table({
-    client_build: client?.build,
-    client_state: client?.state,
-    native_client: client?.nativeClient,
-    owner_contracts_ready: client?.ownerContractsReady,
-    native_bootstrap_path: client?.nativeBootstrapPath,
-    native_write_path: client?.nativeWritePath,
-    legacy_route_named_by_client: client?.legacyRouteNamedByClient,
-    native_read_count: client?.readCount,
-    native_read_status: client?.lastReadStatus,
-    native_read_error: client?.lastReadError,
-    build297_gate_replays: defense?.replayedLegacyRequests,
-    build297_gate_blocks: defense?.blockedLegacyRequests,
-    build297_client_transport_ready: runtime?.clientTransportReady
-  });
-})();
-```
-
-Expected important values:
-
-```text
-client_build                     298
-client_state                     ready
-native_client                    true
-owner_contracts_ready            true
-native_bootstrap_path            /api/admin/packaging-bootstrap
-native_write_path                /api/admin/packaging-write
-legacy_route_named_by_client     false
-native_read_count                >= 1
-native_read_status               200
-native_read_error                ""
-build297_gate_replays            0
-build297_gate_blocks             0
-build297_client_transport_ready  true
-```
-
-## Refresh proof
-
-Clear Network and click **Refresh**.
-
-Expected:
-
-```text
-GET /api/admin/packaging-bootstrap -> 200
-```
-
-Projects must reload and there must be zero `/api/admin/packaging-studio` network requests.
-
-`DDPackagingClient.getStatus().readCount` must increase by one and `lastReadStatus` remain `200`.
-
-## Native Save proof
-
-Clear Network, make one harmless Development Packaging change, and click **Save project**.
-
-Expected physical write:
-
-```text
-POST /api/admin/packaging-write -> 200
-```
-
-There must be zero normal-runtime POST requests to `/api/admin/packaging-studio`.
-
-Run:
-
-```javascript
-(() => {
-  const client = window.DDPackagingClient?.getStatus?.();
-  const compatibilityWrite = window.DDPackagingContracts?.getWriteResponseStatus?.();
-  const boundary = client?.lastWriteBoundary || {};
-  console.table({
-    client_build: client?.build,
-    native_write_count: client?.writeCount,
-    native_write_status: client?.lastWriteStatus,
-    native_write_error: client?.lastWriteError,
-    gateway_build: boundary?.gateway_build,
-    gateway_path: boundary?.gateway_path,
-    write_service_build: boundary?.write_service_build,
-    write_authority: boundary?.write_authority,
-    shared_write_service: boundary?.shared_write_service,
-    legacy_post_route_retired: boundary?.legacy_post_route_retired,
-    packaging_owned_response: boundary?.packaging_owned_response,
-    compatibility_bridge_intercepts: compatibilityWrite?.interceptedWriteCount
-  });
-})();
-```
-
-Expected:
+A normal Development Packaging Save succeeded and returned:
 
 ```text
 client_build                    298
-native_write_count              >= 1
+native_write_count              1
 native_write_status             200
 native_write_error              ""
 gateway_build                   292
@@ -200,17 +81,54 @@ packaging_owned_response        true
 compatibility_bridge_intercepts 0
 ```
 
-The final `0` is intentional in Build 298: the mature editor now calls the native write endpoint directly, so the Build 289 compatibility bridge remains armed as defense-in-depth but is idle for normal Build 298 saves.
+The final `0` is the key Build 298 proof: the mature editor writes directly to `/api/admin/packaging-write`; the Build 289 compatibility bridge remains armed only as defense-in-depth and is idle for normal Build 298 saves.
 
-## Direct retirement probes
+### Retirement boundary
 
-Explicit authenticated probes remain tombstone tests only:
+Build 298 does not modify the protected server tombstones or authority services. The regression confirms these files remain unchanged from the proven Build 297 boundary:
 
-```text
-GET /api/admin/packaging-studio  -> 410 packaging_legacy_get_retired
-POST /api/admin/packaging-studio -> 410 packaging_legacy_post_retired
+- `functions/api/admin/packaging-studio.js` — retired GET/POST tombstone endpoint;
+- `functions/api/admin/packaging-bootstrap.js` — native read endpoint;
+- `functions/api/_lib/packagingReadService.js` — Build 293 read service over the proven Build 286 implementation;
+- `functions/api/admin/packaging-write.js` — Build 292 native write gateway;
+- `functions/api/_lib/packagingDomainService.js` — Build 291 domain write service.
+
+No normal Build 298 runtime traffic reached the retired endpoint during validation.
+
+## Historical activation procedure
+
+The activation helper used was:
+
+```bash
+python scripts/apply_build298_packaging_native_client_cutover.py
 ```
 
-## Completion gate
+It was followed by:
 
-Build 298 is complete only when local regression passes, Development deploys the activation commit, normal load/Refresh/Save use only native endpoints, native read composition remains healthy, native write provenance remains `292 -> 291`, Build 297 compatibility counters stay idle for normal editor traffic, direct tombstones remain 410, and Production is not contacted.
+```bash
+python scripts/build298_packaging_native_client_cutover_test.py
+```
+
+The helper was designed to abort if the exact mature editor API block or Build 297 Packaging page script block had drifted, preventing a broad rewrite of the mature editor.
+
+## Completion gate — PASS
+
+Build 298 completion criteria are satisfied:
+
+- local regression passed;
+- Development deployed activation commit `d3fa66c`;
+- normal initial load and Refresh use the native Build 298 client;
+- native read composition is healthy with HTTP 200 and owner contracts ready;
+- normal Save uses `/api/admin/packaging-write` directly;
+- native write provenance remains Build 292 gateway -> Build 291 domain service;
+- Build 297 gate replay/block counters remain zero for normal reads;
+- Build 289 compatibility write interception remains zero for the normal Build 298 save;
+- the mature editor contains no retired endpoint literal;
+- protected server tombstones/read/write authorities remain unchanged;
+- no SQL/schema, Cloudflare binding/config, R2, or real Production change occurred.
+
+## Next modular boundary
+
+The next build may audit removal of now-idle browser compatibility layers, but it must preserve Build 298 as the proven native-client baseline. Physical deletion of `functions/api/admin/packaging-studio.js` should remain separate and should happen only after an explicit dependency/reference audit proves no current runtime or operational tooling still relies on the tombstone path.
+
+Dormant read helpers inside the Build 291 write-service source remain a separate later audit and must not be mixed into compatibility-layer removal.
