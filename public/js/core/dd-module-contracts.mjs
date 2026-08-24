@@ -1,6 +1,6 @@
-// Devil n Dove Build 311 cross-module contract catalog.
-// Inventory post and reverse remain Inventory-owned and Creative-consumer-enabled.
-// Build 311 adds the read-only Inventory cost authority for Catalog and Accounting consumers.
+// Devil n Dove Build 312 cross-module contract catalog.
+// Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
+// Build 311 owns current Inventory cost reads; Build 312 adds bounded Accounting reads for Operations.
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -49,6 +49,7 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
     kind: 'mutation',
     route: '/api/admin/contracts/inventory-reverse',
     authorityRoute: '/api/admin/contracts/inventory-reverse',
+    authorityAction: 'reviewed-creative-reversal',
     implementationState: 'implemented-creative-consumer-enabled',
     requiresOriginalMovementId: true,
     requiresCreativePostingId: true,
@@ -62,7 +63,13 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('content-media', 'content', ['public', 'catalog', 'packaging'], 'Select or read approved media references managed by Content authority.', { status: 'implemented', route: '/api/admin/contracts/content-media' }),
   contract('content-deliverables', 'content', ['marketing'], 'Read reviewed Content Studio deliverables ready for downstream distribution.'),
   contract('marketing-seo', 'marketing', ['public', 'catalog'], 'Read/apply reviewed SEO and public-discovery presentation rules.'),
-  contract('accounting-read', 'accounting', ['operations'], 'Read bounded financial/payment state required by business operations.'),
+  contract('accounting-read', 'accounting', ['operations'], 'Read bounded order-linked Accounting financial/payment state required by business operations.', {
+    status: 'implemented',
+    route: '/api/admin/contracts/accounting-read',
+    authorityRoute: '/api/admin/contracts/accounting-read',
+    authorityAction: 'read-order-financial-state',
+    implementationState: 'implemented-read-only-order-financial-state',
+  }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 
