@@ -1,121 +1,176 @@
 # Build 300 Validation — Packaging Save + Preview Stabilization
 
-## Scope
+## Status — COMPLETE IN DEVELOPMENT
 
-Build 300 is a corrective stabilization pass. Forward Packaging modularization is paused.
+Build 300 is a corrective stabilization pass. Forward Packaging modularization was paused until the mature Packaging editor could be trusted again.
 
-The live page is restored to the proven Build 298 editor/native-client stack by unloading the Build 299 browser print-source controller. Build 300 then adds one verified-save + Preview stabilization wrapper before the mature editor.
+Runtime completion source:
 
-## Local gate
+```text
+37d2d1c21e80d64211f5f50a8d4be607f23b16e4
+Build 300 guard preview audit feedback regression
+```
 
-After pulling `dev`, run:
+Development Pages project:
+
+```text
+devilndove-site-dev
+source 37d2d1c
+```
+
+The Cloudflare `Environment = Production` label for that deployment is the primary environment of the Development Pages project, not real Devil n Dove Production. Real Production remained untouched and frozen at Build 280.
+
+## Local regression — PASS
+
+Command:
 
 ```bash
 python scripts/build300_packaging_stabilization_test.py
 ```
 
-Expected ending:
+Observed ending:
 
 ```text
+PASS: Build 300 JavaScript syntax
+PASS: Build 300 verifies Save Project, fits/audits the full live soap preview, and prevents preview-audit observer feedback
+PASS: Packaging page restored to proven Build 298 runtime with Build 300 stabilizer only
+PASS: mature editor and proven native read/write/tombstone authorities are unchanged
+PASS: Build 299 is explicitly not signed off and its browser controller rollback is documented
+PASS: exact Build 300 stabilization changed-file boundary
+PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change
 BUILD 300 PACKAGING STABILIZATION: PASS
 No Cloudflare resource was contacted.
 ```
 
-## Development browser proof
+## Development live proof — PASS
 
-Use one existing Packaging project and make two harmless, obvious edits:
+### Verified Save Project
 
-1. change one ordinary field such as Product / variant;
-2. change one English or French claim.
+The owner edited ordinary Packaging data and claims and clicked **Save project**.
 
-Click **Save project**.
+Build 300 verified the write by performing a fresh native D1-backed read before allowing success.
 
-A successful verified save message must contain:
-
-```text
-Verified by fresh D1 read-back.
-```
-
-Then run in Firefox Console:
-
-```js
-(() => {
-  const s = window.DDPackagingSaveStabilizer?.getStatus?.();
-  console.table({
-    build: s?.build,
-    state: s?.state,
-    verified_save_count: s?.verifiedSaveCount,
-    failed_verification_count: s?.failedVerificationCount,
-    preview_mode: s?.previewMode,
-    preview_audit_count: s?.previewAuditCount,
-    forced_preview_refresh_count: s?.forcedPreviewRefreshCount,
-    preview_fit_count: s?.previewFitCount,
-    identity_is_derived: s?.identityIsDerived,
-    preview_contains_identity: s?.previewContainsIdentity
-  });
-  console.log('SAVE VERIFICATION:', s?.lastVerification);
-  console.log('PREVIEW AUDIT:', s?.lastPreviewAudit);
-})();
-```
-
-Expected core values after a verified save:
+Observed browser diagnostics:
 
 ```text
-build                         300
-state                         active
-verified_save_count           >= 1
-failed_verification_count     0
-preview_mode                  fit
-preview_audit_count           >= 1
-preview_fit_count             >= 1
+build                       300
+state                       active
+verified_save_count         2
+failed_verification_count   0
 ```
 
-Expected `SAVE VERIFICATION` object:
+Observed verification object:
 
 ```text
 ok                    true
+packaging_project_id  10
+expected_claim_count  3
+actual_claim_count    3
 claims_match          true
 core_match            true
 mismatch_fields       []
 ```
 
-Expected `PREVIEW AUDIT` object for a project with up to four printable claims:
+This proves the apparent claim-save regression was not a current D1 write failure after stabilization: the editor payload, native write, and fresh D1 read-back agreed.
+
+### Full-ribbon Preview — PASS
+
+The stale-looking Preview was traced to presentation rather than persistence: the soap ribbon is wide and the claims panel sits near the far-right edge. The fitted Preview now keeps the full ribbon visible while preserving the original SVG physical dimensions for print/export.
+
+Observed live Preview diagnostics after the correction:
 
 ```text
-preview_svg_present       true
-preview_mode              fit
-preview_claims_match_dom  true
-dom_matches_verified      true
-rendered_claim_count      == preview_claim_target_count
+build                       300
+state                       active
+preview_mode                fit
+preview_fit_count           1
+forced_preview_refresh_count 0
+dom_claim_count             2
+rendered_claim_count        2
+preview_claim_target_count  2
+preview_svg_present         true
+preview_claims_match_dom    true
+dom_matches_verified        true
 ```
 
-The Preview tab should now show a small **Live preview** status strip with two controls:
+This proves the current claim-editor DOM, verified saved state, and rendered SVG agree.
 
-- **Fit full label** — default; the entire soap ribbon including the far-right claims panel is visible inside the editor width;
-- **Detail / scroll** — restores the former large horizontally scrolling inspection view.
+### Preview audit feedback-loop guard — PASS
 
-The fitted view changes only the browser Preview presentation. The SVG's physical millimetre dimensions, exports and print output remain unchanged.
+An earlier live diagnostic exposed an excessive Preview audit counter. Root cause: the Preview status UI was mutating text inside the same subtree observed by the Build 300 `MutationObserver`, creating a self-triggering audit loop.
 
-Then click the normal **Refresh** button or hard-refresh the page. The changed ordinary field and changed claim must still be present. Return to Preview: the full fitted ribbon must contain the refreshed claim text.
+Build 300 now:
 
-### Derived identity proof
+- rewrites Preview status text only when the text actually changes;
+- ignores mutations originating inside the Build 300 Preview controls;
+- preserves genuine editor/SVG rerender audits.
 
-If Product identity — English was still the default/derived value, Product / variant should keep it synchronized and Preview should display that verified identity.
+Final idle-counter proof:
 
-Then explicitly customize Product identity — English to a different value and change Product / variant again. The explicit identity must remain unchanged; it is the renderer authority.
+```text
+audit_before                4
+audit_after                 4
+audit_delta                 0
+```
 
-### Front tagline correction
+Together with:
 
-The mature soap renderer does print `Front tagline`. Build 300 must leave its normal label and rendered behavior intact; the stabilizer must not describe it as non-printing metadata.
+```text
+forced_preview_refresh_count 0
+preview_svg_present          true
+preview_claims_match_dom     true
+rendered_claim_count         2
+preview_claim_target_count   2
+```
 
-## Failure behavior
+this proves the browser runtime settles when idle and no longer self-audits continuously.
 
-If D1 read-back does not match what was in the editor, Build 300 must **not** show success. The editor should display a verification error and retain its browser draft. `lastVerification` will identify whether claims or named core fields differ.
+## Live runtime shape
 
-If the current claim editor rows are not found in the generated SVG text, the Preview audit triggers one mature-renderer input refresh and checks again. `forcedPreviewRefreshCount` records that recovery attempt.
+The Development Packaging page remains:
 
-## Safety
+```text
+Build 297 startup/defense layers
+-> Build 298 native client
+-> Build 300 verified-save + Preview stabilizer
+-> mature Build 298 editor
+```
 
-Build 300 does not modify the mature editor, Build 298 native client implementation, Build 293/286 read authority, Build 292/291 write authority, retired tombstone, SQL/schema, Cloudflare bindings/config, R2, or real Production.
+Build 299's browser print-source controller is not loaded.
 
-No later Packaging retirement/modularization build should begin until all Build 300 Development browser gates pass.
+## Front tagline correction
+
+The mature soap renderer does print `Front tagline`. Build 300 leaves its normal label and rendered behavior intact; the stabilizer does not describe it as non-printing metadata.
+
+## Preserved authority/safety boundary
+
+Build 300 does not modify:
+
+- mature editor `public/js/admin-packaging-studio.js` Build 298;
+- Build 298 native client launcher/module;
+- Build 293/286 Packaging read authority;
+- Build 292/291 Packaging write authority;
+- Build 294 retired-route tombstone;
+- Packaging SQL/schema;
+- Cloudflare bindings/config;
+- R2;
+- real Production.
+
+## Completion decision
+
+Build 300 is **COMPLETE IN DEVELOPMENT** because all mandatory stabilization gates are green:
+
+- local regression: PASS;
+- Development deployment source: `37d2d1c`;
+- ordinary field/claim Save Project: PASS;
+- fresh D1 read-back verification: PASS;
+- claims match: PASS;
+- core fields match: PASS;
+- fitted full-ribbon Preview: PASS;
+- DOM -> rendered SVG claim parity: PASS;
+- verified saved state -> DOM parity: PASS;
+- forced preview refreshes: 0;
+- idle audit delta: 0;
+- Production contacted: NO.
+
+No future Packaging pass should alter this completed stabilization boundary without first pinning Build 300 historically.
