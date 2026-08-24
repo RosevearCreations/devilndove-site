@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 314 Customer Documents Operations Runtime
+# Devil n Dove AI Context — Build 314 Complete / Orders Runtime Coverage Next
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -39,24 +39,25 @@ Domains remain internal ownership/service boundaries beneath exactly three top-l
 ## Completed modular baselines
 
 ```text
-Build 301 Packaging compatibility        COMPLETE IN DEVELOPMENT
-Build 302 Core + exactly 3 modules       COMPLETE IN DEVELOPMENT
-Build 303 umbrella classification        COMPLETE IN DEVELOPMENT
-Build 304 Catalog runtime                COMPLETE IN DEVELOPMENT
-Build 305 Inventory runtime              COMPLETE IN DEVELOPMENT
-Build 307 Inventory reversal service     COMPLETE IN DEVELOPMENT
-Build 309 Inventory post authority       COMPLETE IN DEVELOPMENT
-Build 310 Creative post consumer cutover COMPLETE IN DEVELOPMENT
-Build 311 Inventory cost read contract   COMPLETE IN DEVELOPMENT
-Build 312 Accounting read contract       COMPLETE IN DEVELOPMENT
-Build 313 Operations read-only runtime   COMPLETE IN DEVELOPMENT
+Build 301 Packaging compatibility          COMPLETE IN DEVELOPMENT
+Build 302 Core + exactly 3 modules         COMPLETE IN DEVELOPMENT
+Build 303 umbrella classification         COMPLETE IN DEVELOPMENT
+Build 304 Catalog runtime                 COMPLETE IN DEVELOPMENT
+Build 305 Inventory runtime               COMPLETE IN DEVELOPMENT
+Build 307 Inventory reversal service      COMPLETE IN DEVELOPMENT
+Build 309 Inventory post authority        COMPLETE IN DEVELOPMENT
+Build 310 Creative post consumer cutover  COMPLETE IN DEVELOPMENT
+Build 311 Inventory cost read contract    COMPLETE IN DEVELOPMENT
+Build 312 Accounting read contract        COMPLETE IN DEVELOPMENT
+Build 313 Operations read-only runtime    COMPLETE IN DEVELOPMENT
+Build 314 Customer Documents runtime      COMPLETE IN DEVELOPMENT
 ```
 
 Build 306 remains historically browser-proven with standalone local signoff not captured in the conversation. Do not silently relabel it.
 
 Build 308 remains browser-proven; its standalone local regression output was not captured before later work began. Do not silently relabel it complete.
 
-## Build 313 — COMPLETE IN DEVELOPMENT
+## Build 313 — completed first Operations runtime page
 
 Proven source/runtime head:
 
@@ -72,49 +73,33 @@ Completed handoff head:
 Build 313 set completed Operations runtime handoff
 ```
 
-Build 313 proved the first real read-only Operations runtime page:
+Build 313 proved:
 
 ```text
 /admin/operations/
 ```
 
-Operations consumes:
+under the read-only `commerce-operations` runtime.
+
+## Build 314 — COMPLETE IN DEVELOPMENT
+
+Proven source/runtime head:
 
 ```text
-catalog-read
-inventory-read
-accounting-read
+f386f89a18190c20fd95ca8ec5a0208a4a051b90
+Build 314 update modular handoff context
 ```
 
-and the runtime reports:
-
-```text
-ownsOperationsMutations = false
-```
-
-## Build 314 — STAGED / VALIDATION REQUIRED
-
-Baseline:
-
-```text
-4ba68bf720561fab590e2dfb74581c0adf871b46
-Build 313 set completed Operations runtime handoff
-```
-
-Build 314 expands explicit Operations runtime coverage to:
+Build 314 expands explicit Operations runtime coverage to exactly:
 
 ```text
 /admin/operations/
 /admin/customer-documents/
 ```
 
-### Explicit Operations page allow-list
+Commerce runtime Build 314 enforces this pathname allow-list for the `operations` domain so older Operations-classified pages cannot be silently counted as migrated.
 
-Commerce runtime Build 314 now checks the pathname for the `operations` domain. Only the two pages above are accepted as proven Operations runtime pages.
-
-This prevents older Operations-classified pages from being silently treated as migrated merely because they happen to load a shared Admin bridge.
-
-Runtime identity:
+### Runtime identity
 
 ```text
 Architecture build              302
@@ -129,25 +114,7 @@ Operations coverage build       314
 Commerce runtime                314
 ```
 
-### Customer Documents scope
-
-`/admin/customer-documents/` is re-pinned from the historical shared-loader cache identity to:
-
-```text
-/public/js/admin.js?v=314
-```
-
-Its existing business implementation remains:
-
-```text
-/public/js/admin-customer-documents.js?v=227
-```
-
-Build 314 does not modify that business script or any Customer Documents API. Issue, print, retain, void, credit-note and refund-confirmation behavior remains compatibility behavior underneath the read-only application-module shell.
-
-### Operations service boundary
-
-Operations still requires exactly:
+Operations still consumes exactly:
 
 ```text
 catalog-read
@@ -155,7 +122,7 @@ inventory-read
 accounting-read
 ```
 
-and remains:
+and remains non-mutating:
 
 ```text
 createsNetworkTransport false
@@ -163,22 +130,57 @@ ownsInventoryMutations  false
 ownsOperationsMutations false
 ```
 
-### Coverage limitation
+### Customer Documents boundary
 
-Do not claim the whole Operations route family is migrated.
-
-The Build 314 proven set is only:
+`/admin/customer-documents/` now loads:
 
 ```text
-/admin/operations/
-/admin/customer-documents/
+/public/js/admin.js?v=314
 ```
 
-`/admin/orders/` remains unchanged and outside the Build 314 boundary. Gift cards, members, membership, custom requests, today-tasks and other Operations pages also remain unproven until separate loader-coverage passes.
+while its business implementation remains unchanged:
 
-### Build 314 safety boundary
+```text
+/public/js/admin-customer-documents.js?v=227
+```
 
-Build 314 does not modify:
+Issue, print, retain, void, credit-note and refund-confirmation behavior remains compatibility behavior beneath the read-only runtime shell.
+
+### Validation proof
+
+Final local regression:
+
+```text
+BUILD 314 CUSTOMER DOCUMENTS OPERATIONS RUNTIME: PASS
+No Cloudflare resource was contacted.
+```
+
+Development browser proof:
+
+```text
+pathname                         /admin/customer-documents/
+commerce_runtime_build           314
+domain                           operations
+application_module               commerce-operations
+application_module_mode          active
+active_required_services         catalog-read,inventory-read,accounting-read
+operations_runtime_active        true
+current_operations_page_proven   true
+operations_coverage              /admin/operations/,/admin/customer-documents/
+owns_operations_mutations        false
+customer_documents_script        .../admin-customer-documents.js?v=227
+accounting_build                 312
+accounting_schema_ready          true
+accounting_schema_mutation       false
+contracts_ok                     true
+services_ok                      true
+```
+
+No Customer Documents mutation was required for validation.
+
+### Safety boundary
+
+Build 314 did not modify:
 
 - Customer Documents business JavaScript or APIs;
 - order/payment behavior;
@@ -192,9 +194,17 @@ Build 314 does not modify:
 - real Production;
 - schema/data parity work.
 
-## Next direction after Build 314
+## Next direction — Orders runtime coverage
 
-After Build 314 is proven, continue route coverage one bounded page group at a time. `/admin/orders/` is a logical next loader target, but loader coverage must remain separate from order/payment mutation-authority extraction.
+The next bounded loader/runtime candidate is:
+
+```text
+/admin/orders/
+```
+
+That page currently remains outside the proven Operations runtime set. Add loader/runtime coverage separately from any order or payment mutation-authority extraction.
+
+After Orders, continue other Operations routes one bounded group at a time: gift cards, members/membership, custom requests, today-tasks, and related pages.
 
 ## Validation interaction preference
 
