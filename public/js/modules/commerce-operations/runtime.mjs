@@ -1,15 +1,19 @@
-// Devil n Dove Build 313 Commerce & Operations umbrella runtime.
-// Catalog, Inventory and the first Operations runtime page are active runtime domains.
-// Operations activation is read-only and requires Catalog, Inventory and Accounting read contracts.
+// Devil n Dove Build 314 Commerce & Operations umbrella runtime.
+// Catalog and Inventory remain active runtime domains. Operations remains read-only and is
+// explicitly limited to proven page coverage so legacy pages cannot be silently counted as migrated.
 
 import {
   BUILD as INVENTORY_WRITE_BOUNDARY_BUILD,
   getInventoryWriteBoundaryStatus,
 } from './inventory-write-boundary.mjs?v=310';
 
-const BUILD = 313;
+const BUILD = 314;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory', 'operations']);
+const OPERATIONS_RUNTIME_PAGES = Object.freeze([
+  '/admin/operations/',
+  '/admin/customer-documents/',
+]);
 const REQUIRED_SERVICES_BY_DOMAIN = Object.freeze({
   catalog: Object.freeze(['catalog-read', 'inventory-cost']),
   inventory: Object.freeze(['inventory-read']),
@@ -30,8 +34,19 @@ function authenticatedAdmin(user) {
 function normalizeDomain(domainId) {
   return String(domainId || '').trim().toLowerCase();
 }
+function normalizePathname(pathname) {
+  const raw = String(pathname || '').trim() || '/';
+  if (raw === '/') return raw;
+  return raw.endsWith('/') ? raw : `${raw}/`;
+}
 function supportedDomain(domainId) {
   return SUPPORTED_DOMAINS.includes(normalizeDomain(domainId));
+}
+function supportedPathForDomain(domainId, pathname) {
+  const domain = normalizeDomain(domainId);
+  if (!supportedDomain(domain)) return false;
+  if (domain !== 'operations') return true;
+  return OPERATIONS_RUNTIME_PAGES.includes(normalizePathname(pathname));
 }
 function requiredServicesForDomain(domainId) {
   return REQUIRED_SERVICES_BY_DOMAIN[normalizeDomain(domainId)] || Object.freeze([]);
@@ -61,13 +76,16 @@ function installFacade() {
     build: BUILD,
     moduleId: MODULE_ID,
     supportedDomains: SUPPORTED_DOMAINS,
+    operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
     allRequiredServices: ALL_REQUIRED_SERVICES,
     inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
     inventoryCostContractBuild: 311,
     accountingReadContractBuild: 312,
-    operationsRuntimeBuild: 313,
+    operationsRuntimeBuild: 314,
+    operationsRuntimeCoverageBuild: 314,
     operationsMutationOwnership: false,
+    supportedPathForDomain,
     requiredServicesForDomain,
     getInventoryWriteBoundaryStatus: inventoryWriteBoundaryStatus,
     getStatus,
@@ -79,30 +97,37 @@ export const metadata = Object.freeze({
   build: BUILD,
   kind: 'application-module-runtime',
   supportedDomains: SUPPORTED_DOMAINS,
+  operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
   requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
   allRequiredServices: ALL_REQUIRED_SERVICES,
-  behaviorMode: 'catalog-inventory-operations-read-only-runtime',
+  behaviorMode: 'catalog-inventory-operations-read-only-explicit-page-coverage',
   createsNetworkTransport: false,
   ownsInventoryMutations: false,
   ownsOperationsMutations: false,
   inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
   inventoryCostContractBuild: 311,
   accountingReadContractBuild: 312,
-  operationsRuntimeBuild: 313,
+  operationsRuntimeBuild: 314,
+  operationsRuntimeCoverageBuild: 314,
   consumerMutationReady: true,
 });
 
-export async function onLoad({ registry, applicationModule, domainDefinition } = {}) {
+export async function onLoad({ registry, applicationModule, domainDefinition, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 313 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 314 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
+    throw new Error(`Commerce & Operations Build 314 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
+  }
   verifyServices(registry, domainDefinition.id);
   state = 'loaded';
   installFacade();
   emit('dd:commerce-operations-loaded', {
     state,
     domainId: normalizeDomain(domainDefinition.id),
+    pathname: normalizePathname(pathname),
     servicesReady,
     supportedDomains: SUPPORTED_DOMAINS,
+    operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     activeRequiredServices,
     inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
@@ -111,11 +136,14 @@ export async function onLoad({ registry, applicationModule, domainDefinition } =
 export async function onActivate({ registry, applicationModule, domainDefinition, user, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime activated with the wrong application-module definition.');
   if (!authenticatedAdmin(user)) throw new Error('Commerce & Operations runtime activation requires an administrator.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 313 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 314 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
+    throw new Error(`Commerce & Operations Build 314 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
+  }
   verifyServices(registry, domainDefinition.id);
   activationCount += 1;
   currentDomain = normalizeDomain(domainDefinition.id);
-  lastPathname = String(pathname || '');
+  lastPathname = normalizePathname(pathname);
   state = 'active';
   installFacade();
   emit('dd:commerce-operations-active', {
@@ -124,6 +152,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     pathname: lastPathname,
     activationCount,
     servicesReady,
+    operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     activeRequiredServices,
     inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
@@ -150,6 +179,7 @@ export function getStatus() {
     currentDomain,
     lastPathname,
     supportedDomains: SUPPORTED_DOMAINS,
+    operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
     activeRequiredServices,
     servicesReady,
@@ -160,7 +190,8 @@ export function getStatus() {
     inventoryCostServiceRequiredForCatalog: true,
     accountingReadContractBuild: 312,
     accountingReadServiceRequiredForOperations: true,
-    operationsRuntimeBuild: 313,
+    operationsRuntimeBuild: 314,
+    operationsRuntimeCoverageBuild: 314,
     operationsMutationOwnership: false,
     inventoryWriteBoundaryBuild: writeBoundary.build,
     inventoryPostImplementationState: writeBoundary.post.implementationState,
@@ -179,6 +210,7 @@ export function getStatus() {
     inventoryRuntimeBoundaryActive: state === 'active' && currentDomain === 'inventory',
     operationsRuntimeActive: state === 'active' && currentDomain === 'operations',
     operationsRuntimeBoundaryActive: state === 'active' && currentDomain === 'operations',
+    currentOperationsPageProven: state === 'active' && currentDomain === 'operations' && OPERATIONS_RUNTIME_PAGES.includes(lastPathname),
   });
 }
 
