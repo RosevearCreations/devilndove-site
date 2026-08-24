@@ -1,4 +1,6 @@
 // Devil n Dove Build 286 Packaging module lifecycle + API boundary cleanup.
+// Build 296 adds an explicit callable bootstrap transport handle without changing
+// the proven Build 286 read implementation or Packaging-owned endpoint.
 // Active Packaging GET bootstrap requests use the narrow Packaging-owned endpoint first.
 // Catalog, Inventory and Content collections come from owner contracts. Legacy broad GET
 // remains rollback-only; Packaging POST/write requests continue to the existing endpoint.
@@ -7,6 +9,7 @@ const PACKAGING_ROUTE_PREFIX = '/admin/packaging-studio';
 const LEGACY_PACKAGING_BOOTSTRAP_PATH = '/api/admin/packaging-studio';
 const NARROW_PACKAGING_BOOTSTRAP_PATH = '/api/admin/packaging-bootstrap';
 const REQUIRED_CONTRACTS = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
+const CLIENT_TRANSPORT_BUILD = 296;
 
 let state = 'registered';
 let activationCount = 0;
@@ -395,10 +398,12 @@ function installBrowserFacade() {
   if (typeof window === 'undefined') return;
   window.DDPackagingContracts = Object.freeze({
     build: 286,
+    clientTransportBuild: CLIENT_TRANSPORT_BUILD,
     requiredContracts: REQUIRED_CONTRACTS,
     readCatalog,
     readInventory,
     readContentMedia,
+    transportBootstrapRequest,
     getAvailableContentMedia: () => availableContentMedia,
     getBootstrapStatus: () => bootstrapStatus,
     getStatus,
@@ -408,6 +413,7 @@ function installBrowserFacade() {
 export const metadata = Object.freeze({
   id: 'packaging',
   build: 286,
+  clientTransportBuild: CLIENT_TRANSPORT_BUILD,
   routePrefix: PACKAGING_ROUTE_PREFIX,
   bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
   requiredContracts: REQUIRED_CONTRACTS,
@@ -417,6 +423,11 @@ export const metadata = Object.freeze({
 export async function readCatalog(options = {}) { return read('catalog-read', options); }
 export async function readInventory(options = {}) { return read('inventory-read', options); }
 export async function readContentMedia(options = {}) { return read('content-media', options); }
+export async function transportBootstrapRequest(input, init) {
+  if (state !== 'active') throw new Error('Packaging bootstrap transport requires the active Packaging module.');
+  if (typeof bridgedApiFetch !== 'function') throw new Error('Packaging bootstrap transport is unavailable.');
+  return bridgedApiFetch(input, init);
+}
 
 export async function onLoad({ registry, definition } = {}) {
   if (definition?.id !== 'packaging') throw new Error('Packaging module loaded with the wrong module definition.');
@@ -479,11 +490,13 @@ export function getStatus() {
   return Object.freeze({
     moduleId: 'packaging',
     build: 286,
+    clientTransportBuild: CLIENT_TRANSPORT_BUILD,
     state,
     activationCount,
     lastContext,
     servicesReady: Boolean(services && REQUIRED_CONTRACTS.every((id) => services[id])),
     bridgeInstalled: Boolean(bridgedApiFetch),
+    transportBootstrapReady: Boolean(state === 'active' && bridgedApiFetch),
     bootstrapContractized: Boolean(bootstrapStatus.contractized),
     bootstrapPath: NARROW_PACKAGING_BOOTSTRAP_PATH,
     legacyEndpointBypassed: Boolean(bootstrapStatus.legacyEndpointBypassed),
