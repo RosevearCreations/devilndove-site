@@ -5,7 +5,7 @@
 Build 298 proved the native Packaging read/write client. Build 299 then added a browser print-source controller, but during live validation the Packaging editor began showing two regressions from the owner perspective:
 
 1. changed Packaging details/claims appeared not to persist after Save Project;
-2. Preview could continue showing stale-looking product identity after edits.
+2. Preview could continue looking stale after edits.
 
 Forward modularization is paused until the mature editor is trustworthy again.
 
@@ -32,12 +32,28 @@ The successful response presented to the editor uses the fresh authoritative rea
 
 ### Preview stabilization
 
-For soap labels the existing renderer gives `Product identity — English` precedence over `Product / variant`. Build 300 preserves that intentional explicit-identity authority while fixing the derived/default case:
+Live Build 300 proof established that Save Project was correct: D1 read-back matched all tested core fields and all three edited structured claims. The remaining stale-looking Preview was therefore isolated to presentation.
+
+The mature soap SVG is a wide 1100-unit ribbon. Its claims zone begins at x=875 and extends to the far-right edge. Existing Packaging CSS deliberately forced the soap SVG to roughly 1080 px wide for detail legibility. Inside the narrower editor column this creates a horizontally scrolling Preview. A Save Project rerender replaces the Preview DOM and resets that horizontal scroll to the left, so claim changes can be rendered correctly but remain off-screen.
+
+Build 300 corrects that presentation problem without changing the SVG source or physical output:
+
+- soap Preview defaults to **Fit full label**;
+- the Preview-only DOM SVG is overridden to `width: 100%`, `min-width: 0`, `max-width: 100%`, `height: auto`;
+- the SVG's own millimetre dimensions and viewBox are unchanged;
+- exports and print functions continue generating fresh `svgMarkup()` and therefore retain the existing physical-size authority;
+- **Detail / scroll** restores the former wide view when close inspection is useful;
+- a Preview audit compares the current structured claim rows against the actual SVG text;
+- if the SVG text does not contain the current printable claims, Build 300 triggers one input-driven mature-renderer refresh and audits again;
+- a visible status line reports the number of printable claims found in the SVG and whether the current editor matches the last verified D1 save.
+
+For soap labels the existing renderer gives `Product identity — English` precedence over `Product / variant`. Build 300 preserves that explicit-identity authority while fixing only the derived/default case:
 
 - when English identity is blank or still equal to the prior Product / variant, Product / variant changes keep the identity synchronized;
 - when the owner explicitly edits English identity to a different value, synchronization stops;
-- rerenders after Save Project are rebound through a MutationObserver;
-- the Front tagline field is labelled honestly as saved metadata that is not currently printed by the soap-ribbon renderer.
+- rerenders after Save Project are rebound through a MutationObserver.
+
+The mature soap renderer also prints `Front tagline`; Build 300 does not relabel or suppress it.
 
 ## Preserved authorities
 
@@ -62,6 +78,10 @@ Build 300 is not complete until live Development proves all of the following on 
 - Save Project returns success containing `Verified by fresh D1 read-back.`;
 - `DDPackagingSaveStabilizer.getStatus()` shows `verifiedSaveCount >= 1`, `failedVerificationCount = 0`, `lastVerification.ok = true`, `claims_match = true`, and `core_match = true`;
 - after Refresh the changed field and claim remain present;
+- Preview defaults to `previewMode = fit` and displays the complete soap ribbon without requiring horizontal scrolling;
+- `lastPreviewAudit.preview_claims_match_dom = true`;
+- `lastPreviewAudit.dom_matches_verified = true` after a verified save;
+- `rendered_claim_count` equals `preview_claim_target_count`;
 - Preview contains the verified saved English identity;
 - explicitly customized English identity is not overwritten by later Product / variant edits.
 
