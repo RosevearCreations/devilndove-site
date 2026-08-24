@@ -63,13 +63,20 @@ for marker in [
     "build: 303",
     "applicationArchitectureBuild: APPLICATION_ARCHITECTURE_BUILD",
     "getCurrentApplicationModule: () => currentApplicationModule",
+    "let verifiedResolutionPromise = null",
+    "function requestVerifiedAdminResolution",
+    "function reconcileVerifiedAuthState",
+    "globalThis.DDAuthUiState",
+    "queueMicrotask(reconcileVerifiedAuthState)",
+    "document.addEventListener('dd:auth-verified'",
+    "reconcileVerifiedAuthState,",
 ]:
     if marker not in runtime:
         fail(f"Build 303 Core runtime marker missing: {marker}")
 for forbidden in ["fetch(", "DDAuth.apiFetch", "XMLHttpRequest"]:
     if forbidden in runtime:
         fail(f"Build 303 Core runtime unexpectedly creates network transport: {forbidden}")
-print("PASS: Build 303 Core runtime adds umbrella classification without new network transport")
+print("PASS: Build 303 Core runtime adds umbrella classification and reconciles already-verified auth without new network transport")
 
 admin = read("public/js/admin.js")
 for marker in [
@@ -103,7 +110,6 @@ for marker in [
         fail(f"completed Build 302 historical pin missing marker: {marker}")
 print("PASS: completed Build 302 architecture proof is historically pinned")
 
-# Build 303 must not change domain ownership/services or the proven Packaging stack.
 protected = [
     "public/js/core/dd-module-registry.mjs",
     "public/js/core/dd-module-definitions.mjs",
@@ -133,7 +139,6 @@ for path in protected:
         fail(f"protected domain/service/Packaging file changed in Build 303: {path}")
 print("PASS: domain services and the completed Build 301 Packaging stack remain unchanged")
 
-# Confirm the mapping contract itself by executing only the passive catalog.
 node_check = r'''
 import {
   applicationModuleForDomain,
