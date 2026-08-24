@@ -1,6 +1,6 @@
 # Build 312 — Accounting Read Contract
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,40 +9,36 @@ Baseline:
 Build 311 set completed inventory-cost handoff
 ```
 
+Proven source/runtime head:
+
+```text
+6d99d05e40999776ab38f91fbaa182e9232db547
+Build 312 update Accounting read handoff context
+```
+
 Real Devil n Dove Production remains frozen at Build 280.
 
 ## Purpose
 
-Build 312 implements the remaining declared read prerequisite for the future Commerce & Operations `operations` domain:
+Build 312 implemented the remaining declared read prerequisite for future Commerce & Operations `operations` activation:
 
 ```text
 catalog-read      implemented
 inventory-read    implemented
-accounting-read   Build 312
+accounting-read   implemented Build 312
 ```
 
-Build 312 does **not** activate Operations. It only gives Operations a bounded Accounting-owned read authority that can be proven independently first.
-
-## Existing Accounting behavior is not reused as the contract
-
-`functions/api/admin/accounting-summary.js` currently calls `ensureAccountingSchema()` during GET. That legacy admin endpoint may remain for compatibility, but it is not an acceptable module-contract read authority because a read contract must not create or repair schema as a side effect.
-
-Build 312 leaves both of these existing files unchanged:
-
-```text
-functions/api/admin/accounting-summary.js
-functions/api/_lib/accounting.js
-```
+Operations was intentionally not activated in Build 312.
 
 ## Accounting authority
 
-The existing Accounting-owned order projection is:
+The Accounting-owned order projection is:
 
 ```text
 accounting_order_records
 ```
 
-It contains the bounded operational financial state that Operations needs:
+Build 312 exposes only bounded order-linked financial/payment state needed by Operations:
 
 ```text
 order identity
@@ -57,9 +53,9 @@ source payment status
 created/updated timestamps
 ```
 
-Customer name/email are intentionally not exposed by the Build 312 contract because Operations does not need those fields to establish the Accounting boundary.
+Customer name/email, journals, bank imports, close controls and Accounting mutations remain outside this contract.
 
-## New read-only route
+## Read-only route
 
 ```text
 GET /api/admin/contracts/accounting-read
@@ -81,107 +77,54 @@ mode             read-only-order-financial-state
 authority table  accounting_order_records
 ```
 
-The route is authenticated and GET-only.
-
 ## No request-time schema mutation
 
-The Build 312 route does not import or call:
+The contract does not import or call:
 
 ```text
 ensureAccountingSchema
 syncAccountingForOrder
 ```
 
-and contains no:
+and performs no request-time DDL or writes.
+
+The existing compatibility files remain unchanged:
 
 ```text
-CREATE TABLE
-ALTER TABLE
-DROP TABLE
-INSERT
-UPDATE
-DELETE
+functions/api/admin/accounting-summary.js
+functions/api/_lib/accounting.js
 ```
 
-It may read `sqlite_master` and `PRAGMA table_info(accounting_order_records)` to report schema readiness.
+Those files may retain historical schema-guard behavior, but they are not the new module-contract authority.
 
-## Schema-aware fallback
+## Schema readiness proof
 
-Schema parity remains a separate workstream. Therefore the contract does not repair missing schema.
-
-If `accounting_order_records` is missing, the contract returns a controlled read response:
+Development returned:
 
 ```text
-ok             true
-schema_ready   false
-missing_tables accounting_order_records
-records        []
+accounting_schema_ready    true
+accounting_missing_tables  <empty>
+accounting_missing_columns <empty>
+accounting_schema_mutation false
 ```
 
-If required columns are missing, it returns `schema_ready=false` with `missing_columns`.
-
-If the authority is present and compatible, it returns `schema_ready=true` with current summary and recent order-linked Accounting records.
-
-This makes the contract safe for fresh-install diagnostics without mixing schema repair into module extraction.
-
-## Read model
-
-The contract exposes a summary:
-
-```text
-records_count
-total_booked_cents
-total_paid_cents
-total_outstanding_cents
-total_tax_cents
-open_records_count
-```
-
-and bounded recent records:
-
-```text
-accounting_order_record_id
-order_id
-order_number
-entry_status
-currency
-total_cents
-amount_paid_cents
-amount_outstanding_cents
-tax_liability_cents
-source_order_status
-source_payment_status
-created_at
-updated_at
-```
-
-Optional query parameters:
-
-```text
-status
-limit (1..100)
-```
+Therefore the Accounting read prerequisite is both implemented and compatible with the current Development schema.
 
 ## Passive browser service
 
-Build 312 registers `accounting-read` in:
+Build 312 registers:
 
 ```text
-public/js/core/dd-module-service-adapters.mjs
+accounting-read
+owner accounting
+mode  read-only-http
 ```
 
-Service identity:
-
-```text
-owner  accounting
-mode   read-only-http
-```
-
-Registration performs no network request. A request occurs only when a consumer calls `.list()`.
+Registration performs no request until `.list()` is called.
 
 ## Operations prerequisite composition
 
-Commerce runtime Build 312 exposes the future Operations service requirement:
+Commerce runtime Build 312 exposes the future Operations read requirements:
 
 ```text
 operations:
@@ -190,20 +133,13 @@ operations:
   accounting-read
 ```
 
-But active runtime domains remain:
+Build 312 itself kept active runtime domains at:
 
 ```text
 SUPPORTED_DOMAINS = ['catalog', 'inventory']
 runtimeDomains    = ['catalog', 'inventory']
-```
-
-Therefore:
-
-```text
 operationsRuntimeActive = false
 ```
-
-Build 312 proves prerequisite composition without performing the Operations activation itself.
 
 ## Runtime identity
 
@@ -219,9 +155,37 @@ Core runtime implementation     305
 Operations runtime active       false
 ```
 
+## Validation proof
+
+Local regression:
+
+```text
+BUILD 312 ACCOUNTING READ CONTRACT: PASS
+No Cloudflare resource was contacted.
+```
+
+Development browser proof confirmed:
+
+```text
+operations_required_services  catalog-read,inventory-read,accounting-read
+accounting_service_owner      accounting
+accounting_service_mode       read-only-http
+accounting_contract           accounting-read
+accounting_build              312
+accounting_authority_table    accounting_order_records
+accounting_schema_ready       true
+accounting_schema_mutation    false
+accounting_rows               0
+operations_runtime            <none>
+contracts_ok                  true
+services_ok                   true
+```
+
+`accounting_rows=0` is valid Development business-data state.
+
 ## Safety boundary
 
-Build 312 does not modify:
+Build 312 did not modify:
 
 - legacy Accounting summary/schema helper behavior;
 - Accounting journals/posting/close controls;
@@ -234,8 +198,8 @@ Build 312 does not modify:
 - real Production;
 - schema/data parity work.
 
-## Decision after validation
+## Next direction
 
-If Development reports `schema_ready=true`, the next bounded build may consider Operations runtime activation.
+The three read prerequisites for Operations are now implemented and Development schema readiness is green. The next bounded build may activate the `operations` domain under Commerce & Operations in a read-only runtime mode.
 
-If Development reports `schema_ready=false`, do **not** activate Operations yet. Record the missing Accounting schema as a schema-parity blocker and resolve it on the separate schema-parity track first.
+That activation must not migrate order/payment/customer mutations. It should first prove route classification, shared-loader coverage and passive access to the three required read services.
