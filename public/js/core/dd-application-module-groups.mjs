@@ -3,7 +3,8 @@
 // Build 305 extended that same Commerce & Operations runtime to Inventory.
 // Build 306 hardened Inventory write-side contracts; Build 307 added Inventory reversal authority;
 // Build 309 added Inventory post authority; Build 310 enabled Creative consumption of both;
-// Build 311 added Inventory cost reads; Build 312 adds Accounting reads without activating Operations.
+// Build 311 added the Inventory-owned cost read boundary; Build 312 added Accounting read;
+// Build 313 activates the first read-only Operations runtime page under Commerce & Operations.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -13,6 +14,7 @@ export const RUNTIME_INVENTORY_BUILD = 305;
 export const INVENTORY_WRITE_CONTRACT_BUILD = 310;
 export const INVENTORY_COST_CONTRACT_BUILD = 311;
 export const ACCOUNTING_READ_CONTRACT_BUILD = 312;
+export const RUNTIME_OPERATIONS_BUILD = 313;
 
 export const DD_APPLICATION_CORE = Object.freeze({
   id: 'core',
@@ -49,8 +51,8 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=312',
-    runtimeDomains: Object.freeze(['catalog', 'inventory']),
+    entry: '../modules/commerce-operations/runtime.mjs?v=313',
+    runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations']),
   }),
   Object.freeze({
     id: 'creative-production',
@@ -109,16 +111,18 @@ export function snapshotApplicationArchitecture() {
     inventoryWriteContractBuild: INVENTORY_WRITE_CONTRACT_BUILD,
     inventoryCostContractBuild: INVENTORY_COST_CONTRACT_BUILD,
     accountingReadContractBuild: ACCOUNTING_READ_CONTRACT_BUILD,
+    runtimeOperationsBuild: RUNTIME_OPERATIONS_BUILD,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'catalog-inventory-cost-accounting-read-prerequisite-creative-write-consumers-enabled',
+    currentRuntimeMigrationMode: 'catalog-inventory-operations-read-only-runtime',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
-    operationsRuntimeDomainActive: false,
-    operationsAccountingReadPrerequisiteBuild: ACCOUNTING_READ_CONTRACT_BUILD,
+    thirdUmbrellaRuntimeDomain: 'operations',
+    operationsRuntimeDomainActive: true,
+    operationsRuntimeActivationMode: 'read-only-first-page',
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
