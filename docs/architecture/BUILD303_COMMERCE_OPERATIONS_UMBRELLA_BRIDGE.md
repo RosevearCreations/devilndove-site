@@ -60,14 +60,14 @@ The document root is annotated with:
 
 ```text
 data-dd-module
- data-dd-application-module
+data-dd-application-module
 ```
 
 and Admin links gain:
 
 ```text
 data-dd-module-target
- data-dd-application-module-target
+data-dd-application-module-target
 ```
 
 A new passive diagnostic event is emitted alongside the existing domain event:
@@ -75,6 +75,30 @@ A new passive diagnostic event is emitted alongside the existing domain event:
 ```text
 dd:application-module-resolved
 ```
+
+## Verified-auth reconciliation
+
+The first Development browser proof showed the Commerce & Operations classification working correctly on `/admin/products/`, but Packaging remained at:
+
+```text
+domain_mode                     activation-pending
+active_domain_runtime           null
+packaging_compatibility_state   waiting-for-proven-packaging-stack
+native_read_status              0
+```
+
+The cause is an event-order race introduced by the slightly longer async Core import chain. `site-auth-ui.js` stores verified auth in `window.DDAuthUiState` and emits `dd:admin-ready` when `/api/auth/me` completes. On a sufficiently fast page, the verified event can occur before `dd-admin-module-runtime.mjs` has finished importing and attached its listener.
+
+Build 303 now makes verified auth level-triggered as well as event-triggered:
+
+- `verifiedResolutionPromise` prevents duplicate concurrent activation;
+- `requestVerifiedAdminResolution()` centralizes verified activation;
+- `reconcileVerifiedAuthState()` reads retained `DDAuthUiState`;
+- `bootstrap()` queues a verified-state reconciliation after normal route classification;
+- `dd:admin-ready` remains the normal event path;
+- `dd:auth-verified` also triggers reconciliation.
+
+This adds no network request and changes no Packaging business/runtime authority. It only ensures Core cannot miss an already-completed verified login because of module-import timing.
 
 ## What does not change
 
@@ -144,9 +168,10 @@ Build 303 is complete only when:
 4. a Commerce & Operations route such as `/admin/products/` reports domain `catalog` and umbrella `commerce-operations`;
 5. the Catalog route remains shadow/inactive as before;
 6. Packaging reports domain `packaging` and umbrella `creative-production`;
-7. Packaging Build 301 compatibility remains active;
-8. no existing domain service/route authority changes;
-9. no SQL/config/R2/Production change occurs.
+7. Packaging domain mode reaches `active` after verified-auth reconciliation;
+8. Packaging Build 301 compatibility remains active and native read status returns 200;
+9. no existing domain service/route authority changes;
+10. no SQL/config/R2/Production change occurs.
 
 ## Next step after Build 303
 
