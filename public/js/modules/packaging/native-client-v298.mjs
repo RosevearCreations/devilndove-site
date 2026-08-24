@@ -1,6 +1,6 @@
 // Devil n Dove Build 298 native Packaging browser client.
 // The mature editor consumes native Packaging semantics through this client instead of
-// naming the retired /api/admin/packaging-studio compatibility route.
+// naming any retired compatibility endpoint.
 // Reads use /api/admin/packaging-bootstrap plus owner contracts; writes use
 // /api/admin/packaging-write directly. Build 297 remains loaded as defense-in-depth.
 
