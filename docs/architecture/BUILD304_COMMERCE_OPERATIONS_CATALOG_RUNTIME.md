@@ -29,11 +29,11 @@ application module            commerce-operations
 active application runtime    commerce-operations
 ```
 
-Catalog remains a valid internal domain and continues to identify route/capability ownership. The top-level application runtime now wraps that domain and becomes the active module-level lifecycle boundary.
+Catalog remains a valid internal domain and continues to identify route/capability ownership. The top-level application runtime wraps that domain and becomes the active module-level lifecycle boundary.
 
-This does **not** mean the Catalog page or APIs have been rewritten in Build 304.
+This does **not** mean Catalog business logic or APIs have been rewritten in Build 304.
 
-Existing Catalog HTML, JavaScript and `/api/admin/contracts/catalog-read` remain authoritative and unchanged.
+Existing Catalog JavaScript and `/api/admin/contracts/catalog-read` remain authoritative. The Products HTML changes only its shared `admin.js` query string so the Build 304 Core loader cannot be hidden by an older cached URL.
 
 ## Why Catalog is first
 
@@ -108,15 +108,42 @@ active application-module runtime
 For `/admin/products/` the Build 304 target is:
 
 ```text
-domain                           catalog
-domain_mode                      shadow
-application_module               commerce-operations
-application_module_mode          active
-active_domain_runtime            null
-active_application_module_runtime commerce-operations
+domain                            catalog
+domain_mode                       shadow
+application_module                commerce-operations
+application_module_mode           active
+active_domain_runtime             null
+active_application_runtime        commerce-operations
 ```
 
 The existing domain registry remains untouched.
+
+## First Development proof and cache-version correction
+
+The first local Build 304 regression passed and the Development Pages deployment was current at source `395eb72`, but both browser probes still reported Core Build 303.
+
+The committed Build 304 shared loader itself was correct:
+
+```text
+/public/js/core/dd-admin-module-runtime.mjs?v=304
+```
+
+The browser never reached it because the validation pages still referenced older `admin.js` URLs:
+
+```text
+Products         /public/js/admin.js?v=245
+Packaging Studio /public/js/admin.js?v=296
+```
+
+Build 304 therefore pins only those two validation-page references to:
+
+```text
+/public/js/admin.js?v=304
+```
+
+The regression verifies each HTML file changed by exactly that one line. This is a release-versioning correction, not a Product or Packaging feature change.
+
+The first Build 303 historical regression also exposed a whitespace-sensitive assertion (`catalog -> commerce-operations`). Build 304 corrects it to the exact aligned historical record while retaining the same pinned Build 303 head `6cbcc435...`.
 
 ## Packaging preservation
 
@@ -128,13 +155,13 @@ domain_mode                      active
 application_module               creative-production
 application_module_mode          domain-bridge
 active_domain_runtime            packaging
-active_application_module_runtime null
+active_application_runtime       null
 packaging_compatibility_build    301
 packaging_compatibility_state    active
 native_read_status               200
 ```
 
-Build 304 does not modify any Packaging implementation file.
+Build 304 does not modify Packaging transport, native client, compatibility facade, Save/Preview stabilizer, runtime service, or server authorities. The Packaging HTML change is limited to the shared `admin.js` cache-version query.
 
 ## Verified-auth reconciliation
 
@@ -148,13 +175,15 @@ Build 304 does not change:
 - `dd-module-definitions.mjs`;
 - domain contract declarations;
 - default contract service adapters;
-- Catalog page or API implementation;
+- Catalog API implementation;
 - Inventory or Operations extraction state;
-- Packaging page/runtime/native client/stabilizer/server services;
+- Packaging transport/read/write/save/preview implementation;
 - SQL/schema;
 - Cloudflare bindings/config;
 - R2;
 - real Production.
+
+The only page-level changes are the two exact shared-loader cache-version pins described above.
 
 ## Completion gate
 
@@ -162,7 +191,7 @@ Build 304 is complete only when:
 
 1. completed Build 303 historical regression passes;
 2. Build 304 local regression passes;
-3. Development deployment points at the Build 304 head;
+3. Development deployment points at the corrective Build 304 head;
 4. `/admin/products/` shows `commerce-operations` as the active application runtime while Catalog remains the internal shadow domain;
 5. the Commerce & Operations facade reports `state = active`, `currentDomain = catalog`, and `servicesReady = true`;
 6. Inventory/Operations/Public do not receive an application runtime entry;
