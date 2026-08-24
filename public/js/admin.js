@@ -3,6 +3,7 @@
 // Build 290: Packaging physically removes retired broad Catalog/Inventory reads from legacy server source.
 // Build 296: Packaging exposes an explicit client transport facade over the proven read/write bridges.
 // Build 303: Core runtime reports Build 302 umbrella application-module classification without changing domain activation.
+// Build 304: Core activates the Commerce & Operations umbrella runtime for Catalog routes only.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -40,5 +41,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=303')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=304')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
