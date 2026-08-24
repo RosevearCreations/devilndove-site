@@ -4,6 +4,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "b4dc4ce2890c0a982aae56d343caa88b5f0d807b"
+HISTORICAL_HEAD = "d207609967c9a182627561f2f8f9b7ae47b17b04"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD290_CHANGED_FILES.md",
@@ -26,8 +27,6 @@ def fail(message):
 
 
 def run(args):
-    # Git and Node emit UTF-8. Pin decoding explicitly so Windows locale/code-page
-    # settings (for example cp1252) cannot corrupt historical-source comparisons.
     return subprocess.run(
         args,
         cwd=ROOT,
@@ -83,7 +82,7 @@ if result.returncode:
     fail(f"Build 290 module import failed: {result.stderr.strip() or result.stdout.strip()}")
 print("PASS: Build 290 module imports resolve")
 
-studio = read("functions/api/admin/packaging-studio.js")
+studio = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-studio.js")
 list_data = between(studio, "async function listData(db){", "async function loadDetail(db,projectId){")
 for forbidden in [
     "ORDER BY LOWER(name),product_id DESC LIMIT 500",
@@ -126,12 +125,12 @@ if current_detail != base_detail:
     fail("Packaging loadDetail contextual read implementation changed from final Build 289")
 print("PASS: mature Packaging POST logic and selected-detail context are unchanged from Build 289")
 
-helper_path = ROOT / "functions/api/_lib/packagingWriteBoundary.mjs"
-if helper_path.exists():
-    fail("obsolete Build 289 packagingWriteBoundary SQL-filter helper still exists")
+helper_exists = run(["git", "cat-file", "-e", f"{HISTORICAL_HEAD}:functions/api/_lib/packagingWriteBoundary.mjs"])
+if helper_exists.returncode == 0:
+    fail("obsolete Build 289 packagingWriteBoundary SQL-filter helper still exists at final Build 290")
 print("PASS: obsolete Build 289 SQL-filter helper is removed")
 
-gateway = read("functions/api/admin/packaging-write.js")
+gateway = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-write.js")
 required_gateway_markers = [
     "const BUILD = 290;",
     "onRequestPost as legacyPackagingPost",
@@ -151,11 +150,11 @@ for forbidden in ["createPackagingResponseFilteredDb", "packagingWriteBoundary",
         fail(f"obsolete Build 289 gateway filtering marker remains: {forbidden}")
 print("PASS: Packaging write gateway delegates directly with owner-contract response shape")
 
-base = read("public/js/modules/packaging/index.mjs")
-picker = read("public/js/modules/packaging/artwork-picker.mjs")
-retirement = read("public/js/modules/packaging/read-retirement.mjs")
-write_bridge = read("public/js/modules/packaging/write-response.mjs")
-runtime = read("public/js/modules/packaging/runtime.mjs")
+base = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/index.mjs")
+picker = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/artwork-picker.mjs")
+retirement = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/read-retirement.mjs")
+write_bridge = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/write-response.mjs")
+runtime = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/runtime.mjs")
 if "apiBoundaryCleanupBridge: true" not in base or "build: 286" not in base:
     fail("Build 286 narrow-bootstrap bridge marker missing")
 if "Use selected artwork" not in picker:
@@ -176,9 +175,9 @@ for marker in [
         fail(f"Build 290 runtime composition marker missing: {marker}")
 print("PASS: Build 286-289 runtime stack remains composed under Build 290")
 
-admin = read("public/js/admin.js")
-module_runtime = read("public/js/core/dd-admin-module-runtime.mjs")
-definitions = read("public/js/core/dd-module-definitions.mjs")
+admin = git_show(HISTORICAL_HEAD, "public/js/admin.js")
+module_runtime = git_show(HISTORICAL_HEAD, "public/js/core/dd-admin-module-runtime.mjs")
+definitions = git_show(HISTORICAL_HEAD, "public/js/core/dd-module-definitions.mjs")
 if "dd-admin-module-runtime.mjs?v=290" not in admin:
     fail("Admin does not load Build 290 runtime")
 if "build: 290" not in module_runtime:
@@ -187,7 +186,7 @@ if "entry: '../modules/packaging/runtime.mjs?v=290'" not in definitions:
     fail("Packaging definition does not load Build 290 runtime")
 print("PASS: Build 290 routing/version markers")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
+result = run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
