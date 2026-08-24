@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 311 Complete / Accounting Read Next
+# Devil n Dove AI Context — Build 312 Accounting Read Contract
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -15,8 +15,9 @@ Current modular architecture authority includes:
 - `docs/architecture/BUILD309_INVENTORY_POST_AUTHORITY.md`
 - `docs/architecture/BUILD310_CREATIVE_INVENTORY_POST_CONSUMER_CUTOVER.md`
 - `docs/architecture/BUILD311_INVENTORY_COST_READ_CONTRACT.md`
-- `BUILD310_VALIDATION.md`
+- `docs/architecture/BUILD312_ACCOUNTING_READ_CONTRACT.md`
 - `BUILD311_VALIDATION.md`
+- `BUILD312_VALIDATION.md`
 
 **Real Devil n Dove Production remains frozen at Build 280 unless deliberately promoted through the separate Production workflow.**
 
@@ -51,38 +52,6 @@ Build 306 remains historically browser-proven with standalone local signoff not 
 
 Build 308 remains browser-proven; its standalone local regression output was not captured before later work began. Do not silently relabel it complete.
 
-## Build 310 — completed consumer cutover
-
-Proven runtime/source head:
-
-```text
-c55f72b73941e0a568591c6a1125bc360a86a8f9
-Build 310 update modular posting-consumer handoff
-```
-
-Completed handoff head:
-
-```text
-c88bcd63d7478cdb24e2b7070fa739f35789ac88
-Build 310 set completed modular handoff
-```
-
-Creative Inventory authority state:
-
-```text
-inventory-post
-  authority build       309
-  consumer build        310
-  consumer writes ready true
-
-inventory-reverse
-  authority build       307
-  consumer build        308
-  consumer writes ready true
-```
-
-Commerce remains non-mutating: `ownsInventoryMutations=false`.
-
 ## Build 311 — COMPLETE IN DEVELOPMENT
 
 Proven source/regression head:
@@ -92,15 +61,14 @@ Proven source/regression head:
 Build 311 make historical pins line-ending safe
 ```
 
-Build 311 resolved the two review gates left by Build 310.
+Completed handoff head:
 
-### Creative compatibility decision
+```text
+78546a6b9304ce38d0a42b130445a7504a15823f
+Build 311 set completed inventory-cost handoff
+```
 
-`functions/api/admin/creative-process-compat.js` cannot yet be retired. It still owns unrelated Creative Process actions outside the Inventory post/reverse cutovers.
-
-### Inventory cost authority
-
-Implemented read-only contract:
+Build 311 implements:
 
 ```text
 GET /api/admin/contracts/inventory-cost
@@ -109,33 +77,107 @@ build     311
 authority site_item_inventory.unit_cost_cents
 ```
 
-Optional supporting history:
+Catalog requires `catalog-read,inventory-cost`. Inventory requires `inventory-read`. Operations remains inactive.
+
+## Build 312 — STAGED / VALIDATION REQUIRED
+
+Baseline:
 
 ```text
-site_item_inventory_cost_history
+78546a6b9304ce38d0a42b130445a7504a15823f
+Build 311 set completed inventory-cost handoff
 ```
 
-The route performs no mutation and no request-time DDL.
-
-### Runtime composition
+Build 312 implements the remaining read prerequisite for future Operations activation:
 
 ```text
-catalog required services:
+GET /api/admin/contracts/accounting-read
+owner            accounting
+build            312
+mode             read-only-order-financial-state
+authority table  accounting_order_records
+```
+
+### Accounting boundary
+
+The contract exposes only bounded order-linked financial/payment state:
+
+```text
+summary:
+  records_count
+  total_booked_cents
+  total_paid_cents
+  total_outstanding_cents
+  total_tax_cents
+  open_records_count
+
+records:
+  accounting_order_record_id
+  order_id
+  order_number
+  entry_status
+  currency
+  total_cents
+  amount_paid_cents
+  amount_outstanding_cents
+  tax_liability_cents
+  source_order_status
+  source_payment_status
+  created_at
+  updated_at
+```
+
+It deliberately excludes customer name/email and does not expose journals, bank imports, close controls, or Accounting mutation APIs.
+
+### No read-side schema repair
+
+The legacy `functions/api/admin/accounting-summary.js` calls `ensureAccountingSchema()` during GET. Build 312 does not reuse that behavior as a module contract.
+
+The new route does not call:
+
+```text
+ensureAccountingSchema
+syncAccountingForOrder
+```
+
+and performs no request-time DDL or writes.
+
+If `accounting_order_records` or required columns are absent, it returns a controlled `schema_ready=false` read response. Missing schema remains part of the separate schema-parity track.
+
+### Passive service
+
+`public/js/core/dd-module-service-adapters.mjs` registers:
+
+```text
+accounting-read
+owner accounting
+mode  read-only-http
+```
+
+Registration performs no request until `.list()` is called.
+
+### Future Operations prerequisite set
+
+Commerce runtime Build 312 exposes:
+
+```text
+operations required services:
   catalog-read
-  inventory-cost
-
-inventory required services:
   inventory-read
+  accounting-read
 ```
 
-Operations remains inactive:
+But active runtime domains remain:
 
 ```text
-runtimeDomains = ['catalog', 'inventory']
-operationsRuntimeDomainActive = false
+SUPPORTED_DOMAINS = ['catalog', 'inventory']
+runtimeDomains    = ['catalog', 'inventory']
+operationsRuntimeActive = false
 ```
 
-Runtime identity:
+Build 312 therefore proves prerequisite composition without activating Operations.
+
+### Runtime identity
 
 ```text
 Architecture build              302
@@ -143,66 +185,32 @@ Catalog runtime                 304
 Inventory runtime               305
 Inventory write boundary        310
 Inventory cost contract         311
-Commerce runtime                311
+Accounting read contract        312
+Commerce runtime                312
 Core runtime implementation     305
 Operations runtime active       false
 ```
 
-### Validation proof
+### Build 312 safety boundary
 
-Final local regression:
+Build 312 does not modify:
 
-```text
-BUILD 311 INVENTORY COST READ CONTRACT: PASS
-No Cloudflare resource was contacted.
-```
-
-Development browser proof:
-
-```text
-inventory_cost_service_owner   inventory
-inventory_cost_service_mode    read-only-http
-inventory_cost_contract        inventory-cost
-inventory_cost_build           311
-inventory_cost_authority_field site_item_inventory.unit_cost_cents
-inventory_cost_rows            5
-catalog_required_services      catalog-read,inventory-cost
-operations_runtime             <none>
-contracts_ok                   true
-services_ok                    true
-```
-
-The Windows CRLF/LF false-negative in the first regression run was corrected in `92aaef7b` by switching protected-file historical pins to Git-native comparison. The Build 311 file boundary did not expand.
-
-## Build 311 safety boundary
-
-Build 311 did not move or change:
-
-- Creative compatibility behavior;
+- legacy Accounting summary/schema helper behavior;
+- Accounting journals/posting/close controls;
 - Inventory post/reverse authorities;
 - Creative post/reverse consumers;
-- legacy broad Inventory mutation endpoint;
 - Operations implementation;
-- Accounting implementation;
 - SQL/schema;
 - Cloudflare bindings/config;
 - R2;
 - real Production;
 - schema/data parity work.
 
-## Next direction — Accounting read before Operations
+## Decision after Build 312 validation
 
-Do not activate Operations yet.
+If Development reports `accounting_schema_ready=true`, a later bounded build may consider Operations runtime activation.
 
-Operations declares:
-
-```text
-catalog-read
-inventory-read
-accounting-read
-```
-
-`catalog-read` and `inventory-read` are implemented. The remaining prerequisite is a bounded, read-only Accounting-owned `accounting-read` contract. Prove that contract first; only then reconsider adding `operations` to the Commerce & Operations runtime domains.
+If Development reports `accounting_schema_ready=false`, do not activate Operations. Record the missing Accounting schema/columns as a schema-parity blocker and resolve it on the separate schema-parity track first.
 
 ## Validation interaction preference
 
