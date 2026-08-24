@@ -1,14 +1,15 @@
 // Devil n Dove Build 302 Core + Three Application Modules architecture catalog.
 // Build 304 added the first passive umbrella runtime metadata for Catalog.
 // Build 305 extended that same Commerce & Operations runtime to Inventory.
-// Build 306 hardens Inventory write-side contracts without adding mutation transport.
+// Build 306 hardened Inventory write-side contracts; Build 307 adds the Inventory-owned
+// compensating reversal service while keeping consumer migration disabled.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
 export const BUILD = 302;
 export const RUNTIME_CATALOG_BUILD = 304;
 export const RUNTIME_INVENTORY_BUILD = 305;
-export const INVENTORY_WRITE_CONTRACT_BUILD = 306;
+export const INVENTORY_WRITE_CONTRACT_BUILD = 307;
 
 export const DD_APPLICATION_CORE = Object.freeze({
   id: 'core',
@@ -45,7 +46,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=306',
+    entry: '../modules/commerce-operations/runtime.mjs?v=307',
     runtimeDomains: Object.freeze(['catalog', 'inventory']),
   }),
   Object.freeze({
@@ -107,7 +108,7 @@ export function snapshotApplicationArchitecture() {
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'catalog-inventory-write-contract-hardening',
+    currentRuntimeMigrationMode: 'catalog-inventory-reversal-service',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
