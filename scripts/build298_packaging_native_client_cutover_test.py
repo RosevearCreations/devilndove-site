@@ -32,6 +32,13 @@ def read(path):
     return (ROOT / path).read_text(encoding="utf-8")
 
 
+def changed_files(*args):
+    result = run(["git", "diff", "--name-only", *args])
+    if result.returncode:
+        fail(f"git changed-file check failed for {args}: {result.stderr.strip()}")
+    return {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
+
+
 for name in [
     "public/js/admin-packaging-native-client-v298.js",
     "public/js/admin-packaging-studio.js",
@@ -151,13 +158,20 @@ for path in protected:
         fail(f"Build 298 unexpectedly changed proven runtime/server authority: {path}")
 print("PASS: Build 297 defense runtime and 293/286 read + 292/291 write authorities are unchanged")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
-if result.returncode:
-    fail(f"git changed-file check failed: {result.stderr.strip()}")
-actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
+# Build 298 is intentionally validated before its two activation files are committed.
+# Combine committed BASE->HEAD changes with unstaged/staged working-tree changes so the
+# exact boundary check works both immediately before the activation commit and after it.
+committed = changed_files(BASE, "HEAD")
+working_tree = changed_files("HEAD")
+staged = changed_files("--cached", "HEAD")
+actual = committed | working_tree | staged
 if actual != EXPECTED:
-    fail(f"Build 298 changed-file boundary mismatch. expected={sorted(EXPECTED)} actual={sorted(actual)}")
-print("PASS: exact Build 298 changed-file boundary")
+    fail(
+        "Build 298 changed-file boundary mismatch. "
+        f"expected={sorted(EXPECTED)} actual={sorted(actual)} "
+        f"committed={sorted(committed)} working_tree={sorted(working_tree)} staged={sorted(staged)}"
+    )
+print("PASS: exact Build 298 changed-file boundary across committed + local activation changes")
 
 if any(name.endswith(".sql") or "/migrations/" in f"/{name}" for name in actual):
     fail("Build 298 changed SQL/schema")
