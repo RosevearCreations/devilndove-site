@@ -12,6 +12,7 @@
 // Build 311: Inventory exposes the passive cost read contract; Operations remains bridge-only.
 // Build 312: Accounting exposes a passive bounded read prerequisite; Operations remains inactive.
 // Build 313: Commerce & Operations activates the first read-only Operations runtime page.
+// Build 314: Operations runtime coverage is explicit for Operations and Customer Documents pages only.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -49,5 +50,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=313')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=314')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
