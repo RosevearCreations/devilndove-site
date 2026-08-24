@@ -1,15 +1,22 @@
 # Build 300 Changed Files
 
-Base: `e5be1b4adcb2a6f335d1aabbe90ca6b9234a2f45` (Build 299 candidate head after local gate + Project-draft browser proof)
+Base: `e5be1b4adcb2a6f335d1aabbe90ca6b9234a2f45` (Build 299 candidate head before stabilization)
 
-Expected Build 300 boundary:
+Expected net Build 300 boundary:
 
-1. `BUILD300_CHANGED_FILES.md`
-2. `BUILD300_VALIDATION.md`
-3. `admin/packaging-studio/index.html`
-4. `docs/architecture/BUILD300_PACKAGING_LIVE_PREVIEW_SYNC.md`
-5. `public/js/admin-packaging-preview-sync-v300.js`
-6. `scripts/apply_build300_packaging_live_preview_sync.py`
-7. `scripts/build300_packaging_live_preview_sync_test.py`
+1. `AI_CONTEXT.md`
+2. `BUILD299_VALIDATION.md`
+3. `BUILD300_CHANGED_FILES.md`
+4. `BUILD300_VALIDATION.md`
+5. `admin/packaging-studio/index.html`
+6. `docs/architecture/BUILD300_PACKAGING_STABILIZATION.md`
+7. `public/js/admin-packaging-save-stabilizer-v300.js`
+8. `scripts/build300_packaging_stabilization_test.py`
 
-No mature editor, server Packaging service/gateway, SQL/schema, Cloudflare binding/config, R2, or Production file is part of this boundary.
+Runtime effect:
+
+- unload Build 299 browser print-source controller from the Packaging page;
+- keep proven Build 298 editor/native client loaded;
+- add Build 300 verified Save Project/read-back stabilization between native client and mature editor.
+
+No mature editor, server Packaging read/write authority, SQL/schema, Cloudflare binding/config, R2, or Production file is part of this boundary.
