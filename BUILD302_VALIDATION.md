@@ -1,21 +1,26 @@
 # Build 302 Validation — Core + Three Application Modules Normalization
 
-## Status — STAGED / LOCAL VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
-Build 302 is an architecture-normalization pass. It does **not** change the completed Build 301 Packaging runtime.
+Build 302 is the completed architecture-normalization pass that establishes **one shared Application Core + exactly three top-level application modules** without changing the completed Build 301 Packaging runtime.
 
-Completed Build 301 head pinned by this build:
+Completed Build 301 historical head pinned by this build:
 
 ```text
 a81f8d6af0004d847174fa27043c11e159ca3d10
 Build 301 set completed compatibility baseline handoff
 ```
 
-Real Production remains frozen at Build 280.
+Completed Build 302 baseline:
 
-## Build 302 target
+```text
+cb68b71440f344c258809e79efe23bea65d0167f
+Build 302 harden Build 301 historical syntax pin
+```
 
-The authoritative application structure is now:
+Real Production remained frozen at Build 280.
+
+## Authoritative target — PASS
 
 ```text
                      DEVIL N DOVE APPLICATION CORE
@@ -27,7 +32,7 @@ The authoritative application structure is now:
        OPERATIONS          PRODUCTION      ADMINISTRATION
 ```
 
-Current domain grouping:
+Domain grouping:
 
 ```text
 Commerce & Operations
@@ -51,7 +56,7 @@ Business & Administration
 
 Packaging Build 301 remains the first proven extracted domain inside Creative & Production.
 
-## Runtime rule
+## Runtime rule — PRESERVED
 
 Build 302 adds the passive target catalog:
 
@@ -59,9 +64,9 @@ Build 302 adds the passive target catalog:
 public/js/core/dd-application-module-groups.mjs
 ```
 
-It is not imported by the current live module runtime in Build 302.
+It is intentionally not imported by the current live module runtime in Build 302.
 
-Therefore Build 302 must not change:
+Build 302 therefore does not change:
 
 - Packaging page script order;
 - Build 301 compatibility facade;
@@ -72,23 +77,29 @@ Therefore Build 302 must not change:
 - current `dd-admin-module-runtime.mjs` behavior;
 - Packaging server read/write authorities.
 
-## Local validation
+## Completed local validation — PASS
 
-After pulling `dev`, run:
-
-```bash
-python scripts/build301_packaging_compatibility_checkpoint_test.py
-python scripts/build302_core_three_module_architecture_test.py
-```
-
-Expected Build 301 ending:
+User pulled through Build 302 with a clean fast-forward ending at:
 
 ```text
+cb68b714 (HEAD -> dev, origin/dev) Build 302 harden Build 301 historical syntax pin
+```
+
+### Build 301 historical regression
+
+```text
+PASS: completed Build 301 JavaScript syntax is historically pinned
+PASS: completed Build 301 compatibility umbrella is historically pinned
+PASS: completed Build 301 live page shape is historically pinned
+PASS: Build 301 preserves the completed Build 300 historical pin
+PASS: completed Build 301 protected Packaging authorities are historically unchanged
+PASS: exact completed Build 301 boundary is historically pinned
+PASS: completed Build 301 had no SQL/schema, Cloudflare binding/config, R2, or Production change
 BUILD 301 PACKAGING COMPATIBILITY HISTORICAL REGRESSION: PASS (a81f8d6a)
 No Cloudflare resource was contacted.
 ```
 
-Expected Build 302 ending:
+### Build 302 architecture regression
 
 ```text
 PASS: Build 302 architecture catalog JavaScript syntax
@@ -104,9 +115,15 @@ BUILD 302 CORE + THREE MODULE ARCHITECTURE NORMALIZATION: PASS
 No Cloudflare resource was contacted.
 ```
 
-## Expected changed-file boundary
+### Working tree
 
-From completed Build 301 head `a81f8d6a...`, Build 302 must contain exactly:
+`git status --short` returned no entries after validation.
+
+That clean working tree is part of the completed Build 302 evidence.
+
+## Exact completed Build 302 changed-file boundary
+
+From completed Build 301 head `a81f8d6a...`, Build 302 contains exactly:
 
 ```text
 AI_CONTEXT.md
@@ -121,31 +138,33 @@ scripts/build302_core_three_module_architecture_test.py
 
 No active Packaging page/runtime file is in the boundary.
 
-## Development deployment
+## Browser/deployment proof decision
 
-Because the repository is connected to the Development Pages project, documentation/passive-catalog commits may still produce a Development deployment record.
+A repeated Packaging browser Save/Preview proof is not required for Build 302 because no proven Build 301 runtime file changed.
 
-No browser behavior change is expected or required for Build 302 completion because the new catalog is intentionally not loaded by the live runtime yet.
+The historical Build 301 regression protects that completed runtime baseline.
 
-If checking deployments, use only:
+Build 302 may produce Development Pages deployment records because the repository is connected to `devilndove-site-dev`, but no browser behavior change is required for this architecture-only pass.
 
-```text
-devilndove-site-dev
-```
+## Completion decision — PASS
 
-Do not contact or promote real Production.
+Build 302 is **COMPLETE IN DEVELOPMENT** because:
 
-## Completion decision
+1. completed Build 301 historical regression passed;
+2. Build 302 defines exactly three application modules;
+3. all current domains are assigned exactly once;
+4. the authoritative architecture is Core + three modules;
+5. Packaging is preserved as the proven Build 301 domain inside Creative & Production;
+6. current runtime route/module behavior is unchanged;
+7. the exact Build 302 changed-file boundary passed;
+8. no SQL/schema, Cloudflare binding/config, R2, or Production change occurred;
+9. the local working tree was clean after validation.
 
-Build 302 is complete when both local regressions pass and the exact changed-file/safety boundary is confirmed.
-
-A browser Save/Preview proof is **not** repeated for Build 302 because no proven Build 301 runtime file is changed. The historical Build 301 regression protects that baseline instead.
-
-## Next runtime work after Build 302
+## Next runtime direction after Build 302
 
 Do not immediately delete old Packaging compatibility layers.
 
-The next runtime phase should begin migrating from twelve top-level domain classifications toward the three umbrella application modules, one bounded route/service group at a time.
+The next runtime phase should begin migrating from twelve domain classifications toward the three umbrella application modules, one bounded route/service group at a time.
 
 Recommended first runtime target:
 
