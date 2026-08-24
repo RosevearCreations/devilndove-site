@@ -1,12 +1,13 @@
-// Devil n Dove Build 306 Inventory write-side authority boundary.
-// This module is declarative only. It creates no network transport and performs no stock mutation.
-// Build 306 records the existing post authority and blocks contract-level reversal until a true
-// compensating movement can reference the original Inventory movement.
+// Devil n Dove Build 307 Inventory write-side authority boundary.
+// Build 307 adds an Inventory-owned compensating reversal contract route while keeping
+// consumer migration disabled. The umbrella runtime still performs no mutation itself.
 
-export const BUILD = 306;
+export const BUILD = 307;
 export const OWNER = 'inventory';
 export const LEGACY_AUTHORITY_ROUTE = '/api/admin/site-item-inventory';
 export const POST_ACTION = 'consume_usage';
+export const REVERSE_CONTRACT_ROUTE = '/api/admin/contracts/inventory-reverse';
+export const REVERSE_CONFIRMATION = 'REVERSE INVENTORY';
 
 export const INVENTORY_WRITE_BOUNDARY = Object.freeze({
   build: BUILD,
@@ -23,10 +24,14 @@ export const INVENTORY_WRITE_BOUNDARY = Object.freeze({
   }),
   reverse: Object.freeze({
     contractId: 'inventory-reverse',
-    authorityRoute: null,
-    authorityAction: null,
-    implementationState: 'blocked-pending-compensating-movement-service',
+    authorityRoute: REVERSE_CONTRACT_ROUTE,
+    authorityAction: 'compensating-reversal',
+    implementationState: 'implemented-not-consumer-enabled',
     requiresOriginalMovementId: true,
+    requiresCreativePostingId: true,
+    requiresTypedConfirmation: true,
+    confirmationText: REVERSE_CONFIRMATION,
+    usesExistingCreativeReversalLedger: true,
     compensatingMovementOnly: true,
     directStockAddBackAllowed: false,
     consumerWritesReady: false,
