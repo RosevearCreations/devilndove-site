@@ -10,7 +10,7 @@ Current modular architecture authority:
 - `docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md`
 - `BUILD304_VALIDATION.md`
 
-**Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
+**Real Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
 
 ## Authoritative application structure
 
@@ -60,7 +60,7 @@ Runtime activation:
 e2be2209ed96b7a67e975feead37a768f0043cb5
 ```
 
-Completed Build 301 handoff:
+Completed handoff:
 
 ```text
 a81f8d6af0004d847174fa27043c11e159ca3d10
@@ -78,13 +78,7 @@ Completed architecture handoff:
 000b9617bc5141ba876ec667d4fbc653ea9ee556
 ```
 
-Build 302 normalized the application to Core + exactly three top-level modules and added the passive grouping catalog.
-
-Architecture build remains:
-
-```text
-302
-```
+Build 302 normalized the application to Core + exactly three top-level modules and added the passive grouping catalog. Architecture build remains `302`.
 
 ## Build 303 — COMPLETE IN DEVELOPMENT
 
@@ -122,7 +116,7 @@ Packaging
 
 Build 304 historically pins Build 303 to `6cbcc435...`.
 
-## Build 304 — STAGED / VALIDATION REQUIRED
+## Build 304 — CORRECTIVE RETEST REQUIRED
 
 Build 304 is the first true top-level application-module runtime extraction.
 
@@ -134,15 +128,15 @@ public/js/modules/commerce-operations/runtime.mjs
 
 and opts **Catalog only** into the Commerce & Operations runtime.
 
-### Runtime identities
+Runtime identities:
 
 ```text
-DDModuleRuntime.build                        304
+DDModuleRuntime.build                         304
 DDModuleRuntime.applicationArchitectureBuild 302
 DDModuleRuntime.applicationRuntimeCatalogBuild 304
 ```
 
-The Build 302 grouping catalog remains the architecture authority but now carries passive Build 304 runtime metadata:
+The Build 302 grouping catalog remains the architecture authority but carries passive Build 304 runtime metadata:
 
 ```text
 RUNTIME_CATALOG_BUILD = 304
@@ -157,28 +151,70 @@ Inventory, Operations and Public remain bridge-only. Creative & Production and B
 On `/admin/products/` after verified Admin startup:
 
 ```text
-domain                            catalog
-domain_mode                       shadow
-application_module                commerce-operations
-application_module_mode           active
-active_domain_runtime             null
-active_application_runtime        commerce-operations
-application_runtime_state         active
-application_runtime_domain        catalog
+domain                             catalog
+domain_mode                        shadow
+application_module                 commerce-operations
+application_module_mode            active
+active_domain_runtime              null
+active_application_runtime         commerce-operations
+application_runtime_state          active
+application_runtime_domain         catalog
 application_runtime_services_ready true
 ```
 
-The new Commerce & Operations runtime:
+The Commerce & Operations runtime:
 
 - supports only `catalog`;
-- requires only the existing `catalog-read` service;
+- requires only existing `catalog-read`;
 - creates no network transport;
 - exposes `window.DDCommerceOperations` diagnostics;
-- does not rewrite Catalog page/API business logic.
+- does not rewrite Catalog API/business logic.
+
+### First Build 304 validation attempt
+
+Local Build 304 regression passed and Development deployment source `395eb72` was Active.
+
+The Build 303 historical regression failed only because its assertion searched for unpadded `catalog -> commerce-operations` while the pinned completed Build 303 record contains aligned `catalog    -> commerce-operations`. Build 304 corrects that test marker without changing the historical head.
+
+Both first browser probes still reported Core `303` and `runtime_catalog_build = undefined`.
+
+Root cause was release cache versioning, not the new runtime:
+
+```text
+admin/products/index.html
+  /public/js/admin.js?v=245
+
+admin/packaging-studio/index.html
+  /public/js/admin.js?v=296
+```
+
+while current Build 304 `public/js/admin.js` correctly imports:
+
+```text
+/public/js/core/dd-admin-module-runtime.mjs?v=304
+```
+
+The old page script URLs allowed cached pre-304 `admin.js` content to be reused, so Core 304 was never requested.
+
+### Corrective Build 304 page pins
+
+Build 304 now changes exactly one line on each browser-validation page:
+
+```text
+admin/products/index.html
+  /public/js/admin.js?v=245 -> /public/js/admin.js?v=304
+
+admin/packaging-studio/index.html
+  /public/js/admin.js?v=296 -> /public/js/admin.js?v=304
+```
+
+The Build 304 regression verifies those are the only diffs in those pages.
+
+These are shared-loader cache-version pins only. They do not alter Product or Packaging feature behavior.
 
 ### Packaging preservation target
 
-On `/admin/packaging-studio/`:
+On `/admin/packaging-studio/` after the corrective retest:
 
 ```text
 domain                          packaging
@@ -194,7 +230,7 @@ failed_verification_count       0
 preview_mode                    fit
 ```
 
-Build 304 changes no Packaging implementation file.
+Build 304 changes no Packaging transport/client/runtime/service/read/write/save/preview authority. The only Packaging page change is the `admin.js?v=304` cache-version pin.
 
 ### Build 304 safety boundary
 
@@ -202,13 +238,30 @@ Build 304 must not change:
 
 - domain registry or domain definitions;
 - domain contract ownership/service adapters;
-- Catalog page or API implementations;
+- Catalog APIs;
 - Inventory/Operations/Public extraction;
-- Packaging page/client/runtime/read/write/save/preview authorities;
+- Packaging transport/read/write/save/preview implementation;
 - SQL/schema;
 - Cloudflare bindings/config;
 - R2;
 - real Production.
+
+Expected Build 304 boundary from completed Build 303 head `6cbcc435...` is exactly 12 files:
+
+```text
+AI_CONTEXT.md
+BUILD304_CHANGED_FILES.md
+BUILD304_VALIDATION.md
+admin/products/index.html
+admin/packaging-studio/index.html
+docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md
+public/js/admin.js
+public/js/core/dd-admin-module-runtime.mjs
+public/js/core/dd-application-module-groups.mjs
+public/js/modules/commerce-operations/runtime.mjs
+scripts/build303_commerce_operations_umbrella_bridge_test.py
+scripts/build304_commerce_operations_catalog_runtime_test.py
+```
 
 Run:
 
@@ -219,7 +272,7 @@ python scripts/build304_commerce_operations_catalog_runtime_test.py
 
 Then perform the two browser proofs in `BUILD304_VALIDATION.md`.
 
-Do not mark Build 304 complete until both local and browser gates are green.
+Do not mark Build 304 complete until both corrected local regressions and both browser gates are green.
 
 ## Next bounded direction after Build 304
 
