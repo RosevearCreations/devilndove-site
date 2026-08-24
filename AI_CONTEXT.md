@@ -18,6 +18,44 @@ Build 297 fixes that post-activation path without rewriting the mature editor or
 
 Build 297 preserves server/domain authority: read service Build 293 over proven read implementation Build 286; write gateway Build 292 over domain service Build 291; Build 294 GET tombstone; Build 292 POST tombstone. The mature `public/js/admin-packaging-studio.js`, Build 296 runtime, server endpoints, SQL/schema, Wrangler/bindings, R2, and Production remain unchanged.
 
-Immediate Development gate: run `scripts/build297_packaging_legacy_get_fallback_removal_test.py`. Then prove both initial load and a later normal **Refresh** physically use `/api/admin/packaging-bootstrap` with zero `/api/admin/packaging-studio` network requests. Only after Refresh reloads Packaging projects successfully should one harmless Save be used to re-prove `/api/admin/packaging-write` and the 292 -> 291 write boundary.
+## Build 297 completed Development proof — 2026-08-24
 
-Expected next work after Build 297 parity: remove the mature editor's internal naming of `/api/admin/packaging-studio` entirely and give it a native client API/facade shape. Only after that naming cutover is independently proven should `functions/api/admin/packaging-studio.js` be considered for physical deletion. Separately, dormant read helpers inside the Build 291 write-service source can be removed only after write-response/detail dependencies are audited and independently protected.
+Build 297 is now **COMPLETE in Development**. Local regression passed on final Build 297 source `8d444153`, and Development deployed that source in `devilndove-site-dev` without touching the real Production application.
+
+The mature Packaging page successfully loaded projects. Initial load plus one normal Refresh proved the native read path remained active:
+
+```text
+client_transport_build           297
+client_transport_ready           true
+post_activation_transport_armed  true
+legacy_get_fallback_removed      true
+legacy_server_get_reachable      false
+bootstrap_contractized           true
+bootstrap_source                 packaging-bootstrap
+legacy_endpoint_bypassed         true
+native_read_request_count        2
+native_read_last_status          200
+native_read_last_error           ""
+```
+
+A normal Packaging Save then succeeded with the UI message `Labeling and packaging project, structured content, claims and artwork selection saved to D1.` The retained write bridge recorded six intercepted writes in the active session, last HTTP status 200, and the server response proved the native authority chain:
+
+```text
+intercepted_write_count       6
+last_write_http_status        200
+gateway_build                 292
+gateway_path                  /api/admin/packaging-write
+write_service_build           291
+write_authority               packaging-domain-service
+shared_write_service          true
+legacy_post_route_retired     true
+packaging_owned_response      true
+```
+
+Therefore normal Packaging initial load, Refresh, project loading, and Save are proven in Development without using the retired legacy GET as a normal runtime fallback. `BUILD297_VALIDATION.md` contains the completed evidence.
+
+## Recommended next modular work
+
+The next Packaging build should remove the mature editor's internal naming of `/api/admin/packaging-studio` entirely and give the editor a native client API/facade shape for reads and writes. This should be a naming/client-boundary cutover only: preserve the proven Build 297 read transport and `292 -> 291` write authority, keep the mature editor behavior/functionality intact, and do not mix schema work into the cutover.
+
+Only after that native-client naming cutover is independently proven should `functions/api/admin/packaging-studio.js` be considered for physical deletion. Separately, dormant read helpers inside the Build 291 write-service source can be removed only after write-response/detail dependencies are audited and independently protected.
