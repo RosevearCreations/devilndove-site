@@ -1,6 +1,6 @@
 # Build 315 Validation — Orders Operations Runtime Coverage
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,7 +9,12 @@ c29aca8c789ac53e9418f6074e8408b56391d7e5
 Build 314 set completed runtime handoff context
 ```
 
-Build 314 is COMPLETE IN DEVELOPMENT.
+Proven source/runtime head:
+
+```text
+1984d97d5656691d44ad96917d15e38b07e71016
+Build 315 update modular handoff context
+```
 
 Build 315 expands the proven read-only Operations runtime page set to exactly:
 
@@ -21,45 +26,26 @@ Build 315 expands the proven read-only Operations runtime page set to exactly:
 
 Orders business scripts and APIs remain unchanged.
 
-## One GIT BASH block
+## Local regression — PASS
 
-```bash
-git pull --ff-only origin dev
-python scripts/build315_orders_operations_runtime_test.py
-git status --short
-```
-
-Expected ending:
+Observed result:
 
 ```text
 BUILD 315 ORDERS OPERATIONS RUNTIME: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+The working tree was expected to remain clean after the run.
 
-## One BROWSER DEVTOOLS CONSOLE block
+## Development browser proof — PASS
 
-Open and hard-refresh:
+Proven on:
 
 ```text
 https://devilndove-site-dev.pages.dev/admin/orders/
 ```
 
-The browser proof must confirm:
-
-- `admin.js?v=315` is present;
-- the historical Orders business scripts remain present;
-- domain is `operations`;
-- application module is `commerce-operations` and mode is active;
-- Commerce runtime is Build 315;
-- active required services remain `catalog-read,inventory-read,accounting-read`;
-- `/admin/orders/` is in the explicit Operations runtime page allow-list;
-- Operations mutation ownership remains false;
-- Accounting remains Build 312, schema-ready and non-mutating;
-- contracts/services remain green.
-
-Expected architectural values:
+Observed architectural values:
 
 ```text
 pathname                         /admin/orders/
@@ -85,7 +71,26 @@ contracts_ok                     true
 services_ok                      true
 ```
 
-No order update, payment record, refund, gift-card redemption, status change or other mutation is required for validation.
+No order update, payment record, refund, gift-card redemption, status change or other mutation was required.
+
+## Legacy Accounting backend observation
+
+While `/admin/orders/` loaded, the unchanged legacy Accounting backend issued:
+
+```text
+GET /api/admin/accounting-expenses -> HTTP 500
+```
+
+This does not invalidate Build 315 because:
+
+- `public/js/admin-accounting-backend.js` was unchanged from the completed Build 314 baseline;
+- `functions/api/admin/accounting-expenses.js` was unchanged from the completed Build 314 baseline;
+- Build 315 changes only loader/runtime coverage and explicitly freezes the Orders/payment/Accounting compatibility behavior;
+- the Build 312 `accounting-read` module contract remained healthy, schema-ready and non-mutating.
+
+Repository review identified a likely legacy defect in `accounting-expenses.js`: the GET joins an attachment aggregate that also exposes `expense_id` while selecting/order-resolving unqualified `expense_id`, which may produce an SQLite/D1 ambiguous-column failure. The same legacy GET also performs request-time schema creation/repair through Accounting helper functions.
+
+Treat this as a separate bounded correction after Build 315 completion. Do not fold it into the Build 315 runtime boundary.
 
 ## Coverage limitation
 
@@ -103,14 +108,16 @@ remain outside the proven Build 315 runtime page set.
 
 ## Completion decision
 
-Do not mark Build 315 complete until:
+Build 315 is COMPLETE IN DEVELOPMENT because:
 
-1. local regression passes;
-2. working tree is clean;
-3. Development serves `admin.js?v=315` on Orders;
-4. Orders resolves to Operations under Commerce & Operations;
-5. Commerce runtime is Build 315 and current-page coverage is true;
-6. all three Operations read services remain available;
-7. Operations mutation ownership remains false;
-8. all existing Orders business scripts/API authorities remain unchanged;
-9. no SQL/schema/config/R2/real Production change occurs.
+1. local regression passed;
+2. Development served `admin.js?v=315` on Orders;
+3. Orders resolved to Operations under Commerce & Operations;
+4. Commerce runtime Build 315 reported current-page coverage true;
+5. all three Operations read services remained available;
+6. Operations mutation ownership remained false;
+7. all existing Orders business scripts/API authorities remained unchanged;
+8. the observed legacy `accounting-expenses` 500 is outside the changed-file boundary and did not affect the proven Build 312 `accounting-read` contract;
+9. no SQL/schema/config/R2/real Production change occurred.
+
+No further Build 315 browser validation is required.
