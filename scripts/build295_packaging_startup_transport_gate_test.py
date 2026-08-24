@@ -59,22 +59,34 @@ for marker in [
     "const BUILD = 295;",
     "const LEGACY_PACKAGING_PATH = '/api/admin/packaging-studio';",
     "const RUNTIME_ACTIVE_EVENT = 'dd:packaging-runtime-active';",
+    "const AUTH_DEGRADED_EVENT = 'dd:auth-degraded';",
+    "const WAIT_TIMEOUT_MS = 30000;",
     "function isLegacyPackagingRequest(input, init = {})",
     "function waitForPackagingRuntime()",
     "status.legacyGetGuardArmed === true",
     "status.writeResponseBridgeArmed === true",
+    "degradedAuthEvents += 1;",
+    "if (runtimeReady()) finish(true, 'runtime-active');",
     "if (currentFetch !== gatedApiFetch && typeof currentFetch === 'function')",
     "error_code: 'packaging_runtime_not_ready'",
+    "wait_exit_reason: lastWaitExitReason",
     "legacy_server_route_contacted: false",
     "status: 503",
     "globalThis.DDPackagingStartupGate = Object.freeze",
+    "degradedAuthEvents,",
+    "lastWaitExitReason,",
     "legacyServerRouteContactedByGate: false",
 ]:
     if marker not in gate:
         fail(f"Build 295 startup-gate marker missing: {marker}")
 if "return originalApiFetch.call(auth, input, init);" not in gate:
     fail("Build 295 gate does not preserve non-Packaging traffic")
+if "document.addEventListener(AUTH_DEGRADED_EVENT, onAuthUnavailable)" in gate:
+    fail("Build 295 still treats temporary degraded auth as a terminal startup failure")
+if "document.addEventListener(AUTH_DEGRADED_EVENT, onAuthDegraded)" not in gate:
+    fail("Build 295 does not observe degraded auth without aborting the startup wait")
 print("PASS: startup gate delays legacy-shaped Packaging traffic until modular transport is active")
+print("PASS: temporary degraded auth no longer aborts the Packaging startup wait")
 
 page = read("admin/packaging-studio/index.html")
 gate_ref = '/public/js/admin-packaging-startup-gate.js?v=295'
