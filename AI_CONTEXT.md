@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 315 Orders Operations Runtime Coverage
+# Devil n Dove AI Context — Build 315 Complete / Accounting Expenses Correction Next
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -52,13 +52,14 @@ Build 311 Inventory cost read contract    COMPLETE IN DEVELOPMENT
 Build 312 Accounting read contract        COMPLETE IN DEVELOPMENT
 Build 313 Operations read-only runtime    COMPLETE IN DEVELOPMENT
 Build 314 Customer Documents runtime      COMPLETE IN DEVELOPMENT
+Build 315 Orders runtime coverage         COMPLETE IN DEVELOPMENT
 ```
 
 Build 306 remains historically browser-proven with standalone local signoff not captured in the conversation. Do not silently relabel it.
 
 Build 308 remains browser-proven; its standalone local regression output was not captured before later work began. Do not silently relabel it complete.
 
-## Build 314 — COMPLETE IN DEVELOPMENT
+## Build 314 — completed Customer Documents coverage
 
 Proven source/runtime head:
 
@@ -74,7 +75,7 @@ c29aca8c789ac53e9418f6074e8408b56391d7e5
 Build 314 set completed runtime handoff context
 ```
 
-Build 314 proves exactly:
+Build 314 proved:
 
 ```text
 /admin/operations/
@@ -83,15 +84,13 @@ Build 314 proves exactly:
 
 under the read-only `commerce-operations` runtime.
 
-Customer Documents business behavior remains on its historical Build 227 script and Operations owns no mutations.
+## Build 315 — COMPLETE IN DEVELOPMENT
 
-## Build 315 — STAGED / VALIDATION REQUIRED
-
-Baseline:
+Proven source/runtime head:
 
 ```text
-c29aca8c789ac53e9418f6074e8408b56391d7e5
-Build 314 set completed runtime handoff context
+1984d97d5656691d44ad96917d15e38b07e71016
+Build 315 update modular handoff context
 ```
 
 Build 315 expands explicit Operations runtime coverage to exactly:
@@ -110,7 +109,7 @@ Build 315 expands explicit Operations runtime coverage to exactly:
 /public/js/admin.js?v=315
 ```
 
-before its existing business scripts:
+before its unchanged compatibility scripts:
 
 ```text
 /public/js/admin-orders.js
@@ -119,11 +118,7 @@ before its existing business scripts:
 /public/js/admin-accounting-backend.js
 ```
 
-Those scripts remain unchanged from the completed Build 314 baseline.
-
-### Orders business/API authority remains compatibility behavior
-
-Build 315 does not modify the current Orders/payment API surface, including:
+The current Orders/payment API authorities remain unchanged, including:
 
 ```text
 functions/api/admin/orders.js
@@ -133,19 +128,7 @@ functions/api/admin/payment-actions.js
 functions/api/admin/order-payments.js
 ```
 
-Order/payment/refund/gift-card mutations therefore remain outside the application-module runtime shell.
-
-### Explicit Operations page allow-list
-
-Commerce runtime Build 315 accepts only:
-
-```text
-/admin/operations/
-/admin/customer-documents/
-/admin/orders/
-```
-
-for the `operations` domain. Other Operations-classified pages remain rejected until separately proven.
+Order/payment/refund/gift-card mutations remain outside the application-module runtime shell.
 
 ### Runtime identity
 
@@ -162,7 +145,7 @@ Operations coverage build       315
 Commerce runtime                315
 ```
 
-Operations still consumes exactly:
+Operations consumes exactly:
 
 ```text
 catalog-read
@@ -178,9 +161,55 @@ ownsInventoryMutations  false
 ownsOperationsMutations false
 ```
 
+### Validation proof
+
+Final local regression:
+
+```text
+BUILD 315 ORDERS OPERATIONS RUNTIME: PASS
+No Cloudflare resource was contacted.
+```
+
+Development browser proof on `/admin/orders/`:
+
+```text
+commerce_runtime_build           315
+domain                           operations
+application_module               commerce-operations
+application_module_mode          active
+active_required_services         catalog-read,inventory-read,accounting-read
+operations_runtime_active        true
+current_operations_page_proven   true
+operations_coverage              /admin/operations/,/admin/customer-documents/,/admin/orders/
+owns_operations_mutations        false
+accounting_build                 312
+accounting_schema_ready          true
+accounting_schema_mutation       false
+contracts_ok                     true
+services_ok                      true
+```
+
+The historical Orders business scripts were present unchanged.
+
+### Separate legacy Accounting defect observed during Build 315 proof
+
+The Orders page's unchanged `public/js/admin-accounting-backend.js` requested:
+
+```text
+GET /api/admin/accounting-expenses
+```
+
+and Development returned HTTP 500.
+
+This did not invalidate Build 315 because the Accounting backend and endpoint were unchanged from the completed Build 314 baseline, while the proven Build 312 `accounting-read` contract remained healthy, schema-ready and non-mutating.
+
+Repository review found a likely bug in `functions/api/admin/accounting-expenses.js`: the GET joins an attachment aggregate exposing `expense_id` while parts of the outer query use unqualified `expense_id`, which can fail in SQLite/D1 as ambiguous. The same legacy GET also performs request-time schema creation/repair through Accounting helpers.
+
+Do not fold this correction back into Build 315. Treat it as the next bounded Accounting compatibility correction.
+
 ### Build 315 safety boundary
 
-Build 315 does not modify:
+Build 315 did not modify:
 
 - Orders business JavaScript;
 - order/payment/refund/gift-card mutation APIs;
@@ -194,11 +223,20 @@ Build 315 does not modify:
 - real Production;
 - schema/data parity work.
 
-## Next direction after Build 315
+## Next direction — Accounting expenses read correction
 
-After Build 315 is proven, continue Operations route coverage one bounded group at a time. Remaining classified routes include gift cards, members/membership, custom requests and today-tasks.
+Before expanding more Operations routes, fix the observed legacy `/api/admin/accounting-expenses` GET failure in a separate bounded build.
 
-Do not combine loader/runtime coverage with mutation-authority extraction. Mutation-heavy domains such as orders, gift cards and membership require separate authority reviews before their writes move.
+Preferred correction sequence:
+
+1. inspect and confirm the exact SQLite/D1 failure path;
+2. qualify the expense-table columns in the joined GET query;
+3. remove request-time schema mutation from GET, replacing it with schema-aware readiness/fallback behavior;
+4. leave POST expense authority separate and unchanged unless an independently justified fix is required;
+5. regression-pin Orders/payment APIs and the Build 312 `accounting-read` contract;
+6. validate the legacy GET on Development without creating or altering schema.
+
+After that correction is proven, continue Operations route coverage one bounded group at a time: gift cards, members/membership, custom requests, today-tasks and related pages.
 
 ## Validation interaction preference
 
@@ -206,4 +244,4 @@ Keep validation concise: default to **one GIT BASH block and one reusable BROWSE
 
 ## Separate schema/data parity track — DO NOT MIX
 
-Fresh-install schema parity remains a separate priority before any Production business-data copy. Do not combine schema/data parity with module extraction.
+Fresh-install schema parity remains a separate priority before any Production business-data copy. Do not combine schema/data parity with module extraction or this bounded Accounting compatibility correction.
