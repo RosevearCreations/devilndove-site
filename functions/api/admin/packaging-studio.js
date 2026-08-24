@@ -1,4 +1,5 @@
 // Build 277 - Bilingual ingredient-panel restoration, Inventory traceability, and long-list readiness.
+// Build 290 - physically remove retired broad Catalog/Inventory listData enumeration; owner-contract reads remain external.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
 const BUILD = '277';
@@ -66,23 +67,8 @@ function mapReference(row){return{...row,packaging_reference_source_id:id(row.pa
 function mapFormula(row){return{...row,packaging_formula_library_id:id(row.packaging_formula_library_id),ingredients:safeJson(row.ingredients_json,[])};}
 function mapLibraryContent(row){return{...row,packaging_content_library_id:id(row.packaging_content_library_id),metadata:safeJson(row.metadata_json,{})};}
 function mapSourceMaterial(row){return{...row,packaging_source_material_template_id:id(row.packaging_source_material_template_id),product_family:text(row.product_family||'general',80)||'general',material_subtype:text(row.material_subtype||row.material_type||'other',80)||'other',default_role:text(row.default_role||'',40)||null,colour_hex:text(row.colour_hex||'',20)||null,master_inci:safeJson(row.master_inci_json,[]),fragrance_allergens:safeJson(row.fragrance_allergens_json,[]),benefits:safeJson(row.benefits_json,[]),supplier_claims:safeJson(row.supplier_claims_json,[]),source_snapshot:safeJson(row.source_snapshot_json,{})};}
-
 function mapPrinterProfile(row={}){return{...row,packaging_printer_profile_id:id(row.packaging_printer_profile_id),name:text(row.profile_name,180),paper:text(row.paper_stock,180)||'Letter 8.5 × 11 in',margin_mm:Math.max(0,number(row.margin_mm,0)),gap_mm:Math.max(0,number(row.gap_mm,0)),scale_percent:Math.max(1,number(row.scale_percent,100)),auto_rotate:Number(row.auto_rotate)!==0,is_default_label:Number(row.is_default_label)===1,is_active:Number(row.is_active)!==0,settings_note:text(row.settings_note,1000)||''};}
 
-function metadataText(meta, keys=[]){
-  if(!meta||typeof meta!=='object')return'';
-  for(const key of keys){const value=meta[key];if(Array.isArray(value))return value.map((item)=>typeof item==='string'?item:(item?.name||item?.title||'')).filter(Boolean).join(', ');if(value&&typeof value==='object')continue;if(String(value||'').trim())return text(value,8000);}
-  return'';
-}
-function mapPackagingInventory(row={}){
-  const meta=safeJson(row.catalog_source_record_json,{});
-  return{
-    site_item_inventory_id:id(row.site_item_inventory_id),source_type:text(row.source_type,40),external_key:text(row.external_key,180),item_name:text(row.item_name,300),category:text(row.category,180),
-    source_url:text(row.source_url,1000),amazon_url:text(row.amazon_url,1000),image_url:text(row.image_url,1000),on_hand_quantity:number(row.on_hand_quantity),reserved_quantity:number(row.reserved_quantity),unit_cost_cents:Math.max(0,Math.round(number(row.unit_cost_cents))),stock_unit_label:text(row.stock_unit_label,80)||'unit',usage_unit_label:text(row.usage_unit_label,80)||'unit',usage_units_per_stock_unit:Math.max(.001,number(row.usage_units_per_stock_unit,1)),supplier_name:text(row.supplier_name||row.catalog_brand,180),supplier_sku:text(row.supplier_sku,180),
-    item_description:text(row.item_description||row.catalog_short_description||row.catalog_notes,1200),packaging_source_material_template_id:id(row.packaging_source_material_template_id)||null,source_material_link_role:text(row.source_material_link_role,40)||null,
-    captured_ingredients:metadataText(meta,['ingredients','ingredient_list','ingredient_declaration','ingredient_declaration_raw','inci','master_inci']),captured_allergens:metadataText(meta,['allergens','allergen_statement','allergen_information']),captured_benefits:metadataText(meta,['benefits','features','key_features']),captured_claims:metadataText(meta,['claims','claim_suggestions'])
-  };
-}
 function normalizeSourceInci(value=[]){
   if(!Array.isArray(value))return[];
   return value.slice(0,120).map((row,index)=>({
@@ -200,13 +186,6 @@ function packagingRequiredFields(project={},ingredients=[],claims=[],template={}
 async function listData(db){
   const templates=rows(await db.prepare(`SELECT * FROM packaging_templates WHERE is_active=1 ORDER BY CASE WHEN template_key='soap-ribbon-glacial-approved-v1' THEN 0 WHEN template_key='soap-ribbon-spec-50mm-seal-v1' THEN 1 ELSE 2 END,is_system DESC,LOWER(template_name)`).all()).map(mapTemplate);
   const projects=rows(await db.prepare(`SELECT pp.*,p.sku,p.slug,p.status AS product_status,p.featured_image_url,sp.print_status AS soap_print_status FROM packaging_projects pp LEFT JOIN products p ON p.product_id=pp.product_id LEFT JOIN soap_products sp ON sp.packaging_project_id=pp.packaging_project_id ORDER BY pp.updated_at DESC,pp.packaging_project_id DESC`).all()).map(mapProject);
-  const products=rows(await db.prepare(`SELECT product_id,product_number,sku,name,slug,status,product_category,short_description,description,weight_grams,featured_image_url FROM products WHERE COALESCE(status,'draft')<>'archived' ORDER BY LOWER(name),product_id DESC LIMIT 500`).all().catch(()=>({results:[]})));
-  let inventory=[];
-  try{
-    inventory=rows(await db.prepare(`SELECT sii.site_item_inventory_id,sii.source_type,sii.external_key,sii.item_name,sii.category,sii.source_url,sii.amazon_url,sii.image_url,sii.on_hand_quantity,sii.reserved_quantity,sii.unit_cost_cents,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit,sii.supplier_name,sii.supplier_sku,d.item_description,ci.brand AS catalog_brand,ci.short_description AS catalog_short_description,ci.notes AS catalog_notes,ci.source_record_json AS catalog_source_record_json,isml.packaging_source_material_template_id,isml.link_role AS source_material_link_role FROM site_item_inventory sii LEFT JOIN site_inventory_item_descriptions d ON d.site_item_inventory_id=sii.site_item_inventory_id LEFT JOIN catalog_items ci ON ci.item_kind=sii.source_type AND ci.source_key=sii.external_key LEFT JOIN inventory_source_material_links isml ON isml.inventory_source_material_link_id=(SELECT x.inventory_source_material_link_id FROM inventory_source_material_links x WHERE x.site_item_inventory_id=sii.site_item_inventory_id ORDER BY CASE x.link_role WHEN 'soap_base' THEN 1 WHEN 'fragrance' THEN 2 WHEN 'colourant' THEN 3 WHEN 'additive' THEN 4 ELSE 5 END,x.inventory_source_material_link_id LIMIT 1) WHERE COALESCE(sii.is_active,1)=1 AND LOWER(COALESCE(sii.source_type,''))<>'tool' ORDER BY LOWER(sii.item_name) LIMIT 1000`).all()).map(mapPackagingInventory);
-  }catch{
-    inventory=rows(await db.prepare(`SELECT site_item_inventory_id,source_type,external_key,item_name,category,source_url,amazon_url,image_url,on_hand_quantity,reserved_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_name,supplier_sku FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND LOWER(COALESCE(source_type,''))<>'tool' ORDER BY LOWER(item_name) LIMIT 1000`).all().catch(()=>({results:[]}))).map(mapPackagingInventory);
-  }
   let printers=[];let printers_schema_ready=true;
   try{printers=rows(await db.prepare(`SELECT * FROM packaging_printer_profiles WHERE is_active=1 ORDER BY is_default_label DESC,LOWER(profile_name),packaging_printer_profile_id`).all()).map(mapPrinterProfile);}catch{printers_schema_ready=false;}
   const reference_sources=rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key`).all()).map(mapReference);
@@ -225,7 +204,7 @@ async function listData(db){
     const links=rows(await db.prepare(`SELECT packaging_formula_library_id,packaging_source_material_template_id,material_role FROM packaging_formula_source_material_links ORDER BY packaging_formula_source_material_link_id`).all());
     for(const formula of formula_library){const link=links.find((row)=>Number(row.packaging_formula_library_id)===Number(formula.packaging_formula_library_id)&&String(row.material_role)==='base');if(link)formula.source_material_template_id=Number(link.packaging_source_material_template_id);}
   }catch{source_material_schema_ready=false;}
-  return{templates,projects,products,inventory,printers,printers_schema_ready,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready,source_material_metadata_ready};
+  return{templates,projects,printers,printers_schema_ready,reference_sources,formula_library,content_library,source_material_library,library_schema_ready,source_material_schema_ready,source_material_metadata_ready};
 }
 
 async function loadDetail(db,projectId){
