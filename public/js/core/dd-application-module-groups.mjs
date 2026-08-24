@@ -4,7 +4,8 @@
 // Build 306 hardened Inventory write-side contracts; Build 307 added Inventory reversal authority;
 // Build 309 added Inventory post authority; Build 310 enabled Creative consumption of both;
 // Build 311 added the Inventory-owned cost read boundary; Build 312 added Accounting read;
-// Build 313 activated the first read-only Operations page; Build 314 adds explicit Customer Documents coverage.
+// Build 313 activated the first read-only Operations page; Build 314 added Customer Documents coverage;
+// Build 315 adds Orders loader/runtime coverage without moving order/payment mutations.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -14,11 +15,12 @@ export const RUNTIME_INVENTORY_BUILD = 305;
 export const INVENTORY_WRITE_CONTRACT_BUILD = 310;
 export const INVENTORY_COST_CONTRACT_BUILD = 311;
 export const ACCOUNTING_READ_CONTRACT_BUILD = 312;
-export const RUNTIME_OPERATIONS_BUILD = 314;
-export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 314;
+export const RUNTIME_OPERATIONS_BUILD = 315;
+export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 315;
 export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
+  '/admin/orders/',
 ]);
 
 export const DD_APPLICATION_CORE = Object.freeze({
@@ -56,7 +58,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=314',
+    entry: '../modules/commerce-operations/runtime.mjs?v=315',
     runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations']),
   }),
   Object.freeze({
@@ -129,7 +131,7 @@ export function snapshotApplicationArchitecture() {
     secondUmbrellaRuntimeDomain: 'inventory',
     thirdUmbrellaRuntimeDomain: 'operations',
     operationsRuntimeDomainActive: true,
-    operationsRuntimeActivationMode: 'read-only-explicit-two-page-coverage',
+    operationsRuntimeActivationMode: 'read-only-explicit-three-page-coverage',
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
