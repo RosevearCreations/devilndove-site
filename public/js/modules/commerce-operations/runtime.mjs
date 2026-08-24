@@ -1,20 +1,21 @@
-// Devil n Dove Build 311 Commerce & Operations umbrella runtime.
-// Catalog and Inventory remain the only active runtime domains. Build 311 adds the passive
-// Inventory-owned cost read service to Catalog while both Creative Inventory write consumers remain enabled.
+// Devil n Dove Build 312 Commerce & Operations umbrella runtime.
+// Catalog and Inventory remain the only active runtime domains. Build 312 adds the passive
+// Accounting-owned read prerequisite for future Operations activation without activating Operations.
 
 import {
   BUILD as INVENTORY_WRITE_BOUNDARY_BUILD,
   getInventoryWriteBoundaryStatus,
 } from './inventory-write-boundary.mjs?v=310';
 
-const BUILD = 311;
+const BUILD = 312;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory']);
 const REQUIRED_SERVICES_BY_DOMAIN = Object.freeze({
   catalog: Object.freeze(['catalog-read', 'inventory-cost']),
   inventory: Object.freeze(['inventory-read']),
+  operations: Object.freeze(['catalog-read', 'inventory-read', 'accounting-read']),
 });
-const ALL_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-read', 'inventory-cost']);
+const ALL_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-read', 'inventory-cost', 'accounting-read']);
 
 let state = 'registered';
 let activationCount = 0;
@@ -64,6 +65,7 @@ function installFacade() {
     allRequiredServices: ALL_REQUIRED_SERVICES,
     inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
     inventoryCostContractBuild: 311,
+    accountingReadContractBuild: 312,
     requiredServicesForDomain,
     getInventoryWriteBoundaryStatus: inventoryWriteBoundaryStatus,
     getStatus,
@@ -77,18 +79,20 @@ export const metadata = Object.freeze({
   supportedDomains: SUPPORTED_DOMAINS,
   requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
   allRequiredServices: ALL_REQUIRED_SERVICES,
-  behaviorMode: 'catalog-inventory-cost-boundary-creative-write-consumers-enabled',
+  behaviorMode: 'catalog-inventory-accounting-read-prerequisite-creative-write-consumers-enabled',
   createsNetworkTransport: false,
   ownsInventoryMutations: false,
   inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
   inventoryCostContractBuild: 311,
+  accountingReadContractBuild: 312,
   consumerMutationReady: true,
   operationsRuntimeActive: false,
+  operationsReadPrerequisitesRegistered: true,
 });
 
 export async function onLoad({ registry, applicationModule, domainDefinition } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 311 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 312 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
   verifyServices(registry, domainDefinition.id);
   state = 'loaded';
   installFacade();
@@ -105,7 +109,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition } =
 export async function onActivate({ registry, applicationModule, domainDefinition, user, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime activated with the wrong application-module definition.');
   if (!authenticatedAdmin(user)) throw new Error('Commerce & Operations runtime activation requires an administrator.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 311 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 312 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
   verifyServices(registry, domainDefinition.id);
   activationCount += 1;
   currentDomain = normalizeDomain(domainDefinition.id);
@@ -151,6 +155,9 @@ export function getStatus() {
     ownsInventoryMutations: false,
     inventoryCostContractBuild: 311,
     inventoryCostServiceRequiredForCatalog: true,
+    accountingReadContractBuild: 312,
+    accountingReadServiceRequiredForOperations: true,
+    operationsReadPrerequisites: REQUIRED_SERVICES_BY_DOMAIN.operations,
     inventoryWriteBoundaryBuild: writeBoundary.build,
     inventoryPostImplementationState: writeBoundary.post.implementationState,
     inventoryPostRoute: writeBoundary.post.authorityRoute,
