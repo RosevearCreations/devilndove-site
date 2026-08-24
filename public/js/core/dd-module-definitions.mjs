@@ -1,6 +1,6 @@
-// Devil n Dove Build 290 locked module catalog.
-// Definitions describe ownership, routing and capability boundaries.
-// Packaging is the first active module and its retired broad server reads are now physically removed.
+// Devil n Dove Build 305 module catalog.
+// Build 305 preserves existing ownership/capability boundaries and explicitly maps
+// the real Inventory Operations workspace to the Inventory domain.
 
 const ADMIN_ROLES = Object.freeze(['admin']);
 
@@ -38,7 +38,7 @@ export const DD_MODULE_DEFINITIONS = Object.freeze([
     description: 'Supplies, tools, materials, inventory identity, usage, cost history, movements, kits and supplier/source relationships.',
     roles: ADMIN_ROLES,
     exactRoutes: [],
-    routePrefixes: ['/admin/site-item-inventory', '/admin/inventory'],
+    routePrefixes: ['/admin/site-item-inventory', '/admin/inventory', '/admin/inventory-operations'],
     capabilities: ['inventory-read', 'inventory-post', 'inventory-reverse', 'inventory-cost'],
     consumes: [],
     entry: null,
