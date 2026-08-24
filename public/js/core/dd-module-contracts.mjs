@@ -49,7 +49,6 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
     kind: 'mutation',
     route: '/api/admin/contracts/inventory-reverse',
     authorityRoute: '/api/admin/contracts/inventory-reverse',
-    authorityAction: 'reviewed-creative-reversal',
     implementationState: 'implemented-creative-consumer-enabled',
     requiresOriginalMovementId: true,
     requiresCreativePostingId: true,
