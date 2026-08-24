@@ -55,6 +55,10 @@ for marker in [
     "preview_claims_match_dom",
     "dom_matches_verified",
     "forcedPreviewRefreshCount",
+    "const nextStatus = `${savePart} ${claimPart} ${modePart}`;",
+    "if (status.textContent !== nextStatus) status.textContent = nextStatus;",
+    "const observer = new MutationObserver((mutations) => {",
+    "return !target?.closest?.('[data-build300-preview-controls]');",
     "auditPreview: () => auditPreview('manual', true)",
     "globalThis.DDPackagingSaveStabilizer = Object.freeze",
 ]:
@@ -64,7 +68,7 @@ if "/api/admin/packaging-studio" in stabilizer:
     fail("Build 300 stabilizer names the retired Packaging route")
 if "not printed on soap ribbon" in stabilizer:
     fail("Build 300 still falsely labels the soap front tagline as non-printing")
-print("PASS: Build 300 verifies Save Project and fits/audits the full live soap preview")
+print("PASS: Build 300 verifies Save Project, fits/audits the full live soap preview, and prevents preview-audit observer feedback")
 
 page = read("admin/packaging-studio/index.html")
 required = [
