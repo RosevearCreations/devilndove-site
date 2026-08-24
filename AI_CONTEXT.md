@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 304 Catalog Umbrella Runtime
+# Devil n Dove AI Context — Build 304 Completed Catalog Umbrella Runtime
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader functional roadmap.
 
@@ -10,7 +10,7 @@ Current modular architecture authority:
 - `docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md`
 - `BUILD304_VALIDATION.md`
 
-**Real Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
+**Real Devil n Dove Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
 
 ## Authoritative application structure
 
@@ -54,19 +54,13 @@ Core owns shared infrastructure only and must not absorb business-domain rules.
 
 Build 301 remains the trusted Packaging compatibility baseline.
 
-Runtime activation:
-
-```text
-e2be2209ed96b7a67e975feead37a768f0043cb5
-```
-
 Completed handoff:
 
 ```text
 a81f8d6af0004d847174fa27043c11e159ca3d10
 ```
 
-Live proof established native read/write 200, verified Save Project, fitted Preview, zero failed verification, zero compatibility replay/block traffic, and write authority `packaging-domain-service`.
+Proven Packaging state includes native read/write 200, verified Save Project, fitted Preview, zero failed verification, zero compatibility replay/block traffic, and write authority `packaging-domain-service`.
 
 Build 299 remains NOT COMPLETE and rolled back.
 
@@ -82,11 +76,10 @@ Build 302 normalized the application to Core + exactly three top-level modules a
 
 ## Build 303 — COMPLETE IN DEVELOPMENT
 
-Completed Build 303 handoff:
+Completed handoff:
 
 ```text
 6cbcc4353327eea093ef4701497fa5321b680096
-Build 303 set completed umbrella-runtime handoff
 ```
 
 Proven runtime head:
@@ -97,38 +90,23 @@ Proven runtime head:
 
 Build 303 made Core umbrella-aware while preserving domain activation and fixed the verified-auth event race through retained `DDAuthUiState` reconciliation.
 
-Completed browser proof:
+## Build 304 — COMPLETE IN DEVELOPMENT
+
+Build 304 is the first proven real top-level application-module runtime extraction.
+
+Core/Commerce runtime implementation head:
 
 ```text
-Catalog
-  domain                     catalog
-  application module         commerce-operations
-  domain mode                shadow
-  application module mode    domain-bridge
-
-Packaging
-  domain                     packaging
-  application module         creative-production
-  domain mode                active
-  Build 301 compatibility    active
-  native read status         200
+395eb722a9b060d904b28b1a917f66dc7120f64c
 ```
 
-Build 304 historically pins Build 303 to `6cbcc435...`.
-
-## Build 304 — CORRECTIVE RETEST REQUIRED
-
-Build 304 is the first true top-level application-module runtime extraction.
-
-It adds:
+Validated Build 304 handoff/deployment source:
 
 ```text
-public/js/modules/commerce-operations/runtime.mjs
+af0993ef9b4da807d9d1f32c63988dc28b07f1f8
 ```
 
-and opts **Catalog only** into the Commerce & Operations runtime.
-
-Runtime identities:
+Runtime identity:
 
 ```text
 DDModuleRuntime.build                         304
@@ -136,7 +114,7 @@ DDModuleRuntime.applicationArchitectureBuild 302
 DDModuleRuntime.applicationRuntimeCatalogBuild 304
 ```
 
-The Build 302 grouping catalog remains the architecture authority but carries passive Build 304 runtime metadata:
+The Build 302 grouping catalog remains the architecture authority but carries Build 304 runtime metadata:
 
 ```text
 RUNTIME_CATALOG_BUILD = 304
@@ -144,25 +122,37 @@ commerce-operations.entry = ../modules/commerce-operations/runtime.mjs?v=304
 commerce-operations.runtimeDomains = [catalog]
 ```
 
-Inventory, Operations and Public remain bridge-only. Creative & Production and Business & Administration still have no top-level runtime entry.
+### Catalog is now behind a real top-level runtime
 
-### Catalog target state
-
-On `/admin/products/` after verified Admin startup:
+Final `/admin/products/` browser proof:
 
 ```text
-domain                             catalog
-domain_mode                        shadow
-application_module                 commerce-operations
-application_module_mode            active
-active_domain_runtime              null
-active_application_runtime         commerce-operations
-application_runtime_state          active
-application_runtime_domain         catalog
-application_runtime_services_ready true
+admin_script_src                     https://devilndove-site-dev.pages.dev/public/js/admin.js?v=304
+runtime_build                        304
+architecture_build                   302
+runtime_catalog_build                304
+auth_phase                           verified
+auth_verified                        true
+domain                               catalog
+domain_mode                          shadow
+application_module                   commerce-operations
+application_module_mode              active
+api_current_application_module       commerce-operations
+active_domain_runtime                null
+active_application_runtime           commerce-operations
+application_runtime_state            active
+application_runtime_domain           catalog
+application_runtime_services_ready   true
+facade_build                         304
+facade_state                         active
+facade_catalog_boundary_active       true
+contracts_ok                         true
+services_ok                          true
 ```
 
-The Commerce & Operations runtime:
+Catalog remains an explicit internal domain, but `commerce-operations` is now the active top-level lifecycle owner.
+
+The Commerce & Operations runtime currently:
 
 - supports only `catalog`;
 - requires only existing `catalog-read`;
@@ -170,115 +160,125 @@ The Commerce & Operations runtime:
 - exposes `window.DDCommerceOperations` diagnostics;
 - does not rewrite Catalog API/business logic.
 
-### First Build 304 validation attempt
+Inventory, Operations and Public remain grouped under Commerce & Operations but are not yet opted into its runtime.
 
-Local Build 304 regression passed and Development deployment source `395eb72` was Active.
+### Packaging preservation
 
-The Build 303 historical regression failed only because its assertion searched for unpadded `catalog -> commerce-operations` while the pinned completed Build 303 record contains aligned `catalog    -> commerce-operations`. Build 304 corrects that test marker without changing the historical head.
-
-Both first browser probes still reported Core `303` and `runtime_catalog_build = undefined`.
-
-Root cause was release cache versioning, not the new runtime:
+Final `/admin/packaging-studio/` browser proof:
 
 ```text
-admin/products/index.html
-  /public/js/admin.js?v=245
-
-admin/packaging-studio/index.html
-  /public/js/admin.js?v=296
-```
-
-while current Build 304 `public/js/admin.js` correctly imports:
-
-```text
-/public/js/core/dd-admin-module-runtime.mjs?v=304
-```
-
-The old page script URLs allowed cached pre-304 `admin.js` content to be reused, so Core 304 was never requested.
-
-### Corrective Build 304 page pins
-
-Build 304 now changes exactly one line on each browser-validation page:
-
-```text
-admin/products/index.html
-  /public/js/admin.js?v=245 -> /public/js/admin.js?v=304
-
-admin/packaging-studio/index.html
-  /public/js/admin.js?v=296 -> /public/js/admin.js?v=304
-```
-
-The Build 304 regression verifies those are the only diffs in those pages.
-
-These are shared-loader cache-version pins only. They do not alter Product or Packaging feature behavior.
-
-### Packaging preservation target
-
-On `/admin/packaging-studio/` after the corrective retest:
-
-```text
-domain                          packaging
-domain_mode                     active
-application_module              creative-production
+admin_script_src                 https://devilndove-site-dev.pages.dev/public/js/admin.js?v=304
+runtime_build                    304
+architecture_build               302
+runtime_catalog_build            304
+domain                           packaging
+domain_mode                      active
+application_module               creative-production
 application_module_mode         domain-bridge
-active_domain_runtime           packaging
-active_application_runtime      null
-packaging_compatibility_build   301
-packaging_compatibility_state   active
-native_read_status              200
-failed_verification_count       0
-preview_mode                    fit
+api_current_application_module   creative-production
+active_domain_runtime            packaging
+active_application_runtime       null
+packaging_compatibility_build    301
+packaging_compatibility_state    active
+native_read_count                2
+native_read_status               200
+failed_verification_count        0
+preview_mode                     fit
 ```
 
-Build 304 changes no Packaging transport/client/runtime/service/read/write/save/preview authority. The only Packaging page change is the `admin.js?v=304` cache-version pin.
+Build 304 changes no Packaging transport/read/write/save/preview authority.
+
+### Build 304 historical-test correction
+
+The first validation found a whitespace-sensitive Build 303 historical assertion. The assertion was corrected while keeping completed Build 303 pinned to `6cbcc435...`.
+
+Final Build 303 historical regression and Build 304 regression both PASS with no Cloudflare resource contacted by the tests.
+
+### Shared-loader delivery incident and recovery
+
+The first browser proof remained on Core 303 because Products and Packaging Studio still referenced historical `admin.js` query versions. Build 304 pins both validation pages to:
+
+```text
+/public/js/admin.js?v=304
+```
+
+The regression verifies each page change is exactly that one-line version pin.
+
+A later served-asset audit showed the Development Pages alias still served older HTML and older `/public/js/admin.js` despite the deployment list showing source `af0993e` as active.
+
+The clean local `af0993ef...` tree was therefore directly uploaded to **Development project `devilndove-site-dev` only** with Wrangler.
+
+Validated deployment:
+
+```text
+Id      6effd1eb-9a1f-4538-b7d3-3cdc18b54328
+Branch  dev
+Source  af0993e
+Status  Active
+```
+
+After recovery, both the Development alias and exact deployment served:
+
+```text
+Products HTML       admin.js?v=304
+Packaging HTML      admin.js?v=304
+Shared admin.js      Core ?v=304 import present
+Build 304 marker     present
+HTTP                 200
+```
+
+No real Production resource was touched.
 
 ### Build 304 safety boundary
 
-Build 304 must not change:
+Build 304 does not change:
 
 - domain registry or domain definitions;
-- domain contract ownership/service adapters;
+- domain contract ownership/default service adapters;
 - Catalog APIs;
-- Inventory/Operations/Public extraction;
-- Packaging transport/read/write/save/preview implementation;
+- Inventory/Operations/Public runtime extraction;
+- Packaging transport/native client/read/write/save/preview implementation;
 - SQL/schema;
 - Cloudflare bindings/config;
-- R2;
+- R2 bindings/data;
 - real Production.
 
-Expected Build 304 boundary from completed Build 303 head `6cbcc435...` is exactly 12 files:
+Final Build 304 boundary from completed Build 303 is exactly 12 files, including two exact one-line validation-page loader pins.
+
+## Current separation state
 
 ```text
-AI_CONTEXT.md
-BUILD304_CHANGED_FILES.md
-BUILD304_VALIDATION.md
-admin/products/index.html
-admin/packaging-studio/index.html
-docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md
-public/js/admin.js
-public/js/core/dd-admin-module-runtime.mjs
-public/js/core/dd-application-module-groups.mjs
-public/js/modules/commerce-operations/runtime.mjs
-scripts/build303_commerce_operations_umbrella_bridge_test.py
-scripts/build304_commerce_operations_catalog_runtime_test.py
+Core
+  established
+  umbrella-aware
+  generic top-level application-runtime lifecycle proven
+
+Commerce & Operations
+  real top-level runtime exists
+  Catalog is active beneath it
+  Inventory not yet migrated
+  Operations not yet migrated
+  Public not yet migrated
+
+Creative & Production
+  Packaging domain remains proven/active beneath it
+  top-level Creative & Production runtime not yet established
+  Creative/CAIP/Content remain legacy/shadow
+
+Business & Administration
+  umbrella identity mapped
+  no top-level runtime yet
 ```
 
-Run:
+## Next bounded direction — Inventory only
 
-```text
-python scripts/build303_commerce_operations_umbrella_bridge_test.py
-python scripts/build304_commerce_operations_catalog_runtime_test.py
-```
+The next pass should historically pin completed Build 304 and add **Inventory** to the already-proven Commerce & Operations runtime.
 
-Then perform the two browser proofs in `BUILD304_VALIDATION.md`.
+Inventory must remain an explicit domain/service authority. Use the existing `inventory-read` service contract for passive read ownership and do not collapse Catalog and Inventory business rules together.
 
-Do not mark Build 304 complete until both corrected local regressions and both browser gates are green.
+Do not migrate Operations or Public in the same pass.
 
-## Next bounded direction after Build 304
-
-If Build 304 is green, the next Commerce & Operations extraction should add **Inventory** to the same top-level runtime in a separate build while preserving Inventory as an explicit authority/service boundary.
-
-Do not migrate Inventory and Operations together.
+Also add a Core release/version-integrity gate so active Admin validation pages cannot silently reference an older shared `admin.js` loader when Core changes.
 
 ## Separate schema/data parity track — DO NOT MIX WITH MODULE EXTRACTION
 
