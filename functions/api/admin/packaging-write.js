@@ -1,11 +1,13 @@
-// Devil n Dove Build 291 Packaging write gateway.
-// The active write endpoint calls the shared Packaging domain service directly.
-// The legacy /api/admin/packaging-studio POST route remains only a compatibility adapter.
+// Devil n Dove Build 292 Packaging write gateway.
+// The native write endpoint calls the unchanged Build 291 shared Packaging domain service directly.
+// Build 292 retires direct POST authority on /api/admin/packaging-studio.
 
 import { onRequestPost as executePackagingWrite } from '../_lib/packagingDomainService.js';
 
-const BUILD = 291;
+const BUILD = 292;
+const WRITE_SERVICE_BUILD = 291;
 const BROAD_READ_REMOVAL_BUILD = 290;
+const LEGACY_POST_RETIREMENT_BUILD = 292;
 
 function rewrittenJsonResponse(response, payload) {
   if (typeof Response === 'undefined' || typeof Headers === 'undefined') return response;
@@ -35,11 +37,13 @@ function decouplePackagingWritePayload(payload) {
     build: BUILD,
     gateway_build: BUILD,
     gateway_path: '/api/admin/packaging-write',
-    write_service_build: BUILD,
+    write_service_build: WRITE_SERVICE_BUILD,
     write_authority: 'packaging-domain-service',
     shared_write_service: true,
-    legacy_post_route_is_adapter: true,
-    delegated_legacy_write: true,
+    legacy_post_route_is_adapter: false,
+    legacy_post_route_retired: true,
+    legacy_post_retirement_build: LEGACY_POST_RETIREMENT_BUILD,
+    legacy_post_error_code: 'packaging_legacy_post_retired',
     packaging_owned_response: true,
     catalog_collection: 'omitted-owner-contract',
     inventory_collection: 'omitted-owner-contract',
