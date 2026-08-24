@@ -1,6 +1,5 @@
-// Devil n Dove Build 309 cross-module contract catalog.
-// Inventory post now has an Inventory-owned contract route, but Creative posting migration
-// remains deliberately disabled. Inventory reverse remains Creative-consumer-enabled.
+// Devil n Dove Build 310 cross-module contract catalog.
+// Inventory post and reverse are both Inventory-owned and Creative-consumer-enabled.
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -37,8 +36,8 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
     route: '/api/admin/contracts/inventory-post',
     authorityRoute: '/api/admin/contracts/inventory-post',
     authorityAction: 'reviewed-creative-usage',
-    implementationState: 'implemented-not-consumer-enabled',
-    consumerWritesReady: false,
+    implementationState: 'implemented-creative-consumer-enabled',
+    consumerWritesReady: true,
   }),
   contract('inventory-reverse', 'inventory', ['creative'], 'Reverse posted usage only through a compensating Inventory movement tied to the original movement.', {
     status: 'implemented',
