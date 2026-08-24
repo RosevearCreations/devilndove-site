@@ -1,6 +1,6 @@
 # Build 310 Validation — Creative Inventory Post Consumer Cutover
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,42 +9,44 @@ ab8089b76d881617bc3ca4768abdb4674afcf3a0
 Build 309 set completed post-authority handoff
 ```
 
-Build 309 is COMPLETE IN DEVELOPMENT.
-
-## One Bash block
-
-```bash
-git pull --ff-only origin dev
-python scripts/build310_creative_inventory_post_consumer_cutover_test.py
-git status --short
-```
-
-Expected ending:
+Proven Build 310 runtime/source head:
 
 ```text
+c55f72b73941e0a568591c6a1125bc360a86a8f9
+Build 310 update modular posting-consumer handoff
+```
+
+## Local regression — PASS
+
+The supplied Development signoff ended with:
+
+```text
+PASS: Build 310 Creative/contract/runtime JavaScript syntax
+PASS: Creative post adapter delegates mutation authority and owns no Inventory writes
+PASS: all three Creative posting workflows are intercepted before legacy compatibility logic
+PASS: unrelated Creative behavior remains on the preserved Build 308 compatibility implementation
+PASS: Build 309 Inventory posting authority remains frozen beneath the Build 310 consumer
+PASS: post and reverse consumers are enabled while Commerce remains non-mutating
+PASS: Build 310 runtime/catalog/cache identity is explicit without changing architecture Build 302
+PASS: completed Build 309 post-authority proof remains historically pinned
+PASS: Build 310 handoff documents the posting-consumer cutover and exclusions
+PASS: exact Build 310 Creative Inventory post-consumer changed-file boundary
+PASS: no SQL/schema, Cloudflare binding/config, R2, Operations implementation, or real Production change
 BUILD 310 CREATIVE INVENTORY POST CONSUMER CUTOVER: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+`git pull --ff-only origin dev` reported `Already up to date.` No working-tree drift was reported.
 
-## One browser block
+## Development browser proof — PASS
 
-Open and hard-refresh:
+Development page:
 
 ```text
 https://devilndove-site-dev.pages.dev/admin/creative-process/
 ```
 
-The browser proof should perform only:
-
-- GET `/api/admin/creative-process`;
-- GET `/api/admin/contracts/inventory-post`;
-- one intentionally invalid POST to `/api/admin/creative-process` with only `{action:'post_material_inventory'}`.
-
-The invalid POST contains no project, event, Inventory item, or quantity, so it must fail before any mutation.
-
-Expected state:
+Observed:
 
 ```text
 pathname                        /admin/creative-process/
@@ -64,16 +66,19 @@ invalid_post_authority          inventory-post
 invalid_post_error              Project, approved material, inventory item and a usage amount greater than zero are required.
 ```
 
-No valid POST and no stock mutation is required for Build 310 validation.
+The HTTP 400 from the intentionally invalid POST is the expected safe result. It proves the live Build 310 interceptor handled the posting action before any Inventory mutation could occur.
 
 ## Completion decision
 
-Do not mark Build 310 complete until:
+Build 310 is COMPLETE IN DEVELOPMENT because:
 
-1. local regression passes;
-2. working tree is clean;
-3. Development GET reports Creative post consumer Build 310 / `inventory-post`;
+1. local regression passed;
+2. Development browser proof passed;
+3. Creative reports post consumer Build 310 / `inventory-post`;
 4. Build 309 Inventory post authority reports schema ready;
-5. safe invalid POST is handled by the Build 310 wrapper and returns Build 310 metadata;
+5. the safe invalid POST is handled by the Build 310 wrapper;
 6. Build 308 reversal consumer metadata remains present;
-7. no SQL/schema/config/R2/real Production change occurs.
+7. Commerce remains non-mutating;
+8. no SQL/schema/config/R2/Operations/real Production change occurred.
+
+No further Build 310 browser validation is required.
