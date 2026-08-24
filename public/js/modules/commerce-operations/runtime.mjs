@@ -1,13 +1,13 @@
-// Devil n Dove Build 307 Commerce & Operations umbrella runtime.
-// Catalog and Inventory remain the proven runtime domains. Build 307 adds an
-// Inventory-owned compensating reversal service without switching Creative consumers.
+// Devil n Dove Build 309 Commerce & Operations umbrella runtime.
+// Catalog and Inventory remain the proven runtime domains. Build 309 adds an Inventory-owned
+// reviewed-material posting service while keeping Creative post migration disabled.
 
 import {
   BUILD as INVENTORY_WRITE_BOUNDARY_BUILD,
   getInventoryWriteBoundaryStatus,
-} from './inventory-write-boundary.mjs?v=307';
+} from './inventory-write-boundary.mjs?v=309';
 
-const BUILD = 307;
+const BUILD = 309;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory']);
 const REQUIRED_SERVICES_BY_DOMAIN = Object.freeze({
@@ -87,7 +87,7 @@ export const metadata = Object.freeze({
   supportedDomains: SUPPORTED_DOMAINS,
   requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
   allRequiredServices: ALL_REQUIRED_SERVICES,
-  behaviorMode: 'catalog-inventory-reversal-service-implemented',
+  behaviorMode: 'catalog-inventory-post-and-reversal-authorities',
   createsNetworkTransport: false,
   ownsInventoryMutations: false,
   inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
@@ -99,7 +99,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition } =
     throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
   }
   if (!supportedDomain(domainDefinition?.id)) {
-    throw new Error(`Commerce & Operations Build 307 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+    throw new Error(`Commerce & Operations Build 309 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
   }
   verifyServices(registry, domainDefinition.id);
   state = 'loaded';
@@ -122,7 +122,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     throw new Error('Commerce & Operations runtime activation requires an administrator.');
   }
   if (!supportedDomain(domainDefinition?.id)) {
-    throw new Error(`Commerce & Operations Build 307 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+    throw new Error(`Commerce & Operations Build 309 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
   }
   verifyServices(registry, domainDefinition.id);
 
@@ -174,8 +174,12 @@ export function getStatus() {
     ownsInventoryMutations: false,
     inventoryWriteBoundaryBuild: writeBoundary.build,
     inventoryPostImplementationState: writeBoundary.post.implementationState,
+    inventoryPostRoute: writeBoundary.post.authorityRoute,
+    inventoryPostConsumerReady: writeBoundary.post.consumerWritesReady,
+    inventoryPostAtomicReviewPosting: writeBoundary.post.atomicReviewPosting,
     inventoryReverseImplementationState: writeBoundary.reverse.implementationState,
     inventoryReverseRoute: writeBoundary.reverse.authorityRoute,
+    inventoryReverseConsumerReady: writeBoundary.reverse.consumerWritesReady,
     inventoryReverseRequiresOriginalMovementId: writeBoundary.reverse.requiresOriginalMovementId,
     inventoryReverseRequiresCreativePostingId: writeBoundary.reverse.requiresCreativePostingId,
     inventoryReverseConfirmationText: writeBoundary.reverse.confirmationText,
