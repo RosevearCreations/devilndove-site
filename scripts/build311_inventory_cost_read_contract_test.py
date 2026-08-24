@@ -41,6 +41,19 @@ def git(*args):
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
+def git_path_matches_base(rel):
+    # Use Git's own comparison rather than raw working-tree bytes. This keeps
+    # historical pins correct on Windows checkouts where core.autocrlf may
+    # materialize CRLF while committed blobs remain LF.
+    result = subprocess.run(
+        ["git", "diff", "--quiet", BASE, "--", rel],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    return result.returncode == 0
+
+
 def node_check(rel):
     source = text(rel)
     suffix = ".mjs"
@@ -137,12 +150,8 @@ check("/public/js/admin.js?v=311" in inventory_page,
       "Inventory validation page pins the Build 311 shared loader")
 
 try:
-    compat_now = (ROOT / "functions/api/admin/creative-process-compat.js").read_bytes()
-    compat_base = subprocess.check_output(
-        ["git", "show", f"{BASE}:functions/api/admin/creative-process-compat.js"], cwd=ROOT
-    )
-    check(compat_now == compat_base,
-          "Creative compatibility implementation remains byte-for-byte frozen from completed Build 310")
+    check(git_path_matches_base("functions/api/admin/creative-process-compat.js"),
+          "Creative compatibility implementation remains Git-equivalent to completed Build 310")
 except Exception as exc:
     check(False, f"could not verify Creative compatibility historical pin: {exc}")
 
@@ -155,9 +164,7 @@ for rel in [
     "functions/api/_lib/creativeInventoryReversalConsumer.js",
 ]:
     try:
-        current = (ROOT / rel).read_bytes()
-        historic = subprocess.check_output(["git", "show", f"{BASE}:{rel}"], cwd=ROOT)
-        check(current == historic, f"completed write authority/consumer remains historically pinned: {rel}")
+        check(git_path_matches_base(rel), f"completed write authority/consumer remains historically pinned: {rel}")
     except Exception as exc:
         check(False, f"could not verify historical pin for {rel}: {exc}")
 
