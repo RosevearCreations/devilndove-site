@@ -1,12 +1,19 @@
 # Build 314 — Customer Documents Operations Runtime Coverage
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
 ```text
 4ba68bf720561fab590e2dfb74581c0adf871b46
 Build 313 set completed Operations runtime handoff
+```
+
+Proven source/runtime head:
+
+```text
+f386f89a18190c20fd95ca8ec5a0208a4a051b90
+Build 314 update modular handoff context
 ```
 
 Real Devil n Dove Production remains frozen at Build 280.
@@ -22,34 +29,36 @@ Build 314 expands the read-only Commerce & Operations runtime from the first pro
 
 This build is loader/runtime coverage only. It does not migrate Customer Documents business writes.
 
-## Why Customer Documents is next
-
-`/admin/customer-documents/` already loaded the shared `admin.js` bridge, but it was pinned to the historical `v=245` cache identity. Its business implementation is still the established Build 227 script:
-
-```text
-/public/js/admin-customer-documents.js?v=227
-```
-
-Build 314 updates only the shared module-loader pin and runtime coverage boundary. The document-issue/void implementation remains untouched.
-
 ## Explicit Operations page allow-list
 
-Commerce runtime Build 314 defines:
+Commerce runtime Build 314 defines the only currently proven Operations runtime pages as:
 
 ```text
 /admin/operations/
 /admin/customer-documents/
 ```
 
-as the only proven Operations runtime pages.
+For the `operations` domain, the runtime validates the pathname during both load and activation. Older Operations-classified pages cannot be silently treated as migrated merely because they happen to load a shared Admin bridge.
 
-For the `operations` domain, the runtime checks the current pathname during both load and activation. A legacy Operations-classified page that happens to load a current shared Admin bridge is rejected unless its path is in this allow-list.
+## Customer Documents boundary
 
-This keeps runtime coverage honest while the route family is migrated incrementally.
+`/admin/customer-documents/` now loads:
+
+```text
+/public/js/admin.js?v=314
+```
+
+while its established business implementation remains:
+
+```text
+/public/js/admin-customer-documents.js?v=227
+```
+
+Build 314 does not modify that business script or the APIs it calls. Existing issue, print, retain, void, credit-note and refund-confirmation behavior stays beneath the read-only application-module shell.
 
 ## Runtime service boundary
 
-Operations still consumes exactly:
+Operations continues to consume exactly:
 
 ```text
 catalog-read
@@ -57,37 +66,13 @@ inventory-read
 accounting-read
 ```
 
-All are passive read services. Build 314 does not add a Customer Documents mutation service or move any document business authority.
-
-Runtime remains:
+and the umbrella continues to report:
 
 ```text
 createsNetworkTransport = false
 ownsInventoryMutations   = false
 ownsOperationsMutations  = false
 ```
-
-## Customer Documents behavior remains legacy-compatible
-
-The existing page continues to load:
-
-```text
-/public/js/admin-customer-documents.js?v=227
-```
-
-Build 314 does not modify that file or the APIs it calls. Existing issue, print, retain, void, credit-note and refund-confirmation behavior therefore stays beneath the read-only application-module shell.
-
-No mutation is used to validate Build 314.
-
-## Existing Operations page remains proven
-
-`/admin/operations/` is re-pinned to:
-
-```text
-/public/js/admin.js?v=314
-```
-
-so the original Build 313 proof page and the newly added Customer Documents page share the same current runtime graph.
 
 ## Runtime identity
 
@@ -104,6 +89,37 @@ Operations coverage build       314
 Commerce runtime                314
 ```
 
+## Validation proof
+
+Local regression passed:
+
+```text
+BUILD 314 CUSTOMER DOCUMENTS OPERATIONS RUNTIME: PASS
+No Cloudflare resource was contacted.
+```
+
+Development browser proof on `/admin/customer-documents/`:
+
+```text
+commerce_runtime_build           314
+domain                           operations
+application_module               commerce-operations
+application_module_mode          active
+active_required_services         catalog-read,inventory-read,accounting-read
+operations_runtime_active        true
+current_operations_page_proven   true
+operations_coverage              /admin/operations/,/admin/customer-documents/
+owns_operations_mutations        false
+customer_documents_script        .../admin-customer-documents.js?v=227
+accounting_build                 312
+accounting_schema_ready          true
+accounting_schema_mutation       false
+contracts_ok                     true
+services_ok                      true
+```
+
+No mutation was required to prove Build 314.
+
 ## Route-family limitation
 
 Build 314 does not claim these Operations route groups are migrated:
@@ -117,11 +133,11 @@ Build 314 does not claim these Operations route groups are migrated:
 /admin/today-tasks/
 ```
 
-`/admin/orders/` remains especially important because it currently has no shared `admin.js` module bridge. It must be handled in a later bounded loader-coverage build before being called runtime-migrated.
+`/admin/orders/` remains especially important because it still lacks the shared module bridge and must be handled in a separate bounded loader-coverage build before it can be called runtime-migrated.
 
 ## Safety boundary
 
-Build 314 does not modify:
+Build 314 did not modify:
 
 - Customer Documents business JavaScript or APIs;
 - order/payment behavior;
@@ -135,21 +151,6 @@ Build 314 does not modify:
 - real Production;
 - schema/data parity work.
 
-## Validation
-
-Build 314 validation proves only the runtime shell on Customer Documents:
-
-1. Development serves `admin.js?v=314`;
-2. domain resolves to `operations`;
-3. application module is `commerce-operations` and active;
-4. Commerce runtime is Build 314;
-5. active services are `catalog-read,inventory-read,accounting-read`;
-6. `/admin/customer-documents/` is in the explicit Operations page allow-list;
-7. `currentOperationsPageProven=true`;
-8. Operations mutation ownership is false;
-9. Accounting remains Build 312 and schema-ready;
-10. the historical Customer Documents business script remains loaded unchanged.
-
 ## Next direction
 
-After Build 314 is proven, continue Operations route coverage one bounded page group at a time. `/admin/orders/` is a logical next loader target, but its loader addition must remain separate from any order/payment mutation-authority extraction.
+Continue Operations route coverage one bounded page group at a time. `/admin/orders/` is the logical next loader target, but loader/runtime coverage must remain separate from order/payment mutation-authority extraction.
