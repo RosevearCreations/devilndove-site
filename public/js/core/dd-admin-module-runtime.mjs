@@ -1,7 +1,7 @@
-// Devil n Dove Build 289 Admin module runtime bridge.
-// Packaging remains the only actively loadable module. Its Build 289 runtime keeps
-// narrow contract reads, the Build 287 artwork picker and Build 288 GET retirement,
-// while decoupling successful Packaging write responses from broad external reads.
+// Devil n Dove Build 290 Admin module runtime bridge.
+// Packaging remains the only actively loadable module. Its Build 290 runtime keeps
+// the proven narrow contract reads, Content artwork picker, legacy-GET retirement
+// and write bridge after physically removing retired broad server reads.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
@@ -186,7 +186,7 @@ if (!serviceRegistration.ok) {
 
 const runtimeApi = Object.freeze({
   mode: 'runtime',
-  build: 289,
+  build: 290,
   registry,
   definitions: registry.list(),
   contractValidation,
