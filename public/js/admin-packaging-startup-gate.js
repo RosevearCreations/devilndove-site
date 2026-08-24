@@ -8,7 +8,7 @@
   const RUNTIME_ACTIVE_EVENT = 'dd:packaging-runtime-active';
   const AUTH_REJECTED_EVENT = 'dd:auth-rejected';
   const AUTH_DEGRADED_EVENT = 'dd:auth-degraded';
-  const WAIT_TIMEOUT_MS = 15000;
+  const WAIT_TIMEOUT_MS = 30000;
 
   const auth = globalThis.DDAuth;
   if (!auth || typeof auth.apiFetch !== 'function') return;
@@ -18,6 +18,8 @@
   let delayedLegacyRequests = 0;
   let replayedLegacyRequests = 0;
   let blockedLegacyRequests = 0;
+  let degradedAuthEvents = 0;
+  let lastWaitExitReason = 'not-started';
 
   function rawRequestUrl(input) {
     return typeof input === 'string' ? input : String(input?.url || '');
@@ -65,33 +67,46 @@
   }
 
   function waitForPackagingRuntime() {
-    if (runtimeReady()) return Promise.resolve(true);
+    if (runtimeReady()) {
+      lastWaitExitReason = 'already-ready';
+      return Promise.resolve(true);
+    }
     if (waitPromise) return waitPromise;
 
     waitPromise = new Promise((resolve) => {
       let settled = false;
       let timer = null;
 
-      const finish = (ready) => {
+      const finish = (ready, reason) => {
         if (settled) return;
         settled = true;
+        lastWaitExitReason = String(reason || (ready ? 'ready' : 'unavailable'));
         if (timer) clearTimeout(timer);
         document.removeEventListener(RUNTIME_ACTIVE_EVENT, onRuntimeActive);
-        document.removeEventListener(AUTH_REJECTED_EVENT, onAuthUnavailable);
-        document.removeEventListener(AUTH_DEGRADED_EVENT, onAuthUnavailable);
+        document.removeEventListener(AUTH_REJECTED_EVENT, onAuthRejected);
+        document.removeEventListener(AUTH_DEGRADED_EVENT, onAuthDegraded);
         resolve(Boolean(ready));
       };
 
-      const onRuntimeActive = () => finish(runtimeReady());
-      const onAuthUnavailable = () => finish(false);
+      const onRuntimeActive = () => {
+        if (runtimeReady()) finish(true, 'runtime-active');
+      };
+      const onAuthRejected = () => finish(false, 'auth-rejected');
+      const onAuthDegraded = () => {
+        degradedAuthEvents += 1;
+        if (runtimeReady()) finish(true, 'runtime-ready-after-degraded-auth');
+      };
 
       document.addEventListener(RUNTIME_ACTIVE_EVENT, onRuntimeActive);
-      document.addEventListener(AUTH_REJECTED_EVENT, onAuthUnavailable);
-      document.addEventListener(AUTH_DEGRADED_EVENT, onAuthUnavailable);
-      timer = setTimeout(() => finish(runtimeReady()), WAIT_TIMEOUT_MS);
+      document.addEventListener(AUTH_REJECTED_EVENT, onAuthRejected);
+      document.addEventListener(AUTH_DEGRADED_EVENT, onAuthDegraded);
+      timer = setTimeout(() => {
+        const ready = runtimeReady();
+        finish(ready, ready ? 'timeout-runtime-ready' : 'timeout-runtime-not-ready');
+      }, WAIT_TIMEOUT_MS);
 
       queueMicrotask(() => {
-        if (runtimeReady()) finish(true);
+        if (runtimeReady()) finish(true, 'microtask-runtime-ready');
       });
     }).finally(() => {
       waitPromise = null;
@@ -106,6 +121,7 @@
       build: BUILD,
       error: 'Packaging modular runtime did not activate. The retired Packaging Studio server route was not contacted.',
       error_code: 'packaging_runtime_not_ready',
+      wait_exit_reason: lastWaitExitReason,
       legacy_server_route_contacted: false,
     }), {
       status: 503,
@@ -135,6 +151,7 @@
     }
 
     blockedLegacyRequests += 1;
+    lastWaitExitReason = 'runtime-ready-but-transport-not-replaced';
     return runtimeUnavailableResponse();
   }
 
@@ -147,9 +164,12 @@
     getStatus: () => Object.freeze({
       build: BUILD,
       runtimeReady: runtimeReady(),
+      waitTimeoutMs: WAIT_TIMEOUT_MS,
       delayedLegacyRequests,
       replayedLegacyRequests,
       blockedLegacyRequests,
+      degradedAuthEvents,
+      lastWaitExitReason,
       legacyServerRouteContactedByGate: false,
     }),
   });
