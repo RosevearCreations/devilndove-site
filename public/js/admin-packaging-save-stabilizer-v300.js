@@ -1,7 +1,7 @@
 // Devil n Dove Build 300 Packaging save + preview stabilization.
 // Save Project is verified by a fresh native read-back before success is shown.
-// Soap Product / variant also keeps the rendered English identity synchronized only
-// while that identity is still default/derived; explicit owner identity edits win.
+// The live soap preview is fitted to the editor width by default so the far-right
+// claims panel remains visible after rerenders; print/export dimensions are unchanged.
 (() => {
   const BUILD = 300;
   const baseClient = globalThis.DDPackagingClient;
@@ -15,12 +15,22 @@
   let verifiedSaveCount = 0;
   let failedVerificationCount = 0;
   let lastVerification = null;
+  let lastVerifiedClaims = Object.freeze([]);
+  let hasVerifiedSave = false;
+
   let previewBindCount = 0;
   let identitySyncCount = 0;
+  let previewAuditCount = 0;
+  let forcedPreviewRefreshCount = 0;
+  let previewFitCount = 0;
   let lastPreviewReason = '';
+  let lastPreviewAudit = null;
+  let previewMode = 'fit';
+  let previewAuditScheduled = false;
 
   const text = (value) => String(value ?? '').trim();
   const byId = (name) => document.getElementById(name);
+  const canonical = (value) => text(value).toLowerCase().replace(/\s+/g, '');
 
   function normalizeClaims(rows) {
     return (Array.isArray(rows) ? rows : [])
@@ -37,6 +47,17 @@
 
   function claimsEqual(expected, actual) {
     return JSON.stringify(normalizeClaims(expected)) === JSON.stringify(normalizeClaims(actual));
+  }
+
+  function claimsFromDom() {
+    return normalizeClaims([...document.querySelectorAll('[data-soap-claim-row]')].map((row, index) => ({
+      sort_order: index + 1,
+      claim_en: row.querySelector('[data-field="claim_en"]')?.value || '',
+      claim_fr: row.querySelector('[data-field="claim_fr"]')?.value || '',
+      icon_name: row.querySelector('[data-field="icon_name"]')?.value || '',
+      is_approved: row.querySelector('[data-field="is_approved"]')?.checked ? 1 : 0,
+      compliance_note: row.querySelector('[data-field="compliance_note"]')?.value || '',
+    })));
   }
 
   function coreMismatches(body, project) {
@@ -137,7 +158,10 @@
       }, 409, writeResponse);
     }
 
+    hasVerifiedSave = true;
+    lastVerifiedClaims = Object.freeze(actualClaims.map((row) => Object.freeze({ ...row })));
     verifiedSaveCount += 1;
+
     const verifiedPayload = {
       ...freshPayload,
       message: `${writePayload.message || 'Packaging project saved.'} Verified by fresh D1 read-back.`,
@@ -196,19 +220,172 @@
       identity.dataset.build300DerivedIdentity = (!currentIdentity || currentIdentity === currentProduct) ? 'true' : 'false';
       lastPreviewReason = 'identity-owner-edit';
     });
+  }
 
-    if (text(byId('packagingType')?.value) === 'soap_ribbon') {
-      const subtitleLabel = byId('packagingSubtitle')?.closest('label')?.querySelector('.small');
-      if (subtitleLabel) subtitleLabel.textContent = 'Front tagline (saved metadata; not printed on soap ribbon)';
+  function claimAppearsInPreview(claim, previewCanonical) {
+    const source = text(claim?.claim_en) || text(claim?.claim_fr);
+    const needle = canonical(source).slice(0, 28);
+    return !needle || previewCanonical.includes(needle);
+  }
+
+  function ensurePreviewControls() {
+    const mount = byId('packagingSvgPreview');
+    if (!mount) return null;
+
+    let controls = document.querySelector('[data-build300-preview-controls]');
+    if (!controls) {
+      controls = document.createElement('div');
+      controls.dataset.build300PreviewControls = 'true';
+      controls.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 10px;padding:9px 10px;border:1px solid rgba(184,138,47,.38);border-radius:10px;background:rgba(184,138,47,.07)';
+      controls.innerHTML = '<strong>Live preview</strong><span data-build300-preview-status class="small" style="flex:1 1 280px">Checking rendered label…</span><button class="btn" type="button" data-build300-preview-fit>Fit full label</button><button class="btn" type="button" data-build300-preview-detail>Detail / scroll</button>';
+      mount.insertAdjacentElement('beforebegin', controls);
+
+      controls.querySelector('[data-build300-preview-fit]')?.addEventListener('click', () => {
+        previewMode = 'fit';
+        applyPreviewMode();
+        schedulePreviewAudit('fit-button', false);
+      });
+      controls.querySelector('[data-build300-preview-detail]')?.addEventListener('click', () => {
+        previewMode = 'detail';
+        applyPreviewMode();
+        schedulePreviewAudit('detail-button', false);
+      });
     }
+
+    return controls;
+  }
+
+  function applyPreviewMode() {
+    const mount = byId('packagingSvgPreview');
+    const svg = mount?.querySelector('svg');
+    if (!mount || !svg) return;
+
+    const isSoap = svg.dataset.soapLayout === 'reference-v3';
+    if (!isSoap) return;
+
+    if (previewMode === 'fit') {
+      mount.style.setProperty('overflow-x', 'hidden');
+      svg.style.setProperty('width', '100%', 'important');
+      svg.style.setProperty('min-width', '0', 'important');
+      svg.style.setProperty('max-width', '100%', 'important');
+      svg.style.setProperty('height', 'auto', 'important');
+      if (svg.dataset.build300PreviewMode !== 'fit') previewFitCount += 1;
+      svg.dataset.build300PreviewMode = 'fit';
+      mount.scrollLeft = 0;
+    } else {
+      mount.style.removeProperty('overflow-x');
+      svg.style.removeProperty('width');
+      svg.style.removeProperty('min-width');
+      svg.style.removeProperty('max-width');
+      svg.style.removeProperty('height');
+      svg.dataset.build300PreviewMode = 'detail';
+    }
+  }
+
+  function updatePreviewStatus(audit) {
+    const controls = ensurePreviewControls();
+    const status = controls?.querySelector('[data-build300-preview-status]');
+    if (!status || !audit) return;
+
+    const savePart = audit.dom_matches_verified === null
+      ? 'No verified Save Project in this page session yet.'
+      : audit.dom_matches_verified
+        ? 'Editor matches verified D1 save.'
+        : 'Editor differs from the last verified D1 save.';
+    const claimPart = audit.preview_claims_match_dom
+      ? `${audit.rendered_claim_count}/${audit.preview_claim_target_count} printable claim(s) rendered.`
+      : `${audit.rendered_claim_count}/${audit.preview_claim_target_count} printable claim(s) found in SVG.`;
+    const modePart = previewMode === 'fit' ? 'Full ribbon fitted to view.' : 'Detail view may require horizontal scrolling.';
+
+    status.textContent = `${savePart} ${claimPart} ${modePart}`;
+    controls.style.borderColor = audit.preview_claims_match_dom ? 'rgba(85,190,126,.48)' : 'rgba(220,103,103,.6)';
+    controls.style.background = audit.preview_claims_match_dom ? 'rgba(85,190,126,.07)' : 'rgba(220,103,103,.08)';
+  }
+
+  function auditPreview(reason = 'audit', allowForce = true) {
+    previewAuditCount += 1;
+    lastPreviewReason = reason;
+
+    ensurePreviewControls();
+    applyPreviewMode();
+
+    const mount = byId('packagingSvgPreview');
+    const svg = mount?.querySelector('svg');
+    const domClaims = claimsFromDom();
+    const printableClaims = domClaims.slice(0, 4);
+    const previewCanonical = canonical(mount?.textContent);
+    const renderedClaimCount = printableClaims.filter((claim) => claimAppearsInPreview(claim, previewCanonical)).length;
+    const previewClaimsMatchDom = Boolean(svg) && renderedClaimCount === printableClaims.length;
+    const domMatchesVerified = hasVerifiedSave ? claimsEqual(lastVerifiedClaims, domClaims) : null;
+
+    lastPreviewAudit = Object.freeze({
+      reason,
+      preview_svg_present: Boolean(svg),
+      preview_mode: previewMode,
+      dom_claim_count: domClaims.length,
+      verified_claim_count: hasVerifiedSave ? lastVerifiedClaims.length : null,
+      preview_claim_target_count: printableClaims.length,
+      rendered_claim_count: renderedClaimCount,
+      preview_claims_match_dom: previewClaimsMatchDom,
+      dom_matches_verified: domMatchesVerified,
+    });
+
+    updatePreviewStatus(lastPreviewAudit);
+
+    if (!previewClaimsMatchDom && printableClaims.length && allowForce) {
+      const field = document.querySelector('[data-soap-claim-row] [data-field="claim_en"], [data-soap-claim-row] [data-field="claim_fr"]');
+      if (field) {
+        forcedPreviewRefreshCount += 1;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        schedulePreviewAudit('forced-claim-render', false);
+      }
+    }
+
+    return lastPreviewAudit;
+  }
+
+  function schedulePreviewAudit(reason = 'scheduled', allowForce = true) {
+    if (previewAuditScheduled) return;
+    previewAuditScheduled = true;
+    const run = () => {
+      previewAuditScheduled = false;
+      auditPreview(reason, allowForce);
+    };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => requestAnimationFrame(run));
+    else setTimeout(run, 0);
+  }
+
+  function bindPreviewAuditEvents() {
+    const main = byId('packagingStudioMain');
+    if (!main || main.dataset.build300PreviewAuditBound === 'true') return;
+    main.dataset.build300PreviewAuditBound = 'true';
+
+    const relevant = (target) => Boolean(target?.closest?.(
+      '[data-soap-claim-row], #packagingProductName, #packagingIdentityEn, #packagingIdentityFr, #packagingSubtitle, #packagingNetQuantity, #packagingWebsite, #packagingRoseColour, #packagingRoseAsset'
+    ));
+    main.addEventListener('input', (event) => {
+      if (relevant(event.target)) schedulePreviewAudit('editor-input');
+    });
+    main.addEventListener('change', (event) => {
+      if (relevant(event.target)) schedulePreviewAudit('editor-change');
+    });
   }
 
   function watchEditor() {
     const main = byId('packagingStudioMain');
     if (!main || typeof MutationObserver === 'undefined') return;
-    const observer = new MutationObserver(() => bindPreviewIdentity());
+
+    bindPreviewAuditEvents();
+    const observer = new MutationObserver(() => {
+      bindPreviewIdentity();
+      ensurePreviewControls();
+      schedulePreviewAudit('editor-render');
+    });
     observer.observe(main, { childList: true, subtree: true });
+
     bindPreviewIdentity();
+    ensurePreviewControls();
+    schedulePreviewAudit('initial');
   }
 
   function getStatus() {
@@ -229,6 +406,11 @@
       previewContainsIdentity: Boolean(identity && previewText.includes(identity)),
       productValue: product,
       identityValue: identity,
+      previewMode,
+      previewAuditCount,
+      forcedPreviewRefreshCount,
+      previewFitCount,
+      lastPreviewAudit,
       lastPreviewReason,
       build298NativeClientPreserved: true,
       build299BrowserControllerLoaded: false,
@@ -243,6 +425,7 @@
 
   globalThis.DDPackagingSaveStabilizer = Object.freeze({
     build: BUILD,
+    auditPreview: () => auditPreview('manual', true),
     getStatus: () => Object.freeze({
       build: BUILD,
       state: 'active',
@@ -253,6 +436,11 @@
       identitySyncCount,
       identityIsDerived: byId('packagingIdentityEn')?.dataset.build300DerivedIdentity === 'true',
       previewContainsIdentity: Boolean(text(byId('packagingIdentityEn')?.value) && text(byId('packagingSvgPreview')?.textContent).includes(text(byId('packagingIdentityEn')?.value))),
+      previewMode,
+      previewAuditCount,
+      forcedPreviewRefreshCount,
+      previewFitCount,
+      lastPreviewAudit,
       lastPreviewReason,
     }),
   });
