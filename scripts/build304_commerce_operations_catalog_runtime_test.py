@@ -9,6 +9,8 @@ EXPECTED = {
     "BUILD304_CHANGED_FILES.md",
     "BUILD304_VALIDATION.md",
     "docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md",
+    "admin/products/index.html",
+    "admin/packaging-studio/index.html",
     "public/js/admin.js",
     "public/js/core/dd-admin-module-runtime.mjs",
     "public/js/core/dd-application-module-groups.mjs",
@@ -43,6 +45,19 @@ def changed_files(*args):
     if result.returncode:
         fail(result.stderr.strip() or f"could not compare {args}")
     return {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
+
+
+def payload_diff_lines(path):
+    result = run(["git", "diff", "--unified=0", BASE, "HEAD", "--", path])
+    if result.returncode:
+        fail(result.stderr.strip() or f"could not inspect diff for {path}")
+    return [
+        line
+        for line in result.stdout.splitlines()
+        if (line.startswith("+") or line.startswith("-"))
+        and not line.startswith("+++")
+        and not line.startswith("---")
+    ]
 
 
 for path in [
@@ -166,20 +181,39 @@ build303_test = read("scripts/build303_commerce_operations_umbrella_bridge_test.
 for marker in [
     'HISTORICAL_HEAD = "6cbcc4353327eea093ef4701497fa5321b680096"',
     'git_show(HISTORICAL_HEAD, "public/js/core/dd-admin-module-runtime.mjs")',
+    '"catalog    -> commerce-operations"',
     'BUILD 303 COMMERCE & OPERATIONS UMBRELLA BRIDGE HISTORICAL REGRESSION: PASS',
 ]:
     if marker not in build303_test:
         fail(f"completed Build 303 historical pin missing marker: {marker}")
 print("PASS: completed Build 303 runtime/browser proof is historically pinned")
 
+products = read("admin/products/index.html")
+packaging_page = read("admin/packaging-studio/index.html")
+if '/public/js/admin.js?v=304' not in products:
+    fail("Products validation page does not cache-bust the Build 304 shared Admin loader")
+if '/public/js/admin.js?v=304' not in packaging_page:
+    fail("Packaging validation page does not cache-bust the Build 304 shared Admin loader")
+expected_products_diff = {
+    '-  <script src="/public/js/admin.js?v=245"></script>',
+    '+  <script src="/public/js/admin.js?v=304"></script>',
+}
+expected_packaging_diff = {
+    '-  <script src="/public/js/admin.js?v=296"></script>',
+    '+  <script src="/public/js/admin.js?v=304"></script>',
+}
+if set(payload_diff_lines("admin/products/index.html")) != expected_products_diff:
+    fail("Products page changed beyond the Build 304 shared Admin loader cache-bust")
+if set(payload_diff_lines("admin/packaging-studio/index.html")) != expected_packaging_diff:
+    fail("Packaging page changed beyond the Build 304 shared Admin loader cache-bust")
+print("PASS: Build 304 validation pages explicitly load the fresh shared Admin/Core runtime and otherwise remain unchanged")
+
 protected = [
     "public/js/core/dd-module-registry.mjs",
     "public/js/core/dd-module-definitions.mjs",
     "public/js/core/dd-module-contracts.mjs",
     "public/js/core/dd-module-service-adapters.mjs",
-    "admin/products/index.html",
     "admin/catalog/index.html",
-    "admin/packaging-studio/index.html",
     "public/js/admin-packaging-compatibility-v301.js",
     "public/js/admin-packaging-save-stabilizer-v300.js",
     "public/js/admin-packaging-native-client-v298.js",
