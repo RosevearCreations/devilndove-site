@@ -1,14 +1,15 @@
-// Devil n Dove Build 289 Packaging runtime composition.
-// Build 289 keeps the proven Build 286 narrow-bootstrap bridge, Build 287 Content
-// artwork picker, and Build 288 legacy-GET retirement while decoupling successful
-// Packaging POST responses from broad Catalog/Inventory enumeration.
+// Devil n Dove Build 290 Packaging runtime composition.
+// Build 290 keeps the proven Build 286 narrow-bootstrap bridge, Build 287 Content
+// artwork picker, Build 288 legacy-GET retirement and Build 289 write bridge while
+// physically removing the retired broad Catalog/Inventory reads from server source.
 
 import * as base from './index.mjs';
 import { createPackagingArtworkPicker, normalizeContentArtworkRows } from './artwork-picker.mjs';
 import { createPackagingLegacyGetRetirementGuard } from './read-retirement.mjs';
 import { createPackagingWriteResponseBridge } from './write-response.mjs';
 
-const BUILD = 289;
+const BUILD = 290;
+const WRITE_RESPONSE_BUILD = 289;
 const REQUIRED_CONTRACTS = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
 
 let baseFacade = null;
@@ -46,7 +47,7 @@ function retirementStatus() {
 
 function writeStatus() {
   return writeBridge?.getStatus?.() || Object.freeze({
-    build: BUILD,
+    build: WRITE_RESPONSE_BUILD,
     state: 'not-created',
     armed: false,
     writeResponseDecoupled: true,
@@ -146,7 +147,10 @@ function installBrowserFacade() {
     baseBuild: 286,
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
-    writeResponseBuild: BUILD,
+    writeResponseBuild: WRITE_RESPONSE_BUILD,
+    writeGatewayBuild: BUILD,
+    legacyBroadReadRemovalBuild: BUILD,
+    legacyBroadReadsRemoved: true,
     requiredContracts: REQUIRED_CONTRACTS,
     readCatalog,
     readInventory,
@@ -167,13 +171,15 @@ export const metadata = Object.freeze({
   baseBuild: 286,
   artworkPickerBuild: 287,
   legacyGetRetirementBuild: 288,
-  writeResponseBuild: BUILD,
+  writeResponseBuild: WRITE_RESPONSE_BUILD,
+  writeGatewayBuild: BUILD,
+  legacyBroadReadRemovalBuild: BUILD,
   routePrefix: '/admin/packaging-studio',
   bootstrapPath: '/api/admin/packaging-bootstrap',
   legacyWritePath: '/api/admin/packaging-studio',
   writePath: '/api/admin/packaging-write',
   requiredContracts: REQUIRED_CONTRACTS,
-  behaviorMode: 'write-response-decoupled-legacy-get-retired-content-artwork-runtime',
+  behaviorMode: 'legacy-broad-read-source-removed-write-response-decoupled-runtime',
 });
 
 export async function readCatalog(options = {}) { return base.readCatalog(options); }
@@ -193,6 +199,8 @@ export async function onLoad(context = {}) {
     baseBuild: 286,
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
+    writeResponseBuild: WRITE_RESPONSE_BUILD,
+    legacyBroadReadsRemoved: true,
     writeResponseDecoupled: true,
   });
 }
@@ -202,15 +210,15 @@ export async function onActivate(context = {}) {
   const writes = ensureWriteBridge();
 
   // Build 288 guard is innermost, Build 286 bootstrap bridge sits above it, and
-  // Build 289 write bridge is outermost. GETs therefore retain the proven narrow
-  // read path, while POSTs are rerouted to the decoupled write gateway.
+  // the Build 289 write bridge remains outermost. Build 290 changes server source,
+  // not this proven transport order.
   guard.arm();
   try {
     await base.onActivate(context);
     writes.arm();
   } catch (error) {
     writes.disarm();
-    try { await base.onDeactivate({ reason: 'build289-activation-failed' }); } catch {}
+    try { await base.onDeactivate({ reason: 'build290-activation-failed' }); } catch {}
     guard.disarm();
     throw error;
   }
@@ -224,6 +232,8 @@ export async function onActivate(context = {}) {
     baseBuild: 286,
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
+    writeResponseBuild: WRITE_RESPONSE_BUILD,
+    legacyBroadReadsRemoved: true,
     writeResponseDecoupled: true,
     legacyGetRetired: true,
     activeRuntimeBroadLegacyGetReachable: false,
@@ -262,8 +272,11 @@ export function getStatus() {
     baseBuild: Number(baseStatus?.build || 286),
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
-    writeResponseBuild: BUILD,
+    writeResponseBuild: WRITE_RESPONSE_BUILD,
+    writeGatewayBuild: BUILD,
+    legacyBroadReadRemovalBuild: BUILD,
     behaviorMode: metadata.behaviorMode,
+    legacyBroadReadsRemoved: true,
     legacyGetRetired: true,
     activeRuntimeBroadLegacyGetReachable: false,
     legacyGetGuardArmed: Boolean(retired.armed),
