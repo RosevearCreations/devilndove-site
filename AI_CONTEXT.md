@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 310 Complete / Build 311 Review Next
+# Devil n Dove AI Context — Build 311 Inventory Cost Read Contract
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -14,7 +14,9 @@ Current modular architecture authority includes:
 - `docs/architecture/BUILD308_CREATIVE_REVERSAL_CONSUMER_CUTOVER.md`
 - `docs/architecture/BUILD309_INVENTORY_POST_AUTHORITY.md`
 - `docs/architecture/BUILD310_CREATIVE_INVENTORY_POST_CONSUMER_CUTOVER.md`
+- `docs/architecture/BUILD311_INVENTORY_COST_READ_CONTRACT.md`
 - `BUILD310_VALIDATION.md`
+- `BUILD311_VALIDATION.md`
 
 **Real Devil n Dove Production remains frozen at Build 280 unless deliberately promoted through the separate Production workflow.**
 
@@ -48,32 +50,6 @@ Build 306 remains historically browser-proven with standalone local signoff not 
 
 Build 308 remains browser-proven; its standalone local regression output was not captured before later work began. Do not silently relabel it complete.
 
-## Build 309 — completed authority
-
-Proven runtime/service head:
-
-```text
-f23a914c9ea4848c6f91d715ce0c983a06f716b3
-Build 309 update modular post-authority handoff
-```
-
-Completed handoff head:
-
-```text
-ab8089b76d881617bc3ca4768abdb4674afcf3a0
-Build 309 set completed post-authority handoff
-```
-
-Inventory owns reviewed Creative material posting through:
-
-```text
-GET  /api/admin/contracts/inventory-post
-POST /api/admin/contracts/inventory-post
-functions/api/_lib/inventoryPostService.js
-```
-
-The service uses one guarded D1 batch, the existing UNIQUE material-review posting constraint for idempotency, a current-stock snapshot check, physical movement provenance, and fractional usage linkage.
-
 ## Build 310 — COMPLETE IN DEVELOPMENT
 
 Proven runtime/source head:
@@ -83,21 +59,14 @@ c55f72b73941e0a568591c6a1125bc360a86a8f9
 Build 310 update modular posting-consumer handoff
 ```
 
-Build 310 migrates all three current Creative posting workflows to the Inventory-owned Build 309 service:
+Completed handoff head:
 
 ```text
-post_material_inventory
-record_inventory_use
-correct_inventory_use
+c88bcd63d7478cdb24e2b7070fa739f35789ac88
+Build 310 set completed modular handoff
 ```
 
-The live Creative route is a narrow wrapper. Unrelated Creative behavior remains in the preserved compatibility implementation:
-
-```text
-functions/api/admin/creative-process-compat.js
-```
-
-Creative Inventory authority state is now:
+Creative Inventory authority state:
 
 ```text
 inventory-post
@@ -111,68 +80,127 @@ inventory-reverse
   consumer writes ready true
 ```
 
-Runtime identity:
+Commerce remains non-mutating: `ownsInventoryMutations=false`.
+
+## Build 311 — STAGED / VALIDATION REQUIRED
+
+Build 311 resolves the two review questions left by Build 310 before Operations activation.
+
+### Compatibility retirement decision
+
+`functions/api/admin/creative-process-compat.js` cannot be retired safely yet.
+
+It still owns the unrelated Creative actions intentionally excluded from the narrow Inventory post/reverse cutovers. Build 311 therefore freezes it byte-for-byte from the completed Build 310 baseline.
+
+### Inventory cost decision
+
+`inventory-cost` is now implemented as a read-only Inventory-owned contract:
+
+```text
+GET /api/admin/contracts/inventory-cost
+```
+
+Authority:
+
+```text
+site_item_inventory.unit_cost_cents
+```
+
+Optional supporting history:
+
+```text
+site_item_inventory_cost_history
+```
+
+The route performs no mutation and no request-time DDL.
+
+It returns current cost facts including:
+
+```text
+unit_cost_cents
+usage_units_per_stock_unit
+cost_per_usage_unit_cents
+on_hand_quantity
+inventory_value_cents
+```
+
+### Passive browser service
+
+`public/js/core/dd-module-service-adapters.mjs` registers:
+
+```text
+inventory-cost
+owner inventory
+mode  read-only-http
+```
+
+Registration performs no request until `.list()` is called.
+
+### Catalog runtime dependency
+
+Build 311 makes Catalog's existing declared dependency real:
+
+```text
+catalog required services:
+  catalog-read
+  inventory-cost
+```
+
+Inventory remains:
+
+```text
+inventory required services:
+  inventory-read
+```
+
+### Operations remains inactive
+
+Do not activate Operations in Build 311.
+
+```text
+runtimeDomains = ['catalog', 'inventory']
+operationsRuntimeDomainActive = false
+```
+
+No orders, memberships, fulfillment, gift-card, customer-workflow, Accounting, or payment implementation moves.
+
+### Runtime identity
 
 ```text
 Architecture build              302
 Catalog runtime                 304
 Inventory runtime               305
 Inventory write boundary        310
-Commerce runtime                310
+Inventory cost contract         311
+Commerce runtime                311
 Core runtime implementation     305
-Creative post consumer          310
-Creative reversal consumer      308
-Inventory post authority        309
-Inventory reversal authority    307
+Operations runtime active       false
 ```
 
-Commerce still reports `ownsInventoryMutations=false`.
+### Build 311 exclusions
 
-### Validation proof
+Build 311 does not modify:
 
-Build 310 local regression passed. Development browser validation also passed:
-
-```text
-creative_ok                     true
-creative_engine_build           274
-post_consumer_build             310
-post_authority                  inventory-post
-reversal_consumer_build         308
-reversal_authority              inventory-reverse
-inventory_post_build            309
-inventory_post_schema_ready     true
-invalid_post_ok                 false
-invalid_post_consumer_build     310
-invalid_post_authority          inventory-post
-```
-
-The invalid POST intentionally omitted IDs/quantity and returned the expected controlled 400 before any Inventory mutation.
-
-## Build 310 safety boundary
-
-Build 310 did not modify:
-
-- Build 309 Inventory post service/route;
-- Build 307 Inventory reversal service/route;
-- Build 308 reversal consumer adapter;
+- Creative compatibility implementation;
+- Build 309 Inventory post authority;
+- Build 307 Inventory reversal authority;
+- Build 310/308 Creative Inventory consumers;
 - legacy broad Inventory mutation endpoint;
+- Operations implementation;
+- Accounting implementation;
 - SQL/schema;
 - Cloudflare bindings/config;
 - R2;
-- Operations implementation;
 - real Production;
 - schema/data parity work.
 
-## Next direction — Build 311 review before Operations
+## Next direction after Build 311
 
-Do **not** activate Operations yet.
+Only after Build 311 is proven should Operations activation be reconsidered. Before activation, Operations' declared `accounting-read` dependency should become a real bounded read contract or be explicitly deferred with a documented service plan.
 
-First review:
+## Validation interaction preference
 
-1. whether `functions/api/admin/creative-process-compat.js` can be retired safely without losing unrelated Creative behavior;
-2. whether `inventory-cost` should become the next explicit Inventory-owned read contract.
-
-Prefer a bounded, non-mutating Build 311 that records those decisions and implements only a safe read boundary if warranted.
+Keep validation concise: default to **one Git Bash block and one reusable browser-console script** unless a failure requires deeper isolation.
 
 ## Separate schema/data parity track — DO NOT MIX
 
