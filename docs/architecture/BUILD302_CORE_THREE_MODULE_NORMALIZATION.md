@@ -1,12 +1,12 @@
 # Build 302 — Core + Three Application Modules Normalization
 
-## Purpose
+## Status — COMPLETE IN DEVELOPMENT
 
 Build 302 corrects architectural drift before more Devil n Dove domains are extracted.
 
 Build 281 intentionally began with a broad domain catalog so ownership could be identified without a large-bang rewrite. By Build 301, Packaging had become the first substantially extracted domain, but the repository still described twelve domain IDs as if each might become a separate top-level application module.
 
-The owner direction is simpler and remains authoritative:
+The owner direction is simpler and authoritative:
 
 ```text
 one shared Application Core
@@ -14,6 +14,15 @@ one shared Application Core
 ```
 
 Build 302 normalizes the architecture to that target without changing the completed Build 301 Packaging runtime.
+
+Completed Build 302 baseline:
+
+```text
+cb68b71440f344c258809e79efe23bea65d0167f
+Build 302 harden Build 301 historical syntax pin
+```
+
+Local Build 301 historical and Build 302 architecture regressions both passed, and `git status --short` was clean after validation.
 
 ## Completed Build 301 baseline
 
@@ -168,9 +177,9 @@ Creative Projects, CAIP and Content remain shadow/legacy at the top-level runtim
 
 Marketing, Accounting, Platform and Admin remain shadow/legacy top-level domain classifications.
 
-## Build 302 safety boundary
+## Build 302 safety boundary — PASS
 
-Build 302 must not modify:
+Build 302 did not modify:
 
 - Packaging page script order;
 - Build 301 compatibility facade;
@@ -189,25 +198,26 @@ Build 302 must not modify:
 
 Fresh-install schema parity and Production business-data migration remain separate from application-module extraction.
 
-Do not mix schema repair/data copy into Build 302.
+Do not mix schema repair/data copy into module extraction builds.
 
-## Build 302 completion gate
+## Build 302 completion proof
 
-Build 302 is complete when:
+Build 302 is complete because:
 
-1. completed Build 301 historical regression passes;
-2. the new Build 302 catalog has exactly three application modules;
+1. completed Build 301 historical regression passed;
+2. the Build 302 catalog has exactly three application modules;
 3. all twelve current domain IDs are assigned exactly once;
 4. the authoritative architecture document describes Core + three modules;
 5. Packaging is mapped to Creative & Production and Build 301 is preserved;
-6. no current runtime route/module implementation changes;
-7. no SQL/config/R2/Production change occurs.
+6. current runtime route/module implementation is unchanged;
+7. no SQL/config/R2/Production change occurred;
+8. the working tree was clean after local validation.
 
-Because Build 302 is architecture normalization only, it does not require a Packaging browser behavior change or a Development-only D1 write.
+Because Build 302 is architecture normalization only, no Packaging browser behavior change or Development-only D1 write was required.
 
 ## Next extraction direction
 
-After Build 302 is green, future builds should migrate runtime grouping incrementally rather than continuing Packaging-only cleanup indefinitely.
+Future builds should migrate runtime grouping incrementally rather than continuing Packaging-only cleanup indefinitely.
 
 Recommended order:
 
