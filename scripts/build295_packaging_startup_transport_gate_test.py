@@ -100,14 +100,18 @@ print("PASS: both valid dynamic-import startup orders replay through modular Pac
 
 page = read("admin/packaging-studio/index.html")
 gate_ref = '/public/js/admin-packaging-startup-gate.js?v=295'
+admin_ref = '/public/js/admin.js?v=245'
 editor_ref = '/public/js/admin-packaging-studio.js?v=277'
-if gate_ref not in page:
-    fail("Packaging page does not load the Build 295 startup gate")
-if editor_ref not in page:
-    fail("Packaging page lost the proven mature editor script")
-if page.index(gate_ref) > page.index(editor_ref):
-    fail("Build 295 startup gate loads after the mature Packaging editor")
-print("PASS: Packaging startup gate loads before the mature editor")
+for ref, label in [
+    (gate_ref, "Build 295 startup gate"),
+    (admin_ref, "admin modular runtime launcher"),
+    (editor_ref, "mature Packaging editor"),
+]:
+    if ref not in page:
+        fail(f"Packaging page does not load the {label}")
+if not (page.index(gate_ref) < page.index(admin_ref) < page.index(editor_ref)):
+    fail("Packaging script order must be startup gate -> admin runtime launcher -> mature editor")
+print("PASS: Packaging startup gate loads before admin.js and the mature editor")
 
 protected = [
     "public/js/admin-packaging-studio.js",
