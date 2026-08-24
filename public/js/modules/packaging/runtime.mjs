@@ -1,4 +1,6 @@
 // Devil n Dove Build 290 Packaging runtime composition.
+// Build 296 exposes a stable client transport facade over the proven Build 286 read
+// bridge and Build 289 write bridge so callers never infer ownership from DDAuth.apiFetch.
 // Build 290 keeps the proven Build 286 narrow-bootstrap bridge, Build 287 Content
 // artwork picker, Build 288 legacy-GET retirement and Build 289 write bridge while
 // physically removing the retired broad Catalog/Inventory reads from server source.
@@ -9,7 +11,9 @@ import { createPackagingLegacyGetRetirementGuard } from './read-retirement.mjs';
 import { createPackagingWriteResponseBridge } from './write-response.mjs';
 
 const BUILD = 290;
+const CLIENT_TRANSPORT_BUILD = 296;
 const WRITE_RESPONSE_BUILD = 289;
+const LEGACY_PACKAGING_PATH = '/api/admin/packaging-studio';
 const REQUIRED_CONTRACTS = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
 
 let baseFacade = null;
@@ -22,6 +26,28 @@ let bootstrapListenerInstalled = false;
 function emit(name, detail = {}) {
   if (typeof document === 'undefined' || typeof CustomEvent === 'undefined') return;
   document.dispatchEvent(new CustomEvent(name, { detail: Object.freeze({ ...detail }) }));
+}
+
+function rawRequestUrl(input) {
+  return typeof input === 'string' ? input : String(input?.url || '');
+}
+
+function requestUrl(input) {
+  const raw = rawRequestUrl(input);
+  if (!raw) return null;
+  try {
+    return new URL(raw, globalThis.location?.origin || 'https://devilndove.invalid');
+  } catch {
+    return null;
+  }
+}
+
+function requestPath(input) {
+  return requestUrl(input)?.pathname || rawRequestUrl(input).split(/[?#]/, 1)[0] || '';
+}
+
+function requestMethod(input, init = {}) {
+  return String(init?.method || input?.method || 'GET').toUpperCase();
 }
 
 function currentArtworkRows() {
@@ -48,10 +74,12 @@ function retirementStatus() {
 function writeStatus() {
   return writeBridge?.getStatus?.() || Object.freeze({
     build: WRITE_RESPONSE_BUILD,
+    clientTransportBuild: CLIENT_TRANSPORT_BUILD,
     state: 'not-created',
     armed: false,
+    transportReady: false,
     writeResponseDecoupled: true,
-    legacyWritePath: '/api/admin/packaging-studio',
+    legacyWritePath: LEGACY_PACKAGING_PATH,
     gatewayPath: '/api/admin/packaging-write',
     interceptedWriteCount: 0,
     lastStatus: 0,
@@ -145,6 +173,7 @@ function installBrowserFacade() {
   window.DDPackagingContracts = Object.freeze({
     build: BUILD,
     baseBuild: 286,
+    clientTransportBuild: CLIENT_TRANSPORT_BUILD,
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
     writeResponseBuild: WRITE_RESPONSE_BUILD,
@@ -156,6 +185,7 @@ function installBrowserFacade() {
     readInventory,
     readContentMedia,
     refreshArtworkMedia,
+    transportLegacyRequest,
     getAvailableContentMedia: () => currentArtworkRows(),
     getBootstrapStatus: bootstrapStatus,
     getLegacyGetRetirementStatus: retirementStatus,
@@ -169,6 +199,7 @@ export const metadata = Object.freeze({
   id: 'packaging',
   build: BUILD,
   baseBuild: 286,
+  clientTransportBuild: CLIENT_TRANSPORT_BUILD,
   artworkPickerBuild: 287,
   legacyGetRetirementBuild: 288,
   writeResponseBuild: WRITE_RESPONSE_BUILD,
@@ -176,7 +207,7 @@ export const metadata = Object.freeze({
   legacyBroadReadRemovalBuild: BUILD,
   routePrefix: '/admin/packaging-studio',
   bootstrapPath: '/api/admin/packaging-bootstrap',
-  legacyWritePath: '/api/admin/packaging-studio',
+  legacyWritePath: LEGACY_PACKAGING_PATH,
   writePath: '/api/admin/packaging-write',
   requiredContracts: REQUIRED_CONTRACTS,
   behaviorMode: 'legacy-broad-read-source-removed-write-response-decoupled-runtime',
@@ -185,6 +216,16 @@ export const metadata = Object.freeze({
 export async function readCatalog(options = {}) { return base.readCatalog(options); }
 export async function readInventory(options = {}) { return base.readInventory(options); }
 export async function readContentMedia(options = {}) { return base.readContentMedia(options); }
+
+export async function transportLegacyRequest(input, init = {}) {
+  if (requestPath(input) !== LEGACY_PACKAGING_PATH) {
+    throw new Error('Packaging client transport only accepts the retired compatibility path.');
+  }
+  const method = requestMethod(input, init);
+  if (method === 'GET') return base.transportBootstrapRequest(input, init);
+  if (method === 'POST') return ensureWriteBridge().transport(input, init);
+  throw new Error(`Unsupported Packaging compatibility method: ${method}`);
+}
 
 export async function onLoad(context = {}) {
   await base.onLoad(context);
@@ -197,6 +238,7 @@ export async function onLoad(context = {}) {
     moduleId: 'packaging',
     build: BUILD,
     baseBuild: 286,
+    clientTransportBuild: CLIENT_TRANSPORT_BUILD,
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
     writeResponseBuild: WRITE_RESPONSE_BUILD,
@@ -210,8 +252,8 @@ export async function onActivate(context = {}) {
   const writes = ensureWriteBridge();
 
   // Build 288 guard is innermost, Build 286 bootstrap bridge sits above it, and
-  // the Build 289 write bridge remains outermost. Build 290 changes server source,
-  // not this proven transport order.
+  // the Build 289 write bridge remains outermost. Build 296 exposes these same
+  // proven bridge instances through transportLegacyRequest().
   guard.arm();
   try {
     await base.onActivate(context);
@@ -230,6 +272,7 @@ export async function onActivate(context = {}) {
     moduleId: 'packaging',
     build: BUILD,
     baseBuild: 286,
+    clientTransportBuild: CLIENT_TRANSPORT_BUILD,
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
     writeResponseBuild: WRITE_RESPONSE_BUILD,
@@ -270,6 +313,12 @@ export function getStatus() {
     moduleId: 'packaging',
     build: BUILD,
     baseBuild: Number(baseStatus?.build || 286),
+    clientTransportBuild: CLIENT_TRANSPORT_BUILD,
+    clientTransportReady: Boolean(
+      baseStatus?.transportBootstrapReady
+      && writes.transportReady
+      && retired.armed
+    ),
     artworkPickerBuild: 287,
     legacyGetRetirementBuild: 288,
     writeResponseBuild: WRITE_RESPONSE_BUILD,
