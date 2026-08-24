@@ -1,8 +1,7 @@
-// Devil n Dove Build 309 Inventory write-side authority boundary.
-// Inventory now owns dedicated post and reverse contract routes. Creative reversal consumption
-// is enabled; Creative posting consumption remains deliberately disabled until a later cutover.
+// Devil n Dove Build 310 Inventory write-side authority boundary.
+// Inventory owns dedicated post and reverse contract routes, and Creative now consumes both.
 
-export const BUILD = 309;
+export const BUILD = 310;
 export const OWNER = 'inventory';
 export const POST_CONTRACT_ROUTE = '/api/admin/contracts/inventory-post';
 export const REVERSE_CONTRACT_ROUTE = '/api/admin/contracts/inventory-reverse';
@@ -15,14 +14,14 @@ export const INVENTORY_WRITE_BOUNDARY = Object.freeze({
     contractId: 'inventory-post',
     authorityRoute: POST_CONTRACT_ROUTE,
     authorityAction: 'reviewed-creative-usage',
-    implementationState: 'implemented-not-consumer-enabled',
+    implementationState: 'implemented-creative-consumer-enabled',
     requiresPositiveQuantity: true,
     requiresInventoryItemId: true,
     requiresApprovedMaterialReview: true,
     createsMovementRecord: true,
     createsUsageMovementRecord: true,
     atomicReviewPosting: true,
-    consumerWritesReady: false,
+    consumerWritesReady: true,
   }),
   reverse: Object.freeze({
     contractId: 'inventory-reverse',
@@ -44,7 +43,7 @@ export const INVENTORY_WRITE_BOUNDARY = Object.freeze({
   }),
   createsNetworkTransport: false,
   mutatesInventory: false,
-  consumerMutationReady: false,
+  consumerMutationReady: true,
 });
 
 export function getInventoryWriteBoundaryStatus() {
