@@ -1,4 +1,4 @@
-// Devil n Dove Build 314 Commerce & Operations umbrella runtime.
+// Devil n Dove Build 315 Commerce & Operations umbrella runtime.
 // Catalog and Inventory remain active runtime domains. Operations remains read-only and is
 // explicitly limited to proven page coverage so legacy pages cannot be silently counted as migrated.
 
@@ -7,12 +7,13 @@ import {
   getInventoryWriteBoundaryStatus,
 } from './inventory-write-boundary.mjs?v=310';
 
-const BUILD = 314;
+const BUILD = 315;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory', 'operations']);
 const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
+  '/admin/orders/',
 ]);
 const REQUIRED_SERVICES_BY_DOMAIN = Object.freeze({
   catalog: Object.freeze(['catalog-read', 'inventory-cost']),
@@ -82,8 +83,8 @@ function installFacade() {
     inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
     inventoryCostContractBuild: 311,
     accountingReadContractBuild: 312,
-    operationsRuntimeBuild: 314,
-    operationsRuntimeCoverageBuild: 314,
+    operationsRuntimeBuild: 315,
+    operationsRuntimeCoverageBuild: 315,
     operationsMutationOwnership: false,
     supportedPathForDomain,
     requiredServicesForDomain,
@@ -107,16 +108,16 @@ export const metadata = Object.freeze({
   inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
   inventoryCostContractBuild: 311,
   accountingReadContractBuild: 312,
-  operationsRuntimeBuild: 314,
-  operationsRuntimeCoverageBuild: 314,
+  operationsRuntimeBuild: 315,
+  operationsRuntimeCoverageBuild: 315,
   consumerMutationReady: true,
 });
 
 export async function onLoad({ registry, applicationModule, domainDefinition, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 314 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 315 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
   if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
-    throw new Error(`Commerce & Operations Build 314 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
+    throw new Error(`Commerce & Operations Build 315 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
   }
   verifyServices(registry, domainDefinition.id);
   state = 'loaded';
@@ -136,9 +137,9 @@ export async function onLoad({ registry, applicationModule, domainDefinition, pa
 export async function onActivate({ registry, applicationModule, domainDefinition, user, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime activated with the wrong application-module definition.');
   if (!authenticatedAdmin(user)) throw new Error('Commerce & Operations runtime activation requires an administrator.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 314 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 315 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
   if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
-    throw new Error(`Commerce & Operations Build 314 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
+    throw new Error(`Commerce & Operations Build 315 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
   }
   verifyServices(registry, domainDefinition.id);
   activationCount += 1;
@@ -190,8 +191,8 @@ export function getStatus() {
     inventoryCostServiceRequiredForCatalog: true,
     accountingReadContractBuild: 312,
     accountingReadServiceRequiredForOperations: true,
-    operationsRuntimeBuild: 314,
-    operationsRuntimeCoverageBuild: 314,
+    operationsRuntimeBuild: 315,
+    operationsRuntimeCoverageBuild: 315,
     operationsMutationOwnership: false,
     inventoryWriteBoundaryBuild: writeBoundary.build,
     inventoryPostImplementationState: writeBoundary.post.implementationState,
