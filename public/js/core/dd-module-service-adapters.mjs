@@ -1,10 +1,11 @@
-// Devil n Dove Build 311 browser adapters for implemented read contracts.
+// Devil n Dove Build 312 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
   'inventory-read': '/api/admin/contracts/inventory-read',
   'inventory-cost': '/api/admin/contracts/inventory-cost',
+  'accounting-read': '/api/admin/contracts/accounting-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -70,6 +71,24 @@ export function createDefaultModuleServices() {
         historyCount: Number(data.history_count || 0),
         historyAvailable: Boolean(data.history_available),
         authorityField: data.authority_field || null,
+        contract: data.contract,
+        build: Number(data.build || 0),
+      });
+    }),
+    'accounting-read': service('accounting-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-read'], {
+        status: text(options.status),
+        limit: boundedInt(options.limit, 25, 1, 100),
+      });
+      return Object.freeze({
+        rows: Object.freeze(data.records || []),
+        count: Number(data.count || 0),
+        summary: Object.freeze(data.summary || {}),
+        schemaReady: Boolean(data.schema_ready),
+        missingTables: Object.freeze(data.missing_tables || []),
+        missingColumns: Object.freeze(data.missing_columns || []),
+        authorityTable: data.authority_table || null,
+        requestTimeSchemaMutation: data.request_time_schema_mutation === true,
         contract: data.contract,
         build: Number(data.build || 0),
       });
