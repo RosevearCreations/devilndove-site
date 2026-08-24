@@ -1,24 +1,18 @@
 // File: /functions/api/admin/accounting-expenses.js
+// Build 316: GET delegates to the Accounting-owned read service; POST remains legacy-compatible.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
+import { readAccountingExpenses } from '../_lib/accountingExpensesReadService.js';
 import { assertAccountingPeriodOpen, monthFromDateish } from './_accountingPeriods.js';
 import { ensureAccountingVendorsTable, getAccountingVendorById } from './_accountingVendors.js';
-import { ensureAccountingAttachmentsTable } from './_accountingAttachments.js';
-
-function nr(result) {
-  return Array.isArray(result?.results) ? result.results : [];
-}
 
 async function getTableColumnSet(db, tableName) {
   try {
     const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-    return new Set(nr(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
   } catch {
     return new Set();
   }
-}
-
-function colExpr(cols, name) {
-  return cols.has(name) ? name : `NULL AS ${name}`;
 }
 
 async function ensureTable(db) {
@@ -88,38 +82,26 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
 
-  try {
-    await ensureAccountingVendorsTable(db);
-    await ensureAccountingAttachmentsTable(db);
-    const cols = await ensureTable(db);
-    const attachmentExists = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='accounting_attachments' LIMIT 1`).first().catch(() => null);
-    const attachmentJoin = attachmentExists ? `LEFT JOIN (SELECT expense_id, COUNT(*) AS attachment_count FROM accounting_attachments GROUP BY expense_id) aa ON aa.expense_id = accounting_expenses.expense_id` : '';
-    const attachmentSelect = attachmentExists ? `COALESCE(aa.attachment_count,0) AS attachment_count,` : `0 AS attachment_count,`;
-    const result = await db.prepare(`
-      SELECT
-        ${colExpr(cols, 'expense_id')},
-        ${colExpr(cols, 'expense_date')},
-        ${colExpr(cols, 'vendor_id')},
-        ${colExpr(cols, 'vendor_name')},
-        ${colExpr(cols, 'amount')},
-        ${colExpr(cols, 'tax_amount')},
-        ${colExpr(cols, 'ledger_code')},
-        ${colExpr(cols, 'ledger_name')},
-        ${colExpr(cols, 'recurring_expense_rule_id')},
-        ${colExpr(cols, 'source_mode')},
-        ${colExpr(cols, 'reference_number')},
-        ${colExpr(cols, 'notes')},
-        ${attachmentSelect}
-        ${colExpr(cols, 'created_at')},
-        ${colExpr(cols, 'updated_at')}
-      FROM accounting_expenses
-      ${attachmentJoin}
-      ORDER BY COALESCE(expense_date, created_at, '1970-01-01') DESC, COALESCE(expense_id, 0) DESC
-    `).all();
+  const url = new URL(context.request.url);
 
-    return jsonResponse({ ok: true, expenses: nr(result) });
+  try {
+    const payload = await readAccountingExpenses(db, {
+      limit: url.searchParams.get('limit'),
+    });
+    return jsonResponse({
+      ...payload,
+      compatibility_route: '/api/admin/accounting-expenses',
+      requested_by: adminUser,
+    }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
-    return jsonResponse({ ok: false, error: error?.message || 'Failed to load expenses.' }, 500);
+    return jsonResponse({
+      ok: false,
+      build: 316,
+      contract: 'accounting-expenses-read',
+      owner: 'accounting',
+      request_time_schema_mutation: false,
+      error: error?.message || 'Failed to load expenses.',
+    }, 500);
   }
 }
 
