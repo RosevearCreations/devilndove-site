@@ -93,9 +93,10 @@ validation = git_show("BUILD305_VALIDATION.md")
 for marker in [
     "## Status — COMPLETE IN DEVELOPMENT",
     "f999a5fd61a233254e062540b80aff4fa57956d7",
-    "domain                              inventory",
-    "required_services                   inventory-read",
-    "owns_inventory_mutations            false",
+    "pathname                    /admin/inventory-operations/",
+    "domain                      inventory",
+    "required_services           inventory-read",
+    "owns_inventory_mutations    false",
 ]:
     if marker not in validation:
         fail(f"completed Build 305 validation marker missing: {marker}")
