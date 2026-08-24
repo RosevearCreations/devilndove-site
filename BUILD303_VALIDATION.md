@@ -1,8 +1,8 @@
 # Build 303 Validation — Commerce & Operations Umbrella Runtime Bridge
 
-## Status — CORRECTIVE RETEST REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
-Build 303 is the first runtime bridge after Build 302 normalized the application to Core + three top-level modules.
+Build 303 is the first runtime bridge after Build 302 normalized Devil n Dove to one shared Core + exactly three top-level application modules.
 
 Completed Build 302 historical head:
 
@@ -10,15 +10,20 @@ Completed Build 302 historical head:
 000b9617bc5141ba876ec667d4fbc653ea9ee556
 ```
 
+Proven Build 303 runtime head:
+
+```text
+4fa2124cb89edff89c873c0dbdc1feee35a4e92b
+Build 303 record Packaging activation race correction
+```
+
 Real Production remains frozen at Build 280.
 
-## Build 303 scope
+## Scope
 
-Build 303 changes Core classification/diagnostic behavior only.
+Build 303 changes Core classification/diagnostic behavior only. It does not move Catalog, Inventory or Operations business logic and does not change Packaging domain authority.
 
-It does **not** move Catalog, Inventory or Operations business logic and does not change Packaging domain activation authority.
-
-Expected runtime identity:
+Runtime identity:
 
 ```text
 DDModuleRuntime.build = 303
@@ -26,8 +31,6 @@ DDModuleRuntime.applicationArchitectureBuild = 302
 ```
 
 The Core runtime reports both the current domain and its top-level application module.
-
-Examples:
 
 ```text
 catalog    -> commerce-operations
@@ -37,49 +40,11 @@ packaging  -> creative-production
 accounting -> business-administration
 ```
 
-## First Development browser proof
+## Verified-auth reconciliation correction
 
-Commerce & Operations classification passed on `/admin/products/`:
+The first Development Packaging proof correctly classified `packaging -> creative-production` but remained at `activation-pending` because verified auth could complete before the async Core module finished importing and attached its `dd:admin-ready` listener.
 
-```text
-runtime_build                   303
-architecture_build              302
-domain                          catalog
-domain_mode                     shadow
-application_module              commerce-operations
-application_module_mode         domain-bridge
-api_current_application_module  commerce-operations
-active_domain_runtime           null
-contracts_ok                    true
-services_ok                     true
-```
-
-Packaging classification was correct but activation did not complete:
-
-```text
-runtime_build                   303
-architecture_build              302
-domain                          packaging
-domain_mode                     activation-pending
-application_module              creative-production
-api_current_application_module  creative-production
-active_domain_runtime           null
-packaging_compatibility_build   301
-packaging_compatibility_state   waiting-for-proven-packaging-stack
-native_read_status              0
-failed_verification_count       0
-preview_mode                    fit
-```
-
-Build 303 is therefore not complete yet.
-
-## Root cause and corrective change
-
-`site-auth-ui.js` retains verified auth in `window.DDAuthUiState` and emits `dd:admin-ready` when `/api/auth/me` completes.
-
-Build 303 adds the Build 302 grouping catalog to the async Core module import graph. On a sufficiently fast page the verified admin event can complete before `dd-admin-module-runtime.mjs` has finished importing and attached its event listener. The result is a correctly classified Packaging route that remains at `activation-pending` because the one-time verified event was missed.
-
-The corrective Build 303 runtime now includes:
+Build 303 therefore added retained verified-auth reconciliation using:
 
 ```text
 verifiedResolutionPromise
@@ -89,27 +54,27 @@ queueMicrotask(reconcileVerifiedAuthState)
 dd:auth-verified reconciliation
 ```
 
-This makes verified auth both event-triggered and retained-state-triggered while guarding against duplicate concurrent activation.
+This correction adds no network transport and does not change Packaging read/write/Save/Preview authorities.
 
-The correction performs no network request itself and does not change Packaging transport, read/write, Save Project or Preview authorities.
+## Completed local validation
 
-## Local validation
-
-After pulling the corrective Build 303 head, run:
-
-```bash
-python scripts/build302_core_three_module_architecture_test.py
-python scripts/build303_commerce_operations_umbrella_bridge_test.py
-```
-
-Expected Build 302 ending:
+Build 302 historical regression:
 
 ```text
+PASS: completed Build 302 architecture catalog JavaScript syntax is historically pinned
+PASS: completed Build 302 passive Core + three-module catalog is historically pinned
+PASS: completed Build 302 authoritative architecture is historically pinned
+PASS: completed Build 302 migration state is historically pinned
+PASS: completed Build 302 local proof is historically pinned
+PASS: Build 302 preserves the completed Build 301 historical pin
+PASS: completed Build 302 preserved Build 301 Packaging and Core/domain runtime behavior
+PASS: exact completed Build 302 architecture-normalization boundary is historically pinned
+PASS: completed Build 302 had no SQL/schema, Cloudflare binding/config, R2, or Production change
 BUILD 302 CORE + THREE MODULE ARCHITECTURE HISTORICAL REGRESSION: PASS (000b9617)
 No Cloudflare resource was contacted.
 ```
 
-Expected Build 303 ending:
+Build 303 corrective regression:
 
 ```text
 PASS: Build 303 shared Admin/Core JavaScript syntax
@@ -125,49 +90,30 @@ BUILD 303 COMMERCE & OPERATIONS UMBRELLA RUNTIME BRIDGE: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty after pulling because Build 303 is already committed on `dev`.
+`git status --short` was empty after validation.
 
-## Development deployment
+## Development deployment proof
 
-Confirm the newest Development Pages deployment uses the corrective Build 303 head:
-
-```bash
-npx --yes wrangler@latest pages deployment list \
-  --project-name devilndove-site-dev | head -n 20
-```
-
-The Cloudflare `Environment = Production` label refers to the primary environment of the Development Pages project, not real Production.
-
-## Browser proof 1 — Commerce & Operations classification
-
-Hard-refresh:
+Development Pages project:
 
 ```text
-/admin/products/
+devilndove-site-dev
 ```
 
-Then run in Firefox DevTools Console:
+Current validated deployment:
 
-```js
-(() => {
-  const r = window.DDModuleRuntime;
-  const app = r?.getCurrentApplicationModule?.();
-  console.table({
-    runtime_build: r?.build,
-    architecture_build: r?.applicationArchitectureBuild,
-    domain: document.documentElement.dataset.ddModule,
-    domain_mode: document.documentElement.dataset.ddModuleMode,
-    application_module: document.documentElement.dataset.ddApplicationModule,
-    application_module_mode: document.documentElement.dataset.ddApplicationModuleMode,
-    api_current_application_module: app?.id,
-    active_domain_runtime: r?.getActiveModuleId?.(),
-    contracts_ok: r?.contractValidation?.ok,
-    services_ok: r?.serviceRegistration?.ok,
-  });
-})();
+```text
+Id      d093fdc8-c9e5-48f0-b58c-d6d7252b8047
+Branch  dev
+Source  4fa2124
+Status  Active
 ```
 
-Expected final steady state:
+The Cloudflare `Environment = Production` label refers to the primary environment of the Development Pages project, not real Devil n Dove Production.
+
+## Browser proof — Commerce & Operations
+
+On `/admin/products/`:
 
 ```text
 runtime_build                   303
@@ -182,41 +128,11 @@ contracts_ok                    true
 services_ok                     true
 ```
 
-## Browser proof 2 — Packaging preservation after reconciliation
+This proves the Catalog route is classified under Commerce & Operations without creating a new active domain runtime.
 
-Hard-refresh:
+## Browser proof — Packaging preservation
 
-```text
-/admin/packaging-studio/
-```
-
-Allow the Packaging project to load, then run:
-
-```js
-(() => {
-  const r = window.DDModuleRuntime;
-  const app = r?.getCurrentApplicationModule?.();
-  const p = window.DDPackagingCompatibility?.getStatus?.();
-  console.table({
-    runtime_build: r?.build,
-    architecture_build: r?.applicationArchitectureBuild,
-    auth_phase: window.DDAuthUiState?.phase,
-    auth_verified: window.DDAuthUiState?.verified,
-    domain: document.documentElement.dataset.ddModule,
-    domain_mode: document.documentElement.dataset.ddModuleMode,
-    application_module: document.documentElement.dataset.ddApplicationModule,
-    api_current_application_module: app?.id,
-    active_domain_runtime: r?.getActiveModuleId?.(),
-    packaging_compatibility_build: p?.build,
-    packaging_compatibility_state: p?.state,
-    native_read_status: p?.nativeReadStatus,
-    failed_verification_count: p?.failedVerificationCount,
-    preview_mode: p?.previewMode,
-  });
-})();
-```
-
-Expected:
+After the verified-auth reconciliation correction, `/admin/packaging-studio/` produced:
 
 ```text
 runtime_build                   303
@@ -226,27 +142,43 @@ auth_verified                   true
 domain                          packaging
 domain_mode                     active
 application_module              creative-production
+application_module_mode         domain-bridge
 api_current_application_module  creative-production
 active_domain_runtime           packaging
 packaging_compatibility_build   301
 packaging_compatibility_state   active
+native_read_count               2
 native_read_status              200
 failed_verification_count       0
 preview_mode                    fit
 ```
 
-Build 303 does not require another Packaging write because it does not alter Packaging transport/save logic. If any Packaging functional regression is observed, stop and investigate before completion.
+This proves Build 303 umbrella awareness preserves the completed Build 301 Packaging runtime.
+
+No new Packaging write proof was required because Build 303 does not alter Packaging transport/save logic.
+
+## Safety boundary
+
+Build 303 does not change:
+
+- domain IDs or route prefixes in `dd-module-definitions.mjs`;
+- module contract ownership;
+- Catalog/Inventory/Operations API routes;
+- Packaging runtime entry;
+- Build 301 Packaging compatibility facade;
+- Build 300 Save/Preview stabilizer;
+- Packaging server read/write authorities;
+- SQL/schema;
+- Cloudflare bindings/config;
+- R2;
+- real Production.
 
 ## Completion decision
 
-Do not mark Build 303 complete until:
+**Build 303 is COMPLETE IN DEVELOPMENT.**
 
-1. Build 302 historical regression passes;
-2. corrective Build 303 local regression passes;
-3. Development deployment is current;
-4. `/admin/products/` resolves `catalog -> commerce-operations` without activating a domain runtime;
-5. Packaging resolves `packaging -> creative-production`;
-6. retained verified auth reconciles Packaging to `domain_mode = active` even if the original verified event was missed;
-7. Build 301 compatibility reaches `active` with native read status 200;
-8. contracts/services remain green;
-9. no SQL/config/R2/Production change occurred.
+The first runtime bridge from domain-only classification to the Core + three-module architecture is now proven.
+
+## Next runtime direction
+
+The next bounded pass should give **Commerce & Operations** its first real umbrella runtime boundary while migrating only one internal domain at a time. Do not convert all four Commerce & Operations domains simultaneously.
