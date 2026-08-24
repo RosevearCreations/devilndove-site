@@ -3,6 +3,8 @@
 // Build 311 owns current Inventory cost reads; Build 312 adds bounded Accounting order reads;
 // Build 316 adds an Accounting-owned expenses read contract without moving expense writes.
 
+export const BUILD = 316;
+
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
   const kind = options.kind === 'mutation' ? 'mutation' : 'read';
