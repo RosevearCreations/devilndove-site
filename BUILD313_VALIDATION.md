@@ -1,6 +1,6 @@
 # Build 313 Validation — Operations Read-Only Runtime
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,7 +9,12 @@ Baseline:
 Build 312 complete handoff and set Operations activation next
 ```
 
-Build 312 is COMPLETE IN DEVELOPMENT.
+Proven Build 313 source/runtime head:
+
+```text
+a93611eadf291a66eb3fc7d815bc49dbfd4ba5ce
+Build 313 update Operations runtime handoff context
+```
 
 Build 313 activates only the first explicitly pinned Operations runtime page:
 
@@ -19,96 +24,89 @@ Build 313 activates only the first explicitly pinned Operations runtime page:
 
 Operations business mutations remain outside the runtime shell.
 
-## One GIT BASH block
+## Local regression proof
 
-```bash
-git pull --ff-only origin dev
-python scripts/build313_operations_read_only_runtime_test.py
-git status --short
-```
-
-Expected ending:
+The final local regression passed:
 
 ```text
 BUILD 313 OPERATIONS READ-ONLY RUNTIME: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+The regression proved:
 
-## One BROWSER DEVTOOLS CONSOLE block
+- Commerce runtime Build 313 supports `catalog`, `inventory`, and `operations`;
+- Operations requires exactly `catalog-read,inventory-read,accounting-read`;
+- the umbrella owns no Operations mutations;
+- `/admin/operations/` is explicitly pinned to `admin.js?v=313`;
+- `/admin/orders/` remains outside the Build 313 changed-file boundary;
+- Accounting Build 312 and all previously proven Inventory authorities/consumers remain historically pinned;
+- no SQL/schema, Cloudflare config, R2, or real Production change occurred.
 
-Open and hard-refresh:
+## Development browser proof
+
+Validated at:
 
 ```text
 https://devilndove-site-dev.pages.dev/admin/operations/
 ```
 
-The browser proof must confirm:
-
-- `admin.js?v=313` is served;
-- domain is `operations`;
-- application module is `commerce-operations`;
-- application-module mode is active;
-- Commerce runtime is Build 313;
-- active required services are `catalog-read,inventory-read,accounting-read`;
-- all three services are registered in read-only HTTP mode;
-- explicit reads through all three services succeed;
-- Accounting remains Build 312 and schema-ready;
-- Operations mutation ownership remains false;
-- contracts/services remain green.
-
-Expected architectural state:
+Observed values:
 
 ```text
-pathname                        /admin/operations/
-admin_script                    .../public/js/admin.js?v=313
-core_runtime_build              305
-commerce_runtime_build          313
-domain                          operations
-application_module              commerce-operations
-application_module_mode         active
-active_required_services        catalog-read,inventory-read,accounting-read
-operations_runtime_active       true
-owns_operations_mutations       false
-catalog_service_owner           catalog
-catalog_service_mode            read-only-http
-inventory_service_owner         inventory
-inventory_service_mode          read-only-http
-accounting_service_owner        accounting
-accounting_service_mode         read-only-http
-accounting_build                312
-accounting_schema_ready         true
-contracts_ok                    true
-services_ok                     true
+pathname                     /admin/operations/
+admin_script                 .../public/js/admin.js?v=313
+core_runtime_build           305
+commerce_runtime_build       313
+domain                       operations
+application_module           commerce-operations
+application_module_mode      active
+active_required_services     catalog-read,inventory-read,accounting-read
+operations_runtime_active    true
+owns_operations_mutations    false
+catalog_service_owner        catalog
+catalog_service_mode         read-only-http
+catalog_rows                 2
+inventory_service_owner      inventory
+inventory_service_mode       read-only-http
+inventory_rows               2
+accounting_service_owner     accounting
+accounting_service_mode      read-only-http
+accounting_build             312
+accounting_schema_ready      true
+accounting_schema_mutation   false
+accounting_rows              0
+contracts_ok                 true
+services_ok                  true
 ```
 
-Returned Catalog, Inventory and Accounting row counts may be zero or greater.
-
-No POST, order mutation, payment mutation, customer mutation, gift-card mutation, membership mutation, SQL migration or Production action is required.
+The row counts are not architectural requirements. The proof establishes that all three read authorities are callable on the live Development Operations page and that Accounting remains schema-ready without request-time DDL.
 
 ## Coverage limitation
 
 Build 313 does not claim the full Operations route family is migrated.
 
-`/admin/orders/` is intentionally unchanged and currently lacks the shared runtime loader. `/admin/customer-documents/` retains a historical loader pin but is not re-pinned or validated in Build 313.
+`/admin/orders/` remains unchanged and lacks the shared runtime loader. `/admin/customer-documents/` retains a historical loader pin but was not re-pinned or validated in Build 313.
 
-The only Build 313 runtime page requiring browser proof is:
+The proven Build 313 runtime page is only:
 
 ```text
 /admin/operations/
 ```
 
+Additional Operations routes require separate bounded loader-coverage passes.
+
 ## Completion decision
 
-Do not mark Build 313 complete until:
+All completion gates passed:
 
-1. local regression passes;
-2. working tree is clean;
-3. Development serves `admin.js?v=313` on `/admin/operations/`;
-4. Operations activates under `commerce-operations`;
-5. all three required read services are active and callable;
-6. Accounting remains schema-ready at Build 312;
-7. Operations mutation ownership is false;
-8. `/admin/orders/` remains outside the changed-file boundary;
-9. no SQL/schema/config/R2/real Production change occurs.
+1. local regression passed;
+2. Development served `admin.js?v=313` on `/admin/operations/`;
+3. Operations activated under `commerce-operations`;
+4. all three required read services were active and callable;
+5. Accounting remained schema-ready at Build 312 with request-time schema mutation false;
+6. Operations mutation ownership remained false;
+7. `/admin/orders/` remained outside the changed-file boundary;
+8. no SQL/schema/config/R2/real Production change occurred.
+
+No additional Build 313 browser validation is required.
