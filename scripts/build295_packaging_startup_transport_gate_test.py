@@ -65,16 +65,23 @@ for marker in [
     "function waitForPackagingRuntime()",
     "status.legacyGetGuardArmed === true",
     "status.writeResponseBridgeArmed === true",
+    "const capturedRuntimeReadyAtInstall = runtimeReady();",
     "degradedAuthEvents += 1;",
     "if (runtimeReady()) finish(true, 'runtime-active');",
     "if (currentFetch !== gatedApiFetch && typeof currentFetch === 'function')",
+    "lastReplayTransport = 'runtime-installed-after-gate';",
+    "if (capturedRuntimeReadyAtInstall)",
+    "lastReplayTransport = 'runtime-captured-before-gate';",
     "error_code: 'packaging_runtime_not_ready'",
     "wait_exit_reason: lastWaitExitReason",
+    "replay_transport: lastReplayTransport",
     "legacy_server_route_contacted: false",
     "status: 503",
     "globalThis.DDPackagingStartupGate = Object.freeze",
+    "capturedRuntimeReadyAtInstall,",
     "degradedAuthEvents,",
     "lastWaitExitReason,",
+    "lastReplayTransport,",
     "legacyServerRouteContactedByGate: false",
 ]:
     if marker not in gate:
@@ -85,8 +92,11 @@ if "document.addEventListener(AUTH_DEGRADED_EVENT, onAuthUnavailable)" in gate:
     fail("Build 295 still treats temporary degraded auth as a terminal startup failure")
 if "document.addEventListener(AUTH_DEGRADED_EVENT, onAuthDegraded)" not in gate:
     fail("Build 295 does not observe degraded auth without aborting the startup wait")
+if gate.count("replayedLegacyRequests += 1;") < 2:
+    fail("Build 295 does not protect both runtime-before-gate and gate-before-runtime replay orders")
 print("PASS: startup gate delays legacy-shaped Packaging traffic until modular transport is active")
 print("PASS: temporary degraded auth no longer aborts the Packaging startup wait")
+print("PASS: both valid dynamic-import startup orders replay through modular Packaging transport")
 
 page = read("admin/packaging-studio/index.html")
 gate_ref = '/public/js/admin-packaging-startup-gate.js?v=295'
