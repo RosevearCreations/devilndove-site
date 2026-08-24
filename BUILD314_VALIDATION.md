@@ -1,6 +1,6 @@
 # Build 314 Validation — Customer Documents Operations Runtime Coverage
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,7 +9,12 @@ Baseline:
 Build 313 set completed Operations runtime handoff
 ```
 
-Build 313 is COMPLETE IN DEVELOPMENT.
+Proven Build 314 source/runtime head:
+
+```text
+f386f89a18190c20fd95ca8ec5a0208a4a051b90
+Build 314 update modular handoff context
+```
 
 Build 314 expands the proven read-only Operations runtime page set from one page to two:
 
@@ -20,45 +25,36 @@ Build 314 expands the proven read-only Operations runtime page set from one page
 
 The Customer Documents business implementation remains unchanged.
 
-## One GIT BASH block
+## Local regression proof
 
-```bash
-git pull --ff-only origin dev
-python scripts/build314_customer_documents_operations_runtime_test.py
-git status --short
-```
-
-Expected ending:
+Final local regression passed:
 
 ```text
 BUILD 314 CUSTOMER DOCUMENTS OPERATIONS RUNTIME: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+The regression confirms:
 
-## One BROWSER DEVTOOLS CONSOLE block
+- Commerce runtime Build 314 has explicit Operations pathname enforcement;
+- the proven Operations page allow-list contains only `/admin/operations/` and `/admin/customer-documents/`;
+- Operations still requires `catalog-read,inventory-read,accounting-read`;
+- `ownsOperationsMutations=false`;
+- `/admin/customer-documents/` is pinned to `admin.js?v=314`;
+- `/admin/operations/` is pinned to the same Build 314 loader;
+- `/admin/orders/` remains outside the Build 314 changed-file boundary;
+- `public/js/admin-customer-documents.js` remains historically pinned to the completed Build 313 baseline;
+- Accounting, Inventory write authorities, Creative Inventory consumers, SQL/schema, Cloudflare configuration, R2 and real Production remain unchanged.
 
-Open and hard-refresh:
+## Development browser proof
+
+Validated at:
 
 ```text
 https://devilndove-site-dev.pages.dev/admin/customer-documents/
 ```
 
-The browser proof must confirm:
-
-- `admin.js?v=314` is served;
-- domain is `operations`;
-- application module is `commerce-operations` and mode is active;
-- Commerce runtime is Build 314;
-- active required services remain `catalog-read,inventory-read,accounting-read`;
-- current path is listed in the explicit Operations runtime page coverage;
-- Operations mutation ownership remains false;
-- Accounting remains Build 312, schema-ready and non-mutating;
-- the historical Customer Documents business script remains present as `admin-customer-documents.js?v=227`;
-- contracts/services remain green.
-
-Expected architectural values:
+Observed values:
 
 ```text
 pathname                         /admin/customer-documents/
@@ -81,7 +77,7 @@ contracts_ok                     true
 services_ok                      true
 ```
 
-No document issue, void, refund, order, payment or other mutation is required for validation.
+No document issue, void, refund, order, payment or other mutation was required for validation.
 
 ## Coverage limitation
 
@@ -100,15 +96,16 @@ remain outside the proven Build 314 runtime page set.
 
 ## Completion decision
 
-Do not mark Build 314 complete until:
+All completion gates passed:
 
-1. local regression passes;
-2. working tree is clean;
-3. Development serves `admin.js?v=314` on Customer Documents;
-4. Customer Documents resolves to Operations under Commerce & Operations;
-5. Commerce runtime is Build 314 and current-page coverage is true;
-6. all three Operations read services remain available;
-7. Operations mutation ownership remains false;
-8. the Customer Documents business script remains unchanged;
-9. `/admin/orders/` remains outside the changed-file boundary;
-10. no SQL/schema/config/R2/real Production change occurs.
+1. local regression passed;
+2. Development served `admin.js?v=314` on Customer Documents;
+3. Customer Documents resolved to `operations` under `commerce-operations`;
+4. Commerce runtime was Build 314 and current-page coverage was true;
+5. all three Operations read services remained available;
+6. Operations mutation ownership remained false;
+7. the Customer Documents Build 227 business script remained unchanged;
+8. `/admin/orders/` remained outside the changed-file boundary;
+9. no SQL/schema/config/R2/real Production change occurred.
+
+No additional Build 314 browser validation is required.
