@@ -47,13 +47,24 @@ for marker in [
     "Verified by fresh D1 read-back.",
     "identity.dataset.build300DerivedIdentity",
     "identity.dispatchEvent(new Event('input', { bubbles: true }))",
+    "let previewMode = 'fit';",
+    "data-build300-preview-fit",
+    "data-build300-preview-detail",
+    "svg.style.setProperty('width', '100%', 'important');",
+    "svg.style.setProperty('min-width', '0', 'important');",
+    "preview_claims_match_dom",
+    "dom_matches_verified",
+    "forcedPreviewRefreshCount",
+    "auditPreview: () => auditPreview('manual', true)",
     "globalThis.DDPackagingSaveStabilizer = Object.freeze",
 ]:
     if marker not in stabilizer:
         fail(f"Build 300 stabilizer marker missing: {marker}")
 if "/api/admin/packaging-studio" in stabilizer:
     fail("Build 300 stabilizer names the retired Packaging route")
-print("PASS: Build 300 verifies Save Project against fresh native read-back and stabilizes derived preview identity")
+if "not printed on soap ribbon" in stabilizer:
+    fail("Build 300 still falsely labels the soap front tagline as non-printing")
+print("PASS: Build 300 verifies Save Project and fits/audits the full live soap preview")
 
 page = read("admin/packaging-studio/index.html")
 required = [
