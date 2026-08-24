@@ -20,6 +20,7 @@
   let blockedLegacyRequests = 0;
   let degradedAuthEvents = 0;
   let lastWaitExitReason = 'not-started';
+  let lastReplayTransport = 'none';
 
   function rawRequestUrl(input) {
     return typeof input === 'string' ? input : String(input?.url || '');
@@ -65,6 +66,13 @@
       && status.writeResponseBridgeArmed === true
     );
   }
+
+  // admin.js starts the modular runtime with a dynamic import. Depending on browser
+  // cache/network timing, that runtime can finish either before or after this external
+  // gate script executes. If it is already active here, originalApiFetch is the proven
+  // outer modular transport and remains safe to replay through after the gate becomes
+  // outermost. Otherwise the runtime will replace auth.apiFetch after this gate installs.
+  const capturedRuntimeReadyAtInstall = runtimeReady();
 
   function waitForPackagingRuntime() {
     if (runtimeReady()) {
@@ -122,6 +130,7 @@
       error: 'Packaging modular runtime did not activate. The retired Packaging Studio server route was not contacted.',
       error_code: 'packaging_runtime_not_ready',
       wait_exit_reason: lastWaitExitReason,
+      replay_transport: lastReplayTransport,
       legacy_server_route_contacted: false,
     }), {
       status: 503,
@@ -141,17 +150,26 @@
     const ready = await waitForPackagingRuntime();
     if (!ready) {
       blockedLegacyRequests += 1;
+      lastReplayTransport = 'runtime-unavailable';
       return runtimeUnavailableResponse();
     }
 
     const currentFetch = auth.apiFetch;
     if (currentFetch !== gatedApiFetch && typeof currentFetch === 'function') {
       replayedLegacyRequests += 1;
+      lastReplayTransport = 'runtime-installed-after-gate';
       return currentFetch.call(auth, input, init);
+    }
+
+    if (capturedRuntimeReadyAtInstall) {
+      replayedLegacyRequests += 1;
+      lastReplayTransport = 'runtime-captured-before-gate';
+      return originalApiFetch.call(auth, input, init);
     }
 
     blockedLegacyRequests += 1;
     lastWaitExitReason = 'runtime-ready-but-transport-not-replaced';
+    lastReplayTransport = 'none';
     return runtimeUnavailableResponse();
   }
 
@@ -164,12 +182,14 @@
     getStatus: () => Object.freeze({
       build: BUILD,
       runtimeReady: runtimeReady(),
+      capturedRuntimeReadyAtInstall,
       waitTimeoutMs: WAIT_TIMEOUT_MS,
       delayedLegacyRequests,
       replayedLegacyRequests,
       blockedLegacyRequests,
       degradedAuthEvents,
       lastWaitExitReason,
+      lastReplayTransport,
       legacyServerRouteContactedByGate: false,
     }),
   });
