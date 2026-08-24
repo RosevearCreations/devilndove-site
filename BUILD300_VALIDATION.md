@@ -1,69 +1,110 @@
-# Build 300 Validation — Packaging Live Preview Sync
+# Build 300 Validation — Packaging Save + Preview Stabilization
 
 ## Scope
 
-Build 300 corrects a live Preview mismatch discovered during Build 299 validation. Product / variant can save correctly while the soap SVG continues rendering an older `Product identity — English` value because the renderer intentionally gives English identity precedence.
+Build 300 is a corrective stabilization pass. Forward Packaging modularization is paused.
 
-Build 300 preserves explicit owner identity edits while keeping the default/derived identity synchronized with Product / variant.
+The live page is restored to the proven Build 298 editor/native-client stack by unloading the Build 299 browser print-source controller. Build 300 then adds one verified-save wrapper before the mature editor.
 
-## Activation
+## Local gate
 
-Run locally:
+After pulling `dev`, run:
 
 ```bash
-python scripts/apply_build300_packaging_live_preview_sync.py
-python scripts/build300_packaging_live_preview_sync_test.py
+python scripts/build300_packaging_stabilization_test.py
 ```
 
-The activation helper changes only `admin/packaging-studio/index.html` and inserts:
-
-```html
-<script src="/public/js/admin-packaging-preview-sync-v300.js?v=300"></script>
-```
-
-after the mature Build 298 editor and before the Build 299 print-source controller.
-
-## Local completion gate
-
-Expected regression ending:
+Expected ending:
 
 ```text
-BUILD 300 PACKAGING LIVE PREVIEW SYNC: PASS
+BUILD 300 PACKAGING STABILIZATION: PASS
 No Cloudflare resource was contacted.
 ```
 
 ## Development browser proof
 
-Open a soap Packaging project. With English identity still equal to Product / variant, change Product / variant to an obvious temporary value.
+Use one existing Packaging project and make two harmless, obvious edits:
 
-Expected:
+1. change one ordinary field such as Product / variant;
+2. change one English or French claim.
 
-- Preview updates immediately;
-- English identity follows the product value;
-- Save Project returns success;
-- after the save rerender Preview still contains that identity.
+Click **Save project**.
 
-Run in Firefox Console:
+A successful verified save message must contain:
+
+```text
+Verified by fresh D1 read-back.
+```
+
+Then run in Firefox Console:
 
 ```js
 (() => {
-  console.table(window.DDPackagingPreviewSync?.getStatus?.());
+  console.table(window.DDPackagingSaveStabilizer?.getStatus?.());
 })();
 ```
 
 Expected core values:
 
 ```text
-build                  300
-state                  active
-identityIsDerived      true
-previewContainsIdentity true
-matureEditorPreserved  true
-saveTransportPreserved true
+build                    300
+state                    active
+verifiedSaveCount        >= 1
+failedVerificationCount  0
+lastVerification.ok      true
+lastVerification.claims_match true
+lastVerification.core_match   true
 ```
 
-Then deliberately edit Product identity — English to a different custom value and change Product / variant again. Expected: the custom identity does not get overwritten and `identityIsDerived` becomes false.
+Because nested objects are not expanded well by `console.table`, also run:
+
+```js
+(() => {
+  console.log('Build 300 verification', window.DDPackagingSaveStabilizer?.getStatus?.()?.lastVerification);
+})();
+```
+
+Then click the normal **Refresh** button or hard-refresh the page. The changed ordinary field and changed claim must still be present.
+
+### Preview proof
+
+If Product identity — English was still the default/derived value, Product / variant should keep it synchronized and Preview should display that verified identity.
+
+Run:
+
+```js
+(() => {
+  const s = window.DDPackagingClient?.getStatus?.();
+  console.table({
+    stabilization_build: s?.stabilizationBuild,
+    product_value: s?.productValue,
+    identity_value: s?.identityValue,
+    identity_is_derived: s?.identityIsDerived,
+    preview_contains_identity: s?.previewContainsIdentity,
+    verified_save_count: s?.verifiedSaveCount,
+    failed_verification_count: s?.failedVerificationCount
+  });
+})();
+```
+
+Expected after a derived identity save:
+
+```text
+stabilization_build       300
+identity_is_derived       true
+preview_contains_identity true
+verified_save_count       >= 1
+failed_verification_count 0
+```
+
+Then explicitly customize Product identity — English to a different value and change Product / variant again. The explicit identity must remain unchanged; it is the renderer authority.
+
+## Failure behavior
+
+If D1 read-back does not match what was in the editor, Build 300 must **not** show success. The editor should display a verification error and retain its browser draft. `lastVerification` will identify whether claims or named core fields differ.
 
 ## Safety
 
-No schema/SQL, Cloudflare binding/config, R2, or real Production change is authorized by Build 300.
+Build 300 does not modify the mature editor, Build 298 native client implementation, Build 293/286 read authority, Build 292/291 write authority, retired tombstone, SQL/schema, Cloudflare bindings/config, R2, or real Production.
+
+No later Packaging retirement/modularization build should begin until all Build 300 Development browser gates pass.
