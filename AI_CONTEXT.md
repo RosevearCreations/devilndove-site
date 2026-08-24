@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 303 Completed Commerce & Operations Umbrella Bridge
+# Devil n Dove AI Context — Build 304 Catalog Umbrella Runtime
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader functional roadmap.
 
@@ -6,9 +6,9 @@ Current modular architecture authority:
 
 - `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`
 - `docs/architecture/BUILD302_CORE_THREE_MODULE_NORMALIZATION.md`
-- `BUILD302_VALIDATION.md`
 - `docs/architecture/BUILD303_COMMERCE_OPERATIONS_UMBRELLA_BRIDGE.md`
-- `BUILD303_VALIDATION.md`
+- `docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md`
+- `BUILD304_VALIDATION.md`
 
 **Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
 
@@ -26,7 +26,7 @@ Current modular architecture authority:
 
 There is one shared Core + exactly three top-level application modules.
 
-Historical domain IDs remain internal ownership/service boundaries during migration:
+Internal domains remain explicit ownership/service boundaries:
 
 ```text
 Commerce & Operations
@@ -48,11 +48,7 @@ Business & Administration
   admin
 ```
 
-## Core responsibilities
-
-Core owns shared infrastructure only: auth/session awareness, authorization context, module registry/lifecycle, route resolution, shared API helpers, notifications/errors, environment/runtime state, shared service registration, and module availability.
-
-Core must not absorb business-domain rules.
+Core owns shared infrastructure only and must not absorb business-domain rules.
 
 ## Build 301 Packaging baseline — COMPLETE IN DEVELOPMENT
 
@@ -64,157 +60,172 @@ Runtime activation:
 e2be2209ed96b7a67e975feead37a768f0043cb5
 ```
 
-Completed Build 301 handoff head:
+Completed Build 301 handoff:
 
 ```text
 a81f8d6af0004d847174fa27043c11e159ca3d10
 ```
 
-Live proof established native read/write status 200, verified Save Project, fitted Preview, zero failed verification, zero compatibility replay/block traffic, and write authority `packaging-domain-service`.
+Live proof established native read/write 200, verified Save Project, fitted Preview, zero failed verification, zero compatibility replay/block traffic, and write authority `packaging-domain-service`.
 
-Build 299 remains NOT COMPLETE and its browser print-source controller remains rolled back.
+Build 299 remains NOT COMPLETE and rolled back.
 
 ## Build 302 — COMPLETE IN DEVELOPMENT
 
-Proven Build 302 runtime/architecture baseline:
-
-```text
-cb68b71440f344c258809e79efe23bea65d0167f
-```
-
-Completed Build 302 documentation/handoff head:
+Completed architecture handoff:
 
 ```text
 000b9617bc5141ba876ec667d4fbc653ea9ee556
 ```
 
-Build 302 normalized the architecture to Core + exactly three application modules and added the passive grouping catalog.
+Build 302 normalized the application to Core + exactly three top-level modules and added the passive grouping catalog.
+
+Architecture build remains:
+
+```text
+302
+```
 
 ## Build 303 — COMPLETE IN DEVELOPMENT
 
-Proven Build 303 runtime head:
+Completed Build 303 handoff:
+
+```text
+6cbcc4353327eea093ef4701497fa5321b680096
+Build 303 set completed umbrella-runtime handoff
+```
+
+Proven runtime head:
 
 ```text
 4fa2124cb89edff89c873c0dbdc1feee35a4e92b
-Build 303 record Packaging activation race correction
 ```
 
-Build 303 is the first runtime bridge from historical domain-only classification to the three umbrella modules.
+Build 303 made Core umbrella-aware while preserving domain activation and fixed the verified-auth event race through retained `DDAuthUiState` reconciliation.
 
-Runtime identity:
+Completed browser proof:
 
 ```text
-DDModuleRuntime.build = 303
-DDModuleRuntime.applicationArchitectureBuild = 302
+Catalog
+  domain                     catalog
+  application module         commerce-operations
+  domain mode                shadow
+  application module mode    domain-bridge
+
+Packaging
+  domain                     packaging
+  application module         creative-production
+  domain mode                active
+  Build 301 compatibility    active
+  native read status         200
 ```
 
-Core continues to resolve/activate the existing domain definition while also reporting its top-level application-module parent.
+Build 304 historically pins Build 303 to `6cbcc435...`.
 
-Examples:
+## Build 304 — STAGED / VALIDATION REQUIRED
+
+Build 304 is the first true top-level application-module runtime extraction.
+
+It adds:
 
 ```text
-catalog     -> commerce-operations
-inventory   -> commerce-operations
-operations  -> commerce-operations
-packaging   -> creative-production
-accounting  -> business-administration
+public/js/modules/commerce-operations/runtime.mjs
 ```
 
-### Verified-auth correction
+and opts **Catalog only** into the Commerce & Operations runtime.
 
-The first Packaging browser proof remained at `activation-pending` because verified auth could finish before the asynchronous Core import attached its event listener.
-
-Build 303 corrected this with retained-state reconciliation using `DDAuthUiState`, plus an in-flight guard against duplicate activation. No new network transport or Packaging business logic was added.
-
-### Completed local proof
+### Runtime identities
 
 ```text
-BUILD 302 CORE + THREE MODULE ARCHITECTURE HISTORICAL REGRESSION: PASS (000b9617)
-BUILD 303 COMMERCE & OPERATIONS UMBRELLA RUNTIME BRIDGE: PASS
-No Cloudflare resource was contacted.
+DDModuleRuntime.build                        304
+DDModuleRuntime.applicationArchitectureBuild 302
+DDModuleRuntime.applicationRuntimeCatalogBuild 304
 ```
 
-Working tree was clean after validation.
-
-### Development deployment proof
+The Build 302 grouping catalog remains the architecture authority but now carries passive Build 304 runtime metadata:
 
 ```text
-Project devilndove-site-dev
-Source  4fa2124
-Status  Active
+RUNTIME_CATALOG_BUILD = 304
+commerce-operations.entry = ../modules/commerce-operations/runtime.mjs?v=304
+commerce-operations.runtimeDomains = [catalog]
 ```
 
-### Commerce & Operations browser proof
+Inventory, Operations and Public remain bridge-only. Creative & Production and Business & Administration still have no top-level runtime entry.
 
-On `/admin/products/`:
+### Catalog target state
+
+On `/admin/products/` after verified Admin startup:
 
 ```text
-runtime_build                   303
-architecture_build              302
-domain                          catalog
-domain_mode                     shadow
-application_module              commerce-operations
-application_module_mode         domain-bridge
-api_current_application_module  commerce-operations
-active_domain_runtime           null
-contracts_ok                    true
-services_ok                     true
+domain                            catalog
+domain_mode                       shadow
+application_module                commerce-operations
+application_module_mode           active
+active_domain_runtime             null
+active_application_runtime        commerce-operations
+application_runtime_state         active
+application_runtime_domain        catalog
+application_runtime_services_ready true
 ```
 
-### Packaging preservation browser proof
+The new Commerce & Operations runtime:
+
+- supports only `catalog`;
+- requires only the existing `catalog-read` service;
+- creates no network transport;
+- exposes `window.DDCommerceOperations` diagnostics;
+- does not rewrite Catalog page/API business logic.
+
+### Packaging preservation target
 
 On `/admin/packaging-studio/`:
 
 ```text
-runtime_build                   303
-architecture_build              302
-auth_phase                      verified
-auth_verified                   true
 domain                          packaging
 domain_mode                     active
 application_module              creative-production
 application_module_mode         domain-bridge
-api_current_application_module  creative-production
 active_domain_runtime           packaging
+active_application_runtime      null
 packaging_compatibility_build   301
 packaging_compatibility_state   active
-native_read_count               2
 native_read_status              200
 failed_verification_count       0
 preview_mode                    fit
 ```
 
-Build 303 changed no Packaging read/write/save implementation, so no additional write proof was required.
+Build 304 changes no Packaging implementation file.
 
-## Current separation state
+### Build 304 safety boundary
+
+Build 304 must not change:
+
+- domain registry or domain definitions;
+- domain contract ownership/service adapters;
+- Catalog page or API implementations;
+- Inventory/Operations/Public extraction;
+- Packaging page/client/runtime/read/write/save/preview authorities;
+- SQL/schema;
+- Cloudflare bindings/config;
+- R2;
+- real Production.
+
+Run:
 
 ```text
-Core
-  established; now umbrella-aware at runtime
-
-Commerce & Operations
-  umbrella identity proven at runtime
-  catalog/inventory/operations implementations still domain/shadow
-
-Creative & Production
-  umbrella identity proven at runtime
-  Packaging domain substantially extracted and active under Build 301
-  creative/caip/content remain shadow/legacy
-
-Business & Administration
-  umbrella identity available through Core mapping
-  domains remain shadow/legacy
+python scripts/build303_commerce_operations_umbrella_bridge_test.py
+python scripts/build304_commerce_operations_catalog_runtime_test.py
 ```
 
-## Next runtime direction
+Then perform the two browser proofs in `BUILD304_VALIDATION.md`.
 
-The next bounded pass should create the first real **Commerce & Operations umbrella runtime boundary** and migrate only one internal domain at a time behind it.
+Do not mark Build 304 complete until both local and browser gates are green.
 
-Preferred first candidate: **Catalog**, because `catalog-read` is already an explicit passive contract.
+## Next bounded direction after Build 304
 
-Do not convert Public, Catalog, Inventory and Operations simultaneously.
+If Build 304 is green, the next Commerce & Operations extraction should add **Inventory** to the same top-level runtime in a separate build while preserving Inventory as an explicit authority/service boundary.
 
-After Commerce & Operations is proven, establish Creative & Production around Packaging, then Business & Administration. Only after all three top-level runtimes are proven should redundant shadow/domain loaders and old compatibility layers be retired.
+Do not migrate Inventory and Operations together.
 
 ## Separate schema/data parity track — DO NOT MIX WITH MODULE EXTRACTION
 
