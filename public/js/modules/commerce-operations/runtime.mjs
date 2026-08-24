@@ -1,9 +1,13 @@
-// Devil n Dove Build 305 Commerce & Operations umbrella runtime.
-// Build 304 proved Catalog under the top-level runtime. Build 305 adds Inventory
-// through its existing inventory-read authority only. This runtime creates no network
-// request by itself and does not absorb Inventory mutation/business rules.
+// Devil n Dove Build 306 Commerce & Operations umbrella runtime.
+// Catalog and Inventory remain the proven runtime domains. Build 306 hardens the
+// Inventory write-side contract boundary without creating new mutation transport.
 
-const BUILD = 305;
+import {
+  BUILD as INVENTORY_WRITE_BOUNDARY_BUILD,
+  getInventoryWriteBoundaryStatus,
+} from './inventory-write-boundary.mjs?v=306';
+
+const BUILD = 306;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory']);
 const REQUIRED_SERVICES_BY_DOMAIN = Object.freeze({
@@ -46,6 +50,10 @@ function verifyServices(registry, domainId) {
   return true;
 }
 
+function inventoryWriteBoundaryStatus() {
+  return getInventoryWriteBoundaryStatus();
+}
+
 function emit(name, detail = {}) {
   if (typeof document === 'undefined' || typeof CustomEvent === 'undefined') return;
   document.dispatchEvent(new CustomEvent(name, {
@@ -65,7 +73,9 @@ function installFacade() {
     supportedDomains: SUPPORTED_DOMAINS,
     requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
     allRequiredServices: ALL_REQUIRED_SERVICES,
+    inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
     requiredServicesForDomain,
+    getInventoryWriteBoundaryStatus: inventoryWriteBoundaryStatus,
     getStatus,
   });
 }
@@ -77,9 +87,11 @@ export const metadata = Object.freeze({
   supportedDomains: SUPPORTED_DOMAINS,
   requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
   allRequiredServices: ALL_REQUIRED_SERVICES,
-  behaviorMode: 'catalog-inventory-umbrella-runtime-boundary',
+  behaviorMode: 'catalog-inventory-write-contract-hardening',
   createsNetworkTransport: false,
   ownsInventoryMutations: false,
+  inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
+  consumerMutationReady: false,
 });
 
 export async function onLoad({ registry, applicationModule, domainDefinition } = {}) {
@@ -87,7 +99,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition } =
     throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
   }
   if (!supportedDomain(domainDefinition?.id)) {
-    throw new Error(`Commerce & Operations Build 305 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+    throw new Error(`Commerce & Operations Build 306 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
   }
   verifyServices(registry, domainDefinition.id);
   state = 'loaded';
@@ -98,6 +110,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition } =
     servicesReady,
     supportedDomains: SUPPORTED_DOMAINS,
     activeRequiredServices,
+    inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
 }
 
@@ -109,7 +122,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     throw new Error('Commerce & Operations runtime activation requires an administrator.');
   }
   if (!supportedDomain(domainDefinition?.id)) {
-    throw new Error(`Commerce & Operations Build 305 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+    throw new Error(`Commerce & Operations Build 306 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
   }
   verifyServices(registry, domainDefinition.id);
 
@@ -125,6 +138,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     activationCount,
     servicesReady,
     activeRequiredServices,
+    inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
 }
 
@@ -144,6 +158,7 @@ export async function onDeactivate({ reason = 'route-lifecycle' } = {}) {
 }
 
 export function getStatus() {
+  const writeBoundary = inventoryWriteBoundaryStatus();
   return Object.freeze({
     build: BUILD,
     moduleId: MODULE_ID,
@@ -157,6 +172,12 @@ export function getStatus() {
     servicesReady,
     createsNetworkTransport: false,
     ownsInventoryMutations: false,
+    inventoryWriteBoundaryBuild: writeBoundary.build,
+    inventoryPostImplementationState: writeBoundary.post.implementationState,
+    inventoryReverseImplementationState: writeBoundary.reverse.implementationState,
+    inventoryReverseRequiresOriginalMovementId: writeBoundary.reverse.requiresOriginalMovementId,
+    inventoryDirectStockAddBackAllowed: writeBoundary.reverse.directStockAddBackAllowed,
+    inventoryConsumerMutationReady: writeBoundary.consumerMutationReady,
     catalogRuntimeBoundaryActive: state === 'active' && currentDomain === 'catalog',
     inventoryRuntimeBoundaryActive: state === 'active' && currentDomain === 'inventory',
   });
