@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 306 Inventory Write Contracts
+# Devil n Dove AI Context — Build 307 Inventory Compensating Reversal Service
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -10,7 +10,9 @@ Current modular architecture authority:
 - `docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md`
 - `docs/architecture/BUILD305_COMMERCE_OPERATIONS_INVENTORY_RUNTIME.md`
 - `docs/architecture/BUILD306_INVENTORY_WRITE_CONTRACTS.md`
+- `docs/architecture/BUILD307_INVENTORY_COMPENSATING_REVERSAL_SERVICE.md`
 - `BUILD306_VALIDATION.md`
+- `BUILD307_VALIDATION.md`
 
 **Real Devil n Dove Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow.**
 
@@ -27,7 +29,7 @@ Current modular architecture authority:
 
 Internal domains remain explicit ownership/service boundaries.
 
-## Completed baselines
+## Completed modular baselines
 
 ```text
 Build 301 Packaging compatibility      COMPLETE IN DEVELOPMENT
@@ -51,121 +53,194 @@ catalog   -> commerce-operations -> catalog-read
 inventory -> commerce-operations -> inventory-read
 ```
 
-Inventory live proof showed `domain=inventory`, active application runtime `commerce-operations`, `required_services=inventory-read`, and `owns_inventory_mutations=false`.
-
 Packaging remained green beneath Creative & Production through Build 301.
 
-## Build 306 — STAGED / VALIDATION REQUIRED
+## Build 306 — BROWSER PROVEN / LOCAL SIGNOFF PENDING
 
-Build 306 hardens Inventory write-side contracts **without moving or rewriting mutation authority**.
-
-### Existing Inventory authority
-
-Current Inventory code already performs movement-backed usage through:
+Build 306 baseline:
 
 ```text
-POST /api/admin/site-item-inventory
-action = consume_usage
+c8ea00e57cb906cc671fc15727ed2c8cd8b63dab
+Build 306 harden Build 305 historical proof markers
 ```
 
-Build 306 preserves that server/UI implementation unchanged.
-
-### inventory-post
-
-Build 306 records:
+The Development browser proof passed:
 
 ```text
-owner                    inventory
-consumer                 creative
-existing authority       /api/admin/site-item-inventory
-authority action         consume_usage
-implementation state     existing-authority-not-yet-contract-route
-consumer writes ready    false
+admin_script                   ...admin.js?v=306
+Core runtime                   305
+Commerce runtime               306
+write contract build           306
+domain                         inventory
+application module             commerce-operations
+required service               inventory-read
+owns inventory mutations       false
+consumer mutation ready        false
+inventory-post                 existing-authority-not-yet-contract-route
+inventory-reverse              blocked-pending-compensating-movement-service
+requires original movement     true
+direct stock add-back          false
+contracts/services             true / true
 ```
 
-The generic Inventory endpoint is existing authority, not yet a stable cross-module mutation contract.
+The user has not yet supplied the final Build 306 local-regression output. Do not relabel Build 306 as COMPLETE until that proof exists.
 
-### inventory-reverse
+## Build 307 — STAGED / VALIDATION REQUIRED
 
-Build 306 explicitly blocks fake reversal by stock increment:
+Build 307 implements the Inventory-owned compensating reversal service without migrating Creative Process to it yet.
+
+### New contract route
 
 ```text
-implementation state              blocked-pending-compensating-movement-service
-requires original movement id     true
-compensating movement only        true
-direct stock add-back allowed     false
-consumer writes ready             false
+GET  /api/admin/contracts/inventory-reverse
+POST /api/admin/contracts/inventory-reverse
 ```
 
-No dedicated reversal route is added.
-
-A future reversal must preserve the original movement and create a compensating movement with traceable linkage, reason and authorization.
-
-### Passive write-boundary facade
-
-New file:
+Contract state:
 
 ```text
-public/js/modules/commerce-operations/inventory-write-boundary.mjs
+owner                         inventory
+consumer                      creative
+status                        implemented
+implementation state          implemented-not-consumer-enabled
+requires original movement    true
+requires Creative posting     true
+confirmation                  REVERSE INVENTORY
+compensating movement only    true
+direct stock add-back         false
+consumer writes ready         false
 ```
 
-It exposes `window.DDInventoryWriteBoundary` and creates no fetch or mutation.
+### Inventory-owned service
 
-### Commerce runtime
-
-Commerce runtime advances to Build 306 for diagnostics only.
-
-Catalog/Inventory ownership remains unchanged. It still requires only:
+New helper:
 
 ```text
-catalog   -> catalog-read
-inventory -> inventory-read
+functions/api/_lib/inventoryReversalService.js
 ```
 
-and still reports:
+The service requires:
 
 ```text
-ownsInventoryMutations = false
-inventoryConsumerMutationReady = false
-inventoryWriteBoundaryBuild = 306
+creative_work_project_id
+creative_project_inventory_post_id
+original_site_inventory_movement_id
+reason >= 8 characters
+confirmation = REVERSE INVENTORY
 ```
 
-### Core lifecycle
+Authenticated admin identity supplies authorization; callers cannot choose another authorizer.
 
-Build 306 deliberately does **not** change `public/js/core/dd-admin-module-runtime.mjs`.
+### Original movement provenance
 
-The proven Core Build 305 lifecycle is reused. `admin.js?v=306` cache-busts it so the browser reloads the Build 306 application catalog and Commerce runtime metadata.
+The supplied `site_inventory_movement_id` must match the Creative posting on:
 
-Expected Build 306 browser identity therefore includes:
+- inventory item;
+- `consume` movement type;
+- negative stock delta;
+- previous/new stock values;
+- Creative project/event provenance in movement note;
+- posting/movement actor when both exist.
+
+Unrelated movement IDs are rejected with a 409 mismatch.
+
+### Compensating reversal rule
+
+Never restore an old absolute stock value.
+
+Build 307 applies:
 
 ```text
-Core runtime build             305
-Commerce runtime build         306
-Inventory write contract build 306
+current on-hand + original posted stock consumption
 ```
 
-### Safety boundary
+so later legitimate stock activity is preserved.
 
-Build 306 changes no:
+For reusable/log-only usage, physical stock restoration may be zero while usage quantity is still reversed.
 
+### Idempotency and race protection
+
+Build 307 reuses the existing database-unique ledger:
+
+```text
+creative_project_inventory_reversals.creative_project_inventory_post_id UNIQUE
+```
+
+No new reversal table is introduced.
+
+A unique request marker is embedded in the ledger reason and compensating movement notes. Every mutation statement is gated by the exact marker for this request.
+
+The D1 batch order is:
+
+```text
+1. claim unique reversal ledger row conditioned on current stock snapshot
+2. add compensating stock delta
+3. insert correction movement
+4. insert positive usage movement linked to correction movement
+5. mark Creative post reversed
+6. clear material-review inventory_consumed
+```
+
+If inventory changed before the claim, the service returns:
+
+```text
+409 inventory_reversal_stale_stock
+```
+
+If another request already completed the reversal, the UNIQUE ledger makes the call idempotent and the existing reversal is returned.
+
+### Safe readiness GET
+
+GET is admin-authenticated and non-mutating. It reports Build 307 contract state and verifies required tables via `sqlite_master`.
+
+Development validation should use GET only. Do **not** run a live reversal POST in Build 307 because the Creative consumer has not been switched yet.
+
+### Runtime identity
+
+Architecture build remains 302.
+
+```text
+Catalog runtime                   304
+Inventory runtime                 305
+Inventory write contract/service  307
+Commerce runtime                  307
+Core runtime source               305
+```
+
+Inventory remains active under Commerce & Operations through `inventory-read`.
+
+The umbrella runtime still reports:
+
+```text
+ownsInventoryMutations        false
+inventoryConsumerMutationReady false
+```
+
+The Inventory-owned endpoint performs mutation authority; the umbrella runtime itself does not.
+
+### Build 307 safety boundary
+
+Build 307 does not modify:
+
+- `functions/api/admin/creative-process.js`;
+- `functions/api/admin/site-item-inventory.js`;
 - Core lifecycle implementation;
-- Inventory mutation implementation;
-- Inventory read API;
-- Catalog business behavior;
+- Build 217/244 schema;
+- `database_full_schema.sql`;
+- Catalog implementation;
 - Packaging implementation;
-- Operations/Public extraction;
 - SQL/schema;
 - Cloudflare bindings/config;
 - R2;
 - real Production.
 
-## Next direction after Build 306
+The existing Creative reversal helper remains the compatibility path until a later consumer-cutover build.
 
-After Build 306 is proven, implement a dedicated `inventory-post` service/route with stable request, authorization, idempotency, movement identity, audit and error semantics.
+## Next direction after Build 307
 
-Do not implement `inventory-reverse` until it can create a compensating movement tied to the original movement ID.
+After Build 307 is proven, migrate **only Creative reversal consumption** to the new Inventory-owned contract with equivalence/idempotency tests.
 
-Do not migrate Operations yet.
+Do not combine that cutover with `inventory-post` extraction or Operations migration.
 
 ## Validation interaction preference
 
