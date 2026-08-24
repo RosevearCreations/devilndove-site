@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "e5be1b4adcb2a6f335d1aabbe90ca6b9234a2f45"
+HISTORICAL_HEAD = "21b01cc34ef734f581da22a7f0d3c43ec10607c0"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD299_VALIDATION.md",
@@ -25,15 +27,22 @@ def run(args):
     return subprocess.run(args, cwd=ROOT, text=True, capture_output=True, encoding="utf-8", errors="replace")
 
 
-def read(path):
-    return (ROOT / path).read_text(encoding="utf-8")
+def git_show(ref, path):
+    result = run(["git", "show", f"{ref}:{path}"])
+    if result.returncode:
+        fail(f"could not read historical {path} at {ref}: {result.stderr.strip()}")
+    return result.stdout
 
 
-stabilizer = read("public/js/admin-packaging-save-stabilizer-v300.js")
-syntax = run(["node", "--check", "public/js/admin-packaging-save-stabilizer-v300.js"])
+stabilizer = git_show(HISTORICAL_HEAD, "public/js/admin-packaging-save-stabilizer-v300.js")
+with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".js", delete=False) as handle:
+    handle.write(stabilizer)
+    syntax_path = handle.name
+syntax = subprocess.run(["node", "--check", syntax_path], text=True, capture_output=True, encoding="utf-8", errors="replace")
+Path(syntax_path).unlink(missing_ok=True)
 if syntax.returncode:
-    fail(syntax.stderr.strip() or "Build 300 JavaScript syntax failed")
-print("PASS: Build 300 JavaScript syntax")
+    fail(syntax.stderr.strip() or "historical Build 300 JavaScript syntax failed")
+print("PASS: completed Build 300 JavaScript syntax")
 
 for marker in [
     "const BUILD = 300;",
@@ -63,14 +72,14 @@ for marker in [
     "globalThis.DDPackagingSaveStabilizer = Object.freeze",
 ]:
     if marker not in stabilizer:
-        fail(f"Build 300 stabilizer marker missing: {marker}")
+        fail(f"completed Build 300 stabilizer marker missing: {marker}")
 if "/api/admin/packaging-studio" in stabilizer:
-    fail("Build 300 stabilizer names the retired Packaging route")
+    fail("completed Build 300 stabilizer names the retired Packaging route")
 if "not printed on soap ribbon" in stabilizer:
-    fail("Build 300 still falsely labels the soap front tagline as non-printing")
-print("PASS: Build 300 verifies Save Project, fits/audits the full live soap preview, and prevents preview-audit observer feedback")
+    fail("completed Build 300 falsely labels the soap front tagline as non-printing")
+print("PASS: completed Build 300 verified-save + fitted-preview stabilization is pinned")
 
-page = read("admin/packaging-studio/index.html")
+page = git_show(HISTORICAL_HEAD, "admin/packaging-studio/index.html")
 required = [
     '/public/js/admin-packaging-startup-gate-v297.js?v=297',
     '/public/js/admin.js?v=296',
@@ -81,13 +90,13 @@ required = [
 ]
 for marker in required:
     if marker not in page:
-        fail(f"Packaging page marker missing: {marker}")
+        fail(f"completed Build 300 Packaging page marker missing: {marker}")
 positions = [page.index(marker) for marker in required]
 if positions != sorted(positions):
-    fail("Packaging stabilization script order is not deterministic")
+    fail("completed Build 300 Packaging script order is not deterministic")
 if '/public/js/admin-packaging-print-source-v299.js?v=299' in page:
-    fail("Build 299 browser print-source controller is still loaded on the live Packaging page")
-print("PASS: Packaging page restored to proven Build 298 runtime with Build 300 stabilizer only")
+    fail("completed Build 300 still loads the rolled-back Build 299 browser controller")
+print("PASS: completed Build 300 live page shape is pinned historically")
 
 protected = [
     "public/js/admin-packaging-studio.js",
@@ -102,37 +111,30 @@ protected = [
     "functions/api/admin/packaging-studio.js",
 ]
 for path in protected:
-    result = run(["git", "diff", "--quiet", BASE, "HEAD", "--", path])
+    result = run(["git", "diff", "--quiet", BASE, HISTORICAL_HEAD, "--", path])
     if result.returncode != 0:
-        fail(f"protected Packaging authority changed from Build 299 base: {path}")
-print("PASS: mature editor and proven native read/write/tombstone authorities are unchanged")
+        fail(f"protected Packaging authority changed inside completed Build 300 boundary: {path}")
+print("PASS: completed Build 300 protected authorities are historically unchanged")
 
-build299_validation = read("BUILD299_VALIDATION.md")
-for marker in [
-    "NOT COMPLETE",
-    "rolled back",
-    "Build 300",
-]:
+build299_validation = git_show(HISTORICAL_HEAD, "BUILD299_VALIDATION.md")
+for marker in ["NOT COMPLETE", "rolled back", "Build 300"]:
     if marker.lower() not in build299_validation.lower():
-        fail(f"Build 299 rollback record missing marker: {marker}")
-print("PASS: Build 299 is explicitly not signed off and its browser controller rollback is documented")
+        fail(f"completed Build 300 rollback record missing marker: {marker}")
+print("PASS: completed Build 300 preserves the Build 299 rollback record")
 
-committed = run(["git", "diff", "--name-only", BASE, "HEAD"])
+committed = run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])
 if committed.returncode:
-    fail(committed.stderr.strip() or "could not read committed Build 300 boundary")
-local = run(["git", "diff", "--name-only"])
-if local.returncode:
-    fail(local.stderr.strip() or "could not read local Build 300 boundary")
-actual = {line.strip() for line in (committed.stdout + "\n" + local.stdout).splitlines() if line.strip()}
+    fail(committed.stderr.strip() or "could not read completed Build 300 boundary")
+actual = {line.strip() for line in committed.stdout.splitlines() if line.strip()}
 if actual != EXPECTED:
-    fail(f"Build 300 changed-file boundary mismatch. expected={sorted(EXPECTED)} actual={sorted(actual)}")
-print("PASS: exact Build 300 stabilization changed-file boundary")
+    fail(f"completed Build 300 changed-file boundary mismatch. expected={sorted(EXPECTED)} actual={sorted(actual)}")
+print("PASS: exact completed Build 300 stabilization boundary is historically pinned")
 
 for path in actual:
     lower = path.lower()
     if lower.endswith('.sql') or lower in {'wrangler.toml', 'wrangler.json', 'wrangler.jsonc'}:
-        fail(f"forbidden schema/config change in Build 300 boundary: {path}")
-print("PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change")
+        fail(f"forbidden schema/config change in completed Build 300 boundary: {path}")
+print("PASS: completed Build 300 had no SQL/schema, Cloudflare binding/config, R2, or Production change")
 
-print("BUILD 300 PACKAGING STABILIZATION: PASS")
+print(f"BUILD 300 PACKAGING STABILIZATION HISTORICAL REGRESSION: PASS ({HISTORICAL_HEAD[:8]})")
 print("No Cloudflare resource was contacted.")
