@@ -1,19 +1,27 @@
-// Devil n Dove Build 290 Admin module runtime bridge.
-// Packaging remains the only actively loadable module. Its Build 290 runtime keeps
-// the proven narrow contract reads, Content artwork picker, legacy-GET retirement
-// and write bridge after physically removing retired broad server reads.
+// Devil n Dove Build 303 Admin module runtime bridge.
+// Build 303 adds Core awareness of the three Build 302 umbrella application modules
+// while preserving the proven domain registry/activation behavior. Packaging remains
+// the only actively loadable domain runtime; umbrella classification is metadata only.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
 import { validateModuleContracts } from './dd-module-contracts.mjs';
 import { registerDefaultModuleServices } from './dd-module-service-adapters.mjs';
+import {
+  BUILD as APPLICATION_ARCHITECTURE_BUILD,
+  applicationModuleForDomain,
+  getApplicationModule,
+  snapshotApplicationArchitecture,
+} from './dd-application-module-groups.mjs';
 
 const registry = createModuleRegistry(DD_MODULE_DEFINITIONS);
 const contractValidation = validateModuleContracts(DD_MODULE_DEFINITIONS);
 const serviceRegistration = registerDefaultModuleServices(registry);
+const applicationArchitecture = snapshotApplicationArchitecture();
 const CLASSIFICATION_USER = Object.freeze({ role: 'admin' });
 
 let currentResolution = null;
+let currentApplicationModule = null;
 let activeModuleId = null;
 let verifiedAdmin = null;
 
@@ -29,41 +37,60 @@ function missingRuntimeServices(definition) {
   return (definition?.consumes || []).filter((contractId) => !registry.service(contractId));
 }
 
+function applicationModuleFromDefinition(definition) {
+  const applicationModuleId = applicationModuleForDomain(definition?.id);
+  return applicationModuleId ? getApplicationModule(applicationModuleId) : null;
+}
+
 function annotateAdminLinks(root = document) {
   if (!root?.querySelectorAll) return;
   for (const link of root.querySelectorAll('a[href^="/admin"]')) {
     try {
       const url = new URL(link.getAttribute('href'), window.location.origin);
       const definition = classifyPath(url.pathname);
+      const applicationModule = applicationModuleFromDefinition(definition);
       link.dataset.ddModuleTarget = definition?.id || 'legacy-review';
       link.dataset.ddModuleActivation = definition?.entry ? 'runtime' : 'shadow';
+      link.dataset.ddApplicationModuleTarget = applicationModule?.id || 'legacy-review';
     } catch {
       link.dataset.ddModuleTarget = 'legacy-review';
       link.dataset.ddModuleActivation = 'shadow';
+      link.dataset.ddApplicationModuleTarget = 'legacy-review';
     }
   }
 }
 
 function setResolution(definition, mode) {
   currentResolution = definition || null;
+  currentApplicationModule = applicationModuleFromDefinition(definition);
   document.documentElement.dataset.ddModule = definition?.id || 'legacy-review';
   document.documentElement.dataset.ddModuleMode = mode;
+  document.documentElement.dataset.ddApplicationModule = currentApplicationModule?.id || 'legacy-review';
+  document.documentElement.dataset.ddApplicationModuleMode = 'domain-bridge';
+}
+
+function resolutionDetail(definition, mode, extra = {}) {
+  const applicationModule = applicationModuleFromDefinition(definition);
+  return Object.freeze({
+    mode,
+    moduleId: definition?.id || null,
+    moduleLabel: definition?.label || null,
+    applicationModuleId: applicationModule?.id || null,
+    applicationModuleLabel: applicationModule?.label || null,
+    applicationArchitectureBuild: APPLICATION_ARCHITECTURE_BUILD,
+    pathname: window.location.pathname,
+    contractsOk: contractValidation.ok,
+    servicesOk: serviceRegistration.ok,
+    runtimeEntry: definition?.entry || null,
+    state: definition ? registry.state(definition.id) : null,
+    ...extra,
+  });
 }
 
 function dispatchResolution(definition, mode, extra = {}) {
-  document.dispatchEvent(new CustomEvent('dd:module-resolved', {
-    detail: Object.freeze({
-      mode,
-      moduleId: definition?.id || null,
-      moduleLabel: definition?.label || null,
-      pathname: window.location.pathname,
-      contractsOk: contractValidation.ok,
-      servicesOk: serviceRegistration.ok,
-      runtimeEntry: definition?.entry || null,
-      state: definition ? registry.state(definition.id) : null,
-      ...extra,
-    }),
-  }));
+  const detail = resolutionDetail(definition, mode, extra);
+  document.dispatchEvent(new CustomEvent('dd:module-resolved', { detail }));
+  document.dispatchEvent(new CustomEvent('dd:application-module-resolved', { detail }));
 }
 
 async function deactivateActive(reason = 'route-lifecycle') {
@@ -154,7 +181,7 @@ document.addEventListener('dd:admin-ready', (event) => {
     return;
   }
 
-  // Cached/degraded identity may classify the route but cannot start a module.
+  // Cached/degraded identity may classify the route but cannot start a domain runtime.
   if (!activeModuleId) {
     const definition = registry.resolve(window.location.pathname, detail.user);
     setResolution(definition, detail.degraded ? 'shadow-degraded' : 'activation-pending');
@@ -168,8 +195,11 @@ document.addEventListener('dd:auth-rejected', () => {
   verifiedAdmin = null;
   void deactivateActive('auth-rejected').finally(() => {
     currentResolution = null;
+    currentApplicationModule = null;
     document.documentElement.dataset.ddModule = 'unverified';
     document.documentElement.dataset.ddModuleMode = 'shadow-unverified';
+    document.documentElement.dataset.ddApplicationModule = 'unverified';
+    document.documentElement.dataset.ddApplicationModuleMode = 'domain-bridge';
   });
 });
 
@@ -186,14 +216,19 @@ if (!serviceRegistration.ok) {
 
 const runtimeApi = Object.freeze({
   mode: 'runtime',
-  build: 290,
+  build: 303,
+  applicationArchitectureBuild: APPLICATION_ARCHITECTURE_BUILD,
+  applicationArchitecture,
   registry,
   definitions: registry.list(),
   contractValidation,
   serviceRegistration,
   classifyPath,
   resolveForUser: (pathname, user) => registry.resolve(pathname, user),
+  applicationModuleForDomain,
+  getApplicationModule,
   getCurrent: () => currentResolution,
+  getCurrentApplicationModule: () => currentApplicationModule,
   getActiveModuleId: () => activeModuleId,
   getModuleState: (moduleId) => registry.state(moduleId),
   service: (name) => registry.service(name),
