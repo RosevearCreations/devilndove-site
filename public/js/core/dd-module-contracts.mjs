@@ -1,5 +1,6 @@
-// Devil n Dove Build 310 cross-module contract catalog.
-// Inventory post and reverse are both Inventory-owned and Creative-consumer-enabled.
+// Devil n Dove Build 311 cross-module contract catalog.
+// Inventory post and reverse remain Inventory-owned and Creative-consumer-enabled.
+// Build 311 adds the read-only Inventory cost authority for Catalog and Accounting consumers.
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -27,8 +28,12 @@ function contract(id, owner, consumers, description, options = {}) {
 export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('catalog-read', 'catalog', ['public', 'operations', 'packaging', 'marketing', 'accounting'], 'Read stable product/catalog identity and presentation facts.', { status: 'implemented', route: '/api/admin/contracts/catalog-read' }),
   contract('inventory-read', 'inventory', ['operations', 'creative', 'packaging'], 'Read inventory identity, source and reusable material facts without mutating stock.', { status: 'implemented', route: '/api/admin/contracts/inventory-read' }),
-  contract('inventory-cost', 'inventory', ['catalog', 'accounting'], 'Read authoritative inventory cost facts for pricing and finance.', {
-    implementationState: 'declared-separate-read-authority-required',
+  contract('inventory-cost', 'inventory', ['catalog', 'accounting'], 'Read authoritative current Inventory cost facts and optional cost-history evidence for pricing and finance.', {
+    status: 'implemented',
+    route: '/api/admin/contracts/inventory-cost',
+    authorityRoute: '/api/admin/contracts/inventory-cost',
+    authorityAction: 'read-current-cost',
+    implementationState: 'implemented-read-only-current-cost',
   }),
   contract('inventory-post', 'inventory', ['creative'], 'Post reviewed physical material usage through Inventory authority.', {
     status: 'implemented',
