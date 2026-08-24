@@ -1,15 +1,15 @@
 // Devil n Dove Build 302 Core + Three Application Modules architecture catalog.
 // Build 304 added the first passive umbrella runtime metadata for Catalog.
 // Build 305 extended that same Commerce & Operations runtime to Inventory.
-// Build 306 hardened Inventory write-side contracts; Build 307 added the Inventory-owned
-// compensating reversal service; Build 309 adds the Inventory-owned reviewed-material post service.
+// Build 306 hardened Inventory write-side contracts; Build 307 added Inventory reversal authority;
+// Build 309 added Inventory post authority; Build 310 enables Creative consumption of both.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
 export const BUILD = 302;
 export const RUNTIME_CATALOG_BUILD = 304;
 export const RUNTIME_INVENTORY_BUILD = 305;
-export const INVENTORY_WRITE_CONTRACT_BUILD = 309;
+export const INVENTORY_WRITE_CONTRACT_BUILD = 310;
 
 export const DD_APPLICATION_CORE = Object.freeze({
   id: 'core',
@@ -46,7 +46,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=309',
+    entry: '../modules/commerce-operations/runtime.mjs?v=310',
     runtimeDomains: Object.freeze(['catalog', 'inventory']),
   }),
   Object.freeze({
@@ -108,7 +108,7 @@ export function snapshotApplicationArchitecture() {
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'catalog-inventory-post-and-reversal-authorities',
+    currentRuntimeMigrationMode: 'catalog-inventory-creative-write-consumers-enabled',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
