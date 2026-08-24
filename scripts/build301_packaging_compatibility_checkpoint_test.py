@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "21b01cc34ef734f581da22a7f0d3c43ec10607c0"
@@ -49,10 +50,16 @@ def changed_files(base, head):
 
 
 compat = git_show(HISTORICAL_HEAD, "public/js/admin-packaging-compatibility-v301.js")
-syntax = run(["node", "--check", "public/js/admin-packaging-compatibility-v301.js"])
+with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as handle:
+    handle.write(compat)
+    syntax_path = handle.name
+try:
+    syntax = run(["node", "--check", syntax_path])
+finally:
+    Path(syntax_path).unlink(missing_ok=True)
 if syntax.returncode:
-    fail(syntax.stderr.strip() or "current Build 301 compatibility JavaScript syntax failed")
-print("PASS: completed Build 301 JavaScript syntax")
+    fail(syntax.stderr.strip() or "historical Build 301 compatibility JavaScript syntax failed")
+print("PASS: completed Build 301 JavaScript syntax is historically pinned")
 
 for marker in [
     "const BUILD = 301;",
