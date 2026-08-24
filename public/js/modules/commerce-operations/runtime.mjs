@@ -1,30 +1,47 @@
-// Devil n Dove Build 304 Commerce & Operations umbrella runtime.
-// First extraction scope: Catalog routes only. This runtime creates no network request
-// by itself and preserves existing Catalog page/business logic while Core gains a real
-// top-level application-module lifecycle boundary.
+// Devil n Dove Build 305 Commerce & Operations umbrella runtime.
+// Build 304 proved Catalog under the top-level runtime. Build 305 adds Inventory
+// through its existing inventory-read authority only. This runtime creates no network
+// request by itself and does not absorb Inventory mutation/business rules.
 
-const BUILD = 304;
+const BUILD = 305;
 const MODULE_ID = 'commerce-operations';
-const SUPPORTED_DOMAINS = Object.freeze(['catalog']);
-const REQUIRED_SERVICES = Object.freeze(['catalog-read']);
+const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory']);
+const REQUIRED_SERVICES_BY_DOMAIN = Object.freeze({
+  catalog: Object.freeze(['catalog-read']),
+  inventory: Object.freeze(['inventory-read']),
+});
+const ALL_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-read']);
 
 let state = 'registered';
 let activationCount = 0;
 let currentDomain = null;
 let lastPathname = '';
 let servicesReady = false;
+let activeRequiredServices = Object.freeze([]);
 
 function authenticatedAdmin(user) {
   return Boolean(user && String(user.role || '').trim().toLowerCase() === 'admin');
 }
 
-function supportedDomain(domainId) {
-  return SUPPORTED_DOMAINS.includes(String(domainId || '').trim().toLowerCase());
+function normalizeDomain(domainId) {
+  return String(domainId || '').trim().toLowerCase();
 }
 
-function verifyServices(registry) {
-  const missing = REQUIRED_SERVICES.filter((serviceId) => !registry?.service?.(serviceId));
-  if (missing.length) throw new Error(`Commerce & Operations is missing required services: ${missing.join(', ')}`);
+function supportedDomain(domainId) {
+  return SUPPORTED_DOMAINS.includes(normalizeDomain(domainId));
+}
+
+function requiredServicesForDomain(domainId) {
+  return REQUIRED_SERVICES_BY_DOMAIN[normalizeDomain(domainId)] || Object.freeze([]);
+}
+
+function verifyServices(registry, domainId) {
+  const required = requiredServicesForDomain(domainId);
+  const missing = required.filter((serviceId) => !registry?.service?.(serviceId));
+  if (missing.length) {
+    throw new Error(`Commerce & Operations ${normalizeDomain(domainId) || 'unknown'} boundary is missing required services: ${missing.join(', ')}`);
+  }
+  activeRequiredServices = Object.freeze([...required]);
   servicesReady = true;
   return true;
 }
@@ -46,7 +63,9 @@ function installFacade() {
     build: BUILD,
     moduleId: MODULE_ID,
     supportedDomains: SUPPORTED_DOMAINS,
-    requiredServices: REQUIRED_SERVICES,
+    requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
+    allRequiredServices: ALL_REQUIRED_SERVICES,
+    requiredServicesForDomain,
     getStatus,
   });
 }
@@ -56,22 +75,29 @@ export const metadata = Object.freeze({
   build: BUILD,
   kind: 'application-module-runtime',
   supportedDomains: SUPPORTED_DOMAINS,
-  requiredServices: REQUIRED_SERVICES,
-  behaviorMode: 'catalog-first-umbrella-runtime-boundary',
+  requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
+  allRequiredServices: ALL_REQUIRED_SERVICES,
+  behaviorMode: 'catalog-inventory-umbrella-runtime-boundary',
   createsNetworkTransport: false,
+  ownsInventoryMutations: false,
 });
 
-export async function onLoad({ registry, applicationModule } = {}) {
+export async function onLoad({ registry, applicationModule, domainDefinition } = {}) {
   if (applicationModule?.id !== MODULE_ID) {
     throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
   }
-  verifyServices(registry);
+  if (!supportedDomain(domainDefinition?.id)) {
+    throw new Error(`Commerce & Operations Build 305 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+  }
+  verifyServices(registry, domainDefinition.id);
   state = 'loaded';
   installFacade();
   emit('dd:commerce-operations-loaded', {
     state,
+    domainId: normalizeDomain(domainDefinition.id),
     servicesReady,
     supportedDomains: SUPPORTED_DOMAINS,
+    activeRequiredServices,
   });
 }
 
@@ -83,12 +109,12 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     throw new Error('Commerce & Operations runtime activation requires an administrator.');
   }
   if (!supportedDomain(domainDefinition?.id)) {
-    throw new Error(`Commerce & Operations Build 304 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+    throw new Error(`Commerce & Operations Build 305 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
   }
-  verifyServices(registry);
+  verifyServices(registry, domainDefinition.id);
 
   activationCount += 1;
-  currentDomain = String(domainDefinition.id);
+  currentDomain = normalizeDomain(domainDefinition.id);
   lastPathname = String(pathname || '');
   state = 'active';
   installFacade();
@@ -98,6 +124,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     pathname: lastPathname,
     activationCount,
     servicesReady,
+    activeRequiredServices,
   });
 }
 
@@ -106,6 +133,8 @@ export async function onDeactivate({ reason = 'route-lifecycle' } = {}) {
   state = 'inactive';
   currentDomain = null;
   lastPathname = '';
+  servicesReady = false;
+  activeRequiredServices = Object.freeze([]);
   installFacade();
   emit('dd:commerce-operations-inactive', {
     state,
@@ -123,10 +152,13 @@ export function getStatus() {
     currentDomain,
     lastPathname,
     supportedDomains: SUPPORTED_DOMAINS,
-    requiredServices: REQUIRED_SERVICES,
+    requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
+    activeRequiredServices,
     servicesReady,
     createsNetworkTransport: false,
+    ownsInventoryMutations: false,
     catalogRuntimeBoundaryActive: state === 'active' && currentDomain === 'catalog',
+    inventoryRuntimeBoundaryActive: state === 'active' && currentDomain === 'inventory',
   });
 }
 
