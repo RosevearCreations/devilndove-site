@@ -1,7 +1,6 @@
-// Devil n Dove Build 306 cross-module contract catalog.
-// Implemented read contracts expose stable owner-side API boundaries. Declared
-// mutation contracts now also record authority and compensating-reversal requirements
-// without creating new mutation routes or bypassing existing Inventory rules.
+// Devil n Dove Build 307 cross-module contract catalog.
+// Read contracts remain stable. Inventory reverse now has an Inventory-owned contract
+// route, but Creative consumer migration remains deliberately disabled until a later pass.
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -18,6 +17,8 @@ function contract(id, owner, consumers, description, options = {}) {
     authorityAction: String(options.authorityAction || '').trim() || null,
     implementationState: String(options.implementationState || '').trim() || (status === 'implemented' ? 'implemented' : 'declared'),
     requiresOriginalMovementId: Boolean(options.requiresOriginalMovementId),
+    requiresCreativePostingId: Boolean(options.requiresCreativePostingId),
+    confirmationText: String(options.confirmationText || '').trim() || null,
     compensatingMovementOnly: Boolean(options.compensatingMovementOnly),
     directStockAddBackAllowed: options.directStockAddBackAllowed === true,
     consumerWritesReady: options.consumerWritesReady === true,
@@ -38,9 +39,14 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
     consumerWritesReady: false,
   }),
   contract('inventory-reverse', 'inventory', ['creative'], 'Reverse posted usage only through a compensating Inventory movement tied to the original movement.', {
+    status: 'implemented',
     kind: 'mutation',
-    implementationState: 'blocked-pending-compensating-movement-service',
+    route: '/api/admin/contracts/inventory-reverse',
+    authorityRoute: '/api/admin/contracts/inventory-reverse',
+    implementationState: 'implemented-not-consumer-enabled',
     requiresOriginalMovementId: true,
+    requiresCreativePostingId: true,
+    confirmationText: 'REVERSE INVENTORY',
     compensatingMovementOnly: true,
     directStockAddBackAllowed: false,
     consumerWritesReady: false,
@@ -72,6 +78,12 @@ export function validateModuleContracts(definitions, contracts = DD_MODULE_CONTR
     }
     if (item.id === 'inventory-reverse' && item.directStockAddBackAllowed) {
       errors.push('inventory-reverse cannot permit direct stock add-back.');
+    }
+    if (item.id === 'inventory-reverse' && item.status === 'implemented' && !item.requiresCreativePostingId) {
+      errors.push('implemented inventory-reverse must require the current Creative posting id until generic reversal provenance exists.');
+    }
+    if (item.id === 'inventory-reverse' && item.status === 'implemented' && item.confirmationText !== 'REVERSE INVENTORY') {
+      errors.push('implemented inventory-reverse must retain explicit typed confirmation.');
     }
     for (const consumer of item.consumers) {
       if (!modules.has(consumer)) errors.push(`Contract ${item.id} has unknown consumer ${consumer}`);
