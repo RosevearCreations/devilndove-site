@@ -26,7 +26,16 @@ def fail(message):
 
 
 def run(args):
-    return subprocess.run(args, cwd=ROOT, text=True, capture_output=True)
+    # Git and Node emit UTF-8. Pin decoding explicitly so Windows locale/code-page
+    # settings (for example cp1252) cannot corrupt historical-source comparisons.
+    return subprocess.run(
+        args,
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+    )
 
 
 def read(path):
