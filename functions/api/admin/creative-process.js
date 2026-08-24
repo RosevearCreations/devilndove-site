@@ -132,7 +132,7 @@ export async function onRequestGet(context){
     const productId=num(url.searchParams.get('product_id'));
     let productProjectIds=[];
     if(productId){
-      const linked=await access.db.prepare(`SELECT creative_work_project_id FROM creative_project_product_links WHERE product_id=?1 ORDER BY is_primary DESC,creative_project_product_link_id DESC`).bind(productId).all();
+      const linked=await access.db.prepare(`SELECT creative_work_project_id FROM creative_project_product_links WHERE product_id=?1 ORDER BY is_primary DESC,creative_work_project_id DESC`).bind(productId).all();
       productProjectIds=(linked.results||[]).map(row=>Number(row.creative_work_project_id||0)).filter(Boolean);
     }
     return json({ok:true,build:BUILD,inventory_reversal_consumer_build:REVERSAL_CONSUMER_BUILD,inventory_reversal_authority:'inventory-reverse',projects:await listProjects(access.db),detail:id?await detail(access.db,id):null,product_project_ids:productProjectIds,output_blueprint:OUTPUTS.map(([key,label,group])=>({key,label,group})),mode:'project_first_optional_product_links'});
