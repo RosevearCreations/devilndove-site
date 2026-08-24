@@ -1,9 +1,9 @@
-// Devil n Dove Build 295 Packaging startup transport gate.
-// The mature Packaging editor still emits the legacy-shaped GET/POST request as its
-// internal compatibility trigger. Build 295 prevents that trigger from reaching the
-// retired server route until the modular read/write bridges are fully active.
+// Devil n Dove Build 296 Packaging client transport adapter.
+// The mature Packaging editor still emits the retired compatibility path internally.
+// Build 296 waits for the modular Packaging runtime, then calls its explicit transport
+// facade directly. It never infers bridge ownership from the mutable DDAuth.apiFetch slot.
 (() => {
-  const BUILD = 295;
+  const BUILD = 296;
   const LEGACY_PACKAGING_PATH = '/api/admin/packaging-studio';
   const RUNTIME_ACTIVE_EVENT = 'dd:packaging-runtime-active';
   const AUTH_REJECTED_EVENT = 'dd:auth-rejected';
@@ -49,12 +49,23 @@
     return requestPath(input) === LEGACY_PACKAGING_PATH && (method === 'GET' || method === 'POST');
   }
 
+  function contracts() {
+    return globalThis.DDPackagingContracts || null;
+  }
+
   function runtimeStatus() {
     try {
-      return globalThis.DDPackagingContracts?.getStatus?.() || null;
+      return contracts()?.getStatus?.() || null;
     } catch {
       return null;
     }
+  }
+
+  function transportFacade() {
+    const facade = contracts();
+    return typeof facade?.transportLegacyRequest === 'function'
+      ? facade.transportLegacyRequest
+      : null;
   }
 
   function runtimeReady() {
@@ -62,17 +73,13 @@
     return Boolean(
       status
       && status.state === 'active'
+      && status.clientTransportBuild === BUILD
+      && status.clientTransportReady === true
       && status.legacyGetGuardArmed === true
       && status.writeResponseBridgeArmed === true
+      && transportFacade()
     );
   }
-
-  // admin.js starts the modular runtime with a dynamic import. Depending on browser
-  // cache/network timing, that runtime can finish either before or after this external
-  // gate script executes. If it is already active here, originalApiFetch is the proven
-  // outer modular transport and remains safe to replay through after the gate becomes
-  // outermost. Otherwise the runtime will replace auth.apiFetch after this gate installs.
-  const capturedRuntimeReadyAtInstall = runtimeReady();
 
   function waitForPackagingRuntime() {
     if (runtimeReady()) {
@@ -127,8 +134,8 @@
     return new Response(JSON.stringify({
       ok: false,
       build: BUILD,
-      error: 'Packaging modular runtime did not activate. The retired Packaging Studio server route was not contacted.',
-      error_code: 'packaging_runtime_not_ready',
+      error: 'Packaging modular client transport did not activate. The retired Packaging Studio server route was not contacted.',
+      error_code: 'packaging_client_transport_not_ready',
       wait_exit_reason: lastWaitExitReason,
       replay_transport: lastReplayTransport,
       legacy_server_route_contacted: false,
@@ -154,23 +161,17 @@
       return runtimeUnavailableResponse();
     }
 
-    const currentFetch = auth.apiFetch;
-    if (currentFetch !== gatedApiFetch && typeof currentFetch === 'function') {
-      replayedLegacyRequests += 1;
-      lastReplayTransport = 'runtime-installed-after-gate';
-      return currentFetch.call(auth, input, init);
+    const transport = transportFacade();
+    if (typeof transport !== 'function') {
+      blockedLegacyRequests += 1;
+      lastWaitExitReason = 'runtime-ready-but-client-transport-missing';
+      lastReplayTransport = 'none';
+      return runtimeUnavailableResponse();
     }
 
-    if (capturedRuntimeReadyAtInstall) {
-      replayedLegacyRequests += 1;
-      lastReplayTransport = 'runtime-captured-before-gate';
-      return originalApiFetch.call(auth, input, init);
-    }
-
-    blockedLegacyRequests += 1;
-    lastWaitExitReason = 'runtime-ready-but-transport-not-replaced';
-    lastReplayTransport = 'none';
-    return runtimeUnavailableResponse();
+    replayedLegacyRequests += 1;
+    lastReplayTransport = 'packaging-client-transport-facade';
+    return transport(input, init);
   }
 
   auth.apiFetch = gatedApiFetch;
@@ -178,11 +179,11 @@
   globalThis.DDPackagingStartupGate = Object.freeze({
     build: BUILD,
     legacyPath: LEGACY_PACKAGING_PATH,
-    behaviorMode: 'wait-for-modular-packaging-transport',
+    behaviorMode: 'explicit-packaging-client-transport-facade',
     getStatus: () => Object.freeze({
       build: BUILD,
       runtimeReady: runtimeReady(),
-      capturedRuntimeReadyAtInstall,
+      transportFacadeAvailable: Boolean(transportFacade()),
       waitTimeoutMs: WAIT_TIMEOUT_MS,
       delayedLegacyRequests,
       replayedLegacyRequests,
