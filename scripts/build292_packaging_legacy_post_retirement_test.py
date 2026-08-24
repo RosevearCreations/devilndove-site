@@ -4,6 +4,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "f144edffe54c9ec46160ab95b129c4c71267baeb"
+HISTORICAL_HEAD = "40a458354a8c0785386456dc4646cb44b48ca124"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD292_CHANGED_FILES.md",
@@ -53,13 +54,13 @@ for name in [
         fail(f"JavaScript syntax failed for {name}: {result.stderr.strip()}")
 print("PASS: Build 292 JavaScript syntax")
 
-service = read("functions/api/_lib/packagingDomainService.js")
+service = git_show(HISTORICAL_HEAD, "functions/api/_lib/packagingDomainService.js")
 base_service = git_show(BASE, "functions/api/_lib/packagingDomainService.js")
 if service != base_service:
     fail("Build 291 shared Packaging domain service changed during Build 292")
 print("PASS: Build 291 shared Packaging domain service is unchanged")
 
-adapter = read("functions/api/admin/packaging-studio.js")
+adapter = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-studio.js")
 for marker in [
     "const BUILD = 292;",
     "onRequestGet as loadLegacyPackagingStudio",
@@ -85,7 +86,7 @@ for forbidden in [
 print("PASS: legacy Packaging POST authority is retired with authenticated 410 semantics")
 print("PASS: legacy Packaging GET compatibility delegation remains")
 
-gateway = read("functions/api/admin/packaging-write.js")
+gateway = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-write.js")
 for marker in [
     "const BUILD = 292;",
     "const WRITE_SERVICE_BUILD = 291;",
@@ -138,7 +139,7 @@ protected = [
     "public/js/modules/packaging/runtime.mjs",
 ]
 for path in protected:
-    result = run(["git", "diff", "--quiet", BASE, "HEAD", "--", path])
+    result = run(["git", "diff", "--quiet", BASE, HISTORICAL_HEAD, "--", path])
     if result.returncode != 0:
         fail(f"Build 292 unexpectedly changed protected file: {path}")
 print("PASS: shared service, bootstrap, legacy UI and Build 290 browser/runtime stack are unchanged")
@@ -152,7 +153,7 @@ if 'git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-studio.js")' not in
     fail("Build 291 regression still reads future legacy adapter source")
 print("PASS: Build 291 historical regression boundary is pinned")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
+result = run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
