@@ -45,11 +45,10 @@ function isCompatibilityRequest(input, init = {}) {
 
 function capturePreviousFacade() {
   const facade = globalThis.DDPackagingContracts || null;
-  const status = facade?.getStatus?.() || null;
   if (
     facade
     && typeof facade.transportLegacyRequest === 'function'
-    && Number(status?.clientTransportBuild || 0) === 296
+    && Number(facade.clientTransportBuild || 0) === 296
   ) {
     previousFacade = facade;
   }
@@ -186,7 +185,7 @@ function emitActive() {
 function activateIfReady() {
   const facade = capturePreviousFacade();
   const status = facade?.getStatus?.() || null;
-  if (!facade || status?.state !== 'active' || Number(status?.clientTransportBuild || 0) !== 296) return false;
+  if (!facade || status?.state !== 'active' || Number(facade.clientTransportBuild || 0) !== 296) return false;
   ensureNativeRead();
   if (!installOuterTransport()) return false;
   installFacadeRepairListeners();
