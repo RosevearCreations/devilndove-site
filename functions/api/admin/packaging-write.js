@@ -1,12 +1,11 @@
-// Devil n Dove Build 290 Packaging write gateway.
-// The mature Packaging POST implementation remains authoritative for business writes.
-// Build 290 physically removes the retired broad Catalog/Inventory reads from that
-// implementation, so this gateway now delegates directly and only keeps the Build 289
-// response-shape boundary for contract-owned collections.
+// Devil n Dove Build 291 Packaging write gateway.
+// The active write endpoint calls the shared Packaging domain service directly.
+// The legacy /api/admin/packaging-studio POST route remains only a compatibility adapter.
 
-import { onRequestPost as legacyPackagingPost } from './packaging-studio.js';
+import { onRequestPost as executePackagingWrite } from '../_lib/packagingDomainService.js';
 
-const BUILD = 290;
+const BUILD = 291;
+const BROAD_READ_REMOVAL_BUILD = 290;
 
 function rewrittenJsonResponse(response, payload) {
   if (typeof Response === 'undefined' || typeof Headers === 'undefined') return response;
@@ -36,12 +35,16 @@ function decouplePackagingWritePayload(payload) {
     build: BUILD,
     gateway_build: BUILD,
     gateway_path: '/api/admin/packaging-write',
+    write_service_build: BUILD,
+    write_authority: 'packaging-domain-service',
+    shared_write_service: true,
+    legacy_post_route_is_adapter: true,
     delegated_legacy_write: true,
     packaging_owned_response: true,
     catalog_collection: 'omitted-owner-contract',
     inventory_collection: 'omitted-owner-contract',
     legacy_broad_reads_removed: true,
-    legacy_broad_reads_removed_build: BUILD,
+    legacy_broad_reads_removed_build: BROAD_READ_REMOVAL_BUILD,
     broad_catalog_queries_skipped: 0,
     broad_inventory_queries_skipped: 0,
     legacy_post_business_logic_preserved: true,
@@ -50,7 +53,7 @@ function decouplePackagingWritePayload(payload) {
 }
 
 export async function onRequestPost(context) {
-  const response = await legacyPackagingPost(context);
+  const response = await executePackagingWrite(context);
   const payload = await readPayload(response);
   if (!response?.ok || !payload?.ok) return response;
   return rewrittenJsonResponse(response, decouplePackagingWritePayload(payload));
