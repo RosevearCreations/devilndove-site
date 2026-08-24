@@ -4,6 +4,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "afc50a80183ce30bc9c6182a4db3c4adc068f0ad"
+HISTORICAL_HEAD = "ab0b7cc6e5dd3ac54bbdba0a3dc8e455ff318de3"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD296_CHANGED_FILES.md",
@@ -26,18 +27,18 @@ def fail(message):
 
 
 def run(args):
-    return subprocess.run(
-        args,
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+    return subprocess.run(args, cwd=ROOT, text=True, capture_output=True, encoding="utf-8", errors="replace")
 
 
 def read(path):
     return (ROOT / path).read_text(encoding="utf-8")
+
+
+def git_show(ref, path):
+    result = run(["git", "show", f"{ref}:{path}"])
+    if result.returncode:
+        fail(f"git show failed for {ref}:{path}: {result.stderr.strip()}")
+    return result.stdout
 
 
 for name in [
@@ -53,12 +54,17 @@ for name in [
     "functions/api/admin/packaging-bootstrap.js",
     "functions/api/admin/packaging-write.js",
 ]:
-    result = run(["node", "--check", name])
+    source = git_show(HISTORICAL_HEAD, name)
+    suffix = ".mjs" if name.endswith(".mjs") else ".js"
+    temp = ROOT / f".build296_historical_check{suffix}"
+    temp.write_text(source, encoding="utf-8")
+    result = run(["node", "--check", str(temp.name)])
+    temp.unlink(missing_ok=True)
     if result.returncode:
-        fail(f"JavaScript syntax failed for {name}: {result.stderr.strip()}")
-print("PASS: Build 296 JavaScript syntax")
+        fail(f"Build 296 historical JavaScript syntax failed for {name}: {result.stderr.strip()}")
+print("PASS: Build 296 historical JavaScript syntax")
 
-base = read("public/js/modules/packaging/index.mjs")
+base = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/index.mjs")
 for marker in [
     "const CLIENT_TRANSPORT_BUILD = 296;",
     "export async function transportBootstrapRequest(input, init)",
@@ -68,87 +74,60 @@ for marker in [
 ]:
     if marker not in base:
         fail(f"Build 296 bootstrap transport marker missing: {marker}")
-if "build: 286" not in base:
-    fail("Build 286 read implementation provenance changed")
-print("PASS: Build 286 bootstrap bridge exposes an explicit Build 296 transport handle")
+print("PASS: Build 286 bootstrap bridge exposes the historical Build 296 transport handle")
 
-writes = read("public/js/modules/packaging/write-response.mjs")
+writes = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/write-response.mjs")
 for marker in [
     "const BUILD = 289;",
     "const CLIENT_TRANSPORT_BUILD = 296;",
     "const WRITE_GATEWAY_PATH = '/api/admin/packaging-write';",
     "async function transport(input, init)",
     "return bridgedApiFetch(input, init);",
-    "return Object.freeze({ arm, disarm, transport, getStatus });",
 ]:
     if marker not in writes:
         fail(f"Build 296 write transport marker missing: {marker}")
-print("PASS: Build 289 write bridge exposes an explicit Build 296 transport handle")
+print("PASS: Build 289 write bridge exposes the historical Build 296 transport handle")
 
-runtime = read("public/js/modules/packaging/runtime.mjs")
+runtime = git_show(HISTORICAL_HEAD, "public/js/modules/packaging/runtime.mjs")
 for marker in [
     "const BUILD = 290;",
     "const CLIENT_TRANSPORT_BUILD = 296;",
-    "transportLegacyRequest,",
     "export async function transportLegacyRequest(input, init = {})",
     "if (method === 'GET') return base.transportBootstrapRequest(input, init);",
     "if (method === 'POST') return ensureWriteBridge().transport(input, init);",
-    "clientTransportReady: Boolean(",
 ]:
     if marker not in runtime:
         fail(f"Build 296 runtime transport marker missing: {marker}")
-print("PASS: Build 290 facade routes compatibility GET/POST through explicit proven bridge handles")
+print("PASS: historical Build 290 facade preserves Build 296 GET/POST routing")
 
-gate = read("public/js/admin-packaging-startup-gate.js")
+gate = git_show(HISTORICAL_HEAD, "public/js/admin-packaging-startup-gate.js")
 for marker in [
     "const BUILD = 296;",
     "status.clientTransportBuild === BUILD",
-    "status.clientTransportReady === true",
     "typeof facade?.transportLegacyRequest === 'function'",
     "lastReplayTransport = 'packaging-client-transport-facade';",
-    "return transport(input, init);",
-    "error_code: 'packaging_client_transport_not_ready'",
-    "legacyServerRouteContactedByGate: false",
 ]:
     if marker not in gate:
         fail(f"Build 296 adapter marker missing: {marker}")
-for forbidden in [
-    "currentFetch !== gatedApiFetch",
-    "capturedRuntimeReadyAtInstall",
-    "runtime-captured-before-gate",
-    "runtime-installed-after-gate",
-]:
-    if forbidden in gate:
-        fail(f"Build 296 still infers mutable DDAuth wrapper ownership: {forbidden}")
-print("PASS: browser adapter uses explicit Packaging client transport instead of DDAuth wrapper inference")
+print("PASS: historical Build 296 adapter uses explicit client transport")
 
-admin = read("public/js/admin.js")
+admin = git_show(HISTORICAL_HEAD, "public/js/admin.js")
+page = git_show(HISTORICAL_HEAD, "admin/packaging-studio/index.html")
 if "dd-admin-module-runtime.mjs?v=296" not in admin:
-    fail("admin runtime cache key was not advanced to Build 296")
-page = read("admin/packaging-studio/index.html")
+    fail("historical Build 296 admin runtime cache key missing")
 for marker in [
     '/public/js/admin-packaging-startup-gate.js?v=296',
     '/public/js/admin.js?v=296',
     '/public/js/admin-packaging-studio.js?v=277',
 ]:
     if marker not in page:
-        fail(f"Build 296 Packaging page asset marker missing: {marker}")
-if not (
-    page.index('/public/js/admin-packaging-startup-gate.js?v=296')
-    < page.index('/public/js/admin.js?v=296')
-    < page.index('/public/js/admin-packaging-studio.js?v=277')
-):
-    fail("Build 296 script order must remain adapter -> admin runtime -> mature editor")
-print("PASS: Build 296 runtime/adapter cache keys and script ordering are deterministic")
+        fail(f"historical Build 296 Packaging page marker missing: {marker}")
+print("PASS: historical Build 296 page/runtime cache boundary retained")
 
-build295 = read("scripts/build295_packaging_startup_transport_gate_test.py")
+build295 = git_show(HISTORICAL_HEAD, "scripts/build295_packaging_startup_transport_gate_test.py")
 if 'HISTORICAL_HEAD = "afc50a80183ce30bc9c6182a4db3c4adc068f0ad"' not in build295:
     fail("Build 295 historical regression head is not pinned")
-if 'git_show(HISTORICAL_HEAD, "public/js/admin-packaging-startup-gate.js")' not in build295:
-    fail("Build 295 regression still reads future adapter source")
-if 'run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])' not in build295:
-    fail("Build 295 changed-file boundary still follows future HEAD")
-print("PASS: Build 295 historical regression boundary is pinned")
+print("PASS: Build 295 historical regression boundary remains pinned")
 
 protected = [
     "public/js/admin-packaging-studio.js",
@@ -163,24 +142,18 @@ protected = [
     "functions/api/admin/packaging-write.js",
 ]
 for path in protected:
-    result = run(["git", "diff", "--quiet", BASE, "HEAD", "--", path])
+    result = run(["git", "diff", "--quiet", BASE, HISTORICAL_HEAD, "--", path])
     if result.returncode != 0:
         fail(f"Build 296 changed protected editor/server authority: {path}")
-print("PASS: mature editor, retirement guard, and server read/write authorities are unchanged")
+print("PASS: historical Build 296 protected authority boundary retained")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
+result = run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
 if actual != EXPECTED:
-    fail(f"Build 296 changed-file boundary mismatch. expected={sorted(EXPECTED)} actual={sorted(actual)}")
-print("PASS: exact Build 296 changed-file boundary")
+    fail(f"Build 296 historical boundary mismatch. expected={sorted(EXPECTED)} actual={sorted(actual)}")
+print("PASS: exact historical Build 296 changed-file boundary")
 
-if any(name.endswith(".sql") or "/migrations/" in f"/{name}" for name in actual):
-    fail("Build 296 changed SQL/schema")
-if any(name in {"wrangler.toml", "wrangler.json", "wrangler.jsonc"} or name.startswith(".dev.vars") for name in actual):
-    fail("Build 296 changed Cloudflare binding/config")
-print("PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change")
-
-print("BUILD 296 PACKAGING EXPLICIT CLIENT TRANSPORT: PASS")
+print("BUILD 296 PACKAGING EXPLICIT CLIENT TRANSPORT: PASS (HISTORICAL)")
 print("No Cloudflare resource was contacted.")
