@@ -1,6 +1,6 @@
 # Build 311 Validation — Inventory Cost Read Contract
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,85 +9,89 @@ c88bcd63d7478cdb24e2b7070fa739f35789ac88
 Build 310 set completed modular handoff
 ```
 
-Build 310 is COMPLETE IN DEVELOPMENT.
+Proven Build 311 source/regression head:
 
-Build 311 does two bounded things only:
+```text
+92aaef7b0076dbbf5db0e4a87109067b7af563ff
+Build 311 make historical pins line-ending safe
+```
 
-1. records that the preserved Creative compatibility implementation cannot yet be retired safely;
-2. implements `inventory-cost` as a passive Inventory-owned read contract for Catalog and Accounting consumers.
+Build 311 completed two bounded objectives:
+
+1. confirmed that `functions/api/admin/creative-process-compat.js` cannot yet be retired safely because it still owns unrelated Creative Process behavior;
+2. implemented `inventory-cost` as a passive Inventory-owned read contract for Catalog and Accounting consumers.
 
 Operations remains bridge-only and is not activated.
 
-## One Git Bash block
+## Local regression proof
 
-```bash
-git pull --ff-only origin dev
-python scripts/build311_inventory_cost_read_contract_test.py
-git status --short
-```
-
-Expected ending:
+The final local regression passed:
 
 ```text
 BUILD 311 INVENTORY COST READ CONTRACT: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+The first regression run exposed a Windows checkout false-negative: protected text files were compared as raw working-tree bytes against LF Git blobs. Commit `92aaef7b` changed those historical-pin checks to Git-native `git diff --quiet` comparisons. The Build 311 changed-file boundary did not expand.
 
-## One browser block
+The corrected regression proved:
 
-Open and hard-refresh:
+- Inventory owns the dedicated Build 311 `inventory-cost` route;
+- `site_item_inventory.unit_cost_cents` is the current cost authority;
+- normalized cost-per-usage and current inventory value are read-only derived facts;
+- existing cost history is optional evidence;
+- no mutation or request-time schema statement exists in the cost route;
+- Catalog requires `catalog-read,inventory-cost`;
+- Inventory continues to require only `inventory-read`;
+- Operations/Public remain outside the active Commerce runtime;
+- Creative compatibility and completed Inventory write authorities/consumers remain historically pinned;
+- no SQL/schema, Cloudflare config, Operations implementation, Accounting implementation, R2, or real Production change occurred.
+
+## Development browser proof
+
+Validated at:
 
 ```text
 https://devilndove-site-dev.pages.dev/admin/inventory-operations/
 ```
 
-The browser proof should:
-
-- confirm the Build 311 runtime graph is loaded;
-- confirm `inventory-cost` is registered as a passive read service;
-- make one authenticated read through that service;
-- confirm Catalog now requires `catalog-read,inventory-cost`;
-- confirm Operations still has no active application runtime.
-
-Expected state:
+Observed values:
 
 ```text
-pathname                         /admin/inventory-operations/
-admin_script                     .../public/js/admin.js?v=311
-core_runtime_build               305
-commerce_runtime_build           311
-domain                           inventory
-application_module               commerce-operations
-application_module_mode          active
-active_required_services         inventory-read
-catalog_required_services        catalog-read,inventory-cost
-inventory_cost_service_owner     inventory
-inventory_cost_service_mode      read-only-http
-inventory_cost_contract          inventory-cost
-inventory_cost_build             311
-inventory_cost_authority_field   site_item_inventory.unit_cost_cents
-operations_application_module    commerce-operations
-operations_runtime               <none>
-contracts_ok                     true
-services_ok                      true
+pathname                       /admin/inventory-operations/
+admin_script                   .../public/js/admin.js?v=311
+core_runtime_build             305
+commerce_runtime_build         311
+domain                         inventory
+application_module             commerce-operations
+application_module_mode        active
+active_required_services       inventory-read
+catalog_required_services      catalog-read,inventory-cost
+inventory_cost_service_owner   inventory
+inventory_cost_service_mode    read-only-http
+inventory_cost_contract        inventory-cost
+inventory_cost_build           311
+inventory_cost_authority_field site_item_inventory.unit_cost_cents
+inventory_cost_rows            5
+operations_application_module  commerce-operations
+operations_runtime             <none>
+contracts_ok                   true
+services_ok                    true
 ```
 
-The returned cost-row count may be zero or greater depending on Development data. Build 311 validates authority and transport, not business-data parity.
-
-No POST, stock mutation, SQL migration, or Operations workflow test is required.
+The returned row count of 5 confirms the authenticated Development read worked. The specific count is not an architectural requirement; business-data parity remains a separate track.
 
 ## Completion decision
 
-Do not mark Build 311 complete until:
+All completion gates passed:
 
-1. local regression passes;
-2. working tree is clean;
-3. Development serves `admin.js?v=311`;
-4. the passive `inventory-cost` service is registered;
-5. authenticated cost GET succeeds at Build 311;
-6. Catalog's required service list includes `inventory-cost`;
-7. Operations still has no umbrella runtime activation;
-8. Build 310 write consumers remain unchanged;
-9. no SQL/schema/config/R2/real Production change occurs.
+1. local regression passed;
+2. Development served the Build 311 runtime graph;
+3. passive `inventory-cost` service registration succeeded;
+4. authenticated cost read succeeded;
+5. Catalog consumes `inventory-cost`;
+6. Operations remains inactive;
+7. Build 310/308 write consumers and Build 309/307 authorities remain unchanged;
+8. no SQL/schema/config/R2/real Production change occurred.
+
+No additional Build 311 browser validation is required.

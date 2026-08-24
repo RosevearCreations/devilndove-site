@@ -1,6 +1,6 @@
 # Build 311 — Inventory Cost Read Contract
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,31 +9,38 @@ c88bcd63d7478cdb24e2b7070fa739f35789ac88
 Build 310 set completed modular handoff
 ```
 
+Proven source/regression head:
+
+```text
+92aaef7b0076dbbf5db0e4a87109067b7af563ff
+Build 311 make historical pins line-ending safe
+```
+
 Real Devil n Dove Production remains frozen at Build 280.
 
 ## Review decision before Operations
 
-Build 310 required two questions to be answered before Operations could join the Commerce & Operations runtime.
+Build 310 left two questions to resolve before Operations could join the Commerce & Operations runtime.
 
 ### 1. Can the preserved Creative compatibility copy be retired now?
 
-No. The compatibility copy cannot be retired safely in Build 311.
+No.
 
-`functions/api/admin/creative-process-compat.js` still contains the large set of unrelated Creative Process actions that were intentionally left outside the narrow Inventory post/reverse cutovers. Deleting or rewriting it now would turn a bounded Inventory authority extraction into a broad Creative engine rewrite.
+`functions/api/admin/creative-process-compat.js` still owns the unrelated Creative Process actions intentionally left outside the narrow Inventory post/reverse cutovers. Retiring it now would require a broad Creative engine extraction and is outside Build 311.
 
-Therefore Build 311 freezes that file byte-for-byte from the completed Build 310 baseline.
+Build 311 therefore keeps the compatibility implementation Git-equivalent to the completed Build 310 baseline.
 
 ### 2. Is `inventory-cost` ready to become an explicit Inventory contract?
 
 Yes, as a read-only boundary.
 
-The existing Inventory authority already has stable current-cost facts in:
+Current Inventory cost authority is:
 
 ```text
 site_item_inventory.unit_cost_cents
 ```
 
-with unit conversion facts in:
+Usage conversion facts remain:
 
 ```text
 stock_unit_label
@@ -41,7 +48,7 @@ usage_unit_label
 usage_units_per_stock_unit
 ```
 
-and optional historical evidence in:
+Optional historical evidence remains:
 
 ```text
 site_item_inventory_cost_history
@@ -49,7 +56,7 @@ site_item_inventory_cost_history
 
 No new schema is required.
 
-## New Inventory-owned route
+## Inventory-owned route
 
 ```text
 GET /api/admin/contracts/inventory-cost
@@ -73,9 +80,9 @@ authority field       site_item_inventory.unit_cost_cents
 
 The route is authenticated and GET-only.
 
-## Cost facts returned
+## Cost facts
 
-For each active Inventory item the contract can return:
+For active Inventory items the contract returns current cost facts including:
 
 ```text
 site_item_inventory_id
@@ -98,25 +105,23 @@ updated_at
 
 `cost_per_usage_unit_cents` is derived from current Inventory cost divided by `usage_units_per_stock_unit`.
 
-`inventory_value_cents` is a current operational valuation of on-hand quantity using the current unit cost. It is not a posted accounting journal value.
+`inventory_value_cents` is an operational current-value calculation, not a posted accounting journal value.
 
 ## Optional history evidence
 
-`include_history=1` reads existing rows from `site_item_inventory_cost_history` when that table exists.
+`include_history=1` reads existing `site_item_inventory_cost_history` rows when available. History supports audit/review; it does not override current cost authority.
 
-History is supporting evidence only. It does not override current cost authority.
+The contract creates no tables and performs no request-time DDL or Inventory mutation.
 
-The contract never calls schema-creation helpers and never performs request-time DDL.
+## Passive browser service
 
-## Browser service adapter
-
-Build 311 adds `inventory-cost` to the passive read service registry:
+Build 311 registers `inventory-cost` in:
 
 ```text
 public/js/core/dd-module-service-adapters.mjs
 ```
 
-Registration performs no network request. A request occurs only when a consumer explicitly calls:
+Registration is passive. Network activity occurs only when a consumer explicitly calls:
 
 ```text
 window.DDModuleRuntime.service('inventory-cost').list(...)
@@ -124,7 +129,7 @@ window.DDModuleRuntime.service('inventory-cost').list(...)
 
 ## Catalog boundary
 
-Catalog already declares `inventory-cost` as a consumed capability. Build 311 makes that dependency real in the Commerce & Operations runtime:
+Catalog's declared Inventory-cost dependency is now an active runtime requirement:
 
 ```text
 catalog required services:
@@ -135,24 +140,20 @@ inventory required services:
   inventory-read
 ```
 
-This is still read-only runtime composition.
+This remains read-only composition.
 
 ## Operations remains inactive
 
-Build 311 does not add `operations` to `runtimeDomains`.
+Build 311 does not add `operations` to `runtimeDomains`:
 
 ```text
 runtimeDomains = ['catalog', 'inventory']
 operationsRuntimeDomainActive = false
 ```
 
-Operations remains classified beneath Commerce & Operations but bridge-only.
+Operations is classified beneath Commerce & Operations but remains bridge-only. No orders, memberships, fulfillment, gift-card, customer-workflow, payment, or Accounting implementation moved.
 
-No orders, memberships, fulfillment, gift-card, customer-workflow, payment, or accounting business behavior moves in this build.
-
-## Existing Inventory write authorities stay frozen
-
-Build 311 does not modify:
+## Existing Inventory write authorities remain frozen
 
 ```text
 Inventory post authority      Build 309
@@ -161,7 +162,7 @@ Inventory reversal authority  Build 307
 Creative reversal consumer    Build 308
 ```
 
-The Commerce umbrella remains non-mutating:
+Commerce remains non-mutating:
 
 ```text
 ownsInventoryMutations = false
@@ -180,11 +181,30 @@ Core runtime implementation     305
 Operations runtime active       false
 ```
 
+## Validation proof
+
+Local regression passed after correcting Windows CRLF/LF historical-pin comparisons to Git-native comparison semantics. That correction changed only the already-declared Build 311 regression file.
+
+Development browser validation passed with:
+
+```text
+inventory_cost_service_owner   inventory
+inventory_cost_service_mode    read-only-http
+inventory_cost_contract        inventory-cost
+inventory_cost_build           311
+inventory_cost_authority_field site_item_inventory.unit_cost_cents
+inventory_cost_rows            5
+catalog_required_services      catalog-read,inventory-cost
+operations_runtime             <none>
+contracts_ok                   true
+services_ok                    true
+```
+
 ## Safety boundary
 
-Build 311 intentionally does not modify:
+Build 311 did not modify:
 
-- `creative-process-compat.js`;
+- `creative-process-compat.js` behavior;
 - Inventory post/reverse services;
 - Creative post/reverse consumers;
 - legacy broad Inventory mutation endpoint;
@@ -198,4 +218,4 @@ Build 311 intentionally does not modify:
 
 ## Next direction
 
-Only after Build 311 is proven should Operations activation be reconsidered. Before activation, Operations' declared `accounting-read` dependency must either become a real bounded read contract or be explicitly deferred with a documented runtime service plan.
+The remaining architectural prerequisite before Operations runtime activation is its declared `accounting-read` dependency. The next bounded pass should define and prove a read-only Accounting-owned contract before activating Operations.

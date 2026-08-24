@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 311 Inventory Cost Read Contract
+# Devil n Dove AI Context — Build 311 Complete / Accounting Read Next
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -44,13 +44,14 @@ Build 305 Inventory runtime              COMPLETE IN DEVELOPMENT
 Build 307 Inventory reversal service     COMPLETE IN DEVELOPMENT
 Build 309 Inventory post authority       COMPLETE IN DEVELOPMENT
 Build 310 Creative post consumer cutover COMPLETE IN DEVELOPMENT
+Build 311 Inventory cost read contract   COMPLETE IN DEVELOPMENT
 ```
 
 Build 306 remains historically browser-proven with standalone local signoff not captured in the conversation. Do not silently relabel it.
 
 Build 308 remains browser-proven; its standalone local regression output was not captured before later work began. Do not silently relabel it complete.
 
-## Build 310 — COMPLETE IN DEVELOPMENT
+## Build 310 — completed consumer cutover
 
 Proven runtime/source head:
 
@@ -82,28 +83,30 @@ inventory-reverse
 
 Commerce remains non-mutating: `ownsInventoryMutations=false`.
 
-## Build 311 — STAGED / VALIDATION REQUIRED
+## Build 311 — COMPLETE IN DEVELOPMENT
 
-Build 311 resolves the two review questions left by Build 310 before Operations activation.
+Proven source/regression head:
 
-### Compatibility retirement decision
+```text
+92aaef7b0076dbbf5db0e4a87109067b7af563ff
+Build 311 make historical pins line-ending safe
+```
 
-`functions/api/admin/creative-process-compat.js` cannot be retired safely yet.
+Build 311 resolved the two review gates left by Build 310.
 
-It still owns the unrelated Creative actions intentionally excluded from the narrow Inventory post/reverse cutovers. Build 311 therefore freezes it byte-for-byte from the completed Build 310 baseline.
+### Creative compatibility decision
 
-### Inventory cost decision
+`functions/api/admin/creative-process-compat.js` cannot yet be retired. It still owns unrelated Creative Process actions outside the Inventory post/reverse cutovers.
 
-`inventory-cost` is now implemented as a read-only Inventory-owned contract:
+### Inventory cost authority
+
+Implemented read-only contract:
 
 ```text
 GET /api/admin/contracts/inventory-cost
-```
-
-Authority:
-
-```text
-site_item_inventory.unit_cost_cents
+owner     inventory
+build     311
+authority site_item_inventory.unit_cost_cents
 ```
 
 Optional supporting history:
@@ -114,57 +117,25 @@ site_item_inventory_cost_history
 
 The route performs no mutation and no request-time DDL.
 
-It returns current cost facts including:
-
-```text
-unit_cost_cents
-usage_units_per_stock_unit
-cost_per_usage_unit_cents
-on_hand_quantity
-inventory_value_cents
-```
-
-### Passive browser service
-
-`public/js/core/dd-module-service-adapters.mjs` registers:
-
-```text
-inventory-cost
-owner inventory
-mode  read-only-http
-```
-
-Registration performs no request until `.list()` is called.
-
-### Catalog runtime dependency
-
-Build 311 makes Catalog's existing declared dependency real:
+### Runtime composition
 
 ```text
 catalog required services:
   catalog-read
   inventory-cost
-```
 
-Inventory remains:
-
-```text
 inventory required services:
   inventory-read
 ```
 
-### Operations remains inactive
-
-Do not activate Operations in Build 311.
+Operations remains inactive:
 
 ```text
 runtimeDomains = ['catalog', 'inventory']
 operationsRuntimeDomainActive = false
 ```
 
-No orders, memberships, fulfillment, gift-card, customer-workflow, Accounting, or payment implementation moves.
-
-### Runtime identity
+Runtime identity:
 
 ```text
 Architecture build              302
@@ -177,14 +148,39 @@ Core runtime implementation     305
 Operations runtime active       false
 ```
 
-### Build 311 exclusions
+### Validation proof
 
-Build 311 does not modify:
+Final local regression:
 
-- Creative compatibility implementation;
-- Build 309 Inventory post authority;
-- Build 307 Inventory reversal authority;
-- Build 310/308 Creative Inventory consumers;
+```text
+BUILD 311 INVENTORY COST READ CONTRACT: PASS
+No Cloudflare resource was contacted.
+```
+
+Development browser proof:
+
+```text
+inventory_cost_service_owner   inventory
+inventory_cost_service_mode    read-only-http
+inventory_cost_contract        inventory-cost
+inventory_cost_build           311
+inventory_cost_authority_field site_item_inventory.unit_cost_cents
+inventory_cost_rows            5
+catalog_required_services      catalog-read,inventory-cost
+operations_runtime             <none>
+contracts_ok                   true
+services_ok                    true
+```
+
+The Windows CRLF/LF false-negative in the first regression run was corrected in `92aaef7b` by switching protected-file historical pins to Git-native comparison. The Build 311 file boundary did not expand.
+
+## Build 311 safety boundary
+
+Build 311 did not move or change:
+
+- Creative compatibility behavior;
+- Inventory post/reverse authorities;
+- Creative post/reverse consumers;
 - legacy broad Inventory mutation endpoint;
 - Operations implementation;
 - Accounting implementation;
@@ -194,13 +190,23 @@ Build 311 does not modify:
 - real Production;
 - schema/data parity work.
 
-## Next direction after Build 311
+## Next direction — Accounting read before Operations
 
-Only after Build 311 is proven should Operations activation be reconsidered. Before activation, Operations' declared `accounting-read` dependency should become a real bounded read contract or be explicitly deferred with a documented service plan.
+Do not activate Operations yet.
+
+Operations declares:
+
+```text
+catalog-read
+inventory-read
+accounting-read
+```
+
+`catalog-read` and `inventory-read` are implemented. The remaining prerequisite is a bounded, read-only Accounting-owned `accounting-read` contract. Prove that contract first; only then reconsider adding `operations` to the Commerce & Operations runtime domains.
 
 ## Validation interaction preference
 
-Keep validation concise: default to **one Git Bash block and one reusable browser-console script** unless a failure requires deeper isolation.
+Keep validation concise: default to **one GIT BASH block and one reusable BROWSER DEVTOOLS CONSOLE block** unless a failure requires deeper isolation.
 
 ## Separate schema/data parity track — DO NOT MIX
 
