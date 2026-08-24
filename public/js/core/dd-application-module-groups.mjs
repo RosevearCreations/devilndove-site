@@ -1,9 +1,10 @@
 // Devil n Dove Build 302 Core + Three Application Modules architecture catalog.
-// This file is intentionally passive. It defines the target application grouping only;
-// importing it creates no timers, fetches, polling, D1/R2 calls, route interception, or
-// automatic module activation. The Build 301 Packaging runtime remains unchanged.
+// Build 304 adds passive runtime-entry metadata for the first umbrella extraction.
+// Importing this file still creates no timers, fetches, polling, D1/R2 calls,
+// route interception, or automatic module activation.
 
 export const BUILD = 302;
+export const RUNTIME_CATALOG_BUILD = 304;
 
 export const DD_APPLICATION_CORE = Object.freeze({
   id: 'core',
@@ -39,7 +40,9 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     kind: 'application-module',
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
-    extractionState: 'planned',
+    extractionState: 'in-progress',
+    entry: '../modules/commerce-operations/runtime.mjs?v=304',
+    runtimeDomains: Object.freeze(['catalog']),
   }),
   Object.freeze({
     id: 'creative-production',
@@ -48,6 +51,8 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Creative projects, CAIP, Packaging & Labeling, Media/Content Studio and reviewed production workflows.',
     domains: Object.freeze(['creative', 'caip', 'packaging', 'content']),
     extractionState: 'in-progress',
+    entry: null,
+    runtimeDomains: Object.freeze([]),
   }),
   Object.freeze({
     id: 'business-administration',
@@ -56,6 +61,8 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Marketing, publishing, SEO, accounting, analytics, administration, command-center and platform operations.',
     domains: Object.freeze(['marketing', 'accounting', 'platform', 'admin']),
     extractionState: 'planned',
+    entry: null,
+    runtimeDomains: Object.freeze([]),
   }),
 ]);
 
@@ -77,14 +84,26 @@ export function getApplicationModule(moduleId) {
   return DD_APPLICATION_MODULES.find((definition) => definition.id === key) || null;
 }
 
+export function applicationModuleRuntimeForDomain(domainId) {
+  const moduleId = applicationModuleForDomain(domainId);
+  const definition = moduleId ? getApplicationModule(moduleId) : null;
+  if (!definition?.entry) return null;
+  return definition.runtimeDomains.includes(String(domainId || '').trim().toLowerCase())
+    ? definition
+    : null;
+}
+
 export function snapshotApplicationArchitecture() {
   return Object.freeze({
     build: BUILD,
+    runtimeCatalogBuild: RUNTIME_CATALOG_BUILD,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'domain-runtime-preserved-during-umbrella-normalization',
+    currentRuntimeMigrationMode: 'catalog-first-umbrella-runtime-extraction',
+    firstUmbrellaRuntimeModule: 'commerce-operations',
+    firstUmbrellaRuntimeDomain: 'catalog',
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
