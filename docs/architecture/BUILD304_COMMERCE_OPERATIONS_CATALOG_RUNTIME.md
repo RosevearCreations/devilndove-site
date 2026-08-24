@@ -1,10 +1,10 @@
 # Build 304 — Commerce & Operations Catalog Umbrella Runtime
 
-## Purpose
+## Status — COMPLETE IN DEVELOPMENT
 
-Build 304 is the first build in which one of the three top-level application modules has a real runtime lifecycle.
+Build 304 is the first build in which one of the three top-level application modules has a proven real runtime lifecycle.
 
-The authoritative application structure remains:
+The authoritative structure remains:
 
 ```text
                      DEVIL N DOVE APPLICATION CORE
@@ -18,85 +18,90 @@ The authoritative application structure remains:
 
 Build 304 activates `commerce-operations` for the internal `catalog` domain only.
 
-## What “Catalog is behind the umbrella runtime” means
+## Proven Build 304 heads
 
-On a verified Admin Catalog route, Core now maintains two separate runtime concepts:
+Core/Commerce runtime implementation head:
 
 ```text
-domain classification         catalog
-active domain runtime         none
-application module            commerce-operations
-active application runtime    commerce-operations
+395eb722a9b060d904b28b1a917f66dc7120f64c
 ```
 
-Catalog remains a valid internal domain and continues to identify route/capability ownership. The top-level application runtime wraps that domain and becomes the active module-level lifecycle boundary.
+Validated Build 304 handoff/deployment source:
 
-This does **not** mean Catalog business logic or APIs have been rewritten in Build 304.
+```text
+af0993ef9b4da807d9d1f32c63988dc28b07f1f8
+```
 
-Existing Catalog JavaScript and `/api/admin/contracts/catalog-read` remain authoritative. The Products HTML changes only its shared `admin.js` query string so the Build 304 Core loader cannot be hidden by an older cached URL.
+The commits after `395eb722...` corrected historical regression markers, shared-loader version pins, and documentation. They did not modify the new Commerce & Operations runtime implementation.
+
+## Catalog behind the umbrella runtime
+
+On a verified Admin Catalog route, Core maintains separate internal-domain and top-level application-runtime concepts:
+
+```text
+domain classification          catalog
+active domain runtime          none
+application module             commerce-operations
+active application runtime     commerce-operations
+```
+
+Catalog remains an explicit internal ownership/service boundary. The top-level Commerce & Operations runtime wraps the Catalog route and becomes the application-level lifecycle owner.
+
+Build 304 does not rewrite Catalog business logic or APIs. Existing Catalog JavaScript and `/api/admin/contracts/catalog-read` remain authoritative.
 
 ## Why Catalog is first
 
-Catalog already has a stable cross-module read contract:
+Catalog already exposes a stable cross-module read contract:
 
 ```text
 catalog-read
 ```
 
-Packaging and other consumers can depend on that contract without importing Catalog implementation details. This makes Catalog the safest first domain for proving a top-level Commerce & Operations runtime.
+Consumers can therefore depend on Catalog facts through an explicit contract without importing Catalog implementation details. This made Catalog the safest first domain for proving the top-level runtime pattern.
 
 ## Runtime catalog
 
-`public/js/core/dd-application-module-groups.mjs` retains:
+`public/js/core/dd-application-module-groups.mjs` retains architecture build:
 
 ```text
 BUILD = 302
 ```
 
-because Build 302 remains the architecture-definition build.
-
-Build 304 adds:
+and adds Build 304 runtime metadata:
 
 ```text
 RUNTIME_CATALOG_BUILD = 304
+commerce-operations.entry = ../modules/commerce-operations/runtime.mjs?v=304
+commerce-operations.runtimeDomains = [catalog]
 ```
 
-and marks only Commerce & Operations as having a top-level runtime entry:
+Inventory, Operations and Public remain grouped under Commerce & Operations but are not yet activated through its runtime.
 
-```text
-entry: ../modules/commerce-operations/runtime.mjs?v=304
-runtimeDomains: [catalog]
-```
-
-Inventory, Operations and Public remain grouped under Commerce & Operations but are not activated through the umbrella runtime yet.
-
-Creative & Production and Business & Administration remain bridge-only at the top-level runtime layer.
-
-Packaging continues to use its proven domain runtime beneath Creative & Production.
+Creative & Production and Business & Administration remain bridge-only at the top-level runtime layer. Packaging continues to use its proven domain runtime beneath Creative & Production.
 
 ## Commerce & Operations runtime
 
-New file:
+Build 304 adds:
 
 ```text
 public/js/modules/commerce-operations/runtime.mjs
 ```
 
-Build 304 responsibilities are intentionally narrow:
+Its responsibilities are intentionally narrow:
 
 - identify itself as `commerce-operations`;
-- support only the `catalog` internal domain;
+- support only `catalog`;
 - require the already-registered `catalog-read` service;
 - expose lifecycle status through `window.DDCommerceOperations`;
 - emit load/active/inactive diagnostics;
-- perform no network request;
+- create no network transport;
 - own no Inventory or Operations behavior yet.
 
-The runtime fails closed if Core attempts to activate it for any domain other than Catalog.
+The runtime fails closed if Core attempts to activate it for an unsupported domain.
 
 ## Core lifecycle
 
-`public/js/core/dd-admin-module-runtime.mjs` now has a separate top-level application-module lifecycle in addition to the existing domain registry.
+`public/js/core/dd-admin-module-runtime.mjs` now maintains a separate top-level application-module lifecycle in addition to the existing domain registry.
 
 Core can report independently:
 
@@ -105,67 +110,104 @@ active domain runtime
 active application-module runtime
 ```
 
-For `/admin/products/` the Build 304 target is:
+Final Catalog proof:
 
 ```text
-domain                            catalog
-domain_mode                       shadow
-application_module                commerce-operations
-application_module_mode           active
-active_domain_runtime             null
-active_application_runtime        commerce-operations
+runtime_build                        304
+architecture_build                   302
+runtime_catalog_build                304
+auth_phase                           verified
+auth_verified                        true
+domain                               catalog
+domain_mode                          shadow
+application_module                   commerce-operations
+application_module_mode              active
+active_domain_runtime                null
+active_application_runtime           commerce-operations
+application_runtime_state            active
+application_runtime_domain           catalog
+application_runtime_services_ready   true
+facade_build                         304
+facade_state                         active
+facade_catalog_boundary_active       true
+contracts_ok                         true
+services_ok                          true
 ```
 
-The existing domain registry remains untouched.
+This is the first proof that one of the three umbrella modules is actually active as a runtime owner.
 
-## First Development proof and cache-version correction
+## Verified-auth reconciliation
 
-The first local Build 304 regression passed and the Development Pages deployment was current at source `395eb72`, but both browser probes still reported Core Build 303.
+Build 303's retained verified-auth reconciliation remains mandatory. Build 304 reuses it so both domain and top-level application-runtime activation recover correctly if `/api/auth/me` finishes before the async Core import attaches its event listeners.
 
-The committed Build 304 shared loader itself was correct:
+## Shared-loader delivery correction
 
-```text
-/public/js/core/dd-admin-module-runtime.mjs?v=304
-```
+The first Build 304 browser attempt incorrectly remained on Core 303 even though the Build 304 code was present in GitHub.
 
-The browser never reached it because the validation pages still referenced older `admin.js` URLs:
+The Products and Packaging Studio pages still referenced historical shared-loader URLs:
 
 ```text
 Products         /public/js/admin.js?v=245
 Packaging Studio /public/js/admin.js?v=296
 ```
 
-Build 304 therefore pins only those two validation-page references to:
+Build 304 changes only those two script query strings to:
 
 ```text
 /public/js/admin.js?v=304
 ```
 
-The regression verifies each HTML file changed by exactly that one line. This is a release-versioning correction, not a Product or Packaging feature change.
+The regression verifies each HTML file changed by exactly that one line.
 
-The first Build 303 historical regression also exposed a whitespace-sensitive assertion (`catalog -> commerce-operations`). Build 304 corrects it to the exact aligned historical record while retaining the same pinned Build 303 head `6cbcc435...`.
+A later served-asset audit proved the Development Pages alias was still serving an older artifact, including an older `/public/js/admin.js`, despite the Pages deployment list showing source `af0993e` as active.
+
+The clean local `af0993ef...` tree was therefore directly uploaded to the **Development project only** with Wrangler. The upload compiled the Worker, uploaded assets, `_headers`, `_redirects`, the Functions bundle and `_routes.json`.
+
+Validated Development deployment:
+
+```text
+Id      6effd1eb-9a1f-4538-b7d3-3cdc18b54328
+Project devilndove-site-dev
+Branch  dev
+Source  af0993e
+Status  Active
+```
+
+After direct upload, both the Development alias and exact deployment returned:
+
+```text
+Products HTML       admin.js?v=304
+Packaging HTML      admin.js?v=304
+Shared admin.js      Core ?v=304 import present
+Build 304 marker     present
+HTTP                 200
+```
+
+This recovery touched no real Production resource.
 
 ## Packaging preservation
 
-For `/admin/packaging-studio/` Build 304 should still report:
+Final Packaging proof:
 
 ```text
-domain                           packaging
-domain_mode                      active
-application_module               creative-production
-application_module_mode          domain-bridge
-active_domain_runtime            packaging
-active_application_runtime       null
-packaging_compatibility_build    301
-packaging_compatibility_state    active
-native_read_status               200
+runtime_build                   304
+architecture_build              302
+runtime_catalog_build           304
+domain                          packaging
+domain_mode                     active
+application_module              creative-production
+application_module_mode         domain-bridge
+active_domain_runtime           packaging
+active_application_runtime      null
+packaging_compatibility_build   301
+packaging_compatibility_state   active
+native_read_count               2
+native_read_status              200
+failed_verification_count       0
+preview_mode                    fit
 ```
 
-Build 304 does not modify Packaging transport, native client, compatibility facade, Save/Preview stabilizer, runtime service, or server authorities. The Packaging HTML change is limited to the shared `admin.js` cache-version query.
-
-## Verified-auth reconciliation
-
-Build 303's retained verified-auth reconciliation remains mandatory. Build 304 reuses that behavior so both domain and top-level application runtime activation can recover if `/api/auth/me` finishes before the async Core runtime import.
+Build 304 does not modify Packaging transport, native client, compatibility facade, Save/Preview stabilizer, runtime service, or server authorities. No new Packaging write proof was necessary.
 
 ## Safety boundary
 
@@ -173,31 +215,28 @@ Build 304 does not change:
 
 - `dd-module-registry.mjs`;
 - `dd-module-definitions.mjs`;
-- domain contract declarations;
-- default contract service adapters;
+- domain contract ownership;
+- default domain service adapters;
 - Catalog API implementation;
-- Inventory or Operations extraction state;
-- Packaging transport/read/write/save/preview implementation;
+- Inventory/Operations/Public runtime extraction;
+- Packaging read/write/save/preview implementation;
 - SQL/schema;
 - Cloudflare bindings/config;
-- R2;
+- R2 bindings/data;
 - real Production.
 
-The only page-level changes are the two exact shared-loader cache-version pins described above.
+The final Build 304 changed-file boundary from completed Build 303 is exactly 12 files, including the two one-line validation-page cache-version pins.
 
-## Completion gate
+## Completion decision
 
-Build 304 is complete only when:
+**Build 304 is COMPLETE IN DEVELOPMENT.**
 
-1. completed Build 303 historical regression passes;
-2. Build 304 local regression passes;
-3. Development deployment points at the corrective Build 304 head;
-4. `/admin/products/` shows `commerce-operations` as the active application runtime while Catalog remains the internal shadow domain;
-5. the Commerce & Operations facade reports `state = active`, `currentDomain = catalog`, and `servicesReady = true`;
-6. Inventory/Operations/Public do not receive an application runtime entry;
-7. Packaging remains fully active through Build 301 with native read status 200;
-8. no SQL/config/R2/Production change occurs.
+Catalog is now the first internal domain proven beneath a genuine top-level application runtime.
 
 ## Next bounded migration
 
-After Build 304 is proven, the next Commerce & Operations extraction should add **Inventory** to the same umbrella runtime in a separate build. Inventory authority and stock mutation rules must remain explicit service contracts; Catalog and Inventory should not be collapsed into one undifferentiated implementation.
+The next Commerce & Operations pass should add **Inventory** to the same already-proven top-level runtime while preserving Inventory as an explicit domain/service authority.
+
+Do not migrate Operations or Public in the same pass.
+
+A future Core release gate should validate shared `admin.js` version integrity so a new Core build cannot be considered deployable while active Admin pages still point at an older shared loader version.
