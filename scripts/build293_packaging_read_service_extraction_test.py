@@ -4,6 +4,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "40a458354a8c0785386456dc4646cb44b48ca124"
+HISTORICAL_HEAD = "4d605e87a7cfdcf7378c236fa3f609bccb9ddd1a"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD293_CHANGED_FILES.md",
@@ -56,7 +57,7 @@ for name in [
         fail(f"JavaScript syntax failed for {name}: {result.stderr.strip()}")
 print("PASS: Build 293 JavaScript syntax")
 
-read_service = read("functions/api/_lib/packagingReadService.js")
+read_service = git_show(HISTORICAL_HEAD, "functions/api/_lib/packagingReadService.js")
 base_bootstrap = git_show(BASE, "functions/api/admin/packaging-bootstrap.js")
 if read_service != base_bootstrap:
     fail("shared Packaging read service is not byte-for-byte final Build 292 bootstrap source")
@@ -76,7 +77,7 @@ for marker in [
         fail(f"preserved Build 286 read implementation marker missing: {marker}")
 print("PASS: Build 286 Packaging read implementation provenance is preserved")
 
-bootstrap = read("functions/api/admin/packaging-bootstrap.js")
+bootstrap = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-bootstrap.js")
 for marker in [
     "const BUILD = 293;",
     "const READ_IMPLEMENTATION_BUILD = 286;",
@@ -96,7 +97,7 @@ for forbidden in ["db.prepare(`", "function listPackagingData", "function loadDe
         fail(f"bootstrap adapter still owns read implementation: {forbidden}")
 print("PASS: Packaging bootstrap is a thin Build 293 shared-read adapter")
 
-legacy = read("functions/api/admin/packaging-studio.js")
+legacy = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-studio.js")
 for marker in [
     "const BUILD = 293;",
     "const LEGACY_SURFACE_BUILD = '277';",
@@ -161,7 +162,7 @@ protected = [
     "public/js/modules/packaging/runtime.mjs",
 ]
 for path in protected:
-    result = run(["git", "diff", "--quiet", BASE, "HEAD", "--", path])
+    result = run(["git", "diff", "--quiet", BASE, HISTORICAL_HEAD, "--", path])
     if result.returncode != 0:
         fail(f"Build 293 unexpectedly changed protected write/client file: {path}")
 print("PASS: Build 291 write service, Build 292 gateway and proven browser/runtime stack are unchanged")
@@ -177,7 +178,7 @@ if 'git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-write.js")' not in 
     fail("Build 292 regression still reads future native-gateway source")
 print("PASS: Build 292 historical regression boundary is pinned")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
+result = run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
