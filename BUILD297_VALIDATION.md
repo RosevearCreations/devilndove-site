@@ -177,14 +177,52 @@ POST /api/admin/packaging-studio -> 410 packaging_legacy_post_retired
 
 Those explicit probes must not be confused with normal runtime traffic.
 
+## Completed Development evidence — 2026-08-24
+
+Build 297 was validated on Development source `8d444153` in the `devilndove-site-dev` Pages project. Local regression passed with all Build 297 boundary checks and reported `No Cloudflare resource was contacted.` The deployed Packaging page then successfully loaded its projects.
+
+The read-side live proof passed after initial load plus one manual Refresh:
+
+```text
+client_transport_build           297
+client_transport_ready           true
+post_activation_transport_armed  true
+legacy_get_fallback_removed      true
+legacy_server_get_reachable      false
+bootstrap_contractized           true
+bootstrap_source                 packaging-bootstrap
+legacy_endpoint_bypassed         true
+native_read_request_count        2
+native_read_last_status          200
+native_read_last_error           ""
+```
+
+The normal Save proof also passed. The UI reported `Labeling and packaging project, structured content, claims and artwork selection saved to D1.` Runtime/write provenance was:
+
+```text
+intercepted_write_count       6
+last_write_http_status        200
+gateway_build                 292
+gateway_path                  /api/admin/packaging-write
+write_service_build           291
+write_authority               packaging-domain-service
+shared_write_service          true
+legacy_post_route_retired     true
+packaging_owned_response      true
+```
+
+This proves Build 297 preserved the intended native `292 -> 291` write authority while removing the remaining physical legacy GET fallback. Normal Packaging load, Refresh, and Save are therefore validated in Development.
+
 ## Completion gate
 
-Build 297 is complete only when:
+**Build 297 is COMPLETE in Development.** The completion criteria have been satisfied:
 
-- local regression passes;
-- Development deploys the final Build 297 head;
-- initial load has no physical legacy GET;
-- **Refresh reloads Packaging projects with no physical legacy GET**;
-- native bootstrap remains contractized;
-- normal Save uses `/api/admin/packaging-write` and preserves 292 -> 291 write provenance;
-- Production remains untouched.
+- local regression passed;
+- Development deployed the final Build 297 head `8d444153`;
+- initial load had no required legacy GET path and loaded Packaging projects successfully;
+- Refresh reloaded Packaging projects through the native Build 297 read transport;
+- native bootstrap remained contractized and reported HTTP 200;
+- normal Save used the native write gateway and preserved the `292 -> 291` write provenance;
+- no SQL/schema, Cloudflare binding/config, R2, or Production change was introduced.
+
+Production remains frozen at Build 280 unless deliberately promoted through the separate Production workflow.
