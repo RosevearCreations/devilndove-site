@@ -1,35 +1,13 @@
 # Build 299 Validation — Packaging Print Source Consistency
 
-Status: **Development candidate — live browser proof required**
+Status: **NOT COMPLETE — browser controller rolled back by Build 300 stabilization**
 
 Base: `3a19ebc263a206acd22e6490327ffa32567e4a8a` (completed Build 298 parity)
+Candidate head before stabilization: `e5be1b4adcb2a6f335d1aabbe90ca6b9234a2f45`
 
-## Local regression
+## What passed
 
-After pulling `dev`:
-
-```bash
-python scripts/build299_packaging_print_source_consistency_test.py
-```
-
-Expected final lines:
-
-```text
-BUILD 299 PACKAGING PRINT SOURCE CONSISTENCY: PASS
-No Cloudflare resource was contacted.
-```
-
-## Development browser proof
-
-Open the Development Packaging Studio, hard-refresh once, then open an existing Packaging project.
-
-### 1. Controller status
-
-```js
-console.table(window.DDPackagingPrintSource?.getStatus?.());
-```
-
-Expected before printing a saved historical version:
+The Build 299 local regression passed. In Development the controller loaded successfully and reported:
 
 ```text
 build                                  299
@@ -45,68 +23,43 @@ savedVersionsImmutable                 true
 historicalVersionMustBeExplicitlySelected true
 ```
 
-### 2. Normal project-save / draft-print proof
+The tested project had no saved review versions, so the historical-version artifact path could not be live-proven.
 
-1. Make a harmless reversible Packaging wording change.
-2. Click **Save project**.
-3. Open **Print Test**.
-4. Confirm the first selector now reads **Print source / evidence version** and is set to **Project draft**.
-5. Click **Print optimized 8.5 × 11 sheet**.
+## Regression observed during live validation
 
-Expected:
+During the same Development validation sequence, owner testing found that Packaging details/Preview still appeared stale and then changed claims appeared not to persist after **Save project**.
 
-- the generated sheet reflects the current project details;
-- no request is made to `/api/admin/packaging-version-artifact` because the proven mature-editor draft print handler remains authoritative;
-- no request is made to `/api/admin/packaging-studio`;
-- normal Save remains `POST /api/admin/packaging-write -> 200`.
+Because Build 298 Save Project had previously been live-proven, Build 299 was not signed off. Forward compatibility-retirement work was stopped immediately.
 
-### 3. Immutable saved-version proof
+## Rollback decision
 
-If the project already has a saved review version, select one explicitly in **Print source / evidence version**, clear Network, then click **Print optimized 8.5 × 11 sheet**.
+Build 300 rolled back the Build 299 **browser print-source controller** from the live Packaging page and restored the proven Build 298 editor/native-client runtime as the active baseline.
 
-Expected Network request:
+The following Build 299 files may remain in the repository for audit/history, but are dormant from normal Packaging page operation:
 
-```text
-GET /api/admin/packaging-version-artifact?packaging_project_id=<id>&packaging_project_version_id=<id> -> 200
-```
+- `public/js/admin-packaging-print-source-v299.js`
+- `functions/api/admin/packaging-version-artifact.js`
+- Build 299 architecture/validation/regression files
 
-The printed sheet must show that historical version exactly even if the live Project draft has since changed.
+The saved-version artifact endpoint is not used by the normal Packaging page after the rollback.
 
-Then run:
+## Build 300 stabilization gate
 
-```js
-console.table(window.DDPackagingPrintSource?.getStatus?.());
-```
+Build 300 now verifies every **Save project** success by performing a fresh native read-back and comparing core fields plus complete structured claims against what the editor sent. It also stabilizes the derived Product / variant -> English identity preview relationship without overriding an explicitly customized identity.
 
-Expected semantic result:
+Build 299 remains **NOT COMPLETE** until a future deliberate re-evaluation after Build 300 stabilization is fully green. Do not reload or reactivate the Build 299 browser controller during stabilization.
 
-```text
-build                    299
-state                    active
-lastPrintSource          saved-review-version
-savedVersionPrintCount   >= 1
-lastVersionId            > 0
-lastVersionStatus        200
-lastVersionError         ""
-```
+## Preserved safety boundary
 
-### 4. Version immutability check
+The rollback and Build 300 stabilization preserve:
 
-After printing a saved review version, return to the Versions tab. No new version should have been created and the selected version number/created date must remain unchanged. Build 299 reads the stored SVG; it never updates the historical row.
-
-## Safety boundary
-
-Build 299 must preserve:
-
-- mature editor Build 298 source unchanged;
-- Build 298 native read/write client unchanged;
-- Build 297 compatibility defenses still loaded;
-- Build 293/286 Packaging read authority unchanged;
-- Build 292/291 Packaging write authority unchanged;
-- Build 294 retired-route tombstone unchanged;
+- mature editor Build 298 source;
+- Build 298 native read/write client implementation;
+- Build 297 compatibility defenses;
+- Build 293/286 Packaging read authority;
+- Build 292/291 Packaging write authority;
+- Build 294 retired-route tombstone;
 - no SQL/schema changes;
 - no Cloudflare binding/config changes;
 - no R2 changes;
 - no real Production contact.
-
-Do not resume browser-compatibility retirement until both draft-print and saved-version-print proofs pass in Development.
