@@ -1,6 +1,13 @@
 # Build 307 — Inventory-Owned Compensating Reversal Service
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
+
+Proven Build 307 runtime/service head:
+
+```text
+f1cc11000b0c90944c4224b6c0002ddab7063876
+Build 307 update modular reversal-service handoff
+```
 
 Build 307 implements the first dedicated `inventory-reverse` contract route while deliberately leaving Creative Process on its existing compatibility reversal path.
 
@@ -11,7 +18,7 @@ c8ea00e57cb906cc671fc15727ed2c8cd8b63dab
 Build 306 harden Build 305 historical proof markers
 ```
 
-Build 306 has a successful Development browser proof but still lacks the final user-supplied local regression signoff. Build 307 therefore pins it as a **browser-proven staging baseline**, not as a completed historical build.
+Build 306 remains browser-proven with its own local completion signoff pending; Build 307 completion does not retroactively relabel Build 306.
 
 Real Devil n Dove Production remains frozen at Build 280.
 
@@ -41,11 +48,11 @@ implementation_state = implemented-not-consumer-enabled
 consumer_writes_ready = false
 ```
 
-This separates **authority implementation** from **consumer migration**.
+This separates authority implementation from consumer migration.
 
 ## Existing authority reused
 
-Build 307 does not add schema.
+Build 307 adds no schema.
 
 The current only `inventory-reverse` consumer is `creative`. The existing table:
 
@@ -105,7 +112,7 @@ current on-hand + original posted stock consumption
 
 is the compensating correction.
 
-That matters because valid inventory activity may have occurred after the original Creative posting. Replacing current stock with the old historical value would erase that later activity.
+That preserves valid Inventory activity that may have happened after the original Creative posting.
 
 For `log_only` or `reusable` usage, stock restoration can legitimately be zero while the usage quantity is still reversed.
 
@@ -130,15 +137,15 @@ The transaction is ordered:
 6. clear material-review inventory_consumed
 ```
 
-The ledger is claimed first. If concurrent work already created a reversal, the unique constraint causes the transaction to fail and the service returns the existing reversal as an idempotent replay.
+If concurrent work already created a reversal, the unique constraint causes the transaction to fail and the service returns the existing reversal as an idempotent replay.
 
-If current inventory changes before the transaction acquires its claim, the ledger insert changes zero rows. No later statement matches this request marker, and the service returns:
+If current Inventory changes before the transaction acquires its claim, the ledger insert changes zero rows and the service returns:
 
 ```text
 409 inventory_reversal_stale_stock
 ```
 
-The caller must refresh and retry rather than applying a stale correction.
+The caller must refresh and retry rather than apply a stale correction.
 
 ## D1 transaction boundary
 
@@ -152,7 +159,7 @@ Unexpected server failures are sent through the existing runtime-incident mechan
 
 ## Safe GET readiness
 
-`GET /api/admin/contracts/inventory-reverse` does not mutate inventory.
+`GET /api/admin/contracts/inventory-reverse` does not mutate Inventory.
 
 It reports:
 
@@ -171,7 +178,20 @@ schema_ready                  true/false
 missing_tables                [...]
 ```
 
-The Development browser proof uses this GET route only. No live reversal POST is required in Build 307 because no consumer is migrated yet.
+The completed Development browser proof used this GET route only.
+
+Observed:
+
+```text
+api_ok             true
+api_build          307
+api_state          implemented-not-consumer-enabled
+api_consumer_ready false
+api_schema_ready   true
+api_missing_tables <empty>
+```
+
+No live reversal POST was required for Build 307 because no consumer is migrated yet.
 
 ## Runtime metadata
 
@@ -188,7 +208,7 @@ Catalog runtime   304
 Inventory runtime 305
 ```
 
-Write-contract/service identity becomes:
+Write-contract/service identity is:
 
 ```text
 INVENTORY_WRITE_CONTRACT_BUILD = 307
@@ -206,26 +226,42 @@ required runtime service  inventory-read
 The umbrella runtime still records:
 
 ```text
-ownsInventoryMutations       false
+ownsInventoryMutations         false
 inventoryConsumerMutationReady false
 ```
 
-The Inventory-owned endpoint performs the mutation; the umbrella runtime itself does not.
+The Inventory-owned endpoint performs mutation authority; the umbrella runtime itself does not.
+
+## Completed proof
+
+Local regression ended:
+
+```text
+BUILD 307 INVENTORY COMPENSATING REVERSAL SERVICE: PASS
+No Cloudflare resource was contacted.
+```
+
+The working tree was clean.
+
+Development browser proof matched every Build 307 target, including `admin.js?v=307`, active Inventory under Commerce & Operations, implemented reversal readiness, schema readiness, and fail-closed consumer migration.
 
 ## Compatibility boundary
 
-Build 307 intentionally does not modify:
+Build 307 did not modify:
 
 - `functions/api/admin/creative-process.js`;
 - `functions/api/admin/site-item-inventory.js`;
-- Build 217/244 inventory schema;
+- Build 217/244 Inventory schema;
 - `database_full_schema.sql`;
 - Core lifecycle implementation;
 - Catalog behavior;
-- Packaging behavior.
+- Packaging behavior;
+- Cloudflare bindings/config;
+- R2;
+- real Production.
 
 The existing Creative reversal helper remains the compatibility fallback until a later build switches the consumer to the new contract.
 
 ## Next bounded pass
 
-After Build 307 is proven, the next pass should migrate **only Creative reversal consumption** to the Inventory-owned route/service, with equivalence and idempotency tests. Do not combine that consumer cutover with `inventory-post` extraction or Operations migration.
+Migrate **only Creative reversal consumption** to the Inventory-owned route/service, with equivalence and idempotency tests. Do not combine that consumer cutover with `inventory-post` extraction or Operations migration.
