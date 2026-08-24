@@ -1,14 +1,14 @@
-# Devil n Dove AI Context — Development Build 302 Core + Three Modules Normalization
+# Devil n Dove AI Context — Build 302 Completed Core + Three-Module Baseline
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader functional roadmap.
 
-For current modular architecture read:
+Current modular architecture authority:
 
 - `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`
 - `docs/architecture/BUILD302_CORE_THREE_MODULE_NORMALIZATION.md`
 - `BUILD302_VALIDATION.md`
 
-For the completed Packaging baseline read:
+Completed Packaging baseline authority:
 
 - `BUILD300_VALIDATION.md`
 - `BUILD301_VALIDATION.md`
@@ -17,9 +17,9 @@ For the completed Packaging baseline read:
 
 **Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
 
-## Current application architecture rule
+## Current application architecture — AUTHORITATIVE
 
-The authoritative Devil n Dove target is:
+Devil n Dove is one application platform with:
 
 ```text
                      DEVIL N DOVE APPLICATION CORE
@@ -33,7 +33,7 @@ The authoritative Devil n Dove target is:
 
 There is **one shared Core + exactly three top-level application modules**.
 
-The existing domain names remain internal ownership/service boundaries during migration. They are not intended to remain twelve separate top-level independently loaded applications.
+The twelve historical domain IDs remain internal ownership/service boundaries during migration. They are not intended to remain twelve separate top-level applications.
 
 ## Core responsibilities
 
@@ -51,7 +51,7 @@ Core may own only shared cross-application infrastructure:
 
 Core must not absorb Catalog, Inventory, Creative, CAIP, Packaging, Content, Marketing or Accounting business rules.
 
-Existing Core primitives include:
+Existing Core primitives:
 
 ```text
 public/js/core/dd-module-registry.mjs
@@ -68,7 +68,7 @@ Build 302 adds the passive target grouping catalog:
 public/js/core/dd-application-module-groups.mjs
 ```
 
-This Build 302 catalog is intentionally not loaded by the current live runtime yet.
+It is intentionally not loaded by the active runtime yet.
 
 ## Module 1 — Commerce & Operations
 
@@ -83,12 +83,12 @@ operations
 
 Owns storefront/customer-facing commerce, Catalog/Products, Inventory/Materials, Orders, customer operations, memberships, gift cards, fulfillment and related operational workflows.
 
-Inventory remains a foundational authority even though it is grouped inside Commerce & Operations. Other modules consume Inventory through explicit service contracts.
+Inventory remains a foundational authority. Other modules must consume Inventory through explicit service contracts.
 
-Current extraction state:
+Current state:
 
 ```text
-umbrella module runtime: not yet extracted
+umbrella runtime: not yet extracted
 public: shadow/legacy
 catalog: shadow/legacy
 inventory: shadow/contract provider
@@ -108,10 +108,10 @@ content
 
 Owns Creative Projects, CAIP, Packaging & Labeling, Media/Content Studio and reviewed production workflows.
 
-Current extraction state:
+Current state:
 
 ```text
-umbrella module runtime: partially established through Packaging proof
+umbrella runtime: partially established through Packaging proof
 creative: shadow/legacy
 caip: shadow/legacy
 packaging: substantially extracted; Build 301 baseline
@@ -133,10 +133,10 @@ admin
 
 Owns Marketing/Publishing/SEO, Accounting/Finance, analytics, platform/runtime health, users/roles/settings, Command Center, release/readiness and system administration.
 
-Current extraction state:
+Current state:
 
 ```text
-umbrella module runtime: not yet extracted
+umbrella runtime: not yet extracted
 marketing: shadow/legacy
 accounting: shadow/legacy
 platform: shadow/platform
@@ -145,7 +145,7 @@ admin: shadow/platform-admin
 
 ## Why twelve current domain definitions still exist
 
-`public/js/core/dd-module-definitions.mjs` currently defines these twelve domain IDs:
+`public/js/core/dd-module-definitions.mjs` currently defines:
 
 ```text
 public
@@ -162,21 +162,17 @@ platform
 admin
 ```
 
-Those definitions currently support route classification, capability ownership and service contracts.
+These definitions currently support route classification, capability ownership, service contracts and migration sequencing.
 
-Only Packaging has a non-null runtime entry. The rest remain `entry: null` and therefore shadow/legacy classifications.
+Only Packaging has a non-null runtime entry. The rest remain shadow/legacy classifications.
 
 Do not mistake the twelve domain definitions for the final top-level application structure.
 
-Build 302 maps them to the three umbrella modules without changing live route resolution yet.
-
 ## Build 301 Packaging baseline — COMPLETE IN DEVELOPMENT
 
-**Build 301 is the one current Packaging compatibility baseline/conversation.**
+Build 301 is the one current Packaging compatibility baseline/conversation.
 
-Do not describe Builds 297, 298 or 300 as separate current Packaging passes. They are implementation provenance beneath Build 301.
-
-Build 301 runtime activation commit:
+Runtime activation:
 
 ```text
 e2be2209ed96b7a67e975feead37a768f0043cb5
@@ -190,53 +186,28 @@ a81f8d6af0004d847174fa27043c11e159ca3d10
 Build 301 set completed compatibility baseline handoff
 ```
 
-Build 302 pins the completed Build 301 regression to this historical head.
+Build 302 historically pins Build 301 to this completed head.
 
-Development Pages project:
-
-```text
-devilndove-site-dev
-```
-
-The Cloudflare `Environment = Production` label for this project means the primary environment of the Development project. It is not real Devil n Dove Production.
-
-### Build 301 live proof
-
-Initial load passed:
+Live Build 301 proof established:
 
 ```text
-build301_script_in_page       true
-build301_global_exists        true
-compatibility_build           301
-compatibility_state           active
-compatibility_checkpoint      true
-single_conversation_build     301
-startup_gate_ready            true
-client_transport_ready        true
-native_client_ready           true
-save_verification_active      true
-preview_stabilization_active  true
-native_read_status            200
-failed_verification_count     0
-preview_mode                  fit
-forced_preview_refresh_count  0
+compatibility_build          301
+compatibility_state          active
+native_read_status           200
+native_write_status          200
+verified_save_count          1
+failed_verification_count    0
+preview_mode                 fit
+forced_preview_refresh_count 0
+compatibility_delayed        0
+compatibility_replayed       0
+compatibility_blocked        0
+gateway_build                292
+write_service_build          291
+write_authority              packaging-domain-service
 ```
 
-One Development-only Save Project also passed:
-
-```text
-native_write_status           200
-verified_save_count           1
-failed_verification_count     0
-compatibility_delayed         0
-compatibility_replayed        0
-compatibility_blocked         0
-gateway_build                 292
-write_service_build           291
-write_authority               packaging-domain-service
-```
-
-### Build 301 implementation provenance
+Implementation provenance beneath Build 301 remains:
 
 ```text
 startupGateBuild              297
@@ -250,60 +221,22 @@ nativeWriteGatewayBuild       292
 nativeWriteServiceBuild       291
 ```
 
-These are provenance only beneath the one Build 301 Packaging compatibility identity.
+These are provenance only, not separate current Packaging conversations.
 
-## Build 300 historical stabilization baseline
+Build 299 remains **NOT COMPLETE** and its print-source browser controller remains rolled back.
 
-Completed Build 300 head:
+## Build 302 — COMPLETE IN DEVELOPMENT
 
-```text
-21b01cc34ef734f581da22a7f0d3c43ec10607c0
-```
-
-Build 300 proved:
+Completed Build 302 baseline:
 
 ```text
-verified Save Project through fresh D1 read-back
-claims/core fields persisted correctly
-fitted full-ribbon Preview
-DOM -> rendered SVG claim parity
-verified saved state -> DOM parity
-forced preview refreshes = 0
-idle preview audit delta = 0
+cb68b71440f344c258809e79efe23bea65d0167f
+Build 302 harden Build 301 historical syntax pin
 ```
 
-The mature soap renderer does print `Front tagline`.
+Build 302 corrected the architectural drift between the broad Build 281 domain inventory and the intended final structure of Core + three application modules.
 
-## Build 299 status
-
-Build 299 is **NOT COMPLETE**.
-
-Its draft-versus-saved-version browser print controller was rolled back after live regressions. Do not reactivate it without a deliberate redesign and new proof.
-
-## Build 302 — CURRENT ARCHITECTURE NORMALIZATION
-
-Build 302 corrects the architectural drift between the broad Build 281 domain inventory and the owner's intended final structure of Core + three application modules.
-
-Build 302 changes architecture/documentation only plus one passive module-group catalog and historical regression pinning.
-
-It does **not** change:
-
-- Packaging page script order;
-- Build 301 compatibility facade;
-- Build 300 Save/Preview stabilizer;
-- Build 298 native client/editor;
-- Build 297 startup/compatibility implementation;
-- current `dd-module-definitions.mjs` route/domain behavior;
-- current `dd-admin-module-runtime.mjs` behavior;
-- Packaging server read/write authorities;
-- SQL/schema;
-- Cloudflare binding/config;
-- R2;
-- real Production.
-
-### Build 302 machine-readable target
-
-`public/js/core/dd-application-module-groups.mjs` defines:
+Build 302 machine-readable target:
 
 ```text
 core
@@ -331,56 +264,56 @@ platform    -> business-administration
 admin       -> business-administration
 ```
 
-The catalog is passive: no fetch, timers, D1/R2 work or route interception.
+### Build 302 completed local proof
 
-### Build 302 local gates
-
-Run:
-
-```text
-python scripts/build301_packaging_compatibility_checkpoint_test.py
-python scripts/build302_core_three_module_architecture_test.py
-```
-
-Required endings:
+Build 301 historical regression passed:
 
 ```text
 BUILD 301 PACKAGING COMPATIBILITY HISTORICAL REGRESSION: PASS (a81f8d6a)
 No Cloudflare resource was contacted.
 ```
 
-and:
+Build 302 architecture regression passed:
 
 ```text
+PASS: Build 302 architecture catalog JavaScript syntax
+PASS: Build 302 catalog is passive and defines Core + three application modules
+PASS: all current domains are assigned exactly once across the three application modules
+PASS: authoritative architecture is normalized to Core + three modules
+PASS: Build 302 documents the migration state without claiming runtime conversion is complete
+PASS: completed Build 301 compatibility proof is historically pinned
+PASS: Build 301 Packaging and current Core/domain runtime behavior are unchanged
+PASS: exact Build 302 architecture-normalization changed-file boundary
+PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change
 BUILD 302 CORE + THREE MODULE ARCHITECTURE NORMALIZATION: PASS
 No Cloudflare resource was contacted.
 ```
 
-Build 302 needs no repeated Packaging browser Save/Preview proof because it changes no proven Build 301 runtime file.
+`git status --short` was clean after validation.
 
-## Next runtime direction after Build 302
+Build 302 changes architecture/documentation, one passive grouping catalog and historical regression pinning only. It does **not** change the proven Build 301 Packaging runtime.
 
-Do not spend the next passes only deleting Packaging compatibility code.
+## Next runtime direction
 
-The next runtime objective is to migrate from twelve top-level domain classifications toward the three umbrella application modules incrementally.
+The next runtime objective is to move from twelve domain classifications toward the three umbrella modules incrementally.
 
-Recommended direction:
+Recommended order:
 
-1. establish the Commerce & Operations umbrella/runtime boundary and formalize Catalog/Inventory/Operations service ownership;
-2. establish Creative & Production around the already-proven Packaging domain and bring Creative/CAIP/Content under it;
-3. establish Business & Administration;
-4. after all three top-level runtimes are proven, retire redundant shadow/domain loaders and old compatibility layers.
+1. establish the **Commerce & Operations** umbrella/runtime boundary and formalize Catalog/Inventory/Operations service ownership;
+2. establish **Creative & Production** around the already-proven Packaging domain and bring Creative/CAIP/Content under it;
+3. establish **Business & Administration**;
+4. only after all three top-level runtimes are proven, retire redundant shadow/domain loaders and old compatibility layers.
 
-A future Packaging compatibility-retirement pass must still respect the Build 298 readiness dependency on Build 297 until an equivalent umbrella/Core readiness contract replaces it.
+Do not spend upcoming passes only deleting Packaging compatibility code. Build 301 is stable and should remain preserved while the broader module boundaries are established.
 
 ## Separate schema/data parity track — DO NOT MIX WITH MODULE EXTRACTION
 
-There is a separate Devil n Dove database parity problem:
+There is a separate database parity problem:
 
 1. missing Production business data in Development;
-2. incomplete fresh-install schema, with Development missing Production tables that current runtime code may still use.
+2. incomplete fresh-install schema, with Development missing Production tables current runtime code may still use.
 
-Examples previously identified include `accounting_order_records`, `gift_cards`, several Command Center tables, and the `notification_dispatch_log` fresh-install inconsistency.
+Examples already identified include `accounting_order_records`, `gift_cards`, several Command Center tables, and `notification_dispatch_log` fresh-install inconsistency.
 
 Priority remains:
 
@@ -389,4 +322,4 @@ schema parity first
 then business-data copy/migration
 ```
 
-Do not combine that work with Build 302 architecture normalization or future module-runtime extraction.
+Do not combine that work with module-runtime extraction.
