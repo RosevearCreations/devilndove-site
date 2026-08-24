@@ -1,4 +1,4 @@
-// Devil n Dove Build 312 browser adapters for implemented read contracts.
+// Devil n Dove Build 316 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
 const ROUTES = Object.freeze({
@@ -6,6 +6,7 @@ const ROUTES = Object.freeze({
   'inventory-read': '/api/admin/contracts/inventory-read',
   'inventory-cost': '/api/admin/contracts/inventory-cost',
   'accounting-read': '/api/admin/contracts/accounting-read',
+  'accounting-expenses-read': '/api/admin/contracts/accounting-expenses-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -88,6 +89,25 @@ export function createDefaultModuleServices() {
         missingTables: Object.freeze(data.missing_tables || []),
         missingColumns: Object.freeze(data.missing_columns || []),
         authorityTable: data.authority_table || null,
+        requestTimeSchemaMutation: data.request_time_schema_mutation === true,
+        contract: data.contract,
+        build: Number(data.build || 0),
+      });
+    }),
+    'accounting-expenses-read': service('accounting-expenses-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-expenses-read'], {
+        limit: boundedInt(options.limit, 100, 1, 500),
+      });
+      return Object.freeze({
+        rows: Object.freeze(data.expenses || []),
+        count: Number(data.count || 0),
+        schemaReady: Boolean(data.schema_ready),
+        missingTables: Object.freeze(data.missing_tables || []),
+        missingColumns: Object.freeze(data.missing_columns || []),
+        authorityTable: data.authority_table || null,
+        attachmentTable: data.attachment_table || null,
+        attachmentTableAvailable: Boolean(data.attachment_table_available),
+        attachmentJoinEnabled: Boolean(data.attachment_join_enabled),
         requestTimeSchemaMutation: data.request_time_schema_mutation === true,
         contract: data.contract,
         build: Number(data.build || 0),
