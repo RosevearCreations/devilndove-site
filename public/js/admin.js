@@ -1,6 +1,6 @@
 // File: /public/js/admin.js
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
-// Build 289: Packaging write responses are decoupled from broad Catalog/Inventory enumeration.
+// Build 290: Packaging physically removes retired broad Catalog/Inventory reads from legacy server source.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -38,5 +38,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=289')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=290')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
