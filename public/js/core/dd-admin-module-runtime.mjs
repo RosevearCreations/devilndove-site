@@ -2,6 +2,8 @@
 // Build 303 adds Core awareness of the three Build 302 umbrella application modules
 // while preserving the proven domain registry/activation behavior. Packaging remains
 // the only actively loadable domain runtime; umbrella classification is metadata only.
+// Verified auth state is also reconciled after the async Core import so a fast
+// dd:admin-ready event cannot be missed before this module attaches its listener.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
@@ -24,6 +26,7 @@ let currentResolution = null;
 let currentApplicationModule = null;
 let activeModuleId = null;
 let verifiedAdmin = null;
+let verifiedResolutionPromise = null;
 
 function classifyPath(pathname) {
   return registry.resolve(pathname, CLASSIFICATION_USER);
@@ -156,11 +159,39 @@ async function resolveVerifiedAdmin(user) {
   return definition;
 }
 
+function requestVerifiedAdminResolution(user, source = 'auth-event') {
+  if (!authenticatedAdmin(user)) return Promise.resolve(null);
+  if (verifiedResolutionPromise) return verifiedResolutionPromise;
+
+  verifiedResolutionPromise = resolveVerifiedAdmin(user)
+    .catch((error) => {
+      console.warn(`[DD modules] verified module activation failed (${source})`, error);
+      document.documentElement.dataset.ddModuleMode = 'activation-failed';
+      throw error;
+    })
+    .finally(() => {
+      verifiedResolutionPromise = null;
+    });
+  return verifiedResolutionPromise;
+}
+
+function reconcileVerifiedAuthState() {
+  const authState = globalThis.DDAuthUiState;
+  if (authState?.verified !== true || !authenticatedAdmin(authState?.user)) return false;
+  void requestVerifiedAdminResolution(authState.user, 'verified-state-reconcile').catch(() => {});
+  return true;
+}
+
 function bootstrap() {
   annotateAdminLinks(document);
   const definition = classifyPath(window.location.pathname);
   setResolution(definition, definition?.entry ? 'activation-pending' : 'shadow-unverified');
   dispatchResolution(definition, document.documentElement.dataset.ddModuleMode);
+
+  // site-auth-ui may have completed /api/auth/me before this async module import
+  // finished. Reconcile its retained verified state so activation never depends on
+  // catching a one-time dd:admin-ready event.
+  queueMicrotask(reconcileVerifiedAuthState);
 }
 
 if (document.readyState === 'loading') {
@@ -174,10 +205,7 @@ document.addEventListener('dd:admin-ready', (event) => {
   if (!detail.ok || !authenticatedAdmin(detail.user)) return;
 
   if (detail.verified === true) {
-    void resolveVerifiedAdmin(detail.user).catch((error) => {
-      console.warn('[DD modules] verified module activation failed', error);
-      document.documentElement.dataset.ddModuleMode = 'activation-failed';
-    });
+    void requestVerifiedAdminResolution(detail.user, 'dd:admin-ready').catch(() => {});
     return;
   }
 
@@ -189,6 +217,10 @@ document.addEventListener('dd:admin-ready', (event) => {
   } else if (detail.degraded) {
     document.documentElement.dataset.ddModuleMode = 'active-degraded';
   }
+});
+
+document.addEventListener('dd:auth-verified', () => {
+  reconcileVerifiedAuthState();
 });
 
 document.addEventListener('dd:auth-rejected', () => {
@@ -234,6 +266,7 @@ const runtimeApi = Object.freeze({
   service: (name) => registry.service(name),
   getServiceIds: () => Object.freeze([...serviceRegistration.available]),
   annotateAdminLinks: () => annotateAdminLinks(document),
+  reconcileVerifiedAuthState,
 });
 
 window.DDModuleRuntime = runtimeApi;
