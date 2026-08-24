@@ -4,7 +4,7 @@
 // Build 306 hardened Inventory write-side contracts; Build 307 added Inventory reversal authority;
 // Build 309 added Inventory post authority; Build 310 enabled Creative consumption of both;
 // Build 311 added the Inventory-owned cost read boundary; Build 312 added Accounting read;
-// Build 313 activates the first read-only Operations runtime page under Commerce & Operations.
+// Build 313 activated the first read-only Operations page; Build 314 adds explicit Customer Documents coverage.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -14,7 +14,12 @@ export const RUNTIME_INVENTORY_BUILD = 305;
 export const INVENTORY_WRITE_CONTRACT_BUILD = 310;
 export const INVENTORY_COST_CONTRACT_BUILD = 311;
 export const ACCOUNTING_READ_CONTRACT_BUILD = 312;
-export const RUNTIME_OPERATIONS_BUILD = 313;
+export const RUNTIME_OPERATIONS_BUILD = 314;
+export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 314;
+export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
+  '/admin/operations/',
+  '/admin/customer-documents/',
+]);
 
 export const DD_APPLICATION_CORE = Object.freeze({
   id: 'core',
@@ -51,7 +56,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=313',
+    entry: '../modules/commerce-operations/runtime.mjs?v=314',
     runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations']),
   }),
   Object.freeze({
@@ -112,17 +117,19 @@ export function snapshotApplicationArchitecture() {
     inventoryCostContractBuild: INVENTORY_COST_CONTRACT_BUILD,
     accountingReadContractBuild: ACCOUNTING_READ_CONTRACT_BUILD,
     runtimeOperationsBuild: RUNTIME_OPERATIONS_BUILD,
+    operationsRuntimeCoverageBuild: OPERATIONS_RUNTIME_COVERAGE_BUILD,
+    operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'catalog-inventory-operations-read-only-runtime',
+    currentRuntimeMigrationMode: 'catalog-inventory-operations-read-only-explicit-page-coverage',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
     thirdUmbrellaRuntimeDomain: 'operations',
     operationsRuntimeDomainActive: true,
-    operationsRuntimeActivationMode: 'read-only-first-page',
+    operationsRuntimeActivationMode: 'read-only-explicit-two-page-coverage',
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
