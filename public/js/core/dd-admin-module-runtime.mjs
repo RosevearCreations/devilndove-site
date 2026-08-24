@@ -1,8 +1,7 @@
-// Devil n Dove Build 304 Admin module runtime bridge.
-// Build 304 preserves the proven domain registry while adding the first real top-level
-// application-module runtime lifecycle. Commerce & Operations activates for Catalog only;
-// Inventory, Operations and Public remain bridge-only. Packaging domain activation remains
-// unchanged beneath Creative & Production. Verified auth reconciliation from Build 303 remains.
+// Devil n Dove Build 305 Admin module runtime bridge.
+// Build 304 proved the first real top-level application-module runtime for Catalog.
+// Build 305 extends Commerce & Operations to Inventory while preserving the proven
+// domain registry, Packaging activation, and Build 303 verified-auth reconciliation.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
@@ -11,6 +10,7 @@ import { registerDefaultModuleServices } from './dd-module-service-adapters.mjs'
 import {
   BUILD as APPLICATION_ARCHITECTURE_BUILD,
   RUNTIME_CATALOG_BUILD as APPLICATION_RUNTIME_CATALOG_BUILD,
+  RUNTIME_INVENTORY_BUILD as APPLICATION_RUNTIME_INVENTORY_BUILD,
   applicationModuleForDomain,
   applicationModuleRuntimeForDomain,
   getApplicationModule,
@@ -103,6 +103,7 @@ function resolutionDetail(definition, mode, extra = {}) {
     applicationModuleMode: document.documentElement.dataset.ddApplicationModuleMode || applicationModeForDefinition(definition),
     applicationArchitectureBuild: APPLICATION_ARCHITECTURE_BUILD,
     applicationRuntimeCatalogBuild: APPLICATION_RUNTIME_CATALOG_BUILD,
+    applicationRuntimeInventoryBuild: APPLICATION_RUNTIME_INVENTORY_BUILD,
     applicationRuntimeEntry: applicationRuntime?.entry || null,
     activeApplicationModuleId,
     pathname: window.location.pathname,
@@ -385,9 +386,10 @@ if (!serviceRegistration.ok) {
 
 const runtimeApi = Object.freeze({
   mode: 'runtime',
-  build: 304,
+  build: 305,
   applicationArchitectureBuild: APPLICATION_ARCHITECTURE_BUILD,
   applicationRuntimeCatalogBuild: APPLICATION_RUNTIME_CATALOG_BUILD,
+  applicationRuntimeInventoryBuild: APPLICATION_RUNTIME_INVENTORY_BUILD,
   applicationArchitecture,
   registry,
   definitions: registry.list(),
