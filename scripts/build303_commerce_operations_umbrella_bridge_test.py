@@ -102,8 +102,8 @@ validation = git_show(HISTORICAL_HEAD, "BUILD303_VALIDATION.md")
 for marker in [
     "Status — COMPLETE IN DEVELOPMENT",
     "4fa2124cb89edff89c873c0dbdc1feee35a4e92b",
-    "catalog -> commerce-operations",
-    "packaging -> creative-production",
+    "catalog    -> commerce-operations",
+    "packaging  -> creative-production",
     "packaging_compatibility_state   active",
     "native_read_status              200",
 ]:
