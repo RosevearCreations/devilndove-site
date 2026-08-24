@@ -4,6 +4,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "d207609967c9a182627561f2f8f9b7ae47b17b04"
+HISTORICAL_HEAD = "f144edffe54c9ec46160ab95b129c4c71267baeb"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD291_CHANGED_FILES.md",
@@ -54,13 +55,13 @@ for name in [
         fail(f"JavaScript syntax failed for {name}: {result.stderr.strip()}")
 print("PASS: Build 291 JavaScript syntax")
 
-service = read("functions/api/_lib/packagingDomainService.js")
+service = git_show(HISTORICAL_HEAD, "functions/api/_lib/packagingDomainService.js")
 base_studio = git_show(BASE, "functions/api/admin/packaging-studio.js")
 if service != base_studio:
     fail("shared Packaging domain service is not byte-for-byte final Build 290 mature source")
 print("PASS: shared Packaging domain service is byte-for-byte final Build 290 mature source")
 
-adapter = read("functions/api/admin/packaging-studio.js")
+adapter = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-studio.js")
 required_adapter = [
     "from '../_lib/packagingDomainService.js'",
     "onRequestGet as loadLegacyPackagingStudio",
@@ -84,7 +85,7 @@ for forbidden in [
         fail(f"legacy Packaging route still contains mature business implementation: {forbidden}")
 print("PASS: legacy Packaging Studio route is a thin compatibility adapter")
 
-gateway = read("functions/api/admin/packaging-write.js")
+gateway = git_show(HISTORICAL_HEAD, "functions/api/admin/packaging-write.js")
 required_gateway = [
     "const BUILD = 291;",
     "const BROAD_READ_REMOVAL_BUILD = 290;",
@@ -146,7 +147,7 @@ protected_client = [
     "functions/api/admin/packaging-bootstrap.js",
 ]
 for path in protected_client:
-    result = run(["git", "diff", "--quiet", BASE, "HEAD", "--", path])
+    result = run(["git", "diff", "--quiet", BASE, HISTORICAL_HEAD, "--", path])
     if result.returncode != 0:
         fail(f"Build 291 unexpectedly changed protected compatibility file: {path}")
 print("PASS: Build 290 browser/runtime compatibility stack is unchanged")
@@ -158,7 +159,7 @@ if 'run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])' not in build290:
     fail("Build 290 historical changed-file boundary still follows future HEAD")
 print("PASS: Build 290 historical regression boundary is pinned")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
+result = run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
