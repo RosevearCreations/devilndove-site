@@ -1,10 +1,12 @@
 // Devil n Dove Build 302 Core + Three Application Modules architecture catalog.
-// Build 304 adds passive runtime-entry metadata for the first umbrella extraction.
-// Importing this file still creates no timers, fetches, polling, D1/R2 calls,
+// Build 304 added the first passive umbrella runtime metadata for Catalog.
+// Build 305 extends that same Commerce & Operations runtime to Inventory only.
+// Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
 export const BUILD = 302;
 export const RUNTIME_CATALOG_BUILD = 304;
+export const RUNTIME_INVENTORY_BUILD = 305;
 
 export const DD_APPLICATION_CORE = Object.freeze({
   id: 'core',
@@ -41,8 +43,8 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=304',
-    runtimeDomains: Object.freeze(['catalog']),
+    entry: '../modules/commerce-operations/runtime.mjs?v=305',
+    runtimeDomains: Object.freeze(['catalog', 'inventory']),
   }),
   Object.freeze({
     id: 'creative-production',
@@ -97,13 +99,15 @@ export function snapshotApplicationArchitecture() {
   return Object.freeze({
     build: BUILD,
     runtimeCatalogBuild: RUNTIME_CATALOG_BUILD,
+    runtimeInventoryBuild: RUNTIME_INVENTORY_BUILD,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'catalog-first-umbrella-runtime-extraction',
+    currentRuntimeMigrationMode: 'catalog-inventory-umbrella-runtime-extraction',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
+    secondUmbrellaRuntimeDomain: 'inventory',
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
