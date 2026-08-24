@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 312 Complete / Operations Runtime Next
+# Devil n Dove AI Context — Build 313 Operations Read-Only Runtime
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -16,8 +16,9 @@ Current modular architecture authority includes:
 - `docs/architecture/BUILD310_CREATIVE_INVENTORY_POST_CONSUMER_CUTOVER.md`
 - `docs/architecture/BUILD311_INVENTORY_COST_READ_CONTRACT.md`
 - `docs/architecture/BUILD312_ACCOUNTING_READ_CONTRACT.md`
-- `BUILD311_VALIDATION.md`
+- `docs/architecture/BUILD313_OPERATIONS_READ_ONLY_RUNTIME.md`
 - `BUILD312_VALIDATION.md`
+- `BUILD313_VALIDATION.md`
 
 **Real Devil n Dove Production remains frozen at Build 280 unless deliberately promoted through the separate Production workflow.**
 
@@ -53,31 +54,6 @@ Build 306 remains historically browser-proven with standalone local signoff not 
 
 Build 308 remains browser-proven; its standalone local regression output was not captured before later work began. Do not silently relabel it complete.
 
-## Build 311 — completed cost boundary
-
-Proven source/regression head:
-
-```text
-92aaef7b0076dbbf5db0e4a87109067b7af563ff
-Build 311 make historical pins line-ending safe
-```
-
-Completed handoff head:
-
-```text
-78546a6b9304ce38d0a42b130445a7504a15823f
-Build 311 set completed inventory-cost handoff
-```
-
-Inventory cost authority:
-
-```text
-GET /api/admin/contracts/inventory-cost
-owner     inventory
-build     311
-authority site_item_inventory.unit_cost_cents
-```
-
 ## Build 312 — COMPLETE IN DEVELOPMENT
 
 Proven source/runtime head:
@@ -87,49 +63,83 @@ Proven source/runtime head:
 Build 312 update Accounting read handoff context
 ```
 
-Build 312 implements:
+Completed handoff head:
+
+```text
+3b5709c842ed7bce8335ddd57fe11420ae207367
+Build 312 complete handoff and set Operations activation next
+```
+
+Accounting read authority:
 
 ```text
 GET /api/admin/contracts/accounting-read
 owner            accounting
 build            312
-mode             read-only-order-financial-state
 authority table  accounting_order_records
+schema ready     true
+schema mutation  false
 ```
 
-The contract exposes only bounded order-linked financial/payment state and excludes customer identity, journals, bank imports, close controls and Accounting mutations.
-
-The route does not call `ensureAccountingSchema` or `syncAccountingForOrder` and performs no request-time DDL or writes.
-
-Development proof:
+Operations read prerequisites are now all implemented:
 
 ```text
-operations_required_services  catalog-read,inventory-read,accounting-read
-accounting_service_owner      accounting
-accounting_service_mode       read-only-http
-accounting_contract           accounting-read
-accounting_build              312
-accounting_authority_table    accounting_order_records
-accounting_schema_ready       true
-accounting_missing_tables     <empty>
-accounting_missing_columns    <empty>
-accounting_schema_mutation    false
-accounting_rows               0
-operations_runtime            <none>
-contracts_ok                  true
-services_ok                   true
+catalog-read
+inventory-read
+accounting-read
 ```
 
-Local regression:
+## Build 313 — STAGED / VALIDATION REQUIRED
+
+Baseline:
 
 ```text
-BUILD 312 ACCOUNTING READ CONTRACT: PASS
-No Cloudflare resource was contacted.
+3b5709c842ed7bce8335ddd57fe11420ae207367
+Build 312 complete handoff and set Operations activation next
 ```
 
-`accounting_rows=0` is valid Development business-data state.
+Build 313 activates the first real `operations` runtime page beneath Commerce & Operations in read-only mode.
 
-## Current runtime identity
+### Commerce runtime
+
+```text
+build              313
+supported domains  catalog, inventory, operations
+operations reads   catalog-read, inventory-read, accounting-read
+```
+
+The runtime remains non-mutating:
+
+```text
+createsNetworkTransport false
+ownsInventoryMutations  false
+ownsOperationsMutations false
+```
+
+### Explicitly migrated page
+
+Build 313 pins:
+
+```text
+/admin/operations/
+/public/js/admin.js?v=313
+```
+
+The shared Admin loader imports the Build 313 runtime graph.
+
+### Coverage limitation
+
+Do not claim the whole Operations route family is migrated in Build 313.
+
+`/admin/orders/` is unchanged and currently has no shared `admin.js` runtime loader. `/admin/customer-documents/` retains a historical loader pin but is not re-pinned or validated in Build 313.
+
+Build 313 proven runtime-page scope is intentionally only:
+
+```text
+/admin/operations/
+```
+
+### Runtime identity
 
 ```text
 Architecture build              302
@@ -139,32 +149,29 @@ Inventory runtime               305
 Inventory write boundary        310
 Inventory cost contract         311
 Accounting read contract        312
-Commerce runtime                312
-Operations runtime active       false
+Operations runtime              313
+Commerce runtime                313
 ```
 
-## Next direction — Build 313 Operations runtime activation
+### Build 313 exclusions
 
-The required read services now exist:
+Build 313 does not modify:
 
-```text
-catalog-read
-inventory-read
-accounting-read
-```
+- Accounting contract/helper behavior;
+- Catalog/Inventory read contracts;
+- Inventory post/reverse authorities;
+- Creative Inventory consumers;
+- order/payment/customer/gift-card/membership mutation handlers;
+- `/admin/orders/`;
+- SQL/schema;
+- Cloudflare bindings/config;
+- R2;
+- real Production;
+- schema/data parity work.
 
-Build 313 may activate the `operations` domain beneath Commerce & Operations, but the first activation must remain read-only.
+## Next direction after Build 313
 
-Requirements for Build 313:
-
-- add `operations` to the Commerce runtime domain set only after confirming shared-loader coverage;
-- require `catalog-read,inventory-read,accounting-read` for Operations activation;
-- do not migrate or intercept order/payment/customer/gift-card/membership mutations;
-- do not change Accounting or Inventory authorities;
-- do not add SQL/schema/config/R2/Production changes;
-- prove one real Operations page classifies and activates as `operations` under `commerce-operations`;
-- keep legacy page behavior available underneath the runtime shell;
-- document any Operations route families that still lack the shared loader rather than claiming unproven coverage.
+After Build 313 is proven, expand Operations runtime loader coverage one bounded route group at a time. Prefer read-heavy pages before any mutation-authority extraction.
 
 ## Validation interaction preference
 
