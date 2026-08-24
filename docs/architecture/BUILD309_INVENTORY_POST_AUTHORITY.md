@@ -1,32 +1,32 @@
 # Build 309 — Inventory-Owned Post Authority
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
-Build 309 implements a dedicated Inventory-owned `inventory-post` contract route for reviewed Creative material usage while deliberately leaving Creative Process on its current posting path until a separate consumer-cutover build.
-
-Baseline:
+Proven runtime/service head:
 
 ```text
-6d9a236ae688fe3d4b8e6975b866c637efe51c9b
-Build 308 update modular reversal-consumer handoff
+f23a914c9ea4848c6f91d715ce0c983a06f716b3
+Build 309 update modular post-authority handoff
 ```
-
-Build 308 is browser-proven; its local regression signoff remains pending.
 
 Real Devil n Dove Production remains frozen at Build 280.
 
 ## Purpose
 
-Before Build 309, `inventory-post` was only described as an existing authority through the broad legacy Inventory endpoint. Creative Process also retained its own direct reviewed-material posting implementation.
-
-Build 309 creates a dedicated Inventory-owned authority:
+Build 309 creates the dedicated Inventory-owned authority for reviewed Creative material usage:
 
 ```text
 GET  /api/admin/contracts/inventory-post
 POST /api/admin/contracts/inventory-post
 ```
 
-Contract state:
+Service:
+
+```text
+functions/api/_lib/inventoryPostService.js
+```
+
+Contract state proven in Development:
 
 ```text
 owner                  inventory
@@ -35,133 +35,65 @@ implementation state   implemented-not-consumer-enabled
 consumer writes ready  false
 ```
 
-Creative posting behavior does not change in this build.
+Creative posting behavior is deliberately unchanged in Build 309.
 
-## Inventory-owned posting service
+## Posting requirements
 
-New service:
-
-```text
-functions/api/_lib/inventoryPostService.js
-```
-
-Required input:
+The service requires:
 
 ```text
 creative_work_project_id
 creative_work_event_id
 site_item_inventory_id
 usage_quantity_consumed > 0
-notes optional
-authorized_by supplied by authenticated admin route
+a matching approved material review
+authenticated administrator identity
 ```
-
-The service requires the matching Creative material review to exist and be approved.
 
 ## Tracking-mode preservation
 
-The service preserves the established Inventory usage modes:
-
 ```text
-exact
-estimated
-log_only
-reusable
+exact / estimated: stock quantity consumed = usage quantity / usage units per stock unit
+log_only / reusable: physical stock quantity consumed = 0
 ```
 
-For exact/estimated usage:
-
-```text
-stock quantity consumed = usage quantity / usage units per stock unit
-```
-
-For log-only/reusable usage:
-
-```text
-stock quantity consumed = 0
-```
-
-Usage is still recorded even when physical stock is unchanged.
+Usage provenance is still recorded for every mode.
 
 ## Atomic reviewed-material posting
 
-Build 309 improves the old multi-step Creative posting pattern by performing the authoritative mutation as one guarded D1 batch.
-
-Transaction order:
+The Inventory service performs one guarded D1 batch:
 
 ```text
-1. claim the approved Creative material review by inserting its UNIQUE inventory-post row
-2. reduce physical on-hand stock by the calculated delta
-3. insert the physical `consume` movement
+1. claim approved review through UNIQUE creative_project_material_review_id posting row
+2. apply stock delta
+3. insert physical consume movement
 4. insert Creative usage-detail provenance
 5. insert fractional usage movement linked to the physical movement id
-6. mark the material review inventory_consumed=1
+6. mark material review inventory_consumed=1
 ```
 
-The first posting row is conditioned on:
+The existing UNIQUE constraint on `creative_project_inventory_posts.creative_project_material_review_id` provides database-level idempotency without new schema.
 
-- the review still being approved;
-- `inventory_consumed=0`;
-- the Inventory item still being active;
-- current stock still matching the pre-read snapshot;
-- no existing posting for the material review.
-
-The existing schema provides:
-
-```text
-UNIQUE(creative_project_material_review_id)
-```
-
-on `creative_project_inventory_posts`, giving the posting claim database-level idempotency without adding schema.
-
-## Race and retry behavior
-
-If another request already posted the same review, the service returns the existing posting as an idempotent replay.
-
-If stock changed before the guarded claim, the service returns:
+The claim is conditioned on the approved review, active Inventory item, current stock snapshot, and absence of an existing posting. Stale stock returns:
 
 ```text
 409 inventory_post_stale_stock
 ```
 
-The caller must refresh instead of applying a stale stock calculation.
+A pre-existing posting is returned as an idempotent replay.
 
 ## Movement provenance
 
-The physical movement uses:
+The physical movement remains compatible with the Build 308 reversal resolver:
 
 ```text
 movement_type = consume
 note prefix   = Creative Project <project>, event <event>.
 ```
 
-This preserves the provenance format used by the Build 308 reversal consumer to resolve the original movement later.
+The fractional usage movement stores the generated `site_inventory_movement_id`.
 
-The fractional usage movement stores the generated `site_inventory_movement_id`, improving linkage compared with the older Creative posting path.
-
-## Safe readiness GET
-
-The GET route is authenticated and non-mutating. It reports:
-
-```text
-build                         309
-contract                      inventory-post
-owner                         inventory
-implementation_state          implemented-not-consumer-enabled
-consumer_writes_ready         false
-requires_approved_material_review true
-requires_positive_usage_quantity  true
-supports_fractional_usage     true
-supports_log_only             true
-supports_reusable             true
-atomic_review_posting         true
-schema_ready                  true/false
-missing_tables                [...]
-```
-
-## Runtime metadata
-
-Architecture remains:
+## Runtime identity
 
 ```text
 Core architecture             302
@@ -172,18 +104,16 @@ Commerce runtime              309
 Core runtime implementation   305
 ```
 
-The Commerce umbrella runtime still performs no stock mutation itself:
+The Commerce umbrella runtime still performs no mutation itself:
 
 ```text
-ownsInventoryMutations   false
-consumerMutationReady    false
+ownsInventoryMutations false
+consumerMutationReady  false
 ```
 
-The dedicated Inventory contract route owns the mutation.
+The dedicated Inventory contract route owns the mutation authority.
 
-## Reversal state remains intact
-
-Build 308 reversal consumption remains:
+## Reversal state preserved
 
 ```text
 inventory-reverse
@@ -191,17 +121,41 @@ implementation state   implemented-creative-consumer-enabled
 consumer writes ready  true
 ```
 
-Build 309 does not modify the Build 307 reversal service or the Build 308 Creative reversal consumer adapter.
+Build 309 does not modify the Build 307 reversal service or Build 308 Creative reversal adapter.
+
+## Completed proof
+
+Local regression:
+
+```text
+BUILD 309 INVENTORY POST AUTHORITY: PASS
+No Cloudflare resource was contacted.
+```
+
+Development browser proof confirmed:
+
+```text
+admin.js?v=309
+Commerce runtime 309
+write boundary 309
+inventory-post implemented-not-consumer-enabled
+post consumer ready false
+atomic review posting true
+inventory-reverse implemented-creative-consumer-enabled
+reverse consumer ready true
+schema ready true
+missing tables none
+contracts/services true / true
+```
 
 ## Compatibility boundary
 
 Build 309 intentionally does not modify:
 
-- `functions/api/admin/creative-process.js`;
-- `functions/api/_lib/creativeInventoryReversalConsumer.js`;
-- `functions/api/_lib/inventoryReversalService.js`;
-- `functions/api/admin/contracts/inventory-reverse.js`;
-- `functions/api/admin/site-item-inventory.js`;
+- Creative posting consumption;
+- Build 308 reversal consumer;
+- Build 307 reversal authority;
+- legacy broad Inventory mutation endpoint;
 - SQL/schema;
 - Cloudflare bindings/config;
 - R2;
@@ -209,6 +163,6 @@ Build 309 intentionally does not modify:
 
 ## Next bounded pass
 
-After Build 309 is proven, migrate only Creative's reviewed-material posting consumer to the Inventory-owned `inventory-post` service with equivalence/idempotency tests.
+Build 310 should migrate only Creative reviewed-material posting consumption to the Inventory-owned `inventory-post` service with equivalence/idempotency validation.
 
-Do not combine that consumer cutover with Operations migration or schema/data-parity work.
+Do not combine that cutover with Operations migration or schema/data-parity work.
