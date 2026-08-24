@@ -1,6 +1,6 @@
-# Devil n Dove AI Context — Development Build 300 Completed Stabilization Pointer
+# Devil n Dove AI Context — Development Build 301 Compatibility Checkpoint Pointer
 
-Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the pre-modular functional roadmap. For the modular Development line after the Build 280 Production freeze, read `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `BUILD298_VALIDATION.md`, `BUILD299_VALIDATION.md`, `BUILD300_VALIDATION.md`, and `docs/architecture/BUILD300_PACKAGING_STABILIZATION.md`.
+Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the pre-modular functional roadmap. For the modular Development line after the Build 280 Production freeze, read `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `BUILD298_VALIDATION.md`, `BUILD299_VALIDATION.md`, `BUILD300_VALIDATION.md`, `BUILD301_VALIDATION.md`, `docs/architecture/BUILD300_PACKAGING_STABILIZATION.md`, and `docs/architecture/BUILD301_PACKAGING_COMPATIBILITY_CHECKPOINT.md`.
 
 **Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
 
@@ -38,7 +38,7 @@ write authority: packaging-domain-service
 compatibility bridge intercepts: 0
 ```
 
-Build 298 remains the proven native transport/editor baseline underneath Build 300.
+Build 298 remains the proven native transport/editor implementation baseline underneath later compatibility checkpoints.
 
 ## Build 299 status — NOT COMPLETE / browser controller rolled back
 
@@ -56,7 +56,7 @@ See `BUILD299_VALIDATION.md` for the rollback record.
 
 ## Build 300 — COMPLETE IN DEVELOPMENT — 2026-08-24
 
-Build 300 is the mandatory Packaging stabilization pass that restored trust in Save Project and Preview before any forward modularization resumes.
+Build 300 is the mandatory Packaging stabilization pass that restored trust in Save Project and Preview before forward modularization resumed.
 
 Runtime completion source:
 
@@ -65,7 +65,14 @@ Runtime completion source:
 Build 300 guard preview audit feedback regression
 ```
 
-Development Pages project deployed source:
+Completed documentation/handoff head now historically pinned by Build 301:
+
+```text
+21b01cc34ef734f581da22a7f0d3c43ec10607c0
+Build 300 record completed stabilization handoff
+```
+
+Development Pages project deployed source for the live runtime proof:
 
 ```text
 devilndove-site-dev
@@ -74,7 +81,7 @@ source 37d2d1c
 
 The Cloudflare `Environment = Production` label on that deployment refers to the primary environment of the Development Pages project. Real Devil n Dove Production was not contacted and remains frozen at Build 280.
 
-### Live runtime shape
+### Build 300 live runtime shape
 
 ```text
 Build 297 startup/defense layers
@@ -115,11 +122,9 @@ A successful message includes:
 Verified by fresh D1 read-back.
 ```
 
-This establishes that after Build 300 stabilization, ordinary fields and structured claims are genuinely persisted and agree with fresh D1 read-back.
-
 ### Full-ribbon Preview — PASS
 
-The stale-looking Preview was traced to presentation rather than persistence. The soap SVG is a wide ribbon and the claims panel sits near the far-right edge; the old detail-width presentation could leave the changed claims outside the visible viewport after rerender.
+The stale-looking Preview was traced to presentation rather than persistence. The soap SVG is a wide ribbon and the claims panel sits near the far-right edge; the old detail-width presentation could leave changed claims outside the visible viewport after rerender.
 
 Build 300 now defaults Preview to **Fit full label**, while **Detail / scroll** preserves the old large inspection view when wanted. The fitted browser view does not change physical SVG millimetre dimensions, print output, or exports.
 
@@ -141,13 +146,7 @@ The mature soap renderer does print `Front tagline`; Build 300 leaves that norma
 
 ### Preview audit stability — PASS
 
-A live diagnostic exposed a self-triggering Preview audit loop. The Preview status UI was mutating text inside the same subtree watched by the Build 300 `MutationObserver`.
-
-Build 300 now:
-
-- updates Preview status text only when its value actually changes;
-- ignores mutations originating inside the Build 300 Preview controls;
-- continues to audit genuine editor/SVG rerenders.
+A live diagnostic exposed a self-triggering Preview audit loop. Build 300 now updates Preview status text only when needed and ignores mutations originating inside its own Preview controls.
 
 Final idle proof:
 
@@ -157,28 +156,94 @@ audit_after = 4
 audit_delta = 0
 ```
 
-This is the required proof that the browser runtime settles while idle.
+### Build 300 historical regression
 
-### Build 300 local regression — PASS
+Build 301 changes `scripts/build300_packaging_stabilization_test.py` so completed Build 300 is validated against historical head `21b01cc34ef734f581da22a7f0d3c43ec10607c0` rather than future HEAD. Do not undo this historical pin.
+
+## Build 301 — CURRENT PACKAGING COMPATIBILITY CHECKPOINT
+
+Owner direction: advance Packaging to one Build 301 compatibility conversation rather than continuing to discuss Build 297, 298 and 300 as if they are separate current runtimes.
+
+Build 301 therefore becomes the single **current compatibility identity** while older build numbers remain explicit implementation provenance only.
+
+Build 301 adds:
 
 ```text
-PASS: Build 300 JavaScript syntax
-PASS: Build 300 verifies Save Project, fits/audits the full live soap preview, and prevents preview-audit observer feedback
-PASS: Packaging page restored to proven Build 298 runtime with Build 300 stabilizer only
-PASS: mature editor and proven native read/write/tombstone authorities are unchanged
-PASS: Build 299 is explicitly not signed off and its browser controller rollback is documented
-PASS: exact Build 300 stabilization changed-file boundary
-PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change
-BUILD 300 PACKAGING STABILIZATION: PASS
-No Cloudflare resource was contacted.
+public/js/admin-packaging-compatibility-v301.js
 ```
 
-## Build 300 preserved authority/safety boundary
+and exposes:
 
-Build 300 does not change:
+```js
+window.DDPackagingCompatibility?.getStatus?.()
+```
 
-- mature editor `public/js/admin-packaging-studio.js` Build 298;
-- Build 298 native client launcher/module;
+Top-level expected identity:
+
+```text
+build = 301
+compatibilityCheckpoint = true
+singleConversationBuild = 301
+state = active   // after normal Packaging startup/read completes
+```
+
+### Implementation provenance under the one Build 301 conversation
+
+```text
+startupGateBuild              297
+clientTransportBuild          297
+nativeClientBuild             298
+stabilizationBuild            300
+editorImplementationBuild     298
+nativeReadGatewayBuild        293
+nativeReadImplementationBuild 286
+nativeWriteGatewayBuild       292
+nativeWriteServiceBuild       291
+```
+
+These are not separate current workstreams. They identify which already-proven implementation is supplying each responsibility beneath Build 301.
+
+### Build 301 intended live page shape after activation
+
+```text
+Build 297 startup gate
+-> core admin/runtime bootstrap
+-> Build 297 compatibility transport
+-> Build 298 native client
+-> Build 300 verified-save + Preview stabilizer
+-> Build 301 compatibility checkpoint
+-> mature Build 298 editor
+```
+
+The Build 301 checkpoint is diagnostic/orchestration metadata only. It performs no API fetch and installs no additional network transport.
+
+### Build 301 activation workflow
+
+Build 301 support is staged before page activation. Run locally:
+
+```bash
+python scripts/apply_build301_packaging_compatibility_checkpoint.py
+python scripts/build300_packaging_stabilization_test.py
+python scripts/build301_packaging_compatibility_checkpoint_test.py
+```
+
+Only after both regressions pass should `admin/packaging-studio/index.html` be committed as:
+
+```text
+Build 301 activate Packaging compatibility checkpoint
+```
+
+See `BUILD301_VALIDATION.md` for exact browser proof and completion gates.
+
+## Build 301 safety boundary
+
+Build 301 does not modify:
+
+- Build 297 startup gate implementation;
+- Build 297 client-transport launcher/module;
+- Build 298 native-client launcher/module;
+- Build 300 save/Preview stabilizer;
+- mature editor implementation;
 - Build 293/286 Packaging read authority;
 - Build 292/291 Packaging write authority;
 - Build 294 retired-route tombstone;
@@ -191,15 +256,10 @@ The Production freeze remains Build 280.
 
 ## Next Packaging rule
 
-Build 300 is now complete, so forward work may resume only from this stabilized baseline.
+Treat **Build 301** as the one current Packaging compatibility conversation after activation. When diagnostics show older build numbers, describe them as implementation provenance beneath Build 301, not as separate current passes.
 
-Before altering Packaging runtime in a future build:
+Do not physically remove Build 297 compatibility layers merely because Build 301 reports them idle. Build 298 still has a real readiness dependency on the Build 297 transport. A future retirement build must first remove that dependency and prove native startup/save/Preview behavior independently.
 
-1. pin the completed Build 300 historical boundary/regression rather than allowing it to follow future `HEAD`;
-2. keep Build 299 marked incomplete unless its historical print-source behavior is deliberately redesigned and separately proven;
-3. do not combine Packaging modularization with the separate schema-parity/data-copy track;
-4. preserve the Build 298 native read/write authorities unless a future build intentionally replaces them with its own regression and live proof.
+Do not reactivate Build 299 print-source behavior without a deliberate redesign and new live proof.
 
-The safest next Packaging pass is an audit-first pass. Do not delete compatibility layers or tombstones merely because normal Build 300 traffic is healthy; first prove each remaining dependency and remove only one bounded layer at a time.
-
-Schema parity/data-copy remains a completely separate track and must not be mixed into Packaging stabilization/modularization work.
+Schema parity/data-copy remains a completely separate track and must not be mixed into Packaging compatibility work.
