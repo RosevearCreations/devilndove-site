@@ -1,6 +1,6 @@
-# Devil n Dove AI Context — Development Build 298 Completed Pointer
+# Devil n Dove AI Context — Development Build 299 Candidate Pointer
 
-Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the pre-modular functional roadmap. For the modular Development line after the Build 280 Production freeze, read `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md` and the Packaging build notes through `docs/architecture/BUILD298_PACKAGING_NATIVE_CLIENT_CUTOVER.md`.
+Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the pre-modular functional roadmap. For the modular Development line after the Build 280 Production freeze, read `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md` and the Packaging build notes through `docs/architecture/BUILD299_PACKAGING_PRINT_SOURCE_CONSISTENCY.md`.
 
 **Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
 
@@ -18,18 +18,25 @@ A normal Packaging Save also passed through the compatibility bridge with Build 
 
 ## Build 298 completed Development proof — 2026-08-24
 
-Build 298 is now **complete in Development**. Activation commit:
+Build 298 is **complete in Development**. Activation commit:
 
 ```text
 d3fa66c37665797d303a3a44f40015dd81fdf7aa
 Build 298 activate native Packaging client cutover
 ```
 
-The Development Pages project `devilndove-site-dev` deployed source `d3fa66c` as active. Real Devil n Dove Production remained untouched.
+Completed Development parity head:
+
+```text
+3a19ebc263a206acd22e6490327ffa32567e4a8a
+Build 298 record completed Development parity
+```
+
+The Development Pages project `devilndove-site-dev` deployed the Build 298 native-client line. Real Devil n Dove Production remained untouched.
 
 Build 298 removes the retired compatibility endpoint name from the mature editor itself. The browser facade is `DDPackagingClient`, launched by `public/js/admin-packaging-native-client-v298.js` and implemented by `public/js/modules/packaging/native-client-v298.mjs`.
 
-The mature editor now delegates its Packaging `api()` helper to `DDPackagingClient.request(body, projectId)` and contains no `/api/admin/packaging-studio` literal. The Packaging page loads the Build 298 client before the mature editor while keeping Build 297 compatibility machinery loaded only as defense-in-depth.
+The mature editor delegates its Packaging `api()` helper to `DDPackagingClient.request(body, projectId)` and contains no `/api/admin/packaging-studio` literal. The Packaging page loads the Build 298 client before the mature editor while keeping Build 297 compatibility machinery loaded only as defense-in-depth.
 
 ### Proven native read path
 
@@ -51,8 +58,6 @@ build297_gate_blocks          0
 build297_transport_ready      true
 ```
 
-This proves normal mature-editor reads now use the Build 298 native client and the Build 297 startup compatibility gate is idle.
-
 ### Proven native write path
 
 A normal Development Packaging Save produced:
@@ -72,15 +77,54 @@ packaging_owned_response        true
 compatibility_bridge_intercepts 0
 ```
 
-The final zero is the decisive Build 298 write proof: the mature editor now writes directly to `/api/admin/packaging-write`; the Build 289 compatibility write bridge remains armed only as defense-in-depth and is idle for normal Build 298 saves.
+The zero compatibility intercept count is the decisive Build 298 write proof: the mature editor writes directly to `/api/admin/packaging-write`.
 
-`BUILD298_VALIDATION.md` contains the completed local/deployment/live evidence.
+## Build 299 Development candidate — Packaging print source consistency
+
+During normal Development use after Build 298, project edits were saving correctly but the Print Test interface made the printed source look stale. The root cause was a browser-model mismatch:
+
+- **Save project** correctly updates the live Packaging project;
+- **Save review version** correctly creates an immutable historical snapshot;
+- the Print Test selector defaulted to the newest saved review version after every render;
+- the existing optimized-sheet function nevertheless rendered the live Project draft and ignored that selected version.
+
+Build 299 corrects that inconsistency without changing the mature editor or version semantics.
+
+New read endpoint:
+
+```text
+GET /api/admin/packaging-version-artifact
+  ?packaging_project_id=<project>
+  &packaging_project_version_id=<version>
+```
+
+It returns exactly one stored `packaging_project_versions.svg_markup` artifact after admin authentication and project/version ownership validation. Normal bootstrap remains small and unchanged.
+
+New browser controller:
+
+```text
+public/js/admin-packaging-print-source-v299.js
+```
+
+Behavior:
+
+- Print Test defaults to **Project draft** after every project/render refresh;
+- draft printing continues through the existing mature-editor optimized-sheet handler unchanged;
+- explicitly selecting Version 1/2/etc. intercepts only that print click and loads/prints the immutable stored SVG for that version;
+- saved versions are never silently rewritten by **Save project**;
+- the selector is presented as **Print source / evidence version** so the current source is explicit.
+
+The earlier browser-compatibility-retirement candidate was removed from the current tree before this fix was activated. That retirement audit is deferred until Build 299 has independent live Development proof.
+
+`BUILD299_VALIDATION.md` contains the local and live validation procedure. Build 299 is not complete until the local regression, normal draft-print proof, and explicit saved-version print proof all pass.
 
 ## Preserved authority and safety boundary
 
-Build 298 did not change:
+Build 299 does not change:
 
-- Build 297 compatibility runtime/defense layers except for the historical regression pin prepared during staging;
+- mature editor `public/js/admin-packaging-studio.js` Build 298;
+- Build 298 native client read/write transport;
+- Build 297 compatibility runtime/defense layers;
 - Build 293 read service over the proven Build 286 read implementation;
 - Build 292 write gateway over Build 291 domain service;
 - `functions/api/admin/packaging-studio.js` retired GET/POST tombstone endpoint;
@@ -89,13 +133,13 @@ Build 298 did not change:
 - R2 configuration;
 - real Production.
 
-Normal Build 298 validation traffic did not touch the retired Packaging endpoint.
+Normal Build 299 draft printing should not call the new version-artifact endpoint. That endpoint is used only after a historical review version is deliberately selected.
 
 ## Recommended next modular work
 
-The next Packaging build should audit the now-idle browser compatibility layers introduced across Builds 295–297 and determine which can be removed while preserving Build 298 as the native-client baseline.
+First finish Build 299 Development parity. Do not resume browser-compatibility retirement until current-draft printing and exact historical-version printing are both proven.
 
-Do **not** combine that browser cleanup with physical deletion of `functions/api/admin/packaging-studio.js`. The tombstone endpoint should be considered separately only after an explicit repository/runtime/tooling reference audit proves nothing current depends on it.
+After Build 299 is complete, resume the audit of idle browser compatibility layers introduced across Builds 295–297 while preserving Build 298/299 behavior. Do **not** combine that cleanup with physical deletion of `functions/api/admin/packaging-studio.js`; the server tombstone remains a separate decision requiring its own repository/runtime/tooling reference audit.
 
 Separately, dormant read helpers inside the Build 291 write-service source can be removed only after write-response/detail dependencies are audited and independently protected.
 
