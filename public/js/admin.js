@@ -8,6 +8,7 @@
 // Build 306: Inventory write-side contract readiness is exposed without moving mutation authority.
 // Build 307: Inventory exposes an owned compensating reversal service; consumer migration remains disabled.
 // Build 309: Inventory exposes an owned reviewed-material post service; Creative post migration remains disabled.
+// Build 310: Creative consumes both Inventory-owned post and reverse authorities.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -45,5 +46,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=309')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=310')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
