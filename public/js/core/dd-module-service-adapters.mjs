@@ -1,9 +1,10 @@
-// Devil n Dove Build 284 browser adapters for implemented read contracts.
+// Devil n Dove Build 311 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
   'inventory-read': '/api/admin/contracts/inventory-read',
+  'inventory-cost': '/api/admin/contracts/inventory-cost',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -54,6 +55,24 @@ export function createDefaultModuleServices() {
         include_tools: options.includeTools ? 1 : 0,
       });
       return Object.freeze({ rows: Object.freeze(data.items || []), count: Number(data.count || 0), contract: data.contract });
+    }),
+    'inventory-cost': service('inventory-cost', 'inventory', async (options = {}) => {
+      const data = await fetchContract(ROUTES['inventory-cost'], {
+        inventory_id: Number(options.inventoryId || 0) || '',
+        q: text(options.q),
+        limit: boundedInt(options.limit, 250, 1, 1000),
+        include_history: options.includeHistory ? 1 : 0,
+      });
+      return Object.freeze({
+        rows: Object.freeze(data.items || []),
+        count: Number(data.count || 0),
+        history: Object.freeze(data.history || []),
+        historyCount: Number(data.history_count || 0),
+        historyAvailable: Boolean(data.history_available),
+        authorityField: data.authority_field || null,
+        contract: data.contract,
+        build: Number(data.build || 0),
+      });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], {
