@@ -1,4 +1,5 @@
-// Build 277 - Restore dedicated French + English ingredient panels, strengthen claim spacing, and retain Build 276 Inventory traceability/overflow safety.
+// Build 298 - Mature Packaging editor requests now use the native DDPackagingClient facade.
+// Build 277 renderer/content behavior remains otherwise unchanged.
 (() => {
   const STORAGE_KEY = 'dd_packaging_studio_local_draft_v5';
   const state = { projects: [], templates: [], products: [], inventory: [], printers: [], printersSchemaReady: true, referenceSources: [], formulaLibrary: [], contentLibrary: [], sourceMaterialLibrary: [], librarySchemaReady: true, sourceMaterialSchemaReady: true, sourceMaterialMetadataReady: true, detail: null, loading: false, activeTab: 'product', activeSourceMaterialId: 0, activeContentLibraryId: 0 };
@@ -102,8 +103,9 @@
   }
 
   async function api(body = null, projectId = 0) {
-    const url = `/api/admin/packaging-studio${projectId ? `?packaging_project_id=${encodeURIComponent(projectId)}` : ''}`;
-    const response = await DDAuth.apiFetch(url, body ? { method: 'POST', body: JSON.stringify(body) } : undefined);
+    const client = globalThis.DDPackagingClient;
+    if (!client || typeof client.request !== 'function') throw new Error('Packaging native client is unavailable.');
+    const response = await client.request(body, projectId);
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) throw new Error(data?.error || 'Packaging Studio request failed.');
     return data;
