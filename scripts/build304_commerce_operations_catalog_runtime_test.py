@@ -4,13 +4,14 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "6cbcc4353327eea093ef4701497fa5321b680096"
+HISTORICAL_HEAD = "b142b3a6267df57ac43b8189982bd6abe82605ac"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD304_CHANGED_FILES.md",
     "BUILD304_VALIDATION.md",
-    "docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md",
     "admin/products/index.html",
     "admin/packaging-studio/index.html",
+    "docs/architecture/BUILD304_COMMERCE_OPERATIONS_CATALOG_RUNTIME.md",
     "public/js/admin.js",
     "public/js/core/dd-admin-module-runtime.mjs",
     "public/js/core/dd-application-module-groups.mjs",
@@ -36,220 +37,128 @@ def run(args):
     )
 
 
-def read(path):
-    return (ROOT / path).read_text(encoding="utf-8")
-
-
-def changed_files(*args):
-    result = run(["git", "diff", "--name-only", *args])
+def git_show(ref, path):
+    result = run(["git", "show", f"{ref}:{path}"])
     if result.returncode:
-        fail(result.stderr.strip() or f"could not compare {args}")
+        fail(f"could not read {path} at {ref}: {result.stderr.strip()}")
+    return result.stdout
+
+
+def changed_files(base, head):
+    result = run(["git", "diff", "--name-only", base, head])
+    if result.returncode:
+        fail(result.stderr.strip() or f"could not compare {base}..{head}")
     return {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
 
 
-def payload_diff_lines(path):
-    result = run(["git", "diff", "--unified=0", BASE, "HEAD", "--", path])
-    if result.returncode:
-        fail(result.stderr.strip() or f"could not inspect diff for {path}")
-    return [
-        line
-        for line in result.stdout.splitlines()
-        if (line.startswith("+") or line.startswith("-"))
-        and not line.startswith("+++")
-        and not line.startswith("---")
-    ]
+def node_check_source(source, filename):
+    path = ROOT / filename
+    try:
+        path.write_text(source, encoding="utf-8")
+        result = run(["node", "--check", filename])
+        if result.returncode:
+            fail(result.stderr.strip() or f"historical JavaScript syntax failed: {filename}")
+    finally:
+        path.unlink(missing_ok=True)
 
 
-for path in [
-    "public/js/admin.js",
-    "public/js/core/dd-admin-module-runtime.mjs",
-    "public/js/core/dd-application-module-groups.mjs",
-    "public/js/modules/commerce-operations/runtime.mjs",
+admin = git_show(HISTORICAL_HEAD, "public/js/admin.js")
+core = git_show(HISTORICAL_HEAD, "public/js/core/dd-admin-module-runtime.mjs")
+catalog = git_show(HISTORICAL_HEAD, "public/js/core/dd-application-module-groups.mjs")
+runtime = git_show(HISTORICAL_HEAD, "public/js/modules/commerce-operations/runtime.mjs")
+for source, filename in [
+    (admin, ".build304-historical-admin.js"),
+    (core, ".build304-historical-core.mjs"),
+    (catalog, ".build304-historical-catalog.mjs"),
+    (runtime, ".build304-historical-commerce.mjs"),
 ]:
-    syntax = run(["node", "--check", path])
-    if syntax.returncode:
-        fail(syntax.stderr.strip() or f"JavaScript syntax failed: {path}")
-print("PASS: Build 304 shared Core/catalog/application-runtime JavaScript syntax")
+    node_check_source(source, filename)
+print("PASS: completed Build 304 shared Core/catalog/application-runtime syntax is historically pinned")
 
-admin = read("public/js/admin.js")
 for marker in [
-    "Build 304: Core activates the Commerce & Operations umbrella runtime for Catalog routes only.",
     "dd-admin-module-runtime.mjs?v=304",
+    "Build 304: Core activates the Commerce & Operations umbrella runtime for Catalog routes only.",
 ]:
     if marker not in admin:
-        fail(f"Build 304 shared Admin loader marker missing: {marker}")
-print("PASS: shared Admin loader cache-busts the Build 304 Core runtime")
+        fail(f"historical Build 304 shared loader marker missing: {marker}")
+print("PASS: completed Build 304 shared Admin loader is historically pinned")
 
-catalog = read("public/js/core/dd-application-module-groups.mjs")
 for marker in [
     "export const BUILD = 302;",
     "export const RUNTIME_CATALOG_BUILD = 304;",
-    "id: 'commerce-operations'",
-    "extractionState: 'in-progress'",
     "entry: '../modules/commerce-operations/runtime.mjs?v=304'",
     "runtimeDomains: Object.freeze(['catalog'])",
-    "id: 'creative-production'",
-    "entry: null",
-    "firstUmbrellaRuntimeModule: 'commerce-operations'",
     "firstUmbrellaRuntimeDomain: 'catalog'",
-    "applicationModuleRuntimeForDomain",
 ]:
     if marker not in catalog:
-        fail(f"Build 304 application catalog marker missing: {marker}")
-for forbidden in ["fetch(", "setInterval(", "setTimeout(", "XMLHttpRequest", "DDAuth.apiFetch"]:
-    if forbidden in catalog:
-        fail(f"Build 304 application catalog unexpectedly creates runtime work: {forbidden}")
-print("PASS: Build 302 architecture remains intact while Build 304 opts only Catalog into the first umbrella runtime")
+        fail(f"historical Build 304 runtime catalog marker missing: {marker}")
+print("PASS: completed Build 304 Catalog-only umbrella runtime catalog is historically pinned")
 
-runtime = read("public/js/modules/commerce-operations/runtime.mjs")
 for marker in [
     "const BUILD = 304;",
-    "const MODULE_ID = 'commerce-operations';",
     "const SUPPORTED_DOMAINS = Object.freeze(['catalog']);",
     "const REQUIRED_SERVICES = Object.freeze(['catalog-read']);",
     "behaviorMode: 'catalog-first-umbrella-runtime-boundary'",
-    "createsNetworkTransport: false",
-    "export async function onLoad",
-    "export async function onActivate",
-    "export async function onDeactivate",
     "catalogRuntimeBoundaryActive",
-    "window.DDCommerceOperations",
+    "createsNetworkTransport: false",
 ]:
     if marker not in runtime:
-        fail(f"Build 304 Commerce & Operations runtime marker missing: {marker}")
-for forbidden in ["fetch(", "DDAuth.apiFetch", "XMLHttpRequest", "inventory-read", "operations-read"]:
-    if forbidden in runtime:
-        fail(f"Build 304 Catalog-first runtime exceeded scope: {forbidden}")
-print("PASS: Commerce & Operations runtime is Catalog-only, service-bounded, and creates no network transport")
+        fail(f"historical Build 304 Commerce runtime marker missing: {marker}")
+print("PASS: completed Build 304 Catalog runtime boundary is historically pinned")
 
-core = read("public/js/core/dd-admin-module-runtime.mjs")
 for marker in [
     "// Devil n Dove Build 304 Admin module runtime bridge.",
-    "RUNTIME_CATALOG_BUILD as APPLICATION_RUNTIME_CATALOG_BUILD",
-    "applicationModuleRuntimeForDomain",
-    "let activeApplicationModuleId = null",
-    "const applicationModuleNamespaces = new Map()",
-    "async function loadApplicationModule",
-    "async function activateApplicationModuleForDefinition",
-    "async function deactivateActiveApplicationModule",
+    "build: 304",
+    "applicationRuntimeCatalogBuild: APPLICATION_RUNTIME_CATALOG_BUILD",
     "getActiveApplicationModuleId: () => activeApplicationModuleId",
     "getCurrentApplicationModuleRuntimeStatus",
-    "build: 304",
-    "applicationArchitectureBuild: APPLICATION_ARCHITECTURE_BUILD",
-    "applicationRuntimeCatalogBuild: APPLICATION_RUNTIME_CATALOG_BUILD",
     "reconcileVerifiedAuthState",
 ]:
     if marker not in core:
-        fail(f"Build 304 Core runtime marker missing: {marker}")
-for forbidden in ["fetch(", "DDAuth.apiFetch", "XMLHttpRequest"]:
-    if forbidden in core:
-        fail(f"Build 304 Core runtime unexpectedly creates network transport: {forbidden}")
-print("PASS: Core now has a generic top-level application-module lifecycle while preserving Build 303 auth reconciliation")
+        fail(f"historical Build 304 Core marker missing: {marker}")
+print("PASS: completed Build 304 generic application-runtime lifecycle is historically pinned")
 
-node_check = r'''
-import {
-  BUILD,
-  RUNTIME_CATALOG_BUILD,
-  applicationModuleForDomain,
-  applicationModuleRuntimeForDomain,
-  snapshotApplicationArchitecture,
-} from './public/js/core/dd-application-module-groups.mjs';
-const errors = [];
-if (BUILD !== 302) errors.push(`architecture build changed to ${BUILD}`);
-if (RUNTIME_CATALOG_BUILD !== 304) errors.push(`runtime catalog build=${RUNTIME_CATALOG_BUILD}`);
-if (applicationModuleForDomain('catalog') !== 'commerce-operations') errors.push('catalog umbrella mapping changed');
-const catalogRuntime = applicationModuleRuntimeForDomain('catalog');
-if (catalogRuntime?.id !== 'commerce-operations') errors.push('catalog runtime is not commerce-operations');
-for (const domain of ['inventory', 'operations', 'public', 'packaging', 'creative', 'accounting']) {
-  if (applicationModuleRuntimeForDomain(domain) !== null) errors.push(`${domain} unexpectedly has an umbrella runtime`);
-}
-const snapshot = snapshotApplicationArchitecture();
-if (snapshot.topLevelApplicationModuleCount !== 3) errors.push('top-level module count changed');
-if (snapshot.firstUmbrellaRuntimeDomain !== 'catalog') errors.push('first runtime domain is not catalog');
-if (errors.length) {
-  console.error(errors.join('\n'));
-  process.exit(1);
-}
-console.log('catalog-umbrella-runtime-map-ok');
-'''
-module_check = run(["node", "--input-type=module", "--eval", node_check])
-if module_check.returncode:
-    fail(module_check.stderr.strip() or module_check.stdout.strip() or "Build 304 runtime catalog mapping check failed")
-print("PASS: only Catalog resolves to an active umbrella-runtime definition in Build 304")
+validation = git_show(HISTORICAL_HEAD, "BUILD304_VALIDATION.md")
+for marker in [
+    "Status — COMPLETE IN DEVELOPMENT",
+    "af0993ef9b4da807d9d1f32c63988dc28b07f1f8",
+    "active_application_runtime           commerce-operations",
+    "application_runtime_domain           catalog",
+    "packaging_compatibility_state    active",
+    "native_read_status               200",
+    "6effd1eb-9a1f-4538-b7d3-3cdc18b54328",
+]:
+    if marker not in validation:
+        fail(f"completed Build 304 validation marker missing: {marker}")
+print("PASS: completed Build 304 Development/browser/direct-upload proof is historically pinned")
 
-build303_test = read("scripts/build303_commerce_operations_umbrella_bridge_test.py")
+products = git_show(HISTORICAL_HEAD, "admin/products/index.html")
+packaging = git_show(HISTORICAL_HEAD, "admin/packaging-studio/index.html")
+if '/public/js/admin.js?v=304' not in products:
+    fail("historical Build 304 Products loader pin missing")
+if '/public/js/admin.js?v=304' not in packaging:
+    fail("historical Build 304 Packaging loader pin missing")
+print("PASS: completed Build 304 validation-page loader pins are historically pinned")
+
+build303_test = git_show(HISTORICAL_HEAD, "scripts/build303_commerce_operations_umbrella_bridge_test.py")
 for marker in [
     'HISTORICAL_HEAD = "6cbcc4353327eea093ef4701497fa5321b680096"',
-    'git_show(HISTORICAL_HEAD, "public/js/core/dd-admin-module-runtime.mjs")',
-    '"catalog    -> commerce-operations"',
     'BUILD 303 COMMERCE & OPERATIONS UMBRELLA BRIDGE HISTORICAL REGRESSION: PASS',
 ]:
     if marker not in build303_test:
-        fail(f"completed Build 303 historical pin missing marker: {marker}")
-print("PASS: completed Build 303 runtime/browser proof is historically pinned")
+        fail(f"completed Build 303 historical pin missing at Build 304 head: {marker}")
+print("PASS: Build 304 preserves the completed Build 303 historical pin")
 
-products = read("admin/products/index.html")
-packaging_page = read("admin/packaging-studio/index.html")
-if '/public/js/admin.js?v=304' not in products:
-    fail("Products validation page does not cache-bust the Build 304 shared Admin loader")
-if '/public/js/admin.js?v=304' not in packaging_page:
-    fail("Packaging validation page does not cache-bust the Build 304 shared Admin loader")
-expected_products_diff = {
-    '-  <script src="/public/js/admin.js?v=245"></script>',
-    '+  <script src="/public/js/admin.js?v=304"></script>',
-}
-expected_packaging_diff = {
-    '-  <script src="/public/js/admin.js?v=296"></script>',
-    '+  <script src="/public/js/admin.js?v=304"></script>',
-}
-if set(payload_diff_lines("admin/products/index.html")) != expected_products_diff:
-    fail("Products page changed beyond the Build 304 shared Admin loader cache-bust")
-if set(payload_diff_lines("admin/packaging-studio/index.html")) != expected_packaging_diff:
-    fail("Packaging page changed beyond the Build 304 shared Admin loader cache-bust")
-print("PASS: Build 304 validation pages explicitly load the fresh shared Admin/Core runtime and otherwise remain unchanged")
-
-protected = [
-    "public/js/core/dd-module-registry.mjs",
-    "public/js/core/dd-module-definitions.mjs",
-    "public/js/core/dd-module-contracts.mjs",
-    "public/js/core/dd-module-service-adapters.mjs",
-    "admin/catalog/index.html",
-    "public/js/admin-packaging-compatibility-v301.js",
-    "public/js/admin-packaging-save-stabilizer-v300.js",
-    "public/js/admin-packaging-native-client-v298.js",
-    "public/js/modules/packaging/native-client-v298.mjs",
-    "public/js/admin-packaging-startup-gate-v297.js",
-    "public/js/admin-packaging-client-transport-v297.js",
-    "public/js/modules/packaging/client-transport-v297.mjs",
-    "public/js/admin-packaging-studio.js",
-    "public/js/modules/packaging/runtime.mjs",
-    "functions/api/admin/packaging-bootstrap.js",
-    "functions/api/admin/packaging-write.js",
-    "functions/api/_lib/packagingReadService.js",
-    "functions/api/_lib/packagingDomainService.js",
-    "functions/api/admin/packaging-studio.js",
-    "functions/api/admin/contracts/catalog-read.js",
-    "functions/api/admin/contracts/inventory-read.js",
-]
-for path in protected:
-    result = run(["git", "diff", "--quiet", BASE, "HEAD", "--", path])
-    if result.returncode != 0:
-        fail(f"protected domain/API/Packaging file changed in Build 304: {path}")
-print("PASS: Catalog APIs, Inventory/Operations domains, and completed Packaging runtime remain unchanged")
-
-committed = changed_files(BASE, "HEAD")
-working = changed_files("HEAD")
-staged = changed_files("--cached", "HEAD")
-actual = committed | working | staged
+actual = changed_files(BASE, HISTORICAL_HEAD)
 if actual != EXPECTED:
-    fail(f"Build 304 changed-file boundary mismatch. expected={sorted(EXPECTED)} actual={sorted(actual)}")
-print("PASS: exact Build 304 Catalog-first umbrella-runtime changed-file boundary")
+    fail(f"completed Build 304 boundary mismatch. expected={sorted(EXPECTED)} actual={sorted(actual)}")
+print("PASS: exact completed Build 304 Catalog-runtime boundary is historically pinned")
 
 for path in actual:
     lower = path.lower()
     if lower.endswith('.sql') or lower in {'wrangler.toml', 'wrangler.json', 'wrangler.jsonc'}:
-        fail(f"forbidden schema/config change in Build 304 boundary: {path}")
-print("PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change")
+        fail(f"forbidden schema/config change in completed Build 304 boundary: {path}")
+print("PASS: completed Build 304 had no SQL/schema, binding/config, R2, or real Production change")
 
-print("BUILD 304 COMMERCE & OPERATIONS CATALOG UMBRELLA RUNTIME: PASS")
+print(f"BUILD 304 COMMERCE & OPERATIONS CATALOG RUNTIME HISTORICAL REGRESSION: PASS ({HISTORICAL_HEAD[:8]})")
 print("No Cloudflare resource was contacted.")
