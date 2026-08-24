@@ -4,6 +4,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "4d605e87a7cfdcf7378c236fa3f609bccb9ddd1a"
+HISTORICAL_HEAD = "7c2e49ee3764edb80adb3e26786cc97693a6e60b"
 EXPECTED = {
     "AI_CONTEXT.md",
     "BUILD294_CHANGED_FILES.md",
@@ -142,7 +143,7 @@ for marker in [
     "legacy_post_route_retired: true",
 ]:
     if marker not in gateway:
-        fail(f"active Packaging write provenance missing: {marker}")
+        fail(f"active Packaging gateway provenance missing: {marker}")
 print("PASS: active Packaging write provenance remains Build 292 gateway / Build 291 service")
 
 protected = [
@@ -157,7 +158,7 @@ protected = [
     "public/js/modules/packaging/runtime.mjs",
 ]
 for path in protected:
-    result = run(["git", "diff", "--quiet", BASE, "HEAD", "--", path])
+    result = run(["git", "diff", "--quiet", BASE, HISTORICAL_HEAD, "--", path])
     if result.returncode != 0:
         fail(f"Build 294 unexpectedly changed proven browser/runtime file: {path}")
 print("PASS: proven Build 290 Packaging browser/runtime stack is unchanged")
@@ -175,7 +176,7 @@ if 'run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])' not in build293:
     fail("Build 293 historical changed-file boundary still follows future HEAD")
 print("PASS: Build 293 historical regression boundary is pinned")
 
-result = run(["git", "diff", "--name-only", BASE, "HEAD"])
+result = run(["git", "diff", "--name-only", BASE, HISTORICAL_HEAD])
 if result.returncode:
     fail(f"git changed-file check failed: {result.stderr.strip()}")
 actual = {line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip()}
