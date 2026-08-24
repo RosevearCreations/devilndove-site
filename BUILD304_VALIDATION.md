@@ -1,6 +1,6 @@
 # Build 304 Validation — Commerce & Operations Catalog Umbrella Runtime
 
-## Status — STAGED / LOCAL + DEVELOPMENT BROWSER VALIDATION REQUIRED
+## Status — CORRECTIVE RETEST REQUIRED
 
 Completed Build 303 head pinned by this build:
 
@@ -20,7 +20,7 @@ Only the `catalog` internal domain opts into the `commerce-operations` runtime.
 Expected runtime identities:
 
 ```text
-DDModuleRuntime.build                  304
+DDModuleRuntime.build                         304
 DDModuleRuntime.applicationArchitectureBuild 302
 DDModuleRuntime.applicationRuntimeCatalogBuild 304
 ```
@@ -28,19 +28,78 @@ DDModuleRuntime.applicationRuntimeCatalogBuild 304
 Catalog target:
 
 ```text
-domain                           catalog
-domain_mode                      shadow
-application_module               commerce-operations
-application_module_mode          active
-active_domain_runtime            null
-active_application_module_runtime commerce-operations
+domain                            catalog
+domain_mode                       shadow
+application_module                commerce-operations
+application_module_mode           active
+active_domain_runtime             null
+active_application_runtime        commerce-operations
 ```
 
 Packaging remains domain-owned under Creative & Production.
 
-## Local validation
+## First local/deployment proof
 
-After pulling `dev`, run:
+The initial Build 304 local regression itself passed and the Development Pages deployment was current at source `395eb72`.
+
+However the completed Build 303 historical regression failed on a brittle whitespace-sensitive marker:
+
+```text
+FAIL: completed Build 303 validation marker missing: catalog -> commerce-operations
+```
+
+The historical Build 303 validation actually stores the aligned text:
+
+```text
+catalog    -> commerce-operations
+packaging  -> creative-production
+```
+
+Build 304 corrects that historical assertion without changing the pinned historical head.
+
+## First browser proof — stale shared loader found
+
+The first browser proof on both Products and Packaging still reported:
+
+```text
+runtime_build        303
+runtime_catalog_build undefined
+```
+
+Products remained at the completed Build 303 bridge state and Packaging remained healthy on Build 301.
+
+Root cause: the validation pages still referenced historical shared-loader URLs:
+
+```text
+/admin/products/          -> /public/js/admin.js?v=245
+/admin/packaging-studio/  -> /public/js/admin.js?v=296
+```
+
+The committed Build 304 `public/js/admin.js` correctly imports:
+
+```text
+/public/js/core/dd-admin-module-runtime.mjs?v=304
+```
+
+but the unchanged external `admin.js` URLs allowed the browser to reuse older cached loader content, so the Build 304 Core module was never requested.
+
+## Corrective cache-version pins
+
+Build 304 now changes only the shared loader query string on the two validation pages:
+
+```text
+admin/products/index.html
+  /public/js/admin.js?v=245 -> /public/js/admin.js?v=304
+
+admin/packaging-studio/index.html
+  /public/js/admin.js?v=296 -> /public/js/admin.js?v=304
+```
+
+The Build 304 regression verifies these are exact one-line page diffs. No Product or Packaging feature markup/script order changes are allowed.
+
+## Local validation after correction
+
+After pulling the corrective Build 304 head, run:
 
 ```bash
 python scripts/build303_commerce_operations_umbrella_bridge_test.py
@@ -64,6 +123,7 @@ PASS: Commerce & Operations runtime is Catalog-only, service-bounded, and create
 PASS: Core now has a generic top-level application-module lifecycle while preserving Build 303 auth reconciliation
 PASS: only Catalog resolves to an active umbrella-runtime definition in Build 304
 PASS: completed Build 303 runtime/browser proof is historically pinned
+PASS: Build 304 validation pages explicitly load the fresh shared Admin/Core runtime and otherwise remain unchanged
 PASS: Catalog APIs, Inventory/Operations domains, and completed Packaging runtime remain unchanged
 PASS: exact Build 304 Catalog-first umbrella-runtime changed-file boundary
 PASS: no SQL/schema, Cloudflare binding/config, R2, or Production change
@@ -75,7 +135,7 @@ No Cloudflare resource was contacted.
 
 ## Development deployment
 
-Confirm the newest Development Pages deployment uses the current Build 304 head:
+Confirm the newest Development Pages deployment uses the current corrective Build 304 head:
 
 ```bash
 npx --yes wrangler@latest pages deployment list \
@@ -129,26 +189,26 @@ Then run in Firefox DevTools Console:
 Expected final steady state:
 
 ```text
-runtime_build                         304
-architecture_build                    302
-runtime_catalog_build                 304
-auth_phase                            verified
-auth_verified                         true
-domain                                catalog
-domain_mode                           shadow
-application_module                    commerce-operations
-application_module_mode               active
-api_current_application_module        commerce-operations
+runtime_build                          304
+architecture_build                     302
+runtime_catalog_build                  304
+auth_phase                             verified
+auth_verified                          true
+domain                                 catalog
+domain_mode                            shadow
+application_module                     commerce-operations
+application_module_mode                active
+api_current_application_module         commerce-operations
 active_domain_runtime                  null
 active_application_runtime             commerce-operations
 application_runtime_state              active
 application_runtime_domain             catalog
 application_runtime_services_ready     true
-facade_build                           304
-facade_state                           active
-facade_catalog_boundary_active         true
-contracts_ok                           true
-services_ok                            true
+facade_build                            304
+facade_state                            active
+facade_catalog_boundary_active          true
+contracts_ok                            true
+services_ok                             true
 ```
 
 ## Browser proof 2 — Packaging preservation
@@ -211,4 +271,4 @@ No Packaging write proof is required because Build 304 does not alter Packaging 
 
 ## Completion decision
 
-Do not mark Build 304 complete until both local regressions pass, the Dev deployment is current, Catalog has the active `commerce-operations` application runtime, and Packaging remains green.
+Do not mark Build 304 complete until both corrected local regressions pass, the Dev deployment is current, Catalog has the active `commerce-operations` application runtime, and Packaging remains green.
