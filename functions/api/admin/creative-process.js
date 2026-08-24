@@ -1,9 +1,11 @@
-// Build 274 — Creative Process lifecycle clarity, auditable timeline corrections, and inventory-safe concept-to-content workflow.
+// Build 274 Creative Process engine; Build 308 routes Creative inventory reversals through Inventory authority.
 import { createOrRefreshContentProjectForCreativeProject, createOrRefreshContentProjectForProduct, ensureContentAutomationSchema } from '../_lib/contentAutomationStudio.js';
 import { ensureCreativeAssetIntelligenceSchema, syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import { BUILD as INVENTORY_REVERSAL_CONSUMER_BUILD, reverseCreativeInventoryThroughContract } from '../_lib/creativeInventoryReversalConsumer.js';
 
 const BUILD = '274';
+const REVERSAL_CONSUMER_BUILD = INVENTORY_REVERSAL_CONSUMER_BUILD;
 const OUTPUTS = [
   ['youtube_video','YouTube video','video'], ['youtube_shorts','YouTube Shorts','video'],
   ['instagram_reels','Instagram Reels','social'], ['tiktok_videos','TikToks','social'],
@@ -130,10 +132,10 @@ export async function onRequestGet(context){
     const productId=num(url.searchParams.get('product_id'));
     let productProjectIds=[];
     if(productId){
-      const linked=await access.db.prepare(`SELECT creative_work_project_id FROM creative_project_product_links WHERE product_id=?1 ORDER BY is_primary DESC,creative_work_project_id DESC`).bind(productId).all();
+      const linked=await access.db.prepare(`SELECT creative_work_project_id FROM creative_project_product_links WHERE product_id=?1 ORDER BY is_primary DESC,creative_project_product_link_id DESC`).bind(productId).all();
       productProjectIds=(linked.results||[]).map(row=>Number(row.creative_work_project_id||0)).filter(Boolean);
     }
-    return json({ok:true,build:BUILD,projects:await listProjects(access.db),detail:id?await detail(access.db,id):null,product_project_ids:productProjectIds,output_blueprint:OUTPUTS.map(([key,label,group])=>({key,label,group})),mode:'project_first_optional_product_links'});
+    return json({ok:true,build:BUILD,inventory_reversal_consumer_build:REVERSAL_CONSUMER_BUILD,inventory_reversal_authority:'inventory-reverse',projects:await listProjects(access.db),detail:id?await detail(access.db,id):null,product_project_ids:productProjectIds,output_blueprint:OUTPUTS.map(([key,label,group])=>({key,label,group})),mode:'project_first_optional_product_links'});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'creative_process_engine',incident_code:'creative_process_get_failed',severity:'error',message:error?.message||'Creative Process Engine failed to load.',related_user_id:access.adminUser.user_id,details:{error:String(error?.stack||error)}});
     return json({ok:false,error:'Creative Process Engine could not load.'},500);
@@ -189,26 +191,7 @@ async function postInventoryUsage(db,{projectId,eventId,inventoryId,usageQuantit
 }
 
 async function reverseInventoryPost(db,{projectId,postId,reason,userId}){
-  const why=text(reason,500);
-  if(!projectId||!postId||why.length<8) throw new Error('A posted inventory record and a clear reversal reason of at least 8 characters are required.');
-  const post=await db.prepare(`SELECT ip.*,i.*,COALESCE(iud.usage_quantity_consumed,ip.stock_quantity_consumed,0) usage_quantity_consumed,COALESCE(iud.usage_unit_label,i.usage_unit_label,'unit') posted_usage_unit_label,COALESCE(iud.tracking_mode,'exact') posted_tracking_mode FROM creative_project_inventory_posts ip JOIN site_item_inventory i ON i.site_item_inventory_id=ip.site_item_inventory_id LEFT JOIN creative_project_inventory_usage_details iud ON iud.creative_project_inventory_post_id=ip.creative_project_inventory_post_id WHERE ip.creative_project_inventory_post_id=?1 AND ip.creative_work_project_id=?2`).bind(postId,projectId).first();
-  if(!post) throw new Error('The inventory posting was not found.');
-  if(post.posting_status==='reversed') return {post,alreadyReversed:true,restored:0};
-  const prior=await db.prepare(`SELECT creative_project_inventory_reversal_id FROM creative_project_inventory_reversals WHERE creative_project_inventory_post_id=?1`).bind(postId).first();
-  if(prior) throw new Error('This inventory posting already has a reversal.');
-  const previous=Math.max(0,Number(post.on_hand_quantity||0));
-  const restored=Math.max(0,Number(post.stock_quantity_consumed||0));
-  const next=previous+restored;
-  await db.batch([
-    db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?2,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?1 AND on_hand_quantity=?3`).bind(post.site_item_inventory_id,next,previous),
-    db.prepare(`INSERT INTO site_inventory_movements (site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?1,?2,?3,?4,'adjustment',?5,?6,?7,?8,?8,?9,?9,?10,?11,CURRENT_TIMESTAMP)`).bind(post.site_item_inventory_id,post.source_type||null,post.external_key||null,post.item_name,restored,previous,next,Number(post.reserved_quantity||0),Number(post.incoming_quantity||0),`Creative Project ${projectId} inventory reversal. Reason: ${why}`,userId),
-    db.prepare(`INSERT INTO creative_project_inventory_reversals (creative_project_inventory_post_id,creative_work_project_id,site_item_inventory_id,stock_quantity_restored,previous_on_hand_quantity,new_on_hand_quantity,reason,authorized_by) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)`).bind(postId,projectId,post.site_item_inventory_id,restored,previous,next,why,userId),
-    db.prepare(`UPDATE creative_project_inventory_posts SET posting_status='reversed',notes=TRIM(COALESCE(notes,'') || ?2) WHERE creative_project_inventory_post_id=?1`).bind(postId,` | Reversed: ${why}`),
-    db.prepare(`UPDATE creative_project_material_reviews SET inventory_consumed=0 WHERE creative_project_material_review_id=?1`).bind(post.creative_project_material_review_id)
-  ]);
-  const usageRestored=Math.max(0,Number(post.usage_quantity_consumed||0));
-  if(usageRestored>0) await db.prepare(`INSERT INTO site_inventory_usage_movements (site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,CURRENT_TIMESTAMP)`).bind(post.site_item_inventory_id,usageRestored,post.posted_usage_unit_label||'unit',restored,post.stock_unit_label||'unit',post.posted_tracking_mode||'exact',post.posted_tracking_mode==='estimated'?1:0,`Creative Project ${projectId} usage reversal. Reason: ${why}`,userId).run();
-  return {post,alreadyReversed:false,restored,next};
+  return reverseCreativeInventoryThroughContract(db,{projectId,postId,reason,userId});
 }
 
 async function activeInventoryPostForEvent(db,projectId,eventId){
@@ -438,8 +421,8 @@ export async function onRequestPost(context){
       message='Primary product updated.';
     }else throw new Error('Unsupported Creative Process action.');
     const current=await detail(access.db,projectId);
-    await auditAdminAction(context.env,context.request,access.adminUser,{action_type:`creative_process_${action}`,target_type:'creative_work_project',target_id:projectId,target_key:current?.project?.project_key||null,details:{review_first:true,automatic_publish:false}});
-    return json({ok:true,message,build:BUILD,projects:await listProjects(access.db),detail:current,mode:'project_first_review_first'});
+    await auditAdminAction(context.env,context.request,access.adminUser,{action_type:`creative_process_${action}`,target_type:'creative_work_project',target_id:projectId,target_key:current?.project?.project_key||null,details:{review_first:true,automatic_publish:false,inventory_reversal_consumer_build:REVERSAL_CONSUMER_BUILD}});
+    return json({ok:true,message,build:BUILD,inventory_reversal_consumer_build:REVERSAL_CONSUMER_BUILD,inventory_reversal_authority:'inventory-reverse',projects:await listProjects(access.db),detail:current,mode:'project_first_review_first'});
   }catch(error){
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'creative_process_engine',incident_code:'creative_process_post_failed',severity:'warning',message:error?.message||'Creative Process save failed.',related_user_id:access.adminUser.user_id,details:{action,error:String(error?.stack||error)}});
     return json({ok:false,error:error?.message||'Creative Process save failed.'},400);
