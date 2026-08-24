@@ -1,18 +1,20 @@
-// Devil n Dove Build 288 Packaging runtime composition.
-// Build 288 retires the legacy broad GET from the active runtime while preserving
-// the proven Build 286 narrow-bootstrap bridge, Build 287 Content artwork picker,
-// and the mature legacy Packaging POST/write path.
+// Devil n Dove Build 289 Packaging runtime composition.
+// Build 289 keeps the proven Build 286 narrow-bootstrap bridge, Build 287 Content
+// artwork picker, and Build 288 legacy-GET retirement while decoupling successful
+// Packaging POST responses from broad Catalog/Inventory enumeration.
 
 import * as base from './index.mjs';
 import { createPackagingArtworkPicker, normalizeContentArtworkRows } from './artwork-picker.mjs';
 import { createPackagingLegacyGetRetirementGuard } from './read-retirement.mjs';
+import { createPackagingWriteResponseBridge } from './write-response.mjs';
 
-const BUILD = 288;
+const BUILD = 289;
 const REQUIRED_CONTRACTS = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
 
 let baseFacade = null;
 let picker = null;
 let retirementGuard = null;
+let writeBridge = null;
 let refreshedArtworkRows = null;
 let bootstrapListenerInstalled = false;
 
@@ -32,13 +34,27 @@ function bootstrapStatus() {
 
 function retirementStatus() {
   return retirementGuard?.getStatus?.() || Object.freeze({
-    build: BUILD,
+    build: 288,
     state: 'not-created',
     armed: false,
     legacyGetRetired: true,
     activeRuntimeBroadLegacyGetReachable: false,
     blockedLegacyGetCount: 0,
     lastBlockedPath: '',
+  });
+}
+
+function writeStatus() {
+  return writeBridge?.getStatus?.() || Object.freeze({
+    build: BUILD,
+    state: 'not-created',
+    armed: false,
+    writeResponseDecoupled: true,
+    legacyWritePath: '/api/admin/packaging-studio',
+    gatewayPath: '/api/admin/packaging-write',
+    interceptedWriteCount: 0,
+    lastStatus: 0,
+    lastBoundary: null,
   });
 }
 
@@ -92,6 +108,21 @@ function ensureRetirementGuard() {
   return retirementGuard;
 }
 
+function ensureWriteBridge() {
+  if (writeBridge) return writeBridge;
+  writeBridge = createPackagingWriteResponseBridge({
+    onWrite: (detail) => {
+      installBrowserFacade();
+      emit('dd:packaging-write-response', {
+        moduleId: 'packaging',
+        build: BUILD,
+        ...detail,
+      });
+    },
+  });
+  return writeBridge;
+}
+
 function ensurePicker() {
   if (picker) return picker;
   picker = createPackagingArtworkPicker({
@@ -114,7 +145,8 @@ function installBrowserFacade() {
     build: BUILD,
     baseBuild: 286,
     artworkPickerBuild: 287,
-    legacyGetRetirementBuild: BUILD,
+    legacyGetRetirementBuild: 288,
+    writeResponseBuild: BUILD,
     requiredContracts: REQUIRED_CONTRACTS,
     readCatalog,
     readInventory,
@@ -123,6 +155,7 @@ function installBrowserFacade() {
     getAvailableContentMedia: () => currentArtworkRows(),
     getBootstrapStatus: bootstrapStatus,
     getLegacyGetRetirementStatus: retirementStatus,
+    getWriteResponseStatus: writeStatus,
     getArtworkPickerStatus: () => picker?.getStatus?.() || Object.freeze({ build: 287, started: false, mounted: false, availableCount: currentArtworkRows().length }),
     getStatus,
   });
@@ -133,11 +166,14 @@ export const metadata = Object.freeze({
   build: BUILD,
   baseBuild: 286,
   artworkPickerBuild: 287,
+  legacyGetRetirementBuild: 288,
+  writeResponseBuild: BUILD,
   routePrefix: '/admin/packaging-studio',
   bootstrapPath: '/api/admin/packaging-bootstrap',
-  writePath: '/api/admin/packaging-studio',
+  legacyWritePath: '/api/admin/packaging-studio',
+  writePath: '/api/admin/packaging-write',
   requiredContracts: REQUIRED_CONTRACTS,
-  behaviorMode: 'legacy-get-retired-content-artwork-runtime',
+  behaviorMode: 'write-response-decoupled-legacy-get-retired-content-artwork-runtime',
 });
 
 export async function readCatalog(options = {}) { return base.readCatalog(options); }
@@ -148,6 +184,7 @@ export async function onLoad(context = {}) {
   await base.onLoad(context);
   baseFacade = typeof window !== 'undefined' ? window.DDPackagingContracts || null : null;
   ensureRetirementGuard();
+  ensureWriteBridge();
   ensurePicker();
   installBrowserFacade();
   emit('dd:packaging-runtime-loaded', {
@@ -155,21 +192,25 @@ export async function onLoad(context = {}) {
     build: BUILD,
     baseBuild: 286,
     artworkPickerBuild: 287,
-    legacyGetRetired: true,
+    legacyGetRetirementBuild: 288,
+    writeResponseDecoupled: true,
   });
 }
 
 export async function onActivate(context = {}) {
   const guard = ensureRetirementGuard();
+  const writes = ensureWriteBridge();
 
-  // Arm before Build 286 activates. Build 286 then captures this guard as its
-  // underlying fetch. Healthy legacy-shaped UI GETs are still redirected by the
-  // Build 286 bridge to the narrow bootstrap, but any attempted rollback GET is
-  // blocked by this guard before it can reach the broad server handler.
+  // Build 288 guard is innermost, Build 286 bootstrap bridge sits above it, and
+  // Build 289 write bridge is outermost. GETs therefore retain the proven narrow
+  // read path, while POSTs are rerouted to the decoupled write gateway.
   guard.arm();
   try {
     await base.onActivate(context);
+    writes.arm();
   } catch (error) {
+    writes.disarm();
+    try { await base.onDeactivate({ reason: 'build289-activation-failed' }); } catch {}
     guard.disarm();
     throw error;
   }
@@ -182,6 +223,8 @@ export async function onActivate(context = {}) {
     build: BUILD,
     baseBuild: 286,
     artworkPickerBuild: 287,
+    legacyGetRetirementBuild: 288,
+    writeResponseDecoupled: true,
     legacyGetRetired: true,
     activeRuntimeBroadLegacyGetReachable: false,
     availableArtworkCount: currentArtworkRows().length,
@@ -193,8 +236,9 @@ export async function onDeactivate(context = {}) {
   picker?.stop?.();
   refreshedArtworkRows = null;
 
-  // Build 286 must deactivate first so it restores the guard that it captured as
-  // its underlying fetch. The guard can then safely restore the original DDAuth fetch.
+  // Unwind in reverse order: Build 289 restores Build 286, Build 286 restores the
+  // Build 288 guard, and the guard finally restores the original DDAuth transport.
+  writeBridge?.disarm?.();
   await base.onDeactivate(context);
   retirementGuard?.disarm?.();
 
@@ -210,22 +254,29 @@ export function getStatus() {
   const baseStatus = base.getStatus();
   const pickerStatus = picker?.getStatus?.() || null;
   const retired = retirementStatus();
+  const writes = writeStatus();
   return Object.freeze({
     ...baseStatus,
     moduleId: 'packaging',
     build: BUILD,
     baseBuild: Number(baseStatus?.build || 286),
     artworkPickerBuild: 287,
-    legacyGetRetirementBuild: BUILD,
+    legacyGetRetirementBuild: 288,
+    writeResponseBuild: BUILD,
     behaviorMode: metadata.behaviorMode,
     legacyGetRetired: true,
     activeRuntimeBroadLegacyGetReachable: false,
     legacyGetGuardArmed: Boolean(retired.armed),
     blockedLegacyGetCount: Number(retired.blockedLegacyGetCount || 0),
+    writeResponseDecoupled: true,
+    writeResponseBridgeArmed: Boolean(writes.armed),
+    interceptedWriteCount: Number(writes.interceptedWriteCount || 0),
+    lastWriteBoundary: writes.lastBoundary || null,
     artworkPickerMounted: Boolean(pickerStatus?.mounted),
     artworkPickerStarted: Boolean(pickerStatus?.started),
     contentArtworkCount: currentArtworkRows().length,
     artworkPicker: pickerStatus,
     legacyGetRetirement: retired,
+    writeResponse: writes,
   });
 }

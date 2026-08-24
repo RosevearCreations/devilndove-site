@@ -33,7 +33,7 @@ async function readPayload(response) {
 function scopedEnvironment(env, filteredDb) {
   return new Proxy(env || {}, {
     get(target, property, receiver) {
-      if (property === 'DB') return filteredDb;
+      if (property === 'DB' || property === 'DD_DB') return filteredDb;
       return Reflect.get(target, property, receiver);
     },
   });
@@ -41,7 +41,8 @@ function scopedEnvironment(env, filteredDb) {
 
 export async function onRequestPost(context) {
   const counters = { catalog: 0, inventory: 0 };
-  const filteredDb = createPackagingResponseFilteredDb(context?.env?.DB, counters);
+  const sourceDb = context?.env?.DB || context?.env?.DD_DB;
+  const filteredDb = createPackagingResponseFilteredDb(sourceDb, counters);
   const delegatedContext = {
     ...context,
     env: scopedEnvironment(context?.env, filteredDb),

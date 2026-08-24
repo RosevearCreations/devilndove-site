@@ -1,6 +1,6 @@
-// Devil n Dove Build 288 locked module catalog.
+// Devil n Dove Build 289 locked module catalog.
 // Definitions describe ownership, routing and capability boundaries.
-// Packaging is the first active module and now retires its legacy broad GET from the active runtime.
+// Packaging is the first active module and now decouples write responses from broad external reads.
 
 const ADMIN_ROLES = Object.freeze(['admin']);
 
@@ -93,7 +93,7 @@ export const DD_MODULE_DEFINITIONS = Object.freeze([
     routePrefixes: ['/admin/packaging-studio'],
     capabilities: ['packaging-projects', 'packaging-templates', 'packaging-print'],
     consumes: ['inventory-read', 'catalog-read', 'content-media'],
-    entry: '../modules/packaging/runtime.mjs?v=288',
+    entry: '../modules/packaging/runtime.mjs?v=289',
     lazy: true,
   }),
   Object.freeze({

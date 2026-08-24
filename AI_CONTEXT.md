@@ -1,1 +1,17 @@
-x
+# Devil n Dove AI Context — Development Build 289 Pointer
+
+Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the pre-modular functional roadmap. For the modular Development line after the Build 280 Production freeze, read `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/BUILD282_ARCHITECTURE_LOCK.md`, `docs/architecture/BUILD283_PACKAGING_MODULE_ACTIVATION.md`, `docs/architecture/BUILD284_PACKAGING_CONTRACT_INTEGRATION.md`, `docs/architecture/BUILD285_PACKAGING_CONTRACT_CONSUMPTION.md`, `docs/architecture/BUILD286_PACKAGING_API_BOUNDARY_CLEANUP.md`, `docs/architecture/BUILD287_PACKAGING_CONTENT_ARTWORK_PICKER.md`, `docs/architecture/BUILD288_PACKAGING_LEGACY_GET_RETIREMENT.md`, and `docs/architecture/BUILD289_PACKAGING_WRITE_RESPONSE_DECOUPLING.md`.
+
+**Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow. Development has intentionally diverged.**
+
+Builds 281–285 established the modular registry, locked ownership, activated Packaging, implemented owner-side read contracts, and moved those contracts into the real Packaging data path. Build 286 introduced the admin-protected `/api/admin/packaging-bootstrap` narrow read boundary and contractized Catalog, Inventory and Content collections. Build 287 added the Content-owned managed artwork picker. Build 288 retired the broad legacy Packaging GET from the active runtime.
+
+Build 289 decouples successful Packaging POST responses from the remaining broad Catalog/Inventory enumeration without rewriting the mature Packaging write logic. The active runtime reroutes POST `/api/admin/packaging-studio` to `/api/admin/packaging-write`. That gateway delegates `onRequestPost` from the existing `functions/api/admin/packaging-studio.js`, but supplies a D1 proxy that suppresses only the three known response-enumeration SELECTs: the broad Product `LIMIT 500` list and the two broad Inventory `LIMIT 1000` forms.
+
+All Packaging write SQL, audit behavior, detail reloads, project/template/library refreshes and other Packaging-owned queries continue through to the real D1 binding. Successful gateway responses omit `products` and `inventory`; the legacy client does not require Product data after POST, and its only two `data.inventory` POST consumers already preserve the in-memory contractized Inventory state when that property is absent.
+
+Build 289 does not make Catalog or Inventory write-authoritative inside Packaging. Initial and refreshed cross-domain read state remains owned by `catalog-read` and `inventory-read`. GET behavior remains the Build 288 stack: narrow Packaging bootstrap plus owner contracts, with the old broad GET blocked before transport. Build 287 artwork behavior remains intact.
+
+Build 289 introduces no D1 migration, SQL/schema change, Wrangler/binding change, R2 enumeration, or Production change. It adds one migration gateway Function and one pure response-boundary helper; the existing mature Packaging Function and legacy Packaging UI remain unchanged.
+
+Expected next work after Build 289 parity validation: physically remove the now-dormant broad Product/Inventory enumeration code from `functions/api/admin/packaging-studio.js`, then consider extracting the mature Packaging POST implementation into a dedicated domain write service so the migration gateway can be retired too.
