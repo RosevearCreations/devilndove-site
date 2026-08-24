@@ -1,53 +1,36 @@
 # Build 309 Validation — Inventory Post Authority
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
-Baseline:
+Proven runtime/service head:
 
 ```text
-6d9a236ae688fe3d4b8e6975b866c637efe51c9b
-Build 308 update modular reversal-consumer handoff
+f23a914c9ea4848c6f91d715ce0c983a06f716b3
+Build 309 update modular post-authority handoff
 ```
 
-Build 308 is browser-proven but still awaits local regression signoff. Build 309 does not relabel it as complete.
+Build 309 implements a dedicated Inventory-owned `inventory-post` authority without migrating Creative posting consumption.
 
-Build 309 introduces a dedicated Inventory-owned `inventory-post` service and route without migrating Creative posting consumption.
+## Completed local regression proof
 
-## One Bash block
-
-```bash
-git pull --ff-only origin dev
-python scripts/build309_inventory_post_authority_test.py
-git status --short
-```
-
-Expected ending:
+User-supplied output ended:
 
 ```text
 BUILD 309 INVENTORY POST AUTHORITY: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+The working tree was clean after the validation command.
 
-## One browser block
+## Completed Development browser proof
 
-Open and hard-refresh:
+Observed on:
 
 ```text
-https://devilndove-site-dev.pages.dev/admin/inventory-operations/
+/admin/inventory-operations/
 ```
 
-Use one browser IIFE to read the Commerce/write-boundary state and the safe authenticated GET readiness response from:
-
 ```text
-/api/admin/contracts/inventory-post
-```
-
-Expected state:
-
-```text
-pathname                     /admin/inventory-operations/
 admin_script                 .../public/js/admin.js?v=309
 core_runtime_build           305
 commerce_runtime_build       309
@@ -73,18 +56,26 @@ contracts_ok                 true
 services_ok                  true
 ```
 
-No POST is required in Build 309. The service is implemented first; Creative post consumer migration is a separate later build.
+No live POST was required. The Build 309 gate intentionally proved the new mutation authority through regression plus authenticated GET readiness while Creative remained on its existing posting path.
+
+## Proven safety boundary
+
+Build 309 leaves unchanged:
+
+- `functions/api/admin/creative-process.js`;
+- `functions/api/_lib/creativeInventoryReversalConsumer.js`;
+- `functions/api/_lib/inventoryReversalService.js`;
+- `functions/api/admin/contracts/inventory-reverse.js`;
+- `functions/api/admin/site-item-inventory.js`;
+- SQL/schema;
+- Cloudflare bindings/config;
+- R2;
+- real Production.
+
+The Build 308 reversal cutover remains enabled. `inventory-post` remains implemented but consumer-disabled until the separate Creative posting cutover.
 
 ## Completion decision
 
-Do not mark Build 309 complete until:
+Build 309 is COMPLETE IN DEVELOPMENT.
 
-1. local regression passes;
-2. working tree is clean;
-3. Development serves `admin.js?v=309`;
-4. Inventory remains active under Commerce & Operations;
-5. safe GET reports the Inventory-owned post route as implemented;
-6. required schema is present;
-7. post consumer migration remains disabled;
-8. the Build 308 reversal cutover remains enabled;
-9. no SQL/config/R2/real Production change occurs.
+Next bounded pass: migrate only Creative reviewed-material posting consumption to the proven Inventory-owned `inventory-post` service. Do not combine that cutover with Operations migration or schema/data-parity work.
