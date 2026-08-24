@@ -1,11 +1,10 @@
-// Devil n Dove Build 307 Inventory write-side authority boundary.
-// Build 307 adds an Inventory-owned compensating reversal contract route while keeping
-// consumer migration disabled. The umbrella runtime still performs no mutation itself.
+// Devil n Dove Build 309 Inventory write-side authority boundary.
+// Inventory now owns dedicated post and reverse contract routes. Creative reversal consumption
+// is enabled; Creative posting consumption remains deliberately disabled until a later cutover.
 
-export const BUILD = 307;
+export const BUILD = 309;
 export const OWNER = 'inventory';
-export const LEGACY_AUTHORITY_ROUTE = '/api/admin/site-item-inventory';
-export const POST_ACTION = 'consume_usage';
+export const POST_CONTRACT_ROUTE = '/api/admin/contracts/inventory-post';
 export const REVERSE_CONTRACT_ROUTE = '/api/admin/contracts/inventory-reverse';
 export const REVERSE_CONFIRMATION = 'REVERSE INVENTORY';
 
@@ -14,19 +13,22 @@ export const INVENTORY_WRITE_BOUNDARY = Object.freeze({
   owner: OWNER,
   post: Object.freeze({
     contractId: 'inventory-post',
-    authorityRoute: LEGACY_AUTHORITY_ROUTE,
-    authorityAction: POST_ACTION,
-    implementationState: 'existing-authority-not-yet-contract-route',
+    authorityRoute: POST_CONTRACT_ROUTE,
+    authorityAction: 'reviewed-creative-usage',
+    implementationState: 'implemented-not-consumer-enabled',
     requiresPositiveQuantity: true,
     requiresInventoryItemId: true,
+    requiresApprovedMaterialReview: true,
     createsMovementRecord: true,
+    createsUsageMovementRecord: true,
+    atomicReviewPosting: true,
     consumerWritesReady: false,
   }),
   reverse: Object.freeze({
     contractId: 'inventory-reverse',
     authorityRoute: REVERSE_CONTRACT_ROUTE,
     authorityAction: 'compensating-reversal',
-    implementationState: 'implemented-not-consumer-enabled',
+    implementationState: 'implemented-creative-consumer-enabled',
     requiresOriginalMovementId: true,
     requiresCreativePostingId: true,
     requiresTypedConfirmation: true,
@@ -34,7 +36,7 @@ export const INVENTORY_WRITE_BOUNDARY = Object.freeze({
     usesExistingCreativeReversalLedger: true,
     compensatingMovementOnly: true,
     directStockAddBackAllowed: false,
-    consumerWritesReady: false,
+    consumerWritesReady: true,
   }),
   cost: Object.freeze({
     contractId: 'inventory-cost',
