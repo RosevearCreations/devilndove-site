@@ -1,67 +1,46 @@
 # Build 305 — Commerce & Operations Inventory Umbrella Runtime
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
-Build 305 is the second bounded domain migration into the proven `commerce-operations` top-level runtime.
-
-Completed Build 304 handoff pinned by this build:
+Completed Build 304 handoff:
 
 ```text
 b142b3a6267df57ac43b8189982bd6abe82605ac
 Build 304 set completed Catalog-runtime handoff
 ```
 
+Proven Build 305 runtime/correction head:
+
+```text
+f999a5fd61a233254e062540b80aff4fa57956d7
+Build 305 restore Inventory page final newline
+```
+
 Real Devil n Dove Production remains frozen at Build 280.
 
 ## Purpose
 
-Build 304 proved:
+Build 305 is the second bounded domain migration into the real `commerce-operations` top-level runtime.
 
 ```text
-Catalog -> commerce-operations runtime
+Commerce & Operations
+  Catalog   -> catalog-read
+  Inventory -> inventory-read
 ```
 
-Build 305 adds:
+Inventory remains an explicit internal domain and does not lose its authority boundary.
 
-```text
-Inventory -> commerce-operations runtime
-```
+## Route ownership
 
-while keeping Inventory as an explicit internal domain/service authority.
-
-The top-level structure remains:
-
-```text
-                     DEVIL N DOVE APPLICATION CORE
-                               |
-              +----------------+----------------+
-              |                |                |
-              v                v                v
-       COMMERCE &         CREATIVE &       BUSINESS &
-       OPERATIONS          PRODUCTION      ADMINISTRATION
-```
-
-## Inventory route ownership correction
-
-The actual Inventory workspace is:
+The real Inventory workspace is:
 
 ```text
 /admin/inventory-operations/
 ```
 
-Before Build 305, the Inventory domain route catalog listed `/admin/site-item-inventory` and `/admin/inventory` but did not explicitly match `/admin/inventory-operations/` under the registry's path-prefix rules.
+Build 305 explicitly maps that route to the Inventory domain. This is a route-ownership correction, not an Inventory feature rewrite.
 
-Build 305 therefore adds:
-
-```text
-/admin/inventory-operations
-```
-
-to the Inventory domain route prefixes.
-
-This is a route-ownership correction, not an Inventory feature rewrite.
-
-## Runtime catalog
+## Runtime identity
 
 Architecture build remains:
 
@@ -69,201 +48,149 @@ Architecture build remains:
 302
 ```
 
-Build 304 Catalog runtime identity remains historically recorded as:
+Runtime identities are:
 
 ```text
-RUNTIME_CATALOG_BUILD = 304
-```
-
-Build 305 adds:
-
-```text
+RUNTIME_CATALOG_BUILD   = 304
 RUNTIME_INVENTORY_BUILD = 305
 ```
 
-and updates the Commerce & Operations runtime metadata to:
+Commerce runtime metadata:
 
 ```text
 entry: ../modules/commerce-operations/runtime.mjs?v=305
 runtimeDomains: [catalog, inventory]
 ```
 
-Operations and Public remain bridge-only in Build 305.
+Operations and Public remain bridge-only.
 
-Creative & Production and Business & Administration remain unchanged at the top-level runtime layer.
+## Commerce & Operations service boundary
 
-## Commerce & Operations runtime
-
-`public/js/modules/commerce-operations/runtime.mjs` becomes Build 305 and supports exactly:
-
-```text
-catalog
-inventory
-```
-
-Service requirements remain domain-specific:
+The Build 305 Commerce runtime supports exactly:
 
 ```text
 catalog   -> catalog-read
 inventory -> inventory-read
 ```
 
-The runtime explicitly records:
+It explicitly records:
 
 ```text
 createsNetworkTransport: false
 ownsInventoryMutations: false
 ```
 
-It does not call `inventory-post`, `inventory-reverse`, or any Inventory mutation API.
+The runtime does not invoke `inventory-post`, `inventory-reverse`, or Inventory mutation APIs.
 
-Inventory writes, stock movements, lots, kits, reserve/release, corrections and reversal rules remain with their existing implementations until separately extracted behind explicit service contracts.
+Stock movement, reserve/release, lot, kit, correction, reversal and cost-write behavior remain with their existing implementations until separately extracted behind explicit contracts.
 
-## Core runtime
+## Proven Inventory steady state
 
-Build 305 Core identity:
-
-```text
-DDModuleRuntime.build                         305
-DDModuleRuntime.applicationArchitectureBuild 302
-DDModuleRuntime.applicationRuntimeCatalogBuild 304
-DDModuleRuntime.applicationRuntimeInventoryBuild 305
-```
-
-The generic application-module lifecycle proven in Build 304 is reused unchanged conceptually.
-
-Expected Inventory steady state:
+Development browser proof established:
 
 ```text
-domain                             inventory
-domain_mode                        shadow
-application_module                 commerce-operations
-application_module_mode            active
-active_domain_runtime              null
-active_application_runtime         commerce-operations
-application_runtime_state          active
-application_runtime_domain         inventory
-application_runtime_services_ready true
+pathname                    /admin/inventory-operations/
+admin_script                .../public/js/admin.js?v=305
+runtime_build               305
+domain                      inventory
+domain_mode                 shadow
+application_module          commerce-operations
+application_module_mode     active
+active_application_runtime  commerce-operations
+runtime_state               active
+runtime_domain              inventory
+required_services           inventory-read
+facade_build                305
+inventory_boundary          true
+catalog_boundary            false
+owns_inventory_mutations    false
+contracts_ok                true
+services_ok                 true
 ```
 
-Expected Commerce facade state:
-
-```text
-facade_build                       305
-facade_state                       active
-facade_inventory_boundary_active   true
-facade_catalog_boundary_active     false
-active_required_services           inventory-read
-owns_inventory_mutations           false
-```
+This proves Inventory is inside the active top-level module while retaining its own internal domain identity and read contract.
 
 ## Catalog preservation
 
-Catalog remains on the same Commerce & Operations runtime and must still produce:
+Catalog remained green under the same runtime:
 
 ```text
-domain                             catalog
-application_module                 commerce-operations
-application_module_mode            active
-active_application_runtime         commerce-operations
-application_runtime_domain         catalog
-facade_catalog_boundary_active     true
+domain                      catalog
+application_module          commerce-operations
+application_module_mode     active
+active_application_runtime  commerce-operations
+runtime_domain              catalog
+required_services           catalog-read
+facade_build                305
+catalog_boundary            true
+inventory_boundary          false
+owns_inventory_mutations    false
 ```
 
-Build 305 does not modify Catalog page/API business logic.
+Build 305 does not change Catalog API/business logic.
 
 ## Packaging preservation
 
-Packaging remains beneath Creative & Production through the proven Build 301 domain runtime.
-
-Expected Packaging steady state:
+Packaging remained beneath Creative & Production through the proven Build 301 domain runtime:
 
 ```text
-runtime_build                    305
-domain                           packaging
-domain_mode                      active
-application_module               creative-production
-application_module_mode          domain-bridge
-active_domain_runtime            packaging
-active_application_runtime       null
-packaging_compatibility_build    301
-packaging_compatibility_state    active
-native_read_status               200
-failed_verification_count        0
-preview_mode                     fit
+runtime_build                   305
+domain                          packaging
+domain_mode                     active
+application_module              creative-production
+application_module_mode         domain-bridge
+active_domain_runtime           packaging
+active_application_runtime      null
+packaging_compatibility_build   301
+packaging_compatibility_state   active
+native_read_status              200
+failed_verification_count       0
+preview_mode                    fit
 ```
 
-The Packaging page receives only a Build 305 shared-loader query pin. Packaging implementation files are not changed.
+No Packaging transport/read/write/save/preview authority changed.
 
-## Shared-loader validation pins
+## Validation lesson
 
-Build 305 explicitly pins:
+Build 305's first strict regression failed only because the Inventory HTML edit removed the file's final newline. The intended loader change was correct. Commit `f999a5fd...` restored the newline and the exact-boundary regression then passed.
 
-```text
-/admin/inventory-operations/  -> /public/js/admin.js?v=305
-/admin/packaging-studio/      -> /public/js/admin.js?v=305
-```
-
-The Inventory page is the new runtime target and Packaging is the cross-module regression surface.
-
-Build 305 does not mass-edit unrelated Admin pages solely for loader query consistency.
-
-## Historical Build 304 pin
-
-`scripts/build304_commerce_operations_catalog_runtime_test.py` is converted to a historical regression pinned to:
-
-```text
-b142b3a6267df57ac43b8189982bd6abe82605ac
-```
-
-It preserves:
-
-- Build 304 syntax proof;
-- Catalog-only runtime catalog;
-- generic Core lifecycle;
-- Catalog browser proof;
-- Packaging browser proof;
-- direct-upload Development recovery evidence;
-- exact completed Build 304 changed-file boundary.
+This reinforces the rule that strict historical/page-diff regressions should remain strict; correct accidental formatting drift rather than broadening the allowed boundary.
 
 ## Safety boundary
 
 Build 305 does not change:
 
-- `dd-module-registry.mjs`;
-- domain contract declarations;
-- default module service adapters;
-- `/api/admin/contracts/catalog-read`;
-- `/api/admin/contracts/inventory-read`;
-- Inventory API/business implementations;
-- Inventory mutation authorities;
-- Catalog APIs/business logic;
-- Packaging transport/native client/read/write/save/preview authorities;
-- Operations runtime extraction;
-- Public runtime extraction;
+- module registry lifecycle;
+- contract declarations;
+- default service adapters;
+- Catalog read API;
+- Inventory read API;
+- Inventory mutation implementations;
+- Catalog business logic;
+- Packaging implementation;
+- Operations/Public extraction;
 - SQL/schema;
 - Cloudflare bindings/config;
-- R2 bindings/data;
+- R2;
 - real Production.
 
-## Completion gate
+## Completion decision
 
-Build 305 is complete only when:
+**Build 305 is COMPLETE IN DEVELOPMENT.**
 
-1. completed Build 304 historical regression passes;
-2. Build 305 local regression passes;
-3. working tree is clean after pull;
-4. Development serves the Build 305 shared loader/Core runtime;
-5. `/admin/inventory-operations/` resolves domain `inventory`;
-6. Inventory activates `commerce-operations` with `inventory-read` ready;
-7. Inventory facade reports `ownsInventoryMutations = false`;
-8. Catalog remains active under the same Commerce runtime;
-9. Packaging remains active through Build 301 with native read 200;
-10. Operations/Public remain bridge-only;
-11. no SQL/config/R2/real Production change occurs.
+Catalog and Inventory now share the real Commerce & Operations umbrella runtime, while Inventory mutation authority remains explicitly outside that runtime.
 
 ## Next bounded migration
 
-Do not automatically move Operations next merely because Catalog and Inventory are now grouped.
+Do not move Operations next merely because Inventory is now grouped.
 
-After Build 305, first assess whether Inventory needs explicit write-side contracts (`inventory-post`, `inventory-reverse`, cost/movement services) before further umbrella extraction. If those authorities are not yet contractized enough, the next pass should strengthen those service boundaries rather than collapsing Operations into the module prematurely.
+First strengthen and prove Inventory write-side boundaries:
+
+```text
+inventory-post
+inventory-reverse
+inventory-cost / movement authority
+compensating reversal with reason + authorization
+```
+
+Only after those contracts are explicit should we decide whether Operations is ready to join Commerce & Operations.
