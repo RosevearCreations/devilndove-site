@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Build 308 Creative Reversal Consumer Cutover
+# Devil n Dove AI Context — Build 309 Inventory Post Authority
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Architecture authority:
+Current modular architecture authority:
 
 - `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`
 - `docs/architecture/BUILD302_CORE_THREE_MODULE_NORMALIZATION.md`
@@ -12,12 +12,14 @@ Architecture authority:
 - `docs/architecture/BUILD306_INVENTORY_WRITE_CONTRACTS.md`
 - `docs/architecture/BUILD307_INVENTORY_COMPENSATING_REVERSAL_SERVICE.md`
 - `docs/architecture/BUILD308_CREATIVE_REVERSAL_CONSUMER_CUTOVER.md`
+- `docs/architecture/BUILD309_INVENTORY_POST_AUTHORITY.md`
 - `BUILD307_VALIDATION.md`
 - `BUILD308_VALIDATION.md`
+- `BUILD309_VALIDATION.md`
 
 **Real Devil n Dove Production is frozen at Build 280 unless deliberately promoted through the separate Production workflow.**
 
-## Authoritative structure
+## Authoritative application structure
 
 ```text
                      DEVIL N DOVE APPLICATION CORE
@@ -28,7 +30,7 @@ Architecture authority:
        OPERATIONS          PRODUCTION      ADMINISTRATION
 ```
 
-Domains remain explicit ownership/service boundaries beneath those exactly three top-level modules.
+Domains remain internal ownership/service boundaries beneath exactly three top-level modules.
 
 ## Completed modular baselines
 
@@ -48,151 +50,188 @@ Completed Build 307 handoff:
 Build 307 set completed reversal-service handoff
 ```
 
-Proven Build 307 runtime/service head:
+Build 306 remains historically browser-proven with standalone local signoff not captured in the conversation. Do not silently relabel it.
+
+## Build 308 — BROWSER PROVEN / LOCAL SIGNOFF PENDING
+
+Build 308 staged handoff:
 
 ```text
-f1cc11000b0c90944c4224b6c0002ddab7063876
+6d9a236ae688fe3d4b8e6975b866c637efe51c9b
+Build 308 update modular reversal-consumer handoff
 ```
 
-Build 307 provides the Inventory-owned reversal authority:
+Development browser proof passed:
 
 ```text
-GET/POST /api/admin/contracts/inventory-reverse
+pathname                          /admin/creative-process/
+creative_ok                       true
+creative_engine_build             274
+reversal_consumer_build           308
+reversal_authority                inventory-reverse
+inventory_authority_ok            true
+inventory_authority_build         307
+inventory_authority_state         implemented-not-consumer-enabled
+inventory_authority_schema_ready  true
+inventory_authority_missing       <empty>
 ```
 
-It requires the original physical movement, Creative posting, typed confirmation, compensating-only reversal, UNIQUE ledger idempotency and stale-stock protection. Build 307 added no SQL/schema.
+Build 308 changes only Creative reversal consumption:
 
-Development proof showed the required reversal schema present and no missing tables. Local regression passed and the working tree was clean.
+- `creativeInventoryReversalConsumer.js` resolves exactly one matching original Creative `consume` movement;
+- Creative's former direct reversal SQL delegates to the Inventory-owned Build 307 service;
+- timeline void, usage correction, and explicit reversal callers keep their existing Creative API/UI behavior;
+- `inventory-reverse` contract is marked `implemented-creative-consumer-enabled` / `consumerWritesReady=true` in cross-module metadata;
+- `inventory-post` remained untouched in Build 308.
 
-## Build 306 historical note
+Do not mark Build 308 complete until its local regression output is supplied or a deliberate documented signoff policy supersedes that requirement.
 
-Build 306 write-contract readiness was browser-proven, but its standalone local regression output was not separately supplied before Build 307 superseded the reversal-service staging work. Do not retroactively label Build 306 COMPLETE without an explicit policy decision or historical proof.
+## Build 309 — STAGED / VALIDATION REQUIRED
 
-## Build 308 — STAGED / VALIDATION REQUIRED
+Build 309 implements the Inventory-owned reviewed-material posting authority without migrating Creative posting consumption.
 
-Build 308 migrates only **Creative reversal consumption** to the proven Inventory-owned Build 307 authority.
-
-### New Creative consumer adapter
+Baseline:
 
 ```text
-functions/api/_lib/creativeInventoryReversalConsumer.js
+6d9a236ae688fe3d4b8e6975b866c637efe51c9b
+Build 308 update modular reversal-consumer handoff
 ```
 
-The adapter performs no reversal mutation SQL. It:
-
-1. loads the Creative inventory posting;
-2. preserves idempotent already-reversed behavior;
-3. resolves exactly one matching original `consume` movement;
-4. fails closed when the movement is missing or ambiguous;
-5. delegates to `reverseCreativeInventoryPost()` in the frozen Build 307 Inventory service;
-6. adapts the result back to the existing Creative helper shape.
-
-### Creative Process cutover
-
-`functions/api/admin/creative-process.js` keeps the historical Creative engine identity:
+### New post authority
 
 ```text
-build = 274
+GET  /api/admin/contracts/inventory-post
+POST /api/admin/contracts/inventory-post
 ```
 
-but now exposes:
+Service:
 
 ```text
-inventory_reversal_consumer_build = 308
-inventory_reversal_authority = inventory-reverse
+functions/api/_lib/inventoryPostService.js
 ```
 
-Its `reverseInventoryPost()` helper now delegates to the consumer adapter. Existing callers remain:
+Contract state:
 
 ```text
-void_event
-correct_inventory_use
-reverse_material_inventory
+owner                  inventory
+consumer               creative
+implementation state   implemented-not-consumer-enabled
+consumer writes ready  false
 ```
 
-The retired Creative direct reversal SQL is removed.
+### Posting requirements
 
-### Original movement resolution
-
-Because older Creative posts do not persist the physical movement ID directly, the Build 308 adapter matches the original movement using all available provenance:
-
-- same Inventory item;
-- `consume` movement type;
-- negative posted stock delta;
-- same previous/new on-hand values;
-- same Creative project/event in the movement note;
-- same actor when available.
+The service requires:
 
 ```text
-0 matches  -> block
-1 match    -> delegate to Inventory
->1 matches -> block for review
+creative_work_project_id
+creative_work_event_id
+site_item_inventory_id
+usage_quantity_consumed > 0
+a matching approved material review
+authenticated administrator identity
 ```
 
-Creative never guesses an original movement.
+Creative consumer migration is deliberately disabled in Build 309.
 
-### Contract state
+### Atomic posting transaction
 
-`inventory-reverse` now records:
+The Inventory service performs one guarded D1 batch:
 
 ```text
-implementation state  implemented-creative-consumer-enabled
-consumer writes ready true
+1. claim approved review through UNIQUE creative_project_material_review_id posting row
+2. apply stock delta
+3. insert physical consume movement
+4. insert Creative usage detail
+5. insert fractional usage movement linked to the physical movement id
+6. mark material review inventory_consumed=1
 ```
 
-Guardrails remain:
+The existing schema already provides:
 
 ```text
-requires original movement id  true
-requires Creative posting id   true
-compensating movement only      true
-direct stock add-back allowed  false
-confirmation                    REVERSE INVENTORY
+UNIQUE(creative_project_material_review_id)
 ```
 
-`inventory-post` remains unchanged:
+so no new schema is added.
+
+The claim is also conditioned on the current stock snapshot. If stock changes first, the service returns:
 
 ```text
-implementation state  existing-authority-not-yet-contract-route
-consumer writes ready false
+409 inventory_post_stale_stock
 ```
 
-### Frozen Build 307 authority
+A pre-existing posting is returned as an idempotent replay.
 
-Build 308 deliberately does not change:
+### Usage semantics preserved
 
 ```text
-functions/api/_lib/inventoryReversalService.js
-functions/api/admin/contracts/inventory-reverse.js
+exact / estimated: stock quantity = usage quantity / usage units per stock unit
+log_only / reusable: physical stock delta = 0
 ```
 
-Therefore the safe Build 307 readiness GET may still identify its own implementation state as `implemented-not-consumer-enabled`. Build 308 consumer activation is represented by the Creative API identity and Build 308 contract catalog; the proven mutation service itself remains frozen.
+All modes still write usage provenance.
 
-### Build 308 safety boundary
+Physical movement provenance remains compatible with Build 308 reversal resolution:
 
-Expected changed files are exactly those in `BUILD308_CHANGED_FILES.md`.
+```text
+movement_type = consume
+note prefix   = Creative Project <project>, event <event>.
+```
 
-No changes to:
+### Runtime metadata
 
-- Inventory-owned Build 307 reversal mutation logic;
-- legacy `site-item-inventory` mutation endpoint;
-- Creative inventory-post implementation;
-- Core lifecycle;
-- Catalog;
-- Packaging;
-- Operations extraction;
+```text
+Architecture build              302
+Catalog runtime                 304
+Inventory runtime               305
+Inventory write boundary        309
+Commerce runtime                309
+Core runtime implementation     305
+```
+
+Commerce still reports:
+
+```text
+ownsInventoryMutations false
+consumerMutationReady  false
+```
+
+The dedicated Inventory contract route owns mutation authority, not the umbrella runtime.
+
+### Reversal remains enabled
+
+```text
+inventory-reverse
+implementation state   implemented-creative-consumer-enabled
+consumer writes ready  true
+```
+
+Build 309 does not alter the Build 307 reversal service or Build 308 Creative reversal adapter.
+
+### Build 309 safety boundary
+
+Build 309 does not modify:
+
+- `functions/api/admin/creative-process.js`;
+- `functions/api/_lib/creativeInventoryReversalConsumer.js`;
+- `functions/api/_lib/inventoryReversalService.js`;
+- `functions/api/admin/contracts/inventory-reverse.js`;
+- `functions/api/admin/site-item-inventory.js`;
 - SQL/schema;
 - Cloudflare bindings/config;
 - R2;
 - real Production.
 
-## Next direction after Build 308
+## Next direction after Build 309
 
-After Build 308 is proven, extract **inventory-post** as its own Inventory-owned contract/service pass. Do not combine posting extraction with Operations migration.
+After Build 309 is proven, migrate **only Creative reviewed-material posting consumption** to `inventory-post` with equivalence/idempotency validation.
+
+Do not combine that cutover with Operations migration.
 
 ## Validation interaction preference
 
-Keep validation concise: default to **one GIT BASH block and one reusable BROWSER DEVTOOLS CONSOLE IIFE** unless a failure requires deeper isolation.
+Keep validation concise: default to **one Git Bash block and one reusable browser-console script** unless a failure requires deeper isolation.
 
 ## Separate schema/data parity track — DO NOT MIX
 
