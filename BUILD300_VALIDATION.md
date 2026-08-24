@@ -4,7 +4,7 @@
 
 Build 300 is a corrective stabilization pass. Forward Packaging modularization is paused.
 
-The live page is restored to the proven Build 298 editor/native-client stack by unloading the Build 299 browser print-source controller. Build 300 then adds one verified-save wrapper before the mature editor.
+The live page is restored to the proven Build 298 editor/native-client stack by unloading the Build 299 browser print-source controller. Build 300 then adds one verified-save + Preview stabilization wrapper before the mature editor.
 
 ## Local gate
 
@@ -40,68 +40,79 @@ Then run in Firefox Console:
 
 ```js
 (() => {
-  console.table(window.DDPackagingSaveStabilizer?.getStatus?.());
+  const s = window.DDPackagingSaveStabilizer?.getStatus?.();
+  console.table({
+    build: s?.build,
+    state: s?.state,
+    verified_save_count: s?.verifiedSaveCount,
+    failed_verification_count: s?.failedVerificationCount,
+    preview_mode: s?.previewMode,
+    preview_audit_count: s?.previewAuditCount,
+    forced_preview_refresh_count: s?.forcedPreviewRefreshCount,
+    preview_fit_count: s?.previewFitCount,
+    identity_is_derived: s?.identityIsDerived,
+    preview_contains_identity: s?.previewContainsIdentity
+  });
+  console.log('SAVE VERIFICATION:', s?.lastVerification);
+  console.log('PREVIEW AUDIT:', s?.lastPreviewAudit);
 })();
 ```
 
-Expected core values:
+Expected core values after a verified save:
 
 ```text
-build                    300
-state                    active
-verifiedSaveCount        >= 1
-failedVerificationCount  0
-lastVerification.ok      true
-lastVerification.claims_match true
-lastVerification.core_match   true
+build                         300
+state                         active
+verified_save_count           >= 1
+failed_verification_count     0
+preview_mode                  fit
+preview_audit_count           >= 1
+preview_fit_count             >= 1
 ```
 
-Because nested objects are not expanded well by `console.table`, also run:
+Expected `SAVE VERIFICATION` object:
 
-```js
-(() => {
-  console.log('Build 300 verification', window.DDPackagingSaveStabilizer?.getStatus?.()?.lastVerification);
-})();
+```text
+ok                    true
+claims_match          true
+core_match            true
+mismatch_fields       []
 ```
 
-Then click the normal **Refresh** button or hard-refresh the page. The changed ordinary field and changed claim must still be present.
+Expected `PREVIEW AUDIT` object for a project with up to four printable claims:
 
-### Preview proof
+```text
+preview_svg_present       true
+preview_mode              fit
+preview_claims_match_dom  true
+dom_matches_verified      true
+rendered_claim_count      == preview_claim_target_count
+```
+
+The Preview tab should now show a small **Live preview** status strip with two controls:
+
+- **Fit full label** — default; the entire soap ribbon including the far-right claims panel is visible inside the editor width;
+- **Detail / scroll** — restores the former large horizontally scrolling inspection view.
+
+The fitted view changes only the browser Preview presentation. The SVG's physical millimetre dimensions, exports and print output remain unchanged.
+
+Then click the normal **Refresh** button or hard-refresh the page. The changed ordinary field and changed claim must still be present. Return to Preview: the full fitted ribbon must contain the refreshed claim text.
+
+### Derived identity proof
 
 If Product identity — English was still the default/derived value, Product / variant should keep it synchronized and Preview should display that verified identity.
 
-Run:
-
-```js
-(() => {
-  const s = window.DDPackagingClient?.getStatus?.();
-  console.table({
-    stabilization_build: s?.stabilizationBuild,
-    product_value: s?.productValue,
-    identity_value: s?.identityValue,
-    identity_is_derived: s?.identityIsDerived,
-    preview_contains_identity: s?.previewContainsIdentity,
-    verified_save_count: s?.verifiedSaveCount,
-    failed_verification_count: s?.failedVerificationCount
-  });
-})();
-```
-
-Expected after a derived identity save:
-
-```text
-stabilization_build       300
-identity_is_derived       true
-preview_contains_identity true
-verified_save_count       >= 1
-failed_verification_count 0
-```
-
 Then explicitly customize Product identity — English to a different value and change Product / variant again. The explicit identity must remain unchanged; it is the renderer authority.
+
+### Front tagline correction
+
+The mature soap renderer does print `Front tagline`. Build 300 must leave its normal label and rendered behavior intact; the stabilizer must not describe it as non-printing metadata.
 
 ## Failure behavior
 
 If D1 read-back does not match what was in the editor, Build 300 must **not** show success. The editor should display a verification error and retain its browser draft. `lastVerification` will identify whether claims or named core fields differ.
+
+If the current claim editor rows are not found in the generated SVG text, the Preview audit triggers one mature-renderer input refresh and checks again. `forcedPreviewRefreshCount` records that recovery attempt.
 
 ## Safety
 
