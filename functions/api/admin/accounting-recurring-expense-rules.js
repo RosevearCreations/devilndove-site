@@ -1,4 +1,5 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import { BUILD, CONTRACT_ID, OWNER, readAccountingRecurringExpenseRules } from '../_lib/accountingRecurringExpenseRulesReadService.js';
 import { assertAccountingPeriodOpen, monthFromDateish } from './_accountingPeriods.js';
 import { ensureAccountingVendorsTable, getAccountingVendorById } from './_accountingVendors.js';
 
@@ -159,64 +160,17 @@ async function generateExpenseFromRule(db, adminUser, rule, explicitDate) {
   return { expense_id: expenseId, expense_date: expenseDate, next_due_date: nextDate, ledger_name: ledgerName || '' };
 }
 
-function mapRule(row) {
-  return {
-    recurring_expense_rule_id: Number(row.recurring_expense_rule_id || 0),
-    vendor_id: row.vendor_id == null ? null : Number(row.vendor_id || 0),
-    vendor_name: row.vendor_name || '',
-    rule_name: row.rule_name || '',
-    ledger_code: row.ledger_code || '',
-    ledger_name: row.ledger_name || '',
-    amount: Number(row.amount || 0),
-    tax_amount: Number(row.tax_amount || 0),
-    frequency: cleanFrequency(row.frequency),
-    due_day: row.due_day == null ? null : Number(row.due_day || 0),
-    next_due_date: row.next_due_date || null,
-    auto_create_mode: cleanAutoCreateMode(row.auto_create_mode),
-    notes: row.notes || '',
-    is_active: Number(row.is_active || 0) === 1 ? 1 : 0,
-    last_generated_at: row.last_generated_at || null,
-    last_generated_expense_id: row.last_generated_expense_id == null ? null : Number(row.last_generated_expense_id || 0),
-    created_by_user_id: row.created_by_user_id == null ? null : Number(row.created_by_user_id || 0),
-    updated_by_user_id: row.updated_by_user_id == null ? null : Number(row.updated_by_user_id || 0),
-    created_at: row.created_at || null,
-    updated_at: row.updated_at || null,
-  };
-}
-
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureAccountingVendorsTable(db);
-  await ensureRecurringRulesTable(db);
-
-  const url = new URL(context.request.url);
-  const includeInactive = url.searchParams.get('include_inactive') === '1';
-  const today = new Date().toISOString().slice(0, 10);
-  const result = await db.prepare(`
-    SELECT recurring_expense_rule_id, vendor_id, vendor_name, rule_name, ledger_code, ledger_name,
-           amount, tax_amount, frequency, due_day, next_due_date, auto_create_mode,
-           notes, is_active, last_generated_at, last_generated_expense_id,
-           created_by_user_id, updated_by_user_id, created_at, updated_at
-    FROM accounting_recurring_expense_rules
-    ORDER BY is_active DESC, COALESCE(next_due_date, '9999-12-31') ASC, rule_name ASC
-  `).all().catch(() => ({ results: [] }));
-
-  const rules = rows(result).map(mapRule).filter((row) => includeInactive || row.is_active === 1);
-  const dueRules = rules.filter((row) => row.is_active === 1 && row.next_due_date && row.next_due_date <= today);
-  return jsonResponse({
-    ok: true,
-    rules,
-    summary: {
-      rule_count: rules.length,
-      active_rule_count: rules.filter((row) => row.is_active === 1).length,
-      due_rule_count: dueRules.length,
-      monthly_rule_count: rules.filter((row) => row.frequency === 'monthly').length,
-    },
-    due_rules: dueRules,
-  });
+  try {
+    const includeInactive = new URL(context.request.url).searchParams.get('include_inactive') === '1';
+    return jsonResponse(await readAccountingRecurringExpenseRules(db, { includeInactive }));
+  } catch (error) {
+    return jsonResponse({ ok: false, build: BUILD, contract: CONTRACT_ID, owner: OWNER, error: error?.message || 'Failed to load recurring expense rules.' }, 500);
+  }
 }
 
 export async function onRequestPost(context) {
