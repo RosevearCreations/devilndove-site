@@ -1,6 +1,8 @@
 // File: /functions/api/admin/accounting-writeoffs.js
+// Build 317: GET delegates to the Accounting-owned read authority; POST remains compatibility write behavior.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
 import { assertAccountingPeriodOpen, monthFromDateish } from './_accountingPeriods.js';
+import { readAccountingWriteoffs } from '../_lib/accountingWriteoffsReadService.js';
 
 function nr(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -13,10 +15,6 @@ async function getTableColumnSet(db, tableName) {
   } catch {
     return new Set();
   }
-}
-
-function colExpr(cols, name) {
-  return cols.has(name) ? name : `NULL AS ${name}`;
 }
 
 async function ensureTable(db) {
@@ -60,23 +58,20 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
 
-  try {
-    const cols = await ensureTable(db);
-    const result = await db.prepare(`
-      SELECT
-        ${colExpr(cols, 'writeoff_id')},
-        ${colExpr(cols, 'writeoff_date')},
-        ${colExpr(cols, 'item_name')},
-        ${colExpr(cols, 'amount')},
-        ${colExpr(cols, 'reason_code')},
-        ${colExpr(cols, 'notes')},
-        ${colExpr(cols, 'created_at')},
-        ${colExpr(cols, 'updated_at')}
-      FROM accounting_writeoffs
-      ORDER BY COALESCE(writeoff_date, created_at, '1970-01-01') DESC, COALESCE(writeoff_id, 0) DESC
-    `).all();
+  const url = new URL(context.request.url);
+  const limitValue = Number(url.searchParams.get('limit'));
+  const limit = Math.max(1, Math.min(500, Number.isFinite(limitValue) && limitValue > 0 ? Math.trunc(limitValue) : 100));
 
-    return jsonResponse({ ok: true, writeoffs: nr(result) });
+  try {
+    const result = await readAccountingWriteoffs(db, { limit });
+    return jsonResponse({
+      ...result,
+      requested_by: {
+        user_id: adminUser.user_id,
+        email: adminUser.email,
+        display_name: adminUser.display_name,
+      },
+    }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     return jsonResponse({ ok: false, error: error?.message || 'Failed to load writeoffs.' }, 500);
   }
