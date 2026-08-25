@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through browser-proven Build 358 on 2026-08-24.
+Updated through staged Builds 359–361 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -38,13 +38,15 @@ Business Accounting activation          348 validated
 Packaging baseline                      301 validated
 Creative Packaging activation           351 validated
 Creative Process read contract          352 browser-proven
-Creative Process activation             browser-proven after Build 358
-Content Studio read contract            355 staged
-Creative runtime coverage               357 staged
 Creative dependency gate fix            358 browser-proven / local required
+Content Studio read/activation           355–357 browser-proven / local required
+CAIP read contracts                     359 staged
+Creative runtime implementation         360 staged
+CAIP activation                         361 staged
 Accounting mutation ownership moved     false
 Creative mutation ownership moved       false
 Content mutation ownership moved        false
+CAIP mutation ownership moved           false
 ```
 
 ### Commerce & Operations
@@ -53,103 +55,68 @@ Proven pages remain `/admin/operations/`, `/admin/customer-documents/`, and `/ad
 
 ### Business & Administration
 
-`/admin/accounting/` is the first validated Business & Administration runtime page. Builds 346–348 are fully validated. Accounting mutations remain in compatibility authorities. Builds 343–345 are fully validated.
+`/admin/accounting/` is the first validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain in compatibility authorities.
 
 ### Creative & Production
 
-Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated in Development.
+Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated.
 
-Build 352 formalizes the Creative Process GET as `creative-process-read`. Its browser read contract passed with `request_time_schema_mutation=false` and `mutation_ownership_moved=false`.
+Creative Process browser activation now passes after Build 358 corrected the dependency gate. Creative activation requires `creative-process-read` and `inventory-read`; Inventory-owned `inventory-post` and `inventory-reverse` remain separate retained mutation authorities and are not Core activation services.
 
-The initial top-level browser activation failed because the shared Creative runtime incorrectly required `inventory-post` and `inventory-reverse` as registered Core browser services. Those are real Inventory-owned mutation authorities, but not passive activation services.
+Content Studio browser proof passed with Build 355 legacy/contract reads schema-ready and non-mutating, one registered `content-studio-read` service, active Creative top-level runtime, and `contentMutationOwnership=false`.
 
-Build 358 corrects that distinction and the browser revalidation now passes.
-
-Current Creative runtime scope:
+Current staged Creative runtime scope:
 
 ```text
 creative-production
   packaging -> /admin/packaging-studio/   validated
   creative  -> /admin/creative-process/   browser-proven after Build 358; corrected local required
-  content   -> /admin/content-studio/      staged
-
-caip        -> no top-level runtime coverage yet
+  content   -> /admin/content-studio/      browser-proven; corrected local required
+  caip      -> /admin/creative-assets/     staged Builds 359–361
 ```
 
-Activation services by Creative runtime domain:
+Activation services by domain:
 
 ```text
 packaging: inventory-read, catalog-read, content-media
 creative:  creative-process-read, inventory-read
 content:   content-studio-read
+caip:      caip-read, caip-media-intake-read
 ```
 
-Retained Creative Process mutation authorities are declared separately:
+The top-level runtime creates no network transport and owns no Packaging, Creative, Content, or CAIP mutations.
+
+### CAIP audit correction and staged activation
+
+Historical CAIP schema helper names were misleading. Current source shows:
 
 ```text
-inventory-post
-inventory-reverse
+ensureCreativeAssetIntelligenceSchema()  -> SELECT-only migration verification
+ensureCreativeAssetOperationsSchema()    -> SELECT-only migration verification
+assertCaipMediaIntakeSchema()             -> SELECT-only migration verification
 ```
 
-They are **not** top-level runtime activation services. Build 358 reports `mutationAuthoritiesRequiredAsActivationServices=false`.
-
-Browser-proven Build 358 Creative state:
-
-```text
-application_module                     creative-production
-application_mode                       active
-active_application_module              creative-production
-creative_domain                        creative
-runtime_entry                          ../modules/creative-production/runtime.mjs?v=358
-runtime_build                          358
-activation_build                       357
-dependency_gate_fix_build              358
-runtime_state                          active
-services_ready                         true
-required_service_count                 2
-required_services                      ["creative-process-read","inventory-read"]
-mutation_authority_count               2
-mutation_authorities                   ["inventory-post","inventory-reverse"]
-mutation_authorities_activation_gate   false
-page_proven                            true
-creates_network_transport              false
-creative_mutation_ownership            false
-contracts_ok                           true
-services_ok                            true
-```
-
-The top-level runtime creates no network transport and owns no Creative, Packaging or Content mutations.
-
-### Content Studio
-
-Build 355 removes request-time schema creation from the automatic Content Studio GET and exposes `content-studio-read`. Build 356 extends the top-level runtime to the `content` domain. Build 357 adds `/admin/content-studio/` coverage. Content Studio POST actions remain on the retained compatibility endpoint.
-
-### CAIP startup-read audit correction
-
-Earlier notes treated CAIP's `ensure...Schema()` calls as request-time DDL. Current source shows these helpers are migration-owned verification only:
-
-```text
-ensureCreativeAssetIntelligenceSchema()  -> SELECT-only table verification
-ensureCreativeAssetOperationsSchema()    -> SELECT-only table verification
-assertCaipMediaIntakeSchema()             -> SELECT-only table verification
-```
-
-The `/admin/creative-assets/` page starts two automatic reads:
+The CAIP page automatically reads:
 
 ```text
 GET /api/admin/creative-assets
 GET /api/admin/caip-media-intake
 ```
 
-The main CAIP GET uses verification-only schema checks plus listing/detail/operations reads. The media-intake GET uses verification-only schema checks, readiness queries and duplicate-audit reads. No request-time CREATE/ALTER/INSERT/UPDATE/DELETE is required merely to load the page.
+Build 359 adds GET-only owned wrappers:
 
-So CAIP is **not blocked by request-time schema mutation**. Its actual modular gap is explicit ownership/registration of the two startup read boundaries. Keep `caip` outside top-level runtime coverage until those reads are formalized as passive services/contracts and browser-proven.
+```text
+/api/admin/contracts/caip-read
+/api/admin/contracts/caip-media-intake-read
+```
 
-CAIP POST/upload/governance/probe/derivative/review-link actions remain compatibility mutation authorities and must not move merely to activate the page.
+Build 360 registers both passively and expands the Creative umbrella to `caip`. Build 361 adds only `/admin/creative-assets/` to top-level lifecycle coverage and loads Core before the retained CAIP UI scripts.
 
-## Read-time schema mutation rule
+CAIP project/evidence/story edits, probes, derivative plans, secure-review actions, private-media uploads, R2 writes, duplicate cleanup, governance changes, and public-promotion review requests remain on retained mutation authorities.
 
-> GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
+## Read-time schema rule
+
+> GET/read paths report or verify schema readiness; migrations/readiness tooling creates or repairs schema.
 
 Never use top-level runtime activation as permission to add request-time DDL or move mutations.
 
@@ -165,9 +132,7 @@ access_tiers.tier_id                          missing expected column (Build 341
 payment_disputes.payment_dispute_id           missing expected column (Build 341)
 ```
 
-These findings belong in fresh-install schema/migrations/readiness tooling, never in GET handlers or runtime activation code.
-
-Fresh-install schema parity still takes priority over any Production business-data copy. Prior audit also found Production-only active tables such as `accounting_order_records`, `gift_cards`, Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy.
+Fresh-install schema parity still takes priority over Production business-data copy. Prior audit also found Production-only active tables such as `accounting_order_records`, `gift_cards`, Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy.
 
 ## Validation state
 
@@ -180,30 +145,29 @@ Builds 343–345   fully validated 2026-08-24
 Builds 346–348   fully validated 2026-08-24
 Builds 349–351   fully validated 2026-08-24
 Builds 352–354   browser revalidation passed after Build 358; corrected local regression required
-Builds 355–357   staged / corrected local + Content Studio browser validation required
-Build 358        browser passed / corrected local regression required
+Builds 355–357   browser proof passed 2026-08-24; corrected local regression required
+Build 358        browser proof passed 2026-08-24; corrected local regression required
+Builds 359–361   staged / local + browser validation required
 ```
 
 ## Validation-harness rule
 
-Historical regression scripts verify durable boundaries introduced by their build. They must not freeze unrelated shared runtime/cache versions or confuse retained mutation authorities with passive activation services.
-
-The Build 349–351, Build 352–354, and Build 355–357 historical regressions are future-compatible with later Creative runtime changes.
+Historical regression scripts verify durable boundaries introduced by their build. They must not freeze later shared runtime/cache versions, require a later domain to remain inactive, or confuse retained mutation authorities with passive activation services.
 
 ## Mutation-authority extraction still open
 
-Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting writes, Creative Process project/timeline/content/CAIP/cost edits, CAIP governance/media operations and Content Studio project/media/deliverable/social-queue actions. Inventory-reviewed material posting/reversal already uses Inventory-owned authorities.
+Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting writes, Creative Process project/timeline/content/CAIP/cost edits, CAIP governance/media operations, and Content Studio project/media/deliverable/social-queue actions. Inventory-reviewed material posting/reversal already uses Inventory-owned authorities.
 
 A loader, read-contract migration, or top-level runtime activation never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Pull the browser-proof documentation checkpoint and run the corrected Build 352–354, Build 355–357 and Build 358 regressions.
-2. Browser-validate `/admin/content-studio/` without POST actions.
-3. If the corrected local tests and Content Studio browser proof pass, close Builds 352–358 while leaving all mutation authority unchanged.
-4. Next CAIP batch should formalize both automatic CAIP read boundaries as passive/owned services, then add `/admin/creative-assets/` top-level coverage only after those reads are proven.
+1. Pull the staged Build 361 checkpoint and run Build 352–354, 355–357, 358, and 359–361 local regressions.
+2. Browser-validate `/admin/creative-assets/` using GET/read checks only.
+3. If all pass, close Builds 352–361 and stop expanding Creative top-level loader coverage because all four Creative & Production domains will have proven pages.
+4. Choose the next bounded ownership target from source evidence rather than reworking passing Creative pages.
 5. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
 
-Real Devil n Dove Production remains frozen until deliberate promotion through the separate Production workflow. No module-extraction or runtime-activation build should implicitly promote `dev` or mutate Production D1/R2.
+Real Devil n Dove Production remains frozen until deliberate promotion through the separate Production workflow. No module-extraction/runtime build should implicitly promote `dev` or mutate Production D1/R2.
