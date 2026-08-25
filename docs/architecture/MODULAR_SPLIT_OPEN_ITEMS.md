@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Build 358 on 2026-08-24.
+Updated through browser-proven Build 358 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -37,11 +37,11 @@ Default passive adapters                345
 Business Accounting activation          348 validated
 Packaging baseline                      301 validated
 Creative Packaging activation           351 validated
-Creative Process read contract          352 browser read proven
-Creative Process activation             354 local proven / initial browser failed
+Creative Process read contract          352 browser-proven
+Creative Process activation             browser-proven after Build 358
 Content Studio read contract            355 staged
 Creative runtime coverage               357 staged
-Creative dependency gate fix            358 staged
+Creative dependency gate fix            358 browser-proven / local required
 Accounting mutation ownership moved     false
 Creative mutation ownership moved       false
 Content mutation ownership moved        false
@@ -61,16 +61,16 @@ Build 301 remains the completed Packaging compatibility baseline. Builds 349–3
 
 Build 352 formalizes the Creative Process GET as `creative-process-read`. Its browser read contract passed with `request_time_schema_mutation=false` and `mutation_ownership_moved=false`.
 
-The initial top-level browser activation failed because the shared Creative runtime incorrectly required `inventory-post` and `inventory-reverse` as registered Core browser services. Those are real Inventory-owned mutation authorities, but Core's passive service registry does not register them; the retained Creative Process POST path consumes them directly when the user explicitly posts/reverses reviewed material usage.
+The initial top-level browser activation failed because the shared Creative runtime incorrectly required `inventory-post` and `inventory-reverse` as registered Core browser services. Those are real Inventory-owned mutation authorities, but not passive activation services.
 
-Build 358 corrects that distinction.
+Build 358 corrects that distinction and the browser revalidation now passes.
 
 Current Creative runtime scope:
 
 ```text
 creative-production
   packaging -> /admin/packaging-studio/   validated
-  creative  -> /admin/creative-process/   Build 358 revalidation required
+  creative  -> /admin/creative-process/   browser-proven after Build 358; corrected local required
   content   -> /admin/content-studio/      staged
 
 caip        -> no top-level runtime coverage yet
@@ -92,6 +92,31 @@ inventory-reverse
 ```
 
 They are **not** top-level runtime activation services. Build 358 reports `mutationAuthoritiesRequiredAsActivationServices=false`.
+
+Browser-proven Build 358 Creative state:
+
+```text
+application_module                     creative-production
+application_mode                       active
+active_application_module              creative-production
+creative_domain                        creative
+runtime_entry                          ../modules/creative-production/runtime.mjs?v=358
+runtime_build                          358
+activation_build                       357
+dependency_gate_fix_build              358
+runtime_state                          active
+services_ready                         true
+required_service_count                 2
+required_services                      ["creative-process-read","inventory-read"]
+mutation_authority_count               2
+mutation_authorities                   ["inventory-post","inventory-reverse"]
+mutation_authorities_activation_gate   false
+page_proven                            true
+creates_network_transport              false
+creative_mutation_ownership            false
+contracts_ok                           true
+services_ok                            true
+```
 
 The top-level runtime creates no network transport and owns no Creative, Packaging or Content mutations.
 
@@ -142,9 +167,9 @@ Builds 340–342   fully validated 2026-08-24 (+ schema parity for 341)
 Builds 343–345   fully validated 2026-08-24
 Builds 346–348   fully validated 2026-08-24
 Builds 349–351   fully validated 2026-08-24
-Builds 352–354   local regression passed; initial browser activation failed; Build 358 fix staged
-Builds 355–357   staged / validation required
-Build 358        staged / local + browser revalidation required
+Builds 352–354   browser revalidation passed after Build 358; corrected local regression required
+Builds 355–357   staged / corrected local + Content Studio browser validation required
+Build 358        browser passed / corrected local regression required
 ```
 
 ## Validation-harness rule
@@ -161,12 +186,11 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Pull Build 358 and run the Build 352–354, Build 355–357 and Build 358 regressions.
-2. Repeat the Firefox GET/runtime proof on `/admin/creative-process/`; expected Creative activation service count is 2.
-3. If Creative Process activates, browser-validate `/admin/content-studio/` without POST actions.
-4. If clean, close Builds 352–358 while leaving all mutation authority unchanged.
-5. Audit/extract CAIP automatic GETs next; do not activate CAIP until its schema-creating read paths are retired.
-6. Continue fresh-install schema parity separately before Production business-data copy.
+1. Pull the browser-proof documentation checkpoint and run the corrected Build 352–354, Build 355–357 and Build 358 regressions.
+2. Browser-validate `/admin/content-studio/` without POST actions.
+3. If the corrected local tests and Content Studio browser proof pass, close Builds 352–358 while leaving all mutation authority unchanged.
+4. Audit/extract CAIP automatic GETs next; do not activate CAIP until its schema-creating read paths are retired.
+5. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
 
