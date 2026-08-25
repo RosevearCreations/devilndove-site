@@ -1,6 +1,6 @@
 # Builds 403–412 Validation — Commerce Mutation Boundaries + Development RC
 
-## Status — STAGED / LOCAL + DEVELOPMENT D1 + READ-ONLY BROWSER PROOF REQUIRED
+## Status — LOCAL RC PASS / DEVELOPMENT D1 + READ-ONLY BROWSER PROOF REQUIRED
 
 ```text
 403  Canonical shared notification schema/readiness authority
@@ -65,18 +65,14 @@ provider_sync_confirmed=true
 
 No provider write is required for validation.
 
-## Local validation
+## Local validation — PASS
 
-Run:
-
-```bash
-python scripts/build412_development_rc_gate.py
-```
-
-Expected ending:
+The 2026-08-25 Development RC run completed:
 
 ```text
 BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
+BUILD 401 ACTIVE RUNTIME TABLE PARITY AUDIT: PASS
+BUILD 402 FRESH INSTALL PARITY SMOKE: PASS
 BUILDS 393-402 MODULARITY + PARITY BATCH: PASS
 BUILDS 403-410 COMMERCE MODULARITY: PASS
 BUILD 412 DEVELOPMENT RC LOCAL GATE: PASS
@@ -84,9 +80,11 @@ No Cloudflare resource was contacted.
 PRODUCTION PROMOTION: CLOSED — Development D1/browser/live parity gates are still required.
 ```
 
-## Development D1 parity application
+Build 402 also proved the current clean-install composition with 512 tables, 25 overlay-owned tables, current parity seeds, and a passing `PRAGMA foreign_key_check`.
 
-After the local RC gate passes, apply the post-Build-384 overlays to Development only:
+## Development D1 parity application — NEXT GATE
+
+Apply the post-Build-384 overlays to Development only:
 
 ```bash
 python scripts/build410_apply_development_parity_overlays.py
@@ -114,7 +112,7 @@ If any migration stops on a real schema mismatch, preserve the exact statement o
 
 ### Customer Documents
 
-Open `/admin/customer-documents/` and prove Build 397 read/runtime activation with one required service and no mutation ownership.
+Open `/admin/customer-documents/` and prove Build 397 read/runtime activation with one required service and no runtime mutation ownership.
 
 ### Gift Cards post-mutation-extraction sanity
 
