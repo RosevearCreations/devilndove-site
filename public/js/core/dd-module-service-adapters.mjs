@@ -1,7 +1,7 @@
-// Devil n Dove Build 316 browser adapters for implemented read contracts.
+// Devil n Dove Build 317 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 316;
+export const BUILD = 317;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -9,6 +9,7 @@ const ROUTES = Object.freeze({
   'inventory-cost': '/api/admin/contracts/inventory-cost',
   'accounting-read': '/api/admin/contracts/accounting-read',
   'accounting-expenses-read': '/api/admin/contracts/accounting-expenses-read',
+  'accounting-writeoffs-read': '/api/admin/contracts/accounting-writeoffs-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -110,6 +111,22 @@ export function createDefaultModuleServices() {
         attachmentTable: data.attachment_table || null,
         attachmentTableAvailable: Boolean(data.attachment_table_available),
         attachmentJoinEnabled: Boolean(data.attachment_join_enabled),
+        requestTimeSchemaMutation: data.request_time_schema_mutation === true,
+        contract: data.contract,
+        build: Number(data.build || 0),
+      });
+    }),
+    'accounting-writeoffs-read': service('accounting-writeoffs-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-writeoffs-read'], {
+        limit: boundedInt(options.limit, 100, 1, 500),
+      });
+      return Object.freeze({
+        rows: Object.freeze(data.writeoffs || []),
+        count: Number(data.count || 0),
+        schemaReady: Boolean(data.schema_ready),
+        missingTables: Object.freeze(data.missing_tables || []),
+        missingColumns: Object.freeze(data.missing_columns || []),
+        authorityTable: data.authority_table || null,
         requestTimeSchemaMutation: data.request_time_schema_mutation === true,
         contract: data.contract,
         build: Number(data.build || 0),
