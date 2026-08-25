@@ -1,14 +1,18 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { cleanVendorPayload, ensureAccountingVendorsTable, listAccountingVendors } from './_accountingVendors.js';
+import { BUILD, CONTRACT_ID, OWNER, readAccountingVendors } from '../_lib/accountingVendorsReadService.js';
+import { cleanVendorPayload, ensureAccountingVendorsTable } from './_accountingVendors.js';
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureAccountingVendorsTable(db);
-  const vendors = await listAccountingVendors(db, { includeInactive: new URL(context.request.url).searchParams.get('include_inactive') === '1' });
-  return jsonResponse({ ok: true, vendors, summary: { vendor_count: vendors.length, active_vendor_count: vendors.filter((row) => Number(row.is_active || 0) === 1).length } });
+  try {
+    const includeInactive = new URL(context.request.url).searchParams.get('include_inactive') === '1';
+    return jsonResponse(await readAccountingVendors(db, { includeInactive }));
+  } catch (error) {
+    return jsonResponse({ ok: false, build: BUILD, contract: CONTRACT_ID, owner: OWNER, error: error?.message || 'Failed to load Accounting vendors.' }, 500);
+  }
 }
 
 export async function onRequestPost(context) {
