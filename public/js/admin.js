@@ -2,27 +2,8 @@
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
 // Build 290: Packaging physically removes retired broad Catalog/Inventory reads from legacy server source.
 // Build 296: Packaging exposes an explicit client transport facade over the proven read/write bridges.
-// Build 303: Core runtime reports Build 302 umbrella application-module classification without changing domain activation.
-// Build 304: Core activates the Commerce & Operations umbrella runtime for Catalog routes only.
-// Build 305: Commerce & Operations extends to Inventory through the existing inventory-read authority.
-// Build 306: Inventory write-side contract readiness is exposed without moving mutation authority.
-// Build 307: Inventory exposes an owned compensating reversal service; consumer migration remains disabled.
-// Build 309: Inventory exposes an owned reviewed-material post service; Creative post migration remains disabled.
-// Build 310: Creative consumes both Inventory-owned post and reverse authorities.
-// Build 311: Inventory exposes the passive cost read contract; Operations remains bridge-only.
-// Build 312: Accounting exposes a passive bounded read prerequisite; Operations remains inactive.
-// Build 313: Commerce & Operations activates the first read-only Operations runtime page.
-// Build 314: Operations runtime coverage is explicit for Operations and Customer Documents pages only.
-// Build 315: Orders joins explicit read-only Operations runtime coverage without moving order/payment writes.
-// Build 348: Business & Administration activates read-only runtime coverage for /admin/accounting/ only.
-// Build 351: Creative & Production activates top-level coverage for proven /admin/packaging-studio/ only.
-// Build 354: Creative & Production adds /admin/creative-process/ without moving Creative Process mutations.
-// Build 357: Creative & Production adds /admin/content-studio/ after removing GET-time schema creation.
-// Build 358: Creative Process activation no longer treats Inventory mutation authorities as Core browser services.
-// Build 361: Creative & Production adds CAIP lifecycle coverage without moving CAIP/R2 mutations.
-// Build 364: Commerce & Operations adds /admin/membership/ after retiring Tier Policy GET-time schema mutation.
-// Build 368: Commerce & Operations adds /admin/today-tasks/ with readiness-aware GET-only lifecycle coverage.
-// Build 372: Commerce & Operations adds /admin/custom-request/ with a readiness-aware startup-read contract.
+// Builds 303–372: Core and the three top-level application-module runtimes progressively add proven read-only page coverage.
+// Build 386: Commerce & Operations adds /admin/gift-cards/ through the Operations-owned Gift Cards read contract.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -60,5 +41,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=372')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=386')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
