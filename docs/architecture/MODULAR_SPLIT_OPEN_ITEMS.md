@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 328–330.
+Updated through Builds 328–330 validation progress on 2026-08-24.
 
 ## Architectural invariant
 
@@ -61,12 +61,12 @@ accounting-overhead-allocations-read          Build 320 VALIDATED
 accounting-overhead-product-allocations-read  Build 321 VALIDATED
 accounting-product-costs-read                 Build 322 VALIDATED
 accounting-profit-loss-read                   Build 324 VALIDATED
-accounting-item-costing-read                  Build 325 BROWSER PROVEN
-accounting-journal-read                       Build 326 BROWSER PROVEN
-accounting-gifi-notes-read                    Build 327 BROWSER PROVEN
-accounting-gifi-summary-read                  Build 328 STAGED
-accounting-period-locks-read                  Build 329 STAGED
-accounting-attachments-read                   Build 330 STAGED
+accounting-item-costing-read                  Build 325 BROWSER PROVEN; CORRECTED LOCAL REQUIRED
+accounting-journal-read                       Build 326 BROWSER PROVEN; CORRECTED LOCAL REQUIRED
+accounting-gifi-notes-read                    Build 327 BROWSER PROVEN; CORRECTED LOCAL REQUIRED
+accounting-gifi-summary-read                  Build 328 LOCAL PASSED; BROWSER REQUIRED
+accounting-period-locks-read                  Build 329 LOCAL PASSED; BROWSER REQUIRED
+accounting-attachments-read                   Build 330 LOCAL PASSED; BROWSER REQUIRED
 ```
 
 Build 324 exposed separate Development schema evidence:
@@ -96,6 +96,12 @@ Build 330 removes GET-time attachment schema ensure/repair while preserving expl
 
 The Accounting page still has automatic legacy reads that require bounded source audits, including vendors/recurring rules, reconciliation, statement imports/profiles, year-end close, sales-tax filing, fixed assets, vendor statements, close workflow, evidence checks and DB sanity.
 
+## Validation-harness rule learned from Build 328
+
+Historical regression scripts must verify the durable feature boundary introduced by their build, not require the continued presence of a later blocker or freeze unrelated shared files forever.
+
+The original Builds 325–327 regression required `await ensureGlSchema(db)` to remain in the GIFI-summary endpoint because that was the known *next* blocker at Build 327. Build 328 correctly removed it, making the older test falsely fail. The corrected regression now tests only the three owned read extractions and their non-mutating GET behavior.
+
 ## Mutation-authority extraction still open
 
 Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, attachment uploads and close/lock actions.
@@ -104,11 +110,12 @@ A loader or read-contract migration never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Complete the local 325–327 gate and validate 328–330 together.
-2. Source-audit the next automatic Accounting reads and select another 2–3 closely related blockers.
-3. Keep GET/read paths schema-aware and non-mutating.
-4. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page with mutation ownership still false.
-5. Separately continue Commerce route coverage and Creative & Production runtime work.
+1. Rerun the corrected Builds 325–327 local regression and confirm clean `git status --short`.
+2. Complete the Builds 328–330 browser proof.
+3. Source-audit the next automatic Accounting reads and select another 2–3 closely related blockers.
+4. Keep GET/read paths schema-aware and non-mutating.
+5. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page with mutation ownership still false.
+6. Separately continue Commerce route coverage and Creative & Production runtime work.
 
 ## Separate fresh-install schema/data parity track
 
