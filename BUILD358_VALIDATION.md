@@ -1,12 +1,12 @@
 # Build 358 Validation — Creative Process Activation Dependency Gate
 
-## Status — STAGED / LOCAL + BROWSER REVALIDATION REQUIRED
+## Status — BROWSER PASSED / LOCAL REGRESSION REQUIRED
 
 Build 358 fixes a real browser activation defect discovered while validating Builds 352–354.
 
 ## Defect
 
-The top-level Creative & Production runtime required four Creative services:
+The top-level Creative & Production runtime incorrectly required four Creative services:
 
 ```text
 creative-process-read
@@ -17,7 +17,7 @@ inventory-reverse
 
 Only the first two are Core browser services. `inventory-post` and `inventory-reverse` are Inventory-owned mutation authorities used by the retained Creative Process POST flow; they are not default passive browser services.
 
-The browser therefore failed activation with:
+The browser therefore initially failed activation with:
 
 ```text
 Creative & Production creative boundary is missing required services: inventory-post, inventory-reverse
@@ -59,7 +59,36 @@ content   -> /admin/content-studio/
 caip      -> not activated
 ```
 
-## Local regression
+## Browser proof — PASSED 2026-08-24
+
+User-run Development browser evidence on `/admin/creative-process/`:
+
+```text
+application_module                     creative-production
+application_mode                       active
+active_application_module              creative-production
+creative_domain                        creative
+runtime_entry                          ../modules/creative-production/runtime.mjs?v=358
+runtime_build                          358
+activation_build                       357
+dependency_gate_fix_build              358
+runtime_state                          active
+services_ready                         true
+required_service_count                 2
+required_services                      ["creative-process-read","inventory-read"]
+mutation_authority_count               2
+mutation_authorities                   ["inventory-post","inventory-reverse"]
+mutation_authorities_activation_gate   false
+page_proven                            true
+creates_network_transport              false
+creative_mutation_ownership            false
+contracts_ok                           true
+services_ok                            true
+```
+
+This is the exact expected structural proof. The page activates successfully, mutation authorities remain separate from passive activation services, and no mutation ownership moved.
+
+## Remaining local regression
 
 ```bash
 git -c gc.auto=0 pull --ff-only origin dev
@@ -80,30 +109,4 @@ BUILD 358 CREATIVE DEPENDENCY GATE FIX: PASS
 No Cloudflare resource was contacted.
 ```
 
-## Browser proof
-
-On `/admin/creative-process/` after Development deploy, verify:
-
-```text
-application_module                    creative-production
-application_mode                      active
-active_application_module             creative-production
-creative_domain                       creative
-runtime_entry                         ../modules/creative-production/runtime.mjs?v=358
-runtime_build                         358
-activation_build                      357
-dependency_gate_fix_build             358
-runtime_state                         active
-services_ready                        true
-required_service_count                2
-mutation_authority_count              2
-mutation_authorities_activation_gate  false
-page_proven                           true
-creative_contract_build               352
-creates_network_transport             false
-creative_mutation_ownership           false
-contracts_ok                          true
-services_ok                           true
-```
-
-No POST or Inventory mutation is required for this proof.
+No POST or Inventory mutation is required for validation.
