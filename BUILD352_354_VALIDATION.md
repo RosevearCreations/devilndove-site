@@ -1,6 +1,6 @@
 # Builds 352–354 Validation — Creative Process Runtime
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — LOCAL REGRESSION PASSED / BROWSER VALIDATION REQUIRED
 
 ```text
 Build 352  Creative Process GET-only owned read contract
@@ -10,30 +10,16 @@ Build 354  /admin/creative-process/ top-level activation
 
 Creative Process mutation ownership remains unchanged. Inventory posting/reversal remain Inventory-owned.
 
-## Local checkpoint
+## Local regression — PASSED 2026-08-24
 
-The combined checkpoint also closes the two still-outstanding historical local gates:
-
-```bash
-git pull --ff-only origin dev
-python scripts/build343_345_accounting_read_batch_test.py
-python scripts/build349_351_creative_production_runtime_test.py
-python scripts/build352_354_creative_process_runtime_test.py
-git status --short
-```
-
-Expected:
+User-run Development checkpoint:
 
 ```text
-BUILDS 343-345 ACCOUNTING YEAR-END/EXPORT READ BATCH: PASS
-No Cloudflare resource was contacted.
-BUILDS 349-351 CREATIVE PRODUCTION PACKAGING RUNTIME: PASS
-No Cloudflare resource was contacted.
 BUILDS 352-354 CREATIVE PROCESS RUNTIME: PASS
 No Cloudflare resource was contacted.
 ```
 
-and no output from `git status --short`.
+This local pass proves the static/runtime boundary introduced by Builds 352–354 is intact. Browser activation proof remains required before the batch is fully validated.
 
 ## Firefox activation gate
 
