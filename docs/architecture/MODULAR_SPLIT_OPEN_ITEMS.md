@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 331–333 on 2026-08-24.
+Updated through staged Builds 334–336 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -32,8 +32,8 @@ Application modules are not permanent Git branches.
 Core architecture            302
 Core runtime implementation  305
 Commerce runtime             315
-Contract catalog             333
-Passive service adapters     333
+Contract catalog             336
+Passive service adapters     336
 Business runtime             inactive
 ```
 
@@ -67,9 +67,12 @@ accounting-gifi-notes-read                    Build 327 VALIDATED
 accounting-gifi-summary-read                  Build 328 VALIDATED
 accounting-period-locks-read                  Build 329 VALIDATED
 accounting-attachments-read                   Build 330 VALIDATED
-accounting-vendors-read                       Build 331 STAGED
-accounting-recurring-expense-rules-read       Build 332 STAGED
-accounting-statement-provider-profiles-read   Build 333 STAGED
+accounting-vendors-read                       Build 331 BROWSER PROVEN; LOCAL REQUIRED
+accounting-recurring-expense-rules-read       Build 332 BROWSER PROVEN; LOCAL REQUIRED
+accounting-statement-provider-profiles-read   Build 333 BROWSER PROVEN; LOCAL REQUIRED
+accounting-statement-imports-read             Build 334 STAGED
+accounting-reconciliation-exceptions-read     Build 335 STAGED
+accounting-vendor-statements-read             Build 336 STAGED
 ```
 
 Build 324 exposed separate Development schema evidence:
@@ -92,11 +95,14 @@ Build 327 removed GIFI-notes GET table/index creation while preserving POST save
 Build 328 removed GIFI-summary GET `ensureGlSchema()` CREATE/ALTER behavior.
 Build 329 removed GET-time closure/attachment/import ensures from period-lock reads.
 Build 330 removed GET-time attachment schema ensure/repair while preserving explicit uploads.
-Build 331 removes vendor-table ensure from vendor GET while preserving vendor POST writes.
-Build 332 removes vendor/rule/expense ensures from recurring-rule GET while preserving explicit save/generate writes.
-Build 333 removes provider-profile GET seeding. Six built-in provider defaults are now returned in memory; explicit POST remains the materialization path.
+Build 331 removed vendor-table ensure from vendor GET while preserving vendor POST writes.
+Build 332 removed vendor/rule/expense ensures from recurring-rule GET while preserving explicit save/generate writes.
+Build 333 removed provider-profile GET seeding; six built-in defaults are returned in memory and POST remains the materialization path.
+Build 334 removes GET-time statement-import schema creation and provider-profile seeding while preserving CSV import POST compatibility.
+Build 335 removes GET-time reconciliation-exception schema creation while preserving explicit status/update POST compatibility.
+Build 336 prevents vendor-statement GET from reaching the mutating legacy attachment list helper by reusing the Build 330 attachment read authority.
 
-The Accounting page still has automatic legacy reads requiring bounded source audits, including reconciliation, statement imports, year-end close, sales-tax filing, fixed assets, vendor statements, close workflow, evidence checks and DB sanity.
+The Accounting page still has automatic legacy reads requiring bounded source audits, including the larger reconciliation endpoint, year-end close, sales-tax filing, fixed assets, close workflow, evidence checks and DB sanity.
 
 ## Validation-harness rule
 
@@ -104,14 +110,14 @@ Historical regression scripts verify durable feature boundaries introduced by th
 
 ## Mutation-authority extraction still open
 
-Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, vendor/recurring-rule/profile writes, attachment uploads and close/lock actions.
+Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, vendor/recurring-rule/profile writes, CSV statement imports, reconciliation-exception updates, attachment uploads and close/lock actions.
 
 A loader or read-contract migration never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Validate Builds 331–333 with one local and one browser gate.
-2. Source-audit another 2–3 automatic Accounting read blockers, prioritizing reconciliation/statement-import dependencies that currently hide ensure/write helpers.
+1. Complete the Builds 331–333 local regression and validate Builds 334–336 with one local/browser pair.
+2. Source-audit the larger reconciliation engine and another 1–2 closely related automatic Accounting reads.
 3. Keep GET/read paths schema-aware and non-mutating.
 4. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page with mutation ownership still false.
 5. Separately continue Commerce route coverage and Creative & Production runtime work.

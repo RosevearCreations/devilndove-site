@@ -1,7 +1,7 @@
-// Devil n Dove Build 333 browser adapters for implemented read contracts.
+// Devil n Dove Build 336 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 333;
+export const BUILD = 336;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -25,6 +25,9 @@ const ROUTES = Object.freeze({
   'accounting-vendors-read': '/api/admin/contracts/accounting-vendors-read',
   'accounting-recurring-expense-rules-read': '/api/admin/contracts/accounting-recurring-expense-rules-read',
   'accounting-statement-provider-profiles-read': '/api/admin/contracts/accounting-statement-provider-profiles-read',
+  'accounting-statement-imports-read': '/api/admin/contracts/accounting-statement-imports-read',
+  'accounting-reconciliation-exceptions-read': '/api/admin/contracts/accounting-reconciliation-exceptions-read',
+  'accounting-vendor-statements-read': '/api/admin/contracts/accounting-vendor-statements-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -155,6 +158,21 @@ export function createDefaultModuleServices() {
     'accounting-statement-provider-profiles-read': service('accounting-statement-provider-profiles-read', 'accounting', async () => {
       const data = await fetchContract(ROUTES['accounting-statement-provider-profiles-read']);
       return Object.freeze({ ...accountingReadResult(data, 'profiles'), defaultProfileCount: Number(data.default_profile_count || 0), defaultsMaterialized: data.defaults_materialized === true, source: data.source || null });
+    }),
+    'accounting-statement-imports-read': service('accounting-statement-imports-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-statement-imports-read'], {
+        accounting_statement_import_id: Number(options.importId || 0) || '', provider_scope: text(options.providerScope), period_month: text(options.periodMonth),
+        status: text(options.status), limit: boundedInt(options.limit, 50, 1, 1000), exception_limit: boundedInt(options.exceptionLimit, 100, 1, 500),
+      });
+      return Object.freeze({ build: Number(data.build || 0), contract: data.contract, schemaReady: Boolean(data.schema_ready), missingTables: Object.freeze(data.missing_tables || []), missingColumns: Object.freeze(data.missing_columns || []), requestTimeSchemaMutation: data.request_time_schema_mutation === true, rows: Object.freeze(data.rows || []), imports: Object.freeze(data.imports || []), exceptions: Object.freeze(data.exceptions || []), providerProfiles: Object.freeze(data.provider_profiles || []), summary: Object.freeze(data.summary || {}), importId: Number(data.accounting_statement_import_id || 0) || null });
+    }),
+    'accounting-reconciliation-exceptions-read': service('accounting-reconciliation-exceptions-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-reconciliation-exceptions-read'], { reconciliation_type: text(options.reconciliationType), period_month: text(options.periodMonth), status: text(options.status), limit: boundedInt(options.limit, 200, 1, 500) });
+      return accountingReadResult(data, 'exceptions');
+    }),
+    'accounting-vendor-statements-read': service('accounting-vendor-statements-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-vendor-statements-read'], { period_month: text(options.periodMonth) });
+      return accountingReadResult(data, 'rows');
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
