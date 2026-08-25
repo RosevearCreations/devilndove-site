@@ -5,8 +5,8 @@ Why this exists:
 - Wrangler remote --file imports can fail with {"D1_RESET_DO": true} while polling
   the D1 import endpoint.
 - This tool avoids the remote file-import path entirely. It reads the authoritative
-  database_gift_card_runtime_parity.sql file, splits it into bounded statement
-  batches, and sends those batches through `wrangler d1 execute --command`.
+  database_gift_card_runtime_parity.sql file, splits it into individual SQL
+  statements, and sends each statement through `wrangler d1 execute --command`.
 
 Safety:
 - Refuses to run unless the current Git branch is `dev`.
@@ -19,6 +19,8 @@ Safety:
   are printed.
 - Removes SQL line comments before passing statements to Wrangler `--command` so
   a leading `-- ...` migration comment cannot be misparsed as a CLI option.
+- Executes one SQL statement per remote command. This avoids multi-statement
+  payload ambiguity and identifies the exact statement if D1 rejects anything.
 """
 
 from __future__ import annotations
@@ -34,7 +36,7 @@ MIGRATION = ROOT / "database_gift_card_runtime_parity.sql"
 CONFIG = ROOT / "wrangler.toml"
 DATABASE = "devilndove-dev"
 PROJECT = "devilndove-site-dev"
-MAX_BATCH_CHARS = 4200
+MAX_COMMAND_CHARS = 6000
 
 EXPECTED_TABLES = (
     "gift_card_admin_events",
@@ -152,31 +154,20 @@ def split_sql(text: str) -> list[str]:
     return statements
 
 
-def make_batches(statements: list[str]) -> list[str]:
-    batches: list[str] = []
-    current: list[str] = []
-    current_size = 0
-
-    for statement in statements:
+def validate_statements(statements: list[str]) -> None:
+    for index, statement in enumerate(statements, start=1):
         if statement.lstrip().startswith("--"):
-            fail("A SQL batch still begins with a line comment after sanitization.")
-        size = len(statement) + 1
-        if size > MAX_BATCH_CHARS:
+            fail(f"SQL statement {index} still begins with a line comment after sanitization.")
+        if len(statement) > MAX_COMMAND_CHARS:
             fail(
-                f"One SQL statement is {size} characters, above the direct-query "
-                f"batch limit of {MAX_BATCH_CHARS}."
+                f"SQL statement {index} is {len(statement)} characters, above the direct-command "
+                f"limit of {MAX_COMMAND_CHARS}."
             )
-        if current and current_size + size > MAX_BATCH_CHARS:
-            batches.append("\n".join(current))
-            current = []
-            current_size = 0
-        current.append(statement)
-        current_size += size
 
-    if current:
-        batches.append("\n".join(current))
 
-    return batches
+def sql_preview(sql: str, limit: int = 140) -> str:
+    compact = " ".join(sql.split())
+    return compact if len(compact) <= limit else compact[: limit - 3] + "..."
 
 
 def wrangler_command(npx: str, sql: str) -> list[str]:
@@ -195,8 +186,10 @@ def wrangler_command(npx: str, sql: str) -> list[str]:
     ]
 
 
-def execute_direct(npx: str, sql: str, label: str) -> None:
+def execute_direct(npx: str, sql: str, label: str, show_sql: bool = False) -> None:
     print(f"\n=== {label} ===")
+    if show_sql:
+        print(f"SQL: {sql_preview(sql)}")
     result = run_capture(wrangler_command(npx, sql))
     print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
     if result.returncode != 0:
@@ -232,12 +225,12 @@ def main() -> int:
         fail("Build 384 migration unexpectedly attempts to own notification_outbox.")
 
     statements = split_sql(migration_text)
-    batches = make_batches(statements)
+    validate_statements(statements)
     print(
         f"Target: {PROJECT} / {DATABASE}\n"
         f"Migration: {MIGRATION.name}\n"
         f"Statements: {len(statements)}\n"
-        f"Direct-query batches: {len(batches)}"
+        f"Direct-query statements: {len(statements)}"
     )
 
     npx = resolve_npx()
@@ -253,8 +246,13 @@ def main() -> int:
     )
     execute_direct(npx, preflight_sql, "READ-ONLY PREFLIGHT")
 
-    for index, batch in enumerate(batches, start=1):
-        execute_direct(npx, batch, f"DIRECT SQL BATCH {index}/{len(batches)}")
+    for index, statement in enumerate(statements, start=1):
+        execute_direct(
+            npx,
+            statement,
+            f"DIRECT SQL STATEMENT {index}/{len(statements)}",
+            show_sql=True,
+        )
 
     verify_sql = (
         "SELECT name FROM sqlite_schema "
