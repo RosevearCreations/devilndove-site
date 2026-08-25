@@ -51,6 +51,18 @@ def main() -> int:
     if 'database_name = "devilndove-dev"' not in config:
         return fail("wrangler.toml D1 database is not devilndove-dev")
 
+    runtime = read("public/js/modules/commerce-operations/runtime.mjs")
+    if require(runtime, [
+        "const BUILD = 397;",
+        "const CUSTOMER_DOCUMENTS_REQUIRED_SERVICES = Object.freeze(['operations-customer-documents-read']);",
+        "const GIFT_CARDS_REQUIRED_SERVICES = Object.freeze(['operations-gift-cards-read']);",
+        "customerDocumentsMutationOwnership: false",
+        "giftCardsMutationOwnership: false",
+        "ownsOperationsMutations: false",
+        "createsNetworkTransport: false",
+    ], "Commerce Operations runtime"):
+        return 1
+
     customer_page = read("admin/customer-documents/index.html")
     customer_read = read("functions/api/admin/contracts/operations-customer-documents-read.js")
     customer_service = read("public/js/modules/commerce-operations/operations-customer-documents-read-service.mjs")
@@ -62,7 +74,8 @@ def main() -> int:
     ], "Customer Documents page"):
         return 1
     if require(customer_read, [
-        "export const BUILD = 397;",
+        "Build 397 Operations-owned Customer Documents GET-only read contract",
+        "export { BUILD, CONTRACT_ID, OWNER };",
         "export async function onRequestGet",
         "request_time_schema_mutation: false",
     ], "Customer Documents read contract"):
