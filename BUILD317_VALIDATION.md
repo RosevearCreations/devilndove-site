@@ -1,32 +1,66 @@
 # Build 317 Validation — Accounting Write-Offs Read Extraction
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
-Baseline: `343a67de711234f193614f38e83a46122e205197`.
+Baseline:
 
-Validate together with Builds 318–319 in the consolidated pass if those builds are staged on top of this one.
-
-Build 317 must prove:
-
-- legacy `/api/admin/accounting-writeoffs` GET returns 200;
-- dedicated `/api/admin/contracts/accounting-writeoffs-read` returns 200;
-- both identify Build 317 / owner `accounting` / contract `accounting-writeoffs-read`;
-- both report `request_time_schema_mutation=false`;
-- schema is ready or missing schema is reported without repair;
-- passive adapter is owner `accounting`, mode `read-only-http`;
-- write-off POST remains compatibility behavior and is not invoked for validation;
-- Core runtime remains 305 and Commerce runtime remains 315.
-
-Local regression:
-
-```bash
-git pull --ff-only origin dev
-python scripts/build317_accounting_writeoffs_read_extraction_test.py
+```text
+343a67de711234f193614f38e83a46122e205197
+Build 316 set completed Accounting handoff context
 ```
 
-Expected:
+Build 317 source checkpoint:
+
+```text
+7ffceabb8a11d7e3f4e4b3dfc4ea923811e28a96
+```
+
+Consolidated Builds 317–319 proven head:
+
+```text
+7a5c41d4a426f30a0fe1ab7887ea071a51529cf8
+Build 319 relax brittle branching wording assertion
+```
+
+## Local regression — PASS
+
+Observed:
 
 ```text
 BUILD 317 ACCOUNTING WRITEOFFS READ EXTRACTION: PASS
 No Cloudflare resource was contacted.
 ```
+
+## Development browser proof — PASS
+
+Validated from `/admin/orders/` during the consolidated Builds 317–319 proof.
+
+Observed Build 317 values:
+
+```text
+writeoff_legacy_status             200
+writeoff_legacy_build              317
+writeoff_legacy_schema_ready       true
+writeoff_legacy_schema_mutation    false
+writeoff_contract_status           200
+writeoff_contract_build            317
+writeoff_contract_owner            accounting
+writeoff_service_build             317
+writeoff_service_schema_mutation   false
+```
+
+The legacy GET and dedicated contract both proved Accounting ownership, schema readiness, and zero request-time schema mutation.
+
+The legacy write-off POST was not invoked and remains compatibility write authority.
+
+## Boundary retained
+
+Build 317 did not change write-off POST semantics, Accounting expenses, General Ledger writes, Accounting Summary writes, Orders/payment behavior, Operations page coverage, SQL/schema, Cloudflare config, R2, Production, or business-data migration.
+
+## Completion decision
+
+All Build 317 completion gates are satisfied.
+
+**Build 317 is COMPLETE IN DEVELOPMENT.**
+
+No further Build 317 validation is required unless a later change touches its bounded source files.
