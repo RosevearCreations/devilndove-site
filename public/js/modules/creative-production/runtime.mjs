@@ -2,6 +2,8 @@
 // Build 354 extends explicit coverage from the proven Packaging Studio to Creative Process.
 // This top-level runtime performs no reads/writes itself and does not move domain mutation authority.
 
+import { ensureCreativeProcessReadService } from './creative-process-read-service.mjs?v=353';
+
 const BUILD = 353;
 const ACTIVATION_BUILD = 354;
 const MODULE_ID = 'creative-production';
@@ -9,7 +11,7 @@ const SUPPORTED_DOMAINS = Object.freeze(['packaging', 'creative']);
 const PACKAGING_RUNTIME_PAGES = Object.freeze(['/admin/packaging-studio/']);
 const CREATIVE_PROCESS_RUNTIME_PAGES = Object.freeze(['/admin/creative-process/']);
 const PACKAGING_REQUIRED_SERVICES = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
-const CREATIVE_REQUIRED_SERVICES = Object.freeze(['inventory-read', 'inventory-post', 'inventory-reverse']);
+const CREATIVE_REQUIRED_SERVICES = Object.freeze(['creative-process-read', 'inventory-read', 'inventory-post', 'inventory-reverse']);
 const CREATIVE_PROCESS_READ_CONTRACT = '/api/admin/contracts/creative-process-read';
 const CREATIVE_PROCESS_READ_CONTRACT_BUILD = 352;
 
@@ -46,7 +48,8 @@ function requiredServicesForDomain(domainId) {
     ? CREATIVE_REQUIRED_SERVICES
     : PACKAGING_REQUIRED_SERVICES;
 }
-function verifyServices(registry, domainId) {
+function ensureDomainServices(registry, domainId) {
+  if (normalizeDomain(domainId) === 'creative') ensureCreativeProcessReadService(registry);
   const required = requiredServicesForDomain(domainId);
   const missing = required.filter((serviceId) => !registry?.service?.(serviceId));
   if (missing.length) {
@@ -114,7 +117,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition, pa
   if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
     throw new Error(`Creative & Production Build ${BUILD} has no proven runtime coverage for: ${normalizePathname(pathname)}`);
   }
-  verifyServices(registry, domainDefinition.id);
+  ensureDomainServices(registry, domainDefinition.id);
   state = 'loaded';
   installFacade();
   emit('dd:creative-production-loaded', {
@@ -135,7 +138,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
   if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
     throw new Error(`Creative & Production Build ${BUILD} has no proven runtime coverage for: ${normalizePathname(pathname)}`);
   }
-  verifyServices(registry, domainDefinition.id);
+  ensureDomainServices(registry, domainDefinition.id);
   activationCount += 1;
   currentDomain = normalizeDomain(domainDefinition.id);
   lastPathname = normalizePathname(pathname);
