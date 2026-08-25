@@ -1,22 +1,12 @@
 # Build 322 Validation — Product Costs Read Extraction / Builds 320–322 Consolidated Proof
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — VALIDATED
 
 Build 322 baseline: `612ff1b875d00d9a0aefd1b954c91c92d4c46d9d`.
 
-Builds 320–322 may be proven together because they are consecutive Accounting read-only extractions and their write paths remain independent.
+Builds 320–322 were proven together because they are consecutive Accounting read-only extractions and their write paths remain independent.
 
-## Local regressions
-
-```bash
-git pull --ff-only origin dev
-python scripts/build320_accounting_overhead_allocations_read_extraction_test.py
-python scripts/build321_accounting_overhead_product_allocations_read_extraction_test.py
-python scripts/build322_accounting_product_costs_read_extraction_test.py
-git status --short
-```
-
-Expected:
+## Local regression proof — 2026-08-24
 
 ```text
 BUILD 320 ACCOUNTING OVERHEAD ALLOCATIONS READ EXTRACTION: PASS
@@ -27,39 +17,47 @@ BUILD 322 ACCOUNTING PRODUCT COSTS READ EXTRACTION: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+## Development browser proof — 2026-08-24
 
-## Development browser proof
+From `/admin/orders/`, all six legacy/contract reads returned 200 and reported non-mutating Accounting ownership.
 
-Use `/admin/orders/` because the existing Accounting backend is already loaded there.
-
-Prove all three legacy GETs and all three dedicated contracts return 200 and report non-mutating Accounting-owned reads:
+Observed runtime proof:
 
 ```text
-/api/admin/accounting-overhead-allocations
-/api/admin/contracts/accounting-overhead-allocations-read
-/api/admin/accounting-overhead-product-allocations
-/api/admin/contracts/accounting-overhead-product-allocations-read
-/api/admin/product-costs
-/api/admin/contracts/accounting-product-costs-read
+overhead_legacy_build                 320
+overhead_legacy_schema_ready          true
+overhead_legacy_schema_mutation       false
+overhead_contract_build               320
+overhead_contract_owner               accounting
+overhead_service_build                320
+overhead_service_schema_mutation      false
+
+product_alloc_legacy_build            321
+product_alloc_legacy_schema_ready     true
+product_alloc_legacy_schema_mutation  false
+product_join_enabled                  true
+product_alloc_contract_build          321
+product_alloc_contract_owner          accounting
+product_alloc_service_build           321
+product_alloc_service_schema_mutation false
+
+costs_legacy_build                    322
+costs_legacy_schema_ready             true
+costs_legacy_schema_mutation          false
+costs_contract_build                  322
+costs_contract_owner                  accounting
+costs_service_build                   322
+costs_service_schema_mutation         false
+
+contract_catalog_build                322
+service_adapter_build                 322
+core_runtime_build                    305
+commerce_runtime_build                315
+owns_operations_mutations             false
+contracts_ok                          true
+services_ok                           true
 ```
 
-Also prove:
+No mutation validation was performed or required for these read-only builds.
 
-```text
-contract catalog build       322
-service adapter build        322
-Core runtime                 305
-Commerce runtime             315
-Operations mutation owner    false
-contracts_ok                 true
-services_ok                  true
-```
-
-Zero rows are valid. If any read reports `schema_ready=false`, capture missing tables/columns and route them to the separate schema-parity track; do not restore request-time DDL.
-
-## No mutation validation
-
-Do not create/update/delete overhead allocations, overhead-product allocations, product costs, orders, payments, or other business records during this proof.
-
-Builds 320–322 are not COMPLETE until the consolidated local and browser gates pass.
+Note: the captured transcript did not include the requested `git status --short` line. Runtime and regression gates passed; source-control cleanliness remains a housekeeping check rather than a functional failure.

@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Build 322.
+Updated through staged Build 323.
 
 ## Architectural invariant
 
@@ -98,7 +98,9 @@ Still open:
 
 ### Business & Administration
 
-Business & Administration is not yet top-level runtime-active, but Accounting extraction is now broad enough for a bounded runtime audit.
+Business & Administration is not yet top-level runtime-active.
+
+Build 323 completed the first bounded `/admin/accounting/` page dependency audit and added the verified Core module bridge to that page. The page must remain `business-administration` domain-bridge/shadow until its automatic legacy read blockers are retired.
 
 Owned Accounting reads now include:
 
@@ -108,10 +110,12 @@ accounting-expenses-read                      Build 316 COMPLETE
 accounting-writeoffs-read                     Build 317 COMPLETE
 accounting-general-ledger-read                Build 318 COMPLETE
 accounting-summary-read                       Build 319 COMPLETE
-accounting-overhead-allocations-read          Build 320 STAGED
-accounting-overhead-product-allocations-read  Build 321 STAGED
-accounting-product-costs-read                 Build 322 STAGED
+accounting-overhead-allocations-read          Build 320 VALIDATED
+accounting-overhead-product-allocations-read  Build 321 VALIDATED
+accounting-product-costs-read                 Build 322 VALIDATED
 ```
+
+Build 323 source audit confirmed that Accounting page load still invokes legacy reads including profit/loss, item costing, journal, GIFI, reconciliation, attachments/imports, close workflow and evidence checks. `accounting-journal` GET is a confirmed blocker because it calls schema-creation/repair logic before reading.
 
 Marketing, Platform and Administration still need bounded service/runtime work before broader top-level activation.
 
@@ -121,29 +125,29 @@ Rule:
 
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Completed/proven before this pass:
+Validated/proven:
 
 ```text
 /api/admin/accounting-expenses
 /api/admin/accounting-writeoffs
 /api/admin/general-ledger-accounts
 /api/admin/accounting-summary
+/api/admin/accounting-overhead-allocations
+/api/admin/accounting-overhead-product-allocations
+/api/admin/product-costs
 ```
 
-Staged in Builds 320–322:
+Each corresponding migrated GET is schema-aware and non-mutating. Existing POST/write behavior remains separate.
+
+Confirmed remaining read-time DDL blocker:
 
 ```text
-/api/admin/accounting-overhead-allocations
-  -> accounting-overhead-allocations-read Build 320
-
-/api/admin/accounting-overhead-product-allocations
-  -> accounting-overhead-product-allocations-read Build 321
-
-/api/admin/product-costs
-  -> accounting-product-costs-read Build 322
+/api/admin/accounting-journal
+  GET -> fetchJournal() -> ensureJournalSchema()
+  creates/repairs journal tables, columns and indexes at request time
 ```
 
-Each corresponding GET is schema-aware and non-mutating. Existing POST/write behavior remains separate.
+See `docs/architecture/BUILD323_ACCOUNTING_PAGE_RUNTIME_AUDIT.md` for the full page dependency inventory.
 
 ## Mutation-authority extraction still open
 
@@ -161,16 +165,14 @@ Compatibility writes still requiring dedicated authority reviews include:
 
 A loader or read-contract migration never implies mutation ownership.
 
-## Next bounded sequence after Builds 320–322 validate
+## Next bounded sequence after Build 323
 
-1. Audit `/admin/accounting/` page, loader, scripts and API dependencies.
-2. If its current read dependencies are covered by Accounting-owned contracts, activate the first read-only `business-administration` runtime page.
-3. Keep mutation ownership false until dedicated Accounting write contracts are extracted.
-4. Separately continue remaining Commerce & Operations route coverage.
-5. Begin a bounded Creative & Production top-level runtime activation using already-owned Packaging/Creative/Inventory boundaries.
-6. Audit remaining Accounting reports/exports for hidden read-time DDL only where that blocks Business & Administration activation.
-
-Do not continue extracting every Accounting GET merely for build count if runtime activation is now safe.
+1. Build 324 — extract the automatic Accounting profit/loss read into an Accounting-owned non-mutating contract/service.
+2. Build 325 — extract the automatic Accounting item-costing read into an Accounting-owned non-mutating contract/service.
+3. Build 326 — remove request-time schema mutation from Accounting journal GET and expose a dedicated Accounting-owned journal read.
+4. Continue only the remaining automatic `/admin/accounting/` read blockers needed for safe runtime activation; do not extract unrelated GETs for build count.
+5. When all automatic page reads are owned/non-mutating, activate `/admin/accounting/` as the first read-only `business-administration` runtime page with mutation ownership still false.
+6. Separately continue remaining Commerce & Operations route coverage and begin a bounded Creative & Production top-level runtime activation.
 
 ## Separate fresh-install schema/data parity track
 

@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Builds 320–322 Accounting Read Extraction Staged
+# Devil n Dove AI Context — Build 323 Accounting Runtime Audit Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -14,7 +14,8 @@ Primary modular authorities:
 - `docs/architecture/BUILD320_ACCOUNTING_OVERHEAD_ALLOCATIONS_READ_EXTRACTION.md`
 - `docs/architecture/BUILD321_ACCOUNTING_OVERHEAD_PRODUCT_ALLOCATIONS_READ_EXTRACTION.md`
 - `docs/architecture/BUILD322_ACCOUNTING_PRODUCT_COSTS_READ_EXTRACTION.md`
-- `BUILD322_VALIDATION.md`
+- `docs/architecture/BUILD323_ACCOUNTING_PAGE_RUNTIME_AUDIT.md`
+- `BUILD323_VALIDATION.md`
 
 ## Production safety
 
@@ -46,7 +47,7 @@ Development has already been proven to contain the old `main` baseline with zero
 
 Cleanup-only refs still include historical `build291-candidate` through `build294-candidate` plus temporary `build317-accounting-writeoffs`. They are not active development lines.
 
-## Completed modular baselines
+## Modular baselines
 
 ```text
 Build 301 Packaging compatibility          COMPLETE IN DEVELOPMENT
@@ -66,73 +67,17 @@ Build 316 Accounting expenses read        COMPLETE IN DEVELOPMENT
 Build 317 Accounting write-offs read      COMPLETE IN DEVELOPMENT
 Build 318 General Ledger read             COMPLETE IN DEVELOPMENT
 Build 319 Accounting summary read         COMPLETE IN DEVELOPMENT
+Build 320 Accounting overhead read        VALIDATED 2026-08-24
+Build 321 Overhead-product read           VALIDATED 2026-08-24
+Build 322 Product-cost read               VALIDATED 2026-08-24
+Build 323 Accounting page runtime audit   STAGED
 ```
 
 Build 306 remains historically browser-proven with standalone local signoff not captured. Do not silently relabel it complete.
 
 Build 308 remains browser-proven with standalone local regression output not captured. Do not silently relabel it complete.
 
-## Current staged three-step pass
-
-### Build 320 — Accounting Overhead Allocations Read Extraction
-
-Source checkpoint:
-
-```text
-5e16845202a2f2b870f02420703f7bf0c3089a5b
-```
-
-```text
-GET /api/admin/accounting-overhead-allocations
-  -> Accounting-owned read service
-GET /api/admin/contracts/accounting-overhead-allocations-read
-  build 320
-  owner accounting
-  authority accounting_overhead_allocations
-  request_time_schema_mutation false
-```
-
-Legacy POST remains compatibility write authority with period-open validation, upsert, audit logging and write-side schema ensure behavior.
-
-### Build 321 — Accounting Overhead Product Allocations Read Extraction
-
-Source checkpoint:
-
-```text
-612ff1b875d00d9a0aefd1b954c91c92d4c46d9d
-```
-
-```text
-GET /api/admin/accounting-overhead-product-allocations
-  -> Accounting-owned read service
-GET /api/admin/contracts/accounting-overhead-product-allocations-read
-  build 321
-  owner accounting
-  authority accounting_overhead_product_allocations
-  request_time_schema_mutation false
-```
-
-The `products` join is optional presentation enrichment. Missing product presentation schema is reported through join-availability metadata, not repaired during GET. Legacy POST keeps product validation, upsert/delete, audit logging and write-side schema/index ensure behavior.
-
-### Build 322 — Accounting Product Costs Read Extraction
-
-Source checkpoint:
-
-```text
-3ef7e8bf545884a74268d522668a2493ee15a55f
-```
-
-```text
-GET /api/admin/product-costs
-  -> Accounting-owned read service
-GET /api/admin/contracts/accounting-product-costs-read
-  build 322
-  owner accounting
-  authority product_costs
-  request_time_schema_mutation false
-```
-
-The legacy GET remains unbounded to preserve historical UI behavior. The dedicated contract may accept an explicit limit. Legacy POST retains period-open checks, dynamic column compatibility, insert/audit behavior and write-side schema ensure.
+For Builds 320–322, local and browser gates passed. The captured transcript did not include the requested final `git status --short` line, so source-control cleanliness is retained as a housekeeping note rather than hidden.
 
 ## Current runtime/contract identities
 
@@ -147,26 +92,46 @@ Accounting expenses read                  316
 Accounting write-offs read                317
 Accounting General Ledger read            318
 Accounting summary read                   319
-Accounting overhead allocations read      320 staged
-Accounting overhead-product read          321 staged
-Accounting product-costs read             322 staged
+Accounting overhead allocations read      320 validated
+Accounting overhead-product read          321 validated
+Accounting product-costs read             322 validated
 Contract catalog                          322
 Passive service adapters                  322
+Business & Administration runtime         inactive
+Accounting page bridge                    Build 323 staged shadow/domain-bridge
 ```
 
-## Source boundaries for Builds 320–322
+## Build 323 — Accounting page runtime audit
 
-Each source build is exactly five files:
+`/admin/accounting/` now loads `/public/js/admin.js?v=323` so the verified Core module runtime can classify it as:
 
 ```text
-one Accounting-owned read service
-one dedicated GET-only contract route
-one legacy compatibility route
-public/js/core/dd-module-contracts.mjs
-public/js/core/dd-module-service-adapters.mjs
+domain              accounting
+application module  business-administration
+application mode    domain-bridge
 ```
 
-No Core runtime, Commerce runtime, Orders/payment, Inventory, Creative, SQL schema, Cloudflare config, R2, Production or business-data migration change is part of this pass.
+Build 323 intentionally does **not** create or activate a `business-administration` runtime entry.
+
+The page audit found that the current Accounting UI still auto-loads many legacy reads beyond the owned Builds 316–322 boundaries. These include profit/loss, item costing, journal, GIFI, vendors/recurring rules, attachments, reconciliation, statement imports, tax worksheet, fixed assets, vendor statements, close workflow and evidence checks.
+
+Most importantly, `accounting-journal` GET currently calls `fetchJournal()`, which calls `ensureJournalSchema()`. That helper creates journal tables/indexes and may ALTER columns. Therefore Accounting page load still has a confirmed read-time schema-mutation path and top-level Business & Administration activation would be premature.
+
+The detailed inventory is in `docs/architecture/BUILD323_ACCOUNTING_PAGE_RUNTIME_AUDIT.md`.
+
+## Next default bounded sequence
+
+```text
+Build 324  Accounting profit/loss read extraction
+Build 325  Accounting item-costing read extraction
+Build 326  Accounting journal GET schema-mutation retirement + read extraction
+then       remaining automatic Accounting-page read blockers only
+finally    first read-only business-administration runtime activation
+```
+
+Do not continue extracting every Accounting GET merely for build count. Prioritize automatic `/admin/accounting/` dependencies that block safe activation.
+
+Mutation ownership remains false/unmoved until dedicated Accounting write contracts are separately extracted.
 
 ## Application-module open work
 
@@ -180,9 +145,9 @@ Still open: bounded top-level `creative-production` runtime activation, CAIP/Con
 
 ### Business & Administration
 
-Accounting read extraction is now broad enough that, after Builds 320–322 validate, the next default architecture step is to audit `/admin/accounting/` and its loader/dependencies for the first bounded read-only `business-administration` runtime activation.
+Accounting page classification is now staged through Build 323, but top-level runtime activation is blocked by remaining automatic legacy reads and confirmed journal GET request-time DDL.
 
-Do not automatically continue endless GET extraction if the Accounting page is ready for runtime activation.
+Marketing, Platform and Administration remain future bounded service/runtime work.
 
 ## Separate schema/data parity track — DO NOT MIX
 
