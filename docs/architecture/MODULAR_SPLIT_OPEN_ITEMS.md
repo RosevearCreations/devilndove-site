@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through Builds 328–330 validation progress on 2026-08-24.
+Updated through staged Builds 331–333 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -32,8 +32,8 @@ Application modules are not permanent Git branches.
 Core architecture            302
 Core runtime implementation  305
 Commerce runtime             315
-Contract catalog             330
-Passive service adapters     330
+Contract catalog             333
+Passive service adapters     333
 Business runtime             inactive
 ```
 
@@ -61,12 +61,15 @@ accounting-overhead-allocations-read          Build 320 VALIDATED
 accounting-overhead-product-allocations-read  Build 321 VALIDATED
 accounting-product-costs-read                 Build 322 VALIDATED
 accounting-profit-loss-read                   Build 324 VALIDATED
-accounting-item-costing-read                  Build 325 BROWSER PROVEN; CORRECTED LOCAL REQUIRED
-accounting-journal-read                       Build 326 BROWSER PROVEN; CORRECTED LOCAL REQUIRED
-accounting-gifi-notes-read                    Build 327 BROWSER PROVEN; CORRECTED LOCAL REQUIRED
-accounting-gifi-summary-read                  Build 328 LOCAL PASSED; BROWSER REQUIRED
-accounting-period-locks-read                  Build 329 LOCAL PASSED; BROWSER REQUIRED
-accounting-attachments-read                   Build 330 LOCAL PASSED; BROWSER REQUIRED
+accounting-item-costing-read                  Build 325 VALIDATED
+accounting-journal-read                       Build 326 VALIDATED
+accounting-gifi-notes-read                    Build 327 VALIDATED
+accounting-gifi-summary-read                  Build 328 VALIDATED
+accounting-period-locks-read                  Build 329 VALIDATED
+accounting-attachments-read                   Build 330 VALIDATED
+accounting-vendors-read                       Build 331 STAGED
+accounting-recurring-expense-rules-read       Build 332 STAGED
+accounting-statement-provider-profiles-read   Build 333 STAGED
 ```
 
 Build 324 exposed separate Development schema evidence:
@@ -85,37 +88,33 @@ Rule:
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
 Build 326 removed journal GET DDL while keeping write-side journal schema compatibility for explicit POST actions.
-
 Build 327 removed GIFI-notes GET table/index creation while preserving POST save compatibility.
+Build 328 removed GIFI-summary GET `ensureGlSchema()` CREATE/ALTER behavior.
+Build 329 removed GET-time closure/attachment/import ensures from period-lock reads.
+Build 330 removed GET-time attachment schema ensure/repair while preserving explicit uploads.
+Build 331 removes vendor-table ensure from vendor GET while preserving vendor POST writes.
+Build 332 removes vendor/rule/expense ensures from recurring-rule GET while preserving explicit save/generate writes.
+Build 333 removes provider-profile GET seeding. Six built-in provider defaults are now returned in memory; explicit POST remains the materialization path.
 
-Build 328 removes GIFI-summary GET `ensureGlSchema()` CREATE/ALTER behavior.
+The Accounting page still has automatic legacy reads requiring bounded source audits, including reconciliation, statement imports, year-end close, sales-tax filing, fixed assets, vendor statements, close workflow, evidence checks and DB sanity.
 
-Build 329 removes GET-time closure/attachment/import ensures from period-lock reads; the read now needs only existing closure state.
+## Validation-harness rule
 
-Build 330 removes GET-time attachment schema ensure/repair while preserving explicit upload writes.
-
-The Accounting page still has automatic legacy reads that require bounded source audits, including vendors/recurring rules, reconciliation, statement imports/profiles, year-end close, sales-tax filing, fixed assets, vendor statements, close workflow, evidence checks and DB sanity.
-
-## Validation-harness rule learned from Build 328
-
-Historical regression scripts must verify the durable feature boundary introduced by their build, not require the continued presence of a later blocker or freeze unrelated shared files forever.
-
-The original Builds 325–327 regression required `await ensureGlSchema(db)` to remain in the GIFI-summary endpoint because that was the known *next* blocker at Build 327. Build 328 correctly removed it, making the older test falsely fail. The corrected regression now tests only the three owned read extractions and their non-mutating GET behavior.
+Historical regression scripts verify durable feature boundaries introduced by their build. They must not require the continued presence of a later blocker or freeze unrelated shared files forever.
 
 ## Mutation-authority extraction still open
 
-Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, attachment uploads and close/lock actions.
+Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, vendor/recurring-rule/profile writes, attachment uploads and close/lock actions.
 
 A loader or read-contract migration never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Rerun the corrected Builds 325–327 local regression and confirm clean `git status --short`.
-2. Complete the Builds 328–330 browser proof.
-3. Source-audit the next automatic Accounting reads and select another 2–3 closely related blockers.
-4. Keep GET/read paths schema-aware and non-mutating.
-5. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page with mutation ownership still false.
-6. Separately continue Commerce route coverage and Creative & Production runtime work.
+1. Validate Builds 331–333 with one local and one browser gate.
+2. Source-audit another 2–3 automatic Accounting read blockers, prioritizing reconciliation/statement-import dependencies that currently hide ensure/write helpers.
+3. Keep GET/read paths schema-aware and non-mutating.
+4. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page with mutation ownership still false.
+5. Separately continue Commerce route coverage and Creative & Production runtime work.
 
 ## Separate fresh-install schema/data parity track
 
