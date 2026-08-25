@@ -1,6 +1,6 @@
 # Builds 334–336 Validation — Accounting Statement/Reconciliation Support Read Batch
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — BROWSER PROVEN / LOCAL REGRESSION REQUIRED
 
 ```text
 Build 334  Statement imports GET schema/seeding retirement + read extraction
@@ -10,7 +10,63 @@ Build 336  Vendor statements GET attachment-helper mutation retirement + read ex
 
 Business & Administration remains `domain-bridge` / inactive. No Accounting mutation ownership moves.
 
-## One Git Bash block
+## Development browser proof — PASSED 2026-08-24
+
+Observed on `/admin/accounting/`:
+
+```text
+imports_legacy_status                                  200
+imports_legacy_build                                   334
+imports_legacy_owner                                   accounting
+imports_legacy_schema_ready                            true
+imports_legacy_schema_mutation                         false
+imports_contract_status                                200
+imports_contract_build                                 334
+imports_contract_owner                                 accounting
+imports_contract_schema_ready                          true
+imports_contract_schema_mutation                       false
+accounting-statement-imports-read_service_build        334
+accounting-statement-imports-read_service_schema_ready true
+accounting-statement-imports-read_service_schema_mutation false
+
+exceptions_legacy_status                               200
+exceptions_legacy_build                                335
+exceptions_legacy_owner                                accounting
+exceptions_legacy_schema_ready                         true
+exceptions_legacy_schema_mutation                      false
+exceptions_contract_status                             200
+exceptions_contract_build                              335
+exceptions_contract_owner                              accounting
+exceptions_contract_schema_ready                       true
+exceptions_contract_schema_mutation                    false
+accounting-reconciliation-exceptions-read_service_build 335
+accounting-reconciliation-exceptions-read_service_schema_ready true
+accounting-reconciliation-exceptions-read_service_schema_mutation false
+
+vendor_statements_legacy_status                        200
+vendor_statements_legacy_build                         336
+vendor_statements_legacy_owner                         accounting
+vendor_statements_legacy_schema_ready                   true
+vendor_statements_legacy_schema_mutation                false
+vendor_statements_contract_status                      200
+vendor_statements_contract_build                       336
+vendor_statements_contract_owner                       accounting
+vendor_statements_contract_schema_ready                true
+vendor_statements_contract_schema_mutation             false
+accounting-vendor-statements-read_service_build        336
+accounting-vendor-statements-read_service_schema_ready true
+accounting-vendor-statements-read_service_schema_mutation false
+
+application_module                                     business-administration
+application_mode                                       domain-bridge
+active_application_module                              null
+contracts_ok                                           true
+services_ok                                            true
+```
+
+All three browser boundaries passed with no Development schema deficit. Business & Administration remains inactive and no mutation ownership moved.
+
+## Combined local checkpoint still required
 
 ```bash
 git pull --ff-only origin dev
@@ -28,53 +84,4 @@ BUILDS 334-336 ACCOUNTING READ BATCH: PASS
 No Cloudflare resource was contacted.
 ```
 
-## One Firefox browser block
-
-Open `/admin/accounting/` and run:
-
-```js
-(async () => {
-  const month = new Date().toISOString().slice(0, 7);
-  const r = window.DDModuleRuntime;
-  const checks = [
-    ['imports_legacy', `/api/admin/accounting-statement-imports?period_month=${encodeURIComponent(month)}`],
-    ['imports_contract', `/api/admin/contracts/accounting-statement-imports-read?period_month=${encodeURIComponent(month)}`],
-    ['exceptions_legacy', `/api/admin/accounting-reconciliation-exceptions?period_month=${encodeURIComponent(month)}`],
-    ['exceptions_contract', `/api/admin/contracts/accounting-reconciliation-exceptions-read?period_month=${encodeURIComponent(month)}`],
-    ['vendor_statements_legacy', `/api/admin/accounting-vendor-statements?period_month=${encodeURIComponent(month)}`],
-    ['vendor_statements_contract', `/api/admin/contracts/accounting-vendor-statements-read?period_month=${encodeURIComponent(month)}`],
-  ];
-  const out = {};
-  for (const [name,url] of checks) {
-    const response = await window.DDAuth.apiFetch(url);
-    const data = await response.json().catch(() => null);
-    out[`${name}_status`] = response.status;
-    out[`${name}_build`] = data?.build ?? null;
-    out[`${name}_owner`] = data?.owner ?? null;
-    out[`${name}_schema_ready`] = data?.schema_ready ?? null;
-    out[`${name}_schema_mutation`] = data?.request_time_schema_mutation ?? null;
-    if (data?.schema_ready === false) {
-      out[`${name}_missing_tables`] = JSON.stringify(data?.missing_tables || []);
-      out[`${name}_missing_columns`] = JSON.stringify(data?.missing_columns || []);
-    }
-  }
-  for (const [id,options] of [
-    ['accounting-statement-imports-read',{periodMonth:month}],
-    ['accounting-reconciliation-exceptions-read',{periodMonth:month}],
-    ['accounting-vendor-statements-read',{periodMonth:month}],
-  ]) {
-    const service=r?.service?.(id); const result=service?await service.list(options):null;
-    out[`${id}_service_build`]=result?.build??null;
-    out[`${id}_service_schema_ready`]=result?.schemaReady??null;
-    out[`${id}_service_schema_mutation`]=result?.requestTimeSchemaMutation??null;
-  }
-  out.application_module=r?.getCurrentApplicationModule?.()?.id??null;
-  out.application_mode=document.documentElement.dataset.ddApplicationModuleMode??null;
-  out.active_application_module=r?.getActiveApplicationModuleId?.()??null;
-  out.contracts_ok=r?.contractValidation?.ok===true;
-  out.services_ok=r?.serviceRegistration?.ok===true;
-  console.table(out);
-})();
-```
-
-Expected builds are 334, 335 and 336; all owners `accounting`; all read/service mutation flags `false`; application remains `business-administration` / `domain-bridge` / inactive; contract and service registration remain true. Any `schema_ready=false` is schema-parity evidence rather than permission to restore GET-time DDL.
+`git status --short` should print nothing. Once the local output is captured, Builds 334–336 become fully VALIDATED. Browser proof used reads only; no CSV import, reconciliation-exception update, or attachment write was performed.
