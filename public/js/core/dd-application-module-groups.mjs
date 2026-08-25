@@ -1,28 +1,9 @@
 // Devil n Dove Build 302 Core + Three Application Modules architecture catalog.
-// Build 304 added the first passive umbrella runtime metadata for Catalog.
-// Build 305 extended that same Commerce & Operations runtime to Inventory.
-// Build 306 hardened Inventory write-side contracts; Build 307 added Inventory reversal authority;
-// Build 309 added Inventory post authority; Build 310 enabled Creative consumption of both;
-// Build 311 added the Inventory-owned cost read boundary; Build 312 added Accounting read;
-// Build 313 activated the first read-only Operations page; Build 314 added Customer Documents coverage;
-// Build 315 added Orders loader/runtime coverage without moving order/payment mutations.
-// Build 346 closes the Accounting startup-read audit; Build 347 adds the passive Business runtime;
-// Build 348 activates Business & Administration for /admin/accounting/ only, read-only.
-// Build 349 pins the proven Packaging compatibility baseline; Build 350 adds the passive Creative runtime;
-// Build 351 activates Creative & Production for /admin/packaging-studio/ only without moving Packaging mutations.
-// Build 352 formalizes the Creative Process read contract; Build 353 extends the Creative runtime;
-// Build 354 activates /admin/creative-process/ without moving Creative Process POST authority.
-// Build 355 removes Content Studio GET-time schema creation; Build 356 extends the Creative runtime to Content;
-// Build 357 activates /admin/content-studio/ without moving Content Studio mutation authority.
-// Build 358 corrects Creative Process activation dependencies without registering or moving Inventory writes.
-// Build 359 formalizes CAIP intelligence and private-media startup GETs; Build 360 extends the Creative runtime;
-// Build 361 activates /admin/creative-assets/ without moving CAIP/R2 mutation authority.
-// Build 362 removes Membership Tier Policy GET-time schema mutation; Build 363 extends the Commerce runtime;
-// Build 364 activates /admin/membership/ without moving Membership assignment or policy mutations.
-// Build 366 formalizes Today Tasks readiness-aware GET; Build 367 extends the Commerce runtime;
-// Build 368 activates /admin/today-tasks/ without moving Done/Ignore/Snooze mutations.
-// Build 370 formalizes Custom Requests startup-read readiness; Build 371 extends the Commerce runtime;
-// Build 372 activates /admin/custom-request/ without moving Custom Requests workflow/payment/order mutations.
+// Builds 304–315 establish Commerce Catalog/Inventory/Operations coverage.
+// Builds 346–348 establish Business & Administration Accounting coverage.
+// Builds 349–361 establish Creative & Production Packaging/Creative/Content/CAIP coverage.
+// Builds 362–372 add page-specific Operations Membership, Today Tasks, and Custom Requests reads.
+// Builds 383–386 restore Gift Card schema authority, add its owned read, and activate /admin/gift-cards/.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -35,8 +16,9 @@ export const ACCOUNTING_READ_CONTRACT_BUILD = 312;
 export const OPERATIONS_MEMBERSHIP_READ_CONTRACT_BUILD = 362;
 export const OPERATIONS_TODAY_TASKS_READ_CONTRACT_BUILD = 366;
 export const OPERATIONS_CUSTOM_REQUESTS_READ_CONTRACT_BUILD = 370;
-export const RUNTIME_OPERATIONS_BUILD = 371;
-export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 372;
+export const OPERATIONS_GIFT_CARDS_READ_CONTRACT_BUILD = 385;
+export const RUNTIME_OPERATIONS_BUILD = 386;
+export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 386;
 export const ACCOUNTING_STARTUP_READ_AUDIT_BUILD = 346;
 export const BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD = 347;
 export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
@@ -55,6 +37,7 @@ export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/membership/',
   '/admin/today-tasks/',
   '/admin/custom-request/',
+  '/admin/gift-cards/',
 ]);
 export const BUSINESS_ADMINISTRATION_RUNTIME_PAGES = Object.freeze([
   '/admin/accounting/',
@@ -101,7 +84,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=371',
+    entry: '../modules/commerce-operations/runtime.mjs?v=386',
     runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations']),
   }),
   Object.freeze({
@@ -148,9 +131,7 @@ export function applicationModuleRuntimeForDomain(domainId) {
   const moduleId = applicationModuleForDomain(domainId);
   const definition = moduleId ? getApplicationModule(moduleId) : null;
   if (!definition?.entry) return null;
-  return definition.runtimeDomains.includes(String(domainId || '').trim().toLowerCase())
-    ? definition
-    : null;
+  return definition.runtimeDomains.includes(String(domainId || '').trim().toLowerCase()) ? definition : null;
 }
 
 export function snapshotApplicationArchitecture() {
@@ -164,6 +145,7 @@ export function snapshotApplicationArchitecture() {
     operationsMembershipReadContractBuild: OPERATIONS_MEMBERSHIP_READ_CONTRACT_BUILD,
     operationsTodayTasksReadContractBuild: OPERATIONS_TODAY_TASKS_READ_CONTRACT_BUILD,
     operationsCustomRequestsReadContractBuild: OPERATIONS_CUSTOM_REQUESTS_READ_CONTRACT_BUILD,
+    operationsGiftCardsReadContractBuild: OPERATIONS_GIFT_CARDS_READ_CONTRACT_BUILD,
     runtimeOperationsBuild: RUNTIME_OPERATIONS_BUILD,
     operationsRuntimeCoverageBuild: OPERATIONS_RUNTIME_COVERAGE_BUILD,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
@@ -184,7 +166,7 @@ export function snapshotApplicationArchitecture() {
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'commerce-operations-membership-today-tasks-custom-requests-plus-business-accounting-plus-creative-four-domain-explicit-page-coverage',
+    currentRuntimeMigrationMode: 'commerce-operations-page-specific-reads-plus-business-accounting-plus-creative-four-domain-explicit-page-coverage',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
@@ -197,7 +179,7 @@ export function snapshotApplicationArchitecture() {
     thirdCreativeProductionRuntimeDomain: 'content',
     fourthCreativeProductionRuntimeDomain: 'caip',
     operationsRuntimeDomainActive: true,
-    operationsRuntimeActivationMode: 'read-only-explicit-six-page-coverage-with-membership-today-tasks-and-custom-requests-page-specific-service-gates',
+    operationsRuntimeActivationMode: 'read-only-explicit-seven-page-coverage-with-page-specific-service-gates',
     businessAdministrationRuntimeDomainActive: true,
     businessAdministrationRuntimeActivationMode: 'accounting-read-only-explicit-single-page-coverage',
     creativeProductionRuntimeDomainActive: true,
@@ -207,6 +189,7 @@ export function snapshotApplicationArchitecture() {
     membershipMutationOwnershipMovedByTopLevelRuntime: false,
     todayTasksMutationOwnershipMovedByTopLevelRuntime: false,
     customRequestsMutationOwnershipMovedByTopLevelRuntime: false,
+    giftCardsMutationOwnershipMovedByTopLevelRuntime: false,
     creativeProductionMutationOwnership: false,
     packagingMutationOwnershipMovedByTopLevelRuntime: false,
     creativeProcessMutationOwnershipMovedByTopLevelRuntime: false,
