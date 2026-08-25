@@ -5,8 +5,12 @@ This launcher skips the non-essential `wrangler whoami` preflight, because that
 command can hang on Windows even when authenticated D1 commands work normally.
 The first live D1 SELECT becomes the authentication check instead.
 
-It also starts each subprocess in its own process group and, on Windows, kills
-the complete child process tree if a timeout is reached. This avoids a timed-out
+It also normalizes Wrangler execution through a pinned, non-interactive npx call:
+`npx --yes wrangler@4.126.0 ...`. This prevents npm/npx from pausing to ask for
+permission to download Wrangler when it is absent from the local npm cache.
+
+Each subprocess runs in its own process group and, on Windows, the complete child
+process tree is terminated if a timeout is reached. This avoids a timed-out
 `npx.cmd` parent leaving its Node/Wrangler child alive with the output pipe open.
 
 This launcher does not change Build 418 SQL, target database UUIDs, or read-only
@@ -15,6 +19,7 @@ guards.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 import subprocess
 import sys
 import time
@@ -30,13 +35,35 @@ for stream in (sys.stdout, sys.stderr):
             pass
 
 
-QUERY_TIMEOUT_SECONDS = 90
+WRANGLER_VERSION = '4.126.0'
+QUERY_TIMEOUT_SECONDS = 120
 KILL_WAIT_SECONDS = 15
 
 
 def _is_wrangler_whoami(args: list[str]) -> bool:
     normalized = [str(value).lower() for value in args]
-    return 'wrangler' in normalized and 'whoami' in normalized
+    return any(value == 'wrangler' or value.startswith('wrangler@') for value in normalized) and 'whoami' in normalized
+
+
+def _normalize_npx_wrangler(args: list[str]) -> list[str]:
+    values = [str(value) for value in args]
+    if len(values) < 2:
+        return values
+
+    executable = Path(values[0]).name.lower()
+    if executable not in {'npx', 'npx.cmd', 'npx.exe'}:
+        return values
+
+    second = values[1].lower()
+    if second == '--yes':
+        return values
+    if second != 'wrangler':
+        return values
+
+    # npm/npx options must appear before the package name. The base Build 418
+    # command places Wrangler's own --yes later in the argument list, which does
+    # not answer npx's package-install prompt. Pin and approve the npx package here.
+    return [values[0], '--yes', f'wrangler@{WRANGLER_VERSION}', *values[2:]]
 
 
 def _terminate_process_tree(proc: subprocess.Popen[str]) -> None:
@@ -69,6 +96,8 @@ def resilient_run_capture(args: list[str]) -> subprocess.CompletedProcess[str]:
                 'Reason: `wrangler whoami` can block on Windows; the first read-only D1 SELECT is the live authentication check.\n'
             ),
         )
+
+    args = _normalize_npx_wrangler(args)
 
     creationflags = 0
     if os.name == 'nt' and hasattr(subprocess, 'CREATE_NEW_PROCESS_GROUP'):
@@ -105,7 +134,7 @@ def resilient_run_capture(args: list[str]) -> subprocess.CompletedProcess[str]:
         except subprocess.TimeoutExpired:
             remainder = ''
 
-        command_text = ' '.join(str(value) for value in args[:5])
+        command_text = ' '.join(str(value) for value in args[:6])
         return subprocess.CompletedProcess(
             args=args,
             returncode=124,
