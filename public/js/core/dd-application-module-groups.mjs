@@ -15,6 +15,8 @@
 // Build 355 removes Content Studio GET-time schema creation; Build 356 extends the Creative runtime to Content;
 // Build 357 activates /admin/content-studio/ without moving Content Studio mutation authority.
 // Build 358 corrects Creative Process activation dependencies without registering or moving Inventory writes.
+// Build 359 formalizes CAIP intelligence and private-media startup GETs; Build 360 extends the Creative runtime;
+// Build 361 activates /admin/creative-assets/ without moving CAIP/R2 mutation authority.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -32,9 +34,11 @@ export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
 export const PACKAGING_TOP_LEVEL_AUDIT_BUILD = 349;
 export const CREATIVE_PROCESS_READ_CONTRACT_BUILD = 352;
 export const CONTENT_STUDIO_READ_CONTRACT_BUILD = 355;
-export const CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 358;
-export const CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD = 357;
 export const CREATIVE_PROCESS_DEPENDENCY_GATE_FIX_BUILD = 358;
+export const CAIP_READ_CONTRACT_BUILD = 359;
+export const CAIP_MEDIA_INTAKE_READ_CONTRACT_BUILD = 359;
+export const CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 360;
+export const CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD = 361;
 export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
@@ -47,6 +51,7 @@ export const CREATIVE_PRODUCTION_RUNTIME_PAGES = Object.freeze([
   '/admin/packaging-studio/',
   '/admin/creative-process/',
   '/admin/content-studio/',
+  '/admin/creative-assets/',
 ]);
 
 export const DD_APPLICATION_CORE = Object.freeze({
@@ -94,8 +99,8 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Creative projects, CAIP, Packaging & Labeling, Media/Content Studio and reviewed production workflows.',
     domains: Object.freeze(['creative', 'caip', 'packaging', 'content']),
     extractionState: 'in-progress',
-    entry: '../modules/creative-production/runtime.mjs?v=358',
-    runtimeDomains: Object.freeze(['packaging', 'creative', 'content']),
+    entry: '../modules/creative-production/runtime.mjs?v=360',
+    runtimeDomains: Object.freeze(['packaging', 'creative', 'content', 'caip']),
   }),
   Object.freeze({
     id: 'business-administration',
@@ -154,15 +159,17 @@ export function snapshotApplicationArchitecture() {
     packagingTopLevelAuditBuild: PACKAGING_TOP_LEVEL_AUDIT_BUILD,
     creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
     contentStudioReadContractBuild: CONTENT_STUDIO_READ_CONTRACT_BUILD,
+    creativeProcessDependencyGateFixBuild: CREATIVE_PROCESS_DEPENDENCY_GATE_FIX_BUILD,
+    caipReadContractBuild: CAIP_READ_CONTRACT_BUILD,
+    caipMediaIntakeReadContractBuild: CAIP_MEDIA_INTAKE_READ_CONTRACT_BUILD,
     creativeProductionRuntimeImplementationBuild: CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD,
     creativeProductionRuntimeCoverageBuild: CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD,
-    creativeProcessDependencyGateFixBuild: CREATIVE_PROCESS_DEPENDENCY_GATE_FIX_BUILD,
     creativeProductionRuntimePages: CREATIVE_PRODUCTION_RUNTIME_PAGES,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'commerce-operations-plus-business-accounting-plus-creative-packaging-process-content-explicit-page-coverage',
+    currentRuntimeMigrationMode: 'commerce-operations-plus-business-accounting-plus-creative-packaging-process-content-caip-explicit-page-coverage',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
@@ -173,17 +180,19 @@ export function snapshotApplicationArchitecture() {
     firstCreativeProductionRuntimeDomain: 'packaging',
     secondCreativeProductionRuntimeDomain: 'creative',
     thirdCreativeProductionRuntimeDomain: 'content',
+    fourthCreativeProductionRuntimeDomain: 'caip',
     operationsRuntimeDomainActive: true,
     operationsRuntimeActivationMode: 'read-only-explicit-three-page-coverage',
     businessAdministrationRuntimeDomainActive: true,
     businessAdministrationRuntimeActivationMode: 'accounting-read-only-explicit-single-page-coverage',
     creativeProductionRuntimeDomainActive: true,
-    creativeProductionRuntimeActivationMode: 'packaging-wrapper-plus-creative-process-plus-content-studio-explicit-three-page-coverage',
+    creativeProductionRuntimeActivationMode: 'packaging-wrapper-plus-creative-process-plus-content-studio-plus-caip-explicit-four-page-coverage',
     accountingMutationOwnership: false,
     creativeProductionMutationOwnership: false,
     packagingMutationOwnershipMovedByTopLevelRuntime: false,
     creativeProcessMutationOwnershipMovedByTopLevelRuntime: false,
     contentStudioMutationOwnershipMovedByTopLevelRuntime: false,
+    caipMutationOwnershipMovedByTopLevelRuntime: false,
     creativeMutationAuthoritiesRequiredAsActivationServices: false,
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
