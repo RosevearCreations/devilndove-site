@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through Build 384 Development D1 parity proof on 2026-08-25; Builds 383–392 final local/browser closure still pending.
+Updated through Build 384 Development D1 parity proof and Gift Cards browser proof on 2026-08-25; Builds 383–392 refreshed local closure remains pending.
 
 ## Invariant
 
@@ -33,7 +33,8 @@ through 365       fully validated through recorded checkpoints
 370–372           browser-proven / local pending
 373–382           browser-proven / local pending
 Build 384 D1      Development parity PASSED 2026-08-25
-383–392           strengthened local 383–392 rerun + Gift Card browser proof pending
+Gift Cards        Build 385/386 browser proof PASSED 2026-08-25
+383–392           only strengthened local 383–392 rerun pending
 ```
 
 ## Commerce & Operations
@@ -92,7 +93,7 @@ Local regressions remain pending. The dedicated page now guards against the lega
 
 Build 383 found three automatic startup GETs that created schema and multiple request-time Gift Card table creators.
 
-Build 384 migration authority is now **proven on Development D1**. `database_gift_card_runtime_parity.sql` owns:
+Build 384 migration authority is **proven on Development D1**. `database_gift_card_runtime_parity.sql` owns:
 
 ```text
 gift_cards
@@ -124,7 +125,27 @@ was_success
 
 The previously missing `gift_card_lookup_lockouts` table and its status index were created, all eight Gift Card-owned tables verified, both default templates verified, and the direct Development helper reached COMPLETE.
 
-Build 385 adds non-mutating/readiness-aware `operations-gift-cards-read`. Build 386 changes `/admin/gift-cards/` automatic startup to that one contract and activates the page under Commerce with exactly one read service. All Gift Card writes remain compatibility-owned.
+Build 385 adds non-mutating/readiness-aware `operations-gift-cards-read`. Build 386 changes `/admin/gift-cards/` automatic startup to that one contract and activates the page under Commerce with exactly one read service.
+
+The Build 385/386 Firefox proof passed exactly on 2026-08-25:
+
+```text
+schema_ready true
+missing_tables []
+query_error_count 0
+request_time_schema_mutation false
+request_time_default_seeding false
+service registration 386 / contract payload 385
+runtime 386 / activation 386
+required services [operations-gift-cards-read]
+gift_cards_page_proven true
+creates_network_transport false
+gift_cards_mutation_ownership false
+contracts_ok true
+services_ok true
+```
+
+The Gift Card read/runtime boundary is closed. All Gift Card writes remain compatibility-owned.
 
 Build 387 removes request-time table creation from Gift Card delivery-history GET and records mutation blockers:
 
@@ -198,4 +219,4 @@ Historical tests verify durable boundaries. They must not freeze later shared ru
 
 ## Immediate validation
 
-Run only the strengthened `build383_392_commerce_operations_batch_test.py` local regression after the final Build 384 migration/test correction, then browser-validate the Build 385/386 Gift Card read/runtime state. Do not execute Gift Card, Orders, provider/refund, fulfillment, or Today Tasks writes merely to prove the new source contracts.
+Run only the strengthened `build383_392_commerce_operations_batch_test.py` local regression. Gift Card Development D1 parity and browser proof are already passed. Do not execute Gift Card, Orders, provider/refund, fulfillment, or Today Tasks writes merely to prove source contracts.
