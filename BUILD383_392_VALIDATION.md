@@ -1,6 +1,6 @@
 # Builds 383–392 Validation — Commerce & Operations 10-Build Batch
 
-## Status — DEVELOPMENT D1 PASSED / BUILD 383–392 LOCAL RERUN + GIFT CARD BROWSER REQUIRED
+## Status — DEVELOPMENT D1 PASSED / GIFT CARD BROWSER PASSED / REFRESHED LOCAL 383–392 RERUN REQUIRED
 
 ```text
 383  Gift Card schema-authority audit
@@ -52,8 +52,6 @@ The first real schema defect then appeared in Development: the existing `gift_ca
 
 The final direct-query run completed successfully against Development D1.
 
-### Lookup-attempt compatibility alignment
-
 Existing legacy columns were correctly tolerated as already present:
 
 ```text
@@ -73,27 +71,9 @@ user_agent
 result_status
 ```
 
-The current email index then succeeded:
+The current email index succeeded, the previously absent `gift_card_lookup_lockouts` table and status index were created, all eight Gift Card-owned tables verified, and both migration-owned templates verified.
 
-```text
-idx_gift_card_lookup_attempts_email
-```
-
-### Missing lockout parity restored
-
-The previously absent table was created successfully:
-
-```text
-gift_card_lookup_lockouts
-```
-
-and its status index was created:
-
-```text
-idx_gift_card_lookup_lockouts_status
-```
-
-### Final verified Gift Card-owned tables
+Final verified Gift Card-owned tables:
 
 ```text
 gift_card_admin_events
@@ -106,14 +86,14 @@ gift_card_redemptions
 gift_cards
 ```
 
-### Final verified migration-owned templates
+Final verified templates:
 
 ```text
 activation
 reissue
 ```
 
-### Final verified current lookup-attempt columns
+Final verified current lookup-attempt columns:
 
 ```text
 client_key
@@ -136,34 +116,9 @@ BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE
 
 Build 384 Development D1 parity is therefore **PASSED**. Do not return to the Wrangler remote `--file` path for this release.
 
-## Remaining local closure
+## Gift Cards Firefox gate — PASSED 2026-08-25
 
-Because the Build 383–392 regression was strengthened after the initial local PASS, run only:
-
-```bash
-git -c gc.auto=0 pull --ff-only origin dev
-python scripts/build383_392_commerce_operations_batch_test.py
-git status --short
-```
-
-Expected:
-
-```text
-BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
-No Cloudflare resource was contacted.
-```
-
-## Firefox gate — Gift Cards only
-
-After Development deploys, open:
-
-```text
-/admin/gift-cards/
-```
-
-Do not save templates, resend, send through a provider, queue notification-outbox records, change card state, or perform abuse lock/unlock actions.
-
-Read-only expected structural state:
+Read-only proof on `/admin/gift-cards/` returned the exact expected boundary:
 
 ```text
 contract_status                    200
@@ -173,6 +128,7 @@ contract_id                        operations-gift-cards-read
 schema_ready                       true
 missing_tables                     []
 query_error_count                  0
+query_errors                       []
 request_time_schema_mutation       false
 request_time_default_seeding       false
 mutation_ownership_moved           false
@@ -189,6 +145,7 @@ operations_domain                  operations
 runtime_build                      386
 activation_build                   386
 runtime_state                      active
+current_domain                     operations
 last_pathname                      /admin/gift-cards/
 services_ready                     true
 required_services                  ["operations-gift-cards-read"]
@@ -199,8 +156,25 @@ contracts_ok                       true
 services_ok                        true
 ```
 
-The registered service object is Build 386; its `list()` result carries the Build 385 server-contract payload.
+No Gift Card mutation was required or executed for this proof. Builds 385–386 are browser-proven and the Gift Card read/runtime boundary is closed.
 
-If `schema_ready=false`, preserve `missing_tables` and `query_errors`; do not repair schema from GET. Build 384 remains the migration authority.
+## Remaining local closure
+
+Run only:
+
+```bash
+git -c gc.auto=0 pull --ff-only origin dev
+python scripts/build383_392_commerce_operations_batch_test.py
+git status --short
+```
+
+Expected:
+
+```text
+BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
+No Cloudflare resource was contacted.
+```
+
+When that refreshed local regression passes, Builds 383–392 are fully validated.
 
 Builds 389, 391, and 392 are mutation-authority source boundaries only. Do not execute real writes merely to validate their existence.
