@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 324 Accounting Profit/Loss Read Extraction Staged
+# Devil n Dove AI Context — Build 324 Accounting Profit/Loss Read Extraction Browser Proven
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -72,7 +72,7 @@ Build 320 Accounting overhead read        VALIDATED 2026-08-24
 Build 321 Overhead-product read           VALIDATED 2026-08-24
 Build 322 Product-cost read               VALIDATED 2026-08-24
 Build 323 Accounting page runtime audit   VALIDATED 2026-08-24
-Build 324 Accounting profit/loss read     STAGED
+Build 324 Accounting profit/loss read     BROWSER PROVEN; LOCAL + SCHEMA DETAIL REQUIRED
 ```
 
 Build 306 remains historically browser-proven with standalone local signoff not captured. Do not silently relabel it complete.
@@ -98,7 +98,7 @@ Accounting overhead allocations read      320 validated
 Accounting overhead-product read          321 validated
 Accounting product-costs read             322 validated
 Accounting page bridge                    323 validated shadow/domain-bridge
-Accounting profit/loss read               324 staged
+Accounting profit/loss read               324 browser proven
 Contract catalog                          324
 Passive service adapters                  324
 Business & Administration runtime         inactive
@@ -106,7 +106,7 @@ Business & Administration runtime         inactive
 
 ## Build 323 result
 
-`/admin/accounting/` now loads the verified Core module bridge and browser proof confirmed:
+`/admin/accounting/` loads the verified Core module bridge and browser proof confirmed:
 
 ```text
 domain                      accounting
@@ -143,6 +143,31 @@ mutation    false
 ```
 
 The service reads existing Orders, expenses, write-offs, overhead and General Ledger state without CREATE/ALTER/INSERT/UPDATE/DELETE. It reports missing schema rather than repairing it.
+
+Development browser proof on 2026-08-24 returned:
+
+```text
+legacy_status               200
+legacy_build                324
+legacy_owner                accounting
+legacy_schema_ready         false
+legacy_schema_mutation      false
+contract_status             200
+contract_build              324
+contract_owner              accounting
+contract_schema_mutation    false
+service_build               324
+service_schema_mutation     false
+application_module          business-administration
+application_mode            domain-bridge
+active_application_module   null
+contracts_ok                true
+services_ok                 true
+```
+
+This is an architecture PASS. `schema_ready=false` is a separate schema-parity finding. Capture exact `missing_tables` / `missing_columns` and route them to the fresh-install schema-parity track; never restore request-time DDL.
+
+Build 324 remains not fully VALIDATED until its local regression output and exact missing-schema evidence are captured.
 
 The current Accounting UI keeps the legacy URL for compatibility. No Accounting write authority moves.
 
