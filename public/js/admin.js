@@ -22,6 +22,7 @@
 // Build 361: Creative & Production adds CAIP lifecycle coverage without moving CAIP/R2 mutations.
 // Build 364: Commerce & Operations adds /admin/membership/ after retiring Tier Policy GET-time schema mutation.
 // Build 368: Commerce & Operations adds /admin/today-tasks/ with readiness-aware GET-only lifecycle coverage.
+// Build 372: Commerce & Operations adds /admin/custom-request/ with a readiness-aware startup-read contract.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -59,5 +60,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=368')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=372')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
