@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -11,6 +12,18 @@ def section(text, start, end=None):
     i = text.index(start)
     j = text.index(end, i) if end else len(text)
     return text[i:j]
+
+
+def numeric_constant(text, name):
+    match = re.search(rf"(?:export\s+)?const\s+{re.escape(name)}\s*=\s*(\d+)", text)
+    assert match, f'Missing numeric constant: {name}'
+    return int(match.group(1))
+
+
+def cache_version(text, pattern):
+    match = re.search(pattern, text)
+    assert match, f'Missing cache-busted path matching: {pattern}'
+    return int(match.group(1))
 
 
 read_service = read('functions/api/_lib/todayTasksReadService.js')
@@ -27,8 +40,6 @@ definitions = read('public/js/core/dd-module-definitions.mjs')
 custom_requests = read('functions/api/admin/custom-requests.js')
 
 # Build 366 — readiness-aware Today Tasks read authority is GET-only/non-mutating.
-# Later read-schema alignment may change specific table/column names, but must preserve
-# readiness/error reporting and never restore request-time mutation.
 assert 'export const BUILD = 366' in read_service
 assert "export const CONTRACT_ID = 'operations-today-tasks-read'" in read_service
 assert "export const OWNER = 'operations'" in read_service
@@ -66,7 +77,7 @@ assert 'today_task_actions' in actions
 assert 'CREATE TABLE IF NOT EXISTS today_task_actions' in actions
 assert "['completed','ignored','snoozed']" in actions
 
-# Build 367 passive browser service: registration itself performs no request.
+# Build 367 passive browser service remains intact.
 assert 'export const BUILD = 367' in client_service
 assert 'export const CONTRACT_BUILD = 366' in client_service
 assert "export const SERVICE_ID = 'operations-today-tasks-read'" in client_service
@@ -76,9 +87,9 @@ registration = section(client_service, 'export function ensureOperationsTodayTas
 assert 'apiFetch(' not in registration
 assert 'fetch(' not in registration
 
-# Build 367/368 shared Commerce runtime adds a page-specific Today Tasks gate.
-assert 'const BUILD = 367;' in runtime
-assert 'const ACTIVATION_BUILD = 368;' in runtime
+# The shared Commerce runtime may advance later, but the Today Tasks gate must remain.
+assert numeric_constant(runtime, 'BUILD') >= 367
+assert numeric_constant(runtime, 'ACTIVATION_BUILD') >= 368
 assert "const TODAY_TASKS_RUNTIME_PAGE = '/admin/today-tasks/'" in runtime
 assert "const TODAY_TASKS_REQUIRED_SERVICES = Object.freeze(['operations-today-tasks-read'])" in runtime
 assert 'ensureOperationsTodayTasksReadService(registry)' in runtime
@@ -91,28 +102,28 @@ assert 'apiFetch(' not in runtime
 assert 'fetch(' not in runtime
 assert 'currentTodayTasksPageProven' in runtime
 
-# Build 368 Core coverage includes the dedicated page and advances only the shared Commerce runtime.
+# Core may advance later while preserving Today Tasks coverage.
 commerce = section(groups, "id: 'commerce-operations'", "id: 'creative-production'")
-assert "entry: '../modules/commerce-operations/runtime.mjs?v=367'" in commerce
+assert cache_version(commerce, r"entry:\s*'\.\./modules/commerce-operations/runtime\.mjs\?v=(\d+)'") >= 367
 assert "runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations'])" in commerce
 assert "'/admin/today-tasks/'" in groups
 assert 'OPERATIONS_TODAY_TASKS_READ_CONTRACT_BUILD = 366' in groups
-assert 'RUNTIME_OPERATIONS_BUILD = 367' in groups
-assert 'OPERATIONS_RUNTIME_COVERAGE_BUILD = 368' in groups
+assert numeric_constant(groups, 'RUNTIME_OPERATIONS_BUILD') >= 367
+assert numeric_constant(groups, 'OPERATIONS_RUNTIME_COVERAGE_BUILD') >= 368
 assert 'todayTasksMutationOwnershipMovedByTopLevelRuntime: false' in groups
-assert 'dd-admin-module-runtime.mjs?v=368' in admin_js
+assert cache_version(admin_js, r"dd-admin-module-runtime\.mjs\?v=(\d+)") >= 368
 
-# The route was already classified as Operations; Build 368 supplies the missing real page.
+# The dedicated Build 368 page keeps its proven loader order even if shared Core later advances elsewhere.
 operations_definition = section(definitions, "id: 'operations'", "id: 'creative'")
 assert "'/admin/today-tasks'" in operations_definition
-assert '/public/js/admin.js?v=368' in page
-assert '/public/js/admin-today-tasks.js?v=368' in page
-assert page.index('/public/js/admin.js?v=368') < page.index('/public/js/admin-today-tasks.js?v=368')
+admin_pos = page.index('/public/js/admin.js?v=368')
+ui_pos = page.index('/public/js/admin-today-tasks.js?v=368')
+assert admin_pos < ui_pos
 assert 'id="todayTasksAdminMount"' in page
 assert '/api/admin/contracts/operations-today-tasks-read' in ui
 assert '/api/admin/today-task-actions' in ui
 
-# Custom Requests remains intentionally outside this batch because its GET is still schema-coupled.
+# Custom Requests retains its compatibility schema/mutation authority even if later read coverage is added.
 assert 'async function ensureSchema(db)' in custom_requests
 assert 'CREATE TABLE IF NOT EXISTS custom_requests' in custom_requests
 assert 'ALTER TABLE' in custom_requests
