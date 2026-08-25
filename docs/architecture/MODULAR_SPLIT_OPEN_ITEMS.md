@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 383–392 on 2026-08-25.
+Updated through Build 384 Development D1 parity proof on 2026-08-25; Builds 383–392 final local/browser closure still pending.
 
 ## Invariant
 
@@ -22,7 +22,7 @@ dev  = active Development/modularization line
 
 ## Cadence
 
-Use coherent **10-build execution batches** and keep the next **20 builds** in `docs/architecture/NEXT_20_BUILDS.md`. Validation failures may insert correction builds and shift later numbers.
+Use coherent **10-build execution batches** and keep the next **20 builds** in `docs/architecture/NEXT_20_BUILDS.md`. Validation failures may insert bounded correction builds and shift later numbers.
 
 ## Validation state
 
@@ -32,7 +32,8 @@ through 365       fully validated through recorded checkpoints
 369               browser-proven / local pending
 370–372           browser-proven / local pending
 373–382           browser-proven / local pending
-383–392           staged / local + Gift Card browser proof required
+Build 384 D1      Development parity PASSED 2026-08-25
+383–392           strengthened local 383–392 rerun + Gift Card browser proof pending
 ```
 
 ## Commerce & Operations
@@ -57,7 +58,7 @@ Page-specific reads:
 Membership       operations-membership-read        362
 Today Tasks      operations-today-tasks-read       366 / implementation 369
 Custom Requests  operations-custom-requests-read   370
-Gift Cards       operations-gift-cards-read         385 staged
+Gift Cards       operations-gift-cards-read         385
 ```
 
 The runtime creates no network transport and owns none of the page mutations above.
@@ -87,11 +88,11 @@ runtime                      371 / activation 372
 
 Local regressions remain pending. The dedicated page now guards against the legacy self-ensuring marketplace CSV GET.
 
-### Gift Cards — 383–387 staged
+### Gift Cards — 383–387
 
 Build 383 found three automatic startup GETs that created schema and multiple request-time Gift Card table creators.
 
-Build 384 adds `database_gift_card_runtime_parity.sql` for Gift Card-owned tables:
+Build 384 migration authority is now **proven on Development D1**. `database_gift_card_runtime_parity.sql` owns:
 
 ```text
 gift_cards
@@ -104,21 +105,38 @@ gift_card_lookup_attempts
 gift_card_lookup_lockouts
 ```
 
-Default activation/reissue templates are migration-owned. Shared `notification_outbox` is deliberately excluded because current Gift Card writers assume incompatible historical shapes.
+Default activation/reissue templates are migration-owned. Shared `notification_outbox` remains deliberately excluded because current Gift Card writers assume incompatible historical shapes.
+
+Development parity proof exposed and repaired legacy `gift_card_lookup_attempts` drift. The current combined schema is now present:
+
+```text
+client_key
+code_hint
+code_suffix
+created_at
+email_hash
+ip_hash
+lookup_email
+result_status
+user_agent
+was_success
+```
+
+The previously missing `gift_card_lookup_lockouts` table and its status index were created, all eight Gift Card-owned tables verified, both default templates verified, and the direct Development helper reached COMPLETE.
 
 Build 385 adds non-mutating/readiness-aware `operations-gift-cards-read`. Build 386 changes `/admin/gift-cards/` automatic startup to that one contract and activates the page under Commerce with exactly one read service. All Gift Card writes remain compatibility-owned.
 
 Build 387 removes request-time table creation from Gift Card delivery-history GET and records mutation blockers:
 
-- card POST still self-ensures schema until migration proof;
+- card POST still self-ensures schema until mutation consumer migration;
 - provider/outbox writes need shared notification reconciliation;
 - old abuse release UI/API semantics disagree (key/action vs stable lockout ID), so the unsafe control is not exposed by the Build 386 UI.
 
-### Orders — 388–391 staged
+### Orders — 388–391
 
 Build 388 confirms `GET /api/admin/orders` is non-mutating and uses the current cents model (`total_cents`, etc.). Historical Build 324 `total_amount|total` must remain scoped to its old consumer rather than being imposed on this read.
 
-Build 389 adds `operations-order-status-write`, delegating the mature status implementation. That implementation still has a paid-order Gift Card history table fallback; do not remove it until Build 384 migration application is proven.
+Build 389 adds `operations-order-status-write`, delegating the mature status implementation. Its paid-order Gift Card history fallback can now be revisited in later consumer migration because Build 384 Development table parity is proven.
 
 Build 390 holds provider-aware refund/dispute consumer migration because the path can call Stripe/PayPal and crosses payments, orders, refunds/disputes, status history, notifications, and audit.
 
@@ -161,7 +179,7 @@ Build 341  access_tiers.tier_id
 Build 341  payment_disputes.payment_dispute_id
 ```
 
-Prior audit also found `accounting_order_records`, Gift Card schema, Command Center tables, and `notification_dispatch_log(s)` aggregate execution drift. Build 384 begins resolving Gift Card parity, but fresh-install execution proof remains required.
+Prior audit also found `accounting_order_records`, Command Center tables, and `notification_dispatch_log(s)` aggregate execution drift. Gift Card-owned Development parity is now proven through Build 384; broader fresh-install aggregate execution proof remains required.
 
 Do not copy Production business data until fresh-install schema parity is proven.
 
@@ -180,4 +198,4 @@ Historical tests verify durable boundaries. They must not freeze later shared ru
 
 ## Immediate validation
 
-Run accumulated Commerce local regressions through `build383_392_commerce_operations_batch_test.py`, then browser-validate only the Build 385/386 Gift Card read/runtime state. Do not execute Gift Card, Orders, provider/refund, fulfillment, or Today Tasks writes merely to prove the new source contracts.
+Run only the strengthened `build383_392_commerce_operations_batch_test.py` local regression after the final Build 384 migration/test correction, then browser-validate the Build 385/386 Gift Card read/runtime state. Do not execute Gift Card, Orders, provider/refund, fulfillment, or Today Tasks writes merely to prove the new source contracts.
