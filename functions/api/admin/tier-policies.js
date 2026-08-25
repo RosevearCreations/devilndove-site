@@ -1,6 +1,7 @@
 import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 import {
   BUILD as MEMBERSHIP_TIER_POLICY_READ_BUILD,
+  IMPLEMENTATION_BUILD as MEMBERSHIP_TIER_POLICY_READ_IMPLEMENTATION_BUILD,
   DEFAULT_TIER_POLICIES,
   mapTierPolicyRow,
   readMembershipTierPolicies,
@@ -25,7 +26,7 @@ function normalizeBenefits(value) {
     .filter(Boolean);
 }
 
-// Retained write-side compatibility only. Build 362 GET/read paths never call this.
+// Retained write-side compatibility only. Build 362/365 GET/read paths never call this.
 async function ensureTierPolicyTable(db) {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS membership_tier_policies (
@@ -43,7 +44,7 @@ async function ensureTierPolicyTable(db) {
   `);
 }
 
-// Retained write-side compatibility only. Build 362 GET/read paths never call this.
+// Retained write-side compatibility only. Build 362/365 GET/read paths never call this.
 async function seedDefaultPolicies(db) {
   for (const item of DEFAULT_TIER_POLICIES) {
     await db
@@ -78,18 +79,31 @@ export async function onRequestGet(context) {
     return jsonResponse({ ok: false, error: "Admin access required." }, 401);
   }
 
-  const read = await readMembershipTierPolicies(db);
-  return jsonResponse({
-    ok: true,
-    build: MEMBERSHIP_TIER_POLICY_READ_BUILD,
-    owner: "operations",
-    schema_ready: read.schema_ready,
-    missing_tables: read.missing_tables,
-    request_time_schema_mutation: false,
-    defaults_materialized: read.defaults_materialized,
-    source: read.source,
-    items: read.items,
-  });
+  try {
+    const read = await readMembershipTierPolicies(db);
+    return jsonResponse({
+      ok: true,
+      build: MEMBERSHIP_TIER_POLICY_READ_BUILD,
+      implementation_build: MEMBERSHIP_TIER_POLICY_READ_IMPLEMENTATION_BUILD,
+      owner: "operations",
+      schema_ready: read.schema_ready,
+      missing_tables: read.missing_tables,
+      request_time_schema_mutation: false,
+      defaults_materialized: read.defaults_materialized,
+      source: read.source,
+      items: read.items,
+    });
+  } catch (error) {
+    return jsonResponse({
+      ok: false,
+      build: MEMBERSHIP_TIER_POLICY_READ_BUILD,
+      implementation_build: MEMBERSHIP_TIER_POLICY_READ_IMPLEMENTATION_BUILD,
+      owner: "operations",
+      request_time_schema_mutation: false,
+      error_code: "membership_tier_policy_read_failed",
+      error: String(error?.message || error || "Membership tier policy read failed."),
+    }, 500);
+  }
 }
 
 export async function onRequestPost(context) {
