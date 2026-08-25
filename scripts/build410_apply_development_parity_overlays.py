@@ -27,6 +27,16 @@ MIGRATIONS = [
     'database_notification_runtime_parity.sql',
 ]
 MAX_COMMAND_CHARS = 7000
+AUTH_ENV_NAMES = (
+    'CLOUDFLARE_API_TOKEN',
+    'CLOUDFLARE_ACCOUNT_ID',
+    'CLOUDFLARE_API_KEY',
+    'CLOUDFLARE_EMAIL',
+    'CF_API_TOKEN',
+    'CF_ACCOUNT_ID',
+    'CF_API_KEY',
+    'CF_EMAIL',
+)
 
 NOTIFICATION_COMPAT_COLUMNS = (
     ('channel', "TEXT NOT NULL DEFAULT 'email'"),
@@ -68,6 +78,22 @@ def current_branch() -> str:
     result = run_capture(['git', 'branch', '--show-current'])
     if result.returncode != 0: fail(result.stdout or 'Unable to determine branch.')
     return result.stdout.strip()
+
+
+def configured_auth_env_names() -> list[str]:
+    return [name for name in AUTH_ENV_NAMES if str(os.environ.get(name, '')).strip()]
+
+
+def print_auth_diagnostics(npx: str) -> None:
+    print('\n=== WRANGLER AUTH DIAGNOSTIC (NO SECRETS) ===')
+    configured = configured_auth_env_names()
+    print('Cloudflare auth/account environment overrides:', ', '.join(configured) if configured else 'none detected in inherited environment')
+    print('Wrangler identity:')
+    result = run_capture([npx, 'wrangler', 'whoami'])
+    # `whoami` does not print bearer tokens; preserve its account/auth summary for diagnosis.
+    print(result.stdout, end='' if result.stdout.endswith('\n') else '\n')
+    if result.returncode != 0:
+        fail('Wrangler is not currently authenticated. Run `npx wrangler login`, then retry this helper.')
 
 
 def strip_line_comments(text: str) -> str:
@@ -147,6 +173,13 @@ def execute(npx: str, sql: str, label: str, *, tolerate_duplicate_column: bool =
     if tolerate_duplicate_column and 'duplicate column name' in lower:
         print('Compatibility column already exists; continuing.')
         return
+    if 'code: 7403' in lower or 'not valid or is not authorized to access this service' in lower:
+        configured = configured_auth_env_names()
+        suffix = f' Environment overrides currently detected: {", ".join(configured)}.' if configured else ''
+        fail(
+            f'{label} was blocked by Cloudflare authorization (7403); no SQL from this statement was executed.'
+            f'{suffix} Verify `npx wrangler whoami`. If CLOUDFLARE_API_TOKEN is set, remember it takes precedence over Wrangler OAuth and must grant D1 Read/Write for the target account.'
+        )
     fail(f'{label} failed with exit code {result.returncode}. Preserve this output; do not use --file.')
 
 
@@ -182,6 +215,7 @@ def main() -> int:
         if not (ROOT / name).exists(): fail(f'Missing migration: {name}')
 
     npx = npx_path()
+    print_auth_diagnostics(npx)
     execute(npx, "SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name LIMIT 5;", 'READ-ONLY DEVELOPMENT PREFLIGHT')
 
     for migration_name in MIGRATIONS:
