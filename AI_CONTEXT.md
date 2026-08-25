@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — All Creative Domains Browser-Proven Through Build 361
+# Devil n Dove AI Context — Creative Browser-Proven / Operations Membership Staged Through Build 364
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 361, and validation files through `BUILD359_361_VALIDATION.md`.
+Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 364, and validation files through `BUILD362_364_VALIDATION.md`.
 
 ## Production safety
 
@@ -35,7 +35,9 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                              302
 Core runtime implementation                    305
-Commerce/Operations runtime                    315
+Commerce/Operations runtime                    363 staged
+Operations Membership read contract            362 staged
+Operations Membership activation               364 staged
 Accounting reads through 345                   validated
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
@@ -51,19 +53,21 @@ Default passive service adapters               345
 Creative Process passive service               353 runtime-local
 Content Studio passive service                 356 runtime-local
 CAIP passive read services                     360 runtime-local
+Operations Membership passive service          363 runtime-local
 Accounting mutation ownership moved            false
+Operations/Membership mutation ownership moved false
 Creative/Packaging mutation ownership moved    false
 Content mutation ownership moved               false
 CAIP mutation ownership moved                  false
 ```
 
-All four Creative & Production domains now have a browser-proven top-level runtime page. Do not extend or rework that loader again merely to create more evidence; close the corrected local regressions first, then move to another bounded ownership target.
+All four Creative & Production domains now have a browser-proven top-level runtime page. Do not extend or rework that loader again merely to create more evidence; close the corrected local regressions, then leave that loader stable.
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
 
 ## Read/runtime boundary rule
 
-GET/read paths report or verify schema readiness; migrations/readiness tooling creates or repairs schema. Never restore request-time DDL to a read because Development reports a schema deficit.
+GET/read paths report or verify schema readiness; migrations/readiness tooling creates or repairs schema. Never restore request-time DDL/default seeding to a read because Development reports a schema deficit.
 
 A loader/read-contract migration or top-level runtime activation never implies mutation ownership. Existing compatibility POST/PUT/DELETE/upload/import paths remain legacy until dedicated mutation contracts are separately extracted.
 
@@ -77,152 +81,86 @@ A loader/read-contract migration or top-level runtime activation never implies m
 - Builds 355–357: Content Studio browser proof passed 2026-08-24; corrected local regression still required.
 - Build 358: browser proof passed 2026-08-24; corrected local regression still required.
 - Builds 359–361: CAIP browser proof passed 2026-08-24; local regression still required.
+- Builds 362–364: staged / local + Membership browser validation required.
 
-## Browser-proven Creative Process state after Build 358
+## Creative & Production browser-proven state
 
-```text
-application_module                     creative-production
-application_mode                       active
-active_application_module              creative-production
-creative_domain                        creative
-runtime_build                          358
-runtime_state                          active
-services_ready                         true
-required_services                      ["creative-process-read","inventory-read"]
-mutation_authorities                   ["inventory-post","inventory-reverse"]
-mutation_authorities_activation_gate   false
-page_proven                            true
-creates_network_transport              false
-creative_mutation_ownership            false
-contracts_ok                           true
-services_ok                            true
-```
-
-## Browser-proven Content Studio state
-
-Development proof on `/admin/content-studio/` returned:
+Creative Process after Build 358:
 
 ```text
-legacy_status                    200
-legacy_build                     355
-legacy_legacy_build              273
-legacy_owner                     content
-legacy_contract                  content-studio-read
-legacy_schema_ready              true
-legacy_schema_mutation           false
-contract_status                  200
-contract_build                   355
-contract_owner                   content
-contract_schema_ready            true
-contract_schema_mutation         false
-service_registered               true
-service_build                    355
-application_module               creative-production
-application_mode                 active
-active_application_module        creative-production
-content_domain                   content
-runtime_build                    358
-runtime_state                    active
-services_ready                   true
-required_service_count           1
-content_page_proven              true
-content_contract_build           355
-creates_network_transport        false
-content_mutation_ownership       false
-contracts_ok                     true
-services_ok                      true
+creative domain required services  ["creative-process-read","inventory-read"]
+retained mutation authorities       ["inventory-post","inventory-reverse"]
+mutation authorities activation gate false
+page proven                          true
+creates network transport            false
+creative mutation ownership          false
 ```
 
-## CAIP startup-read audit correction
+Content Studio proof returned Build 355 legacy/contract reads at 200 with `schema_ready=true`, `request_time_schema_mutation=false`, one registered `content-studio-read` service, active `creative-production`, one required service, and `contentMutationOwnership=false`.
 
-Historical `ensure...Schema()` / `assert...Schema()` names were misleading. Current source proves these helpers are migration-owned verification only:
+CAIP proof returned both Build 359 contracts at 200 with verification-only/non-mutating metadata, both passive services registered, active `/admin/creative-assets/` runtime Build 360/activation 361, two required read services, `currentCaipPageProven=true`, and `caipMutationOwnership=false`.
+
+No Creative Process, Content Studio, CAIP, R2, binary, upload, governance, probe, derivative, secure-review, duplicate-cleanup, or public-promotion mutation was invoked merely to prove those loader/read boundaries.
+
+## Builds 362–364 — Operations Membership boundary
+
+Source audit selected `/admin/membership/` as the next bounded Commerce & Operations page. `/admin/members/` is much more coupled, while Gift Cards has known fresh-install schema parity and is deliberately not mixed into this activation batch.
+
+Automatic Membership reads are:
 
 ```text
-ensureCreativeAssetIntelligenceSchema()  SELECT-only verification
-ensureCreativeAssetOperationsSchema()    SELECT-only verification
-assertCaipMediaIntakeSchema()             SELECT-only verification
+GET /api/admin/users
+GET /api/admin/access-tiers
+GET /api/admin/tier-policies
 ```
 
-The CAIP page starts two automatic reads:
+The first two are SELECT-only. Before Build 362, Tier Policy GET called `ensureTierPolicyTable()` and `seedDefaultPolicies()`, creating `membership_tier_policies` and inserting Bronze/Silver/Gold rows during a read.
+
+### Build 362
+
+`functions/api/_lib/membershipTierPolicyReadService.js` now owns non-mutating Tier Policy reads. Missing or empty state is represented with in-memory defaults and explicit readiness metadata:
 
 ```text
-GET /api/admin/creative-assets
-GET /api/admin/caip-media-intake
+schema_ready
+missing_tables
+request_time_schema_mutation=false
+defaults_materialized
+source
 ```
 
-Neither current GET requires CREATE/ALTER/INSERT/UPDATE/DELETE merely to load the page.
+`GET /api/admin/tier-policies` delegates to that read service and no longer creates/seeds schema. The retained POST still owns its legacy ensure/seed/update behavior.
 
-## Builds 359–361 — CAIP read/runtime boundary
+`GET /api/admin/contracts/operations-membership-read` aggregates the users, active access tiers, and Tier Policy reads under Operations ownership with `mutation_ownership_moved=false`.
 
-Build 359 adds two GET-only CAIP-owned wrappers:
+### Build 363
+
+`operations-membership-read` is registered passively in the Commerce & Operations runtime. Registration performs no request.
+
+Operations service requirements are now page-specific:
 
 ```text
-/api/admin/contracts/caip-read
-/api/admin/contracts/caip-media-intake-read
+/admin/operations/          catalog-read, inventory-read, accounting-read
+/admin/customer-documents/  catalog-read, inventory-read, accounting-read
+/admin/orders/              catalog-read, inventory-read, accounting-read
+/admin/membership/          operations-membership-read
 ```
 
-Both report `request_time_schema_mutation=false`, `mutation_ownership_moved=false`, and `schema_verification_only=true`. The intake contract also reports `r2_mutation=false` and `binary_mutation=false`.
+The original three proven Operations pages therefore retain their established service boundary, while Membership does not inherit unrelated dependencies.
 
-Build 360 passively registers exactly:
+### Build 364
+
+`/admin/membership/` joins explicit Operations top-level coverage. The page loads `admin.js?v=364` before the retained Membership UI scripts.
+
+Build 364 also fixes an existing page/script mount mismatch:
 
 ```text
-caip-read
-caip-media-intake-read
+page previously: adminTierPolicyMount
+script expects:   tierPolicyAdminMount
 ```
 
-Registration performs no HTTP request. The top-level Creative runtime creates no network transport and owns no CAIP mutations.
+The corrected mount restores the intended Tier Policy panel. No assignment/removal or policy-edit mutation moves to the top-level runtime.
 
-Build 361 adds `/admin/creative-assets/` to explicit top-level coverage and loads Core before the retained Build 279 media-intake and Build 271 CAIP UI scripts. Existing compatibility GET/POST authorities and R2/media helpers remain unchanged.
-
-### Browser proof — PASSED 2026-08-24
-
-```text
-caip_contract_status                     200
-caip_contract_build                      359
-caip_contract_legacy_build               Build 201 + Build 202 + Build 279
-caip_contract_owner                      caip
-caip_contract_id                         caip-read
-caip_contract_schema_mutation            false
-caip_contract_mutation_ownership_moved   false
-caip_contract_verification_only          true
-caip_contract_r2_mutation                false
-intake_contract_status                   200
-intake_contract_build                    359
-intake_contract_legacy_build             Build 279
-intake_contract_owner                    caip
-intake_contract_id                       caip-media-intake-read
-intake_contract_schema_mutation          false
-intake_contract_mutation_ownership_moved false
-intake_contract_verification_only        true
-intake_contract_r2_mutation              false
-intake_contract_binary_mutation          false
-caip_read_service_registered             true
-caip_read_service_build                  359
-caip_intake_service_registered           true
-caip_intake_service_build                359
-application_module                       creative-production
-application_mode                         active
-active_application_module                creative-production
-caip_domain                              caip
-runtime_entry                            ../modules/creative-production/runtime.mjs?v=360
-runtime_build                            360
-activation_build                         361
-runtime_state                            active
-current_domain                           caip
-last_pathname                            /admin/creative-assets/
-services_ready                           true
-required_service_count                   2
-required_services                        ["caip-read","caip-media-intake-read"]
-caip_page_proven                         true
-caip_read_contract_build                 359
-caip_intake_contract_build               359
-creates_network_transport                false
-caip_mutation_ownership                  false
-contracts_ok                             true
-services_ok                              true
-```
-
-No project/evidence/story mutation, probe, derivative, secure-review, upload/session, governance, duplicate-cleanup, R2, binary, or public-promotion action was invoked during the proof.
+If `membership_tier_policies` is absent on a fresh install, the GET reports `schema_ready=false` and returns in-memory defaults; that missing table belongs to schema-parity work and must not be repaired inside GET.
 
 ## Development schema-parity track — separate
 
@@ -236,7 +174,9 @@ Build 341  access_tiers.tier_id
 Build 341  payment_disputes.payment_dispute_id
 ```
 
-Prior parity audit also identified Production-only active tables including `accounting_order_records`, `gift_cards`, several Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy. Keep schema parity separate from module activation and resolve it before Production business-data copy.
+Prior parity audit also identified Production-only active tables including `accounting_order_records`, `gift_cards`, several Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy. `membership_tier_policies` should be treated as additional parity evidence if the Build 362 read reports it missing on a true fresh install.
+
+Keep schema parity separate from module activation and resolve it before Production business-data copy.
 
 ## Windows Git pack cleanup note
 
@@ -244,17 +184,18 @@ Windows previously refused to unlink an obsolete `.git/objects/pack/*.idx` and m
 
 ## Historical regression rule
 
-Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache versions or require a later domain to remain inactive. Build 355–357 and Build 358 regressions are future-compatible with CAIP activation.
+Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache versions, require a later domain/page to remain inactive, or confuse retained mutation authorities with passive activation services.
 
 ## Next direction
 
-1. Pull the browser-proof Build 361 documentation checkpoint with automatic Git GC disabled if needed.
-2. Run corrected regressions for Builds 352–354, 355–357, 358, and 359–361.
-3. If all four local gates pass with a clean working tree, mark Builds 352–361 fully validated. No further browser proof is required for these loader/read checkpoints.
-4. Stop expanding Creative & Production top-level loader coverage; all four domains now have browser-proven pages.
-5. Choose the next bounded ownership target from source evidence. Prefer a remaining Commerce & Operations page with a clean read boundary; avoid mixing known `gift_cards` fresh-install parity work into loader activation unless schema parity is deliberately the batch target.
-6. Continue fresh-install schema parity separately and before any Production business-data copy.
+1. Pull the staged Build 364 checkpoint with automatic Git GC disabled if needed.
+2. Run corrected regressions for Builds 352–354, 355–357, 358, 359–361, plus the new 362–364 Membership regression.
+3. If the first four pass, mark Builds 352–361 fully validated; they already have browser proof.
+4. Browser-validate `/admin/membership/` using GET/runtime checks only. If `schema_ready=false`, record the missing table as parity evidence; do not add DDL back to GET.
+5. If Membership local + browser gates pass, close Builds 362–364 without moving assignment/policy mutations.
+6. Continue Commerce & Operations source audit after Membership. Avoid Gift Cards unless schema parity is deliberately the batch target.
+7. Continue fresh-install schema parity separately and before Production business-data copy.
 
 ## Validation preference
 
-Batch related builds and provide one Git Bash block plus Firefox-safe browser blocks whenever practical.
+Batch related builds and provide one Git Bash block plus one Firefox-safe browser block whenever practical.
