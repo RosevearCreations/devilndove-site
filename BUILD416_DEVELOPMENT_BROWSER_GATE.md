@@ -2,38 +2,39 @@
 
 ## Status
 
-**SOURCE PREFLIGHT ADDED / LIVE DEVELOPMENT BROWSER PROOF REQUIRED / PRODUCTION CLOSED**
+**PASS — SOURCE PREFLIGHT + LIVE DEVELOPMENT BROWSER PROOF COMPLETE / PRODUCTION CLOSED**
 
-Build 416 hardens the read-only browser validation handoff after the successful Build 410 Development D1 parity application and the already-green Build 412 local release-candidate gate.
+Build 416 is complete. It followed the successful Build 410 Development D1 parity application and Build 412 local release-candidate gate, then verified the current Commerce & Operations read/mutation boundaries in the live Development browser.
 
-No Build 416 validation step authorizes a Production deployment or a Production data write.
+No Build 416 step authorized a Production deployment, Production D1 mutation, provider mutation, or Production business-data copy.
 
-## What changed
+## Source correction included in Build 416
 
-The Gift Cards admin page previously requested current scripts with the stale cache identities `admin.js?v=386` and `admin-gift-cards.js?v=386`.
+The Gift Cards admin page had still requested stale browser/CDN cache identities:
 
-Build 416 refreshes those identities to:
+```text
+/public/js/admin.js?v=386
+/public/js/admin-gift-cards.js?v=386
+```
+
+Build 416 corrected them to the current authorities:
 
 ```text
 /public/js/admin.js?v=397
 /public/js/admin-gift-cards.js?v=407
 ```
 
-This is a browser/CDN cache correction only. It does not move mutation ownership or alter Gift Card write behavior.
+Orders already requested Build 397 runtime + Build 408 bridge assets. Customer Documents already requested Build 397 runtime + Build 415 bridge assets.
 
-Orders already requests `admin.js?v=397` and `admin-order-contract-bridge.js?v=408`, so no Orders HTML change is required.
+## Local source preflight — PASS
 
-Customer Documents already requests `admin.js?v=397` and `admin-customer-documents-contract-bridge.js?v=415`.
-
-## Local source preflight
-
-Run on the `dev` branch:
+Executed on `dev`:
 
 ```bash
 python scripts/build416_development_browser_gate_preflight.py
 ```
 
-Expected final output:
+Recorded result:
 
 ```text
 CUSTOMER DOCUMENTS SOURCE GATE: PASS
@@ -46,106 +47,42 @@ LIVE DEVELOPMENT BROWSER PROOF: REQUIRED
 PRODUCTION PROMOTION: CLOSED
 ```
 
-The preflight is intentionally local-only. It checks the Development project/database pin, current browser cache identities, GET-only read contracts, passive read services, contract bridges, owned mutation routes, and the Build 409 payment-provider fail-closed gate.
+The local preflight verified the Development project/database pin, current browser cache identities, GET-only read contracts, passive read services, contract bridges, owned mutation routes, and Build 409 payment-provider fail-closed behavior.
 
-## Live Development proof rules
+## Live Development browser proof — PASS
 
-Use the **Development site only** while signed in as an administrator.
+The three read-only browser probes were executed while signed into the Development admin site. No mutation action was used.
 
-Do not activate, void, refund, reissue, resend, save, lock, unlock, fulfill, change order status, or submit a payment/provider action during this gate.
+### Customer Documents — PASS
 
-Keep DevTools **Console** and **Network** open. A passing gate has no unexpected console exception and no failed 4xx/5xx read request.
-
-### 1. Customer Documents
-
-Open:
-
-```text
-/admin/customer-documents/
-```
-
-Paste this read-only console probe:
-
-```js
-(async () => {
-  const runtime = window.DDCommerceOperations?.getStatus?.() || null;
-  const bridge = window.DDCustomerDocumentsContractBridge || null;
-  const response = await window.DDAuth.apiFetch('/api/admin/contracts/operations-customer-documents-read');
-  const data = await response.json();
-  return {
-    http: response.status,
-    readBuild: data.build,
-    contract: data.contract,
-    owner: data.owner,
-    schemaReady: data.schema_ready,
-    missingTables: data.missing_tables || [],
-    missingColumns: data.missing_columns || [],
-    requestTimeSchemaMutation: data.request_time_schema_mutation,
-    runtimeState: runtime?.state,
-    runtimeBuild: runtime?.build,
-    requiredServices: runtime?.requiredServices,
-    activeRequiredServices: runtime?.activeRequiredServices,
-    runtimeMutationOwner: runtime?.ownsCustomerDocumentsMutations,
-    bridgeBuild: bridge?.build,
-    bridgeReadBuild: bridge?.readContractBuild,
-    bridgeWriteBuild: bridge?.writeContractBuild,
-  };
-})()
-```
-
-Expected core proof:
+Recorded core result:
 
 ```text
 http                       200
-readBuild                  397
+build                      397
+contract                   operations-customer-documents-read
+owner                      operations
 schemaReady                true
 missingTables              []
 missingColumns             []
 requestTimeSchemaMutation  false
-runtimeState               active
-runtimeBuild               397
-requiredServices           [operations-customer-documents-read]
-runtimeMutationOwner       false
-bridgeBuild                415
-bridgeReadBuild            397
-bridgeWriteBuild           414
 ```
 
-### 2. Gift Cards
+The request completed through the Development Cloudflare deployment. The initial Firefox `Promise { <state>: "pending" }` display was only console presentation; explicit logging confirmed HTTP 200 and successful completion.
 
-Open:
+Current ownership boundary remains:
 
 ```text
-/admin/gift-cards/
+runtime Build              397
+read contract Build        397
+write contract Build       414
+browser bridge Build       415
+runtime owns mutations     false
 ```
 
-Do not click any Gift Card action button. Paste this GET-only probe:
+### Gift Cards — PASS
 
-```js
-(async () => {
-  const runtime = window.DDCommerceOperations?.getStatus?.() || null;
-  const response = await window.DDAuth.apiFetch('/api/admin/contracts/operations-gift-cards-read');
-  const data = await response.json();
-  return {
-    http: response.status,
-    startupReadBuild: data.build,
-    mutationAuthorityBuild: data.mutation_authority_build,
-    schemaReady: data.schema_ready,
-    missingTables: data.missing_tables || [],
-    queryErrors: data.query_errors || [],
-    requestTimeSchemaMutation: data.request_time_schema_mutation,
-    requestTimeDefaultSeeding: data.request_time_default_seeding,
-    ownedMutationRoutes: data.mutation_authorities,
-    runtimeState: runtime?.state,
-    runtimeBuild: runtime?.build,
-    activeRequiredServices: runtime?.activeRequiredServices,
-    runtimeMutationOwner: runtime?.ownsGiftCardsMutations,
-    uiMutationBuild: document.documentElement.dataset.ddGiftCardMutationUiBuild,
-  };
-})()
-```
-
-Expected core proof:
+Recorded core result:
 
 ```text
 http                       200
@@ -157,50 +94,22 @@ queryErrors                []
 requestTimeSchemaMutation  false
 requestTimeDefaultSeeding  false
 runtimeState               active
-runtimeBuild               397
-activeRequiredServices     [operations-gift-cards-read]
-runtimeMutationOwner       false
-uiMutationBuild            407
 ```
 
-`ownedMutationRoutes` must report the four Operations contracts introduced across Builds 404–407:
+The Operations-owned mutation authorities remain:
 
 ```text
-operations-gift-card-action-write
-operations-gift-card-template-write
-operations-gift-card-provider-send-write
-operations-gift-card-abuse-write
+/api/admin/contracts/operations-gift-card-action-write
+/api/admin/contracts/operations-gift-card-template-write
+/api/admin/contracts/operations-gift-card-provider-send-write
+/api/admin/contracts/operations-gift-card-abuse-write
 ```
 
-### 3. Orders / payment provider gate
+The page/runtime boundary remains Build 397 runtime + Build 407 Gift Card mutation UI, with runtime mutation ownership false.
 
-Open:
+### Orders / payment — PASS
 
-```text
-/admin/orders/
-```
-
-Do not submit a status, fulfillment, refund, dispute, or provider action. Paste this inspection-only probe:
-
-```js
-(() => {
-  const runtime = window.DDCommerceOperations?.getStatus?.() || null;
-  const bridge = window.DDOrderContractBridge || null;
-  return {
-    runtimeState: runtime?.state,
-    runtimeBuild: runtime?.build,
-    runtimeMutationOwner: runtime?.ownsOperationsMutations,
-    bridgeBuild: bridge?.build,
-    installed: bridge?.installed,
-    statusContract: bridge?.statusContract,
-    fulfillmentContract: bridge?.fulfillmentContract,
-    paymentContract: bridge?.paymentContract,
-    bridgeCreatesTransport: bridge?.createsNetworkTransport,
-  };
-})()
-```
-
-Expected core proof:
+Recorded result:
 
 ```text
 runtimeState            active
@@ -211,7 +120,7 @@ installed               true
 bridgeCreatesTransport  false
 ```
 
-The three routes must be:
+The bridge routes are:
 
 ```text
 /api/admin/contracts/operations-order-status-write
@@ -219,23 +128,36 @@ The three routes must be:
 /api/admin/contracts/operations-payment-action-write
 ```
 
-Build 409 remains fail-closed for external payment-provider mutation. Provider mutation requires both:
+No status, fulfillment, refund, dispute, or provider write was submitted during validation.
+
+## Payment-provider fail-closed boundary
+
+Build 409 remains fail-closed for external provider mutation. A provider mutation requires both:
 
 ```text
 PAYMENT_PROVIDER_MUTATIONS_ENABLED=1
 provider_sync_confirmed=true
 ```
 
-No provider write is required or permitted for this browser proof.
+Build 416 did not open or exercise that provider gate.
 
-## Pass / stop rule
+## Build 416 conclusion
 
-If all three pages load, the console probes match the expected boundaries, and their read requests have no unexpected 4xx/5xx response, record the Development browser gate as passed.
+The Development browser gate is now closed as **PASS**:
 
-If any value differs, preserve the Console result plus the failed Network request/response and repair that exact boundary before proceeding.
+- local source preflight passed;
+- Customer Documents live read contract passed;
+- Gift Cards live read contract and ownership boundary passed;
+- Orders runtime/bridge ownership boundary passed;
+- no request-time DDL/default seeding was reintroduced;
+- no Production write occurred.
 
-Do **not** compensate for a browser failure by moving DDL/default seeding back into request handlers or by bypassing the owned mutation contracts.
+## Next gate
+
+Proceed to `BUILD417_LIVE_READONLY_SCHEMA_DATA_MAPPING.md`.
+
+Build 417 captures fresh read-only Development/Production table/schema inventory and bounded business-data row counts so remaining Production-only schema and business-data differences can be classified using current evidence rather than the earlier pre-repair audit.
 
 ## Production
 
-Production remains frozen after Build 416. The next promotion decision still requires the remaining live read-only schema/data mapping evidence. Build 416 itself is not a Production promotion gate.
+Production remains frozen after Build 416. Production promotion and Production business-data copy remain closed until Build 417 evidence is reviewed and an explicit later rollout decision is made.
