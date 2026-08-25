@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -11,6 +12,12 @@ def section(text, start, end=None):
     i = text.index(start)
     j = text.index(end, i) if end else len(text)
     return text[i:j]
+
+
+def numeric(pattern, text):
+    match = re.search(pattern, text)
+    assert match, pattern
+    return int(match.group(1))
 
 
 read_service = read('functions/api/_lib/membershipTierPolicyReadService.js')
@@ -27,8 +34,6 @@ access_ui = read('public/js/admin-access-tiers.js')
 policy_ui = read('public/js/admin-tier-policy.js')
 
 # Build 362 — Tier Policy GET uses a non-mutating read service.
-# Later implementation hardening may change how table/readiness detection is performed,
-# but must preserve the Build 362 contract and never restore GET-time schema mutation.
 assert 'export const BUILD = 362' in read_service
 assert "export const OWNER = 'operations'" in read_service
 assert "export const TABLE = 'membership_tier_policies'" in read_service
@@ -52,7 +57,7 @@ assert 'seedDefaultPolicies(db)' in post_section
 assert 'INSERT INTO membership_tier_policies' in post_section
 assert 'UPDATE SET' in post_section
 
-# Other automatic Membership reads are SELECT-only.
+# Other automatic Membership reads remain SELECT-only.
 for source in [users_api, tiers_api]:
     get = section(source, 'export async function onRequestGet')
     for forbidden in ['CREATE TABLE', 'ALTER TABLE', 'INSERT INTO', 'UPDATE ', 'DELETE FROM']:
@@ -69,7 +74,7 @@ assert 'request_time_schema_mutation: false' in contract
 assert 'mutation_ownership_moved: false' in contract
 assert 'onRequestPost' not in contract
 
-# Build 363 passive browser service. Registration itself performs no request.
+# Build 363 passive browser service remains available unchanged.
 assert 'export const BUILD = 363' in client_service
 assert 'export const CONTRACT_BUILD = 362' in client_service
 assert "export const SERVICE_ID = 'operations-membership-read'" in client_service
@@ -77,9 +82,9 @@ assert "export const OWNER = 'operations'" in client_service
 assert "export const ROUTE = '/api/admin/contracts/operations-membership-read'" in client_service
 assert 'ensureOperationsMembershipReadService' in client_service
 
-# Build 363/364 shared Commerce runtime adds page-specific Membership prerequisites.
-assert 'const BUILD = 363;' in runtime
-assert 'const ACTIVATION_BUILD = 364;' in runtime
+# Shared Commerce runtime may advance after Build 364, but the Membership boundary must remain.
+assert numeric(r'const BUILD = (\d+);', runtime) >= 363
+assert numeric(r'const ACTIVATION_BUILD = (\d+);', runtime) >= 364
 assert "const MEMBERSHIP_RUNTIME_PAGE = '/admin/membership/'" in runtime
 assert "const MEMBERSHIP_REQUIRED_SERVICES = Object.freeze(['operations-membership-read'])" in runtime
 assert "const LEGACY_OPERATIONS_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-read', 'accounting-read'])" in runtime
@@ -91,19 +96,20 @@ assert 'apiFetch(' not in runtime
 assert 'fetch(' not in runtime
 assert 'currentMembershipPageProven' in runtime
 
-# Build 364 Core coverage keeps the original Operations pages and adds Membership only.
+# Core coverage may expand later, but Membership and the original Operations pages must remain covered.
 commerce = section(groups, "id: 'commerce-operations'", "id: 'creative-production'")
-assert "entry: '../modules/commerce-operations/runtime.mjs?v=363'" in commerce
+entry_version = numeric(r"entry: '../modules/commerce-operations/runtime\.mjs\?v=(\d+)'", commerce)
+assert entry_version >= 363
 assert "runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations'])" in commerce
 for path in ['/admin/operations/', '/admin/customer-documents/', '/admin/orders/', '/admin/membership/']:
     assert f"'{path}'" in groups
 assert 'OPERATIONS_MEMBERSHIP_READ_CONTRACT_BUILD = 362' in groups
-assert 'RUNTIME_OPERATIONS_BUILD = 363' in groups
-assert 'OPERATIONS_RUNTIME_COVERAGE_BUILD = 364' in groups
+assert numeric(r'RUNTIME_OPERATIONS_BUILD = (\d+);', groups) >= 363
+assert numeric(r'OPERATIONS_RUNTIME_COVERAGE_BUILD = (\d+);', groups) >= 364
 assert 'membershipMutationOwnershipMovedByTopLevelRuntime: false' in groups
-assert "dd-admin-module-runtime.mjs?v=364" in admin_js
+assert numeric(r'dd-admin-module-runtime\.mjs\?v=(\d+)', admin_js) >= 364
 
-# Membership page loads Core before retained UI scripts and fixes the existing policy mount typo.
+# Membership page keeps its proven loader checkpoint and intended UI wiring.
 assert 'id="tierPolicyAdminMount"' in page
 assert 'id="adminTierPolicyMount"' not in page
 assert "getElementById('tierPolicyAdminMount')" in policy_ui or 'getElementById("tierPolicyAdminMount")' in policy_ui
