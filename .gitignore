@@ -10,3 +10,7 @@ node_modules/
 
 # Temporary schema safety backups
 database_full_schema.before_*.sql
+
+# Local parity evidence / rollback artifacts
+build*.local.*
+local_backups/
