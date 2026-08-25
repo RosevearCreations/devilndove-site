@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Builds 349–351 Creative & Production Packaging Runtime Staged
+# Devil n Dove AI Context — Builds 352–354 Creative Process Runtime Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, `docs/architecture/SOURCE_CONTROL_BRANCHING.md`, the Build 323–351 architecture notes, and validation files through `BUILD349_351_VALIDATION.md`.
+Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, `docs/architecture/SOURCE_CONTROL_BRANCHING.md`, architecture notes through Build 354, and validation files through `BUILD352_354_VALIDATION.md`.
 
 ## Production safety
 
@@ -38,16 +38,16 @@ Core runtime implementation                    305
 Commerce/Operations runtime                    315
 Accounting reads through 342                   validated
 Accounting reads 343–345                       browser proven; corrected local rerun required
-Accounting startup-read audit                  346 validated
-Business & Administration runtime impl         347 validated
-Business Accounting runtime activation         348 validated
+Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
-Packaging top-level audit                      349 staged
-Creative & Production runtime impl             350 staged
-Creative Packaging runtime activation          351 staged
+Creative Packaging runtime                     351 browser proven; local required
+Creative Process read contract                 352 staged
+Creative & Production runtime implementation   353 staged
+Creative Process runtime activation            354 staged
 Contract catalog                               345
-Passive service adapters                       345
-Accounting mutation ownership                  false
+Default passive service adapters               345
+Creative Process passive service registration  353 runtime-local
+Accounting mutation ownership moved            false
 Creative/Packaging mutation ownership moved    false
 ```
 
@@ -55,7 +55,7 @@ Build 306 and Build 308 retain their historical standalone local-signoff caveats
 
 ## Read/runtime boundary rule
 
-GET/read paths report schema readiness. Migrations/readiness tooling creates or repairs schema. Never restore request-time DDL to a read because Development reports `schema_ready=false`.
+GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema. Never restore request-time DDL to a read because Development reports a schema deficit.
 
 A loader/read-contract migration or top-level runtime activation never implies mutation ownership. Existing compatibility POST/PUT/DELETE/upload/import paths remain legacy until dedicated mutation contracts are separately extracted.
 
@@ -81,26 +81,15 @@ Prior parity audit also identified Production-only active tables including `acco
 - Builds 331–336: fully validated 2026-08-24.
 - Builds 337–339: fully validated 2026-08-24; Builds 338/339 retain separate schema-parity findings.
 - Builds 340–342: fully validated 2026-08-24; Build 341 retains separate schema-parity findings.
-- Builds 343–345: browser proven and schema-ready. The historical local regression was corrected to stop freezing pre-348 Business runtime state; corrected local rerun still required.
-- Builds 346–348: fully validated 2026-08-24. Firefox proved active `business-administration` Accounting runtime with 28 registered required services, no runtime network transport and mutation ownership false.
-- Build 301 Packaging compatibility checkpoint: COMPLETE IN DEVELOPMENT with native reads/writes, verified Save Project, Build 297 fallback removal and Build 292 -> 291 write provenance.
-- Builds 349–351: staged / validation required.
+- Builds 343–345: browser proven and schema-ready. The historical regression was corrected after Build 348 invalidated its obsolete inactive-Business assertion; corrected local rerun still required.
+- Builds 346–348: fully validated 2026-08-24. Business & Administration is active only for `/admin/accounting/`; its runtime creates no network transport and owns no Accounting mutations.
+- Build 301 Packaging compatibility checkpoint: COMPLETE IN DEVELOPMENT with native reads/writes, verified Save Project, Build 297 legacy GET fallback removal, and Build 292 -> 291 write provenance.
+- Builds 349–351: browser proven 2026-08-24; local regression required. Firefox proved active `creative-production` Packaging runtime while the Build 301 Packaging chain remained healthy and mutation ownership unchanged.
+- Builds 352–354: staged / validation required.
 
-## Builds 349–351
+## Builds 349–351 browser proof
 
-### Build 349 — Packaging top-level runtime audit
-
-The completed Build 301 Packaging checkpoint is approved as the safest first `creative-production` page. Its startup gate, client/native read transport, native client, save stabilization, read authority and write authority are already proven. No new read/write extraction is required merely to wrap it at the top-level application-module layer.
-
-### Build 350 — passive Creative & Production runtime
-
-`public/js/modules/creative-production/runtime.mjs` supports only `packaging` and `/admin/packaging-studio/`. It requires the existing `inventory-read`, `catalog-read`, and `content-media` services, performs no reads/writes itself, creates no network transport, and owns no Packaging/Creative mutations. It only reports the existing Packaging domain-runtime status dynamically.
-
-### Build 351 — first Creative & Production activation
-
-`creative-production` now has runtime domain `packaging` only. The Packaging page cache-busts `admin.js?v=351`, which loads the current Core bridge. The existing Packaging Build 297/298/300/301 script chain remains unchanged. `creative`, `caip`, and `content` remain without top-level Creative runtime coverage.
-
-Expected Development state after verified auth and Packaging load:
+Validated Development state:
 
 ```text
 application_module                       creative-production
@@ -121,19 +110,52 @@ packaging_legacy_get_fallback_removed    true
 packaging_legacy_server_get_reachable    false
 compatibility_build                      301
 compatibility_state                      active
+native_read_status                       200
 ```
+
+## Build 352 — Creative Process read contract
+
+`/api/admin/contracts/creative-process-read` is GET-only and Creative-owned. It wraps the retained non-mutating Creative Process GET and reports Build 352, legacy Build 274, owner `creative`, `request_time_schema_mutation=false`, and `mutation_ownership_moved=false`.
+
+The legacy Creative Process POST authority is unchanged. `post_material_inventory`, `record_inventory_use`, and `correct_inventory_use` continue to consume Inventory-owned `inventory-post` and `inventory-reverse` authorities.
+
+## Build 353 — Creative & Production runtime expansion
+
+`public/js/modules/creative-production/runtime.mjs` now supports `packaging` and `creative` only. Packaging keeps its three existing requirements. Creative Process requires four services:
+
+```text
+creative-process-read
+inventory-read
+inventory-post
+inventory-reverse
+```
+
+`public/js/modules/creative-production/creative-process-read-service.mjs` passively registers `creative-process-read` into Core's shared registry when the Creative runtime loads. Registration performs no HTTP request; `list()` calls the Build 352 contract only when explicitly invoked.
+
+The top-level runtime still creates no network transport and owns no Packaging or Creative mutations.
+
+## Build 354 — Creative Process activation
+
+`creative-production` runtime domains are now `packaging` and `creative`. Explicit page coverage is limited to:
+
+```text
+/admin/packaging-studio/
+/admin/creative-process/
+```
+
+The Creative Process page loads `admin.js?v=354` before its retained Build 274 UI script. CAIP and Content remain without top-level Creative runtime coverage.
 
 ## Historical regression rule
 
-Historical regression scripts verify the durable boundaries introduced by their own build. They must not freeze later architectural state. Build 343–345 therefore does not require Business & Administration to remain inactive after Build 348.
+Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later architectural state.
 
 ## Next direction
 
-1. Run the corrected Build 343–345 local regression plus the Build 349–351 local regression in one pull/checkpoint.
-2. Browser-validate Build 351 on `/admin/packaging-studio/` without performing a mutation.
-3. If both pass, mark Builds 343–345 and 349–351 validated.
-4. Keep all Packaging/Creative mutation ownership unchanged.
-5. Continue fresh-install schema parity separately, then source-audit either additional Creative domains or remaining Commerce/Business route coverage.
+1. Run the combined local checkpoint for Builds 343–345, 349–351 and 352–354.
+2. Browser-validate Build 354 on `/admin/creative-process/` using GET/read checks only.
+3. If clean, mark those remaining local/browser gates validated.
+4. Keep Creative Process and Packaging mutation authority unchanged.
+5. Continue fresh-install schema parity separately, then source-audit CAIP and Content as the remaining Creative & Production domains before expanding top-level coverage.
 
 ## Validation preference
 
