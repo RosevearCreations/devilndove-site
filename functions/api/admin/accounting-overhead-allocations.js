@@ -3,10 +3,7 @@
 
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
 import { assertAccountingPeriodOpen } from './_accountingPeriods.js';
-
-function rows(result) {
-  return Array.isArray(result?.results) ? result.results : [];
-}
+import { readAccountingOverheadAllocations } from '../_lib/accountingOverheadAllocationsReadService.js';
 
 function centsFromAmount(value) {
   const num = Number(value || 0);
@@ -59,21 +56,15 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
 
-  await ensureTable(db);
   const url = new URL(context.request.url);
-  const period = monthValue(url.searchParams.get('month'));
-  const result = await db.prepare(`
-    SELECT allocation_id, period_month, ledger_code, ledger_name, allocation_basis, amount_cents, notes, created_at, updated_at
-    FROM accounting_overhead_allocations
-    WHERE period_month = ?
-    ORDER BY ledger_code ASC, ledger_name ASC
-  `).bind(period).all();
-
-  return jsonResponse({
-    ok: true,
-    period_month: period,
-    allocations: rows(result).map((row) => mapRow(row, period)),
-  });
+  try {
+    const result = await readAccountingOverheadAllocations(db, {
+      month: url.searchParams.get('month'),
+    });
+    return jsonResponse(result);
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error?.message || 'Failed to load overhead allocations.' }, 500);
+  }
 }
 
 export async function onRequestPost(context) {
