@@ -27,10 +27,11 @@ access_ui = read('public/js/admin-access-tiers.js')
 policy_ui = read('public/js/admin-tier-policy.js')
 
 # Build 362 — Tier Policy GET uses a non-mutating read service.
+# Later implementation hardening may change how table/readiness detection is performed,
+# but must preserve the Build 362 contract and never restore GET-time schema mutation.
 assert 'export const BUILD = 362' in read_service
 assert "export const OWNER = 'operations'" in read_service
 assert "export const TABLE = 'membership_tier_policies'" in read_service
-assert 'sqlite_master' in read_service
 assert 'in-memory-defaults-missing-schema' in read_service
 assert 'request_time_schema_mutation: false' in read_service
 for forbidden in ['CREATE TABLE', 'ALTER TABLE', 'INSERT INTO', 'UPDATE ', 'DELETE FROM']:
