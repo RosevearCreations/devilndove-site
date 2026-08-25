@@ -1,57 +1,57 @@
 # Devil n Dove — Rolling Next 20 Builds
 
-Updated 2026-08-25 after staging the 10-build Custom Requests read-surface batch (Builds 373–382).
+Updated 2026-08-25 after staging the 10-build Commerce & Operations batch (Builds 383–392).
 
 ## Cadence rule
 
 Work in **10-build execution batches**. Keep the next **20 builds** visible here so two full batches are always queued behind the current work.
 
-This file is a rolling plan, not permission to ignore validation findings. A browser/local failure may insert a bounded correction build and shift later numbers. Production remains frozen unless separately promoted.
+A validation failure may insert a bounded correction build and shift later numbers. Production remains frozen unless separately promoted.
 
-## Current execution batch — Builds 373–382
+## Current execution batch — Builds 383–392
 
-| Build | Target | Outcome |
+| Build | Target | Staged outcome |
 | --- | --- | --- |
-| 373 | Custom Requests marketplace CSV | Add non-mutating CSV export over already-prepared packs. |
-| 374 | Marketplace export readiness | Add read-only schema/readiness contract; no preset seeding. |
-| 375 | Dedicated page diagnostics bootstrap | Read Build 370 startup contract from the dedicated page. |
-| 376 | Safe export toolbar | Add explicit all/Etsy/Facebook/Pinterest/manual safe downloads. |
-| 377 | Legacy CSV-link rewrite | Rewrite old `?format=marketplace_csv` links on `/admin/custom-request/`. |
-| 378 | Startup schema visibility | Show Build 370 checked/missing startup tables in-page. |
-| 379 | Export schema visibility | Show export-pack and optional marketplace-preset readiness in-page. |
-| 380 | Dedicated-page guard | MutationObserver/capture guard prevents the old CSV GET from being used on the dedicated workspace. |
-| 381 | Regression | Pin non-mutating export/read behavior and preserve 371/372 loader ownership boundaries. |
-| 382 | Rolling roadmap/handoff | Adopt 10-build execution cadence and maintain this next-20 queue. |
+| 383 | Gift Cards schema authority audit | Identified Gift Card-owned schema, startup GET mutation, shared notification conflict. |
+| 384 | Gift Cards fresh-install parity | Added `database_gift_card_runtime_parity.sql` for eight Gift Card-owned tables/default templates. |
+| 385 | Gift Cards read contract | Added readiness-aware GET-only `operations-gift-cards-read`. |
+| 386 | Gift Cards Operations workspace | Automatic page read now uses one passive service; Commerce runtime/page activation added. |
+| 387 | Gift Cards mutation audit | Kept writes compatibility-owned; made delivery-history GET non-mutating. |
+| 388 | Orders schema/read audit | Confirmed current list GET is SELECT-only and uses `*_cents`/`total_cents`. |
+| 389 | Orders status mutation contract | Added Operations-owned order-status authority delegating mature implementation. |
+| 390 | Orders payment/refund boundary | Audited provider-aware refund/dispute writes; no provider behavior changed. |
+| 391 | Orders fulfillment boundary | Added narrow `fulfilled` transition authority. |
+| 392 | Today Tasks action contract | Added Operations-owned completed/ignored/snoozed authority; schema follow-up deferred to 393. |
 
-## Next execution batch — Builds 383–392
+## Next execution batch — Builds 393–402
 
 | Build | Planned target | Guardrail / expected result |
 | --- | --- | --- |
-| 383 | Gift Cards schema authority audit | Inventory all active gift-card tables/columns/endpoints before touching runtime. |
-| 384 | Gift Cards fresh-install parity | Restore missing active gift-card schema to aggregate/migration authority; no request-time DDL. |
-| 385 | Gift Cards read contract | Add readiness-aware admin gift-card read boundary. |
-| 386 | Gift Cards Operations workspace | Activate a dedicated read-only admin page if schema parity is proven. |
-| 387 | Gift Cards mutation audit | Separate issue/redeem/adjust/balance writes from read lifecycle; do not move writes implicitly. |
-| 388 | Orders schema/read audit | Recheck `orders.total_amount|total` drift and current startup reads before write extraction. |
-| 389 | Orders status mutation contract | Extract reviewed order-status changes behind an Operations-owned authority. |
-| 390 | Orders payment/refund boundary | Audit payment/refund/dispute writes and identify owned authority without changing providers. |
-| 391 | Orders fulfillment boundary | Extract fulfillment/status evidence write boundary where safe. |
-| 392 | Today Tasks action contract | Formalize Done/Ignore/Snooze write authority; preserve compensating/audited semantics. |
-
-## Following execution batch — Builds 393–402
-
-| Build | Planned target | Guardrail / expected result |
-| --- | --- | --- |
-| 393 | Today Tasks action schema ownership | Remove action-time schema self-creation once migration authority is verified. |
-| 394 | Membership assignment mutation contract | Extract assign/remove tier writes without changing read runtime. |
+| 393 | Today Tasks action schema ownership | Move `today_task_actions` table/column creation to migration authority; remove POST self-repair after parity proof. |
+| 394 | Membership assignment mutation contract | Extract assign/remove tier writes without changing validated read runtime. |
 | 395 | Membership policy mutation contract | Extract policy edits from compatibility POST; keep Build 362 read untouched. |
-| 396 | Customer Documents startup-read audit | Identify automatic reads and any hidden schema mutation. |
+| 396 | Customer Documents startup-read audit | Identify automatic reads and hidden schema mutation. |
 | 397 | Customer Documents owned read boundary | Add page-specific read contract/service only if audit is clean. |
 | 398 | Customer Documents mutation audit | Map create/send/archive/delete/document-state writes to retained authorities. |
 | 399 | Accounting parity repair batch | Address active missing accounting schema such as `accounting_order_records`, `accountant_export_manifests`, and known column drift. |
-| 400 | Aggregate-schema execution verification | Resolve `notification_dispatch_log(s)` fresh-install discrepancy and prove aggregate schema actually materializes declared tables. |
-| 401 | Production-only active-table parity | Re-audit remaining active Production-only tables and add missing fresh-install definitions where justified. |
-| 402 | Fresh-install parity smoke + data-copy gate | Rebuild a clean Development database, verify active schema parity, then decide whether Production business-data copy is safe. |
+| 400 | Aggregate-schema execution verification | Resolve `notification_dispatch_log(s)` discrepancy and prove declared aggregate tables materialize. |
+| 401 | Production-only active-table parity | Re-audit active Production-only tables and add justified fresh-install definitions. |
+| 402 | Fresh-install parity smoke + data-copy gate | Rebuild clean Development schema, verify parity, then decide whether Production business-data copy is safe. |
+
+## Following execution batch — Builds 403–412
+
+| Build | Planned target | Guardrail / expected result |
+| --- | --- | --- |
+| 403 | Shared notification_outbox authority | Reconcile current aggregate shape with Gift Card and Orders writer expectations before consumer migration. |
+| 404 | Gift Card card-action mutation contract | Formalize activate/void/refund/reissue authority after Build 384 migration proof. |
+| 405 | Gift Card template/resend mutation contract | Extract template/resend writes; default templates remain migration-owned. |
+| 406 | Gift Card provider-send contract | Extract queue/provider/outbox write authority only after notification schema reconciliation. |
+| 407 | Gift Card abuse lock/unlock contract | Replace legacy action/key mismatch with stable lockout-ID semantics and audit evidence. |
+| 408 | Orders mutation consumer migration | Move reviewed status/fulfillment UI calls to Builds 389/391 contracts after source + browser safety proof. |
+| 409 | Payment/refund schema + integration gate | Prove refund/dispute columns and provider test harness before any refund consumer migration. |
+| 410 | Commerce & Operations boundary sanity | Re-run every page-specific Operations runtime/read contract and mutation-ownership invariant. |
+| 411 | Modular documentation consolidation | Consolidate architecture/validation handoff while preserving exact historical validation states. |
+| 412 | Development release-candidate gate | Full Development regression, schema readiness, browser sanity, and Production-promotion decision checkpoint. |
 
 ## Standing constraints
 
@@ -61,13 +61,14 @@ This file is a rolling plan, not permission to ignore validation findings. A bro
 - Creative & Production loader/read boundaries are closed and should not be expanded merely to create activity.
 - Production/main remains frozen.
 - Fresh-install schema parity must be resolved before Production business-data copy.
-- Passing browser/local write tests are not repeated merely to prove a wrapper.
+- Passing browser/local writes are not repeated merely to prove a wrapper.
+- External provider mutations (Stripe/PayPal/etc.) require dedicated integration gates before consumer migration.
 
 ## Rolling maintenance rule
 
 When a 10-build batch closes:
 
-1. Mark its exact local/browser state in the relevant validation files.
+1. Mark exact local/browser state in validation files.
 2. Promote the next 10 rows into the current execution batch.
-3. Append another 10 rows so this document again contains 20 future builds.
-4. Reorder only when validation evidence or schema parity makes the planned order unsafe.
+3. Append another 10 rows so the document again contains 20 future builds.
+4. Reorder only when validation or parity evidence makes the planned order unsafe.
