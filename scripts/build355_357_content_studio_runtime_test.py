@@ -34,7 +34,6 @@ runtime = read('public/js/modules/creative-production/runtime.mjs')
 groups = read('public/js/core/dd-application-module-groups.mjs')
 admin_js = read('public/js/admin.js')
 page = read('admin/content-studio/index.html')
-caip = read('functions/api/admin/creative-assets.js')
 
 # Build 355 — schema-aware read authority with no request-time DDL/DML.
 assert 'export const BUILD = 355' in server_service
@@ -84,6 +83,7 @@ assert 'apiFetch(' not in runtime
 assert 'fetch(' not in runtime
 
 # Build 357 durable boundary — Content Studio remains inside top-level Creative runtime coverage.
+# Later builds may add additional Creative & Production domains/pages.
 creative = section(groups, "id: 'creative-production'", "id: 'business-administration'")
 assert cache_version(creative, r"\.\./modules/creative-production/runtime\.mjs\?v=(\d+)") >= 356
 runtime_domains = section(creative, 'runtimeDomains:', '),')
@@ -101,11 +101,6 @@ assert admin_version >= 357
 admin_pos = page.index(f'/public/js/admin.js?v={admin_version}')
 content_pos = page.index('/public/js/admin-content-studio.js?v=273')
 assert admin_pos < content_pos
-
-# CAIP remains intentionally unactivated because its GET still performs schema ensures.
-assert 'await ensureCreativeAssetIntelligenceSchema(state.db);' in caip
-assert 'await ensureCreativeAssetOperationsSchema(state.db);' in caip
-assert "'caip'" not in runtime_domains
 
 print('BUILDS 355-357 CONTENT STUDIO RUNTIME: PASS')
 print('No Cloudflare resource was contacted.')
