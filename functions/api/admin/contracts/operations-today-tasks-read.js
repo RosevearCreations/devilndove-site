@@ -1,9 +1,10 @@
-// Devil n Dove Build 366 — Operations-owned Today Tasks GET-only contract.
+// Devil n Dove Build 366 contract / Build 369 implementation hardening — Operations-owned Today Tasks GET-only contract.
 // Wraps the retained Today Tasks GET without moving Done/Ignore/Snooze mutation authority.
 
 import { onRequestGet as legacyGet } from '../today-tasks.js';
 
 export const BUILD = 366;
+export const IMPLEMENTATION_BUILD = 369;
 export const CONTRACT_ID = 'operations-today-tasks-read';
 export const OWNER = 'operations';
 
@@ -26,6 +27,7 @@ export async function onRequestGet(context) {
       return json({
         ok: false,
         build: BUILD,
+        implementation_build: IMPLEMENTATION_BUILD,
         contract: CONTRACT_ID,
         owner: OWNER,
         request_time_schema_mutation: false,
@@ -39,6 +41,7 @@ export async function onRequestGet(context) {
       ...data,
       ok: true,
       build: BUILD,
+      implementation_build: Number(data?.implementation_build || IMPLEMENTATION_BUILD),
       contract: CONTRACT_ID,
       owner: OWNER,
       request_time_schema_mutation: false,
@@ -50,6 +53,7 @@ export async function onRequestGet(context) {
     return json({
       ok: false,
       build: BUILD,
+      implementation_build: IMPLEMENTATION_BUILD,
       contract: CONTRACT_ID,
       owner: OWNER,
       request_time_schema_mutation: false,
