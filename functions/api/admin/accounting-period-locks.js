@@ -1,24 +1,20 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import { ensureAccountingPeriodClosuresTable, listAccountingPeriodClosures, getAccountingPeriodClosure, monthValue, normalizeChecklistPayload } from './_accountingPeriods.js';
+import { ensureAccountingPeriodClosuresTable, getAccountingPeriodClosure, monthValue, normalizeChecklistPayload } from './_accountingPeriods.js';
 import { ensureAccountingAttachmentsTable, listAccountingAttachments } from './_accountingAttachments.js';
 import { ensureAccountingStatementImportsTables, listAccountingReconciliationExceptions, listAccountingStatementImports } from './_accountingStatementImports.js';
+import { BUILD, CONTRACT_ID, OWNER, readAccountingPeriodLocks } from '../_lib/accountingPeriodLocksReadService.js';
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureAccountingPeriodClosuresTable(db);
-  await ensureAccountingAttachmentsTable(db);
-  await ensureAccountingStatementImportsTables(db);
   const url = new URL(context.request.url);
-  const period = normalizeText(url.searchParams.get('period_month'));
-  if (period) {
-    const row = await getAccountingPeriodClosure(db, period);
-    return jsonResponse({ ok: true, period_month: monthValue(period), closure: row, closures: row ? [row] : [] });
+  try {
+    return jsonResponse(await readAccountingPeriodLocks(db, { periodMonth: normalizeText(url.searchParams.get('period_month')), limit: Number(url.searchParams.get('limit') || 18) || 18 }));
+  } catch (error) {
+    return jsonResponse({ ok: false, build: BUILD, contract: CONTRACT_ID, owner: OWNER, error: error?.message || 'Failed to load accounting period locks.' }, 500);
   }
-  const closures = await listAccountingPeriodClosures(db, { limit: Number(url.searchParams.get('limit') || 18) || 18 });
-  return jsonResponse({ ok: true, closures });
 }
 
 export async function onRequestPost(context) {
@@ -52,9 +48,7 @@ export async function onRequestPost(context) {
     if (requiredKinds.includes('receipt') && !receipts.length) missing.push('bill or receipt support');
     if (!imports.length) missing.push('statement import');
     if (exceptions.length) missing.push(`${exceptions.length} unresolved reconciliation exception(s)`);
-    if (missing.length) {
-      return jsonResponse({ ok: false, error: `Cannot lock ${periodMonth} yet. Still needed: ${missing.join(', ')}.` , missing_requirements: missing }, 400);
-    }
+    if (missing.length) return jsonResponse({ ok: false, error: `Cannot lock ${periodMonth} yet. Still needed: ${missing.join(', ')}.`, missing_requirements: missing }, 400);
   }
 
   await db.prepare(`
@@ -71,21 +65,11 @@ export async function onRequestPost(context) {
       reopened_by_user_id = CASE WHEN excluded.lock_state = 'open' THEN excluded.reopened_by_user_id ELSE accounting_period_closures.reopened_by_user_id END,
       reopened_at = CASE WHEN excluded.lock_state = 'open' THEN CURRENT_TIMESTAMP ELSE accounting_period_closures.reopened_at END,
       updated_at = CURRENT_TIMESTAMP
-  `).bind(
-    periodMonth,
-    lockState,
-    JSON.stringify(checklist),
-    closeNotes || null,
-    lockState === 'locked' ? Number(adminUser.user_id || 0) : null,
-    lockState,
-    lockState === 'open' ? Number(adminUser.user_id || 0) : null,
-    lockState,
-  ).run();
+  `).bind(periodMonth, lockState, JSON.stringify(checklist), closeNotes || null, lockState === 'locked' ? Number(adminUser.user_id || 0) : null, lockState, lockState === 'open' ? Number(adminUser.user_id || 0) : null, lockState).run();
 
   await auditAdminAction(context.env, context.request, adminUser, {
     action_type: lockState === 'locked' ? 'lock_accounting_period' : 'reopen_accounting_period',
-    target_type: 'accounting_period_closure',
-    target_key: periodMonth,
+    target_type: 'accounting_period_closure', target_key: periodMonth,
     details: { period_month: periodMonth, lock_state: lockState, close_checklist: checklist, close_notes: closeNotes || '' }
   });
 

@@ -1,7 +1,7 @@
-// Devil n Dove Build 327 browser adapters for implemented read contracts.
+// Devil n Dove Build 330 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 327;
+export const BUILD = 330;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -19,6 +19,9 @@ const ROUTES = Object.freeze({
   'accounting-item-costing-read': '/api/admin/contracts/accounting-item-costing-read',
   'accounting-journal-read': '/api/admin/contracts/accounting-journal-read',
   'accounting-gifi-notes-read': '/api/admin/contracts/accounting-gifi-notes-read',
+  'accounting-gifi-summary-read': '/api/admin/contracts/accounting-gifi-summary-read',
+  'accounting-period-locks-read': '/api/admin/contracts/accounting-period-locks-read',
+  'accounting-attachments-read': '/api/admin/contracts/accounting-attachments-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -122,6 +125,22 @@ export function createDefaultModuleServices() {
       const data = await fetchContract(ROUTES['accounting-gifi-notes-read'], { year: text(options.year) });
       return Object.freeze({ ...accountingReadResult(data, 'notes'), year: data.year || null });
     }),
+    'accounting-gifi-summary-read': service('accounting-gifi-summary-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-gifi-summary-read'], { year: text(options.year) });
+      return Object.freeze({ ...accountingReadResult(data, 'gifi_rows'), year: data.year || null, sourceUsed: data.source_used || null, glReviewSummary: Object.freeze(data.gl_review_summary || {}), unmappedAccounts: Object.freeze(data.unmapped_accounts || []) });
+    }),
+    'accounting-period-locks-read': service('accounting-period-locks-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-period-locks-read'], { period_month: text(options.periodMonth || options.month), limit: boundedInt(options.limit, 18, 1, 60) });
+      return Object.freeze({ ...accountingReadResult(data, 'closures'), periodMonth: data.period_month || null, closure: data.closure || null });
+    }),
+    'accounting-attachments-read': service('accounting-attachments-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-attachments-read'], {
+        expense_id: Number(options.expenseId || 0) || '', vendor_id: Number(options.vendorId || 0) || '', reconciliation_type: text(options.reconciliationType),
+        period_month: text(options.periodMonth), tax_year: text(options.taxYear), scope_key: text(options.scopeKey), attachment_kind: text(options.attachmentKind),
+        attachment_scope: text(options.attachmentScope), provider_scope: text(options.providerScope), limit: boundedInt(options.limit, 50, 1, 500),
+      });
+      return accountingReadResult(data, 'attachments');
+    }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
       return Object.freeze({ rows: Object.freeze(data.media || []), count: Number(data.count || 0), contract: data.contract });
@@ -134,10 +153,7 @@ export function registerDefaultModuleServices(registry) {
   const defaults = createDefaultModuleServices();
   const registered = [];
   for (const [id, value] of Object.entries(defaults)) {
-    if (!registry.service(id)) {
-      registry.registerService(id, value, value.owner);
-      registered.push(id);
-    }
+    if (!registry.service(id)) { registry.registerService(id, value, value.owner); registered.push(id); }
   }
   const missing = Object.keys(defaults).filter((id) => !registry.service(id));
   return Object.freeze({ ok: missing.length === 0, registered: Object.freeze(registered), available: Object.freeze(Object.keys(defaults).filter((id) => Boolean(registry.service(id)))), missing: Object.freeze(missing) });

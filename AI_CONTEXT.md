@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Builds 325–327 Accounting Read Batch Staged
+# Devil n Dove AI Context — Builds 328–330 Accounting Read Batch Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -12,7 +12,11 @@ Primary modular authorities now include:
 - `docs/architecture/BUILD325_ACCOUNTING_ITEM_COSTING_READ_EXTRACTION.md`
 - `docs/architecture/BUILD326_ACCOUNTING_JOURNAL_READ_EXTRACTION.md`
 - `docs/architecture/BUILD327_ACCOUNTING_GIFI_NOTES_READ_EXTRACTION.md`
+- `docs/architecture/BUILD328_ACCOUNTING_GIFI_SUMMARY_READ_EXTRACTION.md`
+- `docs/architecture/BUILD329_ACCOUNTING_PERIOD_LOCKS_READ_EXTRACTION.md`
+- `docs/architecture/BUILD330_ACCOUNTING_ATTACHMENTS_READ_EXTRACTION.md`
 - `BUILD325_327_VALIDATION.md`
+- `BUILD328_330_VALIDATION.md`
 
 ## Production safety
 
@@ -65,9 +69,12 @@ Build 321 Overhead-product read            VALIDATED 2026-08-24
 Build 322 Product-cost read                VALIDATED 2026-08-24
 Build 323 Accounting page runtime audit    VALIDATED 2026-08-24
 Build 324 Accounting profit/loss read      VALIDATED 2026-08-24
-Build 325 Accounting item-costing read     STAGED
-Build 326 Accounting journal read          STAGED
-Build 327 Accounting GIFI notes read       STAGED
+Build 325 Accounting item-costing read     BROWSER PROVEN; LOCAL REQUIRED
+Build 326 Accounting journal read          BROWSER PROVEN; LOCAL REQUIRED
+Build 327 Accounting GIFI notes read       BROWSER PROVEN; LOCAL REQUIRED
+Build 328 Accounting GIFI summary read     STAGED
+Build 329 Accounting period-locks read     STAGED
+Build 330 Accounting attachments read      STAGED
 ```
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
@@ -80,18 +87,21 @@ Core runtime implementation               305
 Commerce/Operations runtime               315
 Accounting page bridge                    323 validated shadow/domain-bridge
 Accounting profit/loss read               324 validated
-Accounting item-costing read              325 staged
-Accounting journal read                   326 staged
-Accounting GIFI notes read                327 staged
-Contract catalog                          327
-Passive service adapters                  327
+Accounting item-costing read              325 browser proven
+Accounting journal read                   326 browser proven
+Accounting GIFI notes read                327 browser proven
+Accounting GIFI summary read              328 staged
+Accounting period locks read              329 staged
+Accounting attachments read               330 staged
+Contract catalog                          330
+Passive service adapters                  330
 Business & Administration runtime         inactive
 Accounting mutation ownership             unmoved
 ```
 
-## Build 324 result and schema-parity finding
+## Build 324 schema-parity finding
 
-Build 324 local and browser gates passed. Development returned:
+Development returned:
 
 ```text
 missing_tables   []
@@ -99,27 +109,26 @@ missing_columns  ["orders.total_amount|total"]
 mutation         false
 ```
 
-This means the P&L read boundary is correct, while the Development `orders` schema lacks both logical amount alternatives currently understood by that service. Keep this on the separate schema-parity track. Do not add DDL to the GET.
+Keep this on the separate schema-parity track. Do not add DDL to the GET.
 
-## Builds 325–327 staged batch
+## Builds 325–327 browser result
 
-### Build 325
+Development browser proof passed all six legacy/contract requests. Item costing, journal and GIFI notes each returned HTTP 200, the correct build/owner, `schema_ready=true`, and `request_time_schema_mutation=false`. All three passive services reported their expected builds and no schema mutation. Accounting remained `business-administration` / `domain-bridge` with no active top-level Business & Administration runtime. The single local batch regression remains to close these builds fully.
 
-`/api/admin/accounting-item-costing` now delegates to an Accounting-owned non-mutating service, also exposed as `/api/admin/contracts/accounting-item-costing-read`.
+## Builds 328–330 staged batch
 
-### Build 326
+### Build 328
+`/api/admin/accounting-gifi-summary` no longer runs `ensureGlSchema()` or request-time CREATE/ALTER. It delegates to an Accounting-owned schema-aware read service. Legacy CSV export is preserved from the service result.
 
-`/api/admin/accounting-journal` GET no longer calls `ensureJournalSchema()`. It delegates to an Accounting-owned journal read service that reports missing journal tables/columns without creating them. Explicit POST sync/validate/post actions retain write-side schema compatibility for now.
+### Build 329
+`/api/admin/accounting-period-locks` GET no longer ensures period-closure, attachment or statement-import schema. It reads only existing `accounting_period_closures`. Explicit POST lock/reopen behavior retains its existing write-side prerequisites and ensures.
 
-### Build 327
+### Build 330
+`/api/admin/accounting-attachments` GET no longer ensures/repairs the attachments table. It delegates to an Accounting-owned metadata read service. Multipart upload POST and R2/database write behavior remain unchanged in authority.
 
-`/api/admin/accounting-gifi-notes` GET no longer creates its notes table/index. It delegates to an Accounting-owned read service. The explicit POST save path retains write-side ensure behavior.
+## Next direction
 
-## Next automatic blocker
-
-`/api/admin/accounting-gifi-summary` still calls `ensureGlSchema()` from GET and can CREATE/ALTER `general_ledger_accounts`. This is now the clearest next read-time DDL blocker.
-
-After the 325–327 batch validates, continue in small batches rather than one build per user validation cycle. A sensible next batch begins with GIFI summary, then other automatic Accounting page reads such as period locks / reconciliation-related reads after source audit.
+Continue batching a few automatic Accounting reads at a time. Likely next candidates after source audit include vendors/recurring rules, reconciliation/statement imports, year-end close or evidence checks. Do not activate the top-level `business-administration` runtime until automatic page reads are owned/non-mutating.
 
 ## Separate schema/data parity track — DO NOT MIX
 

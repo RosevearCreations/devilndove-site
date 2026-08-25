@@ -1,8 +1,8 @@
-// Devil n Dove Build 327 cross-module contract catalog.
+// Devil n Dove Build 330 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
-// Accounting read extraction now includes profit/loss, item costing, journal, and GIFI notes.
+// Accounting read extraction now includes GIFI summary, period-lock and attachment metadata reads.
 
-export const BUILD = 327;
+export const BUILD = 330;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -50,6 +50,9 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('accounting-item-costing-read', 'accounting', ['accounting'], 'Read monthly estimated item costing and recognized rough COGS without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-item-costing-read', authorityRoute: '/api/admin/contracts/accounting-item-costing-read', authorityAction: 'read-accounting-item-costing', implementationState: 'implemented-read-only-accounting-item-costing' }),
   contract('accounting-journal-read', 'accounting', ['accounting'], 'Read monthly Accounting journal entries and lines without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-journal-read', authorityRoute: '/api/admin/contracts/accounting-journal-read', authorityAction: 'read-accounting-journal', implementationState: 'implemented-read-only-accounting-journal' }),
   contract('accounting-gifi-notes-read', 'accounting', ['accounting'], 'Read year-specific Accounting GIFI review notes without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-gifi-notes-read', authorityRoute: '/api/admin/contracts/accounting-gifi-notes-read', authorityAction: 'read-accounting-gifi-notes', implementationState: 'implemented-read-only-accounting-gifi-notes' }),
+  contract('accounting-gifi-summary-read', 'accounting', ['accounting'], 'Read year-specific GIFI staging and mapping readiness without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-gifi-summary-read', authorityRoute: '/api/admin/contracts/accounting-gifi-summary-read', authorityAction: 'read-accounting-gifi-summary', implementationState: 'implemented-read-only-accounting-gifi-summary' }),
+  contract('accounting-period-locks-read', 'accounting', ['accounting'], 'Read Accounting period lock/close state without creating closure, attachment, or import schema.', { status: 'implemented', route: '/api/admin/contracts/accounting-period-locks-read', authorityRoute: '/api/admin/contracts/accounting-period-locks-read', authorityAction: 'read-accounting-period-locks', implementationState: 'implemented-read-only-accounting-period-locks' }),
+  contract('accounting-attachments-read', 'accounting', ['accounting'], 'Read Accounting attachment metadata without request-time table or index creation.', { status: 'implemented', route: '/api/admin/contracts/accounting-attachments-read', authorityRoute: '/api/admin/contracts/accounting-attachments-read', authorityAction: 'read-accounting-attachments', implementationState: 'implemented-read-only-accounting-attachments' }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 
@@ -72,10 +75,7 @@ export function validateModuleContracts(definitions, contracts = DD_MODULE_CONTR
   for (const definition of modules.values()) {
     for (const capability of definition.consumes || []) {
       const declared = byId.get(capability);
-      if (!declared) {
-        errors.push(`${definition.id} consumes undeclared contract ${capability}`);
-        continue;
-      }
+      if (!declared) { errors.push(`${definition.id} consumes undeclared contract ${capability}`); continue; }
       if (!declared.consumers.includes(definition.id)) errors.push(`${definition.id} is not an allowed consumer of ${capability}`);
     }
   }
