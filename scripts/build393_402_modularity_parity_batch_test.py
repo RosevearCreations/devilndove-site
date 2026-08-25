@@ -95,7 +95,15 @@ assert "'/admin/customer-documents/'" in runtime
 assert "operations-customer-documents-read" in runtime
 assert '/public/js/admin.js?v=397' in customer_page
 assert 'Build 398' in audit398
-assert 'request_time_schema_mutation: false' in customer_endpoint
+# Build 414 strengthens the mutation boundary: the compatibility POST no longer performs
+# request-time DDL and uses the shared Build 397 readiness authority before any write.
+assert 'const BUILD = 414;' in customer_endpoint
+assert 'readCustomerDocumentsSchemaReadiness' in customer_endpoint
+assert 'requireWriteSchema' in customer_endpoint
+assert 'database_customer_documents_runtime_parity.sql' in customer_endpoint
+assert 'request_time_schema_mutation:false' in customer_endpoint.replace(' ', '')
+for forbidden in ['CREATE TABLE', 'ALTER TABLE']:
+    assert forbidden not in customer_endpoint
 
 # 399 current Accounting parity authority.
 accounting_migration = read('database_accounting_runtime_parity.sql')
