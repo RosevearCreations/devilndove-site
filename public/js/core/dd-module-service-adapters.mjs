@@ -1,7 +1,7 @@
-// Devil n Dove Build 330 browser adapters for implemented read contracts.
+// Devil n Dove Build 333 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 330;
+export const BUILD = 333;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -22,6 +22,9 @@ const ROUTES = Object.freeze({
   'accounting-gifi-summary-read': '/api/admin/contracts/accounting-gifi-summary-read',
   'accounting-period-locks-read': '/api/admin/contracts/accounting-period-locks-read',
   'accounting-attachments-read': '/api/admin/contracts/accounting-attachments-read',
+  'accounting-vendors-read': '/api/admin/contracts/accounting-vendors-read',
+  'accounting-recurring-expense-rules-read': '/api/admin/contracts/accounting-recurring-expense-rules-read',
+  'accounting-statement-provider-profiles-read': '/api/admin/contracts/accounting-statement-provider-profiles-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -140,6 +143,18 @@ export function createDefaultModuleServices() {
         attachment_scope: text(options.attachmentScope), provider_scope: text(options.providerScope), limit: boundedInt(options.limit, 50, 1, 500),
       });
       return accountingReadResult(data, 'attachments');
+    }),
+    'accounting-vendors-read': service('accounting-vendors-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-vendors-read'], { include_inactive: options.includeInactive ? 1 : '' });
+      return accountingReadResult(data, 'vendors');
+    }),
+    'accounting-recurring-expense-rules-read': service('accounting-recurring-expense-rules-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-recurring-expense-rules-read'], { include_inactive: options.includeInactive ? 1 : '' });
+      return Object.freeze({ ...accountingReadResult(data, 'rules'), dueRules: Object.freeze(data.due_rules || []) });
+    }),
+    'accounting-statement-provider-profiles-read': service('accounting-statement-provider-profiles-read', 'accounting', async () => {
+      const data = await fetchContract(ROUTES['accounting-statement-provider-profiles-read']);
+      return Object.freeze({ ...accountingReadResult(data, 'profiles'), defaultProfileCount: Number(data.default_profile_count || 0), defaultsMaterialized: data.defaults_materialized === true, source: data.source || null });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
