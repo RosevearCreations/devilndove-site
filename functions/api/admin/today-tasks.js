@@ -1,9 +1,9 @@
 // File: /functions/api/admin/today-tasks.js
-// Devil n Dove Build 366 — non-mutating Today Tasks GET.
+// Devil n Dove Build 366 contract / Build 369 implementation — non-mutating Today Tasks GET.
 // Read failures are surfaced as readiness metadata instead of being silently converted to zero.
 
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { readTodayTasks } from '../_lib/todayTasksReadService.js';
+import { BUILD, IMPLEMENTATION_BUILD, readTodayTasks } from '../_lib/todayTasksReadService.js';
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { 'Cache-Control': 'no-store' });
@@ -25,7 +25,8 @@ export async function onRequestGet(context) {
   } catch (error) {
     return json({
       ok: false,
-      build: 366,
+      build: BUILD,
+      implementation_build: IMPLEMENTATION_BUILD,
       contract: 'operations-today-tasks-read',
       owner: 'operations',
       request_time_schema_mutation: false,
