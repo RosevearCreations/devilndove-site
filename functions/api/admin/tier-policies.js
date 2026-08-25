@@ -2,10 +2,13 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit
 import {
   BUILD as MEMBERSHIP_TIER_POLICY_READ_BUILD,
   IMPLEMENTATION_BUILD as MEMBERSHIP_TIER_POLICY_READ_IMPLEMENTATION_BUILD,
-  DEFAULT_TIER_POLICIES,
   mapTierPolicyRow,
   readMembershipTierPolicies,
 } from "../_lib/membershipTierPolicyReadService.js";
+
+const MUTATION_BUILD = 395;
+const MUTATION_OWNER = 'operations';
+const MIGRATION_AUTHORITY = 'database_membership_tier_policy_runtime_parity.sql';
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -26,48 +29,6 @@ function normalizeBenefits(value) {
     .filter(Boolean);
 }
 
-// Retained write-side compatibility only. Build 362/365 GET/read paths never call this.
-async function ensureTierPolicyTable(db) {
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS membership_tier_policies (
-      policy_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tier_code TEXT NOT NULL UNIQUE,
-      title TEXT NOT NULL DEFAULT '',
-      short_description TEXT NOT NULL DEFAULT '',
-      benefits_json TEXT NOT NULL DEFAULT '[]',
-      badge_color TEXT NOT NULL DEFAULT '',
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      is_visible INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-}
-
-// Retained write-side compatibility only. Build 362/365 GET/read paths never call this.
-async function seedDefaultPolicies(db) {
-  for (const item of DEFAULT_TIER_POLICIES) {
-    await db
-      .prepare(`
-        INSERT INTO membership_tier_policies (
-          tier_code, title, short_description, benefits_json, badge_color, sort_order, is_visible
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(tier_code) DO NOTHING
-      `)
-      .bind(
-        item.tier_code,
-        item.title,
-        item.short_description,
-        JSON.stringify(item.benefits || []),
-        item.badge_color,
-        item.sort_order,
-        item.is_visible ? 1 : 0
-      )
-      .run();
-  }
-}
-
 export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) {
@@ -85,7 +46,7 @@ export async function onRequestGet(context) {
       ok: true,
       build: MEMBERSHIP_TIER_POLICY_READ_BUILD,
       implementation_build: MEMBERSHIP_TIER_POLICY_READ_IMPLEMENTATION_BUILD,
-      owner: "operations",
+      owner: MUTATION_OWNER,
       schema_ready: read.schema_ready,
       missing_tables: read.missing_tables,
       request_time_schema_mutation: false,
@@ -98,7 +59,7 @@ export async function onRequestGet(context) {
       ok: false,
       build: MEMBERSHIP_TIER_POLICY_READ_BUILD,
       implementation_build: MEMBERSHIP_TIER_POLICY_READ_IMPLEMENTATION_BUILD,
-      owner: "operations",
+      owner: MUTATION_OWNER,
       request_time_schema_mutation: false,
       error_code: "membership_tier_policy_read_failed",
       error: String(error?.message || error || "Membership tier policy read failed."),
@@ -109,22 +70,35 @@ export async function onRequestGet(context) {
 export async function onRequestPost(context) {
   const db = getDb(context.env);
   if (!db) {
-    return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
+    return jsonResponse({ ok: false, build: MUTATION_BUILD, error: "Database binding is not configured." }, 500);
   }
 
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) {
-    return jsonResponse({ ok: false, error: "Admin access required." }, 401);
+    return jsonResponse({ ok: false, build: MUTATION_BUILD, error: "Admin access required." }, 401);
   }
 
-  await ensureTierPolicyTable(db);
-  await seedDefaultPolicies(db);
+  const readiness = await readMembershipTierPolicies(db);
+  if (!readiness.schema_ready) {
+    return jsonResponse({
+      ok: false,
+      build: MUTATION_BUILD,
+      owner: MUTATION_OWNER,
+      error_code: 'membership_tier_policy_schema_not_ready',
+      error: 'Membership tier-policy schema is not ready. Apply the migration authority before saving policy changes.',
+      schema_ready: false,
+      missing_tables: readiness.missing_tables,
+      migration_authority: MIGRATION_AUTHORITY,
+      request_time_schema_mutation: false,
+      request_time_default_seeding: false,
+    }, 503);
+  }
 
   let body;
   try {
     body = await context.request.json();
   } catch {
-    return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+    return jsonResponse({ ok: false, build: MUTATION_BUILD, error: "Invalid JSON body." }, 400);
   }
 
   const tierCode = normalizeCode(body?.tier_code);
@@ -136,11 +110,11 @@ export async function onRequestPost(context) {
   const isVisible = body?.is_visible === false ? 0 : 1;
 
   if (!tierCode) {
-    return jsonResponse({ ok: false, error: "tier_code is required." }, 400);
+    return jsonResponse({ ok: false, build: MUTATION_BUILD, error: "tier_code is required." }, 400);
   }
 
   if (!title) {
-    return jsonResponse({ ok: false, error: "title is required." }, 400);
+    return jsonResponse({ ok: false, build: MUTATION_BUILD, error: "title is required." }, 400);
   }
 
   await db
@@ -198,6 +172,11 @@ export async function onRequestPost(context) {
 
   return jsonResponse({
     ok: true,
+    build: MUTATION_BUILD,
+    owner: MUTATION_OWNER,
+    migration_authority: MIGRATION_AUTHORITY,
+    request_time_schema_mutation: false,
+    request_time_default_seeding: false,
     item: mapTierPolicyRow(row),
   });
 }
