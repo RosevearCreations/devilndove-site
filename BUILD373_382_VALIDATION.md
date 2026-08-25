@@ -1,6 +1,6 @@
 # Builds 373–382 Validation — Custom Requests Read Surface
 
-## Status — STAGED / LOCAL + BROWSER VALIDATION REQUIRED
+## Status — BROWSER PROVEN / LOCAL REGRESSION REQUIRED
 
 ```text
 373  non-mutating marketplace CSV export
@@ -17,7 +17,59 @@
 
 No Custom Requests mutation authority moves in this batch.
 
-## Local regression
+## Firefox proof — PASS 2026-08-25
+
+User-run Development proof returned:
+
+```text
+startup_status                    200
+startup_contract_build            370
+startup_schema_ready              true
+startup_missing_tables            []
+startup_checked_table_count       23
+export_readiness_status           200
+export_readiness_build            374
+export_schema_ready               true
+export_missing_tables             []
+export_optional_schema_ready      true
+export_optional_missing_tables    []
+export_pack_count                 0
+marketplace_preset_count          0
+export_seeds_presets              false
+safe_export_status                200
+safe_export_contract              operations-custom-requests-marketplace-export
+safe_export_build                 373
+safe_export_schema_ready          true
+safe_export_schema_mutation       false
+safe_export_mutation_moved        false
+csv_header_ok                     true
+safe_export_toolbar_link_count    5
+unsafe_legacy_export_link_count   0
+page_tools_build                  380
+page_owned_read_ready             true
+page_export_ready                 true
+legacy_links_rewritten            0
+application_mode                  active
+active_application_module         commerce-operations
+runtime_build                     371
+activation_build                  372
+runtime_state                     active
+current_domain                    operations
+last_pathname                     /admin/custom-request/
+services_ready                    true
+required_services                 ["operations-custom-requests-read"]
+custom_requests_page_proven       true
+creates_network_transport         false
+custom_requests_mutation_ownership false
+contracts_ok                      true
+services_ok                       true
+```
+
+`legacy_links_rewritten=0` is correct for this proof because no unsafe legacy export link was present to rewrite. The stronger invariant is `unsafe_legacy_export_link_count=0` with five safe export links present.
+
+The browser side is closed.
+
+## Remaining local regression
 
 ```bash
 git -c gc.auto=0 pull --ff-only origin dev
@@ -32,53 +84,4 @@ python scripts/build373_382_custom_requests_read_surface_test.py
 git status --short
 ```
 
-Expected six PASS results and a clean tree.
-
-## Firefox gate
-
-After Development deploys, open:
-
-```text
-/admin/custom-request/
-```
-
-Do not create/update any request workflow records, export packs, presets, quotes, payments, orders, or consent/public-proof records during proof.
-
-The Build 373 CSV endpoint is safe to read because it only exports already-prepared packs and performs no mutation.
-
-Expected read/export state:
-
-```text
-startup_contract_build             370
-startup_schema_ready               true
-startup_missing_tables             []
-export_readiness_build             374
-export_schema_ready                true
-export_missing_tables              []
-export_optional_schema_ready       true
-safe_export_status                 200
-safe_export_build                  373
-safe_export_schema_ready_header    true
-safe_export_schema_mutation        false
-page_tools_build                   380
-safe_export_link_count             5
-unsafe_legacy_export_link_count    0
-runtime_build                      371
-activation_build                   372
-custom_requests_page_proven        true
-custom_requests_mutation_ownership false
-```
-
-If the optional marketplace preset table is absent, `export_optional_schema_ready=false` is acceptable because Build 373 exports already-prepared pack JSON and does not need to seed presets at download time. Missing required export-pack schema is not acceptable for a successful download and should be reported as readiness/parity evidence rather than repaired during GET.
-
-## Browser proof block
-
-Use the Firefox-safe block supplied with the handoff. It reads:
-
-- Build 370 startup contract;
-- Build 374 export-readiness contract;
-- Build 373 safe CSV response/headers;
-- page-tools dataset/link rewrite state;
-- unchanged Commerce 371/372 runtime state.
-
-The mature legacy `?format=marketplace_csv` branch is not called during validation.
+Expected six PASS results and a clean tree. Do not mark Builds 373–382 fully validated until the local regression is supplied.
