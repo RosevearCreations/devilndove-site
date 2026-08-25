@@ -1,6 +1,6 @@
 # Builds 343–345 Validation — Accounting Year-End / Export Read Batch
 
-## Status — BROWSER PROVEN / LOCAL REGRESSION REQUIRED
+## Status — FULLY VALIDATED 2026-08-24
 
 ```text
 Build 343  Accounting year-end close read extraction
@@ -8,7 +8,7 @@ Build 344  Monthly summary export read ownership/schema diagnostics
 Build 345  Quarter/year summary export read ownership/schema diagnostics
 ```
 
-Business & Administration was still `domain-bridge` / inactive during this proof. Accounting mutation ownership remained unmoved.
+Business & Administration was still `domain-bridge` / inactive during the original browser proof. Accounting mutation ownership remained unmoved.
 
 ## Development browser proof — PASSED 2026-08-24
 
@@ -61,19 +61,13 @@ services_ok                                                 true
 
 No new schema-parity deficit was exposed by Builds 343–345.
 
-## Local regression still required
+## Local regression — PASSED 2026-08-24
 
-```bash
-git pull --ff-only origin dev
-python scripts/build343_345_accounting_read_batch_test.py
-git status --short
-```
-
-Expected:
+User-run Development checkpoint:
 
 ```text
 BUILDS 343-345 ACCOUNTING YEAR-END/EXPORT READ BATCH: PASS
 No Cloudflare resource was contacted.
 ```
 
-A clean local regression plus the browser proof above fully validates Builds 343–345.
+The historical regression had previously been corrected so later Business & Administration activation does not invalidate this read-extraction boundary. Browser and local gates are now both closed.
