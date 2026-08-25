@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Build 319.
+Updated through completed Build 319.
 
 ## Architectural invariant
 
@@ -30,7 +30,7 @@ Core owns only shared infrastructure:
 
 Core must not own Catalog, Inventory, Creative, Packaging, Content, Marketing, Accounting, order, payment, gift-card, membership, or other business rules.
 
-Current identities after staged Build 319:
+Current identities after Build 319:
 
 ```text
 Core architecture            302
@@ -40,7 +40,7 @@ Passive service adapters     319
 Commerce runtime             315
 ```
 
-Advancing the contract catalog does not imply Core absorbed Accounting logic. Every Accounting read implementation remains owner=`accounting`.
+Advancing the contract catalog does not imply Core absorbed Accounting logic. Accounting read implementations remain owner=`accounting`.
 
 ## Source-control state
 
@@ -48,10 +48,10 @@ Permanent branch model:
 
 ```text
 main  = retained Production/legacy release line
-dev   = active modular Development/integration line
+dev   = active modularization and Development integration line
 ```
 
-Build 319 verification found `dev` contains `main` and is hundreds of commits ahead with no commits missing from `main`.
+Build 319 verification proved `dev` contains `main` with zero commits missing from `main`; Development has surpassed the old baseline.
 
 Application modules are not permanent Git branches. See `docs/architecture/SOURCE_CONTROL_BRANCHING.md`.
 
@@ -62,23 +62,14 @@ build291-candidate
 build292-candidate
 build293-candidate
 build294-candidate
-```
-
-All were previously proven fully contained in `dev` (`behind_by=0`).
-
-Build 317 used a temporary isolation ref:
-
-```text
 build317-accounting-writeoffs
 ```
 
-Its source was fast-forward integrated into `dev`; retire the branch when branch-deletion tooling/permissions permit. Do not create additional permanent module branches.
+The historical candidate branches were previously proven fully contained in `dev`. The Build 317 branch was a temporary isolation checkpoint whose source was fast-forward integrated into `dev`. These are cleanup-only refs, not active development lines.
 
 ## Current application-module state
 
 ### Commerce & Operations
-
-This is the most mature top-level runtime.
 
 Proven Operations pages through Build 315:
 
@@ -121,14 +112,14 @@ Business & Administration is not yet top-level runtime-active, but Accounting ex
 Owned Accounting reads now include:
 
 ```text
-accounting-read                   Build 312
-accounting-expenses-read          Build 316
-accounting-writeoffs-read         Build 317 staged
-accounting-general-ledger-read    Build 318 staged
-accounting-summary-read           Build 319 staged
+accounting-read                   Build 312 COMPLETE
+accounting-expenses-read          Build 316 COMPLETE
+accounting-writeoffs-read         Build 317 COMPLETE
+accounting-general-ledger-read    Build 318 COMPLETE
+accounting-summary-read           Build 319 COMPLETE
 ```
 
-Marketing, Platform and Administration still need bounded service/runtime work before full top-level activation.
+Marketing, Platform and Administration still need bounded service/runtime work before broader top-level activation.
 
 ## Accounting read-time schema mutation retirement
 
@@ -136,24 +127,19 @@ Rule:
 
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Completed/proven before this pass:
+Completed/proven:
 
 ```text
-/api/admin/accounting-expenses GET
-  -> Accounting-owned Build 316 read authority
-  -> no request-time DDL
-```
+/api/admin/accounting-expenses
+  -> accounting-expenses-read Build 316
 
-Staged in the current three-step pass:
-
-```text
-/api/admin/accounting-writeoffs GET
+/api/admin/accounting-writeoffs
   -> accounting-writeoffs-read Build 317
 
-/api/admin/general-ledger-accounts GET
+/api/admin/general-ledger-accounts
   -> accounting-general-ledger-read Build 318
 
-/api/admin/accounting-summary GET
+/api/admin/accounting-summary
   -> accounting-summary-read Build 319
 ```
 
@@ -185,7 +171,7 @@ Compatibility writes still requiring dedicated authority reviews include:
 
 A loader or read-contract migration never implies mutation ownership.
 
-## Recommended next bounded sequence after Builds 317–319 validate
+## Recommended next bounded sequence
 
 1. Build 320 — Accounting overhead allocations read extraction.
 2. Build 321 — Accounting overhead-product allocations read extraction.
