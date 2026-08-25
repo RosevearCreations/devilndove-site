@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Builds 352–354 Creative Process Runtime Staged
+# Devil n Dove AI Context — Builds 352–354 Creative Process Runtime Local-Proven
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -36,14 +36,13 @@ Application modules are not permanent Git branches.
 Core architecture                              302
 Core runtime implementation                    305
 Commerce/Operations runtime                    315
-Accounting reads through 342                   validated
-Accounting reads 343–345                       browser proven; corrected local rerun required
+Accounting reads through 345                   validated
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
-Creative Packaging runtime                     351 browser proven; local required
-Creative Process read contract                 352 staged
-Creative & Production runtime implementation   353 staged
-Creative Process runtime activation            354 staged
+Creative Packaging runtime                     351 browser proven; corrected local rerun required
+Creative Process read contract                 352 local proven; browser required
+Creative & Production runtime implementation   353 local proven; browser required
+Creative Process runtime activation            354 local proven; browser required
 Contract catalog                               345
 Default passive service adapters               345
 Creative Process passive service registration  353 runtime-local
@@ -81,11 +80,11 @@ Prior parity audit also identified Production-only active tables including `acco
 - Builds 331–336: fully validated 2026-08-24.
 - Builds 337–339: fully validated 2026-08-24; Builds 338/339 retain separate schema-parity findings.
 - Builds 340–342: fully validated 2026-08-24; Build 341 retains separate schema-parity findings.
-- Builds 343–345: browser proven and schema-ready. The historical regression was corrected after Build 348 invalidated its obsolete inactive-Business assertion; corrected local rerun still required.
+- Builds 343–345: fully validated 2026-08-24. Browser and corrected local regression both passed; no new schema-parity deficit appeared.
 - Builds 346–348: fully validated 2026-08-24. Business & Administration is active only for `/admin/accounting/`; its runtime creates no network transport and owns no Accounting mutations.
 - Build 301 Packaging compatibility checkpoint: COMPLETE IN DEVELOPMENT with native reads/writes, verified Save Project, Build 297 legacy GET fallback removal, and Build 292 -> 291 write provenance.
-- Builds 349–351: browser proven 2026-08-24; local regression required. Firefox proved active `creative-production` Packaging runtime while the Build 301 Packaging chain remained healthy and mutation ownership unchanged.
-- Builds 352–354: staged / validation required.
+- Builds 349–351: browser proven 2026-08-24. Initial local rerun failed only because the historical regression froze the shared Creative runtime at exactly Build 350 / activation Build 351. Build 353 legitimately advances that runtime. The test is now future-compatible and requires one corrected local rerun. Packaging authority and browser proof remain valid.
+- Builds 352–354: local regression passed 2026-08-24. Browser activation proof on `/admin/creative-process/` remains required.
 
 ## Builds 349–351 browser proof
 
@@ -112,6 +111,8 @@ compatibility_build                      301
 compatibility_state                      active
 native_read_status                       200
 ```
+
+The Build 349–351 historical test must validate this durable Packaging boundary rather than freeze later Creative runtime expansion. It now accepts runtime/build/cache versions greater than the original Build 350/351 values while requiring Packaging coverage, no wrapper transport, no mutation ownership, and the Build 301 Packaging baseline.
 
 ## Build 352 — Creative Process read contract
 
@@ -145,15 +146,21 @@ The top-level runtime still creates no network transport and owns no Packaging o
 
 The Creative Process page loads `admin.js?v=354` before its retained Build 274 UI script. CAIP and Content remain without top-level Creative runtime coverage.
 
+Local regression for Builds 352–354 passed on 2026-08-24. Browser GET/runtime proof remains required before the batch is fully validated.
+
+## Windows Git pack cleanup note
+
+During the 2026-08-24 pull to Build 354, Windows refused to unlink an obsolete `.git/objects/pack/*.idx` and matching `.pack` during Git housekeeping. The fast-forward itself completed successfully and all subsequent Python regressions executed. Treat this as a local file-handle/cleanup issue, not a source-control or build regression. Do not manually delete one half of a pack pair; close processes holding the repository and use `git gc --prune=now` later if needed.
+
 ## Historical regression rule
 
-Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later architectural state.
+Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later architectural state. Later module expansion may advance shared runtime build numbers, cache-bust versions, and supported-domain lists while preserving an earlier proven boundary.
 
 ## Next direction
 
-1. Run the combined local checkpoint for Builds 343–345, 349–351 and 352–354.
+1. Pull the corrected Build 349–351 historical regression and run only `python scripts/build349_351_creative_production_runtime_test.py`.
 2. Browser-validate Build 354 on `/admin/creative-process/` using GET/read checks only.
-3. If clean, mark those remaining local/browser gates validated.
+3. If both pass, mark Builds 349–354 fully validated.
 4. Keep Creative Process and Packaging mutation authority unchanged.
 5. Continue fresh-install schema parity separately, then source-audit CAIP and Content as the remaining Creative & Production domains before expanding top-level coverage.
 
