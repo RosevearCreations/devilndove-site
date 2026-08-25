@@ -2,138 +2,89 @@
 
 ## Status
 
-**READY FOR LIVE READ-ONLY CLASSIFICATION / PRODUCTION WRITES CLOSED**
+**PASS — LIVE READ-ONLY EVIDENCE COMPLETE / PRODUCTION WRITES CLOSED**
 
-Build 417 completed against both live D1 databases and materially narrowed the migration problem.
+Build 418 completed successfully against both live D1 databases. No migration or data mutation was executed.
 
-Recorded Build 417 baseline:
+## Live baseline
 
 ```text
 Development user tables: 511
 Production user tables: 512
 Common tables: 510
-Production-only tables: 2
-  - __sql_test
-  - search_query_terms
-Development-only tables: 1
-  - gift_card_lookup_lockouts
-Common CREATE-SQL differences: 54
+CREATE-SQL-different common tables: 54
 ```
 
-The main business-data anchors are already aligned by row count:
+All Development/Production table inventory, column-signature, foreign-key, explicit-index, one-sided-table, and CAIP aggregate reads completed successfully.
+
+## Semantic result
 
 ```text
-products                     45 / 45
-site_item_inventory        1041 / 1041
-packaging_projects            7 / 7
-creative_work_projects        5 / 5
-creative_projects            23 / 23
-content_projects             20 / 20
-creative_assets              45 / 45
-membership_tier_policies      3 / 3
+CREATE-SQL differences inspected: 54
+Core semantic signatures identical: 14
+Core semantic signatures different: 40
 ```
 
-The only bounded business-data delta found by Build 417 was:
+The 14 core-identical tables have matching ordered columns, foreign keys, and explicit indexes despite different stored CREATE text. They must not be rebuilt merely to make stored SQL text identical.
+
+The 40-table bucket still mixes genuine structural drift with harmless creation-history differences. Several entries report no named column-attribute, FK, or index difference, which is consistent with column-order/history-only drift. Build 419 therefore performs the exact structural classification before any migration plan is authored.
+
+## Confirmed material findings
+
+### Gift Card schema
+
+Production is behind the current Gift Card authority:
+
+- `gift_card_lookup_attempts` lacks Development columns `lookup_email`, `code_suffix`, `ip_hash`, `user_agent`, and `result_status`;
+- `gift_card_lookup_lockouts` exists in Development and is missing from Production.
+
+`database_gift_card_runtime_parity.sql` is the current migration authority. Current public Gift Card readiness requires the lookup attempts and lockout tables.
+
+### Membership tier policies
+
+Development is on the canonical Build 395 shape while Production retains the older naming shape. Current authority is `database_membership_tier_policy_runtime_parity.sql`.
+
+Build 410 already proved a data-preserving Development-only compatibility rebuild. Do not point the Build 410 helper at Production.
+
+### Notification outbox
+
+Development contains `notification_outbox.metadata_json`; Production does not. Current shared notification authority is `database_notification_runtime_parity.sql`.
+
+### One-sided tables
 
 ```text
-caip_media_upload_files       0 / 113
+__sql_test:                 Development MISSING / Production 0
+search_query_terms:         Development MISSING / Production 5
+gift_card_lookup_lockouts:  Development 0 / Production MISSING
 ```
 
-Orders, order items, payments, refunds, Customer Documents, Gift Cards, Gift Card redemptions, accounting order records and notification outbox were all 0 / 0.
+Build 418 source scanning found `database_full_schema.sql` references for both Production-only tables. They therefore require aggregate-schema execution-path review rather than automatic deletion or copy.
 
-Therefore **do not bulk-copy the main Production business tables into Development**. Build 417 evidence shows that the records previously thought missing are now present at matching counts.
+### CAIP metadata / R2 boundary
 
-## Why Build 418 exists
+Development has no `caip_media_upload_files` rows. Production has 113:
 
-A stored `CREATE TABLE` text difference does not prove semantic schema drift. Historical migration order can leave equivalent tables with different SQL text.
+```text
+aborted    1 row     467.8 MiB   linked assets 0
+archived  66 rows    114.3 GiB   linked assets 0
+failed     1 row       3.8 GiB   linked assets 0
+uploaded  45 rows     91.9 GiB   linked assets 45
+```
 
-Build 418 compares the 54 Build 417 differences using live read-only signatures for:
+All rows use the private CAIP R2 storage profile. D1 contains metadata/state while binaries remain in private R2. Do not copy these D1 rows alone into Development.
 
-- table columns via `pragma_table_xinfo(...)`;
-- foreign keys via `pragma_foreign_key_list(...)`;
-- explicit index SQL from `sqlite_schema`.
+## Business-data decision
 
-It then separates:
+The broad Production-to-Development data-copy idea remains cancelled. Build 417 already established matching counts for products, site inventory, packaging projects, creative work/projects/content/assets, and membership policy rows. Build 418 found no evidence that those main business datasets need a blanket copy.
 
-1. tables whose core semantic signatures are identical despite different stored CREATE SQL;
-2. tables with actual column / foreign-key / explicit-index differences;
-3. one-sided tables requiring authority classification;
-4. the CAIP metadata delta, aggregated without printing filenames or object keys.
+## Next gate
 
-Build 418 still does not modify either database.
-
-## Important authority findings before the live run
-
-### `gift_card_lookup_lockouts`
-
-This Development-only table is current schema, not accidental drift.
-
-`database_gift_card_runtime_parity.sql` creates `gift_card_lookup_lockouts`, and the current Build 413 public Gift Card balance lookup requires it in its readiness gate before serving requests.
-
-Production therefore has a pending Gift Card schema requirement. Do not remove the table from Development simply to make table counts match.
-
-### `__sql_test`
-
-No current runtime or canonical migration authority has yet been established for this Production-only table. Build 418 reports its row count and local current-source references so it can be classified as active, historical or test residue without guessing.
-
-### `search_query_terms`
-
-No current exact repository reference was returned in the Build 417 follow-up search. Build 418 reports its row count and current-source references before any retirement or migration decision.
-
-### CAIP 113-row delta
-
-The CAIP raw-media architecture deliberately separates metadata from binaries:
-
-- D1 stores metadata/upload/evidence state;
-- binary originals remain in the private `CAIP_PRIVATE_MEDIA_BUCKET` R2 binding.
-
-Development and Production use separate private R2 buckets. Therefore the 113 Production `caip_media_upload_files` rows must **not** be copied to Development as ordinary rows unless their corresponding R2 objects and downstream linkage are explicitly mapped. Copying metadata alone could create dangling media references.
-
-Build 418 aggregates CAIP rows by upload status, storage provider and bucket alias and reports only counts/total bytes/link counts/object-key presence.
-
-## Run
-
-From `dev`:
+Build 419 is the targeted exact structural drift evidence gate:
 
 ```bash
-python scripts/build418_live_semantic_schema_classification.py --run
+python -u scripts/build419_targeted_structural_drift_evidence.py 2>&1 | tee build419_structural_drift.txt
 ```
 
-The script is Windows-console safe directly; no separate launcher is required.
+It reuses the Windows-safe Build 418 transport and remains read-only.
 
-## Safety boundary
-
-Build 418 uses temporary one-binding Wrangler configs for the exact Development and Production D1 UUIDs and permits only internally generated `SELECT` / inspection PRAGMA statements.
-
-It rejects mutation-capable SQL tokens including:
-
-```text
-INSERT UPDATE DELETE REPLACE CREATE ALTER DROP TRUNCATE VACUUM
-ATTACH DETACH REINDEX ANALYZE BEGIN COMMIT ROLLBACK SAVEPOINT RELEASE
-```
-
-No migration, seed, copy, Production write, or provider action is permitted.
-
-## Expected footer
-
-```text
-BUILD 418 LIVE READ-ONLY SEMANTIC SCHEMA CLASSIFICATION: EVIDENCE COMPLETE
-No migration or data mutation was executed.
-PRODUCTION PROMOTION: CLOSED
-PRODUCTION DATA COPY: CLOSED
-NEXT: classify core semantic drift, one-sided-table authority, and CAIP R2/D1 portability before any Production mutation.
-```
-
-## Decision rule after Build 418
-
-Only tables reported under **Core semantic signatures different** are candidates for targeted schema migration analysis.
-
-Tables whose columns, foreign keys and explicit indexes are identical remain definition-text/constraint-review items; do not rebuild them merely to make stored CREATE SQL text identical.
-
-Production promotion remains closed until:
-
-1. real semantic drift is mapped to current migration authority;
-2. `gift_card_lookup_lockouts` Production rollout is included safely;
-3. Production-only `__sql_test` and `search_query_terms` are classified;
-4. the CAIP 113-row metadata/R2 relationship is deliberately handled or explicitly left Production-only;
-5. a targeted Production migration plan is reviewed before any write.
+Production promotion remains closed until the actual structural candidates are mapped to current committed migration authority and a targeted rollout plan is reviewed.
