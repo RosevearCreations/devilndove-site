@@ -1,5 +1,6 @@
-// Build 227 — immutable, print-ready client document snapshots for orders and refunds.
+// Build 227 mutation compatibility / Build 397 non-mutating read authority — immutable client document snapshots.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import { readCustomerDocuments } from '../_lib/customerDocumentsReadService.js';
 
 const BUILD = '227';
 const TYPES = new Set(['invoice','receipt','packing_slip','credit_note','refund_confirmation']);
@@ -17,6 +18,7 @@ async function access(context){
   return{adminUser,db};
 }
 
+// Retained POST compatibility only. Build 397 GET/read paths never call this.
 async function ensureSchema(db){
   for(const sql of [
     `CREATE TABLE IF NOT EXISTS customer_document_sequences (document_type TEXT NOT NULL,sequence_year INTEGER NOT NULL,next_number INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY(document_type,sequence_year))`,
@@ -62,8 +64,11 @@ async function readData(db,orderId=0,documentId=0){
 
 export async function onRequestGet(context){
   const a=await access(context);if(a.error)return a.error;
-  try{await ensureSchema(a.db);const url=new URL(context.request.url);return json(await readData(a.db,id(url.searchParams.get('order_id')),id(url.searchParams.get('document_id'))));}
-  catch(error){await captureRuntimeIncident(context.env,context.request,{incident_scope:'customer_documents',incident_code:'customer_documents_get_failed',severity:'error',message:error?.message||'Customer documents failed to load.',related_user_id:a.adminUser.user_id,details:{error:String(error?.stack||error)}}).catch(()=>null);return json({ok:false,error:'Client documents could not load.'},500);}
+  try{
+    const url=new URL(context.request.url);
+    return json(await readCustomerDocuments(a.db,{orderId:id(url.searchParams.get('order_id')),documentId:id(url.searchParams.get('document_id'))}));
+  }
+  catch(error){await captureRuntimeIncident(context.env,context.request,{incident_scope:'customer_documents',incident_code:'customer_documents_get_failed',severity:'error',message:error?.message||'Customer documents failed to load.',related_user_id:a.adminUser.user_id,details:{error:String(error?.stack||error)}}).catch(()=>null);return json({ok:false,build:397,request_time_schema_mutation:false,error:'Client documents could not load.'},500);}
 }
 
 export async function onRequestPost(context){
