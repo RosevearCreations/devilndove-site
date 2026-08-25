@@ -1,6 +1,6 @@
 # Builds 383–392 Validation — Commerce & Operations 10-Build Batch
 
-## Status — BUILD 384 SOURCE CORRECTION LOCAL RERUN + DEVELOPMENT D1 + GIFT CARD BROWSER REQUIRED
+## Status — DEVELOPMENT D1 PASSED / BUILD 383–392 LOCAL RERUN + GIFT CARD BROWSER REQUIRED
 
 ```text
 383  Gift Card schema-authority audit
@@ -30,7 +30,7 @@ Production/main is not part of this release gate.
 
 ## Local regression status
 
-The accumulated Commerce checkpoint passed on 2026-08-25 before the lookup-attempt parity correction:
+The accumulated Commerce checkpoint passed on 2026-08-25 before the final lookup-attempt parity correction:
 
 ```text
 BUILDS 362-364 OPERATIONS MEMBERSHIP RUNTIME: PASS
@@ -42,94 +42,58 @@ BUILDS 373-382 CUSTOM REQUESTS READ SURFACE: PASS
 BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
 ```
 
-No local regression contacted Cloudflare. Because Build 384 migration/test source changed after the last line above, only `scripts/build383_392_commerce_operations_batch_test.py` requires rerun before final closure; the earlier six passing regressions do not.
+No local regression contacted Cloudflare. Because Build 384 migration/test source changed after the last `383-392` PASS above, only `scripts/build383_392_commerce_operations_batch_test.py` requires rerun before final closure; the earlier six passing regressions do not.
 
-## Build 384 Development D1 release history
+## Build 384 Development D1 release — PASSED 2026-08-25
 
-The normal Wrangler remote `--file` path failed after upload with:
+The normal Wrangler remote `--file` path first failed after upload with the known `D1_RESET_DO` shape and a Windows Node/libuv teardown assertion. The repository-owned fallback was progressively hardened for Windows output decoding, leading SQL comments, multi-statement ambiguity, and multiline `npx.cmd` argument transport.
 
-```text
-File already uploaded. Processing.
-{"D1_RESET_DO":true}
-```
+The first real schema defect then appeared in Development: the existing `gift_card_lookup_attempts` table had an older anti-abuse shape without `lookup_email`. Build 384 was corrected so fresh installs create the full current table and the Development fallback aligns missing legacy columns before creating current indexes.
 
-Wrangler then hit a Windows Node/libuv `UV_HANDLE_CLOSING` assertion. This was not a Build 384 SQL validation error.
+The final direct-query run completed successfully against Development D1.
 
-The repository-owned direct-query fallback is:
+### Lookup-attempt compatibility alignment
 
-```text
-scripts/build384_apply_gift_card_parity_direct.py
-```
-
-The helper was progressively hardened for Windows CP1252 output decoding, Wrangler/Yargs parsing of leading SQL comments, multi-statement ambiguity, and multiline `npx.cmd` argument transport. It now sends one compact physical-line SQL statement at a time through `wrangler d1 execute --command`.
-
-A read-only Development preflight proved seven of the eight Gift Card-owned tables were already present. At that checkpoint only `gift_card_lookup_lockouts` was absent.
-
-The compact single-statement release then progressed successfully through statement 20. Statement 21 failed on:
-
-```text
-CREATE INDEX IF NOT EXISTS idx_gift_card_lookup_attempts_email
-ON gift_card_lookup_attempts(lookup_email, created_at DESC);
-```
-
-with:
-
-```text
-no such column: lookup_email
-```
-
-This is genuine legacy-schema drift, not a Wrangler transport failure. `gift_card_lookup_attempts` exists in Development with an older shape.
-
-The current public Gift Card balance runtime uses the combined/current lookup-attempt model:
+Existing legacy columns were correctly tolerated as already present:
 
 ```text
 code_hint
 email_hash
 client_key
+was_success
+```
+
+Missing current columns were added successfully:
+
+```text
 lookup_email
 code_suffix
 ip_hash
 user_agent
 result_status
-was_success
-created_at
 ```
 
-Build 384 has therefore been corrected so:
-
-1. `database_gift_card_runtime_parity.sql` creates the full current lookup-attempt shape on fresh installs;
-2. the Development release helper performs idempotent legacy-column alignment immediately after the lookup-attempt table CREATE statement;
-3. duplicate-column errors during that compatibility alignment are treated as already-aligned success;
-4. the email index is created only after the current columns have been reconciled;
-5. final verification checks the current lookup-attempt column set as well as all eight tables and the two default templates;
-6. the Build 383–392 local regression now compares the migration/helper requirements with the current public Gift Card runtime so this drift cannot silently return.
-
-## Minimal rerun after the parity correction
-
-Run only:
-
-```bash
-git -c gc.auto=0 pull --ff-only origin dev
-python scripts/build383_392_commerce_operations_batch_test.py
-python scripts/build384_apply_gift_card_parity_direct.py
-```
-
-Do not rerun the earlier six passing Commerce regressions and do not return to the Wrangler remote `--file` path.
-
-Expected local result:
+The current email index then succeeded:
 
 ```text
-BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
-No Cloudflare resource was contacted.
+idx_gift_card_lookup_attempts_email
 ```
 
-Expected D1 final line:
+### Missing lockout parity restored
+
+The previously absent table was created successfully:
 
 ```text
-BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE
+gift_card_lookup_lockouts
 ```
 
-Final verification must contain all eight Gift Card-owned tables:
+and its status index was created:
+
+```text
+idx_gift_card_lookup_lockouts_status
+```
+
+### Final verified Gift Card-owned tables
 
 ```text
 gift_card_admin_events
@@ -142,14 +106,52 @@ gift_card_redemptions
 gift_cards
 ```
 
-Both migration-owned templates:
+### Final verified migration-owned templates
 
 ```text
 activation
 reissue
 ```
 
-And the current lookup-attempt columns listed above.
+### Final verified current lookup-attempt columns
+
+```text
+client_key
+code_hint
+code_suffix
+created_at
+email_hash
+ip_hash
+lookup_email
+result_status
+user_agent
+was_success
+```
+
+The release helper reached:
+
+```text
+BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE
+```
+
+Build 384 Development D1 parity is therefore **PASSED**. Do not return to the Wrangler remote `--file` path for this release.
+
+## Remaining local closure
+
+Because the Build 383–392 regression was strengthened after the initial local PASS, run only:
+
+```bash
+git -c gc.auto=0 pull --ff-only origin dev
+python scripts/build383_392_commerce_operations_batch_test.py
+git status --short
+```
+
+Expected:
+
+```text
+BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
+No Cloudflare resource was contacted.
+```
 
 ## Firefox gate — Gift Cards only
 
