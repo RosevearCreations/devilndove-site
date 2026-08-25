@@ -1,6 +1,6 @@
 # Builds 346–348 Validation — Accounting Startup Audit / Business Runtime Activation
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — VALIDATED 2026-08-24
 
 ```text
 Build 346  Accounting startup-read audit closure
@@ -10,59 +10,20 @@ Build 348  /admin/accounting/ read-only Business runtime activation
 
 Accounting mutation ownership remains false. Schema parity remains a separate track.
 
-## Combined local checkpoint
+## Local regression — PASSED 2026-08-24
 
-```bash
-git pull --ff-only origin dev
-python scripts/build331_333_accounting_read_batch_test.py
-python scripts/build334_336_accounting_read_batch_test.py
-python scripts/build337_339_accounting_read_batch_test.py
-python scripts/build340_342_accounting_read_batch_test.py
-python scripts/build343_345_accounting_read_batch_test.py
-python scripts/build346_348_business_admin_runtime_test.py
-git status --short
+Observed during the combined local checkpoint:
+
+```text
+BUILDS 346-348 BUSINESS ADMINISTRATION RUNTIME: PASS
+No Cloudflare resource was contacted.
 ```
 
-Expected every script to PASS with `No Cloudflare resource was contacted.` and a clean status.
+The runtime regression proves the Business runtime creates no network transport, owns no mutations, supports only the Accounting domain/page boundary, and requires the registered read services rather than performing reads itself.
 
-## Firefox activation gate
+## Firefox activation proof — PASSED 2026-08-24
 
-Open `/admin/accounting/` after Development deploys and wait for administrator verification, then run:
-
-```js
-(() => {
-  const r = window.DDModuleRuntime;
-  const b = window.DDBusinessAdministration;
-  const s = b?.getStatus?.() || null;
-  const app = r?.getCurrentApplicationModule?.() || null;
-  const runtimeDefinition = r?.applicationModuleRuntimeForDomain?.('accounting') || null;
-
-  const out = {
-    application_module: app?.id ?? null,
-    application_mode: document.documentElement.dataset.ddApplicationModuleMode ?? null,
-    active_application_module: r?.getActiveApplicationModuleId?.() ?? null,
-    accounting_domain: r?.getCurrent?.()?.id ?? null,
-    business_runtime_definition: runtimeDefinition?.id ?? null,
-    business_runtime_entry: runtimeDefinition?.entry ?? null,
-    business_runtime_build: s?.build ?? null,
-    business_activation_build: s?.activationBuild ?? null,
-    business_state: s?.state ?? null,
-    business_current_domain: s?.currentDomain ?? null,
-    business_last_pathname: s?.lastPathname ?? null,
-    business_services_ready: s?.servicesReady ?? null,
-    business_required_service_count: s?.allRequiredServices?.length ?? null,
-    business_accounting_page_proven: s?.currentAccountingPageProven ?? null,
-    business_creates_network_transport: s?.createsNetworkTransport ?? null,
-    business_accounting_mutation_ownership: s?.accountingMutationOwnership ?? null,
-    contracts_ok: r?.contractValidation?.ok === true,
-    services_ok: r?.serviceRegistration?.ok === true,
-  };
-
-  console.table(out);
-})();
-```
-
-Expected structural proof:
+Observed on `/admin/accounting/` after verified administrator auth:
 
 ```text
 application_module                       business-administration
@@ -70,6 +31,7 @@ application_mode                         active
 active_application_module                business-administration
 accounting_domain                        accounting
 business_runtime_definition              business-administration
+business_runtime_entry                   ../modules/business-administration/runtime.mjs?v=347
 business_runtime_build                   347
 business_activation_build                348
 business_state                           active
@@ -84,4 +46,8 @@ contracts_ok                             true
 services_ok                              true
 ```
 
-Do not use any POST/save/upload/import/lock/journal action during this activation proof.
+This is the first proven active `business-administration` top-level runtime. It is intentionally limited to `/admin/accounting/` and does not move Accounting POST/PUT/DELETE/upload/import/lock/journal authority.
+
+## Safety boundary
+
+The runtime itself performs no fetch/apiFetch, D1/R2 mutation, schema mutation, or business write. Marketing, Platform, Admin, Analytics, Command Center and every other Business & Administration route remain domain-bridge only until separately audited and activated.
