@@ -27,6 +27,8 @@ definitions = read('public/js/core/dd-module-definitions.mjs')
 custom_requests = read('functions/api/admin/custom-requests.js')
 
 # Build 366 — readiness-aware Today Tasks read authority is GET-only/non-mutating.
+# Later read-schema alignment may change specific table/column names, but must preserve
+# readiness/error reporting and never restore request-time mutation.
 assert 'export const BUILD = 366' in read_service
 assert "export const CONTRACT_ID = 'operations-today-tasks-read'" in read_service
 assert "export const OWNER = 'operations'" in read_service
@@ -35,7 +37,7 @@ assert 'mutation_ownership_moved: false' in read_service
 assert 'schema_ready: issues.length === 0' in read_service
 assert 'missing_tables: missingTables' in read_service
 assert 'query_errors: issues' in read_service
-assert 'hst_gst_review_records' in read_service
+assert 'scalarRead' in read_service
 assert 'today_task_actions' in read_service
 for forbidden in ['CREATE TABLE', 'ALTER TABLE', 'INSERT INTO', 'UPDATE ', 'DELETE FROM']:
     assert forbidden not in read_service
