@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Builds 317–319 Complete / Accounting Read Extraction Continues
+# Devil n Dove AI Context — Builds 320–322 Accounting Read Extraction Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities now include:
+Primary modular authorities:
 
 - `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`
 - `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`
@@ -11,13 +11,14 @@ Primary modular authorities now include:
 - `docs/architecture/BUILD317_ACCOUNTING_WRITEOFFS_READ_EXTRACTION.md`
 - `docs/architecture/BUILD318_GENERAL_LEDGER_READ_EXTRACTION.md`
 - `docs/architecture/BUILD319_ACCOUNTING_SUMMARY_READ_EXTRACTION.md`
-- `BUILD317_VALIDATION.md`
-- `BUILD318_VALIDATION.md`
-- `BUILD319_VALIDATION.md`
+- `docs/architecture/BUILD320_ACCOUNTING_OVERHEAD_ALLOCATIONS_READ_EXTRACTION.md`
+- `docs/architecture/BUILD321_ACCOUNTING_OVERHEAD_PRODUCT_ALLOCATIONS_READ_EXTRACTION.md`
+- `docs/architecture/BUILD322_ACCOUNTING_PRODUCT_COSTS_READ_EXTRACTION.md`
+- `BUILD322_VALIDATION.md`
 
 ## Production safety
 
-Real Devil n Dove Production remains frozen unless deliberately promoted through the separate Production workflow. `main` is not to be advanced merely because Development is ahead.
+Real Devil n Dove Production remains frozen unless deliberately promoted through the separate Production workflow. `main` must not advance merely because Development is ahead.
 
 ## Authoritative application structure
 
@@ -32,22 +33,18 @@ Real Devil n Dove Production remains frozen unless deliberately promoted through
 
 Domains remain internal ownership/service boundaries beneath exactly three top-level modules.
 
-Core owns shared infrastructure only: auth/session context, module registry/lifecycle, route resolution, passive contract/service registration, common runtime/error helpers and availability. Business rules remain domain-owned.
+Core owns shared infrastructure only: auth/session context, module registry/lifecycle, route resolution, passive contract/service registration, common runtime/error helpers, availability and diagnostics. Business rules remain domain-owned.
 
-## Source-control status
-
-Permanent branch model:
+## Source-control rule
 
 ```text
 main  = retained Production/legacy release line
 dev   = active modularization and Development integration line
 ```
 
-Build 319 comparison proved `dev` contains `main`, is hundreds of commits ahead and is zero commits behind. Development has surpassed the old `main` baseline while retaining all of its history.
+Development has already been proven to contain the old `main` baseline with zero missing `main` commits. Application modules are not permanent Git branches.
 
-The application modules are not Git branches.
-
-Cleanup-only branch refs still include historical `build291-candidate` through `build294-candidate` plus the temporary `build317-accounting-writeoffs` checkpoint. They are not active development lines.
+Cleanup-only refs still include historical `build291-candidate` through `build294-candidate` plus temporary `build317-accounting-writeoffs`. They are not active development lines.
 
 ## Completed modular baselines
 
@@ -75,179 +72,123 @@ Build 306 remains historically browser-proven with standalone local signoff not 
 
 Build 308 remains browser-proven with standalone local regression output not captured. Do not silently relabel it complete.
 
-## Builds 317–319 — COMPLETE IN DEVELOPMENT
+## Current staged three-step pass
 
-Build 317:
+### Build 320 — Accounting Overhead Allocations Read Extraction
+
+Source checkpoint:
 
 ```text
-GET /api/admin/accounting-writeoffs
+5e16845202a2f2b870f02420703f7bf0c3089a5b
+```
+
+```text
+GET /api/admin/accounting-overhead-allocations
   -> Accounting-owned read service
-GET /api/admin/contracts/accounting-writeoffs-read
-  build 317
+GET /api/admin/contracts/accounting-overhead-allocations-read
+  build 320
   owner accounting
+  authority accounting_overhead_allocations
   request_time_schema_mutation false
 ```
 
-Legacy write-off POST remains compatibility write authority.
+Legacy POST remains compatibility write authority with period-open validation, upsert, audit logging and write-side schema ensure behavior.
 
-Build 318:
+### Build 321 — Accounting Overhead Product Allocations Read Extraction
+
+Source checkpoint:
 
 ```text
-GET /api/admin/general-ledger-accounts
+612ff1b875d00d9a0aefd1b954c91c92d4c46d9d
+```
+
+```text
+GET /api/admin/accounting-overhead-product-allocations
   -> Accounting-owned read service
-GET /api/admin/contracts/accounting-general-ledger-read
-  build 318
+GET /api/admin/contracts/accounting-overhead-product-allocations-read
+  build 321
   owner accounting
+  authority accounting_overhead_product_allocations
   request_time_schema_mutation false
 ```
 
-The legacy GET preserves accounts, GIFI review summary and `starter_mapping_count`; Development proof observed `starter_mapping_count=19`. General Ledger POST remains compatibility write authority.
+The `products` join is optional presentation enrichment. Missing product presentation schema is reported through join-availability metadata, not repaired during GET. Legacy POST keeps product validation, upsert/delete, audit logging and write-side schema/index ensure behavior.
 
-Build 319:
+### Build 322 — Accounting Product Costs Read Extraction
+
+Source checkpoint:
 
 ```text
-GET /api/admin/accounting-summary
+3ef7e8bf545884a74268d522668a2493ee15a55f
+```
+
+```text
+GET /api/admin/product-costs
   -> Accounting-owned read service
-GET /api/admin/contracts/accounting-summary-read
-  build 319
+GET /api/admin/contracts/accounting-product-costs-read
+  build 322
   owner accounting
-  authority accounting_order_records
+  authority product_costs
   request_time_schema_mutation false
 ```
 
-The old GET no longer imports or calls `ensureAccountingSchema()` and missing schema is reported rather than repaired.
-
-### Proven head
-
-Consolidated Builds 317–319 source/runtime proof is anchored at:
-
-```text
-7a5c41d4a426f30a0fe1ab7887ea071a51529cf8
-Build 319 relax brittle branching wording assertion
-```
-
-The first Build 319 local attempt failed only because its regression asserted an exact documentation phrase. The documentation was correct; the brittle assertion was relaxed to check source-control invariants, then the local regression passed.
-
-### Local proof
-
-```text
-BUILD 317 ACCOUNTING WRITEOFFS READ EXTRACTION: PASS
-No Cloudflare resource was contacted.
-BUILD 318 GENERAL LEDGER READ EXTRACTION: PASS
-No Cloudflare resource was contacted.
-BUILD 319 ACCOUNTING SUMMARY READ EXTRACTION: PASS
-No Cloudflare resource was contacted.
-```
-
-### Development browser proof
-
-Validated on `/admin/orders/`:
-
-```text
-writeoff_legacy_status             200
-writeoff_legacy_build              317
-writeoff_legacy_schema_ready       true
-writeoff_legacy_schema_mutation    false
-writeoff_contract_status           200
-writeoff_contract_build            317
-writeoff_contract_owner            accounting
-writeoff_service_build             317
-writeoff_service_schema_mutation   false
-
-gl_legacy_status                   200
-gl_legacy_build                    318
-gl_legacy_schema_ready             true
-gl_legacy_schema_mutation          false
-gl_starter_mapping_count           19
-gl_contract_status                 200
-gl_contract_build                  318
-gl_contract_owner                  accounting
-gl_service_build                   318
-gl_service_schema_mutation         false
-
-summary_legacy_status              200
-summary_legacy_build               319
-summary_legacy_schema_ready        true
-summary_legacy_schema_mutation     false
-summary_contract_status            200
-summary_contract_build             319
-summary_contract_owner             accounting
-summary_service_build              319
-summary_service_schema_mutation    false
-
-contract_catalog_build             319
-service_adapter_build              319
-core_runtime_build                 305
-commerce_runtime_build             315
-owns_operations_mutations          false
-contracts_ok                       true
-services_ok                        true
-```
-
-No mutation validation was performed or required.
+The legacy GET remains unbounded to preserve historical UI behavior. The dedicated contract may accept an explicit limit. Legacy POST retains period-open checks, dynamic column compatibility, insert/audit behavior and write-side schema ensure.
 
 ## Current runtime/contract identities
 
 ```text
-Core architecture                 302
-Core runtime implementation       305
-Commerce/Operations runtime       315
-Operations proven pages           /admin/operations/, /admin/customer-documents/, /admin/orders/
-Operations mutation ownership     false
-Accounting order read             312
-Accounting expenses read          316
-Accounting write-offs read        317
-Accounting General Ledger read    318
-Accounting summary read           319
-Contract catalog                  319
-Passive service adapters          319
+Core architecture                         302
+Core runtime implementation               305
+Commerce/Operations runtime               315
+Operations proven pages                   /admin/operations/, /admin/customer-documents/, /admin/orders/
+Operations mutation ownership             false
+Accounting order read                     312
+Accounting expenses read                  316
+Accounting write-offs read                317
+Accounting General Ledger read            318
+Accounting summary read                   319
+Accounting overhead allocations read      320 staged
+Accounting overhead-product read          321 staged
+Accounting product-costs read             322 staged
+Contract catalog                          322
+Passive service adapters                  322
 ```
+
+## Source boundaries for Builds 320–322
+
+Each source build is exactly five files:
+
+```text
+one Accounting-owned read service
+one dedicated GET-only contract route
+one legacy compatibility route
+public/js/core/dd-module-contracts.mjs
+public/js/core/dd-module-service-adapters.mjs
+```
+
+No Core runtime, Commerce runtime, Orders/payment, Inventory, Creative, SQL schema, Cloudflare config, R2, Production or business-data migration change is part of this pass.
 
 ## Application-module open work
 
 ### Commerce & Operations
 
-Remaining loader/runtime coverage:
-
-```text
-/admin/gift-cards/
-/admin/members/
-/admin/membership/
-/admin/custom-request/
-/admin/today-tasks/
-```
-
-Do not conflate loader coverage with mutation-authority extraction.
+Remaining loader/runtime coverage includes `/admin/gift-cards/`, `/admin/members/`, `/admin/membership/`, `/admin/custom-request/`, and `/admin/today-tasks/`. Loader coverage must remain separate from mutation-authority extraction.
 
 ### Creative & Production
 
-Still open:
-
-- bounded top-level `creative-production` runtime activation;
-- CAIP service/contract extraction;
-- Content service/contract extraction;
-- retirement of `creative-process-compat.js` only after every remaining action has an owned destination;
-- keep Packaging business logic out of Core.
+Still open: bounded top-level `creative-production` runtime activation, CAIP/Content contract extraction, and eventual retirement of `creative-process-compat.js` only after every action has an owned destination. Packaging remains domain-owned and outside Core.
 
 ### Business & Administration
 
-Accounting is materially extracted from the old monolith at the read boundary. Marketing, Platform and Administration still need bounded services/runtime work before broader Business & Administration activation.
+Accounting read extraction is now broad enough that, after Builds 320–322 validate, the next default architecture step is to audit `/admin/accounting/` and its loader/dependencies for the first bounded read-only `business-administration` runtime activation.
 
-## Immediate next sequence
-
-```text
-Build 320 — accounting-overhead-allocations read extraction
-Build 321 — accounting-overhead-product-allocations read extraction
-Build 322 — product-cost read extraction
-```
-
-After Builds 320–322, audit the Accounting administration page and dependencies for the first bounded read-only Business & Administration top-level runtime activation.
+Do not automatically continue endless GET extraction if the Accounting page is ready for runtime activation.
 
 ## Separate schema/data parity track — DO NOT MIX
 
 Fresh-install schema parity remains separate and must be repaired before any Production business-data copy.
 
-If any read contract reports missing tables/columns, record that evidence and repair it through the schema-parity workflow. Never restore request-time DDL to GET/read handlers.
+If any read contract reports missing tables/columns, capture that evidence and repair it through the schema-parity workflow. Never restore request-time DDL to GET/read handlers.
 
 ## Validation interaction preference
 
