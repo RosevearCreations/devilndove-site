@@ -133,11 +133,29 @@ assert 'local-only' in payment_gate_doc
 
 # 410 invariant: top-level Commerce runtime remains transportless and does not own mutations.
 runtime = read('public/js/modules/commerce-operations/runtime.mjs')
+applicator = read('scripts/build410_apply_development_parity_overlays.py')
 assert 'createsNetworkTransport: false' in runtime
 assert 'ownsOperationsMutations: false' in runtime
 assert 'operationsMutationOwnership: false' in runtime
 assert 'apiFetch(' not in runtime
 assert 'fetch(' not in runtime
+
+# Build 410 Development applicator must preserve data while reconciling known legacy shapes.
+assert "DATABASE = 'devilndove-dev'" in applicator
+assert "PROJECT = 'devilndove-site-dev'" in applicator
+assert 'MEMBERSHIP_CANONICAL_COLUMNS' in applicator
+assert 'rebuild_membership_policy_table' in applicator
+assert 'recover_membership_partial_swap' in applicator
+assert "pragma_table_info('membership_tier_policies')" in applicator
+assert "pragma_index_list('membership_tier_policies')" in applicator
+assert 'MEMBERSHIP_SHADOW' in applicator
+assert 'MEMBERSHIP_BACKUP' in applicator
+assert 'VERIFY MEMBERSHIP SHADOW ROW COUNT' in applicator
+assert 'RETIRE MEMBERSHIP LEGACY BACKUP AFTER VERIFIED SEED' in applicator
+assert "first_existing(columns, 'tier_code', 'code')" in applicator
+assert "source_expr(columns, ('policy_id', 'id'), 'rowid')" in applicator
+assert 'NOTIFICATION_COMPAT_COLUMNS' in applicator
+assert 'ALIGN LEGACY notification_outbox COLUMNS' in applicator
 
 print('BUILDS 403-410 COMMERCE MODULARITY: PASS')
 print('No Cloudflare resource was contacted.')
