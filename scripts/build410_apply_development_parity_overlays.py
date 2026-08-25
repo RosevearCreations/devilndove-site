@@ -5,8 +5,8 @@ Applies post-Gift-Card migration authorities one SQL statement at a time through
 Wrangler's remote --command path.
 
 Special Development compatibility handling is intentionally narrow:
-- legacy membership_tier_policies shapes are rebuilt in-place through a shadow table
-  into the canonical Build 395 shape while preserving mapped legacy rows;
+- legacy membership_tier_policies shapes are rebuilt through a verified shadow table
+  into the canonical Build 395 shape while preserving legacy IDs/rows where possible;
 - legacy notification_outbox columns are aligned immediately after its CREATE/no-op
   statement and before dependent notification indexes/defaults.
 
@@ -319,13 +319,41 @@ def membership_code_expr(columns: set[str]) -> str:
         return f"CASE WHEN trim(COALESCE({quoted(code)},''))<>'' THEN lower(trim({quoted(code)})) ELSE 'legacy_' || rowid END"
     title = first_existing(columns, 'title', 'name')
     if title:
-        return f"CASE WHEN trim(COALESCE({quoted(title)},''))<>'' THEN lower(replace(trim({quoted(title)}),' ','_')) || '_' || rowid ELSE 'legacy_' || rowid END"
+        return f"CASE WHEN trim(COALESCE({quoted(title)},''))<>'' THEN lower(replace(trim({quoted(title)}),' ','_')) ELSE 'legacy_' || rowid END"
     return "'legacy_' || rowid"
 
 
-def rebuild_membership_policy_table(npx: str, columns: set[str]) -> None:
+def membership_table_names(npx: str) -> set[str]:
+    rows = query_rows(
+        npx,
+        f"SELECT name FROM sqlite_schema WHERE type='table' AND name IN ('membership_tier_policies','{MEMBERSHIP_SHADOW}','{MEMBERSHIP_BACKUP}') ORDER BY name;",
+        'INSPECT MEMBERSHIP REBUILD STATE',
+    )
+    return {str(row.get('name') or '').strip() for row in rows if str(row.get('name') or '').strip()}
+
+
+def recover_membership_partial_swap(npx: str) -> None:
+    names = membership_table_names(npx)
+    if 'membership_tier_policies' not in names and MEMBERSHIP_BACKUP in names:
+        print('Recovering preserved membership legacy backup before continuing.')
+        execute(
+            npx,
+            f'ALTER TABLE {MEMBERSHIP_BACKUP} RENAME TO membership_tier_policies;',
+            'RECOVER MEMBERSHIP LEGACY BACKUP',
+        )
+        names = membership_table_names(npx)
+    if 'membership_tier_policies' not in names:
+        print('No existing membership_tier_policies table; Build 395 CREATE will materialize the canonical table.')
+
+
+def rebuild_membership_policy_table(npx: str, columns: set[str], *, backup_exists: bool) -> None:
     print('\n##### REBUILD LEGACY membership_tier_policies -> BUILD 395 CANONICAL SHAPE #####')
     print('Detected legacy columns:', ', '.join(sorted(columns)) if columns else '(none)')
+    if backup_exists:
+        fail(
+            f'{MEMBERSHIP_BACKUP} already exists while the active membership table is still non-canonical. '
+            'Preserve both tables and inspect them before another rebuild; the helper will not discard a possible backup.'
+        )
 
     code_expr = membership_code_expr(columns)
     duplicate_rows = query_rows(
@@ -336,7 +364,8 @@ def rebuild_membership_policy_table(npx: str, columns: set[str]) -> None:
     if duplicate_rows:
         fail(f'Membership legacy rows cannot be mapped safely to unique tier_code values: {duplicate_rows}')
 
-    title_expr = source_expr(columns, ('title', 'name'), "''")
+    id_expr = source_expr(columns, ('policy_id', 'id'), 'rowid')
+    title_expr = source_expr(columns, ('title', 'name'), code_expr)
     description_expr = source_expr(columns, ('short_description', 'description'), "''")
     benefits_expr = source_expr(columns, ('benefits_json', 'benefits'), "'[]'")
     badge_expr = source_expr(columns, ('badge_color', 'badge_colour'), "''")
@@ -365,8 +394,9 @@ def rebuild_membership_policy_table(npx: str, columns: set[str]) -> None:
     execute(
         npx,
         f'''INSERT INTO {MEMBERSHIP_SHADOW}
-          (tier_code,title,short_description,benefits_json,badge_color,sort_order,is_visible,created_at,updated_at)
-        SELECT {code_expr},
+          (policy_id,tier_code,title,short_description,benefits_json,badge_color,sort_order,is_visible,created_at,updated_at)
+        SELECT COALESCE({id_expr},rowid),
+               {code_expr},
                COALESCE({title_expr},''),
                COALESCE({description_expr},''),
                COALESCE({benefits_expr},'[]'),
@@ -387,50 +417,96 @@ def rebuild_membership_policy_table(npx: str, columns: set[str]) -> None:
     if not counts or int(counts[0].get('legacy_count', -1)) != int(counts[0].get('current_count', -2)):
         fail(f'Membership shadow row-count verification failed: {counts}')
 
-    execute(npx, f'DROP TABLE IF EXISTS {MEMBERSHIP_BACKUP};', 'DROP STALE MEMBERSHIP BACKUP')
-    execute(npx, f'ALTER TABLE membership_tier_policies RENAME TO {MEMBERSHIP_BACKUP};', 'BACK UP LEGACY MEMBERSHIP TABLE')
-    execute(npx, f'ALTER TABLE {MEMBERSHIP_SHADOW} RENAME TO membership_tier_policies;', 'ACTIVATE CANONICAL MEMBERSHIP TABLE')
+    execute(
+        npx,
+        f'ALTER TABLE membership_tier_policies RENAME TO {MEMBERSHIP_BACKUP};',
+        'BACK UP LEGACY MEMBERSHIP TABLE',
+    )
+    execute(
+        npx,
+        f'ALTER TABLE {MEMBERSHIP_SHADOW} RENAME TO membership_tier_policies;',
+        'ACTIVATE CANONICAL MEMBERSHIP TABLE',
+    )
 
 
 def apply_membership_migration(npx: str, statements: list[str]) -> None:
     create_index = next(
-        (i for i, sql in enumerate(statements) if sql.lstrip().upper().startswith('CREATE TABLE IF NOT EXISTS MEMBERSHIP_TIER_POLICIES')),
+        (
+            i
+            for i, sql in enumerate(statements)
+            if sql.lstrip().upper().startswith('CREATE TABLE IF NOT EXISTS MEMBERSHIP_TIER_POLICIES')
+        ),
         None,
     )
     if create_index is None:
         fail('Membership migration no longer defines membership_tier_policies.')
 
+    recover_membership_partial_swap(npx)
+
     for index, statement in enumerate(statements[: create_index + 1], start=1):
-        execute(npx, statement, f'database_membership_tier_policy_runtime_parity.sql STATEMENT {index}/{len(statements)}')
+        execute(
+            npx,
+            statement,
+            f'database_membership_tier_policy_runtime_parity.sql STATEMENT {index}/{len(statements)}',
+        )
 
     column_rows = query_rows(
         npx,
         "SELECT name FROM pragma_table_info('membership_tier_policies') ORDER BY cid;",
         'INSPECT MEMBERSHIP TIER POLICY COLUMNS',
     )
-    columns = {str(row.get('name') or '').strip() for row in column_rows if str(row.get('name') or '').strip()}
+    columns = {
+        str(row.get('name') or '').strip()
+        for row in column_rows
+        if str(row.get('name') or '').strip()
+    }
+    unique_rows = query_rows(
+        npx,
+        "SELECT il.name AS index_name, group_concat(ii.name, ',') AS indexed_columns FROM pragma_index_list('membership_tier_policies') AS il JOIN pragma_index_info(il.name) AS ii WHERE il.\"unique\"=1 GROUP BY il.name;",
+        'INSPECT MEMBERSHIP UNIQUE INDEXES',
+    )
+    tier_code_unique = any(str(row.get('indexed_columns') or '') == 'tier_code' for row in unique_rows)
     missing = [name for name in MEMBERSHIP_CANONICAL_COLUMNS if name not in columns]
-    if missing:
-        print('Membership canonical columns missing:', ', '.join(missing))
-        rebuild_membership_policy_table(npx, columns)
+    names = membership_table_names(npx)
+    backup_exists = MEMBERSHIP_BACKUP in names
+    if missing or not tier_code_unique:
+        if missing:
+            print('Membership canonical columns missing:', ', '.join(missing))
+        if not tier_code_unique:
+            print('Membership tier_code UNIQUE authority missing.')
+        rebuild_membership_policy_table(npx, columns, backup_exists=backup_exists)
     else:
-        print('Membership tier-policy table already has the canonical Build 395 column set.')
+        print('Membership tier-policy table already has the canonical Build 395 columns and tier_code UNIQUE authority.')
 
     for index, statement in enumerate(statements[create_index + 1 :], start=create_index + 2):
-        execute(npx, statement, f'database_membership_tier_policy_runtime_parity.sql STATEMENT {index}/{len(statements)}')
+        execute(
+            npx,
+            statement,
+            f'database_membership_tier_policy_runtime_parity.sql STATEMENT {index}/{len(statements)}',
+        )
 
     verification = query_rows(
         npx,
-        "SELECT tier_code,title,sort_order,is_visible FROM membership_tier_policies ORDER BY sort_order,tier_code;",
+        "SELECT policy_id,tier_code,title,sort_order,is_visible FROM membership_tier_policies ORDER BY sort_order,tier_code;",
         'VERIFY MEMBERSHIP CURRENT ROWS',
     )
     print('Membership current row count:', len(verification))
-    execute(npx, f'DROP TABLE IF EXISTS {MEMBERSHIP_BACKUP};', 'RETIRE MEMBERSHIP LEGACY BACKUP AFTER VERIFIED SEED')
+    names = membership_table_names(npx)
+    if MEMBERSHIP_BACKUP in names:
+        execute(
+            npx,
+            f'DROP TABLE {MEMBERSHIP_BACKUP};',
+            'RETIRE MEMBERSHIP LEGACY BACKUP AFTER VERIFIED SEED',
+        )
 
 
 def apply_notification_migration(npx: str, statements: list[str]) -> None:
     create_index = next(
-        (i for i, sql in enumerate(statements) if sql.lstrip().upper().startswith('CREATE TABLE IF NOT EXISTS NOTIFICATION_OUTBOX')),
+        (
+            i
+            for i, sql in enumerate(statements)
+            if sql.lstrip().upper().startswith('CREATE TABLE IF NOT EXISTS NOTIFICATION_OUTBOX')
+        ),
         None,
     )
     if create_index is None:
@@ -454,7 +530,11 @@ def apply_notification_migration(npx: str, statements: list[str]) -> None:
     for index, statement in enumerate(statements, start=1):
         if index - 1 == create_index:
             continue
-        execute(npx, statement, f'database_notification_runtime_parity.sql STATEMENT {index}/{len(statements)}')
+        execute(
+            npx,
+            statement,
+            f'database_notification_runtime_parity.sql STATEMENT {index}/{len(statements)}',
+        )
 
 
 def main() -> int:
