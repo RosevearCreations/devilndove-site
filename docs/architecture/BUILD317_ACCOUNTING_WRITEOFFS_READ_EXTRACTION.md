@@ -1,6 +1,6 @@
 # Build 317 — Accounting Write-Offs Read Extraction
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,9 +9,21 @@ Baseline:
 Build 316 set completed Accounting handoff context
 ```
 
+Build 317 source checkpoint:
+
+```text
+7ffceabb8a11d7e3f4e4b3dfc4ea923811e28a96
+```
+
+Consolidated Builds 317–319 proven head:
+
+```text
+7a5c41d4a426f30a0fe1ab7887ea071a51529cf8
+```
+
 ## Purpose
 
-Build 317 applies the Build 316 Accounting read rule to write-offs:
+Build 317 applies the Accounting read rule to write-offs:
 
 ```text
 GET/read paths inspect and report schema readiness.
@@ -21,7 +33,7 @@ Write paths remain separate until independently extracted.
 
 The historical `GET /api/admin/accounting-writeoffs` called `ensureTable()`, allowing CREATE/ALTER work during a read.
 
-## New Accounting-owned read authority
+## Accounting-owned read authority
 
 ```text
 functions/api/_lib/accountingWriteoffsReadService.js
@@ -31,41 +43,17 @@ owner             accounting
 authority table   accounting_writeoffs
 ```
 
-The service performs only schema inspection and SELECT operations. It reports:
+The service performs only schema inspection and SELECT operations. It reports schema readiness and `request_time_schema_mutation=false`.
 
-- `schema_ready`
-- `missing_tables`
-- `missing_columns`
-- `request_time_schema_mutation=false`
-- `writeoffs`
-- `count`
-
-## Dedicated contract
+Dedicated contract:
 
 ```text
 GET /api/admin/contracts/accounting-writeoffs-read
 ```
 
-The contract is authenticated, GET-only, no-store, and delegates to Accounting authority.
+The legacy GET delegates to this Accounting-owned service while preserving the historical `writeoffs` response field.
 
-## Legacy compatibility route
-
-`GET /api/admin/accounting-writeoffs` now delegates to the Accounting-owned service and preserves the historical `writeoffs` field.
-
-`POST /api/admin/accounting-writeoffs` remains the existing compatibility write path. Its period-open check, insert, audit logging, and write-side schema ensure behavior are intentionally unchanged.
-
-## Core composition
-
-The passive contract catalog and service adapter registry advance to Build 317 and register:
-
-```text
-accounting-writeoffs-read
-owner     accounting
-consumer  operations
-mode      read-only-http
-```
-
-Core registers/composes the contract but does not own Accounting business logic.
+`POST /api/admin/accounting-writeoffs` remains compatibility write authority with its period-open check, insert, audit logging and write-side schema ensure behavior unchanged.
 
 ## Runtime identity
 
@@ -76,14 +64,35 @@ Commerce/Operations runtime    315
 Accounting order read          312
 Accounting expenses read       316
 Accounting write-offs read     317
-Contract catalog               317
-Passive service adapters       317
+```
+
+Core composes the contract but does not own Accounting logic.
+
+## Validation proof
+
+Local regression:
+
+```text
+BUILD 317 ACCOUNTING WRITEOFFS READ EXTRACTION: PASS
+No Cloudflare resource was contacted.
+```
+
+Development browser proof:
+
+```text
+writeoff_legacy_status             200
+writeoff_legacy_build              317
+writeoff_legacy_schema_ready       true
+writeoff_legacy_schema_mutation    false
+writeoff_contract_status           200
+writeoff_contract_build            317
+writeoff_contract_owner            accounting
+writeoff_service_build             317
+writeoff_service_schema_mutation   false
 ```
 
 ## Safety boundary
 
-Build 317 does not change write-off POST semantics, Accounting expenses, General Ledger, Accounting Summary, Orders/payment behavior, Operations page coverage, SQL/schema, Cloudflare config, R2, Production, or business-data migration.
+Build 317 did not change write-off POST semantics, SQL/schema migrations, Core runtime, Commerce runtime, Operations page coverage, Orders/payment mutations, Cloudflare config, R2, Production, or business-data migration.
 
-## Next
-
-Build 318 should apply the same read extraction to `general-ledger-accounts.js`, preserving GIFI/starter-mapping write behavior while removing `ensureTable()` from GET.
+**Build 317 is COMPLETE IN DEVELOPMENT.**
