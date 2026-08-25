@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through completed Build 319.
+Updated through staged Build 322.
 
 ## Architectural invariant
 
@@ -19,24 +19,17 @@ Domains remain ownership/service boundaries beneath those modules. They are not 
 
 ## Core rule
 
-Core owns only shared infrastructure:
-
-- authentication/session/current-user context;
-- module registry and lifecycle;
-- route/domain/application-module resolution;
-- passive contract/service registration;
-- common request/runtime/error helpers;
-- module availability and diagnostics.
+Core owns only shared infrastructure: auth/session/current-user context, module registry/lifecycle, route/domain/application-module resolution, passive contract/service registration, common runtime/error helpers, availability and diagnostics.
 
 Core must not own Catalog, Inventory, Creative, Packaging, Content, Marketing, Accounting, order, payment, gift-card, membership, or other business rules.
 
-Current identities after Build 319:
+Current identities:
 
 ```text
 Core architecture            302
 Core runtime implementation  305
-Contract catalog             319
-Passive service adapters     319
+Contract catalog             322
+Passive service adapters     322
 Commerce runtime             315
 ```
 
@@ -51,11 +44,9 @@ main  = retained Production/legacy release line
 dev   = active modularization and Development integration line
 ```
 
-Build 319 verification proved `dev` contains `main` with zero commits missing from `main`; Development has surpassed the old baseline.
+Development has already been proven to contain the old `main` baseline with zero missing `main` commits. Application modules are not permanent Git branches. See `docs/architecture/SOURCE_CONTROL_BRANCHING.md`.
 
-Application modules are not permanent Git branches. See `docs/architecture/SOURCE_CONTROL_BRANCHING.md`.
-
-Historical retirement candidates still present:
+Cleanup-only refs still include:
 
 ```text
 build291-candidate
@@ -65,13 +56,13 @@ build294-candidate
 build317-accounting-writeoffs
 ```
 
-The historical candidate branches were previously proven fully contained in `dev`. The Build 317 branch was a temporary isolation checkpoint whose source was fast-forward integrated into `dev`. These are cleanup-only refs, not active development lines.
+These are historical or temporary checkpoints, not active development lines.
 
 ## Current application-module state
 
 ### Commerce & Operations
 
-Proven Operations pages through Build 315:
+Proven Operations pages:
 
 ```text
 /admin/operations/
@@ -81,7 +72,7 @@ Proven Operations pages through Build 315:
 
 Commerce runtime remains Build 315 and Operations mutation ownership remains false.
 
-Remaining Operations loader/runtime coverage:
+Remaining loader/runtime coverage includes:
 
 ```text
 /admin/gift-cards/
@@ -107,16 +98,19 @@ Still open:
 
 ### Business & Administration
 
-Business & Administration is not yet top-level runtime-active, but Accounting extraction is now materially ahead of the old monolith.
+Business & Administration is not yet top-level runtime-active, but Accounting extraction is now broad enough for a bounded runtime audit.
 
 Owned Accounting reads now include:
 
 ```text
-accounting-read                   Build 312 COMPLETE
-accounting-expenses-read          Build 316 COMPLETE
-accounting-writeoffs-read         Build 317 COMPLETE
-accounting-general-ledger-read    Build 318 COMPLETE
-accounting-summary-read           Build 319 COMPLETE
+accounting-read                               Build 312 COMPLETE
+accounting-expenses-read                      Build 316 COMPLETE
+accounting-writeoffs-read                     Build 317 COMPLETE
+accounting-general-ledger-read                Build 318 COMPLETE
+accounting-summary-read                       Build 319 COMPLETE
+accounting-overhead-allocations-read          Build 320 STAGED
+accounting-overhead-product-allocations-read  Build 321 STAGED
+accounting-product-costs-read                 Build 322 STAGED
 ```
 
 Marketing, Platform and Administration still need bounded service/runtime work before broader top-level activation.
@@ -127,33 +121,29 @@ Rule:
 
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Completed/proven:
+Completed/proven before this pass:
 
 ```text
 /api/admin/accounting-expenses
-  -> accounting-expenses-read Build 316
-
 /api/admin/accounting-writeoffs
-  -> accounting-writeoffs-read Build 317
-
 /api/admin/general-ledger-accounts
-  -> accounting-general-ledger-read Build 318
-
 /api/admin/accounting-summary
-  -> accounting-summary-read Build 319
 ```
 
-Each corresponding GET is schema-aware and non-mutating. Existing POST/write behavior remains separate where present.
-
-Remaining Accounting read-time DDL candidates to inspect next:
+Staged in Builds 320–322:
 
 ```text
-functions/api/admin/accounting-overhead-allocations.js
-functions/api/admin/accounting-overhead-product-allocations.js
-functions/api/admin/product-costs.js
+/api/admin/accounting-overhead-allocations
+  -> accounting-overhead-allocations-read Build 320
+
+/api/admin/accounting-overhead-product-allocations
+  -> accounting-overhead-product-allocations-read Build 321
+
+/api/admin/product-costs
+  -> accounting-product-costs-read Build 322
 ```
 
-Additional Accounting reports/exports should be audited for hidden ensure/repair calls before Business & Administration runtime activation.
+Each corresponding GET is schema-aware and non-mutating. Existing POST/write behavior remains separate.
 
 ## Mutation-authority extraction still open
 
@@ -171,20 +161,20 @@ Compatibility writes still requiring dedicated authority reviews include:
 
 A loader or read-contract migration never implies mutation ownership.
 
-## Recommended next bounded sequence
+## Next bounded sequence after Builds 320–322 validate
 
-1. Build 320 — Accounting overhead allocations read extraction.
-2. Build 321 — Accounting overhead-product allocations read extraction.
-3. Build 322 — Product-cost read extraction.
-4. Audit `/admin/accounting/` loader and dependencies for a first read-only Business & Administration runtime activation.
-5. Separately continue remaining Commerce & Operations route coverage.
-6. Then begin a bounded Creative & Production top-level runtime activation using already-owned Packaging/Creative/Inventory boundaries.
+1. Audit `/admin/accounting/` page, loader, scripts and API dependencies.
+2. If its current read dependencies are covered by Accounting-owned contracts, activate the first read-only `business-administration` runtime page.
+3. Keep mutation ownership false until dedicated Accounting write contracts are extracted.
+4. Separately continue remaining Commerce & Operations route coverage.
+5. Begin a bounded Creative & Production top-level runtime activation using already-owned Packaging/Creative/Inventory boundaries.
+6. Audit remaining Accounting reports/exports for hidden read-time DDL only where that blocks Business & Administration activation.
+
+Do not continue extracting every Accounting GET merely for build count if runtime activation is now safe.
 
 ## Separate fresh-install schema/data parity track
 
 This remains separate from module extraction.
-
-Request-time DDL is a symptom of weak schema lifecycle discipline, but these modular builds do not edit aggregate schema or migrations.
 
 Priority remains:
 
