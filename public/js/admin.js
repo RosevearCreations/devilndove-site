@@ -2,8 +2,8 @@
 // Build 245: resilient desktop admin identity panel. Temporary 5xx responses never render a false signed-out state.
 // Build 290: Packaging physically removes retired broad Catalog/Inventory reads from legacy server source.
 // Build 296: Packaging exposes an explicit client transport facade over the proven read/write bridges.
-// Builds 303–372: Core and the three top-level application-module runtimes progressively add proven read-only page coverage.
-// Build 386: Commerce & Operations adds /admin/gift-cards/ through the Operations-owned Gift Cards read contract.
+// Builds 303–397: Core and the three top-level application-module runtimes progressively add proven page-specific read coverage.
+// Build 397: Commerce & Operations gives /admin/customer-documents/ its Operations-owned read boundary.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -41,5 +41,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=386')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=397')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
