@@ -1,5 +1,5 @@
-// File: /public/js/admin-tier-policy.js
-// Brief description: Admin editor for Bronze, Silver, and Gold member-facing tier policy text.
+// Build 395 — Admin editor for Bronze, Silver, and Gold member-facing tier policy text.
+// Reads remain on the proven Build 362 endpoint; writes use the Operations-owned Build 395 contract.
 
 document.addEventListener("DOMContentLoaded", () => {
   const mount = document.getElementById("tierPolicyAdminMount");
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             sort_order: Number(form.sort_order.value || 0),
             is_visible: !!form.is_visible.checked
           };
-          const saveResponse = await window.DDAuth.apiFetch('/api/admin/tier-policies', { method: 'POST', body: JSON.stringify(payload) });
+          const saveResponse = await window.DDAuth.apiFetch('/api/admin/contracts/operations-membership-policy-write', { method: 'POST', body: JSON.stringify(payload) });
           const saveData = await saveResponse.json();
           if (!saveResponse.ok || !saveData?.ok) throw new Error(saveData?.error || 'Failed saving tier policy.');
           status.textContent = 'Saved.';
