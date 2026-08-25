@@ -1,4 +1,5 @@
-// Build 273 — review-first Content Studio with direct Creative Process/CAIP project handoff.
+// Build 355 — Content Studio GET uses an owned non-mutating read authority.
+// Build 273 mutation behavior remains the compatibility authority for POST actions.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
   CONTENT_STUDIO_BUILD,
@@ -13,6 +14,7 @@ import {
   updateContentProject,
   updateContentProjectMedia
 } from '../_lib/contentAutomationStudio.js';
+import { readContentStudio } from '../_lib/contentStudioReadService.js';
 import { syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 
 function json(data, status = 200, headers = {}) { return jsonResponse(data, status, { 'Cache-Control': 'no-store', ...headers }); }
@@ -30,26 +32,20 @@ export async function onRequestGet(context) {
   const access = await requireAdmin(context);
   if (access.error) return access.error;
   const { db, adminUser } = access;
+  const url = new URL(context.request.url);
+  const projectId = number(url.searchParams.get('project_id'));
+  const requestedCreativeProjectId = number(url.searchParams.get('creative_project_id') || url.searchParams.get('creative_work_project_id'));
   try {
-    await ensureContentAutomationSchema(db);
-    const url = new URL(context.request.url);
-    let projectId = number(url.searchParams.get('project_id'));
-    const requestedCreativeProjectId = number(url.searchParams.get('creative_project_id') || url.searchParams.get('creative_work_project_id'));
-    const response = await listContentStudioProjects(db);
-    if (!projectId && requestedCreativeProjectId) {
-      const linked = await db.prepare(`SELECT content_project_id FROM content_projects WHERE source_type='creative_project' AND source_id=? LIMIT 1`).bind(String(requestedCreativeProjectId)).first();
-      projectId = number(linked?.content_project_id);
-    }
-    const detail = projectId ? await getContentProjectDetail(db, projectId) : null;
-    if (projectId && !detail) return json({ ok: false, error: 'Content project not found.' }, 404);
-    return json({ ok: true, build: CONTENT_STUDIO_BUILD, ...response, detail, requested_creative_project_id: requestedCreativeProjectId || null, mode: 'review_first_no_auto_publish' });
+    const data = await readContentStudio(db, { projectId, creativeProjectId: requestedCreativeProjectId });
+    if (data.not_found) return json({ ...data, ok: false, error: 'Content project not found.' }, 404);
+    return json(data);
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'content_automation_studio', incident_code: 'content_studio_get_failed', severity: 'error',
       message: error?.message || 'Content Automation Studio failed to load.', related_user_id: adminUser.user_id,
-      details: { error: String(error?.stack || error?.message || error) }
+      details: { error: String(error?.stack || error?.message || error), request_time_schema_mutation: false }
     });
-    return json({ ok: false, error: 'Content Automation Studio could not load right now. Check the Build 199 migration and Cloudflare logs.' }, 500);
+    return json({ ok: false, build: 355, owner: 'content', contract: 'content-studio-read', request_time_schema_mutation: false, error: 'Content Automation Studio could not load right now. Check schema readiness and Cloudflare logs.' }, 500);
   }
 }
 
@@ -88,8 +84,6 @@ export async function onRequestPost(context) {
       const productId = number(body.product_id);
       if (!productId) throw new Error('Choose an approved product first.');
       const created = await createOrRefreshContentProjectForProduct(db, productId, adminUser.user_id, { refresh_copy: action === 'refresh_archive' && Number(body.refresh_copy) === 1 });
-      // Build 201: keep CAIP in step with the same reference-only source archive.
-      // A CAIP sync failure must not undo a successful Content Studio archive operation.
       let caip = null;
       try { caip = await syncCreativeProjectFromContentProject(db, created.project.content_project_id, adminUser.user_id, { trigger: 'content_studio_create_or_refresh' }); } catch (caipError) {
         await captureRuntimeIncident(context.env, context.request, {
