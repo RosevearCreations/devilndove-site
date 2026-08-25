@@ -17,7 +17,7 @@
 
 ## Development release target
 
-`wrangler.toml` is explicitly Development-only and binds:
+`wrangler.toml` is Development-only and binds:
 
 ```text
 Pages project  devilndove-site-dev
@@ -28,11 +28,9 @@ D1 id          dbc1615b-dcbe-4951-973b-b47c99c73bfa
 
 Production/main is not part of this release gate.
 
-Build 384 must be applied to the Development D1 before `schema_ready=true` is required from the Build 385 browser contract. The migration is idempotent for fresh table creation/default template seeding and intentionally does not redefine the shared `notification_outbox` table.
-
 ## Local regression status
 
-The accumulated local Commerce checkpoint passed on 2026-08-25:
+The accumulated Commerce checkpoint passed on 2026-08-25:
 
 ```text
 BUILDS 362-364 OPERATIONS MEMBERSHIP RUNTIME: PASS
@@ -46,39 +44,26 @@ BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
 
 No local regression contacted Cloudflare.
 
-## Build 384 remote D1 execution note
+## Build 384 Development D1 release history
 
-The normal Wrangler remote-file command:
-
-```bash
-npx wrangler d1 execute devilndove-dev --remote --config wrangler.toml --file=database_gift_card_runtime_parity.sql --yes
-```
-
-hit the known remote import/polling failure shape:
+The normal Wrangler remote `--file` path failed after upload with:
 
 ```text
 File already uploaded. Processing.
 {"D1_RESET_DO":true}
 ```
 
-On Windows the Wrangler process then also exited through a Node/libuv `UV_HANDLE_CLOSING` assertion. This is not a SQL validation error from the Build 384 migration.
+Wrangler then hit a Windows Node/libuv `UV_HANDLE_CLOSING` assertion. This was not a Build 384 SQL validation error.
 
-Do not keep retrying the `--file` path. Use the repository-owned direct-query fallback instead:
-
-```bash
-git -c gc.auto=0 pull --ff-only origin dev
-python scripts/build384_apply_gift_card_parity_direct.py
-```
-
-The first direct-query fallback run exposed a Windows-only helper bug before D1 diagnostics could be printed:
+The repository-owned direct-query fallback was introduced at:
 
 ```text
-UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f
+scripts/build384_apply_gift_card_parity_direct.py
 ```
 
-That failure was local Python subprocess decoding, not D1 or SQL. The helper now pins Wrangler output decoding to UTF-8 with replacement and disables color output so malformed/progress bytes cannot abort the release helper.
+Its first run exposed Windows CP1252 subprocess decoding; the helper now decodes Wrangler output explicitly as UTF-8 with replacement.
 
-The second direct-query run proved the `--command` route works. Its read-only preflight returned seven of the eight expected Gift Card tables:
+The next run proved the direct `--command` route works. The read-only preflight found seven of the eight Gift Card-owned tables already present:
 
 ```text
 gift_card_admin_events
@@ -90,33 +75,26 @@ gift_card_redemptions
 gift_cards
 ```
 
-At that checkpoint only `gift_card_lookup_lockouts` was absent. The first executable batch then failed locally before reaching D1 because its SQL text still began with the migration comment:
+Only `gift_card_lookup_lockouts` was absent at that checkpoint.
+
+The first executable direct-query attempt then failed because the migration comment `-- Devil n Dove Build 384` was interpreted by Wrangler/Yargs as a CLI option. The helper now removes full-line SQL comments before constructing command arguments.
+
+The following two-batch direct-query attempt reached D1 successfully. Batch 1 completed, while batch 2 returned:
 
 ```text
--- Devil n Dove Build 384
+incomplete input: SQLITE_ERROR
 ```
 
-Wrangler/Yargs interpreted that leading `-- ...` as another command-line option and reported:
+To remove multi-statement ambiguity entirely, the fallback now executes each of the 24 authoritative migration statements separately through `wrangler d1 execute --command` and prints a short SQL preview before every statement. This provides an exact failing statement if any current-schema mismatch remains.
 
-```text
-Unknown argument: Devil n Dove Build 384
+Run only:
+
+```bash
+git -c gc.auto=0 pull --ff-only origin dev
+python scripts/build384_apply_gift_card_parity_direct.py
 ```
 
-That was not a SQL error. The helper now strips full-line SQL comments before constructing `--command` values and refuses any sanitized statement that still begins with `--`.
-
-The fallback now:
-
-- refuses to run off the `dev` branch;
-- verifies `devilndove-site-dev` and `devilndove-dev` from `wrangler.toml`;
-- reads the authoritative `database_gift_card_runtime_parity.sql` file;
-- refuses any migration that attempts to redefine `notification_outbox`;
-- performs a read-only Development D1 preflight;
-- strips full-line SQL comments before passing SQL to Wrangler;
-- splits the migration into bounded statement batches;
-- uses `wrangler d1 execute --command` rather than the failing remote `--file` import path;
-- decodes Wrangler/Node output safely on Windows;
-- verifies all eight Gift Card-owned tables;
-- verifies migration-owned `activation` and `reissue` templates.
+Do not rerun the seven passing application regressions and do not return to the Wrangler remote `--file` path.
 
 Expected final line:
 
@@ -124,7 +102,7 @@ Expected final line:
 BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE
 ```
 
-The verified table set must contain:
+Final verification must contain all eight tables:
 
 ```text
 gift_card_admin_events
@@ -137,7 +115,7 @@ gift_card_redemptions
 gift_cards
 ```
 
-The template verification must return:
+and both migration-owned templates:
 
 ```text
 activation
@@ -152,15 +130,9 @@ After Development deploys, open:
 /admin/gift-cards/
 ```
 
-Do not save templates, resend, send through a provider, queue notification outbox records, change card state, or perform abuse lock/unlock actions.
+Do not save templates, resend, send through a provider, queue notification-outbox records, change card state, or perform abuse lock/unlock actions.
 
-Run the supplied read-only proof against:
-
-```text
-GET /api/admin/contracts/operations-gift-cards-read
-```
-
-Expected structural state:
+Read-only expected structural state:
 
 ```text
 contract_status                    200
@@ -189,15 +161,15 @@ runtime_state                      active
 last_pathname                      /admin/gift-cards/
 services_ready                     true
 required_services                  ["operations-gift-cards-read"]
-gift_cards_page_proven           true
+gift_cards_page_proven             true
 creates_network_transport          false
 gift_cards_mutation_ownership      false
 contracts_ok                       true
 services_ok                        true
 ```
 
-The registered service object is Build 386; its `list()` result carries the Build 385 server contract payload. This distinction is intentional.
+The registered service object is Build 386; its `list()` result carries the Build 385 server-contract payload.
 
-If `schema_ready=false`, paste `missing_tables` and `query_errors`. Do not repair schema from GET. Build 384 is the migration authority.
+If `schema_ready=false`, preserve `missing_tables` and `query_errors`; do not repair schema from GET. Build 384 remains the migration authority.
 
-Builds 389, 391, and 392 are mutation-authority source boundaries only in this batch. Do not execute writes merely to validate their existence.
+Builds 389, 391, and 392 are mutation-authority source boundaries only. Do not execute real writes merely to validate their existence.
