@@ -1,7 +1,7 @@
-// Devil n Dove Build 321 browser adapters for implemented read contracts.
+// Devil n Dove Build 322 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 321;
+export const BUILD = 322;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -14,6 +14,7 @@ const ROUTES = Object.freeze({
   'accounting-summary-read': '/api/admin/contracts/accounting-summary-read',
   'accounting-overhead-allocations-read': '/api/admin/contracts/accounting-overhead-allocations-read',
   'accounting-overhead-product-allocations-read': '/api/admin/contracts/accounting-overhead-product-allocations-read',
+  'accounting-product-costs-read': '/api/admin/contracts/accounting-product-costs-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -102,6 +103,10 @@ export function createDefaultModuleServices() {
     'accounting-overhead-product-allocations-read': service('accounting-overhead-product-allocations-read', 'accounting', async (options = {}) => {
       const data = await fetchContract(ROUTES['accounting-overhead-product-allocations-read'], { month: text(options.month || options.periodMonth), limit: boundedInt(options.limit, 150, 1, 500) });
       return Object.freeze({ ...accountingReadResult(data, 'allocations'), productTable: data.product_table || null, productTableAvailable: Boolean(data.product_table_available), productJoinEnabled: Boolean(data.product_join_enabled) });
+    }),
+    'accounting-product-costs-read': service('accounting-product-costs-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-product-costs-read'], { limit: options.limit == null ? '' : boundedInt(options.limit, 500, 1, 5000) });
+      return accountingReadResult(data, 'product_costs');
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
