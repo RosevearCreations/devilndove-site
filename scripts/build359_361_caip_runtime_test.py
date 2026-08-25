@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -17,6 +18,12 @@ def exported_async_function(text, name):
     start = text.index(f'export async function {name}')
     end = text.find('\nexport async function ', start + 1)
     return text[start:end if end >= 0 else len(text)]
+
+
+def cache_version(text, pattern):
+    match = re.search(pattern, text)
+    assert match, f'Missing cache-busted path matching: {pattern}'
+    return int(match.group(1))
 
 
 caip_contract = read('functions/api/admin/contracts/caip-read.js')
@@ -107,8 +114,11 @@ assert 'CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 360' in groups
 assert 'CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD = 361' in groups
 assert "'/admin/creative-assets/'" in groups
 assert 'caipMutationOwnershipMovedByTopLevelRuntime: false' in groups
-assert "dd-admin-module-runtime.mjs?v=361" in admin_js
 
+# Shared admin.js may advance after Build 361 as unrelated module coverage grows.
+assert cache_version(admin_js, r"dd-admin-module-runtime\.mjs\?v=(\d+)") >= 361
+
+# The CAIP page retains its own proven Build 361 loader checkpoint.
 admin_pos = page.index('/public/js/admin.js?v=361')
 intake_pos = page.index('/public/js/admin-caip-media-intake.js?v=279')
 caip_pos = page.index('/public/js/admin-creative-assets.js?v=271')
