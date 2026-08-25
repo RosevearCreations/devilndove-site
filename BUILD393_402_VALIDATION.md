@@ -34,6 +34,24 @@ No Cloudflare resource was contacted.
 
 Build 402 intentionally keeps the Production business-data-copy gate closed. Its local in-memory smoke proves the committed aggregate + parity overlays can build a current clean schema; it does not prove live Production-vs-Development row/data parity.
 
+## Build 399 Accounting authority validation rule
+
+The current Accounting evidence reader uses only these active authorities:
+
+```text
+accounting_hst_gst_reviews
+accountant_export_packages
+```
+
+The historical names below may remain in explicit retirement metadata only:
+
+```text
+hst_gst_review_records
+accountant_export_manifests
+```
+
+Their presence in `legacy_authorities_retired` is evidence that the migration is understood; it is not an active dependency. Local regression therefore rejects those names from the active readiness/query section while requiring them in retirement metadata. Do not remove correct retirement evidence merely to satisfy a string-absence test.
+
 ## Browser gate — Customer Documents only
 
 After Development deploys, open:
