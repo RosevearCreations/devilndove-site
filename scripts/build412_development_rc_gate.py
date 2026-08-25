@@ -6,6 +6,7 @@ Production promotion remains fail-closed until explicit Development D1/browser/l
 parity gates are supplied separately.
 """
 from pathlib import Path
+import os
 import subprocess
 import sys
 
@@ -16,11 +17,24 @@ CHECKS = [
     ('scripts/build403_410_commerce_modularity_test.py', 'BUILDS 403-410 COMMERCE MODULARITY: PASS'),
 ]
 
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(errors='replace')
+    except Exception:
+        pass
+
 
 def run(args):
     return subprocess.run(
-        args, cwd=ROOT, text=True, encoding='utf-8', errors='replace',
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+        args,
+        cwd=ROOT,
+        text=True,
+        encoding='utf-8',
+        errors='replace',
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        env={**os.environ, 'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1'},
+        check=False,
     )
 
 
