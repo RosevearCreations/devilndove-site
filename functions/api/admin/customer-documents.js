@@ -1,8 +1,12 @@
-// Build 227 mutation compatibility / Build 397 non-mutating read authority — immutable client document snapshots.
-import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import { readCustomerDocuments } from '../_lib/customerDocumentsReadService.js';
+// Devil n Dove Build 414 mutation implementation / Build 397 read authority.
+// Customer Documents schema is migration-owned; GET and POST perform no request-time DDL.
 
-const BUILD = '227';
+import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import { readCustomerDocuments, readCustomerDocumentsSchemaReadiness } from '../_lib/customerDocumentsReadService.js';
+
+const BUILD = 414;
+const READ_BUILD = 397;
+const CONTRACT_ID = 'operations-customer-documents-write';
 const TYPES = new Set(['invoice','receipt','packing_slip','credit_note','refund_confirmation']);
 const PREFIX = { invoice:'INV', receipt:'RCT', packing_slip:'PKG', credit_note:'CRN', refund_confirmation:'RFD' };
 const text = (value,max=2000) => normalizeText(value).slice(0,max);
@@ -13,19 +17,16 @@ const json = (data,status=200) => jsonResponse(data,status,{'Cache-Control':'no-
 
 async function access(context){
   const adminUser=await getAdminUserFromRequest(context.request,context.env);
-  if(!adminUser)return{error:json({ok:false,error:'Admin access required.'},401)};
-  const db=getDb(context.env);if(!db)return{error:json({ok:false,error:'Database binding is not configured.'},500)};
+  if(!adminUser)return{error:json({ok:false,build:BUILD,error:'Admin access required.'},401)};
+  const db=getDb(context.env);if(!db)return{error:json({ok:false,build:BUILD,error:'Database binding is not configured.'},500)};
   return{adminUser,db};
 }
 
-// Retained POST compatibility only. Build 397 GET/read paths never call this.
-async function ensureSchema(db){
-  for(const sql of [
-    `CREATE TABLE IF NOT EXISTS customer_document_sequences (document_type TEXT NOT NULL,sequence_year INTEGER NOT NULL,next_number INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY(document_type,sequence_year))`,
-    `CREATE TABLE IF NOT EXISTS customer_documents (customer_document_id INTEGER PRIMARY KEY AUTOINCREMENT,document_number TEXT NOT NULL UNIQUE,document_type TEXT NOT NULL,order_id INTEGER NOT NULL,refund_id INTEGER,document_status TEXT NOT NULL DEFAULT 'issued',currency TEXT NOT NULL DEFAULT 'CAD',document_amount_cents INTEGER NOT NULL DEFAULT 0,tax_adjustment_cents INTEGER NOT NULL DEFAULT 0,issue_reason TEXT,customer_email TEXT,business_name TEXT,business_registration_number TEXT,source_snapshot_json TEXT NOT NULL,issued_by_user_id INTEGER,issued_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,voided_by_user_id INTEGER,voided_at TEXT,void_reason TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY(order_id) REFERENCES orders(order_id) ON DELETE RESTRICT,FOREIGN KEY(refund_id) REFERENCES payment_refunds(refund_id) ON DELETE SET NULL)`,
-    `CREATE INDEX IF NOT EXISTS idx_customer_documents_order ON customer_documents(order_id,issued_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_customer_documents_type_status ON customer_documents(document_type,document_status,issued_at DESC)`
-  ])await db.prepare(sql).run();
+async function requireWriteSchema(db){
+  const readiness=await readCustomerDocumentsSchemaReadiness(db);
+  return readiness.schema_ready
+    ? {ok:true,readiness}
+    : {ok:false,readiness,error:'Customer Documents schema is not ready. Apply database_customer_documents_runtime_parity.sql before retrying.'};
 }
 
 function businessProfile(env={}){
@@ -54,12 +55,9 @@ async function nextNumber(db,type){
   return`${PREFIX[type]}-${year}-${String(Number(row?.issued_number||1)).padStart(6,'0')}`;
 }
 
-async function readData(db,orderId=0,documentId=0){
-  const orders=rows(await db.prepare(`SELECT o.order_id,o.order_number,o.customer_name,o.customer_email,o.order_status,o.payment_status,o.fulfillment_type,o.currency,o.total_cents,o.tax_cents,o.created_at,COALESCE((SELECT SUM(pr.amount_cents) FROM payment_refunds pr WHERE pr.order_id=o.order_id AND COALESCE(pr.refund_status,'recorded') NOT IN ('failed','cancelled')),0) AS refunded_cents FROM orders o ORDER BY o.created_at DESC,o.order_id DESC LIMIT 300`).all());
-  const documents=rows(await db.prepare(`SELECT customer_document_id,document_number,document_type,order_id,refund_id,document_status,currency,document_amount_cents,tax_adjustment_cents,issue_reason,customer_email,business_name,business_registration_number,issued_at,voided_at,void_reason FROM customer_documents ORDER BY issued_at DESC,customer_document_id DESC LIMIT 300`).all());
-  let document_detail=null;
-  if(documentId){const row=await db.prepare(`SELECT * FROM customer_documents WHERE customer_document_id=?`).bind(documentId).first();if(row){try{document_detail={...row,source_snapshot:JSON.parse(row.source_snapshot_json||'{}')} }catch{document_detail={...row,source_snapshot:{}}}}}
-  return{ok:true,build:BUILD,orders,documents,detail:orderId?await loadOrder(db,orderId):null,document_detail};
+async function responseSnapshot(db,orderId=0,documentId=0,extra={}){
+  const data=await readCustomerDocuments(db,{orderId,documentId});
+  return{...data,build:BUILD,read_build:READ_BUILD,contract:CONTRACT_ID,owner:'operations',request_time_schema_mutation:false,mutation_ownership_moved:true,...extra};
 }
 
 export async function onRequestGet(context){
@@ -68,27 +66,40 @@ export async function onRequestGet(context){
     const url=new URL(context.request.url);
     return json(await readCustomerDocuments(a.db,{orderId:id(url.searchParams.get('order_id')),documentId:id(url.searchParams.get('document_id'))}));
   }
-  catch(error){await captureRuntimeIncident(context.env,context.request,{incident_scope:'customer_documents',incident_code:'customer_documents_get_failed',severity:'error',message:error?.message||'Customer documents failed to load.',related_user_id:a.adminUser.user_id,details:{error:String(error?.stack||error)}}).catch(()=>null);return json({ok:false,build:397,request_time_schema_mutation:false,error:'Client documents could not load.'},500);}
+  catch(error){
+    await captureRuntimeIncident(context.env,context.request,{incident_scope:'customer_documents',incident_code:'customer_documents_get_failed',severity:'error',message:error?.message||'Customer documents failed to load.',related_user_id:a.adminUser.user_id,details:{error:String(error?.stack||error)}}).catch(()=>null);
+    return json({ok:false,build:READ_BUILD,request_time_schema_mutation:false,error:'Client documents could not load.'},500);
+  }
 }
 
 export async function onRequestPost(context){
-  const a=await access(context);if(a.error)return a.error;let body={};try{body=await context.request.json()}catch{return json({ok:false,error:'Expected a JSON request body.'},400)}
+  const a=await access(context);if(a.error)return a.error;
+  const schema=await requireWriteSchema(a.db);
+  if(!schema.ok)return json({ok:false,build:BUILD,contract:CONTRACT_ID,owner:'operations',error_code:'customer_documents_schema_not_ready',error:schema.error,...schema.readiness},503);
+
+  let body={};try{body=await context.request.json()}catch{return json({ok:false,build:BUILD,contract:CONTRACT_ID,error:'Expected a JSON request body.'},400)}
   const action=text(body.action,60).toLowerCase();
   try{
-    await ensureSchema(a.db);
     if(action==='void_document'){
-      const documentId=id(body.customer_document_id);const reason=text(body.void_reason,1000);if(!documentId||reason.length<5)throw new Error('Choose a document and provide a clear void reason.');
-      const current=await a.db.prepare(`SELECT * FROM customer_documents WHERE customer_document_id=?`).bind(documentId).first();if(!current)throw new Error('Client document was not found.');if(current.document_status==='void')throw new Error('This client document is already void.');
+      const documentId=id(body.customer_document_id);const reason=text(body.void_reason,1000);
+      if(!documentId||reason.length<5)throw new Error('Choose a document and provide a clear void reason.');
+      const current=await a.db.prepare(`SELECT * FROM customer_documents WHERE customer_document_id=?`).bind(documentId).first();
+      if(!current)throw new Error('Client document was not found.');
+      if(current.document_status==='void')throw new Error('This client document is already void.');
       await a.db.prepare(`UPDATE customer_documents SET document_status='void',voided_by_user_id=?,voided_at=CURRENT_TIMESTAMP,void_reason=?,updated_at=CURRENT_TIMESTAMP WHERE customer_document_id=?`).bind(a.adminUser.user_id,reason,documentId).run();
       await auditAdminAction(context.env,context.request,a.adminUser,{action_type:'customer_document_voided',target_type:'customer_document',target_id:documentId,target_key:current.document_number,details:{reason}}).catch(()=>null);
-      return json({...await readData(a.db,id(current.order_id)),message:'Client document voided. The immutable source snapshot remains in history.'});
+      return json(await responseSnapshot(a.db,id(current.order_id),0,{message:'Client document voided. The immutable source snapshot remains in history.'}));
     }
-    if(action!=='issue_document')return json({ok:false,error:'Unsupported client-document action.'},400);
-    const type=text(body.document_type,40).toLowerCase();const orderId=id(body.order_id);if(!TYPES.has(type)||!orderId)throw new Error('A supported document type and order are required.');
+
+    if(action!=='issue_document')return json({ok:false,build:BUILD,contract:CONTRACT_ID,error:'Unsupported client-document action.'},400);
+    const type=text(body.document_type,40).toLowerCase();const orderId=id(body.order_id);
+    if(!TYPES.has(type)||!orderId)throw new Error('A supported document type and order are required.');
     const detail=await loadOrder(a.db,orderId);if(!detail)throw new Error('Order was not found.');
     const selectedRefund=id(body.refund_id)?detail.refunds.find((row)=>id(row.refund_id)===id(body.refund_id)):null;
     if((type==='credit_note'||type==='refund_confirmation')&&!selectedRefund)throw new Error('Choose the recorded refund that this credit/refund document represents.');
-    const reason=text(body.issue_reason||selectedRefund?.reason,1000);if((type==='credit_note'||type==='refund_confirmation')&&reason.length<3)throw new Error('Add the refund or credit reason.');
+    const reason=text(body.issue_reason||selectedRefund?.reason,1000);
+    if((type==='credit_note'||type==='refund_confirmation')&&reason.length<3)throw new Error('Add the refund or credit reason.');
+
     const profile=businessProfile(context.env);const registrationMissing=!profile.registration_number;
     const amount=(type==='credit_note'||type==='refund_confirmation')?cents(selectedRefund?.amount_cents):cents(detail.order.total_cents);
     const proportionalTax=detail.order.total_cents?Math.round(cents(detail.order.tax_cents)*amount/cents(detail.order.total_cents)):0;
@@ -100,6 +111,9 @@ export async function onRequestPost(context){
     const warnings=[];
     if(!profile.address_line1||!profile.city||!profile.postal_code)warnings.push('Business address fields are incomplete. Configure and owner-review the business identity before sending this document to a customer.');
     if((type==='credit_note'||type==='refund_confirmation')&&taxAdjustment>0&&registrationMissing)warnings.push('This document adjusts tax but the GST/HST or registration number is not configured. Add the owner/accountant-verified BUSINESS_GST_HST_NUMBER before treating it as complete.');
-    return json({...await readData(a.db,orderId),message:`${documentNumber} issued as an immutable print-ready snapshot.`,issued_document:{customer_document_id:id(result.meta?.last_row_id),document_number:documentNumber,snapshot},warnings});
-  }catch(error){await captureRuntimeIncident(context.env,context.request,{incident_scope:'customer_documents',incident_code:'customer_documents_post_failed',severity:'warning',message:error?.message||'Customer document action failed.',related_user_id:a.adminUser.user_id,details:{action,error:String(error?.stack||error)}}).catch(()=>null);return json({ok:false,error:error?.message||'Customer document action failed.'},400);}
+    return json(await responseSnapshot(a.db,orderId,0,{message:`${documentNumber} issued as an immutable print-ready snapshot.`,issued_document:{customer_document_id:id(result.meta?.last_row_id),document_number:documentNumber,snapshot},warnings}));
+  }catch(error){
+    await captureRuntimeIncident(context.env,context.request,{incident_scope:'customer_documents',incident_code:'customer_documents_post_failed',severity:'warning',message:error?.message||'Customer document action failed.',related_user_id:a.adminUser.user_id,details:{action,error:String(error?.stack||error)}}).catch(()=>null);
+    return json({ok:false,build:BUILD,contract:CONTRACT_ID,error:error?.message||'Customer document action failed.',request_time_schema_mutation:false},400);
+  }
 }
