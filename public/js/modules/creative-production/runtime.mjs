@@ -1,28 +1,35 @@
-// Devil n Dove Build 358 — Creative & Production passive umbrella runtime.
-// Build 357 extends explicit coverage to Content Studio while keeping all mutations domain-owned.
-// Build 358 corrects the Creative Process activation dependency gate: Inventory-owned mutation
-// authorities remain declared/consumed by the retained POST path, but are not Core browser services.
+// Devil n Dove Build 360 — Creative & Production passive umbrella runtime.
+// Build 361 extends explicit coverage to CAIP while keeping all mutations domain-owned.
+// Build 358 remains the Creative Process dependency-gate correction: Inventory-owned mutation
+// authorities are declared/consumed by the retained POST path, not Core activation services.
 // This top-level runtime performs no reads/writes itself and does not move domain mutation authority.
 
 import { ensureCreativeProcessReadService } from './creative-process-read-service.mjs?v=353';
 import { ensureContentStudioReadService } from './content-studio-read-service.mjs?v=356';
+import { ensureCaipReadServices } from './caip-read-services.mjs?v=360';
 
-const BUILD = 358;
-const ACTIVATION_BUILD = 357;
+const BUILD = 360;
+const ACTIVATION_BUILD = 361;
 const DEPENDENCY_GATE_FIX_BUILD = 358;
 const MODULE_ID = 'creative-production';
-const SUPPORTED_DOMAINS = Object.freeze(['packaging', 'creative', 'content']);
+const SUPPORTED_DOMAINS = Object.freeze(['packaging', 'creative', 'content', 'caip']);
 const PACKAGING_RUNTIME_PAGES = Object.freeze(['/admin/packaging-studio/']);
 const CREATIVE_PROCESS_RUNTIME_PAGES = Object.freeze(['/admin/creative-process/']);
 const CONTENT_STUDIO_RUNTIME_PAGES = Object.freeze(['/admin/content-studio/']);
+const CAIP_RUNTIME_PAGES = Object.freeze(['/admin/creative-assets/']);
 const PACKAGING_REQUIRED_SERVICES = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
 const CREATIVE_REQUIRED_SERVICES = Object.freeze(['creative-process-read', 'inventory-read']);
 const CREATIVE_MUTATION_AUTHORITIES = Object.freeze(['inventory-post', 'inventory-reverse']);
 const CONTENT_REQUIRED_SERVICES = Object.freeze(['content-studio-read']);
+const CAIP_REQUIRED_SERVICES = Object.freeze(['caip-read', 'caip-media-intake-read']);
 const CREATIVE_PROCESS_READ_CONTRACT = '/api/admin/contracts/creative-process-read';
 const CREATIVE_PROCESS_READ_CONTRACT_BUILD = 352;
 const CONTENT_STUDIO_READ_CONTRACT = '/api/admin/contracts/content-studio-read';
 const CONTENT_STUDIO_READ_CONTRACT_BUILD = 355;
+const CAIP_READ_CONTRACT = '/api/admin/contracts/caip-read';
+const CAIP_MEDIA_INTAKE_READ_CONTRACT = '/api/admin/contracts/caip-media-intake-read';
+const CAIP_READ_CONTRACT_BUILD = 359;
+const CAIP_MEDIA_INTAKE_READ_CONTRACT_BUILD = 359;
 
 let state = 'registered';
 let activationCount = 0;
@@ -51,18 +58,21 @@ function supportedPathForDomain(domainId, pathname) {
   if (domain === 'packaging') return PACKAGING_RUNTIME_PAGES.includes(path);
   if (domain === 'creative') return CREATIVE_PROCESS_RUNTIME_PAGES.includes(path);
   if (domain === 'content') return CONTENT_STUDIO_RUNTIME_PAGES.includes(path);
+  if (domain === 'caip') return CAIP_RUNTIME_PAGES.includes(path);
   return false;
 }
 function requiredServicesForDomain(domainId) {
   const domain = normalizeDomain(domainId);
   if (domain === 'creative') return CREATIVE_REQUIRED_SERVICES;
   if (domain === 'content') return CONTENT_REQUIRED_SERVICES;
+  if (domain === 'caip') return CAIP_REQUIRED_SERVICES;
   return PACKAGING_REQUIRED_SERVICES;
 }
 function ensureDomainServices(registry, domainId) {
   const domain = normalizeDomain(domainId);
   if (domain === 'creative') ensureCreativeProcessReadService(registry);
   if (domain === 'content') ensureContentStudioReadService(registry);
+  if (domain === 'caip') ensureCaipReadServices(registry);
   const required = requiredServicesForDomain(domain);
   const missing = required.filter((serviceId) => !registry?.service?.(serviceId));
   if (missing.length) {
@@ -93,18 +103,25 @@ function installFacade() {
     packagingRuntimePages: PACKAGING_RUNTIME_PAGES,
     creativeProcessRuntimePages: CREATIVE_PROCESS_RUNTIME_PAGES,
     contentStudioRuntimePages: CONTENT_STUDIO_RUNTIME_PAGES,
+    caipRuntimePages: CAIP_RUNTIME_PAGES,
     packagingRequiredServices: PACKAGING_REQUIRED_SERVICES,
     creativeRequiredServices: CREATIVE_REQUIRED_SERVICES,
     creativeMutationAuthorities: CREATIVE_MUTATION_AUTHORITIES,
     contentRequiredServices: CONTENT_REQUIRED_SERVICES,
+    caipRequiredServices: CAIP_REQUIRED_SERVICES,
     creativeProcessReadContract: CREATIVE_PROCESS_READ_CONTRACT,
     creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
     contentStudioReadContract: CONTENT_STUDIO_READ_CONTRACT,
     contentStudioReadContractBuild: CONTENT_STUDIO_READ_CONTRACT_BUILD,
+    caipReadContract: CAIP_READ_CONTRACT,
+    caipMediaIntakeReadContract: CAIP_MEDIA_INTAKE_READ_CONTRACT,
+    caipReadContractBuild: CAIP_READ_CONTRACT_BUILD,
+    caipMediaIntakeReadContractBuild: CAIP_MEDIA_INTAKE_READ_CONTRACT_BUILD,
     createsNetworkTransport: false,
     packagingMutationOwnership: false,
     creativeMutationOwnership: false,
     contentMutationOwnership: false,
+    caipMutationOwnership: false,
     mutationAuthoritiesRequiredAsActivationServices: false,
     supportedPathForDomain,
     requiredServicesForDomain,
@@ -123,19 +140,26 @@ export const metadata = Object.freeze({
   packagingRuntimePages: PACKAGING_RUNTIME_PAGES,
   creativeProcessRuntimePages: CREATIVE_PROCESS_RUNTIME_PAGES,
   contentStudioRuntimePages: CONTENT_STUDIO_RUNTIME_PAGES,
+  caipRuntimePages: CAIP_RUNTIME_PAGES,
   packagingRequiredServices: PACKAGING_REQUIRED_SERVICES,
   creativeRequiredServices: CREATIVE_REQUIRED_SERVICES,
   creativeMutationAuthorities: CREATIVE_MUTATION_AUTHORITIES,
   contentRequiredServices: CONTENT_REQUIRED_SERVICES,
+  caipRequiredServices: CAIP_REQUIRED_SERVICES,
   creativeProcessReadContract: CREATIVE_PROCESS_READ_CONTRACT,
   creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
   contentStudioReadContract: CONTENT_STUDIO_READ_CONTRACT,
   contentStudioReadContractBuild: CONTENT_STUDIO_READ_CONTRACT_BUILD,
-  behaviorMode: 'packaging-plus-creative-process-plus-content-studio-explicit-page-coverage',
+  caipReadContract: CAIP_READ_CONTRACT,
+  caipMediaIntakeReadContract: CAIP_MEDIA_INTAKE_READ_CONTRACT,
+  caipReadContractBuild: CAIP_READ_CONTRACT_BUILD,
+  caipMediaIntakeReadContractBuild: CAIP_MEDIA_INTAKE_READ_CONTRACT_BUILD,
+  behaviorMode: 'packaging-plus-creative-process-plus-content-studio-plus-caip-explicit-page-coverage',
   createsNetworkTransport: false,
   ownsPackagingMutations: false,
   ownsCreativeMutations: false,
   ownsContentMutations: false,
+  ownsCaipMutations: false,
   mutationAuthoritiesRequiredAsActivationServices: false,
   packagingBaselineBuild: 301,
 });
@@ -158,6 +182,8 @@ export async function onLoad({ registry, applicationModule, domainDefinition, pa
     packagingBaselineBuild: 301,
     creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
     contentStudioReadContractBuild: CONTENT_STUDIO_READ_CONTRACT_BUILD,
+    caipReadContractBuild: CAIP_READ_CONTRACT_BUILD,
+    caipMediaIntakeReadContractBuild: CAIP_MEDIA_INTAKE_READ_CONTRACT_BUILD,
   });
 }
 
@@ -184,6 +210,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     packagingMutationOwnership: false,
     creativeMutationOwnership: false,
     contentMutationOwnership: false,
+    caipMutationOwnership: false,
   });
 }
 
@@ -214,10 +241,12 @@ export function getStatus() {
     packagingRuntimePages: PACKAGING_RUNTIME_PAGES,
     creativeProcessRuntimePages: CREATIVE_PROCESS_RUNTIME_PAGES,
     contentStudioRuntimePages: CONTENT_STUDIO_RUNTIME_PAGES,
+    caipRuntimePages: CAIP_RUNTIME_PAGES,
     packagingRequiredServices: PACKAGING_REQUIRED_SERVICES,
     creativeRequiredServices: CREATIVE_REQUIRED_SERVICES,
     creativeMutationAuthorities: CREATIVE_MUTATION_AUTHORITIES,
     contentRequiredServices: CONTENT_REQUIRED_SERVICES,
+    caipRequiredServices: CAIP_REQUIRED_SERVICES,
     requiredServices: currentRequired,
     activeRequiredServices,
     servicesReady,
@@ -225,21 +254,29 @@ export function getStatus() {
     packagingMutationOwnership: false,
     creativeMutationOwnership: false,
     contentMutationOwnership: false,
+    caipMutationOwnership: false,
     ownsPackagingMutations: false,
     ownsCreativeMutations: false,
     ownsContentMutations: false,
+    ownsCaipMutations: false,
     mutationAuthoritiesRequiredAsActivationServices: false,
     creativeProcessReadContract: CREATIVE_PROCESS_READ_CONTRACT,
     creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
     contentStudioReadContract: CONTENT_STUDIO_READ_CONTRACT,
     contentStudioReadContractBuild: CONTENT_STUDIO_READ_CONTRACT_BUILD,
+    caipReadContract: CAIP_READ_CONTRACT,
+    caipMediaIntakeReadContract: CAIP_MEDIA_INTAKE_READ_CONTRACT,
+    caipReadContractBuild: CAIP_READ_CONTRACT_BUILD,
+    caipMediaIntakeReadContractBuild: CAIP_MEDIA_INTAKE_READ_CONTRACT_BUILD,
     packagingBaselineBuild: 301,
     packagingRuntimeActive: state === 'active' && currentDomain === 'packaging',
     creativeProcessRuntimeActive: state === 'active' && currentDomain === 'creative',
     contentStudioRuntimeActive: state === 'active' && currentDomain === 'content',
+    caipRuntimeActive: state === 'active' && currentDomain === 'caip',
     currentPackagingPageProven: state === 'active' && currentDomain === 'packaging' && PACKAGING_RUNTIME_PAGES.includes(lastPathname),
     currentCreativeProcessPageProven: state === 'active' && currentDomain === 'creative' && CREATIVE_PROCESS_RUNTIME_PAGES.includes(lastPathname),
     currentContentStudioPageProven: state === 'active' && currentDomain === 'content' && CONTENT_STUDIO_RUNTIME_PAGES.includes(lastPathname),
+    currentCaipPageProven: state === 'active' && currentDomain === 'caip' && CAIP_RUNTIME_PAGES.includes(lastPathname),
     packagingDomainRuntimePresent: Boolean(packaging),
     packagingDomainRuntimeState: packaging?.state || null,
     packagingDomainRuntimeBuild: Number(packaging?.build || 0) || null,
