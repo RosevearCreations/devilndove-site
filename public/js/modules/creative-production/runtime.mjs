@@ -1,19 +1,23 @@
-// Devil n Dove Build 356 — Creative & Production passive umbrella runtime.
+// Devil n Dove Build 358 — Creative & Production passive umbrella runtime.
 // Build 357 extends explicit coverage to Content Studio while keeping all mutations domain-owned.
+// Build 358 corrects the Creative Process activation dependency gate: Inventory-owned mutation
+// authorities remain declared/consumed by the retained POST path, but are not Core browser services.
 // This top-level runtime performs no reads/writes itself and does not move domain mutation authority.
 
 import { ensureCreativeProcessReadService } from './creative-process-read-service.mjs?v=353';
 import { ensureContentStudioReadService } from './content-studio-read-service.mjs?v=356';
 
-const BUILD = 356;
+const BUILD = 358;
 const ACTIVATION_BUILD = 357;
+const DEPENDENCY_GATE_FIX_BUILD = 358;
 const MODULE_ID = 'creative-production';
 const SUPPORTED_DOMAINS = Object.freeze(['packaging', 'creative', 'content']);
 const PACKAGING_RUNTIME_PAGES = Object.freeze(['/admin/packaging-studio/']);
 const CREATIVE_PROCESS_RUNTIME_PAGES = Object.freeze(['/admin/creative-process/']);
 const CONTENT_STUDIO_RUNTIME_PAGES = Object.freeze(['/admin/content-studio/']);
 const PACKAGING_REQUIRED_SERVICES = Object.freeze(['inventory-read', 'catalog-read', 'content-media']);
-const CREATIVE_REQUIRED_SERVICES = Object.freeze(['creative-process-read', 'inventory-read', 'inventory-post', 'inventory-reverse']);
+const CREATIVE_REQUIRED_SERVICES = Object.freeze(['creative-process-read', 'inventory-read']);
+const CREATIVE_MUTATION_AUTHORITIES = Object.freeze(['inventory-post', 'inventory-reverse']);
 const CONTENT_REQUIRED_SERVICES = Object.freeze(['content-studio-read']);
 const CREATIVE_PROCESS_READ_CONTRACT = '/api/admin/contracts/creative-process-read';
 const CREATIVE_PROCESS_READ_CONTRACT_BUILD = 352;
@@ -83,6 +87,7 @@ function installFacade() {
   window.DDCreativeProduction = Object.freeze({
     build: BUILD,
     activationBuild: ACTIVATION_BUILD,
+    dependencyGateFixBuild: DEPENDENCY_GATE_FIX_BUILD,
     moduleId: MODULE_ID,
     supportedDomains: SUPPORTED_DOMAINS,
     packagingRuntimePages: PACKAGING_RUNTIME_PAGES,
@@ -90,6 +95,7 @@ function installFacade() {
     contentStudioRuntimePages: CONTENT_STUDIO_RUNTIME_PAGES,
     packagingRequiredServices: PACKAGING_REQUIRED_SERVICES,
     creativeRequiredServices: CREATIVE_REQUIRED_SERVICES,
+    creativeMutationAuthorities: CREATIVE_MUTATION_AUTHORITIES,
     contentRequiredServices: CONTENT_REQUIRED_SERVICES,
     creativeProcessReadContract: CREATIVE_PROCESS_READ_CONTRACT,
     creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
@@ -99,6 +105,7 @@ function installFacade() {
     packagingMutationOwnership: false,
     creativeMutationOwnership: false,
     contentMutationOwnership: false,
+    mutationAuthoritiesRequiredAsActivationServices: false,
     supportedPathForDomain,
     requiredServicesForDomain,
     getPackagingDomainRuntimeStatus: packagingDomainRuntimeStatus,
@@ -110,6 +117,7 @@ export const metadata = Object.freeze({
   id: MODULE_ID,
   build: BUILD,
   activationBuild: ACTIVATION_BUILD,
+  dependencyGateFixBuild: DEPENDENCY_GATE_FIX_BUILD,
   kind: 'application-module-runtime',
   supportedDomains: SUPPORTED_DOMAINS,
   packagingRuntimePages: PACKAGING_RUNTIME_PAGES,
@@ -117,6 +125,7 @@ export const metadata = Object.freeze({
   contentStudioRuntimePages: CONTENT_STUDIO_RUNTIME_PAGES,
   packagingRequiredServices: PACKAGING_REQUIRED_SERVICES,
   creativeRequiredServices: CREATIVE_REQUIRED_SERVICES,
+  creativeMutationAuthorities: CREATIVE_MUTATION_AUTHORITIES,
   contentRequiredServices: CONTENT_REQUIRED_SERVICES,
   creativeProcessReadContract: CREATIVE_PROCESS_READ_CONTRACT,
   creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
@@ -127,6 +136,7 @@ export const metadata = Object.freeze({
   ownsPackagingMutations: false,
   ownsCreativeMutations: false,
   ownsContentMutations: false,
+  mutationAuthoritiesRequiredAsActivationServices: false,
   packagingBaselineBuild: 301,
 });
 
@@ -194,6 +204,7 @@ export function getStatus() {
   return Object.freeze({
     build: BUILD,
     activationBuild: ACTIVATION_BUILD,
+    dependencyGateFixBuild: DEPENDENCY_GATE_FIX_BUILD,
     moduleId: MODULE_ID,
     state,
     activationCount,
@@ -205,6 +216,7 @@ export function getStatus() {
     contentStudioRuntimePages: CONTENT_STUDIO_RUNTIME_PAGES,
     packagingRequiredServices: PACKAGING_REQUIRED_SERVICES,
     creativeRequiredServices: CREATIVE_REQUIRED_SERVICES,
+    creativeMutationAuthorities: CREATIVE_MUTATION_AUTHORITIES,
     contentRequiredServices: CONTENT_REQUIRED_SERVICES,
     requiredServices: currentRequired,
     activeRequiredServices,
@@ -216,6 +228,7 @@ export function getStatus() {
     ownsPackagingMutations: false,
     ownsCreativeMutations: false,
     ownsContentMutations: false,
+    mutationAuthoritiesRequiredAsActivationServices: false,
     creativeProcessReadContract: CREATIVE_PROCESS_READ_CONTRACT,
     creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
     contentStudioReadContract: CONTENT_STUDIO_READ_CONTRACT,
