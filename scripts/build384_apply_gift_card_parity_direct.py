@@ -14,6 +14,9 @@ Safety:
 - Uses only the Build 384 migration file already committed to the repository.
 - Verifies all eight Gift Card-owned tables and the two migration-owned templates.
 - Does not touch the shared notification_outbox schema.
+- Decodes Wrangler/Node subprocess output explicitly as UTF-8 with replacement so
+  Windows console encoding cannot abort the release helper before D1 diagnostics
+  are printed.
 """
 
 from __future__ import annotations
@@ -49,13 +52,19 @@ def fail(message: str, code: int = 1) -> "NoReturn":
 
 
 def run_capture(args: list[str]) -> subprocess.CompletedProcess[str]:
+    # Wrangler/Node can emit bytes that Windows' default CP1252 decoder cannot
+    # represent (for example while rendering CLI progress output). Pin decoding to
+    # UTF-8 and replace any malformed byte rather than losing the actual D1 result
+    # to a UnicodeDecodeError in this helper.
     return subprocess.run(
         args,
         cwd=ROOT,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        env={**os.environ, "NO_COLOR": "1"},
+        env={**os.environ, "NO_COLOR": "1", "FORCE_COLOR": "0"},
         check=False,
     )
 
