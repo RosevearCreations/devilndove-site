@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 359–361 on 2026-08-24.
+Updated through browser-proven Builds 359–361 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -37,12 +37,10 @@ Default passive adapters                345
 Business Accounting activation          348 validated
 Packaging baseline                      301 validated
 Creative Packaging activation           351 validated
-Creative Process read contract          352 browser-proven
-Creative dependency gate fix            358 browser-proven / local required
-Content Studio read/activation           355–357 browser-proven / local required
-CAIP read contracts                     359 staged
-Creative runtime implementation         360 staged
-CAIP activation                         361 staged
+Creative Process read/runtime            browser-proven; corrected local required
+Creative dependency gate fix            358 browser-proven; corrected local required
+Content Studio read/runtime              355–357 browser-proven; corrected local required
+CAIP read/runtime                        359–361 browser-proven; local required
 Accounting mutation ownership moved     false
 Creative mutation ownership moved       false
 Content mutation ownership moved        false
@@ -53,6 +51,8 @@ CAIP mutation ownership moved           false
 
 Proven pages remain `/admin/operations/`, `/admin/customer-documents/`, and `/admin/orders/`. Remaining loader/runtime coverage includes gift cards, members/membership, custom requests and today-tasks. Loader coverage remains separate from mutation authority.
 
+Known `gift_cards` fresh-install schema parity should not be silently mixed into a loader/runtime activation batch. Prefer a different Operations page unless schema parity is deliberately the target.
+
 ### Business & Administration
 
 `/admin/accounting/` is the first validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain in compatibility authorities.
@@ -61,18 +61,18 @@ Proven pages remain `/admin/operations/`, `/admin/customer-documents/`, and `/ad
 
 Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated.
 
-Creative Process browser activation now passes after Build 358 corrected the dependency gate. Creative activation requires `creative-process-read` and `inventory-read`; Inventory-owned `inventory-post` and `inventory-reverse` remain separate retained mutation authorities and are not Core activation services.
+Creative Process browser activation passes after Build 358 corrected the dependency gate. Creative activation requires `creative-process-read` and `inventory-read`; Inventory-owned `inventory-post` and `inventory-reverse` remain separate retained mutation authorities and are not Core activation services.
 
 Content Studio browser proof passed with Build 355 legacy/contract reads schema-ready and non-mutating, one registered `content-studio-read` service, active Creative top-level runtime, and `contentMutationOwnership=false`.
 
-Current staged Creative runtime scope:
+CAIP browser proof now also passes. All four Creative & Production domains have browser-proven top-level pages:
 
 ```text
 creative-production
   packaging -> /admin/packaging-studio/   validated
-  creative  -> /admin/creative-process/   browser-proven after Build 358; corrected local required
+  creative  -> /admin/creative-process/   browser-proven; corrected local required
   content   -> /admin/content-studio/      browser-proven; corrected local required
-  caip      -> /admin/creative-assets/     staged Builds 359–361
+  caip      -> /admin/creative-assets/     browser-proven; local required
 ```
 
 Activation services by domain:
@@ -86,7 +86,9 @@ caip:      caip-read, caip-media-intake-read
 
 The top-level runtime creates no network transport and owns no Packaging, Creative, Content, or CAIP mutations.
 
-### CAIP audit correction and staged activation
+Do not expand this loader further merely to create more proof. Close the remaining local regressions, then move to another bounded ownership target.
+
+### CAIP read/runtime boundary
 
 Historical CAIP schema helper names were misleading. Current source shows:
 
@@ -111,6 +113,42 @@ Build 359 adds GET-only owned wrappers:
 ```
 
 Build 360 registers both passively and expands the Creative umbrella to `caip`. Build 361 adds only `/admin/creative-assets/` to top-level lifecycle coverage and loads Core before the retained CAIP UI scripts.
+
+Browser proof on `/admin/creative-assets/` passed 2026-08-24:
+
+```text
+caip_contract_status                     200
+caip_contract_build                      359
+caip_contract_owner                      caip
+caip_contract_schema_mutation            false
+caip_contract_verification_only          true
+caip_contract_r2_mutation                false
+intake_contract_status                   200
+intake_contract_build                    359
+intake_contract_owner                    caip
+intake_contract_schema_mutation          false
+intake_contract_verification_only        true
+intake_contract_r2_mutation              false
+intake_contract_binary_mutation          false
+caip_read_service_registered             true
+caip_intake_service_registered           true
+application_module                       creative-production
+application_mode                         active
+active_application_module                creative-production
+caip_domain                              caip
+runtime_entry                            ../modules/creative-production/runtime.mjs?v=360
+runtime_build                            360
+activation_build                         361
+runtime_state                            active
+services_ready                           true
+required_service_count                   2
+required_services                        ["caip-read","caip-media-intake-read"]
+caip_page_proven                         true
+creates_network_transport                false
+caip_mutation_ownership                  false
+contracts_ok                             true
+services_ok                              true
+```
 
 CAIP project/evidence/story edits, probes, derivative plans, secure-review actions, private-media uploads, R2 writes, duplicate cleanup, governance changes, and public-promotion review requests remain on retained mutation authorities.
 
@@ -147,7 +185,7 @@ Builds 349–351   fully validated 2026-08-24
 Builds 352–354   browser revalidation passed after Build 358; corrected local regression required
 Builds 355–357   browser proof passed 2026-08-24; corrected local regression required
 Build 358        browser proof passed 2026-08-24; corrected local regression required
-Builds 359–361   staged / local + browser validation required
+Builds 359–361   browser proof passed 2026-08-24; local regression required
 ```
 
 ## Validation-harness rule
@@ -162,10 +200,10 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Pull the staged Build 361 checkpoint and run Build 352–354, 355–357, 358, and 359–361 local regressions.
-2. Browser-validate `/admin/creative-assets/` using GET/read checks only.
-3. If all pass, close Builds 352–361 and stop expanding Creative top-level loader coverage because all four Creative & Production domains will have proven pages.
-4. Choose the next bounded ownership target from source evidence rather than reworking passing Creative pages.
+1. Pull the browser-proof Build 361 documentation checkpoint and run Build 352–354, 355–357, 358, and 359–361 local regressions.
+2. If all four local gates pass with a clean working tree, close Builds 352–361. No additional browser proof is required for these loader/read boundaries.
+3. Stop expanding Creative & Production top-level loader coverage; all four domains now have proven browser pages.
+4. Audit remaining Commerce & Operations pages and choose the cleanest bounded read/runtime target from source evidence. Avoid `gift_cards` unless the batch is explicitly schema-parity work.
 5. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
