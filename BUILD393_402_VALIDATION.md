@@ -1,6 +1,6 @@
 # Builds 393–402 Validation — Modularity + Fresh-Install Parity
 
-## Status — BUILD 401 LOCAL PASS / BUILD 402 CORRECTED AND RECHECK REQUIRED
+## Status — CONSOLIDATED LOCAL PASS / DEVELOPMENT D1 + CUSTOMER DOCUMENTS BROWSER GATE REQUIRED
 
 ```text
 393  Today Tasks action schema ownership
@@ -15,15 +15,9 @@
 402  Fresh-install parity smoke / Production-data-copy fail-closed gate
 ```
 
-## Consolidated local gate
+## Consolidated local gate — PASS
 
-Run:
-
-```bash
-python scripts/build393_402_modularity_parity_batch_test.py
-```
-
-Expected final output:
+The 2026-08-25 Development RC run completed:
 
 ```text
 BUILD 401 ACTIVE RUNTIME TABLE PARITY AUDIT: PASS
@@ -75,7 +69,7 @@ functions/api/admin/public-proof-candidates.js
 
 Do not automatically migrate every legacy bootstrap table merely because a CREATE remains. Each name must be classified as current authority, compatibility-only bootstrap, or retireable legacy schema before adding a new migration.
 
-## Build 402 fresh-install sequencing correction
+## Build 402 fresh-install result — PASS
 
 The first Build 402 run exposed a real clean-install dependency defect:
 
@@ -86,7 +80,7 @@ no such table: main.users
 
 Cause: the old smoke applied current overlays before `database_full_schema.sql`. Gift Card tables can be declared before the `users` parent exists, but the migration-owned delivery-template seed forces SQLite foreign-key resolution and therefore requires Core parents such as `users` to exist first.
 
-The corrected smoke now uses this Development-local/in-memory composition:
+The corrected smoke uses this Development-local/in-memory composition:
 
 1. Execute retained `database_full_schema.sql` first to establish Core/prerequisite parents (`users`, `orders`, `payments`, `products`, etc.).
 2. With foreign-key enforcement temporarily disabled, drop only tables owned by current parity overlays. This in-memory database contains no business data.
@@ -103,6 +97,19 @@ database_notification_runtime_parity.sql
 ```
 
 5. Verify current required columns, Gift Card templates, membership tier seeds, notification cooldown/automation seeds and `PRAGMA foreign_key_check`.
+
+The passing smoke reported:
+
+```text
+Applied retained aggregate prerequisites: database_full_schema.sql
+Removed stale aggregate copies for 25 overlay-owned tables.
+Fresh-install table count: 512
+Current overlay-owned table count: 25
+Current parity overlays: PASS
+Foreign-key check: PASS
+BUILD 402 FRESH INSTALL PARITY SMOKE: PASS
+PRODUCTION DATA COPY GATE: CLOSED — live Production read-only parity/data mapping is still required.
+```
 
 This drop/recreate technique is **fresh-install smoke only**. It must never be used against live Development/Production data. Existing Development D1 continues to use `scripts/build410_apply_development_parity_overlays.py`, which performs incremental/idempotent migration work rather than table replacement.
 
@@ -156,9 +163,15 @@ contracts/services             true
 
 If schema readiness is false, preserve exact missing tables/columns as parity evidence. Do not add DDL to GET.
 
-## Schema application note
+## Development D1 gate
 
-Gift Card parity has already been applied/proven against Development D1. The later overlays still require an explicit Development parity application/readiness checkpoint before the current RC can be called D1-proven.
+Gift Card parity has already been applied/proven against Development D1. The remaining Build 393/395/397/399/403 overlays now require the explicit Development-only applicator:
+
+```bash
+python scripts/build410_apply_development_parity_overlays.py
+```
+
+The local RC gate is complete; this D1 parity application is now the next release gate.
 
 ## Production gate
 
