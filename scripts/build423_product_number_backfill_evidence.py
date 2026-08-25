@@ -42,6 +42,24 @@ def identity(row: dict) -> tuple:
     )
 
 
+def sequence_rows(npx: str, cfg: Path, label: str) -> dict:
+    table = query(
+        npx,
+        cfg,
+        "SELECT name FROM sqlite_schema WHERE type='table' AND name='catalog_product_number_sequence';",
+        f'{label} PRODUCT SEQUENCE TABLE',
+    )
+    if not table:
+        return {'table_exists': False, 'rows': []}
+    rows = query(
+        npx,
+        cfg,
+        "SELECT sequence_key,next_product_number FROM catalog_product_number_sequence WHERE sequence_key='products';",
+        f'{label} PRODUCT SEQUENCE ROW',
+    )
+    return {'table_exists': True, 'rows': rows}
+
+
 def main() -> int:
     if len(sys.argv) != 2 or sys.argv[1] != '--run':
         print('Run explicitly with:')
@@ -122,16 +140,8 @@ def main() -> int:
             and all_prod_missing
         )
 
-        dev_seq = query(
-            npx, dev_cfg,
-            "SELECT sequence_key,next_product_number FROM catalog_product_number_sequence WHERE sequence_key='products';",
-            'DEVELOPMENT PRODUCT SEQUENCE',
-        )
-        prod_seq = query(
-            npx, prod_cfg,
-            "SELECT sequence_key,next_product_number FROM catalog_product_number_sequence WHERE sequence_key='products';",
-            'PRODUCTION PRODUCT SEQUENCE',
-        )
+        dev_seq = sequence_rows(npx, dev_cfg, 'DEVELOPMENT')
+        prod_seq = sequence_rows(npx, prod_cfg, 'PRODUCTION')
 
         payload = {
             'artifact': 'Build 423 non-executing Product-number mapping evidence',
@@ -149,8 +159,8 @@ def main() -> int:
             'development_max_product_number': max(dev_numbers) if dev_numbers else None,
             'production_missing_product_numbers': prod_missing_numbers,
             'production_existing_product_numbers': sorted(production_existing_numbers),
-            'development_sequence_rows': dev_seq,
-            'production_sequence_rows': prod_seq,
+            'development_sequence': dev_seq,
+            'production_sequence': prod_seq,
             'mapping': mapping if mapping_safe else [],
             'production_mutation_executed': False,
             'executable_helper_generated': False,
@@ -167,6 +177,8 @@ def main() -> int:
     print(f'Development number range: {min(dev_numbers) if dev_numbers else None}..{max(dev_numbers) if dev_numbers else None}')
     print(f'Production missing product_number: {prod_missing_numbers}')
     print(f'Production existing numbered rows: {len(production_existing_numbers)}')
+    print(f'Development sequence table exists: {dev_seq["table_exists"]}')
+    print(f'Production sequence table exists: {prod_seq["table_exists"]}')
     print(f'Non-executing mapping safe to prepare: {"YES" if mapping_safe else "NO"}')
     print(f'Local evidence artifact: {OUTPUT.name}')
     print('No database or R2 mutation was executed.')
