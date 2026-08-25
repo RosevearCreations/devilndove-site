@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 346–348 on 2026-08-24.
+Updated through local Build 348 proof on 2026-08-24.
 
 ## Architectural invariant
 
@@ -35,8 +35,8 @@ Commerce runtime                     315
 Contract catalog                     345
 Passive service adapters             345
 Accounting startup-read audit        346
-Business runtime implementation      347
-Business Accounting activation       348 staged
+Business runtime implementation      347 local proven
+Business Accounting activation       348 local proven / browser pending
 Accounting mutation ownership        false
 ```
 
@@ -52,7 +52,9 @@ Still open: bounded top-level `creative-production` runtime activation, CAIP/Con
 
 Build 323 proved `/admin/accounting/` resolves as the `accounting` domain under `business-administration` while the top-level Business runtime was inactive.
 
-Builds 324–345 then extracted/audited the Accounting page reads. Builds 343–345 are browser proven with `schema_ready=true`; local regressions remain outstanding. Build 346 confirms every automatic `/admin/accounting/` startup GET now resolves to an owned non-mutating read boundary. Build 347 adds a passive Business runtime, and Build 348 enables only the Accounting page.
+Builds 324–345 extracted/audited the Accounting page reads. Builds 331–342 are now fully validated. Builds 343–345 are browser proven and schema-ready; their first local run failed only because the historical test still asserted the pre-348 state `business-administration.entry === null`. That assertion was removed in commit `d630c11f6241fb4cab1bc897bfc6396033961811`; the corrected local rerun remains required.
+
+Build 346 confirms every automatic `/admin/accounting/` startup GET resolves to an owned non-mutating read boundary. Build 347 adds a passive Business runtime. Build 348 enables only the Accounting page. The combined Build 346–348 local regression passed on 2026-08-24; browser activation proof remains required.
 
 Business runtime scope after Build 348:
 
@@ -97,16 +99,16 @@ Fresh-install schema parity still takes priority over any Production business-da
 
 ```text
 Builds 325–330   fully validated
-Builds 331–336   browser proven; local required
-Builds 337–339   browser proven; local required (+ schema parity for 338/339)
-Builds 340–342   browser proven; local required (+ schema parity for 341)
-Builds 343–345   browser proven; local required; schemas ready in browser proof
-Builds 346–348   staged / validation required
+Builds 331–336   fully validated 2026-08-24
+Builds 337–339   fully validated 2026-08-24 (+ schema parity for 338/339)
+Builds 340–342   fully validated 2026-08-24 (+ schema parity for 341)
+Builds 343–345   browser proven; corrected local rerun required; schemas ready
+Builds 346–348   local regression PASS; browser activation proof required
 ```
 
 ## Validation-harness rule
 
-Historical regression scripts verify durable boundaries introduced by their build. They must not require the continued presence of a later blocker or freeze unrelated shared files forever.
+Historical regression scripts verify durable boundaries introduced by their build. They must not require the continued presence of a later blocker or freeze unrelated shared files forever. Build 343–345 specifically must not require Business & Administration to remain inactive after Build 348.
 
 ## Mutation-authority extraction still open
 
@@ -116,11 +118,11 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Run the combined local regressions for Builds 331–348.
+1. Pull current `dev` and rerun only `scripts/build343_345_accounting_read_batch_test.py`.
 2. Browser-validate Build 348 application-module activation on `/admin/accounting/`.
-3. If clean, mark the read sequence and first Business runtime activation validated while leaving Accounting mutations in compatibility paths.
+3. If clean, mark Builds 343–348 fully validated while leaving Accounting mutations in compatibility paths.
 4. Continue fresh-install schema parity separately before Production business-data copy.
-5. Source-audit the next modular target rather than expanding Business runtime coverage by assumption.
+5. Source-audit the next modular target rather than expanding runtime coverage by assumption.
 
 ## Production safety
 
