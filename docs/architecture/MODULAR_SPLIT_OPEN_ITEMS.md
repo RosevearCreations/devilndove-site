@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Build 364 on 2026-08-24.
+Updated through staged Build 365 on 2026-08-25.
 
 ## Architectural invariant
 
@@ -31,9 +31,10 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                       302
 Core runtime implementation             305
-Commerce runtime                        363 staged
-Operations Membership read contract     362 staged
-Operations Membership activation        364 staged
+Commerce runtime                        363 Membership browser-proven
+Operations Membership read contract     362 browser-failed / Build 365 patch staged
+Operations Membership activation        364 browser-proven
+Membership read hardening               365 staged
 Contract catalog                        345
 Default passive adapters                345
 Business Accounting activation          348 validated
@@ -61,9 +62,9 @@ Previously proven Operations pages remain:
 /admin/orders/
 ```
 
-Builds 362–364 stage `/admin/membership/` as the fourth explicit Operations runtime page.
+Builds 362–364 add `/admin/membership/` as the fourth explicit Operations runtime page.
 
-The source audit found three intended startup reads:
+The page's intended startup reads are:
 
 ```text
 GET /api/admin/users
@@ -71,13 +72,11 @@ GET /api/admin/access-tiers
 GET /api/admin/tier-policies
 ```
 
-Users and access tiers are SELECT-only. Tier Policies previously created `membership_tier_policies` and seeded Bronze/Silver/Gold during GET.
+Users and access tiers are SELECT-only. Before Build 362, Tier Policies created `membership_tier_policies` and seeded Bronze/Silver/Gold during GET.
 
-Build 362 adds a non-mutating Tier Policy read service. Missing/empty state is represented with in-memory defaults and explicit `schema_ready`/`missing_tables` metadata. `GET /api/admin/tier-policies` no longer creates or seeds schema. Its retained POST still owns legacy ensure/seed/update behavior.
+Build 362 established a non-mutating Tier Policy read contract and GET-only `operations-membership-read` aggregate. The retained POST still owns legacy ensure/seed/update behavior.
 
-Build 362 also adds GET-only `operations-membership-read`, aggregating the three startup reads under Operations ownership with `mutation_ownership_moved=false`.
-
-Build 363 passively registers `operations-membership-read` and makes Operations prerequisites page-specific:
+Build 363 registers `operations-membership-read` passively and makes Operations prerequisites page-specific:
 
 ```text
 /admin/operations/          catalog-read, inventory-read, accounting-read
@@ -88,11 +87,61 @@ Build 363 passively registers `operations-membership-read` and makes Operations 
 
 Build 364 adds `/admin/membership/` to explicit coverage, cache-busts Core, and fixes the existing Tier Policy mount mismatch (`adminTierPolicyMount` -> `tierPolicyAdminMount`). Assignment/removal and policy-edit mutations remain compatibility authorities.
 
-Known `gift_cards` fresh-install schema parity is deliberately not mixed into this batch. `/admin/members/` also remains outside current coverage because it composes many more account/engagement/gift-card/timeline scripts and is not the narrow Membership boundary proven here.
+#### Browser evidence — 2026-08-25
+
+The Build 363/364 loader/runtime boundary passed:
+
+```text
+membership_service_registered           true
+application_module                      commerce-operations
+application_mode                        active
+active_application_module               commerce-operations
+operations_domain                       operations
+runtime_entry                           ../modules/commerce-operations/runtime.mjs?v=363
+runtime_build                           363
+activation_build                        364
+runtime_state                           active
+current_domain                          operations
+last_pathname                           /admin/membership/
+services_ready                          true
+required_service_count                  1
+required_services                       ["operations-membership-read"]
+membership_page_proven                  true
+creates_network_transport               false
+operations_mutation_ownership           false
+membership_mutation_ownership           false
+contracts_ok                            true
+services_ok                             true
+```
+
+However both Build 362 read endpoints returned opaque HTTP 500 before contract metadata could be parsed:
+
+```text
+GET /api/admin/tier-policies                         500
+GET /api/admin/contracts/operations-membership-read  500
+```
+
+A genuinely missing `membership_tier_policies` table should have returned HTTP 200 with `schema_ready=false`; therefore this is treated as a thrown legacy-schema/read assumption, not normal missing-table readiness.
+
+#### Build 365
+
+Build 365 preserves public Build 362 contract identity while hardening the read implementation:
+
+- no `sqlite_master` dependency;
+- no fixed explicit legacy column list;
+- bounded `SELECT * FROM membership_tier_policies` during the compatibility window;
+- defensive mapping for known legacy aliases;
+- genuine missing-table fallback remains non-mutating and returns in-memory defaults;
+- unexpected Tier Policy errors return structured Build 362 / implementation Build 365 JSON;
+- aggregate Membership read catches thrown child reads and reports `failed_read` rather than collapsing into an opaque platform 500;
+- Build 363/364 runtime/page identities remain unchanged;
+- Membership mutation ownership remains unchanged.
+
+Known `gift_cards` fresh-install schema parity is deliberately not mixed into this batch. `/admin/members/` also remains outside current coverage because it composes many more account/engagement/gift-card/timeline scripts.
 
 ### Business & Administration
 
-`/admin/accounting/` is the first validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain in compatibility authorities.
+`/admin/accounting/` is the first validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain compatibility authorities.
 
 ### Creative & Production
 
@@ -139,7 +188,7 @@ payment_disputes.payment_dispute_id           missing expected column (Build 341
 
 Fresh-install schema parity still takes priority over Production business-data copy. Prior audit also found Production-only active tables such as `accounting_order_records`, `gift_cards`, Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy.
 
-If Build 362 reports `membership_tier_policies` missing on a true fresh install, record it here as additional schema-parity evidence. Do not restore GET-time CREATE/INSERT.
+If Build 365 reports `membership_tier_policies` missing on a true fresh install, record it as additional schema-parity evidence. Do not restore GET-time CREATE/INSERT.
 
 ## Validation state
 
@@ -152,15 +201,16 @@ Builds 343–345   fully validated 2026-08-24
 Builds 346–348   fully validated 2026-08-24
 Builds 349–351   fully validated 2026-08-24
 Builds 352–354   browser revalidation passed after Build 358; corrected local regression required
-Builds 355–357   browser proof passed 2026-08-24; corrected local regression required
-Build 358        browser proof passed 2026-08-24; corrected local regression required
-Builds 359–361   browser proof passed 2026-08-24; local regression required
-Builds 362–364   staged / local + browser validation required
+Builds 355–357   browser proof passed; corrected local regression required
+Build 358        browser proof passed; corrected local regression required
+Builds 359–361   browser proof passed 2026-08-25; local regression required
+Builds 362–364   runtime/browser activation proven; Build 362 read failed 500
+Build 365        staged / local + browser read revalidation required
 ```
 
 ## Validation-harness rule
 
-Historical regression scripts verify durable boundaries introduced by their build. They must not freeze later shared runtime/cache versions, require a later domain/page to remain inactive, or confuse retained mutation authorities with passive activation services.
+Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache/read implementations, require a later domain/page to remain inactive, or confuse retained mutation authorities with passive activation services.
 
 ## Mutation-authority extraction still open
 
@@ -170,12 +220,13 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Pull staged Build 364 and run the corrected Creative regressions plus Builds 362–364 Membership regression.
+1. Pull current `dev` and run corrected Creative regressions plus Builds 362–364 and Build 365 Membership regressions.
 2. If Builds 352–361 local gates pass, close them; their browser gates are already complete.
-3. Browser-validate `/admin/membership/` with GET/runtime checks only. If the Tier Policy read reports a missing table, retain it as parity evidence.
-4. If Membership local + browser gates pass, close Builds 362–364 without moving any Membership mutation authority.
-5. Continue Commerce & Operations source audit after Membership. Avoid Gift Cards unless schema parity is deliberately the batch target.
-6. Continue fresh-install schema parity separately before Production business-data copy.
+3. Browser-revalidate `/admin/membership/` with GET/runtime checks only after Build 365 deploys.
+4. Accept `schema_ready=true` or explicit `schema_ready=false`; the latter is parity evidence, not permission for GET-time repair.
+5. If a 500 remains, use Build 365 structured `error_code`, `failed_read`, and `error` metadata to correct the exact drift.
+6. After Membership closes, continue Commerce & Operations source audit. Avoid Gift Cards unless schema parity is deliberately the batch target.
+7. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
 
