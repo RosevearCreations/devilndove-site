@@ -1,5 +1,4 @@
-// File: /public/js/admin-access-tiers.js
-// Brief description: Standalone access-tier manager for the Members department.
+// Build 394 — standalone access-tier manager using the Operations-owned assignment write contract.
 
 document.addEventListener("DOMContentLoaded", () => {
   const mount = document.getElementById("accessTiersAdminMount");
@@ -109,9 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const expiresAt = String(document.getElementById("assignAccessTierExpiresAt")?.value || "").trim();
     const notes = String(document.getElementById("assignAccessTierNotes")?.value || "").trim();
     if (!userId || !accessTierId) return msg("Choose a user and access tier first.", true);
-    const response = await window.DDAuth.apiFetch("/api/admin/assign-user-access-tier", {
+    const response = await window.DDAuth.apiFetch("/api/admin/contracts/operations-membership-assignment-write", {
       method: "POST",
-      body: JSON.stringify({ user_id: userId, access_tier_id: accessTierId, expires_at: expiresAt || null, notes: notes || null })
+      body: JSON.stringify({ action: "assign", user_id: userId, access_tier_id: accessTierId, expires_at: expiresAt || null, notes: notes || null })
     });
     const data = await response.json();
     if (!response.ok || !data?.ok) return msg(data?.error || "Failed assigning access tier.", true);
@@ -120,9 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function removeTier(userAccessTierId) {
-    const response = await window.DDAuth.apiFetch("/api/admin/remove-user-access-tier", {
+    const response = await window.DDAuth.apiFetch("/api/admin/contracts/operations-membership-assignment-write", {
       method: "POST",
-      body: JSON.stringify({ user_access_tier_id: Number(userAccessTierId || 0) })
+      body: JSON.stringify({ action: "remove", user_access_tier_id: Number(userAccessTierId || 0) })
     });
     const data = await response.json();
     if (!response.ok || !data?.ok) return msg(data?.error || "Failed removing access tier.", true);
