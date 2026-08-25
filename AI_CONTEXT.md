@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Browser-Proven Through 382 / Builds 383–392 Staged
+# Devil n Dove AI Context — Browser-Proven Through 382 / Build 384 D1 Parity Passed / 383–392 Final Validation Pending
 
 Read `AI_HANDOFF.md` for retained business/data safety history. Modular authorities:
 
@@ -41,7 +41,9 @@ through 365       fully validated through recorded checkpoints
 369               browser-proven / local regression pending
 370–372           browser-proven / local regression pending
 373–382           browser-proven 2026-08-25 / local regression pending
-383–392           staged / local + Gift Card browser gate required
+383–392           local originally passed; Build 384 source correction requires only refreshed 383–392 local rerun
+Build 384 D1      PASSED 2026-08-25 on Development after legacy lookup-attempt alignment
+Gift Card browser pending
 ```
 
 All Creative & Production top-level read/loader boundaries are fully validated and closed:
@@ -80,7 +82,7 @@ Page-specific owned reads:
 Membership       operations-membership-read        Build 362
 Today Tasks      operations-today-tasks-read       Build 366 / implementation 369
 Custom Requests  operations-custom-requests-read   Build 370
-Gift Cards       operations-gift-cards-read         Build 385 staged
+Gift Cards       operations-gift-cards-read         Build 385
 ```
 
 Commerce runtime creates no network transport and owns no Membership, Today Tasks, Custom Requests, or Gift Card mutations.
@@ -125,7 +127,7 @@ mutation ownership        false
 
 The mature legacy `?format=marketplace_csv` branch still exists on `/api/admin/custom-requests`, but the dedicated page uses the safe Build 373 export and guards against legacy links.
 
-## Builds 383–387 — Gift Cards staged
+## Builds 383–387 — Gift Cards
 
 ### 383 audit
 
@@ -139,9 +141,9 @@ Automatic Gift Card UI startup previously called three GETs that created schema:
 
 The audit also found incompatible historical `notification_outbox` shapes between Gift Card writers and the current shared notification schema.
 
-### 384 migration authority
+### 384 migration authority — Development D1 PASSED
 
-New `database_gift_card_runtime_parity.sql` owns:
+`database_gift_card_runtime_parity.sql` owns:
 
 ```text
 gift_cards
@@ -156,18 +158,43 @@ gift_card_lookup_lockouts
 
 and seeds activation/reissue templates. It deliberately does not redefine shared `notification_outbox`.
 
+Development D1 release initially exposed real legacy drift in `gift_card_lookup_attempts`: the existing table had the older anti-abuse columns but lacked `lookup_email`, `code_suffix`, `ip_hash`, `user_agent`, and `result_status`. Build 384 was corrected so fresh installs create the full current shape and the release helper aligns missing legacy columns before indexes.
+
+Final Development verification on 2026-08-25 proved:
+
+```text
+all 8 Gift Card-owned tables present
+activation template present
+reissue template present
+lookup-attempt current columns present:
+  client_key
+  code_hint
+  code_suffix
+  created_at
+  email_hash
+  ip_hash
+  lookup_email
+  result_status
+  user_agent
+  was_success
+```
+
+The helper reached `BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE`.
+
+Do not return to the Wrangler remote `--file` path for this release; the repo-owned direct-query fallback is the proven Development procedure.
+
 ### 385/386 read + activation
 
-New GET-only `operations-gift-cards-read` checks/reads those eight tables without DDL/seeding. `/admin/gift-cards/` automatic startup now uses only that contract through passive service Build 386. Commerce runtime/activation advanced to 386 with exactly `operations-gift-cards-read` required on that page.
+GET-only `operations-gift-cards-read` checks/reads the eight Gift Card tables without DDL/seeding. `/admin/gift-cards/` automatic startup uses only that contract through passive service Build 386. Commerce runtime/activation is 386 with exactly `operations-gift-cards-read` required on that page.
 
 All Gift Card writes remain compatibility-owned.
 
 ### 387 mutation audit
 
-- card actions still self-ensure Gift Card tables until migration application is proven;
+- card actions still self-ensure Gift Card tables until mutation consumer migration;
 - delivery/template/send/abuse writes remain compatibility-owned;
 - old abuse release UI/API semantics were mismatched, so Build 386 does not expose that unsafe action;
-- `GET /api/admin/gift-card-delivery-history` is now non-mutating/readiness-aware;
+- `GET /api/admin/gift-card-delivery-history` is non-mutating/readiness-aware;
 - shared notification schema must be reconciled before Gift Card delivery-send mutation extraction.
 
 ## Builds 388–391 — Orders staged
@@ -194,7 +221,7 @@ Build 341  access_tiers.tier_id
 Build 341  payment_disputes.payment_dispute_id
 ```
 
-Earlier audit also identified active Production-only/missing fresh-install tables such as `accounting_order_records`, Gift Card schema, Command Center tables, and the `notification_dispatch_log(s)` aggregate execution discrepancy. Build 384 begins resolving Gift Card parity; fresh-install verification is still required.
+Earlier audit also identified active Production-only/missing fresh-install tables such as `accounting_order_records`, Command Center tables, and the `notification_dispatch_log(s)` aggregate execution discrepancy. Gift Card-owned table parity is now proven in Development through Build 384; broader fresh-install verification remains required.
 
 Schema parity must be resolved before Production business-data copy.
 
@@ -213,4 +240,4 @@ Historical regressions verify durable boundaries. They must not freeze later sha
 
 ## Next validation
 
-Run accumulated Commerce local regressions through `build383_392_commerce_operations_batch_test.py`. Then browser-validate only `/admin/gift-cards/` using the Build 385 read/runtime state. Do not execute Gift Card, Orders, refund/provider, fulfillment, or Today Tasks writes merely to prove the new source authorities.
+Only the strengthened `scripts/build383_392_commerce_operations_batch_test.py` local rerun remains from the Build 384 source correction. Then browser-validate only `/admin/gift-cards/` using the Build 385 read/runtime state. Do not execute Gift Card, Orders, refund/provider, fulfillment, or Today Tasks writes merely to prove the new source authorities.
