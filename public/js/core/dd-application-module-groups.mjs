@@ -8,6 +8,8 @@
 // Build 315 adds Orders loader/runtime coverage without moving order/payment mutations.
 // Build 346 closes the Accounting startup-read audit; Build 347 adds the passive Business runtime;
 // Build 348 activates Business & Administration for /admin/accounting/ only, read-only.
+// Build 349 pins the proven Packaging compatibility baseline; Build 350 adds the passive Creative runtime;
+// Build 351 activates Creative & Production for /admin/packaging-studio/ only without moving Packaging mutations.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -22,6 +24,9 @@ export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 315;
 export const ACCOUNTING_STARTUP_READ_AUDIT_BUILD = 346;
 export const BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD = 347;
 export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
+export const PACKAGING_TOP_LEVEL_AUDIT_BUILD = 349;
+export const CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 350;
+export const CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD = 351;
 export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
@@ -29,6 +34,9 @@ export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
 ]);
 export const BUSINESS_ADMINISTRATION_RUNTIME_PAGES = Object.freeze([
   '/admin/accounting/',
+]);
+export const CREATIVE_PRODUCTION_RUNTIME_PAGES = Object.freeze([
+  '/admin/packaging-studio/',
 ]);
 
 export const DD_APPLICATION_CORE = Object.freeze({
@@ -76,8 +84,8 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Creative projects, CAIP, Packaging & Labeling, Media/Content Studio and reviewed production workflows.',
     domains: Object.freeze(['creative', 'caip', 'packaging', 'content']),
     extractionState: 'in-progress',
-    entry: null,
-    runtimeDomains: Object.freeze([]),
+    entry: '../modules/creative-production/runtime.mjs?v=350',
+    runtimeDomains: Object.freeze(['packaging']),
   }),
   Object.freeze({
     id: 'business-administration',
@@ -133,22 +141,32 @@ export function snapshotApplicationArchitecture() {
     businessAdministrationRuntimeImplementationBuild: BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD,
     businessAdministrationRuntimeCoverageBuild: BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD,
     businessAdministrationRuntimePages: BUSINESS_ADMINISTRATION_RUNTIME_PAGES,
+    packagingTopLevelAuditBuild: PACKAGING_TOP_LEVEL_AUDIT_BUILD,
+    creativeProductionRuntimeImplementationBuild: CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD,
+    creativeProductionRuntimeCoverageBuild: CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD,
+    creativeProductionRuntimePages: CREATIVE_PRODUCTION_RUNTIME_PAGES,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'commerce-operations-plus-accounting-read-only-explicit-page-coverage',
+    currentRuntimeMigrationMode: 'commerce-operations-plus-business-accounting-plus-creative-packaging-explicit-page-coverage',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
     thirdUmbrellaRuntimeDomain: 'operations',
     secondUmbrellaRuntimeModule: 'business-administration',
     firstBusinessAdministrationRuntimeDomain: 'accounting',
+    thirdUmbrellaRuntimeModule: 'creative-production',
+    firstCreativeProductionRuntimeDomain: 'packaging',
     operationsRuntimeDomainActive: true,
     operationsRuntimeActivationMode: 'read-only-explicit-three-page-coverage',
     businessAdministrationRuntimeDomainActive: true,
     businessAdministrationRuntimeActivationMode: 'accounting-read-only-explicit-single-page-coverage',
+    creativeProductionRuntimeDomainActive: true,
+    creativeProductionRuntimeActivationMode: 'packaging-wrapper-over-proven-domain-runtime-explicit-single-page-coverage',
     accountingMutationOwnership: false,
+    creativeProductionMutationOwnership: false,
+    packagingMutationOwnershipMovedByTopLevelRuntime: false,
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
