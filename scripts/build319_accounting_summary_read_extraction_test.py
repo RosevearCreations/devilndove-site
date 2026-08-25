@@ -48,9 +48,12 @@ for contract_id in (
     assert contract_id in contracts, f"Missing contract catalog entry: {contract_id}"
     assert contract_id in adapters, f"Missing passive adapter: {contract_id}"
 
+# Validate source-control meaning without coupling the regression to prose wording.
 assert "main  = retained Production/legacy release line" in branching
-assert "dev   = active modular Development/integration line" in branching
+assert "dev   = active" in branching
+assert "Development integration line" in branching
 assert "Application modules are not Git branches" in branching
+assert "Do not create permanent branches named for these modules" in branching
 
 for protected in (
     "public/js/core/dd-admin-module-runtime.mjs",
