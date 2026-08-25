@@ -1,6 +1,6 @@
 # Builds 355–357 Validation — Content Studio Runtime
 
-## Status — BROWSER PROVEN / CORRECTED LOCAL RERUN REQUIRED
+## Status — FULLY VALIDATED IN DEVELOPMENT 2026-08-25
 
 ```text
 Build 355  Content Studio non-mutating GET/read contract
@@ -9,6 +9,13 @@ Build 357  /admin/content-studio/ top-level activation
 ```
 
 Content Studio mutation ownership remains unchanged.
+
+## Local regression — PASSED 2026-08-25
+
+```text
+BUILDS 355-357 CONTENT STUDIO RUNTIME: PASS
+No Cloudflare resource was contacted.
+```
 
 ## Firefox proof — PASSED 2026-08-24
 
@@ -50,21 +57,4 @@ contracts_ok                     true
 services_ok                      true
 ```
 
-This proves the Build 355 read boundary is schema-ready and non-mutating and that the Content Studio page activates under Creative & Production without moving Content mutation ownership.
-
-## Local checkpoint still required
-
-Build 358 corrected the shared Creative dependency gate and Builds 359–361 subsequently advance the same runtime again. The historical regression has been made future-compatible; rerun it at the current Development checkpoint before marking this batch fully validated.
-
-```bash
-python scripts/build355_357_content_studio_runtime_test.py
-```
-
-Expected:
-
-```text
-BUILDS 355-357 CONTENT STUDIO RUNTIME: PASS
-No Cloudflare resource was contacted.
-```
-
-Do not create/refresh a package, edit media/deliverables, queue social content, or invoke any POST action as part of validation.
+This batch is fully validated. No package refresh, media/deliverable edit, social queue action, or POST was required for validation.
