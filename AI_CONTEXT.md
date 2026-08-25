@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Fully Validated Through Build 365 / Today Tasks Through Build 369
+# Devil n Dove AI Context — Fully Validated Through Build 365 / Today Tasks Browser-Proven Through 369 / Custom Requests Staged 370–372
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 369, and validation files through `BUILD369_VALIDATION.md`.
+Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 372, and validation files through `BUILD370_372_VALIDATION.md`.
 
 ## Production safety
 
@@ -35,13 +35,15 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                              302
 Core runtime implementation                    305
-Commerce & Operations runtime                  367 browser-proven on Today Tasks
+Commerce & Operations runtime                  371 staged
 Operations Membership read contract            362 validated
 Operations Membership activation               364 validated
 Membership read implementation hardening       365 validated
-Operations Today Tasks read contract            366 browser structure proven
+Operations Today Tasks read contract            366 browser-proven
 Operations Today Tasks activation               368 browser-proven
-Today Tasks read schema alignment               369 staged
+Today Tasks read schema alignment               369 browser-proven / local pending
+Operations Custom Requests read contract        370 staged
+Operations Custom Requests activation           372 staged
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
 Creative Packaging runtime                     351 validated
@@ -52,6 +54,7 @@ CAIP read/runtime                               359–361 validated
 Accounting mutation ownership moved            false
 Operations/Membership mutation ownership moved false
 Today Tasks mutation ownership moved           false
+Custom Requests mutation ownership moved       false
 Creative/Packaging mutation ownership moved    false
 Content mutation ownership moved               false
 CAIP mutation ownership moved                  false
@@ -63,7 +66,7 @@ Build 306 and Build 308 retain their historical standalone local-signoff caveats
 
 ## Read/runtime boundary rule
 
-GET/read paths report or verify schema readiness; migrations/readiness tooling creates or repairs schema. Never restore request-time DDL/default seeding to a read because Development reports a schema deficit.
+GET/read paths report or verify schema readiness; migrations/readiness tooling creates or repairs schema. Never restore request-time DDL/default seeding to an owned startup read because Development reports a schema deficit.
 
 A loader/read-contract migration or top-level runtime activation never implies mutation ownership. Existing compatibility POST/PUT/DELETE/upload/import paths remain legacy until dedicated mutation contracts are separately extracted.
 
@@ -79,8 +82,9 @@ Build 358        fully validated 2026-08-25
 Builds 359–361   fully validated 2026-08-25
 Builds 362–364   fully validated 2026-08-25 after Build 365 read correction
 Build 365        fully validated 2026-08-25
-Builds 366–368   browser runtime proven; read alignment + local gates pending
-Build 369        staged / local + browser revalidation required
+Builds 366–368   browser-proven after Build 369 / local regression pending
+Build 369        browser-proven / local regression pending
+Builds 370–372   staged / local + browser validation required
 ```
 
 ## Creative & Production — closed loader/read boundary
@@ -100,80 +104,106 @@ Membership is fully validated. Build 362 removed Tier Policy GET-time schema cre
 
 ## Today Tasks — Builds 366–369
 
-Today Tasks was chosen ahead of Custom Requests because its GET was already SELECT-only, its mutations were already separate at `POST /api/admin/today-task-actions`, and `/admin/today-tasks` was already classified Operations but had no real page. Custom Requests remains excluded because `functions/api/admin/custom-requests.js` still owns a large CREATE/ALTER `ensureSchema()` path.
+Build 366 added readiness-aware GET contract `operations-today-tasks-read`. Build 367 registered it passively; Build 368 added `/admin/today-tasks/`. Build 369 aligned stale Today Tasks queries to current schema.
 
-### Build 366
-
-Adds readiness-aware non-mutating read contract:
+Initial browser diagnostics exposed:
 
 ```text
-GET /api/admin/contracts/operations-today-tasks-read
+site_items                       obsolete for this read
+hst_gst_review_records           obsolete for this read
+runtime_incidents.status         obsolete column
+runtime_incidents.incident_id    obsolete column
+runtime_incidents.request_path   obsolete column
 ```
 
-It reports `schema_ready`, `missing_tables`, and `query_errors` instead of silently converting failed reads to zero.
-
-### Build 367/368
-
-Registers passive service `operations-today-tasks-read`, adds `/admin/today-tasks/`, and activates it under `commerce-operations` with exactly one read service. Done/Ignore/Snooze remains `/api/admin/today-task-actions`; top-level mutation ownership remains false.
-
-### Initial browser proof — 2026-08-25
-
-Runtime structure passed exactly:
+Build 369 aligned to:
 
 ```text
-contract_status                    200
-contract_build                     366
-service_registered                 true
-application_module                 commerce-operations
-application_mode                   active
-active_application_module          commerce-operations
-operations_domain                  operations
-runtime_entry                      ../modules/commerce-operations/runtime.mjs?v=367
-runtime_build                      367
-activation_build                   368
-runtime_state                      active
-current_domain                     operations
-last_pathname                      /admin/today-tasks/
-services_ready                     true
-required_service_count             1
-required_services                  ["operations-today-tasks-read"]
-today_tasks_page_proven            true
-creates_network_transport          false
-operations_mutation_ownership      false
-today_tasks_mutation_ownership     false
-contracts_ok                       true
-services_ok                        true
+site_item_inventory
+accounting_hst_gst_reviews
+runtime_incident_id
+review_status
+endpoint_path
 ```
 
-Read diagnostics exposed four drifted assumptions:
+Browser revalidation passed exactly on 2026-08-25:
 
 ```text
-inventory                 D1_ERROR no such table: site_items
-accounting                D1_ERROR no such table: hst_gst_review_records
-failed_api                D1_ERROR no such column: status
-runtime_incident_details  D1_ERROR no such column: incident_id
+contract_status                200
+contract_build                 366
+contract_implementation_build  369
+schema_ready                   true
+missing_tables                 []
+query_error_count              0
+query_errors                   []
+task_count                     2
+task_total                     4
+service_registered             true
+service_contract_build         366
+service_implementation_build   369
+application_mode               active
+active_application_module      commerce-operations
+runtime_build                  367
+activation_build               368
+runtime_state                  active
+current_domain                 operations
+last_pathname                  /admin/today-tasks/
+services_ready                 true
+required_services              ["operations-today-tasks-read"]
+today_tasks_page_proven        true
+creates_network_transport      false
+today_tasks_mutation_ownership false
+action_mutation_moved          false
+contracts_ok                   true
+services_ok                    true
 ```
 
-The parser also returned `site_items:` and `hst_gst_review_records:` with trailing punctuation.
+Browser side is closed. Remaining closure is the corrected local regression. The historical Build 339 `hst_gst_review_records` parity finding remains separate and is not erased by Build 369.
 
-### Build 369
+## Custom Requests audit — Builds 370–372
 
-Build 369 preserves public contract Build 366 and runtime/activation 367/368, but aligns the read implementation to current schema:
+The audit corrected an earlier overstatement: the automatic Custom Requests dashboard list GET has already avoided `ensureSchema()` since Build 197. Its real startup-read problem is that every missing-table query is caught and silently converted to an empty list.
+
+The legacy endpoint still has a large `ensureSchema()` authority for POST workflow actions. Its explicit `?format=marketplace_csv` GET also calls `ensureSchema()` and seeds marketplace presets. That export GET is not part of the owned startup-read boundary and remains a later compatibility cleanup target.
+
+### Build 370
+
+Adds GET-only owned contract:
 
 ```text
-site_items                       -> site_item_inventory
-reorder_status/reorder_threshold -> is_on_reorder_list/reorder_level/do_not_reorder
-hst_gst_review_records           -> accounting_hst_gst_reviews
-runtime_incidents.status         -> review_status
-runtime_incidents.incident_id    -> runtime_incident_id
-runtime_incidents.request_path   -> endpoint_path
+/api/admin/contracts/operations-custom-requests-read
 ```
 
-Missing-table parsing now excludes punctuation before `SQLITE_ERROR`. The contract/service surface `implementation_build=369` / `implementationBuild=369`.
+The contract:
 
-No GET-time DDL/DML was added. Today Tasks action mutation ownership remains retained compatibility.
+- forces `/api/admin/custom-requests` with an empty query string, so it cannot enter marketplace CSV mode;
+- invokes the mature normal list GET;
+- performs read-only `PRAGMA table_info` readiness checks for all 23 tables used by `listPayload`;
+- returns `schema_ready`, `missing_tables`, `checked_tables`;
+- reports `request_time_schema_mutation=false`;
+- reports `mutation_ownership_moved=false`;
+- leaves `/api/admin/custom-requests` as compatibility POST authority;
+- explicitly reports `marketplace_csv_legacy_get_outside_contract=true`.
 
-Important: the historical Build 339 `hst_gst_review_records` missing-table parity finding remains separate. Build 369 does not erase or repair that older parity item; it only stops Today Tasks from querying the obsolete name when the current accounting authority is `accounting_hst_gst_reviews`.
+### Build 371
+
+Registers passive service:
+
+```text
+operations-custom-requests-read
+```
+
+Commerce runtime advances to Build 371 / activation Build 372. The broad `/admin/operations/` page keeps its existing `catalog-read`, `inventory-read`, `accounting-read` gate.
+
+### Build 372
+
+Adds dedicated page:
+
+```text
+/admin/custom-request/
+```
+
+It loads Core before the mature `admin-custom-requests.js` UI. The UI still uses compatibility GET/POST paths; the top-level runtime separately proves the owned read boundary. No quote, job, product-plan, reply, payment, order, fulfillment, consent, marketplace, or review mutation moves.
 
 ## Development schema-parity track — separate
 
@@ -198,11 +228,11 @@ Historical regressions verify durable executable boundaries. They must not freez
 ## Next direction
 
 1. Pull current `dev` with automatic Git GC disabled if needed.
-2. Run future-compatible Membership/365 regressions plus Builds 366–368 and Build 369 regressions.
-3. Browser-revalidate `/admin/today-tasks/` with GET/runtime checks only. Do not click Done/Ignore/Snooze.
-4. Expected after Build 369: contract Build 366, implementation Build 369, runtime 367/activation 368, `schema_ready=true`, `missing_tables=[]`, `query_errors=[]`.
-5. If any diagnostic remains, use its exact key/message/table; do not add DDL to GET.
-6. After Today Tasks closes, return to Custom Requests for a real read-model/schema-authority extraction; do not activate its current schema-coupled GET unchanged.
+2. Run Membership/365 regressions plus corrected Today Tasks 366–369 and new Custom Requests 370–372 regression.
+3. Do not repeat the Today Tasks browser proof; it has already passed after Build 369.
+4. Browser-validate `/admin/custom-request/` using the Build 370 read contract/runtime only. Do not execute workflow mutations or marketplace CSV export during proof.
+5. If the Build 370 contract reports missing tables, record them as schema-readiness evidence; do not repair schema in GET.
+6. After 370–372 closes, separately extract/retire the legacy marketplace CSV GET-time schema ensure/seeding before calling the entire Custom Requests GET surface conformant.
 7. Avoid Gift Cards unless schema parity is deliberately the batch target.
 8. Continue fresh-install schema parity before Production business-data copy.
 
