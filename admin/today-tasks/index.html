@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Today Tasks — Devil n Dove</title>
+  <meta name="description" content="Devil n Dove daily Operations task queue with readiness-aware counts and direct workflow links."/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="today-tasks">
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand">
+        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
+        <div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Admin / Operations</div></div>
+      </div>
+      <div class="links">
+        <a href="/admin/">Dashboard</a>
+        <a href="/admin/operations/">Operations</a>
+        <a href="/admin/orders/">Orders</a>
+        <a href="/admin/membership/">Membership</a>
+      </div>
+    </div>
+
+    <div class="hero compact-hero">
+      <div>
+        <h1>Today Tasks</h1>
+        <p>A focused daily queue across catalog, custom requests, orders, inventory, accounting, and runtime health.</p>
+      </div>
+    </div>
+
+    <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+    <div class="card" style="margin-bottom:18px">
+      <div class="small" id="adminAuthState">Checking administrator session…</div>
+      <div id="adminUserSummary"></div>
+    </div>
+
+    <div id="todayTasksAdminMount"></div>
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+
+  <script src="/js/main.js?v=279"></script>
+  <script src="/public/js/auth.js?v=279"></script>
+  <script src="/public/js/admin-route-usage.js"></script>
+  <script src="/public/js/site-auth-ui.js?v=245"></script>
+  <script src="/public/js/site-analytics.js?v=279"></script>
+  <script src="/public/js/admin-self-protect.js?v=245"></script>
+  <script src="/public/js/admin.js?v=368"></script>
+  <script src="/public/js/admin-today-tasks.js?v=368"></script>
+</body>
+</html>
