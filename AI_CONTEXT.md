@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 316 Accounting Expenses Read Correction
+# Devil n Dove AI Context — Build 316 Complete / Accounting Read-Time DDL Retirement Next
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -57,6 +57,7 @@ Build 312 Accounting read contract        COMPLETE IN DEVELOPMENT
 Build 313 Operations read-only runtime    COMPLETE IN DEVELOPMENT
 Build 314 Customer Documents runtime      COMPLETE IN DEVELOPMENT
 Build 315 Orders runtime coverage         COMPLETE IN DEVELOPMENT
+Build 316 Accounting expenses read        COMPLETE IN DEVELOPMENT
 ```
 
 Build 306 remains historically browser-proven with standalone local signoff not captured in the conversation. Do not silently relabel it.
@@ -89,15 +90,7 @@ Build 315 proves exactly these read-only Operations runtime pages:
 
 Commerce/Operations remains Build 315 and owns no Operations mutations. Orders/payment/refund/gift-card business scripts/APIs remain compatibility behavior.
 
-During Build 315 browser proof, the unchanged Accounting backend on `/admin/orders/` exposed a separate HTTP 500 on:
-
-```text
-GET /api/admin/accounting-expenses
-```
-
-That defect is the bounded Build 316 target.
-
-## Build 316 — STAGED / VALIDATION REQUIRED
+## Build 316 — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -106,9 +99,14 @@ Baseline:
 Build 315 set completed modular handoff context
 ```
 
-### Purpose
+Proven source/runtime head:
 
-Build 316 fixes the Accounting Expenses GET failure by extracting an Accounting-owned read authority instead of merely patching one SQL expression.
+```text
+2047f29a52f54d3416792cc3c22f728b040f793b
+Build 316 update modular Accounting handoff context
+```
+
+### Accounting-owned expenses read authority
 
 New read service:
 
@@ -164,7 +162,7 @@ contract catalog         316
 service adapter registry 316
 ```
 
-They now register `accounting-expenses-read` as:
+They register `accounting-expenses-read` as:
 
 ```text
 owner accounting
@@ -189,9 +187,56 @@ Accounting expenses read        316
 
 Build 316 does not widen the Operations page allow-list or change Commerce runtime.
 
+### Build 316 validation proof
+
+Development browser proof on `/admin/orders/`:
+
+```text
+legacy_status                    200
+legacy_ok                        true
+legacy_build                     316
+legacy_contract                  accounting-expenses-read
+legacy_owner                     accounting
+legacy_schema_ready              true
+legacy_schema_mutation           false
+legacy_rows                      0
+contract_status                  200
+contract_ok                      true
+contract_build                   316
+contract_name                    accounting-expenses-read
+contract_owner                   accounting
+contract_schema_ready            true
+contract_schema_mutation         false
+contract_rows                    0
+contract_catalog_build           316
+service_adapter_build            316
+expense_service_owner            accounting
+expense_service_mode             read-only-http
+service_build                    316
+service_schema_ready             true
+service_schema_mutation          false
+service_rows                     0
+core_runtime_build               305
+commerce_runtime_build           315
+owns_operations_mutations        false
+contracts_ok                     true
+services_ok                      true
+```
+
+Zero expense rows are valid Development state.
+
+Final local regression:
+
+```text
+BUILD 316 ACCOUNTING EXPENSES READ CORRECTION: PASS
+No Cloudflare resource was contacted.
+```
+
+No mutation validation was performed or required.
+
 ## Modular split audit / remaining work
 
-`docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md` is now the concise open-item authority for the split.
+`docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md` is the concise open-item authority for the split.
 
 ### Commerce & Operations
 
@@ -261,11 +306,11 @@ functions/api/admin/accounting-overhead-product-allocations.js
 functions/api/admin/product-costs.js
 ```
 
-Recommended next read extraction after Build 316: Accounting write-offs. Keep the corresponding write path separate unless independently reviewed.
+Recommended next bounded extraction: Accounting write-offs. Keep the corresponding write path separate unless independently reviewed.
 
 ## Git/source-control rule
 
-Current repository branches observed during Build 316:
+Repository branches observed during Build 316:
 
 ```text
 main
@@ -282,9 +327,9 @@ Do not create permanent Git branches for Commerce & Operations, Creative & Produ
 
 `dev` remains the modularization/integration branch. `main` remains separate. Git branch names are not deployment proof.
 
-## Build 316 safety boundary
+## Build 316 safety boundary — proven intact
 
-Build 316 does not modify:
+Build 316 did not modify:
 
 - Core runtime implementation Build 305;
 - application-module grouping/definitions;
@@ -303,6 +348,10 @@ Build 316 does not modify:
 - real Production;
 - Production-to-Development data copy.
 
+## Next direction
+
+Proceed with the next bounded Accounting read extraction, beginning with `accounting-writeoffs.js`, and continue the Core/module split audit without mixing loader/runtime expansion, write-authority migration, schema parity, or Production promotion into the same build.
+
 ## Validation interaction preference
 
 Keep validation concise: default to **one GIT BASH block and one reusable BROWSER DEVTOOLS CONSOLE block** unless a failure requires deeper isolation.
@@ -311,4 +360,4 @@ Keep validation concise: default to **one GIT BASH block and one reusable BROWSE
 
 Fresh-install schema parity remains separate and must be repaired before any Production business-data copy.
 
-If a Build 316 read reports missing Accounting schema, do not add request-time DDL back to GET. Record the missing tables/columns and resolve them through the separate schema-parity workflow.
+If a read contract reports missing Accounting schema, do not add request-time DDL back to GET. Record the missing tables/columns and resolve them through the separate schema-parity workflow.
