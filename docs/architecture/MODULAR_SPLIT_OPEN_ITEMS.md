@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through local Build 348 proof on 2026-08-24.
+Updated through validated Build 348 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -34,9 +34,9 @@ Core runtime implementation          305
 Commerce runtime                     315
 Contract catalog                     345
 Passive service adapters             345
-Accounting startup-read audit        346
-Business runtime implementation      347 local proven
-Business Accounting activation       348 local proven / browser pending
+Accounting startup-read audit        346 validated
+Business runtime implementation      347 validated
+Business Accounting activation       348 validated
 Accounting mutation ownership        false
 ```
 
@@ -46,22 +46,23 @@ Proven pages remain `/admin/operations/`, `/admin/customer-documents/`, and `/ad
 
 ### Creative & Production
 
-Still open: bounded top-level `creative-production` runtime activation, CAIP/Content contract extraction, and compatibility retirement only after owned destinations exist. Packaging remains domain-owned.
+Still open: bounded top-level `creative-production` runtime activation, CAIP/Content contract extraction, and compatibility retirement only after owned destinations exist. Packaging remains domain-owned and is the preferred first source-audit candidate because it already has a domain runtime.
 
 ### Business & Administration
 
 Build 323 proved `/admin/accounting/` resolves as the `accounting` domain under `business-administration` while the top-level Business runtime was inactive.
 
-Builds 324–345 extracted/audited the Accounting page reads. Builds 331–342 are now fully validated. Builds 343–345 are browser proven and schema-ready; their first local run failed only because the historical test still asserted the pre-348 state `business-administration.entry === null`. That assertion was removed in commit `d630c11f6241fb4cab1bc897bfc6396033961811`; the corrected local rerun remains required.
+Builds 324–345 extracted/audited the Accounting page reads. Builds 331–342 are fully validated. Builds 343–345 are browser proven and schema-ready; their first local run failed only because the historical test still asserted the pre-348 state `business-administration.entry === null`. That assertion was removed in commit `d630c11f6241fb4cab1bc897bfc6396033961811`; the corrected local rerun remains required.
 
-Build 346 confirms every automatic `/admin/accounting/` startup GET resolves to an owned non-mutating read boundary. Build 347 adds a passive Business runtime. Build 348 enables only the Accounting page. The combined Build 346–348 local regression passed on 2026-08-24; browser activation proof remains required.
+Build 346 confirms every automatic `/admin/accounting/` startup GET resolves to an owned non-mutating read boundary. Build 347 adds a passive Business runtime. Build 348 enables only the Accounting page. The Build 346–348 local regression and browser activation proof both passed on 2026-08-24.
 
-Business runtime scope after Build 348:
+Validated Business runtime scope:
 
 ```text
 runtime module:       business-administration
 runtime domain:       accounting only
 runtime page:         /admin/accounting/ only
+runtime services:     28 registered required services
 mutation ownership:   false
 network transport:    none created by runtime
 other Business pages: domain-bridge only
@@ -103,7 +104,7 @@ Builds 331–336   fully validated 2026-08-24
 Builds 337–339   fully validated 2026-08-24 (+ schema parity for 338/339)
 Builds 340–342   fully validated 2026-08-24 (+ schema parity for 341)
 Builds 343–345   browser proven; corrected local rerun required; schemas ready
-Builds 346–348   local regression PASS; browser activation proof required
+Builds 346–348   fully validated 2026-08-24
 ```
 
 ## Validation-harness rule
@@ -118,11 +119,11 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Pull current `dev` and rerun only `scripts/build343_345_accounting_read_batch_test.py`.
-2. Browser-validate Build 348 application-module activation on `/admin/accounting/`.
-3. If clean, mark Builds 343–348 fully validated while leaving Accounting mutations in compatibility paths.
-4. Continue fresh-install schema parity separately before Production business-data copy.
-5. Source-audit the next modular target rather than expanding runtime coverage by assumption.
+1. Pull current `dev` and rerun only `scripts/build343_345_accounting_read_batch_test.py` to close the corrected historical local gate.
+2. Source-audit the existing Packaging domain runtime and `/admin/packaging-studio/` loader as the preferred first `creative-production` activation candidate.
+3. If clean, stage Builds 349–351 as Packaging runtime audit, passive Creative & Production runtime implementation, and Packaging-only top-level activation.
+4. Keep Packaging/Creative mutation ownership unchanged during activation.
+5. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
 
