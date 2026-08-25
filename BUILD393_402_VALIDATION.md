@@ -1,6 +1,6 @@
 # Builds 393–402 Validation — Modularity + Fresh-Install Parity
 
-## Status — STAGED / CONSOLIDATED LOCAL + CUSTOMER DOCUMENTS BROWSER GATE REQUIRED
+## Status — BUILD 401 LOCAL PASS / BUILD 402 CORRECTED AND RECHECK REQUIRED
 
 ```text
 393  Today Tasks action schema ownership
@@ -32,7 +32,79 @@ BUILDS 393-402 MODULARITY + PARITY BATCH: PASS
 No Cloudflare resource was contacted.
 ```
 
-Build 402 intentionally keeps the Production business-data-copy gate closed. Its local in-memory smoke proves the committed aggregate + parity overlays can build a current clean schema; it does not prove live Production-vs-Development row/data parity.
+Build 402 intentionally keeps the Production business-data-copy gate closed. Its local in-memory smoke proves the retained aggregate plus current parity overlays can compose a clean current schema; it does not prove live Production-vs-Development row/data parity.
+
+## Build 401 local result — PASS
+
+The 2026-08-25 Development local audit reported:
+
+```text
+Runtime CREATE TABLE names: 347
+Covered by database*.sql authority: 335
+Runtime-only table names: 12
+Critical Build 393–399 migration authorities: PASS
+BUILD 401 ACTIVE RUNTIME TABLE PARITY AUDIT: PASS
+```
+
+The 12 runtime-only names are the next explicit migration/retirement backlog:
+
+```text
+candle_soap_recall_customer_matches
+comments
+creations
+inventory_items
+inventory_usage
+member_sessions
+members
+product_qa_blocker_history
+project_updates
+public_proof_candidate_events
+site_links
+store_products
+```
+
+Their current source locations are concentrated in:
+
+```text
+functions/api/admin/bootstrap.js
+functions/api/admin/migrate.js
+functions/api/admin/candle-soap-recalls.js
+functions/api/admin/product-qa-history.js
+functions/api/admin/public-proof-candidates.js
+```
+
+Do not automatically migrate every legacy bootstrap table merely because a CREATE remains. Each name must be classified as current authority, compatibility-only bootstrap, or retireable legacy schema before adding a new migration.
+
+## Build 402 fresh-install sequencing correction
+
+The first Build 402 run exposed a real clean-install dependency defect:
+
+```text
+database_gift_card_runtime_parity.sql failed fresh-install execution:
+no such table: main.users
+```
+
+Cause: the old smoke applied current overlays before `database_full_schema.sql`. Gift Card tables can be declared before the `users` parent exists, but the migration-owned delivery-template seed forces SQLite foreign-key resolution and therefore requires Core parents such as `users` to exist first.
+
+The corrected smoke now uses this Development-local/in-memory composition:
+
+1. Execute retained `database_full_schema.sql` first to establish Core/prerequisite parents (`users`, `orders`, `payments`, `products`, etc.).
+2. With foreign-key enforcement temporarily disabled, drop only tables owned by current parity overlays. This in-memory database contains no business data.
+3. Re-enable foreign keys.
+4. Apply current overlays in dependency/build order so their table shapes and seeds replace stale aggregate copies:
+
+```text
+database_gift_card_runtime_parity.sql
+database_today_task_actions_runtime_parity.sql
+database_membership_tier_policy_runtime_parity.sql
+database_customer_documents_runtime_parity.sql
+database_accounting_runtime_parity.sql
+database_notification_runtime_parity.sql
+```
+
+5. Verify current required columns, Gift Card templates, membership tier seeds, notification cooldown/automation seeds and `PRAGMA foreign_key_check`.
+
+This drop/recreate technique is **fresh-install smoke only**. It must never be used against live Development/Production data. Existing Development D1 continues to use `scripts/build410_apply_development_parity_overlays.py`, which performs incremental/idempotent migration work rather than table replacement.
 
 ## Build 399 Accounting authority validation rule
 
@@ -86,17 +158,7 @@ If schema readiness is false, preserve exact missing tables/columns as parity ev
 
 ## Schema application note
 
-The following committed migration authorities are now part of the current fresh-install source:
-
-```text
-database_gift_card_runtime_parity.sql
-database_today_task_actions_runtime_parity.sql
-database_membership_tier_policy_runtime_parity.sql
-database_customer_documents_runtime_parity.sql
-database_accounting_runtime_parity.sql
-```
-
-Gift Card parity has already been applied/proven against Development D1. The later overlays still require an explicit Development parity application/readiness checkpoint before request-time compatibility schema fallbacks are retired globally.
+Gift Card parity has already been applied/proven against Development D1. The later overlays still require an explicit Development parity application/readiness checkpoint before the current RC can be called D1-proven.
 
 ## Production gate
 
