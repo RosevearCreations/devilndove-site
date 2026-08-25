@@ -1,4 +1,4 @@
-// Devil n Dove Build 367 — passive Operations Today Tasks read service.
+// Devil n Dove Build 367 passive service / Build 369 read implementation metadata.
 // Registration performs no request. list() invokes the Build 366 owned read contract.
 
 export const BUILD = 367;
@@ -26,6 +26,7 @@ async function fetchTodayTasksRead(options = {}) {
 
   return Object.freeze({
     build: Number(data.build || 0),
+    implementationBuild: Number(data.implementation_build || 0),
     contract: data.contract || SERVICE_ID,
     owner: data.owner || OWNER,
     schemaReady: data.schema_ready === true,
