@@ -80,35 +80,40 @@ GET /api/admin/contracts/operations-gift-cards-read
 Expected structural state:
 
 ```text
-contract_status                  200
-contract_build                   385
-contract_owner                   operations
-contract_id                      operations-gift-cards-read
-schema_ready                     true
-missing_tables                   []
-query_error_count                0
-request_time_schema_mutation     false
-request_time_default_seeding     false
-mutation_ownership_moved         false
-migration_authority              database_gift_card_runtime_parity.sql
-service_registered               true
-service_build                    386
-application_module               commerce-operations
-application_mode                 active
-active_application_module        commerce-operations
-operations_domain                operations
-runtime_build                    386
-activation_build                 386
-runtime_state                    active
-last_pathname                    /admin/gift-cards/
-services_ready                   true
-required_services                ["operations-gift-cards-read"]
-gift_cards_page_proven           true
-creates_network_transport        false
-gift_cards_mutation_ownership    false
-contracts_ok                     true
-services_ok                      true
+contract_status                    200
+contract_build                     385
+contract_owner                     operations
+contract_id                        operations-gift-cards-read
+schema_ready                       true
+missing_tables                     []
+query_error_count                  0
+request_time_schema_mutation       false
+request_time_default_seeding       false
+mutation_ownership_moved           false
+migration_authority                database_gift_card_runtime_parity.sql
+service_registered                 true
+service_registration_build         386
+service_contract_build             385
+service_schema_ready               true
+service_schema_mutation            false
+application_module                 commerce-operations
+application_mode                   active
+active_application_module          commerce-operations
+operations_domain                  operations
+runtime_build                      386
+activation_build                   386
+runtime_state                      active
+last_pathname                      /admin/gift-cards/
+services_ready                     true
+required_services                  ["operations-gift-cards-read"]
+gift_cards_page_proven             true
+creates_network_transport          false
+gift_cards_mutation_ownership      false
+contracts_ok                       true
+services_ok                        true
 ```
+
+The registered service object is Build 386; its `list()` result carries the Build 385 server contract payload. This distinction is intentional.
 
 If `schema_ready=false`, paste `missing_tables` and `query_errors`. Do not repair schema from GET. Build 384 is the migration authority.
 
