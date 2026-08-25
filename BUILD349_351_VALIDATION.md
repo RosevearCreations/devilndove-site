@@ -1,6 +1,6 @@
 # Builds 349–351 Validation — Creative & Production Packaging Runtime
 
-## Status — BROWSER PROVEN / CORRECTED LOCAL RERUN REQUIRED
+## Status — FULLY VALIDATED IN DEVELOPMENT
 
 ```text
 Build 349  Packaging top-level runtime audit / Build 301 baseline pin
@@ -48,16 +48,16 @@ services_ok                              true
 
 This proves the first top-level Creative & Production boundary can coexist with the completed Build 301 Packaging stack without changing its native read/write authority or contacting the retired legacy GET route.
 
-## Initial local checkpoint — HISTORICAL ASSERTION STALE
+## Initial local checkpoint — historical assertion stale
 
-The 2026-08-24 combined local run failed only because the historical regression froze later-shared runtime state at exactly Build 350 / activation Build 351:
+The first combined local run failed only because the historical regression froze later-shared runtime state at exactly Build 350 / activation Build 351:
 
 ```text
 assert 'const BUILD = 350' in runtime
 AssertionError
 ```
 
-Build 353 intentionally advances the same Creative & Production runtime while retaining Packaging coverage. The regression has now been corrected to validate the durable Build 349–351 boundary instead:
+Build 353 intentionally advanced the same Creative & Production runtime while retaining Packaging coverage. The regression was corrected to validate the durable Build 349–351 boundary instead:
 
 - runtime build may advance beyond 350;
 - activation build may advance beyond 351;
@@ -67,19 +67,15 @@ Build 353 intentionally advances the same Creative & Production runtime while re
 - Packaging/Creative mutation ownership must remain false;
 - Build 301 Packaging authority remains the wrapped baseline.
 
-## Corrected local rerun required
+## Corrected local regression — PASSED 2026-08-24
 
-```bash
-git pull --ff-only origin dev
-python scripts/build349_351_creative_production_runtime_test.py
-git status --short
-```
-
-Expected:
+User-run Development checkpoint:
 
 ```text
 BUILDS 349-351 CREATIVE PRODUCTION PACKAGING RUNTIME: PASS
 No Cloudflare resource was contacted.
 ```
+
+The corrected regression plus the Development browser proof fully validate Builds 349–351.
 
 No Save, create, delete, print, upload, or other mutation was required for the browser proof. Build 301 separately validated normal Packaging writes.
