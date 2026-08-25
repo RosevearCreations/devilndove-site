@@ -1,12 +1,19 @@
 # Build 316 — Accounting Expenses Read Correction and Core Contract Identity
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
 ```text
 2edcc42865fe818baa5091f6db55c94dcb6c5363
 Build 315 set completed modular handoff context
+```
+
+Proven source/runtime head:
+
+```text
+2047f29a52f54d3416792cc3c22f728b040f793b
+Build 316 update modular Accounting handoff context
 ```
 
 Real Devil n Dove Production remains frozen at Build 280.
@@ -27,7 +34,7 @@ The build establishes an Accounting-owned read boundary for expenses, preserves 
 
 The historical GET implementation joined an attachment-count subquery containing `expense_id` while selecting and ordering by an unqualified `expense_id` from `accounting_expenses`.
 
-That makes the query vulnerable to SQLite/D1 ambiguity once the attachment join is present.
+That made the query vulnerable to SQLite/D1 ambiguity once the attachment join was present.
 
 The same GET also called schema-creation/repair helpers for:
 
@@ -39,7 +46,7 @@ accounting_expenses
 
 so a read request could perform `CREATE TABLE`, `ALTER TABLE`, and index creation.
 
-Both behaviors are outside the desired modular boundary.
+Both behaviors were outside the desired modular boundary.
 
 ## New Accounting-owned read service
 
@@ -106,13 +113,13 @@ The GET handler now delegates to `readAccountingExpenses()` and preserves the hi
 expenses
 ```
 
-so `public/js/admin-accounting-backend.js` does not require a business-layer rewrite in this build.
+so `public/js/admin-accounting-backend.js` did not require a business-layer rewrite.
 
-The compatibility GET now also returns Build 316 contract/readiness metadata.
+The compatibility GET also returns Build 316 contract/readiness metadata.
 
 ### POST
 
-POST is intentionally not migrated.
+POST was intentionally not migrated.
 
 The existing compatibility write path still owns:
 
@@ -122,7 +129,7 @@ The existing compatibility write path still owns:
 - expense insertion;
 - audit logging.
 
-This is deliberate. Build 316 is a read-authority extraction and must not silently move expense write authority.
+Build 316 is a read-authority extraction and does not claim expense write authority has moved.
 
 ## Core contract boundary
 
@@ -133,7 +140,7 @@ public/js/core/dd-module-contracts.mjs
 public/js/core/dd-module-service-adapters.mjs
 ```
 
-Both now expose explicit build identity:
+Both expose explicit build identity:
 
 ```text
 BUILD = 316
@@ -182,6 +189,53 @@ The proven Operations page allow-list remains:
 /admin/orders/
 ```
 
+## Validation proof
+
+Development browser proof on `/admin/orders/`:
+
+```text
+legacy_status                    200
+legacy_ok                        true
+legacy_build                     316
+legacy_contract                  accounting-expenses-read
+legacy_owner                     accounting
+legacy_schema_ready              true
+legacy_schema_mutation           false
+legacy_rows                      0
+contract_status                  200
+contract_ok                      true
+contract_build                   316
+contract_name                    accounting-expenses-read
+contract_owner                   accounting
+contract_schema_ready            true
+contract_schema_mutation         false
+contract_rows                    0
+contract_catalog_build           316
+service_adapter_build            316
+expense_service_owner            accounting
+expense_service_mode             read-only-http
+service_build                    316
+service_schema_ready             true
+service_schema_mutation          false
+service_rows                     0
+core_runtime_build               305
+commerce_runtime_build           315
+owns_operations_mutations        false
+contracts_ok                     true
+services_ok                      true
+```
+
+Zero expense rows are valid Development state and were not a blocker.
+
+Final local regression:
+
+```text
+BUILD 316 ACCOUNTING EXPENSES READ CORRECTION: PASS
+No Cloudflare resource was contacted.
+```
+
+No mutation validation was performed or required.
+
 ## Other split findings
 
 Build 316 also creates:
@@ -201,7 +255,7 @@ The audit records:
 
 ## Git branch finding
 
-The repository currently contains:
+The repository contains:
 
 ```text
 main
@@ -214,11 +268,11 @@ build294-candidate
 
 Each historical candidate branch is fully contained in `dev` (`behind_by=0` relative to `dev`). They are retirement candidates, but Build 316 does not delete them.
 
-The three top-level application modules must remain runtime/application boundaries, not permanent Git branches.
+The three top-level application modules remain runtime/application boundaries, not permanent Git branches.
 
-## Safety boundary
+## Safety boundary — proven intact
 
-Build 316 does not modify:
+Build 316 did not modify:
 
 - Commerce runtime Build 315;
 - Operations page allow-list;
@@ -235,24 +289,6 @@ Build 316 does not modify:
 - real Production;
 - Production-to-Development business-data migration.
 
-## Validation
-
-Build 316 must prove:
-
-1. local regression passes;
-2. changed-file boundary is exact;
-3. the new read service contains no DDL/write SQL;
-4. the new contract is GET-only;
-5. legacy expense GET delegates to the service and does not call schema ensure helpers;
-6. legacy expense POST still retains its compatibility write path;
-7. Development legacy GET returns HTTP 200 instead of the observed 500;
-8. the dedicated contract returns HTTP 200;
-9. both report Build 316, Accounting ownership, and `request_time_schema_mutation=false`;
-10. Development reports `schema_ready=true`, or if false, returns explicit missing schema without repairing it;
-11. Core catalog/adapter source identity is Build 316;
-12. Commerce/Operations runtime remains Build 315;
-13. no Production/schema/config/branch deletion occurs.
-
 ## Next direction
 
-After Build 316 is proven, continue the same pattern through the Accounting read-time DDL retirement queue, beginning with `accounting-writeoffs.js`, while keeping write-authority extraction separate.
+Continue the same pattern through the Accounting read-time DDL retirement queue, beginning with `accounting-writeoffs.js`, while keeping write-authority extraction separate.
