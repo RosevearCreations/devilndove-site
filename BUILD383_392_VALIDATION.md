@@ -85,7 +85,11 @@ The following two-batch direct-query attempt reached D1 successfully. Batch 1 co
 incomplete input: SQLITE_ERROR
 ```
 
-To remove multi-statement ambiguity entirely, the fallback now executes each of the 24 authoritative migration statements separately through `wrangler d1 execute --command` and prints a short SQL preview before every statement. This provides an exact failing statement if any current-schema mismatch remains.
+To remove multi-statement ambiguity entirely, the fallback was changed to execute each of the 24 authoritative migration statements separately through `wrangler d1 execute --command` and print a short SQL preview before every statement.
+
+The first one-statement run proved statement 1 (`PRAGMA foreign_keys = ON`) succeeds, but statement 2 (`CREATE TABLE IF NOT EXISTS gift_cards (...)`) still returned `incomplete input` even though the migration source is syntactically complete. Because the direct read-only preflight and short PRAGMA command both succeed, the remaining failure is Windows `npx.cmd` multiline argument transport rather than SQLite schema validation.
+
+The helper now compacts every SQL command to one physical line outside quoted strings before invoking Wrangler. Quoted template text is preserved exactly, command length is revalidated after compaction, and the helper refuses any command that still contains a physical newline.
 
 Run only:
 
