@@ -17,6 +17,8 @@ Safety:
 - Decodes Wrangler/Node subprocess output explicitly as UTF-8 with replacement so
   Windows console encoding cannot abort the release helper before D1 diagnostics
   are printed.
+- Removes SQL line comments before passing statements to Wrangler `--command` so
+  a leading `-- ...` migration comment cannot be misparsed as a CLI option.
 """
 
 from __future__ import annotations
@@ -80,6 +82,18 @@ def resolve_npx() -> str:
     return shutil.which("npx.cmd") or shutil.which("npx") or fail("npx was not found on PATH.")
 
 
+def strip_sql_line_comments(text: str) -> str:
+    """Remove full-line SQL comments before building Wrangler --command values.
+
+    Wrangler/yargs can interpret a command value beginning with `-- comment` as a
+    new CLI option. The Build 384 migration uses ordinary full-line comments only,
+    so remove those lines while preserving all executable SQL and quoted strings.
+    """
+    return "\n".join(
+        line for line in text.splitlines() if not line.lstrip().startswith("--")
+    )
+
+
 def split_sql(text: str) -> list[str]:
     """Split SQL on semicolons outside quoted strings.
 
@@ -87,6 +101,7 @@ def split_sql(text: str) -> list[str]:
     intentionally remains small and deterministic instead of trying to be a full
     SQL grammar.
     """
+    text = strip_sql_line_comments(text)
     statements: list[str] = []
     current: list[str] = []
     in_single = False
@@ -143,6 +158,8 @@ def make_batches(statements: list[str]) -> list[str]:
     current_size = 0
 
     for statement in statements:
+        if statement.lstrip().startswith("--"):
+            fail("A SQL batch still begins with a line comment after sanitization.")
         size = len(statement) + 1
         if size > MAX_BATCH_CHARS:
             fail(
