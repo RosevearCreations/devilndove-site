@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 348 Business & Administration Accounting Runtime Pending Browser Proof
+# Devil n Dove AI Context — Build 348 Business & Administration Accounting Runtime Validated
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -39,9 +39,9 @@ Commerce/Operations runtime                    315
 Accounting page bridge audit                   323 validated
 Accounting reads through 342                   validated
 Accounting reads 343–345                       browser proven; corrected local rerun required
-Accounting startup-read audit                  346 complete
-Business & Administration runtime impl         347 local proven
-Business Accounting runtime activation         348 local proven; browser proof required
+Accounting startup-read audit                  346 validated
+Business & Administration runtime impl         347 validated
+Business Accounting runtime activation         348 validated
 Contract catalog                               345
 Passive service adapters                       345
 Business & Administration mutation ownership   false
@@ -78,11 +78,11 @@ Prior parity audit also identified Production-only active tables including `acco
 - Builds 337–339: fully validated 2026-08-24; Builds 338/339 retain separate schema-parity findings.
 - Builds 340–342: fully validated 2026-08-24; Build 341 retains separate schema-parity findings.
 - Builds 343–345: browser proven and schema-ready. Original local run reached a stale historical assertion requiring `business-administration.entry === null`; Build 348 intentionally invalidated that assumption. The regression was corrected in commit `d630c11f6241fb4cab1bc897bfc6396033961811`; corrected local rerun still required.
-- Builds 346–348: combined local regression PASS 2026-08-24; browser activation proof still required.
+- Builds 346–348: fully validated 2026-08-24. Local regression passed and Firefox proved active `business-administration` Accounting runtime with 28 required services, no runtime network transport and mutation ownership false.
 
 ## Build 346 — Accounting startup-read audit closure
 
-`admin/accounting/index.html` loads eight Accounting feature scripts. The source audit confirms every automatic startup GET maps to an owned passive non-mutating read service extracted through Build 345. `admin-accounting-t2-presets.js` performs no network reads. User-triggered POSTs/uploads/imports/locks/journal actions remain compatibility mutations and are outside the startup-read activation prerequisite.
+`admin/accounting/index.html` loads eight Accounting feature scripts. Every automatic startup GET maps to an owned passive non-mutating read service extracted through Build 345. `admin-accounting-t2-presets.js` performs no network reads. User-triggered POSTs/uploads/imports/locks/journal actions remain compatibility mutations and are outside the startup-read activation prerequisite.
 
 ## Build 347 — passive Business & Administration runtime
 
@@ -92,7 +92,7 @@ Prior parity audit also identified Production-only active tables including `acco
 
 `business-administration` is `in-progress` with runtime domain `accounting` only. The only proven Business runtime page is `/admin/accounting/`. Marketing, Platform, Admin, Analytics, Command Center and every other Business & Administration route remain domain-bridge only.
 
-Expected post-deploy state on `/admin/accounting/` after verified admin auth:
+Validated Development state:
 
 ```text
 application_module                       business-administration
@@ -114,11 +114,11 @@ Historical regression scripts verify the durable boundaries introduced by their 
 
 ## Next direction
 
-1. Pull the regression-fix/doc commits and rerun only `scripts/build343_345_accounting_read_batch_test.py`.
-2. Browser-validate Build 348 activation on `/admin/accounting/`.
-3. If both pass, mark Builds 343–348 fully validated.
-4. Keep mutation ownership false; do not use runtime activation as permission to move Accounting writes.
-5. Continue fresh-install schema parity separately, then source-audit the next bounded modular target.
+1. Pull current `dev` and rerun only `scripts/build343_345_accounting_read_batch_test.py` to close the historical 343–345 local gap.
+2. Source-audit the existing Packaging domain runtime as the safest candidate for the first bounded top-level `creative-production` activation.
+3. If Packaging audit is clean, stage Builds 349–351 as Packaging runtime audit, passive Creative & Production runtime implementation, and `/admin/packaging-studio/`-only activation.
+4. Keep mutation ownership unchanged during that activation.
+5. Continue fresh-install schema parity separately before any Production business-data copy.
 
 ## Validation preference
 
