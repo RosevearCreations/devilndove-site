@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Builds 359–361 CAIP Runtime Staged
+# Devil n Dove AI Context — All Creative Domains Browser-Proven Through Build 361
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -40,13 +40,12 @@ Accounting reads through 345                   validated
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
 Creative Packaging runtime                     351 validated
-Creative Process read contract                 352 browser-proven
-Creative dependency correction                 358 browser-proven / corrected local required
-Content Studio read contract                   355 browser-proven / corrected local required
-Content Studio top-level activation            357 browser-proven / corrected local required
-CAIP startup read contracts                    359 staged
-Creative & Production runtime implementation   360 staged
-CAIP top-level activation                      361 staged
+Creative Process read/runtime                   browser-proven; corrected local required
+Content Studio read/runtime                     browser-proven; corrected local required
+Creative dependency correction                 358 browser-proven; corrected local required
+CAIP startup read contracts                    359 browser-proven; local required
+Creative & Production runtime implementation   360 browser-proven; local required
+CAIP top-level activation                      361 browser-proven; local required
 Contract catalog                               345
 Default passive service adapters               345
 Creative Process passive service               353 runtime-local
@@ -57,6 +56,8 @@ Creative/Packaging mutation ownership moved    false
 Content mutation ownership moved               false
 CAIP mutation ownership moved                  false
 ```
+
+All four Creative & Production domains now have a browser-proven top-level runtime page. Do not extend or rework that loader again merely to create more evidence; close the corrected local regressions first, then move to another bounded ownership target.
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
 
@@ -72,10 +73,10 @@ A loader/read-contract migration or top-level runtime activation never implies m
 - Builds 346–348: fully validated; Business & Administration is active only for `/admin/accounting/`.
 - Build 301 Packaging compatibility checkpoint: complete in Development.
 - Builds 349–351: fully validated; Packaging remains on the proven Build 301 authority chain.
-- Builds 352–354: browser activation now passes after Build 358; corrected local regression still required.
+- Builds 352–354: browser activation passes after Build 358; corrected local regression still required.
 - Builds 355–357: Content Studio browser proof passed 2026-08-24; corrected local regression still required.
 - Build 358: browser proof passed 2026-08-24; corrected local regression still required.
-- Builds 359–361: staged; local + CAIP browser validation required.
+- Builds 359–361: CAIP browser proof passed 2026-08-24; local regression still required.
 
 ## Browser-proven Creative Process state after Build 358
 
@@ -134,7 +135,7 @@ services_ok                      true
 
 ## CAIP startup-read audit correction
 
-Earlier notes incorrectly treated CAIP's historical `ensure...Schema()` names as request-time DDL. Current source proves these helpers are migration-owned verification only:
+Historical `ensure...Schema()` / `assert...Schema()` names were misleading. Current source proves these helpers are migration-owned verification only:
 
 ```text
 ensureCreativeAssetIntelligenceSchema()  SELECT-only verification
@@ -151,7 +152,7 @@ GET /api/admin/caip-media-intake
 
 Neither current GET requires CREATE/ALTER/INSERT/UPDATE/DELETE merely to load the page.
 
-## Build 359 — CAIP startup read contracts
+## Builds 359–361 — CAIP read/runtime boundary
 
 Build 359 adds two GET-only CAIP-owned wrappers:
 
@@ -160,46 +161,68 @@ Build 359 adds two GET-only CAIP-owned wrappers:
 /api/admin/contracts/caip-media-intake-read
 ```
 
-Both report `request_time_schema_mutation=false`, `mutation_ownership_moved=false`, and `schema_verification_only=true` while retaining the existing GET endpoints as source authorities.
+Both report `request_time_schema_mutation=false`, `mutation_ownership_moved=false`, and `schema_verification_only=true`. The intake contract also reports `r2_mutation=false` and `binary_mutation=false`.
 
-No project/evidence/story, probe, derivative, secure-review, upload/session, governance, duplicate-cleanup, R2, or public-promotion mutation moves.
-
-## Build 360 — passive CAIP services + Creative runtime expansion
-
-`public/js/modules/creative-production/caip-read-services.mjs` registers exactly:
+Build 360 passively registers exactly:
 
 ```text
 caip-read
 caip-media-intake-read
 ```
 
-Registration performs no HTTP request. `list()` is the only network boundary.
+Registration performs no HTTP request. The top-level Creative runtime creates no network transport and owns no CAIP mutations.
 
-The Creative & Production runtime now supports:
+Build 361 adds `/admin/creative-assets/` to explicit top-level coverage and loads Core before the retained Build 279 media-intake and Build 271 CAIP UI scripts. Existing compatibility GET/POST authorities and R2/media helpers remain unchanged.
 
-```text
-packaging
-creative
-content
-caip
-```
-
-For CAIP it requires exactly those two passive read services and still reports `createsNetworkTransport=false` and `caipMutationOwnership=false`.
-
-## Build 361 — CAIP activation
-
-Explicit Creative & Production coverage is now staged as:
+### Browser proof — PASSED 2026-08-24
 
 ```text
-/admin/packaging-studio/
-/admin/creative-process/
-/admin/content-studio/
-/admin/creative-assets/
+caip_contract_status                     200
+caip_contract_build                      359
+caip_contract_legacy_build               Build 201 + Build 202 + Build 279
+caip_contract_owner                      caip
+caip_contract_id                         caip-read
+caip_contract_schema_mutation            false
+caip_contract_mutation_ownership_moved   false
+caip_contract_verification_only          true
+caip_contract_r2_mutation                false
+intake_contract_status                   200
+intake_contract_build                    359
+intake_contract_legacy_build             Build 279
+intake_contract_owner                    caip
+intake_contract_id                       caip-media-intake-read
+intake_contract_schema_mutation          false
+intake_contract_mutation_ownership_moved false
+intake_contract_verification_only        true
+intake_contract_r2_mutation              false
+intake_contract_binary_mutation          false
+caip_read_service_registered             true
+caip_read_service_build                  359
+caip_intake_service_registered           true
+caip_intake_service_build                359
+application_module                       creative-production
+application_mode                         active
+active_application_module                creative-production
+caip_domain                              caip
+runtime_entry                            ../modules/creative-production/runtime.mjs?v=360
+runtime_build                            360
+activation_build                         361
+runtime_state                            active
+current_domain                           caip
+last_pathname                            /admin/creative-assets/
+services_ready                           true
+required_service_count                   2
+required_services                        ["caip-read","caip-media-intake-read"]
+caip_page_proven                         true
+caip_read_contract_build                 359
+caip_intake_contract_build               359
+creates_network_transport                false
+caip_mutation_ownership                  false
+contracts_ok                             true
+services_ok                              true
 ```
 
-The CAIP page already resolves to the `caip` domain. It now loads `/public/js/admin.js?v=361` before the retained Build 279 media-intake and Build 271 CAIP UI scripts.
-
-The existing UI scripts and compatibility POST authorities are unchanged.
+No project/evidence/story mutation, probe, derivative, secure-review, upload/session, governance, duplicate-cleanup, R2, binary, or public-promotion action was invoked during the proof.
 
 ## Development schema-parity track — separate
 
@@ -221,16 +244,16 @@ Windows previously refused to unlink an obsolete `.git/objects/pack/*.idx` and m
 
 ## Historical regression rule
 
-Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache versions or require a later domain to remain inactive. Build 355–357 and Build 358 regressions are now future-compatible with CAIP activation.
+Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache versions or require a later domain to remain inactive. Build 355–357 and Build 358 regressions are future-compatible with CAIP activation.
 
 ## Next direction
 
-1. Pull the staged Build 361 checkpoint with automatic Git GC disabled if needed.
-2. Run corrected regressions for Builds 352–354, 355–357, 358, and the new 359–361 batch.
-3. Browser-validate `/admin/creative-assets/` using GET/read checks only.
-4. If all local gates and the CAIP browser proof pass, close Builds 352–361 without moving mutation authority.
-5. After all four Creative & Production domains are proven, stop expanding top-level Creative loader coverage and move to the next bounded ownership target rather than reworking passing pages.
-6. Continue fresh-install schema parity separately before Production business-data copy.
+1. Pull the browser-proof Build 361 documentation checkpoint with automatic Git GC disabled if needed.
+2. Run corrected regressions for Builds 352–354, 355–357, 358, and 359–361.
+3. If all four local gates pass with a clean working tree, mark Builds 352–361 fully validated. No further browser proof is required for these loader/read checkpoints.
+4. Stop expanding Creative & Production top-level loader coverage; all four domains now have browser-proven pages.
+5. Choose the next bounded ownership target from source evidence. Prefer a remaining Commerce & Operations page with a clean read boundary; avoid mixing known `gift_cards` fresh-install parity work into loader activation unless schema parity is deliberately the batch target.
+6. Continue fresh-install schema parity separately and before any Production business-data copy.
 
 ## Validation preference
 
