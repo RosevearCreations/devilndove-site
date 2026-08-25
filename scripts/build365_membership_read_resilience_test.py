@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -11,6 +12,12 @@ def section(text, start, end=None):
     i = text.index(start)
     j = text.index(end, i) if end else len(text)
     return text[i:j]
+
+
+def numeric(pattern, text):
+    match = re.search(pattern, text)
+    assert match, pattern
+    return int(match.group(1))
 
 
 read_service = read('functions/api/_lib/membershipTierPolicyReadService.js')
@@ -74,14 +81,15 @@ assert 'request_time_schema_mutation: false' in contract
 assert 'mutation_ownership_moved: false' in contract
 assert 'onRequestPost' not in contract
 
-# Loader/runtime boundary remains the already staged Build 363/364 boundary.
-assert 'const BUILD = 363;' in runtime
-assert 'const ACTIVATION_BUILD = 364;' in runtime
+# Shared Commerce runtime may advance after Build 365, but the Membership boundary must remain intact.
+assert numeric(r'const BUILD = (\d+);', runtime) >= 363
+assert numeric(r'const ACTIVATION_BUILD = (\d+);', runtime) >= 364
 assert "const MEMBERSHIP_RUNTIME_PAGE = '/admin/membership/'" in runtime
 assert "const MEMBERSHIP_REQUIRED_SERVICES = Object.freeze(['operations-membership-read'])" in runtime
 assert 'membershipMutationOwnership: false' in runtime
-assert "entry: '../modules/commerce-operations/runtime.mjs?v=363'" in groups
-assert 'OPERATIONS_RUNTIME_COVERAGE_BUILD = 364' in groups
+commerce = section(groups, "id: 'commerce-operations'", "id: 'creative-production'")
+assert numeric(r"entry: '../modules/commerce-operations/runtime\.mjs\?v=(\d+)'", commerce) >= 363
+assert numeric(r'OPERATIONS_RUNTIME_COVERAGE_BUILD = (\d+);', groups) >= 364
 assert 'membershipMutationOwnershipMovedByTopLevelRuntime: false' in groups
 
 print('BUILD 365 MEMBERSHIP READ RESILIENCE: PASS')
