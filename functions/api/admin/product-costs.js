@@ -1,6 +1,7 @@
 // File: /functions/api/admin/product-costs.js
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
 import { assertAccountingPeriodOpen, monthFromDateish } from './_accountingPeriods.js';
+import { readAccountingProductCosts } from '../_lib/accountingProductCostsReadService.js';
 
 function nr(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -13,10 +14,6 @@ async function getTableColumnSet(db, tableName) {
   } catch {
     return new Set();
   }
-}
-
-function colExpr(cols, name) {
-  return cols.has(name) ? name : `NULL AS ${name}`;
 }
 
 async function ensureTable(db) {
@@ -59,21 +56,8 @@ export async function onRequestGet(context) {
   if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
 
   try {
-    const cols = await ensureTable(db);
-    const result = await db.prepare(`
-      SELECT
-        ${colExpr(cols, 'product_cost_id')},
-        ${colExpr(cols, 'product_number')},
-        ${colExpr(cols, 'cost_per_unit')},
-        ${colExpr(cols, 'effective_date')},
-        ${colExpr(cols, 'notes')},
-        ${colExpr(cols, 'created_at')},
-        ${colExpr(cols, 'updated_at')}
-      FROM product_costs
-      ORDER BY COALESCE(effective_date, created_at, '1970-01-01') DESC, COALESCE(product_cost_id, 0) DESC
-    `).all();
-
-    return jsonResponse({ ok: true, product_costs: nr(result) });
+    const result = await readAccountingProductCosts(db);
+    return jsonResponse(result);
   } catch (error) {
     return jsonResponse({ ok: false, error: error?.message || 'Failed to load product costs.' }, 500);
   }
