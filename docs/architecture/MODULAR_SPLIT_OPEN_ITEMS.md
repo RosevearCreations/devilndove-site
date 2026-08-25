@@ -1,80 +1,45 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 373–382 on 2026-08-25.
+Updated through staged Builds 383–392 on 2026-08-25.
 
-## Architectural invariant
+## Invariant
 
-Devil n Dove has exactly one shared Core and three top-level application modules:
-
-```text
-                     DEVIL N DOVE APPLICATION CORE
-                               |
-              +----------------+----------------+
-              |                |                |
-       COMMERCE &         CREATIVE &       BUSINESS &
-       OPERATIONS          PRODUCTION      ADMINISTRATION
-```
-
-Domains remain ownership/service boundaries beneath those modules. Core owns shared infrastructure only; business rules remain domain-owned.
-
-## Source-control state
+Exactly one shared Core and three top-level application modules:
 
 ```text
-main = retained Production/legacy release line
-dev  = active modularization and Development integration line
+Core
+├─ Commerce & Operations
+├─ Creative & Production
+└─ Business & Administration
 ```
 
-Application modules are not permanent Git branches.
-
-## Execution cadence
-
-As of 2026-08-25, use **10-build execution batches** when work remains coherent and bounded.
-
-Maintain the rolling next 20 builds in:
+Domains remain ownership/service boundaries below those modules. Core owns shared infrastructure only. Top-level activation never implies mutation ownership.
 
 ```text
-docs/architecture/NEXT_20_BUILDS.md
+main = frozen Production/legacy line
+dev  = active Development/modularization line
 ```
 
-Validation evidence can insert correction builds and shift later numbers; safety and accurate validation labels override the planned numbering.
+## Cadence
 
-## Current identities
+Use coherent **10-build execution batches** and keep the next **20 builds** in `docs/architecture/NEXT_20_BUILDS.md`. Validation failures may insert correction builds and shift later numbers.
+
+## Validation state
 
 ```text
-Core architecture                       302
-Core runtime implementation             305
-Commerce runtime                        371 browser-proven
-Operations Membership read contract     362 validated
-Operations Membership activation        364 validated
-Membership read hardening               365 validated
-Operations Today Tasks read contract    366 browser-proven
-Operations Today Tasks activation       368 browser-proven
-Today Tasks schema alignment            369 browser-proven / local pending
-Operations Custom Requests read         370 browser-proven
-Operations Custom Requests activation   372 browser-proven / local pending
-Custom Requests read-surface cleanup    373–382 staged
-Business Accounting activation          348 validated
-Packaging baseline                      301 validated
-Creative Packaging activation           351 validated
-Creative Process read/runtime            352–354 validated
-Creative dependency gate fix            358 validated
-Content Studio read/runtime              355–357 validated
-CAIP read/runtime                        359–361 validated
-Accounting mutation ownership moved     false
-Operations mutation ownership moved     false
-Membership mutation ownership moved     false
-Today Tasks mutation ownership moved    false
-Custom Requests mutation ownership      false
-Creative mutation ownership moved       false
-Content mutation ownership moved        false
-CAIP mutation ownership moved           false
+through 365       fully validated through recorded checkpoints
+366–368           browser-proven after 369 / local pending
+369               browser-proven / local pending
+370–372           browser-proven / local pending
+373–382           browser-proven / local pending
+383–392           staged / local + Gift Card browser proof required
 ```
-
-Everything through Build 365 is fully validated.
 
 ## Commerce & Operations
 
-Explicit Operations runtime pages are now:
+Current shared Commerce runtime / activation: **386 / 386**.
+
+Explicit Operations pages:
 
 ```text
 /admin/operations/
@@ -83,205 +48,136 @@ Explicit Operations runtime pages are now:
 /admin/membership/
 /admin/today-tasks/
 /admin/custom-request/
+/admin/gift-cards/
 ```
 
-The broad first three pages retain the proven legacy Operations read-service gate. Membership, Today Tasks, and Custom Requests use page-specific read services.
-
-### Membership — closed through Build 365
-
-Membership is fully validated. Build 362 established a non-mutating Tier Policy read authority; Build 363 registered it passively; Build 364 activated `/admin/membership/`; Build 365 hardened the read after an initial browser 500.
-
-Development returned database-backed Bronze/Silver/Gold policies with `schema_ready=true`.
-
-### Today Tasks — Builds 366–369
-
-Build 366 added readiness-aware `operations-today-tasks-read`; Build 367 registered it passively; Build 368 added `/admin/today-tasks/`; Build 369 aligned the read to current Inventory/Accounting/runtime-incident schema names.
-
-Final Firefox revalidation returned:
+Page-specific reads:
 
 ```text
-contract Build 366 / implementation 369
-schema_ready=true
-missing_tables=[]
-query_errors=[]
-runtime 367 / activation 368
-required service operations-today-tasks-read
-page proven true
-mutation ownership false
+Membership       operations-membership-read        362
+Today Tasks      operations-today-tasks-read       366 / implementation 369
+Custom Requests  operations-custom-requests-read   370
+Gift Cards       operations-gift-cards-read         385 staged
 ```
 
-Browser side is closed. Local regressions remain pending.
+The runtime creates no network transport and owns none of the page mutations above.
 
-The separate Build 339 `hst_gst_review_records` fresh-install parity finding remains open; Today Tasks simply no longer queries that obsolete name.
+### Membership
 
-### Custom Requests — Builds 370–372
+Fully validated through Build 365. Do not disturb its Build 362 read boundary when extracting assignment/policy mutations in 394–395.
 
-Build 370 adds readiness-aware startup contract:
+### Today Tasks
+
+Build 369 browser proof returned `schema_ready=true`, no missing tables/query errors, runtime 367/activation 368, one read service, and no mutation ownership. Local closure remains pending.
+
+Build 392 adds source authority `operations-today-task-action-write` over the existing completed/ignored/snoozed POST. Build 393 must move `today_task_actions` table/column creation to migration authority before consumer migration.
+
+### Custom Requests
+
+Builds 370–372 browser proof passed with all 23 startup tables ready and no mutation ownership. Builds 373–382 browser proof also passed:
 
 ```text
-GET /api/admin/contracts/operations-custom-requests-read
+safe export Build 373       200 / no schema mutation
+export readiness Build 374  schema_ready=true
+safe links                   5
+unsafe legacy links          0
+page tools                   380
+runtime                      371 / activation 372
 ```
 
-It verifies all 23 tables used by the mature list payload with read-only checks and forces the normal list path so it cannot enter marketplace CSV mode.
+Local regressions remain pending. The dedicated page now guards against the legacy self-ensuring marketplace CSV GET.
 
-Build 371 registers the passive service. Build 372 adds `/admin/custom-request/` under Commerce & Operations.
+### Gift Cards — 383–387 staged
 
-Firefox proof passed exactly on 2026-08-25:
+Build 383 found three automatic startup GETs that created schema and multiple request-time Gift Card table creators.
+
+Build 384 adds `database_gift_card_runtime_parity.sql` for Gift Card-owned tables:
 
 ```text
-contract_status                     200
-contract_build                      370
-schema_ready                        true
-missing_tables                      []
-checked_table_count                 23
-service_registered                  true
-runtime_build                       371
-activation_build                    372
-required_services                   ["operations-custom-requests-read"]
-custom_requests_page_proven         true
-creates_network_transport           false
-custom_requests_mutation_ownership  false
+gift_cards
+gift_card_redemptions
+gift_card_admin_events
+gift_card_delivery_templates
+gift_card_delivery_queue
+gift_card_provider_send_logs
+gift_card_lookup_attempts
+gift_card_lookup_lockouts
 ```
 
-Browser side is closed. Local regression remains pending.
+Default activation/reissue templates are migration-owned. Shared `notification_outbox` is deliberately excluded because current Gift Card writers assume incompatible historical shapes.
 
-### Builds 373–382 — complete the dedicated Custom Requests read surface
+Build 385 adds non-mutating/readiness-aware `operations-gift-cards-read`. Build 386 changes `/admin/gift-cards/` automatic startup to that one contract and activates the page under Commerce with exactly one read service. All Gift Card writes remain compatibility-owned.
 
-The mature Custom Requests UI still renders marketplace CSV links that historically targeted:
+Build 387 removes request-time table creation from Gift Card delivery-history GET and records mutation blockers:
 
-```text
-/api/admin/custom-requests?format=marketplace_csv
-```
+- card POST still self-ensures schema until migration proof;
+- provider/outbox writes need shared notification reconciliation;
+- old abuse release UI/API semantics disagree (key/action vs stable lockout ID), so the unsafe control is not exposed by the Build 386 UI.
 
-That compatibility branch calls the large legacy schema/preset ensure authority. Rather than modifying the huge mature workflow implementation in this batch, the dedicated page now receives owned non-mutating export/read tools.
+### Orders — 388–391 staged
 
-Ten-update batch:
+Build 388 confirms `GET /api/admin/orders` is non-mutating and uses the current cents model (`total_cents`, etc.). Historical Build 324 `total_amount|total` must remain scoped to its old consumer rather than being imposed on this read.
 
-```text
-373  non-mutating marketplace CSV export
-374  marketplace export readiness read
-375  dedicated-page owned-read diagnostics bootstrap
-376  safe export toolbar
-377  legacy CSV-link rewrite
-378  startup schema visibility
-379  export schema visibility
-380  dedicated-page legacy-export guard
-381  regression harness
-382  rolling next-20 roadmap / 10-build cadence
-```
+Build 389 adds `operations-order-status-write`, delegating the mature status implementation. That implementation still has a paid-order Gift Card history table fallback; do not remove it until Build 384 migration application is proven.
 
-Safe export:
+Build 390 holds provider-aware refund/dispute consumer migration because the path can call Stripe/PayPal and crosses payments, orders, refunds/disputes, status history, notifications, and audit.
 
-```text
-GET /api/admin/contracts/operations-custom-requests-marketplace-export
-```
-
-It reads already-prepared `custom_request_marketplace_export_packs` only and never creates schema, seeds presets, creates packs, or publishes anything.
-
-Export readiness:
-
-```text
-GET /api/admin/contracts/operations-custom-requests-marketplace-export-read
-```
-
-It reports required/optional schema readiness, pack/preset counts, and safe export routes using read-only checks.
-
-Dedicated page tools:
-
-```text
-/public/js/modules/commerce-operations/custom-requests-page-tools.mjs?v=380
-```
-
-They render diagnostics and safe exports, rewrite the older CSV links as they appear, and use a MutationObserver/capture guard on `/admin/custom-request/`. There is no polling.
-
-Builds 373–382 do not advance shared Commerce runtime 371 / activation 372 and do not move any Custom Requests mutation authority.
+Build 391 adds `operations-order-fulfillment-write`, restricted to `fulfilled`; consumer migration remains false.
 
 ## Business & Administration
 
-`/admin/accounting/` remains the validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain compatibility authorities.
+`/admin/accounting/` remains the validated Business & Administration runtime page. Accounting writes remain compatibility-owned. Accounting/fresh-install parity work is queued for 399–402.
 
 ## Creative & Production
 
-All four Creative & Production domains remain fully validated:
+All four top-level read/loader boundaries remain fully validated and closed:
 
 ```text
-packaging -> /admin/packaging-studio/
-creative  -> /admin/creative-process/
-content   -> /admin/content-studio/
-caip      -> /admin/creative-assets/
+packaging  /admin/packaging-studio/
+creative   /admin/creative-process/
+content    /admin/content-studio/
+caip       /admin/creative-assets/
 ```
 
-Do not expand or rework that loader merely to create activity.
+Do not expand this loader merely to create activity.
 
-## Read-time schema rule
+## Read/schema rule
 
-> GET/read paths report or verify schema readiness; migrations/readiness tooling creates or repairs schema.
+> GET/read paths report or verify readiness; migrations/readiness tooling creates/repairs schema.
 
-Never use top-level activation as permission to add request-time DDL/default seeding or move mutations.
+Never use page activation as permission for GET-time DDL/seeding or implicit mutation transfer.
 
-## Development schema-parity track — separate from extraction
+## Schema-parity track — separate
+
+Historical known items include:
 
 ```text
-orders.total_amount|total                     missing logical revenue column alternative (Build 324)
-accounting_fixed_assets.location_note         missing column (Build 338)
-hst_gst_review_records                        missing table (Build 339)
-accountant_export_manifests                   missing table (Build 339)
-user_profiles.profile_id                      missing expected column (Build 341)
-access_tiers.tier_id                          missing expected column (Build 341)
-payment_disputes.payment_dispute_id           missing expected column (Build 341)
+Build 324  orders.total_amount|total (historical consumer; current Orders list uses total_cents)
+Build 338  accounting_fixed_assets.location_note
+Build 339  hst_gst_review_records
+Build 339  accountant_export_manifests
+Build 341  user_profiles.profile_id
+Build 341  access_tiers.tier_id
+Build 341  payment_disputes.payment_dispute_id
 ```
 
-Fresh-install schema parity still takes priority over Production business-data copy. Prior audit also found Production-only active tables such as `accounting_order_records`, `gift_cards`, Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy.
+Prior audit also found `accounting_order_records`, Gift Card schema, Command Center tables, and `notification_dispatch_log(s)` aggregate execution drift. Build 384 begins resolving Gift Card parity, but fresh-install execution proof remains required.
 
-## Validation state
+Do not copy Production business data until fresh-install schema parity is proven.
+
+## Rolling next 20
+
+See `docs/architecture/NEXT_20_BUILDS.md`:
 
 ```text
-Builds 325–365   fully validated through recorded checkpoints
-Builds 366–368   browser-proven after Build 369 / local regression pending
-Build 369        browser-proven / local regression pending
-Builds 370–372   browser-proven / local regression pending
-Builds 373–382   staged / local + browser validation required
+393–402  Today Tasks schema ownership, Membership writes, Customer Documents, accounting/aggregate/Production parity, fresh-install gate
+403–412  shared notification reconciliation, Gift Card mutation contracts, Orders consumer migration, payment integration, Commerce sanity, documentation/RC gates
 ```
 
-## Rolling next 20 — Builds 383–402
+## Historical regression rule
 
-See `docs/architecture/NEXT_20_BUILDS.md` for the authoritative queue.
+Historical tests verify durable boundaries. They must not freeze later shared runtime/cache versions, require later pages to stay inactive, confuse write authorities with passive activation services, or match explanatory comments instead of executable behavior.
 
-High-level order:
+## Immediate validation
 
-```text
-383–387  Gift Cards schema/read/mutation boundary
-388–391  Orders schema/status/payment/fulfillment boundaries
-392–393  Today Tasks action authority/schema ownership
-394–395  Membership assignment/policy mutation contracts
-396–398  Customer Documents read/mutation boundaries
-399–402  Accounting/aggregate/Production-only schema parity + fresh-install smoke/data-copy gate
-```
-
-Gift Cards begins with parity rather than activation because `gift_cards` was previously identified as an active table missing from the aggregate fresh-install schema.
-
-## Validation-harness rule
-
-Historical regressions verify durable executable boundaries. They must not freeze later shared runtime/cache/read implementations, require later domains/pages to remain inactive, confuse retained mutation authorities with passive activation services, or fail because explanatory comments contain names of removed legacy mechanisms.
-
-## Mutation-authority extraction still open
-
-Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, Membership assignment/policy lifecycle, Today Tasks actions, Custom Requests workflow, Customer Documents actions, Accounting writes, Creative Process project/timeline/content/CAIP/cost edits, CAIP governance/media operations, and Content Studio project/media/deliverable/social-queue actions.
-
-Inventory-reviewed material posting/reversal already uses Inventory-owned authorities.
-
-A loader, read-contract migration, or top-level runtime activation never implies mutation ownership.
-
-## Next sequence
-
-1. Pull current `dev`.
-2. Run the accumulated Commerce local regressions through `build373_382_custom_requests_read_surface_test.py`.
-3. Do not repeat Today Tasks or Build 370–372 browser proof; both already passed.
-4. Browser-validate only Builds 373–382 on `/admin/custom-request/` using owned read/export checks and no workflow mutations.
-5. If the local + browser gates pass, close the accumulated 366–382 boundaries according to their recorded evidence.
-6. Promote Builds 383–392 into the active 10-build batch and append another 10 future rows to `NEXT_20_BUILDS.md`.
-7. Continue fresh-install schema parity before Production business-data copy.
-
-## Production safety
-
-Real Production remains frozen until deliberate promotion through the separate Production workflow. No modularization build should implicitly advance `main` or mutate Production D1/R2.
+Run accumulated Commerce local regressions through `build383_392_commerce_operations_batch_test.py`, then browser-validate only the Build 385/386 Gift Card read/runtime state. Do not execute Gift Card, Orders, provider/refund, fulfillment, or Today Tasks writes merely to prove the new source contracts.
