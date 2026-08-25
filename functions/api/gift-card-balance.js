@@ -1,6 +1,9 @@
-// File: /functions/api/gift-card-balance.js
-// Brief description: Public gift-card balance lookup with code and email verification.
+// Devil n Dove Build 413 — public gift-card balance lookup.
+// Gift Card schema is migration-owned; public GET never creates/alters tables.
 
+import { requireGiftCardSchema } from './_lib/giftCardSchemaReadiness.js';
+
+const BUILD = 413;
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -16,60 +19,6 @@ function clean(value, limit = 180) {
   return text.length > limit ? text.slice(0, limit).trim() : text;
 }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
-async function ensureTables(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
-    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL UNIQUE,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
-    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
-    issued_to_email TEXT,
-    issued_to_name TEXT,
-    recipient_email TEXT,
-    recipient_name TEXT,
-    purchaser_email TEXT,
-    purchaser_name TEXT,
-    note TEXT,
-    recipient_note TEXT,
-    status TEXT NOT NULL DEFAULT 'active',
-    expires_at TEXT,
-    last_redeemed_at TEXT,
-    order_id INTEGER,
-    purchase_source TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_lookup_attempts (
-    gift_card_lookup_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code_hint TEXT,
-    email_hash TEXT,
-    client_key TEXT,
-    lookup_email TEXT,
-    code_suffix TEXT,
-    ip_hash TEXT,
-    user_agent TEXT,
-    result_status TEXT,
-    was_success INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  for (const sql of [
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN lookup_email TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN code_suffix TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN ip_hash TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN user_agent TEXT`,
-    `ALTER TABLE gift_card_lookup_attempts ADD COLUMN result_status TEXT`
-  ]) await db.prepare(sql).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_lookup_lockouts (gift_card_lookup_lockout_id INTEGER PRIMARY KEY AUTOINCREMENT, lookup_email TEXT, code_suffix TEXT, ip_hash TEXT, lockout_status TEXT NOT NULL DEFAULT 'active', lockout_reason TEXT, locked_by_user_id INTEGER, locked_at TEXT DEFAULT CURRENT_TIMESTAMP, expires_at TEXT, released_at TEXT, notes TEXT)`).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
-    gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    gift_card_id INTEGER NOT NULL,
-    order_id INTEGER,
-    redeemed_amount_cents INTEGER NOT NULL DEFAULT 0,
-    redeemed_by_email TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-}
 function safeCard(row) {
   return {
     code: String(row.code || '').replace(/^(.{4}).+(.{4})$/, '$1••••$2'),
@@ -83,23 +32,42 @@ function safeCard(row) {
     purchase_source: row.purchase_source || ''
   };
 }
+
 export async function onRequestGet(context) {
   const db = context.env.DB || context.env.DD_DB;
-  if (!db) return json({ ok: false, error: 'Gift-card lookup is unavailable right now.' }, 503);
-  await ensureTables(db);
+  if (!db) return json({ ok: false, build: BUILD, error: 'Gift-card lookup is unavailable right now.' }, 503);
+
+  const schema = await requireGiftCardSchema(db, {
+    requiredTables: ['gift_cards','gift_card_lookup_attempts','gift_card_lookup_lockouts','gift_card_redemptions']
+  });
+  if (!schema.ok) {
+    return json({
+      ok: false,
+      build: BUILD,
+      error: 'Gift-card lookup is temporarily unavailable while the service is being prepared.',
+      error_code: 'gift_card_schema_not_ready',
+      request_time_schema_mutation: false,
+      migration_authority: 'database_gift_card_runtime_parity.sql'
+    }, 503);
+  }
+
   const url = new URL(context.request.url);
   const code = clean(url.searchParams.get('code')).toUpperCase();
   const email = clean(url.searchParams.get('email')).toLowerCase();
-  if (!code || !email || !email.includes('@')) return json({ ok: false, error: 'Enter the gift-card code and recipient or purchaser email.' }, 400);
+  if (!code || !email || !email.includes('@')) return json({ ok: false, build: BUILD, error: 'Enter the gift-card code and recipient or purchaser email.' }, 400);
+
   const ip = context.request.headers.get('cf-connecting-ip') || context.request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = context.request.headers.get('user-agent') || '';
   const ipHash = String(ip || 'unknown').slice(0, 120);
   const codeSuffix = code.slice(-4);
   const clientKey = `${ip}:${email.slice(0, 80)}`;
+
   const lockout = await db.prepare(`SELECT * FROM gift_card_lookup_lockouts WHERE lockout_status='active' AND (LOWER(COALESCE(lookup_email,''))=LOWER(?) OR code_suffix=? OR ip_hash=?) AND (expires_at IS NULL OR datetime(expires_at) > datetime('now')) LIMIT 1`).bind(email, codeSuffix, ipHash).first().catch(() => null);
-  if (lockout) return json({ ok: false, error: 'Gift-card lookup is temporarily locked for safety. Please contact Devil n Dove if this is your card.' }, 423);
+  if (lockout) return json({ ok: false, build: BUILD, error: 'Gift-card lookup is temporarily locked for safety. Please contact Devil n Dove if this is your card.' }, 423);
+
   const recentAttempts = await db.prepare(`SELECT COUNT(*) AS total FROM gift_card_lookup_attempts WHERE client_key=? AND datetime(created_at) >= datetime('now','-15 minutes')`).bind(clientKey).first().catch(() => ({ total: 0 }));
-  if (Number(recentAttempts?.total || 0) >= 12) return json({ ok: false, error: 'Too many balance lookup attempts. Please wait a little while and try again.' }, 429);
+  if (Number(recentAttempts?.total || 0) >= 12) return json({ ok: false, build: BUILD, error: 'Too many balance lookup attempts. Please wait a little while and try again.' }, 429);
+
   const row = await db.prepare(`
     SELECT * FROM gift_cards
     WHERE UPPER(code)=?
@@ -110,8 +78,13 @@ export async function onRequestGet(context) {
       )
     LIMIT 1
   `).bind(code, email, email, email).first().catch(() => null);
-  if (!row) { await db.prepare(`INSERT INTO gift_card_lookup_attempts (code_hint, email_hash, client_key, lookup_email, code_suffix, ip_hash, user_agent, result_status, was_success, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'failed', 0, CURRENT_TIMESTAMP)`).bind(code.slice(0,8), email.slice(0,3), clientKey, email, codeSuffix, ipHash, userAgent.slice(0,240)).run().catch(() => null); return json({ ok: false, error: 'No gift card matched that code and email.' }, 404); }
+
+  if (!row) {
+    await db.prepare(`INSERT INTO gift_card_lookup_attempts (code_hint, email_hash, client_key, lookup_email, code_suffix, ip_hash, user_agent, result_status, was_success, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'failed', 0, CURRENT_TIMESTAMP)`).bind(code.slice(0,8), email.slice(0,3), clientKey, email, codeSuffix, ipHash, userAgent.slice(0,240)).run().catch(() => null);
+    return json({ ok: false, build: BUILD, error: 'No gift card matched that code and email.', request_time_schema_mutation: false }, 404);
+  }
+
   await db.prepare(`INSERT INTO gift_card_lookup_attempts (code_hint, email_hash, client_key, lookup_email, code_suffix, ip_hash, user_agent, result_status, was_success, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'ok', 1, CURRENT_TIMESTAMP)`).bind(code.slice(0,8), email.slice(0,3), clientKey, email, codeSuffix, ipHash, userAgent.slice(0,240)).run().catch(() => null);
   const redemptions = rows(await db.prepare(`SELECT redeemed_amount_cents, redeemed_by_email, created_at FROM gift_card_redemptions WHERE gift_card_id=? ORDER BY datetime(created_at) DESC LIMIT 20`).bind(Number(row.gift_card_id || 0)).all().catch(() => ({ results: [] })));
-  return json({ ok: true, card: safeCard(row), redemptions });
+  return json({ ok: true, build: BUILD, card: safeCard(row), redemptions, request_time_schema_mutation: false, migration_authority: 'database_gift_card_runtime_parity.sql' });
 }
