@@ -1,9 +1,10 @@
-// Devil n Dove Build 362 — non-mutating Membership tier-policy read authority.
-// GET/read paths never create or seed schema. Missing/empty policy state is represented
-// with in-memory defaults plus explicit readiness metadata; retained POST compatibility
+// Devil n Dove Build 362 contract / Build 365 implementation hardening — non-mutating Membership tier-policy read authority.
+// GET/read paths never create or seed schema. Build 365 removes fixed-column/sqlite_master assumptions
+// so older compatible table shapes cannot collapse the read into an opaque 500. Retained POST compatibility
 // remains responsible for any legacy write-time ensure/seed behavior until separately extracted.
 
 export const BUILD = 362;
+export const IMPLEMENTATION_BUILD = 365;
 export const OWNER = 'operations';
 export const TABLE = 'membership_tier_policies';
 
@@ -55,6 +56,7 @@ function rows(result) {
 }
 
 function benefits(value) {
+  if (Array.isArray(value)) return value.map(text).filter(Boolean);
   try {
     const parsed = JSON.parse(String(value || '[]'));
     return Array.isArray(parsed) ? parsed.map(text).filter(Boolean) : [];
@@ -64,37 +66,55 @@ function benefits(value) {
 }
 
 export function mapTierPolicyRow(row) {
+  const benefitSource = row?.benefits_json ?? row?.benefits ?? '[]';
   return Object.freeze({
-    policy_id: Number(row?.policy_id || 0),
-    tier_code: text(row?.tier_code).toLowerCase(),
-    title: text(row?.title),
-    short_description: text(row?.short_description),
-    benefits: Object.freeze(benefits(row?.benefits_json)),
-    badge_color: text(row?.badge_color),
-    sort_order: Number(row?.sort_order || 0),
-    is_visible: Number(row?.is_visible || 0) === 1,
+    policy_id: Number(row?.policy_id ?? row?.id ?? 0),
+    tier_code: text(row?.tier_code ?? row?.code).toLowerCase(),
+    title: text(row?.title ?? row?.name),
+    short_description: text(row?.short_description ?? row?.description),
+    benefits: Object.freeze(benefits(benefitSource)),
+    badge_color: text(row?.badge_color ?? row?.badge_colour),
+    sort_order: Number(row?.sort_order ?? 0),
+    is_visible: Number(row?.is_visible ?? 1) === 1,
     created_at: row?.created_at || null,
     updated_at: row?.updated_at || null,
   });
 }
 
-async function tableExists(db) {
+function missingTableError(error) {
+  const message = text(error?.message || error).toLowerCase();
+  return message.includes('no such table') && message.includes(TABLE.toLowerCase());
+}
+
+async function readStoredRows(db) {
   try {
-    const row = await db
-      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`)
-      .bind(TABLE)
-      .first();
-    return Boolean(row);
-  } catch {
-    return false;
+    // SELECT * is deliberate during the compatibility window: Build 362 originally named
+    // optional legacy columns explicitly, which can throw before readiness metadata is returned.
+    // Mapping is tolerant; the read remains bounded to one known table and performs no mutation.
+    const result = await db.prepare(`SELECT * FROM membership_tier_policies`).all();
+    return Object.freeze({ schema_ready: true, rows: Object.freeze(rows(result)) });
+  } catch (error) {
+    if (missingTableError(error)) {
+      return Object.freeze({ schema_ready: false, rows: Object.freeze([]) });
+    }
+    throw error;
   }
 }
 
+function sortPolicies(items) {
+  return [...items].sort((a, b) => {
+    const order = Number(a?.sort_order || 0) - Number(b?.sort_order || 0);
+    if (order) return order;
+    return text(a?.tier_code).localeCompare(text(b?.tier_code));
+  });
+}
+
 export async function readMembershipTierPolicies(db) {
-  const schemaReady = await tableExists(db);
-  if (!schemaReady) {
+  const storedResult = await readStoredRows(db);
+  if (!storedResult.schema_ready) {
     return Object.freeze({
       build: BUILD,
+      implementation_build: IMPLEMENTATION_BUILD,
       owner: OWNER,
       schema_ready: false,
       missing_tables: Object.freeze([TABLE]),
@@ -105,25 +125,10 @@ export async function readMembershipTierPolicies(db) {
     });
   }
 
-  const result = await db.prepare(`
-    SELECT
-      policy_id,
-      tier_code,
-      title,
-      short_description,
-      benefits_json,
-      badge_color,
-      sort_order,
-      is_visible,
-      created_at,
-      updated_at
-    FROM membership_tier_policies
-    ORDER BY sort_order ASC, tier_code ASC
-  `).all();
-
-  const stored = rows(result).map(mapTierPolicyRow);
+  const stored = sortPolicies(storedResult.rows.map(mapTierPolicyRow));
   return Object.freeze({
     build: BUILD,
+    implementation_build: IMPLEMENTATION_BUILD,
     owner: OWNER,
     schema_ready: true,
     missing_tables: Object.freeze([]),
