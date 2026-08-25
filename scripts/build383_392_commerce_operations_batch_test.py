@@ -70,6 +70,7 @@ assert 'export const BUILD = 386' in gift_service
 assert 'export const CONTRACT_BUILD = 385' in gift_service
 assert "export const SERVICE_ID = 'operations-gift-cards-read'" in gift_service
 registration = section(gift_service, 'export function ensureOperationsGiftCardsReadService')
+assert 'registry.registerService(SERVICE_ID, SERVICE, OWNER)' in registration
 assert 'apiFetch(' not in registration
 assert 'fetch(' not in registration
 assert 'const BUILD = 386;' in runtime
