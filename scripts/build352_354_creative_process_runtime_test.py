@@ -65,7 +65,8 @@ assert 'ensureCreativeProcessReadService' in service
 
 # The shared Creative & Production runtime may advance after Build 353/354, but it
 # must continue to support the Creative Process boundary without owning transport
-# or Creative mutations.
+# or Creative mutations. Inventory write contracts are mutation authorities used by
+# the retained POST path; they are not required Core browser activation services.
 assert numeric_constant(runtime, 'BUILD') >= 353
 assert numeric_constant(runtime, 'ACTIVATION_BUILD') >= 354
 assert "const MODULE_ID = 'creative-production'" in runtime
@@ -73,8 +74,10 @@ supported = runtime[runtime.index('const SUPPORTED_DOMAINS'):runtime.index('cons
 assert "'packaging'" in supported
 assert "'creative'" in supported
 assert "'/admin/creative-process/'" in runtime
-for required in ['creative-process-read', 'inventory-read', 'inventory-post', 'inventory-reverse']:
+for required in ['creative-process-read', 'inventory-read']:
     assert required in runtime
+assert "const CREATIVE_MUTATION_AUTHORITIES = Object.freeze(['inventory-post', 'inventory-reverse'])" in runtime
+assert 'mutationAuthoritiesRequiredAsActivationServices: false' in runtime
 assert 'ensureCreativeProcessReadService(registry)' in runtime
 assert 'createsNetworkTransport: false' in runtime
 assert 'creativeMutationOwnership: false' in runtime
@@ -97,7 +100,9 @@ assert "'/admin/creative-process/'" in groups
 assert 'creativeProcessMutationOwnershipMovedByTopLevelRuntime: false' in groups
 assert cache_version(admin_js, r"dd-admin-module-runtime\.mjs\?v=(\d+)") >= 354
 
-admin_pos = page.index('/public/js/admin.js?v=354')
+admin_version = cache_version(page, r"/public/js/admin\.js\?v=(\d+)")
+assert admin_version >= 354
+admin_pos = page.index(f'/public/js/admin.js?v={admin_version}')
 creative_pos = page.index('/public/js/admin-creative-process.js?v=274')
 assert admin_pos < creative_pos
 
