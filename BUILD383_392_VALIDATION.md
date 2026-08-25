@@ -1,6 +1,6 @@
 # Builds 383–392 Validation — Commerce & Operations 10-Build Batch
 
-## Status — STAGED / LOCAL + DEVELOPMENT D1 + GIFT CARD BROWSER VALIDATION REQUIRED
+## Status — LOCAL PASSED / DEVELOPMENT D1 + GIFT CARD BROWSER VALIDATION REQUIRED
 
 ```text
 383  Gift Card schema-authority audit
@@ -30,36 +30,83 @@ Production/main is not part of this release gate.
 
 Build 384 must be applied to the Development D1 before `schema_ready=true` is required from the Build 385 browser contract. The migration is idempotent for fresh table creation/default template seeding and intentionally does not redefine the shared `notification_outbox` table.
 
-## Local regression + Development D1 parity release
+## Local regression status
 
-Run from the repository root on `dev`:
+The accumulated local Commerce checkpoint passed on 2026-08-25:
+
+```text
+BUILDS 362-364 OPERATIONS MEMBERSHIP RUNTIME: PASS
+BUILD 365 MEMBERSHIP READ RESILIENCE: PASS
+BUILDS 366-368 TODAY TASKS RUNTIME: PASS
+BUILD 369 TODAY TASKS SCHEMA ALIGNMENT: PASS
+BUILDS 370-372 CUSTOM REQUESTS RUNTIME: PASS
+BUILDS 373-382 CUSTOM REQUESTS READ SURFACE: PASS
+BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
+```
+
+No local regression contacted Cloudflare.
+
+## Build 384 remote D1 execution note
+
+The normal Wrangler remote-file command:
+
+```bash
+npx wrangler d1 execute devilndove-dev --remote --config wrangler.toml --file=database_gift_card_runtime_parity.sql --yes
+```
+
+hit the known remote import/polling failure shape:
+
+```text
+File already uploaded. Processing.
+{"D1_RESET_DO":true}
+```
+
+On Windows the Wrangler process then also exited through a Node/libuv `UV_HANDLE_CLOSING` assertion. This is not a SQL validation error from the Build 384 migration.
+
+Do not keep retrying the `--file` path. Use the repository-owned direct-query fallback instead:
 
 ```bash
 git -c gc.auto=0 pull --ff-only origin dev
-
-python scripts/build362_364_operations_membership_runtime_test.py
-python scripts/build365_membership_read_resilience_test.py
-python scripts/build366_368_today_tasks_runtime_test.py
-python scripts/build369_today_tasks_schema_alignment_test.py
-python scripts/build370_372_custom_requests_runtime_test.py
-python scripts/build373_382_custom_requests_read_surface_test.py
-python scripts/build383_392_commerce_operations_batch_test.py
-
-npx wrangler d1 execute devilndove-dev --remote --config wrangler.toml --file=database_gift_card_runtime_parity.sql
-npx wrangler d1 execute devilndove-dev --remote --config wrangler.toml --command="SELECT name FROM sqlite_master WHERE type='table' AND name IN ('gift_cards','gift_card_redemptions','gift_card_admin_events','gift_card_delivery_templates','gift_card_delivery_queue','gift_card_provider_send_logs','gift_card_lookup_attempts','gift_card_lookup_lockouts') ORDER BY name;"
-
-git rev-parse --short HEAD
-git status --short
+python scripts/build384_apply_gift_card_parity_direct.py
 ```
 
-Expected:
+The fallback:
 
-- seven local PASS results;
-- each regression remains source/local only and does not contact Cloudflare;
-- the D1 verification query returns all eight Gift Card-owned tables;
-- clean Git status.
+- refuses to run off the `dev` branch;
+- verifies `devilndove-site-dev` and `devilndove-dev` from `wrangler.toml`;
+- reads the authoritative `database_gift_card_runtime_parity.sql` file;
+- refuses any migration that attempts to redefine `notification_outbox`;
+- performs a read-only Development D1 preflight;
+- splits the migration into bounded statement batches;
+- uses `wrangler d1 execute --command` rather than the failing remote `--file` import path;
+- verifies all eight Gift Card-owned tables;
+- verifies migration-owned `activation` and `reissue` templates.
 
-The two explicit Wrangler commands are the only Cloudflare/D1 operations in this gate. They target `devilndove-dev` from the Development-only `wrangler.toml`.
+Expected final line:
+
+```text
+BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE
+```
+
+The verified table set must contain:
+
+```text
+gift_card_admin_events
+gift_card_delivery_queue
+gift_card_delivery_templates
+gift_card_lookup_attempts
+gift_card_lookup_lockouts
+gift_card_provider_send_logs
+gift_card_redemptions
+gift_cards
+```
+
+The template verification must return:
+
+```text
+activation
+reissue
+```
 
 ## Firefox gate — Gift Cards only
 
