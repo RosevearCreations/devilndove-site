@@ -1,4 +1,10 @@
 import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
+import {
+  BUILD as MEMBERSHIP_TIER_POLICY_READ_BUILD,
+  DEFAULT_TIER_POLICIES,
+  mapTierPolicyRow,
+  readMembershipTierPolicies,
+} from "../_lib/membershipTierPolicyReadService.js";
 
 function normalizeText(value) {
   return String(value || "").trim();
@@ -19,18 +25,7 @@ function normalizeBenefits(value) {
     .filter(Boolean);
 }
 
-async function tableExists(db, tableName) {
-  try {
-    const row = await db
-      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1`)
-      .bind(tableName)
-      .first();
-    return !!row;
-  } catch {
-    return false;
-  }
-}
-
+// Retained write-side compatibility only. Build 362 GET/read paths never call this.
 async function ensureTierPolicyTable(db) {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS membership_tier_policies (
@@ -48,51 +43,9 @@ async function ensureTierPolicyTable(db) {
   `);
 }
 
+// Retained write-side compatibility only. Build 362 GET/read paths never call this.
 async function seedDefaultPolicies(db) {
-  const defaults = [
-    {
-      tier_code: "bronze",
-      title: "Bronze",
-      short_description: "Entry membership tier for basic perks and updates.",
-      benefits_json: JSON.stringify([
-        "Member badge",
-        "News and updates",
-        "Occasional coupon access",
-      ]),
-      badge_color: "#8c6239",
-      sort_order: 10,
-      is_visible: 1,
-    },
-    {
-      tier_code: "silver",
-      title: "Silver",
-      short_description: "Mid-tier membership with stronger savings and earlier access.",
-      benefits_json: JSON.stringify([
-        "Everything in Bronze",
-        "Better member discounts",
-        "Early access to select releases",
-      ]),
-      badge_color: "#a7adb5",
-      sort_order: 20,
-      is_visible: 1,
-    },
-    {
-      tier_code: "gold",
-      title: "Gold",
-      short_description: "Top starter tier with best discounts and premium extras.",
-      benefits_json: JSON.stringify([
-        "Everything in Silver",
-        "Best member discounts",
-        "Priority early access",
-        "Premium bonus perks",
-      ]),
-      badge_color: "#c9a227",
-      sort_order: 30,
-      is_visible: 1,
-    },
-  ];
-
-  for (const item of defaults) {
+  for (const item of DEFAULT_TIER_POLICIES) {
     await db
       .prepare(`
         INSERT INTO membership_tier_policies (
@@ -105,36 +58,13 @@ async function seedDefaultPolicies(db) {
         item.tier_code,
         item.title,
         item.short_description,
-        item.benefits_json,
+        JSON.stringify(item.benefits || []),
         item.badge_color,
         item.sort_order,
-        item.is_visible
+        item.is_visible ? 1 : 0
       )
       .run();
   }
-}
-
-function mapPolicyRow(row) {
-  let benefits = [];
-  try {
-    benefits = JSON.parse(row?.benefits_json || "[]");
-    if (!Array.isArray(benefits)) benefits = [];
-  } catch {
-    benefits = [];
-  }
-
-  return {
-    policy_id: Number(row?.policy_id || 0),
-    tier_code: normalizeCode(row?.tier_code),
-    title: normalizeText(row?.title),
-    short_description: normalizeText(row?.short_description),
-    benefits,
-    badge_color: normalizeText(row?.badge_color),
-    sort_order: Number(row?.sort_order || 0),
-    is_visible: Number(row?.is_visible || 0) === 1,
-    created_at: row?.created_at || null,
-    updated_at: row?.updated_at || null,
-  };
 }
 
 export async function onRequestGet(context) {
@@ -148,30 +78,17 @@ export async function onRequestGet(context) {
     return jsonResponse({ ok: false, error: "Admin access required." }, 401);
   }
 
-  await ensureTierPolicyTable(db);
-  await seedDefaultPolicies(db);
-
-  const rows = await db
-    .prepare(`
-      SELECT
-        policy_id,
-        tier_code,
-        title,
-        short_description,
-        benefits_json,
-        badge_color,
-        sort_order,
-        is_visible,
-        created_at,
-        updated_at
-      FROM membership_tier_policies
-      ORDER BY sort_order ASC, tier_code ASC
-    `)
-    .all();
-
+  const read = await readMembershipTierPolicies(db);
   return jsonResponse({
     ok: true,
-    items: (rows?.results || []).map(mapPolicyRow),
+    build: MEMBERSHIP_TIER_POLICY_READ_BUILD,
+    owner: "operations",
+    schema_ready: read.schema_ready,
+    missing_tables: read.missing_tables,
+    request_time_schema_mutation: false,
+    defaults_materialized: read.defaults_materialized,
+    source: read.source,
+    items: read.items,
   });
 }
 
@@ -267,6 +184,6 @@ export async function onRequestPost(context) {
 
   return jsonResponse({
     ok: true,
-    item: mapPolicyRow(row),
+    item: mapTierPolicyRow(row),
   });
 }
