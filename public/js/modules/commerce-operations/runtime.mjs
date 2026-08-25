@@ -1,6 +1,6 @@
-// Devil n Dove Build 386 Commerce & Operations umbrella runtime.
-// Build 386 adds explicit Gift Cards coverage. Existing Operations pages retain their
-// proven prerequisites; Membership, Today Tasks, Custom Requests, and Gift Cards use page-specific passive reads.
+// Devil n Dove Build 397 Commerce & Operations umbrella runtime.
+// Build 397 gives Customer Documents a page-specific passive read boundary.
+// Existing Operations pages retain their proven prerequisites and no mutation ownership moves.
 
 import {
   BUILD as INVENTORY_WRITE_BOUNDARY_BUILD,
@@ -10,18 +10,20 @@ import { ensureOperationsMembershipReadService } from './operations-membership-r
 import { ensureOperationsTodayTasksReadService } from './operations-today-tasks-read-service.mjs?v=367';
 import { ensureOperationsCustomRequestsReadService } from './operations-custom-requests-read-service.mjs?v=371';
 import { ensureOperationsGiftCardsReadService } from './operations-gift-cards-read-service.mjs?v=386';
+import { ensureOperationsCustomerDocumentsReadService } from './operations-customer-documents-read-service.mjs?v=397';
 
-const BUILD = 386;
-const ACTIVATION_BUILD = 386;
+const BUILD = 397;
+const ACTIVATION_BUILD = 397;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory', 'operations']);
+const CUSTOMER_DOCUMENTS_RUNTIME_PAGE = '/admin/customer-documents/';
 const MEMBERSHIP_RUNTIME_PAGE = '/admin/membership/';
 const TODAY_TASKS_RUNTIME_PAGE = '/admin/today-tasks/';
 const CUSTOM_REQUESTS_RUNTIME_PAGE = '/admin/custom-request/';
 const GIFT_CARDS_RUNTIME_PAGE = '/admin/gift-cards/';
 const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
-  '/admin/customer-documents/',
+  CUSTOMER_DOCUMENTS_RUNTIME_PAGE,
   '/admin/orders/',
   MEMBERSHIP_RUNTIME_PAGE,
   TODAY_TASKS_RUNTIME_PAGE,
@@ -31,6 +33,7 @@ const OPERATIONS_RUNTIME_PAGES = Object.freeze([
 const CATALOG_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-cost']);
 const INVENTORY_REQUIRED_SERVICES = Object.freeze(['inventory-read']);
 const LEGACY_OPERATIONS_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-read', 'accounting-read']);
+const CUSTOMER_DOCUMENTS_REQUIRED_SERVICES = Object.freeze(['operations-customer-documents-read']);
 const MEMBERSHIP_REQUIRED_SERVICES = Object.freeze(['operations-membership-read']);
 const TODAY_TASKS_REQUIRED_SERVICES = Object.freeze(['operations-today-tasks-read']);
 const CUSTOM_REQUESTS_REQUIRED_SERVICES = Object.freeze(['operations-custom-requests-read']);
@@ -40,16 +43,22 @@ const ALL_REQUIRED_SERVICES = Object.freeze([
   'inventory-read',
   'inventory-cost',
   'accounting-read',
+  'operations-customer-documents-read',
   'operations-membership-read',
   'operations-today-tasks-read',
   'operations-custom-requests-read',
   'operations-gift-cards-read',
 ]);
+const CUSTOMER_DOCUMENTS_READ_CONTRACT = '/api/admin/contracts/operations-customer-documents-read';
+const CUSTOMER_DOCUMENTS_READ_CONTRACT_BUILD = 397;
+const CUSTOMER_DOCUMENTS_COMPATIBILITY_AUTHORITY = '/api/admin/customer-documents';
 const MEMBERSHIP_READ_CONTRACT = '/api/admin/contracts/operations-membership-read';
 const MEMBERSHIP_READ_CONTRACT_BUILD = 362;
+const MEMBERSHIP_ASSIGNMENT_AUTHORITY = '/api/admin/contracts/operations-membership-assignment-write';
+const MEMBERSHIP_POLICY_AUTHORITY = '/api/admin/contracts/operations-membership-policy-write';
 const TODAY_TASKS_READ_CONTRACT = '/api/admin/contracts/operations-today-tasks-read';
 const TODAY_TASKS_READ_CONTRACT_BUILD = 366;
-const TODAY_TASKS_ACTION_AUTHORITY = '/api/admin/today-task-actions';
+const TODAY_TASKS_ACTION_AUTHORITY = '/api/admin/contracts/operations-today-task-action-write';
 const CUSTOM_REQUESTS_READ_CONTRACT = '/api/admin/contracts/operations-custom-requests-read';
 const CUSTOM_REQUESTS_READ_CONTRACT_BUILD = 370;
 const CUSTOM_REQUESTS_COMPATIBILITY_AUTHORITY = '/api/admin/custom-requests';
@@ -95,6 +104,7 @@ function requiredServicesForDomain(domainId, pathname = '') {
   if (domain === 'catalog') return CATALOG_REQUIRED_SERVICES;
   if (domain === 'inventory') return INVENTORY_REQUIRED_SERVICES;
   if (domain === 'operations') {
+    if (path === CUSTOMER_DOCUMENTS_RUNTIME_PAGE) return CUSTOMER_DOCUMENTS_REQUIRED_SERVICES;
     if (path === MEMBERSHIP_RUNTIME_PAGE) return MEMBERSHIP_REQUIRED_SERVICES;
     if (path === TODAY_TASKS_RUNTIME_PAGE) return TODAY_TASKS_REQUIRED_SERVICES;
     if (path === CUSTOM_REQUESTS_RUNTIME_PAGE) return CUSTOM_REQUESTS_REQUIRED_SERVICES;
@@ -106,6 +116,7 @@ function requiredServicesForDomain(domainId, pathname = '') {
 function verifyServices(registry, domainId, pathname) {
   const domain = normalizeDomain(domainId);
   const path = normalizePathname(pathname);
+  if (domain === 'operations' && path === CUSTOMER_DOCUMENTS_RUNTIME_PAGE) ensureOperationsCustomerDocumentsReadService(registry);
   if (domain === 'operations' && path === MEMBERSHIP_RUNTIME_PAGE) ensureOperationsMembershipReadService(registry);
   if (domain === 'operations' && path === TODAY_TASKS_RUNTIME_PAGE) ensureOperationsTodayTasksReadService(registry);
   if (domain === 'operations' && path === CUSTOM_REQUESTS_RUNTIME_PAGE) ensureOperationsCustomRequestsReadService(registry);
@@ -132,6 +143,7 @@ function installFacade() {
     moduleId: MODULE_ID,
     supportedDomains: SUPPORTED_DOMAINS,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
+    customerDocumentsRuntimePage: CUSTOMER_DOCUMENTS_RUNTIME_PAGE,
     membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
     todayTasksRuntimePage: TODAY_TASKS_RUNTIME_PAGE,
     customRequestsRuntimePage: CUSTOM_REQUESTS_RUNTIME_PAGE,
@@ -139,13 +151,19 @@ function installFacade() {
     catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
     inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
     legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
+    customerDocumentsRequiredServices: CUSTOMER_DOCUMENTS_REQUIRED_SERVICES,
     membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
     todayTasksRequiredServices: TODAY_TASKS_REQUIRED_SERVICES,
     customRequestsRequiredServices: CUSTOM_REQUESTS_REQUIRED_SERVICES,
     giftCardsRequiredServices: GIFT_CARDS_REQUIRED_SERVICES,
     allRequiredServices: ALL_REQUIRED_SERVICES,
+    customerDocumentsReadContract: CUSTOMER_DOCUMENTS_READ_CONTRACT,
+    customerDocumentsReadContractBuild: CUSTOMER_DOCUMENTS_READ_CONTRACT_BUILD,
+    customerDocumentsCompatibilityAuthority: CUSTOMER_DOCUMENTS_COMPATIBILITY_AUTHORITY,
     membershipReadContract: MEMBERSHIP_READ_CONTRACT,
     membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
+    membershipAssignmentAuthority: MEMBERSHIP_ASSIGNMENT_AUTHORITY,
+    membershipPolicyAuthority: MEMBERSHIP_POLICY_AUTHORITY,
     todayTasksReadContract: TODAY_TASKS_READ_CONTRACT,
     todayTasksReadContractBuild: TODAY_TASKS_READ_CONTRACT_BUILD,
     todayTasksActionAuthority: TODAY_TASKS_ACTION_AUTHORITY,
@@ -161,6 +179,7 @@ function installFacade() {
     operationsRuntimeBuild: BUILD,
     operationsRuntimeCoverageBuild: ACTIVATION_BUILD,
     operationsMutationOwnership: false,
+    customerDocumentsMutationOwnership: false,
     membershipMutationOwnership: false,
     todayTasksMutationOwnership: false,
     customRequestsMutationOwnership: false,
@@ -180,6 +199,7 @@ export const metadata = Object.freeze({
   kind: 'application-module-runtime',
   supportedDomains: SUPPORTED_DOMAINS,
   operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
+  customerDocumentsRuntimePage: CUSTOMER_DOCUMENTS_RUNTIME_PAGE,
   membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
   todayTasksRuntimePage: TODAY_TASKS_RUNTIME_PAGE,
   customRequestsRuntimePage: CUSTOM_REQUESTS_RUNTIME_PAGE,
@@ -187,13 +207,19 @@ export const metadata = Object.freeze({
   catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
   inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
   legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
+  customerDocumentsRequiredServices: CUSTOMER_DOCUMENTS_REQUIRED_SERVICES,
   membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
   todayTasksRequiredServices: TODAY_TASKS_REQUIRED_SERVICES,
   customRequestsRequiredServices: CUSTOM_REQUESTS_REQUIRED_SERVICES,
   giftCardsRequiredServices: GIFT_CARDS_REQUIRED_SERVICES,
   allRequiredServices: ALL_REQUIRED_SERVICES,
+  customerDocumentsReadContract: CUSTOMER_DOCUMENTS_READ_CONTRACT,
+  customerDocumentsReadContractBuild: CUSTOMER_DOCUMENTS_READ_CONTRACT_BUILD,
+  customerDocumentsCompatibilityAuthority: CUSTOMER_DOCUMENTS_COMPATIBILITY_AUTHORITY,
   membershipReadContract: MEMBERSHIP_READ_CONTRACT,
   membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
+  membershipAssignmentAuthority: MEMBERSHIP_ASSIGNMENT_AUTHORITY,
+  membershipPolicyAuthority: MEMBERSHIP_POLICY_AUTHORITY,
   todayTasksReadContract: TODAY_TASKS_READ_CONTRACT,
   todayTasksReadContractBuild: TODAY_TASKS_READ_CONTRACT_BUILD,
   todayTasksActionAuthority: TODAY_TASKS_ACTION_AUTHORITY,
@@ -207,6 +233,7 @@ export const metadata = Object.freeze({
   createsNetworkTransport: false,
   ownsInventoryMutations: false,
   ownsOperationsMutations: false,
+  ownsCustomerDocumentsMutations: false,
   ownsMembershipMutations: false,
   ownsTodayTasksMutations: false,
   ownsCustomRequestsMutations: false,
@@ -234,6 +261,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition, pa
     supportedDomains: SUPPORTED_DOMAINS,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     activeRequiredServices,
+    customerDocumentsReadContractBuild: CUSTOMER_DOCUMENTS_READ_CONTRACT_BUILD,
     membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
     todayTasksReadContractBuild: TODAY_TASKS_READ_CONTRACT_BUILD,
     customRequestsReadContractBuild: CUSTOM_REQUESTS_READ_CONTRACT_BUILD,
@@ -262,6 +290,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     activeRequiredServices,
     operationsMutationOwnership: false,
+    customerDocumentsMutationOwnership: false,
     membershipMutationOwnership: false,
     todayTasksMutationOwnership: false,
     customRequestsMutationOwnership: false,
@@ -294,6 +323,7 @@ export function getStatus() {
     lastPathname,
     supportedDomains: SUPPORTED_DOMAINS,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
+    customerDocumentsRuntimePage: CUSTOMER_DOCUMENTS_RUNTIME_PAGE,
     membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
     todayTasksRuntimePage: TODAY_TASKS_RUNTIME_PAGE,
     customRequestsRuntimePage: CUSTOM_REQUESTS_RUNTIME_PAGE,
@@ -301,6 +331,7 @@ export function getStatus() {
     catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
     inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
     legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
+    customerDocumentsRequiredServices: CUSTOMER_DOCUMENTS_REQUIRED_SERVICES,
     membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
     todayTasksRequiredServices: TODAY_TASKS_REQUIRED_SERVICES,
     customRequestsRequiredServices: CUSTOM_REQUESTS_REQUIRED_SERVICES,
@@ -311,17 +342,26 @@ export function getStatus() {
     createsNetworkTransport: false,
     ownsInventoryMutations: false,
     ownsOperationsMutations: false,
+    ownsCustomerDocumentsMutations: false,
     ownsMembershipMutations: false,
     ownsTodayTasksMutations: false,
     ownsCustomRequestsMutations: false,
     ownsGiftCardsMutations: false,
     operationsMutationOwnership: false,
+    customerDocumentsMutationOwnership: false,
     membershipMutationOwnership: false,
     todayTasksMutationOwnership: false,
     customRequestsMutationOwnership: false,
     giftCardsMutationOwnership: false,
+    customerDocumentsReadContract: CUSTOMER_DOCUMENTS_READ_CONTRACT,
+    customerDocumentsReadContractBuild: CUSTOMER_DOCUMENTS_READ_CONTRACT_BUILD,
+    customerDocumentsCompatibilityAuthority: CUSTOMER_DOCUMENTS_COMPATIBILITY_AUTHORITY,
+    customerDocumentsMutationOwnershipMoved: false,
     membershipReadContract: MEMBERSHIP_READ_CONTRACT,
     membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
+    membershipAssignmentAuthority: MEMBERSHIP_ASSIGNMENT_AUTHORITY,
+    membershipPolicyAuthority: MEMBERSHIP_POLICY_AUTHORITY,
+    membershipMutationOwnershipMoved: false,
     todayTasksReadContract: TODAY_TASKS_READ_CONTRACT,
     todayTasksReadContractBuild: TODAY_TASKS_READ_CONTRACT_BUILD,
     todayTasksActionAuthority: TODAY_TASKS_ACTION_AUTHORITY,
@@ -358,11 +398,13 @@ export function getStatus() {
     inventoryRuntimeBoundaryActive: state === 'active' && currentDomain === 'inventory',
     operationsRuntimeActive: state === 'active' && currentDomain === 'operations',
     operationsRuntimeBoundaryActive: state === 'active' && currentDomain === 'operations',
+    customerDocumentsRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === CUSTOMER_DOCUMENTS_RUNTIME_PAGE,
     membershipRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === MEMBERSHIP_RUNTIME_PAGE,
     todayTasksRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === TODAY_TASKS_RUNTIME_PAGE,
     customRequestsRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === CUSTOM_REQUESTS_RUNTIME_PAGE,
     giftCardsRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === GIFT_CARDS_RUNTIME_PAGE,
     currentOperationsPageProven: state === 'active' && currentDomain === 'operations' && OPERATIONS_RUNTIME_PAGES.includes(lastPathname),
+    currentCustomerDocumentsPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === CUSTOMER_DOCUMENTS_RUNTIME_PAGE,
     currentMembershipPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === MEMBERSHIP_RUNTIME_PAGE,
     currentTodayTasksPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === TODAY_TASKS_RUNTIME_PAGE,
     currentCustomRequestsPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === CUSTOM_REQUESTS_RUNTIME_PAGE,
