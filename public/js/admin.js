@@ -18,6 +18,7 @@
 // Build 351: Creative & Production activates top-level coverage for proven /admin/packaging-studio/ only.
 // Build 354: Creative & Production adds /admin/creative-process/ without moving Creative Process mutations.
 // Build 357: Creative & Production adds /admin/content-studio/ after removing GET-time schema creation.
+// Build 358: Creative Process activation no longer treats Inventory mutation authorities as Core browser services.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -55,5 +56,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=357')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=358')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
