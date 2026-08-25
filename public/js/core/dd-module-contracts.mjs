@@ -1,9 +1,9 @@
-// Devil n Dove Build 316 cross-module contract catalog.
+// Devil n Dove Build 317 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
 // Build 311 owns current Inventory cost reads; Build 312 adds bounded Accounting order reads;
-// Build 316 adds an Accounting-owned expenses read contract without moving expense writes.
+// Build 316 adds Accounting expenses reads; Build 317 adds Accounting write-offs reads.
 
-export const BUILD = 316;
+export const BUILD = 317;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -78,6 +78,13 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
     authorityRoute: '/api/admin/contracts/accounting-expenses-read',
     authorityAction: 'read-accounting-expenses',
     implementationState: 'implemented-read-only-accounting-expenses',
+  }),
+  contract('accounting-writeoffs-read', 'accounting', ['operations'], 'Read Accounting write-off records without request-time schema mutation.', {
+    status: 'implemented',
+    route: '/api/admin/contracts/accounting-writeoffs-read',
+    authorityRoute: '/api/admin/contracts/accounting-writeoffs-read',
+    authorityAction: 'read-accounting-writeoffs',
+    implementationState: 'implemented-read-only-accounting-writeoffs',
   }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
