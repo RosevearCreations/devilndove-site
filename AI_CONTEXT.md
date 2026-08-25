@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Fully Validated Through Build 365
+# Devil n Dove AI Context — Fully Validated Through Build 365 / Builds 366–368 Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 365, and validation files through `BUILD365_VALIDATION.md`.
+Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 368, and validation files through `BUILD366_368_VALIDATION.md`.
 
 ## Production safety
 
@@ -35,27 +35,30 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                              302
 Core runtime implementation                    305
-Commerce & Operations runtime                  363
-Operations Membership read contract            362
-Operations Membership activation               364
-Membership read implementation hardening       365 fully validated
+Commerce & Operations runtime                  367 staged
+Operations Membership read contract            362 validated
+Operations Membership activation               364 validated
+Membership read implementation hardening       365 validated
+Operations Today Tasks read contract            366 staged
+Operations Today Tasks activation               368 staged
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
 Creative Packaging runtime                     351 validated
-Creative Process read/runtime                   352–354 fully validated
-Content Studio read/runtime                     355–357 fully validated
-Creative dependency correction                 358 fully validated
-CAIP read/runtime                               359–361 fully validated
+Creative Process read/runtime                   352–354 validated
+Content Studio read/runtime                     355–357 validated
+Creative dependency correction                 358 validated
+CAIP read/runtime                               359–361 validated
 Contract catalog                               345
 Default passive service adapters               345
 Accounting mutation ownership moved            false
 Operations/Membership mutation ownership moved false
+Today Tasks mutation ownership moved           false
 Creative/Packaging mutation ownership moved    false
 Content mutation ownership moved               false
 CAIP mutation ownership moved                  false
 ```
 
-All four Creative & Production domains are fully validated at the top-level loader/read boundary. Do not expand or rework that loader merely to create more evidence.
+Everything through Build 365 is fully validated. All four Creative & Production domains are fully validated at the top-level loader/read boundary. Do not expand or rework that loader merely to create more evidence.
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
 
@@ -77,9 +80,10 @@ Build 358        fully validated 2026-08-25
 Builds 359–361   fully validated 2026-08-25
 Builds 362–364   fully validated 2026-08-25 after Build 365 read correction
 Build 365        fully validated 2026-08-25
+Builds 366–368   staged / local + browser validation required
 ```
 
-User-run corrected Build 365 local checkpoint:
+Latest user-run local checkpoint:
 
 ```text
 BUILD 365 MEMBERSHIP READ RESILIENCE: PASS
@@ -96,52 +100,88 @@ content   -> /admin/content-studio/      validated
 caip      -> /admin/creative-assets/     validated
 ```
 
-Activation services remain:
-
-```text
-packaging: inventory-read, catalog-read, content-media
-creative:  creative-process-read, inventory-read
-content:   content-studio-read
-caip:      caip-read, caip-media-intake-read
-```
-
 The Creative top-level runtime creates no network transport and owns no Packaging, Creative, Content, or CAIP mutations.
 
 ## Operations Membership — Builds 362–365
 
-Automatic Membership reads are:
+Membership is fully validated. Build 362 removed Tier Policy GET-time schema creation, Build 363 registered the passive Membership read service, Build 364 activated `/admin/membership/`, and Build 365 hardened the legacy table read after an initial browser 500.
+
+Development returned database-backed Bronze/Silver/Gold policies with `schema_ready=true`; no Membership table parity deficit was observed.
+
+## Today Tasks audit — why it was chosen next
+
+The Commerce audit compared Today Tasks with Custom Requests.
+
+Today Tasks:
+
+- `GET /api/admin/today-tasks` was already SELECT-only;
+- read failures were silently caught and converted to zero counts;
+- `/admin/today-tasks` was already classified as Operations but had no real page;
+- mutations were already separate at `POST /api/admin/today-task-actions`.
+
+Custom Requests:
+
+- is embedded in the already-large `/admin/operations/` workspace;
+- `functions/api/admin/custom-requests.js` still owns a large `ensureSchema()` path containing CREATE/ALTER/INDEX work;
+- therefore requires a broader read-model extraction before it should become a new top-level read boundary.
+
+Custom Requests is intentionally excluded from Builds 366–368.
+
+## Builds 366–368 — Today Tasks
+
+### Build 366
+
+Adds a readiness-aware non-mutating read service and GET-only contract:
 
 ```text
-GET /api/admin/users
-GET /api/admin/access-tiers
-GET /api/admin/tier-policies
+/api/admin/contracts/operations-today-tasks-read
 ```
 
-Before Build 362, Tier Policy GET created `membership_tier_policies` and seeded Bronze/Silver/Gold during a read. Build 362 moved GET to a non-mutating read authority and added GET-only `operations-membership-read`. Retained POST still owns legacy ensure/seed/update behavior.
+The read now exposes:
 
-Build 363 registers `operations-membership-read` passively and makes Membership page-specific:
+```text
+schema_ready
+missing_tables
+query_errors
+request_time_schema_mutation=false
+mutation_ownership_moved=false
+```
+
+Available task counts still render even if one source read fails. Missing-table/query errors are no longer silently represented as zero.
+
+Known parity findings such as `hst_gst_review_records` may therefore appear during browser proof. That is valid parity evidence, not permission to add GET-time DDL.
+
+### Build 367
+
+Registers passive runtime-local service:
+
+```text
+operations-today-tasks-read
+```
+
+Operations service gates are now:
 
 ```text
 /admin/operations/          catalog-read, inventory-read, accounting-read
 /admin/customer-documents/  catalog-read, inventory-read, accounting-read
 /admin/orders/              catalog-read, inventory-read, accounting-read
 /admin/membership/          operations-membership-read
+/admin/today-tasks/         operations-today-tasks-read
 ```
 
-Build 364 activates `/admin/membership/` and fixes `adminTierPolicyMount` -> `tierPolicyAdminMount`.
+The shared Commerce runtime remains transport-free and reports `todayTasksMutationOwnership=false`.
 
-The first browser proof showed runtime 363/364 active but both Build 362 reads returning HTTP 500. Build 365 corrected the read implementation without changing the public contract or loader:
+### Build 368
 
-- `BUILD=362`, `IMPLEMENTATION_BUILD=365`;
-- bounded `SELECT * FROM membership_tier_policies` during the compatibility window;
-- defensive mapping for known legacy aliases;
-- genuine missing table -> in-memory defaults with `schema_ready=false`, no GET mutation;
-- unexpected direct-read error -> structured JSON;
-- aggregate child throw -> structured `failed_read` instead of opaque platform 500.
+Adds real page:
 
-Build 365 browser proof passed with both endpoints returning 200, `schema_ready=true`, and database-backed Bronze/Silver/Gold rows. The corrected Build 365 local regression also passed, so Builds 362–365 are fully validated.
+```text
+/admin/today-tasks/
+```
 
-Development therefore has a usable `membership_tier_policies` table with Bronze, Silver, and Gold rows. No Membership table parity deficit was observed in this Development database.
+The page loads Core before `admin-today-tasks.js`. Automatic load uses the Build 366 GET contract. Done/Ignore/Snooze remains on retained compatibility POST `/api/admin/today-task-actions` and only runs after explicit administrator action.
+
+Historical Membership/Build 365 regressions were made future-compatible with later Commerce runtime/cache versions before staging this batch.
 
 ## Development schema-parity track — separate
 
@@ -161,15 +201,18 @@ Keep schema parity separate from module activation and resolve it before Product
 
 ## Historical regression rule
 
-Historical regression scripts verify durable executable boundaries. They must not freeze later shared runtime/cache/read implementations, require a later domain/page to remain inactive, confuse retained mutation authorities with passive activation services, or match explanatory comments instead of executable behavior.
+Historical regression scripts verify durable executable boundaries. They must not freeze later shared runtime/cache/read implementations, require later domains/pages to remain inactive, confuse retained mutation authorities with passive activation services, or match explanatory comments instead of executable behavior.
 
 ## Next direction
 
-1. Everything through Build 365 is fully validated; do not rerun passing Membership or Creative browser proofs.
-2. Continue Commerce & Operations source audit with the next narrow read/runtime page. Compare Custom Requests and Today Tasks and choose the cleaner startup-read boundary.
-3. Avoid Gift Cards unless schema parity is deliberately the batch target.
-4. Keep `/admin/members/` outside the narrow Membership boundary until its many account/engagement/gift-card/timeline startup reads are separately audited.
-5. Continue fresh-install schema parity separately and before Production business-data copy.
+1. Pull current `dev` with automatic Git GC disabled if needed.
+2. Run the future-compatible Membership regression, Build 365 regression, and new Builds 366–368 Today Tasks regression.
+3. Browser-validate `/admin/today-tasks/` using GET/runtime checks only; do not click Done/Ignore/Snooze during the proof.
+4. Accept either `schema_ready=true` or explicit `schema_ready=false` with `missing_tables/query_errors`; the latter is parity evidence.
+5. If local + browser gates pass, close Builds 366–368.
+6. Then return to Custom Requests for a bounded read-model/schema-authority audit; do not activate its current schema-coupled GET unchanged.
+7. Avoid Gift Cards unless schema parity is deliberately the batch target.
+8. Continue fresh-install schema parity before Production business-data copy.
 
 ## Validation preference
 
