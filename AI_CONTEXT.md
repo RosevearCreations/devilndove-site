@@ -1,8 +1,14 @@
-# Devil n Dove AI Context — Fully Validated Through Build 365 / Today Tasks Browser-Proven Through 369 / Custom Requests Staged 370–372
+# Devil n Dove AI Context — Browser-Proven Through 372 / Builds 373–382 Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 372, and validation files through `BUILD370_372_VALIDATION.md`.
+Primary modular authorities now include:
+
+- `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`
+- `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`
+- `docs/architecture/NEXT_20_BUILDS.md`
+- architecture notes through Builds 373–382
+- validation files through `BUILD373_382_VALIDATION.md`
 
 ## Production safety
 
@@ -30,20 +36,33 @@ dev  = active modularization and Development integration line
 
 Application modules are not permanent Git branches.
 
+## Execution cadence — changed 2026-08-25
+
+Work in **10-build execution batches** instead of 3-build slices where the work remains coherent and bounded.
+
+Maintain a rolling **next 20 builds** in:
+
+```text
+docs/architecture/NEXT_20_BUILDS.md
+```
+
+When a 10-build batch closes, promote the next 10 into active work and append another 10 so two future batches remain visible. Validation evidence may insert a bounded correction build and shift later numbers.
+
 ## Current modular state
 
 ```text
 Core architecture                              302
 Core runtime implementation                    305
-Commerce & Operations runtime                  371 staged
+Commerce & Operations runtime                  371 browser-proven
 Operations Membership read contract            362 validated
 Operations Membership activation               364 validated
 Membership read implementation hardening       365 validated
 Operations Today Tasks read contract            366 browser-proven
 Operations Today Tasks activation               368 browser-proven
 Today Tasks read schema alignment               369 browser-proven / local pending
-Operations Custom Requests read contract        370 staged
-Operations Custom Requests activation           372 staged
+Operations Custom Requests read contract        370 browser-proven
+Operations Custom Requests activation           372 browser-proven / local pending
+Custom Requests read-surface cleanup            373–382 staged
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
 Creative Packaging runtime                     351 validated
@@ -60,7 +79,7 @@ Content mutation ownership moved               false
 CAIP mutation ownership moved                  false
 ```
 
-Everything through Build 365 is fully validated. All four Creative & Production domains are fully validated at the top-level loader/read boundary; do not expand that loader merely to create more evidence.
+Everything through Build 365 is fully validated. All four Creative & Production domains are fully validated at the top-level loader/read boundary; do not expand that loader merely to create activity.
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
 
@@ -84,7 +103,8 @@ Builds 362–364   fully validated 2026-08-25 after Build 365 read correction
 Build 365        fully validated 2026-08-25
 Builds 366–368   browser-proven after Build 369 / local regression pending
 Build 369        browser-proven / local regression pending
-Builds 370–372   staged / local + browser validation required
+Builds 370–372   browser-proven / local regression pending
+Builds 373–382   staged / local + browser validation required
 ```
 
 ## Creative & Production — closed loader/read boundary
@@ -105,26 +125,6 @@ Membership is fully validated. Build 362 removed Tier Policy GET-time schema cre
 ## Today Tasks — Builds 366–369
 
 Build 366 added readiness-aware GET contract `operations-today-tasks-read`. Build 367 registered it passively; Build 368 added `/admin/today-tasks/`. Build 369 aligned stale Today Tasks queries to current schema.
-
-Initial browser diagnostics exposed:
-
-```text
-site_items                       obsolete for this read
-hst_gst_review_records           obsolete for this read
-runtime_incidents.status         obsolete column
-runtime_incidents.incident_id    obsolete column
-runtime_incidents.request_path   obsolete column
-```
-
-Build 369 aligned to:
-
-```text
-site_item_inventory
-accounting_hst_gst_reviews
-runtime_incident_id
-review_status
-endpoint_path
-```
 
 Browser revalidation passed exactly on 2026-08-25:
 
@@ -158,52 +158,125 @@ contracts_ok                   true
 services_ok                    true
 ```
 
-Browser side is closed. Remaining closure is the corrected local regression. The historical Build 339 `hst_gst_review_records` parity finding remains separate and is not erased by Build 369.
+Browser side is closed. Remaining closure is corrected local regression. The historical Build 339 `hst_gst_review_records` parity finding remains separate.
 
-## Custom Requests audit — Builds 370–372
+## Custom Requests — Builds 370–372 browser-proven
 
-The audit corrected an earlier overstatement: the automatic Custom Requests dashboard list GET has already avoided `ensureSchema()` since Build 197. Its real startup-read problem is that every missing-table query is caught and silently converted to an empty list.
-
-The legacy endpoint still has a large `ensureSchema()` authority for POST workflow actions. Its explicit `?format=marketplace_csv` GET also calls `ensureSchema()` and seeds marketplace presets. That export GET is not part of the owned startup-read boundary and remains a later compatibility cleanup target.
-
-### Build 370
-
-Adds GET-only owned contract:
+Build 370 adds startup-read contract:
 
 ```text
 /api/admin/contracts/operations-custom-requests-read
 ```
 
-The contract:
+It forces the mature normal list GET without query parameters, verifies all 23 list/read tables using read-only checks, and never enters the legacy marketplace CSV branch.
 
-- forces `/api/admin/custom-requests` with an empty query string, so it cannot enter marketplace CSV mode;
-- invokes the mature normal list GET;
-- performs read-only `PRAGMA table_info` readiness checks for all 23 tables used by `listPayload`;
-- returns `schema_ready`, `missing_tables`, `checked_tables`;
-- reports `request_time_schema_mutation=false`;
-- reports `mutation_ownership_moved=false`;
-- leaves `/api/admin/custom-requests` as compatibility POST authority;
-- explicitly reports `marketplace_csv_legacy_get_outside_contract=true`.
+Build 371 registers passive service `operations-custom-requests-read`. Build 372 adds `/admin/custom-request/` under Commerce & Operations with exactly that one activation service.
 
-### Build 371
-
-Registers passive service:
+Firefox proof on 2026-08-25 passed exactly:
 
 ```text
-operations-custom-requests-read
+contract_status                       200
+contract_build                        370
+schema_ready                          true
+missing_tables                        []
+checked_table_count                   23
+request_time_schema_mutation          false
+mutation_ownership_moved              false
+compatibility_post_authority          /api/admin/custom-requests
+compatibility_post_mutation_moved     false
+marketplace_csv_legacy_outside_read   true
+request_count                         0
+service_registered                    true
+service_build                         370
+service_schema_ready                  true
+service_missing_tables                []
+application_module                    commerce-operations
+application_mode                      active
+active_application_module             commerce-operations
+operations_domain                     operations
+runtime_entry                         ../modules/commerce-operations/runtime.mjs?v=371
+runtime_build                         371
+activation_build                      372
+runtime_state                         active
+current_domain                        operations
+last_pathname                         /admin/custom-request/
+services_ready                        true
+required_service_count                1
+required_services                     ["operations-custom-requests-read"]
+custom_requests_page_proven           true
+creates_network_transport             false
+operations_mutation_ownership         false
+custom_requests_mutation_ownership    false
+custom_requests_mutation_moved        false
+contracts_ok                          true
+services_ok                           true
 ```
 
-Commerce runtime advances to Build 371 / activation Build 372. The broad `/admin/operations/` page keeps its existing `catalog-read`, `inventory-read`, `accounting-read` gate.
+Browser side is closed. Local regression remains.
 
-### Build 372
+## Builds 373–382 — Custom Requests full dedicated-page read surface
 
-Adds dedicated page:
+The remaining dedicated-page read-side risk was the mature UI's legacy marketplace CSV links:
 
 ```text
-/admin/custom-request/
+/api/admin/custom-requests?format=marketplace_csv
 ```
 
-It loads Core before the mature `admin-custom-requests.js` UI. The UI still uses compatibility GET/POST paths; the top-level runtime separately proves the owned read boundary. No quote, job, product-plan, reply, payment, order, fulfillment, consent, marketplace, or review mutation moves.
+That compatibility branch still calls the old schema/preset ensure path.
+
+The 10-build batch stages:
+
+```text
+373  safe non-mutating marketplace CSV export
+374  read-only marketplace export readiness
+375  owned startup diagnostics bootstrap
+376  safe export toolbar
+377  legacy CSV-link rewrite
+378  startup schema visibility
+379  export schema visibility
+380  dedicated-page legacy-export guard
+381  regression harness
+382  rolling next-20 roadmap / 10-build cadence
+```
+
+New safe export authority:
+
+```text
+GET /api/admin/contracts/operations-custom-requests-marketplace-export
+```
+
+It reads only already-prepared `custom_request_marketplace_export_packs`. It does not create tables, seed presets, create packs, or publish listings.
+
+New readiness authority:
+
+```text
+GET /api/admin/contracts/operations-custom-requests-marketplace-export-read
+```
+
+It reports required/optional table readiness, pack/preset counts, safe export routes, `request_time_schema_mutation=false`, and `seeds_marketplace_presets=false`.
+
+Dedicated page module:
+
+```text
+/public/js/modules/commerce-operations/custom-requests-page-tools.mjs?v=380
+```
+
+It:
+
+- reads Build 370 startup readiness;
+- reads Build 374 export readiness;
+- renders safe all/Etsy/Facebook/Pinterest/manual export links;
+- rewrites old `?format=marketplace_csv` links on `/admin/custom-request/`;
+- uses MutationObserver + capture guard so later-rendered legacy links cannot call the self-ensuring CSV GET;
+- uses no polling/timers;
+- leaves every workflow POST on compatibility authority.
+
+Builds 373–382 do not advance the already browser-proven Commerce runtime:
+
+```text
+runtime 371
+activation 372
+```
 
 ## Development schema-parity track — separate
 
@@ -221,6 +294,23 @@ Prior parity audit also identified Production-only active tables including `acco
 
 Keep schema parity separate from module activation and resolve it before Production business-data copy.
 
+## Rolling next 20 — Builds 383–402
+
+Authoritative queue: `docs/architecture/NEXT_20_BUILDS.md`.
+
+High-level order:
+
+```text
+383–387  Gift Cards schema/read/mutation boundary
+388–391  Orders schema/status/payment/fulfillment boundaries
+392–393  Today Tasks action authority + schema ownership
+394–395  Membership assignment/policy mutation contracts
+396–398  Customer Documents read/mutation boundaries
+399–402  Accounting/aggregate/Production-only schema parity + fresh-install smoke/data-copy gate
+```
+
+Gift Cards intentionally begins with schema authority/parity because `gift_cards` was previously identified as an active runtime table missing from the aggregate fresh-install schema.
+
 ## Historical regression rule
 
 Historical regressions verify durable executable boundaries. They must not freeze later shared runtime/cache/read implementations, require later domains/pages to remain inactive, confuse retained mutation authorities with passive activation services, or match explanatory comments instead of executable behavior.
@@ -228,14 +318,13 @@ Historical regressions verify durable executable boundaries. They must not freez
 ## Next direction
 
 1. Pull current `dev` with automatic Git GC disabled if needed.
-2. Run Membership/365 regressions plus corrected Today Tasks 366–369 and new Custom Requests 370–372 regression.
-3. Do not repeat the Today Tasks browser proof; it has already passed after Build 369.
-4. Browser-validate `/admin/custom-request/` using the Build 370 read contract/runtime only. Do not execute workflow mutations or marketplace CSV export during proof.
-5. If the Build 370 contract reports missing tables, record them as schema-readiness evidence; do not repair schema in GET.
-6. After 370–372 closes, separately extract/retire the legacy marketplace CSV GET-time schema ensure/seeding before calling the entire Custom Requests GET surface conformant.
-7. Avoid Gift Cards unless schema parity is deliberately the batch target.
-8. Continue fresh-install schema parity before Production business-data copy.
+2. Run the combined Commerce local block through `build373_382_custom_requests_read_surface_test.py`.
+3. Do not repeat Today Tasks or Build 370–372 browser proofs; both already passed.
+4. Browser-validate only the new Builds 373–382 safe export/read-surface behavior on `/admin/custom-request/`.
+5. If local + browser gates pass, mark Builds 366–382 fully validated as applicable from the accumulated browser evidence.
+6. Promote Builds 383–392 from `NEXT_20_BUILDS.md` into the active 10-build batch and append another 10 future rows.
+7. Continue fresh-install schema parity before Production business-data copy.
 
 ## Validation preference
 
-Batch related builds and provide one Git Bash block plus Firefox-safe browser blocks whenever practical.
+Use one Git Bash block plus one Firefox-safe browser block for each 10-build execution batch whenever practical.
