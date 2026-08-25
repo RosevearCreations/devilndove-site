@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Builds 355–357 Content Studio Runtime Staged
+# Devil n Dove AI Context — Build 358 Creative Dependency Gate Fix Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, `docs/architecture/SOURCE_CONTROL_BRANCHING.md`, architecture notes through Build 357, and validation files through `BUILD355_357_VALIDATION.md`.
+Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 357, `BUILD352_354_VALIDATION.md`, `BUILD355_357_VALIDATION.md`, and `BUILD358_VALIDATION.md`.
 
 ## Production safety
 
@@ -40,11 +40,11 @@ Accounting reads through 345                   validated
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
 Creative Packaging runtime                     351 validated
-Creative Process read contract                 352 local proven; browser required
-Creative Process top-level activation           354 local proven; browser required
+Creative Process read contract                 352 read contract browser-proven
+Creative Process top-level activation           354 local proven; initial browser activation failed
 Content Studio read contract                   355 staged
-Creative & Production runtime implementation   356 staged
-Content Studio top-level activation            357 staged
+Creative & Production runtime coverage          357 staged
+Creative dependency gate correction             358 staged
 Contract catalog                               345
 Default passive service adapters               345
 Creative Process passive service registration  353 runtime-local
@@ -80,81 +80,105 @@ Prior parity audit also identified Production-only active tables including `acco
 
 ## Validation state
 
-- Builds 325–330: fully validated.
-- Builds 331–336: fully validated 2026-08-24.
-- Builds 337–339: fully validated 2026-08-24; Builds 338/339 retain separate schema-parity findings.
-- Builds 340–342: fully validated 2026-08-24; Build 341 retains separate schema-parity findings.
-- Builds 343–345: fully validated 2026-08-24. Browser and corrected local regression both passed; no new schema-parity deficit appeared.
-- Builds 346–348: fully validated 2026-08-24. Business & Administration is active only for `/admin/accounting/`; its runtime creates no network transport and owns no Accounting mutations.
-- Build 301 Packaging compatibility checkpoint: COMPLETE IN DEVELOPMENT with native reads/writes, verified Save Project, Build 297 legacy GET fallback removal, and Build 292 -> 291 write provenance.
-- Builds 349–351: fully validated 2026-08-24. Browser proof and corrected local regression both passed; Packaging remains on its proven Build 301 authority chain.
-- Builds 352–354: local regression passed 2026-08-24. Browser activation proof on `/admin/creative-process/` remains required.
+- Builds 325–345: fully validated through the existing batch checkpoints; Builds 338/339/341 retain separate schema-parity findings.
+- Builds 346–348: fully validated. Business & Administration is active for `/admin/accounting/` only; mutation ownership remains false.
+- Build 301 Packaging compatibility checkpoint: COMPLETE IN DEVELOPMENT.
+- Builds 349–351: fully validated. Packaging remains on the proven Build 301 authority chain.
+- Builds 352–354: local regression passed. Initial browser proof on `/admin/creative-process/` exposed a real top-level activation dependency defect. The Build 352 read contract itself returned 200 and correct non-mutating metadata.
 - Builds 355–357: staged / validation required.
-
-## Builds 349–351 validated Packaging boundary
-
-```text
-application_module                       creative-production
-application_mode                         active
-active_application_module                creative-production
-creative_runtime_build                   350
-creative_activation_build                351
-creative_current_domain                  packaging
-creative_services_ready                  true
-creative_required_service_count          3
-creative_packaging_page_proven           true
-creative_creates_network_transport       false
-creative_packaging_mutation_ownership    false
-packaging_domain_runtime_state           active
-packaging_client_transport_build         297
-packaging_client_transport_ready         true
-packaging_legacy_get_fallback_removed    true
-packaging_legacy_server_get_reachable    false
-compatibility_build                      301
-compatibility_state                      active
-native_read_status                       200
-```
-
-Historical regressions must validate this durable Packaging boundary rather than freeze later Creative runtime expansion.
+- Build 358: staged dependency-gate correction; local + browser revalidation required.
 
 ## Build 352 — Creative Process read contract
 
-`/api/admin/contracts/creative-process-read` is GET-only and Creative-owned. It wraps the retained non-mutating Creative Process GET and reports Build 352, legacy Build 274, owner `creative`, `request_time_schema_mutation=false`, and `mutation_ownership_moved=false`.
+`/api/admin/contracts/creative-process-read` is GET-only and Creative-owned. Browser proof returned:
 
-The legacy Creative Process POST authority is unchanged. `post_material_inventory`, `record_inventory_use`, and `correct_inventory_use` continue to consume Inventory-owned `inventory-post` and `inventory-reverse` authorities.
+```text
+status                         200
+build                          352
+legacy_build                   274
+owner                          creative
+contract                       creative-process-read
+request_time_schema_mutation   false
+mutation_ownership_moved       false
+inventory_post_authority       inventory-post
+inventory_reversal_authority   inventory-reverse
+```
 
-## Builds 353–354 — Creative Process activation
+The legacy Creative Process POST authority is unchanged. `post_material_inventory`, `record_inventory_use`, and `correct_inventory_use` continue to consume Inventory-owned `inventory-post` and `inventory-reverse` HTTP authorities.
 
-The Creative & Production runtime gained the `creative` domain and `/admin/creative-process/` coverage. Creative Process requires:
+## Initial Build 354 browser failure
+
+Observed on `/admin/creative-process/` after the Build 357 deployment:
+
+```text
+Creative & Production creative boundary is missing required services: inventory-post, inventory-reverse
+```
+
+State:
+
+```text
+application_module          creative-production
+application_mode            activation-failed
+active_application_module   null
+creative_domain             creative
+runtime_build               356
+activation_build            357
+runtime_state               registered
+services_ready              false
+page_proven                 false
+contracts_ok                true
+services_ok                 true
+```
+
+This was a real runtime defect, not a stale historical assertion.
+
+## Root cause
+
+Core's default passive browser service adapters register read services such as `inventory-read` and `inventory-cost`; they do not register `inventory-post` or `inventory-reverse`.
+
+Build 310 intentionally defines those two as Inventory-owned mutation authorities and creates no network transport. The retained Creative Process POST path calls the Inventory contracts directly when a user explicitly posts/reverses reviewed material usage.
+
+The top-level Creative runtime therefore must not require those mutation authorities as passive browser services merely to activate the page.
+
+## Build 358 — dependency gate correction
+
+Creative activation services are now:
 
 ```text
 creative-process-read
 inventory-read
+```
+
+Retained mutation authorities are declared separately:
+
+```text
 inventory-post
 inventory-reverse
 ```
 
-Local regression passed. Browser activation proof remains required.
+Runtime invariants:
+
+```text
+BUILD                                      358
+ACTIVATION_BUILD                           357
+DEPENDENCY_GATE_FIX_BUILD                  358
+createsNetworkTransport                    false
+creativeMutationOwnership                  false
+ownsCreativeMutations                      false
+mutationAuthoritiesRequiredAsActivationServices false
+```
+
+No Inventory mutation browser service was invented. No POST implementation moved. Build 310 remains the authority definition for Inventory post/reverse.
 
 ## Build 355 — Content Studio read extraction
 
-The old automatic `/api/admin/content-studio` GET called `ensureContentAutomationSchema(db)`, and the shared read helpers called the same schema-creating function internally.
+The automatic `/api/admin/content-studio` GET no longer calls `ensureContentAutomationSchema(db)`. Build 355 introduces a schema-aware non-mutating `content-studio-read` authority and contract.
 
-Build 355 introduces `functions/api/_lib/contentStudioReadService.js` and `/api/admin/contracts/content-studio-read`.
+The read service reports schema readiness and performs no CREATE/ALTER/INSERT/UPDATE/DELETE. Content Studio POST retains Build 273 mutation behavior and still owns create/refresh/update/media/deliverable/social-queue actions.
 
-The read service:
+## Builds 356–357 — Content Studio top-level coverage
 
-- inspects D1 with `sqlite_master` and `PRAGMA table_info` only;
-- reports `schema_ready`, missing tables/columns and optional Creative/CAIP table availability;
-- reads Content projects, approved products, Creative Process links, project media, deliverables and recent events;
-- reports `request_time_schema_mutation=false` and `mutation_ownership_moved=false`;
-- performs no CREATE/ALTER/INSERT/UPDATE/DELETE.
-
-The legacy Content Studio GET now delegates to the Build 355 read service. POST retains Build 273 behavior and still calls `ensureContentAutomationSchema(db)` before mutations.
-
-## Build 356 — Creative & Production Content expansion
-
-The top-level Creative runtime now supports:
+Creative & Production runtime domains are:
 
 ```text
 packaging
@@ -162,19 +186,7 @@ creative
 content
 ```
 
-Content requires one passive runtime-local service:
-
-```text
-content-studio-read
-```
-
-`public/js/modules/creative-production/content-studio-read-service.mjs` registers that service without making a request. `list()` is the only HTTP boundary.
-
-The top-level runtime still creates no network transport and owns no Packaging, Creative or Content mutations.
-
-## Build 357 — Content Studio activation
-
-Explicit Creative & Production coverage is now:
+Explicit pages:
 
 ```text
 /admin/packaging-studio/
@@ -182,41 +194,38 @@ Explicit Creative & Production coverage is now:
 /admin/content-studio/
 ```
 
-`/admin/content-studio/` already belongs to the `content` domain in `dd-module-definitions.mjs`. The page now loads `admin.js?v=357` before the retained Build 273 Content Studio UI script.
+Content requires only `content-studio-read`. Content mutation ownership remains false.
 
-Content Studio create/refresh/update/media/deliverable/social-queue POST actions remain on the legacy endpoint and are not owned by the top-level runtime.
+## CAIP blocker
 
-## CAIP audit result / blocker
-
-CAIP is not activation-ready yet. `/api/admin/creative-assets` GET still executes:
+CAIP is not activation-ready. `/api/admin/creative-assets` GET still executes:
 
 ```text
 ensureCreativeAssetIntelligenceSchema(state.db)
 ensureCreativeAssetOperationsSchema(state.db)
 ```
 
-CAIP also has a separate automatic `/api/admin/caip-media-intake` GET. Keep the `caip` domain outside `creative-production.runtimeDomains` until both startup read paths are extracted/audited and GET-time schema creation is removed.
+CAIP also has a separate automatic `/api/admin/caip-media-intake` GET. Keep `caip` outside `creative-production.runtimeDomains` until both startup read paths are extracted/audited and GET-time schema creation is removed.
 
 ## Windows Git pack cleanup note
 
-During the 2026-08-24 pull to Build 354, Windows refused to unlink an obsolete `.git/objects/pack/*.idx` and matching `.pack` during Git housekeeping. The fast-forward completed successfully and Python regressions executed. Treat this as a local file-handle/cleanup issue, not a build regression. Use `git -c gc.auto=0 pull ...` while validating if needed; do not manually delete one half of a pack pair.
+Windows previously refused to unlink an obsolete `.git/objects/pack/*.idx` and matching `.pack` during automatic Git housekeeping. Fast-forward and regressions still succeeded. Use `git -c gc.auto=0 pull ...` while validating if needed; do not manually delete one half of a pack pair.
 
 ## Historical regression rule
 
-Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later architectural state. Later module expansion may advance shared runtime build numbers, cache-bust versions, and supported-domain lists while preserving an earlier proven boundary.
+Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime build numbers/cache versions or encode mutation-authority registration as a prerequisite when that was never part of the boundary.
 
-Build 349–351 and Build 352–354 regressions are now future-compatible with later Creative runtime expansion.
+Build 349–351, Build 352–354, and Build 355–357 regressions are future-compatible with later Creative runtime changes.
 
 ## Next direction
 
-1. Browser-validate Build 354 on `/admin/creative-process/` using GET/read checks only.
-2. Pull Build 357 with automatic Git GC disabled if the Windows pack lock persists.
-3. Run `build349_351`, `build352_354`, and `build355_357` regressions because Build 356 advanced the shared Creative runtime again.
-4. Browser-validate Build 357 on `/admin/content-studio/` without invoking POST actions.
-5. If clean, mark Builds 352–357 fully validated.
-6. Keep Creative Process, Packaging and Content Studio mutation authority unchanged.
-7. Extract/audit CAIP automatic reads next; do not activate CAIP while its GET still creates schema.
-8. Continue fresh-install schema parity separately before Production business-data copy.
+1. Pull Build 358 with automatic Git GC disabled if needed.
+2. Run `build352_354`, `build355_357`, and `build358` regressions.
+3. Repeat the Firefox GET/runtime proof on `/admin/creative-process/`; expected required service count is now 2.
+4. If Creative Process activates, browser-validate Content Studio without POST actions.
+5. Keep Creative Process, Packaging and Content Studio mutation authority unchanged.
+6. Extract/audit CAIP automatic reads next; do not activate CAIP while GET creates schema.
+7. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Validation preference
 
