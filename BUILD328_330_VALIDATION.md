@@ -1,6 +1,6 @@
 # Builds 328–330 Validation — Accounting Read-Time DDL Retirement Batch
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — LOCAL REGRESSION PASSED / BROWSER PROOF REQUIRED
 
 This batch covers:
 
@@ -12,7 +12,20 @@ Build 330  Accounting attachments GET schema-mutation retirement + read extracti
 
 Business & Administration remains domain-bridge/inactive and no mutation ownership moves.
 
-## One Git Bash block
+## Local regression — PASSED 2026-08-24
+
+Observed after pulling commit `9580d72965c939bd812e2330fdb32cf05516a13e`:
+
+```text
+BUILDS 328-330 ACCOUNTING READ BATCH: PASS
+No Cloudflare resource was contacted.
+```
+
+The same shell session also exposed a stale assertion in the older Builds 325–327 regression. That harness has been corrected separately; it did not invalidate this Build 328–330 PASS.
+
+A clean `git status --short` line was not included in the captured transcript, so repository cleanliness should still be confirmed on the corrected rerun.
+
+## Corrected combined local checkpoint
 
 ```bash
 git pull --ff-only origin dev
@@ -30,7 +43,7 @@ BUILDS 328-330 ACCOUNTING READ BATCH: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should print nothing. The first test closes the remaining local gate for the already browser-proven 325–327 batch.
+`git status --short` should print nothing.
 
 ## One Firefox browser block
 
