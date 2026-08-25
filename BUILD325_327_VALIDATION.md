@@ -1,8 +1,6 @@
 # Builds 325–327 Validation — Accounting Read Batch
 
-## Status — BROWSER PROVEN / CORRECTED LOCAL REGRESSION REQUIRED
-
-This batch validates three bounded Accounting read changes together:
+## Status — VALIDATED 2026-08-24
 
 ```text
 Build 325  item-costing read extraction
@@ -10,95 +8,35 @@ Build 326  journal GET schema-mutation retirement + read extraction
 Build 327  GIFI notes GET schema-mutation retirement + read extraction
 ```
 
-## Development browser proof — PASSED 2026-08-24
+## Development browser proof — PASS
 
-Observed on `/admin/accounting/`:
+All legacy and contract requests returned HTTP 200 with the expected build and `owner=accounting`. Development reported `schema_ready=true` and `request_time_schema_mutation=false` for item costing, journal, and GIFI notes. Passive services reported Builds 325/326/327 and no schema mutation.
 
-```text
-item_legacy_status                         200
-item_legacy_build                          325
-item_legacy_owner                          accounting
-item_legacy_schema_ready                   true
-item_legacy_schema_mutation                false
-item_contract_status                       200
-item_contract_build                        325
-item_contract_owner                        accounting
-item_contract_schema_ready                 true
-item_contract_schema_mutation              false
-accounting-item-costing-read_service_build 325
-accounting-item-costing-read_service_schema_mutation false
-
-journal_legacy_status                      200
-journal_legacy_build                       326
-journal_legacy_owner                       accounting
-journal_legacy_schema_ready                true
-journal_legacy_schema_mutation             false
-journal_contract_status                    200
-journal_contract_build                     326
-journal_contract_owner                     accounting
-journal_contract_schema_ready              true
-journal_contract_schema_mutation           false
-accounting-journal-read_service_build      326
-accounting-journal-read_service_schema_mutation false
-
-gifi_notes_legacy_status                   200
-gifi_notes_legacy_build                    327
-gifi_notes_legacy_owner                    accounting
-gifi_notes_legacy_schema_ready             true
-gifi_notes_legacy_schema_mutation          false
-gifi_notes_contract_status                 200
-gifi_notes_contract_build                  327
-gifi_notes_contract_owner                  accounting
-gifi_notes_contract_schema_ready           true
-gifi_notes_contract_schema_mutation        false
-accounting-gifi-notes-read_service_build   327
-accounting-gifi-notes-read_service_schema_mutation false
-
-application_module                         business-administration
-application_mode                           domain-bridge
-active_application_module                  null
-contracts_ok                               true
-services_ok                                true
-```
-
-All three read boundaries are browser-proven and Development reported no schema-parity deficit for these three reads.
-
-## Local regression harness correction — 2026-08-24
-
-The first post-Build-330 local run failed inside the regression harness on this stale assertion:
+The Accounting page remained:
 
 ```text
-assert "await ensureGlSchema(db)" in gifi_summary
+application_module         business-administration
+application_mode           domain-bridge
+active_application_module  null
+contracts_ok               true
+services_ok                true
 ```
 
-That assertion described Build 327's *next blocker* rather than a Build 325–327 owned invariant. Build 328 intentionally removed that call, so the older test became false after the later successful extraction. The test also froze unrelated shared files against an older Git baseline, which would have produced more false failures as the architecture legitimately advances.
+## Corrected local regression — PASS
 
-The regression has therefore been corrected to verify only the durable Build 325–327 boundaries:
-
-- each owned read service remains present and non-mutating;
-- each GET-only contract remains present;
-- the legacy GET path delegates to the owned read service without read-time DDL;
-- the shared contract/service catalogs may advance beyond Build 327 as long as the three registrations remain present.
-
-The correction changes test coverage only; no application/runtime code changed.
-
-## Corrected local regression still required
-
-```bash
-git pull --ff-only origin dev
-python scripts/build325_327_accounting_read_batch_test.py
-git status --short
-```
-
-Expected:
+After the historical harness was corrected so it no longer required Build 328's blocker to remain present, Development returned:
 
 ```text
 BUILDS 325-327 ACCOUNTING READ BATCH: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should print nothing. Once this corrected local output is captured, Builds 325–327 become fully VALIDATED.
+The earlier failed assertion was a stale test-harness expectation (`await ensureGlSchema(db)` in the next blocker), not a runtime failure.
 
-## Safety boundary
+## Boundary proven
 
-Browser proof used GET/read calls only. No journal sync/validate/post, GIFI-note save, expense save or other Accounting mutation is part of this gate.
+- Item-costing GET is Accounting-owned and non-mutating.
+- Journal GET no longer ensures/creates journal schema; explicit POST compatibility remains separate.
+- GIFI-notes GET no longer creates schema; explicit POST save compatibility remains separate.
+- No Accounting mutation ownership moved.
+- Business & Administration remains intentionally inactive until remaining automatic reads are owned/non-mutating.
