@@ -21,6 +21,8 @@
 // Build 364 activates /admin/membership/ without moving Membership assignment or policy mutations.
 // Build 366 formalizes Today Tasks readiness-aware GET; Build 367 extends the Commerce runtime;
 // Build 368 activates /admin/today-tasks/ without moving Done/Ignore/Snooze mutations.
+// Build 370 formalizes Custom Requests startup-read readiness; Build 371 extends the Commerce runtime;
+// Build 372 activates /admin/custom-request/ without moving Custom Requests workflow/payment/order mutations.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -32,8 +34,9 @@ export const INVENTORY_COST_CONTRACT_BUILD = 311;
 export const ACCOUNTING_READ_CONTRACT_BUILD = 312;
 export const OPERATIONS_MEMBERSHIP_READ_CONTRACT_BUILD = 362;
 export const OPERATIONS_TODAY_TASKS_READ_CONTRACT_BUILD = 366;
-export const RUNTIME_OPERATIONS_BUILD = 367;
-export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 368;
+export const OPERATIONS_CUSTOM_REQUESTS_READ_CONTRACT_BUILD = 370;
+export const RUNTIME_OPERATIONS_BUILD = 371;
+export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 372;
 export const ACCOUNTING_STARTUP_READ_AUDIT_BUILD = 346;
 export const BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD = 347;
 export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
@@ -51,6 +54,7 @@ export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/orders/',
   '/admin/membership/',
   '/admin/today-tasks/',
+  '/admin/custom-request/',
 ]);
 export const BUSINESS_ADMINISTRATION_RUNTIME_PAGES = Object.freeze([
   '/admin/accounting/',
@@ -97,7 +101,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=367',
+    entry: '../modules/commerce-operations/runtime.mjs?v=371',
     runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations']),
   }),
   Object.freeze({
@@ -159,6 +163,7 @@ export function snapshotApplicationArchitecture() {
     accountingReadContractBuild: ACCOUNTING_READ_CONTRACT_BUILD,
     operationsMembershipReadContractBuild: OPERATIONS_MEMBERSHIP_READ_CONTRACT_BUILD,
     operationsTodayTasksReadContractBuild: OPERATIONS_TODAY_TASKS_READ_CONTRACT_BUILD,
+    operationsCustomRequestsReadContractBuild: OPERATIONS_CUSTOM_REQUESTS_READ_CONTRACT_BUILD,
     runtimeOperationsBuild: RUNTIME_OPERATIONS_BUILD,
     operationsRuntimeCoverageBuild: OPERATIONS_RUNTIME_COVERAGE_BUILD,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
@@ -179,7 +184,7 @@ export function snapshotApplicationArchitecture() {
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'commerce-operations-membership-today-tasks-plus-business-accounting-plus-creative-four-domain-explicit-page-coverage',
+    currentRuntimeMigrationMode: 'commerce-operations-membership-today-tasks-custom-requests-plus-business-accounting-plus-creative-four-domain-explicit-page-coverage',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
@@ -192,7 +197,7 @@ export function snapshotApplicationArchitecture() {
     thirdCreativeProductionRuntimeDomain: 'content',
     fourthCreativeProductionRuntimeDomain: 'caip',
     operationsRuntimeDomainActive: true,
-    operationsRuntimeActivationMode: 'read-only-explicit-five-page-coverage-with-membership-and-today-tasks-page-specific-service-gates',
+    operationsRuntimeActivationMode: 'read-only-explicit-six-page-coverage-with-membership-today-tasks-and-custom-requests-page-specific-service-gates',
     businessAdministrationRuntimeDomainActive: true,
     businessAdministrationRuntimeActivationMode: 'accounting-read-only-explicit-single-page-coverage',
     creativeProductionRuntimeDomainActive: true,
@@ -201,6 +206,7 @@ export function snapshotApplicationArchitecture() {
     operationsMutationOwnership: false,
     membershipMutationOwnershipMovedByTopLevelRuntime: false,
     todayTasksMutationOwnershipMovedByTopLevelRuntime: false,
+    customRequestsMutationOwnershipMovedByTopLevelRuntime: false,
     creativeProductionMutationOwnership: false,
     packagingMutationOwnershipMovedByTopLevelRuntime: false,
     creativeProcessMutationOwnershipMovedByTopLevelRuntime: false,
