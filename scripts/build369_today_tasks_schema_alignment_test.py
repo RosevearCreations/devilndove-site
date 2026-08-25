@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -13,6 +14,18 @@ def section(text, start, end=None):
     return text[i:j]
 
 
+def numeric_constant(text, name):
+    match = re.search(rf"(?:export\s+)?const\s+{re.escape(name)}\s*=\s*(\d+)", text)
+    assert match, f'Missing numeric constant: {name}'
+    return int(match.group(1))
+
+
+def cache_version(text, pattern):
+    match = re.search(pattern, text)
+    assert match, f'Missing cache-busted path matching: {pattern}'
+    return int(match.group(1))
+
+
 read_service = read('functions/api/_lib/todayTasksReadService.js')
 legacy_get = read('functions/api/admin/today-tasks.js')
 contract = read('functions/api/admin/contracts/operations-today-tasks-read.js')
@@ -21,7 +34,7 @@ runtime = read('public/js/modules/commerce-operations/runtime.mjs')
 groups = read('public/js/core/dd-application-module-groups.mjs')
 schema = read('database_full_schema.sql')
 
-# Build 369 hardens the Build 366 read implementation without changing loader identity.
+# Build 369 hardens the Build 366 read implementation.
 assert 'export const BUILD = 366' in read_service
 assert 'export const IMPLEMENTATION_BUILD = 369' in read_service
 assert "export const CONTRACT_ID = 'operations-today-tasks-read'" in read_service
@@ -81,13 +94,16 @@ registration = section(client_service, 'export function ensureOperationsTodayTas
 assert 'apiFetch(' not in registration
 assert 'fetch(' not in registration
 
-# Build 369 does not advance or alter the proven Build 367/368 loader boundary.
-assert 'const BUILD = 367;' in runtime
-assert 'const ACTIVATION_BUILD = 368;' in runtime
+# Later Commerce expansion may advance the shared loader, but must preserve the proven Today Tasks boundary.
+assert numeric_constant(runtime, 'BUILD') >= 367
+assert numeric_constant(runtime, 'ACTIVATION_BUILD') >= 368
+assert "const TODAY_TASKS_RUNTIME_PAGE = '/admin/today-tasks/'" in runtime
+assert "const TODAY_TASKS_REQUIRED_SERVICES = Object.freeze(['operations-today-tasks-read'])" in runtime
 assert 'todayTasksMutationOwnership: false' in runtime
 assert 'createsNetworkTransport: false' in runtime
-assert "entry: '../modules/commerce-operations/runtime.mjs?v=367'" in groups
-assert 'OPERATIONS_RUNTIME_COVERAGE_BUILD = 368' in groups
+commerce = section(groups, "id: 'commerce-operations'", "id: 'creative-production'")
+assert cache_version(commerce, r"entry:\s*'\.\./modules/commerce-operations/runtime\.mjs\?v=(\d+)'") >= 367
+assert numeric_constant(groups, 'OPERATIONS_RUNTIME_COVERAGE_BUILD') >= 368
 assert 'todayTasksMutationOwnershipMovedByTopLevelRuntime: false' in groups
 
 print('BUILD 369 TODAY TASKS SCHEMA ALIGNMENT: PASS')
