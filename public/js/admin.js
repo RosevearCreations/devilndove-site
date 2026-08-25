@@ -14,6 +14,7 @@
 // Build 313: Commerce & Operations activates the first read-only Operations runtime page.
 // Build 314: Operations runtime coverage is explicit for Operations and Customer Documents pages only.
 // Build 315: Orders joins explicit read-only Operations runtime coverage without moving order/payment writes.
+// Build 348: Business & Administration activates read-only runtime coverage for /admin/accounting/ only.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -51,5 +52,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=315')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=348')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));

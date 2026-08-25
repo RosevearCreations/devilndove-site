@@ -6,6 +6,8 @@
 // Build 311 added the Inventory-owned cost read boundary; Build 312 added Accounting read;
 // Build 313 activated the first read-only Operations page; Build 314 added Customer Documents coverage;
 // Build 315 adds Orders loader/runtime coverage without moving order/payment mutations.
+// Build 346 closes the Accounting startup-read audit; Build 347 adds the passive Business runtime;
+// Build 348 activates Business & Administration for /admin/accounting/ only, read-only.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -17,10 +19,16 @@ export const INVENTORY_COST_CONTRACT_BUILD = 311;
 export const ACCOUNTING_READ_CONTRACT_BUILD = 312;
 export const RUNTIME_OPERATIONS_BUILD = 315;
 export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 315;
+export const ACCOUNTING_STARTUP_READ_AUDIT_BUILD = 346;
+export const BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD = 347;
+export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
 export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
   '/admin/orders/',
+]);
+export const BUSINESS_ADMINISTRATION_RUNTIME_PAGES = Object.freeze([
+  '/admin/accounting/',
 ]);
 
 export const DD_APPLICATION_CORE = Object.freeze({
@@ -77,9 +85,9 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     kind: 'application-module',
     description: 'Marketing, publishing, SEO, accounting, analytics, administration, command-center and platform operations.',
     domains: Object.freeze(['marketing', 'accounting', 'platform', 'admin']),
-    extractionState: 'planned',
-    entry: null,
-    runtimeDomains: Object.freeze([]),
+    extractionState: 'in-progress',
+    entry: '../modules/business-administration/runtime.mjs?v=347',
+    runtimeDomains: Object.freeze(['accounting']),
   }),
 ]);
 
@@ -121,17 +129,26 @@ export function snapshotApplicationArchitecture() {
     runtimeOperationsBuild: RUNTIME_OPERATIONS_BUILD,
     operationsRuntimeCoverageBuild: OPERATIONS_RUNTIME_COVERAGE_BUILD,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
+    accountingStartupReadAuditBuild: ACCOUNTING_STARTUP_READ_AUDIT_BUILD,
+    businessAdministrationRuntimeImplementationBuild: BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD,
+    businessAdministrationRuntimeCoverageBuild: BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD,
+    businessAdministrationRuntimePages: BUSINESS_ADMINISTRATION_RUNTIME_PAGES,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'catalog-inventory-operations-read-only-explicit-page-coverage',
+    currentRuntimeMigrationMode: 'commerce-operations-plus-accounting-read-only-explicit-page-coverage',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
     thirdUmbrellaRuntimeDomain: 'operations',
+    secondUmbrellaRuntimeModule: 'business-administration',
+    firstBusinessAdministrationRuntimeDomain: 'accounting',
     operationsRuntimeDomainActive: true,
     operationsRuntimeActivationMode: 'read-only-explicit-three-page-coverage',
+    businessAdministrationRuntimeDomainActive: true,
+    businessAdministrationRuntimeActivationMode: 'accounting-read-only-explicit-single-page-coverage',
+    accountingMutationOwnership: false,
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
