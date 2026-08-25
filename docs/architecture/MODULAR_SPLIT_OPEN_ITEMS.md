@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 355–357 on 2026-08-24.
+Updated through staged Build 358 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -37,11 +37,11 @@ Default passive adapters                345
 Business Accounting activation          348 validated
 Packaging baseline                      301 validated
 Creative Packaging activation           351 validated
-Creative Process read contract          352 local proven / browser required
-Creative runtime implementation         356 staged
-Creative Process activation             354 local proven / browser required
+Creative Process read contract          352 browser read proven
+Creative Process activation             354 local proven / initial browser failed
 Content Studio read contract            355 staged
-Content Studio activation               357 staged
+Creative runtime coverage               357 staged
+Creative dependency gate fix            358 staged
 Accounting mutation ownership moved     false
 Creative mutation ownership moved       false
 Content mutation ownership moved        false
@@ -53,38 +53,51 @@ Proven pages remain `/admin/operations/`, `/admin/customer-documents/`, and `/ad
 
 ### Business & Administration
 
-`/admin/accounting/` is the first validated Business & Administration runtime page. Builds 346–348 are fully validated. Accounting mutations remain in compatibility authorities.
-
-Builds 343–345 are fully validated. Their browser proof was schema-ready and the corrected historical local regression passed.
+`/admin/accounting/` is the first validated Business & Administration runtime page. Builds 346–348 are fully validated. Accounting mutations remain in compatibility authorities. Builds 343–345 are fully validated.
 
 ### Creative & Production
 
-Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated in Development: the top-level `creative-production` wrapper coexists with Build 297 native Packaging transport and the Build 292 -> 291 write authority while owning no Packaging mutations.
+Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated in Development.
 
-Build 352 formalizes the Creative Process GET as `creative-process-read`. Build 353/354 adds the Creative Process page. Its local regression passed; browser activation proof is still required.
+Build 352 formalizes the Creative Process GET as `creative-process-read`. Its browser read contract passed with `request_time_schema_mutation=false` and `mutation_ownership_moved=false`.
 
-Build 355 removes request-time schema creation from the automatic Content Studio GET and exposes `content-studio-read`. Build 356 extends the top-level runtime to the `content` domain. Build 357 adds `/admin/content-studio/` coverage. Content Studio POST actions remain on the retained compatibility endpoint.
+The initial top-level browser activation failed because the shared Creative runtime incorrectly required `inventory-post` and `inventory-reverse` as registered Core browser services. Those are real Inventory-owned mutation authorities, but Core's passive service registry does not register them; the retained Creative Process POST path consumes them directly when the user explicitly posts/reverses reviewed material usage.
 
-Current staged Creative runtime scope:
+Build 358 corrects that distinction.
+
+Current Creative runtime scope:
 
 ```text
 creative-production
   packaging -> /admin/packaging-studio/   validated
-  creative  -> /admin/creative-process/   local proven / browser required
+  creative  -> /admin/creative-process/   Build 358 revalidation required
   content   -> /admin/content-studio/      staged
 
 caip        -> no top-level runtime coverage yet
 ```
 
-Required services by Creative runtime domain:
+Activation services by Creative runtime domain:
 
 ```text
 packaging: inventory-read, catalog-read, content-media
-creative:  creative-process-read, inventory-read, inventory-post, inventory-reverse
+creative:  creative-process-read, inventory-read
 content:   content-studio-read
 ```
 
+Retained Creative Process mutation authorities are declared separately:
+
+```text
+inventory-post
+inventory-reverse
+```
+
+They are **not** top-level runtime activation services. Build 358 reports `mutationAuthoritiesRequiredAsActivationServices=false`.
+
 The top-level runtime creates no network transport and owns no Creative, Packaging or Content mutations.
+
+### Content Studio
+
+Build 355 removes request-time schema creation from the automatic Content Studio GET and exposes `content-studio-read`. Build 356 extends the top-level runtime to the `content` domain. Build 357 adds `/admin/content-studio/` coverage. Content Studio POST actions remain on the retained compatibility endpoint.
 
 ### CAIP blocker
 
@@ -129,15 +142,16 @@ Builds 340–342   fully validated 2026-08-24 (+ schema parity for 341)
 Builds 343–345   fully validated 2026-08-24
 Builds 346–348   fully validated 2026-08-24
 Builds 349–351   fully validated 2026-08-24
-Builds 352–354   local regression passed; browser validation required
+Builds 352–354   local regression passed; initial browser activation failed; Build 358 fix staged
 Builds 355–357   staged / validation required
+Build 358        staged / local + browser revalidation required
 ```
 
 ## Validation-harness rule
 
-Historical regression scripts verify durable boundaries introduced by their build. They must not require the continued presence of a later blocker or freeze unrelated shared runtime/cache versions forever.
+Historical regression scripts verify durable boundaries introduced by their build. They must not freeze unrelated shared runtime/cache versions or confuse retained mutation authorities with passive activation services.
 
-The Build 349–351 and Build 352–354 historical regressions are future-compatible with later Creative runtime expansion.
+The Build 349–351, Build 352–354, and Build 355–357 historical regressions are future-compatible with later Creative runtime changes.
 
 ## Mutation-authority extraction still open
 
@@ -147,10 +161,10 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Browser-validate Build 354 on `/admin/creative-process/` using GET/read checks only.
-2. Run the Build 349–351, 352–354 and 355–357 local regressions after pulling the Build 357 shared runtime.
-3. Browser-validate Build 357 on `/admin/content-studio/` without invoking POST actions.
-4. If clean, close Builds 352–357 while leaving all mutation authority unchanged.
+1. Pull Build 358 and run the Build 352–354, Build 355–357 and Build 358 regressions.
+2. Repeat the Firefox GET/runtime proof on `/admin/creative-process/`; expected Creative activation service count is 2.
+3. If Creative Process activates, browser-validate `/admin/content-studio/` without POST actions.
+4. If clean, close Builds 352–358 while leaving all mutation authority unchanged.
 5. Audit/extract CAIP automatic GETs next; do not activate CAIP until its schema-creating read paths are retired.
 6. Continue fresh-install schema parity separately before Production business-data copy.
 
