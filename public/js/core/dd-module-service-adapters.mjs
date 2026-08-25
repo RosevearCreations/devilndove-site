@@ -1,7 +1,7 @@
-// Devil n Dove Build 324 browser adapters for implemented read contracts.
+// Devil n Dove Build 327 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 324;
+export const BUILD = 327;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -16,6 +16,9 @@ const ROUTES = Object.freeze({
   'accounting-overhead-product-allocations-read': '/api/admin/contracts/accounting-overhead-product-allocations-read',
   'accounting-product-costs-read': '/api/admin/contracts/accounting-product-costs-read',
   'accounting-profit-loss-read': '/api/admin/contracts/accounting-profit-loss-read',
+  'accounting-item-costing-read': '/api/admin/contracts/accounting-item-costing-read',
+  'accounting-journal-read': '/api/admin/contracts/accounting-journal-read',
+  'accounting-gifi-notes-read': '/api/admin/contracts/accounting-gifi-notes-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -23,10 +26,7 @@ function boundedInt(value, fallback, min, max) {
   const parsed = Number(value);
   return Math.max(min, Math.min(max, Number.isFinite(parsed) ? Math.trunc(parsed) : fallback));
 }
-
-function text(value) {
-  return String(value ?? '').trim();
-}
+function text(value) { return String(value ?? '').trim(); }
 
 async function fetchContract(route, params = {}) {
   const apiFetch = globalThis.DDAuth?.apiFetch;
@@ -43,10 +43,7 @@ async function fetchContract(route, params = {}) {
   return data;
 }
 
-function service(id, owner, list) {
-  return Object.freeze({ id, owner, mode: 'read-only-http', list });
-}
-
+function service(id, owner, list) { return Object.freeze({ id, owner, mode: 'read-only-http', list }); }
 function accountingReadResult(data, rowsKey) {
   return Object.freeze({
     rows: Object.freeze(data[rowsKey] || []),
@@ -111,20 +108,19 @@ export function createDefaultModuleServices() {
     }),
     'accounting-profit-loss-read': service('accounting-profit-loss-read', 'accounting', async (options = {}) => {
       const data = await fetchContract(ROUTES['accounting-profit-loss-read'], { month: text(options.month || options.periodMonth) });
-      return Object.freeze({
-        period: data.period || null,
-        summary: Object.freeze(data.summary || {}),
-        expenseGroups: Object.freeze(data.expense_groups || []),
-        overheadGroups: Object.freeze(data.overhead_groups || []),
-        generalLedgerAccounts: Object.freeze(data.general_ledger_accounts || []),
-        schemaReady: Boolean(data.schema_ready),
-        missingTables: Object.freeze(data.missing_tables || []),
-        missingColumns: Object.freeze(data.missing_columns || []),
-        authorityTables: Object.freeze(data.authority_tables || []),
-        requestTimeSchemaMutation: data.request_time_schema_mutation === true,
-        contract: data.contract,
-        build: Number(data.build || 0),
-      });
+      return Object.freeze({ period: data.period || null, summary: Object.freeze(data.summary || {}), expenseGroups: Object.freeze(data.expense_groups || []), overheadGroups: Object.freeze(data.overhead_groups || []), generalLedgerAccounts: Object.freeze(data.general_ledger_accounts || []), schemaReady: Boolean(data.schema_ready), missingTables: Object.freeze(data.missing_tables || []), missingColumns: Object.freeze(data.missing_columns || []), authorityTables: Object.freeze(data.authority_tables || []), requestTimeSchemaMutation: data.request_time_schema_mutation === true, contract: data.contract, build: Number(data.build || 0) });
+    }),
+    'accounting-item-costing-read': service('accounting-item-costing-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-item-costing-read'], { month: text(options.month || options.periodMonth) });
+      return Object.freeze({ ...accountingReadResult(data, 'items'), period: data.period || null, optionalTableAvailability: Object.freeze(data.optional_table_availability || {}) });
+    }),
+    'accounting-journal-read': service('accounting-journal-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-journal-read'], { month: text(options.month || options.periodMonth) });
+      return Object.freeze({ ...accountingReadResult(data, 'entries'), period: data.period || null, authorityTables: Object.freeze(data.authority_tables || []) });
+    }),
+    'accounting-gifi-notes-read': service('accounting-gifi-notes-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-gifi-notes-read'], { year: text(options.year) });
+      return Object.freeze({ ...accountingReadResult(data, 'notes'), year: data.year || null });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });

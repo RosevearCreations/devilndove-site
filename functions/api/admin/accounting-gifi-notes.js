@@ -1,5 +1,6 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { cleanGifiCode, ensureAccountingGifiNotesTable, listAccountingGifiNotes } from './_accountingGifi.js';
+import { BUILD, CONTRACT_ID, OWNER, readAccountingGifiNotes } from '../_lib/accountingGifiNotesReadService.js';
 
 function normalizeReviewStatus(value) {
   const raw = normalizeText(value).toLowerCase();
@@ -11,10 +12,13 @@ export async function onRequestGet(context) {
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureAccountingGifiNotesTable(db);
   const year = String(new URL(context.request.url).searchParams.get('year') || new Date().getFullYear()).trim();
-  const notes = await listAccountingGifiNotes(db, year);
-  return jsonResponse({ ok: true, year, notes, summary: { note_count: notes.length, finalized_count: notes.filter((row) => row.review_status === 'finalized').length } });
+  try {
+    return jsonResponse(await readAccountingGifiNotes(db, { year }));
+  } catch (error) {
+    if (error instanceof RangeError || error?.code === 'invalid_accounting_year') return jsonResponse({ ok: false, build: BUILD, contract: CONTRACT_ID, owner: OWNER, error: error?.message }, 400);
+    return jsonResponse({ ok: false, build: BUILD, contract: CONTRACT_ID, owner: OWNER, error: error?.message || 'Failed to load GIFI review notes.' }, 500);
+  }
 }
 
 export async function onRequestPost(context) {

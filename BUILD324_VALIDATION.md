@@ -1,31 +1,26 @@
 # Build 324 Validation — Accounting Profit/Loss Read Extraction
 
-## Status — BROWSER PROVEN / LOCAL + SCHEMA DETAIL REQUIRED
+## Status — VALIDATED 2026-08-24
 
 Baseline: `b23a98a557721319afe73f5707563aa9703901f4`.
 
-Build 324 extracts the automatic `/api/admin/accounting-profit-loss` GET into an Accounting-owned, non-mutating read service and dedicated GET-only contract while preserving the legacy URL for the current Accounting UI.
+Build 324 extracted the automatic `/api/admin/accounting-profit-loss` GET into an Accounting-owned, non-mutating read service and dedicated GET-only contract while preserving the legacy URL for the current Accounting UI.
 
-## Local regression
+## Local regression — PASSED
 
-Still required:
-
-```bash
-git pull --ff-only origin dev
-python scripts/build324_accounting_profit_loss_read_extraction_test.py
-git status --short
-```
-
-Expected:
+Observed:
 
 ```text
+From https://github.com/RosevearCreations/devilndove-site
+ * branch              dev        -> FETCH_HEAD
+Already up to date.
 BUILD 324 ACCOUNTING PROFIT/LOSS READ EXTRACTION: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty before later local edits.
+The pasted command block included `git status --short`; no status output followed the regression result, consistent with a clean local tree.
 
-## Development browser proof — PASSED 2026-08-24
+## Development browser proof — PASSED
 
 Observed on `/admin/accounting/` after administrator verification:
 
@@ -49,50 +44,26 @@ contracts_ok                true
 services_ok                 true
 ```
 
-The async Firefox console first displayed `Promise { <state>: "pending" }`; this is normal. The completed `console.table()` output above is the validation result.
+The async Firefox console first displayed `Promise { <state>: "pending" }`; this is normal. The completed table is the proof.
 
-### Browser conclusion
+## Schema-parity evidence — CAPTURED
 
-The Build 324 architecture boundary passed:
+Development returned:
 
-- legacy compatibility GET returns 200;
-- legacy GET identifies Build 324 and owner `accounting`;
-- legacy GET reports `request_time_schema_mutation=false`;
-- dedicated contract returns 200 and identifies Build 324 / owner `accounting`;
-- passive Accounting service reports Build 324 and no schema mutation;
-- Accounting remains `business-administration` domain-bridge only;
-- no top-level Business & Administration runtime is active;
-- contract and service registries remain healthy.
-
-`legacy_schema_ready=false` is a separate schema-parity finding, not a reason to restore request-time DDL and not by itself a Build 324 architecture failure.
-
-## Required schema-parity evidence
-
-Capture the exact missing schema from Development before marking the build fully validated:
-
-```js
-(async () => {
-  const month = new Date().toISOString().slice(0, 7);
-  const response = await window.DDAuth.apiFetch(`/api/admin/accounting-profit-loss?month=${encodeURIComponent(month)}`);
-  const data = await response.json().catch(() => null);
-  console.log({
-    status: response.status,
-    build: data?.build ?? null,
-    owner: data?.owner ?? null,
-    schema_ready: data?.schema_ready ?? null,
-    missing_tables: data?.missing_tables ?? [],
-    missing_columns: data?.missing_columns ?? [],
-    request_time_schema_mutation: data?.request_time_schema_mutation ?? null,
-  });
-})();
+```text
+MISSING TABLES: []
+MISSING COLUMNS: ["orders.total_amount|total"]
 ```
 
-Route any returned `missing_tables` / `missing_columns` to the separate fresh-install schema-parity track. Do not repair schema from this GET.
+Interpretation:
 
-## Safety boundary
+- the required P&L source tables are present;
+- Development's `orders` table currently exposes neither logical revenue column alternative expected by this read (`total_amount` or `total`);
+- this is a fresh-install/schema-parity finding, not an excuse to restore request-time DDL;
+- Build 324 correctly reports the mismatch with `request_time_schema_mutation=false`.
 
-Do not post journals, save expenses, upload files, import statements, or mutate Accounting records during validation.
+The schema-parity track must determine the canonical current Orders amount field and align the fresh-install schema/read mapping deliberately.
 
-Build 324 does not activate Business & Administration and does not move any Accounting mutation authority.
+## Safety conclusion
 
-Build 324 becomes VALIDATED when the local regression passes and the missing-schema evidence above is captured/documented.
+Build 324 is VALIDATED. It does not activate Business & Administration and does not move any Accounting mutation authority.

@@ -1,8 +1,8 @@
-// Devil n Dove Build 324 cross-module contract catalog.
+// Devil n Dove Build 327 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
-// Accounting read extraction now includes the automatic Accounting profit/loss page read.
+// Accounting read extraction now includes profit/loss, item costing, journal, and GIFI notes.
 
-export const BUILD = 324;
+export const BUILD = 327;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -47,6 +47,9 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('accounting-overhead-product-allocations-read', 'accounting', ['operations'], 'Read overhead allocations assigned to products without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-overhead-product-allocations-read', authorityRoute: '/api/admin/contracts/accounting-overhead-product-allocations-read', authorityAction: 'read-accounting-overhead-product-allocations', implementationState: 'implemented-read-only-accounting-overhead-product-allocations' }),
   contract('accounting-product-costs-read', 'accounting', ['operations', 'catalog'], 'Read historical Accounting product-cost records without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-product-costs-read', authorityRoute: '/api/admin/contracts/accounting-product-costs-read', authorityAction: 'read-accounting-product-costs', implementationState: 'implemented-read-only-accounting-product-costs' }),
   contract('accounting-profit-loss-read', 'accounting', ['accounting'], 'Read the monthly Accounting profit/loss overview used by the Accounting application page without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-profit-loss-read', authorityRoute: '/api/admin/contracts/accounting-profit-loss-read', authorityAction: 'read-accounting-profit-loss', implementationState: 'implemented-read-only-accounting-profit-loss' }),
+  contract('accounting-item-costing-read', 'accounting', ['accounting'], 'Read monthly estimated item costing and recognized rough COGS without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-item-costing-read', authorityRoute: '/api/admin/contracts/accounting-item-costing-read', authorityAction: 'read-accounting-item-costing', implementationState: 'implemented-read-only-accounting-item-costing' }),
+  contract('accounting-journal-read', 'accounting', ['accounting'], 'Read monthly Accounting journal entries and lines without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-journal-read', authorityRoute: '/api/admin/contracts/accounting-journal-read', authorityAction: 'read-accounting-journal', implementationState: 'implemented-read-only-accounting-journal' }),
+  contract('accounting-gifi-notes-read', 'accounting', ['accounting'], 'Read year-specific Accounting GIFI review notes without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-gifi-notes-read', authorityRoute: '/api/admin/contracts/accounting-gifi-notes-read', authorityAction: 'read-accounting-gifi-notes', implementationState: 'implemented-read-only-accounting-gifi-notes' }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 
@@ -54,7 +57,6 @@ export function validateModuleContracts(definitions, contracts = DD_MODULE_CONTR
   const modules = new Map((definitions || []).map((definition) => [definition.id, definition]));
   const byId = new Map();
   const errors = [];
-
   for (const item of contracts) {
     if (byId.has(item.id)) errors.push(`Duplicate contract: ${item.id}`);
     byId.set(item.id, item);
@@ -67,7 +69,6 @@ export function validateModuleContracts(definitions, contracts = DD_MODULE_CONTR
     if (item.id === 'inventory-reverse' && item.status === 'implemented' && item.confirmationText !== 'REVERSE INVENTORY') errors.push('implemented inventory-reverse must retain explicit typed confirmation.');
     for (const consumer of item.consumers) if (!modules.has(consumer)) errors.push(`Contract ${item.id} has unknown consumer ${consumer}`);
   }
-
   for (const definition of modules.values()) {
     for (const capability of definition.consumes || []) {
       const declared = byId.get(capability);
@@ -78,7 +79,6 @@ export function validateModuleContracts(definitions, contracts = DD_MODULE_CONTR
       if (!declared.consumers.includes(definition.id)) errors.push(`${definition.id} is not an allowed consumer of ${capability}`);
     }
   }
-
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 
