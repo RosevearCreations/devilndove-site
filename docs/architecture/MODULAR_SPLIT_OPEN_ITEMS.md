@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 366–368 on 2026-08-25.
+Updated through staged Build 369 on 2026-08-25.
 
 ## Architectural invariant
 
@@ -20,8 +20,8 @@ Domains remain ownership/service boundaries beneath those modules. Core owns sha
 ## Source-control state
 
 ```text
-main  = retained Production/legacy release line
-dev   = active modularization and Development integration line
+main = retained Production/legacy release line
+dev  = active modularization and Development integration line
 ```
 
 Application modules are not permanent Git branches.
@@ -31,14 +31,13 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                       302
 Core runtime implementation             305
-Commerce runtime                        367 staged
+Commerce runtime                        367 Today Tasks browser-proven
 Operations Membership read contract     362 validated
 Operations Membership activation        364 validated
 Membership read hardening               365 validated
-Operations Today Tasks read contract    366 staged
-Operations Today Tasks activation       368 staged
-Contract catalog                        345
-Default passive adapters                345
+Operations Today Tasks read contract    366 browser structure proven
+Operations Today Tasks activation       368 browser-proven
+Today Tasks schema alignment            369 staged
 Business Accounting activation          348 validated
 Packaging baseline                      301 validated
 Creative Packaging activation           351 validated
@@ -59,7 +58,7 @@ Everything through Build 365 is fully validated.
 
 ## Commerce & Operations
 
-Validated Operations pages before the current batch:
+Validated pages through Build 365:
 
 ```text
 /admin/operations/
@@ -68,83 +67,55 @@ Validated Operations pages before the current batch:
 /admin/membership/
 ```
 
-Builds 366–368 stage a fifth explicit Operations page:
+Builds 366–368 add the fifth explicit Operations page:
 
 ```text
 /admin/today-tasks/
 ```
 
-### Membership boundary — Builds 362–365
+### Today Tasks boundary
 
-Membership remains fully validated. Build 362 established a non-mutating Tier Policy read authority and GET-only `operations-membership-read`; Build 363 registered it passively; Build 364 activated `/admin/membership/`; Build 365 hardened the read against legacy table shapes after an initial browser 500.
-
-Development browser + local validation ultimately returned database-backed Bronze/Silver/Gold policies, `schema_ready=true`, active Commerce runtime, one Membership service, and no Membership mutation ownership.
-
-Historical Membership and Build 365 regressions are now future-compatible with later shared Commerce runtime/cache builds.
-
-### Today Tasks audit
-
-The audit compared Today Tasks with Custom Requests.
-
-Today Tasks was chosen because:
-
-- its GET was already SELECT-only;
-- its read failures were silently caught and converted to zero counts;
-- the route prefix `/admin/today-tasks` was already classified as Operations;
-- no dedicated page existed yet;
-- Done/Ignore/Snooze mutations were already separate at `POST /api/admin/today-task-actions`.
-
-Custom Requests remains outside this batch because `functions/api/admin/custom-requests.js` still has a large `ensureSchema()` authority with CREATE/ALTER/INDEX work and is embedded in the broad `/admin/operations/` workspace.
-
-### Build 366 — readiness-aware Today Tasks read
-
-Build 366 adds non-mutating read service plus:
+Build 366 replaced silent query-failure-to-zero behavior with an explicit non-mutating read contract:
 
 ```text
 GET /api/admin/contracts/operations-today-tasks-read
 ```
 
-The read exposes:
+Build 367 passively registers `operations-today-tasks-read`. Build 368 adds the dedicated page and activates it under `commerce-operations`. Done/Ignore/Snooze remains compatibility POST `/api/admin/today-task-actions` and is not owned by the top-level runtime.
+
+Initial browser proof on 2026-08-25 proved the loader/runtime boundary but surfaced four read-schema drift errors:
 
 ```text
-schema_ready
-missing_tables
-query_errors
-request_time_schema_mutation=false
-mutation_ownership_moved=false
+inventory                 no such table: site_items
+accounting                no such table: hst_gst_review_records
+failed_api                no such column: status
+runtime_incident_details  no such column: incident_id
 ```
 
-Available task counts still render when one source query fails. Missing-table/query failures are no longer silently represented as zero.
+The contract still returned HTTP 200, `request_time_schema_mutation=false`, active runtime Build 367 / activation 368, one required read service, `today_tasks_page_proven=true`, and no Today Tasks mutation ownership.
 
-Known schema-parity findings such as `hst_gst_review_records` may surface here. Do not add DDL to GET.
+### Build 369 — schema alignment
 
-### Build 367 — passive Commerce service
-
-Registers:
+Source audit showed the errors were stale query assumptions rather than four true missing authorities. Build 369 preserves public contract Build 366 and loader 367/368 while aligning to current schema:
 
 ```text
-operations-today-tasks-read
+site_items                       -> site_item_inventory
+reorder_status/reorder_threshold -> is_on_reorder_list/reorder_level/do_not_reorder
+hst_gst_review_records           -> accounting_hst_gst_reviews
+runtime_incidents.status         -> review_status
+runtime_incidents.incident_id    -> runtime_incident_id
+runtime_incidents.request_path   -> endpoint_path
 ```
 
-Operations prerequisites become:
+It also fixes D1 missing-table parsing so the colon before `SQLITE_ERROR` is not included in the table name.
 
-```text
-/admin/operations/          catalog-read, inventory-read, accounting-read
-/admin/customer-documents/  catalog-read, inventory-read, accounting-read
-/admin/orders/              catalog-read, inventory-read, accounting-read
-/admin/membership/          operations-membership-read
-/admin/today-tasks/         operations-today-tasks-read
-```
+Build 369 adds no GET-time DDL/DML and does not alter `/api/admin/today-task-actions` mutation authority.
 
-The runtime creates no network transport and owns no Today Tasks mutations.
+Important: the separate Build 339 `hst_gst_review_records` fresh-install parity finding remains open on the parity track. Build 369 only corrects Today Tasks to use the current accounting authority `accounting_hst_gst_reviews`.
 
-### Build 368 — dedicated Today Tasks page
+### Custom Requests remains next, but blocked from direct activation
 
-Adds `/admin/today-tasks/` and loads Core before `admin-today-tasks.js`.
-
-Automatic page load uses the Build 366 GET contract. Done/Ignore/Snooze continues to use retained compatibility POST `/api/admin/today-task-actions` only after explicit administrator action.
-
-No Custom Requests, Gift Cards, Membership, Accounting, Creative, SQL migration, or Cloudflare configuration authority is moved by this activation.
+`functions/api/admin/custom-requests.js` still owns a large `ensureSchema()` path containing CREATE/ALTER/INDEX work and is embedded in `/admin/operations/`. Do not activate a new Custom Requests read boundary until its GET/read model is separated from that schema authority.
 
 ## Business & Administration
 
@@ -152,25 +123,22 @@ No Custom Requests, Gift Cards, Membership, Accounting, Creative, SQL migration,
 
 ## Creative & Production
 
-Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated.
-
-All four Creative & Production domains are fully validated at the loader/read boundary:
+All four Creative & Production domains remain fully validated:
 
 ```text
-creative-production
-  packaging -> /admin/packaging-studio/   validated
-  creative  -> /admin/creative-process/   validated
-  content   -> /admin/content-studio/      validated
-  caip      -> /admin/creative-assets/     validated
+packaging -> /admin/packaging-studio/
+creative  -> /admin/creative-process/
+content   -> /admin/content-studio/
+caip      -> /admin/creative-assets/
 ```
 
-Do not expand this loader further merely to create more proof.
+Do not expand or rework that loader merely to create more evidence.
 
 ## Read-time schema rule
 
 > GET/read paths report or verify schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Never use top-level runtime activation as permission to add request-time DDL/default seeding or move mutations.
+Never use top-level activation as permission to add request-time DDL/default seeding or move mutations.
 
 ## Development schema-parity track — separate from extraction
 
@@ -189,20 +157,9 @@ Fresh-install schema parity still takes priority over Production business-data c
 ## Validation state
 
 ```text
-Builds 325–330   fully validated
-Builds 331–336   fully validated 2026-08-24
-Builds 337–339   fully validated 2026-08-24 (+ schema parity for 338/339)
-Builds 340–342   fully validated 2026-08-24 (+ schema parity for 341)
-Builds 343–345   fully validated 2026-08-24
-Builds 346–348   fully validated 2026-08-24
-Builds 349–351   fully validated 2026-08-24
-Builds 352–354   fully validated 2026-08-25
-Builds 355–357   fully validated 2026-08-25
-Build 358        fully validated 2026-08-25
-Builds 359–361   fully validated 2026-08-25
-Builds 362–364   fully validated 2026-08-25 after Build 365 correction
-Build 365        fully validated 2026-08-25
-Builds 366–368   staged / local + browser validation required
+Builds 325–365   fully validated through recorded checkpoints
+Builds 366–368   browser runtime proven; local + Build 369 read revalidation pending
+Build 369        staged / local + browser revalidation required
 ```
 
 ## Validation-harness rule
@@ -213,18 +170,18 @@ Historical regressions verify durable executable boundaries. They must not freez
 
 Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, Membership assignment/policy lifecycle, Today Tasks actions, Custom Requests workflow, Customer Documents actions, Accounting writes, Creative Process project/timeline/content/CAIP/cost edits, CAIP governance/media operations, and Content Studio project/media/deliverable/social-queue actions. Inventory-reviewed material posting/reversal already uses Inventory-owned authorities.
 
-A loader, read-contract migration, or top-level runtime activation never implies mutation ownership.
+A loader/read-contract migration or top-level runtime activation never implies mutation ownership.
 
-## Next batched sequence
+## Next sequence
 
-1. Pull staged Builds 366–368 and run the future-compatible Membership/365 regressions plus the new Today Tasks regression.
-2. Browser-validate `/admin/today-tasks/` without clicking Done/Ignore/Snooze.
-3. Accept `schema_ready=true` or explicit `schema_ready=false` with `missing_tables/query_errors`; the latter is parity evidence.
-4. If local + browser gates pass, close Builds 366–368.
-5. Then source-audit Custom Requests for a real non-mutating read-model extraction; do not activate its current schema-coupled GET unchanged.
+1. Pull current `dev` and run future-compatible Membership/365 regressions plus Builds 366–368 and Build 369 tests.
+2. Browser-revalidate `/admin/today-tasks/` without clicking Done/Ignore/Snooze.
+3. Expected after Build 369: Build 366 contract, implementation 369, runtime 367/activation 368, `schema_ready=true`, no missing tables/query errors.
+4. If any diagnostic remains, use exact key/message/table and correct the read assumption; do not add DDL to GET.
+5. After Today Tasks closes, source-extract Custom Requests read model from its large schema authority before any new activation.
 6. Avoid Gift Cards unless schema parity is deliberately the batch target.
-7. Continue fresh-install schema parity separately before Production business-data copy.
+7. Continue fresh-install schema parity before Production business-data copy.
 
 ## Production safety
 
-Real Devil n Dove Production remains frozen until deliberate promotion through the separate Production workflow. No module-extraction/runtime build should implicitly promote `dev` or mutate Production D1/R2.
+Real Production remains frozen until deliberate promotion through the separate Production workflow. No modularization build should implicitly advance `main` or mutate Production D1/R2.
