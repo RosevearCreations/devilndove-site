@@ -112,14 +112,20 @@ CREATE TABLE IF NOT EXISTS gift_card_provider_send_logs (
 CREATE INDEX IF NOT EXISTS idx_gift_card_provider_send_logs_queue ON gift_card_provider_send_logs(gift_card_delivery_queue_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_gift_card_provider_send_logs_card ON gift_card_provider_send_logs(gift_card_id, created_at DESC);
 
+-- Full current lookup-attempt shape. The Development release helper performs
+-- idempotent ALTER alignment for older tables before indexes are applied.
 CREATE TABLE IF NOT EXISTS gift_card_lookup_attempts (
   gift_card_lookup_attempt_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code_hint TEXT,
+  email_hash TEXT,
+  client_key TEXT,
   lookup_email TEXT,
   code_suffix TEXT,
   ip_hash TEXT,
   user_agent TEXT,
   result_status TEXT,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  was_success INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_gift_card_lookup_attempts_created ON gift_card_lookup_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_gift_card_lookup_attempts_email ON gift_card_lookup_attempts(lookup_email, created_at DESC);
