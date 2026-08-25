@@ -4,6 +4,10 @@
 Build 418 reduced 54 stored CREATE-SQL differences to exact matches,
 column-order/history-only candidates, and genuine structural candidates.
 Build 419 prints exact Dev-vs-Prod column/FK/index differences without mutation.
+
+Build 420 hardening reuses the same evidence flow but normalizes formatting-only
+index differences (comma/parenthesis whitespace and redundant ASC) before
+classification. UNIQUE, DESC and indexed-column order remain material.
 """
 from __future__ import annotations
 
@@ -12,6 +16,7 @@ import tempfile
 
 import build418_live_semantic_schema_classification as base
 import build418_live_semantic_schema_classification_resilient  # noqa: F401
+from build420_index_semantics import index_signature as build420_index_signature
 
 
 def column_map(rows: list[dict]) -> dict[str, tuple]:
@@ -50,7 +55,7 @@ def fk_set(rows: list[dict]) -> set[tuple]:
 
 
 def index_set(rows: list[str]) -> set[str]:
-    return set(base.index_signature(rows))
+    return set(build420_index_signature(rows))
 
 
 def print_set_diff(label: str, dev_values: set, prod_values: set) -> None:
@@ -80,6 +85,7 @@ def main() -> int:
     print(f'Production target:  {base.PROD_DATABASE} ({base.PROD_DATABASE_ID})')
     print('SQL guard: SELECT / inspection-only PRAGMA — PASS')
     print('PRODUCTION MUTATION CAPABILITY IN THIS HELPER: NONE')
+    print('Build 420 index normalization: whitespace/ASC cosmetic differences ignored')
 
     with tempfile.TemporaryDirectory(prefix='dd-build419-') as temp_dir:
         temp = Path(temp_dir)
