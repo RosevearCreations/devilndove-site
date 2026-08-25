@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through browser-proven Build 365 on 2026-08-25.
+Updated through fully validated Build 365 on 2026-08-25.
 
 ## Architectural invariant
 
@@ -33,8 +33,8 @@ Core architecture                       302
 Core runtime implementation             305
 Commerce runtime                        363
 Operations Membership read contract     362
-Operations Membership activation        364 validated after Build 365
-Membership read hardening               365 browser-passed / local rerun pending
+Operations Membership activation        364 validated
+Membership read hardening               365 validated
 Contract catalog                        345
 Default passive adapters                345
 Business Accounting activation          348 validated
@@ -100,46 +100,19 @@ The first browser proof showed Build 363/364 runtime activation succeeding while
 - aggregate child throws are reported with `failed_read` rather than collapsing into an opaque platform 500;
 - Membership mutation ownership remains unchanged.
 
-Browser revalidation on 2026-08-25 passed:
+Browser revalidation passed with Build 362/365 reads at HTTP 200, `schema_ready=true`, database-backed Bronze/Silver/Gold rows, active Commerce runtime Build 363 / activation 364, exactly one Membership read service, and no Membership mutation ownership.
+
+Corrected local regression also passed:
 
 ```text
-membership_contract_status                 200
-membership_contract_build                  362
-membership_contract_implementation_build   365
-membership_contract_schema_ready           true
-membership_contract_missing_tables         []
-tier_policy_status                         200
-tier_policy_build                          362
-tier_policy_implementation_build           365
-tier_policy_schema_ready                   true
-tier_policy_source                         database
-tier_policy_defaults_materialized          true
-tier_policy_item_count                     3
-tier_policy_codes                          bronze,silver,gold
-application_module                         commerce-operations
-application_mode                           active
-active_application_module                  commerce-operations
-operations_domain                          operations
-runtime_entry                              ../modules/commerce-operations/runtime.mjs?v=363
-runtime_build                              363
-activation_build                           364
-runtime_state                              active
-services_ready                             true
-required_service_count                     1
-required_services                          ["operations-membership-read"]
-membership_page_proven                     true
-creates_network_transport                  false
-operations_mutation_ownership              false
-membership_mutation_ownership              false
-contracts_ok                               true
-services_ok                                true
+BUILD 365 MEMBERSHIP READ RESILIENCE: PASS
+No Cloudflare resource was contacted.
+9a999d33
 ```
 
-The Development database therefore already has a usable `membership_tier_policies` table with Bronze, Silver, and Gold rows. No Membership table parity deficit was observed there.
+Builds 362–365 are fully validated.
 
-Builds 362–364 are fully validated. Build 365 requires only its corrected local regression rerun; no further Firefox proof is required unless the implementation changes again.
-
-Known `gift_cards` fresh-install schema parity is deliberately not mixed into this batch. `/admin/members/` remains outside current narrow coverage because it composes many account/engagement/gift-card/timeline scripts.
+Known `gift_cards` fresh-install schema parity is deliberately not mixed into this track. `/admin/members/` remains outside current narrow coverage because it composes many account/engagement/gift-card/timeline scripts.
 
 ## Business & Administration
 
@@ -149,7 +122,7 @@ Known `gift_cards` fresh-install schema parity is deliberately not mixed into th
 
 Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated.
 
-All four Creative & Production domains are now fully validated at the loader/read boundary:
+All four Creative & Production domains are fully validated at the loader/read boundary:
 
 ```text
 creative-production
@@ -205,7 +178,7 @@ Builds 355–357   fully validated 2026-08-25
 Build 358        fully validated 2026-08-25
 Builds 359–361   fully validated 2026-08-25
 Builds 362–364   fully validated 2026-08-25 after Build 365 correction
-Build 365        browser passed; corrected local regression required
+Build 365        fully validated 2026-08-25
 ```
 
 ## Validation-harness rule
@@ -220,12 +193,11 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Pull current `dev` and rerun only `scripts/build365_membership_read_resilience_test.py`.
-2. If it passes with a clean working tree, mark Build 365 fully validated; no further Membership browser proof is required.
-3. Continue Commerce & Operations source audit for the next narrow read/runtime page. Prefer Custom Requests or Today Tasks only after source audit confirms clean startup-read boundaries.
-4. Avoid Gift Cards unless schema parity is deliberately the batch target.
-5. Keep `/admin/members/` outside the narrow Membership boundary until its coupled account/engagement/gift-card/timeline reads are separately audited.
-6. Continue fresh-install schema parity separately before Production business-data copy.
+1. Everything through Build 365 is fully validated; do not rerun passing Membership or Creative browser proofs.
+2. Audit Custom Requests and Today Tasks as the next Commerce & Operations candidates and choose the narrower non-mutating startup-read boundary.
+3. Avoid Gift Cards unless schema parity is deliberately the batch target.
+4. Keep `/admin/members/` outside the narrow Membership boundary until its coupled account/engagement/gift-card/timeline reads are separately audited.
+5. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
 
