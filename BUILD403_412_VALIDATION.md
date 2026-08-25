@@ -1,6 +1,6 @@
 # Builds 403–412 Validation — Commerce Mutation Boundaries + Development RC
 
-## Status — LOCAL RC PASS / DEVELOPMENT D1 + READ-ONLY BROWSER PROOF REQUIRED
+## Status — LOCAL RC PASS / DEVELOPMENT D1 AUTH BLOCKED / READ-ONLY BROWSER PROOF REQUIRED
 
 ```text
 403  Canonical shared notification schema/readiness authority
@@ -82,9 +82,19 @@ PRODUCTION PROMOTION: CLOSED — Development D1/browser/live parity gates are st
 
 Build 402 also proved the current clean-install composition with 512 tables, 25 overlay-owned tables, current parity seeds, and a passing `PRAGMA foreign_key_check`.
 
-## Development D1 parity application — NEXT GATE
+## Development D1 parity application — AUTHENTICATION BLOCKED BEFORE SQL
 
-Apply the post-Build-384 overlays to Development only:
+The first post-RC Build 410 Development D1 attempt stopped during its read-only preflight before any migration statement executed:
+
+```text
+The given account is not valid or is not authorized to access this service [code: 7403]
+```
+
+This is an authentication/account-authorization gate, not a schema result. The committed `wrangler.toml` remains pinned to the Development project/database, and the same Development D1 had been reachable earlier in the session.
+
+The applicator now performs a no-secret Wrangler authentication diagnostic before the D1 preflight. It reports `wrangler whoami` and only the names of configured Cloudflare auth/account environment variables; it never prints token values. On Cloudflare 7403 it stops with explicit guidance that environment API-token credentials can take precedence over Wrangler OAuth and that the active credential must have D1 Read/Write access to the target account.
+
+After authentication is corrected, rerun:
 
 ```bash
 python scripts/build410_apply_development_parity_overlays.py
@@ -106,7 +116,7 @@ Expected final line:
 BUILD 410 DEVELOPMENT PARITY OVERLAY APPLICATOR: COMPLETE
 ```
 
-If any migration stops on a real schema mismatch, preserve the exact statement output and repair that parity gap; do not move DDL back into request handlers.
+If a later migration stops on a real schema mismatch, preserve the exact statement output and repair that parity gap; do not move DDL back into request handlers.
 
 ## Read-only browser gates
 
