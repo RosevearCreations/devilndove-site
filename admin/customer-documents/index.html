@@ -12,12 +12,20 @@
 <body data-admin-page="customer-documents">
   <main class="container admin-shell customer-documents-page">
     <nav class="nav"><div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"/><div><strong>Devil n Dove</strong><div class="small">Admin / Client Documents</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/orders/">Orders</a><a href="/admin/accounting/">Accounting</a><a href="/admin/packaging-studio/">Packaging</a><button class="btn" data-nav-logout type="button">Logout</button></div></nav>
-    <section class="hero customer-documents-hero"><div><p class="eyebrow">Build 397 • Owned read boundary + immutable document snapshots</p><h1>Client Documents</h1><p>Issue formatted invoices, receipts, packing slips, credit notes and refund confirmations from the facts stored on an order. Each issued document receives a sequential number and preserves its own immutable source snapshot; later order edits do not silently rewrite customer history.</p></div><div class="visual-placeholder-card"><img src="/assets/client-document-workflow-placeholder.svg" alt="Placeholder illustration of an invoice, packing slip and credit note moving through review, issue and print stages"/><small>Issue → review → print/PDF → retain or formally void</small></div></section>
+    <section class="hero customer-documents-hero"><div><p class="eyebrow">Build 415 • Owned read + mutation contracts / immutable snapshots</p><h1>Client Documents</h1><p>Issue formatted invoices, receipts, packing slips, credit notes and refund confirmations from the facts stored on an order. Each issued document receives a sequential number and preserves its own immutable source snapshot; later order edits do not silently rewrite customer history.</p></div><div class="visual-placeholder-card"><img src="/assets/client-document-workflow-placeholder.svg" alt="Placeholder illustration of an invoice, packing slip and credit note moving through review, issue and print stages"/><small>Issue → review → print/PDF → retain or formally void</small></div></section>
     <section class="card document-boundary"><strong>Financial control boundary</strong><p class="small">Credit notes and refund confirmations must be linked to a recorded refund. Confirm the business legal name, GST/HST registration number and tax adjustment with the owner/accountant. Voiding preserves the original snapshot and requires a reason.</p></section>
     <div id="customerDocumentsMessage" class="card" hidden></div>
     <div id="customerDocumentsMount"><section class="card"><p>Loading client documents…</p></section></div>
     <div class="footer card" style="margin-top:18px"></div>
   </main>
-  <script src="/js/main.js?v=279"></script><script src="/public/js/auth.js?v=279"></script><script src="/public/js/admin-route-usage.js"></script><script src="/public/js/site-auth-ui.js?v=245"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/admin-self-protect.js?v=245"></script><script src="/public/js/admin.js?v=397"></script><script src="/public/js/admin-customer-documents.js?v=227"></script>
+  <script src="/js/main.js?v=279"></script>
+  <script src="/public/js/auth.js?v=279"></script>
+  <script src="/public/js/admin-route-usage.js"></script>
+  <script src="/public/js/site-auth-ui.js?v=245"></script>
+  <script src="/public/js/site-analytics.js?v=279"></script>
+  <script src="/public/js/admin-self-protect.js?v=245"></script>
+  <script src="/public/js/admin.js?v=397"></script>
+  <script src="/public/js/admin-customer-documents-contract-bridge.js?v=415"></script>
+  <script src="/public/js/admin-customer-documents.js?v=227"></script>
 </body>
 </html>
