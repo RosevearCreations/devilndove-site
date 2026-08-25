@@ -21,6 +21,8 @@ Safety:
   a leading `-- ...` migration comment cannot be misparsed as a CLI option.
 - Executes one SQL statement per remote command. This avoids multi-statement
   payload ambiguity and identifies the exact statement if D1 rejects anything.
+- Compacts command SQL to one physical line outside quoted strings before invoking
+  npx.cmd so Windows batch argument forwarding cannot truncate multiline SQL.
 """
 
 from __future__ import annotations
@@ -56,10 +58,6 @@ def fail(message: str, code: int = 1) -> "NoReturn":
 
 
 def run_capture(args: list[str]) -> subprocess.CompletedProcess[str]:
-    # Wrangler/Node can emit bytes that Windows' default CP1252 decoder cannot
-    # represent (for example while rendering CLI progress output). Pin decoding to
-    # UTF-8 and replace any malformed byte rather than losing the actual D1 result
-    # to a UnicodeDecodeError in this helper.
     return subprocess.run(
         args,
         cwd=ROOT,
@@ -85,24 +83,13 @@ def resolve_npx() -> str:
 
 
 def strip_sql_line_comments(text: str) -> str:
-    """Remove full-line SQL comments before building Wrangler --command values.
-
-    Wrangler/yargs can interpret a command value beginning with `-- comment` as a
-    new CLI option. The Build 384 migration uses ordinary full-line comments only,
-    so remove those lines while preserving all executable SQL and quoted strings.
-    """
     return "\n".join(
         line for line in text.splitlines() if not line.lstrip().startswith("--")
     )
 
 
 def split_sql(text: str) -> list[str]:
-    """Split SQL on semicolons outside quoted strings.
-
-    The Build 384 migration contains ordinary DDL/DML statements only; this parser
-    intentionally remains small and deterministic instead of trying to be a full
-    SQL grammar.
-    """
+    """Split SQL on semicolons outside quoted strings."""
     text = strip_sql_line_comments(text)
     statements: list[str] = []
     current: list[str] = []
@@ -154,23 +141,81 @@ def split_sql(text: str) -> list[str]:
     return statements
 
 
+def compact_sql_for_command(sql: str) -> str:
+    """Collapse whitespace outside quoted strings to make one Windows-safe argument."""
+    out: list[str] = []
+    in_single = False
+    in_double = False
+    pending_space = False
+    i = 0
+
+    while i < len(sql):
+        ch = sql[i]
+
+        if ch == "'" and not in_double:
+            if pending_space and out and out[-1] != " ":
+                out.append(" ")
+            pending_space = False
+            if in_single and i + 1 < len(sql) and sql[i + 1] == "'":
+                out.extend(("'", "'"))
+                i += 2
+                continue
+            in_single = not in_single
+            out.append(ch)
+            i += 1
+            continue
+
+        if ch == '"' and not in_single:
+            if pending_space and out and out[-1] != " ":
+                out.append(" ")
+            pending_space = False
+            if in_double and i + 1 < len(sql) and sql[i + 1] == '"':
+                out.extend(('"', '"'))
+                i += 2
+                continue
+            in_double = not in_double
+            out.append(ch)
+            i += 1
+            continue
+
+        if not in_single and not in_double and ch.isspace():
+            pending_space = True
+            i += 1
+            continue
+
+        if pending_space and out and out[-1] != " ":
+            out.append(" ")
+        pending_space = False
+        out.append(ch)
+        i += 1
+
+    compact = "".join(out).strip()
+    if in_single or in_double:
+        fail("Command compaction encountered an unterminated quoted string.")
+    return compact
+
+
 def validate_statements(statements: list[str]) -> None:
     for index, statement in enumerate(statements, start=1):
         if statement.lstrip().startswith("--"):
             fail(f"SQL statement {index} still begins with a line comment after sanitization.")
-        if len(statement) > MAX_COMMAND_CHARS:
+        compact = compact_sql_for_command(statement)
+        if len(compact) > MAX_COMMAND_CHARS:
             fail(
-                f"SQL statement {index} is {len(statement)} characters, above the direct-command "
-                f"limit of {MAX_COMMAND_CHARS}."
+                f"SQL statement {index} is {len(compact)} compacted characters, above the "
+                f"direct-command limit of {MAX_COMMAND_CHARS}."
             )
+        if "\n" in compact or "\r" in compact:
+            fail(f"SQL statement {index} still contains a physical newline after compaction.")
 
 
 def sql_preview(sql: str, limit: int = 140) -> str:
-    compact = " ".join(sql.split())
+    compact = compact_sql_for_command(sql)
     return compact if len(compact) <= limit else compact[: limit - 3] + "..."
 
 
 def wrangler_command(npx: str, sql: str) -> list[str]:
+    compact = compact_sql_for_command(sql)
     return [
         npx,
         "wrangler",
@@ -182,7 +227,7 @@ def wrangler_command(npx: str, sql: str) -> list[str]:
         str(CONFIG),
         "--yes",
         "--command",
-        sql,
+        compact,
     ]
 
 
@@ -235,8 +280,6 @@ def main() -> int:
 
     npx = resolve_npx()
 
-    # Read-only preflight: this also proves the direct --command route works before
-    # any DDL is attempted.
     table_list = ",".join(f"'{name}'" for name in EXPECTED_TABLES)
     preflight_sql = (
         "SELECT name FROM sqlite_schema "
