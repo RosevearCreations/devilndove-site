@@ -1,6 +1,6 @@
-// Devil n Dove Build 371 Commerce & Operations umbrella runtime.
-// Build 372 adds explicit Custom Requests coverage. Existing Operations pages retain their
-// proven prerequisites; Membership, Today Tasks, and Custom Requests use page-specific passive reads.
+// Devil n Dove Build 386 Commerce & Operations umbrella runtime.
+// Build 386 adds explicit Gift Cards coverage. Existing Operations pages retain their
+// proven prerequisites; Membership, Today Tasks, Custom Requests, and Gift Cards use page-specific passive reads.
 
 import {
   BUILD as INVENTORY_WRITE_BOUNDARY_BUILD,
@@ -9,14 +9,16 @@ import {
 import { ensureOperationsMembershipReadService } from './operations-membership-read-service.mjs?v=363';
 import { ensureOperationsTodayTasksReadService } from './operations-today-tasks-read-service.mjs?v=367';
 import { ensureOperationsCustomRequestsReadService } from './operations-custom-requests-read-service.mjs?v=371';
+import { ensureOperationsGiftCardsReadService } from './operations-gift-cards-read-service.mjs?v=386';
 
-const BUILD = 371;
-const ACTIVATION_BUILD = 372;
+const BUILD = 386;
+const ACTIVATION_BUILD = 386;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory', 'operations']);
 const MEMBERSHIP_RUNTIME_PAGE = '/admin/membership/';
 const TODAY_TASKS_RUNTIME_PAGE = '/admin/today-tasks/';
 const CUSTOM_REQUESTS_RUNTIME_PAGE = '/admin/custom-request/';
+const GIFT_CARDS_RUNTIME_PAGE = '/admin/gift-cards/';
 const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
@@ -24,6 +26,7 @@ const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   MEMBERSHIP_RUNTIME_PAGE,
   TODAY_TASKS_RUNTIME_PAGE,
   CUSTOM_REQUESTS_RUNTIME_PAGE,
+  GIFT_CARDS_RUNTIME_PAGE,
 ]);
 const CATALOG_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-cost']);
 const INVENTORY_REQUIRED_SERVICES = Object.freeze(['inventory-read']);
@@ -31,6 +34,7 @@ const LEGACY_OPERATIONS_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inve
 const MEMBERSHIP_REQUIRED_SERVICES = Object.freeze(['operations-membership-read']);
 const TODAY_TASKS_REQUIRED_SERVICES = Object.freeze(['operations-today-tasks-read']);
 const CUSTOM_REQUESTS_REQUIRED_SERVICES = Object.freeze(['operations-custom-requests-read']);
+const GIFT_CARDS_REQUIRED_SERVICES = Object.freeze(['operations-gift-cards-read']);
 const ALL_REQUIRED_SERVICES = Object.freeze([
   'catalog-read',
   'inventory-read',
@@ -39,6 +43,7 @@ const ALL_REQUIRED_SERVICES = Object.freeze([
   'operations-membership-read',
   'operations-today-tasks-read',
   'operations-custom-requests-read',
+  'operations-gift-cards-read',
 ]);
 const MEMBERSHIP_READ_CONTRACT = '/api/admin/contracts/operations-membership-read';
 const MEMBERSHIP_READ_CONTRACT_BUILD = 362;
@@ -48,6 +53,14 @@ const TODAY_TASKS_ACTION_AUTHORITY = '/api/admin/today-task-actions';
 const CUSTOM_REQUESTS_READ_CONTRACT = '/api/admin/contracts/operations-custom-requests-read';
 const CUSTOM_REQUESTS_READ_CONTRACT_BUILD = 370;
 const CUSTOM_REQUESTS_COMPATIBILITY_AUTHORITY = '/api/admin/custom-requests';
+const GIFT_CARDS_READ_CONTRACT = '/api/admin/contracts/operations-gift-cards-read';
+const GIFT_CARDS_READ_CONTRACT_BUILD = 385;
+const GIFT_CARDS_MUTATION_AUTHORITIES = Object.freeze([
+  '/api/admin/gift-card-actions',
+  '/api/admin/gift-card-delivery-templates',
+  '/api/admin/gift-card-delivery-send',
+  '/api/admin/gift-card-abuse',
+]);
 
 let state = 'registered';
 let activationCount = 0;
@@ -85,6 +98,7 @@ function requiredServicesForDomain(domainId, pathname = '') {
     if (path === MEMBERSHIP_RUNTIME_PAGE) return MEMBERSHIP_REQUIRED_SERVICES;
     if (path === TODAY_TASKS_RUNTIME_PAGE) return TODAY_TASKS_REQUIRED_SERVICES;
     if (path === CUSTOM_REQUESTS_RUNTIME_PAGE) return CUSTOM_REQUESTS_REQUIRED_SERVICES;
+    if (path === GIFT_CARDS_RUNTIME_PAGE) return GIFT_CARDS_REQUIRED_SERVICES;
     return LEGACY_OPERATIONS_REQUIRED_SERVICES;
   }
   return Object.freeze([]);
@@ -92,27 +106,18 @@ function requiredServicesForDomain(domainId, pathname = '') {
 function verifyServices(registry, domainId, pathname) {
   const domain = normalizeDomain(domainId);
   const path = normalizePathname(pathname);
-  if (domain === 'operations' && path === MEMBERSHIP_RUNTIME_PAGE) {
-    ensureOperationsMembershipReadService(registry);
-  }
-  if (domain === 'operations' && path === TODAY_TASKS_RUNTIME_PAGE) {
-    ensureOperationsTodayTasksReadService(registry);
-  }
-  if (domain === 'operations' && path === CUSTOM_REQUESTS_RUNTIME_PAGE) {
-    ensureOperationsCustomRequestsReadService(registry);
-  }
+  if (domain === 'operations' && path === MEMBERSHIP_RUNTIME_PAGE) ensureOperationsMembershipReadService(registry);
+  if (domain === 'operations' && path === TODAY_TASKS_RUNTIME_PAGE) ensureOperationsTodayTasksReadService(registry);
+  if (domain === 'operations' && path === CUSTOM_REQUESTS_RUNTIME_PAGE) ensureOperationsCustomRequestsReadService(registry);
+  if (domain === 'operations' && path === GIFT_CARDS_RUNTIME_PAGE) ensureOperationsGiftCardsReadService(registry);
   const required = requiredServicesForDomain(domain, path);
   const missing = required.filter((serviceId) => !registry?.service?.(serviceId));
-  if (missing.length) {
-    throw new Error(`Commerce & Operations ${domain || 'unknown'} boundary is missing required services: ${missing.join(', ')}`);
-  }
+  if (missing.length) throw new Error(`Commerce & Operations ${domain || 'unknown'} boundary is missing required services: ${missing.join(', ')}`);
   activeRequiredServices = Object.freeze([...required]);
   servicesReady = true;
   return true;
 }
-function inventoryWriteBoundaryStatus() {
-  return getInventoryWriteBoundaryStatus();
-}
+function inventoryWriteBoundaryStatus() { return getInventoryWriteBoundaryStatus(); }
 function emit(name, detail = {}) {
   if (typeof document === 'undefined' || typeof CustomEvent === 'undefined') return;
   document.dispatchEvent(new CustomEvent(name, {
@@ -130,12 +135,14 @@ function installFacade() {
     membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
     todayTasksRuntimePage: TODAY_TASKS_RUNTIME_PAGE,
     customRequestsRuntimePage: CUSTOM_REQUESTS_RUNTIME_PAGE,
+    giftCardsRuntimePage: GIFT_CARDS_RUNTIME_PAGE,
     catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
     inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
     legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
     membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
     todayTasksRequiredServices: TODAY_TASKS_REQUIRED_SERVICES,
     customRequestsRequiredServices: CUSTOM_REQUESTS_REQUIRED_SERVICES,
+    giftCardsRequiredServices: GIFT_CARDS_REQUIRED_SERVICES,
     allRequiredServices: ALL_REQUIRED_SERVICES,
     membershipReadContract: MEMBERSHIP_READ_CONTRACT,
     membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
@@ -145,6 +152,9 @@ function installFacade() {
     customRequestsReadContract: CUSTOM_REQUESTS_READ_CONTRACT,
     customRequestsReadContractBuild: CUSTOM_REQUESTS_READ_CONTRACT_BUILD,
     customRequestsCompatibilityAuthority: CUSTOM_REQUESTS_COMPATIBILITY_AUTHORITY,
+    giftCardsReadContract: GIFT_CARDS_READ_CONTRACT,
+    giftCardsReadContractBuild: GIFT_CARDS_READ_CONTRACT_BUILD,
+    giftCardsMutationAuthorities: GIFT_CARDS_MUTATION_AUTHORITIES,
     inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
     inventoryCostContractBuild: 311,
     accountingReadContractBuild: 312,
@@ -154,6 +164,7 @@ function installFacade() {
     membershipMutationOwnership: false,
     todayTasksMutationOwnership: false,
     customRequestsMutationOwnership: false,
+    giftCardsMutationOwnership: false,
     createsNetworkTransport: false,
     supportedPathForDomain,
     requiredServicesForDomain,
@@ -172,12 +183,14 @@ export const metadata = Object.freeze({
   membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
   todayTasksRuntimePage: TODAY_TASKS_RUNTIME_PAGE,
   customRequestsRuntimePage: CUSTOM_REQUESTS_RUNTIME_PAGE,
+  giftCardsRuntimePage: GIFT_CARDS_RUNTIME_PAGE,
   catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
   inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
   legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
   membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
   todayTasksRequiredServices: TODAY_TASKS_REQUIRED_SERVICES,
   customRequestsRequiredServices: CUSTOM_REQUESTS_REQUIRED_SERVICES,
+  giftCardsRequiredServices: GIFT_CARDS_REQUIRED_SERVICES,
   allRequiredServices: ALL_REQUIRED_SERVICES,
   membershipReadContract: MEMBERSHIP_READ_CONTRACT,
   membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
@@ -187,13 +200,17 @@ export const metadata = Object.freeze({
   customRequestsReadContract: CUSTOM_REQUESTS_READ_CONTRACT,
   customRequestsReadContractBuild: CUSTOM_REQUESTS_READ_CONTRACT_BUILD,
   customRequestsCompatibilityAuthority: CUSTOM_REQUESTS_COMPATIBILITY_AUTHORITY,
-  behaviorMode: 'catalog-inventory-operations-read-only-explicit-membership-today-tasks-custom-requests-page-coverage',
+  giftCardsReadContract: GIFT_CARDS_READ_CONTRACT,
+  giftCardsReadContractBuild: GIFT_CARDS_READ_CONTRACT_BUILD,
+  giftCardsMutationAuthorities: GIFT_CARDS_MUTATION_AUTHORITIES,
+  behaviorMode: 'catalog-inventory-operations-read-only-explicit-page-specific-coverage',
   createsNetworkTransport: false,
   ownsInventoryMutations: false,
   ownsOperationsMutations: false,
   ownsMembershipMutations: false,
   ownsTodayTasksMutations: false,
   ownsCustomRequestsMutations: false,
+  ownsGiftCardsMutations: false,
   inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
   inventoryCostContractBuild: 311,
   accountingReadContractBuild: 312,
@@ -205,9 +222,7 @@ export const metadata = Object.freeze({
 export async function onLoad({ registry, applicationModule, domainDefinition, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
   if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build ${BUILD} cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
-  if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
-    throw new Error(`Commerce & Operations Build ${BUILD} has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
-  }
+  if (!supportedPathForDomain(domainDefinition?.id, pathname)) throw new Error(`Commerce & Operations Build ${BUILD} has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
   verifyServices(registry, domainDefinition.id, pathname);
   state = 'loaded';
   installFacade();
@@ -222,6 +237,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition, pa
     membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
     todayTasksReadContractBuild: TODAY_TASKS_READ_CONTRACT_BUILD,
     customRequestsReadContractBuild: CUSTOM_REQUESTS_READ_CONTRACT_BUILD,
+    giftCardsReadContractBuild: GIFT_CARDS_READ_CONTRACT_BUILD,
     inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
 }
@@ -230,9 +246,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime activated with the wrong application-module definition.');
   if (!authenticatedAdmin(user)) throw new Error('Commerce & Operations runtime activation requires an administrator.');
   if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build ${BUILD} cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
-  if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
-    throw new Error(`Commerce & Operations Build ${BUILD} has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
-  }
+  if (!supportedPathForDomain(domainDefinition?.id, pathname)) throw new Error(`Commerce & Operations Build ${BUILD} has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
   verifyServices(registry, domainDefinition.id, pathname);
   activationCount += 1;
   currentDomain = normalizeDomain(domainDefinition.id);
@@ -251,6 +265,7 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     membershipMutationOwnership: false,
     todayTasksMutationOwnership: false,
     customRequestsMutationOwnership: false,
+    giftCardsMutationOwnership: false,
     inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
 }
@@ -268,9 +283,7 @@ export async function onDeactivate({ reason = 'route-lifecycle' } = {}) {
 
 export function getStatus() {
   const writeBoundary = inventoryWriteBoundaryStatus();
-  const currentRequired = currentDomain
-    ? requiredServicesForDomain(currentDomain, lastPathname)
-    : Object.freeze([]);
+  const currentRequired = currentDomain ? requiredServicesForDomain(currentDomain, lastPathname) : Object.freeze([]);
   return Object.freeze({
     build: BUILD,
     activationBuild: ACTIVATION_BUILD,
@@ -284,12 +297,14 @@ export function getStatus() {
     membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
     todayTasksRuntimePage: TODAY_TASKS_RUNTIME_PAGE,
     customRequestsRuntimePage: CUSTOM_REQUESTS_RUNTIME_PAGE,
+    giftCardsRuntimePage: GIFT_CARDS_RUNTIME_PAGE,
     catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
     inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
     legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
     membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
     todayTasksRequiredServices: TODAY_TASKS_REQUIRED_SERVICES,
     customRequestsRequiredServices: CUSTOM_REQUESTS_REQUIRED_SERVICES,
+    giftCardsRequiredServices: GIFT_CARDS_REQUIRED_SERVICES,
     requiredServices: currentRequired,
     activeRequiredServices,
     servicesReady,
@@ -299,10 +314,12 @@ export function getStatus() {
     ownsMembershipMutations: false,
     ownsTodayTasksMutations: false,
     ownsCustomRequestsMutations: false,
+    ownsGiftCardsMutations: false,
     operationsMutationOwnership: false,
     membershipMutationOwnership: false,
     todayTasksMutationOwnership: false,
     customRequestsMutationOwnership: false,
+    giftCardsMutationOwnership: false,
     membershipReadContract: MEMBERSHIP_READ_CONTRACT,
     membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
     todayTasksReadContract: TODAY_TASKS_READ_CONTRACT,
@@ -314,6 +331,10 @@ export function getStatus() {
     customRequestsCompatibilityAuthority: CUSTOM_REQUESTS_COMPATIBILITY_AUTHORITY,
     customRequestsMutationOwnershipMoved: false,
     customRequestsMarketplaceCsvLegacyGetOutsideContract: true,
+    giftCardsReadContract: GIFT_CARDS_READ_CONTRACT,
+    giftCardsReadContractBuild: GIFT_CARDS_READ_CONTRACT_BUILD,
+    giftCardsMutationAuthorities: GIFT_CARDS_MUTATION_AUTHORITIES,
+    giftCardsMutationOwnershipMoved: false,
     inventoryCostContractBuild: 311,
     inventoryCostServiceRequiredForCatalog: true,
     accountingReadContractBuild: 312,
@@ -340,10 +361,12 @@ export function getStatus() {
     membershipRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === MEMBERSHIP_RUNTIME_PAGE,
     todayTasksRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === TODAY_TASKS_RUNTIME_PAGE,
     customRequestsRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === CUSTOM_REQUESTS_RUNTIME_PAGE,
+    giftCardsRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === GIFT_CARDS_RUNTIME_PAGE,
     currentOperationsPageProven: state === 'active' && currentDomain === 'operations' && OPERATIONS_RUNTIME_PAGES.includes(lastPathname),
     currentMembershipPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === MEMBERSHIP_RUNTIME_PAGE,
     currentTodayTasksPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === TODAY_TASKS_RUNTIME_PAGE,
     currentCustomRequestsPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === CUSTOM_REQUESTS_RUNTIME_PAGE,
+    currentGiftCardsPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === GIFT_CARDS_RUNTIME_PAGE,
   });
 }
 
