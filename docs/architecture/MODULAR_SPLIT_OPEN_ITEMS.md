@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Build 365 on 2026-08-25.
+Updated through browser-proven Build 365 on 2026-08-25.
 
 ## Architectural invariant
 
@@ -31,19 +31,19 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                       302
 Core runtime implementation             305
-Commerce runtime                        363 Membership browser-proven
-Operations Membership read contract     362 browser-failed / Build 365 patch staged
-Operations Membership activation        364 browser-proven
-Membership read hardening               365 staged
+Commerce runtime                        363
+Operations Membership read contract     362
+Operations Membership activation        364 validated after Build 365
+Membership read hardening               365 browser-passed / local rerun pending
 Contract catalog                        345
 Default passive adapters                345
 Business Accounting activation          348 validated
 Packaging baseline                      301 validated
 Creative Packaging activation           351 validated
-Creative Process read/runtime            browser-proven; corrected local required
-Creative dependency gate fix            358 browser-proven; corrected local required
-Content Studio read/runtime              355–357 browser-proven; corrected local required
-CAIP read/runtime                        359–361 browser-proven; local required
+Creative Process read/runtime            352–354 validated
+Creative dependency gate fix            358 validated
+Content Studio read/runtime              355–357 validated
+CAIP read/runtime                        359–361 validated
 Accounting mutation ownership moved     false
 Operations mutation ownership moved     false
 Membership mutation ownership moved     false
@@ -52,19 +52,20 @@ Content mutation ownership moved        false
 CAIP mutation ownership moved           false
 ```
 
-### Commerce & Operations
+## Commerce & Operations
 
-Previously proven Operations pages remain:
+Validated Operations pages now include:
 
 ```text
 /admin/operations/
 /admin/customer-documents/
 /admin/orders/
+/admin/membership/
 ```
 
-Builds 362–364 add `/admin/membership/` as the fourth explicit Operations runtime page.
+### Membership boundary — Builds 362–365
 
-The page's intended startup reads are:
+Membership startup reads are:
 
 ```text
 GET /api/admin/users
@@ -72,9 +73,9 @@ GET /api/admin/access-tiers
 GET /api/admin/tier-policies
 ```
 
-Users and access tiers are SELECT-only. Before Build 362, Tier Policies created `membership_tier_policies` and seeded Bronze/Silver/Gold during GET.
+Before Build 362, Tier Policy GET created `membership_tier_policies` and seeded Bronze/Silver/Gold during a read.
 
-Build 362 established a non-mutating Tier Policy read contract and GET-only `operations-membership-read` aggregate. The retained POST still owns legacy ensure/seed/update behavior.
+Build 362 established a non-mutating Tier Policy read authority and GET-only `operations-membership-read`. Retained POST still owns legacy ensure/seed/update behavior.
 
 Build 363 registers `operations-membership-read` passively and makes Operations prerequisites page-specific:
 
@@ -85,76 +86,77 @@ Build 363 registers `operations-membership-read` passively and makes Operations 
 /admin/membership/          operations-membership-read
 ```
 
-Build 364 adds `/admin/membership/` to explicit coverage, cache-busts Core, and fixes the existing Tier Policy mount mismatch (`adminTierPolicyMount` -> `tierPolicyAdminMount`). Assignment/removal and policy-edit mutations remain compatibility authorities.
+Build 364 adds `/admin/membership/` to explicit coverage and fixes `adminTierPolicyMount` -> `tierPolicyAdminMount`.
 
-#### Browser evidence — 2026-08-25
+The first browser proof showed Build 363/364 runtime activation succeeding while both Build 362 reads returned opaque HTTP 500. Build 365 corrected the read implementation without changing the public contract or loader:
 
-The Build 363/364 loader/runtime boundary passed:
-
-```text
-membership_service_registered           true
-application_module                      commerce-operations
-application_mode                        active
-active_application_module               commerce-operations
-operations_domain                       operations
-runtime_entry                           ../modules/commerce-operations/runtime.mjs?v=363
-runtime_build                           363
-activation_build                        364
-runtime_state                           active
-current_domain                          operations
-last_pathname                           /admin/membership/
-services_ready                          true
-required_service_count                  1
-required_services                       ["operations-membership-read"]
-membership_page_proven                  true
-creates_network_transport               false
-operations_mutation_ownership           false
-membership_mutation_ownership           false
-contracts_ok                            true
-services_ok                             true
-```
-
-However both Build 362 read endpoints returned opaque HTTP 500 before contract metadata could be parsed:
-
-```text
-GET /api/admin/tier-policies                         500
-GET /api/admin/contracts/operations-membership-read  500
-```
-
-A genuinely missing `membership_tier_policies` table should have returned HTTP 200 with `schema_ready=false`; therefore this is treated as a thrown legacy-schema/read assumption, not normal missing-table readiness.
-
-#### Build 365
-
-Build 365 preserves public Build 362 contract identity while hardening the read implementation:
-
-- no `sqlite_master` dependency;
-- no fixed explicit legacy column list;
+- public contract remains Build 362;
+- implementation build is 365;
+- no `sqlite_master` dependency in the executable read path;
 - bounded `SELECT * FROM membership_tier_policies` during the compatibility window;
 - defensive mapping for known legacy aliases;
-- genuine missing-table fallback remains non-mutating and returns in-memory defaults;
-- unexpected Tier Policy errors return structured Build 362 / implementation Build 365 JSON;
-- aggregate Membership read catches thrown child reads and reports `failed_read` rather than collapsing into an opaque platform 500;
-- Build 363/364 runtime/page identities remain unchanged;
+- genuine missing table returns in-memory defaults and `schema_ready=false` without GET mutation;
+- unexpected direct-read failures return structured JSON;
+- aggregate child throws are reported with `failed_read` rather than collapsing into an opaque platform 500;
 - Membership mutation ownership remains unchanged.
 
-Known `gift_cards` fresh-install schema parity is deliberately not mixed into this batch. `/admin/members/` also remains outside current coverage because it composes many more account/engagement/gift-card/timeline scripts.
+Browser revalidation on 2026-08-25 passed:
 
-### Business & Administration
+```text
+membership_contract_status                 200
+membership_contract_build                  362
+membership_contract_implementation_build   365
+membership_contract_schema_ready           true
+membership_contract_missing_tables         []
+tier_policy_status                         200
+tier_policy_build                          362
+tier_policy_implementation_build           365
+tier_policy_schema_ready                   true
+tier_policy_source                         database
+tier_policy_defaults_materialized          true
+tier_policy_item_count                     3
+tier_policy_codes                          bronze,silver,gold
+application_module                         commerce-operations
+application_mode                           active
+active_application_module                  commerce-operations
+operations_domain                          operations
+runtime_entry                              ../modules/commerce-operations/runtime.mjs?v=363
+runtime_build                              363
+activation_build                           364
+runtime_state                              active
+services_ready                             true
+required_service_count                     1
+required_services                          ["operations-membership-read"]
+membership_page_proven                     true
+creates_network_transport                  false
+operations_mutation_ownership              false
+membership_mutation_ownership              false
+contracts_ok                               true
+services_ok                                true
+```
+
+The Development database therefore already has a usable `membership_tier_policies` table with Bronze, Silver, and Gold rows. No Membership table parity deficit was observed there.
+
+Builds 362–364 are fully validated. Build 365 requires only its corrected local regression rerun; no further Firefox proof is required unless the implementation changes again.
+
+Known `gift_cards` fresh-install schema parity is deliberately not mixed into this batch. `/admin/members/` remains outside current narrow coverage because it composes many account/engagement/gift-card/timeline scripts.
+
+## Business & Administration
 
 `/admin/accounting/` is the first validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain compatibility authorities.
 
-### Creative & Production
+## Creative & Production
 
 Build 301 remains the completed Packaging compatibility baseline. Builds 349–351 are fully validated.
 
-All four Creative & Production domains now have browser-proven top-level pages:
+All four Creative & Production domains are now fully validated at the loader/read boundary:
 
 ```text
 creative-production
   packaging -> /admin/packaging-studio/   validated
-  creative  -> /admin/creative-process/   browser-proven; corrected local required
-  content   -> /admin/content-studio/      browser-proven; corrected local required
-  caip      -> /admin/creative-assets/     browser-proven; local required
+  creative  -> /admin/creative-process/   validated
+  content   -> /admin/content-studio/      validated
+  caip      -> /admin/creative-assets/     validated
 ```
 
 Activation services:
@@ -188,8 +190,6 @@ payment_disputes.payment_dispute_id           missing expected column (Build 341
 
 Fresh-install schema parity still takes priority over Production business-data copy. Prior audit also found Production-only active tables such as `accounting_order_records`, `gift_cards`, Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy.
 
-If Build 365 reports `membership_tier_policies` missing on a true fresh install, record it as additional schema-parity evidence. Do not restore GET-time CREATE/INSERT.
-
 ## Validation state
 
 ```text
@@ -200,17 +200,17 @@ Builds 340–342   fully validated 2026-08-24 (+ schema parity for 341)
 Builds 343–345   fully validated 2026-08-24
 Builds 346–348   fully validated 2026-08-24
 Builds 349–351   fully validated 2026-08-24
-Builds 352–354   browser revalidation passed after Build 358; corrected local regression required
-Builds 355–357   browser proof passed; corrected local regression required
-Build 358        browser proof passed; corrected local regression required
-Builds 359–361   browser proof passed 2026-08-25; local regression required
-Builds 362–364   runtime/browser activation proven; Build 362 read failed 500
-Build 365        staged / local + browser read revalidation required
+Builds 352–354   fully validated 2026-08-25
+Builds 355–357   fully validated 2026-08-25
+Build 358        fully validated 2026-08-25
+Builds 359–361   fully validated 2026-08-25
+Builds 362–364   fully validated 2026-08-25 after Build 365 correction
+Build 365        browser passed; corrected local regression required
 ```
 
 ## Validation-harness rule
 
-Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache/read implementations, require a later domain/page to remain inactive, or confuse retained mutation authorities with passive activation services.
+Historical regressions verify durable executable boundaries. They must not freeze later shared runtime/cache/read implementations, require later domains/pages to remain inactive, confuse retained mutation authorities with passive activation services, or fail because explanatory comments contain names of removed legacy mechanisms.
 
 ## Mutation-authority extraction still open
 
@@ -220,13 +220,12 @@ A loader, read-contract migration, or top-level runtime activation never implies
 
 ## Next batched sequence
 
-1. Pull current `dev` and run corrected Creative regressions plus Builds 362–364 and Build 365 Membership regressions.
-2. If Builds 352–361 local gates pass, close them; their browser gates are already complete.
-3. Browser-revalidate `/admin/membership/` with GET/runtime checks only after Build 365 deploys.
-4. Accept `schema_ready=true` or explicit `schema_ready=false`; the latter is parity evidence, not permission for GET-time repair.
-5. If a 500 remains, use Build 365 structured `error_code`, `failed_read`, and `error` metadata to correct the exact drift.
-6. After Membership closes, continue Commerce & Operations source audit. Avoid Gift Cards unless schema parity is deliberately the batch target.
-7. Continue fresh-install schema parity separately before Production business-data copy.
+1. Pull current `dev` and rerun only `scripts/build365_membership_read_resilience_test.py`.
+2. If it passes with a clean working tree, mark Build 365 fully validated; no further Membership browser proof is required.
+3. Continue Commerce & Operations source audit for the next narrow read/runtime page. Prefer Custom Requests or Today Tasks only after source audit confirms clean startup-read boundaries.
+4. Avoid Gift Cards unless schema parity is deliberately the batch target.
+5. Keep `/admin/members/` outside the narrow Membership boundary until its coupled account/engagement/gift-card/timeline reads are separately audited.
+6. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
 
