@@ -21,6 +21,7 @@
 // Build 358: Creative Process activation no longer treats Inventory mutation authorities as Core browser services.
 // Build 361: Creative & Production adds CAIP lifecycle coverage without moving CAIP/R2 mutations.
 // Build 364: Commerce & Operations adds /admin/membership/ after retiring Tier Policy GET-time schema mutation.
+// Build 368: Commerce & Operations adds /admin/today-tasks/ with readiness-aware GET-only lifecycle coverage.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -58,5 +59,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=364')
+void import('/public/js/core/dd-admin-module-runtime.mjs?v=368')
   .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
