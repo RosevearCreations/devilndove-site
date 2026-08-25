@@ -40,7 +40,11 @@ assert 'request_time_schema_mutation: false' in today_impl
 assert 'database_today_task_actions_runtime_parity.sql' in today_impl
 for forbidden in ['CREATE TABLE', 'ALTER TABLE']:
     assert forbidden not in today_impl
-assert 'schemaOwnershipFollowupBuild: null' in today_contract
+assert 'export const BUILD = 392' in today_contract
+assert 'export const IMPLEMENTATION_BUILD = 393' in today_contract
+assert "export const MIGRATION_AUTHORITY = 'database_today_task_actions_runtime_parity.sql'" in today_contract
+assert 'schemaOwnershipBuild: 393' in today_contract
+assert 'requestTimeSchemaRepairRemoved: true' in today_contract
 assert 'requestTimeSchemaMutation: false' in today_contract
 
 # 394 Membership assignment authority and real consumer migration.
