@@ -124,16 +124,28 @@ The top-level runtime creates no network transport and owns no Creative, Packagi
 
 Build 355 removes request-time schema creation from the automatic Content Studio GET and exposes `content-studio-read`. Build 356 extends the top-level runtime to the `content` domain. Build 357 adds `/admin/content-studio/` coverage. Content Studio POST actions remain on the retained compatibility endpoint.
 
-### CAIP blocker
+### CAIP startup-read audit correction
 
-CAIP is intentionally not activation-ready. `/api/admin/creative-assets` GET still calls:
+Earlier notes treated CAIP's `ensure...Schema()` calls as request-time DDL. Current source shows these helpers are migration-owned verification only:
 
 ```text
-ensureCreativeAssetIntelligenceSchema()
-ensureCreativeAssetOperationsSchema()
+ensureCreativeAssetIntelligenceSchema()  -> SELECT-only table verification
+ensureCreativeAssetOperationsSchema()    -> SELECT-only table verification
+assertCaipMediaIntakeSchema()             -> SELECT-only table verification
 ```
 
-CAIP also has a separate automatic `/api/admin/caip-media-intake` GET. CAIP must remain bridge-only until both automatic read paths are audited/extracted and request-time schema mutation is removed from reads.
+The `/admin/creative-assets/` page starts two automatic reads:
+
+```text
+GET /api/admin/creative-assets
+GET /api/admin/caip-media-intake
+```
+
+The main CAIP GET uses verification-only schema checks plus listing/detail/operations reads. The media-intake GET uses verification-only schema checks, readiness queries and duplicate-audit reads. No request-time CREATE/ALTER/INSERT/UPDATE/DELETE is required merely to load the page.
+
+So CAIP is **not blocked by request-time schema mutation**. Its actual modular gap is explicit ownership/registration of the two startup read boundaries. Keep `caip` outside top-level runtime coverage until those reads are formalized as passive services/contracts and browser-proven.
+
+CAIP POST/upload/governance/probe/derivative/review-link actions remain compatibility mutation authorities and must not move merely to activate the page.
 
 ## Read-time schema mutation rule
 
@@ -189,7 +201,7 @@ A loader, read-contract migration, or top-level runtime activation never implies
 1. Pull the browser-proof documentation checkpoint and run the corrected Build 352–354, Build 355–357 and Build 358 regressions.
 2. Browser-validate `/admin/content-studio/` without POST actions.
 3. If the corrected local tests and Content Studio browser proof pass, close Builds 352–358 while leaving all mutation authority unchanged.
-4. Audit/extract CAIP automatic GETs next; do not activate CAIP until its schema-creating read paths are retired.
+4. Next CAIP batch should formalize both automatic CAIP read boundaries as passive/owned services, then add `/admin/creative-assets/` top-level coverage only after those reads are proven.
 5. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
