@@ -1,6 +1,6 @@
 # Builds 383–392 Validation — Commerce & Operations 10-Build Batch
 
-## Status — STAGED / LOCAL + GIFT CARD BROWSER VALIDATION REQUIRED
+## Status — STAGED / LOCAL + DEVELOPMENT D1 + GIFT CARD BROWSER VALIDATION REQUIRED
 
 ```text
 383  Gift Card schema-authority audit
@@ -15,7 +15,24 @@
 392  Operations Today Tasks action authority
 ```
 
-## Local regression
+## Development release target
+
+`wrangler.toml` is explicitly Development-only and binds:
+
+```text
+Pages project  devilndove-site-dev
+D1 binding     DB
+D1 database    devilndove-dev
+D1 id          dbc1615b-dcbe-4951-973b-b47c99c73bfa
+```
+
+Production/main is not part of this release gate.
+
+Build 384 must be applied to the Development D1 before `schema_ready=true` is required from the Build 385 browser contract. The migration is idempotent for fresh table creation/default template seeding and intentionally does not redefine the shared `notification_outbox` table.
+
+## Local regression + Development D1 parity release
+
+Run from the repository root on `dev`:
 
 ```bash
 git -c gc.auto=0 pull --ff-only origin dev
@@ -28,11 +45,21 @@ python scripts/build370_372_custom_requests_runtime_test.py
 python scripts/build373_382_custom_requests_read_surface_test.py
 python scripts/build383_392_commerce_operations_batch_test.py
 
+npx wrangler d1 execute devilndove-dev --remote --config wrangler.toml --file=database_gift_card_runtime_parity.sql
+npx wrangler d1 execute devilndove-dev --remote --config wrangler.toml --command="SELECT name FROM sqlite_master WHERE type='table' AND name IN ('gift_cards','gift_card_redemptions','gift_card_admin_events','gift_card_delivery_templates','gift_card_delivery_queue','gift_card_provider_send_logs','gift_card_lookup_attempts','gift_card_lookup_lockouts') ORDER BY name;"
+
 git rev-parse --short HEAD
 git status --short
 ```
 
-Expected seven PASS results and a clean tree. No regression contacts Cloudflare.
+Expected:
+
+- seven local PASS results;
+- each regression remains source/local only and does not contact Cloudflare;
+- the D1 verification query returns all eight Gift Card-owned tables;
+- clean Git status.
+
+The two explicit Wrangler commands are the only Cloudflare/D1 operations in this gate. They target `devilndove-dev` from the Development-only `wrangler.toml`.
 
 ## Firefox gate — Gift Cards only
 
@@ -83,6 +110,6 @@ contracts_ok                     true
 services_ok                      true
 ```
 
-If `schema_ready=false`, paste `missing_tables` and `query_errors`. Do not repair schema from GET. Build 384 is the migration authority and its application/fresh-install verification belongs to the parity workflow.
+If `schema_ready=false`, paste `missing_tables` and `query_errors`. Do not repair schema from GET. Build 384 is the migration authority.
 
 Builds 389, 391, and 392 are mutation-authority source boundaries only in this batch. Do not execute writes merely to validate their existence.
