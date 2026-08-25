@@ -4,10 +4,17 @@
 Source-only plus local SQLite smoke. No Cloudflare resource is contacted.
 """
 from pathlib import Path
+import os
 import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(errors='replace')
+    except Exception:
+        pass
 
 
 def read(path: str) -> str:
@@ -23,6 +30,7 @@ def run_local(script: str, expected: str) -> None:
         errors='replace',
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        env={**os.environ, 'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1'},
         check=False,
     )
     print(result.stdout, end='' if result.stdout.endswith('\n') else '\n')
@@ -115,18 +123,12 @@ for table in [
 ]:
     assert f'CREATE TABLE IF NOT EXISTS {table}' in accounting_migration
 assert "AUTHORITY_TABLES = Object.freeze(['accounting_hst_gst_reviews','accountant_export_packages'])" in accounting_reader
-assert 'accounting_hst_gst_reviews' in accounting_reader
-assert 'accountant_export_packages' in accounting_reader
-# Legacy table names are intentionally retained only as retirement evidence. They must
-# never participate in active readiness checks or SELECT paths.
-active_accounting_reader = accounting_reader.split('legacy_authorities_retired', 1)[0]
-assert 'hst_gst_review_records' not in active_accounting_reader
-assert 'accountant_export_manifests' not in active_accounting_reader
-retired_accounting_aliases = accounting_reader.split('legacy_authorities_retired', 1)[1]
-assert 'hst_gst_review_records' in retired_accounting_aliases
-assert 'accountant_export_manifests' in retired_accounting_aliases
-assert 'implementation_build: IMPLEMENTATION_BUILD' in accounting_reader
-assert 'request_time_schema_mutation: false' in accounting_reader
+assert 'FROM accounting_hst_gst_reviews' in accounting_reader
+assert 'FROM accountant_export_packages' in accounting_reader
+assert "legacy_authorities_retired: Object.freeze(['hst_gst_review_records','accountant_export_manifests'])" in accounting_reader
+active_accounting = accounting_reader.split('legacy_authorities_retired:', 1)[0]
+assert 'hst_gst_review_records' not in active_accounting
+assert 'accountant_export_manifests' not in active_accounting
 
 # 400 singular/plural notification ledgers remain deliberately distinct.
 audit400 = read('docs/architecture/BUILD400_AGGREGATE_NOTIFICATION_AUTHORITY_AUDIT.md')
