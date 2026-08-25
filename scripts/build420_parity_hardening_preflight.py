@@ -10,7 +10,6 @@ from __future__ import annotations
 from pathlib import Path
 import re
 import subprocess
-import sys
 
 from build420_index_semantics import normalize_index_sql
 
@@ -182,8 +181,8 @@ def main() -> int:
     )
 
     gate.check(
-        all_present(index_helper, ['UNIQUE, DESC', "re.sub(r'\\s+asc(?=,|\\))'", "re.sub(r'\\s*,\\s*', ','])
-        and 'column order remains material' in index_regression,
+        all_present(index_helper, ['normalize_index_sql', 'UNIQUE, DESC', 'value = re.sub'])
+        and all_present(index_regression, ['column order remains material', 'DESC remains material', 'UNIQUE remains material']),
         'index normalizer preserves material UNIQUE/DESC/order semantics',
     )
 
