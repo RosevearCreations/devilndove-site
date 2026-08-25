@@ -1,6 +1,6 @@
 # Builds 403–412 Validation — Commerce Mutation Boundaries + Development RC
 
-## Status — LOCAL RC PASS / DEVELOPMENT D1 AUTH BLOCKED / READ-ONLY BROWSER PROOF REQUIRED
+## Status — LOCAL RC PASS / DEVELOPMENT D1 AUTH RECOVERED / PARITY APPLICATION + READ-ONLY BROWSER PROOF REQUIRED
 
 ```text
 403  Canonical shared notification schema/readiness authority
@@ -82,7 +82,7 @@ PRODUCTION PROMOTION: CLOSED — Development D1/browser/live parity gates are st
 
 Build 402 also proved the current clean-install composition with 512 tables, 25 overlay-owned tables, current parity seeds, and a passing `PRAGMA foreign_key_check`.
 
-## Development D1 parity application — AUTHENTICATION BLOCKED BEFORE SQL
+## Development D1 authentication — RECOVERED
 
 The first post-RC Build 410 Development D1 attempt stopped during its read-only preflight before any migration statement executed:
 
@@ -90,11 +90,24 @@ The first post-RC Build 410 Development D1 attempt stopped during its read-only 
 The given account is not valid or is not authorized to access this service [code: 7403]
 ```
 
-This is an authentication/account-authorization gate, not a schema result. The committed `wrangler.toml` remains pinned to the Development project/database, and the same Development D1 had been reachable earlier in the session.
+That stop was authentication/account authorization only; no schema SQL executed.
 
-The applicator now performs a no-secret Wrangler authentication diagnostic before the D1 preflight. It reports `wrangler whoami` and only the names of configured Cloudflare auth/account environment variables; it never prints token values. On Cloudflare 7403 it stops with explicit guidance that environment API-token credentials can take precedence over Wrangler OAuth and that the active credential must have D1 Read/Write access to the target account.
+The follow-up auth-only diagnostic on 2026-08-25 proved:
 
-After authentication is corrected, rerun:
+```text
+Cloudflare auth/account environment overrides: none
+Wrangler authentication: OAuth
+Authenticated account: Devilndovelive@gmail.com's Account
+OAuth D1 permission: d1 (write)
+Development D1 read-only auth probe: PASS
+SELECT 1 AS auth_probe -> 1
+```
+
+The committed `wrangler.toml` remains pinned to the Development project/database, and the direct read-only probe against `devilndove-dev` succeeded. Authentication is therefore no longer blocking Build 410. Do not rerun the already-green local RC suite merely because of the earlier 7403.
+
+## Development D1 parity application — NEXT GATE
+
+Rerun:
 
 ```bash
 python scripts/build410_apply_development_parity_overlays.py
@@ -116,7 +129,7 @@ Expected final line:
 BUILD 410 DEVELOPMENT PARITY OVERLAY APPLICATOR: COMPLETE
 ```
 
-If a later migration stops on a real schema mismatch, preserve the exact statement output and repair that parity gap; do not move DDL back into request handlers.
+If a migration now stops, preserve the exact statement output. At this point the failure is likely real Development schema drift rather than authentication or local harness behavior. Repair the exact parity gap; do not move DDL back into request handlers.
 
 ## Read-only browser gates
 
