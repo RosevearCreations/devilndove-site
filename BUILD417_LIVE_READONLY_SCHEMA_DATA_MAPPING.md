@@ -2,136 +2,144 @@
 
 ## Status
 
-**READY FOR LIVE READ-ONLY EVIDENCE / PRODUCTION WRITES CLOSED**
+**PASS — LIVE READ-ONLY EVIDENCE CAPTURE COMPLETE / CLASSIFICATION MOVED TO BUILD 418 / PRODUCTION WRITES CLOSED**
 
-Build 416 Development source and browser gates are complete. Build 417 is the next evidence gate before any Production promotion or Production-to-Development business-data copy decision.
-
-Build 417 intentionally performs **inspection only** against both live D1 databases:
+Build 417 completed successfully against both live D1 databases:
 
 - Development: `devilndove-dev`
 - Production: `devilndove-prod`
 
-It does not apply migrations, copy records, seed defaults, or modify either database.
+No migration, seed, copy, INSERT, UPDATE, DELETE, DDL, provider action or other data mutation was executed.
 
-## Why this gate exists
+## Recorded live table inventory
 
-Earlier comparison work established that two different issues must not be mixed together:
+```text
+Development user tables: 511
+Production user tables: 512
+Common tables: 510
+```
 
-1. Production contains business records that are not present in the newly initialized Development database.
-2. Production historically contained tables/shapes that the fresh-install schema did not reproduce.
+Production-only tables:
 
-Builds 393–410 repaired a substantial part of the schema-authority/fresh-install problem, and Build 416 proved the current Customer Documents, Gift Cards, Orders and payment boundaries in the live Development browser.
+```text
+__sql_test
+search_query_terms
+```
 
-The remaining decision needs fresh live evidence showing what differences still exist **now**, after those repairs. We must not assume the earlier Production-only table count is still current.
+Development-only table:
 
-## Helper
+```text
+gift_card_lookup_lockouts
+```
 
-Run from the `dev` branch:
+Common tables with identical normalized stored CREATE SQL:
+
+```text
+456
+```
+
+Common tables with different normalized stored CREATE SQL:
+
+```text
+54
+```
+
+A stored CREATE-SQL difference is evidence requiring semantic review; it is not automatically proof of structural drift. Build 418 owns the live column / foreign-key / explicit-index classification of these 54 tables.
+
+## Recorded bounded business-data counts
+
+```text
+table                                   development   production     prod-dev
+------------------------------------------------------------------------------
+products                                         45           45           +0
+site_item_inventory                            1041         1041           +0
+packaging_projects                                7            7           +0
+creative_work_projects                            5            5           +0
+creative_projects                                23           23           +0
+content_projects                                 20           20           +0
+creative_assets                                  45           45           +0
+caip_media_upload_files                           0          113         +113
+orders                                            0            0           +0
+order_items                                       0            0           +0
+payments                                          0            0           +0
+payment_refunds                                   0            0           +0
+customer_documents                                0            0           +0
+gift_cards                                        0            0           +0
+gift_card_redemptions                             0            0           +0
+membership_tier_policies                          3            3           +0
+accounting_order_records                          0            0           +0
+notification_outbox                               0            0           +0
+```
+
+## Business-data conclusion
+
+The earlier assumption that Production business records still needed a broad copy into Development is no longer supported by the live evidence.
+
+The principal Devil n Dove business anchors now match by count:
+
+- 45 products;
+- 1,041 inventory records;
+- 7 packaging projects;
+- 5 Creative Process projects;
+- 23 CAIP creative projects;
+- 20 Content Studio projects;
+- 45 creative assets;
+- 3 membership tier policies.
+
+**Do not perform a broad Production-to-Development business-data copy.**
+
+The only bounded business-data delta is `caip_media_upload_files` at `0 / 113`. CAIP raw-media D1 rows are metadata/state while binary originals remain in the private R2 binding, so those rows require an R2-aware portability decision and must not be copied as ordinary standalone D1 records.
+
+## One-sided table authority
+
+### `gift_card_lookup_lockouts`
+
+This Development-only table is current canonical Gift Card schema, not accidental Development drift. `database_gift_card_runtime_parity.sql` creates it, and the current public Gift Card lookup readiness gate requires it. Its Production absence therefore represents a pending Production schema rollout item.
+
+### `__sql_test`
+
+Production-only. Current runtime/migration authority has not yet been established. Treat as a test/residue candidate pending Build 418 source-reference and row-count classification; do not copy it merely to make table counts match.
+
+### `search_query_terms`
+
+Production-only. No current exact repository reference was identified during the Build 417 follow-up search. Treat as historical/orphan candidate pending Build 418 source-reference and row-count classification; do not copy or drop it based on name alone.
+
+## Build 417 helper and safety boundary
+
+Canonical helper:
 
 ```bash
 python scripts/build417_live_readonly_schema_data_mapping.py --run
 ```
 
-The helper deliberately requires `--run` because it contacts both remote D1 databases.
+Windows-safe launcher used for the recorded run:
 
-## Safety boundary
-
-The helper has a fail-closed SQL guard. It permits only internally generated `SELECT` statements and narrowly recognized inspection PRAGMAs. It rejects mutation-capable SQL tokens including:
-
-```text
-INSERT UPDATE DELETE REPLACE CREATE ALTER DROP TRUNCATE VACUUM
-ATTACH DETACH REINDEX ANALYZE BEGIN COMMIT ROLLBACK SAVEPOINT RELEASE
+```bash
+python scripts/build417_live_readonly_schema_data_mapping_windows.py --run
 ```
 
-The remote target is also isolated through a temporary Wrangler config containing exactly one `DB` binding for each database UUID. The positional Wrangler target is always the binding name `DB`; the script does not choose a remote database by an ambiguous name at execution time.
+The helper uses exact Development/Production D1 UUIDs through temporary one-binding Wrangler configs and permits only internally generated SELECT / inspection SQL. Production mutation capability is intentionally absent.
 
-Temporary configs are deleted automatically when the helper exits.
+## Handoff to Build 418
 
-## Evidence collected
+Build 418 now owns the remaining classification:
 
-### 1. Live user-table inventory
+1. compare the 54 CREATE-SQL differences using live column, foreign-key and explicit-index signatures;
+2. classify `__sql_test`, `search_query_terms`, and `gift_card_lookup_lockouts` with row counts and current-source references;
+3. aggregate the 113 Production CAIP upload rows by status/storage linkage without exposing filenames or object keys;
+4. design only the targeted Production migration(s) that remain justified by that evidence.
 
-For each D1, Build 417 reads `sqlite_schema` and records user table names plus their stored `CREATE TABLE` SQL text.
+Run:
 
-System `sqlite_%` and `_cf_%` tables are excluded from the business-schema comparison.
-
-The helper reports:
-
-- Development user-table count
-- Production user-table count
-- common tables
-- Production-only tables
-- Development-only tables
-- common tables whose normalized stored CREATE SQL differs
-
-A CREATE-SQL difference is **evidence requiring review**, not automatically proof that one side is wrong. Historical creation order or semantically equivalent SQL text can differ. Build 417 therefore reports compact schema digests rather than attempting an automatic Production mutation.
-
-### 2. Bounded business-data anchors
-
-Build 417 captures row counts only for this bounded set when the table exists:
-
-```text
-products
-site_item_inventory
-packaging_projects
-creative_work_projects
-creative_projects
-content_projects
-creative_assets
-caip_media_upload_files
-orders
-order_items
-payments
-payment_refunds
-customer_documents
-gift_cards
-gift_card_redemptions
-membership_tier_policies
-accounting_order_records
-notification_outbox
+```bash
+python scripts/build418_live_semantic_schema_classification.py --run
 ```
-
-These counts are mapping evidence only. A positive Production-minus-Development delta does **not** authorize copying that table.
-
-Identity, session and security tables are deliberately excluded from the business-data-copy anchor list. They require separate authority and must not be swept into a broad copy operation.
-
-## Expected final footer
-
-A successful evidence run ends with:
-
-```text
-BUILD 417 LIVE READ-ONLY SCHEMA / DATA MAPPING: EVIDENCE CAPTURE COMPLETE
-No migration or data mutation was executed.
-PRODUCTION PROMOTION: CLOSED
-PRODUCTION DATA COPY: CLOSED
-NEXT: review Production-only tables, CREATE-SQL differences, and business-data deltas before any rollout decision.
-```
-
-`EVIDENCE CAPTURE COMPLETE` is intentionally not called a parity PASS. Differences are expected to be reviewed after the output is captured.
-
-## Stop rules
-
-Stop and preserve the output if:
-
-- Wrangler authentication fails;
-- Cloudflare returns authorization code 7403;
-- either target cannot be queried;
-- the SQL safety guard rejects a command;
-- a remote query returns no parseable Wrangler result;
-- the configured Development target no longer matches `devilndove-dev` and its expected UUID.
-
-Do not work around a failure by adding write SQL, exporting/importing Production, applying an old aggregate migration to Production, or restoring request-time DDL.
-
-## After Build 417 evidence
-
-Review in this order:
-
-1. **Production-only tables** — determine whether each still has current runtime authority, is historical/archive-only, or is already covered under a different canonical schema authority.
-2. **Development-only tables** — determine whether they are expected post-repair/newer schema additions.
-3. **Common CREATE-SQL differences** — inspect only the materially relevant tables; do not equate text differences with semantic drift automatically.
-4. **Business-data row-count deltas** — classify records that eventually need a controlled Development copy, records that should remain Production-only, and records that should be rebuilt/seeded rather than copied.
-5. Only after the mapping is classified should a Production rollout or a one-way business-data-copy plan be designed.
 
 ## Production
 
-Production remains frozen for schema/data mutation during Build 417. Reading Production metadata and bounded row counts is permitted by this gate; writing Production is not.
+```text
+PRODUCTION PROMOTION: CLOSED
+PRODUCTION DATA COPY: CLOSED
+```
+
+Build 417 authorizes no Production write. Any later Production change must be explicitly derived from Build 418 classification and reviewed as a targeted migration rather than a broad schema/data synchronization.
