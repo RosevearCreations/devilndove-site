@@ -1,24 +1,24 @@
 # Build 319 Validation — Accounting Summary Read Extraction / Builds 317–319 Consolidated Proof
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
-Build 319 baseline: `246bee5c9069c15e17b21ac13c3490f0e80fee08`.
+Build 319 baseline:
 
-This validation pass may prove Builds 317, 318 and 319 together because they are consecutive Accounting read-only extractions and their write paths remain independent.
-
-## Local regressions
-
-Run:
-
-```bash
-git pull --ff-only origin dev
-python scripts/build317_accounting_writeoffs_read_extraction_test.py
-python scripts/build318_general_ledger_read_extraction_test.py
-python scripts/build319_accounting_summary_read_extraction_test.py
-git status --short
+```text
+246bee5c9069c15e17b21ac13c3490f0e80fee08
+Build 318 source checkpoint
 ```
 
-Expected:
+Proven source/runtime head:
+
+```text
+7a5c41d4a426f30a0fe1ab7887ea071a51529cf8
+Build 319 relax brittle branching wording assertion
+```
+
+## Consolidated local proof — PASS
+
+Observed across the three consecutive Accounting read extractions:
 
 ```text
 BUILD 317 ACCOUNTING WRITEOFFS READ EXTRACTION: PASS
@@ -29,41 +29,93 @@ BUILD 319 ACCOUNTING SUMMARY READ EXTRACTION: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+The first Build 319 local attempt failed only because the regression asserted an exact prose sentence in `SOURCE_CONTROL_BRANCHING.md`. The documentation itself was correct. The regression was corrected to assert the actual source-control invariants instead of brittle wording, after which Build 319 passed.
 
-## Development browser proof
+## Development browser proof — PASS
 
-Use `/admin/orders/` because the existing Accounting backend is already loaded there.
-
-Prove all three legacy GETs and all three dedicated contracts return 200 and report non-mutating schema-aware reads:
+Validated on:
 
 ```text
-/accounting-writeoffs                 build 317
-/contracts/accounting-writeoffs-read  build 317
-/general-ledger-accounts              build 318
-/contracts/accounting-general-ledger-read build 318
-/accounting-summary                   build 319
-/contracts/accounting-summary-read    build 319
+https://devilndove-site-dev.pages.dev/admin/orders/
 ```
 
-Also prove:
+Observed values:
 
 ```text
-contract catalog build       319
-service adapter build        319
-Core runtime                 305
-Commerce runtime             315
-Operations mutation owner    false
-contracts_ok                 true
-services_ok                  true
+writeoff_legacy_status             200
+writeoff_legacy_build              317
+writeoff_legacy_schema_ready       true
+writeoff_legacy_schema_mutation    false
+writeoff_contract_status           200
+writeoff_contract_build            317
+writeoff_contract_owner            accounting
+writeoff_service_build             317
+writeoff_service_schema_mutation   false
+
+gl_legacy_status                   200
+gl_legacy_build                    318
+gl_legacy_schema_ready             true
+gl_legacy_schema_mutation          false
+gl_starter_mapping_count           19
+gl_contract_status                 200
+gl_contract_build                  318
+gl_contract_owner                  accounting
+gl_service_build                   318
+gl_service_schema_mutation         false
+
+summary_legacy_status              200
+summary_legacy_build               319
+summary_legacy_schema_ready        true
+summary_legacy_schema_mutation     false
+summary_contract_status            200
+summary_contract_build             319
+summary_contract_owner             accounting
+summary_service_build              319
+summary_service_schema_mutation    false
+
+contract_catalog_build             319
+service_adapter_build              319
+core_runtime_build                 305
+commerce_runtime_build             315
+owns_operations_mutations          false
+contracts_ok                       true
+services_ok                        true
 ```
 
-Zero rows are valid. If any read reports `schema_ready=false`, capture missing tables/columns and route them to the separate schema-parity track; do not restore request-time DDL.
+## Proven decisions
 
-## No mutation validation
+Builds 317–319 prove that these legacy GET paths now delegate to Accounting-owned, schema-aware, non-mutating read services:
 
-Do not create write-offs, change General Ledger accounts, apply GIFI mappings, create expenses, change orders, record payments, or perform any other write during this validation pass.
+```text
+/api/admin/accounting-writeoffs
+/api/admin/general-ledger-accounts
+/api/admin/accounting-summary
+```
 
-## Completion
+Their dedicated read contracts are:
 
-Builds 317–319 are not COMPLETE until the consolidated local and browser gates pass.
+```text
+/api/admin/contracts/accounting-writeoffs-read
+/api/admin/contracts/accounting-general-ledger-read
+/api/admin/contracts/accounting-summary-read
+```
+
+All report `request_time_schema_mutation=false` and Development reported `schema_ready=true` for each path.
+
+General Ledger retained `starter_mapping_count=19` in the legacy compatibility response.
+
+Core runtime remains 305. Commerce/Operations runtime remains 315. Operations mutation ownership remains false. Contract and service validation remain green.
+
+No write-off creation, General Ledger mutation, GIFI mapping change, expense creation, order/payment mutation, or other write was required for validation.
+
+## Boundary retained
+
+Builds 317–319 do not claim their corresponding write authorities are modularized. They do not change SQL/schema migrations, Core runtime implementation, Commerce runtime, Operations loader coverage, Orders/payment mutation APIs, Inventory authority, Creative consumers, Cloudflare config, R2, Production, or Production-to-Development business-data migration.
+
+## Completion decision
+
+All consolidated completion gates are satisfied.
+
+**Builds 317, 318 and 319 are COMPLETE IN DEVELOPMENT.**
+
+No further validation for these builds is required unless a later change touches their bounded source files.
