@@ -1,4 +1,5 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import { BUILD, CONTRACT_ID, OWNER, readAccountingFixedAssets } from '../_lib/accountingFixedAssetsReadService.js';
 
 async function ensureFixedAssetsTable(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_fixed_assets (
@@ -22,9 +23,8 @@ export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env); if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureFixedAssetsTable(db);
-  const result = await db.prepare(`SELECT * FROM accounting_fixed_assets ORDER BY acquisition_date DESC, accounting_fixed_asset_id DESC LIMIT 200`).all().catch(() => ({ results: [] }));
-  return jsonResponse({ ok: true, assets: Array.isArray(result?.results) ? result.results : [] });
+  try { return jsonResponse(await readAccountingFixedAssets(db)); }
+  catch (error) { return jsonResponse({ ok: false, build: BUILD, contract: CONTRACT_ID, owner: OWNER, error: error?.message || 'Failed to read fixed assets.' }, 500); }
 }
 
 export async function onRequestPost(context) {

@@ -1,7 +1,7 @@
-// Devil n Dove Build 336 browser adapters for implemented read contracts.
+// Devil n Dove Build 339 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 336;
+export const BUILD = 339;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -28,6 +28,9 @@ const ROUTES = Object.freeze({
   'accounting-statement-imports-read': '/api/admin/contracts/accounting-statement-imports-read',
   'accounting-reconciliation-exceptions-read': '/api/admin/contracts/accounting-reconciliation-exceptions-read',
   'accounting-vendor-statements-read': '/api/admin/contracts/accounting-vendor-statements-read',
+  'accounting-sales-tax-filing-read': '/api/admin/contracts/accounting-sales-tax-filing-read',
+  'accounting-fixed-assets-read': '/api/admin/contracts/accounting-fixed-assets-read',
+  'accounting-evidence-check-read': '/api/admin/contracts/accounting-evidence-check-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -173,6 +176,18 @@ export function createDefaultModuleServices() {
     'accounting-vendor-statements-read': service('accounting-vendor-statements-read', 'accounting', async (options = {}) => {
       const data = await fetchContract(ROUTES['accounting-vendor-statements-read'], { period_month: text(options.periodMonth) });
       return accountingReadResult(data, 'rows');
+    }),
+    'accounting-sales-tax-filing-read': service('accounting-sales-tax-filing-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-sales-tax-filing-read'], { period_month: text(options.periodMonth) });
+      return Object.freeze({ worksheet: Object.freeze(data.worksheet || {}), schemaReady: Boolean(data.schema_ready), missingTables: Object.freeze(data.missing_tables || []), missingColumns: Object.freeze(data.missing_columns || []), requestTimeSchemaMutation: data.request_time_schema_mutation === true, contract: data.contract, build: Number(data.build || 0) });
+    }),
+    'accounting-fixed-assets-read': service('accounting-fixed-assets-read', 'accounting', async () => {
+      const data = await fetchContract(ROUTES['accounting-fixed-assets-read']);
+      return accountingReadResult(data, 'assets');
+    }),
+    'accounting-evidence-check-read': service('accounting-evidence-check-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-evidence-check-read'], { period_month: text(options.periodMonth) });
+      return Object.freeze({ ...accountingReadResult(data, 'checks'), periodMonth: data.period_month || '', authorityTables: Object.freeze(data.authority_tables || []) });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });

@@ -1,8 +1,8 @@
-// Devil n Dove Build 336 cross-module contract catalog.
+// Devil n Dove Build 339 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
-// Accounting read extraction now includes statement imports, reconciliation exceptions and vendor statement summaries.
+// Accounting read extraction now includes sales-tax filing, fixed-assets and evidence readiness reads.
 
-export const BUILD = 336;
+export const BUILD = 339;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -59,6 +59,9 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('accounting-statement-imports-read', 'accounting', ['accounting'], 'Read Accounting statement imports, import rows, exceptions and provider-profile references without request-time schema mutation or default seeding.', { status: 'implemented', route: '/api/admin/contracts/accounting-statement-imports-read', authorityRoute: '/api/admin/contracts/accounting-statement-imports-read', authorityAction: 'read-accounting-statement-imports', implementationState: 'implemented-read-only-accounting-statement-imports' }),
   contract('accounting-reconciliation-exceptions-read', 'accounting', ['accounting'], 'Read reconciliation exception queue state without request-time statement/import schema creation.', { status: 'implemented', route: '/api/admin/contracts/accounting-reconciliation-exceptions-read', authorityRoute: '/api/admin/contracts/accounting-reconciliation-exceptions-read', authorityAction: 'read-accounting-reconciliation-exceptions', implementationState: 'implemented-read-only-accounting-reconciliation-exceptions' }),
   contract('accounting-vendor-statements-read', 'accounting', ['accounting'], 'Read vendor statement attachment summaries through the non-mutating Accounting attachment authority.', { status: 'implemented', route: '/api/admin/contracts/accounting-vendor-statements-read', authorityRoute: '/api/admin/contracts/accounting-vendor-statements-read', authorityAction: 'read-accounting-vendor-statements', implementationState: 'implemented-read-only-accounting-vendor-statements' }),
+  contract('accounting-sales-tax-filing-read', 'accounting', ['accounting'], 'Read the sales-tax filing worksheet without ensuring reconciliation schema during GET.', { status: 'implemented', route: '/api/admin/contracts/accounting-sales-tax-filing-read', authorityRoute: '/api/admin/contracts/accounting-sales-tax-filing-read', authorityAction: 'read-accounting-sales-tax-filing', implementationState: 'implemented-read-only-accounting-sales-tax-filing' }),
+  contract('accounting-fixed-assets-read', 'accounting', ['accounting'], 'Read Accounting fixed assets without creating the fixed-assets table during GET.', { status: 'implemented', route: '/api/admin/contracts/accounting-fixed-assets-read', authorityRoute: '/api/admin/contracts/accounting-fixed-assets-read', authorityAction: 'read-accounting-fixed-assets', implementationState: 'implemented-read-only-accounting-fixed-assets' }),
+  contract('accounting-evidence-check-read', 'accounting', ['accounting'], 'Read accountant-evidence readiness with explicit schema readiness and no request-time mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-evidence-check-read', authorityRoute: '/api/admin/contracts/accounting-evidence-check-read', authorityAction: 'read-accounting-evidence-check', implementationState: 'implemented-read-only-accounting-evidence-check' }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 
