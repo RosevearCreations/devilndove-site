@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated during Build 316.
+Updated through staged Build 319.
 
 ## Architectural invariant
 
@@ -19,7 +19,7 @@ Domains remain ownership/service boundaries beneath those modules. They are not 
 
 ## Core rule
 
-Core may own only shared infrastructure:
+Core owns only shared infrastructure:
 
 - authentication/session/current-user context;
 - module registry and lifecycle;
@@ -30,41 +30,55 @@ Core may own only shared infrastructure:
 
 Core must not own Catalog, Inventory, Creative, Packaging, Content, Marketing, Accounting, order, payment, gift-card, membership, or other business rules.
 
-Build 316 adds explicit build identities to the cross-module contract catalog and passive service-adapter registry. Core runtime implementation remains Build 305. The new `accounting-expenses-read` contract is owned by Accounting, not Core.
-
-## Source-control rule: application modules are not Git branches
-
-Repository branches observed during Build 316:
+Current identities after staged Build 319:
 
 ```text
-main
-dev
+Core architecture            302
+Core runtime implementation  305
+Contract catalog             319
+Passive service adapters     319
+Commerce runtime             315
+```
+
+Advancing the contract catalog does not imply Core absorbed Accounting logic. Every Accounting read implementation remains owner=`accounting`.
+
+## Source-control state
+
+Permanent branch model:
+
+```text
+main  = retained Production/legacy release line
+dev   = active modular Development/integration line
+```
+
+Build 319 verification found `dev` contains `main` and is hundreds of commits ahead with no commits missing from `main`.
+
+Application modules are not permanent Git branches. See `docs/architecture/SOURCE_CONTROL_BRANCHING.md`.
+
+Historical retirement candidates still present:
+
+```text
 build291-candidate
 build292-candidate
 build293-candidate
 build294-candidate
 ```
 
-The four historical candidate branches are fully contained in `dev`:
+All were previously proven fully contained in `dev` (`behind_by=0`).
+
+Build 317 used a temporary isolation ref:
 
 ```text
-build291-candidate -> dev: behind_by 0
-build292-candidate -> dev: behind_by 0
-build293-candidate -> dev: behind_by 0
-build294-candidate -> dev: behind_by 0
+build317-accounting-writeoffs
 ```
 
-They may be retired later after explicit approval. Build 316 does not delete branches.
-
-Do not create permanent Git branches named for Commerce & Operations, Creative & Production, or Business & Administration. Those are independently loadable application modules inside the same integrated codebase and must continue to compose through Core contracts.
-
-`dev` remains the active modularization/integration branch. `main` remains separate from the Development work. A Git branch name alone must never be treated as proof of what Cloudflare has deployed; real Production remains governed by the separate release/promotion workflow.
+Its source was fast-forward integrated into `dev`; retire the branch when branch-deletion tooling/permissions permit. Do not create additional permanent module branches.
 
 ## Current application-module state
 
 ### Commerce & Operations
 
-Active runtime work is furthest along.
+This is the most mature top-level runtime.
 
 Proven Operations pages through Build 315:
 
@@ -90,54 +104,62 @@ Loader coverage must remain separate from mutation-authority extraction.
 
 ### Creative & Production
 
-Packaging has a proven domain runtime/compatibility checkpoint, and Creative inventory post/reversal consumers have been cut over to Inventory-owned authorities.
+Packaging has a proven domain runtime/compatibility checkpoint. Creative inventory post/reversal consumers already use Inventory-owned authorities.
 
 Still open:
 
-- top-level `creative-production` application runtime activation;
-- retirement of broad `creative-process-compat.js` only after every unrelated action has an owned destination;
-- standalone historical Build 308 local regression was not captured and must not be silently relabeled complete;
-- CAIP and Content service/contract extraction remains incomplete;
-- Packaging should remain domain-owned and must not be absorbed into Core.
+- activate the top-level `creative-production` application runtime on a bounded proven page;
+- retire `creative-process-compat.js` only after every remaining action has an owned destination;
+- preserve the historical Build 308 local-signoff caveat;
+- extract CAIP and Content services/contracts;
+- keep Packaging logic domain-owned and out of Core.
 
 ### Business & Administration
 
-This top-level module is still largely planned rather than runtime-active.
+Business & Administration is not yet top-level runtime-active, but Accounting extraction is now materially ahead of the old monolith.
 
-Accounting is the best current extraction path because read contracts already exist:
+Owned Accounting reads now include:
 
 ```text
-accounting-read              Build 312
-accounting-expenses-read     Build 316
+accounting-read                   Build 312
+accounting-expenses-read          Build 316
+accounting-writeoffs-read         Build 317 staged
+accounting-general-ledger-read    Build 318 staged
+accounting-summary-read           Build 319 staged
 ```
 
-Marketing, Platform and Administration still require their own bounded contracts/runtime work before the top-level Business & Administration runtime can be activated safely.
+Marketing, Platform and Administration still need bounded service/runtime work before full top-level activation.
 
-## Accounting read-time schema mutation retirement queue
+## Accounting read-time schema mutation retirement
 
-Build 316 establishes the rule:
+Rule:
 
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Completed in Build 316:
+Completed/proven before this pass:
 
 ```text
 /api/admin/accounting-expenses GET
-  -> delegates to Accounting-owned read service
+  -> Accounting-owned Build 316 read authority
   -> no request-time DDL
-  -> no ambiguous expense_id join
-  -> legacy POST remains compatibility write behavior
 ```
 
-Confirmed remaining legacy GET/schema-mutation areas include:
+Staged in the current three-step pass:
 
 ```text
-functions/api/admin/accounting-summary.js
-functions/api/admin/accounting-writeoffs.js
-functions/api/admin/general-ledger-accounts.js
+/api/admin/accounting-writeoffs GET
+  -> accounting-writeoffs-read Build 317
+
+/api/admin/general-ledger-accounts GET
+  -> accounting-general-ledger-read Build 318
+
+/api/admin/accounting-summary GET
+  -> accounting-summary-read Build 319
 ```
 
-Repository audit/search also identifies these as the same follow-on class and they must be inspected before cutover:
+Each corresponding GET is schema-aware and non-mutating. Existing POST/write behavior remains separate where present.
+
+Remaining Accounting read-time DDL candidates to inspect next:
 
 ```text
 functions/api/admin/accounting-overhead-allocations.js
@@ -145,45 +167,38 @@ functions/api/admin/accounting-overhead-product-allocations.js
 functions/api/admin/product-costs.js
 ```
 
-Recommended order:
-
-1. write-offs read contract/cutover;
-2. overhead allocations read contract/cutover;
-3. product-cost reads;
-4. GL account reads;
-5. remaining Accounting summaries/exports that still repair schema during GET.
-
-Do not move the corresponding POST/write authority in the same build unless that write has a separately reviewed contract.
+Additional Accounting reports/exports should be audited for hidden ensure/repair calls before Business & Administration runtime activation.
 
 ## Mutation-authority extraction still open
 
-These areas remain compatibility behavior and require dedicated authority reviews:
+Compatibility writes still requiring dedicated authority reviews include:
 
 - Orders status changes;
-- payment recording and payment actions;
-- refunds/disputes where applicable;
+- payment recording/payment actions;
+- refunds/disputes;
 - gift-card issuance/redemption;
 - membership lifecycle changes;
-- Customer Documents issue/void actions;
+- Customer Documents issue/void;
 - Accounting expense/write-off/overhead/product-cost writes;
+- General Ledger writes/GIFI finalization;
 - broader Accounting journal/post/close actions.
 
-The runtime shell must not claim ownership merely because a page has been loader-migrated.
+A loader or read-contract migration never implies mutation ownership.
 
-## Core/contract cleanup queue
+## Recommended next bounded sequence after Builds 317–319 validate
 
-1. Continue giving contract catalogs and passive adapter registries explicit build identities.
-2. Add business services only with a non-Core owner.
-3. Keep application-module runtime build identities separate from Core implementation build identity.
-4. Do not place SQL/DDL in Core browser/runtime files.
-5. Prefer compatibility wrappers that delegate reads to domain services while old writes remain isolated.
-6. Retire compatibility files only when all actions they contain have owned destinations.
+1. Build 320 — Accounting overhead allocations read extraction.
+2. Build 321 — Accounting overhead-product allocations read extraction.
+3. Build 322 — Product-cost read extraction.
+4. Audit `/admin/accounting/` loader and dependencies for a first read-only Business & Administration runtime activation.
+5. Separately continue remaining Commerce & Operations route coverage.
+6. Then begin a bounded Creative & Production top-level runtime activation using already-owned Packaging/Creative/Inventory boundaries.
 
 ## Separate fresh-install schema/data parity track
 
 This remains separate from module extraction.
 
-Request-time DDL in legacy GET handlers is a symptom of incomplete schema lifecycle discipline, but Build 316 does not edit aggregate schema or migrations.
+Request-time DDL is a symptom of weak schema lifecycle discipline, but these modular builds do not edit aggregate schema or migrations.
 
 Priority remains:
 
@@ -192,10 +207,10 @@ fresh-install schema parity
 then Development business-data copy/migration
 ```
 
-Do not copy Production business data into Development until schema parity is repaired and independently validated.
+Do not copy Production business data into Development until schema parity is independently repaired and validated.
 
 ## Production safety
 
-Real Devil n Dove Production remains frozen at Build 280 unless deliberately promoted through the separate Production workflow.
+Real Devil n Dove Production remains frozen until a deliberate promotion through the separate Production workflow.
 
-No module-extraction build should implicitly merge/promote `dev` to Production, mutate Production D1/R2, or infer Production state from Git branch names alone.
+No module-extraction build should implicitly promote `dev`, mutate Production D1/R2, or infer deployment state from a Git branch name.
