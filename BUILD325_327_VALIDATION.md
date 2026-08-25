@@ -1,6 +1,6 @@
 # Builds 325–327 Validation — Accounting Read Batch
 
-## Status — BROWSER PROVEN / LOCAL REGRESSION REQUIRED
+## Status — BROWSER PROVEN / CORRECTED LOCAL REGRESSION REQUIRED
 
 This batch validates three bounded Accounting read changes together:
 
@@ -44,7 +44,7 @@ accounting-journal-read_service_schema_mutation false
 gifi_notes_legacy_status                   200
 gifi_notes_legacy_build                    327
 gifi_notes_legacy_owner                    accounting
-gifi_notes_legacy_schema_ready              true
+gifi_notes_legacy_schema_ready             true
 gifi_notes_legacy_schema_mutation          false
 gifi_notes_contract_status                 200
 gifi_notes_contract_build                  327
@@ -63,7 +63,26 @@ services_ok                                true
 
 All three read boundaries are browser-proven and Development reported no schema-parity deficit for these three reads.
 
-## Local regression still required
+## Local regression harness correction — 2026-08-24
+
+The first post-Build-330 local run failed inside the regression harness on this stale assertion:
+
+```text
+assert "await ensureGlSchema(db)" in gifi_summary
+```
+
+That assertion described Build 327's *next blocker* rather than a Build 325–327 owned invariant. Build 328 intentionally removed that call, so the older test became false after the later successful extraction. The test also froze unrelated shared files against an older Git baseline, which would have produced more false failures as the architecture legitimately advances.
+
+The regression has therefore been corrected to verify only the durable Build 325–327 boundaries:
+
+- each owned read service remains present and non-mutating;
+- each GET-only contract remains present;
+- the legacy GET path delegates to the owned read service without read-time DDL;
+- the shared contract/service catalogs may advance beyond Build 327 as long as the three registrations remain present.
+
+The correction changes test coverage only; no application/runtime code changed.
+
+## Corrected local regression still required
 
 ```bash
 git pull --ff-only origin dev
@@ -78,7 +97,7 @@ BUILDS 325-327 ACCOUNTING READ BATCH: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should print nothing. Once this local output is captured, Builds 325–327 become fully VALIDATED.
+`git status --short` should print nothing. Once this corrected local output is captured, Builds 325–327 become fully VALIDATED.
 
 ## Safety boundary
 
