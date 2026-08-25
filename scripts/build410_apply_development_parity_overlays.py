@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build 410 Development-only parity overlay applicator.
 
-Applies the post-Gift-Card migration authorities one SQL statement at a time through
-Wrangler's remote --command path. This avoids the Windows/remote --file issues already
-seen during Build 384 and makes any remaining legacy-schema drift exact and actionable.
+Applies post-Gift-Card migration authorities one SQL statement at a time through
+Wrangler's remote --command path. Notification outbox compatibility columns are
+aligned immediately after its CREATE statement and before dependent indexes/defaults.
 
 This script MUTATES only the Development D1 target declared in wrangler.toml.
 """
@@ -54,15 +54,9 @@ def fail(message: str, code: int = 1) -> None:
 
 def run_capture(args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        args,
-        cwd=ROOT,
-        text=True,
-        encoding='utf-8',
-        errors='replace',
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        env={**os.environ, 'NO_COLOR': '1', 'FORCE_COLOR': '0'},
-        check=False,
+        args, cwd=ROOT, text=True, encoding='utf-8', errors='replace',
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        env={**os.environ, 'NO_COLOR': '1', 'FORCE_COLOR': '0'}, check=False,
     )
 
 
@@ -72,8 +66,7 @@ def npx_path() -> str:
 
 def current_branch() -> str:
     result = run_capture(['git', 'branch', '--show-current'])
-    if result.returncode != 0:
-        fail(result.stdout or 'Unable to determine branch.')
+    if result.returncode != 0: fail(result.stdout or 'Unable to determine branch.')
     return result.stdout.strip()
 
 
@@ -145,7 +138,7 @@ def command(npx: str, sql: str) -> list[str]:
 
 def execute(npx: str, sql: str, label: str, *, tolerate_duplicate_column: bool = False) -> None:
     print(f'\n=== {label} ===')
-    preview = ' '.join(compact_sql(sql).split())
+    preview = compact_sql(sql)
     print('SQL:', preview if len(preview) <= 180 else preview[:177] + '...')
     result = run_capture(command(npx, sql))
     print(result.stdout, end='' if result.stdout.endswith('\n') else '\n')
@@ -155,6 +148,28 @@ def execute(npx: str, sql: str, label: str, *, tolerate_duplicate_column: bool =
         print('Compatibility column already exists; continuing.')
         return
     fail(f'{label} failed with exit code {result.returncode}. Preserve this output; do not use --file.')
+
+
+def apply_notification_migration(npx: str, statements: list[str]) -> None:
+    create_index = next((i for i, sql in enumerate(statements) if sql.lstrip().upper().startswith('CREATE TABLE IF NOT EXISTS NOTIFICATION_OUTBOX')), None)
+    if create_index is None: fail('Notification migration no longer defines notification_outbox.')
+
+    # First materialize/no-op the canonical table. On an older existing table this
+    # leaves its shape unchanged, so align columns immediately afterward.
+    execute(npx, statements[create_index], f'database_notification_runtime_parity.sql STATEMENT {create_index + 1}/{len(statements)}')
+
+    print('\n##### ALIGN LEGACY notification_outbox COLUMNS #####')
+    for column, ddl in NOTIFICATION_COMPAT_COLUMNS:
+        execute(
+            npx,
+            f'ALTER TABLE notification_outbox ADD COLUMN {column} {ddl};',
+            f'ALIGN notification_outbox.{column}',
+            tolerate_duplicate_column=True,
+        )
+
+    for index, statement in enumerate(statements, start=1):
+        if index - 1 == create_index: continue
+        execute(npx, statement, f'database_notification_runtime_parity.sql STATEMENT {index}/{len(statements)}')
 
 
 def main() -> int:
@@ -170,26 +185,13 @@ def main() -> int:
     execute(npx, "SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name LIMIT 5;", 'READ-ONLY DEVELOPMENT PREFLIGHT')
 
     for migration_name in MIGRATIONS:
-        path = ROOT / migration_name
-        statements = split_sql(path.read_text(encoding='utf-8'))
+        statements = split_sql((ROOT / migration_name).read_text(encoding='utf-8'))
         print(f'\n##### APPLY {migration_name} — {len(statements)} statements #####')
+        if migration_name == 'database_notification_runtime_parity.sql':
+            apply_notification_migration(npx, statements)
+            continue
         for index, statement in enumerate(statements, start=1):
             execute(npx, statement, f'{migration_name} STATEMENT {index}/{len(statements)}')
-
-        if migration_name == 'database_notification_runtime_parity.sql':
-            print('\n##### ALIGN LEGACY notification_outbox COLUMNS #####')
-            for column, ddl in NOTIFICATION_COMPAT_COLUMNS:
-                execute(
-                    npx,
-                    f'ALTER TABLE notification_outbox ADD COLUMN {column} {ddl};',
-                    f'ALIGN notification_outbox.{column}',
-                    tolerate_duplicate_column=True,
-                )
-            # Re-run notification indexes/defaults after compatibility alignment so an
-            # older pre-existing outbox cannot leave a current index unapplied.
-            for index, statement in enumerate(statements, start=1):
-                if statement.lstrip().upper().startswith(('CREATE INDEX', 'INSERT INTO')):
-                    execute(npx, statement, f'REAPPLY notification authority {index}/{len(statements)}')
 
     verification = "SELECT name FROM sqlite_schema WHERE type='table' AND name IN ('today_task_actions','membership_tier_policies','customer_documents','customer_document_sequences','accounting_order_records','accounting_hst_gst_reviews','accountant_export_packages','notification_outbox','notification_dispatch_log','notification_exclusions','notification_cooldown_rules','notification_automation_settings') ORDER BY name;"
     execute(npx, verification, 'VERIFY CURRENT PARITY TABLE SET')
