@@ -175,16 +175,29 @@ Explicit pages:
 
 Content requires only `content-studio-read`. Content mutation ownership remains false.
 
-## CAIP blocker
+## CAIP startup-read audit correction
 
-CAIP is not activation-ready. `/api/admin/creative-assets` GET still executes:
+Earlier notes treated CAIP's `ensure...Schema()` calls as request-time schema creation. Current source shows that is not true.
+
+`ensureCreativeAssetIntelligenceSchema(db)` is migration-owned verification only: it performs bounded SELECT checks against required CAIP tables and throws if the migration chain is missing. `ensureCreativeAssetOperationsSchema(db)` is likewise SELECT-only verification. `assertCaipMediaIntakeSchema(db)` verifies the media-intake tables with SELECTs and caches only successful capability checks.
+
+The CAIP page currently starts two automatic GETs:
 
 ```text
-ensureCreativeAssetIntelligenceSchema(state.db)
-ensureCreativeAssetOperationsSchema(state.db)
+/admin/creative-assets/ UI
+  -> GET /api/admin/creative-assets
+
+/admin/creative-assets/ media-intake UI
+  -> GET /api/admin/caip-media-intake
 ```
 
-CAIP also has a separate automatic `/api/admin/caip-media-intake` GET. Keep `caip` outside `creative-production.runtimeDomains` until both startup read paths are extracted/audited and GET-time schema creation is removed.
+The main CAIP GET calls the verification-only schema helpers, `listCreativeAssetProjects`, `getCreativeProjectDetail`, and `loadCreativeAssetOperations`. Those helpers repeat verification but do not create schema during GET.
+
+The media-intake GET calls `listCaipMediaIntake`, `getCaipMediaIntakeReadiness`, and an optional duplicate audit. Its schema assertion is also verification-only.
+
+Therefore CAIP is **not blocked by request-time DDL**. Its remaining modular gap is that these two startup reads are still direct compatibility reads with no explicit passive CAIP read contracts/services or top-level `caip` runtime coverage.
+
+Do not activate CAIP merely because the DDL concern is cleared. First formalize both startup read boundaries and prove that the top-level runtime can require only passive/read services while leaving CAIP POST/upload/governance/probe/derivative/review-link mutations on their existing authorities.
 
 ## Windows Git pack cleanup note
 
@@ -203,7 +216,7 @@ Build 349–351, Build 352–354, and Build 355–357 regressions are future-com
 3. Browser-validate `/admin/content-studio/` without POST actions.
 4. If all local tests plus Content Studio browser proof pass, mark Builds 352–358 fully validated.
 5. Keep Creative Process, Packaging and Content Studio mutation authority unchanged.
-6. Extract/audit CAIP automatic reads next; do not activate CAIP while GET creates schema.
+6. Next CAIP batch should formalize both automatic read boundaries first, then add `caip` top-level coverage only after those passive services are proven. Do not move CAIP POST/upload/governance/probe/derivative/review-link mutations.
 7. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Validation preference
