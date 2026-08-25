@@ -1,0 +1,3 @@
+# Build 342 — Accounting Close Workflow Read Extraction
+
+`/api/admin/accounting-close-workflow` GET no longer reaches the legacy `ensureSchema()` path. JSON, CSV and ZIP reads now consume `accountingCloseWorkflowReadService.js`, which reports readiness for payment applications, HST/GST reviews, period closures, accountant export packages and accounting evidence attachments without request-time DDL. Explicit POST actions retain `ensureSchema()` as write-side compatibility until mutation authority is separately extracted. Dedicated GET-only contract: `/api/admin/contracts/accounting-close-workflow-read`.

@@ -2,16 +2,15 @@
 // Brief description: Consolidated payment application, HST/GST review, month-end close, and accountant export workflow.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
-import { ensureAccountingPeriodClosuresTable, getAccountingPeriodClosure, monthValue, normalizeChecklistPayload } from './_accountingPeriods.js';
+import { ensureAccountingPeriodClosuresTable, monthValue, normalizeChecklistPayload } from './_accountingPeriods.js';
 import { queueNotification } from '../_lib/notificationOutbox.js';
+import { readAccountingCloseWorkflow } from '../_lib/accountingCloseWorkflowReadService.js';
 
-function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function clean(value, limit = 1200) { const text = normalizeText(value); return text.length > limit ? text.slice(0, limit).trim() : text; }
 function cents(value) { const n = Number(value); return Number.isFinite(n) ? Math.round(n) : 0; }
 function boolInt(value) { return value === true || value === 1 || value === '1' || String(value || '').toLowerCase() === 'true' ? 1 : 0; }
-async function tableExists(db, tableName) { try { return !!(await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`).bind(tableName).first()); } catch { return false; } }
 async function tableColumnSet(db, tableName) {
-  try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); return new Set(rows(result).map((row) => String(row.name || '').toLowerCase()).filter(Boolean)); } catch { return new Set(); }
+  try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row.name || '').toLowerCase()).filter(Boolean)); } catch { return new Set(); }
 }
 async function ensureColumn(db, tableName, columnName, sql) {
   const columns = await tableColumnSet(db, tableName);
@@ -248,63 +247,14 @@ async function ensureSchema(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_evidence_attachments (accounting_evidence_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT, period_month TEXT, evidence_kind TEXT, title TEXT, evidence_url TEXT, object_key TEXT, original_filename TEXT, mime_type TEXT, file_size_bytes INTEGER NOT NULL DEFAULT 0, attachment_status TEXT NOT NULL DEFAULT 'active', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(() => null);
 }
 
-async function paymentSummary(db, periodMonth) {
-  const hasOrders = await tableExists(db, 'orders');
-  if (!hasOrders) return { pending_orders: [], applied_rows: [], summary: { order_count: 0, paid_cents: 0, outstanding_cents: 0, applied_cents: 0 } };
-  const hasPayments = await tableExists(db, 'payments');
-  const pending = rows(await db.prepare(`
-    SELECT o.order_id, o.order_number, o.customer_name, o.customer_email, o.total_cents, o.tax_cents, o.currency, o.payment_status, o.order_status, o.created_at,
-           COALESCE(pay.paid_cents,0) AS paid_cents,
-           MAX(COALESCE(o.total_cents,0)-COALESCE(pay.paid_cents,0),0) AS outstanding_cents
-    FROM orders o
-    LEFT JOIN (${hasPayments ? `SELECT order_id, SUM(CASE WHEN LOWER(COALESCE(payment_status,'')) IN ('paid','completed','captured') THEN COALESCE(amount_cents,0) ELSE 0 END) AS paid_cents FROM payments GROUP BY order_id` : `SELECT NULL AS order_id, 0 AS paid_cents`}) pay ON pay.order_id=o.order_id
-    WHERE substr(COALESCE(o.created_at,''),1,7)=?
-    ORDER BY outstanding_cents DESC, datetime(o.created_at) DESC
-    LIMIT 80
-  `).bind(periodMonth).all().catch(() => ({ results: [] })));
-  const applied = rows(await db.prepare(`SELECT * FROM accounting_payment_applications WHERE period_month=? ORDER BY datetime(updated_at) DESC LIMIT 80`).bind(periodMonth).all().catch(() => ({ results: [] })));
-  const summary = pending.reduce((acc, row) => {
-    acc.order_count += 1;
-    acc.paid_cents += Number(row.paid_cents || 0);
-    acc.outstanding_cents += Number(row.outstanding_cents || 0);
-    acc.total_cents += Number(row.total_cents || 0);
-    acc.tax_cents += Number(row.tax_cents || 0);
-    return acc;
-  }, { order_count: 0, total_cents: 0, paid_cents: 0, outstanding_cents: 0, tax_cents: 0, applied_cents: applied.reduce((sum, row) => sum + Number(row.applied_amount_cents || 0), 0) });
-  return { pending_orders: pending, applied_rows: applied, summary };
-}
-
 async function hstReview(db, periodMonth, fallbackTaxCents = 0) {
   const row = await db.prepare(`SELECT * FROM accounting_hst_gst_reviews WHERE period_month=? LIMIT 1`).bind(periodMonth).first().catch(() => null);
   if (row) return row;
   return { period_month: periodMonth, review_status: 'draft', sales_tax_collected_cents: fallbackTaxCents, input_tax_credit_cents: 0, net_tax_payable_cents: fallbackTaxCents, filing_reference: '', filing_due_date: '', remittance_status: 'not_ready', remittance_evidence_url: '', reminder_date: '', notes: '' };
 }
 
-async function exportPackages(db, periodMonth) {
-  const taxYear = periodMonth.slice(0, 4);
-  return rows(await db.prepare(`SELECT * FROM accountant_export_packages WHERE period_month=? OR tax_year=? ORDER BY datetime(updated_at) DESC LIMIT 30`).bind(periodMonth, taxYear).all().catch(() => ({ results: [] })));
-}
-
-function closeReadiness(closure, hst, payment) {
-  const checklist = closure?.close_checklist || {};
-  const blockers = [];
-  if (!checklist.bank_reconciled) blockers.push('Bank/reconciliation checkbox is not complete.');
-  if (!checklist.sales_tax_reviewed && !['reviewed','finalized','filed'].includes(String(hst.review_status || ''))) blockers.push('HST/GST review is not marked reviewed/finalized.');
-  if (Number(payment.summary?.outstanding_cents || 0) > 0) blockers.push('Some orders still show outstanding payment balance.');
-  if (!checklist.receipts_attached) blockers.push('Receipt/bill support checkbox is not complete.');
-  return { ready: blockers.length === 0, blockers };
-}
-
 async function payload(db, periodMonth) {
-  await ensureSchema(db);
-  const payment = await paymentSummary(db, periodMonth);
-  const hst = await hstReview(db, periodMonth, Number(payment.summary?.tax_cents || 0));
-  const closure = await getAccountingPeriodClosure(db, periodMonth) || { period_month: periodMonth, lock_state: 'open', close_checklist: normalizeChecklistPayload({}), close_notes: '' };
-  const packages = await exportPackages(db, periodMonth);
-  const evidence_attachments = rows(await db.prepare(`SELECT * FROM accounting_evidence_attachments WHERE period_month=? ORDER BY datetime(created_at) DESC LIMIT 200`).bind(periodMonth).all().catch(() => ({ results: [] })));
-  const data = { ok: true, period_month: periodMonth, payment, hst_review: hst, closure, export_packages: packages, evidence_attachments, close_readiness: closeReadiness(closure, hst, payment) };
-  data.evidence_bundle_summary = evidenceBundleSummary(data, false, {});
-  return data;
+  return readAccountingCloseWorkflow(db, { periodMonth });
 }
 
 export async function onRequestGet(context) {

@@ -1,8 +1,8 @@
-// Devil n Dove Build 339 cross-module contract catalog.
+// Devil n Dove Build 342 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
-// Accounting read extraction now includes sales-tax filing, fixed-assets and evidence readiness reads.
+// Automatic Business & Administration reads now include reconciliation, Platform DB sanity and close-workflow state.
 
-export const BUILD = 339;
+export const BUILD = 342;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -62,6 +62,9 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('accounting-sales-tax-filing-read', 'accounting', ['accounting'], 'Read the sales-tax filing worksheet without ensuring reconciliation schema during GET.', { status: 'implemented', route: '/api/admin/contracts/accounting-sales-tax-filing-read', authorityRoute: '/api/admin/contracts/accounting-sales-tax-filing-read', authorityAction: 'read-accounting-sales-tax-filing', implementationState: 'implemented-read-only-accounting-sales-tax-filing' }),
   contract('accounting-fixed-assets-read', 'accounting', ['accounting'], 'Read Accounting fixed assets without creating the fixed-assets table during GET.', { status: 'implemented', route: '/api/admin/contracts/accounting-fixed-assets-read', authorityRoute: '/api/admin/contracts/accounting-fixed-assets-read', authorityAction: 'read-accounting-fixed-assets', implementationState: 'implemented-read-only-accounting-fixed-assets' }),
   contract('accounting-evidence-check-read', 'accounting', ['accounting'], 'Read accountant-evidence readiness with explicit schema readiness and no request-time mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-evidence-check-read', authorityRoute: '/api/admin/contracts/accounting-evidence-check-read', authorityAction: 'read-accounting-evidence-check', implementationState: 'implemented-read-only-accounting-evidence-check' }),
+  contract('accounting-reconciliation-read', 'accounting', ['accounting'], 'Read Accounting reconciliation summaries, reviews and statement evidence without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-reconciliation-read', authorityRoute: '/api/admin/contracts/accounting-reconciliation-read', authorityAction: 'read-accounting-reconciliation', implementationState: 'implemented-read-only-accounting-reconciliation' }),
+  contract('platform-db-sanity-read', 'platform', ['accounting', 'admin'], 'Read application-wide schema/runtime sanity without mutating database schema.', { status: 'implemented', route: '/api/admin/contracts/platform-db-sanity-read', authorityRoute: '/api/admin/contracts/platform-db-sanity-read', authorityAction: 'read-platform-db-sanity', implementationState: 'implemented-read-only-platform-db-sanity' }),
+  contract('accounting-close-workflow-read', 'accounting', ['accounting'], 'Read Accounting close-workflow state and export evidence without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-close-workflow-read', authorityRoute: '/api/admin/contracts/accounting-close-workflow-read', authorityAction: 'read-accounting-close-workflow', implementationState: 'implemented-read-only-accounting-close-workflow' }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 

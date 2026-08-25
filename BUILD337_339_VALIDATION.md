@@ -1,6 +1,6 @@
 # Builds 337–339 Validation — Accounting Automatic Read Batch
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — BROWSER PROVEN / LOCAL REGRESSION REQUIRED
 
 ```text
 Build 337  Sales-tax filing read extraction
@@ -10,55 +10,93 @@ Build 339  Evidence-check read ownership/schema-readiness extraction
 
 Business & Administration remains `domain-bridge` / inactive. No Accounting mutation ownership moves.
 
-## One Git Bash block
+## Development browser proof — PASSED 2026-08-24
+
+Observed on `/admin/accounting/`:
+
+```text
+sales_tax_legacy_status                                  200
+sales_tax_legacy_build                                   337
+sales_tax_legacy_owner                                   accounting
+sales_tax_legacy_schema_ready                            true
+sales_tax_legacy_schema_mutation                         false
+sales_tax_contract_status                                200
+sales_tax_contract_build                                 337
+sales_tax_contract_owner                                 accounting
+sales_tax_contract_schema_ready                          true
+sales_tax_contract_schema_mutation                       false
+accounting-sales-tax-filing-read_service_build           337
+accounting-sales-tax-filing-read_service_schema_ready    true
+accounting-sales-tax-filing-read_service_schema_mutation false
+
+fixed_assets_legacy_status                               200
+fixed_assets_legacy_build                                338
+fixed_assets_legacy_owner                                accounting
+fixed_assets_legacy_schema_ready                         false
+fixed_assets_legacy_schema_mutation                      false
+fixed_assets_legacy_missing_tables                       []
+fixed_assets_legacy_missing_columns                      ["accounting_fixed_assets.location_note"]
+fixed_assets_contract_status                             200
+fixed_assets_contract_build                              338
+fixed_assets_contract_owner                              accounting
+fixed_assets_contract_schema_ready                       false
+fixed_assets_contract_schema_mutation                    false
+fixed_assets_contract_missing_tables                     []
+fixed_assets_contract_missing_columns                    ["accounting_fixed_assets.location_note"]
+accounting-fixed-assets-read_service_build               338
+accounting-fixed-assets-read_service_schema_ready        false
+accounting-fixed-assets-read_service_schema_mutation     false
+
+evidence_legacy_status                                   200
+evidence_legacy_build                                    339
+evidence_legacy_owner                                    accounting
+evidence_legacy_schema_ready                             false
+evidence_legacy_schema_mutation                          false
+evidence_legacy_missing_tables                           ["hst_gst_review_records","accountant_export_manifests"]
+evidence_legacy_missing_columns                          []
+evidence_contract_status                                 200
+evidence_contract_build                                  339
+evidence_contract_owner                                  accounting
+evidence_contract_schema_ready                           false
+evidence_contract_schema_mutation                        false
+evidence_contract_missing_tables                         ["hst_gst_review_records","accountant_export_manifests"]
+evidence_contract_missing_columns                        []
+accounting-evidence-check-read_service_build             339
+accounting-evidence-check-read_service_schema_ready      false
+accounting-evidence-check-read_service_schema_mutation   false
+
+application_module                                       business-administration
+application_mode                                         domain-bridge
+active_application_module                                null
+contracts_ok                                             true
+services_ok                                              true
+```
+
+The architecture gate passes. `schema_ready=false` for Builds 338 and 339 is separate fresh-install/schema-parity evidence and must not be repaired inside GET handlers.
+
+## Schema-parity findings captured
+
+```text
+accounting_fixed_assets.location_note    missing column
+hst_gst_review_records                   missing table
+accountant_export_manifests              missing table
+```
+
+These join the existing Build 324 parity finding `orders.total_amount|total`. Schema migrations/readiness tooling owns repair.
+
+## Local regression still required
 
 ```bash
 git pull --ff-only origin dev
-python scripts/build331_333_accounting_read_batch_test.py
-python scripts/build334_336_accounting_read_batch_test.py
 python scripts/build337_339_accounting_read_batch_test.py
 git status --short
 ```
 
-Expected all three batch tests to PASS with `No Cloudflare resource was contacted.` and a clean status.
+Expected:
 
-## One Firefox browser block
-
-Open `/admin/accounting/` and run:
-
-```js
-(async () => {
-  const month = new Date().toISOString().slice(0, 7);
-  const r = window.DDModuleRuntime;
-  const checks = [
-    ['sales_tax_legacy', `/api/admin/accounting-sales-tax-filing?period_month=${encodeURIComponent(month)}`],
-    ['sales_tax_contract', `/api/admin/contracts/accounting-sales-tax-filing-read?period_month=${encodeURIComponent(month)}`],
-    ['fixed_assets_legacy', '/api/admin/accounting-fixed-assets'],
-    ['fixed_assets_contract', '/api/admin/contracts/accounting-fixed-assets-read'],
-    ['evidence_legacy', `/api/admin/accounting-evidence-check?period_month=${encodeURIComponent(month)}`],
-    ['evidence_contract', `/api/admin/contracts/accounting-evidence-check-read?period_month=${encodeURIComponent(month)}`],
-  ];
-  const out = {};
-  for (const [name,url] of checks) {
-    const response = await window.DDAuth.apiFetch(url); const data = await response.json().catch(() => null);
-    out[`${name}_status`] = response.status; out[`${name}_build`] = data?.build ?? null; out[`${name}_owner`] = data?.owner ?? null;
-    out[`${name}_schema_ready`] = data?.schema_ready ?? null; out[`${name}_schema_mutation`] = data?.request_time_schema_mutation ?? null;
-    if (data?.schema_ready === false) { out[`${name}_missing_tables`] = JSON.stringify(data?.missing_tables || []); out[`${name}_missing_columns`] = JSON.stringify(data?.missing_columns || []); }
-  }
-  for (const [id,options] of [
-    ['accounting-sales-tax-filing-read',{periodMonth:month}],
-    ['accounting-fixed-assets-read',{}],
-    ['accounting-evidence-check-read',{periodMonth:month}],
-  ]) {
-    const service = r?.service?.(id); const result = service ? await service.list(options) : null;
-    out[`${id}_service_build`] = result?.build ?? null; out[`${id}_service_schema_ready`] = result?.schemaReady ?? null; out[`${id}_service_schema_mutation`] = result?.requestTimeSchemaMutation ?? null;
-  }
-  out.application_module = r?.getCurrentApplicationModule?.()?.id ?? null;
-  out.application_mode = document.documentElement.dataset.ddApplicationModuleMode ?? null;
-  out.active_application_module = r?.getActiveApplicationModuleId?.() ?? null;
-  out.contracts_ok = r?.contractValidation?.ok === true; out.services_ok = r?.serviceRegistration?.ok === true;
-  console.table(out);
-})();
+```text
+BUILDS 337-339 ACCOUNTING READ BATCH: PASS
+No Cloudflare resource was contacted.
 ```
 
-Expected builds 337/338/339, owner `accounting`, mutation false everywhere, and the application still `business-administration` / `domain-bridge` / inactive. Any `schema_ready=false` is schema-parity evidence, not permission to add DDL to GET.
+A clean `git status --short` plus this browser proof fully validates Builds 337–339.

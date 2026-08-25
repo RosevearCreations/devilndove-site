@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 337–339 on 2026-08-24.
+Updated through staged Builds 340–342 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -32,8 +32,8 @@ Application modules are not permanent Git branches.
 Core architecture            302
 Core runtime implementation  305
 Commerce runtime             315
-Contract catalog             339
-Passive service adapters     339
+Contract catalog             342
+Passive service adapters     342
 Business runtime             inactive
 ```
 
@@ -49,7 +49,7 @@ Still open: bounded top-level `creative-production` runtime activation, CAIP/Con
 
 Build 323 proved `/admin/accounting/` resolves as `accounting` under `business-administration` with `application_mode=domain-bridge` and no active top-level runtime.
 
-Owned Accounting reads now include:
+Owned reads now include:
 
 ```text
 accounting-read                               Build 312 COMPLETE
@@ -73,58 +73,70 @@ accounting-statement-provider-profiles-read   Build 333 BROWSER PROVEN; LOCAL RE
 accounting-statement-imports-read             Build 334 BROWSER PROVEN; LOCAL REQUIRED
 accounting-reconciliation-exceptions-read     Build 335 BROWSER PROVEN; LOCAL REQUIRED
 accounting-vendor-statements-read             Build 336 BROWSER PROVEN; LOCAL REQUIRED
-accounting-sales-tax-filing-read              Build 337 STAGED
-accounting-fixed-assets-read                  Build 338 STAGED
-accounting-evidence-check-read                Build 339 STAGED
+accounting-sales-tax-filing-read              Build 337 BROWSER PROVEN; LOCAL REQUIRED
+accounting-fixed-assets-read                  Build 338 BROWSER PROVEN; LOCAL + SCHEMA PARITY
+accounting-evidence-check-read                Build 339 BROWSER PROVEN; LOCAL + SCHEMA PARITY
+accounting-reconciliation-read                Build 340 STAGED
+platform-db-sanity-read                       Build 341 STAGED (PLATFORM OWNED)
+accounting-close-workflow-read                Build 342 STAGED
 ```
 
-Build 324 exposed separate Development schema evidence:
-
-```text
-missing_tables   []
-missing_columns  ["orders.total_amount|total"]
-```
-
-Do not repair this inside GET handlers.
-
-## Accounting read-time schema mutation retirement
+## Read-time schema mutation retirement
 
 Rule:
 
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Builds 326–336 progressively retired request-time DDL/seeding from automatic Accounting reads while preserving explicit write compatibility. Build 337 removes reconciliation-table ensure from sales-tax filing GET. Build 338 removes fixed-assets table creation from GET while preserving POST create behavior. Build 339 formalizes the already-non-mutating evidence-check read behind an Accounting-owned schema-aware boundary.
+Build 326 removed journal GET DDL while keeping explicit POST compatibility.
+Build 327 removed GIFI-notes GET table/index creation while preserving POST save compatibility.
+Build 328 removed GIFI-summary GET `ensureGlSchema()` behavior.
+Build 329 removed GET-time closure/attachment/import ensures from period-lock reads.
+Build 330 removed GET-time attachment schema ensure/repair while preserving explicit uploads.
+Build 331 removed vendor-table ensure from vendor GET while preserving vendor writes.
+Build 332 removed vendor/rule/expense ensures from recurring-rule GET while preserving save/generate writes.
+Build 333 removed provider-profile GET seeding; defaults are returned in memory and POST remains materialization path.
+Build 334 removed statement-import GET schema creation/default seeding while preserving CSV import POST compatibility.
+Build 335 removed reconciliation-exception GET schema creation while preserving explicit exception updates.
+Build 336 prevented vendor-statement GET from reaching the mutating attachment helper.
+Build 337 removed sales-tax-filing GET reconciliation-table ensure.
+Build 338 removed fixed-assets table creation from GET while preserving POST asset creation compatibility.
+Build 339 added schema-aware ownership to an already non-mutating evidence-check GET.
+Build 340 removes reconciliation GET ensures and moves read calculation behind the Accounting read boundary.
+Build 341 formalizes DB sanity as a Platform-owned, non-mutating cross-application read contract.
+Build 342 removes close-workflow GET `ensureSchema()` reachability while preserving explicit POST write compatibility.
 
-The Accounting page still has automatic legacy reads requiring bounded source audits, especially the large reconciliation endpoint, year-end close, close workflow and DB sanity. Additional endpoints should be audited rather than assumed clean.
+## Development schema-parity track — separate from extraction
+
+Current concrete findings from non-mutating read contracts:
+
+```text
+orders.total_amount|total                     missing logical revenue column alternative (Build 324)
+accounting_fixed_assets.location_note         missing column (Build 338)
+hst_gst_review_records                        missing table (Build 339)
+accountant_export_manifests                   missing table (Build 339)
+```
+
+These findings must be repaired in fresh-install schema/migrations/readiness tooling, never by restoring DDL to GET.
+
+Fresh-install schema parity still takes priority over any Production business-data copy. Prior audit also found Production-only active tables such as `accounting_order_records`, `gift_cards`, Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy. Keep that work independently tracked.
 
 ## Validation-harness rule
 
-Historical regression scripts verify durable feature boundaries introduced by their build. They must not require the continued presence of a later blocker or freeze unrelated shared files forever.
+Historical regression scripts verify durable boundaries introduced by their build. They must not require the continued presence of a later blocker or freeze unrelated shared files forever.
 
 ## Mutation-authority extraction still open
 
-Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, vendor/recurring-rule/profile writes, CSV statement imports, reconciliation-exception updates, fixed-asset creation, attachment uploads and close/lock actions.
+Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, vendor/recurring-rule/profile writes, CSV statement imports, reconciliation review/exception updates, fixed-asset writes, attachment uploads, close/lock actions and accountant export writes.
 
 A loader or read-contract migration never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Complete the combined local regressions for Builds 331–339 and the 337–339 browser gate.
-2. Source-audit the large reconciliation engine, year-end close, close workflow and DB sanity as the remaining major automatic Accounting blockers.
-3. Keep GET/read paths schema-aware and non-mutating.
-4. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page with mutation ownership still false.
+1. Complete local regressions for Builds 331–342 and browser validation for 340–342.
+2. Capture schema deficits from Build 341 DB sanity and Build 342 close workflow without repairing them in GET.
+3. Source-audit remaining automatic Accounting-page reads, especially year-end close and any remaining startup requests.
+4. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page while keeping mutation ownership false.
 5. Separately continue Commerce route coverage and Creative & Production runtime work.
-
-## Separate fresh-install schema/data parity track
-
-Priority remains:
-
-```text
-fresh-install schema parity
-then Development business-data copy/migration
-```
-
-Do not copy Production business data into Development until schema parity is independently repaired and validated.
 
 ## Production safety
 

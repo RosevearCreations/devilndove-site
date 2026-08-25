@@ -1,7 +1,7 @@
-// Devil n Dove Build 339 browser adapters for implemented read contracts.
+// Devil n Dove Build 342 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 339;
+export const BUILD = 342;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -31,6 +31,9 @@ const ROUTES = Object.freeze({
   'accounting-sales-tax-filing-read': '/api/admin/contracts/accounting-sales-tax-filing-read',
   'accounting-fixed-assets-read': '/api/admin/contracts/accounting-fixed-assets-read',
   'accounting-evidence-check-read': '/api/admin/contracts/accounting-evidence-check-read',
+  'accounting-reconciliation-read': '/api/admin/contracts/accounting-reconciliation-read',
+  'platform-db-sanity-read': '/api/admin/contracts/platform-db-sanity-read',
+  'accounting-close-workflow-read': '/api/admin/contracts/accounting-close-workflow-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -188,6 +191,31 @@ export function createDefaultModuleServices() {
     'accounting-evidence-check-read': service('accounting-evidence-check-read', 'accounting', async (options = {}) => {
       const data = await fetchContract(ROUTES['accounting-evidence-check-read'], { period_month: text(options.periodMonth) });
       return Object.freeze({ ...accountingReadResult(data, 'checks'), periodMonth: data.period_month || '', authorityTables: Object.freeze(data.authority_tables || []) });
+    }),
+    'accounting-reconciliation-read': service('accounting-reconciliation-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-reconciliation-read'], { type: text(options.reconciliationType || options.type), period_month: text(options.periodMonth), all_periods: options.includeAllPeriods ? 1 : '' });
+      return Object.freeze({ ...accountingReadResult(data, 'rows'), type: data.type || null, periodMonth: data.period_month || null, reviews: Object.freeze(data.reviews || []), attachmentPreview: Object.freeze(data.attachment_preview || []), authorityTables: Object.freeze(data.authority_tables || []) });
+    }),
+    'platform-db-sanity-read': service('platform-db-sanity-read', 'platform', async () => {
+      const data = await fetchContract(ROUTES['platform-db-sanity-read']);
+      return Object.freeze({
+        build: Number(data.build || 0), contract: data.contract, schemaReady: Boolean(data.schema_ready),
+        missingTables: Object.freeze(data.missing_tables || []), missingTableNames: Object.freeze(data.missing_table_names || []), missingColumns: Object.freeze(data.missing_columns || []),
+        requestTimeSchemaMutation: data.request_time_schema_mutation === true, summary: Object.freeze(data.summary || {}), staleTables: Object.freeze(data.stale_tables || []),
+        okTables: Object.freeze(data.ok_tables || []), unexpectedTables: Object.freeze(data.unexpected_tables || []), indexChecks: Object.freeze(data.index_checks || []),
+        criticalChecks: Object.freeze(data.critical_checks || []), catalogCounts: Object.freeze(data.catalog_counts || []), inventoryCounts: Object.freeze(data.inventory_counts || []),
+        journalBalance: Object.freeze(data.journal_balance || {}), migrationLedgerSummary: Object.freeze(data.migration_ledger_summary || {}),
+      });
+    }),
+    'accounting-close-workflow-read': service('accounting-close-workflow-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-close-workflow-read'], { period_month: text(options.periodMonth) });
+      return Object.freeze({
+        build: Number(data.build || 0), contract: data.contract, schemaReady: Boolean(data.schema_ready), missingTables: Object.freeze(data.missing_tables || []),
+        missingColumns: Object.freeze(data.missing_columns || []), requestTimeSchemaMutation: data.request_time_schema_mutation === true, periodMonth: data.period_month || null,
+        payment: Object.freeze(data.payment || {}), hstReview: Object.freeze(data.hst_review || {}), closure: Object.freeze(data.closure || {}),
+        exportPackages: Object.freeze(data.export_packages || []), evidenceAttachments: Object.freeze(data.evidence_attachments || []), closeReadiness: Object.freeze(data.close_readiness || {}),
+        evidenceBundleSummary: Object.freeze(data.evidence_bundle_summary || {}), authorityTables: Object.freeze(data.authority_tables || []),
+      });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });

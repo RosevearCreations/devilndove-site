@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Builds 337–339 Accounting Read Batch Staged
+# Devil n Dove AI Context — Builds 340–342 Read Batch Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities now include:
+Primary modular authorities include:
 
 - `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`
 - `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`
@@ -24,11 +24,15 @@ Primary modular authorities now include:
 - `docs/architecture/BUILD337_ACCOUNTING_SALES_TAX_FILING_READ_EXTRACTION.md`
 - `docs/architecture/BUILD338_ACCOUNTING_FIXED_ASSETS_READ_EXTRACTION.md`
 - `docs/architecture/BUILD339_ACCOUNTING_EVIDENCE_CHECK_READ_EXTRACTION.md`
+- `docs/architecture/BUILD340_ACCOUNTING_RECONCILIATION_READ_EXTRACTION.md`
+- `docs/architecture/BUILD341_PLATFORM_DB_SANITY_READ_EXTRACTION.md`
+- `docs/architecture/BUILD342_ACCOUNTING_CLOSE_WORKFLOW_READ_EXTRACTION.md`
 - `BUILD325_327_VALIDATION.md`
 - `BUILD328_330_VALIDATION.md`
 - `BUILD331_333_VALIDATION.md`
 - `BUILD334_336_VALIDATION.md`
 - `BUILD337_339_VALIDATION.md`
+- `BUILD340_342_VALIDATION.md`
 
 ## Production safety
 
@@ -93,9 +97,12 @@ Build 333 Statement provider profiles read BROWSER PROVEN; LOCAL REQUIRED
 Build 334 Accounting statement imports     BROWSER PROVEN; LOCAL REQUIRED
 Build 335 Reconciliation exceptions read   BROWSER PROVEN; LOCAL REQUIRED
 Build 336 Vendor statements read           BROWSER PROVEN; LOCAL REQUIRED
-Build 337 Sales-tax filing read            STAGED
-Build 338 Fixed-assets read                STAGED
-Build 339 Evidence-check read              STAGED
+Build 337 Sales-tax filing read            BROWSER PROVEN; LOCAL REQUIRED
+Build 338 Fixed-assets read                BROWSER PROVEN; LOCAL REQUIRED + SCHEMA PARITY
+Build 339 Evidence-check read              BROWSER PROVEN; LOCAL REQUIRED + SCHEMA PARITY
+Build 340 Accounting reconciliation read   STAGED
+Build 341 Platform DB sanity read           STAGED
+Build 342 Accounting close-workflow read   STAGED
 ```
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
@@ -108,59 +115,75 @@ Core runtime implementation               305
 Commerce/Operations runtime               315
 Accounting page bridge                    323 validated shadow/domain-bridge
 Accounting reads through 330              validated
-Accounting vendors read                   331 browser proven
-Accounting recurring rules read           332 browser proven
-Statement provider profiles read          333 browser proven
-Statement imports read                    334 browser proven
-Reconciliation exceptions read            335 browser proven
-Vendor statements read                    336 browser proven
-Sales-tax filing read                     337 staged
-Fixed-assets read                         338 staged
-Evidence-check read                       339 staged
-Contract catalog                          339
-Passive service adapters                  339
+Accounting reads 331–339                  browser proven; local regression outstanding
+Accounting reconciliation read            340 staged
+Platform DB sanity read                   341 staged
+Accounting close workflow read            342 staged
+Contract catalog                          342
+Passive service adapters                  342
 Business & Administration runtime         inactive
 Accounting mutation ownership             unmoved
 ```
 
-## Build 324 schema-parity finding
+## Read-boundary rule
 
-Development returned:
+GET/read paths report schema readiness. Migrations/readiness tooling creates or repairs schema. Never restore request-time DDL to a read merely because Development reports `schema_ready=false`.
+
+A loader/read-contract migration never implies mutation ownership. Existing compatibility POST/PUT/DELETE paths remain legacy until dedicated mutation contracts are separately extracted.
+
+## Development schema-parity findings — separate track
+
+These are evidence from non-mutating read contracts, not modularization failures:
 
 ```text
+Build 324
 missing_tables   []
 missing_columns  ["orders.total_amount|total"]
-mutation         false
+
+Build 338
+missing_tables   []
+missing_columns  ["accounting_fixed_assets.location_note"]
+
+Build 339
+missing_tables   ["hst_gst_review_records","accountant_export_manifests"]
+missing_columns  []
 ```
 
-Keep this on the separate schema-parity track. Do not add DDL to the GET.
+Do not repair these inside GET handlers. Fresh-install schema parity must be repaired and validated independently before any Production business-data copy.
 
 ## Builds 325–330 validation result
 
-Builds 325–327 and 328–330 are fully validated. Their local regressions passed, all browser legacy/contract reads returned HTTP 200 with the correct builds/owner, Development reported `schema_ready=true`, every read/service reported no request-time schema mutation, and Accounting remained `business-administration` / `domain-bridge` with no active top-level Business & Administration runtime.
+Builds 325–330 are fully validated. Their local regressions and browser gates passed, all read/service mutation flags were false, and Accounting remained `business-administration` / `domain-bridge` with no active top-level Business & Administration runtime.
 
-## Builds 331–336 browser result
+## Builds 331–336 validation state
 
-Both browser batches are exact passes. Builds 331–336 all returned HTTP 200 from legacy and contract routes with correct builds/owner, `schema_ready=true`, and `request_time_schema_mutation=false`. Passive services matched the same builds with schema ready and mutation false. Build 333 kept six provider defaults available in memory with `defaults_materialized=false`. Accounting remained `business-administration` / `domain-bridge` / inactive. Local batch regressions remain required before 331–336 are fully validated.
+Browser gates are exact passes: all legacy/contract routes returned HTTP 200 with the expected builds/owner, `schema_ready=true`, and mutation false. Passive services matched. Build 333 kept six provider defaults in memory with `defaults_materialized=false`. Local batch regressions remain required before these builds are fully validated.
 
-## Builds 337–339 staged batch
+## Builds 337–339 browser result
 
-### Build 337
-`/api/admin/accounting-sales-tax-filing` GET no longer calls `ensureAccountingReconciliationReviewsTable()`. It delegates to an Accounting-owned schema-aware worksheet read service.
+The browser architecture gate passes. Build 337 is schema-ready. Build 338 reports missing `accounting_fixed_assets.location_note`. Build 339 reports missing `hst_gst_review_records` and `accountant_export_manifests`. All legacy/contract/service mutation flags are false, contract/service registration is valid, and Accounting remains `business-administration` / `domain-bridge` / inactive. Local regression remains required.
 
-### Build 338
-`/api/admin/accounting-fixed-assets` GET no longer creates `accounting_fixed_assets`. Explicit POST asset creation retains its existing write-side ensure and insert behavior.
+## Builds 340–342 staged batch
 
-### Build 339
-`/api/admin/accounting-evidence-check` was already non-mutating. Build 339 gives it an Accounting-owned schema-aware read contract/passive service and explicit missing-table/column reporting for `hst_gst_review_records` and `accountant_export_manifests`.
+### Build 340 — Accounting reconciliation
+
+`/api/admin/accounting-reconciliation` GET delegates to an Accounting-owned service rather than ensuring reconciliation-review, period-closure, vendor or attachment schema. It reuses non-mutating attachment/vendor authorities and preserves sales-tax, processor-fee and shipping summary behavior. Explicit reconciliation-review POST remains the write-side compatibility path.
+
+### Build 341 — Platform DB sanity
+
+`/api/admin/db-sanity` was already non-mutating. Its application-wide inspection logic now belongs to `platform` via `platform-db-sanity-read`. Accounting/Admin are consumers. The service reports table/column/index sanity, catalog/inventory mismatches, journal balance and migration-ledger state without creating schema.
+
+### Build 342 — Accounting close workflow
+
+`/api/admin/accounting-close-workflow` JSON/CSV/ZIP GET paths now consume an Accounting-owned schema-aware service and no longer reach legacy `ensureSchema()`. Explicit POST actions still call `ensureSchema()` before writes. Mutation ownership is unchanged.
 
 ## Next direction
 
-Validate 331–339 with one combined local checkpoint and the 337–339 browser gate. Then continue source-auditing the remaining automatic Accounting reads, especially the large reconciliation endpoint, year-end close, close workflow and DB sanity. Do not activate top-level `business-administration` until automatic `/admin/accounting/` reads are owned/non-mutating.
-
-## Separate schema/data parity track — DO NOT MIX
-
-Fresh-install schema parity remains separate and must be repaired before any Production business-data copy. Read contracts report missing schema; migrations/readiness tooling owns creation/repair.
+1. Validate Builds 331–342 with the combined local checkpoint and the 340–342 browser gate.
+2. Capture any further `schema_ready=false` output on the separate schema-parity track.
+3. Continue source-auditing remaining automatic Accounting reads, especially year-end close and any other page startup endpoints.
+4. Do not activate top-level `business-administration` until automatic `/admin/accounting/` reads are owned/non-mutating.
+5. Keep Production frozen and fresh-install schema repair separate from modular extraction.
 
 ## Validation preference
 
