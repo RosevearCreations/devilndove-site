@@ -2,50 +2,67 @@
 
 ## Status
 
-**READY FOR LOCAL 20-ITEM FIXTURE GATE / PRODUCTION WRITES CLOSED**
+**PASS — 20/20 LOCAL RELEASE FIXTURE GATE / ONE PRODUCT-NUMBER BLOCKER MAPPED / PRODUCTION WRITES CLOSED**
 
-Build 421 completed all twenty live read-only evidence items and reported exactly one rollout blocker. Build 422 converts that evidence into local release-fixture authority without contacting Cloudflare or enabling a Production mutation path.
+Build 421 completed 20/20 live read-only evidence items with one blocker. Build 422 then completed its local parser/remediation/fixture gate 20/20 after hardening the parser for Windows/Git Bash separator encoding.
 
-The exact blocker is intentionally read from the owner-generated `build421_production_evidence.txt`; Build 422 does not infer or guess it from the summary count.
+Recorded owner-run Build 422 result:
 
-## Build 422 — 20 completed source/fixture changes
+```text
+BUILD 422 BLOCKER MAPPER: PASS
+Build 421 evidence items parsed: 20
+Rollout blockers parsed: 1
+ - 17: products.product_number semantic uniqueness including implicit UNIQUE indexes [product identity uniqueness]
+   missing_product_number=45, duplicate_groups=0, production_unique_index=True, development_unique_index=True
 
-1. Build 421 is formally recorded as **PASS — 20/20 complete with one rollout blocker**.
-2. Added a local Build 421 evidence parser that requires the numbered PASS/BLOCKER records instead of relying only on the footer.
-3. Added exact blocker-label and evidence-summary extraction.
-4. Added blocker-family classification for accounting, constraint/default, fractional Inventory, FK/orphan, Product identity, and one-sided-table authority cases.
-5. Added local `build422_blocker_mapping.local.md` generation; the mapping is evidence only and cannot mutate Production.
-6. Added a source-only release fixture catalog for current Gift Card lookup columns and indexes.
-7. Added explicit `gift_card_lookup_lockouts` fixture authority and retained readiness-gate ownership.
-8. Added Notification outbox metadata/index fixture authority.
-9. Added canonical Membership Build 395 column catalog and legacy alias map.
-10. Retained Build 410 shadow/backup/rebuild logic as the proven data-preserving Membership compatibility reference; it remains Development-only.
-11. Added the five-table fractional Inventory/Creative Project preservation family and exact quantity-column catalog.
-12. Added the five-table Product/FK family and explicit referenced parent keys for orphan-gated rebuild planning.
-13. Added the three-table Accounting rebuild family.
-14. Added the four-table constraint/default review family (`product_costs`, `movie_catalog`, `product_resource_links`, `tax_classes`).
-15. Added a thirteen-phase backup-first / promotion-last rollout sequence catalog.
-16. Added explicit source flags keeping Production mutation, executable Production helper generation, broad Prod→Dev copy, and CAIP D1-only copy disabled.
-17. Added blocker-parser regression coverage using a synthetic PASS/BLOCKER log.
-18. Added a twenty-check local release-fixture gate that consumes the real Build 421 local evidence and manifest.
-19. Preserved `search_query_terms` rows pending authority resolution and kept `__sql_test` retirement separate from table-count parity.
-20. Kept the executable Production helper nonexistent/disabled; Build 422 prepares fixtures and remediation decisions only.
+BUILD 422 TWENTY-ITEM LOCAL RELEASE FIXTURE GATE: PASS (20/20)
+Executable Production helper generated: NO
+PRODUCTION PROMOTION: CLOSED
+```
 
-## Blocker policy
+The single blocker is therefore precisely classified: **all 45 Production Product rows are missing `product_number`; duplicate groups are zero and uniqueness indexes exist on both environments.** Build 423 owns the safe remediation evidence for this data-readiness blocker.
 
-The single Build 421 blocker remains **fail-closed**. Build 422 may complete source/fixture work for unaffected migration families, but the blocked family cannot enter an executable Production helper until its local mapping has:
+## Build 422 completed source/fixture changes
 
-- the exact Build 421 evidence summary;
-- an explicit remediation or preservation decision;
-- a data-preserving regression fixture when rebuild is required;
-- pre/post assertions;
-- a rollback/export boundary.
+1. Build 421 recorded as PASS 20/20 with one blocker.
+2. Local Build 421 PASS/BLOCKER evidence parser.
+3. Exact blocker-label and evidence-summary extraction.
+4. Blocker-family classification.
+5. Local blocker-mapping Markdown generation.
+6. Gift Card lookup additive fixture catalog.
+7. Gift Card lockout/readiness fixture authority.
+8. Notification metadata/index fixture authority.
+9. Membership Build 395 canonical catalog and legacy aliases.
+10. Build 410 data-preserving Membership reference retained Development-only.
+11. Five-table fractional Inventory/Creative Project preservation family.
+12. Five-table Product/FK orphan-gated family.
+13. Three-table Accounting family.
+14. Four-table constraint/default family.
+15. Backup-first/promotion-last rollout sequence.
+16. Mutation/copy/promotion safety flags disabled.
+17. Blocker-parser regression coverage.
+18. Twenty-check local release-fixture gate.
+19. Preserve `search_query_terms`; keep `__sql_test` retirement separate from count parity.
+20. Executable Production helper remains nonexistent/disabled.
+
+## Actual blocker disposition
+
+```text
+products.product_number
+Production rows:              45
+Missing product_number:       45
+Duplicate Product numbers:     0
+Production unique index:      yes
+Development unique index:     yes
+```
+
+This is **not** permission to copy Development values. Build 423 first proves exact Product identity and Development sequence authority before a non-executing mapping can be trusted.
 
 ## One-sided table policy
 
-- `search_query_terms`: **preserve** the five Production rows while runtime/schema authority is resolved. Do not delete or copy them just to equalize table counts.
-- `__sql_test`: remain untouched while retirement safety is reviewed. Its empty row count alone is not justification for deletion or recreation elsewhere.
-- `gift_card_lookup_lockouts`: current required schema; Production eventually needs the table/index after reviewed additive migration preparation.
+- `search_query_terms`: preserve five Production rows while authority is resolved.
+- `__sql_test`: leave the empty Production table untouched pending retirement proof.
+- `gift_card_lookup_lockouts`: required current schema and later additive Production candidate.
 
 ## Safety boundaries
 
@@ -54,64 +71,17 @@ Production schema mutation                 DISABLED
 Executable Production helper               DISABLED
 Broad Production -> Development data copy  DISABLED / CANCELLED
 CAIP D1-only metadata copy                 DISABLED / FORBIDDEN
-Provider mutation during parity work       DISABLED
+Provider mutation                           DISABLED
 Production promotion                       CLOSED
 ```
 
-## Local validation
+## Handoff
 
-Run from `dev` after Build 421 evidence files remain in the repository working directory:
-
-```bash
-python -m py_compile \
-  scripts/build422_blocker_mapper.py \
-  scripts/build422_release_fixture_catalog.py \
-  scripts/build422_blocker_mapper_regression.py \
-  scripts/build422_twenty_item_local_release_fixture_gate.py
-
-python scripts/build422_blocker_mapper_regression.py
-python scripts/build422_blocker_mapper.py
-python scripts/build422_twenty_item_local_release_fixture_gate.py
-```
-
-No command above contacts Cloudflare.
-
-## Next 20 ordered changes
-
-1. Build 423: consume the exact Build 421 blocker mapping and add a blocker-specific remediation/preservation fixture.
-2. Build 423: add a non-executing Gift Card additive migration plan for the five lookup-attempt columns.
-3. Build 423: add Gift Card pre-schema assertions for existing legacy lookup-attempt rows/columns.
-4. Build 423: add Gift Card post-schema assertions for all five current lookup-attempt columns.
-5. Build 423: add `gift_card_lookup_lockouts` create/index fixture assertions.
-6. Build 423: prove Gift Card additive fixture reruns idempotently without row loss.
-7. Build 423: add a non-executing Notification `metadata_json`/index additive plan.
-8. Build 423: add Notification pre/post schema and row-preservation assertions.
-9. Build 423: resolve and fixture the `product_image_annotations(product_id, product_image_id)` additive index authority.
-10. Build 423: build Membership legacy→Build 395 mapping fixtures for all supported old column aliases.
-11. Build 423: prove Membership row-count and unique-tier preservation using representative legacy rows.
-12. Build 423: build fractional Inventory table-copy fixtures with non-integer REAL values.
-13. Build 423: add exact 1,041-row `site_item_inventory` preservation gate without seeding 1,041 fake rows.
-14. Build 423: build Product/FK rebuild fixtures that refuse to run with any orphan reference.
-15. Build 423: add semantic `products.product_number` uniqueness preservation including implicit UNIQUE behavior.
-16. Build 423: build Accounting/default/nullability fixtures for blocker-free or explicitly mapped data only.
-17. Build 423: add local constraint/default fixtures for Product Costs, Movie Catalog, Product Resource Links, and Tax Classes.
-18. Build 423: resolve `search_query_terms` preserve/retire authority while retaining all five live rows until a decision is approved.
-19. Build 423: resolve `__sql_test` retirement authority without using schema-count equality as a reason.
-20. Build 423: produce a local release-candidate gate that still refuses executable Production mutation until every fixture family and the one blocker disposition are PASS.
-
-## Gate status
+The next twenty changes are now owned by `BUILD423_TWENTY_ITEM_BLOCKER_REMEDIATION_FIXTURES.md`.
 
 ```text
-Build 410  Development D1 parity overlay          PASS
-Build 412  Local RC                               PASS
-Build 416  Development browser/read contracts     PASS
-Build 417  Live schema/data mapping               PASS
-Build 418  Live semantic classification           PASS
-Build 419  Exact structural drift evidence        PASS
-Build 420  20-item parity hardening               PASS (20/20 local)
+Build 420  20-item parity hardening               PASS (20/20)
 Build 421  20-item Production evidence/manifest   PASS (20/20, 1 blocker)
-Build 422  20-item local release fixtures          READY
-
-Production schema mutation                        CLOSED
-Production promotion                              CLOSED
+Build 422  20-item local release fixtures         PASS (20/20)
+Build 423  Product-number remediation + fixtures  READY
 ```
