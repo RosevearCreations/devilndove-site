@@ -70,6 +70,14 @@ git -c gc.auto=0 pull --ff-only origin dev
 python scripts/build384_apply_gift_card_parity_direct.py
 ```
 
+The first direct-query fallback run then exposed a Windows-only helper bug before D1 diagnostics could be printed:
+
+```text
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f
+```
+
+That failure was local Python subprocess decoding, not D1 or SQL. The helper now pins Wrangler output decoding to UTF-8 with replacement and disables color output so malformed/progress bytes cannot abort the release helper.
+
 The fallback:
 
 - refuses to run off the `dev` branch;
@@ -79,6 +87,7 @@ The fallback:
 - performs a read-only Development D1 preflight;
 - splits the migration into bounded statement batches;
 - uses `wrangler d1 execute --command` rather than the failing remote `--file` import path;
+- decodes Wrangler/Node output safely on Windows;
 - verifies all eight Gift Card-owned tables;
 - verifies migration-owned `activation` and `reissue` templates.
 
