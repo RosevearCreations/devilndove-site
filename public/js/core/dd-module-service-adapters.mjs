@@ -1,7 +1,7 @@
-// Devil n Dove Build 319 browser adapters for implemented read contracts.
+// Devil n Dove Build 320 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 319;
+export const BUILD = 320;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -12,6 +12,7 @@ const ROUTES = Object.freeze({
   'accounting-writeoffs-read': '/api/admin/contracts/accounting-writeoffs-read',
   'accounting-general-ledger-read': '/api/admin/contracts/accounting-general-ledger-read',
   'accounting-summary-read': '/api/admin/contracts/accounting-summary-read',
+  'accounting-overhead-allocations-read': '/api/admin/contracts/accounting-overhead-allocations-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -92,6 +93,10 @@ export function createDefaultModuleServices() {
     'accounting-summary-read': service('accounting-summary-read', 'accounting', async (options = {}) => {
       const data = await fetchContract(ROUTES['accounting-summary-read'], { limit: boundedInt(options.limit, 25, 1, 100) });
       return accountingReadResult(data, 'records');
+    }),
+    'accounting-overhead-allocations-read': service('accounting-overhead-allocations-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-overhead-allocations-read'], { month: text(options.month || options.periodMonth) });
+      return Object.freeze({ ...accountingReadResult(data, 'allocations'), periodMonth: data.period_month || null });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
