@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Builds 340–342 on 2026-08-24.
+Updated through staged Builds 343–345 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -32,8 +32,8 @@ Application modules are not permanent Git branches.
 Core architecture            302
 Core runtime implementation  305
 Commerce runtime             315
-Contract catalog             342
-Passive service adapters     342
+Contract catalog             345
+Passive service adapters     345
 Business runtime             inactive
 ```
 
@@ -76,9 +76,12 @@ accounting-vendor-statements-read             Build 336 BROWSER PROVEN; LOCAL RE
 accounting-sales-tax-filing-read              Build 337 BROWSER PROVEN; LOCAL REQUIRED
 accounting-fixed-assets-read                  Build 338 BROWSER PROVEN; LOCAL + SCHEMA PARITY
 accounting-evidence-check-read                Build 339 BROWSER PROVEN; LOCAL + SCHEMA PARITY
-accounting-reconciliation-read                Build 340 STAGED
-platform-db-sanity-read                       Build 341 STAGED (PLATFORM OWNED)
-accounting-close-workflow-read                Build 342 STAGED
+accounting-reconciliation-read                Build 340 BROWSER PROVEN; LOCAL REQUIRED
+platform-db-sanity-read                       Build 341 BROWSER PROVEN; LOCAL + SCHEMA PARITY (PLATFORM OWNED)
+accounting-close-workflow-read                Build 342 BROWSER PROVEN; LOCAL REQUIRED
+accounting-year-end-close-read                Build 343 STAGED
+accounting-monthly-summary-export-read        Build 344 STAGED
+accounting-period-summary-export-read         Build 345 STAGED
 ```
 
 ## Read-time schema mutation retirement
@@ -94,29 +97,35 @@ Build 329 removed GET-time closure/attachment/import ensures from period-lock re
 Build 330 removed GET-time attachment schema ensure/repair while preserving explicit uploads.
 Build 331 removed vendor-table ensure from vendor GET while preserving vendor writes.
 Build 332 removed vendor/rule/expense ensures from recurring-rule GET while preserving save/generate writes.
-Build 333 removed provider-profile GET seeding; defaults are returned in memory and POST remains materialization path.
+Build 333 removed provider-profile GET seeding; defaults are returned in memory and POST remains the materialization path.
 Build 334 removed statement-import GET schema creation/default seeding while preserving CSV import POST compatibility.
 Build 335 removed reconciliation-exception GET schema creation while preserving explicit exception updates.
 Build 336 prevented vendor-statement GET from reaching the mutating attachment helper.
 Build 337 removed sales-tax-filing GET reconciliation-table ensure.
 Build 338 removed fixed-assets table creation from GET while preserving POST asset creation compatibility.
 Build 339 added schema-aware ownership to an already non-mutating evidence-check GET.
-Build 340 removes reconciliation GET ensures and moves read calculation behind the Accounting read boundary.
-Build 341 formalizes DB sanity as a Platform-owned, non-mutating cross-application read contract.
-Build 342 removes close-workflow GET `ensureSchema()` reachability while preserving explicit POST write compatibility.
+Build 340 removed reconciliation GET ensures and moved its calculation behind the Accounting read boundary.
+Build 341 formalized DB sanity as a Platform-owned, non-mutating cross-application read contract.
+Build 342 removed close-workflow GET `ensureSchema()` reachability while preserving explicit POST write compatibility.
+Build 343 removes all year-end-close GET ensures, including GL creation, and composes previously extracted non-mutating Accounting authorities.
+Build 344 makes monthly export schema-aware and prevents incompatible order/expense/write-off SQL from disappearing as silent empty CSV output.
+Build 345 applies the same owned schema-aware export boundary to quarter/year exports.
 
 ## Development schema-parity track — separate from extraction
 
-Current concrete findings from non-mutating read contracts:
+Concrete findings from non-mutating reads:
 
 ```text
 orders.total_amount|total                     missing logical revenue column alternative (Build 324)
 accounting_fixed_assets.location_note         missing column (Build 338)
 hst_gst_review_records                        missing table (Build 339)
 accountant_export_manifests                   missing table (Build 339)
+user_profiles.profile_id                      missing expected column (Build 341)
+access_tiers.tier_id                          missing expected column (Build 341)
+payment_disputes.payment_dispute_id           missing expected column (Build 341)
 ```
 
-These findings must be repaired in fresh-install schema/migrations/readiness tooling, never by restoring DDL to GET.
+These findings belong in fresh-install schema/migrations/readiness tooling, never in GET handlers.
 
 Fresh-install schema parity still takes priority over any Production business-data copy. Prior audit also found Production-only active tables such as `accounting_order_records`, `gift_cards`, Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy. Keep that work independently tracked.
 
@@ -132,11 +141,11 @@ A loader or read-contract migration never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Complete local regressions for Builds 331–342 and browser validation for 340–342.
-2. Capture schema deficits from Build 341 DB sanity and Build 342 close workflow without repairing them in GET.
-3. Source-audit remaining automatic Accounting-page reads, especially year-end close and any remaining startup requests.
-4. When all automatic `/admin/accounting/` reads are owned/non-mutating, activate the first read-only `business-administration` runtime page while keeping mutation ownership false.
-5. Separately continue Commerce route coverage and Creative & Production runtime work.
+1. Complete the combined local regression for Builds 331–345 and browser validation for Builds 343–345.
+2. Capture any additional export/year-end schema deficits without repairing them in GET.
+3. Audit every automatic `/admin/accounting/` bootstrap request to verify it resolves to an owned, non-mutating read boundary.
+4. If that audit is clean, stage the first read-only `business-administration` runtime activation while keeping mutation ownership false.
+5. Separately continue fresh-install schema parity, Commerce route coverage, and Creative & Production runtime work.
 
 ## Production safety
 

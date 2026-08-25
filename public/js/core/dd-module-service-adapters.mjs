@@ -1,7 +1,7 @@
-// Devil n Dove Build 342 browser adapters for implemented read contracts.
+// Devil n Dove Build 345 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 342;
+export const BUILD = 345;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -34,6 +34,9 @@ const ROUTES = Object.freeze({
   'accounting-reconciliation-read': '/api/admin/contracts/accounting-reconciliation-read',
   'platform-db-sanity-read': '/api/admin/contracts/platform-db-sanity-read',
   'accounting-close-workflow-read': '/api/admin/contracts/accounting-close-workflow-read',
+  'accounting-year-end-close-read': '/api/admin/contracts/accounting-year-end-close-read',
+  'accounting-monthly-summary-export-read': '/api/admin/contracts/accounting-monthly-summary-export-read',
+  'accounting-period-summary-export-read': '/api/admin/contracts/accounting-period-summary-export-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -216,6 +219,18 @@ export function createDefaultModuleServices() {
         exportPackages: Object.freeze(data.export_packages || []), evidenceAttachments: Object.freeze(data.evidence_attachments || []), closeReadiness: Object.freeze(data.close_readiness || {}),
         evidenceBundleSummary: Object.freeze(data.evidence_bundle_summary || {}), authorityTables: Object.freeze(data.authority_tables || []),
       });
+    }),
+    'accounting-year-end-close-read': service('accounting-year-end-close-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-year-end-close-read'], { year: text(options.year) });
+      return Object.freeze({ build:Number(data.build||0), contract:data.contract, schemaReady:Boolean(data.schema_ready), missingTables:Object.freeze(data.missing_tables||[]), missingColumns:Object.freeze(data.missing_columns||[]), requestTimeSchemaMutation:data.request_time_schema_mutation===true, taxYear:data.tax_year||null, checklist:Object.freeze(data.checklist||{}), accountantHandoff:Object.freeze(data.accountant_handoff||{}), months:Object.freeze(data.months||[]), gifiNotes:Object.freeze(data.gifi_notes||[]), reconciliationReviews:Object.freeze(data.reconciliation_reviews||[]), attachments:Object.freeze(data.attachments||[]), authorityTables:Object.freeze(data.authority_tables||[]) });
+    }),
+    'accounting-monthly-summary-export-read': service('accounting-monthly-summary-export-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-monthly-summary-export-read'], { month: text(options.month || options.periodMonth) });
+      return Object.freeze({ ...accountingReadResult(data, 'rows'), period:data.period||null, range:Object.freeze(data.range||{}), sources:Object.freeze(data.sources||{}), authorityTables:Object.freeze(data.authority_tables||[]) });
+    }),
+    'accounting-period-summary-export-read': service('accounting-period-summary-export-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-period-summary-export-read'], { scope:text(options.scope), period:text(options.period) });
+      return Object.freeze({ ...accountingReadResult(data, 'rows'), scope:data.scope||null, period:data.period||null, range:Object.freeze(data.range||{}), sources:Object.freeze(data.sources||{}), authorityTables:Object.freeze(data.authority_tables||[]) });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
