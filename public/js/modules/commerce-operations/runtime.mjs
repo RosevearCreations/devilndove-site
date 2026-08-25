@@ -1,26 +1,38 @@
-// Devil n Dove Build 315 Commerce & Operations umbrella runtime.
-// Catalog and Inventory remain active runtime domains. Operations remains read-only and is
-// explicitly limited to proven page coverage so legacy pages cannot be silently counted as migrated.
+// Devil n Dove Build 363 Commerce & Operations umbrella runtime.
+// Build 364 extends explicit Operations coverage to Membership after Build 362 removed
+// Tier Policy GET-time schema creation. Existing Operations pages retain their proven
+// Catalog/Inventory/Accounting read prerequisites; Membership uses its own passive read service.
 
 import {
   BUILD as INVENTORY_WRITE_BOUNDARY_BUILD,
   getInventoryWriteBoundaryStatus,
 } from './inventory-write-boundary.mjs?v=310';
+import { ensureOperationsMembershipReadService } from './operations-membership-read-service.mjs?v=363';
 
-const BUILD = 315;
+const BUILD = 363;
+const ACTIVATION_BUILD = 364;
 const MODULE_ID = 'commerce-operations';
 const SUPPORTED_DOMAINS = Object.freeze(['catalog', 'inventory', 'operations']);
+const MEMBERSHIP_RUNTIME_PAGE = '/admin/membership/';
 const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
   '/admin/orders/',
+  MEMBERSHIP_RUNTIME_PAGE,
 ]);
-const REQUIRED_SERVICES_BY_DOMAIN = Object.freeze({
-  catalog: Object.freeze(['catalog-read', 'inventory-cost']),
-  inventory: Object.freeze(['inventory-read']),
-  operations: Object.freeze(['catalog-read', 'inventory-read', 'accounting-read']),
-});
-const ALL_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-read', 'inventory-cost', 'accounting-read']);
+const CATALOG_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-cost']);
+const INVENTORY_REQUIRED_SERVICES = Object.freeze(['inventory-read']);
+const LEGACY_OPERATIONS_REQUIRED_SERVICES = Object.freeze(['catalog-read', 'inventory-read', 'accounting-read']);
+const MEMBERSHIP_REQUIRED_SERVICES = Object.freeze(['operations-membership-read']);
+const ALL_REQUIRED_SERVICES = Object.freeze([
+  'catalog-read',
+  'inventory-read',
+  'inventory-cost',
+  'accounting-read',
+  'operations-membership-read',
+]);
+const MEMBERSHIP_READ_CONTRACT = '/api/admin/contracts/operations-membership-read';
+const MEMBERSHIP_READ_CONTRACT_BUILD = 362;
 
 let state = 'registered';
 let activationCount = 0;
@@ -49,14 +61,27 @@ function supportedPathForDomain(domainId, pathname) {
   if (domain !== 'operations') return true;
   return OPERATIONS_RUNTIME_PAGES.includes(normalizePathname(pathname));
 }
-function requiredServicesForDomain(domainId) {
-  return REQUIRED_SERVICES_BY_DOMAIN[normalizeDomain(domainId)] || Object.freeze([]);
+function requiredServicesForDomain(domainId, pathname = '') {
+  const domain = normalizeDomain(domainId);
+  if (domain === 'catalog') return CATALOG_REQUIRED_SERVICES;
+  if (domain === 'inventory') return INVENTORY_REQUIRED_SERVICES;
+  if (domain === 'operations') {
+    return normalizePathname(pathname) === MEMBERSHIP_RUNTIME_PAGE
+      ? MEMBERSHIP_REQUIRED_SERVICES
+      : LEGACY_OPERATIONS_REQUIRED_SERVICES;
+  }
+  return Object.freeze([]);
 }
-function verifyServices(registry, domainId) {
-  const required = requiredServicesForDomain(domainId);
+function verifyServices(registry, domainId, pathname) {
+  const domain = normalizeDomain(domainId);
+  const path = normalizePathname(pathname);
+  if (domain === 'operations' && path === MEMBERSHIP_RUNTIME_PAGE) {
+    ensureOperationsMembershipReadService(registry);
+  }
+  const required = requiredServicesForDomain(domain, path);
   const missing = required.filter((serviceId) => !registry?.service?.(serviceId));
   if (missing.length) {
-    throw new Error(`Commerce & Operations ${normalizeDomain(domainId) || 'unknown'} boundary is missing required services: ${missing.join(', ')}`);
+    throw new Error(`Commerce & Operations ${domain || 'unknown'} boundary is missing required services: ${missing.join(', ')}`);
   }
   activeRequiredServices = Object.freeze([...required]);
   servicesReady = true;
@@ -68,24 +93,33 @@ function inventoryWriteBoundaryStatus() {
 function emit(name, detail = {}) {
   if (typeof document === 'undefined' || typeof CustomEvent === 'undefined') return;
   document.dispatchEvent(new CustomEvent(name, {
-    detail: Object.freeze({ applicationModuleId: MODULE_ID, build: BUILD, ...detail }),
+    detail: Object.freeze({ applicationModuleId: MODULE_ID, build: BUILD, activationBuild: ACTIVATION_BUILD, ...detail }),
   }));
 }
 function installFacade() {
   if (typeof window === 'undefined') return;
   window.DDCommerceOperations = Object.freeze({
     build: BUILD,
+    activationBuild: ACTIVATION_BUILD,
     moduleId: MODULE_ID,
     supportedDomains: SUPPORTED_DOMAINS,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
-    requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
+    membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
+    catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
+    inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
+    legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
+    membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
     allRequiredServices: ALL_REQUIRED_SERVICES,
+    membershipReadContract: MEMBERSHIP_READ_CONTRACT,
+    membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
     inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
     inventoryCostContractBuild: 311,
     accountingReadContractBuild: 312,
-    operationsRuntimeBuild: 315,
-    operationsRuntimeCoverageBuild: 315,
+    operationsRuntimeBuild: BUILD,
+    operationsRuntimeCoverageBuild: ACTIVATION_BUILD,
     operationsMutationOwnership: false,
+    membershipMutationOwnership: false,
+    createsNetworkTransport: false,
     supportedPathForDomain,
     requiredServicesForDomain,
     getInventoryWriteBoundaryStatus: inventoryWriteBoundaryStatus,
@@ -96,30 +130,38 @@ function installFacade() {
 export const metadata = Object.freeze({
   id: MODULE_ID,
   build: BUILD,
+  activationBuild: ACTIVATION_BUILD,
   kind: 'application-module-runtime',
   supportedDomains: SUPPORTED_DOMAINS,
   operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
-  requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
+  membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
+  catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
+  inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
+  legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
+  membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
   allRequiredServices: ALL_REQUIRED_SERVICES,
-  behaviorMode: 'catalog-inventory-operations-read-only-explicit-page-coverage',
+  membershipReadContract: MEMBERSHIP_READ_CONTRACT,
+  membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
+  behaviorMode: 'catalog-inventory-operations-read-only-explicit-membership-page-coverage',
   createsNetworkTransport: false,
   ownsInventoryMutations: false,
   ownsOperationsMutations: false,
+  ownsMembershipMutations: false,
   inventoryWriteBoundaryBuild: INVENTORY_WRITE_BOUNDARY_BUILD,
   inventoryCostContractBuild: 311,
   accountingReadContractBuild: 312,
-  operationsRuntimeBuild: 315,
-  operationsRuntimeCoverageBuild: 315,
+  operationsRuntimeBuild: BUILD,
+  operationsRuntimeCoverageBuild: ACTIVATION_BUILD,
   consumerMutationReady: true,
 });
 
 export async function onLoad({ registry, applicationModule, domainDefinition, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime loaded with the wrong application-module definition.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 315 cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build ${BUILD} cannot load for domain: ${domainDefinition?.id || 'unknown'}`);
   if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
-    throw new Error(`Commerce & Operations Build 315 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
+    throw new Error(`Commerce & Operations Build ${BUILD} has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
   }
-  verifyServices(registry, domainDefinition.id);
+  verifyServices(registry, domainDefinition.id, pathname);
   state = 'loaded';
   installFacade();
   emit('dd:commerce-operations-loaded', {
@@ -130,6 +172,7 @@ export async function onLoad({ registry, applicationModule, domainDefinition, pa
     supportedDomains: SUPPORTED_DOMAINS,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     activeRequiredServices,
+    membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
     inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
 }
@@ -137,11 +180,11 @@ export async function onLoad({ registry, applicationModule, domainDefinition, pa
 export async function onActivate({ registry, applicationModule, domainDefinition, user, pathname } = {}) {
   if (applicationModule?.id !== MODULE_ID) throw new Error('Commerce & Operations runtime activated with the wrong application-module definition.');
   if (!authenticatedAdmin(user)) throw new Error('Commerce & Operations runtime activation requires an administrator.');
-  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build 315 cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
+  if (!supportedDomain(domainDefinition?.id)) throw new Error(`Commerce & Operations Build ${BUILD} cannot activate for domain: ${domainDefinition?.id || 'unknown'}`);
   if (!supportedPathForDomain(domainDefinition?.id, pathname)) {
-    throw new Error(`Commerce & Operations Build 315 has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
+    throw new Error(`Commerce & Operations Build ${BUILD} has no proven Operations runtime coverage for: ${normalizePathname(pathname)}`);
   }
-  verifyServices(registry, domainDefinition.id);
+  verifyServices(registry, domainDefinition.id, pathname);
   activationCount += 1;
   currentDomain = normalizeDomain(domainDefinition.id);
   lastPathname = normalizePathname(pathname);
@@ -155,6 +198,8 @@ export async function onActivate({ registry, applicationModule, domainDefinition
     servicesReady,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
     activeRequiredServices,
+    operationsMutationOwnership: false,
+    membershipMutationOwnership: false,
     inventoryWriteBoundary: inventoryWriteBoundaryStatus(),
   });
 }
@@ -172,8 +217,12 @@ export async function onDeactivate({ reason = 'route-lifecycle' } = {}) {
 
 export function getStatus() {
   const writeBoundary = inventoryWriteBoundaryStatus();
+  const currentRequired = currentDomain
+    ? requiredServicesForDomain(currentDomain, lastPathname)
+    : Object.freeze([]);
   return Object.freeze({
     build: BUILD,
+    activationBuild: ACTIVATION_BUILD,
     moduleId: MODULE_ID,
     state,
     activationCount,
@@ -181,19 +230,28 @@ export function getStatus() {
     lastPathname,
     supportedDomains: SUPPORTED_DOMAINS,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
-    requiredServicesByDomain: REQUIRED_SERVICES_BY_DOMAIN,
+    membershipRuntimePage: MEMBERSHIP_RUNTIME_PAGE,
+    catalogRequiredServices: CATALOG_REQUIRED_SERVICES,
+    inventoryRequiredServices: INVENTORY_REQUIRED_SERVICES,
+    legacyOperationsRequiredServices: LEGACY_OPERATIONS_REQUIRED_SERVICES,
+    membershipRequiredServices: MEMBERSHIP_REQUIRED_SERVICES,
+    requiredServices: currentRequired,
     activeRequiredServices,
     servicesReady,
     createsNetworkTransport: false,
     ownsInventoryMutations: false,
     ownsOperationsMutations: false,
+    ownsMembershipMutations: false,
+    operationsMutationOwnership: false,
+    membershipMutationOwnership: false,
+    membershipReadContract: MEMBERSHIP_READ_CONTRACT,
+    membershipReadContractBuild: MEMBERSHIP_READ_CONTRACT_BUILD,
     inventoryCostContractBuild: 311,
     inventoryCostServiceRequiredForCatalog: true,
     accountingReadContractBuild: 312,
-    accountingReadServiceRequiredForOperations: true,
-    operationsRuntimeBuild: 315,
-    operationsRuntimeCoverageBuild: 315,
-    operationsMutationOwnership: false,
+    accountingReadServiceRequiredForLegacyOperations: true,
+    operationsRuntimeBuild: BUILD,
+    operationsRuntimeCoverageBuild: ACTIVATION_BUILD,
     inventoryWriteBoundaryBuild: writeBoundary.build,
     inventoryPostImplementationState: writeBoundary.post.implementationState,
     inventoryPostRoute: writeBoundary.post.authorityRoute,
@@ -211,7 +269,9 @@ export function getStatus() {
     inventoryRuntimeBoundaryActive: state === 'active' && currentDomain === 'inventory',
     operationsRuntimeActive: state === 'active' && currentDomain === 'operations',
     operationsRuntimeBoundaryActive: state === 'active' && currentDomain === 'operations',
+    membershipRuntimeActive: state === 'active' && currentDomain === 'operations' && lastPathname === MEMBERSHIP_RUNTIME_PAGE,
     currentOperationsPageProven: state === 'active' && currentDomain === 'operations' && OPERATIONS_RUNTIME_PAGES.includes(lastPathname),
+    currentMembershipPageProven: state === 'active' && currentDomain === 'operations' && lastPathname === MEMBERSHIP_RUNTIME_PAGE,
   });
 }
 
