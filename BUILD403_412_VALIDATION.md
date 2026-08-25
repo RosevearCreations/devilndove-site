@@ -1,0 +1,139 @@
+# Builds 403–412 Validation — Commerce Mutation Boundaries + Development RC
+
+## Status — STAGED / LOCAL + DEVELOPMENT D1 + READ-ONLY BROWSER PROOF REQUIRED
+
+```text
+403  Canonical shared notification schema/readiness authority
+404  Gift Card card-state mutation schema cleanup + owned contract
+405  Gift Card template/resend schema cleanup + owned contract
+406  Gift Card provider/outbox canonicalization + owned contract
+407  Gift Card abuse stable-ID authority + real UI consumer migration
+408  Orders status/fulfillment schema cleanup + real consumer bridge
+409  Payment/refund provider mutation fail-closed gate
+410  Commerce modularity sanity + Development parity overlay applicator
+411  Modular documentation consolidation
+412  Development release-candidate local gate
+```
+
+## What materially changed
+
+### Notification authority
+
+`database_notification_runtime_parity.sql` is the canonical shared notification authority for:
+
+```text
+notification_outbox
+notification_dispatch_log
+notification_exclusions
+notification_cooldown_rules
+customer_engagement_runs
+notification_automation_settings
+gift_card_delivery_audit
+```
+
+The older plural `notification_dispatch_logs` job-attempt ledger remains distinct and is not collapsed into the singular outbox-delivery ledger.
+
+### Gift Cards
+
+Explicit Gift Card writes now use owned Operations contracts:
+
+```text
+operations-gift-card-action-write
+operations-gift-card-template-write
+operations-gift-card-provider-send-write
+operations-gift-card-abuse-write
+```
+
+The corresponding implementations perform no request-time CREATE/ALTER/default seeding. Provider queueing writes the canonical Build 403 notification-outbox shape. The admin UI is migrated to those contracts and stable `gift_card_lookup_lockout_id` unlock semantics.
+
+### Orders / payments
+
+The mature Orders UI is retained. `admin-order-contract-bridge.js` routes its explicit writes through:
+
+```text
+operations-order-status-write
+operations-order-fulfillment-write
+operations-payment-action-write
+```
+
+Order status no longer creates Gift Card history tables when an order becomes paid. Provider-aware refund code is preserved, but Build 409 makes provider mutation local-only by default. External provider mutation requires both:
+
+```text
+PAYMENT_PROVIDER_MUTATIONS_ENABLED=1
+provider_sync_confirmed=true
+```
+
+No provider write is required for validation.
+
+## Local validation
+
+Run:
+
+```bash
+python scripts/build412_development_rc_gate.py
+```
+
+Expected ending:
+
+```text
+BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
+BUILDS 393-402 MODULARITY + PARITY BATCH: PASS
+BUILDS 403-410 COMMERCE MODULARITY: PASS
+BUILD 412 DEVELOPMENT RC LOCAL GATE: PASS
+No Cloudflare resource was contacted.
+PRODUCTION PROMOTION: CLOSED — Development D1/browser/live parity gates are still required.
+```
+
+## Development D1 parity application
+
+After the local RC gate passes, apply the post-Build-384 overlays to Development only:
+
+```bash
+python scripts/build410_apply_development_parity_overlays.py
+```
+
+The helper is hard-pinned to:
+
+```text
+branch        dev
+Pages project devilndove-site-dev
+D1 database   devilndove-dev
+```
+
+It uses Windows-safe one-statement `wrangler d1 execute --command` calls. It aligns legacy `notification_outbox` columns immediately after materializing/no-oping that table and before dependent notification indexes.
+
+Expected final line:
+
+```text
+BUILD 410 DEVELOPMENT PARITY OVERLAY APPLICATOR: COMPLETE
+```
+
+If any migration stops on a real schema mismatch, preserve the exact statement output and repair that parity gap; do not move DDL back into request handlers.
+
+## Read-only browser gates
+
+### Customer Documents
+
+Open `/admin/customer-documents/` and prove Build 397 read/runtime activation with one required service and no mutation ownership.
+
+### Gift Cards post-mutation-extraction sanity
+
+Open `/admin/gift-cards/`. Do not click mutation controls. Confirm:
+
+```text
+startup read Build        385
+mutation authority build  407
+schema ready              true
+owned mutation routes     Builds 404-407 contracts
+runtime active            true
+runtime mutation owner    false
+UI mutation build         407
+```
+
+### Orders bridge / provider gate
+
+Open `/admin/orders/`. Do not submit a status/refund/provider action. Confirm the page loaded `DDOrderContractBridge` Build 408 with status, fulfillment, and payment contract routes. Provider mutation remains disabled unless explicitly enabled and confirmed.
+
+## Production
+
+`main` remains frozen. Build 412 is a Development RC gate, not a Production promotion. Production business-data copy and Production promotion remain closed until live read-only schema/data mapping and the Development browser/D1 gates are complete.
