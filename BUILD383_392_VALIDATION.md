@@ -70,7 +70,7 @@ git -c gc.auto=0 pull --ff-only origin dev
 python scripts/build384_apply_gift_card_parity_direct.py
 ```
 
-The first direct-query fallback run then exposed a Windows-only helper bug before D1 diagnostics could be printed:
+The first direct-query fallback run exposed a Windows-only helper bug before D1 diagnostics could be printed:
 
 ```text
 UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f
@@ -78,13 +78,40 @@ UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f
 
 That failure was local Python subprocess decoding, not D1 or SQL. The helper now pins Wrangler output decoding to UTF-8 with replacement and disables color output so malformed/progress bytes cannot abort the release helper.
 
-The fallback:
+The second direct-query run proved the `--command` route works. Its read-only preflight returned seven of the eight expected Gift Card tables:
+
+```text
+gift_card_admin_events
+gift_card_delivery_queue
+gift_card_delivery_templates
+gift_card_lookup_attempts
+gift_card_provider_send_logs
+gift_card_redemptions
+gift_cards
+```
+
+At that checkpoint only `gift_card_lookup_lockouts` was absent. The first executable batch then failed locally before reaching D1 because its SQL text still began with the migration comment:
+
+```text
+-- Devil n Dove Build 384
+```
+
+Wrangler/Yargs interpreted that leading `-- ...` as another command-line option and reported:
+
+```text
+Unknown argument: Devil n Dove Build 384
+```
+
+That was not a SQL error. The helper now strips full-line SQL comments before constructing `--command` values and refuses any sanitized statement that still begins with `--`.
+
+The fallback now:
 
 - refuses to run off the `dev` branch;
 - verifies `devilndove-site-dev` and `devilndove-dev` from `wrangler.toml`;
 - reads the authoritative `database_gift_card_runtime_parity.sql` file;
 - refuses any migration that attempts to redefine `notification_outbox`;
 - performs a read-only Development D1 preflight;
+- strips full-line SQL comments before passing SQL to Wrangler;
 - splits the migration into bounded statement batches;
 - uses `wrangler d1 execute --command` rather than the failing remote `--file` import path;
 - decodes Wrangler/Node output safely on Windows;
@@ -162,7 +189,7 @@ runtime_state                      active
 last_pathname                      /admin/gift-cards/
 services_ready                     true
 required_services                  ["operations-gift-cards-read"]
-gift_cards_page_proven             true
+gift_cards_page_proven           true
 creates_network_transport          false
 gift_cards_mutation_ownership      false
 contracts_ok                       true
