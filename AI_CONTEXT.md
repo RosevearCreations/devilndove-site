@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Builds 325–330 Accounting Read Validation In Progress
+# Devil n Dove AI Context — Builds 331–333 Accounting Read Batch Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -15,8 +15,12 @@ Primary modular authorities now include:
 - `docs/architecture/BUILD328_ACCOUNTING_GIFI_SUMMARY_READ_EXTRACTION.md`
 - `docs/architecture/BUILD329_ACCOUNTING_PERIOD_LOCKS_READ_EXTRACTION.md`
 - `docs/architecture/BUILD330_ACCOUNTING_ATTACHMENTS_READ_EXTRACTION.md`
+- `docs/architecture/BUILD331_ACCOUNTING_VENDORS_READ_EXTRACTION.md`
+- `docs/architecture/BUILD332_ACCOUNTING_RECURRING_RULES_READ_EXTRACTION.md`
+- `docs/architecture/BUILD333_ACCOUNTING_STATEMENT_PROVIDER_PROFILES_READ_EXTRACTION.md`
 - `BUILD325_327_VALIDATION.md`
 - `BUILD328_330_VALIDATION.md`
+- `BUILD331_333_VALIDATION.md`
 
 ## Production safety
 
@@ -69,12 +73,15 @@ Build 321 Overhead-product read            VALIDATED 2026-08-24
 Build 322 Product-cost read                VALIDATED 2026-08-24
 Build 323 Accounting page runtime audit    VALIDATED 2026-08-24
 Build 324 Accounting profit/loss read      VALIDATED 2026-08-24
-Build 325 Accounting item-costing read     BROWSER PROVEN; CORRECTED LOCAL REQUIRED
-Build 326 Accounting journal read          BROWSER PROVEN; CORRECTED LOCAL REQUIRED
-Build 327 Accounting GIFI notes read       BROWSER PROVEN; CORRECTED LOCAL REQUIRED
-Build 328 Accounting GIFI summary read     LOCAL PASSED; BROWSER REQUIRED
-Build 329 Accounting period-locks read     LOCAL PASSED; BROWSER REQUIRED
-Build 330 Accounting attachments read      LOCAL PASSED; BROWSER REQUIRED
+Build 325 Accounting item-costing read     VALIDATED 2026-08-24
+Build 326 Accounting journal read          VALIDATED 2026-08-24
+Build 327 Accounting GIFI notes read       VALIDATED 2026-08-24
+Build 328 Accounting GIFI summary read     VALIDATED 2026-08-24
+Build 329 Accounting period-locks read     VALIDATED 2026-08-24
+Build 330 Accounting attachments read      VALIDATED 2026-08-24
+Build 331 Accounting vendors read          STAGED
+Build 332 Accounting recurring rules read  STAGED
+Build 333 Statement provider profiles read STAGED
 ```
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
@@ -87,14 +94,17 @@ Core runtime implementation               305
 Commerce/Operations runtime               315
 Accounting page bridge                    323 validated shadow/domain-bridge
 Accounting profit/loss read               324 validated
-Accounting item-costing read              325 browser proven
-Accounting journal read                   326 browser proven
-Accounting GIFI notes read                327 browser proven
-Accounting GIFI summary read              328 local passed
-Accounting period locks read              329 local passed
-Accounting attachments read               330 local passed
-Contract catalog                          330
-Passive service adapters                  330
+Accounting item-costing read              325 validated
+Accounting journal read                   326 validated
+Accounting GIFI notes read                327 validated
+Accounting GIFI summary read              328 validated
+Accounting period locks read              329 validated
+Accounting attachments read               330 validated
+Accounting vendors read                   331 staged
+Accounting recurring rules read           332 staged
+Statement provider profiles read          333 staged
+Contract catalog                          333
+Passive service adapters                  333
 Business & Administration runtime         inactive
 Accounting mutation ownership             unmoved
 ```
@@ -111,35 +121,24 @@ mutation         false
 
 Keep this on the separate schema-parity track. Do not add DDL to the GET.
 
-## Builds 325–327 validation state
+## Builds 325–330 validation result
 
-Development browser proof passed all six legacy/contract requests. Item costing, journal and GIFI notes each returned HTTP 200, the correct build/owner, `schema_ready=true`, and `request_time_schema_mutation=false`. All three passive services reported their expected builds and no schema mutation. Accounting remained `business-administration` / `domain-bridge` with no active top-level Business & Administration runtime.
+Builds 325–327 and 328–330 are fully validated. Their local regressions passed, all browser legacy/contract reads returned HTTP 200 with the correct builds/owner, Development reported `schema_ready=true`, every read/service reported no request-time schema mutation, and Accounting remained `business-administration` / `domain-bridge` with no active top-level Business & Administration runtime.
 
-The first later local rerun failed because the historical test asserted that Build 327's *next blocker* (`await ensureGlSchema(db)` in GIFI summary) must still exist. Build 328 intentionally removed that blocker. The test was corrected on 2026-08-24 to verify only durable Build 325–327 feature boundaries and not freeze unrelated future files or next-blocker state. A corrected local rerun remains required before 325–327 are marked fully validated.
+## Builds 331–333 staged batch
 
-## Builds 328–330 validation state
+### Build 331
+`/api/admin/accounting-vendors` GET no longer calls `ensureAccountingVendorsTable()`. It delegates to an Accounting-owned schema-aware read service. Vendor POST/save remains unchanged in authority.
 
-The local regression passed on 2026-08-24:
+### Build 332
+`/api/admin/accounting-recurring-expense-rules` GET no longer ensures vendor/rule/expense schema. It reports recurring-rule readiness and due state without mutation. Explicit POST save/generate behavior retains its existing write-side prerequisites.
 
-```text
-BUILDS 328-330 ACCOUNTING READ BATCH: PASS
-No Cloudflare resource was contacted.
-```
-
-A clean `git status --short` line was not included in the captured transcript, and the Development browser proof is still required.
-
-### Build 328
-`/api/admin/accounting-gifi-summary` no longer runs `ensureGlSchema()` or request-time CREATE/ALTER. It delegates to an Accounting-owned schema-aware read service. Legacy CSV export is preserved from the service result.
-
-### Build 329
-`/api/admin/accounting-period-locks` GET no longer ensures period-closure, attachment or statement-import schema. It reads only existing `accounting_period_closures`. Explicit POST lock/reopen behavior retains its existing write-side prerequisites and ensures.
-
-### Build 330
-`/api/admin/accounting-attachments` GET no longer ensures/repairs the attachments table. It delegates to an Accounting-owned metadata read service. Multipart upload POST and R2/database write behavior remain unchanged in authority.
+### Build 333
+`/api/admin/accounting-statement-provider-profiles` GET no longer seeds defaults into D1. The read returns the six built-in defaults in memory, overlays stored profiles when available, and reports `defaults_materialized=false`. Explicit POST seeding/saving remains the only materialization path.
 
 ## Next direction
 
-First close the corrected 325–327 local gate and the 328–330 browser gate. Then continue batching a few automatic Accounting reads at a time. Likely next candidates after source audit include vendors/recurring rules, reconciliation/statement imports, year-end close or evidence checks. Do not activate the top-level `business-administration` runtime until automatic page reads are owned/non-mutating.
+After validating 331–333, continue batching automatic Accounting reads. Reconciliation, statement imports, year-end close, sales-tax filing, fixed assets, vendor statements, close workflow, evidence checks and DB sanity remain candidates. Source-audit each batch and avoid hidden ensure/write helpers on GET. Do not activate top-level `business-administration` until automatic `/admin/accounting/` reads are owned/non-mutating.
 
 ## Separate schema/data parity track — DO NOT MIX
 
