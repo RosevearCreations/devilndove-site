@@ -1,6 +1,6 @@
 # Build 316 Validation — Accounting Expenses Read Correction
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — COMPLETE IN DEVELOPMENT
 
 Baseline:
 
@@ -9,53 +9,37 @@ Baseline:
 Build 315 set completed modular handoff context
 ```
 
-Build 315 is COMPLETE IN DEVELOPMENT.
+Proven source/runtime head:
 
-Build 316 fixes the legacy Accounting expenses GET 500 and extracts a read-only Accounting-owned contract without moving expense POST/write authority.
-
-## One GIT BASH block
-
-```bash
-git pull --ff-only origin dev
-python scripts/build316_accounting_expenses_read_correction_test.py
-git status --short
+```text
+2047f29a52f54d3416792cc3c22f728b040f793b
+Build 316 update modular Accounting handoff context
 ```
 
-Expected ending:
+Build 315 is COMPLETE IN DEVELOPMENT.
+
+Build 316 fixed the legacy Accounting expenses GET 500 and extracted a read-only Accounting-owned contract without moving expense POST/write authority.
+
+## Local regression — PASS
+
+Observed:
 
 ```text
 BUILD 316 ACCOUNTING EXPENSES READ CORRECTION: PASS
 No Cloudflare resource was contacted.
 ```
 
-`git status --short` should be empty.
+The regression proved the declared changed-file boundary and retained protected runtime/business/schema files outside the build.
 
-## One BROWSER DEVTOOLS CONSOLE block
+## Development browser proof — PASS
 
-Open and hard-refresh:
+Validated on:
 
 ```text
 https://devilndove-site-dev.pages.dev/admin/orders/
 ```
 
-Then run the Build 316 console proof.
-
-The proof must confirm:
-
-- legacy `/api/admin/accounting-expenses` returns HTTP 200;
-- dedicated `/api/admin/contracts/accounting-expenses-read` returns HTTP 200;
-- both identify Build 316 / `accounting-expenses-read` / owner `accounting`;
-- both report `request_time_schema_mutation=false`;
-- Development reports `schema_ready=true` or explicitly reports missing schema without mutating it;
-- direct Build 316 contract catalog and adapter imports report build 316;
-- the passive `accounting-expenses-read` adapter is owner `accounting`, mode `read-only-http`;
-- adapter read succeeds;
-- Core runtime implementation remains 305;
-- Commerce/Operations runtime remains 315;
-- Operations mutation ownership remains false;
-- contracts/services on the existing runtime remain green.
-
-Expected healthy Development values:
+Observed values:
 
 ```text
 pathname                         /admin/orders/
@@ -66,6 +50,7 @@ legacy_contract                  accounting-expenses-read
 legacy_owner                     accounting
 legacy_schema_ready              true
 legacy_schema_mutation           false
+legacy_rows                      0
 contract_status                  200
 contract_ok                      true
 contract_build                   316
@@ -73,13 +58,15 @@ contract_name                    accounting-expenses-read
 contract_owner                   accounting
 contract_schema_ready            true
 contract_schema_mutation         false
+contract_rows                    0
 contract_catalog_build           316
 service_adapter_build            316
 expense_service_owner            accounting
 expense_service_mode             read-only-http
 service_build                    316
-service_schema_ready              true
-service_schema_mutation           false
+service_schema_ready             true
+service_schema_mutation          false
+service_rows                     0
 core_runtime_build               305
 commerce_runtime_build           315
 owns_operations_mutations        false
@@ -87,25 +74,33 @@ contracts_ok                     true
 services_ok                      true
 ```
 
-Expense row counts may be zero or greater.
+Expense row counts of zero are valid and did not block completion.
 
-If `schema_ready=false`, do not add DDL back to the GET path. Capture `missing_tables` / `missing_columns` and route that issue to the separate fresh-install schema-parity track.
+## Proven decisions
 
-## No mutation validation
+Build 316 proves:
 
-Do not create an expense, change an order, record a payment, issue a gift card, or perform any other mutation for Build 316 validation.
+- legacy `/api/admin/accounting-expenses` GET now returns HTTP 200;
+- dedicated `/api/admin/contracts/accounting-expenses-read` returns HTTP 200;
+- both identify Build 316 / `accounting-expenses-read` / owner `accounting`;
+- both report `request_time_schema_mutation=false`;
+- Development reports `schema_ready=true`;
+- contract catalog and passive adapter registry identify Build 316;
+- the passive `accounting-expenses-read` adapter is owner `accounting`, mode `read-only-http`;
+- Core runtime implementation remains 305;
+- Commerce/Operations runtime remains 315;
+- Operations mutation ownership remains false;
+- existing runtime contract/service validation remains green;
+- no expense/order/payment/gift-card mutation was required for validation.
+
+## Boundary retained
+
+Build 316 does not claim expense POST/write authority is modularized. It also does not modify SQL/schema, Cloudflare config, R2, Git branches, Production, Commerce runtime, Operations coverage, Orders/payment APIs, Inventory authorities, Creative consumers, or other legacy Accounting handlers.
 
 ## Completion decision
 
-Do not mark Build 316 complete until:
+All Build 316 completion gates are satisfied.
 
-1. local regression passes;
-2. working tree is clean;
-3. legacy Accounting expenses GET no longer returns the observed 500;
-4. dedicated contract GET succeeds;
-5. read paths report no request-time schema mutation;
-6. contract/adapter identities are Build 316 and Accounting-owned;
-7. Core runtime implementation remains 305;
-8. Commerce runtime remains 315;
-9. Operations mutation ownership remains false;
-10. no SQL/schema/config/R2/Git-branch deletion/real Production change occurs.
+**Build 316 is COMPLETE IN DEVELOPMENT.**
+
+No further Build 316 validation is required unless a later change touches its bounded source files.
