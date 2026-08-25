@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Builds 328–330 Accounting Read Batch Staged
+# Devil n Dove AI Context — Builds 325–330 Accounting Read Validation In Progress
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -69,12 +69,12 @@ Build 321 Overhead-product read            VALIDATED 2026-08-24
 Build 322 Product-cost read                VALIDATED 2026-08-24
 Build 323 Accounting page runtime audit    VALIDATED 2026-08-24
 Build 324 Accounting profit/loss read      VALIDATED 2026-08-24
-Build 325 Accounting item-costing read     BROWSER PROVEN; LOCAL REQUIRED
-Build 326 Accounting journal read          BROWSER PROVEN; LOCAL REQUIRED
-Build 327 Accounting GIFI notes read       BROWSER PROVEN; LOCAL REQUIRED
-Build 328 Accounting GIFI summary read     STAGED
-Build 329 Accounting period-locks read     STAGED
-Build 330 Accounting attachments read      STAGED
+Build 325 Accounting item-costing read     BROWSER PROVEN; CORRECTED LOCAL REQUIRED
+Build 326 Accounting journal read          BROWSER PROVEN; CORRECTED LOCAL REQUIRED
+Build 327 Accounting GIFI notes read       BROWSER PROVEN; CORRECTED LOCAL REQUIRED
+Build 328 Accounting GIFI summary read     LOCAL PASSED; BROWSER REQUIRED
+Build 329 Accounting period-locks read     LOCAL PASSED; BROWSER REQUIRED
+Build 330 Accounting attachments read      LOCAL PASSED; BROWSER REQUIRED
 ```
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
@@ -90,9 +90,9 @@ Accounting profit/loss read               324 validated
 Accounting item-costing read              325 browser proven
 Accounting journal read                   326 browser proven
 Accounting GIFI notes read                327 browser proven
-Accounting GIFI summary read              328 staged
-Accounting period locks read              329 staged
-Accounting attachments read               330 staged
+Accounting GIFI summary read              328 local passed
+Accounting period locks read              329 local passed
+Accounting attachments read               330 local passed
 Contract catalog                          330
 Passive service adapters                  330
 Business & Administration runtime         inactive
@@ -111,11 +111,22 @@ mutation         false
 
 Keep this on the separate schema-parity track. Do not add DDL to the GET.
 
-## Builds 325–327 browser result
+## Builds 325–327 validation state
 
-Development browser proof passed all six legacy/contract requests. Item costing, journal and GIFI notes each returned HTTP 200, the correct build/owner, `schema_ready=true`, and `request_time_schema_mutation=false`. All three passive services reported their expected builds and no schema mutation. Accounting remained `business-administration` / `domain-bridge` with no active top-level Business & Administration runtime. The single local batch regression remains to close these builds fully.
+Development browser proof passed all six legacy/contract requests. Item costing, journal and GIFI notes each returned HTTP 200, the correct build/owner, `schema_ready=true`, and `request_time_schema_mutation=false`. All three passive services reported their expected builds and no schema mutation. Accounting remained `business-administration` / `domain-bridge` with no active top-level Business & Administration runtime.
 
-## Builds 328–330 staged batch
+The first later local rerun failed because the historical test asserted that Build 327's *next blocker* (`await ensureGlSchema(db)` in GIFI summary) must still exist. Build 328 intentionally removed that blocker. The test was corrected on 2026-08-24 to verify only durable Build 325–327 feature boundaries and not freeze unrelated future files or next-blocker state. A corrected local rerun remains required before 325–327 are marked fully validated.
+
+## Builds 328–330 validation state
+
+The local regression passed on 2026-08-24:
+
+```text
+BUILDS 328-330 ACCOUNTING READ BATCH: PASS
+No Cloudflare resource was contacted.
+```
+
+A clean `git status --short` line was not included in the captured transcript, and the Development browser proof is still required.
 
 ### Build 328
 `/api/admin/accounting-gifi-summary` no longer runs `ensureGlSchema()` or request-time CREATE/ALTER. It delegates to an Accounting-owned schema-aware read service. Legacy CSV export is preserved from the service result.
@@ -128,7 +139,7 @@ Development browser proof passed all six legacy/contract requests. Item costing,
 
 ## Next direction
 
-Continue batching a few automatic Accounting reads at a time. Likely next candidates after source audit include vendors/recurring rules, reconciliation/statement imports, year-end close or evidence checks. Do not activate the top-level `business-administration` runtime until automatic page reads are owned/non-mutating.
+First close the corrected 325–327 local gate and the 328–330 browser gate. Then continue batching a few automatic Accounting reads at a time. Likely next candidates after source audit include vendors/recurring rules, reconciliation/statement imports, year-end close or evidence checks. Do not activate the top-level `business-administration` runtime until automatic page reads are owned/non-mutating.
 
 ## Separate schema/data parity track — DO NOT MIX
 
