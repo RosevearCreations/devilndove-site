@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through fully validated Build 365 on 2026-08-25.
+Updated through staged Builds 366–368 on 2026-08-25.
 
 ## Architectural invariant
 
@@ -31,10 +31,12 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                       302
 Core runtime implementation             305
-Commerce runtime                        363
-Operations Membership read contract     362
+Commerce runtime                        367 staged
+Operations Membership read contract     362 validated
 Operations Membership activation        364 validated
 Membership read hardening               365 validated
+Operations Today Tasks read contract    366 staged
+Operations Today Tasks activation       368 staged
 Contract catalog                        345
 Default passive adapters                345
 Business Accounting activation          348 validated
@@ -47,14 +49,17 @@ CAIP read/runtime                        359–361 validated
 Accounting mutation ownership moved     false
 Operations mutation ownership moved     false
 Membership mutation ownership moved     false
+Today Tasks mutation ownership moved    false
 Creative mutation ownership moved       false
 Content mutation ownership moved        false
 CAIP mutation ownership moved           false
 ```
 
+Everything through Build 365 is fully validated.
+
 ## Commerce & Operations
 
-Validated Operations pages now include:
+Validated Operations pages before the current batch:
 
 ```text
 /admin/operations/
@@ -63,60 +68,87 @@ Validated Operations pages now include:
 /admin/membership/
 ```
 
-### Membership boundary — Builds 362–365
-
-Membership startup reads are:
+Builds 366–368 stage a fifth explicit Operations page:
 
 ```text
-GET /api/admin/users
-GET /api/admin/access-tiers
-GET /api/admin/tier-policies
+/admin/today-tasks/
 ```
 
-Before Build 362, Tier Policy GET created `membership_tier_policies` and seeded Bronze/Silver/Gold during a read.
+### Membership boundary — Builds 362–365
 
-Build 362 established a non-mutating Tier Policy read authority and GET-only `operations-membership-read`. Retained POST still owns legacy ensure/seed/update behavior.
+Membership remains fully validated. Build 362 established a non-mutating Tier Policy read authority and GET-only `operations-membership-read`; Build 363 registered it passively; Build 364 activated `/admin/membership/`; Build 365 hardened the read against legacy table shapes after an initial browser 500.
 
-Build 363 registers `operations-membership-read` passively and makes Operations prerequisites page-specific:
+Development browser + local validation ultimately returned database-backed Bronze/Silver/Gold policies, `schema_ready=true`, active Commerce runtime, one Membership service, and no Membership mutation ownership.
+
+Historical Membership and Build 365 regressions are now future-compatible with later shared Commerce runtime/cache builds.
+
+### Today Tasks audit
+
+The audit compared Today Tasks with Custom Requests.
+
+Today Tasks was chosen because:
+
+- its GET was already SELECT-only;
+- its read failures were silently caught and converted to zero counts;
+- the route prefix `/admin/today-tasks` was already classified as Operations;
+- no dedicated page existed yet;
+- Done/Ignore/Snooze mutations were already separate at `POST /api/admin/today-task-actions`.
+
+Custom Requests remains outside this batch because `functions/api/admin/custom-requests.js` still has a large `ensureSchema()` authority with CREATE/ALTER/INDEX work and is embedded in the broad `/admin/operations/` workspace.
+
+### Build 366 — readiness-aware Today Tasks read
+
+Build 366 adds non-mutating read service plus:
+
+```text
+GET /api/admin/contracts/operations-today-tasks-read
+```
+
+The read exposes:
+
+```text
+schema_ready
+missing_tables
+query_errors
+request_time_schema_mutation=false
+mutation_ownership_moved=false
+```
+
+Available task counts still render when one source query fails. Missing-table/query failures are no longer silently represented as zero.
+
+Known schema-parity findings such as `hst_gst_review_records` may surface here. Do not add DDL to GET.
+
+### Build 367 — passive Commerce service
+
+Registers:
+
+```text
+operations-today-tasks-read
+```
+
+Operations prerequisites become:
 
 ```text
 /admin/operations/          catalog-read, inventory-read, accounting-read
 /admin/customer-documents/  catalog-read, inventory-read, accounting-read
 /admin/orders/              catalog-read, inventory-read, accounting-read
 /admin/membership/          operations-membership-read
+/admin/today-tasks/         operations-today-tasks-read
 ```
 
-Build 364 adds `/admin/membership/` to explicit coverage and fixes `adminTierPolicyMount` -> `tierPolicyAdminMount`.
+The runtime creates no network transport and owns no Today Tasks mutations.
 
-The first browser proof showed Build 363/364 runtime activation succeeding while both Build 362 reads returned opaque HTTP 500. Build 365 corrected the read implementation without changing the public contract or loader:
+### Build 368 — dedicated Today Tasks page
 
-- public contract remains Build 362;
-- implementation build is 365;
-- no `sqlite_master` dependency in the executable read path;
-- bounded `SELECT * FROM membership_tier_policies` during the compatibility window;
-- defensive mapping for known legacy aliases;
-- genuine missing table returns in-memory defaults and `schema_ready=false` without GET mutation;
-- unexpected direct-read failures return structured JSON;
-- aggregate child throws are reported with `failed_read` rather than collapsing into an opaque platform 500;
-- Membership mutation ownership remains unchanged.
+Adds `/admin/today-tasks/` and loads Core before `admin-today-tasks.js`.
 
-Browser revalidation passed with Build 362/365 reads at HTTP 200, `schema_ready=true`, database-backed Bronze/Silver/Gold rows, active Commerce runtime Build 363 / activation 364, exactly one Membership read service, and no Membership mutation ownership.
+Automatic page load uses the Build 366 GET contract. Done/Ignore/Snooze continues to use retained compatibility POST `/api/admin/today-task-actions` only after explicit administrator action.
 
-Corrected local regression also passed:
-
-```text
-BUILD 365 MEMBERSHIP READ RESILIENCE: PASS
-No Cloudflare resource was contacted.
-9a999d33
-```
-
-Builds 362–365 are fully validated.
-
-Known `gift_cards` fresh-install schema parity is deliberately not mixed into this track. `/admin/members/` remains outside current narrow coverage because it composes many account/engagement/gift-card/timeline scripts.
+No Custom Requests, Gift Cards, Membership, Accounting, Creative, SQL migration, or Cloudflare configuration authority is moved by this activation.
 
 ## Business & Administration
 
-`/admin/accounting/` is the first validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain compatibility authorities.
+`/admin/accounting/` remains the validated Business & Administration runtime page. Builds 343–348 are fully validated. Accounting mutations remain compatibility authorities.
 
 ## Creative & Production
 
@@ -132,16 +164,7 @@ creative-production
   caip      -> /admin/creative-assets/     validated
 ```
 
-Activation services:
-
-```text
-packaging: inventory-read, catalog-read, content-media
-creative:  creative-process-read, inventory-read
-content:   content-studio-read
-caip:      caip-read, caip-media-intake-read
-```
-
-The top-level runtime creates no network transport and owns no Packaging, Creative, Content, or CAIP mutations. Do not expand this loader further merely to create more proof.
+Do not expand this loader further merely to create more proof.
 
 ## Read-time schema rule
 
@@ -179,6 +202,7 @@ Build 358        fully validated 2026-08-25
 Builds 359–361   fully validated 2026-08-25
 Builds 362–364   fully validated 2026-08-25 after Build 365 correction
 Build 365        fully validated 2026-08-25
+Builds 366–368   staged / local + browser validation required
 ```
 
 ## Validation-harness rule
@@ -187,17 +211,19 @@ Historical regressions verify durable executable boundaries. They must not freez
 
 ## Mutation-authority extraction still open
 
-Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, Membership assignment/policy lifecycle, Customer Documents actions, Accounting writes, Creative Process project/timeline/content/CAIP/cost edits, CAIP governance/media operations, and Content Studio project/media/deliverable/social-queue actions. Inventory-reviewed material posting/reversal already uses Inventory-owned authorities.
+Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, Membership assignment/policy lifecycle, Today Tasks actions, Custom Requests workflow, Customer Documents actions, Accounting writes, Creative Process project/timeline/content/CAIP/cost edits, CAIP governance/media operations, and Content Studio project/media/deliverable/social-queue actions. Inventory-reviewed material posting/reversal already uses Inventory-owned authorities.
 
 A loader, read-contract migration, or top-level runtime activation never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Everything through Build 365 is fully validated; do not rerun passing Membership or Creative browser proofs.
-2. Audit Custom Requests and Today Tasks as the next Commerce & Operations candidates and choose the narrower non-mutating startup-read boundary.
-3. Avoid Gift Cards unless schema parity is deliberately the batch target.
-4. Keep `/admin/members/` outside the narrow Membership boundary until its coupled account/engagement/gift-card/timeline reads are separately audited.
-5. Continue fresh-install schema parity separately before Production business-data copy.
+1. Pull staged Builds 366–368 and run the future-compatible Membership/365 regressions plus the new Today Tasks regression.
+2. Browser-validate `/admin/today-tasks/` without clicking Done/Ignore/Snooze.
+3. Accept `schema_ready=true` or explicit `schema_ready=false` with `missing_tables/query_errors`; the latter is parity evidence.
+4. If local + browser gates pass, close Builds 366–368.
+5. Then source-audit Custom Requests for a real non-mutating read-model extraction; do not activate its current schema-coupled GET unchanged.
+6. Avoid Gift Cards unless schema parity is deliberately the batch target.
+7. Continue fresh-install schema parity separately before Production business-data copy.
 
 ## Production safety
 
