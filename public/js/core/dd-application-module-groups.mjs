@@ -2,8 +2,7 @@
 // Builds 304–315 establish Commerce Catalog/Inventory/Operations coverage.
 // Builds 346–348 establish Business & Administration Accounting coverage.
 // Builds 349–361 establish Creative & Production Packaging/Creative/Content/CAIP coverage.
-// Builds 362–372 add page-specific Operations Membership, Today Tasks, and Custom Requests reads.
-// Builds 383–386 restore Gift Card schema authority, add its owned read, and activate /admin/gift-cards/.
+// Builds 362–397 add page-specific Operations Membership, Today Tasks, Custom Requests, Gift Cards, and Customer Documents reads.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -17,8 +16,9 @@ export const OPERATIONS_MEMBERSHIP_READ_CONTRACT_BUILD = 362;
 export const OPERATIONS_TODAY_TASKS_READ_CONTRACT_BUILD = 366;
 export const OPERATIONS_CUSTOM_REQUESTS_READ_CONTRACT_BUILD = 370;
 export const OPERATIONS_GIFT_CARDS_READ_CONTRACT_BUILD = 385;
-export const RUNTIME_OPERATIONS_BUILD = 386;
-export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 386;
+export const OPERATIONS_CUSTOMER_DOCUMENTS_READ_CONTRACT_BUILD = 397;
+export const RUNTIME_OPERATIONS_BUILD = 397;
+export const OPERATIONS_RUNTIME_COVERAGE_BUILD = 397;
 export const ACCOUNTING_STARTUP_READ_AUDIT_BUILD = 346;
 export const BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD = 347;
 export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
@@ -84,7 +84,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
     domains: Object.freeze(['public', 'catalog', 'inventory', 'operations']),
     extractionState: 'in-progress',
-    entry: '../modules/commerce-operations/runtime.mjs?v=386',
+    entry: '../modules/commerce-operations/runtime.mjs?v=397',
     runtimeDomains: Object.freeze(['catalog', 'inventory', 'operations']),
   }),
   Object.freeze({
@@ -146,6 +146,7 @@ export function snapshotApplicationArchitecture() {
     operationsTodayTasksReadContractBuild: OPERATIONS_TODAY_TASKS_READ_CONTRACT_BUILD,
     operationsCustomRequestsReadContractBuild: OPERATIONS_CUSTOM_REQUESTS_READ_CONTRACT_BUILD,
     operationsGiftCardsReadContractBuild: OPERATIONS_GIFT_CARDS_READ_CONTRACT_BUILD,
+    operationsCustomerDocumentsReadContractBuild: OPERATIONS_CUSTOMER_DOCUMENTS_READ_CONTRACT_BUILD,
     runtimeOperationsBuild: RUNTIME_OPERATIONS_BUILD,
     operationsRuntimeCoverageBuild: OPERATIONS_RUNTIME_COVERAGE_BUILD,
     operationsRuntimePages: OPERATIONS_RUNTIME_PAGES,
@@ -179,13 +180,14 @@ export function snapshotApplicationArchitecture() {
     thirdCreativeProductionRuntimeDomain: 'content',
     fourthCreativeProductionRuntimeDomain: 'caip',
     operationsRuntimeDomainActive: true,
-    operationsRuntimeActivationMode: 'read-only-explicit-seven-page-coverage-with-page-specific-service-gates',
+    operationsRuntimeActivationMode: 'read-only-explicit-seven-page-coverage-with-five-page-specific-service-gates',
     businessAdministrationRuntimeDomainActive: true,
     businessAdministrationRuntimeActivationMode: 'accounting-read-only-explicit-single-page-coverage',
     creativeProductionRuntimeDomainActive: true,
     creativeProductionRuntimeActivationMode: 'packaging-wrapper-plus-creative-process-plus-content-studio-plus-caip-explicit-four-page-coverage',
     accountingMutationOwnership: false,
     operationsMutationOwnership: false,
+    customerDocumentsMutationOwnershipMovedByTopLevelRuntime: false,
     membershipMutationOwnershipMovedByTopLevelRuntime: false,
     todayTasksMutationOwnershipMovedByTopLevelRuntime: false,
     customRequestsMutationOwnershipMovedByTopLevelRuntime: false,
