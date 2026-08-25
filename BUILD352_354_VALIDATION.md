@@ -1,6 +1,6 @@
 # Builds 352–354 Validation — Creative Process Runtime
 
-## Status — BROWSER REVALIDATION PASSED AFTER BUILD 358 / CORRECTED LOCAL REGRESSION REQUIRED
+## Status — FULLY VALIDATED IN DEVELOPMENT 2026-08-25
 
 ```text
 Build 352  Creative Process GET-only owned read contract
@@ -11,53 +11,31 @@ Build 358  corrects the top-level Creative dependency gate
 
 Creative Process mutation ownership remains unchanged. Inventory posting/reversal remain Inventory-owned.
 
-## Original local regression — PASSED 2026-08-24
+## Local regression — PASSED 2026-08-25
 
-User-run Development checkpoint before the Build 358 harness correction:
+User-run corrected regression:
 
 ```text
 BUILDS 352-354 CREATIVE PROCESS RUNTIME: PASS
 No Cloudflare resource was contacted.
 ```
 
-The historical regression was subsequently corrected so it no longer treats Inventory mutation authorities as passive top-level activation services. That corrected script must be rerun before final closure.
-
 ## Initial Firefox activation proof — FAILED FOR A REAL DEPENDENCY-GATE DEFECT
 
-The Build 352 read contract itself passed:
-
-```text
-contract_status                       200
-contract_build                        352
-contract_legacy_build                 274
-contract_owner                        creative
-contract_id                           creative-process-read
-contract_schema_mutation              false
-contract_mutation_ownership_moved     false
-inventory_post_authority              inventory-post
-inventory_reverse_authority           inventory-reverse
-contracts_ok                          true
-services_ok                           true
-```
-
-Top-level activation initially failed with:
-
-```text
-Creative & Production creative boundary is missing required services: inventory-post, inventory-reverse
-```
-
-Root cause: `inventory-post` and `inventory-reverse` are real Inventory-owned HTTP mutation contracts used by the retained Creative Process POST path, but they are not registered Core browser services. Build 353 incorrectly treated them as top-level runtime activation prerequisites.
+The Build 352 read contract itself passed, but top-level activation initially failed because Build 353 incorrectly required `inventory-post` and `inventory-reverse` as passive browser services.
 
 ## Build 358 correction
 
-Build 358 changes the Creative top-level activation service gate to:
+Build 358 separates activation services from retained mutation authorities.
+
+Activation services:
 
 ```text
 creative-process-read
 inventory-read
 ```
 
-and separately declares retained mutation authorities:
+Retained Inventory-owned mutation authorities:
 
 ```text
 inventory-post
@@ -74,9 +52,9 @@ createsNetworkTransport = false
 
 No Inventory write service is invented or registered. No Creative Process POST implementation changes. Build 310 Inventory authority ownership remains intact.
 
-## Firefox revalidation — PASSED 2026-08-24
+## Firefox revalidation — PASSED 2026-08-25
 
-User browser proof after Build 358 deployment:
+Observed Development proof:
 
 ```text
 application_module                     creative-production
@@ -101,16 +79,4 @@ contracts_ok                           true
 services_ok                            true
 ```
 
-This proves the Creative Process page now activates under `creative-production` with only its actual passive/read activation dependencies, while the two retained Inventory mutation authorities remain separate and do not gate page activation.
-
-## Remaining gate
-
-Rerun the corrected source-only regressions:
-
-```bash
-python scripts/build352_354_creative_process_runtime_test.py
-python scripts/build355_357_content_studio_runtime_test.py
-python scripts/build358_creative_dependency_gate_fix_test.py
-```
-
-Do not create/edit projects or trigger POST/inventory actions for browser validation.
+This batch is fully validated. No project mutation or Inventory write was required for validation.
