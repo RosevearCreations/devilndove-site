@@ -14,6 +14,7 @@
 // Build 354 activates /admin/creative-process/ without moving Creative Process POST authority.
 // Build 355 removes Content Studio GET-time schema creation; Build 356 extends the Creative runtime to Content;
 // Build 357 activates /admin/content-studio/ without moving Content Studio mutation authority.
+// Build 358 corrects Creative Process activation dependencies without registering or moving Inventory writes.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -31,8 +32,9 @@ export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
 export const PACKAGING_TOP_LEVEL_AUDIT_BUILD = 349;
 export const CREATIVE_PROCESS_READ_CONTRACT_BUILD = 352;
 export const CONTENT_STUDIO_READ_CONTRACT_BUILD = 355;
-export const CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 356;
+export const CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 358;
 export const CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD = 357;
+export const CREATIVE_PROCESS_DEPENDENCY_GATE_FIX_BUILD = 358;
 export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
@@ -92,7 +94,7 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Creative projects, CAIP, Packaging & Labeling, Media/Content Studio and reviewed production workflows.',
     domains: Object.freeze(['creative', 'caip', 'packaging', 'content']),
     extractionState: 'in-progress',
-    entry: '../modules/creative-production/runtime.mjs?v=356',
+    entry: '../modules/creative-production/runtime.mjs?v=358',
     runtimeDomains: Object.freeze(['packaging', 'creative', 'content']),
   }),
   Object.freeze({
@@ -154,6 +156,7 @@ export function snapshotApplicationArchitecture() {
     contentStudioReadContractBuild: CONTENT_STUDIO_READ_CONTRACT_BUILD,
     creativeProductionRuntimeImplementationBuild: CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD,
     creativeProductionRuntimeCoverageBuild: CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD,
+    creativeProcessDependencyGateFixBuild: CREATIVE_PROCESS_DEPENDENCY_GATE_FIX_BUILD,
     creativeProductionRuntimePages: CREATIVE_PRODUCTION_RUNTIME_PAGES,
     core: DD_APPLICATION_CORE,
     modules: DD_APPLICATION_MODULES,
@@ -181,6 +184,7 @@ export function snapshotApplicationArchitecture() {
     packagingMutationOwnershipMovedByTopLevelRuntime: false,
     creativeProcessMutationOwnershipMovedByTopLevelRuntime: false,
     contentStudioMutationOwnershipMovedByTopLevelRuntime: false,
+    creativeMutationAuthoritiesRequiredAsActivationServices: false,
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
