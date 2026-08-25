@@ -4,6 +4,10 @@
 Consumes the owner-generated Build 421 evidence log and produces a local Markdown
 remediation note. It performs no network access and contains no database mutation
 capability.
+
+The parser deliberately does not depend on the Unicode dash rendered between the
+PASS/BLOCKER state and label. Windows console/Git Bash encoding can replace that
+separator while leaving the stable item number/state/label text intact.
 """
 from __future__ import annotations
 
@@ -15,7 +19,12 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = ROOT / 'build421_production_evidence.txt'
 OUTPUT_PATH = ROOT / 'build422_blocker_mapping.local.md'
-ITEM_RE = re.compile(r'^(\d{2})\.\s+(PASS|BLOCKER)\s+—\s+(.+)$')
+
+# Anchor only on stable ASCII fields. The remainder is normalized separately so
+# an em dash, en dash, ASCII dash, replacement characters or console glyphs do
+# not prevent an otherwise valid Build 421 evidence item from being parsed.
+ITEM_RE = re.compile(r'^(\d{2})\.\s+(PASS|BLOCKER)\s+(.+)$')
+LEADING_SEPARATOR_RE = re.compile(r'^[\s\-–—:?|>\ufffd▒?]+')
 
 
 @dataclass(frozen=True)
@@ -24,6 +33,12 @@ class Item:
     state: str
     label: str
     summary: str
+
+
+def normalize_label(raw: str) -> str:
+    value = raw.strip()
+    cleaned = LEADING_SEPARATOR_RE.sub('', value).strip()
+    return cleaned or value
 
 
 def parse_items(text: str) -> list[Item]:
@@ -38,7 +53,14 @@ def parse_items(text: str) -> list[Item]:
             next_line = lines[index + 1]
             if next_line.startswith('    '):
                 summary = next_line.strip()
-        items.append(Item(int(match.group(1)), match.group(2), match.group(3).strip(), summary))
+        items.append(
+            Item(
+                int(match.group(1)),
+                match.group(2),
+                normalize_label(match.group(3)),
+                summary,
+            )
+        )
     return items
 
 
@@ -112,6 +134,9 @@ def main() -> int:
     blockers = [item for item in items if item.state == 'BLOCKER']
     if len(items) != 20:
         print(f'BUILD 422 BLOCKER MAPPER: FAIL — expected 20 Build 421 evidence items, parsed {len(items)}')
+        if not items:
+            print('The evidence file exists, but no numbered PASS/BLOCKER records were recognized.')
+            print('Inspect the first numbered lines with: grep -nE "^[0-9][0-9]\\." build421_production_evidence.txt | head')
         return 1
     OUTPUT_PATH.write_text(render(items), encoding='utf-8')
     print('BUILD 422 BLOCKER MAPPER: PASS')
