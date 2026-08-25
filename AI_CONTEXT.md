@@ -1,8 +1,8 @@
-# Devil n Dove AI Context — Build 348 Business & Administration Accounting Runtime Validated
+# Devil n Dove AI Context — Builds 349–351 Creative & Production Packaging Runtime Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, `docs/architecture/SOURCE_CONTROL_BRANCHING.md`, the Build 323–348 architecture notes, and validation files through `BUILD346_348_VALIDATION.md`.
+Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, `docs/architecture/SOURCE_CONTROL_BRANCHING.md`, the Build 323–351 architecture notes, and validation files through `BUILD349_351_VALIDATION.md`.
 
 ## Production safety
 
@@ -36,20 +36,24 @@ Application modules are not permanent Git branches.
 Core architecture                              302
 Core runtime implementation                    305
 Commerce/Operations runtime                    315
-Accounting page bridge audit                   323 validated
 Accounting reads through 342                   validated
 Accounting reads 343–345                       browser proven; corrected local rerun required
 Accounting startup-read audit                  346 validated
 Business & Administration runtime impl         347 validated
 Business Accounting runtime activation         348 validated
+Packaging compatibility baseline               301 validated
+Packaging top-level audit                      349 staged
+Creative & Production runtime impl             350 staged
+Creative Packaging runtime activation          351 staged
 Contract catalog                               345
 Passive service adapters                       345
-Business & Administration mutation ownership   false
+Accounting mutation ownership                  false
+Creative/Packaging mutation ownership moved    false
 ```
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
 
-## Read-boundary rule
+## Read/runtime boundary rule
 
 GET/read paths report schema readiness. Migrations/readiness tooling creates or repairs schema. Never restore request-time DDL to a read because Development reports `schema_ready=false`.
 
@@ -67,7 +71,7 @@ Build 341  access_tiers.tier_id
 Build 341  payment_disputes.payment_dispute_id
 ```
 
-Do not repair these inside GET handlers or the Business runtime. Fresh-install schema parity must be repaired and validated independently before any Production business-data copy.
+Do not repair these inside GET handlers or top-level runtimes. Fresh-install schema parity must be repaired and validated independently before any Production business-data copy.
 
 Prior parity audit also identified Production-only active tables including `accounting_order_records`, `gift_cards`, several Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy.
 
@@ -77,48 +81,59 @@ Prior parity audit also identified Production-only active tables including `acco
 - Builds 331–336: fully validated 2026-08-24.
 - Builds 337–339: fully validated 2026-08-24; Builds 338/339 retain separate schema-parity findings.
 - Builds 340–342: fully validated 2026-08-24; Build 341 retains separate schema-parity findings.
-- Builds 343–345: browser proven and schema-ready. Original local run reached a stale historical assertion requiring `business-administration.entry === null`; Build 348 intentionally invalidated that assumption. The regression was corrected in commit `d630c11f6241fb4cab1bc897bfc6396033961811`; corrected local rerun still required.
-- Builds 346–348: fully validated 2026-08-24. Local regression passed and Firefox proved active `business-administration` Accounting runtime with 28 required services, no runtime network transport and mutation ownership false.
+- Builds 343–345: browser proven and schema-ready. The historical local regression was corrected to stop freezing pre-348 Business runtime state; corrected local rerun still required.
+- Builds 346–348: fully validated 2026-08-24. Firefox proved active `business-administration` Accounting runtime with 28 registered required services, no runtime network transport and mutation ownership false.
+- Build 301 Packaging compatibility checkpoint: COMPLETE IN DEVELOPMENT with native reads/writes, verified Save Project, Build 297 fallback removal and Build 292 -> 291 write provenance.
+- Builds 349–351: staged / validation required.
 
-## Build 346 — Accounting startup-read audit closure
+## Builds 349–351
 
-`admin/accounting/index.html` loads eight Accounting feature scripts. Every automatic startup GET maps to an owned passive non-mutating read service extracted through Build 345. `admin-accounting-t2-presets.js` performs no network reads. User-triggered POSTs/uploads/imports/locks/journal actions remain compatibility mutations and are outside the startup-read activation prerequisite.
+### Build 349 — Packaging top-level runtime audit
 
-## Build 347 — passive Business & Administration runtime
+The completed Build 301 Packaging checkpoint is approved as the safest first `creative-production` page. Its startup gate, client/native read transport, native client, save stabilization, read authority and write authority are already proven. No new read/write extraction is required merely to wrap it at the top-level application-module layer.
 
-`public/js/modules/business-administration/runtime.mjs` supports only the `accounting` domain and `/admin/accounting/`. It performs no network calls and no database/storage writes. It verifies registration of 26 automatic-startup read services plus two interactive export read services. It reports `accountingMutationOwnership=false` and `createsNetworkTransport=false`.
+### Build 350 — passive Creative & Production runtime
 
-## Build 348 — first Business & Administration activation
+`public/js/modules/creative-production/runtime.mjs` supports only `packaging` and `/admin/packaging-studio/`. It requires the existing `inventory-read`, `catalog-read`, and `content-media` services, performs no reads/writes itself, creates no network transport, and owns no Packaging/Creative mutations. It only reports the existing Packaging domain-runtime status dynamically.
 
-`business-administration` is `in-progress` with runtime domain `accounting` only. The only proven Business runtime page is `/admin/accounting/`. Marketing, Platform, Admin, Analytics, Command Center and every other Business & Administration route remain domain-bridge only.
+### Build 351 — first Creative & Production activation
 
-Validated Development state:
+`creative-production` now has runtime domain `packaging` only. The Packaging page cache-busts `admin.js?v=351`, which loads the current Core bridge. The existing Packaging Build 297/298/300/301 script chain remains unchanged. `creative`, `caip`, and `content` remain without top-level Creative runtime coverage.
+
+Expected Development state after verified auth and Packaging load:
 
 ```text
-application_module                       business-administration
+application_module                       creative-production
 application_mode                         active
-active_application_module                business-administration
-business_runtime_build                   347
-business_activation_build                348
-business_current_domain                  accounting
-business_services_ready                  true
-business_required_service_count          28
-business_accounting_page_proven          true
-business_creates_network_transport       false
-business_accounting_mutation_ownership   false
+active_application_module                creative-production
+creative_runtime_build                   350
+creative_activation_build                351
+creative_current_domain                  packaging
+creative_services_ready                  true
+creative_required_service_count          3
+creative_packaging_page_proven           true
+creative_creates_network_transport       false
+creative_packaging_mutation_ownership    false
+packaging_domain_runtime_state           active
+packaging_client_transport_build         297
+packaging_client_transport_ready         true
+packaging_legacy_get_fallback_removed    true
+packaging_legacy_server_get_reachable    false
+compatibility_build                      301
+compatibility_state                      active
 ```
 
 ## Historical regression rule
 
-Historical regression scripts verify the durable boundaries introduced by their own build. They must not freeze later architectural state. In particular, a Build 343–345 regression must not require Business & Administration to remain inactive after Build 348 activates it.
+Historical regression scripts verify the durable boundaries introduced by their own build. They must not freeze later architectural state. Build 343–345 therefore does not require Business & Administration to remain inactive after Build 348.
 
 ## Next direction
 
-1. Pull current `dev` and rerun only `scripts/build343_345_accounting_read_batch_test.py` to close the historical 343–345 local gap.
-2. Source-audit the existing Packaging domain runtime as the safest candidate for the first bounded top-level `creative-production` activation.
-3. If Packaging audit is clean, stage Builds 349–351 as Packaging runtime audit, passive Creative & Production runtime implementation, and `/admin/packaging-studio/`-only activation.
-4. Keep mutation ownership unchanged during that activation.
-5. Continue fresh-install schema parity separately before any Production business-data copy.
+1. Run the corrected Build 343–345 local regression plus the Build 349–351 local regression in one pull/checkpoint.
+2. Browser-validate Build 351 on `/admin/packaging-studio/` without performing a mutation.
+3. If both pass, mark Builds 343–345 and 349–351 validated.
+4. Keep all Packaging/Creative mutation ownership unchanged.
+5. Continue fresh-install schema parity separately, then source-audit either additional Creative domains or remaining Commerce/Business route coverage.
 
 ## Validation preference
 
