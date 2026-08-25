@@ -1,6 +1,6 @@
 # Builds 366–368 Validation — Operations Today Tasks Runtime
 
-## Status — BROWSER RUNTIME PROVEN / BUILD 366 READ REQUIRES BUILD 369 ALIGNMENT / LOCAL REQUIRED
+## Status — BROWSER PROVEN AFTER BUILD 369 / LOCAL REGRESSION REQUIRED
 
 ```text
 Build 366  readiness-aware Today Tasks GET/read contract
@@ -11,7 +11,7 @@ Build 369  read-schema alignment after browser diagnostics
 
 Today Tasks mutation ownership remains unchanged.
 
-## Firefox proof — 2026-08-25
+## Initial Firefox proof — 2026-08-25
 
 The top-level runtime and owned-read boundary activated correctly:
 
@@ -48,7 +48,7 @@ contracts_ok                       true
 services_ok                        true
 ```
 
-The Build 366 readiness diagnostics correctly surfaced four failed reads instead of silently reporting zero:
+That proof correctly exposed four stale read assumptions instead of silently converting them to zero:
 
 ```text
 inventory                 no such table: site_items
@@ -57,15 +57,14 @@ failed_api                no such column: status
 runtime_incident_details  no such column: incident_id
 ```
 
-The original missing-table parser also retained the punctuation suffix, producing `site_items:` and `hst_gst_review_records:`.
+Source/schema audit showed these were query/schema-name drift, not four missing current authorities:
 
-These diagnostics exposed query/schema-name drift rather than four true missing authorities:
+- current Inventory authority is `site_item_inventory`;
+- current HST/GST review authority for this task is `accounting_hst_gst_reviews`;
+- current runtime incident columns use `runtime_incident_id`, `review_status`, and `endpoint_path`;
+- the trailing `:` in parsed missing-table names was parser noise.
 
-- current Inventory authority is `site_item_inventory`, not `site_items`;
-- current HST/GST review authority is `accounting_hst_gst_reviews`, not `hst_gst_review_records`;
-- current runtime incident columns use `runtime_incident_id`, `review_status`, and `endpoint_path`.
-
-The separate historical Build 339 `hst_gst_review_records` parity finding remains on the schema-parity track; Today Tasks simply should not query that legacy name.
+The separate historical Build 339 `hst_gst_review_records` parity finding remains on the schema-parity track.
 
 ## Build 369 correction
 
@@ -78,9 +77,43 @@ runtime build               367
 activation build            368
 ```
 
-It also normalizes D1 missing-table extraction so punctuation before `SQLITE_ERROR` is not treated as part of the table name.
-
 No GET-time CREATE/ALTER/INSERT is introduced. Done/Ignore/Snooze remains retained POST authority at `/api/admin/today-task-actions`.
+
+## Firefox revalidation — PASS 2026-08-25
+
+User-run browser proof after Build 369:
+
+```text
+contract_status                200
+contract_build                 366
+contract_implementation_build  369
+schema_ready                   true
+missing_tables                 []
+query_error_count              0
+query_errors                   []
+task_count                     2
+task_total                     4
+service_registered             true
+service_contract_build         366
+service_implementation_build   369
+application_mode               active
+active_application_module      commerce-operations
+runtime_build                  367
+activation_build               368
+runtime_state                  active
+current_domain                 operations
+last_pathname                  /admin/today-tasks/
+services_ready                 true
+required_services              ["operations-today-tasks-read"]
+today_tasks_page_proven        true
+creates_network_transport      false
+today_tasks_mutation_ownership false
+action_mutation_moved          false
+contracts_ok                   true
+services_ok                    true
+```
+
+Browser side is closed. No Today Tasks action POST was required or executed for proof.
 
 ## Remaining local gates
 
@@ -93,22 +126,4 @@ python scripts/build369_today_tasks_schema_alignment_test.py
 git status --short
 ```
 
-Expected four PASS results and a clean tree.
-
-## Browser revalidation after Build 369
-
-Re-run the read-only Today Tasks contract/runtime proof. Expected:
-
-```text
-contract_status              200
-contract_build               366
-contract_implementation_build 369
-query_error_count            0
-missing_tables               []
-schema_ready                 true
-runtime_build                367
-activation_build             368
-today_tasks_page_proven      true
-```
-
-If any diagnostic remains, use its exact `key`, `message`, and `missing_table` field. Do not click Done, Ignore, or Snooze as part of this proof.
+Expected four PASS results and a clean tree. Do not relabel Builds 366–369 fully validated until those local gates are actually run.
