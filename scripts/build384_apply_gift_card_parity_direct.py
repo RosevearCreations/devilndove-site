@@ -1,28 +1,10 @@
 #!/usr/bin/env python3
 """Build 384 Development D1 parity migration fallback.
 
-Why this exists:
-- Wrangler remote --file imports can fail with {"D1_RESET_DO": true} while polling
-  the D1 import endpoint.
-- This tool avoids the remote file-import path entirely. It reads the authoritative
-  database_gift_card_runtime_parity.sql file, splits it into individual SQL
-  statements, and sends each statement through `wrangler d1 execute --command`.
-
-Safety:
-- Refuses to run unless the current Git branch is `dev`.
-- Refuses to run unless wrangler.toml names the Development Pages project and D1 DB.
-- Uses only the Build 384 migration file already committed to the repository.
-- Verifies all eight Gift Card-owned tables and the two migration-owned templates.
-- Does not touch the shared notification_outbox schema.
-- Decodes Wrangler/Node subprocess output explicitly as UTF-8 with replacement so
-  Windows console encoding cannot abort the release helper before D1 diagnostics
-  are printed.
-- Removes SQL line comments before passing statements to Wrangler `--command` so
-  a leading `-- ...` migration comment cannot be misparsed as a CLI option.
-- Executes one SQL statement per remote command. This avoids multi-statement
-  payload ambiguity and identifies the exact statement if D1 rejects anything.
-- Compacts command SQL to one physical line outside quoted strings before invoking
-  npx.cmd so Windows batch argument forwarding cannot truncate multiline SQL.
+Avoids Wrangler remote --file import failures by executing the authoritative
+Build 384 migration through one compact `wrangler d1 execute --command` statement
+at a time. The helper also aligns the known legacy gift_card_lookup_attempts shape
+before current indexes are created.
 """
 
 from __future__ import annotations
@@ -49,6 +31,21 @@ EXPECTED_TABLES = (
     "gift_card_provider_send_logs",
     "gift_card_redemptions",
     "gift_cards",
+)
+
+# Existing Development databases may contain the older anti-abuse shape with
+# code_hint/email_hash/client_key/was_success but not the newer lookup fields.
+# Execute these after the table CREATE statement and tolerate duplicate columns.
+LOOKUP_ATTEMPT_COMPAT_COLUMNS = (
+    ("code_hint", "TEXT"),
+    ("email_hash", "TEXT"),
+    ("client_key", "TEXT"),
+    ("lookup_email", "TEXT"),
+    ("code_suffix", "TEXT"),
+    ("ip_hash", "TEXT"),
+    ("user_agent", "TEXT"),
+    ("result_status", "TEXT"),
+    ("was_success", "INTEGER NOT NULL DEFAULT 0"),
 )
 
 
@@ -89,7 +86,7 @@ def strip_sql_line_comments(text: str) -> str:
 
 
 def split_sql(text: str) -> list[str]:
-    """Split SQL on semicolons outside quoted strings."""
+    """Split SQL on semicolons outside single/double quoted strings."""
     text = strip_sql_line_comments(text)
     statements: list[str] = []
     current: list[str] = []
@@ -141,8 +138,8 @@ def split_sql(text: str) -> list[str]:
     return statements
 
 
-def compact_sql_for_command(sql: str) -> str:
-    """Collapse whitespace outside quoted strings to make one Windows-safe argument."""
+def compact_sql(sql: str) -> str:
+    """Collapse whitespace outside quoted strings so Windows npx.cmd sees one arg."""
     out: list[str] = []
     in_single = False
     in_double = False
@@ -156,12 +153,12 @@ def compact_sql_for_command(sql: str) -> str:
             if pending_space and out and out[-1] != " ":
                 out.append(" ")
             pending_space = False
+            out.append(ch)
             if in_single and i + 1 < len(sql) and sql[i + 1] == "'":
-                out.extend(("'", "'"))
+                out.append("'")
                 i += 2
                 continue
             in_single = not in_single
-            out.append(ch)
             i += 1
             continue
 
@@ -169,12 +166,12 @@ def compact_sql_for_command(sql: str) -> str:
             if pending_space and out and out[-1] != " ":
                 out.append(" ")
             pending_space = False
+            out.append(ch)
             if in_double and i + 1 < len(sql) and sql[i + 1] == '"':
-                out.extend(('"', '"'))
+                out.append('"')
                 i += 2
                 continue
             in_double = not in_double
-            out.append(ch)
             i += 1
             continue
 
@@ -190,32 +187,29 @@ def compact_sql_for_command(sql: str) -> str:
         i += 1
 
     compact = "".join(out).strip()
-    if in_single or in_double:
-        fail("Command compaction encountered an unterminated quoted string.")
+    if "\n" in compact or "\r" in compact:
+        fail("SQL compaction left a physical newline in a Wrangler command value.")
     return compact
 
 
 def validate_statements(statements: list[str]) -> None:
     for index, statement in enumerate(statements, start=1):
         if statement.lstrip().startswith("--"):
-            fail(f"SQL statement {index} still begins with a line comment after sanitization.")
-        compact = compact_sql_for_command(statement)
+            fail(f"SQL statement {index} still begins with a comment after sanitization.")
+        compact = compact_sql(statement)
         if len(compact) > MAX_COMMAND_CHARS:
             fail(
-                f"SQL statement {index} is {len(compact)} compacted characters, above the "
+                f"SQL statement {index} is {len(compact)} characters, above the "
                 f"direct-command limit of {MAX_COMMAND_CHARS}."
             )
-        if "\n" in compact or "\r" in compact:
-            fail(f"SQL statement {index} still contains a physical newline after compaction.")
 
 
 def sql_preview(sql: str, limit: int = 140) -> str:
-    compact = compact_sql_for_command(sql)
+    compact = compact_sql(sql)
     return compact if len(compact) <= limit else compact[: limit - 3] + "..."
 
 
 def wrangler_command(npx: str, sql: str) -> list[str]:
-    compact = compact_sql_for_command(sql)
     return [
         npx,
         "wrangler",
@@ -227,20 +221,47 @@ def wrangler_command(npx: str, sql: str) -> list[str]:
         str(CONFIG),
         "--yes",
         "--command",
-        compact,
+        compact_sql(sql),
     ]
 
 
-def execute_direct(npx: str, sql: str, label: str, show_sql: bool = False) -> None:
+def execute_direct(
+    npx: str,
+    sql: str,
+    label: str,
+    *,
+    show_sql: bool = False,
+    allow_duplicate_column: bool = False,
+) -> None:
     print(f"\n=== {label} ===")
     if show_sql:
         print(f"SQL: {sql_preview(sql)}")
     result = run_capture(wrangler_command(npx, sql))
     print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
-    if result.returncode != 0:
-        fail(
-            f"{label} failed with exit code {result.returncode}. "
-            "Do not switch back to --file; preserve this output for diagnosis."
+
+    if result.returncode == 0:
+        return
+
+    lower = result.stdout.lower()
+    if allow_duplicate_column and "duplicate column name" in lower:
+        print("Compatibility column already exists; continuing.")
+        return
+
+    fail(
+        f"{label} failed with exit code {result.returncode}. "
+        "Do not switch back to --file; preserve this output for diagnosis."
+    )
+
+
+def align_lookup_attempt_columns(npx: str) -> None:
+    print("\n=== LEGACY LOOKUP-ATTEMPT COLUMN ALIGNMENT ===")
+    for column, definition in LOOKUP_ATTEMPT_COMPAT_COLUMNS:
+        execute_direct(
+            npx,
+            f"ALTER TABLE gift_card_lookup_attempts ADD COLUMN {column} {definition};",
+            f"ALIGN gift_card_lookup_attempts.{column}",
+            show_sql=True,
+            allow_duplicate_column=True,
         )
 
 
@@ -266,6 +287,10 @@ def main() -> int:
         if f"CREATE TABLE IF NOT EXISTS {table}" not in migration_text:
             fail(f"Authoritative migration no longer defines expected table {table}.")
 
+    for column, _definition in LOOKUP_ATTEMPT_COMPAT_COLUMNS:
+        if column not in migration_text:
+            fail(f"Authoritative migration is missing current lookup-attempt column {column}.")
+
     if "CREATE TABLE IF NOT EXISTS notification_outbox" in migration_text:
         fail("Build 384 migration unexpectedly attempts to own notification_outbox.")
 
@@ -279,16 +304,17 @@ def main() -> int:
     )
 
     npx = resolve_npx()
-
     table_list = ",".join(f"'{name}'" for name in EXPECTED_TABLES)
-    preflight_sql = (
-        "SELECT name FROM sqlite_schema "
-        "WHERE type='table' AND name IN ("
-        + table_list
-        + ") ORDER BY name;"
-    )
-    execute_direct(npx, preflight_sql, "READ-ONLY PREFLIGHT")
 
+    execute_direct(
+        npx,
+        "SELECT name FROM sqlite_schema WHERE type='table' AND name IN ("
+        + table_list
+        + ") ORDER BY name;",
+        "READ-ONLY PREFLIGHT",
+    )
+
+    aligned_lookup_attempts = False
     for index, statement in enumerate(statements, start=1):
         execute_direct(
             npx,
@@ -297,19 +323,37 @@ def main() -> int:
             show_sql=True,
         )
 
-    verify_sql = (
-        "SELECT name FROM sqlite_schema "
-        "WHERE type='table' AND name IN ("
-        + table_list
-        + ") ORDER BY name;"
-    )
-    execute_direct(npx, verify_sql, "VERIFY 8 GIFT CARD TABLES")
+        if (
+            not aligned_lookup_attempts
+            and compact_sql(statement).upper().startswith(
+                "CREATE TABLE IF NOT EXISTS GIFT_CARD_LOOKUP_ATTEMPTS"
+            )
+        ):
+            align_lookup_attempt_columns(npx)
+            aligned_lookup_attempts = True
 
-    template_sql = (
-        "SELECT template_key FROM gift_card_delivery_templates "
-        "WHERE template_key IN ('activation','reissue') ORDER BY template_key;"
+    execute_direct(
+        npx,
+        "SELECT name FROM sqlite_schema WHERE type='table' AND name IN ("
+        + table_list
+        + ") ORDER BY name;",
+        "VERIFY 8 GIFT CARD TABLES",
     )
-    execute_direct(npx, template_sql, "VERIFY MIGRATION-OWNED TEMPLATES")
+
+    execute_direct(
+        npx,
+        "SELECT template_key FROM gift_card_delivery_templates "
+        "WHERE template_key IN ('activation','reissue') ORDER BY template_key;",
+        "VERIFY MIGRATION-OWNED TEMPLATES",
+    )
+
+    execute_direct(
+        npx,
+        "SELECT name FROM pragma_table_info('gift_card_lookup_attempts') "
+        "WHERE name IN ('code_hint','email_hash','client_key','lookup_email','code_suffix',"
+        "'ip_hash','user_agent','result_status','was_success','created_at') ORDER BY name;",
+        "VERIFY LOOKUP-ATTEMPT CURRENT COLUMNS",
+    )
 
     print("\nBUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE")
     print("Next gate: read-only Firefox proof on /admin/gift-cards/.")
