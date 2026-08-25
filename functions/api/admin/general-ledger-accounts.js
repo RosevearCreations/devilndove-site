@@ -1,4 +1,5 @@
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
+import { readAccountingGeneralLedger } from '../_lib/accountingGeneralLedgerReadService.js';
 
 function normResults(result) { return Array.isArray(result?.results) ? result.results : []; }
 function cleanCategory(value) { const v = normalizeText(value).toLowerCase(); return ["income", "expense", "asset", "liability", "equity"].includes(v) ? v : "expense"; }
@@ -186,16 +187,21 @@ export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: "Admin access required." }, 401);
   const db = getDb(context.env); if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
-  await ensureTable(db);
-  const result = await db.prepare(`
-    SELECT gl_account_id, code, name, category, parent_group, normal_balance, sort_order,
-           gifi_code, gifi_label, gifi_section, tax_deductibility_percent, gifi_review_state, gifi_review_note,
-           gifi_reviewed_by_user_id, gifi_reviewed_at,
-           is_active, created_at, updated_at
-    FROM general_ledger_accounts
-    ORDER BY COALESCE(is_active,1) DESC, category ASC, sort_order ASC, code ASC
-  `).all();
-  return jsonResponse({ ok: true, accounts: normResults(result), summary: await loadSummary(db), starter_mapping_count: Object.keys(STARTER_GIFI_MAPPINGS).length });
+
+  try {
+    const result = await readAccountingGeneralLedger(db);
+    return jsonResponse({
+      ...result,
+      starter_mapping_count: Object.keys(STARTER_GIFI_MAPPINGS).length,
+      requested_by: {
+        user_id: adminUser.user_id,
+        email: adminUser.email,
+        display_name: adminUser.display_name,
+      },
+    }, 200, { 'Cache-Control': 'no-store' });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error?.message || 'Failed to load General Ledger accounts.' }, 500);
+  }
 }
 
 export async function onRequestPost(context) {
