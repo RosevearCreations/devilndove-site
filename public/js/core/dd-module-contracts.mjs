@@ -1,8 +1,8 @@
-// Devil n Dove Build 330 cross-module contract catalog.
+// Devil n Dove Build 333 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
-// Accounting read extraction now includes GIFI summary, period-lock and attachment metadata reads.
+// Accounting read extraction now includes vendor, recurring-rule and statement-provider-profile reads.
 
-export const BUILD = 330;
+export const BUILD = 333;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -53,6 +53,9 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('accounting-gifi-summary-read', 'accounting', ['accounting'], 'Read year-specific GIFI staging and mapping readiness without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-gifi-summary-read', authorityRoute: '/api/admin/contracts/accounting-gifi-summary-read', authorityAction: 'read-accounting-gifi-summary', implementationState: 'implemented-read-only-accounting-gifi-summary' }),
   contract('accounting-period-locks-read', 'accounting', ['accounting'], 'Read Accounting period lock/close state without creating closure, attachment, or import schema.', { status: 'implemented', route: '/api/admin/contracts/accounting-period-locks-read', authorityRoute: '/api/admin/contracts/accounting-period-locks-read', authorityAction: 'read-accounting-period-locks', implementationState: 'implemented-read-only-accounting-period-locks' }),
   contract('accounting-attachments-read', 'accounting', ['accounting'], 'Read Accounting attachment metadata without request-time table or index creation.', { status: 'implemented', route: '/api/admin/contracts/accounting-attachments-read', authorityRoute: '/api/admin/contracts/accounting-attachments-read', authorityAction: 'read-accounting-attachments', implementationState: 'implemented-read-only-accounting-attachments' }),
+  contract('accounting-vendors-read', 'accounting', ['accounting'], 'Read Accounting vendor master data without request-time table or index creation.', { status: 'implemented', route: '/api/admin/contracts/accounting-vendors-read', authorityRoute: '/api/admin/contracts/accounting-vendors-read', authorityAction: 'read-accounting-vendors', implementationState: 'implemented-read-only-accounting-vendors' }),
+  contract('accounting-recurring-expense-rules-read', 'accounting', ['accounting'], 'Read recurring Accounting expense rules and due state without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-recurring-expense-rules-read', authorityRoute: '/api/admin/contracts/accounting-recurring-expense-rules-read', authorityAction: 'read-accounting-recurring-expense-rules', implementationState: 'implemented-read-only-accounting-recurring-expense-rules' }),
+  contract('accounting-statement-provider-profiles-read', 'accounting', ['accounting'], 'Read statement provider mappings with in-memory defaults without seeding D1 during GET.', { status: 'implemented', route: '/api/admin/contracts/accounting-statement-provider-profiles-read', authorityRoute: '/api/admin/contracts/accounting-statement-provider-profiles-read', authorityAction: 'read-accounting-statement-provider-profiles', implementationState: 'implemented-read-only-accounting-statement-provider-profiles' }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 
