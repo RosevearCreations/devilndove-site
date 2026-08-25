@@ -1,12 +1,14 @@
 # Build 324 Validation — Accounting Profit/Loss Read Extraction
 
-## Status — STAGED / VALIDATION REQUIRED
+## Status — BROWSER PROVEN / LOCAL + SCHEMA DETAIL REQUIRED
 
 Baseline: `b23a98a557721319afe73f5707563aa9703901f4`.
 
 Build 324 extracts the automatic `/api/admin/accounting-profit-loss` GET into an Accounting-owned, non-mutating read service and dedicated GET-only contract while preserving the legacy URL for the current Accounting UI.
 
 ## Local regression
+
+Still required:
 
 ```bash
 git pull --ff-only origin dev
@@ -23,54 +25,16 @@ No Cloudflare resource was contacted.
 
 `git status --short` should be empty before later local edits.
 
-## Development browser proof
+## Development browser proof — PASSED 2026-08-24
 
-Open `/admin/accounting/`, wait for administrator verification, then run this Firefox-safe console block:
-
-```js
-(async () => {
-  const month = new Date().toISOString().slice(0, 7);
-  const r = window.DDModuleRuntime;
-  const service = r?.service?.('accounting-profit-loss-read');
-
-  const [legacyRes, contractRes] = await Promise.all([
-    window.DDAuth.apiFetch(`/api/admin/accounting-profit-loss?month=${encodeURIComponent(month)}`),
-    window.DDAuth.apiFetch(`/api/admin/contracts/accounting-profit-loss-read?month=${encodeURIComponent(month)}`),
-  ]);
-
-  const legacy = await legacyRes.json().catch(() => null);
-  const contract = await contractRes.json().catch(() => null);
-  const serviceResult = service ? await service.list({ month }) : null;
-
-  console.table({
-    pathname: location.pathname,
-    legacy_status: legacyRes.status,
-    legacy_build: legacy?.build ?? null,
-    legacy_owner: legacy?.owner ?? null,
-    legacy_schema_ready: legacy?.schema_ready ?? null,
-    legacy_schema_mutation: legacy?.request_time_schema_mutation ?? null,
-    contract_status: contractRes.status,
-    contract_build: contract?.build ?? null,
-    contract_owner: contract?.owner ?? null,
-    contract_schema_mutation: contract?.request_time_schema_mutation ?? null,
-    service_build: serviceResult?.build ?? null,
-    service_schema_mutation: serviceResult?.requestTimeSchemaMutation ?? null,
-    application_module: r?.getCurrentApplicationModule?.()?.id ?? null,
-    application_mode: document.documentElement.dataset.ddApplicationModuleMode ?? null,
-    active_application_module: r?.getActiveApplicationModuleId?.() ?? null,
-    contracts_ok: r?.contractValidation?.ok === true,
-    services_ok: r?.serviceRegistration?.ok === true,
-  });
-})();
-```
-
-Expected structural proof:
+Observed on `/admin/accounting/` after administrator verification:
 
 ```text
 pathname                    /admin/accounting/
 legacy_status               200
 legacy_build                324
 legacy_owner                accounting
+legacy_schema_ready         false
 legacy_schema_mutation      false
 contract_status             200
 contract_build              324
@@ -85,10 +49,50 @@ contracts_ok                true
 services_ok                 true
 ```
 
-`legacy_schema_ready` may be `true` or `false`. If it is `false`, capture `missing_tables` / `missing_columns` and route those findings to the separate schema-parity track. Do not restore request-time DDL.
+The async Firefox console first displayed `Promise { <state>: "pending" }`; this is normal. The completed `console.table()` output above is the validation result.
+
+### Browser conclusion
+
+The Build 324 architecture boundary passed:
+
+- legacy compatibility GET returns 200;
+- legacy GET identifies Build 324 and owner `accounting`;
+- legacy GET reports `request_time_schema_mutation=false`;
+- dedicated contract returns 200 and identifies Build 324 / owner `accounting`;
+- passive Accounting service reports Build 324 and no schema mutation;
+- Accounting remains `business-administration` domain-bridge only;
+- no top-level Business & Administration runtime is active;
+- contract and service registries remain healthy.
+
+`legacy_schema_ready=false` is a separate schema-parity finding, not a reason to restore request-time DDL and not by itself a Build 324 architecture failure.
+
+## Required schema-parity evidence
+
+Capture the exact missing schema from Development before marking the build fully validated:
+
+```js
+(async () => {
+  const month = new Date().toISOString().slice(0, 7);
+  const response = await window.DDAuth.apiFetch(`/api/admin/accounting-profit-loss?month=${encodeURIComponent(month)}`);
+  const data = await response.json().catch(() => null);
+  console.log({
+    status: response.status,
+    build: data?.build ?? null,
+    owner: data?.owner ?? null,
+    schema_ready: data?.schema_ready ?? null,
+    missing_tables: data?.missing_tables ?? [],
+    missing_columns: data?.missing_columns ?? [],
+    request_time_schema_mutation: data?.request_time_schema_mutation ?? null,
+  });
+})();
+```
+
+Route any returned `missing_tables` / `missing_columns` to the separate fresh-install schema-parity track. Do not repair schema from this GET.
 
 ## Safety boundary
 
-Do not post journals, save expenses, upload files, import statements, or mutate Accounting records during this validation.
+Do not post journals, save expenses, upload files, import statements, or mutate Accounting records during validation.
 
 Build 324 does not activate Business & Administration and does not move any Accounting mutation authority.
+
+Build 324 becomes VALIDATED when the local regression passes and the missing-schema evidence above is captured/documented.
