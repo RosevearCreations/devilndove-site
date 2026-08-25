@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Browser-Proven Through 382 / Build 384 D1 Parity Passed / 383–392 Final Validation Pending
+# Devil n Dove AI Context — Gift Cards Browser-Proven / Build 384 D1 Parity Passed / 383–392 Local Closure Pending
 
 Read `AI_HANDOFF.md` for retained business/data safety history. Modular authorities:
 
@@ -41,9 +41,7 @@ through 365       fully validated through recorded checkpoints
 369               browser-proven / local regression pending
 370–372           browser-proven / local regression pending
 373–382           browser-proven 2026-08-25 / local regression pending
-383–392           local originally passed; Build 384 source correction requires only refreshed 383–392 local rerun
-Build 384 D1      PASSED 2026-08-25 on Development after legacy lookup-attempt alignment
-Gift Card browser pending
+383–392           Gift Card browser + Build 384 Development D1 passed; only refreshed 383–392 local regression remains
 ```
 
 All Creative & Production top-level read/loader boundaries are fully validated and closed:
@@ -103,7 +101,7 @@ mutation ownership false
 
 Build 369 aligned stale reads to `site_item_inventory`, `accounting_hst_gst_reviews`, and current runtime incident columns. Historical Build 339 `hst_gst_review_records` parity remains separate.
 
-Build 392 now stages owned mutation authority `operations-today-task-action-write`, delegating the existing completed/ignored/snoozed implementation. Consumer migration and action-time schema removal wait for Build 393.
+Build 392 stages owned mutation authority `operations-today-task-action-write`, delegating the existing completed/ignored/snoozed implementation. Consumer migration and action-time schema removal wait for Build 393.
 
 ## Custom Requests — 370–382
 
@@ -122,8 +120,6 @@ runtime                   371 / activation 372
 custom_requests_page_proven true
 mutation ownership        false
 ```
-
-`legacy_links_rewritten=0` was valid because no unsafe legacy link existed to rewrite.
 
 The mature legacy `?format=marketplace_csv` branch still exists on `/api/admin/custom-requests`, but the dedicated page uses the safe Build 373 export and guards against legacy links.
 
@@ -158,36 +154,30 @@ gift_card_lookup_lockouts
 
 and seeds activation/reissue templates. It deliberately does not redefine shared `notification_outbox`.
 
-Development D1 release initially exposed real legacy drift in `gift_card_lookup_attempts`: the existing table had the older anti-abuse columns but lacked `lookup_email`, `code_suffix`, `ip_hash`, `user_agent`, and `result_status`. Build 384 was corrected so fresh installs create the full current shape and the release helper aligns missing legacy columns before indexes.
+Development D1 release exposed and repaired legacy drift in `gift_card_lookup_attempts`. Final verification proved all eight Gift Card-owned tables, both default templates, and current lookup-attempt columns are present. The repo-owned direct-query helper reached `BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE`.
 
-Final Development verification on 2026-08-25 proved:
+### 385/386 read + activation — BROWSER PASSED 2026-08-25
+
+Read-only `/admin/gift-cards/` proof returned:
 
 ```text
-all 8 Gift Card-owned tables present
-activation template present
-reissue template present
-lookup-attempt current columns present:
-  client_key
-  code_hint
-  code_suffix
-  created_at
-  email_hash
-  ip_hash
-  lookup_email
-  result_status
-  user_agent
-  was_success
+contract 385
+schema_ready true
+missing_tables []
+query_errors []
+request_time_schema_mutation false
+request_time_default_seeding false
+service registration 386 / contract payload 385
+runtime 386 / activation 386
+required services [operations-gift-cards-read]
+gift_cards_page_proven true
+creates_network_transport false
+gift_cards_mutation_ownership false
+contracts_ok true
+services_ok true
 ```
 
-The helper reached `BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE`.
-
-Do not return to the Wrangler remote `--file` path for this release; the repo-owned direct-query fallback is the proven Development procedure.
-
-### 385/386 read + activation
-
-GET-only `operations-gift-cards-read` checks/reads the eight Gift Card tables without DDL/seeding. `/admin/gift-cards/` automatic startup uses only that contract through passive service Build 386. Commerce runtime/activation is 386 with exactly `operations-gift-cards-read` required on that page.
-
-All Gift Card writes remain compatibility-owned.
+The Gift Card read/runtime boundary is browser-closed. All Gift Card writes remain compatibility-owned.
 
 ### 387 mutation audit
 
@@ -199,7 +189,7 @@ All Gift Card writes remain compatibility-owned.
 
 ## Builds 388–391 — Orders staged
 
-Build 388 confirms `GET /api/admin/orders` is SELECT-only and uses the current cents model (`total_cents`, etc.). The old `orders.total_amount|total` finding is not a blocker for the current admin list.
+Build 388 confirms `GET /api/admin/orders` is SELECT-only and uses the current cents model (`total_cents`, etc.).
 
 Build 389 adds `operations-order-status-write`, delegating the mature status implementation without changing provider behavior.
 
@@ -240,4 +230,4 @@ Historical regressions verify durable boundaries. They must not freeze later sha
 
 ## Next validation
 
-Only the strengthened `scripts/build383_392_commerce_operations_batch_test.py` local rerun remains from the Build 384 source correction. Then browser-validate only `/admin/gift-cards/` using the Build 385 read/runtime state. Do not execute Gift Card, Orders, refund/provider, fulfillment, or Today Tasks writes merely to prove the new source authorities.
+Only the strengthened `scripts/build383_392_commerce_operations_batch_test.py` local rerun remains before Builds 383–392 are fully validated. The Gift Card Development D1 and browser gates are already passed. Do not execute Gift Card, Orders, provider/refund, fulfillment, or Today Tasks writes merely to prove source authorities.
