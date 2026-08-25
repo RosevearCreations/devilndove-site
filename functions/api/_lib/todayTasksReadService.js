@@ -1,8 +1,11 @@
-// Devil n Dove Build 366 — non-mutating Today Tasks read authority.
+// Devil n Dove Build 366 contract / Build 369 implementation — non-mutating Today Tasks read authority.
 // Reads are best-effort but never silently erase schema/query failures: readiness metadata
 // reports missing tables and query errors while still returning the task counts that can be read.
+// Build 369 aligns inventory/accounting/runtime-incident reads to the current schema and normalizes
+// D1 missing-table diagnostics without moving Done/Ignore/Snooze mutation authority.
 
 export const BUILD = 366;
+export const IMPLEMENTATION_BUILD = 369;
 export const CONTRACT_ID = 'operations-today-tasks-read';
 export const OWNER = 'operations';
 
@@ -21,7 +24,7 @@ function firstNumber(row) {
 
 function missingTableFromError(error) {
   const message = text(error?.message || error);
-  const match = message.match(/no such table:\s*([^\s]+)/i);
+  const match = message.match(/no such table:\s*([^\s:]+)/i);
   return match ? match[1].replace(/["'`]/g, '') : null;
 }
 
@@ -46,9 +49,16 @@ async function scalarRead(db, key, sql) {
 async function runtimeIncidentDetails(db) {
   try {
     const result = await db.prepare(`
-      SELECT incident_id, incident_code, incident_scope, severity, message, request_path, created_at
+      SELECT
+        runtime_incident_id AS incident_id,
+        incident_code,
+        incident_scope,
+        severity,
+        message,
+        endpoint_path AS request_path,
+        created_at
       FROM runtime_incidents
-      WHERE COALESCE(status,'open') NOT IN ('resolved','ignored')
+      WHERE COALESCE(review_status,'open') NOT IN ('resolved','ignored')
         AND datetime(created_at) >= datetime('now','-7 days')
       ORDER BY datetime(created_at) DESC
       LIMIT 8
@@ -118,9 +128,9 @@ export async function readTodayTasks(db, options = {}) {
     scalarRead(db, 'readiness', `SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')!='archived' AND (COALESCE(featured_image_url,'')='' OR COALESCE(price_cents,0)<=0 OR COALESCE(short_description,'')='')`),
     scalarRead(db, 'custom_requests', `SELECT COUNT(*) FROM custom_requests WHERE COALESCE(status,'new') IN ('new','reviewing','quote_needed')`),
     scalarRead(db, 'orders', `SELECT COUNT(*) FROM orders WHERE COALESCE(order_status,'pending') IN ('pending','paid') OR COALESCE(payment_status,'pending')='pending'`),
-    scalarRead(db, 'inventory', `SELECT COUNT(*) FROM site_items WHERE COALESCE(reorder_status,'') IN ('needed','requested') OR COALESCE(on_hand_quantity,0)<=COALESCE(reorder_threshold,0)`),
-    scalarRead(db, 'accounting', `SELECT COUNT(*) FROM hst_gst_review_records WHERE COALESCE(remittance_evidence_url,'')='' AND COALESCE(review_status,'draft')!='draft'`),
-    scalarRead(db, 'failed_api', `SELECT COUNT(*) FROM runtime_incidents WHERE COALESCE(status,'open') NOT IN ('resolved','ignored') AND datetime(created_at) >= datetime('now','-7 days')`),
+    scalarRead(db, 'inventory', `SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND COALESCE(do_not_reorder,0)=0 AND (COALESCE(is_on_reorder_list,0)=1 OR (COALESCE(reorder_level,0)>0 AND COALESCE(on_hand_quantity,0)<=COALESCE(reorder_level,0)))`),
+    scalarRead(db, 'accounting', `SELECT COUNT(*) FROM accounting_hst_gst_reviews WHERE COALESCE(remittance_evidence_url,'')='' AND COALESCE(review_status,'draft')!='draft'`),
+    scalarRead(db, 'failed_api', `SELECT COUNT(*) FROM runtime_incidents WHERE COALESCE(review_status,'open') NOT IN ('resolved','ignored') AND datetime(created_at) >= datetime('now','-7 days')`),
     runtimeIncidentDetails(db),
     latestTaskActions(db),
   ]);
@@ -162,6 +172,7 @@ export async function readTodayTasks(db, options = {}) {
   return Object.freeze({
     ok: true,
     build: BUILD,
+    implementation_build: IMPLEMENTATION_BUILD,
     contract: CONTRACT_ID,
     owner: OWNER,
     request_time_schema_mutation: false,
