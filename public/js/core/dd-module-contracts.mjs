@@ -1,8 +1,8 @@
-// Devil n Dove Build 321 cross-module contract catalog.
+// Devil n Dove Build 322 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
-// Accounting read extraction now includes overhead and overhead-to-product allocation reads.
+// Accounting read extraction now includes overhead, product-allocation and product-cost reads.
 
-export const BUILD = 321;
+export const BUILD = 322;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -45,6 +45,7 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('accounting-summary-read', 'accounting', ['operations'], 'Read Accounting summary totals and recent order-linked records without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-summary-read', authorityRoute: '/api/admin/contracts/accounting-summary-read', authorityAction: 'read-accounting-summary', implementationState: 'implemented-read-only-accounting-summary' }),
   contract('accounting-overhead-allocations-read', 'accounting', ['operations'], 'Read monthly Accounting overhead allocations without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-overhead-allocations-read', authorityRoute: '/api/admin/contracts/accounting-overhead-allocations-read', authorityAction: 'read-accounting-overhead-allocations', implementationState: 'implemented-read-only-accounting-overhead-allocations' }),
   contract('accounting-overhead-product-allocations-read', 'accounting', ['operations'], 'Read overhead allocations assigned to products without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-overhead-product-allocations-read', authorityRoute: '/api/admin/contracts/accounting-overhead-product-allocations-read', authorityAction: 'read-accounting-overhead-product-allocations', implementationState: 'implemented-read-only-accounting-overhead-product-allocations' }),
+  contract('accounting-product-costs-read', 'accounting', ['operations', 'catalog'], 'Read historical Accounting product-cost records without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-product-costs-read', authorityRoute: '/api/admin/contracts/accounting-product-costs-read', authorityAction: 'read-accounting-product-costs', implementationState: 'implemented-read-only-accounting-product-costs' }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 
