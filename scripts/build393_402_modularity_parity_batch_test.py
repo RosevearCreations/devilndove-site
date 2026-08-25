@@ -114,10 +114,19 @@ for table in [
     'accountant_export_packages', 'accounting_evidence_attachments',
 ]:
     assert f'CREATE TABLE IF NOT EXISTS {table}' in accounting_migration
-assert 'hst_gst_review_records' not in accounting_reader
-assert 'accountant_export_manifests' not in accounting_reader
+assert "AUTHORITY_TABLES = Object.freeze(['accounting_hst_gst_reviews','accountant_export_packages'])" in accounting_reader
 assert 'accounting_hst_gst_reviews' in accounting_reader
 assert 'accountant_export_packages' in accounting_reader
+# Legacy table names are intentionally retained only as retirement evidence. They must
+# never participate in active readiness checks or SELECT paths.
+active_accounting_reader = accounting_reader.split('legacy_authorities_retired', 1)[0]
+assert 'hst_gst_review_records' not in active_accounting_reader
+assert 'accountant_export_manifests' not in active_accounting_reader
+retired_accounting_aliases = accounting_reader.split('legacy_authorities_retired', 1)[1]
+assert 'hst_gst_review_records' in retired_accounting_aliases
+assert 'accountant_export_manifests' in retired_accounting_aliases
+assert 'implementation_build: IMPLEMENTATION_BUILD' in accounting_reader
+assert 'request_time_schema_mutation: false' in accounting_reader
 
 # 400 singular/plural notification ledgers remain deliberately distinct.
 audit400 = read('docs/architecture/BUILD400_AGGREGATE_NOTIFICATION_AUTHORITY_AUDIT.md')
