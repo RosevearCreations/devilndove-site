@@ -10,6 +10,8 @@
 // Build 348 activates Business & Administration for /admin/accounting/ only, read-only.
 // Build 349 pins the proven Packaging compatibility baseline; Build 350 adds the passive Creative runtime;
 // Build 351 activates Creative & Production for /admin/packaging-studio/ only without moving Packaging mutations.
+// Build 352 formalizes the Creative Process read contract; Build 353 extends the Creative runtime;
+// Build 354 activates /admin/creative-process/ without moving Creative Process POST authority.
 // Importing this file creates no timers, fetches, polling, D1/R2 calls,
 // route interception, or automatic module activation.
 
@@ -25,8 +27,9 @@ export const ACCOUNTING_STARTUP_READ_AUDIT_BUILD = 346;
 export const BUSINESS_ADMINISTRATION_RUNTIME_IMPLEMENTATION_BUILD = 347;
 export const BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD = 348;
 export const PACKAGING_TOP_LEVEL_AUDIT_BUILD = 349;
-export const CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 350;
-export const CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD = 351;
+export const CREATIVE_PROCESS_READ_CONTRACT_BUILD = 352;
+export const CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD = 353;
+export const CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD = 354;
 export const OPERATIONS_RUNTIME_PAGES = Object.freeze([
   '/admin/operations/',
   '/admin/customer-documents/',
@@ -37,6 +40,7 @@ export const BUSINESS_ADMINISTRATION_RUNTIME_PAGES = Object.freeze([
 ]);
 export const CREATIVE_PRODUCTION_RUNTIME_PAGES = Object.freeze([
   '/admin/packaging-studio/',
+  '/admin/creative-process/',
 ]);
 
 export const DD_APPLICATION_CORE = Object.freeze({
@@ -84,8 +88,8 @@ export const DD_APPLICATION_MODULES = Object.freeze([
     description: 'Creative projects, CAIP, Packaging & Labeling, Media/Content Studio and reviewed production workflows.',
     domains: Object.freeze(['creative', 'caip', 'packaging', 'content']),
     extractionState: 'in-progress',
-    entry: '../modules/creative-production/runtime.mjs?v=350',
-    runtimeDomains: Object.freeze(['packaging']),
+    entry: '../modules/creative-production/runtime.mjs?v=353',
+    runtimeDomains: Object.freeze(['packaging', 'creative']),
   }),
   Object.freeze({
     id: 'business-administration',
@@ -142,6 +146,7 @@ export function snapshotApplicationArchitecture() {
     businessAdministrationRuntimeCoverageBuild: BUSINESS_ADMINISTRATION_RUNTIME_COVERAGE_BUILD,
     businessAdministrationRuntimePages: BUSINESS_ADMINISTRATION_RUNTIME_PAGES,
     packagingTopLevelAuditBuild: PACKAGING_TOP_LEVEL_AUDIT_BUILD,
+    creativeProcessReadContractBuild: CREATIVE_PROCESS_READ_CONTRACT_BUILD,
     creativeProductionRuntimeImplementationBuild: CREATIVE_PRODUCTION_RUNTIME_IMPLEMENTATION_BUILD,
     creativeProductionRuntimeCoverageBuild: CREATIVE_PRODUCTION_RUNTIME_COVERAGE_BUILD,
     creativeProductionRuntimePages: CREATIVE_PRODUCTION_RUNTIME_PAGES,
@@ -149,7 +154,7 @@ export function snapshotApplicationArchitecture() {
     modules: DD_APPLICATION_MODULES,
     domainMap: DD_DOMAIN_TO_APPLICATION_MODULE,
     topLevelApplicationModuleCount: DD_APPLICATION_MODULES.length,
-    currentRuntimeMigrationMode: 'commerce-operations-plus-business-accounting-plus-creative-packaging-explicit-page-coverage',
+    currentRuntimeMigrationMode: 'commerce-operations-plus-business-accounting-plus-creative-packaging-and-process-explicit-page-coverage',
     firstUmbrellaRuntimeModule: 'commerce-operations',
     firstUmbrellaRuntimeDomain: 'catalog',
     secondUmbrellaRuntimeDomain: 'inventory',
@@ -158,15 +163,17 @@ export function snapshotApplicationArchitecture() {
     firstBusinessAdministrationRuntimeDomain: 'accounting',
     thirdUmbrellaRuntimeModule: 'creative-production',
     firstCreativeProductionRuntimeDomain: 'packaging',
+    secondCreativeProductionRuntimeDomain: 'creative',
     operationsRuntimeDomainActive: true,
     operationsRuntimeActivationMode: 'read-only-explicit-three-page-coverage',
     businessAdministrationRuntimeDomainActive: true,
     businessAdministrationRuntimeActivationMode: 'accounting-read-only-explicit-single-page-coverage',
     creativeProductionRuntimeDomainActive: true,
-    creativeProductionRuntimeActivationMode: 'packaging-wrapper-over-proven-domain-runtime-explicit-single-page-coverage',
+    creativeProductionRuntimeActivationMode: 'packaging-wrapper-plus-creative-process-explicit-two-page-coverage',
     accountingMutationOwnership: false,
     creativeProductionMutationOwnership: false,
     packagingMutationOwnershipMovedByTopLevelRuntime: false,
+    creativeProcessMutationOwnershipMovedByTopLevelRuntime: false,
     packagingBaselineBuild: 301,
     packagingDomainModule: 'creative-production',
   });
