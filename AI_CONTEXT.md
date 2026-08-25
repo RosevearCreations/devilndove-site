@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Builds 346–348 Business & Administration Accounting Runtime Staged
+# Devil n Dove AI Context — Build 348 Business & Administration Accounting Runtime Pending Browser Proof
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -37,11 +37,11 @@ Core architecture                              302
 Core runtime implementation                    305
 Commerce/Operations runtime                    315
 Accounting page bridge audit                   323 validated
-Accounting reads through 330                   validated
-Accounting reads 331–345                       browser proven; local regressions outstanding
-Accounting startup-read audit                  346 complete in source / local required
-Business & Administration runtime impl         347 staged
-Business Accounting runtime activation         348 staged
+Accounting reads through 342                   validated
+Accounting reads 343–345                       browser proven; corrected local rerun required
+Accounting startup-read audit                  346 complete
+Business & Administration runtime impl         347 local proven
+Business Accounting runtime activation         348 local proven; browser proof required
 Contract catalog                               345
 Passive service adapters                       345
 Business & Administration mutation ownership   false
@@ -53,7 +53,7 @@ Build 306 and Build 308 retain their historical standalone local-signoff caveats
 
 GET/read paths report schema readiness. Migrations/readiness tooling creates or repairs schema. Never restore request-time DDL to a read because Development reports `schema_ready=false`.
 
-A loader/read-contract migration never implies mutation ownership. Existing compatibility POST/PUT/DELETE/upload/import paths remain legacy until dedicated mutation contracts are separately extracted.
+A loader/read-contract migration or top-level runtime activation never implies mutation ownership. Existing compatibility POST/PUT/DELETE/upload/import paths remain legacy until dedicated mutation contracts are separately extracted.
 
 ## Development schema-parity findings — separate track
 
@@ -74,11 +74,11 @@ Prior parity audit also identified Production-only active tables including `acco
 ## Validation state
 
 - Builds 325–330: fully validated.
-- Builds 331–336: browser proven; local regressions still required.
-- Builds 337–339: browser proven; local regression required; Builds 338/339 also exposed schema parity.
-- Builds 340–342: browser proven; local regression required; Build 341 exposed three additional column-parity findings.
-- Builds 343–345: browser proven; local regression required; all three were schema-ready in Development.
-- Builds 346–348: staged / validation required.
+- Builds 331–336: fully validated 2026-08-24.
+- Builds 337–339: fully validated 2026-08-24; Builds 338/339 retain separate schema-parity findings.
+- Builds 340–342: fully validated 2026-08-24; Build 341 retains separate schema-parity findings.
+- Builds 343–345: browser proven and schema-ready. Original local run reached a stale historical assertion requiring `business-administration.entry === null`; Build 348 intentionally invalidated that assumption. The regression was corrected in commit `d630c11f6241fb4cab1bc897bfc6396033961811`; corrected local rerun still required.
+- Builds 346–348: combined local regression PASS 2026-08-24; browser activation proof still required.
 
 ## Build 346 — Accounting startup-read audit closure
 
@@ -86,13 +86,11 @@ Prior parity audit also identified Production-only active tables including `acco
 
 ## Build 347 — passive Business & Administration runtime
 
-`public/js/modules/business-administration/runtime.mjs` supports only the `accounting` domain and `/admin/accounting/`. It performs no network calls and no database/storage writes. It verifies registration of 26 automatic-startup read services plus the two interactive export read services. It explicitly reports `accountingMutationOwnership=false` and `createsNetworkTransport=false`.
+`public/js/modules/business-administration/runtime.mjs` supports only the `accounting` domain and `/admin/accounting/`. It performs no network calls and no database/storage writes. It verifies registration of 26 automatic-startup read services plus two interactive export read services. It reports `accountingMutationOwnership=false` and `createsNetworkTransport=false`.
 
 ## Build 348 — first Business & Administration activation
 
-`business-administration` changes from planned/no runtime to in-progress with runtime domain `accounting` only. The only proven Business runtime page is `/admin/accounting/`. Marketing, Platform, Admin, Analytics, Command Center and every other Business & Administration route remain domain-bridge only.
-
-The Accounting page cache-busts `admin.js?v=348`, which imports the Core runtime bridge with `v=348`. Core's existing verified-admin application-module lifecycle performs activation; no second loader is introduced.
+`business-administration` is `in-progress` with runtime domain `accounting` only. The only proven Business runtime page is `/admin/accounting/`. Marketing, Platform, Admin, Analytics, Command Center and every other Business & Administration route remain domain-bridge only.
 
 Expected post-deploy state on `/admin/accounting/` after verified admin auth:
 
@@ -104,18 +102,23 @@ business_runtime_build                   347
 business_activation_build                348
 business_current_domain                  accounting
 business_services_ready                  true
+business_required_service_count          28
 business_accounting_page_proven          true
 business_creates_network_transport       false
 business_accounting_mutation_ownership   false
 ```
 
+## Historical regression rule
+
+Historical regression scripts verify the durable boundaries introduced by their own build. They must not freeze later architectural state. In particular, a Build 343–345 regression must not require Business & Administration to remain inactive after Build 348 activates it.
+
 ## Next direction
 
-1. Run the combined local checkpoint for Builds 331–348.
-2. Run the Build 348 Firefox activation gate.
-3. If both pass, mark Builds 331–348 according to their already-collected browser proofs and the new Business runtime proof.
+1. Pull the regression-fix/doc commits and rerun only `scripts/build343_345_accounting_read_batch_test.py`.
+2. Browser-validate Build 348 activation on `/admin/accounting/`.
+3. If both pass, mark Builds 343–348 fully validated.
 4. Keep mutation ownership false; do not use runtime activation as permission to move Accounting writes.
-5. Continue fresh-install schema parity separately, then choose the next bounded modular target (Business route coverage, Commerce remaining routes, or Creative & Production runtime) from source evidence.
+5. Continue fresh-install schema parity separately, then source-audit the next bounded modular target.
 
 ## Validation preference
 
