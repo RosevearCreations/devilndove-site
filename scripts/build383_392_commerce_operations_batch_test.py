@@ -15,6 +15,8 @@ def section(text, start, end=None):
 
 audit383 = read('docs/architecture/BUILD383_GIFT_CARD_SCHEMA_AUTHORITY_AUDIT.md')
 migration = read('database_gift_card_runtime_parity.sql')
+release_helper = read('scripts/build384_apply_gift_card_parity_direct.py')
+public_gift_balance = read('functions/api/gift-card-balance.js')
 gift_contract = read('functions/api/admin/contracts/operations-gift-cards-read.js')
 gift_service = read('public/js/modules/commerce-operations/operations-gift-cards-read-service.mjs')
 gift_ui = read('public/js/admin-gift-cards.js')
@@ -51,6 +53,23 @@ for table in [
 assert "('activation'" in migration
 assert "('reissue'" in migration
 assert 'CREATE TABLE IF NOT EXISTS notification_outbox' not in migration
+
+# Build 384 fresh-install lookup-attempt shape must match the current public runtime.
+for column in [
+    'code_hint', 'email_hash', 'client_key', 'lookup_email', 'code_suffix',
+    'ip_hash', 'user_agent', 'result_status', 'was_success', 'created_at',
+]:
+    assert column in migration
+    assert column in public_gift_balance
+assert 'idx_gift_card_lookup_attempts_email' in migration
+
+# Development release helper must align legacy lookup-attempt tables before indexing.
+assert 'LOOKUP_ATTEMPT_COMPAT_COLUMNS' in release_helper
+assert 'LEGACY LOOKUP-ATTEMPT COLUMN ALIGNMENT' in release_helper
+assert 'allow_duplicate_column=True' in release_helper
+assert "ALTER TABLE gift_card_lookup_attempts ADD COLUMN" in release_helper
+assert 'VERIFY LOOKUP-ATTEMPT CURRENT COLUMNS' in release_helper
+assert 'compact_sql(sql)' in release_helper
 
 # 385 owned startup contract is read-only/readiness-aware.
 assert 'export const BUILD = 385' in gift_contract
