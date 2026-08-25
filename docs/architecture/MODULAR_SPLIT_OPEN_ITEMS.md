@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through staged Build 323.
+Updated through staged Build 324.
 
 ## Architectural invariant
 
@@ -28,8 +28,8 @@ Current identities:
 ```text
 Core architecture            302
 Core runtime implementation  305
-Contract catalog             322
-Passive service adapters     322
+Contract catalog             324
+Passive service adapters     324
 Commerce runtime             315
 ```
 
@@ -100,7 +100,14 @@ Still open:
 
 Business & Administration is not yet top-level runtime-active.
 
-Build 323 completed the first bounded `/admin/accounting/` page dependency audit and added the verified Core module bridge to that page. The page must remain `business-administration` domain-bridge/shadow until its automatic legacy read blockers are retired.
+Build 323 validated the first bounded `/admin/accounting/` dependency audit and verified Core module bridge. Browser proof confirmed the page resolves to:
+
+```text
+domain                      accounting
+application_module          business-administration
+application_mode            domain-bridge
+active_application_module   null
+```
 
 Owned Accounting reads now include:
 
@@ -113,9 +120,10 @@ accounting-summary-read                       Build 319 COMPLETE
 accounting-overhead-allocations-read          Build 320 VALIDATED
 accounting-overhead-product-allocations-read  Build 321 VALIDATED
 accounting-product-costs-read                 Build 322 VALIDATED
+accounting-profit-loss-read                   Build 324 STAGED
 ```
 
-Build 323 source audit confirmed that Accounting page load still invokes legacy reads including profit/loss, item costing, journal, GIFI, reconciliation, attachments/imports, close workflow and evidence checks. `accounting-journal` GET is a confirmed blocker because it calls schema-creation/repair logic before reading.
+The Accounting page still auto-loads legacy reads including item costing, journal, GIFI, reconciliation, attachments/imports, close workflow and evidence checks. `accounting-journal` GET remains a confirmed blocker because it calls schema-creation/repair logic before reading.
 
 Marketing, Platform and Administration still need bounded service/runtime work before broader top-level activation.
 
@@ -125,7 +133,7 @@ Rule:
 
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Validated/proven:
+Validated/proven before Build 324:
 
 ```text
 /api/admin/accounting-expenses
@@ -137,7 +145,14 @@ Validated/proven:
 /api/admin/product-costs
 ```
 
-Each corresponding migrated GET is schema-aware and non-mutating. Existing POST/write behavior remains separate.
+Build 324 stages:
+
+```text
+/api/admin/accounting-profit-loss
+  -> accounting-profit-loss-read Build 324
+  -> Accounting-owned service
+  -> request_time_schema_mutation=false
+```
 
 Confirmed remaining read-time DDL blocker:
 
@@ -165,9 +180,9 @@ Compatibility writes still requiring dedicated authority reviews include:
 
 A loader or read-contract migration never implies mutation ownership.
 
-## Next bounded sequence after Build 323
+## Next bounded sequence after Build 324
 
-1. Build 324 — extract the automatic Accounting profit/loss read into an Accounting-owned non-mutating contract/service.
+1. Validate Build 324 locally and in Development.
 2. Build 325 — extract the automatic Accounting item-costing read into an Accounting-owned non-mutating contract/service.
 3. Build 326 — remove request-time schema mutation from Accounting journal GET and expose a dedicated Accounting-owned journal read.
 4. Continue only the remaining automatic `/admin/accounting/` read blockers needed for safe runtime activation; do not extract unrelated GETs for build count.

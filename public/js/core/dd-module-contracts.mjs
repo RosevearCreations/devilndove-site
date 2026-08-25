@@ -1,8 +1,8 @@
-// Devil n Dove Build 322 cross-module contract catalog.
+// Devil n Dove Build 324 cross-module contract catalog.
 // Inventory post/reverse remain Inventory-owned and Creative-consumer-enabled.
-// Accounting read extraction now includes overhead, product-allocation and product-cost reads.
+// Accounting read extraction now includes the automatic Accounting profit/loss page read.
 
-export const BUILD = 322;
+export const BUILD = 324;
 
 function contract(id, owner, consumers, description, options = {}) {
   const status = options.status === 'implemented' ? 'implemented' : 'declared';
@@ -46,6 +46,7 @@ export const DD_MODULE_CONTRACTS = Object.freeze([
   contract('accounting-overhead-allocations-read', 'accounting', ['operations'], 'Read monthly Accounting overhead allocations without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-overhead-allocations-read', authorityRoute: '/api/admin/contracts/accounting-overhead-allocations-read', authorityAction: 'read-accounting-overhead-allocations', implementationState: 'implemented-read-only-accounting-overhead-allocations' }),
   contract('accounting-overhead-product-allocations-read', 'accounting', ['operations'], 'Read overhead allocations assigned to products without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-overhead-product-allocations-read', authorityRoute: '/api/admin/contracts/accounting-overhead-product-allocations-read', authorityAction: 'read-accounting-overhead-product-allocations', implementationState: 'implemented-read-only-accounting-overhead-product-allocations' }),
   contract('accounting-product-costs-read', 'accounting', ['operations', 'catalog'], 'Read historical Accounting product-cost records without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-product-costs-read', authorityRoute: '/api/admin/contracts/accounting-product-costs-read', authorityAction: 'read-accounting-product-costs', implementationState: 'implemented-read-only-accounting-product-costs' }),
+  contract('accounting-profit-loss-read', 'accounting', ['accounting'], 'Read the monthly Accounting profit/loss overview used by the Accounting application page without request-time schema mutation.', { status: 'implemented', route: '/api/admin/contracts/accounting-profit-loss-read', authorityRoute: '/api/admin/contracts/accounting-profit-loss-read', authorityAction: 'read-accounting-profit-loss', implementationState: 'implemented-read-only-accounting-profit-loss' }),
   contract('platform-health', 'platform', ['admin'], 'Read bounded runtime/schema/release health for administrator presentation.'),
 ]);
 

@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Build 323 Accounting Runtime Audit Staged
+# Devil n Dove AI Context — Build 324 Accounting Profit/Loss Read Extraction Staged
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -15,7 +15,8 @@ Primary modular authorities:
 - `docs/architecture/BUILD321_ACCOUNTING_OVERHEAD_PRODUCT_ALLOCATIONS_READ_EXTRACTION.md`
 - `docs/architecture/BUILD322_ACCOUNTING_PRODUCT_COSTS_READ_EXTRACTION.md`
 - `docs/architecture/BUILD323_ACCOUNTING_PAGE_RUNTIME_AUDIT.md`
-- `BUILD323_VALIDATION.md`
+- `docs/architecture/BUILD324_ACCOUNTING_PROFIT_LOSS_READ_EXTRACTION.md`
+- `BUILD324_VALIDATION.md`
 
 ## Production safety
 
@@ -70,14 +71,15 @@ Build 319 Accounting summary read         COMPLETE IN DEVELOPMENT
 Build 320 Accounting overhead read        VALIDATED 2026-08-24
 Build 321 Overhead-product read           VALIDATED 2026-08-24
 Build 322 Product-cost read               VALIDATED 2026-08-24
-Build 323 Accounting page runtime audit   STAGED
+Build 323 Accounting page runtime audit   VALIDATED 2026-08-24
+Build 324 Accounting profit/loss read     STAGED
 ```
 
 Build 306 remains historically browser-proven with standalone local signoff not captured. Do not silently relabel it complete.
 
 Build 308 remains browser-proven with standalone local regression output not captured. Do not silently relabel it complete.
 
-For Builds 320–322, local and browser gates passed. The captured transcript did not include the requested final `git status --short` line, so source-control cleanliness is retained as a housekeeping note rather than hidden.
+For Builds 320–323, functional local/browser gates passed. The captured local transcripts did not include the requested final `git status --short` line, so source-control cleanliness remains a housekeeping note rather than hidden.
 
 ## Current runtime/contract identities
 
@@ -95,41 +97,65 @@ Accounting summary read                   319
 Accounting overhead allocations read      320 validated
 Accounting overhead-product read          321 validated
 Accounting product-costs read             322 validated
-Contract catalog                          322
-Passive service adapters                  322
+Accounting page bridge                    323 validated shadow/domain-bridge
+Accounting profit/loss read               324 staged
+Contract catalog                          324
+Passive service adapters                  324
 Business & Administration runtime         inactive
-Accounting page bridge                    Build 323 staged shadow/domain-bridge
 ```
 
-## Build 323 — Accounting page runtime audit
+## Build 323 result
 
-`/admin/accounting/` now loads `/public/js/admin.js?v=323` so the verified Core module runtime can classify it as:
+`/admin/accounting/` now loads the verified Core module bridge and browser proof confirmed:
 
 ```text
-domain              accounting
-application module  business-administration
-application mode    domain-bridge
+domain                      accounting
+domain_mode                 shadow
+application_module          business-administration
+application_mode            domain-bridge
+active_application_module   null
+core_runtime_build          305
+contracts_ok                true
+services_ok                 true
 ```
 
-Build 323 intentionally does **not** create or activate a `business-administration` runtime entry.
+Build 323 intentionally did not activate a `business-administration` runtime.
 
-The page audit found that the current Accounting UI still auto-loads many legacy reads beyond the owned Builds 316–322 boundaries. These include profit/loss, item costing, journal, GIFI, vendors/recurring rules, attachments, reconciliation, statement imports, tax worksheet, fixed assets, vendor statements, close workflow and evidence checks.
+Its dependency audit found automatic legacy reads including profit/loss, item costing, journal, GIFI, vendors/recurring rules, attachments, reconciliation, statement imports, tax worksheet, fixed assets, vendor statements, close workflow and evidence checks.
 
-Most importantly, `accounting-journal` GET currently calls `fetchJournal()`, which calls `ensureJournalSchema()`. That helper creates journal tables/indexes and may ALTER columns. Therefore Accounting page load still has a confirmed read-time schema-mutation path and top-level Business & Administration activation would be premature.
+Most importantly, `accounting-journal` GET currently reaches `ensureJournalSchema()`, which creates journal tables/indexes and may ALTER columns. Therefore Business & Administration activation remains blocked.
 
-The detailed inventory is in `docs/architecture/BUILD323_ACCOUNTING_PAGE_RUNTIME_AUDIT.md`.
+## Build 324 — Accounting profit/loss read extraction
+
+The automatic Accounting overview request:
+
+```text
+GET /api/admin/accounting-profit-loss?month=YYYY-MM
+```
+
+now delegates to an Accounting-owned non-mutating service and has a dedicated contract:
+
+```text
+GET /api/admin/contracts/accounting-profit-loss-read?month=YYYY-MM
+build       324
+owner       accounting
+mutation    false
+```
+
+The service reads existing Orders, expenses, write-offs, overhead and General Ledger state without CREATE/ALTER/INSERT/UPDATE/DELETE. It reports missing schema rather than repairing it.
+
+The current Accounting UI keeps the legacy URL for compatibility. No Accounting write authority moves.
 
 ## Next default bounded sequence
 
 ```text
-Build 324  Accounting profit/loss read extraction
 Build 325  Accounting item-costing read extraction
 Build 326  Accounting journal GET schema-mutation retirement + read extraction
 then       remaining automatic Accounting-page read blockers only
 finally    first read-only business-administration runtime activation
 ```
 
-Do not continue extracting every Accounting GET merely for build count. Prioritize automatic `/admin/accounting/` dependencies that block safe activation.
+Do not extract unrelated Accounting GETs merely for build count. Prioritize automatic `/admin/accounting/` dependencies that block safe activation.
 
 Mutation ownership remains false/unmoved until dedicated Accounting write contracts are separately extracted.
 
@@ -145,7 +171,7 @@ Still open: bounded top-level `creative-production` runtime activation, CAIP/Con
 
 ### Business & Administration
 
-Accounting page classification is now staged through Build 323, but top-level runtime activation is blocked by remaining automatic legacy reads and confirmed journal GET request-time DDL.
+Accounting page classification is proven, but top-level runtime activation remains blocked by automatic legacy reads and confirmed journal GET request-time DDL.
 
 Marketing, Platform and Administration remain future bounded service/runtime work.
 

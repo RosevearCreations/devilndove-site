@@ -1,22 +1,29 @@
-// File: /functions/api/admin/accounting-profit-loss.js
-// Build 324: legacy compatibility GET delegates to the Accounting-owned non-mutating read service.
+// Devil n Dove Build 324 — Accounting-owned GET-only profit/loss read contract.
 
-import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
+import {
+  getAdminUserFromRequest,
+  getDb,
+  jsonResponse,
+} from '../../_lib/adminAudit.js';
 import {
   BUILD,
   CONTRACT_ID,
   OWNER,
   readAccountingProfitLoss,
-} from '../_lib/accountingProfitLossReadService.js';
+} from '../../_lib/accountingProfitLossReadService.js';
+
+function json(data, status = 200) {
+  return jsonResponse(data, status, { 'Cache-Control': 'no-store' });
+}
 
 export { BUILD, CONTRACT_ID, OWNER };
 
 export async function onRequestGet(context) {
-  const db = getDb(context.env);
-  if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
-  if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
+  if (!adminUser) return json({ ok: false, error: 'Admin access required.' }, 401);
+
+  const db = getDb(context.env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
 
   const url = new URL(context.request.url);
 
@@ -24,10 +31,17 @@ export async function onRequestGet(context) {
     const result = await readAccountingProfitLoss(db, {
       month: url.searchParams.get('month') || new Date().toISOString().slice(0, 7),
     });
-    return jsonResponse(result);
+    return json({
+      ...result,
+      requested_by: {
+        user_id: adminUser.user_id,
+        email: adminUser.email,
+        display_name: adminUser.display_name,
+      },
+    });
   } catch (error) {
     if (error instanceof RangeError || error?.code === 'invalid_accounting_month') {
-      return jsonResponse({
+      return json({
         ok: false,
         build: BUILD,
         contract: CONTRACT_ID,
@@ -35,12 +49,12 @@ export async function onRequestGet(context) {
         error: error?.message || 'Please provide month in YYYY-MM format.',
       }, 400);
     }
-    return jsonResponse({
+    return json({
       ok: false,
       build: BUILD,
       contract: CONTRACT_ID,
       owner: OWNER,
-      error: 'Accounting profit/loss read failed.',
+      error: 'Accounting profit/loss read contract failed.',
       error_code: 'accounting_profit_loss_read_failed',
       detail: String(error?.message || error),
     }, 500);

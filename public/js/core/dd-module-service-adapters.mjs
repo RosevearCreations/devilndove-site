@@ -1,7 +1,7 @@
-// Devil n Dove Build 322 browser adapters for implemented read contracts.
+// Devil n Dove Build 324 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 322;
+export const BUILD = 324;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -15,6 +15,7 @@ const ROUTES = Object.freeze({
   'accounting-overhead-allocations-read': '/api/admin/contracts/accounting-overhead-allocations-read',
   'accounting-overhead-product-allocations-read': '/api/admin/contracts/accounting-overhead-product-allocations-read',
   'accounting-product-costs-read': '/api/admin/contracts/accounting-product-costs-read',
+  'accounting-profit-loss-read': '/api/admin/contracts/accounting-profit-loss-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -107,6 +108,23 @@ export function createDefaultModuleServices() {
     'accounting-product-costs-read': service('accounting-product-costs-read', 'accounting', async (options = {}) => {
       const data = await fetchContract(ROUTES['accounting-product-costs-read'], { limit: options.limit == null ? '' : boundedInt(options.limit, 500, 1, 5000) });
       return accountingReadResult(data, 'product_costs');
+    }),
+    'accounting-profit-loss-read': service('accounting-profit-loss-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-profit-loss-read'], { month: text(options.month || options.periodMonth) });
+      return Object.freeze({
+        period: data.period || null,
+        summary: Object.freeze(data.summary || {}),
+        expenseGroups: Object.freeze(data.expense_groups || []),
+        overheadGroups: Object.freeze(data.overhead_groups || []),
+        generalLedgerAccounts: Object.freeze(data.general_ledger_accounts || []),
+        schemaReady: Boolean(data.schema_ready),
+        missingTables: Object.freeze(data.missing_tables || []),
+        missingColumns: Object.freeze(data.missing_columns || []),
+        authorityTables: Object.freeze(data.authority_tables || []),
+        requestTimeSchemaMutation: data.request_time_schema_mutation === true,
+        contract: data.contract,
+        build: Number(data.build || 0),
+      });
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
