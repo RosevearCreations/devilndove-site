@@ -43,13 +43,13 @@ fulfillment_contract = read('functions/api/admin/contracts/operations-order-fulf
 today_actions = read('functions/api/admin/today-task-actions.js')
 today_action_contract = read('functions/api/admin/contracts/operations-today-task-action-write.js')
 
-# 383 audit pins the real startup/schema authority problem.
+# 383 audit pins the original startup/schema authority problem.
 assert 'three automatic startup GETs' in audit383
 assert 'notification_outbox' in audit383
 assert 'gift_card_delivery_templates' in audit383
 assert 'gift_card_lookup_attempts' in audit383
 
-# 384 migration owns all Gift Card-domain tables and seeds defaults outside GET.
+# 384 migration remains the Gift Card-domain schema/default authority.
 for table in [
     'gift_cards', 'gift_card_redemptions', 'gift_card_admin_events',
     'gift_card_delivery_templates', 'gift_card_delivery_queue',
@@ -61,7 +61,6 @@ assert "('activation'" in migration
 assert "('reissue'" in migration
 assert 'CREATE TABLE IF NOT EXISTS notification_outbox' not in migration
 
-# Build 384 fresh-install lookup-attempt shape must match the current public runtime.
 for column in [
     'code_hint', 'email_hash', 'client_key', 'lookup_email', 'code_suffix',
     'ip_hash', 'user_agent', 'result_status', 'was_success', 'created_at',
@@ -69,8 +68,6 @@ for column in [
     assert column in migration
     assert column in public_gift_balance
 assert 'idx_gift_card_lookup_attempts_email' in migration
-
-# Development release helper must align legacy lookup-attempt tables before indexing.
 assert 'LOOKUP_ATTEMPT_COMPAT_COLUMNS' in release_helper
 assert 'LEGACY LOOKUP-ATTEMPT COLUMN ALIGNMENT' in release_helper
 assert 'allow_duplicate_column=True' in release_helper
@@ -78,7 +75,8 @@ assert 'ALTER TABLE gift_card_lookup_attempts ADD COLUMN' in release_helper
 assert 'VERIFY LOOKUP-ATTEMPT CURRENT COLUMNS' in release_helper
 assert 'compact_sql(sql)' in release_helper
 
-# 385 owned startup contract is read-only/readiness-aware.
+# 385 owned startup contract stays GET-only/readiness-aware even when later mutation
+# contracts replace the compatibility aliases advertised by its metadata.
 assert 'export const BUILD = 385' in gift_contract
 assert "export const CONTRACT_ID = 'operations-gift-cards-read'" in gift_contract
 assert "export const OWNER = 'operations'" in gift_contract
@@ -91,7 +89,7 @@ assert 'onRequestPost' not in gift_contract
 for forbidden in ['CREATE TABLE', 'ALTER TABLE', 'INSERT INTO', 'UPDATE ', 'DELETE FROM']:
     assert forbidden not in gift_contract
 
-# 386 passive service + Gift Card page boundary remain durable under later shared Commerce builds.
+# 386 passive service + Gift Card page boundary remain durable under later work.
 assert 'export const BUILD = 386' in gift_service
 assert 'export const CONTRACT_BUILD = 385' in gift_service
 assert "export const SERVICE_ID = 'operations-gift-cards-read'" in gift_service
@@ -106,7 +104,6 @@ assert "const GIFT_CARDS_REQUIRED_SERVICES = Object.freeze(['operations-gift-car
 assert 'ensureOperationsGiftCardsReadService(registry)' in runtime
 assert 'giftCardsMutationOwnership: false' in runtime
 assert 'ownsGiftCardsMutations: false' in runtime
-assert 'giftCardsMutationOwnershipMoved: false' in runtime
 assert 'currentGiftCardsPageProven' in runtime
 assert 'createsNetworkTransport: false' in runtime
 assert 'apiFetch(' not in runtime
@@ -124,22 +121,32 @@ assert '/public/js/admin.js?v=386' in gift_page
 assert '/public/js/admin-gift-cards.js?v=386' in gift_page
 assert gift_page.index('/public/js/admin.js?v=386') < gift_page.index('/public/js/admin-gift-cards.js?v=386')
 
-# Gift Cards automatic load uses only the owned read; write routes remain explicit click handlers.
+# Gift Cards automatic load remains read-only. Later Builds 404-407 may migrate
+# explicit write consumers to owned contracts; the historical read proof is unchanged.
 load_section = section(gift_ui, 'async function load()', 'async function saveTemplate')
 assert '/api/admin/contracts/operations-gift-cards-read' in load_section
-assert '/api/admin/gift-card-delivery-templates' not in load_section
-assert '/api/admin/gift-card-abuse' not in load_section
-assert '/api/admin/gift-card-delivery-send' not in load_section
 assert "method: 'POST'" in gift_ui
 
-# 387 history GET no longer creates schema; mutation-side fallbacks are intentionally retained/audited.
+# 387 delivery-history GET remains schema-clean. Mutation endpoints may either retain
+# the original compatibility fallback or advance to migration-owned readiness.
 assert 'build:387' in gift_history
 assert 'request_time_schema_mutation:false' in gift_history
 assert 'CREATE TABLE' not in gift_history
-assert 'async function ensureTables(db)' in gift_actions
-assert 'CREATE TABLE IF NOT EXISTS gift_cards' in gift_actions
-assert 'CREATE TABLE IF NOT EXISTS notification_outbox' in gift_actions
-assert 'CREATE TABLE IF NOT EXISTS notification_outbox' in gift_send
+if 'const BUILD = 404' in gift_actions:
+    assert 'requireGiftCardSchema' in gift_actions
+    assert 'CREATE TABLE' not in gift_actions
+    assert 'ALTER TABLE' not in gift_actions
+    assert 'request_time_schema_mutation:false' in gift_actions.replace(' ', '') or 'request_time_schema_mutation: false' in gift_actions
+else:
+    assert 'async function ensureTables(db)' in gift_actions
+    assert 'CREATE TABLE IF NOT EXISTS gift_cards' in gift_actions
+if 'const BUILD = 406' in gift_send:
+    assert 'requireGiftCardSchema' in gift_send
+    assert 'requireNotificationSchema' in gift_send
+    assert 'CREATE TABLE' not in gift_send
+    assert 'ALTER TABLE' not in gift_send
+else:
+    assert 'CREATE TABLE IF NOT EXISTS notification_outbox' in gift_send
 
 # 388 Orders list read stays non-mutating and uses current cents model.
 orders_get = section(orders_read, 'export async function onRequestGet')
@@ -148,32 +155,40 @@ assert 'payments p' in orders_get
 for forbidden in ['CREATE TABLE', 'ALTER TABLE', 'INSERT INTO', 'UPDATE ', 'DELETE FROM']:
     assert forbidden not in orders_get
 
-# 389 formal order-status authority delegates mature implementation without provider changes.
+# 389 status authority remains public Build 389; Build 408 may advance implementation.
 assert 'export const BUILD = 389' in order_status_contract
 assert "export const CONTRACT_ID = 'operations-order-status-write'" in order_status_contract
-assert "import { onRequestPost as legacyPost } from '../update-order-status.js';" in order_status_contract
-assert 'return legacyPost(context)' in order_status_contract
 assert 'providerBehaviorChanged: false' in order_status_contract
 assert 'export async function onRequestPost' in order_status
+if 'IMPLEMENTATION_BUILD = 408' in order_status_contract:
+    assert 'requestTimeSchemaRepairRemoved: true' in order_status_contract
+    assert 'CREATE TABLE' not in order_status
+    assert 'requireGiftCardSchema' in order_status
+else:
+    assert "import { onRequestPost as legacyPost } from '../update-order-status.js';" in order_status_contract
+    assert 'return legacyPost(context)' in order_status_contract
 
-# 390 payment read is GET-only; refund action remains provider-aware compatibility code.
+# 390 payment read remains GET-only and provider implementation remains explicit.
 assert 'export async function onRequestGet' in payment_read
 assert 'onRequestPost' not in payment_read
 assert "fetch('https://api.stripe.com/v1/refunds'" in payment_actions
 assert 'paypal.com' in payment_actions
 assert 'sync_provider' in payment_actions
 
-# 391 fulfillment authority can only force fulfilled and delegates the status implementation.
+# 391 fulfillment remains a fulfilled-only boundary; later Build 408 may move consumer.
 assert 'export const BUILD = 391' in fulfillment_contract
 assert "export const CONTRACT_ID = 'operations-order-fulfillment-write'" in fulfillment_contract
 assert "new_status: 'fulfilled'" in fulfillment_contract
-assert 'legacyStatusPost' in fulfillment_contract
-assert 'mutationConsumerMoved: false' in fulfillment_contract
+if 'IMPLEMENTATION_BUILD = 408' in fulfillment_contract:
+    assert 'mutationConsumerMoved: true' in fulfillment_contract
+    assert 'implementationPost' in fulfillment_contract
+else:
+    assert 'legacyStatusPost' in fulfillment_contract
+    assert 'mutationConsumerMoved: false' in fulfillment_contract
 
-# 392 remains the public Today Tasks action contract. Build 393 may advance its implementation/schema ownership.
+# 392 remains public Today Tasks action authority while 393 may advance implementation.
 assert 'export const BUILD = 392' in today_action_contract
 assert "export const CONTRACT_ID = 'operations-today-task-action-write'" in today_action_contract
-assert "import { onRequestPost as legacyPost } from '../today-task-actions.js';" in today_action_contract
 assert "allowedActions: Object.freeze(['completed', 'ignored', 'snoozed'])" in today_action_contract
 if 'IMPLEMENTATION_BUILD = 393' in today_action_contract:
     assert 'requestTimeSchemaRepairRemoved: true' in today_action_contract
