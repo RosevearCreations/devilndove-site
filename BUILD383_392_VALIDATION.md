@@ -1,6 +1,6 @@
 # Builds 383–392 Validation — Commerce & Operations 10-Build Batch
 
-## Status — LOCAL PASSED / DEVELOPMENT D1 + GIFT CARD BROWSER VALIDATION REQUIRED
+## Status — BUILD 384 SOURCE CORRECTION LOCAL RERUN + DEVELOPMENT D1 + GIFT CARD BROWSER REQUIRED
 
 ```text
 383  Gift Card schema-authority audit
@@ -30,7 +30,7 @@ Production/main is not part of this release gate.
 
 ## Local regression status
 
-The accumulated Commerce checkpoint passed on 2026-08-25:
+The accumulated Commerce checkpoint passed on 2026-08-25 before the lookup-attempt parity correction:
 
 ```text
 BUILDS 362-364 OPERATIONS MEMBERSHIP RUNTIME: PASS
@@ -42,7 +42,7 @@ BUILDS 373-382 CUSTOM REQUESTS READ SURFACE: PASS
 BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
 ```
 
-No local regression contacted Cloudflare.
+No local regression contacted Cloudflare. Because Build 384 migration/test source changed after the last line above, only `scripts/build383_392_commerce_operations_batch_test.py` requires rerun before final closure; the earlier six passing regressions do not.
 
 ## Build 384 Development D1 release history
 
@@ -55,58 +55,81 @@ File already uploaded. Processing.
 
 Wrangler then hit a Windows Node/libuv `UV_HANDLE_CLOSING` assertion. This was not a Build 384 SQL validation error.
 
-The repository-owned direct-query fallback was introduced at:
+The repository-owned direct-query fallback is:
 
 ```text
 scripts/build384_apply_gift_card_parity_direct.py
 ```
 
-Its first run exposed Windows CP1252 subprocess decoding; the helper now decodes Wrangler output explicitly as UTF-8 with replacement.
+The helper was progressively hardened for Windows CP1252 output decoding, Wrangler/Yargs parsing of leading SQL comments, multi-statement ambiguity, and multiline `npx.cmd` argument transport. It now sends one compact physical-line SQL statement at a time through `wrangler d1 execute --command`.
 
-The next run proved the direct `--command` route works. The read-only preflight found seven of the eight Gift Card-owned tables already present:
+A read-only Development preflight proved seven of the eight Gift Card-owned tables were already present. At that checkpoint only `gift_card_lookup_lockouts` was absent.
 
-```text
-gift_card_admin_events
-gift_card_delivery_queue
-gift_card_delivery_templates
-gift_card_lookup_attempts
-gift_card_provider_send_logs
-gift_card_redemptions
-gift_cards
-```
-
-Only `gift_card_lookup_lockouts` was absent at that checkpoint.
-
-The first executable direct-query attempt then failed because the migration comment `-- Devil n Dove Build 384` was interpreted by Wrangler/Yargs as a CLI option. The helper now removes full-line SQL comments before constructing command arguments.
-
-The following two-batch direct-query attempt reached D1 successfully. Batch 1 completed, while batch 2 returned:
+The compact single-statement release then progressed successfully through statement 20. Statement 21 failed on:
 
 ```text
-incomplete input: SQLITE_ERROR
+CREATE INDEX IF NOT EXISTS idx_gift_card_lookup_attempts_email
+ON gift_card_lookup_attempts(lookup_email, created_at DESC);
 ```
 
-To remove multi-statement ambiguity entirely, the fallback was changed to execute each of the 24 authoritative migration statements separately through `wrangler d1 execute --command` and print a short SQL preview before every statement.
+with:
 
-The first one-statement run proved statement 1 (`PRAGMA foreign_keys = ON`) succeeds, but statement 2 (`CREATE TABLE IF NOT EXISTS gift_cards (...)`) still returned `incomplete input` even though the migration source is syntactically complete. Because the direct read-only preflight and short PRAGMA command both succeed, the remaining failure is Windows `npx.cmd` multiline argument transport rather than SQLite schema validation.
+```text
+no such column: lookup_email
+```
 
-The helper now compacts every SQL command to one physical line outside quoted strings before invoking Wrangler. Quoted template text is preserved exactly, command length is revalidated after compaction, and the helper refuses any command that still contains a physical newline.
+This is genuine legacy-schema drift, not a Wrangler transport failure. `gift_card_lookup_attempts` exists in Development with an older shape.
+
+The current public Gift Card balance runtime uses the combined/current lookup-attempt model:
+
+```text
+code_hint
+email_hash
+client_key
+lookup_email
+code_suffix
+ip_hash
+user_agent
+result_status
+was_success
+created_at
+```
+
+Build 384 has therefore been corrected so:
+
+1. `database_gift_card_runtime_parity.sql` creates the full current lookup-attempt shape on fresh installs;
+2. the Development release helper performs idempotent legacy-column alignment immediately after the lookup-attempt table CREATE statement;
+3. duplicate-column errors during that compatibility alignment are treated as already-aligned success;
+4. the email index is created only after the current columns have been reconciled;
+5. final verification checks the current lookup-attempt column set as well as all eight tables and the two default templates;
+6. the Build 383–392 local regression now compares the migration/helper requirements with the current public Gift Card runtime so this drift cannot silently return.
+
+## Minimal rerun after the parity correction
 
 Run only:
 
 ```bash
 git -c gc.auto=0 pull --ff-only origin dev
+python scripts/build383_392_commerce_operations_batch_test.py
 python scripts/build384_apply_gift_card_parity_direct.py
 ```
 
-Do not rerun the seven passing application regressions and do not return to the Wrangler remote `--file` path.
+Do not rerun the earlier six passing Commerce regressions and do not return to the Wrangler remote `--file` path.
 
-Expected final line:
+Expected local result:
+
+```text
+BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS
+No Cloudflare resource was contacted.
+```
+
+Expected D1 final line:
 
 ```text
 BUILD 384 DIRECT DEVELOPMENT D1 PARITY FALLBACK: COMPLETE
 ```
 
-Final verification must contain all eight tables:
+Final verification must contain all eight Gift Card-owned tables:
 
 ```text
 gift_card_admin_events
@@ -119,12 +142,14 @@ gift_card_redemptions
 gift_cards
 ```
 
-and both migration-owned templates:
+Both migration-owned templates:
 
 ```text
 activation
 reissue
 ```
+
+And the current lookup-attempt columns listed above.
 
 ## Firefox gate — Gift Cards only
 
