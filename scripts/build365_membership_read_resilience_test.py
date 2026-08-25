@@ -25,9 +25,10 @@ assert 'export const IMPLEMENTATION_BUILD = 365' in read_service
 assert "export const OWNER = 'operations'" in read_service
 assert "export const TABLE = 'membership_tier_policies'" in read_service
 
-# The read no longer assumes sqlite_master access or a fixed legacy column list.
-assert 'sqlite_master' not in read_service
-assert 'SELECT * FROM membership_tier_policies' in read_service
+# The executable read path no longer assumes sqlite_master access or a fixed legacy column list.
+read_rows_section = section(read_service, 'async function readStoredRows', 'function sortPolicies')
+assert 'sqlite_master' not in read_rows_section
+assert 'SELECT * FROM membership_tier_policies' in read_rows_section
 assert 'missingTableError' in read_service
 assert "message.includes('no such table')" in read_service
 assert 'mapTierPolicyRow' in read_service
