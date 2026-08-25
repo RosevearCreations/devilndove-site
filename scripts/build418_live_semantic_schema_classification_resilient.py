@@ -9,6 +9,11 @@ It also normalizes Wrangler execution through a pinned, non-interactive npx call
 `npx --yes wrangler@4.126.0 ...`. This prevents npm/npx from pausing to ask for
 permission to download Wrangler when it is absent from the local npm cache.
 
+Windows `npx.cmd` also has a much smaller practical command-line ceiling than
+Build 418's generic SQL safety ceiling. On Windows this launcher lowers the SQL
+batch size so the same read-only semantic inspection is split across multiple
+Wrangler calls rather than failing with `The command line is too long.`
+
 Each subprocess runs in its own process group and, on Windows, the complete child
 process tree is terminated if a timeout is reached. This avoids a timed-out
 `npx.cmd` parent leaving its Node/Wrangler child alive with the output pipe open.
@@ -38,6 +43,16 @@ for stream in (sys.stdout, sys.stderr):
 WRANGLER_VERSION = '4.126.0'
 QUERY_TIMEOUT_SECONDS = 120
 KILL_WAIT_SECONDS = 15
+WINDOWS_SAFE_SQL_BATCH_CHARS = 1800
+
+# The canonical mapper uses MAX_COMMAND_CHARS both as the read-only SQL safety
+# ceiling and as its multi-statement batching threshold. 6800 characters is safe
+# for direct process execution on Unix-like hosts but can overflow the Windows
+# command line once npx.cmd, Wrangler arguments, config paths and quoting are
+# included. Lowering the threshold changes only how many SELECT/PRAGMA statements
+# are sent per call; it does not change the statements themselves.
+if os.name == 'nt':
+    base.MAX_COMMAND_CHARS = WINDOWS_SAFE_SQL_BATCH_CHARS
 
 
 def _is_wrangler_whoami(args: list[str]) -> bool:
@@ -151,7 +166,7 @@ _original_query_rows = base.query_rows
 
 
 def visible_query_rows(npx: str, config, sql: str, label: str):
-    print(f'BUILD 418 QUERY START: {label}', flush=True)
+    print(f'BUILD 418 QUERY START: {label} (sql_chars={len(sql)})', flush=True)
     started = time.monotonic()
     try:
         rows = _original_query_rows(npx, config, sql, label)
@@ -169,4 +184,6 @@ base.query_rows = visible_query_rows
 
 
 if __name__ == '__main__':
+    if os.name == 'nt':
+        print(f'BUILD 418 WINDOWS SQL BATCH CAP: {base.MAX_COMMAND_CHARS} characters', flush=True)
     raise SystemExit(base.main())
