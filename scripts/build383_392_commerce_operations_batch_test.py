@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -11,6 +12,12 @@ def section(text, start, end=None):
     i = text.index(start)
     j = text.index(end, i) if end else len(text)
     return text[i:j]
+
+
+def number(text, pattern):
+    match = re.search(pattern, text)
+    assert match, pattern
+    return int(match.group(1))
 
 
 audit383 = read('docs/architecture/BUILD383_GIFT_CARD_SCHEMA_AUTHORITY_AUDIT.md')
@@ -67,7 +74,7 @@ assert 'idx_gift_card_lookup_attempts_email' in migration
 assert 'LOOKUP_ATTEMPT_COMPAT_COLUMNS' in release_helper
 assert 'LEGACY LOOKUP-ATTEMPT COLUMN ALIGNMENT' in release_helper
 assert 'allow_duplicate_column=True' in release_helper
-assert "ALTER TABLE gift_card_lookup_attempts ADD COLUMN" in release_helper
+assert 'ALTER TABLE gift_card_lookup_attempts ADD COLUMN' in release_helper
 assert 'VERIFY LOOKUP-ATTEMPT CURRENT COLUMNS' in release_helper
 assert 'compact_sql(sql)' in release_helper
 
@@ -84,7 +91,7 @@ assert 'onRequestPost' not in gift_contract
 for forbidden in ['CREATE TABLE', 'ALTER TABLE', 'INSERT INTO', 'UPDATE ', 'DELETE FROM']:
     assert forbidden not in gift_contract
 
-# 386 passive service + page-specific runtime gate.
+# 386 passive service + Gift Card page boundary remain durable under later shared Commerce builds.
 assert 'export const BUILD = 386' in gift_service
 assert 'export const CONTRACT_BUILD = 385' in gift_service
 assert "export const SERVICE_ID = 'operations-gift-cards-read'" in gift_service
@@ -92,8 +99,8 @@ registration = section(gift_service, 'export function ensureOperationsGiftCardsR
 assert 'registry.registerService(SERVICE_ID, SERVICE, OWNER)' in registration
 assert 'apiFetch(' not in registration
 assert 'fetch(' not in registration
-assert 'const BUILD = 386;' in runtime
-assert 'const ACTIVATION_BUILD = 386;' in runtime
+assert number(runtime, r'const BUILD = (\d+);') >= 386
+assert number(runtime, r'const ACTIVATION_BUILD = (\d+);') >= 386
 assert "const GIFT_CARDS_RUNTIME_PAGE = '/admin/gift-cards/'" in runtime
 assert "const GIFT_CARDS_REQUIRED_SERVICES = Object.freeze(['operations-gift-cards-read'])" in runtime
 assert 'ensureOperationsGiftCardsReadService(registry)' in runtime
@@ -104,13 +111,15 @@ assert 'currentGiftCardsPageProven' in runtime
 assert 'createsNetworkTransport: false' in runtime
 assert 'apiFetch(' not in runtime
 assert 'fetch(' not in runtime
-assert "entry: '../modules/commerce-operations/runtime.mjs?v=386'" in groups
+runtime_entry = number(groups, r"entry: '../modules/commerce-operations/runtime\.mjs\?v=(\d+)'")
+assert runtime_entry >= 386
 assert 'OPERATIONS_GIFT_CARDS_READ_CONTRACT_BUILD = 385' in groups
-assert 'RUNTIME_OPERATIONS_BUILD = 386' in groups
-assert 'OPERATIONS_RUNTIME_COVERAGE_BUILD = 386' in groups
+assert number(groups, r'RUNTIME_OPERATIONS_BUILD = (\d+);') >= 386
+assert number(groups, r'OPERATIONS_RUNTIME_COVERAGE_BUILD = (\d+);') >= 386
 assert "'/admin/gift-cards/'" in groups
 assert 'giftCardsMutationOwnershipMovedByTopLevelRuntime: false' in groups
-assert 'dd-admin-module-runtime.mjs?v=386' in admin_js
+admin_cache = number(admin_js, r'dd-admin-module-runtime\.mjs\?v=(\d+)')
+assert admin_cache >= 386
 assert '/public/js/admin.js?v=386' in gift_page
 assert '/public/js/admin-gift-cards.js?v=386' in gift_page
 assert gift_page.index('/public/js/admin.js?v=386') < gift_page.index('/public/js/admin-gift-cards.js?v=386')
@@ -161,13 +170,20 @@ assert "new_status: 'fulfilled'" in fulfillment_contract
 assert 'legacyStatusPost' in fulfillment_contract
 assert 'mutationConsumerMoved: false' in fulfillment_contract
 
-# 392 Today Tasks action authority formalizes the existing local action implementation.
+# 392 remains the public Today Tasks action contract. Build 393 may advance its implementation/schema ownership.
 assert 'export const BUILD = 392' in today_action_contract
 assert "export const CONTRACT_ID = 'operations-today-task-action-write'" in today_action_contract
 assert "import { onRequestPost as legacyPost } from '../today-task-actions.js';" in today_action_contract
 assert "allowedActions: Object.freeze(['completed', 'ignored', 'snoozed'])" in today_action_contract
-assert 'schemaOwnershipFollowupBuild: 393' in today_action_contract
-assert 'CREATE TABLE IF NOT EXISTS today_task_actions' in today_actions
+if 'IMPLEMENTATION_BUILD = 393' in today_action_contract:
+    assert 'requestTimeSchemaRepairRemoved: true' in today_action_contract
+    assert 'schemaOwnershipBuild: 393' in today_action_contract
+    assert 'CREATE TABLE IF NOT EXISTS today_task_actions' not in today_actions
+    assert 'ALTER TABLE today_task_actions' not in today_actions
+    assert 'request_time_schema_mutation: false' in today_actions
+else:
+    assert 'schemaOwnershipFollowupBuild: 393' in today_action_contract
+    assert 'CREATE TABLE IF NOT EXISTS today_task_actions' in today_actions
 
 print('BUILDS 383-392 COMMERCE OPERATIONS BATCH: PASS')
 print('No Cloudflare resource was contacted.')
