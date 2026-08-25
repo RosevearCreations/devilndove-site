@@ -1,7 +1,7 @@
-// Devil n Dove Build 318 browser adapters for implemented read contracts.
+// Devil n Dove Build 319 browser adapters for implemented read contracts.
 // Registration is passive: no request occurs until a consumer explicitly calls list().
 
-export const BUILD = 318;
+export const BUILD = 319;
 
 const ROUTES = Object.freeze({
   'catalog-read': '/api/admin/contracts/catalog-read',
@@ -11,6 +11,7 @@ const ROUTES = Object.freeze({
   'accounting-expenses-read': '/api/admin/contracts/accounting-expenses-read',
   'accounting-writeoffs-read': '/api/admin/contracts/accounting-writeoffs-read',
   'accounting-general-ledger-read': '/api/admin/contracts/accounting-general-ledger-read',
+  'accounting-summary-read': '/api/admin/contracts/accounting-summary-read',
   'content-media': '/api/admin/contracts/content-media',
 });
 
@@ -26,7 +27,6 @@ function text(value) {
 async function fetchContract(route, params = {}) {
   const apiFetch = globalThis.DDAuth?.apiFetch;
   if (typeof apiFetch !== 'function') throw new Error('Authenticated API client is unavailable.');
-
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === null || value === undefined || value === '') continue;
@@ -48,6 +48,7 @@ function accountingReadResult(data, rowsKey) {
     rows: Object.freeze(data[rowsKey] || []),
     count: Number(data.count || 0),
     summary: Object.freeze(data.summary || {}),
+    warnings: Object.freeze(data.warnings || []),
     schemaReady: Boolean(data.schema_ready),
     missingTables: Object.freeze(data.missing_tables || []),
     missingColumns: Object.freeze(data.missing_columns || []),
@@ -69,9 +70,7 @@ export function createDefaultModuleServices() {
       return Object.freeze({ rows: Object.freeze(data.items || []), count: Number(data.count || 0), contract: data.contract });
     }),
     'inventory-cost': service('inventory-cost', 'inventory', async (options = {}) => {
-      const data = await fetchContract(ROUTES['inventory-cost'], {
-        inventory_id: Number(options.inventoryId || 0) || '', q: text(options.q), limit: boundedInt(options.limit, 250, 1, 1000), include_history: options.includeHistory ? 1 : 0,
-      });
+      const data = await fetchContract(ROUTES['inventory-cost'], { inventory_id: Number(options.inventoryId || 0) || '', q: text(options.q), limit: boundedInt(options.limit, 250, 1, 1000), include_history: options.includeHistory ? 1 : 0 });
       return Object.freeze({ rows: Object.freeze(data.items || []), count: Number(data.count || 0), history: Object.freeze(data.history || []), historyCount: Number(data.history_count || 0), historyAvailable: Boolean(data.history_available), authorityField: data.authority_field || null, contract: data.contract, build: Number(data.build || 0) });
     }),
     'accounting-read': service('accounting-read', 'accounting', async (options = {}) => {
@@ -89,6 +88,10 @@ export function createDefaultModuleServices() {
     'accounting-general-ledger-read': service('accounting-general-ledger-read', 'accounting', async () => {
       const data = await fetchContract(ROUTES['accounting-general-ledger-read']);
       return accountingReadResult(data, 'accounts');
+    }),
+    'accounting-summary-read': service('accounting-summary-read', 'accounting', async (options = {}) => {
+      const data = await fetchContract(ROUTES['accounting-summary-read'], { limit: boundedInt(options.limit, 25, 1, 100) });
+      return accountingReadResult(data, 'records');
     }),
     'content-media': service('content-media', 'content', async (options = {}) => {
       const data = await fetchContract(ROUTES['content-media'], { q: text(options.q), media_type: text(options.mediaType || 'artwork'), limit: boundedInt(options.limit, 48, 1, 72) });
