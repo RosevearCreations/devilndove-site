@@ -5,13 +5,10 @@ import {
   jsonResponse,
   normalizeText,
 } from "../_lib/adminAudit.js";
+import { readAccountingOverheadProductAllocations } from '../_lib/accountingOverheadProductAllocationsReadService.js';
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { "Cache-Control": "no-store" });
-}
-
-function normalizeResults(result) {
-  return Array.isArray(result?.results) ? result.results : [];
 }
 
 async function ensureTable(db) {
@@ -64,55 +61,19 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
 
-  await ensureTable(db);
-
   const url = new URL(context.request.url);
   const periodMonth = normalizeText(url.searchParams.get("month"));
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit") || 150), 1), 500);
 
-  const where = [];
-  const bindings = [];
-
-  if (periodMonth) {
-    where.push("opa.period_month = ?");
-    bindings.push(periodMonth);
+  try {
+    const result = await readAccountingOverheadProductAllocations(db, {
+      month: periodMonth,
+      limit,
+    });
+    return json(result);
+  } catch (error) {
+    return json({ ok: false, error: error?.message || 'Failed to load overhead product allocations.' }, 500);
   }
-
-  bindings.push(limit);
-
-  const result = await db.prepare(`
-    SELECT
-      opa.overhead_product_allocation_id,
-      opa.period_month,
-      opa.ledger_code,
-      opa.product_id,
-      opa.amount_cents,
-      opa.notes,
-      opa.created_at,
-      opa.updated_at,
-      p.product_number,
-      p.name AS product_name,
-      p.status AS product_status,
-      p.review_status
-    FROM accounting_overhead_product_allocations opa
-    LEFT JOIN products p ON p.product_id = opa.product_id
-    ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-    ORDER BY opa.period_month DESC, opa.ledger_code ASC, LOWER(COALESCE(p.name, '')) ASC, opa.product_id ASC
-    LIMIT ?
-  `).bind(...bindings).all();
-
-  const rows = normalizeResults(result);
-  const allocations = rows.map(mapRow);
-
-  return json({
-    ok: true,
-    allocations,
-    summary: {
-      allocation_count: allocations.length,
-      total_amount_cents: allocations.reduce((sum, row) => sum + Number(row.amount_cents || 0), 0),
-      period_month: periodMonth || null,
-    },
-  });
 }
 
 export async function onRequestPost(context) {
