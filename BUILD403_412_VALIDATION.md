@@ -1,6 +1,6 @@
 # Builds 403–412 Validation — Commerce Mutation Boundaries + Development RC
 
-## Status — LOCAL RC PASS / DEVELOPMENT D1 AUTH RECOVERED / PARITY APPLICATION + READ-ONLY BROWSER PROOF REQUIRED
+## Status — LOCAL RC PASS / DEVELOPMENT D1 MEMBERSHIP DRIFT REPAIR STAGED / READ-ONLY BROWSER PROOF REQUIRED
 
 ```text
 403  Canonical shared notification schema/readiness authority
@@ -84,36 +84,51 @@ Build 402 also proved the current clean-install composition with 512 tables, 25 
 
 ## Development D1 authentication — RECOVERED
 
-The first post-RC Build 410 Development D1 attempt stopped during its read-only preflight before any migration statement executed:
+The first post-RC Build 410 Development D1 attempt stopped during its read-only preflight with Cloudflare `7403`. No schema SQL executed. The follow-up auth-only diagnostic proved OAuth authentication to the expected account, `d1 (write)` permission and a successful `SELECT 1 AS auth_probe` against `devilndove-dev`.
+
+Authentication is no longer blocking Build 410. Do not rerun the already-green local RC suite because of the historical 7403.
+
+## Development D1 parity application — MEMBERSHIP LEGACY SHAPE EXPOSED
+
+The authenticated Build 410 retry successfully re-applied all four Today Tasks statements. The Membership migration then reached:
 
 ```text
-The given account is not valid or is not authorized to access this service [code: 7403]
+database_membership_tier_policy_runtime_parity.sql STATEMENT 2/3
+CREATE TABLE IF NOT EXISTS membership_tier_policies ...
 ```
 
-That stop was authentication/account authorization only; no schema SQL executed.
-
-The follow-up auth-only diagnostic on 2026-08-25 proved:
+and that statement was a no-op because Development already has a `membership_tier_policies` table. Statement 3 then failed with the first real Membership schema-drift evidence:
 
 ```text
-Cloudflare auth/account environment overrides: none
-Wrangler authentication: OAuth
-Authenticated account: Devilndovelive@gmail.com's Account
-OAuth D1 permission: d1 (write)
-Development D1 read-only auth probe: PASS
-SELECT 1 AS auth_probe -> 1
+table membership_tier_policies has no column named tier_code: SQLITE_ERROR [code: 7500]
 ```
 
-The committed `wrangler.toml` remains pinned to the Development project/database, and the direct read-only probe against `devilndove-dev` succeeded. Authentication is therefore no longer blocking Build 410. Do not rerun the already-green local RC suite merely because of the earlier 7403.
+This proves the existing Development table is a legacy shape. `CREATE TABLE IF NOT EXISTS` cannot upgrade it to the canonical Build 395 model.
+
+The Build 410 applicator now performs a narrow, data-preserving reconciliation before the Membership seed:
+
+1. Inspect `membership_tier_policies` columns and UNIQUE indexes.
+2. Recover a preserved `membership_tier_policies_build410_legacy` table if a previous swap stopped after the backup rename.
+3. Require the canonical Build 395 columns and UNIQUE `tier_code` authority.
+4. If the active table is legacy, map known compatibility aliases (`id`, `code`, `name`, `description`, `benefits`, `badge_colour`) into a canonical shadow table while preserving policy IDs where available.
+5. Reject duplicate/blank mapped tier codes before changing the active table.
+6. Verify legacy/shadow row counts match.
+7. Preserve the legacy table as `membership_tier_policies_build410_legacy`, activate the canonical shadow, then execute the normal Build 395 Bronze/Silver/Gold seed.
+8. Verify current rows before retiring the legacy backup.
+
+The helper refuses to discard a pre-existing backup while the active table remains non-canonical. This is intentionally narrower and safer than adding request-time schema repair.
+
+Customer Documents, Accounting and Notification overlays did **not** run after the Membership failure and remain pending in the same applicator.
 
 ## Development D1 parity application — NEXT GATE
 
-Rerun:
+Pull current `dev` and rerun only:
 
 ```bash
 python scripts/build410_apply_development_parity_overlays.py
 ```
 
-The helper is hard-pinned to:
+The helper remains hard-pinned to:
 
 ```text
 branch        dev
@@ -121,7 +136,21 @@ Pages project devilndove-site-dev
 D1 database   devilndove-dev
 ```
 
-It uses Windows-safe one-statement `wrangler d1 execute --command` calls. It aligns legacy `notification_outbox` columns immediately after materializing/no-oping that table and before dependent notification indexes.
+Expected Membership recovery markers include:
+
+```text
+INSPECT MEMBERSHIP TIER POLICY COLUMNS
+INSPECT MEMBERSHIP UNIQUE INDEXES
+REBUILD LEGACY membership_tier_policies -> BUILD 395 CANONICAL SHAPE
+CHECK MEMBERSHIP LEGACY CODE MAPPING
+VERIFY MEMBERSHIP SHADOW ROW COUNT
+BACK UP LEGACY MEMBERSHIP TABLE
+ACTIVATE CANONICAL MEMBERSHIP TABLE
+VERIFY MEMBERSHIP CURRENT ROWS
+RETIRE MEMBERSHIP LEGACY BACKUP AFTER VERIFIED SEED
+```
+
+After Membership, the helper continues to Customer Documents, Accounting and Notification parity. Notification still aligns legacy `notification_outbox` columns immediately after its CREATE/no-op and before dependent indexes.
 
 Expected final line:
 
@@ -129,7 +158,7 @@ Expected final line:
 BUILD 410 DEVELOPMENT PARITY OVERLAY APPLICATOR: COMPLETE
 ```
 
-If a migration now stops, preserve the exact statement output. At this point the failure is likely real Development schema drift rather than authentication or local harness behavior. Repair the exact parity gap; do not move DDL back into request handlers.
+If a later migration stops on another real mismatch, preserve the exact statement output and repair that parity gap. Do not move DDL back into request handlers.
 
 ## Read-only browser gates
 
