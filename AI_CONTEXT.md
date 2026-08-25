@@ -1,14 +1,14 @@
-# Devil n Dove AI Context — Creative Browser-Proven / Membership Read Patch Through Build 365
+# Devil n Dove AI Context — Fully Validated Through Build 364 / Build 365 Local Rerun Pending
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
-Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 365, and validation files including `BUILD362_364_VALIDATION.md`.
+Primary modular authorities include `docs/architecture/MODULAR_APPLICATION_ARCHITECTURE.md`, `docs/architecture/MODULAR_SPLIT_OPEN_ITEMS.md`, architecture notes through Build 365, and validation files through `BUILD365_VALIDATION.md`.
 
 ## Production safety
 
 Real Devil n Dove Production remains frozen unless deliberately promoted through the separate Production workflow. `main` must not advance merely because Development is ahead.
 
-## Authoritative application structure
+## Authoritative structure
 
 ```text
                      DEVIL N DOVE APPLICATION CORE
@@ -19,7 +19,7 @@ Real Devil n Dove Production remains frozen unless deliberately promoted through
        OPERATIONS          PRODUCTION      ADMINISTRATION
 ```
 
-Domains remain internal ownership/service boundaries beneath exactly three top-level modules. Core owns shared infrastructure only; business rules remain domain-owned.
+Domains remain ownership/service boundaries beneath exactly three top-level modules. Core owns shared infrastructure only; business rules remain domain-owned.
 
 ## Source-control rule
 
@@ -35,26 +35,19 @@ Application modules are not permanent Git branches.
 ```text
 Core architecture                              302
 Core runtime implementation                    305
-Commerce/Operations runtime                    363 browser-proven on Membership
-Operations Membership read contract            362 browser failed / Build 365 patch staged
-Operations Membership activation               364 browser-proven
-Membership read implementation hardening       365 staged
-Accounting reads through 345                   validated
+Commerce & Operations runtime                  363
+Operations Membership read contract            362
+Operations Membership activation               364
+Membership read implementation hardening       365 browser-passed / corrected local pending
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
 Creative Packaging runtime                     351 validated
-Creative Process read/runtime                   browser-proven; corrected local required
-Content Studio read/runtime                     browser-proven; corrected local required
-Creative dependency correction                 358 browser-proven; corrected local required
-CAIP startup read contracts                    359 browser-proven; local required
-Creative & Production runtime implementation   360 browser-proven; local required
-CAIP top-level activation                      361 browser-proven; local required
+Creative Process read/runtime                   352–354 fully validated
+Content Studio read/runtime                     355–357 fully validated
+Creative dependency correction                 358 fully validated
+CAIP read/runtime                               359–361 fully validated
 Contract catalog                               345
 Default passive service adapters               345
-Creative Process passive service               353 runtime-local
-Content Studio passive service                 356 runtime-local
-CAIP passive read services                     360 runtime-local
-Operations Membership passive service          363 runtime-local
 Accounting mutation ownership moved            false
 Operations/Membership mutation ownership moved false
 Creative/Packaging mutation ownership moved    false
@@ -62,7 +55,7 @@ Content mutation ownership moved               false
 CAIP mutation ownership moved                  false
 ```
 
-All four Creative & Production domains have browser-proven top-level runtime pages. Do not extend or rework that loader merely to create more evidence; close the remaining local regressions and leave the loader stable.
+All four Creative & Production domains are now fully validated at the top-level loader/read boundary. Do not expand or rework that loader merely to create more evidence.
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
 
@@ -74,39 +67,51 @@ A loader/read-contract migration or top-level runtime activation never implies m
 
 ## Validation state
 
-- Builds 325–345: fully validated through existing checkpoints; Builds 338/339/341 retain separate schema-parity findings.
-- Builds 346–348: fully validated; Business & Administration is active only for `/admin/accounting/`.
-- Build 301 Packaging compatibility checkpoint: complete in Development.
-- Builds 349–351: fully validated; Packaging remains on the proven Build 301 authority chain.
-- Builds 352–354: browser activation passes after Build 358; corrected local regression still required.
-- Builds 355–357: Content Studio browser proof passed; corrected local regression still required.
-- Build 358: browser proof passed; corrected local regression still required.
-- Builds 359–361: CAIP browser proof passed 2026-08-25; local regression still required.
-- Builds 362–364: Membership top-level runtime/browser activation passed, but Build 362 Tier Policy and aggregate GET both returned opaque HTTP 500 before contract metadata could be parsed.
-- Build 365: staged read-resilience correction; local + browser revalidation required.
-
-## Creative & Production browser-proven state
-
-Creative Process after Build 358:
-
 ```text
-creative domain required services   ["creative-process-read","inventory-read"]
-retained mutation authorities        ["inventory-post","inventory-reverse"]
-mutation authorities activation gate false
-page proven                          true
-creates network transport            false
-creative mutation ownership          false
+Builds 325–345   fully validated through existing checkpoints
+Builds 346–348   fully validated
+Builds 349–351   fully validated
+Builds 352–354   fully validated 2026-08-25
+Builds 355–357   fully validated 2026-08-25
+Build 358        fully validated 2026-08-25
+Builds 359–361   fully validated 2026-08-25
+Builds 362–364   fully validated 2026-08-25 after Build 365 read correction
+Build 365        browser passed; corrected local regression still required
 ```
 
-Content Studio proof returned Build 355 legacy/contract reads at 200 with `schema_ready=true`, `request_time_schema_mutation=false`, one registered `content-studio-read` service, active `creative-production`, one required service, and `contentMutationOwnership=false`.
+The user-run local checkpoint on 2026-08-25 returned exact PASS for:
 
-CAIP proof returned both Build 359 contracts at 200 with verification-only/non-mutating metadata, both passive services registered, active `/admin/creative-assets/` runtime Build 360/activation 361, exactly two required read services, `currentCaipPageProven=true`, and `caipMutationOwnership=false`.
+```text
+BUILDS 352-354 CREATIVE PROCESS RUNTIME: PASS
+BUILDS 355-357 CONTENT STUDIO RUNTIME: PASS
+BUILD 358 CREATIVE DEPENDENCY GATE FIX: PASS
+BUILDS 359-361 CAIP RUNTIME: PASS
+BUILDS 362-364 OPERATIONS MEMBERSHIP RUNTIME: PASS
+```
 
-No Creative Process, Content Studio, CAIP, R2, binary, upload, governance, probe, derivative, secure-review, duplicate-cleanup, or public-promotion mutation was invoked merely to prove those loader/read boundaries.
+The first Build 365 local run failed only because its regression searched the entire source file for the literal text `sqlite_master`; that term remained solely in a comment describing the removed implementation. The test has been corrected to inspect the executable `readStoredRows` section instead. Do not interpret that assertion failure as an implementation failure.
 
-## Operations Membership boundary — Builds 362–365
+## Creative & Production — closed loader/read boundary
 
-Source audit selected `/admin/membership/` as the next bounded Commerce & Operations page. `/admin/members/` is much more coupled, while Gift Cards has known fresh-install schema parity and is deliberately not mixed into this activation batch.
+```text
+packaging -> /admin/packaging-studio/   validated
+creative  -> /admin/creative-process/   validated
+content   -> /admin/content-studio/      validated
+caip      -> /admin/creative-assets/     validated
+```
+
+Activation services remain:
+
+```text
+packaging: inventory-read, catalog-read, content-media
+creative:  creative-process-read, inventory-read
+content:   content-studio-read
+caip:      caip-read, caip-media-intake-read
+```
+
+The Creative top-level runtime creates no network transport and owns no Packaging, Creative, Content, or CAIP mutations.
+
+## Operations Membership — Builds 362–365
 
 Automatic Membership reads are:
 
@@ -116,15 +121,9 @@ GET /api/admin/access-tiers
 GET /api/admin/tier-policies
 ```
 
-The first two are SELECT-only. Before Build 362, Tier Policy GET called `ensureTierPolicyTable()` and `seedDefaultPolicies()`, creating `membership_tier_policies` and inserting Bronze/Silver/Gold rows during a read.
+Before Build 362, Tier Policy GET created `membership_tier_policies` and seeded Bronze/Silver/Gold during a read. Build 362 moved GET to a non-mutating read authority and added GET-only `operations-membership-read`. Retained POST still owns legacy ensure/seed/update behavior.
 
-### Build 362
-
-Build 362 introduced a non-mutating Tier Policy read authority and `GET /api/admin/contracts/operations-membership-read`. The retained POST still owns legacy ensure/seed/update behavior. Public contract identity remains Build 362.
-
-### Build 363/364
-
-`operations-membership-read` is registered passively. Membership has a page-specific Operations service gate:
+Build 363 registers `operations-membership-read` passively and makes Membership page-specific:
 
 ```text
 /admin/operations/          catalog-read, inventory-read, accounting-read
@@ -133,58 +132,53 @@ Build 362 introduced a non-mutating Tier Policy read authority and `GET /api/adm
 /admin/membership/          operations-membership-read
 ```
 
-`/admin/membership/` joins explicit Operations top-level coverage. Build 364 also corrected `adminTierPolicyMount` -> `tierPolicyAdminMount`, restoring the intended Tier Policy panel.
+Build 364 activates `/admin/membership/` and fixes `adminTierPolicyMount` -> `tierPolicyAdminMount`.
 
-### Browser evidence — 2026-08-25
+The first browser proof showed runtime 363/364 active but both Build 362 reads returning HTTP 500. Build 365 corrected the read implementation without changing the public contract or loader:
 
-The runtime itself passed:
+- `BUILD=362`, `IMPLEMENTATION_BUILD=365`;
+- bounded `SELECT * FROM membership_tier_policies` during the compatibility window;
+- defensive mapping for known legacy aliases;
+- genuine missing table -> in-memory defaults with `schema_ready=false`, no GET mutation;
+- unexpected direct-read error -> structured JSON;
+- aggregate child throw -> structured `failed_read` instead of opaque platform 500.
 
-```text
-membership_service_registered           true
-application_module                      commerce-operations
-application_mode                        active
-active_application_module               commerce-operations
-operations_domain                       operations
-runtime_entry                           ../modules/commerce-operations/runtime.mjs?v=363
-runtime_build                           363
-activation_build                        364
-runtime_state                           active
-current_domain                          operations
-last_pathname                           /admin/membership/
-services_ready                          true
-required_service_count                  1
-required_services                       ["operations-membership-read"]
-membership_page_proven                  true
-creates_network_transport               false
-operations_mutation_ownership           false
-membership_mutation_ownership           false
-contracts_ok                            true
-services_ok                             true
-```
-
-But both reads failed before metadata could be returned:
+### Build 365 browser proof — PASSED 2026-08-25
 
 ```text
-GET /api/admin/tier-policies                         500
-GET /api/admin/contracts/operations-membership-read  500
+membership_contract_status                 200
+membership_contract_build                  362
+membership_contract_implementation_build   365
+membership_contract_schema_ready           true
+membership_contract_missing_tables         []
+tier_policy_status                         200
+tier_policy_build                          362
+tier_policy_implementation_build           365
+tier_policy_schema_ready                   true
+tier_policy_source                         database
+tier_policy_defaults_materialized          true
+tier_policy_item_count                     3
+tier_policy_codes                          bronze,silver,gold
+application_module                         commerce-operations
+application_mode                           active
+active_application_module                  commerce-operations
+operations_domain                          operations
+runtime_entry                              ../modules/commerce-operations/runtime.mjs?v=363
+runtime_build                              363
+activation_build                           364
+runtime_state                              active
+services_ready                             true
+required_service_count                     1
+required_services                          ["operations-membership-read"]
+membership_page_proven                     true
+creates_network_transport                  false
+operations_mutation_ownership              false
+membership_mutation_ownership              false
+contracts_ok                               true
+services_ok                                true
 ```
 
-Because a genuinely missing table was already supposed to return HTTP 200 with `schema_ready=false`, this failure is interpreted as a thrown legacy-schema/read assumption rather than normal missing-table readiness.
-
-### Build 365 correction
-
-Build 365 preserves public Build 362 identity but hardens the implementation:
-
-- `membershipTierPolicyReadService.js` exports `IMPLEMENTATION_BUILD=365`.
-- The Tier Policy read is bounded to `membership_tier_policies` but no longer depends on `sqlite_master` or a fixed explicit column list.
-- It uses `SELECT *` during this compatibility window and maps known legacy aliases defensively.
-- Genuine missing-table errors still return in-memory defaults, `schema_ready=false`, and no schema mutation.
-- Unexpected Tier Policy errors return structured JSON with `error_code=membership_tier_policy_read_failed`.
-- The aggregate Membership contract catches thrown child reads and reports `failed_read` / structured error data rather than collapsing into a generic Pages Functions 500.
-- Build 363/364 loader/runtime identities remain unchanged.
-- Membership assignment/removal and Tier Policy POST mutation ownership remain unchanged.
-
-Do not add CREATE/INSERT back to GET to solve a Development schema issue.
+Development therefore has a usable `membership_tier_policies` table with Bronze, Silver, and Gold rows. No Membership table parity deficit was observed in this Development database.
 
 ## Development schema-parity track — separate
 
@@ -198,25 +192,23 @@ Build 341  access_tiers.tier_id
 Build 341  payment_disputes.payment_dispute_id
 ```
 
-Prior parity audit also identified Production-only active tables including `accounting_order_records`, `gift_cards`, several Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy. If Build 365 returns `schema_ready=false`, add `membership_tier_policies` as explicit parity evidence.
+Prior parity audit also identified Production-only active tables including `accounting_order_records`, `gift_cards`, several Command Center tables, and the `notification_dispatch_log` aggregate-schema execution discrepancy.
 
 Keep schema parity separate from module activation and resolve it before Production business-data copy.
 
 ## Historical regression rule
 
-Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache/read implementations, require a later domain/page to remain inactive, or confuse retained mutation authorities with passive activation services.
+Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache/read implementations, require a later domain/page to remain inactive, confuse retained mutation authorities with passive activation services, or match explanatory comments instead of executable behavior.
 
 ## Next direction
 
 1. Pull current `dev` with automatic Git GC disabled if needed.
-2. Run corrected local regressions for Builds 352–354, 355–357, 358, 359–361, 362–364, and Build 365.
-3. If the first four Creative gates pass, mark Builds 352–361 fully validated; they already have browser proof.
-4. Re-run the read-only Membership browser proof after Build 365 deploys.
-5. If Build 365 returns 200, accept either `schema_ready=true` or explicit `schema_ready=false`; the latter becomes schema-parity evidence rather than a GET-time repair.
-6. If a 500 remains, use the new structured `error_code`, `failed_read`, and `error` fields to correct the exact remaining drift without guessing.
-7. After Membership closes, continue Commerce & Operations source audit. Avoid Gift Cards unless schema parity is deliberately the batch target.
-8. Continue fresh-install schema parity separately and before Production business-data copy.
+2. Run only `python scripts/build365_membership_read_resilience_test.py` plus `git status --short`.
+3. If Build 365 passes with a clean tree, mark Build 365 fully validated. No additional Membership Firefox proof is needed.
+4. Continue the Commerce & Operations source audit with another bounded read/runtime page. Prefer a clean page such as Custom Requests or Today Tasks after source audit; avoid Gift Cards unless schema parity is deliberately the batch target.
+5. Keep `/admin/members/` outside the narrow Membership boundary until its many account/engagement/gift-card/timeline startup reads are audited separately.
+6. Continue fresh-install schema parity separately and before Production business-data copy.
 
 ## Validation preference
 
-Batch related builds and provide one Git Bash block plus one Firefox-safe browser block whenever practical.
+Batch related builds and provide one Git Bash block plus Firefox-safe browser blocks whenever practical.
