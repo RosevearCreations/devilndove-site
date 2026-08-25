@@ -1,6 +1,6 @@
 # Devil n Dove Modular Split — Open Items and Source-Control Rules
 
-Updated through validated Build 348 on 2026-08-24.
+Updated through staged Builds 349–351 on 2026-08-24.
 
 ## Architectural invariant
 
@@ -37,7 +37,12 @@ Passive service adapters             345
 Accounting startup-read audit        346 validated
 Business runtime implementation      347 validated
 Business Accounting activation       348 validated
+Packaging compatibility baseline     301 validated
+Packaging top-level audit            349 staged
+Creative runtime implementation      350 staged
+Creative Packaging activation        351 staged
 Accounting mutation ownership        false
+Creative/Packaging mutation moved    false
 ```
 
 ### Commerce & Operations
@@ -46,13 +51,30 @@ Proven pages remain `/admin/operations/`, `/admin/customer-documents/`, and `/ad
 
 ### Creative & Production
 
-Still open: bounded top-level `creative-production` runtime activation, CAIP/Content contract extraction, and compatibility retirement only after owned destinations exist. Packaging remains domain-owned and is the preferred first source-audit candidate because it already has a domain runtime.
+Build 349 audits the completed Build 301 Packaging compatibility checkpoint as the safest first top-level Creative & Production page. Build 350 adds a passive `creative-production` runtime requiring only the three services the Packaging domain runtime already consumes. Build 351 enables only `/admin/packaging-studio/`.
+
+Staged Creative runtime scope:
+
+```text
+runtime module:       creative-production
+runtime domain:       packaging only
+runtime page:         /admin/packaging-studio/ only
+required services:    inventory-read, catalog-read, content-media
+network transport:    none created by top-level runtime
+mutation ownership:   unchanged / false at top-level wrapper
+Packaging baseline:   Build 301 COMPLETE IN DEVELOPMENT
+other Creative pages: no top-level runtime coverage
+```
+
+The Packaging domain runtime and Build 297/298/300/301 browser stack remain the actual Packaging implementation. Build 351 does not modify Build 293/286 read authority or Build 292/291 write authority.
+
+Still open after this batch: Creative Projects, CAIP and Content top-level coverage, plus any additional contract extraction those pages require.
 
 ### Business & Administration
 
 Build 323 proved `/admin/accounting/` resolves as the `accounting` domain under `business-administration` while the top-level Business runtime was inactive.
 
-Builds 324–345 extracted/audited the Accounting page reads. Builds 331–342 are fully validated. Builds 343–345 are browser proven and schema-ready; their first local run failed only because the historical test still asserted the pre-348 state `business-administration.entry === null`. That assertion was removed in commit `d630c11f6241fb4cab1bc897bfc6396033961811`; the corrected local rerun remains required.
+Builds 324–345 extracted/audited the Accounting page reads. Builds 331–342 are fully validated. Builds 343–345 are browser proven and schema-ready; their first local run failed only because the historical test asserted pre-348 Business inactivity. That assertion was removed; corrected local rerun remains required.
 
 Build 346 confirms every automatic `/admin/accounting/` startup GET resolves to an owned non-mutating read boundary. Build 347 adds a passive Business runtime. Build 348 enables only the Accounting page. The Build 346–348 local regression and browser activation proof both passed on 2026-08-24.
 
@@ -74,9 +96,9 @@ Rule:
 
 > GET/read paths report schema readiness; migrations/readiness tooling creates or repairs schema.
 
-Builds 326–345 retired or formalized the remaining Accounting read boundaries, including journal, GIFI, locks, attachments, vendors, recurring rules, provider profiles, statement imports, reconciliation, fixed assets, evidence checks, DB sanity, close workflow, year-end close, and export readers.
+Builds 326–345 retired or formalized the remaining Accounting read boundaries. Build 346 closes the Accounting startup-read audit.
 
-Build 346 closes the startup-read audit: the Accounting page no longer has an automatic GET dependent on a legacy mutating schema helper.
+Packaging uses a different proven pattern: Build 297 removes the physical legacy GET fallback, while the mature editor's compatibility trigger is gated until the Packaging domain runtime and native client transport are active. Build 351 does not change that pattern.
 
 ## Development schema-parity track — separate from extraction
 
@@ -105,25 +127,27 @@ Builds 337–339   fully validated 2026-08-24 (+ schema parity for 338/339)
 Builds 340–342   fully validated 2026-08-24 (+ schema parity for 341)
 Builds 343–345   browser proven; corrected local rerun required; schemas ready
 Builds 346–348   fully validated 2026-08-24
+Build 301         Packaging compatibility baseline fully validated
+Builds 349–351   staged / validation required
 ```
 
 ## Validation-harness rule
 
-Historical regression scripts verify durable boundaries introduced by their build. They must not require the continued presence of a later blocker or freeze unrelated shared files forever. Build 343–345 specifically must not require Business & Administration to remain inactive after Build 348.
+Historical regression scripts verify durable boundaries introduced by their build. They must not freeze later architectural state. Build 343–345 specifically must not require Business & Administration to remain inactive after Build 348. Build 349–351 must pin the existing Packaging authority without freezing unrelated future Creative route coverage.
 
 ## Mutation-authority extraction still open
 
-Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting expense/write-off/overhead/product-cost writes, GL/GIFI writes, journal posting, vendor/recurring-rule/profile writes, CSV statement imports, reconciliation review/exception updates, fixed-asset writes, attachment uploads, close/lock actions and accountant export writes.
+Compatibility writes still requiring dedicated authority reviews include Orders/payment flows, gift cards, membership lifecycle, Customer Documents actions, Accounting writes, and future Creative/CAIP/Content writes. Packaging's existing native Build 292 -> 291 write authority is already domain-owned and remains unchanged by the top-level Creative wrapper.
 
 A loader, read-contract migration, or top-level runtime activation never implies mutation ownership.
 
 ## Next batched sequence
 
-1. Pull current `dev` and rerun only `scripts/build343_345_accounting_read_batch_test.py` to close the corrected historical local gate.
-2. Source-audit the existing Packaging domain runtime and `/admin/packaging-studio/` loader as the preferred first `creative-production` activation candidate.
-3. If clean, stage Builds 349–351 as Packaging runtime audit, passive Creative & Production runtime implementation, and Packaging-only top-level activation.
-4. Keep Packaging/Creative mutation ownership unchanged during activation.
-5. Continue fresh-install schema parity separately before Production business-data copy.
+1. Pull current `dev` and run the corrected `build343_345_accounting_read_batch_test.py` plus `build349_351_creative_production_runtime_test.py`.
+2. Browser-validate Build 351 on `/admin/packaging-studio/` after Packaging projects load.
+3. If clean, mark Builds 343–345 and 349–351 validated.
+4. Keep Packaging/Creative mutation ownership unchanged.
+5. Continue fresh-install schema parity separately, then source-audit the next bounded modular target from Creative Projects/CAIP/Content or remaining Commerce/Business route coverage.
 
 ## Production safety
 
