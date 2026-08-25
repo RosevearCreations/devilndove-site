@@ -1,4 +1,4 @@
-# Devil n Dove AI Context — Fully Validated Through Build 364 / Build 365 Local Rerun Pending
+# Devil n Dove AI Context — Fully Validated Through Build 365
 
 Read `AI_HANDOFF.md` for retained business/data safety history and `PROJECT_STATUS_AND_ROADMAP.md` for the broader roadmap.
 
@@ -38,7 +38,7 @@ Core runtime implementation                    305
 Commerce & Operations runtime                  363
 Operations Membership read contract            362
 Operations Membership activation               364
-Membership read implementation hardening       365 browser-passed / corrected local pending
+Membership read implementation hardening       365 fully validated
 Business & Administration Accounting runtime   348 validated
 Packaging compatibility baseline               301 validated
 Creative Packaging runtime                     351 validated
@@ -55,7 +55,7 @@ Content mutation ownership moved               false
 CAIP mutation ownership moved                  false
 ```
 
-All four Creative & Production domains are now fully validated at the top-level loader/read boundary. Do not expand or rework that loader merely to create more evidence.
+All four Creative & Production domains are fully validated at the top-level loader/read boundary. Do not expand or rework that loader merely to create more evidence.
 
 Build 306 and Build 308 retain their historical standalone local-signoff caveats; do not silently relabel them.
 
@@ -76,20 +76,16 @@ Builds 355–357   fully validated 2026-08-25
 Build 358        fully validated 2026-08-25
 Builds 359–361   fully validated 2026-08-25
 Builds 362–364   fully validated 2026-08-25 after Build 365 read correction
-Build 365        browser passed; corrected local regression still required
+Build 365        fully validated 2026-08-25
 ```
 
-The user-run local checkpoint on 2026-08-25 returned exact PASS for:
+User-run corrected Build 365 local checkpoint:
 
 ```text
-BUILDS 352-354 CREATIVE PROCESS RUNTIME: PASS
-BUILDS 355-357 CONTENT STUDIO RUNTIME: PASS
-BUILD 358 CREATIVE DEPENDENCY GATE FIX: PASS
-BUILDS 359-361 CAIP RUNTIME: PASS
-BUILDS 362-364 OPERATIONS MEMBERSHIP RUNTIME: PASS
+BUILD 365 MEMBERSHIP READ RESILIENCE: PASS
+No Cloudflare resource was contacted.
+9a999d33
 ```
-
-The first Build 365 local run failed only because its regression searched the entire source file for the literal text `sqlite_master`; that term remained solely in a comment describing the removed implementation. The test has been corrected to inspect the executable `readStoredRows` section instead. Do not interpret that assertion failure as an implementation failure.
 
 ## Creative & Production — closed loader/read boundary
 
@@ -143,40 +139,7 @@ The first browser proof showed runtime 363/364 active but both Build 362 reads r
 - unexpected direct-read error -> structured JSON;
 - aggregate child throw -> structured `failed_read` instead of opaque platform 500.
 
-### Build 365 browser proof — PASSED 2026-08-25
-
-```text
-membership_contract_status                 200
-membership_contract_build                  362
-membership_contract_implementation_build   365
-membership_contract_schema_ready           true
-membership_contract_missing_tables         []
-tier_policy_status                         200
-tier_policy_build                          362
-tier_policy_implementation_build           365
-tier_policy_schema_ready                   true
-tier_policy_source                         database
-tier_policy_defaults_materialized          true
-tier_policy_item_count                     3
-tier_policy_codes                          bronze,silver,gold
-application_module                         commerce-operations
-application_mode                           active
-active_application_module                  commerce-operations
-operations_domain                          operations
-runtime_entry                              ../modules/commerce-operations/runtime.mjs?v=363
-runtime_build                              363
-activation_build                           364
-runtime_state                              active
-services_ready                             true
-required_service_count                     1
-required_services                          ["operations-membership-read"]
-membership_page_proven                     true
-creates_network_transport                  false
-operations_mutation_ownership              false
-membership_mutation_ownership              false
-contracts_ok                               true
-services_ok                                true
-```
+Build 365 browser proof passed with both endpoints returning 200, `schema_ready=true`, and database-backed Bronze/Silver/Gold rows. The corrected Build 365 local regression also passed, so Builds 362–365 are fully validated.
 
 Development therefore has a usable `membership_tier_policies` table with Bronze, Silver, and Gold rows. No Membership table parity deficit was observed in this Development database.
 
@@ -198,16 +161,15 @@ Keep schema parity separate from module activation and resolve it before Product
 
 ## Historical regression rule
 
-Historical regression scripts verify durable boundaries introduced by their own build. They must not freeze later shared runtime/cache/read implementations, require a later domain/page to remain inactive, confuse retained mutation authorities with passive activation services, or match explanatory comments instead of executable behavior.
+Historical regression scripts verify durable executable boundaries. They must not freeze later shared runtime/cache/read implementations, require a later domain/page to remain inactive, confuse retained mutation authorities with passive activation services, or match explanatory comments instead of executable behavior.
 
 ## Next direction
 
-1. Pull current `dev` with automatic Git GC disabled if needed.
-2. Run only `python scripts/build365_membership_read_resilience_test.py` plus `git status --short`.
-3. If Build 365 passes with a clean tree, mark Build 365 fully validated. No additional Membership Firefox proof is needed.
-4. Continue the Commerce & Operations source audit with another bounded read/runtime page. Prefer a clean page such as Custom Requests or Today Tasks after source audit; avoid Gift Cards unless schema parity is deliberately the batch target.
-5. Keep `/admin/members/` outside the narrow Membership boundary until its many account/engagement/gift-card/timeline startup reads are audited separately.
-6. Continue fresh-install schema parity separately and before Production business-data copy.
+1. Everything through Build 365 is fully validated; do not rerun passing Membership or Creative browser proofs.
+2. Continue Commerce & Operations source audit with the next narrow read/runtime page. Compare Custom Requests and Today Tasks and choose the cleaner startup-read boundary.
+3. Avoid Gift Cards unless schema parity is deliberately the batch target.
+4. Keep `/admin/members/` outside the narrow Membership boundary until its many account/engagement/gift-card/timeline startup reads are separately audited.
+5. Continue fresh-install schema parity separately and before Production business-data copy.
 
 ## Validation preference
 
