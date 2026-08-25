@@ -121,10 +121,15 @@ assert '/public/js/admin.js?v=386' in gift_page
 assert '/public/js/admin-gift-cards.js?v=386' in gift_page
 assert gift_page.index('/public/js/admin.js?v=386') < gift_page.index('/public/js/admin-gift-cards.js?v=386')
 
-# Gift Cards automatic load remains read-only. Later Builds 404-407 may migrate
-# explicit write consumers to owned contracts; the historical read proof is unchanged.
+# Gift Cards automatic load remains read-only. Build 407 moved the route into a
+# named constant and moved explicit writes onto Builds 404-407 contracts.
 load_section = section(gift_ui, 'async function load()', 'async function saveTemplate')
-assert '/api/admin/contracts/operations-gift-cards-read' in load_section
+assert "const READ = '/api/admin/contracts/operations-gift-cards-read';" in gift_ui
+assert 'window.DDAuth.apiFetch(READ)' in load_section
+assert "const CARD_WRITE = '/api/admin/contracts/operations-gift-card-action-write';" in gift_ui
+assert "const TEMPLATE_WRITE = '/api/admin/contracts/operations-gift-card-template-write';" in gift_ui
+assert "const PROVIDER_WRITE = '/api/admin/contracts/operations-gift-card-provider-send-write';" in gift_ui
+assert "const ABUSE_WRITE = '/api/admin/contracts/operations-gift-card-abuse-write';" in gift_ui
 assert "method: 'POST'" in gift_ui
 
 # 387 delivery-history GET remains schema-clean. Mutation endpoints may either retain
