@@ -1,15 +1,6 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import { BUILD, CONTRACT_ID, DEFAULT_PROFILES, OWNER, readAccountingStatementProviderProfiles } from '../_lib/accountingStatementProviderProfilesReadService.js';
 
-const DEFAULT_PROFILES = [
-  { provider_scope: 'bank', display_name: 'Bank CSV', date_column: 'Date', description_column: 'Description', gross_column: 'Amount', fee_column: '', net_column: 'Amount', currency_column: '', reference_column: 'Reference', default_currency: 'CAD', notes: 'Generic Canadian bank CSV mapping. Review against each bank export.' },
-  { provider_scope: 'paypal', display_name: 'PayPal Activity', date_column: 'Date', description_column: 'Name', gross_column: 'Gross', fee_column: 'Fee', net_column: 'Net', currency_column: 'Currency', reference_column: 'Transaction ID', default_currency: 'CAD', notes: 'PayPal activity export mapping for gross/fee/net reconciliation.' },
-  { provider_scope: 'stripe', display_name: 'Stripe Balance Transactions', date_column: 'Created', description_column: 'Description', gross_column: 'Amount', fee_column: 'Fee', net_column: 'Net', currency_column: 'Currency', reference_column: 'id', default_currency: 'CAD', notes: 'Stripe balance transaction CSV mapping.' },
-  { provider_scope: 'square', display_name: 'Square Transactions', date_column: 'Date', description_column: 'Description', gross_column: 'Gross Sales', fee_column: 'Fees', net_column: 'Net Total', currency_column: 'Currency', reference_column: 'Transaction ID', default_currency: 'CAD', notes: 'Square transaction CSV mapping.' },
-  { provider_scope: 'etsy', display_name: 'Etsy Payment Account', date_column: 'Date', description_column: 'Type', gross_column: 'Amount', fee_column: 'Fees & Taxes', net_column: 'Net', currency_column: 'Currency', reference_column: 'Info', default_currency: 'CAD', notes: 'Etsy exports vary; use as a saved review starting point.' },
-  { provider_scope: 'manual', display_name: 'Manual CSV', date_column: 'date', description_column: 'description', gross_column: 'gross_cents', fee_column: 'fee_cents', net_column: 'net_cents', currency_column: 'currency', reference_column: 'reference', default_currency: 'CAD', notes: 'Internal/manual import template.' },
-];
-
-function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function providerScope(value) {
   const raw = normalizeText(value).toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
   return raw || 'manual';
@@ -64,35 +55,9 @@ async function seedDefaults(db) {
   }
 }
 
-function shape(row) {
-  let mapping = {};
-  try { mapping = JSON.parse(row.mapping_json || '{}'); } catch { mapping = {}; }
-  return {
-    accounting_statement_provider_profile_id: Number(row.accounting_statement_provider_profile_id || 0),
-    provider_scope: row.provider_scope || '',
-    display_name: row.display_name || '',
-    date_column: row.date_column || '',
-    description_column: row.description_column || '',
-    gross_column: row.gross_column || '',
-    fee_column: row.fee_column || '',
-    net_column: row.net_column || '',
-    currency_column: row.currency_column || '',
-    reference_column: row.reference_column || '',
-    default_currency: row.default_currency || 'CAD',
-    mapping,
-    notes: row.notes || '',
-    is_active: Number(row.is_active || 0),
-    updated_at: row.updated_at || null,
-  };
-}
-
 async function listProfiles(db) {
-  await seedDefaults(db);
-  return rows(await db.prepare(`
-    SELECT *
-    FROM accounting_statement_provider_profiles
-    ORDER BY is_active DESC, provider_scope ASC
-  `).all().catch(() => ({ results: [] }))).map(shape);
+  const result = await readAccountingStatementProviderProfiles(db);
+  return result.profiles || [];
 }
 
 export async function onRequestGet(context) {
@@ -100,7 +65,11 @@ export async function onRequestGet(context) {
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  return jsonResponse({ ok: true, profiles: await listProfiles(db), default_profile_count: DEFAULT_PROFILES.length });
+  try {
+    return jsonResponse(await readAccountingStatementProviderProfiles(db));
+  } catch (error) {
+    return jsonResponse({ ok: false, build: BUILD, contract: CONTRACT_ID, owner: OWNER, error: error?.message || 'Failed to load statement provider profiles.' }, 500);
+  }
 }
 
 export async function onRequestPost(context) {
