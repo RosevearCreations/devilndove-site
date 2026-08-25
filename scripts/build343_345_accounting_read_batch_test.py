@@ -1,14 +1,10 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
 def read(path):
     return (ROOT / path).read_text(encoding='utf-8')
-
-def section(text, start, end=None):
-    i = text.index(start)
-    j = text.index(end, i) if end else len(text)
-    return text[i:j]
 
 # Build 343
 svc343 = read('functions/api/_lib/accountingYearEndCloseReadService.js')
@@ -57,22 +53,25 @@ assert 'readAccountingPeriodSummaryExport' in legacy345
 assert "'x-dd-request-time-schema-mutation':'false'" in legacy345
 assert 'onRequestPost' not in contract345
 
+# Shared catalogs must retain these durable contracts. Their own BUILD values may
+# advance in later work and must not freeze this historical regression.
 contracts = read('public/js/core/dd-module-contracts.mjs')
 adapters = read('public/js/core/dd-module-service-adapters.mjs')
 for marker in [
-    "export const BUILD = 345",
-    "accounting-year-end-close-read",
-    "accounting-monthly-summary-export-read",
-    "accounting-period-summary-export-read",
+    'accounting-year-end-close-read',
+    'accounting-monthly-summary-export-read',
+    'accounting-period-summary-export-read',
 ]:
     assert marker in contracts
     assert marker in adapters
 
-# Business & Administration remains inactive.
-groups = read('public/js/core/dd-application-module-groups.mjs')
-business = section(groups, "id: 'business-administration'", ']);')
-assert 'entry: null' in business
-assert 'runtimeDomains: Object.freeze([])' in business
+for shared in [contracts, adapters]:
+    match = re.search(r'export const BUILD = (\d+)', shared)
+    assert match and int(match.group(1)) >= 345
+
+# Do not assert that Business & Administration remains inactive here. Build 348
+# intentionally activates its read-only Accounting runtime after these read
+# boundaries were proven. This historical gate owns only Builds 343-345.
 
 print('BUILDS 343-345 ACCOUNTING YEAR-END/EXPORT READ BATCH: PASS')
 print('No Cloudflare resource was contacted.')
