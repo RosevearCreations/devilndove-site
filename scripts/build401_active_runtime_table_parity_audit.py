@@ -79,6 +79,7 @@ def main() -> int:
         print('Runtime-only tables requiring later migration/retirement review: none')
 
     print('Critical Build 393–399 migration authorities: PASS')
+    print('BUILD 401 ACTIVE RUNTIME TABLE PARITY AUDIT: PASS')
     print('No Cloudflare resource was contacted.')
     return 0
 
