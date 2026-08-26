@@ -5,12 +5,15 @@ import { BUILD, availableModulesForRequest } from './_lib/appModules.js';
 import { jsonResponse } from './_lib/adminAudit.js';
 
 export async function onRequestGet({ request, env }) {
-  const result = await availableModulesForRequest(request, env);
+  const url = new URL(request.url);
+  const force = url.searchParams.get('fresh') === '1';
+  const result = await availableModulesForRequest(request, env, { force });
   return jsonResponse({
     ok: true,
     build: BUILD,
     schema_ready: Boolean(result.config?.schema_ready),
     source: result.config?.source || 'unknown',
+    reason: result.config?.reason || null,
     user: result.user ? {
       user_id: Number(result.user.user_id || 0),
       display_name: result.user.display_name || '',
