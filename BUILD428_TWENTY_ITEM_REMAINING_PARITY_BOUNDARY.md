@@ -2,7 +2,7 @@
 
 ## Status
 
-**READY FOR LIVE READ-ONLY REMAINING-PARITY EVIDENCE + LOCAL 20/20 GATES / ALL REMAINING PRODUCTION AUTHORIZATIONS PENDING / PROMOTION CLOSED**
+**LIVE READ-ONLY EVIDENCE PASS / MEMBERSHIP INERT PREVIEW PASS / LOCAL AUTHORIZATION GATE PATCHED FOR RERUN / ALL REMAINING PRODUCTION AUTHORIZATIONS PENDING / PROMOTION CLOSED**
 
 Build 427 closed the Product-number blocker completely:
 
@@ -16,6 +16,32 @@ BUILD 427 PRODUCTION PRODUCT-NUMBER POSTCHECK: PASS
 ```
 
 The remaining work is now schema/additive parity rather than Product-number remediation.
+
+## Owner-run Build 428 live evidence
+
+The Build 428 source compile and local safety regression passed 20/20. The bounded live read-only evidence also passed and established the current remaining Production gaps:
+
+```text
+Gift Card missing columns: code_suffix, ip_hash, lookup_email, result_status, user_agent
+Gift Card missing indexes: idx_gift_card_lookup_attempts_created, idx_gift_card_lookup_attempts_email, idx_gift_card_lookup_lockouts_status
+Gift Card lockout table: absent
+Notification metadata_json: absent
+Notification missing indexes: idx_notification_outbox_kind_destination, idx_notification_outbox_order, idx_notification_outbox_payment, idx_notification_outbox_product
+Build 197 Product-image annotation index: absent
+Membership rows: 3; rebuild required: YES
+Product/FK orphan counts: all zero
+site_item_inventory Production rows: 1041
+search_query_terms rows: 5
+__sql_test rows: 0
+CAIP media upload rows excluded: 113
+Remaining Production authorization inferred: NO
+Production mutation executed: NO
+PRODUCTION PROMOTION: CLOSED
+```
+
+The Membership preview passed with all three Production rows represented, four legacy aliases and zero executable SQL.
+
+The first local authorization-boundary gate was 18/20 only because two local assumptions were stale/brittle: it expected the older three-index Notification gap, while current direct `sqlite_schema` evidence proves all four Build 403 indexes are absent; and it incorrectly required every Build 429 numbered action to begin with the literal `Build 429:` prefix. Both gate checks are patched. No live evidence or Production mutation needs to be repeated for those source-only corrections.
 
 ## Build 428 — 20 completed source/safety changes
 
@@ -125,7 +151,9 @@ Production promotion                         CLOSED
 Build 425  Development Product-number backfill       PASS (20/20)
 Build 426  Production release-candidate assembly     PASS (20/20)
 Build 427  Production Product-number stage           PASS
-Build 428  Remaining parity authorization boundary   READY
+Build 428  Live remaining-parity evidence            PASS
+Build 428  Membership inert preview                   PASS
+Build 428  Remaining-parity local gate               PATCHED / RERUN REQUIRED
 
 Production promotion                                 CLOSED
 ```
