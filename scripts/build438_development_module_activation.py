@@ -40,6 +40,26 @@ def fail(message: str, code: int = 1) -> None:
     raise SystemExit(code)
 
 
+def emit_output(text: str, *, stream=None) -> None:
+    """Write subprocess output without crashing on Windows console encodings.
+
+    Wrangler can emit Unicode glyphs even when Python stdout is CP1252. Encode the
+    captured UTF-8 text through the active stream encoding with replacement before
+    writing so Git Bash, cmd.exe, PowerShell, redirection and `tee` remain safe.
+    """
+    target = stream or sys.stdout
+    value = str(text or '')
+    encoding = getattr(target, 'encoding', None) or 'utf-8'
+    try:
+        safe = value.encode(encoding, errors='replace').decode(encoding, errors='replace')
+    except LookupError:
+        safe = value.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
+    target.write(safe)
+    if value and not value.endswith('\n'):
+        target.write('\n')
+    target.flush()
+
+
 def run(args: list[str], *, echo: bool = True) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         args,
@@ -53,7 +73,7 @@ def run(args: list[str], *, echo: bool = True) -> subprocess.CompletedProcess[st
         check=False,
     )
     if echo:
-        print(result.stdout, end='' if result.stdout.endswith('\n') else '\n')
+        emit_output(result.stdout)
     return result
 
 
@@ -165,13 +185,13 @@ def verify() -> None:
     print('\n=== BUILD 438 STRICT MACHINE VERIFICATION ===')
     strict = run(json_command(STRICT_VERIFY_SQL), echo=False)
     if strict.returncode != 0:
-        print(strict.stdout, end='' if strict.stdout.endswith('\n') else '\n')
+        emit_output(strict.stdout)
         classify_failure(strict, 'the strict Development module verification')
 
     payload = parse_json_payload(strict.stdout or '')
     row = first_result_row(payload)
     if not row:
-        print(strict.stdout, end='' if strict.stdout.endswith('\n') else '\n')
+        emit_output(strict.stdout)
         fail('Strict verification returned no parseable D1 result row.')
 
     actual = {
