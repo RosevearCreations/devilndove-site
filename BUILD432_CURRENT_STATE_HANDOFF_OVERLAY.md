@@ -12,6 +12,7 @@ Build 430  Gift Card Production stage                         PASS
 Build 431  Full Build 403 Notification boundary               PASS (20/20)
 Build 432  Full Build 403 Notification Production stage       PASS
 Build 432  Build 197 annotation-index authorization boundary  PASS (20/20)
+Build 433  Build 197 annotation-index execution               AUTHORIZED / PENDING
 ```
 
 ## Proven completed Production families
@@ -51,7 +52,7 @@ Independent read-only postcheck: PASS
 
 The prior four-index Notification authorization remains superseded and is closed history only.
 
-## Current next Production family — Build 197 annotation index
+## Current Production family — Build 197 annotation index
 
 Canonical candidate:
 
@@ -60,7 +61,7 @@ idx_product_image_annotations_product_image_build197
 ON product_image_annotations(product_id, product_image_id)
 ```
 
-Owner-run Build 432 boundary evidence is now green:
+Owner-run Build 432 boundary evidence:
 
 ```text
 Annotation index exists: False
@@ -70,13 +71,17 @@ Exact Build 197 index gap: YES
 Annotation authorization boundary: PASS (20/20)
 ```
 
-Prepared token, not authorized:
+The owner explicitly supplied:
 
 ```text
 AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX
 ```
 
-No annotation backup or mutation has occurred.
+Authorization is therefore **RECEIVED** for this one-index stage only. No annotation backup or DDL has executed yet.
+
+Build 433 uses `scripts/build433_production_annotation_execution.py` to require all completed prerequisites, rerun the fresh annotation state, create and verify a full Production backup, apply only the canonical Build 197 index, preserve the live annotation row count, and run an independent postcheck.
+
+Do not manually paste the index SQL into the D1 console.
 
 ## Still locked
 
@@ -103,7 +108,7 @@ Product-number Production stage             COMPLETE / PROVEN
 Gift Card Production stage                  COMPLETE / PROVEN
 Full Build 403 Notification stage           COMPLETE / PROVEN
 Build 197 annotation boundary               PASS (20/20)
-Build 197 annotation authorization          NOT RECEIVED
+Build 197 annotation authorization          RECEIVED
 Annotation Production backup                NOT CREATED
 Annotation Production mutation              NOT EXECUTED
 Membership/rebuild authorization            NOT RECEIVED
@@ -113,10 +118,4 @@ Production promotion                        CLOSED
 
 ## Immediate next action
 
-Stop at the explicit Build 197 annotation authorization boundary. Proceed only if the owner supplies exactly:
-
-```text
-AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX
-```
-
-That token authorizes only the Build 197 annotation composite index stage. Membership/rebuild families, provider/R2 work, CAIP copy, and Production promotion remain excluded.
+Run only the guarded Build 433 annotation source regression, fresh annotation preflight, backup, apply, and independent postcheck using `scripts/build433_production_annotation_execution.py`. Stop on any non-zero stage. Membership and every later family remain outside this authorization.
