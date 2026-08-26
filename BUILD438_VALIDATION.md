@@ -49,6 +49,7 @@ Production is not a target of this validation pass.
 - `public/js/core/dd-public-module-visibility.mjs`
 - `public/js/admin.js`
 - `public/js/site-auth-ui.js`
+- `admin/index.html`
 - `admin/application-modules/index.html`
 - `public/js/admin-application-modules.js`
 
@@ -57,10 +58,37 @@ Production is not a target of this validation pass.
 - `scripts/build438_application_module_core_regression.py`
 - `scripts/build438_module_route_map_test.mjs`
 - `scripts/build438_module_catalog_alignment_test.mjs`
+- `scripts/build438_module_access_policy_test.mjs`
 - `scripts/build438_development_module_activation.py`
 - `BUILD438_APPLICATION_CORE_MODULE_PLAN.md`
 - `AI_HANDOFF.md`
 - `PROJECT_STATUS_AND_ROADMAP.md`
+
+## Shared cross-module service policy
+
+A module switch controls the module's **direct UI, broad/legacy API surface and runtime activation**. It does not sever an explicitly reviewed shared service contract that another enabled module legitimately consumes.
+
+Build 438 recognizes exactly seven shared contracts:
+
+| Contract | Owner | Reviewed consumers | Mutation |
+|---|---|---|---|
+| `/api/admin/contracts/catalog-read` | Commerce | Commerce, Creative, Business | No |
+| `/api/admin/contracts/inventory-read` | Commerce | Commerce, Creative | No |
+| `/api/admin/contracts/inventory-cost` | Commerce | Commerce, Business | No |
+| `/api/admin/contracts/inventory-post` | Commerce | Commerce, Creative | Yes |
+| `/api/admin/contracts/inventory-reverse` | Commerce | Commerce, Creative | Yes |
+| `/api/admin/contracts/accounting-read` | Business | Business, Commerce | No |
+| `/api/admin/contracts/content-media` | Creative | Creative, Commerce | No |
+
+Rules:
+
+1. Shared contracts are Application Core boundaries, not broad owner-module bypasses.
+2. At least one reviewed consumer must be enabled and accessible to the current user.
+3. Mutation contracts require a qualifying consumer with `manage` access.
+4. Direct owner-module pages and broad APIs remain blocked while that owner module is disabled.
+5. Adding another cross-module exception requires an explicit contract entry and regression coverage; do not exempt a general API prefix.
+
+This preserves real module independence. Example: Commerce may be disabled for direct use while Creative remains enabled and continues to post/reverse reviewed material usage through the dedicated Inventory contracts.
 
 ## Local source validation
 
@@ -80,6 +108,7 @@ python -m py_compile \
 python scripts/build438_application_module_core_regression.py
 node scripts/build438_module_route_map_test.mjs
 node scripts/build438_module_catalog_alignment_test.mjs
+node scripts/build438_module_access_policy_test.mjs
 
 node --check functions/_middleware.js
 node --check functions/api/_lib/appModules.js
@@ -93,7 +122,7 @@ node --check public/js/core/dd-application-module-bootstrap.mjs
 node --check public/js/core/dd-public-module-visibility.mjs
 ```
 
-Expected regression ending:
+Expected main regression ending:
 
 ```text
 BUILD 438 APPLICATION CORE / MODULE ACTIVATION REGRESSION: PASS (20/20)
@@ -101,22 +130,32 @@ Existing top-level modules: commerce-operations / creative-production / business
 Central D1 activation authority: SOURCE READY
 Server page/API module guard: SOURCE READY
 Read-only module access enforcement: SOURCE READY
+Cross-module shared service preservation: SOURCE READY / CONSUMER-GATED
 Route ownership matrix: SOURCE READY
+Module access policy unit proof: SOURCE READY
 Authoritative client bootstrap: SOURCE READY
-Admin Application Modules control: SOURCE READY
+Admin Application Modules control + health + route proof: SOURCE READY
 Request-time schema mutation: NONE
 Background polling introduced by Build 438: NONE
 Production D1 migration executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-Route checks should finish:
+Expected executable test endings:
 
 ```text
-BUILD 438 MODULE ROUTE MAP TEST: PASS (... routes)
-BUILD 438 MODULE CATALOG ALIGNMENT TEST: PASS (.../...)
+BUILD 438 MODULE ROUTE MAP TEST: PASS (... routes + 7 shared contracts)
 Core recovery/auth surfaces: UNOWNED / AVAILABLE
+Cross-module service contracts: EXPLICIT / CONSUMER-GATED
+
+BUILD 438 MODULE CATALOG ALIGNMENT TEST: PASS (.../...)
 Existing Build 305 domain catalog -> Build 438 server top-level ownership: ALIGNED
+
+BUILD 438 MODULE ACCESS POLICY TEST: PASS (12/12)
+Disabled owner UI + enabled explicit consumer contract: PROVEN
+Shared mutation requires manage-level consumer: PROVEN
+Cold authority read failure: FAIL CLOSED
+
 Production mutation capability: NONE
 ```
 
@@ -140,37 +179,30 @@ devilndove-dev
 UUID dbc1615b-dcbe-4951-973b-b47c99c73bfa
 ```
 
-Expected logical result after apply/verify:
+The helper machine-checks Wrangler JSON results and must prove:
 
 ```text
-app_modules exists
-app_module_role_access exists
+module_count                3
+role_access_count           6
+enabled_module_count        3
+background_enabled_count    0
+expected_index_count        2
+verification_pass           1
 
-module_count:          3
-role_access_count:     6
-enabled_module_count:  3
-expected_module_count: 3
-
-modules:
+module keys:
+business-administration
 commerce-operations
 creative-production
-business-administration
-
-indexes:
-idx_app_modules_enabled_priority
-idx_app_module_role_access_role
-
-background_activity_enabled = 0 for all three
 
 BUILD 438 DEVELOPMENT MODULE AUTHORITY APPLY: PASS
-BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION: PASS
+BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION: PASS / EXACT
 Production D1 mutation executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
 ### Equivalent manual Development commands
 
-If the helper itself has a local execution problem, the equivalent Development-only commands are:
+Use these only if the helper itself has a local execution problem:
 
 ```bash
 npx --yes wrangler@4.126.0 d1 execute devilndove-dev \
@@ -192,62 +224,80 @@ Do not substitute `devilndove-prod`.
 
 After the Build 438 source is deployed/previewable in Development:
 
-### Baseline
+### Baseline/Core Health
 
 1. Login as Admin.
 2. Open `/api/modules?fresh=1`.
-3. Require:
-   - `ok=true`
-   - `build=438`
-   - `schema_ready=true`
-   - `source=d1`
-   - exactly three modules
-   - all three `is_enabled=1`.
-4. Open `/admin/application-modules/`.
-5. Confirm all three top-level modules are visible/enabled and background activity is OFF.
+3. Require `ok=true`, `build=438`, `schema_ready=true`, `source=d1`, exactly three modules, and all three `is_enabled=1`.
+4. Open `/admin/application-modules/` from the permanent **Application Modules** card on the Admin Dashboard.
+5. Require Core Health `PASS` with:
+   - Modules `3/3`;
+   - Role rows `6/6`;
+   - Shared contracts `7`;
+   - no missing/unexpected rows;
+   - no invalid role rows;
+   - no disabled module with background permission;
+   - no Admin recovery risk.
+6. Require background activity OFF for all three modules.
+7. Click **Run current-state route proof** and require `PASS (4/4)` while all three modules are enabled.
 
 ### Commerce & Operations
 
-1. Record representative row counts first.
+1. Record representative business row counts first.
 2. Disable `commerce-operations`.
-3. Verify normal module-aware navigation hides its destinations.
-4. Verify representative Shop/Member/Catalog/Inventory/Orders pages/APIs fail closed.
+3. Verify normal module-aware navigation hides its direct destinations.
+4. Verify representative Shop/Member/Catalog/Inventory/Orders direct pages/APIs fail closed.
 5. Verify `/admin/application-modules/` remains reachable.
-6. Verify the account widget still exposes **Application Modules** to an Admin.
-7. Re-enable Commerce & Operations.
-8. Prove access returns and business row counts are unchanged.
+6. Run **Current-state route proof** and require Commerce direct route blocked while Core, Creative and Business reflect their current enabled state.
+7. Verify Creative remains usable.
+8. Verify safe read contracts needed by another enabled module remain available, especially `inventory-read`/`catalog-read` where the consuming workflow uses them.
+9. Do **not** manufacture dummy Inventory movements merely to prove `inventory-post` or `inventory-reverse`. Their cross-module policy is unit-proven. Live mutation proof must use a real reviewed Creative material-use/reversal fixture.
+10. Re-enable Commerce & Operations and prove direct access returns and business row counts are unchanged.
 
 ### Creative & Production
 
 1. Record representative Creative/CAIP/Packaging/Content row counts.
 2. Disable `creative-production`.
-3. Verify representative Packaging/Creative Process/CAIP/Content pages/APIs fail closed.
-4. Verify the unavailable module umbrella runtime is not imported/activated.
-5. Re-enable and prove access/data return unchanged.
+3. Verify representative Packaging/Creative Process/CAIP/Content direct pages/APIs fail closed.
+4. Verify the unavailable Creative umbrella runtime is not imported/activated.
+5. Verify Commerce can still consume the explicit `content-media` contract when a current workflow needs it.
+6. Run the route proof and require Creative direct route blocked while Core and other enabled modules remain correct.
+7. Re-enable and prove access/data return unchanged.
 
 ### Business & Administration
 
 1. Disable `business-administration`.
-2. Verify representative Accounting/Analytics/Admin/Platform routes fail closed.
+2. Verify representative Accounting/Analytics/Admin/Platform direct routes fail closed.
 3. Verify `/admin/application-modules/` and `/api/admin/app-modules` remain reachable as shared-core recovery surfaces.
-4. Verify the public account widget retains the Admin-only **Application Modules** recovery link even if the Admin Dashboard link is hidden.
-5. Re-enable Business & Administration.
+4. Verify the public account widget retains the Admin-only **Application Modules** recovery link even if the normal Admin Dashboard link is hidden.
+5. Verify Commerce can still consume the explicit `accounting-read` contract when its Operations workflow needs that service.
+6. Run the route proof and require Business direct route blocked while Core and other enabled modules remain correct.
+7. Re-enable Business & Administration.
 
 ### Role/access-level proof
 
 1. In Development only, set one non-essential Admin module access level to `read`.
-2. Prove GET/HEAD remains allowed.
-3. Prove a non-read module-owned API request is rejected with:
+2. Prove GET/HEAD remains allowed on a direct module-owned endpoint.
+3. Prove a non-read direct module-owned API request is rejected with:
 
 ```text
 code: module_access_level_read_only
 ```
 
-4. Restore Admin access to `manage`.
+4. For a shared **mutation** contract, a read-only consumer must not qualify; the executable policy test already proves this without writing business data.
+5. Restore Admin access to `manage`.
 
 ### Data preservation proof
 
-Before/after toggling, compare representative business row counts for the affected module. Module-control changes must only modify `app_modules`, `app_module_role_access` and audit evidence. No Catalog, Inventory, Creative, CAIP, Packaging, Content, Accounting, Orders, Membership or other business records may be deleted because a module was disabled.
+Before/after toggling, compare representative business row counts for the affected module. Module-control changes may modify only:
+
+```text
+app_modules
+app_module_role_access
+admin_action_audit evidence
+```
+
+No Catalog, Inventory, Creative, CAIP, Packaging, Content, Accounting, Orders, Membership or other business records may be deleted because a module was disabled.
 
 ### Module-authority failure behavior
 
@@ -265,11 +315,11 @@ A real module-authority read failure must never silently turn a disabled module 
 
 Build 438 gates concrete transactional/customer Commerce surfaces such as Shop, Cart, Checkout, Product/Member workflows and their APIs. The unrelated informational/static public shell (for example About/Gallery-style pages) is intentionally not globally disabled by the Commerce switch in this first activation release.
 
-This keeps a public informational presence available while Commerce can be taken offline. If a later business requirement calls for a full public-site maintenance switch, add that deliberately rather than overloading the transactional module flag.
+This preserves a public informational presence while Commerce can be taken offline. A future full-site maintenance switch should be separate and deliberate.
 
 ## Audit behavior
 
-Module-control changes use existing `admin_action_audit` with:
+Module-control changes use existing `admin_action_audit`:
 
 ```text
 application_module_state_changed
@@ -277,20 +327,21 @@ application_module_background_changed
 application_module_role_access_changed
 ```
 
-Disabling a module must never delete its Catalog, Inventory, Order, Membership, Creative, CAIP, Packaging, Content, Accounting or other business data.
+Disabling a module also clears its background permission. Re-enabling it does not silently restore earlier background authorization.
 
 ## Resource-efficiency proof
 
 Build 438 adds no recurring polling loop.
 
-- Admin `/api/modules` is one bootstrap read and explicit fresh refresh after control changes.
+- Admin `/api/modules` is one bootstrap read and an explicit fresh refresh after control changes.
 - Public/member visibility uses a short per-tab `sessionStorage` cache rather than one Worker request for every public navigation.
 - server module config cache is brief and non-user-specific;
 - session/user identity stays request-scoped;
-- disabled module page runtime never initializes because middleware blocks direct access;
+- disabled direct module page runtime never initializes because middleware blocks access;
 - top-level Admin runtime is imported only after authoritative availability is known;
 - `background_activity_enabled=0` by default;
-- no request-time module DDL exists.
+- no request-time module DDL exists;
+- explicit cross-module service contracts prevent an enabled consumer from having to fall back to broad owner-module APIs.
 
 Known item to observe: root middleware can add one indexed session read to authenticated module-owned requests while legacy endpoints also perform their own auth verification. Measure this in Development; do not replace it with global user/session caching.
 
@@ -300,14 +351,14 @@ Known item to observe: root middleware can add one indexed session read to authe
 
 Do not run the Build 438 migration against `devilndove-prod` from this document.
 
-A Production authorization boundary may be prepared only after the Development disable/re-enable, role-level, recovery, data-preservation and runtime-suppression proofs are green.
+A Production authorization boundary may be prepared only after the Development disable/re-enable, role-level, recovery, data-preservation, runtime-suppression and shared-contract proofs are green.
 
 Still separately locked:
 
 ```text
 Fractional Inventory / Creative Project rebuilds   NOT AUTHORIZED
 Product / FK rebuilds                              NOT AUTHORIZED
-Accounting default/nullability rebuilds             NOT AUTHORIZED
+Accounting default/nullability rebuilds            NOT AUTHORIZED
 R2/provider mutation                               DISABLED
 CAIP D1-only copy                                   FORBIDDEN
 Broad Production promotion                          CLOSED
@@ -318,14 +369,19 @@ Broad Production promotion                          CLOSED
 Build 438 may be called Development-proven only after:
 
 1. local 20/20 regression passes;
-2. executable route matrix passes;
+2. executable route/shared-contract matrix passes;
 3. existing client-domain catalog/server ownership alignment passes;
-4. JS/Python syntax checks pass;
-5. Development D1 migration succeeds;
-6. D1 verification proves exact three-module/six-role state;
-7. all three modules pass disable/re-enable direct page/API proof;
-8. recovery surface remains reachable;
-9. read-only access-level enforcement is proven;
-10. business data preservation is proven;
-11. no new recurring background traffic is observed;
-12. canonical Markdown is updated with owner-run Development evidence.
+4. executable access-policy test passes 12/12;
+5. JS/Python syntax checks pass;
+6. Development D1 migration succeeds;
+7. exact D1 verification passes;
+8. Core Health passes;
+9. all three modules pass disable/re-enable direct page/API proof;
+10. Current-State Route Proof follows each toggle;
+11. recovery surface remains reachable;
+12. read-only access-level enforcement is proven;
+13. reviewed cross-module shared read contracts remain available to enabled consumers;
+14. any live shared mutation proof uses a real reviewed fixture, never dummy stock movements;
+15. business data preservation is proven;
+16. no new recurring background traffic is observed;
+17. canonical Markdown is updated with owner-run Development evidence.
