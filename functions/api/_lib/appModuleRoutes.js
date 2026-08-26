@@ -111,7 +111,14 @@ function cleanPath(pathname) {
 }
 
 function matches(path, prefix) {
-  return path === prefix || path.startsWith(`${prefix}/`) || (prefix.endsWith('-') && path.startsWith(prefix));
+  if (path === prefix || path.startsWith(`${prefix}/`)) return true;
+  // Pages Functions frequently encode a related API family as product-detail,
+  // gift-card-actions, creative-assets, etc. Treat a hyphen suffix as part of
+  // the same reviewed API stem. Contract stems may already end in '-'.
+  if (prefix.startsWith('/api/')) {
+    return prefix.endsWith('-') ? path.startsWith(prefix) : path.startsWith(`${prefix}-`);
+  }
+  return false;
 }
 
 function matchesAny(path, prefixes) {
