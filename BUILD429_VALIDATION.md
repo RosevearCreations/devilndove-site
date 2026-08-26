@@ -2,28 +2,26 @@
 
 ## Status
 
-**LIVE GIFT CARD PREFLIGHT PASS / AUTHORIZATION GATE PASS (20/20) / LOCAL REGRESSION FALSE-NEGATIVE REPAIRED / NO GIFT CARD PRODUCTION MUTATION AUTHORIZED**
+**PASS (20/20) — GIFT CARD READ-ONLY AUTHORIZATION BOUNDARY CLOSED / GIFT CARD PRODUCTION AUTHORIZATION STILL NOT RECEIVED / PRODUCTION PROMOTION CLOSED**
 
-Build 428 is closed PASS (20/20). Product numbers remain proven in both environments and every remaining Production family is still separately locked.
+Build 428 is closed PASS (20/20). Product numbers remain proven in both environments and every remaining Production family is separately locked.
 
 ## Owner-run Build 429 evidence
 
-The source compile passed.
+Source compile passed.
 
-The first local Gift Card safety regression reported one false-negative:
+The initial local Gift Card safety regression reported one false-negative because its source assertion looked for the literal call spelling `export_backup(stage)` rather than the actual typed function plus Wrangler export command. The executor itself was already correctly backup-gated. That regression assertion was repaired without changing Production behavior.
 
-```text
-BUILD 429 GIFT CARD AUTHORIZATION SAFETY REGRESSION: FAIL (1/20 failed)
- - Gift Card executor requires a full remote Production D1 export
-```
-
-The executor itself was already correct. It defines `export_backup(stage: str)` and invokes Wrangler with the full remote Production export command:
+The repaired local regression then passed:
 
 ```text
-wrangler d1 export devilndove-prod --remote --skip-confirmation --output=<stage backup>
+BUILD 429 GIFT CARD AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
+Gift Card Production authorization inferred: NO
+Production backup created by regression: NO
+Production mutation executed: NO
+Notification/annotation/rebuild authorization inferred: NO
+PRODUCTION PROMOTION: CLOSED
 ```
-
-The regression had incorrectly required the literal source call `export_backup(stage)`, while the real controller dispatches the selected stage through `args.stage`. The assertion has been repaired to inspect the actual export function and Wrangler export arguments instead of that brittle call spelling.
 
 The live read-only Gift Card preflight passed and established the exact reviewed Build 384 gap:
 
@@ -44,7 +42,7 @@ PRODUCTION PROMOTION: CLOSED
 BUILD 429 GIFT CARD AUTHORIZATION PREFLIGHT: PASS
 ```
 
-The local authorization gate passed all twenty checks:
+The local Gift Card authorization-boundary gate passed all twenty checks:
 
 ```text
 BUILD 429 TWENTY-ITEM GIFT CARD AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
@@ -58,60 +56,42 @@ Rebuild-family authorization: NOT RECEIVED
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Rerun now — local regression only
+## Build 429 disposition
 
-The live Gift Card preflight and 20-item gate do not need to be rerun because the repair changes only the local static regression assertion.
+Build 429 is fully green and closed. This PASS does **not** authorize a Gift Card Production write.
 
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-python -m py_compile scripts/build429_gift_card_authorization_regression.py
-python scripts/build429_gift_card_authorization_regression.py
-```
-
-Expected:
+The next stage remains Gift Card only. It may begin only after the owner explicitly supplies:
 
 ```text
-BUILD 429 GIFT CARD AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
-Gift Card Production authorization inferred: NO
-Production backup created by regression: NO
-Production mutation executed: NO
-Notification/annotation/rebuild authorization inferred: NO
-PRODUCTION PROMOTION: CLOSED
+AUTHORIZE-BUILD428-PROD-GIFT-CARD
 ```
 
-Once that local rerun passes, Build 429 is fully green and the workflow may request the separate Gift Card Production authorization token. The regression repair itself does not grant authorization.
+That token authorizes only the bounded Build 384 Gift Card lookup-attempt/lockout additive stage. It does not authorize Notification, annotation-index, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, or promotion work.
 
-## Do not run yet
+## Future authorized Gift Card sequence
 
-Until the owner explicitly authorizes the Gift Card stage, do not run:
+After explicit authorization only:
 
-```text
-scripts/build428_production_additive_execution.py --stage gift --backup ...
-scripts/build428_production_additive_execution.py --stage gift --apply ...
-```
-
-Notification, annotation-index, Membership, fractional Inventory, Product/FK, and Accounting/default families remain separately locked.
-
-## Failure handling
-
-- `7403`: classify as Cloudflare authorization/read interruption; do not infer Gift Card schema state.
-- Different missing-column/index set: treat as live drift and keep Gift Card authorization blocked until reviewed.
-- Lockout table unexpectedly exists: re-plan from fresh state; do not force the older candidate.
-- Local regression/gate defect: patch source only; do not create a Production backup as a workaround.
-- Any preflight/gate failure: no Gift Card authorization should be exercised.
+1. rerun targeted Gift Card before-state;
+2. create a fresh full Production D1 backup dedicated to Gift Card;
+3. verify target UUID, path, nonzero byte count, SHA-256 and <=30-minute age;
+4. reread targeted Gift Card state and reject unexpected drift;
+5. apply only the missing Build 384 lookup columns/indexes/lockout table;
+6. prove `gift_card_lookup_attempts`, `gift_cards`, and `gift_card_redemptions` row counts are preserved;
+7. prove all five canonical columns, all three canonical indexes, and the lockout table exist;
+8. keep Production promotion closed.
 
 ## Safety
 
 ```text
-Product-number prerequisite              complete / proven
-Gift Card Production reads               bounded / read-only
-Gift Card Production backup              not created
-Gift Card Production authorization       not received
-Gift Card Production mutation            locked
-Notification/annotation/rebuild families locked
-R2/provider mutation                     disabled
-Production promotion                     closed
+Product-number prerequisite              COMPLETE / PROVEN
+Build 429 Gift Card boundary             PASS (20/20)
+Gift Card Production backup              NOT CREATED
+Gift Card Production authorization       NOT RECEIVED
+Gift Card Production mutation            NOT EXECUTED
+Notification authorization               NOT RECEIVED
+Annotation-index authorization           NOT RECEIVED
+Rebuild-family authorization             NOT RECEIVED
+R2/provider mutation                     DISABLED
+Production promotion                     CLOSED
 ```
