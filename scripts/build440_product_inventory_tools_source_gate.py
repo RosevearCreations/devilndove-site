@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Build 440 local-only Product / Inventory / Tools source gate.
 
-Initial Build 440 gate preserves proven Product removal and fractional Inventory authority,
-adds the Product Delete Reference Inspector regression, and syntax-checks the touched UI.
-It never contacts Cloudflare, D1, R2, or providers.
+Build 440 preserves proven Product removal and fractional Inventory authority,
+adds the Product Delete Reference Inspector and resource-asset URL regressions,
+and syntax-checks the touched APIs/UI. It never contacts Cloudflare, D1, R2,
+or providers.
 """
 from __future__ import annotations
 
@@ -19,8 +20,10 @@ STEPS = (
     ('Build 232 product removal baseline', ['node', 'scripts/build232_product_removal_test.mjs']),
     ('Build 244 Inventory fractional authority baseline', [PYTHON, 'scripts/build244_inventory_authority_fractional_usage_regression.py']),
     ('Build 440 Product Delete Reference Inspector regression', [PYTHON, 'scripts/build440_product_reference_inspector_regression_test.py']),
+    ('Build 440 Resource Asset URL regression', ['node', 'scripts/build440_resource_asset_url_regression_test.mjs']),
     ('Build 440 delete-product UI JavaScript syntax', ['node', '--check', 'public/js/admin-delete-product.js']),
     ('Build 440 cleanup-centre UI JavaScript syntax', ['node', '--check', 'public/js/admin-product-cleanup.js']),
+    ('Build 440 resource-search API JavaScript syntax', ['node', '--check', 'functions/api/admin/product-resource-search.js']),
     ('Tools public API JavaScript syntax baseline', ['node', '--check', 'functions/api/tools.js']),
 )
 
@@ -52,10 +55,12 @@ def main() -> int:
     print('\n' + '=' * 60)
     print('BUILD 440 PRODUCT / INVENTORY / TOOLS SOURCE GATE: PASS')
     print('=' * 60)
-    print('Product removal safety baseline: PASS')
+    print('Product removal safety baseline: PASS / BOUNDED V2')
     print('Inventory fractional authority baseline: PASS')
     print('Product Delete Reference Inspector: PASS / SOURCE READY')
+    print('Resource image object-key URL handling: PASS / # -> %23')
     print('Protected history deletion authority: UNCHANGED')
+    print('R2 object mutation executed: NO')
     print('Schema migration required for this slice: NO')
     print('Development D1 mutation executed: NO')
     print('Production D1 mutation executed: NO')
