@@ -2,13 +2,15 @@
 
 This is the **second of two canonical current project files**. Read `AI_HANDOFF.md` first for architecture, authority and safety. This file is the current open-functionality roadmap.
 
-Historical Build-number prose remains evidence only. Specialist documents own specialist implementation details. Do not reconstruct current priorities from older chronology when this file provides a newer explicit status.
+Historical Build-number prose remains evidence only. Specialist documents own specialist implementation details.
 
 ## Current baseline
 
 **Current completed Production-proven release: Build 437.**
 
-**Current source/development release in progress: Build 438 — Application Core / Module Activation Authority.**
+**Current source/development release: Build 438 — Application Core / Module Activation Authority.**
+
+Build 438 source control-plane work is now **READY FOR OWNER VALIDATION**. Development D1 apply/live proof remains pending. Production Build 438 D1 is not authorized.
 
 Completed/proven Production parity families:
 
@@ -20,74 +22,107 @@ Build 433 Build 197 annotation index       COMPLETE / PROVEN
 Build 437 Membership Build 395             COMPLETE / PROVEN
 ```
 
-Do not reopen these because later feature work encounters unrelated failures.
+Do not reopen these for unrelated later feature failures.
 
 ## Module architecture sanity check
 
-The repository already contains a genuine modular foundation created progressively in Builds 281–397.
-
 Current architecture:
 
-| Layer/module | Existing functional scope | Current state |
+| Layer/module | Functional scope | Current state |
 |---|---|---|
-| Application Core | auth/session, module registry/lifecycle, route resolution, service contracts, shared runtime helpers | Existing; Build 438 is adding persistent/server authority |
-| `commerce-operations` | storefront/customer/member, Catalog, Inventory, Orders, Membership, Gift Cards, fulfillment/customer operations | Existing top-level module; extraction/runtime coverage still incremental |
+| Application Core | auth/session, module lifecycle, route/service authority, shared recovery/security/runtime helpers | Existing; Build 438 control plane source ready |
+| `commerce-operations` | storefront/customer/member, Catalog, Inventory, Orders, Membership, Gift Cards, fulfillment/customer operations | Existing top-level module; runtime extraction still incremental |
 | `creative-production` | Creative Process, CAIP, Packaging, Media/Content, Content Studio, reviewed production workflows | Existing top-level module; strong four-domain activation/read coverage |
-| `business-administration` | Accounting, Analytics/SEO/marketing, users/settings/security, platform/release/admin controls | Existing top-level module; Accounting runtime is proven, other domains remain incremental/domain-bridge |
+| `business-administration` | Accounting, Analytics/SEO/marketing, users/settings/security, platform/release/admin controls | Existing top-level module; Accounting runtime proven, other domains incremental/domain-bridge |
 
-Customer Commerce and Member Account are separate UX surfaces but are **inside Commerce & Operations**, not separate top-level runtime modules.
+Customer Commerce and Member Account are separate UX surfaces inside Commerce & Operations, not separate top-level runtimes.
 
-## Build 438 — P0 / current work
+## Build 438 — P0 / current release
 
-**Status: SOURCE IMPLEMENTATION IN PROGRESS / DEVELOPMENT MIGRATION NOT YET PROVEN / PRODUCTION NOT AUTHORIZED**
+**Status: SOURCE READY FOR OWNER VALIDATION / DEVELOPMENT D1 + LIVE PROOF PENDING / PRODUCTION NOT AUTHORIZED**
 
-Build 438 is completing the missing central activation/access layer rather than rewriting the existing modules.
-
-Source now includes:
+Build 438 source now includes:
 
 1. additive `app_modules` D1 authority;
 2. additive `app_module_role_access` authority;
-3. exact seed of the three existing top-level modules;
-4. current `member`/`admin` role mapping;
-5. bounded server module-config read service;
-6. request-scoped session/user module access evaluation;
-7. canonical server route/API ownership map;
-8. root Pages middleware module enforcement;
-9. read-only access-level enforcement for non-read API methods;
-10. read-only `/api/modules` bootstrap;
-11. audited `/api/admin/app-modules` control API;
-12. shared-core `/admin/application-modules/` recovery/control screen;
-13. authoritative Admin browser bootstrap before umbrella runtime activation;
-14. disabled/unavailable Admin navigation filtering;
-15. public/member module-aware navigation visibility;
-16. explicit module background-activity permission with default OFF;
-17. no request-time module schema DDL;
-18. no new polling loop;
-19. read-only Build 438 D1 verification SQL;
-20. local 20-check migration/security/runtime regression.
+3. exact three-module seed;
+4. explicit member/admin role mapping;
+5. short non-user module-config cache;
+6. request-scoped session/user evaluation;
+7. fail-closed real authority-error semantics with safe pre-migration compatibility defaults;
+8. canonical server route/API ownership map aligned to the existing Build 305 domain catalog;
+9. hyphenated API-family classification;
+10. root Pages direct module enforcement;
+11. direct `read` access blocking non-read API methods;
+12. seven explicit cross-module shared service contracts;
+13. consumer-gated shared-service access;
+14. `manage` requirement for shared mutation contracts;
+15. read-only `/api/modules` bootstrap with explicit fresh refresh;
+16. audited `/api/admin/app-modules` controls;
+17. shared-core `/admin/application-modules/` recovery surface;
+18. permanent Admin Dashboard **Application Modules** card;
+19. Admin-only account-widget recovery link;
+20. module Core Health diagnostics;
+21. browser Current-State Route Proof;
+22. authoritative Admin bootstrap before umbrella runtime activation;
+23. disabled runtime suppression;
+24. public/member module-aware navigation with short per-tab cache;
+25. background permission default OFF and auto-clear on module disable;
+26. no request-time module DDL;
+27. no new recurring polling;
+28. exact D1 verification SQL;
+29. hard-pinned Development-only D1 apply/verify helper;
+30. local 20-check regression;
+31. executable route/shared-contract matrix test;
+32. existing client-domain/server ownership alignment test;
+33. executable 12-check module access-policy test.
+
+### Shared contract independence now supported
+
+Direct owner-module disablement no longer incorrectly severs a narrow contract legitimately used by another enabled module.
+
+Reviewed shared contracts:
+
+```text
+catalog-read       Commerce -> Commerce / Creative / Business
+inventory-read     Commerce -> Commerce / Creative
+inventory-cost     Commerce -> Commerce / Business
+inventory-post     Commerce -> Commerce / Creative          mutation
+inventory-reverse  Commerce -> Commerce / Creative          mutation
+accounting-read    Business -> Business / Commerce
+content-media      Creative -> Creative / Commerce
+```
+
+Shared mutation contracts require a qualifying consumer with `manage` access.
+
+This means, for example, Commerce may be disabled for direct user access while Creative remains enabled and can still use the explicit reviewed Inventory contract boundary. Broad Commerce/Inventory pages and legacy APIs remain blocked.
 
 ### Build 438 Development acceptance still required
 
-1. Run local source syntax/regression checks.
-2. Apply `database_build438_application_module_activation.sql` to **Development D1 only**.
-3. Run `BUILD438_D1_VERIFICATION.sql` and prove 3 module rows / 6 role-access rows / both indexes.
-4. Deploy/preview Development.
-5. Verify `/api/modules` reports `schema_ready=true`, `source=d1`.
-6. Open `/admin/application-modules/` and verify all three default enabled states.
-7. Disable Commerce & Operations in Development and prove Shop/member/Catalog/Inventory/Orders routes are blocked while control route remains available; then re-enable.
-8. Disable Creative & Production and prove Packaging/Creative/CAIP/Content surfaces are blocked; then re-enable.
-9. Disable Business & Administration and prove Accounting/Analytics/platform/admin routes are blocked while Application Modules recovery remains available; then re-enable.
-10. Prove module disable/re-enable does not delete business rows.
-11. Set a role access level to `read` in Development and prove non-read module-owned API methods return `module_access_level_read_only`.
-12. Verify disabled module runtime activation/import is suppressed in the browser.
-13. Verify public/member/Admin navigation follows module state after refresh.
-14. Verify all default `background_activity_enabled` values are 0.
-15. Confirm Build 438 adds no recurring polling.
-16. Observe request counts/Worker behavior; note the temporary duplicate auth lookup on some authenticated paths.
-17. If needed, tighten route/API ownership mapping for any uncovered direct endpoint before Production consideration.
-18. Update Build 438 evidence/Markdown with Development results.
-19. Decide whether the additive Production migration should get its own narrow authorization boundary.
-20. Keep broad Production promotion closed.
+1. Pull current `dev`.
+2. Run the Build 438 Python compile checks.
+3. Run the 20/20 source regression.
+4. Run the route/shared-contract matrix.
+5. Run Build305 domain/server alignment.
+6. Run the 12/12 access-policy test.
+7. Run JavaScript syntax checks.
+8. Apply `database_build438_application_module_activation.sql` to **Development D1 only** through the hard-pinned helper.
+9. Require exact D1 verification: 3 module rows, 6 role rows, 3 enabled, 0 background enabled, 2 indexes, exact keys.
+10. Deploy/preview Development.
+11. Verify `/api/modules?fresh=1` returns `schema_ready=true`, `source=d1`.
+12. Open `/admin/application-modules/` and require Core Health PASS.
+13. Require Current-State Route Proof PASS with all modules enabled.
+14. Disable/re-enable Commerce; direct Commerce routes block/return correctly and data stays intact.
+15. While Commerce is disabled and Creative remains enabled, prove appropriate shared read contracts remain usable by Creative.
+16. Do not fabricate Inventory movements merely to test `inventory-post`/`inventory-reverse`; use a real reviewed Creative fixture if live mutation proof is needed.
+17. Disable/re-enable Creative and prove direct Creative surfaces/runtime block/return correctly; Commerce may still consume explicit `content-media` where required.
+18. Disable/re-enable Business and prove direct Business surfaces block/return while Core recovery stays available; Commerce may still consume explicit `accounting-read` where required.
+19. Prove a direct module set to `read` blocks non-read methods with `module_access_level_read_only`.
+20. Prove business row counts do not change because a module was disabled.
+21. Observe Worker/request behavior and confirm no new recurring polling.
+22. Record Development evidence in canonical Markdown.
+23. Only after all Development proof is green decide whether a narrow Production migration authorization boundary should be prepared.
+24. Keep broad Production promotion closed.
 
 ## Open requested functionality — prioritized sanity check
 
@@ -204,7 +239,7 @@ Still open:
 
 **Status: PARTIAL**
 
-The Creative Process -> CAIP -> Content Studio authority chain exists. Still open:
+Still open:
 
 1. reviewed scheduling/calendar handoff;
 2. actual social-provider connection/publishing where supported;
@@ -232,7 +267,7 @@ Still requested:
 
 **Status: FUNCTIONAL / CONTINUE POLISH**
 
-Members currently includes profile/account tools, orders, wishlist, reviews and downloads. Continue evidence-driven improvements within Commerce & Operations. Do not create a second customer identity system.
+Members includes profile/account tools, orders, wishlist, reviews and downloads. Continue evidence-driven improvements within Commerce & Operations. Do not create a second customer identity system.
 
 ### P2 — Go-live / reliability acceptance
 
@@ -254,21 +289,11 @@ Before broad Production promotion:
 
 **Status: CONTINUOUS**
 
-Continue:
-
-- one clear H1 on exposed pages;
-- concise truthful titles/descriptions/canonicals;
-- natural searcher wording in prominent places;
-- crawlable descriptive internal links;
-- descriptive alt text;
-- real product/process/workshop evidence;
-- mobile content parity;
-- real Southern Ontario business/service context only;
-- Search Console/Business Profile measurement rather than guaranteed-rank claims.
+Continue one clear H1, truthful titles/descriptions/canonicals, natural searcher wording, crawlable internal links, descriptive alt text, real product/process/workshop evidence, mobile parity, truthful Southern Ontario context and measured Search Console/Business Profile outcomes.
 
 ## Remaining schema/parity technical debt
 
-These remain known but are **not automatically next and are not authorized**:
+Known but **not automatically next and not authorized**:
 
 ```text
 Fractional Inventory / Creative Project numeric rebuilds
@@ -283,6 +308,7 @@ When one is chosen, begin with fresh read-only scope and a new family-specific a
 
 ```text
 Build 437 Membership token                     SPENT / COMPLETE
+Build 438 source control plane                  READY FOR OWNER VALIDATION
 Build 438 Development migration                PENDING OWNER RUN
 Build 438 Production migration                 NOT AUTHORIZED
 R2/provider mutation                           DISABLED
@@ -293,4 +319,4 @@ Main/Production broad promotion                FROZEN pending broader acceptance
 
 ## Documentation rule
 
-`AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` are the two canonical current cross-project authorities. `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` is the current specialist architecture plan. Build 437 overlays remain parity/release evidence and should not override Build 438 current source state.
+`AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` are the two canonical current cross-project authorities. `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` is the current specialist architecture plan and `BUILD438_VALIDATION.md` is the owner-run validation authority. Build 437 overlays remain historical release evidence and do not override current Build 438 source state.
