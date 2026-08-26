@@ -1,0 +1,43 @@
+// Devil n Dove Build 438 application-module route guard.
+// Runs only meaningful module-owned page/API requests through D1-backed availability.
+// Static JS/CSS/assets and shared-core/auth/control routes pass through untouched.
+
+import {
+  BUILD,
+  moduleAccessForRequest,
+  moduleKeyForPath,
+  moduleUnavailableResponse,
+} from './api/_lib/appModules.js';
+
+function isApiPath(pathname) {
+  return String(pathname || '').startsWith('/api/');
+}
+
+function shouldBypass(pathname) {
+  const path = String(pathname || '');
+  if (!path) return true;
+  if (path.startsWith('/assets/') || path.startsWith('/css/') || path.startsWith('/js/') || path.startsWith('/public/')) return true;
+  if (path.startsWith('/api/auth/') || path === '/api/modules' || path.startsWith('/api/modules/')) return true;
+  if (path === '/api/admin/app-modules' || path.startsWith('/api/admin/app-modules/')) return true;
+  if (path === '/admin/application-modules' || path.startsWith('/admin/application-modules/')) return true;
+  return false;
+}
+
+export async function onRequest(context) {
+  const { request, env } = context;
+  const pathname = new URL(request.url).pathname;
+  if (shouldBypass(pathname)) return await context.next();
+
+  const moduleKey = moduleKeyForPath(pathname);
+  if (!moduleKey) return await context.next();
+
+  const access = await moduleAccessForRequest(request, env, moduleKey);
+  context.data.ddModuleAccess = access;
+  context.data.ddModuleBuild = BUILD;
+
+  if (!access.allowed) {
+    return moduleUnavailableResponse(access, { api: isApiPath(pathname) });
+  }
+
+  return await context.next();
+}
