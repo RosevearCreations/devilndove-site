@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""Build 431 guarded Notification-only Production execution controller.
+"""Build 431 guarded full-Build-403 Notification Production execution controller.
 
-This controller wraps the already-proven Build 428 additive primitives but adds
-Notification-specific fail-closed checks promised by the Build 430 boundary:
-- Product-number and Gift Card Production prerequisites must remain green;
-- exact Build 403 pre-write gap only;
-- idx_notification_outbox_status_due must already exist and survive;
-- notification_outbox row count must be preserved;
-- separate full Production D1 backup with byte/SHA/age verification;
-- exact Notification authorization token only.
+The first authorized Notification attempt stopped before backup because live
+Production proved idx_notification_outbox_status_due was also absent. The prior
+four-index authorization is therefore not accepted by this controller.
+
+This corrected controller requires:
+- Product-number and Gift Card Production prerequisites remain green;
+- corrected full Build 403 preflight is green;
+- metadata_json is missing immediately before backup/apply;
+- all five canonical notification_outbox indexes are missing immediately before
+  backup/apply;
+- a new explicit full-Build-403 Notification authorization token;
+- a separate full Production D1 backup with byte/SHA/age verification;
+- notification_outbox row-count preservation;
+- metadata_json and all five canonical indexes present after execution.
 
 No Gift Card mutation, annotation-index, Membership, fractional Inventory,
 Product/FK, Accounting/default, R2/provider, or promotion mutation path exists.
@@ -25,13 +31,13 @@ import sys
 import build428_production_additive_execution as additive
 
 ROOT = Path(__file__).resolve().parents[1]
-PREFLIGHT_SCRIPT = ROOT / 'scripts' / 'build430_notification_authorization_preflight.py'
-PREFLIGHT_ARTIFACT = ROOT / 'build430_notification_authorization_preflight.local.json'
+PREFLIGHT_SCRIPT = ROOT / 'scripts' / 'build431_notification_full_authorization_preflight.py'
+PREFLIGHT_ARTIFACT = ROOT / 'build431_notification_full_authorization_preflight.local.json'
 GIFT_POSTCHECK = ROOT / 'build428_production_gift_postcheck.local.json'
 EVIDENCE = ROOT / 'build431_production_notification_postcheck.local.json'
-AUTH_TOKEN = 'AUTHORIZE-BUILD428-PROD-NOTIFICATION'
-STATUS_DUE_INDEX = 'idx_notification_outbox_status_due'
-EXPECTED_MISSING_INDEXES = {
+AUTH_TOKEN = 'AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403'
+CANONICAL_INDEXES = {
+    'idx_notification_outbox_status_due',
     'idx_notification_outbox_kind_destination',
     'idx_notification_outbox_order',
     'idx_notification_outbox_payment',
@@ -54,7 +60,7 @@ def fail(message: str) -> None:
 
 def require_token(value: str | None) -> None:
     if value != AUTH_TOKEN:
-        fail('explicit Notification Production authorization token is missing or incorrect.')
+        fail('explicit full-Build-403 Notification Production authorization token is missing or incorrect.')
 
 
 def require_gift_postcheck() -> dict:
@@ -82,44 +88,53 @@ def fresh_preflight() -> dict:
     )
     print(result.stdout or '', end='' if (result.stdout or '').endswith('\n') else '\n')
     if result.returncode != 0:
-        fail(f'fresh Build 430 Notification preflight failed with exit code {result.returncode}.')
+        fail(f'fresh corrected Notification preflight failed with exit code {result.returncode}.')
     if not PREFLIGHT_ARTIFACT.exists():
-        fail('fresh Notification preflight artifact was not created.')
+        fail('fresh corrected Notification preflight artifact was not created.')
     payload = json.loads(PREFLIGHT_ARTIFACT.read_text(encoding='utf-8'))
-    if payload.get('safe_to_request_notification_authorization') is not True:
-        fail('fresh Notification preflight is not safe for the authorized stage.')
+    if payload.get('safe_to_request_full_notification_authorization') is not True:
+        fail('fresh corrected Notification preflight is not safe for the full Build 403 stage.')
     return payload
 
 
 def exact_before_state(state: dict) -> bool:
     columns = set(state.get('columns') or [])
     indexes = set(state.get('indexes') or [])
-    missing = EXPECTED_MISSING_INDEXES - indexes
-    return (
-        'metadata_json' not in columns
-        and missing == EXPECTED_MISSING_INDEXES
-        and STATUS_DUE_INDEX in indexes
-    )
+    return 'metadata_json' not in columns and (CANONICAL_INDEXES - indexes) == CANONICAL_INDEXES
 
 
 def complete_after_state(state: dict) -> bool:
     columns = set(state.get('columns') or [])
     indexes = set(state.get('indexes') or [])
-    return (
-        'metadata_json' in columns
-        and EXPECTED_MISSING_INDEXES.issubset(indexes)
-        and STATUS_DUE_INDEX in indexes
-    )
+    return 'metadata_json' in columns and CANONICAL_INDEXES.issubset(indexes)
 
 
 def print_before(state: dict) -> None:
     indexes = set(state.get('indexes') or [])
-    print('=== BUILD 431 NOTIFICATION IMMEDIATE PRE-WRITE STATE ===')
+    print('=== BUILD 431 FULL BUILD 403 NOTIFICATION PRE-WRITE STATE ===')
     print(f'metadata_json exists: {"metadata_json" in set(state.get("columns") or [])}')
-    print(f'Missing reviewed indexes: {sorted(EXPECTED_MISSING_INDEXES - indexes)}')
-    print(f'idx_notification_outbox_status_due intact: {STATUS_DUE_INDEX in indexes}')
+    print(f'Missing canonical indexes: {sorted(CANONICAL_INDEXES - indexes)}')
     print(f'notification_outbox rows: {state.get("row_count")}')
-    print(f'Exact reviewed Build 403 gap: {"YES" if exact_before_state(state) else "NO"}')
+    print(f'Exact full Build 403 gap: {"YES" if exact_before_state(state) else "NO"}')
+
+
+def notification_sql_full(before: dict) -> str:
+    columns = set(before.get('columns') or [])
+    indexes = set(before.get('indexes') or [])
+    lines = ['PRAGMA foreign_keys = ON;']
+    if 'metadata_json' not in columns:
+        lines.append('ALTER TABLE notification_outbox ADD COLUMN metadata_json TEXT;')
+    definitions = {
+        'idx_notification_outbox_status_due': 'CREATE INDEX IF NOT EXISTS idx_notification_outbox_status_due ON notification_outbox(status, next_attempt_at, created_at);',
+        'idx_notification_outbox_kind_destination': 'CREATE INDEX IF NOT EXISTS idx_notification_outbox_kind_destination ON notification_outbox(notification_kind, destination, created_at DESC);',
+        'idx_notification_outbox_order': 'CREATE INDEX IF NOT EXISTS idx_notification_outbox_order ON notification_outbox(related_order_id, created_at DESC);',
+        'idx_notification_outbox_payment': 'CREATE INDEX IF NOT EXISTS idx_notification_outbox_payment ON notification_outbox(related_payment_id, created_at DESC);',
+        'idx_notification_outbox_product': 'CREATE INDEX IF NOT EXISTS idx_notification_outbox_product ON notification_outbox(related_product_id, created_at DESC);',
+    }
+    for name in sorted(CANONICAL_INDEXES):
+        if name not in indexes:
+            lines.append(definitions[name])
+    return '\n'.join(lines) + '\n'
 
 
 def backup(confirm: str | None) -> None:
@@ -130,12 +145,12 @@ def backup(confirm: str | None) -> None:
     before = additive.current_state('notification')
     print_before(before)
     if not exact_before_state(before):
-        fail('Notification state drifted from the exact reviewed Build 403 gap before backup.')
+        fail('Notification state drifted from the corrected full Build 403 gap before backup.')
     additive.export_backup('notification')
     after_backup = additive.current_state('notification')
     if after_backup != before:
         fail('Notification state changed during the backup-only stage.')
-    print('BUILD 431 NOTIFICATION BACKUP BOUNDARY: PASS')
+    print('BUILD 431 FULL BUILD 403 NOTIFICATION BACKUP BOUNDARY: PASS')
     print('Production mutation executed: NO')
     print('PRODUCTION PROMOTION: CLOSED')
 
@@ -149,9 +164,9 @@ def apply(confirm: str | None) -> None:
     before = additive.current_state('notification')
     print_before(before)
     if not exact_before_state(before):
-        fail('Notification state drifted from the exact reviewed Build 403 gap after backup; refusing DDL.')
+        fail('Notification state drifted from the corrected full Build 403 gap after backup; refusing DDL.')
 
-    sql = additive.notification_sql(before)
+    sql = notification_sql_full(before)
     additive.execute_sql('notification', sql)
     after = additive.current_state('notification')
 
@@ -159,23 +174,23 @@ def apply(confirm: str | None) -> None:
     schema_complete = complete_after_state(after)
     passed = rows_preserved and schema_complete
     payload = {
-        'artifact': 'Build 431 Production Notification apply/postcheck evidence',
+        'artifact': 'Build 431 Production full Build 403 Notification apply/postcheck evidence',
         'stage': 'notification',
+        'scope': 'full_build403_notification_outbox_additive',
         'pass': passed,
         'before': before,
         'after': after,
         'row_count_preserved': rows_preserved,
-        'status_due_index_preserved': STATUS_DUE_INDEX in set(after.get('indexes') or []),
+        'all_five_indexes_present': CANONICAL_INDEXES.issubset(set(after.get('indexes') or [])),
         'production_mutation_executed': True,
         'production_promotion_open': False,
     }
     EVIDENCE.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
-    print('BUILD 431 PRODUCTION NOTIFICATION ADDITIVE POSTCHECK:', 'PASS' if passed else 'FAIL')
+    print('BUILD 431 PRODUCTION FULL BUILD 403 NOTIFICATION POSTCHECK:', 'PASS' if passed else 'FAIL')
     print(f'notification_outbox rows preserved: {before.get("row_count")} -> {after.get("row_count")}')
     print(f'metadata_json present: {"metadata_json" in set(after.get("columns") or [])}')
-    print(f'Four reviewed indexes present: {EXPECTED_MISSING_INDEXES.issubset(set(after.get("indexes") or []))}')
-    print(f'idx_notification_outbox_status_due preserved: {STATUS_DUE_INDEX in set(after.get("indexes") or [])}')
+    print(f'All five canonical indexes present: {CANONICAL_INDEXES.issubset(set(after.get("indexes") or []))}')
     print('PRODUCTION PROMOTION: CLOSED')
     if not passed:
         raise SystemExit(1)
@@ -187,11 +202,10 @@ def postcheck() -> None:
     additive.hard_target_guard()
     state = additive.current_state('notification')
     passed = complete_after_state(state)
-    print('BUILD 431 PRODUCTION NOTIFICATION READ-ONLY POSTCHECK:', 'PASS' if passed else 'FAIL')
+    print('BUILD 431 PRODUCTION FULL BUILD 403 NOTIFICATION READ-ONLY POSTCHECK:', 'PASS' if passed else 'FAIL')
     print(f'notification_outbox rows: {state.get("row_count")}')
     print(f'metadata_json present: {"metadata_json" in set(state.get("columns") or [])}')
-    print(f'Four reviewed indexes present: {EXPECTED_MISSING_INDEXES.issubset(set(state.get("indexes") or []))}')
-    print(f'idx_notification_outbox_status_due preserved: {STATUS_DUE_INDEX in set(state.get("indexes") or [])}')
+    print(f'All five canonical indexes present: {CANONICAL_INDEXES.issubset(set(state.get("indexes") or []))}')
     print('PRODUCTION PROMOTION: CLOSED')
     raise SystemExit(0 if passed else 1)
 
