@@ -51,7 +51,16 @@ check(transportGuard.includes("HTMLImageElement?.prototype, 'src'") && transport
 check(transportGuard.includes("window.location.pathname.startsWith('/admin/inventory-operations')"), 'Inventory transport guard must remain narrowly page-scoped.');
 check(!transportGuard.includes('fetch(') && !transportGuard.includes('setInterval(') && !transportGuard.includes('setTimeout('), 'Inventory transport guard must add no network calls or polling.');
 
-check(inventoryUi.includes('${x.image_url ?') && inventoryUi.includes('src=\\"${escapeHtml(x.image_url)}\\"'), 'Regression must continue covering the direct Inventory thumbnail renderer that exposed the browser defect.');
+// Keep the regression anchored to the exact UI path that exposed the live browser
+// failure: the Inventory row thumbnail still renders the API-provided image_url
+// directly into an <img src>. The transport guard must therefore remain loaded
+// before this renderer rather than allowing the test to pass on helper coverage alone.
+check(
+  inventoryUi.includes('site-inventory-list-thumb') &&
+  inventoryUi.includes('${x.image_url ?') &&
+  inventoryUi.includes('<img src="${escapeHtml(x.image_url)}"'),
+  'Regression must continue covering the direct Inventory thumbnail renderer that exposed the browser defect.'
+);
 
 const safetyIndex = inventoryPage.indexOf('/public/js/admin-asset-url-safety.js?v=440.2');
 const transportIndex = inventoryPage.indexOf('/public/js/admin-inventory-asset-transport-guard.js?v=440.3');
