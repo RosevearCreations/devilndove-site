@@ -15,6 +15,7 @@ STALE_MEMBER_DUPLICATE = ROOT / 'member/tier-policies.js'
 DB_SANITY = ROOT / 'functions/api/_lib/platformDbSanityReadService.js'
 PREFLIGHT = ROOT / 'scripts/build436_membership_rebuild_authorization_preflight.py'
 CONTROLLER = ROOT / 'scripts/build436_production_membership_rebuild.py'
+EXECUTION_WRAPPER = ROOT / 'scripts/build437_production_membership_rebuild.py'
 REBUILD_REGRESSION = ROOT / 'scripts/build436_membership_rebuild_regression.py'
 AUTH_GATE = ROOT / 'scripts/build436_membership_rebuild_authorization_gate.py'
 MANIFEST_GENERATOR = ROOT / 'scripts/generate_release_manifest.py'
@@ -48,6 +49,7 @@ def main() -> int:
     db_sanity = text(DB_SANITY)
     preflight = text(PREFLIGHT)
     controller = text(CONTROLLER)
+    execution_wrapper = text(EXECUTION_WRAPPER)
     rebuild_regression = text(REBUILD_REGRESSION)
     auth_gate = text(AUTH_GATE)
     manifest_generator = text(MANIFEST_GENERATOR)
@@ -71,9 +73,9 @@ def main() -> int:
     check("membership_tier_policies: ['policy_id']" in db_sanity, 'platform DB sanity expects canonical Membership policy_id')
     check("'membership_tier_policies'" in db_sanity and 'membership_tier_policies' in db_sanity.split('indexChecks', 1)[1], 'platform DB sanity includes Membership index visibility')
     check('legacy_sort_index_compatible' in preflight and "LEGACY_SORT_COLUMNS = ['sort_order', 'code']" in preflight and 'no_unhandled_user_objects' in preflight, 'preflight handles only the reviewed legacy sort index')
-    check('JOIN pragma_foreign_key_list' not in preflight and 'PRAGMA foreign_key_list(' in preflight, 'preflight retains D1-compatible FK discovery')
+    check("SELECT seqno,cid,name FROM pragma_index_info('" in preflight and 'PRAGMA index_info(' not in preflight and 'JOIN pragma_foreign_key_list' not in preflight, 'preflight uses Build 418 SQL-guard-compatible index/FK discovery')
     check('CREATE INDEX {SORT_INDEX}' in controller and 'sort_order ASC, tier_code ASC' in controller, 'guarded rebuild recreates canonical sort-index semantics')
-    check('canonical_sort_index_present' in controller and 'sort_index_columns' in controller, 'guarded postcheck verifies exact canonical sort-index columns')
+    check(EXECUTION_WRAPPER.exists() and 'guard_compatible_q' in execution_wrapper and "pragma_index_info('" in execution_wrapper and 'executor.q = guard_compatible_q' in execution_wrapper, 'Build 437 execution wrapper makes postcheck index metadata reads SQL-guard-compatible')
     check('Legacy sort index -> canonical sort index: PASS' in rebuild_regression and "CREATE INDEX idx_membership_tier_policies_sort" in rebuild_regression, 'local rebuild regression simulates legacy-to-canonical index preservation')
     check('legacy_sort_index_compatible' in auth_gate and 'no_unhandled_user_objects' in auth_gate, 'authorization gate accepts only the reviewed handled sort index')
     check(EXPECTED_TOKEN in controller and EXPECTED_TOKEN in auth_gate, 'one exact Membership Production authorization token remains enforced')
@@ -95,6 +97,7 @@ def main() -> int:
     print('Member/admin runtime alignment: PASS')
     print('Stale duplicate Membership endpoint: RETIRED')
     print('DB sanity Membership identity: CANONICAL')
+    print('Build 418 SQL-guard compatibility: PASS')
     print('Guarded lossless rebuild + sort-index preservation: SOURCE-GATED')
     print('Membership Production authorization inferred: NO')
     print('Later rebuild authorization inferred: NO')
