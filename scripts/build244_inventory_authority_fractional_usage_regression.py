@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import json, sqlite3, sys
+import json, re, sqlite3, sys
 
 ROOT = Path(__file__).resolve().parents[1]
 MIG = ROOT / 'database_build244_inventory_authority_fractional_usage.sql'
@@ -12,18 +12,27 @@ def check(ok,msg):
 
 sql=MIG.read_text(encoding='utf-8')
 current_sql=UPG.read_text(encoding='utf-8')
-if not any(tag in current_sql for tag in ['Build 256','Build 255','Build 254','Build 253','Build 252','Build 251','Build 250','Build 249','Build 248','build246_product_project_production_packaging','build245_admin_media_resilience']):
-    check(sql in current_sql,'current upgrade SQL must retain/advance beyond the complete Build 244 migration segment')
+# The current-pass migration has advanced well beyond Build 244. Avoid a brittle hard-coded
+# list of later build names: prove either that the current-pass header is Build 244+ or that
+# the complete Build 244 segment is still present verbatim.
+current_build_match=re.search(r'\bBuild\s+(\d+)\b',current_sql[:1000],re.I)
+current_build=int(current_build_match.group(1)) if current_build_match else 0
+check(current_build>=244 or sql in current_sql,'current upgrade SQL must retain/advance beyond the complete Build 244 migration segment')
 check('CREATE TEMP' not in sql.upper(),'migration must not use TEMP tables')
 check('DROP TABLE' not in sql.upper(),'migration must not DROP tables')
 check("'site.inventory.catalog_authority','d1_build244'" in sql,'D1 catalog authority setting missing')
 check("'site.inventory.legacy_usage_default','log_only_review_required'" in sql,'legacy safe usage default missing')
 check('site_inventory_usage_profiles' in sql and 'site_inventory_usage_movements' in sql,'fractional usage sidecars missing')
 
+# Build 310 moved Creative posting mutation behind the Inventory-owned inventory-post contract.
+# Keep proving the Build 244 fractional behavior, but at the current ownership boundary rather
+# than requiring historical SQL/table names to remain inside the Creative request handler.
 for rel, needles in {
     'functions/api/admin/site-item-inventory.js':['consume_usage','usage_tracking_mode','syncCatalogItemsIntoInventory','classification_merge'],
     'public/js/admin-site-item-inventory.js':['Smallest usage increment','500 g mica jar','data-field="source_type"','loadSeedOptions({ query'],
-    'functions/api/admin/creative-process.js':['usage_quantity_consumed','creative_project_inventory_usage_details','log_only'],
+    'functions/api/admin/creative-process.js':['usage_quantity_consumed','postCreativeInventoryThroughContract','inventory-post'],
+    'functions/api/_lib/creativeInventoryPostConsumer.js':['postCreativeInventoryUsage','usageQuantity','inventory-post'],
+    'functions/api/_lib/inventoryPostService.js':['creative_project_inventory_usage_details','site_inventory_usage_movements','usage_quantity_consumed','stock_quantity_consumed'],
     'public/js/admin-creative-process.js':['Amount actually used','data-usage-quantity'],
     'functions/api/tools.js':['D1 catalog_items is the runtime authority'],
     'functions/api/supplies.js':['D1 catalog_items is the runtime authority'],
@@ -97,6 +106,8 @@ if failures:
     for item in failures: print(' -',item)
     sys.exit(1)
 print('Build 244 inventory authority/fractional usage regression: PASS')
+print('Current-pass build detected:',current_build or 'embedded Build 244 segment')
+print('Creative posting authority: inventory-post / Inventory-owned')
 print('Legacy master rows:',len(tools)+len(supplies),f'({len(tools)} tools + {len(supplies)} supplies)')
 print('D1 catalog and clean-schema inventory rows:',conn.execute('select count(*) from catalog_items').fetchone()[0])
 print('TEMP/DROP migration operations: 0')
