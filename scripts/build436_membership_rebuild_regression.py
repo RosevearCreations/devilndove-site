@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build 436 local-only Membership rebuild execution safety regression."""
+"""Build 436/437 local-only Membership rebuild execution safety regression."""
 from __future__ import annotations
 
 import sqlite3
@@ -24,7 +24,7 @@ def check(condition: bool, label: str) -> None:
         failures.append(label)
 
 
-def simulate() -> tuple[list[str], list[tuple], str]:
+def simulate() -> tuple[list[str], list[tuple], str, list[str]]:
     conn = sqlite3.connect(':memory:')
     conn.executescript("""
     CREATE TABLE membership_tier_policies (
@@ -40,6 +40,8 @@ def simulate() -> tuple[list[str], list[tuple], str]:
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+    CREATE INDEX idx_membership_tier_policies_sort
+      ON membership_tier_policies(sort_order ASC, code ASC);
     INSERT INTO membership_tier_policies
       (membership_tier_policy_id,code,name,display_title,short_description,benefits_json,badge_color,is_visible,sort_order,created_at,updated_at)
     VALUES
@@ -51,18 +53,19 @@ def simulate() -> tuple[list[str], list[tuple], str]:
     columns = [row[1] for row in conn.execute("PRAGMA table_info('membership_tier_policies')")]
     rows = list(conn.execute("SELECT policy_id,tier_code,title,short_description,benefits_json,badge_color,sort_order,is_visible,created_at,updated_at FROM membership_tier_policies ORDER BY policy_id"))
     table_sql = conn.execute("SELECT sql FROM sqlite_schema WHERE type='table' AND name='membership_tier_policies'").fetchone()[0]
+    sort_index_columns = [row[2] for row in conn.execute("PRAGMA index_info('idx_membership_tier_policies_sort')")]
     leftovers = list(conn.execute("SELECT name FROM sqlite_schema WHERE name IN ('membership_tier_policies_build436_shadow','_build436_membership_assert')"))
     conn.close()
-    return columns, rows, table_sql if not leftovers else table_sql + ' LEFTOVERS'
+    return columns, rows, table_sql if not leftovers else table_sql + ' LEFTOVERS', sort_index_columns
 
 
 def main() -> int:
     controller_text = CONTROLLER.read_text(encoding='utf-8')
     preflight_text = PREFLIGHT.read_text(encoding='utf-8')
     sql = executor.rebuild_sql()
-    columns, rows, table_sql = simulate()
+    columns, rows, table_sql, sort_index_columns = simulate()
 
-    check(CONTROLLER.exists() and PREFLIGHT.exists(), 'Build 436 controller and preflight source exist')
+    check(CONTROLLER.exists() and PREFLIGHT.exists(), 'Build 436/437 controller and preflight source exist')
     check(executor.AUTH_TOKEN == AUTH_TOKEN and AUTH_TOKEN in controller_text, 'Membership rebuild uses one exact stage-specific token')
     check(executor.PROD_NAME == 'devilndove-prod' and executor.PROD_ID == '0dc8fa3e-319c-45f7-a515-34c8acd89fcf', 'Production database name/UUID are hard pinned')
     check('safe_to_request_membership_rebuild_authorization' in preflight_text, 'execution preflight exposes an explicit safe-to-request decision')
@@ -76,7 +79,12 @@ def main() -> int:
         and 'JOIN pragma_foreign_key_list' not in preflight_text,
         'preflight blocks Membership FK dependencies using D1-compatible per-table PRAGMA discovery',
     )
-    check('no_user_defined_indexes_or_triggers' in preflight_text, 'preflight blocks unhandled Membership indexes/triggers')
+    check(
+        'legacy_sort_index_compatible' in preflight_text
+        and 'no_unhandled_user_objects' in preflight_text
+        and "LEGACY_SORT_COLUMNS = ['sort_order', 'code']" in preflight_text,
+        'preflight recognizes only the reviewed legacy sort index and blocks every other user object',
+    )
     check('no_rebuild_name_collisions' in preflight_text, 'preflight blocks shadow/assert object-name collisions')
     check(f'CREATE TABLE {executor.SHADOW_TABLE}' in sql and 'policy_id INTEGER PRIMARY KEY AUTOINCREMENT' in sql, 'SQL creates the exact canonical shadow table')
     check('membership_tier_policy_id' in sql and 'display_title' in sql and 'short_description' in sql and 'updated_at' in sql, 'SQL uses explicit reviewed legacy-to-canonical mappings')
@@ -84,7 +92,12 @@ def main() -> int:
     check('title_alias_equality' in sql and 'name IS display_title' in sql, 'SQL reasserts name/display_title equality inside the batch')
     check('mapped_value_equality' in sql and 'd.updated_at IS s.updated_at' in sql, 'SQL asserts complete mapped-row value equality before swap')
     check('CHECK (ok = 1)' in sql, 'in-batch assertion table converts failed proofs into SQL failure')
-    check('DROP TABLE membership_tier_policies;' in sql and f'ALTER TABLE {executor.SHADOW_TABLE} RENAME TO membership_tier_policies;' in sql, 'swap is limited to legacy drop plus canonical shadow rename')
+    check(
+        'DROP TABLE membership_tier_policies;' in sql
+        and f'ALTER TABLE {executor.SHADOW_TABLE} RENAME TO membership_tier_policies;' in sql
+        and f'CREATE INDEX {executor.SORT_INDEX}' in sql,
+        'swap recreates the reviewed sort index on the canonical table',
+    )
     check('BEGIN TRANSACTION' not in sql.upper() and '\nBEGIN;' not in sql.upper() and '\nCOMMIT;' not in sql.upper(), 'SQL does not embed explicit transaction statements inside D1 file execution')
     check(columns == executor.CANONICAL_COLUMNS, 'in-memory rebuild produces the exact canonical ten-column order')
     check(rows == [
@@ -92,7 +105,12 @@ def main() -> int:
         (22,'silver','Silver','s-desc','["s"]','#222222',20,1,'2026-02-01','2026-02-02'),
         (33,'gold','Gold','g-desc','["g"]','#333333',30,0,'2026-03-01','2026-03-02'),
     ], 'in-memory rebuild preserves all three IDs and mapped business values exactly')
-    check('AUTOINCREMENT' in table_sql.upper() and 'LEFTOVERS' not in table_sql, 'in-memory rebuild retains AUTOINCREMENT and leaves no rebuild helper tables')
+    check(
+        'AUTOINCREMENT' in table_sql.upper()
+        and 'LEFTOVERS' not in table_sql
+        and sort_index_columns == executor.CANONICAL_SORT_COLUMNS,
+        'in-memory rebuild retains AUTOINCREMENT, removes helpers, and preserves canonical sort-index semantics',
+    )
 
     print()
     if failures:
@@ -103,6 +121,7 @@ def main() -> int:
     print(f'BUILD 436 MEMBERSHIP REBUILD SAFETY REGRESSION: PASS ({checks}/{checks})')
     print('In-memory legacy -> canonical shadow rebuild: PASS')
     print('Complete three-row value preservation: PASS')
+    print('Legacy sort index -> canonical sort index: PASS')
     print('Membership Production authorization inferred: NO')
     print('Cloudflare access: NONE')
     print('Production mutation executed: NO')
