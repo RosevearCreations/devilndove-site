@@ -1,5 +1,5 @@
 -- Devil n Dove Build 438 read-only D1 verification.
--- Safe for Development or Production after the migration has been deliberately applied.
+-- Safe for Development or Production only after the migration has been deliberately applied.
 
 SELECT 'app_modules' AS object_name, type, sql
 FROM sqlite_schema
@@ -31,4 +31,14 @@ SELECT
   (SELECT COUNT(*) FROM app_modules) AS module_count,
   (SELECT COUNT(*) FROM app_module_role_access) AS role_access_count,
   (SELECT COUNT(*) FROM app_modules WHERE is_enabled = 1) AS enabled_module_count,
-  (SELECT COUNT(*) FROM app_modules WHERE module_key IN ('commerce-operations','creative-production','business-administration')) AS expected_module_count;
+  (SELECT COUNT(*) FROM app_modules WHERE background_activity_enabled = 1) AS background_enabled_count,
+  (SELECT COUNT(*) FROM app_modules WHERE module_key IN ('commerce-operations','creative-production','business-administration')) AS expected_module_count,
+  (SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND name IN ('idx_app_modules_enabled_priority','idx_app_module_role_access_role')) AS expected_index_count,
+  CASE WHEN
+    (SELECT COUNT(*) FROM app_modules) = 3
+    AND (SELECT COUNT(*) FROM app_module_role_access) = 6
+    AND (SELECT COUNT(*) FROM app_modules WHERE is_enabled = 1) = 3
+    AND (SELECT COUNT(*) FROM app_modules WHERE background_activity_enabled = 1) = 0
+    AND (SELECT COUNT(*) FROM app_modules WHERE module_key IN ('commerce-operations','creative-production','business-administration')) = 3
+    AND (SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND name IN ('idx_app_modules_enabled_priority','idx_app_module_role_access_role')) = 2
+  THEN 1 ELSE 0 END AS verification_pass;
