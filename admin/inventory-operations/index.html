@@ -41,6 +41,19 @@
         </div>
         <a class="btn" href="#siteInventoryForm">Add or edit inventory item</a>
       </div>
+
+      <section class="card" id="inventoryAssetRestoreStaticCard" style="margin-bottom:18px;border:2px solid currentColor">
+        <div class="section-heading-row">
+          <div>
+            <p class="inventory-operations-eyebrow">Development repair</p>
+            <h3 style="margin:0">Development R2 Asset Restore</h3>
+            <p class="small" style="margin-top:8px">Permanent Development-only recovery control. It restores missing Tool/Supply images from the current public source into the bound Development R2 bucket, never overwrites existing unverified objects, performs no D1 writes, and cannot run on Production.</p>
+          </div>
+          <button class="btn primary" type="button" id="inventoryAssetRestoreStatic">Restore Development R2 Assets</button>
+        </div>
+        <div id="inventoryAssetRestoreStaticStatus" class="small" style="display:none;margin-top:10px"></div>
+      </section>
+
       <div id="inventoryAssetParityMount"></div>
       <div id="inventoryIntegrityReviewMount"></div>
       <div id="toolLifecycleReviewMount"></div>
@@ -64,8 +77,8 @@
   <script src="/public/js/site-analytics.js?v=279"></script>
   <script src="/public/js/admin-self-protect.js?v=245"></script>
   <script src="/public/js/admin.js?v=312"></script>
+  <script src="/public/js/admin-inventory-asset-restore-direct.js?v=440.2"></script>
   <script src="/public/js/admin-inventory-asset-parity.js?v=440.8"></script>
-  <script src="/public/js/admin-inventory-asset-restore-direct.js?v=440.1"></script>
   <script src="/public/js/admin-inventory-integrity-review.js?v=440"></script>
   <script src="/public/js/admin-tool-lifecycle-review.js?v=440"></script>
   <script src="/public/js/admin-product-integrity-review.js?v=440"></script>
