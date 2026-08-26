@@ -1,8 +1,8 @@
-# Build 432 — Authorized Full Build 403 Notification Execution Validation
+# Build 432 — Full Build 403 Notification Production Execution Validation
 
 ## Status
 
-**FULL BUILD 403 NOTIFICATION AUTHORIZED / BACKUP + APPLY + POSTCHECK PENDING / ALL LATER PRODUCTION FAMILIES LOCKED / PRODUCTION PROMOTION CLOSED**
+**PASS — FULL BUILD 403 NOTIFICATION PRODUCTION STAGE COMPLETE / BACKUP + APPLY + INDEPENDENT POSTCHECK PROVEN / PRODUCTION PROMOTION CLOSED**
 
 The owner explicitly authorized only:
 
@@ -10,7 +10,7 @@ The owner explicitly authorized only:
 AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
 ```
 
-The authorized scope is limited to the corrected Build 403 `notification_outbox` additive gap:
+The authorized scope was limited to:
 
 ```text
 metadata_json
@@ -21,144 +21,116 @@ idx_notification_outbox_payment
 idx_notification_outbox_product
 ```
 
-The current corrected pre-authorization evidence showed `notification_outbox` rows = 0. The execution controller reruns live state and must preserve the exact row count it sees immediately before DDL.
+No Build 197 annotation-index, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, CAIP-copy, or Production-promotion operation was authorized.
 
-No Build 197 annotation-index, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, CAIP-copy, or Production-promotion operation is authorized.
+## Owner-run Build 432 evidence
 
-## Guarded execution controller
-
-Use only:
+### Safety regression
 
 ```text
-scripts/build431_production_notification_execution.py
+BUILD 431 FULL NOTIFICATION AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
+Prior four-index Notification authorization sufficient: NO
+Full Build 403 Notification token path: PRESENT / NOT EXERCISED
+Full Production backup boundary: PASS
+Exact five-index pre-write drift refusal: PASS
+notification_outbox row preservation: PASS
+Annotation/rebuild execution path: NONE
+Cloudflare access: NONE
+Production mutation executed: NO
+PRODUCTION PROMOTION: CLOSED
 ```
 
-It requires:
-
-1. green Product-number Production proof;
-2. green Gift Card Production proof;
-3. exact full-Build-403 authorization token;
-4. fresh corrected Notification read-only preflight;
-5. exact `metadata_json` + five-index missing state before backup;
-6. fresh full Production D1 export;
-7. backup target/bytes/SHA-256/<=30-minute verification;
-8. exact state reread after backup;
-9. only the missing Build 403 Notification DDL;
-10. exact `notification_outbox` row preservation;
-11. independent final read-only postcheck.
-
-## Run sequence
-
-Run from `dev` only and stop if any stage returns nonzero:
-
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-set -o pipefail
-
-python -m py_compile \
-  scripts/build431_notification_full_authorization_preflight.py \
-  scripts/build431_production_notification_execution.py \
-  scripts/build431_notification_execution_regression.py
-
-python scripts/build431_notification_execution_regression.py
-
-python -u scripts/build431_notification_full_authorization_preflight.py --run \
-  2>&1 | tee build432_notification_fresh_prewrite.txt
-
-python -u scripts/build431_production_notification_execution.py \
-  --backup \
-  --confirm AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403 \
-  2>&1 | tee build432_notification_backup.txt
-
-python -u scripts/build431_production_notification_execution.py \
-  --apply \
-  --confirm AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403 \
-  2>&1 | tee build432_notification_apply.txt
-
-python -u scripts/build431_production_notification_execution.py \
-  --postcheck \
-  2>&1 | tee build432_notification_postcheck.txt
-```
-
-For a single chained shell block, use `&&` between stages so a failure cannot advance to a later command.
-
-## Required fresh pre-write proof
-
-Before backup the live state must still be the exact corrected scope:
+### Fresh pre-write state
 
 ```text
 metadata_json exists: False
 Missing canonical Notification indexes:
-  idx_notification_outbox_status_due
   idx_notification_outbox_kind_destination
   idx_notification_outbox_order
   idx_notification_outbox_payment
   idx_notification_outbox_product
+  idx_notification_outbox_status_due
+notification_outbox rows: 0
 Exact full Build 403 gap: YES
 ```
 
-If live state differs, stop before backup and re-plan from current evidence.
-
-## Required backup proof
-
-The dedicated Notification backup must report:
+### Dedicated full Production backup
 
 ```text
 BUILD 428 PRODUCTION NOTIFICATION BACKUP: PASS
-Backup: local_backups/<notification-specific full Production export>.sql
-Bytes: <nonzero>
-SHA-256: <digest>
+Backup: local_backups\build428_prod_before_notification_20260826T013708Z.sql
+Bytes: 19002868
+SHA-256: e4b4e4ea2f328aaf244b6f080f1bdc1d1bd599a421e19d914ce6b45545acd149
 Production mutation executed: NO
-
 BUILD 431 FULL BUILD 403 NOTIFICATION BACKUP BOUNDARY: PASS
-Production mutation executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Required apply proof
+The apply rechecked the same backup at age 12 seconds before DDL.
 
-The authorized apply must finish:
+### Authorized additive write
+
+Wrangler 4.126.0 executed the bounded full-Build-403 SQL on Production UUID `0dc8fa3e-319c-45f7-a515-34c8acd89fcf`:
+
+```text
+Processed queries: 7
+Executed queries: 7
+Rows read: 1277
+Rows written: 6
+changed_db: true
+final bookmark: 00000d3f-00000006-000050d3-c42a1f72d226040dadbd8389fddc2c53
+```
+
+The six schema writes correspond to the one missing column plus five missing indexes; no business-row insertion/update/delete was part of this stage.
+
+### Apply postcheck
 
 ```text
 BUILD 431 PRODUCTION FULL BUILD 403 NOTIFICATION POSTCHECK: PASS
-notification_outbox rows preserved: <before> -> <same after>
+notification_outbox rows preserved: 0 -> 0
 metadata_json present: True
 All five canonical indexes present: True
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Required independent postcheck
+### Independent read-only postcheck
 
 ```text
 BUILD 431 PRODUCTION FULL BUILD 403 NOTIFICATION READ-ONLY POSTCHECK: PASS
-notification_outbox rows: <preserved>
+notification_outbox rows: 0
 metadata_json present: True
 All five canonical indexes present: True
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Stop conditions
+## Disposition
 
-- Local regression failure: stop before Cloudflare access.
-- Fresh preflight drift: stop before backup.
-- Cloudflare `7403`: classify as authorization/read interruption; if DDL has not begun, do not continue. If DDL may have begun, run only the read-only Notification postcheck and retain any completed backup.
-- Backup missing/stale/hash mismatch: stop and recreate only the Notification backup under the same full-scope authorization.
-- Apply/postcheck failure: stop all later Production families and retain the Notification backup.
+The full Build 403 `notification_outbox` additive Production gap is closed and proven.
 
-## Safety state before execution
+The prior token `AUTHORIZE-BUILD428-PROD-NOTIFICATION` remains superseded and must not be reused. The full-Build-403 authorization has been exercised for this completed stage and does not authorize any later family.
+
+## Safety state after execution
 
 ```text
 Product-number Production stage             COMPLETE / PROVEN
 Gift Card Production stage                  COMPLETE / PROVEN
-Full Build 403 Notification boundary        PASS (20/20)
-Full Build 403 Notification authorization   RECEIVED
-Notification Production backup              NOT CREATED
-Notification Production mutation            NOT EXECUTED
+Full Build 403 Notification stage           COMPLETE / PROVEN
+Notification Production backup              PASS
+Notification Production mutation            PASS / BOUNDED
+Notification independent postcheck          PASS
 Annotation-index authorization              NOT RECEIVED
 Rebuild-family authorization                NOT RECEIVED
 R2/provider mutation                        DISABLED
 Production promotion                        CLOSED
 ```
+
+## Next boundary
+
+Build 197 Product-image annotation index is next. Its authorization boundary must be read-only/local first and must prove:
+
+- completed Product-number, Gift Card, and full Notification prerequisites;
+- `idx_product_image_annotations_product_image_build197` live existence state;
+- current `product_image_annotations` row count;
+- required `product_id` and `product_image_id` columns;
+- no annotation backup, authorization, or mutation inferred;
+- Production promotion remains closed.
