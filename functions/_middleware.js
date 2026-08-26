@@ -10,6 +10,11 @@ import {
   sharedServiceUnavailableResponse,
 } from './api/_lib/appModules.js';
 import {
+  appModuleSessionUnavailableResponse,
+  isAppModuleSessionVerificationUnavailable,
+  resolveAppModuleRequestUser,
+} from './api/_lib/appModuleSessionGuard.js';
+import {
   moduleKeyForPath,
   sharedServiceContractForPath,
 } from './api/_lib/appModuleRoutes.js';
@@ -51,6 +56,15 @@ function shouldBypass(pathname) {
   return false;
 }
 
+async function resolveGuardUser(request, env, pathname) {
+  try {
+    return await resolveAppModuleRequestUser(request, env);
+  } catch (error) {
+    if (!isAppModuleSessionVerificationUnavailable(error)) throw error;
+    return appModuleSessionUnavailableResponse({ api: isApiPath(pathname) });
+  }
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
   const pathname = new URL(request.url).pathname;
@@ -61,7 +75,10 @@ export async function onRequest(context) {
   // the current user. Mutation contracts additionally require a manage-level consumer.
   const sharedContract = sharedServiceContractForPath(pathname);
   if (sharedContract) {
-    const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract);
+    const resolvedUser = await resolveGuardUser(request, env, pathname);
+    if (resolvedUser instanceof Response) return resolvedUser;
+
+    const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract, { user: resolvedUser });
     context.data.ddSharedServiceAccess = sharedAccess;
     context.data.ddModuleBuild = BUILD;
     if (!sharedAccess.allowed) return sharedServiceUnavailableResponse(sharedAccess);
@@ -71,7 +88,10 @@ export async function onRequest(context) {
   const moduleKey = moduleKeyForPath(pathname);
   if (!moduleKey) return await context.next();
 
-  const access = await moduleAccessForRequest(request, env, moduleKey);
+  const resolvedUser = await resolveGuardUser(request, env, pathname);
+  if (resolvedUser instanceof Response) return resolvedUser;
+
+  const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
   context.data.ddModuleAccess = access;
   context.data.ddModuleBuild = BUILD;
 
