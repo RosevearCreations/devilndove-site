@@ -1,6 +1,8 @@
 // Devil n Dove Build 440 — Development Tool/Supply R2 restore.
 // Runtime Development-only repair path. Uses native D1/R2 bindings: no Wrangler, npm,
 // local shell, request-time DDL, D1 mutation, Production R2 mutation, or overwrite path.
+// site_item_inventory is the operational Tool/Supply image authority; catalog_items is
+// intentionally not used to define restore scope.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
@@ -8,7 +10,7 @@ const BUILD = 440;
 const PUBLIC_ORIGIN = 'https://assets.devilndove.com';
 const PUBLIC_PREFIX = `${PUBLIC_ORIGIN}/`;
 const AUTHORIZATION = 'BUILD440_DEV_R2_RESTORE';
-const ALLOWED_PREFIXES = ['Tools/', 'Supplies/'];
+const ALLOWED_PREFIXES = ['Toolshed/', 'Tools/', 'Supplies/'];
 const MAX_BATCH = 8;
 const MAX_OBJECT_BYTES = 25 * 1024 * 1024;
 const json = (data, status = 200) => jsonResponse(data, status, { 'Cache-Control': 'no-store' });
@@ -21,8 +23,10 @@ function isDevelopmentHost(request) {
 
 function canonicalR2Key(value) {
   const raw = normalizeText(value);
-  if (!raw || !raw.toLowerCase().startsWith(PUBLIC_PREFIX.toLowerCase())) return '';
-  let key = raw.slice(PUBLIC_PREFIX.length).replace(/^\/+/, '');
+  if (!raw) return '';
+  let key = raw;
+  if (raw.toLowerCase().startsWith(PUBLIC_PREFIX.toLowerCase())) key = raw.slice(PUBLIC_PREFIX.length);
+  key = key.replace(/^\/+/, '');
   try { key = decodeURIComponent(key); } catch {}
   if (!ALLOWED_PREFIXES.some((prefix) => key.startsWith(prefix))) return '';
   if (!key || key.length > 1024 || key.includes('\0') || key.includes('\r') || key.includes('\n')) return '';
@@ -66,7 +70,9 @@ function verifiedRestoreMetadata(object, key) {
 async function restoreOne(bucket, row) {
   const key = canonicalR2Key(row.image_url);
   if (!key) {
-    throw new Error(`Unsupported current D1 image URL for catalog item ${Number(row.catalog_item_id || 0)}.`);
+    const error = new Error(`Unsupported operational Inventory image URL for ${row.item_kind || 'item'} ${normalizeText(row.source_key) || Number(row.site_item_inventory_id || 0)}.`);
+    error.code = 'inventory_image_url_unsupported';
+    throw error;
   }
 
   const existing = await bucket.head(key);
@@ -78,7 +84,9 @@ async function restoreOne(bucket, row) {
     }
     return {
       status: 'already_verified',
-      catalog_item_id: Number(row.catalog_item_id || 0),
+      site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+      item_kind: row.item_kind || '',
+      source_key: row.source_key || '',
       key,
       bytes: Number(existing.size || 0),
       sha256: normalizeText(existing.customMetadata?.build440_source_sha256),
@@ -110,6 +118,11 @@ async function restoreOne(bucket, row) {
     error.code = 'source_size_invalid';
     throw error;
   }
+  if (declaredLength > 0 && declaredLength !== buffer.byteLength) {
+    const error = new Error(`Public source length mismatch for ${key}: header ${declaredLength}, received ${buffer.byteLength}.`);
+    error.code = 'source_truncated';
+    throw error;
+  }
 
   const contentType = contentTypeForKey(key, sourceResponse.headers.get('content-type') || '');
   if (!contentType || !contentType.startsWith('image/')) {
@@ -131,7 +144,9 @@ async function restoreOne(bucket, row) {
     }
     return {
       status: 'already_verified',
-      catalog_item_id: Number(row.catalog_item_id || 0),
+      site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+      item_kind: row.item_kind || '',
+      source_key: row.source_key || '',
       key,
       bytes: Number(beforePut.size || 0),
       sha256: normalizeText(beforePut.customMetadata?.build440_source_sha256),
@@ -161,7 +176,9 @@ async function restoreOne(bucket, row) {
 
   return {
     status: 'restored_verified',
-    catalog_item_id: Number(row.catalog_item_id || 0),
+    site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+    item_kind: row.item_kind || '',
+    source_key: row.source_key || '',
     key,
     bytes: buffer.byteLength,
     sha256,
@@ -196,13 +213,17 @@ export async function onRequestPost({ request, env }) {
 
   try {
     const batchRows = rows(await db.prepare(`
-      SELECT catalog_item_id,item_kind,source_key,name,image_url
-      FROM catalog_items
-      WHERE item_kind IN ('tool','supply')
-        AND COALESCE(status,'active')='active'
+      SELECT site_item_inventory_id,
+             LOWER(TRIM(COALESCE(source_type,''))) AS item_kind,
+             external_key AS source_key,
+             item_name AS name,
+             image_url
+      FROM site_item_inventory
+      WHERE COALESCE(is_active,1)=1
+        AND LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
         AND TRIM(COALESCE(image_url,''))<>''
-        AND catalog_item_id>?
-      ORDER BY catalog_item_id ASC
+        AND site_item_inventory_id>?
+      ORDER BY site_item_inventory_id ASC
       LIMIT ?
     `).bind(cursor, limit).all());
 
@@ -211,6 +232,7 @@ export async function onRequestPost({ request, env }) {
         ok: true,
         build: BUILD,
         mode: 'development_inventory_asset_restore',
+        authority: 'D1 site_item_inventory',
         destination: 'PRODUCT_MEDIA_BUCKET',
         source: PUBLIC_ORIGIN,
         mutation_scope: 'development_r2_missing_objects_only',
@@ -229,7 +251,7 @@ export async function onRequestPost({ request, env }) {
       results.push(await restoreOne(bucket, row));
     }
 
-    const nextCursor = Number(batchRows[batchRows.length - 1]?.catalog_item_id || cursor);
+    const nextCursor = Number(batchRows[batchRows.length - 1]?.site_item_inventory_id || cursor);
     const restored = results.filter((entry) => entry.status === 'restored_verified');
     const already = results.filter((entry) => entry.status === 'already_verified');
 
@@ -237,6 +259,7 @@ export async function onRequestPost({ request, env }) {
       ok: true,
       build: BUILD,
       mode: 'development_inventory_asset_restore',
+      authority: 'D1 site_item_inventory',
       destination: 'PRODUCT_MEDIA_BUCKET',
       source: PUBLIC_ORIGIN,
       mutation_scope: 'development_r2_missing_objects_only',
@@ -260,6 +283,7 @@ export async function onRequestPost({ request, env }) {
       code: normalizeText(error?.code) || 'inventory_asset_restore_failed',
       error: normalizeText(error?.message) || 'Development inventory asset restore failed.',
       mutation_scope: 'development_r2_missing_objects_only',
+      authority: 'D1 site_item_inventory',
       d1_mutation: false,
       production_mutation: false,
       cursor,
