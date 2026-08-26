@@ -1,7 +1,23 @@
 {
   "version": 1,
   "include": [
-    "/api/*"
+    "/api/*",
+    "/admin",
+    "/admin/*",
+    "/shop",
+    "/shop/*",
+    "/cart",
+    "/cart/*",
+    "/checkout",
+    "/checkout/*",
+    "/product",
+    "/product/*",
+    "/products",
+    "/products/*",
+    "/custom-request",
+    "/custom-request/*",
+    "/members",
+    "/members/*"
   ],
   "exclude": []
 }
