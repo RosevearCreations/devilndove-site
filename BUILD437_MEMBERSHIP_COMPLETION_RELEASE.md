@@ -2,9 +2,19 @@
 
 ## Status
 
-**SOURCE/RUNTIME/REBUILD PACKAGE COMPLETE / PRODUCTION MEMBERSHIP REBUILD AUTHORIZATION NOT RECEIVED / ONE FINAL GUARDED EXECUTION REMAINS / PRODUCTION PROMOTION CLOSED**
+**SOURCE/RUNTIME/REBUILD PACKAGE COMPLETE / PRODUCTION MEMBERSHIP REBUILD AUTHORIZATION RECEIVED / FINAL GUARDED EXECUTION PENDING / PRODUCTION PROMOTION CLOSED**
 
 Build 437 supersedes the fragmented Membership working notes from Builds 434–436 as the current Membership completion authority. Those earlier artifacts remain historical evidence only.
+
+## Authorization state
+
+The owner explicitly supplied the exact Membership-only Production authorization token:
+
+```text
+AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
+```
+
+Authorization is now **RECEIVED / UNSPENT** and applies only to the guarded Membership Build 395 rebuild described below. It does not authorize Fractional Inventory/Creative Project rebuilds, Product/FK rebuilds, Accounting/default/nullability rebuilds, R2/provider mutation, CAIP copying, or Production promotion.
 
 ## What is complete in source
 
@@ -49,11 +59,11 @@ Legacy user object: idx_membership_tier_policies_sort
 Legacy index columns: sort_order, code
 ```
 
-No Membership backup has been created and no Membership Production mutation has occurred.
+No Membership backup has been created and no Membership Production mutation has occurred yet.
 
-## Exact final Production scope
+## Exact authorized Production scope
 
-The final authorized Membership rebuild may only transform:
+The authorized Membership rebuild may only transform:
 
 ```text
 membership_tier_policy_id -> policy_id
@@ -77,19 +87,9 @@ CREATE INDEX idx_membership_tier_policies_sort
 
 No Build 395 seed value may overwrite an existing Production business value.
 
-## Exact authorization token
+## One final owner-run sequence — AUTHORIZED
 
-Only this literal token authorizes the Membership Production rebuild:
-
-```text
-AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
-```
-
-Do not infer it from continuation language or from the owner's request to finish Membership source work.
-
-## One final owner-run sequence after explicit authorization
-
-After the exact token is supplied, use one guarded command chain only:
+Use this one guarded command chain only:
 
 ```bash
 cd /c/Dev/devilndove-site
@@ -149,7 +149,7 @@ If any command fails, stop at that command. If Cloudflare returns an authorizati
 
 ## Release state after successful final execution
 
-After the successful final sequence, Membership is considered **COMPLETE / PROVEN** and the Membership-specific authorization token is spent. The next work may move to another feature or family without continuing Membership micro-gates.
+After the successful final sequence, Membership is considered **COMPLETE / PROVEN** and this Membership-specific authorization token becomes **SPENT / COMPLETE**. The next work may move to another feature or family without continuing Membership micro-gates.
 
 The following remain explicitly outside Membership authorization:
 
