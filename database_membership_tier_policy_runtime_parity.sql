@@ -1,6 +1,8 @@
--- Devil n Dove Build 395
+-- Devil n Dove Build 395 canonical table authority / Build 437 completion hardening
 -- Membership tier-policy schema/default authority.
 -- Read/write request handlers must not create or seed this table at request time.
+-- IMPORTANT: legacy Production must be upgraded only through the guarded Membership
+-- rebuild controller; do not run this authority directly against the legacy shape.
 
 PRAGMA foreign_keys = ON;
 
@@ -16,6 +18,9 @@ CREATE TABLE IF NOT EXISTS membership_tier_policies (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_membership_tier_policies_sort
+  ON membership_tier_policies(sort_order ASC, tier_code ASC);
 
 INSERT INTO membership_tier_policies (
   tier_code, title, short_description, benefits_json, badge_color, sort_order, is_visible
