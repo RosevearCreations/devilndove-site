@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTES = ROOT / '_routes.json'
+MIDDLEWARE = ROOT / 'functions' / '_middleware.js'
 
 required = {
     '/api/*',
@@ -31,6 +32,7 @@ required = {
 payload = json.loads(ROUTES.read_text(encoding='utf-8'))
 includes = set(payload.get('include') or [])
 excludes = set(payload.get('exclude') or [])
+middleware = MIDDLEWARE.read_text(encoding='utf-8')
 
 checks = [
     ('routes schema version is 1', payload.get('version') == 1),
@@ -41,6 +43,8 @@ checks = [
     ('no exclusion overrides the required module-owned routes', not any(route in excludes for route in required)),
     ('route count remains well below the Cloudflare 100-rule ceiling', len(includes) + len(excludes) < 50),
     ('API route remains covered', '/api/*' in includes),
+    ('middleware emits Build 438 module-guard diagnostic header', "headers.set('X-DND-Module-Guard', String(BUILD))" in middleware),
+    ('middleware emits the resolved direct module key diagnostic', "headers.set('X-DND-Module-Key', moduleKey)" in middleware),
 ]
 
 failures = []
@@ -60,4 +64,5 @@ print(f'BUILD 438 PAGES INVOCATION ROUTES TEST: PASS ({len(checks)}/{len(checks)
 print('Admin/module-owned static pages: FUNCTIONS-GUARDED')
 print('Transactional Commerce pages: FUNCTIONS-GUARDED')
 print('General informational/static pages: STATIC / NOT FORCED THROUGH FUNCTIONS')
+print('Live deployment marker: X-DND-Module-Guard / X-DND-Module-Key')
 print('Production mutation capability: NONE')
