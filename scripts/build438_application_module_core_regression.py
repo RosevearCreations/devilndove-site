@@ -26,6 +26,8 @@ VERIFY_SQL = ROOT / 'BUILD438_D1_VERIFICATION.sql'
 ROUTE_TEST = ROOT / 'scripts/build438_module_route_map_test.mjs'
 ACCESS_POLICY_TEST = ROOT / 'scripts/build438_module_access_policy_test.mjs'
 DEV_HELPER = ROOT / 'scripts/build438_development_module_activation.py'
+FULL_SCHEMA_SYNC = ROOT / 'scripts/build438_sync_full_schema.py'
+SCHEMA_REFERENCE = ROOT / 'DATABASE_SCHEMA_REFERENCE.md'
 
 EXPECTED_MODULES = ['business-administration', 'commerce-operations', 'creative-production']
 
@@ -89,6 +91,8 @@ def main() -> int:
     route_test = read(ROUTE_TEST)
     access_policy_test = read(ACCESS_POLICY_TEST)
     dev_helper = read(DEV_HELPER)
+    full_schema_sync = read(FULL_SCHEMA_SYNC)
+    schema_reference = read(SCHEMA_REFERENCE)
     sim = migration_simulation()
 
     print('BUILD 438 APPLICATION CORE / MODULE ACTIVATION REGRESSION')
@@ -115,7 +119,7 @@ def main() -> int:
     check("fetch(force ? '/api/modules?fresh=1' : '/api/modules'" in admin_bootstrap and "dd-admin-module-runtime.mjs?v=438" in admin_bootstrap and 'setInterval' not in admin_bootstrap, 'Admin availability is read before existing umbrella runtime activation with explicit fresh refresh and no polling')
     check("dd-application-module-bootstrap.mjs?v=438" in admin_js and 'dd-admin-module-runtime.mjs?v=397' not in admin_js and 'site-auth-ui.js?v=438' in admin_index and 'admin.js?v=438' in admin_index, 'Admin shell enters through Build 438 authoritative bootstrap with current cache-busted shared scripts')
     check("dd-public-module-visibility.mjs?v=438" in auth_ui and 'sessionStorage' in public_visibility and 'CORE_RECOVERY_PREFIX' in public_visibility and 'setInterval' not in public_visibility, 'public/member navigation uses bounded per-tab visibility caching and preserves recovery access without polling')
-    check('DD_APPLICATION_MODULES' in app_groups and "id: 'commerce-operations'" in app_groups and "id: 'creative-production'" in app_groups and "id: 'business-administration'" in app_groups and 'three top-level' in plan.lower() and 'SELECT' in verify_sql and EXPECTED_MODULES[1] in dev_helper and 'EXPECTED_DATABASE_ID' in dev_helper, 'Build 438 extends the existing three-module architecture with read-only verification and a hard-pinned Development helper')
+    check('DD_APPLICATION_MODULES' in app_groups and "id: 'commerce-operations'" in app_groups and "id: 'creative-production'" in app_groups and "id: 'business-administration'" in app_groups and 'three top-level' in plan.lower() and 'SELECT' in verify_sql and EXPECTED_MODULES[1] in dev_helper and 'EXPECTED_DATABASE_ID' in dev_helper and 'BUILD 438 FULL-SCHEMA SYNC' in full_schema_sync and 'database_full_schema.sql' in schema_reference and 'database_build438_application_module_activation.sql' in schema_reference, 'Build 438 extends the three-module architecture with exact D1 verification, hard-pinned Development apply and deterministic fresh-schema synchronization')
 
     print()
     if failures:
@@ -134,6 +138,7 @@ def main() -> int:
     print('Module access policy unit proof: SOURCE READY')
     print('Authoritative client bootstrap: SOURCE READY')
     print('Admin Application Modules control + health + route proof: SOURCE READY')
+    print('Deterministic full-schema sync helper: SOURCE READY / OWNER RUN REQUIRED')
     print('Request-time schema mutation: NONE')
     print('Background polling introduced by Build 438: NONE')
     print('Production D1 migration executed: NO')
