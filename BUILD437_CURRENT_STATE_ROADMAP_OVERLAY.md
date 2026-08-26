@@ -16,33 +16,32 @@ Build 437 Membership Build 395             COMPLETE / PROVEN
 
 ## Canonical current documentation
 
-Current cross-project authority has now been consolidated into:
+Current cross-project authority is now:
 
-1. `AI_HANDOFF.md` — Build 437 architecture, safety and subsystem authority.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — Build 437 application/module sanity check and prioritized open functionality.
+1. `AI_HANDOFF.md` — Build 438 source / Build 437 Production baseline architecture and safety.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — Build 438 source/development status and prioritized open functionality.
+3. `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` — current specialist Application Core / Module Activation authority.
+4. `BUILD438_VALIDATION.md` — Development-first owner-run validation/rollout authority.
 
-The next specialist architecture plan is:
+This Build 437 overlay is retained release evidence only and does not override those newer canonical files.
 
-- `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` — planned Application Core / Module Registry release.
+## Current module direction
 
-This Build 437 overlay is retained release evidence and should not override the newer canonical files above.
-
-## Recommended next direction
-
-The default next step is **Build 438 Application Core / Module Registry**, not another schema micro-gate.
-
-Existing application surfaces already map to four modules:
+Repository inspection during Build 438 confirmed that Builds 281–397 already established:
 
 ```text
-customer_commerce   Customer Commerce
-member_account      Customer / Member Account
-operations          Creative & Production Operations
-business_admin      Business Administration
+Devil n Dove Application Core
+    |
+    +-- commerce-operations
+    +-- creative-production
+    +-- business-administration
 ```
 
-They are currently separated primarily by routes/authentication. Build 438 will add the missing central activation/access/runtime layer so an inactive module can suppress navigation, direct access, startup calls, polling/timers, autosave/sync and provider work.
+Customer storefront/member account are Commerce & Operations surfaces; they are not a fourth top-level runtime module.
 
-After the module core, continue the prioritized functionality in `PROJECT_STATUS_AND_ROADMAP.md`, especially CAIP timecode evidence, Creative Process/Content Studio handoff, Packaging physical proof, Media Studio visual completion, Product/Inventory operational workflows, mobile tooling and go-live acceptance.
+Build 438 is adding the missing persistent/server-authoritative enable/disable, role-access, route/API guard, runtime-suppression and background-permission layer around those existing three modules.
+
+After Build 438 Development proof, continue the prioritized functionality in `PROJECT_STATUS_AND_ROADMAP.md`, especially CAIP timecode evidence, Creative Process/Content Studio handoff, Packaging physical proof, Media Studio visual completion, Product/Inventory operational workflows, mobile tooling and go-live acceptance.
 
 ## Remaining schema/parity families
 
@@ -55,12 +54,14 @@ Accounting default / nullability rebuilds
 Other remaining structural drift
 ```
 
-When one of these is chosen, begin with a fresh read-only scope and issue a new family-specific authorization only if a Production mutation is genuinely required.
+When one is chosen, begin with fresh read-only scope and issue a new family-specific authorization only if Production mutation is genuinely required.
 
 ## Release safety state
 
 ```text
 Membership authorization token             SPENT / COMPLETE
+Build 438 Development module migration      PENDING OWNER RUN
+Build 438 Production module migration       NOT AUTHORIZED
 R2/provider mutation                        DISABLED unless explicitly scoped
 CAIP D1-only copy                           FORBIDDEN
 Broad Production promotion                  CLOSED
@@ -87,4 +88,4 @@ total_size_bytes: 66279989
 
 ## Next-session instruction
 
-Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. For the next implementation pass, read `BUILD438_APPLICATION_CORE_MODULE_PLAN.md`. Do not infer that older Build 434–436 Membership instructions or this historical overlay represent pending Membership work.
+Start with `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`. For Build 438 implementation/validation, read `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` and `BUILD438_VALIDATION.md`. Do not infer that older Build 434–436 Membership instructions or this historical overlay represent pending Membership work.
