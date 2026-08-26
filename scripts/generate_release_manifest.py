@@ -44,7 +44,7 @@ def main() -> int:
             'sha256': sha256(path),
         })
     payload={
-        'build_label': 'Build 246',
+        'build_label': 'Build 437',
         'generated_by': 'scripts/generate_release_manifest.py',
         'file_count': len(files),
         'total_size_bytes': sum(item['size_bytes'] for item in files),
@@ -53,8 +53,8 @@ def main() -> int:
     out=ROOT/'data/site/release-package-manifest.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
-    print(json.dumps({'manifest': str(out.relative_to(ROOT)), 'file_count': len(files), 'total_size_bytes': payload['total_size_bytes']}, indent=2))
+    print(json.dumps({'manifest': str(out.relative_to(ROOT)), 'build_label': payload['build_label'], 'file_count': len(files), 'total_size_bytes': payload['total_size_bytes']}, indent=2))
     return 0
 
-if __name__ == '__main__':
+if __name__=='__main__':
     raise SystemExit(main())
