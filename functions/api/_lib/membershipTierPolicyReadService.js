@@ -1,12 +1,24 @@
-// Devil n Dove Build 362 contract / Build 365 implementation hardening — non-mutating Membership tier-policy read authority.
-// GET/read paths never create or seed schema. Build 365 removes fixed-column/sqlite_master assumptions
-// so older compatible table shapes cannot collapse the read into an opaque 500. Retained POST compatibility
-// remains responsible for any legacy write-time ensure/seed behavior until separately extracted.
+// Devil n Dove Build 437 — non-mutating Membership tier-policy read authority.
+// Reads remain compatible with the reviewed legacy Production shape until the
+// guarded Build 395 rebuild completes. Writes must separately prove the exact
+// canonical schema before mutating membership_tier_policies.
 
-export const BUILD = 362;
-export const IMPLEMENTATION_BUILD = 365;
+export const BUILD = 437;
+export const IMPLEMENTATION_BUILD = 437;
 export const OWNER = 'operations';
 export const TABLE = 'membership_tier_policies';
+export const CANONICAL_COLUMNS = Object.freeze([
+  'policy_id',
+  'tier_code',
+  'title',
+  'short_description',
+  'benefits_json',
+  'badge_color',
+  'sort_order',
+  'is_visible',
+  'created_at',
+  'updated_at',
+]);
 
 function text(value) {
   return String(value ?? '').trim();
@@ -68,9 +80,9 @@ function benefits(value) {
 export function mapTierPolicyRow(row) {
   const benefitSource = row?.benefits_json ?? row?.benefits ?? '[]';
   return Object.freeze({
-    policy_id: Number(row?.policy_id ?? row?.id ?? 0),
+    policy_id: Number(row?.policy_id ?? row?.membership_tier_policy_id ?? row?.id ?? 0),
     tier_code: text(row?.tier_code ?? row?.code).toLowerCase(),
-    title: text(row?.title ?? row?.name),
+    title: text(row?.title ?? row?.display_title ?? row?.name),
     short_description: text(row?.short_description ?? row?.description),
     benefits: Object.freeze(benefits(benefitSource)),
     badge_color: text(row?.badge_color ?? row?.badge_colour),
@@ -88,9 +100,9 @@ function missingTableError(error) {
 
 async function readStoredRows(db) {
   try {
-    // SELECT * is deliberate during the compatibility window: Build 362 originally named
-    // optional legacy columns explicitly, which can throw before readiness metadata is returned.
-    // Mapping is tolerant; the read remains bounded to one known table and performs no mutation.
+    // SELECT * is deliberate during the compatibility window. It keeps the GET
+    // path valid for both the reviewed legacy eleven-column table and canonical
+    // Build 395 without request-time schema mutation.
     const result = await db.prepare(`SELECT * FROM membership_tier_policies`).all();
     return Object.freeze({ schema_ready: true, rows: Object.freeze(rows(result)) });
   } catch (error) {
@@ -107,6 +119,35 @@ function sortPolicies(items) {
     if (order) return order;
     return text(a?.tier_code).localeCompare(text(b?.tier_code));
   });
+}
+
+export async function readMembershipTierPolicySchemaState(db) {
+  if (!db) throw new TypeError('A D1 database binding is required.');
+  try {
+    const result = await db.prepare(`PRAGMA table_info("membership_tier_policies")`).all();
+    const columnRows = rows(result);
+    const columns = columnRows.map((row) => text(row?.name)).filter(Boolean);
+    const tableExists = columns.length > 0;
+    const canonicalSchemaReady =
+      columns.length === CANONICAL_COLUMNS.length &&
+      columns.every((column, index) => column === CANONICAL_COLUMNS[index]);
+    return Object.freeze({
+      table_exists: tableExists,
+      columns: Object.freeze(columns),
+      canonical_schema_ready: canonicalSchemaReady,
+      request_time_schema_mutation: false,
+    });
+  } catch (error) {
+    if (missingTableError(error)) {
+      return Object.freeze({
+        table_exists: false,
+        columns: Object.freeze([]),
+        canonical_schema_ready: false,
+        request_time_schema_mutation: false,
+      });
+    }
+    throw error;
+  }
 }
 
 export async function readMembershipTierPolicies(db) {
@@ -134,7 +175,7 @@ export async function readMembershipTierPolicies(db) {
     missing_tables: Object.freeze([]),
     request_time_schema_mutation: false,
     defaults_materialized: stored.length > 0,
-    source: stored.length ? 'database' : 'in-memory-defaults-empty-table',
+    source: stored.length ? 'database-compatible' : 'in-memory-defaults-empty-table',
     items: Object.freeze(stored.length ? stored : [...DEFAULT_TIER_POLICIES]),
   });
 }
