@@ -19,15 +19,17 @@ checks = [
     ('three shared probes are read-only contracts', all(path in js for path in ('/api/admin/contracts/inventory-read?limit=1','/api/admin/contracts/content-media?limit=1','/api/admin/contracts/accounting-read?limit=1'))),
     ('no shared Inventory mutation contract is invoked', '/api/admin/contracts/inventory-post' not in js and '/api/admin/contracts/inventory-reverse' not in js),
     ('module changes use audited control API', "action: 'set_module_state'" in js and "const API = '/api/admin/app-modules'" in js),
-    ('module restore is protected by finally', 'finally {' in js and 'exact restore' in js),
+    ('module restore is protected by finally', js.count('finally {') >= 4 and 'exact restore' in js),
     ('client availability is checked while disabled', 'DDApplicationModules.isAvailable(item.module_key) === false' in js),
-    ('Pages guard headers are required', "X-DND-Module-Guard" in js and "X-DND-Module-Key" in js and "X-DND-Shared-Contract" in js),
+    ('Pages guard headers are required', 'X-DND-Module-Guard' in js and 'X-DND-Module-Key' in js and 'X-DND-Shared-Contract' in js),
     ('read-level probe uses Business Administration', "module_key: 'business-administration'" in js and "path: '/api/admin/startup-readiness'" in js),
     ('read-level mutation probe is intentionally unsupported', '__build438_read_guard_probe__' in js),
     ('read-level denial requires canonical code', 'module_access_level_read_only' in js),
-    ('admin role is restored after read-level proof', "label: 'Admin role exact restore'" not in js and 'Admin role exact restore' in js),
+    ('admin role transition uses audited role-control action', "action: 'set_role_access'" in js and "access_level: 'read'" in js),
+    ('admin role exact restore is checked', 'Admin role exact restore' in js and 'roleRestored' in js),
     ('final health/module/background state is rechecked', 'Final Core Health' in js and 'Final module state' in js and 'Final background state' in js),
-    ('no Product/Inventory/Creative business table SQL exists in browser acceptance code', all(token not in js for token in ('UPDATE products','UPDATE site_item_inventory','DELETE FROM','INSERT INTO'))),
+    ('acceptance runner contains no direct SQL mutation', all(token not in js for token in ('UPDATE ','DELETE FROM','INSERT INTO','DROP TABLE','ALTER TABLE'))),
+    ('acceptance runner has no Production target string', 'devilndove-prod' not in js),
 ]
 
 failures = []
@@ -45,7 +47,9 @@ if failures:
 
 print(f'BUILD 438 AUTHENTICATED ACCEPTANCE SAFETY REGRESSION: PASS ({len(checks)}/{len(checks)})')
 print('Audited temporary module controls: PRESENT / RESTORING')
+print('Audited temporary role control: PRESENT / RESTORING')
 print('Shared live probes: READ-ONLY ONLY')
 print('Inventory post/reverse dummy mutation probes: ABSENT')
 print('Read-level mutation probe: PRE-ENDPOINT / UNSUPPORTED ACTION / FAIL-SAFE')
+print('Direct SQL mutation in browser proof: NONE')
 print('Production mutation capability: NONE')
