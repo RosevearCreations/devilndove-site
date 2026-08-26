@@ -1,1194 +1,10 @@
 {
   "build_label": "Build 437",
   "generated_by": "scripts/generate_release_manifest.py",
-  "file_count": 2062,
-  "total_size_bytes": 407707002,
+  "source_scope": "git_tracked_release_files",
+  "file_count": 1872,
+  "total_size_bytes": 66279989,
   "files": [
-    {
-      "path": ".wrangler/build281/MODULE_INVENTORY.generated.md",
-      "size_bytes": 63007,
-      "sha256": "274046826ccb0e73bdcfc0d10f27dc03bdec610850f6f5c2d1f3611628675f4a"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0001.sql",
-      "size_bytes": 44637,
-      "sha256": "3c2d5294404fb3c19c4bf1df2573442d528ff4bac1448c0b41c9f2fa5340ac93"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0002.sql",
-      "size_bytes": 43659,
-      "sha256": "41d4c91db3e1aa5d45de51bf56361aa8c3a2805a1d2c63a87b63210fd71fbebf"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0003.sql",
-      "size_bytes": 44988,
-      "sha256": "b03316dd93386ce582b09f47af2482b0856ebc7adcc4fc455c162275bc1e9c66"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0004.sql",
-      "size_bytes": 44604,
-      "sha256": "54d6c6e31ca57ac9317d39788c4648d7214efc24483eb8c29bc592b6eec06212"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0005.sql",
-      "size_bytes": 44756,
-      "sha256": "15b904cdfdbde5bc3be9002cc45ef4db7c1d2f9c106eb029e1902a1423d98b7a"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0006.sql",
-      "size_bytes": 40447,
-      "sha256": "8936827d98a007365bf3b1022af9e18869813d1f855bf13171a50c57c8307ca8"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0007.sql",
-      "size_bytes": 44998,
-      "sha256": "d57ecc5e743f9ace33c09f7f46a5c35e8b6549c6ad950074c2d8147ecb8eb962"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0008.sql",
-      "size_bytes": 44796,
-      "sha256": "2f06e305f21eccf60495433c6ef55bb6e593c26f5cad0fd0d7bc543f89214af5"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0009.sql",
-      "size_bytes": 44617,
-      "sha256": "3e8fcd9ae844198b5f18352417a7e2e2445020828080bb6b22217f6174823982"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0010.sql",
-      "size_bytes": 44211,
-      "sha256": "579826564c67508990bfd2dc8c38e145081fe4a4a60101fd5f574e9e606a40b1"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0011.sql",
-      "size_bytes": 43862,
-      "sha256": "579423733ab1376f6aa9f6bbe3b8cfc6ab7a4b2e400335a898a244ec0c3ce1d2"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0012.sql",
-      "size_bytes": 41160,
-      "sha256": "48f4c914b2918efd011bea0c1943d37248a9af07f71370de9ee36852f0025885"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0013.sql",
-      "size_bytes": 36626,
-      "sha256": "d2792981316076ddf31d855e566eaedccb82cc27c1ad992edbbad03fd1942c8c"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0014.sql",
-      "size_bytes": 44501,
-      "sha256": "c0642631700aff510589402ac3644d69e0d3a5ad13012caa9b9d3be911974d26"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0015.sql",
-      "size_bytes": 43841,
-      "sha256": "98ae1f9646198003437bf15ed31b51f4baaf401ce02fbaa76540090c0ef50b14"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0016.sql",
-      "size_bytes": 19485,
-      "sha256": "9d134d41a9664adfe752e1645e9d2c8a3e3f91c27facecbf5d04ade1a6bbbaf2"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0017.sql",
-      "size_bytes": 29271,
-      "sha256": "f313f500feb0eb3e67e36d5f653f0761746c7476aa098676d9f71b80dd4d06c6"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0018.sql",
-      "size_bytes": 44331,
-      "sha256": "93940490610396c9bd1ff802cb4ee598878ccd230166db831a323b40be3b15e7"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0019.sql",
-      "size_bytes": 43871,
-      "sha256": "ebadfc511963af6c0c9fb73004269f93001c344fa889195a2d5b1b5e8a0bb79f"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0020.sql",
-      "size_bytes": 44762,
-      "sha256": "4f6424e062c7d53aaf92d074e464ee8b1b8ae898ef1ad8c19d9dd8f24f3e9aa7"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0021.sql",
-      "size_bytes": 43636,
-      "sha256": "de57f58fa7745621add3a599a9372d40c3c9a4ce3317e44e98f73866af2a16e1"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0022.sql",
-      "size_bytes": 44878,
-      "sha256": "339a5c24d3ecec7776e78f70de193f0d40f17365c23b5ada858a41201609869d"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0023.sql",
-      "size_bytes": 44832,
-      "sha256": "6341db10704cf4eb7d38aa52f6f3bcd4aa92dc77943e99e8a4d77e8d5d5413f0"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0024.sql",
-      "size_bytes": 44269,
-      "sha256": "33dd74aff84256cdf95cb8582a9f78ab641d8a03a02250c2f3cea8651916c213"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0025.sql",
-      "size_bytes": 44811,
-      "sha256": "0abea63bc3c568b32b3ae2079c00601c336d60bf44c225e5416f721028e22f41"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0026.sql",
-      "size_bytes": 43988,
-      "sha256": "ca23abaa26ddddcb465960932328c40e7a82bcc62b4280a391f713b6557c2795"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0027.sql",
-      "size_bytes": 44658,
-      "sha256": "8d8fe20915f9cd9e77212e56e77fad4e527cf4f053c5513b26a8e73bd408493e"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0028.sql",
-      "size_bytes": 44570,
-      "sha256": "527190d2684c03021d47ca3df6412c0bde7cdd50de3174f3e6c6dbd573d16ab9"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0029.sql",
-      "size_bytes": 43144,
-      "sha256": "bed57610a01fd8be9cce093f34f1f92d31ade9f465f32688d4e5e6f16195da5d"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0030.sql",
-      "size_bytes": 44147,
-      "sha256": "24da5e9494034b49c30cf8743c11ba4aeef729abc581b6fe7e07d73ce811387c"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0031.sql",
-      "size_bytes": 44623,
-      "sha256": "8f89812c350ca1884534957200b39437cbc5d39f9942481f60ca92c72b606fd0"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0032.sql",
-      "size_bytes": 43603,
-      "sha256": "d3048741611b7e224a3c120af65ca50147599064f83ce2ee74367ed17c088233"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0033.sql",
-      "size_bytes": 43888,
-      "sha256": "0aecaadba6acc5d105b9ea5ac6ba6053aa75042681643830476b5006bc26f50c"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0034.sql",
-      "size_bytes": 43931,
-      "sha256": "35264ba9c746f33119099d1369b124c4f4e7ccaceb3e584f20b2c9e477ebfc52"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0035.sql",
-      "size_bytes": 44228,
-      "sha256": "37c5ed6cb6019968c5cc173b3dff10c81ea5793b84c5b654c0be9d02ad457f89"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0036.sql",
-      "size_bytes": 43912,
-      "sha256": "59232bc7f840e77817c10979e7275878c195b9089732c27a032028e62c40e3e1"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0037.sql",
-      "size_bytes": 43335,
-      "sha256": "16b98ed846c2e9162b843248e3db42e524ed2e6b873176045d71c611b636a71d"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0038.sql",
-      "size_bytes": 44815,
-      "sha256": "bbf49e198e9ac4265c05b52f8c85964c098ac13c345ed77fee4d8593ba28105d"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0039.sql",
-      "size_bytes": 43021,
-      "sha256": "128a9982a39364b4d1382a3607af2bdfdd10877ee7359b0990dcdbf9d81f9820"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0040.sql",
-      "size_bytes": 42441,
-      "sha256": "f0ea07f738e4f1ad615610ffbfe3eae1cddbb933dc4fd941d50161505b6e23ce"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0041.sql",
-      "size_bytes": 44757,
-      "sha256": "f9c33de943b6a7335965c0ad128fde12bb9933dc9417ef27d18ed00e6e503218"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0042.sql",
-      "size_bytes": 43441,
-      "sha256": "200e6729f990fd852e6eb14e902455c5f39189823a7173987a4777827ac40e2d"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0043.sql",
-      "size_bytes": 43082,
-      "sha256": "2fc65c01723ba26b159cd0b830751c2ace64cb707de6108baed01298de9a119d"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0044.sql",
-      "size_bytes": 41959,
-      "sha256": "30ea91b001c644ba62d0408db421422c4eedb590231c2be82104601df2456884"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0045.sql",
-      "size_bytes": 43476,
-      "sha256": "1f3f618747c42b9d40c08db1e59afdeec22f94011ab18bd08c24040354b89520"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0046.sql",
-      "size_bytes": 44384,
-      "sha256": "2b045fdfd1eb0c7749e09706d5f913b7bfb28f6e9a333c46502c2fdc593c5e36"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0047.sql",
-      "size_bytes": 44075,
-      "sha256": "4b1fb9d70de69f02ba695b47a714fff008ca15ee0d409cb737b811eccb7bd7da"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0048.sql",
-      "size_bytes": 43759,
-      "sha256": "b57bf39739b17f1ee46e673bab76de38b36fc41e9d8f4a7a9c3caff265d08a01"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0049.sql",
-      "size_bytes": 43510,
-      "sha256": "30a9c7be1a23d6a54dde60c220700d6cfc200313df64d1d32239f9da116d1a3a"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0050.sql",
-      "size_bytes": 44590,
-      "sha256": "14fade1ed25e1a89dedfbdc2370dc8317be1b55aa5199e338ce4a270259471a8"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0051.sql",
-      "size_bytes": 44458,
-      "sha256": "da9a0e33ab787f2b3ecc3886dab7020e68ed098048aef852edf24826a60f7e22"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0052.sql",
-      "size_bytes": 43416,
-      "sha256": "7c24c314bde538d54e61dfc396ed410fb33ee0f7fd04a23c9adf1e6fa30f5944"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0053.sql",
-      "size_bytes": 44909,
-      "sha256": "575ee944ee59504cde8e2042efed3c6dce7ec0fc658f742091622b6aae7cbf7c"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0054.sql",
-      "size_bytes": 44963,
-      "sha256": "bcd72725ed9b34f5fd4708c757732be906930cc3b6f339c9a2d9d8cd88fa853a"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0055.sql",
-      "size_bytes": 44682,
-      "sha256": "e90246ec17f87d8e24d5e700d6692e50bc76cfae184fedb9983a36b39b7ac69e"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0056.sql",
-      "size_bytes": 44977,
-      "sha256": "c728d025420433fb1fdd02c760cb2afc859e8a0171126d68bc2ffb7b8a2cd7a9"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0057.sql",
-      "size_bytes": 44898,
-      "sha256": "fe5b76000512d0629a9d6cb19e126c75c5d3dc89ddc701ed0c235c3a7e8a013a"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0058.sql",
-      "size_bytes": 44287,
-      "sha256": "18129d71ee29105f9681b7778efa5bc55f4e9dc7e87af8c9b7b41a4468f77181"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0059.sql",
-      "size_bytes": 37172,
-      "sha256": "5e2500afdbb8d4e01e0a786049ee7296bdce14f9933fb857175dd79dbc8d3c48"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0060.sql",
-      "size_bytes": 38801,
-      "sha256": "92fceac278f944a17cc53cf84be4f9844af693e690fe907447a71d9c39fb89b2"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0061.sql",
-      "size_bytes": 22910,
-      "sha256": "f58d48bf6d0832fd9ae0e14be67539f8c021def1322488a33bda61b76de63b28"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0062.sql",
-      "size_bytes": 22999,
-      "sha256": "c349a03aa6a6e11b34844a232de40bcab1f44d2a2e657d7a513c7894130fbbd9"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0063.sql",
-      "size_bytes": 25429,
-      "sha256": "f4883341318e9d83ed029b19d80b888791b78a959d45a0f73e0fc6ed63092bd5"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0064.sql",
-      "size_bytes": 40641,
-      "sha256": "09e9679ce42dcd8f1c6ea5d7dc6fb352fcaffa518bafdc6da4e31fbcd1d147cf"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0065.sql",
-      "size_bytes": 29591,
-      "sha256": "8020dd295a26573d279d0cbf0d5f5afdcd19f0319ad901c62590a5531308d862"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0066.sql",
-      "size_bytes": 29946,
-      "sha256": "10fe03a23a4f5d9204cb1478eea7b01fab31c027e7cf308b1020c58ba159219e"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0067.sql",
-      "size_bytes": 16629,
-      "sha256": "521fa9a87dc32bd92af926eb21ebbdc8527e5dea91cbb5e1560c370d07aa5837"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0068.sql",
-      "size_bytes": 29993,
-      "sha256": "0f627e4805e64edf5f0bc04086e16e573a025841965ac0be89016588c5859e44"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0069.sql",
-      "size_bytes": 29716,
-      "sha256": "f2cdc313e6b3bf05496bbca3e8db2dacc6127d62751f9ffffb0b1829a5f8a806"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0070.sql",
-      "size_bytes": 15904,
-      "sha256": "8f8b595b12780b1007588187c70432c72adb174c331f96eeb5c77a589780835e"
-    },
-    {
-      "path": ".wrangler/d1-import-chunks/chunk_0071.sql",
-      "size_bytes": 33021,
-      "sha256": "a5e7feffdc9badb354cb7fb991779524d1537c91c520316e76909b59ed5856f1"
-    },
-    {
-      "path": ".wrangler/d1-parity-audit/table-count-parity.md",
-      "size_bytes": 48246,
-      "sha256": "c6512d4efa6e6c3a8e770817c3f4b8338f50e2d4ee388b97650a497e8e9c34c7"
-    },
-    {
-      "path": ".wrangler/d1-probe-chunk16/statement_0001.sql",
-      "size_bytes": 29324,
-      "sha256": "55db84e391862cf3e1bef1998227e73c0d0e203b430877e58943e05d01ed43b0"
-    },
-    {
-      "path": ".wrangler/d1-probe-chunk16/statement_0002.sql",
-      "size_bytes": 13153,
-      "sha256": "84480f4aa8c9e68607fce8b63a9839de3f795376bb9000b0efbbdf0dab61b1b7"
-    },
-    {
-      "path": ".wrangler/d1-probe-chunk16/statement_0003.sql",
-      "size_bytes": 635,
-      "sha256": "aa81ec2f29c496cdbd9fd8f56d5847b4ebe1549b331d3f7d2d7c8dbcf289e0b2"
-    },
-    {
-      "path": ".wrangler/d1-probe-chunk16/statement_0004.sql",
-      "size_bytes": 796,
-      "sha256": "1ce9d9adb8a3297135203718a522f1b37a0ef80dc41e03c148684dff151a5cbf"
-    },
-    {
-      "path": ".wrangler/d1-probe-chunk16/statement_0005.sql",
-      "size_bytes": 739,
-      "sha256": "8c41278b8e8e9fb28c8a622f35a68aa1ed210851000204b7e13f2a3ac233377c"
-    },
-    {
-      "path": ".wrangler/dev-prod-compare/dev-business-data-inventory.sql",
-      "size_bytes": 650,
-      "sha256": "d37febd7a1ab4b37da1219cc421d0fbe22f211fae09a2ce12f69bd116ce98989"
-    },
-    {
-      "path": ".wrangler/dev-prod-compare/dev-business-sync.sql",
-      "size_bytes": 5101601,
-      "sha256": "7500548af59f675f26144dce718fbda55d2c8674b037b7a6642951a43422d563"
-    },
-    {
-      "path": ".wrangler/dev-prod-compare/dev-full.sql",
-      "size_bytes": 4511184,
-      "sha256": "bb08e04f9c585d6be54901c3547f4c224d6237966aa2d0551778d2d9c82bc452"
-    },
-    {
-      "path": ".wrangler/dev-prod-compare/dev-schema.sql",
-      "size_bytes": 368985,
-      "sha256": "77b70b8614aac7a4b383ef50149143c1cebc17cc01913b751830a5567dfc6e67"
-    },
-    {
-      "path": ".wrangler/dev-prod-compare/devilndove-dev-before-business-sync-20260823-095527.sql",
-      "size_bytes": 4511184,
-      "sha256": "bb08e04f9c585d6be54901c3547f4c224d6237966aa2d0551778d2d9c82bc452"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0001.sql",
-      "size_bytes": 44637,
-      "sha256": "3c2d5294404fb3c19c4bf1df2573442d528ff4bac1448c0b41c9f2fa5340ac93"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0002.sql",
-      "size_bytes": 43659,
-      "sha256": "41d4c91db3e1aa5d45de51bf56361aa8c3a2805a1d2c63a87b63210fd71fbebf"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0003.sql",
-      "size_bytes": 44988,
-      "sha256": "b03316dd93386ce582b09f47af2482b0856ebc7adcc4fc455c162275bc1e9c66"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0004.sql",
-      "size_bytes": 44604,
-      "sha256": "54d6c6e31ca57ac9317d39788c4648d7214efc24483eb8c29bc592b6eec06212"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0005.sql",
-      "size_bytes": 44756,
-      "sha256": "15b904cdfdbde5bc3be9002cc45ef4db7c1d2f9c106eb029e1902a1423d98b7a"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0006.sql",
-      "size_bytes": 40447,
-      "sha256": "8936827d98a007365bf3b1022af9e18869813d1f855bf13171a50c57c8307ca8"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0007.sql",
-      "size_bytes": 44998,
-      "sha256": "d57ecc5e743f9ace33c09f7f46a5c35e8b6549c6ad950074c2d8147ecb8eb962"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0008.sql",
-      "size_bytes": 44796,
-      "sha256": "2f06e305f21eccf60495433c6ef55bb6e593c26f5cad0fd0d7bc543f89214af5"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0009.sql",
-      "size_bytes": 44617,
-      "sha256": "3e8fcd9ae844198b5f18352417a7e2e2445020828080bb6b22217f6174823982"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0010.sql",
-      "size_bytes": 44211,
-      "sha256": "579826564c67508990bfd2dc8c38e145081fe4a4a60101fd5f574e9e606a40b1"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0011.sql",
-      "size_bytes": 43862,
-      "sha256": "579423733ab1376f6aa9f6bbe3b8cfc6ab7a4b2e400335a898a244ec0c3ce1d2"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0012.sql",
-      "size_bytes": 41160,
-      "sha256": "48f4c914b2918efd011bea0c1943d37248a9af07f71370de9ee36852f0025885"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0013.sql",
-      "size_bytes": 36626,
-      "sha256": "d2792981316076ddf31d855e566eaedccb82cc27c1ad992edbbad03fd1942c8c"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0014.sql",
-      "size_bytes": 44501,
-      "sha256": "c0642631700aff510589402ac3644d69e0d3a5ad13012caa9b9d3be911974d26"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0015.sql",
-      "size_bytes": 43841,
-      "sha256": "98ae1f9646198003437bf15ed31b51f4baaf401ce02fbaa76540090c0ef50b14"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0016.sql",
-      "size_bytes": 19485,
-      "sha256": "9d134d41a9664adfe752e1645e9d2c8a3e3f91c27facecbf5d04ade1a6bbbaf2"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0017.sql",
-      "size_bytes": 29271,
-      "sha256": "f313f500feb0eb3e67e36d5f653f0761746c7476aa098676d9f71b80dd4d06c6"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0018.sql",
-      "size_bytes": 44331,
-      "sha256": "93940490610396c9bd1ff802cb4ee598878ccd230166db831a323b40be3b15e7"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0019.sql",
-      "size_bytes": 43871,
-      "sha256": "ebadfc511963af6c0c9fb73004269f93001c344fa889195a2d5b1b5e8a0bb79f"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0020.sql",
-      "size_bytes": 44762,
-      "sha256": "4f6424e062c7d53aaf92d074e464ee8b1b8ae898ef1ad8c19d9dd8f24f3e9aa7"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0021.sql",
-      "size_bytes": 43636,
-      "sha256": "de57f58fa7745621add3a599a9372d40c3c9a4ce3317e44e98f73866af2a16e1"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0022.sql",
-      "size_bytes": 44878,
-      "sha256": "339a5c24d3ecec7776e78f70de193f0d40f17365c23b5ada858a41201609869d"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0023.sql",
-      "size_bytes": 44832,
-      "sha256": "6341db10704cf4eb7d38aa52f6f3bcd4aa92dc77943e99e8a4d77e8d5d5413f0"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0024.sql",
-      "size_bytes": 44269,
-      "sha256": "33dd74aff84256cdf95cb8582a9f78ab641d8a03a02250c2f3cea8651916c213"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0025.sql",
-      "size_bytes": 44811,
-      "sha256": "0abea63bc3c568b32b3ae2079c00601c336d60bf44c225e5416f721028e22f41"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0026.sql",
-      "size_bytes": 43988,
-      "sha256": "ca23abaa26ddddcb465960932328c40e7a82bcc62b4280a391f713b6557c2795"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0027.sql",
-      "size_bytes": 44658,
-      "sha256": "8d8fe20915f9cd9e77212e56e77fad4e527cf4f053c5513b26a8e73bd408493e"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0028.sql",
-      "size_bytes": 44570,
-      "sha256": "527190d2684c03021d47ca3df6412c0bde7cdd50de3174f3e6c6dbd573d16ab9"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0029.sql",
-      "size_bytes": 43144,
-      "sha256": "bed57610a01fd8be9cce093f34f1f92d31ade9f465f32688d4e5e6f16195da5d"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0030.sql",
-      "size_bytes": 44147,
-      "sha256": "24da5e9494034b49c30cf8743c11ba4aeef729abc581b6fe7e07d73ce811387c"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0031.sql",
-      "size_bytes": 44623,
-      "sha256": "8f89812c350ca1884534957200b39437cbc5d39f9942481f60ca92c72b606fd0"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0032.sql",
-      "size_bytes": 43603,
-      "sha256": "d3048741611b7e224a3c120af65ca50147599064f83ce2ee74367ed17c088233"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0033.sql",
-      "size_bytes": 43888,
-      "sha256": "0aecaadba6acc5d105b9ea5ac6ba6053aa75042681643830476b5006bc26f50c"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0034.sql",
-      "size_bytes": 43931,
-      "sha256": "35264ba9c746f33119099d1369b124c4f4e7ccaceb3e584f20b2c9e477ebfc52"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0035.sql",
-      "size_bytes": 44228,
-      "sha256": "37c5ed6cb6019968c5cc173b3dff10c81ea5793b84c5b654c0be9d02ad457f89"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0036.sql",
-      "size_bytes": 43912,
-      "sha256": "59232bc7f840e77817c10979e7275878c195b9089732c27a032028e62c40e3e1"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0037.sql",
-      "size_bytes": 43335,
-      "sha256": "16b98ed846c2e9162b843248e3db42e524ed2e6b873176045d71c611b636a71d"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0038.sql",
-      "size_bytes": 44815,
-      "sha256": "bbf49e198e9ac4265c05b52f8c85964c098ac13c345ed77fee4d8593ba28105d"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0039.sql",
-      "size_bytes": 43021,
-      "sha256": "128a9982a39364b4d1382a3607af2bdfdd10877ee7359b0990dcdbf9d81f9820"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0040.sql",
-      "size_bytes": 42441,
-      "sha256": "f0ea07f738e4f1ad615610ffbfe3eae1cddbb933dc4fd941d50161505b6e23ce"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0041.sql",
-      "size_bytes": 44757,
-      "sha256": "f9c33de943b6a7335965c0ad128fde12bb9933dc9417ef27d18ed00e6e503218"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0042.sql",
-      "size_bytes": 43441,
-      "sha256": "200e6729f990fd852e6eb14e902455c5f39189823a7173987a4777827ac40e2d"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0043.sql",
-      "size_bytes": 43082,
-      "sha256": "2fc65c01723ba26b159cd0b830751c2ace64cb707de6108baed01298de9a119d"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0044.sql",
-      "size_bytes": 41959,
-      "sha256": "30ea91b001c644ba62d0408db421422c4eedb590231c2be82104601df2456884"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0045.sql",
-      "size_bytes": 43476,
-      "sha256": "1f3f618747c42b9d40c08db1e59afdeec22f94011ab18bd08c24040354b89520"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0046.sql",
-      "size_bytes": 44384,
-      "sha256": "2b045fdfd1eb0c7749e09706d5f913b7bfb28f6e9a333c46502c2fdc593c5e36"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0047.sql",
-      "size_bytes": 44075,
-      "sha256": "4b1fb9d70de69f02ba695b47a714fff008ca15ee0d409cb737b811eccb7bd7da"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0048.sql",
-      "size_bytes": 43759,
-      "sha256": "b57bf39739b17f1ee46e673bab76de38b36fc41e9d8f4a7a9c3caff265d08a01"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0049.sql",
-      "size_bytes": 43510,
-      "sha256": "30a9c7be1a23d6a54dde60c220700d6cfc200313df64d1d32239f9da116d1a3a"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0050.sql",
-      "size_bytes": 44590,
-      "sha256": "14fade1ed25e1a89dedfbdc2370dc8317be1b55aa5199e338ce4a270259471a8"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0051.sql",
-      "size_bytes": 44458,
-      "sha256": "da9a0e33ab787f2b3ecc3886dab7020e68ed098048aef852edf24826a60f7e22"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0052.sql",
-      "size_bytes": 43416,
-      "sha256": "7c24c314bde538d54e61dfc396ed410fb33ee0f7fd04a23c9adf1e6fa30f5944"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0053.sql",
-      "size_bytes": 44909,
-      "sha256": "575ee944ee59504cde8e2042efed3c6dce7ec0fc658f742091622b6aae7cbf7c"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0054.sql",
-      "size_bytes": 44963,
-      "sha256": "bcd72725ed9b34f5fd4708c757732be906930cc3b6f339c9a2d9d8cd88fa853a"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0055.sql",
-      "size_bytes": 44682,
-      "sha256": "e90246ec17f87d8e24d5e700d6692e50bc76cfae184fedb9983a36b39b7ac69e"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0056.sql",
-      "size_bytes": 44977,
-      "sha256": "c728d025420433fb1fdd02c760cb2afc859e8a0171126d68bc2ffb7b8a2cd7a9"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0057.sql",
-      "size_bytes": 44898,
-      "sha256": "fe5b76000512d0629a9d6cb19e126c75c5d3dc89ddc701ed0c235c3a7e8a013a"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0058.sql",
-      "size_bytes": 44287,
-      "sha256": "18129d71ee29105f9681b7778efa5bc55f4e9dc7e87af8c9b7b41a4468f77181"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0059.sql",
-      "size_bytes": 37172,
-      "sha256": "5e2500afdbb8d4e01e0a786049ee7296bdce14f9933fb857175dd79dbc8d3c48"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0060.sql",
-      "size_bytes": 38801,
-      "sha256": "92fceac278f944a17cc53cf84be4f9844af693e690fe907447a71d9c39fb89b2"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0061.sql",
-      "size_bytes": 22910,
-      "sha256": "f58d48bf6d0832fd9ae0e14be67539f8c021def1322488a33bda61b76de63b28"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0062.sql",
-      "size_bytes": 22999,
-      "sha256": "c349a03aa6a6e11b34844a232de40bcab1f44d2a2e657d7a513c7894130fbbd9"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0063.sql",
-      "size_bytes": 25429,
-      "sha256": "f4883341318e9d83ed029b19d80b888791b78a959d45a0f73e0fc6ed63092bd5"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0064.sql",
-      "size_bytes": 40641,
-      "sha256": "09e9679ce42dcd8f1c6ea5d7dc6fb352fcaffa518bafdc6da4e31fbcd1d147cf"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0065.sql",
-      "size_bytes": 29591,
-      "sha256": "8020dd295a26573d279d0cbf0d5f5afdcd19f0319ad901c62590a5531308d862"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0066.sql",
-      "size_bytes": 29946,
-      "sha256": "10fe03a23a4f5d9204cb1478eea7b01fab31c027e7cf308b1020c58ba159219e"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0067.sql",
-      "size_bytes": 16629,
-      "sha256": "521fa9a87dc32bd92af926eb21ebbdc8527e5dea91cbb5e1560c370d07aa5837"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0068.sql",
-      "size_bytes": 29993,
-      "sha256": "0f627e4805e64edf5f0bc04086e16e573a025841965ac0be89016588c5859e44"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0069.sql",
-      "size_bytes": 29716,
-      "sha256": "f2cdc313e6b3bf05496bbca3e8db2dacc6127d62751f9ffffb0b1829a5f8a806"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0070.sql",
-      "size_bytes": 15904,
-      "sha256": "8f8b595b12780b1007588187c70432c72adb174c331f96eeb5c77a589780835e"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/chunks/chunk_0071.sql",
-      "size_bytes": 33019,
-      "sha256": "9c14e63fdc8eaf91cbc117ba88cc16e382cd2d62b16ac3c2edacca90a7380952"
-    },
-    {
-      "path": ".wrangler/remote-dev-initialization/database_full_schema.committed.sql",
-      "size_bytes": 2880526,
-      "sha256": "f20c4c8b154ca821cbd026524c2acf69de5f2d3c2ccccc2cd3897fe04335b8da"
-    },
-    {
-      "path": ".wrangler/schema-parity/corrected-cutover-post-20260823-071137.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": ".wrangler/schema-parity/corrected-cutover-pre-20260823-071137.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": ".wrangler/schema-parity/database_full_schema.before-parity-repair.sql",
-      "size_bytes": 2880526,
-      "sha256": "f20c4c8b154ca821cbd026524c2acf69de5f2d3c2ccccc2cd3897fe04335b8da"
-    },
-    {
-      "path": ".wrangler/schema-parity/database_full_schema.canonical-patched.sql",
-      "size_bytes": 2905894,
-      "sha256": "e5316050516385b1e1627432d09bcea90f435a4fc12fdc412aeaf87743905378"
-    },
-    {
-      "path": ".wrangler/schema-parity/database_full_schema.repaired-candidate.sql",
-      "size_bytes": 2911201,
-      "sha256": "83c1f520b94295b4f466164f02062ce703f9e5d901a563e7baf4ac3eeca3b297"
-    },
-    {
-      "path": ".wrangler/schema-parity/dev-notification-status.sql",
-      "size_bytes": 95,
-      "sha256": "8051d0e330b08eace871a6fce2658b5e243a8f3316f3ae2f5fbdc112c4a4875a"
-    },
-    {
-      "path": ".wrangler/schema-parity/dev-row-counts.sql",
-      "size_bytes": 724,
-      "sha256": "7a1bd0531bd47a9e235b3f51f997bb08048bfadf4adf1b35f3c6e4a24bfc495c"
-    },
-    {
-      "path": ".wrangler/schema-parity/dev-schema-parity-migration.before-d1-fk-fix.sql",
-      "size_bytes": 31033,
-      "sha256": "41d2f932d86187b1ac1c9c52532efda08707cceb82219b367381c2ad14c340dd"
-    },
-    {
-      "path": ".wrangler/schema-parity/dev-schema-parity-migration.sql",
-      "size_bytes": 31045,
-      "sha256": "04a191cc2c5c34e85527f8c2a2f0565bb337469b0dd6be1d918d23bf684884bb"
-    },
-    {
-      "path": ".wrangler/schema-parity/devilndove-dev-pre-parity-20260822.sql",
-      "size_bytes": 4488848,
-      "sha256": "38d55718a26dd64e38a9ac3a5834858164a275f624808e5c68ef589a3d697f7d"
-    },
-    {
-      "path": ".wrangler/schema-parity/devilndove-prod-pre-schema-parity-20260823.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": ".wrangler/schema-parity/final-precutover-prod-20260823-070047.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": ".wrangler/schema-parity/live-cutover-pre-20260823-070924.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-candidate-canonical.sql",
-      "size_bytes": 2905894,
-      "sha256": "e5316050516385b1e1627432d09bcea90f435a4fc12fdc412aeaf87743905378"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-delta-current-20260823-070516.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-freshness-audit-20260823.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-readonly-audit/candidate-full-schema.sql",
-      "size_bytes": 2905894,
-      "sha256": "e5316050516385b1e1627432d09bcea90f435a4fc12fdc412aeaf87743905378"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-readonly-audit/prod-schema.sql",
-      "size_bytes": 369405,
-      "sha256": "8955aca7ee29375a2a427181f8f608698614160d33835d29eeb0ec14dd3cac20"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-replacement-canonical.sql",
-      "size_bytes": 2905894,
-      "sha256": "e5316050516385b1e1627432d09bcea90f435a4fc12fdc412aeaf87743905378"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-replacement-d1-import-20260823.sql",
-      "size_bytes": 13041919,
-      "sha256": "92ff1c4eff64b17802dcea54d8db74ebafa089c36622acac764083701d9693e6"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-replacement-d1-import-ordered-20260823.sql",
-      "size_bytes": 13048954,
-      "sha256": "390801aa838694d59b5cd9c8a42e380c3e0e879271b4794bd81c5c51a532bf97"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-replacement-d1-import-parent-first-20260823.sql",
-      "size_bytes": 13056724,
-      "sha256": "639bd8418c18be502b0eec81ec7dc7d9cb22638d35d5906667720119b1fb8878"
-    },
-    {
-      "path": ".wrangler/schema-parity/prod-replacement-remote-roundtrip-20260823.sql",
-      "size_bytes": 19028881,
-      "sha256": "21982206705dc785f5b043bae935444785d58c5016b6506a454e646f5d002f3b"
-    },
-    {
-      "path": ".wrangler/schema-parity/repair-shared-tables.sql",
-      "size_bytes": 7148,
-      "sha256": "3889a1d61f7061b546051e2ed7a11b0826f103870366242ac7da596ad62c8b46"
-    },
-    {
-      "path": ".wrangler/schema-parity/restore-missing-tables.sql",
-      "size_bytes": 23448,
-      "sha256": "53dc1e62ee5982b0061ba5eb67a7edb5896d4ebe39b52540c14f17c67c54781f"
-    },
-    {
-      "path": "admin/accounting/index.html",
-      "size_bytes": 5266,
-      "sha256": "941c46dd42b84c80d594a289c290b3fe4560d681759e550f72738f624d1c3683"
-    },
-    {
-      "path": "admin/analytics/index.html",
-      "size_bytes": 3876,
-      "sha256": "7efb6606f00a226e25d9305f4ac0488cff581b89772672a8e430d0a9c7b8fa35"
-    },
-    {
-      "path": "admin/application-sanity/index.html",
-      "size_bytes": 1965,
-      "sha256": "53c537fda226fb7902b7d8c34cddb50d6d7be6d949f0363c5f209b53246908c4"
-    },
-    {
-      "path": "admin/catalog/index.html",
-      "size_bytes": 24254,
-      "sha256": "7cd171554bab9b05b045cf70918473b7bbadeeab532e20287c5a0373e0cdf884"
-    },
-    {
-      "path": "admin/catalog-media/index.html",
-      "size_bytes": 3906,
-      "sha256": "424944e7aca0d40efccd0a03d369e49a4d37ecccab4c387fb0f4a20ff2659019"
-    },
-    {
-      "path": "admin/command-center/index.html",
-      "size_bytes": 3042,
-      "sha256": "2e5ef655393d7ca11bf8fd5f658499140c98832d198cbf50766bec9128c4310d"
-    },
-    {
-      "path": "admin/content-publications/index.html",
-      "size_bytes": 2771,
-      "sha256": "d453e97b0e181073b4d71c33d961ef9d7f107934c8a721dbb08941a9e77cdf3c"
-    },
-    {
-      "path": "admin/content-studio/index.html",
-      "size_bytes": 2904,
-      "sha256": "12aa4f9d80e6ef4e6d59d7367c6f2bee4ff46027ced4ac7856222499419eafc9"
-    },
-    {
-      "path": "admin/creative-assets/index.html",
-      "size_bytes": 3496,
-      "sha256": "e9361181b4a770e531552b2b34864c8ff9f878dac9549f1314cfdc86dae13da9"
-    },
-    {
-      "path": "admin/creative-automation/index.html",
-      "size_bytes": 3562,
-      "sha256": "9fa640183f2148cfa2289a2912e574392b079e37512c706b842867c18d4eb34b"
-    },
-    {
-      "path": "admin/creative-process/index.html",
-      "size_bytes": 3000,
-      "sha256": "19d8a980436ba89915d8029d23cb6a9649f88eaf6fad690f6e112f4485810573"
-    },
-    {
-      "path": "admin/custom-request/index.html",
-      "size_bytes": 3870,
-      "sha256": "505cb3cf6c49dd6e185b13e266dc0aac3fbd5467b14d0ba4af607f6d6585f98d"
-    },
-    {
-      "path": "admin/customer-documents/index.html",
-      "size_bytes": 3067,
-      "sha256": "2f93a3c809fb74c92e0f03df59e6ab930d8fcb0fb9578684e35fd643a62d236f"
-    },
-    {
-      "path": "admin/dark-theme-evidence/index.html",
-      "size_bytes": 1052,
-      "sha256": "8b503c960ec8b87511a62282a9b574587a5b7184c7264792faaf45cc7a4c2ecf"
-    },
-    {
-      "path": "admin/deploy-readiness/index.html",
-      "size_bytes": 2107,
-      "sha256": "be9cf60f4867bbd82546858d6333944d7a784f477ee690444a3cf370280e0b4a"
-    },
-    {
-      "path": "admin/deployment-preflight/index.html",
-      "size_bytes": 3724,
-      "sha256": "e60e4836b6a616b5129f35620563823013223a029efa717464ee7e02200259be"
-    },
-    {
-      "path": "admin/gift-cards/index.html",
-      "size_bytes": 2324,
-      "sha256": "8f785c2202a73e035856a9120a2815a52fa055909c3c5e6497f2be1b878b2c81"
-    },
-    {
-      "path": "admin/go-live-execution/index.html",
-      "size_bytes": 1947,
-      "sha256": "ec98eb329eda94e8ff2c79ce6914bc27bfbfe0ce0df3445cb7c82ed75800e2fb"
-    },
-    {
-      "path": "admin/image-manifest/index.html",
-      "size_bytes": 2953,
-      "sha256": "7ac899cecba5d0aefcf3f54fed6e8ffa20df962abdaf844bbb199d46f7fa61d3"
-    },
-    {
-      "path": "admin/index.html",
-      "size_bytes": 13570,
-      "sha256": "8ad52049c150b68485a54271717c8b33092996aa4e1fff105e3027ca53fa0af4"
-    },
-    {
-      "path": "admin/inventory-operations/index.html",
-      "size_bytes": 4523,
-      "sha256": "14d2e2cd267759be33aa09e61abd8f1b4db725703c673088dfb09919d6bf3045"
-    },
-    {
-      "path": "admin/live-ops-followthrough/index.html",
-      "size_bytes": 1967,
-      "sha256": "bf7e60e6660c3f867f3ca268ed039b2e269c8024896c0cf4ee672fbdc69326c8"
-    },
-    {
-      "path": "admin/local-seo-review/index.html",
-      "size_bytes": 1802,
-      "sha256": "8ff3348e7540db2cbc9e7add2f31a694c902dc29a5b6baebfabaeecddf5f70d2"
-    },
-    {
-      "path": "admin/markdown-sanity/index.html",
-      "size_bytes": 2349,
-      "sha256": "dad5ac1b21ae17caeef800a777babdf1dc5459df8a348d16be2c5378efef5fb1"
-    },
-    {
-      "path": "admin/marketplace-exports/index.html",
-      "size_bytes": 1772,
-      "sha256": "926ecc61ef5bac009e8ae61e051f9644dc10a9340a1fe5100d0cb2810a31edc5"
-    },
-    {
-      "path": "admin/marketplace-mapping/index.html",
-      "size_bytes": 1727,
-      "sha256": "8813df8ae42d412924c4e6d02266a792efcd9c40bcf2a0397805b5bf3e339fbf"
-    },
-    {
-      "path": "admin/media-content-studio/index.html",
-      "size_bytes": 12226,
-      "sha256": "32796c32d83657b6c8e13fddfcca6f475092b5de0dfbb5495c21011a37b15126"
-    },
-    {
-      "path": "admin/members/index.html",
-      "size_bytes": 3869,
-      "sha256": "1232ef06cb79b171110d365fc1e0ea85cc8f94ae923439b2268ef57a90e549f6"
-    },
-    {
-      "path": "admin/membership/index.html",
-      "size_bytes": 1946,
-      "sha256": "0ab312215a5e8cf66018052c700f6feccd044fa801a8421d503eeb2efd9c625b"
-    },
-    {
-      "path": "admin/mobile/index.html",
-      "size_bytes": 8975,
-      "sha256": "80391f54a634484d330bbcacd489fd979067096c907565f8568b2dd0eae3537c"
-    },
-    {
-      "path": "admin/mobile-inventory/index.html",
-      "size_bytes": 3738,
-      "sha256": "29dd188a4e8f16523f5757d04087c72851a324a3ab121c5efa231fbe73d786e3"
-    },
-    {
-      "path": "admin/mobile-product/index.html",
-      "size_bytes": 17290,
-      "sha256": "b073d49bb21fd75f99d1a226dd1e37260d48a60146b5f2ea728d5bea045a4ef5"
-    },
-    {
-      "path": "admin/movies/index.html",
-      "size_bytes": 16526,
-      "sha256": "8b8919a4d286be903f7a9086759f9bf597f9889f826f958d5429d5f7df60bec7"
-    },
-    {
-      "path": "admin/operational-continuity/index.html",
-      "size_bytes": 5316,
-      "sha256": "802c12ca94321beebc53462ffc0a09c47910c519bb6ed9a708d50236d933b37f"
-    },
-    {
-      "path": "admin/operations/index.html",
-      "size_bytes": 6545,
-      "sha256": "bb71b1550e11eb0759cc6c83d84ab422353b0212004af155aa9c051fe583ebc3"
-    },
-    {
-      "path": "admin/orders/index.html",
-      "size_bytes": 5828,
-      "sha256": "8298e7656c04afd5c3aef6d09345974140e562b4b16d2a5f8cff90244d0b6341"
-    },
-    {
-      "path": "admin/packaging/soap-labels/index.html",
-      "size_bytes": 2519,
-      "sha256": "9dd8f71eeb7ba7dcc9e02d43cff4526e53a0b967a65d2e9220b650256b297feb"
-    },
-    {
-      "path": "admin/packaging-studio/index.html",
-      "size_bytes": 9402,
-      "sha256": "2ed08bfb17e2492d47c756e281732d6e44b9cdc63edf0b7e6e40ffab926120fb"
-    },
-    {
-      "path": "admin/post-deploy-smoke-tests/index.html",
-      "size_bytes": 1866,
-      "sha256": "add5581729a9fa565dea3fa63c1991d469635273095a11c0ecc3d36d2a5b2efc"
-    },
-    {
-      "path": "admin/prelaunch/index.html",
-      "size_bytes": 8474,
-      "sha256": "1062e3cc4fed85d3c26766b030ed4a65566c7ed90fe2d9f242c4d5a6296a41ab"
-    },
-    {
-      "path": "admin/products/index.html",
-      "size_bytes": 21301,
-      "sha256": "5493ee66b698ff484e17f4976b55774ac98b7d678ca4675c96432eb6bdeeef74"
-    },
-    {
-      "path": "admin/promotion-control/index.html",
-      "size_bytes": 2153,
-      "sha256": "3b361d30f6eb6a05fa68c2644c21da778f6606244b4dd1761c2cd1348fe98384"
-    },
-    {
-      "path": "admin/public-display-order/index.html",
-      "size_bytes": 2100,
-      "sha256": "7f315cd6a6871f6575324335e480df1c5c2747588c2ec64f7150e4dbdd21c6f0"
-    },
-    {
-      "path": "admin/public-proof-candidates/index.html",
-      "size_bytes": 1741,
-      "sha256": "ea8aa7e76a6bafcf0070c96cd54096a921bd1a2d10b710c3226f17ee993506fa"
-    },
-    {
-      "path": "admin/readiness/index.html",
-      "size_bytes": 2507,
-      "sha256": "fcb24a5780825d6f30ee1165e82a21d35764d384a9b9d2877ae56e24f5b3cfe3"
-    },
-    {
-      "path": "admin/release-control/index.html",
-      "size_bytes": 2008,
-      "sha256": "f3e057b283392252f4d200e5831acf6118164efe7500b059bb9a0178b0a52e55"
-    },
-    {
-      "path": "admin/release-notes/index.html",
-      "size_bytes": 879,
-      "sha256": "491fcbfe5a452df97a93e7213a6f010d2266694e676e1ac9521f1360851a0423"
-    },
-    {
-      "path": "admin/release-preflight/index.html",
-      "size_bytes": 2220,
-      "sha256": "7582fc23bfa1207940d9e3bd4d4f11368ec72c389999e8ea09927eab1841c64f"
-    },
-    {
-      "path": "admin/safe-deploy-package/index.html",
-      "size_bytes": 930,
-      "sha256": "46a7720540b94f116ea0e734b103f56bbb1545b94d0da4db43230307e8dce72b"
-    },
-    {
-      "path": "admin/social-publishing/index.html",
-      "size_bytes": 15437,
-      "sha256": "55067a72d9e8dddfe772ab0510ca4dcb2f62e9acbaa4e34601ee8a8eb403aef5"
-    },
-    {
-      "path": "admin/stage-photo-moderation/index.html",
-      "size_bytes": 1736,
-      "sha256": "99d6f324279cb0effd11668a4f5b00112fdee2e0f8890543656f8e2e9de94c59"
-    },
-    {
-      "path": "admin/startup-readiness/index.html",
-      "size_bytes": 3850,
-      "sha256": "c82f659a3fcc0a4de3d474ddee100fa6f1521c61d6fd78000826909113cb5e46"
-    },
-    {
-      "path": "admin/today-tasks/index.html",
-      "size_bytes": 2246,
-      "sha256": "edc81d97d1da728b2203cd9ea83cfa233ff7be596963aa4a29b9f316e3ae7746"
-    },
-    {
-      "path": "admin/trust-blocks/index.html",
-      "size_bytes": 2239,
-      "sha256": "8b941de99077a4710d1ae2a1a7aeb19f1d12fe94ce53eb0f6566c0942b77726f"
-    },
-    {
-      "path": "admin/users/index.html",
-      "size_bytes": 2223,
-      "sha256": "dac3c6c499ca8b701f05733a476ac068c08579c2f3d115d7701b3af3bfdc8852"
-    },
-    {
-      "path": "admin/visual-enrichment-studio/index.html",
-      "size_bytes": 1949,
-      "sha256": "19b944a15f0a7de87a8b0afc97269de0a64a828c0334598d2ba64e887905baf3"
-    },
-    {
-      "path": "admin/visual-polish/index.html",
-      "size_bytes": 1973,
-      "sha256": "09a8654c95cb07e821ca9620779daa3437160453c85f6fb4be4d647e3e5f0f88"
-    },
     {
       "path": "AI_CONTEXT.md",
       "size_bytes": 9394,
@@ -1203,961 +19,6 @@
       "path": "AMAZON_MATCHING_NOTES.md",
       "size_bytes": 42702,
       "sha256": "eb0a8f40f0a7fa966fc011e6aff5da2425c8cfa89d8bcb008352b03645f1f588"
-    },
-    {
-      "path": "assets/banner-spicing-it-up.png",
-      "size_bytes": 5537699,
-      "sha256": "00f61bf80a3ad58599c36e68532f343d7e5ad1828923a3194543536d2284a915"
-    },
-    {
-      "path": "assets/banner-spicing-it-up.webp",
-      "size_bytes": 297984,
-      "sha256": "6ae953db376441786920638abe4fbedc524c614dea617307038cf79a218a3e26"
-    },
-    {
-      "path": "assets/caip-package-placeholder.svg",
-      "size_bytes": 837,
-      "sha256": "0d01b8e64c79ded426bad9fc2144f7f6a0ac5c305a4dc50f013fa15eec3c4686"
-    },
-    {
-      "path": "assets/caip-planning-placeholder.svg",
-      "size_bytes": 831,
-      "sha256": "c7e63f51fabbfc5a0659f1166003d916d529b750c33b4cf3e95cf06db0fac87f"
-    },
-    {
-      "path": "assets/client-document-workflow-placeholder.svg",
-      "size_bytes": 847,
-      "sha256": "605d7c8afaadc1687168c6812b4ddd78b67346f73fb983b7dfcfdbc32593c7e1"
-    },
-    {
-      "path": "assets/content-only-project-placeholder.svg",
-      "size_bytes": 846,
-      "sha256": "8140bbb675ea9443dbe5355dbc1b83ab7a4825546582125b7db00117794460a1"
-    },
-    {
-      "path": "assets/creative-automation-master-process.svg",
-      "size_bytes": 3281,
-      "sha256": "92c5e8fdd7881a9dfda4baf15a53308a766379b9984669d0388156452ebb95b7"
-    },
-    {
-      "path": "assets/creative-intelligence-integration-placeholder.svg",
-      "size_bytes": 843,
-      "sha256": "076ed316db99ae65ae20c939da68f4b795ee7895ace961ffd802eaa9d371132a"
-    },
-    {
-      "path": "assets/creative-process-engine-placeholder.svg",
-      "size_bytes": 833,
-      "sha256": "e7a65c433ba63ce2546db9c9d706f41c60c6451fcfa2455f7e4139e7eafcebaa"
-    },
-    {
-      "path": "assets/creator-flexible-entry-paths-placeholder.svg",
-      "size_bytes": 830,
-      "sha256": "9d7f4883ba9078b3ad4ad3d18c163756a122af741d45a7076803254c0bbc5d55"
-    },
-    {
-      "path": "assets/free-shipping.png",
-      "size_bytes": 4323246,
-      "sha256": "e89247608e5c3ad3f332097a2ad591906689a622c1c93f58352a70b3db86f01c"
-    },
-    {
-      "path": "assets/generated/editorial/gift-card-brand-illustration-768.webp",
-      "size_bytes": 68376,
-      "sha256": "3b13f341f9a960b63b93402c781c0f9b7e11d5317c02a7fe94666f1354fa8d58"
-    },
-    {
-      "path": "assets/generated/editorial/gift-card-brand-illustration.webp",
-      "size_bytes": 268510,
-      "sha256": "4ae58aab03776005b5ab68b802e30e6a6150d4a5058633a20d9d5f785026a766"
-    },
-    {
-      "path": "assets/generated/editorial/handmade-jewelry-techniques-illustration-768.webp",
-      "size_bytes": 73766,
-      "sha256": "8534956d09f15d5a79acc98c8e045a00d932abc19b1e793e5af4b5581019a13b"
-    },
-    {
-      "path": "assets/generated/editorial/handmade-jewelry-techniques-illustration.webp",
-      "size_bytes": 269602,
-      "sha256": "4c99b7b054a7f0333d157b073725664a77becf11b29f9d83ed91bfc140b53267"
-    },
-    {
-      "path": "assets/generated/editorial/workshop-discovery-illustration-768.webp",
-      "size_bytes": 79676,
-      "sha256": "2e1c2ac85f7934b5a211899bb32a345db5ef0b8fe82a2171488ec99249c6c5d6"
-    },
-    {
-      "path": "assets/generated/editorial/workshop-discovery-illustration.webp",
-      "size_bytes": 261452,
-      "sha256": "dfec6faef75127e75dd8d91a0b41ac6048186be8cbb8a7d7e41d42b72f92d03f"
-    },
-    {
-      "path": "assets/gift-card-art.svg",
-      "size_bytes": 1375,
-      "sha256": "b6c78c355caf2c6fd7df56461dc780adbc40f7190e274b88b605974954459b60"
-    },
-    {
-      "path": "assets/gift-card-placeholder.svg",
-      "size_bytes": 813,
-      "sha256": "0287fbe57764bcdd943b5b3535ad298887baab07637e4e14801bdae07dd14bc2"
-    },
-    {
-      "path": "assets/hero-workshop.webp",
-      "size_bytes": 715488,
-      "sha256": "97841d03e567fb3ac75ec71175ceb7f49e1dfc7c40263f36caf9d1b824ebec23"
-    },
-    {
-      "path": "assets/icons/icon-180.png",
-      "size_bytes": 32614,
-      "sha256": "70f06da94d7de6224347fc225e730f61e0bda627ea5a90fe2399d1501c4e5d06"
-    },
-    {
-      "path": "assets/icons/icon-192.png",
-      "size_bytes": 36263,
-      "sha256": "6519206e796825a303109206a0be9f50ee00839fe121545c6633d0f618b4dc2a"
-    },
-    {
-      "path": "assets/icons/icon-512.png",
-      "size_bytes": 137582,
-      "sha256": "e069c6cd49904a9898a52a6cb5962b5ddfdf7290e2dbd1bf26ac5d6cece40e35"
-    },
-    {
-      "path": "assets/images/site/about-real-workshop.webp",
-      "size_bytes": 109796,
-      "sha256": "f48de1803b955d2cc255603d5f888fe0bba4e5f42637a13c71a7fa539a431959"
-    },
-    {
-      "path": "assets/images/site/about-workshop-story.webp",
-      "size_bytes": 138958,
-      "sha256": "4e3fb9d6e479302012d2676a86c5f80ac1ac38fe86208511f94602d6eac2e502"
-    },
-    {
-      "path": "assets/images/site/candle-product-mockup.webp",
-      "size_bytes": 157014,
-      "sha256": "0e06815c69361163479c7928b7a96415a5d08212d4ca46d5b5f6924640c4c3bf"
-    },
-    {
-      "path": "assets/images/site/collection-overview.webp",
-      "size_bytes": 136194,
-      "sha256": "7d7b862b4e525bc2f239e3bc18c1989db7687cff9938e23bb230f82c272c1cc0"
-    },
-    {
-      "path": "assets/images/site/creation-in-progress.webp",
-      "size_bytes": 163488,
-      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
-    },
-    {
-      "path": "assets/images/site/custom-candle-colour-and-detail.webp",
-      "size_bytes": 184244,
-      "sha256": "781da65e90df42c4145c2cad861ea3e2c24994dafb74715c72880a07e1781732"
-    },
-    {
-      "path": "assets/images/site/custom-gift-process-before-after.webp",
-      "size_bytes": 197660,
-      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
-    },
-    {
-      "path": "assets/images/site/custom-soap-texture-and-process.webp",
-      "size_bytes": 147888,
-      "sha256": "69c8a4e14cab9b40aa0b54c30e5adcd13fc9d220c490afeee858da88bf9c074d"
-    },
-    {
-      "path": "assets/images/site/devil-n-dove-gift-card.webp",
-      "size_bytes": 84528,
-      "sha256": "baa494361be4487c9fe7a71b78bbb2ba47ed2c1457e175d8fe8da790b97ce41f"
-    },
-    {
-      "path": "assets/images/site/devil-n-dove-workshop-process.webp",
-      "size_bytes": 163488,
-      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
-    },
-    {
-      "path": "assets/images/site/event-display-before-after.webp",
-      "size_bytes": 197660,
-      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
-    },
-    {
-      "path": "assets/images/site/events-display-collage.webp",
-      "size_bytes": 326028,
-      "sha256": "756c76c69c70fdf770a81473ceb669cc089826d5884a58ac6b147031c1e823eb"
-    },
-    {
-      "path": "assets/images/site/events-market-display.webp",
-      "size_bytes": 197660,
-      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
-    },
-    {
-      "path": "assets/images/site/gallery-item-specific-collage.webp",
-      "size_bytes": 331886,
-      "sha256": "9adb9d33776e8609edabbe285f633455aace3ad074c0f21a79eb26c8c98d2082"
-    },
-    {
-      "path": "assets/images/site/gallery-proof-collage.webp",
-      "size_bytes": 160056,
-      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
-    },
-    {
-      "path": "assets/images/site/gift-card-mockup.webp",
-      "size_bytes": 286846,
-      "sha256": "7b77876c20c8960d075512a1db48b17d177a393d1c72f26f3fd0f0da3e702713"
-    },
-    {
-      "path": "assets/images/site/handmade-jewelry-macro-detail.webp",
-      "size_bytes": 101802,
-      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
-    },
-    {
-      "path": "assets/images/site/handmade-jewelry-product-mockup.webp",
-      "size_bytes": 258910,
-      "sha256": "acb4a13c721014b9b553fa9c2d857b48a62fba0a745884509122d99f2f7d7c30"
-    },
-    {
-      "path": "assets/images/site/handmade-product-collection.webp",
-      "size_bytes": 143316,
-      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
-    },
-    {
-      "path": "assets/images/site/home-hero-products.webp",
-      "size_bytes": 121650,
-      "sha256": "562918c7734ee4d8b677c6d7345ba865387b4ee6dfc7e1675602b5f22a7c2005"
-    },
-    {
-      "path": "assets/images/site/home-workshop-preview.webp",
-      "size_bytes": 163488,
-      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
-    },
-    {
-      "path": "assets/images/site/laser-engraver-material-test.webp",
-      "size_bytes": 160056,
-      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
-    },
-    {
-      "path": "assets/images/site/laser-engraving-finished-example.webp",
-      "size_bytes": 160056,
-      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
-    },
-    {
-      "path": "assets/images/site/laser-project-mockup.webp",
-      "size_bytes": 131784,
-      "sha256": "23093cd17c6468b19ba9dba790f20ef72f977ee0e2e2caed0e72d237fec37f98"
-    },
-    {
-      "path": "assets/images/site/pickup-package-mockup.webp",
-      "size_bytes": 154592,
-      "sha256": "e7a4b4b4bcc0a4eab1369d3e9065ffed9e4fb1435938fe625828d223f3fa0ba7"
-    },
-    {
-      "path": "assets/images/site/pickup-ready-order.webp",
-      "size_bytes": 147716,
-      "sha256": "5a178288a328d537c356ca5d6428b4fe50f8bbb59e24e23f2ce87cf6bc32e05d"
-    },
-    {
-      "path": "assets/images/site/polymer-clay-earring-macro.webp",
-      "size_bytes": 101802,
-      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
-    },
-    {
-      "path": "assets/images/site/polymer-clay-product-mockup.webp",
-      "size_bytes": 256322,
-      "sha256": "758e95ba32e365dad482de977eb8e8abdd2c05f31f115e6d77b9cbad3d29138a"
-    },
-    {
-      "path": "assets/images/site/project-before-after.webp",
-      "size_bytes": 197660,
-      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
-    },
-    {
-      "path": "assets/images/site/shop-featured-collection.webp",
-      "size_bytes": 138046,
-      "sha256": "368e7ad2c1e6d1ecb6c79e6235152573e3b5cf3fd2517371a93219307f863cd7"
-    },
-    {
-      "path": "assets/images/site/shop-item-specific-collage.webp",
-      "size_bytes": 331072,
-      "sha256": "fa393f33dc919361047aa5901defc11dd88b01cc1d27b0cad158c56a042737bb"
-    },
-    {
-      "path": "assets/images/site/soap-product-mockup.webp",
-      "size_bytes": 123476,
-      "sha256": "2882d56d388bc7d4ccad2518fc8e4474563b958cdf0ecb82f5e83f426e19a459"
-    },
-    {
-      "path": "assets/images/site/social-content-workbench.webp",
-      "size_bytes": 223896,
-      "sha256": "d22e3d227e2147051676f451c026b9e625f3465c3883df94c8e8adab0be1fe22"
-    },
-    {
-      "path": "assets/images/site/vintage-collection-preview.webp",
-      "size_bytes": 143316,
-      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
-    },
-    {
-      "path": "assets/images/site/vintage-item-condition-detail.webp",
-      "size_bytes": 143316,
-      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
-    },
-    {
-      "path": "assets/images/site/vintage-tool-condition-detail.webp",
-      "size_bytes": 160056,
-      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
-    },
-    {
-      "path": "assets/images/site/vintage-tools-mockup.webp",
-      "size_bytes": 119144,
-      "sha256": "4cf3e7afe11312f8db53bfc852a682e259d6437d669da508b8df46ab9a168a50"
-    },
-    {
-      "path": "assets/images/site/workshop-creative-paths.webp",
-      "size_bytes": 197660,
-      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
-    },
-    {
-      "path": "assets/images/site/workshop-gift-making-process.webp",
-      "size_bytes": 163488,
-      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
-    },
-    {
-      "path": "assets/images/site/workshop-journal-storytelling.webp",
-      "size_bytes": 165202,
-      "sha256": "2f956345ad342a962296df34c81d10d576356eda0c66422b280eb2df9239564f"
-    },
-    {
-      "path": "assets/inventory-lot-tracking-placeholder.svg",
-      "size_bytes": 833,
-      "sha256": "7ba78a843c4949792a13e98e8e20664697f981bc942ba147771354e307c2e78a"
-    },
-    {
-      "path": "assets/inventory-operations-placeholder.svg",
-      "size_bytes": 850,
-      "sha256": "fbd35f8bb599819e6d542281b495d0cf395a171b94f013ac4f5a96c0af6418d8"
-    },
-    {
-      "path": "assets/logo-clear-nav.webp",
-      "size_bytes": 36714,
-      "sha256": "c8b8bf79a9b29ded41e063170eb15ae4362d5798a56a4492685df169253c2182"
-    },
-    {
-      "path": "assets/logo-clear.png",
-      "size_bytes": 687421,
-      "sha256": "c31a8be1091730d358f1d089f74b1bf01ca05cb495fecfcee080ee5af88533d9"
-    },
-    {
-      "path": "assets/logo-full.png",
-      "size_bytes": 5717185,
-      "sha256": "9bb51457cb88b5f0f09948f555b3a68227edbe7ddf102669353fd9b033639d9d"
-    },
-    {
-      "path": "assets/logo.png",
-      "size_bytes": 3583441,
-      "sha256": "9849b39c4dfde441ef85810bc93ca66d65bcbf8a34980417b8578774f5fa03c9"
-    },
-    {
-      "path": "assets/mainpage-collage.jpeg",
-      "size_bytes": 599474,
-      "sha256": "417453e221108aa68d70c21fb70d14aadc3bab801accf4cc02ac8dc92314cf0b"
-    },
-    {
-      "path": "assets/mainpage-collage.webp",
-      "size_bytes": 198358,
-      "sha256": "563a243727daa5633af9a5bf7ea2b3c4edea8ba9726efad55924b4f611236d57"
-    },
-    {
-      "path": "assets/mark-display.webp",
-      "size_bytes": 22082,
-      "sha256": "15a2a0bedac7ff00afecebdf915f71223a0d9d1e7a8cb32856c94961f1139869"
-    },
-    {
-      "path": "assets/mark.png",
-      "size_bytes": 532773,
-      "sha256": "438ed428228e8d06769ac756d70126414f3ceaf1802a28aa41c2f1cdfd61966a"
-    },
-    {
-      "path": "assets/packaging/artwork/candle-top-wedding-line-art-v1.png",
-      "size_bytes": 463223,
-      "sha256": "bdf34b23411858ed51e4b4d937663832cd916b3d9e94d51e28283dc3812dbb8d"
-    },
-    {
-      "path": "assets/packaging/artwork/candle-top-wedding-line-art-v1.webp",
-      "size_bytes": 323934,
-      "sha256": "7ffac7cfea0326c96bc90bbdd1a963d419d0eb9f50945ed5cd60c10b8027cdcf"
-    },
-    {
-      "path": "assets/packaging/artwork/soap-botanical-purple-rose-v1.png",
-      "size_bytes": 2044892,
-      "sha256": "06b6de844dd889fb6d22b7e0f3de81d5f3fa17f636fcb8eac2eb3c63b2c5a635"
-    },
-    {
-      "path": "assets/packaging/artwork/soap-botanical-purple-rose-v1.webp",
-      "size_bytes": 257556,
-      "sha256": "4cb107e2642dae0b5a94673d5809998f6fc11a7aef9d416ddf7754a91fae0d0a"
-    },
-    {
-      "path": "assets/packaging/placeholders/candle-label-package.svg",
-      "size_bytes": 1097,
-      "sha256": "55d2b9af888481d9c436dbf842f5bd25a27accb1cf47432d06ff982a5b4e1abb"
-    },
-    {
-      "path": "assets/packaging/placeholders/jewelry-card-package.svg",
-      "size_bytes": 1438,
-      "sha256": "be8e06be7e002f56df794b6813c6893e2d38df0b86abc94cfc29c2c144e803f2"
-    },
-    {
-      "path": "assets/packaging/placeholders/package-insert-system.svg",
-      "size_bytes": 1230,
-      "sha256": "e31ab0ec67698a68f69462a870df95cf5002e2c9de1955309001c273b4dcb719"
-    },
-    {
-      "path": "assets/packaging/placeholders/soap-base-source-template.svg",
-      "size_bytes": 1626,
-      "sha256": "cd60f2e76f179201339735f833585f63902bab0a5f5821f3e1866b002b4438f5"
-    },
-    {
-      "path": "assets/packaging/reference/wedding-candle-top-john-laurie-approved-reference.png",
-      "size_bytes": 1854790,
-      "sha256": "8abe415ff7fb472fd28697a18638a9b30a7e8f53cce737eb5bc87f13c8cfa056"
-    },
-    {
-      "path": "assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png",
-      "size_bytes": 1565130,
-      "sha256": "297d8a7e737447c307523ea50b04d4967892e86c948f19745e35c114dd0a382c"
-    },
-    {
-      "path": "assets/packaging/soap/reference/Soap_Label_Master_Template.svg",
-      "size_bytes": 782,
-      "sha256": "63276ce56619599b9024cb25f9ea4c82d267217afc733171545643b7f13e74a9"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/black-rose-v1.webp",
-      "size_bytes": 132650,
-      "sha256": "7b212a6e01e89af036ff2a1e2baa8d714db9fa20371e999ecbf43b543884159b"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/blue-green-rose-v1.webp",
-      "size_bytes": 137930,
-      "sha256": "d859977436b764805f4106f58757166cf1e46adb128fee1142751882c67c0ae5"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/blue-rose-v1.webp",
-      "size_bytes": 139334,
-      "sha256": "7cb5d5da86c4a98b5627e5ab1c951d938b3d60ea6e135fd85e6b7494714cf59e"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/bronze-rose-v1.webp",
-      "size_bytes": 135242,
-      "sha256": "f4bdaea9b92bc783efb64bd31e3ae80f0a48b23a38db67d230b6891d5bc8088b"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/brown-rose-v1.webp",
-      "size_bytes": 137884,
-      "sha256": "43082d71235da4ba96596e8feb9f590aaf8137707f50cc55ecdb73d738bcfb6b"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/charcoal-rose-v1.webp",
-      "size_bytes": 132372,
-      "sha256": "f80c926e637ef972f647ca808f683e1225332a25aef938f42b067b39f519cb4c"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/copper-rose-v1.webp",
-      "size_bytes": 136668,
-      "sha256": "d62eeb3e04f60b5ec940288e9885f319d7c3e910d409c283f0e6ed118f4733fa"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/coral-rose-v1.webp",
-      "size_bytes": 138412,
-      "sha256": "40c656e917ac549bec8173ae96dbbd81a7340602c2d31cb1dbbce6e1828f8bbd"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/gold-rose-v1.webp",
-      "size_bytes": 136704,
-      "sha256": "38863904d0b784327062e7dbb62828ca4fa1973e703735b85d38472d3281957f"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/green-rose-v1.webp",
-      "size_bytes": 138756,
-      "sha256": "01d2ba15bdfe70d4843562a69cf7f90826d540c0acc38f5c4843564394528042"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/grey-rose-v1.webp",
-      "size_bytes": 132372,
-      "sha256": "f80c926e637ef972f647ca808f683e1225332a25aef938f42b067b39f519cb4c"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/honey-rose-v1.webp",
-      "size_bytes": 137372,
-      "sha256": "d86914552cf44a147bc69c571b8b63fef143fb0fe8bff19c7502d2b10d9d64f0"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/lavender-rose-v1.webp",
-      "size_bytes": 135442,
-      "sha256": "d35d4abb669c9e9569c48de6f83f8971c48c5f0af8a3cd95624cdd7cfa1c5991"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/oatmeal-rose-v1.webp",
-      "size_bytes": 133950,
-      "sha256": "3116dacd928e9cf54a17f06add670d66a343362c34d92975b93ea55ba19247b9"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/off-white-rose-v1.webp",
-      "size_bytes": 131606,
-      "sha256": "f0bf09e40ccf1dcd4394d7ff24bc45fee41bf48f47a2384c019eef47bf9a1d41"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/orange-rose-v1.webp",
-      "size_bytes": 140810,
-      "sha256": "5a5a1e9311493c920362fd5b9e79ddd2f50940d93081fbc9ca84172f6a331d9a"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/peach-rose-v1.webp",
-      "size_bytes": 136718,
-      "sha256": "3c4e22f94bbfec4ebb08a69fbefe4433186f3b056e399c3e944fada2e44f9aff"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/pink-rose-v1.webp",
-      "size_bytes": 135044,
-      "sha256": "b120ccae8195181315c49388b43380d9ce84289c0a74e2761b4b623caa7dec19"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/purple-rose-v1.webp",
-      "size_bytes": 136156,
-      "sha256": "92090eb0a85a4f3f701e5f268c6088ee08a973a1297cde5a33b350c5170a9411"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/red-rose-v1.webp",
-      "size_bytes": 138882,
-      "sha256": "a028b556dc326de14bab59c557e05e5f4e8d0ea790baed6233ca951464d22eb3"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/silver-rose-v1.webp",
-      "size_bytes": 131216,
-      "sha256": "94a0e250e7697493f9283782e85fe230682273f028bc0de63c4162b0970c5cd8"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/white-rose-v1.webp",
-      "size_bytes": 131778,
-      "sha256": "f5827d7de904d00fa9d05dc77aba85f872dfb7789ae6da455558d41dc8ebf9f4"
-    },
-    {
-      "path": "assets/packaging/soap/roses/botanical/yellow-rose-v1.webp",
-      "size_bytes": 137894,
-      "sha256": "f883e8625190a59bfb5c8ddb282e0e43be069a54c40709878cf4201052562cf3"
-    },
-    {
-      "path": "assets/packaging/soap/roses/green-rose.svg",
-      "size_bytes": 961,
-      "sha256": "23e0f927aabb27f1c3a20e6fb022528ab28cc284520ee30a7c6294860477ac11"
-    },
-    {
-      "path": "assets/packaging/soap/roses/oatmeal-rose.svg",
-      "size_bytes": 968,
-      "sha256": "f6a2288258ed6aba9777d8e8245f653081c7e903dd880ddbd94b5345148330e7"
-    },
-    {
-      "path": "assets/packaging/soap/roses/purple-rose.svg",
-      "size_bytes": 974,
-      "sha256": "4437aeb0770fa394ac3bc6ddff8ebb0253a5cb0c240a01920b6baefc3de3345a"
-    },
-    {
-      "path": "assets/packaging-studio-placeholder.svg",
-      "size_bytes": 850,
-      "sha256": "08e8460c78d1f3c9a2020e2b6dc9caa3d841efa176c6b58033f9608cd0cd833c"
-    },
-    {
-      "path": "assets/placeholders/media-content/about-section-visual-1.svg",
-      "size_bytes": 1451,
-      "sha256": "7584a4f70c0991bf39c012f5c9f2bb930cf2613123a51a0b1b0a7d82dff5de28"
-    },
-    {
-      "path": "assets/placeholders/media-content/collections-section-visual-1.svg",
-      "size_bytes": 1483,
-      "sha256": "4d82e9f938720cb6117a735bd1e3c004199627b62d3ddedb60ab9e0143dbf6aa"
-    },
-    {
-      "path": "assets/placeholders/media-content/contact-section-visual-1.svg",
-      "size_bytes": 1467,
-      "sha256": "1f55fd4486a833627d077e4a4df03a52a96068dadf27170a58ba77503dbdca45"
-    },
-    {
-      "path": "assets/placeholders/media-content/creations-section-visual-1.svg",
-      "size_bytes": 1541,
-      "sha256": "6e845167b49a33db5f75e10c34ae37ae312a5e2a3847b136d8e74766a13120fb"
-    },
-    {
-      "path": "assets/placeholders/media-content/custom-candle-making-ontario-section-visual-1.svg",
-      "size_bytes": 1531,
-      "sha256": "3bfd30577ab1cd1072787c673c4525ddb2ff2588e28e4fc8d6bba3f77d7cddec"
-    },
-    {
-      "path": "assets/placeholders/media-content/custom-gifts-southern-ontario-section-visual-1.svg",
-      "size_bytes": 1533,
-      "sha256": "c619ef9270011be9477ba998febe702038015155e8feda84872b83e0a57fb3fc"
-    },
-    {
-      "path": "assets/placeholders/media-content/custom-soap-making-ontario-section-visual-1.svg",
-      "size_bytes": 1523,
-      "sha256": "72b96cb0f10b58ed20b61b57038ac29eaed9dc2407ea77f4abc82611ddf53d97"
-    },
-    {
-      "path": "assets/placeholders/media-content/events-section-visual-1.svg",
-      "size_bytes": 1501,
-      "sha256": "070508456a0d31e64623605e9ee4f97c3c69d3b5b6fc22bb85f08f28e0ef1327"
-    },
-    {
-      "path": "assets/placeholders/media-content/generic-image.svg",
-      "size_bytes": 574,
-      "sha256": "a26e80dbe95ea993076e7fd9e34c8440d6cb0bfa88f0e235f11750bf876203fc"
-    },
-    {
-      "path": "assets/placeholders/media-content/gift-cards-section-visual-1.svg",
-      "size_bytes": 1509,
-      "sha256": "b97162738544b2ba2e69cda81c1c32b3a3f052d7c83cd548e3b0e75c678d38d0"
-    },
-    {
-      "path": "assets/placeholders/media-content/handmade-jewelry-ontario-section-visual-1.svg",
-      "size_bytes": 1531,
-      "sha256": "3aa09090a912c28521a31beea43003022a9b9e956d959cc9204b9bf3072382f5"
-    },
-    {
-      "path": "assets/placeholders/media-content/home-section-visual-1.svg",
-      "size_bytes": 1509,
-      "sha256": "9b6cb0a9df9c8cf893dd6c9e21136b04c51050d03330cc1b7b9467f17d082971"
-    },
-    {
-      "path": "assets/placeholders/media-content/home-what-we-make-2.svg",
-      "size_bytes": 709,
-      "sha256": "bffd47d17ebff8ffa47739971161aeb2f5ac07a87428ff0f0b43aab704957e8d"
-    },
-    {
-      "path": "assets/placeholders/media-content/home-what-we-make-3.svg",
-      "size_bytes": 709,
-      "sha256": "ceaff70b0faf90bee198e233e09f7c8948630accdf5ffb683af08707294a6a37"
-    },
-    {
-      "path": "assets/placeholders/media-content/laser-engraving-ontario-section-visual-1.svg",
-      "size_bytes": 1537,
-      "sha256": "dbdaf68689035bd7334f73f7067641f14a84163044b47e57a8a145aa864604b3"
-    },
-    {
-      "path": "assets/placeholders/media-content/marketplaces-hero-image.svg",
-      "size_bytes": 1457,
-      "sha256": "ba8319a3adedc7e5bf168fa7c819062deb967c77871ea7dafb9f5e0e6404329f"
-    },
-    {
-      "path": "assets/placeholders/media-content/marketplaces-section-visual-1.svg",
-      "size_bytes": 1503,
-      "sha256": "a1556f1c99ea6bc7dfab3be40586393a0e38f91bbaf09e8fa42c0f93d14bf9fe"
-    },
-    {
-      "path": "assets/placeholders/media-content/polymer-clay-earrings-ontario-section-visual-1.svg",
-      "size_bytes": 1541,
-      "sha256": "8843eead6d02b3eb63f1341ec15273003cfc8b06d692fdf73405f79523b66f0c"
-    },
-    {
-      "path": "assets/placeholders/media-content/site-background.svg",
-      "size_bytes": 616,
-      "sha256": "945ddd8784a483ed9aaf9235a9511b05c895744ad68b55c25d6df18bd4e7a8c9"
-    },
-    {
-      "path": "assets/placeholders/media-content/socials-section-visual-1.svg",
-      "size_bytes": 1479,
-      "sha256": "d6f7020ac33c33d18bbbaea5e94d45750b7916818536c2cc52d3c4ae3d889bf0"
-    },
-    {
-      "path": "assets/placeholders/media-content/vintage-finds-ontario-section-visual-1.svg",
-      "size_bytes": 1519,
-      "sha256": "6a3b7f0b2cb62969a0754b19c4c3d6f1538bce450e74f8978c3b78d21d642e61"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-coin-and-spoon-ring-care-hero-image.svg",
-      "size_bytes": 1475,
-      "sha256": "80557ca19fc9c0a998c6e3ed0b1c513de3d84db799809e21800342ba621d30cf"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-coin-and-spoon-ring-care-section-visual-1.svg",
-      "size_bytes": 1501,
-      "sha256": "d8d6e0c4370156ec54df58d2f9e36002134452f9232b5b839fe0dd4b1653709f"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-handmade-vintage-sourced-guide-hero-image.svg",
-      "size_bytes": 1491,
-      "sha256": "26dbdc500dd8390f1d100b2455ae50324b8105b0e03dd8939aca8d751fe2ef1a"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-handmade-vintage-sourced-guide-section-visual-1.svg",
-      "size_bytes": 1505,
-      "sha256": "0eb91376fadc457ba608ce78fedc6bc9d0f2e94b20e23cd0b10d600869ddd5cd"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-polymer-clay-earring-care-hero-image.svg",
-      "size_bytes": 1473,
-      "sha256": "31bf0dd5b905f7e280cdb3af36dbd6fd23f4f5fc6d5ec5d433a2db5f4c4f0b80"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-polymer-clay-earring-care-section-visual-1.svg",
-      "size_bytes": 1503,
-      "sha256": "fc161f629ecb7e95320625de5ed4014bc5929e6ffbad00bfb4b693607b5de94e"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-section-visual-1.svg",
-      "size_bytes": 1521,
-      "sha256": "b4f2174985c32399edbc279e87965ca6a1d3da9a2fa6739962abcd547ebe77e8"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-journal-story-hero-image.svg",
-      "size_bytes": 1467,
-      "sha256": "394d139262167c26c3f8ca0e880dc2f69b940546ea0aef7dee7433869122258b"
-    },
-    {
-      "path": "assets/placeholders/media-content/workshop-made-gifts-ontario-section-visual-1.svg",
-      "size_bytes": 1541,
-      "sha256": "1c08de188cfe83c00850529741f2a86cdb0fc87847ab98273e3ca70e3ebd2233"
-    },
-    {
-      "path": "assets/prelaunch-operations-map.svg",
-      "size_bytes": 840,
-      "sha256": "350e2ec3425fd0e0427dd4c110336d84403e0ddac9d4c622feedcf8f6fba2364"
-    },
-    {
-      "path": "assets/product-cleanup-placeholder.svg",
-      "size_bytes": 842,
-      "sha256": "6cf618fd761b156ffe9d7d99b93f096a21a8680aee22723bc5165b58b989437b"
-    },
-    {
-      "path": "assets/product-media-placeholder.svg",
-      "size_bytes": 851,
-      "sha256": "8ffbf8e38b26c1eb2b25a04bbee254c1b1e0a05b13f4a20cdbd1c887d5104225"
-    },
-    {
-      "path": "assets/product-placeholder.svg",
-      "size_bytes": 813,
-      "sha256": "c0951d80df1b8c932701f6dccbe059b79da5c110d35e588c2e557836633483bd"
-    },
-    {
-      "path": "assets/product-set-pricing-placeholder.svg",
-      "size_bytes": 837,
-      "sha256": "f163a6d537b4b8f50e4fbee791962cb60035aa5a4f377c4b64e0b984283ea8f7"
-    },
-    {
-      "path": "assets/products/fallbacks/DD215-216B.webp",
-      "size_bytes": 185974,
-      "sha256": "c93f6276ab6aa2bacd352b2f29f87b4026d82fc1d5ab1d0847d4e8ab3f31cac0"
-    },
-    {
-      "path": "assets/products/fallbacks/DDM04.webp",
-      "size_bytes": 193404,
-      "sha256": "5a3387d4aed4db4da4c8a398e1cb45068edef7b9c64b596b2e077c3043188c33"
-    },
-    {
-      "path": "assets/products/fallbacks/DDM06.webp",
-      "size_bytes": 190492,
-      "sha256": "36d6d80a0ceb0095c88886f388662fca738e6de1e9d488d2dc7fc5324faa5865"
-    },
-    {
-      "path": "assets/products/fallbacks/DDPR02.webp",
-      "size_bytes": 85314,
-      "sha256": "ba992ec00ebdcf6dcf6f03c4402144a309e5d468b1f9c60a96ff46471662cec4"
-    },
-    {
-      "path": "assets/products/fallbacks/DDPR09.webp",
-      "size_bytes": 194564,
-      "sha256": "945dc46497e100d3d80db4687764e46b7d5d899678e69836cf8c41e24b9cb515"
-    },
-    {
-      "path": "assets/products/fallbacks/DDPR14.webp",
-      "size_bytes": 193996,
-      "sha256": "f682686dd792976feb35040d4321e38ad68f36ee292cdb86dd4728e07e94b857"
-    },
-    {
-      "path": "assets/products/fallbacks/LampLight.webp",
-      "size_bytes": 189994,
-      "sha256": "f0320c55f5a49320f5351e8bcbaa3c594cd8033c0e198af99ca2e6f263fb6d40"
-    },
-    {
-      "path": "assets/real-media/candle-top-reference-photo.webp",
-      "size_bytes": 184244,
-      "sha256": "781da65e90df42c4145c2cad861ea3e2c24994dafb74715c72880a07e1781732"
-    },
-    {
-      "path": "assets/real-media/engraving-process-photo.webp",
-      "size_bytes": 160056,
-      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
-    },
-    {
-      "path": "assets/real-media/gift-card-photo.webp",
-      "size_bytes": 84528,
-      "sha256": "baa494361be4487c9fe7a71b78bbb2ba47ed2c1457e175d8fe8da790b97ce41f"
-    },
-    {
-      "path": "assets/real-media/jewelry-macro-photo.webp",
-      "size_bytes": 101802,
-      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
-    },
-    {
-      "path": "assets/real-media/maker-portrait-photo.webp",
-      "size_bytes": 165202,
-      "sha256": "2f956345ad342a962296df34c81d10d576356eda0c66422b280eb2df9239564f"
-    },
-    {
-      "path": "assets/real-media/product-detail-photo.webp",
-      "size_bytes": 143316,
-      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
-    },
-    {
-      "path": "assets/real-media/soap-label-reference-photo.webp",
-      "size_bytes": 147888,
-      "sha256": "69c8a4e14cab9b40aa0b54c30e5adcd13fc9d220c490afeee858da88bf9c074d"
-    },
-    {
-      "path": "assets/real-media/tools-supplies-photo.webp",
-      "size_bytes": 160056,
-      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
-    },
-    {
-      "path": "assets/real-media/workshop-collage-photo.webp",
-      "size_bytes": 197660,
-      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
-    },
-    {
-      "path": "assets/real-media/workshop-process-photo.webp",
-      "size_bytes": 163488,
-      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
-    },
-    {
-      "path": "assets/release-preflight-placeholder.svg",
-      "size_bytes": 834,
-      "sha256": "49ef96de408573a8f4eae2c179c6f4dbed9fff37584c5b8f9f9cd912d61a4f58"
-    },
-    {
-      "path": "assets/soap-ribbon-scalloped-reference.svg",
-      "size_bytes": 3598,
-      "sha256": "d5fafe2c88dcf66bd018ee59dfe21955581510cacd41cc26b19a9dd9f1caa7d9"
-    },
-    {
-      "path": "assets/social-platform-preflight-placeholder.svg",
-      "size_bytes": 841,
-      "sha256": "42afd47884b931047c782667bc8f9b12f7892b9234d662585186c32da7ad0b8a"
-    },
-    {
-      "path": "assets/social-publishing-placeholder.svg",
-      "size_bytes": 839,
-      "sha256": "53d2f8f9290f6adaf6aad0ee9e94fd65319578ae20dc465900aa27a855cd9b6d"
-    },
-    {
-      "path": "assets/visual-placeholders/before-after.svg",
-      "size_bytes": 829,
-      "sha256": "0e17b693009ab9f7606c95ea7a7882bb1ab71184e4ed4e97e6a008cc0d9abb5e"
-    },
-    {
-      "path": "assets/visual-placeholders/candle-colour.svg",
-      "size_bytes": 853,
-      "sha256": "873a577228773aa8519082256d24521354b98a37cc2e6b05cc792dfadf2dfa9e"
-    },
-    {
-      "path": "assets/visual-placeholders/creative-asset-intelligence.svg",
-      "size_bytes": 1909,
-      "sha256": "431619c512365c026d557f78f3eff323428f8c77e64c20b482950e2713eb962c"
-    },
-    {
-      "path": "assets/visual-placeholders/engraving-detail.svg",
-      "size_bytes": 658,
-      "sha256": "3367c2c075de69bc791263c533f8f9bcddb6a761a3a9e91653346b6829f664f6"
-    },
-    {
-      "path": "assets/visual-placeholders/engraving-proof.svg",
-      "size_bytes": 849,
-      "sha256": "a3c4fa057781d699f8f0b018c89092f2162ec34b706f5b8cf3b24d3078945bb5"
-    },
-    {
-      "path": "assets/visual-placeholders/events.svg",
-      "size_bytes": 822,
-      "sha256": "8dea8c46fcfa5ace5dc69978c08524a583231f21a91e070a8106911bdc342d66"
-    },
-    {
-      "path": "assets/visual-placeholders/jewelry-macro.svg",
-      "size_bytes": 830,
-      "sha256": "f05500b8fa0a32ea4ef19c289860c3009748bd93e0b883f1566a65bc5129f71e"
-    },
-    {
-      "path": "assets/visual-placeholders/material-detail.svg",
-      "size_bytes": 655,
-      "sha256": "187b0db8738ba4691889b32865da8377340e8501e91f5f4c7d2b2cc5e026cf62"
-    },
-    {
-      "path": "assets/visual-placeholders/mobile-upload-safety.svg",
-      "size_bytes": 1692,
-      "sha256": "4bfd0ef6403f8ac23e402f8335be6152ea179fbd8972518118c31d0bc8b782ef"
-    },
-    {
-      "path": "assets/visual-placeholders/pickup.svg",
-      "size_bytes": 813,
-      "sha256": "b0b6a26579c7aa52a18e14dd6eccbc0873b51f5218e43c37bf7f244744bfe549"
-    },
-    {
-      "path": "assets/visual-placeholders/product-care.svg",
-      "size_bytes": 832,
-      "sha256": "44438f40ecc12692e8d24a9461fdab7be638082865a2fec773c448c651e26dbe"
-    },
-    {
-      "path": "assets/visual-placeholders/product-detail.svg",
-      "size_bytes": 833,
-      "sha256": "b056200cff7077ddda185c42182cdef2a3aefa2a326122578401774e59d778d7"
-    },
-    {
-      "path": "assets/visual-placeholders/product-grid.svg",
-      "size_bytes": 651,
-      "sha256": "0fd6fa0a55fb3f665a15b8d7f98e7f4be780167101892e6ec2715d21332ebb3e"
-    },
-    {
-      "path": "assets/visual-placeholders/product-material.svg",
-      "size_bytes": 835,
-      "sha256": "3e4edb7563b235ea837312928bbd09bf5c3cba6c4b9a7f61b628b57d949d6808"
-    },
-    {
-      "path": "assets/visual-placeholders/product-media-roles.svg",
-      "size_bytes": 833,
-      "sha256": "eafb05c241871d0423f941b5658d8074a39dd6811eda9e392dc4ba509222d00f"
-    },
-    {
-      "path": "assets/visual-placeholders/product-photo-coming-soon.svg",
-      "size_bytes": 861,
-      "sha256": "cc107e41251511051188074ca8786a3146cfaf101ace1e0ca3909d339d030f2b"
-    },
-    {
-      "path": "assets/visual-placeholders/product-process.svg",
-      "size_bytes": 838,
-      "sha256": "b953a67ab31acd7d1c78448f9356f353cc76e1b31f1ae298c8a475eb84fcc1ec"
-    },
-    {
-      "path": "assets/visual-placeholders/product-scale.svg",
-      "size_bytes": 835,
-      "sha256": "9b5507af62f8c1fe0fd0543354cf8462c90b89564dbf642a1c1aa7acac54721b"
-    },
-    {
-      "path": "assets/visual-placeholders/soap-texture.svg",
-      "size_bytes": 839,
-      "sha256": "326b444be612ee6762ded68ce2b4fcc75a67efb37a7a842e9d992267f682a3d8"
-    },
-    {
-      "path": "assets/visual-placeholders/tools.svg",
-      "size_bytes": 835,
-      "sha256": "9cdf601b763245a966988e4af8ddf29ca9747c8447f6b14b9a95a43d53c4031e"
-    },
-    {
-      "path": "assets/visual-placeholders/vintage-condition.svg",
-      "size_bytes": 834,
-      "sha256": "8a1555af08ee5ab4380897d036a0b97fe3ed7cf7c08e6618c7e40b4dadea4ffa"
-    },
-    {
-      "path": "assets/visual-placeholders/workshop-discovery.svg",
-      "size_bytes": 837,
-      "sha256": "f107a6ddd29774bedc7d4ffd02f562c70637831d23f03837ef74749ef2a0f9cd"
-    },
-    {
-      "path": "assets/visual-placeholders/workshop-journal.svg",
-      "size_bytes": 838,
-      "sha256": "050c74fd9f86e0afe5fd496d317949a806fae4e05fd9ae7d2878b296eebbcf47"
-    },
-    {
-      "path": "assets/visual-placeholders/workshop-process.svg",
-      "size_bytes": 834,
-      "sha256": "efe170a7bb0151ca902b4a7b67fe8f8e0bafe580533f0efce08db76f7b6fffb3"
     },
     {
       "path": "AUTH_LOGIN_500_TROUBLESHOOTING.md",
@@ -3580,19 +1441,9 @@
       "sha256": "649c738526e0eb22b9eb4625425afdd26c2f1aad561fd3e9f7aad0d3d7b6e6ce"
     },
     {
-      "path": "build421_non_executing_production_migration_manifest.local.md",
-      "size_bytes": 4215,
-      "sha256": "0ccfec4a9edb61fd554a67f7b535f560781e187c91af897297a35636043227a7"
-    },
-    {
       "path": "BUILD421_TWENTY_ITEM_PRODUCTION_EVIDENCE.md",
       "size_bytes": 4424,
       "sha256": "b426b71cdb39224f8cb89cda8784b3828bda3750a3f5cb4811eaf50c3b7554dd"
-    },
-    {
-      "path": "build422_blocker_mapping.local.md",
-      "size_bytes": 1020,
-      "sha256": "edabaa98bc8384e9ed1473b50dd8d19f47b26eb37e85165eef4436d7fd8b50ce"
     },
     {
       "path": "BUILD422_TWENTY_ITEM_RELEASE_FIXTURES.md",
@@ -3615,11 +1466,6 @@
       "sha256": "3879d9ae47730bbec1dbb99bf3f70d581fdb46326c5c37773d4f01ea76635bd1"
     },
     {
-      "path": "build424_nonexecuting_product_number_preview.local.sql",
-      "size_bytes": 7974,
-      "sha256": "14a99e366fde546591d326d3a024b2aba5756635512e5de943924c9e47ca1142"
-    },
-    {
       "path": "BUILD424_TWENTY_ITEM_PRODUCT_NUMBER_RESERVATION.md",
       "size_bytes": 8138,
       "sha256": "9b89606c97b7b4e5635f45066fdde45d248c4af165737d91fa522cbd8509bc05"
@@ -3628,11 +1474,6 @@
       "path": "BUILD424_VALIDATION.md",
       "size_bytes": 3042,
       "sha256": "4eff168ff18ac6b4d5968ae12a99e2383a318b34203bc4a7a63dca11845ac9ef"
-    },
-    {
-      "path": "build425_nonexecuting_production_product_number_preview.local.sql",
-      "size_bytes": 7292,
-      "sha256": "6dee8351d7959bba453866e86afe510f88018f149fa8de405ca2e6cc57b3b428"
     },
     {
       "path": "BUILD425_TWENTY_ITEM_DEVELOPMENT_PRODUCT_NUMBER_BACKFILL.md",
@@ -3653,11 +1494,6 @@
       "path": "BUILD426_CURRENT_STATE_ROADMAP_OVERLAY.md",
       "size_bytes": 3057,
       "sha256": "ad46cca698f7776ad65b2e9b2baaa3f8e6a35f1add0b9ef1ce6c97e9e3c9ecfa"
-    },
-    {
-      "path": "build426_production_release_candidate.local.sql",
-      "size_bytes": 13973,
-      "sha256": "71df8b574e2096cab60d8a7d2ded1ba4a35e7da0d1f032ddee744baadcdb29e0"
     },
     {
       "path": "BUILD426_TWENTY_ITEM_PRODUCTION_RELEASE_CANDIDATE.md",
@@ -3688,11 +1524,6 @@
       "path": "BUILD428_CURRENT_STATE_ROADMAP_OVERLAY.md",
       "size_bytes": 2691,
       "sha256": "0e0eaf70eb71636657a0ca96c1c2b483008451a69a2be8e283dcafba58b1a8da"
-    },
-    {
-      "path": "build428_membership_rebuild_preview.local.sql",
-      "size_bytes": 1668,
-      "sha256": "ab434a58028e7d08873003a810dc109a04d115f43f99caa29ac54faf6079be56"
     },
     {
       "path": "BUILD428_TWENTY_ITEM_REMAINING_PARITY_BOUNDARY.md",
@@ -3855,9 +1686,19 @@
       "sha256": "714044dbbb59026ddc430c1ccde1b4db194b446ee06b3604464279951958c23b"
     },
     {
+      "path": "BUILD437_CURRENT_STATE_HANDOFF_OVERLAY.md",
+      "size_bytes": 3242,
+      "sha256": "e3af7ee56240d5d58bab7c9909f6db9870d5ddf45115ee2220df63cc1f436f37"
+    },
+    {
+      "path": "BUILD437_CURRENT_STATE_ROADMAP_OVERLAY.md",
+      "size_bytes": 3250,
+      "sha256": "83c46da86a32029d1296fd9e59875a64a1a05af74e127149fb15bc4cef476fbe"
+    },
+    {
       "path": "BUILD437_MEMBERSHIP_COMPLETION_RELEASE.md",
-      "size_bytes": 9030,
-      "sha256": "32518662d9ff017c7fed91c7baa27733f8d0b6751cb430f001f951d212fb1762"
+      "size_bytes": 6828,
+      "sha256": "a7276dfaa4a221a8a26ac5cc93e023b65e6c83ee0035b5f1808dc65bd30c8a12"
     },
     {
       "path": "CLOUDFLARE_ENVIRONMENT_CHECKLIST_DETAILED.md",
@@ -3878,6 +1719,1371 @@
       "path": "CREATIVE_AUTOMATION_STUDIO.md",
       "size_bytes": 7272,
       "sha256": "e6c0b8cb298ce394dd390f3606a8d8be2324b60c17ad17ac50120cca479a8a73"
+    },
+    {
+      "path": "DATABASE_SCHEMA_REFERENCE.md",
+      "size_bytes": 12388,
+      "sha256": "9ba2d83713309a2264d5821282d604bbee7fa54079aab456c3e304ab7b4480d5"
+    },
+    {
+      "path": "DEVELOPMENT_ROADMAP.md",
+      "size_bytes": 367,
+      "sha256": "2f6378575b03c90c118a4e48c8d18b5c48f7f2aba9f65f6219c808a3a6cc0d98"
+    },
+    {
+      "path": "DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md",
+      "size_bytes": 807,
+      "sha256": "4328eb20689aa1d76544060982e9baa33ee10879ce76b2be304059b86172af04"
+    },
+    {
+      "path": "GENERATED_VISUAL_ASSET_REGISTER.md",
+      "size_bytes": 8451,
+      "sha256": "788a7982e26673133375a1127006074c0796d3c3f9418c7327a159c3228a78f7"
+    },
+    {
+      "path": "IMAGES.md",
+      "size_bytes": 3346,
+      "sha256": "ead9971cdcc06dc105f58ab095250054ac0732a11c5332dc43bcd9cddcf46563"
+    },
+    {
+      "path": "IMAGES_REQUIRED.md",
+      "size_bytes": 36576,
+      "sha256": "85985e605e4a3ba1575ab8fb0a686fc51e3f6974ed03ad8202b85318531efaff"
+    },
+    {
+      "path": "KNOWN_GAPS_AND_RISKS.md",
+      "size_bytes": 715,
+      "sha256": "85346b94e47908d20eb4c51e3870e0fc9564befec5d7bce63fc0324c18faaece"
+    },
+    {
+      "path": "LIVE_TESTING_GUIDE.md",
+      "size_bytes": 9654,
+      "sha256": "192a1a466287554476f592ffa6c9fb8ecc0d88a5eadffabc7a61b2a7c020ae44"
+    },
+    {
+      "path": "LOCAL_SEO_PLAYBOOK.md",
+      "size_bytes": 14443,
+      "sha256": "9f5b21658af358f266f339244994d5183082f3bc52f6a89ce86203b125e1d96b"
+    },
+    {
+      "path": "MARKDOWN_INDEX.md",
+      "size_bytes": 2797,
+      "sha256": "925eca23adcab38f71f3a585706598cb97f1379423759cdd68376ae59a57e67b"
+    },
+    {
+      "path": "NEW_CHAT_STATUS.md",
+      "size_bytes": 1234,
+      "sha256": "ee8cd47422bb394b9c1bd52c47f3d05303f3469fef67a85a5bae1eec7aed62c2"
+    },
+    {
+      "path": "OPERATIONAL_CONTINUITY_BUILD240.md",
+      "size_bytes": 5857,
+      "sha256": "2dca0afd609c1df8ede79dd365b18496120c1ca3e8593ed7eb3ae2a4b1677a1f"
+    },
+    {
+      "path": "PACKAGING_REFERENCE_BASELINE.md",
+      "size_bytes": 4765,
+      "sha256": "e82eec85bc160566e2b5e7e7df6b39829c806fd6a63d88b7b520e579efb5c166"
+    },
+    {
+      "path": "PACKAGING_STUDIO.md",
+      "size_bytes": 39275,
+      "sha256": "36c69ff571b92cfaf2c6248dffca0b17edefe701f0da7d220898cae1f94c6c6c"
+    },
+    {
+      "path": "POST_DEPLOY_SMOKE_TEST.md",
+      "size_bytes": 14081,
+      "sha256": "d3213b3e6729a5140c0c58f3a82abc6cf0fc533df57dc4bfc3427d0b5ee25b8e"
+    },
+    {
+      "path": "PRELAUNCH_PROCESS_PLAYBOOKS.md",
+      "size_bytes": 14736,
+      "sha256": "7586b948e6827f3d99a7786f1d35523633169e4c889e25b6d8d0bc7a84f57320"
+    },
+    {
+      "path": "PROJECT_STATUS_AND_ROADMAP.md",
+      "size_bytes": 66167,
+      "sha256": "6530901b4ea3997db6e9fc0f6749cbc6d4de9a48f6f3b9d7ddbfd0a865c7059e"
+    },
+    {
+      "path": "PUBLIC_VISUAL_AUDIT_BUILD238.md",
+      "size_bytes": 2972,
+      "sha256": "dcd0f31fc33b007b67ee8085ed2b563d67279c5b6b3328864d36628c606dfe5d"
+    },
+    {
+      "path": "PUBLIC_VISUAL_AUDIT_BUILD239.md",
+      "size_bytes": 1556,
+      "sha256": "2d5c50c0532caa82a3e9c489f87d0dbcfe412d0caa1607c891642ba98e24acee"
+    },
+    {
+      "path": "RELEASE_NOTES.md",
+      "size_bytes": 4129,
+      "sha256": "04a11e6944265aba8a935295d039a51abd2aa8692436601c1a281e8fea483881"
+    },
+    {
+      "path": "REPO_BASE_GUIDE.md",
+      "size_bytes": 45637,
+      "sha256": "8f8f9400988ea5a3de9153841843d936335af05e9817b93ceb07ce0d8a269166"
+    },
+    {
+      "path": "REPO_RULES.md",
+      "size_bytes": 44325,
+      "sha256": "e0d2b8ad49d8dd5a492440e98bc1b4f4b683f9df26ec05c7fb61758db1abf63a"
+    },
+    {
+      "path": "SANITY_HEALTH_CHECK.md",
+      "size_bytes": 2989,
+      "sha256": "9eaf7d1c425c8d3b437b3c40ecedfc72d786822e3bf31627be260bcf08e2988c"
+    },
+    {
+      "path": "SOCIAL_PUBLISHING_CONNECTION_GUIDE.md",
+      "size_bytes": 37910,
+      "sha256": "621def753ccfed9e3fb5a0c85c99d0bda015a681f607d8d889aa108ef5f16d9b"
+    },
+    {
+      "path": "STARTUP_GO_LIVE_GUIDE.md",
+      "size_bytes": 134064,
+      "sha256": "9ba99921bad24763d06c8404a261e56b9a45ce9bfd185c1ad58ef9bff8b1bdb8"
+    },
+    {
+      "path": "admin/accounting/index.html",
+      "size_bytes": 5266,
+      "sha256": "941c46dd42b84c80d594a289c290b3fe4560d681759e550f72738f624d1c3683"
+    },
+    {
+      "path": "admin/analytics/index.html",
+      "size_bytes": 3876,
+      "sha256": "7efb6606f00a226e25d9305f4ac0488cff581b89772672a8e430d0a9c7b8fa35"
+    },
+    {
+      "path": "admin/application-sanity/index.html",
+      "size_bytes": 1965,
+      "sha256": "53c537fda226fb7902b7d8c34cddb50d6d7be6d949f0363c5f209b53246908c4"
+    },
+    {
+      "path": "admin/catalog-media/index.html",
+      "size_bytes": 3906,
+      "sha256": "424944e7aca0d40efccd0a03d369e49a4d37ecccab4c387fb0f4a20ff2659019"
+    },
+    {
+      "path": "admin/catalog/index.html",
+      "size_bytes": 24254,
+      "sha256": "7cd171554bab9b05b045cf70918473b7bbadeeab532e20287c5a0373e0cdf884"
+    },
+    {
+      "path": "admin/command-center/index.html",
+      "size_bytes": 3042,
+      "sha256": "2e5ef655393d7ca11bf8fd5f658499140c98832d198cbf50766bec9128c4310d"
+    },
+    {
+      "path": "admin/content-publications/index.html",
+      "size_bytes": 2771,
+      "sha256": "d453e97b0e181073b4d71c33d961ef9d7f107934c8a721dbb08941a9e77cdf3c"
+    },
+    {
+      "path": "admin/content-studio/index.html",
+      "size_bytes": 2904,
+      "sha256": "12aa4f9d80e6ef4e6d59d7367c6f2bee4ff46027ced4ac7856222499419eafc9"
+    },
+    {
+      "path": "admin/creative-assets/index.html",
+      "size_bytes": 3496,
+      "sha256": "e9361181b4a770e531552b2b34864c8ff9f878dac9549f1314cfdc86dae13da9"
+    },
+    {
+      "path": "admin/creative-automation/index.html",
+      "size_bytes": 3562,
+      "sha256": "9fa640183f2148cfa2289a2912e574392b079e37512c706b842867c18d4eb34b"
+    },
+    {
+      "path": "admin/creative-process/index.html",
+      "size_bytes": 3000,
+      "sha256": "19d8a980436ba89915d8029d23cb6a9649f88eaf6fad690f6e112f4485810573"
+    },
+    {
+      "path": "admin/custom-request/index.html",
+      "size_bytes": 3870,
+      "sha256": "505cb3cf6c49dd6e185b13e266dc0aac3fbd5467b14d0ba4af607f6d6585f98d"
+    },
+    {
+      "path": "admin/customer-documents/index.html",
+      "size_bytes": 3067,
+      "sha256": "2f93a3c809fb74c92e0f03df59e6ab930d8fcb0fb9578684e35fd643a62d236f"
+    },
+    {
+      "path": "admin/dark-theme-evidence/index.html",
+      "size_bytes": 1052,
+      "sha256": "8b503c960ec8b87511a62282a9b574587a5b7184c7264792faaf45cc7a4c2ecf"
+    },
+    {
+      "path": "admin/deploy-readiness/index.html",
+      "size_bytes": 2107,
+      "sha256": "be9cf60f4867bbd82546858d6333944d7a784f477ee690444a3cf370280e0b4a"
+    },
+    {
+      "path": "admin/deployment-preflight/index.html",
+      "size_bytes": 3724,
+      "sha256": "e60e4836b6a616b5129f35620563823013223a029efa717464ee7e02200259be"
+    },
+    {
+      "path": "admin/gift-cards/index.html",
+      "size_bytes": 2324,
+      "sha256": "8f785c2202a73e035856a9120a2815a52fa055909c3c5e6497f2be1b878b2c81"
+    },
+    {
+      "path": "admin/go-live-execution/index.html",
+      "size_bytes": 1947,
+      "sha256": "ec98eb329eda94e8ff2c79ce6914bc27bfbfe0ce0df3445cb7c82ed75800e2fb"
+    },
+    {
+      "path": "admin/image-manifest/index.html",
+      "size_bytes": 2953,
+      "sha256": "7ac899cecba5d0aefcf3f54fed6e8ffa20df962abdaf844bbb199d46f7fa61d3"
+    },
+    {
+      "path": "admin/index.html",
+      "size_bytes": 13570,
+      "sha256": "8ad52049c150b68485a54271717c8b33092996aa4e1fff105e3027ca53fa0af4"
+    },
+    {
+      "path": "admin/inventory-operations/index.html",
+      "size_bytes": 4523,
+      "sha256": "14d2e2cd267759be33aa09e61abd8f1b4db725703c673088dfb09919d6bf3045"
+    },
+    {
+      "path": "admin/live-ops-followthrough/index.html",
+      "size_bytes": 1967,
+      "sha256": "bf7e60e6660c3f867f3ca268ed039b2e269c8024896c0cf4ee672fbdc69326c8"
+    },
+    {
+      "path": "admin/local-seo-review/index.html",
+      "size_bytes": 1802,
+      "sha256": "8ff3348e7540db2cbc9e7add2f31a694c902dc29a5b6baebfabaeecddf5f70d2"
+    },
+    {
+      "path": "admin/markdown-sanity/index.html",
+      "size_bytes": 2349,
+      "sha256": "dad5ac1b21ae17caeef800a777babdf1dc5459df8a348d16be2c5378efef5fb1"
+    },
+    {
+      "path": "admin/marketplace-exports/index.html",
+      "size_bytes": 1772,
+      "sha256": "926ecc61ef5bac009e8ae61e051f9644dc10a9340a1fe5100d0cb2810a31edc5"
+    },
+    {
+      "path": "admin/marketplace-mapping/index.html",
+      "size_bytes": 1727,
+      "sha256": "8813df8ae42d412924c4e6d02266a792efcd9c40bcf2a0397805b5bf3e339fbf"
+    },
+    {
+      "path": "admin/media-content-studio/index.html",
+      "size_bytes": 12226,
+      "sha256": "32796c32d83657b6c8e13fddfcca6f475092b5de0dfbb5495c21011a37b15126"
+    },
+    {
+      "path": "admin/members/index.html",
+      "size_bytes": 3869,
+      "sha256": "1232ef06cb79b171110d365fc1e0ea85cc8f94ae923439b2268ef57a90e549f6"
+    },
+    {
+      "path": "admin/membership/index.html",
+      "size_bytes": 1946,
+      "sha256": "0ab312215a5e8cf66018052c700f6feccd044fa801a8421d503eeb2efd9c625b"
+    },
+    {
+      "path": "admin/mobile-inventory/index.html",
+      "size_bytes": 3738,
+      "sha256": "29dd188a4e8f16523f5757d04087c72851a324a3ab121c5efa231fbe73d786e3"
+    },
+    {
+      "path": "admin/mobile-product/index.html",
+      "size_bytes": 17290,
+      "sha256": "b073d49bb21fd75f99d1a226dd1e37260d48a60146b5f2ea728d5bea045a4ef5"
+    },
+    {
+      "path": "admin/mobile/index.html",
+      "size_bytes": 8975,
+      "sha256": "80391f54a634484d330bbcacd489fd979067096c907565f8568b2dd0eae3537c"
+    },
+    {
+      "path": "admin/movies/index.html",
+      "size_bytes": 16526,
+      "sha256": "8b8919a4d286be903f7a9086759f9bf597f9889f826f958d5429d5f7df60bec7"
+    },
+    {
+      "path": "admin/operational-continuity/index.html",
+      "size_bytes": 5316,
+      "sha256": "802c12ca94321beebc53462ffc0a09c47910c519bb6ed9a708d50236d933b37f"
+    },
+    {
+      "path": "admin/operations/index.html",
+      "size_bytes": 6545,
+      "sha256": "bb71b1550e11eb0759cc6c83d84ab422353b0212004af155aa9c051fe583ebc3"
+    },
+    {
+      "path": "admin/orders/index.html",
+      "size_bytes": 5828,
+      "sha256": "8298e7656c04afd5c3aef6d09345974140e562b4b16d2a5f8cff90244d0b6341"
+    },
+    {
+      "path": "admin/packaging-studio/index.html",
+      "size_bytes": 9402,
+      "sha256": "2ed08bfb17e2492d47c756e281732d6e44b9cdc63edf0b7e6e40ffab926120fb"
+    },
+    {
+      "path": "admin/packaging/soap-labels/index.html",
+      "size_bytes": 2519,
+      "sha256": "9dd8f71eeb7ba7dcc9e02d43cff4526e53a0b967a65d2e9220b650256b297feb"
+    },
+    {
+      "path": "admin/post-deploy-smoke-tests/index.html",
+      "size_bytes": 1866,
+      "sha256": "add5581729a9fa565dea3fa63c1991d469635273095a11c0ecc3d36d2a5b2efc"
+    },
+    {
+      "path": "admin/prelaunch/index.html",
+      "size_bytes": 8474,
+      "sha256": "1062e3cc4fed85d3c26766b030ed4a65566c7ed90fe2d9f242c4d5a6296a41ab"
+    },
+    {
+      "path": "admin/products/index.html",
+      "size_bytes": 21301,
+      "sha256": "5493ee66b698ff484e17f4976b55774ac98b7d678ca4675c96432eb6bdeeef74"
+    },
+    {
+      "path": "admin/promotion-control/index.html",
+      "size_bytes": 2153,
+      "sha256": "3b361d30f6eb6a05fa68c2644c21da778f6606244b4dd1761c2cd1348fe98384"
+    },
+    {
+      "path": "admin/public-display-order/index.html",
+      "size_bytes": 2100,
+      "sha256": "7f315cd6a6871f6575324335e480df1c5c2747588c2ec64f7150e4dbdd21c6f0"
+    },
+    {
+      "path": "admin/public-proof-candidates/index.html",
+      "size_bytes": 1741,
+      "sha256": "ea8aa7e76a6bafcf0070c96cd54096a921bd1a2d10b710c3226f17ee993506fa"
+    },
+    {
+      "path": "admin/readiness/index.html",
+      "size_bytes": 2507,
+      "sha256": "fcb24a5780825d6f30ee1165e82a21d35764d384a9b9d2877ae56e24f5b3cfe3"
+    },
+    {
+      "path": "admin/release-control/index.html",
+      "size_bytes": 2008,
+      "sha256": "f3e057b283392252f4d200e5831acf6118164efe7500b059bb9a0178b0a52e55"
+    },
+    {
+      "path": "admin/release-notes/index.html",
+      "size_bytes": 879,
+      "sha256": "491fcbfe5a452df97a93e7213a6f010d2266694e676e1ac9521f1360851a0423"
+    },
+    {
+      "path": "admin/release-preflight/index.html",
+      "size_bytes": 2220,
+      "sha256": "7582fc23bfa1207940d9e3bd4d4f11368ec72c389999e8ea09927eab1841c64f"
+    },
+    {
+      "path": "admin/safe-deploy-package/index.html",
+      "size_bytes": 930,
+      "sha256": "46a7720540b94f116ea0e734b103f56bbb1545b94d0da4db43230307e8dce72b"
+    },
+    {
+      "path": "admin/social-publishing/index.html",
+      "size_bytes": 15437,
+      "sha256": "55067a72d9e8dddfe772ab0510ca4dcb2f62e9acbaa4e34601ee8a8eb403aef5"
+    },
+    {
+      "path": "admin/stage-photo-moderation/index.html",
+      "size_bytes": 1736,
+      "sha256": "99d6f324279cb0effd11668a4f5b00112fdee2e0f8890543656f8e2e9de94c59"
+    },
+    {
+      "path": "admin/startup-readiness/index.html",
+      "size_bytes": 3850,
+      "sha256": "c82f659a3fcc0a4de3d474ddee100fa6f1521c61d6fd78000826909113cb5e46"
+    },
+    {
+      "path": "admin/today-tasks/index.html",
+      "size_bytes": 2246,
+      "sha256": "edc81d97d1da728b2203cd9ea83cfa233ff7be596963aa4a29b9f316e3ae7746"
+    },
+    {
+      "path": "admin/trust-blocks/index.html",
+      "size_bytes": 2239,
+      "sha256": "8b941de99077a4710d1ae2a1a7aeb19f1d12fe94ce53eb0f6566c0942b77726f"
+    },
+    {
+      "path": "admin/users/index.html",
+      "size_bytes": 2223,
+      "sha256": "dac3c6c499ca8b701f05733a476ac068c08579c2f3d115d7701b3af3bfdc8852"
+    },
+    {
+      "path": "admin/visual-enrichment-studio/index.html",
+      "size_bytes": 1949,
+      "sha256": "19b944a15f0a7de87a8b0afc97269de0a64a828c0334598d2ba64e887905baf3"
+    },
+    {
+      "path": "admin/visual-polish/index.html",
+      "size_bytes": 1973,
+      "sha256": "09a8654c95cb07e821ca9620779daa3437160453c85f6fb4be4d647e3e5f0f88"
+    },
+    {
+      "path": "assets/banner-spicing-it-up.png",
+      "size_bytes": 5537699,
+      "sha256": "00f61bf80a3ad58599c36e68532f343d7e5ad1828923a3194543536d2284a915"
+    },
+    {
+      "path": "assets/banner-spicing-it-up.webp",
+      "size_bytes": 297984,
+      "sha256": "6ae953db376441786920638abe4fbedc524c614dea617307038cf79a218a3e26"
+    },
+    {
+      "path": "assets/caip-package-placeholder.svg",
+      "size_bytes": 837,
+      "sha256": "0d01b8e64c79ded426bad9fc2144f7f6a0ac5c305a4dc50f013fa15eec3c4686"
+    },
+    {
+      "path": "assets/caip-planning-placeholder.svg",
+      "size_bytes": 831,
+      "sha256": "c7e63f51fabbfc5a0659f1166003d916d529b750c33b4cf3e95cf06db0fac87f"
+    },
+    {
+      "path": "assets/client-document-workflow-placeholder.svg",
+      "size_bytes": 847,
+      "sha256": "605d7c8afaadc1687168c6812b4ddd78b67346f73fb983b7dfcfdbc32593c7e1"
+    },
+    {
+      "path": "assets/content-only-project-placeholder.svg",
+      "size_bytes": 846,
+      "sha256": "8140bbb675ea9443dbe5355dbc1b83ab7a4825546582125b7db00117794460a1"
+    },
+    {
+      "path": "assets/creative-automation-master-process.svg",
+      "size_bytes": 3281,
+      "sha256": "92c5e8fdd7881a9dfda4baf15a53308a766379b9984669d0388156452ebb95b7"
+    },
+    {
+      "path": "assets/creative-intelligence-integration-placeholder.svg",
+      "size_bytes": 843,
+      "sha256": "076ed316db99ae65ae20c939da68f4b795ee7895ace961ffd802eaa9d371132a"
+    },
+    {
+      "path": "assets/creative-process-engine-placeholder.svg",
+      "size_bytes": 833,
+      "sha256": "e7a65c433ba63ce2546db9c9d706f41c60c6451fcfa2455f7e4139e7eafcebaa"
+    },
+    {
+      "path": "assets/creator-flexible-entry-paths-placeholder.svg",
+      "size_bytes": 830,
+      "sha256": "9d7f4883ba9078b3ad4ad3d18c163756a122af741d45a7076803254c0bbc5d55"
+    },
+    {
+      "path": "assets/free-shipping.png",
+      "size_bytes": 4323246,
+      "sha256": "e89247608e5c3ad3f332097a2ad591906689a622c1c93f58352a70b3db86f01c"
+    },
+    {
+      "path": "assets/generated/editorial/gift-card-brand-illustration-768.webp",
+      "size_bytes": 68376,
+      "sha256": "3b13f341f9a960b63b93402c781c0f9b7e11d5317c02a7fe94666f1354fa8d58"
+    },
+    {
+      "path": "assets/generated/editorial/gift-card-brand-illustration.webp",
+      "size_bytes": 268510,
+      "sha256": "4ae58aab03776005b5ab68b802e30e6a6150d4a5058633a20d9d5f785026a766"
+    },
+    {
+      "path": "assets/generated/editorial/handmade-jewelry-techniques-illustration-768.webp",
+      "size_bytes": 73766,
+      "sha256": "8534956d09f15d5a79acc98c8e045a00d932abc19b1e793e5af4b5581019a13b"
+    },
+    {
+      "path": "assets/generated/editorial/handmade-jewelry-techniques-illustration.webp",
+      "size_bytes": 269602,
+      "sha256": "4c99b7b054a7f0333d157b073725664a77becf11b29f9d83ed91bfc140b53267"
+    },
+    {
+      "path": "assets/generated/editorial/workshop-discovery-illustration-768.webp",
+      "size_bytes": 79676,
+      "sha256": "2e1c2ac85f7934b5a211899bb32a345db5ef0b8fe82a2171488ec99249c6c5d6"
+    },
+    {
+      "path": "assets/generated/editorial/workshop-discovery-illustration.webp",
+      "size_bytes": 261452,
+      "sha256": "dfec6faef75127e75dd8d91a0b41ac6048186be8cbb8a7d7e41d42b72f92d03f"
+    },
+    {
+      "path": "assets/gift-card-art.svg",
+      "size_bytes": 1375,
+      "sha256": "b6c78c355caf2c6fd7df56461dc780adbc40f7190e274b88b605974954459b60"
+    },
+    {
+      "path": "assets/gift-card-placeholder.svg",
+      "size_bytes": 813,
+      "sha256": "0287fbe57764bcdd943b5b3535ad298887baab07637e4e14801bdae07dd14bc2"
+    },
+    {
+      "path": "assets/hero-workshop.webp",
+      "size_bytes": 715488,
+      "sha256": "97841d03e567fb3ac75ec71175ceb7f49e1dfc7c40263f36caf9d1b824ebec23"
+    },
+    {
+      "path": "assets/icons/icon-180.png",
+      "size_bytes": 32614,
+      "sha256": "70f06da94d7de6224347fc225e730f61e0bda627ea5a90fe2399d1501c4e5d06"
+    },
+    {
+      "path": "assets/icons/icon-192.png",
+      "size_bytes": 36263,
+      "sha256": "6519206e796825a303109206a0be9f50ee00839fe121545c6633d0f618b4dc2a"
+    },
+    {
+      "path": "assets/icons/icon-512.png",
+      "size_bytes": 137582,
+      "sha256": "e069c6cd49904a9898a52a6cb5962b5ddfdf7290e2dbd1bf26ac5d6cece40e35"
+    },
+    {
+      "path": "assets/images/site/about-real-workshop.webp",
+      "size_bytes": 109796,
+      "sha256": "f48de1803b955d2cc255603d5f888fe0bba4e5f42637a13c71a7fa539a431959"
+    },
+    {
+      "path": "assets/images/site/about-workshop-story.webp",
+      "size_bytes": 138958,
+      "sha256": "4e3fb9d6e479302012d2676a86c5f80ac1ac38fe86208511f94602d6eac2e502"
+    },
+    {
+      "path": "assets/images/site/candle-product-mockup.webp",
+      "size_bytes": 157014,
+      "sha256": "0e06815c69361163479c7928b7a96415a5d08212d4ca46d5b5f6924640c4c3bf"
+    },
+    {
+      "path": "assets/images/site/collection-overview.webp",
+      "size_bytes": 136194,
+      "sha256": "7d7b862b4e525bc2f239e3bc18c1989db7687cff9938e23bb230f82c272c1cc0"
+    },
+    {
+      "path": "assets/images/site/creation-in-progress.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/custom-candle-colour-and-detail.webp",
+      "size_bytes": 184244,
+      "sha256": "781da65e90df42c4145c2cad861ea3e2c24994dafb74715c72880a07e1781732"
+    },
+    {
+      "path": "assets/images/site/custom-gift-process-before-after.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/custom-soap-texture-and-process.webp",
+      "size_bytes": 147888,
+      "sha256": "69c8a4e14cab9b40aa0b54c30e5adcd13fc9d220c490afeee858da88bf9c074d"
+    },
+    {
+      "path": "assets/images/site/devil-n-dove-gift-card.webp",
+      "size_bytes": 84528,
+      "sha256": "baa494361be4487c9fe7a71b78bbb2ba47ed2c1457e175d8fe8da790b97ce41f"
+    },
+    {
+      "path": "assets/images/site/devil-n-dove-workshop-process.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/event-display-before-after.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/events-display-collage.webp",
+      "size_bytes": 326028,
+      "sha256": "756c76c69c70fdf770a81473ceb669cc089826d5884a58ac6b147031c1e823eb"
+    },
+    {
+      "path": "assets/images/site/events-market-display.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/gallery-item-specific-collage.webp",
+      "size_bytes": 331886,
+      "sha256": "9adb9d33776e8609edabbe285f633455aace3ad074c0f21a79eb26c8c98d2082"
+    },
+    {
+      "path": "assets/images/site/gallery-proof-collage.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/gift-card-mockup.webp",
+      "size_bytes": 286846,
+      "sha256": "7b77876c20c8960d075512a1db48b17d177a393d1c72f26f3fd0f0da3e702713"
+    },
+    {
+      "path": "assets/images/site/handmade-jewelry-macro-detail.webp",
+      "size_bytes": 101802,
+      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
+    },
+    {
+      "path": "assets/images/site/handmade-jewelry-product-mockup.webp",
+      "size_bytes": 258910,
+      "sha256": "acb4a13c721014b9b553fa9c2d857b48a62fba0a745884509122d99f2f7d7c30"
+    },
+    {
+      "path": "assets/images/site/handmade-product-collection.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/images/site/home-hero-products.webp",
+      "size_bytes": 121650,
+      "sha256": "562918c7734ee4d8b677c6d7345ba865387b4ee6dfc7e1675602b5f22a7c2005"
+    },
+    {
+      "path": "assets/images/site/home-workshop-preview.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/laser-engraver-material-test.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/laser-engraving-finished-example.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/laser-project-mockup.webp",
+      "size_bytes": 131784,
+      "sha256": "23093cd17c6468b19ba9dba790f20ef72f977ee0e2e2caed0e72d237fec37f98"
+    },
+    {
+      "path": "assets/images/site/pickup-package-mockup.webp",
+      "size_bytes": 154592,
+      "sha256": "e7a4b4b4bcc0a4eab1369d3e9065ffed9e4fb1435938fe625828d223f3fa0ba7"
+    },
+    {
+      "path": "assets/images/site/pickup-ready-order.webp",
+      "size_bytes": 147716,
+      "sha256": "5a178288a328d537c356ca5d6428b4fe50f8bbb59e24e23f2ce87cf6bc32e05d"
+    },
+    {
+      "path": "assets/images/site/polymer-clay-earring-macro.webp",
+      "size_bytes": 101802,
+      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
+    },
+    {
+      "path": "assets/images/site/polymer-clay-product-mockup.webp",
+      "size_bytes": 256322,
+      "sha256": "758e95ba32e365dad482de977eb8e8abdd2c05f31f115e6d77b9cbad3d29138a"
+    },
+    {
+      "path": "assets/images/site/project-before-after.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/shop-featured-collection.webp",
+      "size_bytes": 138046,
+      "sha256": "368e7ad2c1e6d1ecb6c79e6235152573e3b5cf3fd2517371a93219307f863cd7"
+    },
+    {
+      "path": "assets/images/site/shop-item-specific-collage.webp",
+      "size_bytes": 331072,
+      "sha256": "fa393f33dc919361047aa5901defc11dd88b01cc1d27b0cad158c56a042737bb"
+    },
+    {
+      "path": "assets/images/site/soap-product-mockup.webp",
+      "size_bytes": 123476,
+      "sha256": "2882d56d388bc7d4ccad2518fc8e4474563b958cdf0ecb82f5e83f426e19a459"
+    },
+    {
+      "path": "assets/images/site/social-content-workbench.webp",
+      "size_bytes": 223896,
+      "sha256": "d22e3d227e2147051676f451c026b9e625f3465c3883df94c8e8adab0be1fe22"
+    },
+    {
+      "path": "assets/images/site/vintage-collection-preview.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/images/site/vintage-item-condition-detail.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/images/site/vintage-tool-condition-detail.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/images/site/vintage-tools-mockup.webp",
+      "size_bytes": 119144,
+      "sha256": "4cf3e7afe11312f8db53bfc852a682e259d6437d669da508b8df46ab9a168a50"
+    },
+    {
+      "path": "assets/images/site/workshop-creative-paths.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/images/site/workshop-gift-making-process.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/images/site/workshop-journal-storytelling.webp",
+      "size_bytes": 165202,
+      "sha256": "2f956345ad342a962296df34c81d10d576356eda0c66422b280eb2df9239564f"
+    },
+    {
+      "path": "assets/inventory-lot-tracking-placeholder.svg",
+      "size_bytes": 833,
+      "sha256": "7ba78a843c4949792a13e98e8e20664697f981bc942ba147771354e307c2e78a"
+    },
+    {
+      "path": "assets/inventory-operations-placeholder.svg",
+      "size_bytes": 850,
+      "sha256": "fbd35f8bb599819e6d542281b495d0cf395a171b94f013ac4f5a96c0af6418d8"
+    },
+    {
+      "path": "assets/logo-clear-nav.webp",
+      "size_bytes": 36714,
+      "sha256": "c8b8bf79a9b29ded41e063170eb15ae4362d5798a56a4492685df169253c2182"
+    },
+    {
+      "path": "assets/logo-clear.png",
+      "size_bytes": 687421,
+      "sha256": "c31a8be1091730d358f1d089f74b1bf01ca05cb495fecfcee080ee5af88533d9"
+    },
+    {
+      "path": "assets/logo-full.png",
+      "size_bytes": 5717185,
+      "sha256": "9bb51457cb88b5f0f09948f555b3a68227edbe7ddf102669353fd9b033639d9d"
+    },
+    {
+      "path": "assets/logo.png",
+      "size_bytes": 3583441,
+      "sha256": "9849b39c4dfde441ef85810bc93ca66d65bcbf8a34980417b8578774f5fa03c9"
+    },
+    {
+      "path": "assets/mainpage-collage.jpeg",
+      "size_bytes": 599474,
+      "sha256": "417453e221108aa68d70c21fb70d14aadc3bab801accf4cc02ac8dc92314cf0b"
+    },
+    {
+      "path": "assets/mainpage-collage.webp",
+      "size_bytes": 198358,
+      "sha256": "563a243727daa5633af9a5bf7ea2b3c4edea8ba9726efad55924b4f611236d57"
+    },
+    {
+      "path": "assets/mark-display.webp",
+      "size_bytes": 22082,
+      "sha256": "15a2a0bedac7ff00afecebdf915f71223a0d9d1e7a8cb32856c94961f1139869"
+    },
+    {
+      "path": "assets/mark.png",
+      "size_bytes": 532773,
+      "sha256": "438ed428228e8d06769ac756d70126414f3ceaf1802a28aa41c2f1cdfd61966a"
+    },
+    {
+      "path": "assets/packaging-studio-placeholder.svg",
+      "size_bytes": 850,
+      "sha256": "08e8460c78d1f3c9a2020e2b6dc9caa3d841efa176c6b58033f9608cd0cd833c"
+    },
+    {
+      "path": "assets/packaging/artwork/candle-top-wedding-line-art-v1.png",
+      "size_bytes": 463223,
+      "sha256": "bdf34b23411858ed51e4b4d937663832cd916b3d9e94d51e28283dc3812dbb8d"
+    },
+    {
+      "path": "assets/packaging/artwork/candle-top-wedding-line-art-v1.webp",
+      "size_bytes": 323934,
+      "sha256": "7ffac7cfea0326c96bc90bbdd1a963d419d0eb9f50945ed5cd60c10b8027cdcf"
+    },
+    {
+      "path": "assets/packaging/artwork/soap-botanical-purple-rose-v1.png",
+      "size_bytes": 2044892,
+      "sha256": "06b6de844dd889fb6d22b7e0f3de81d5f3fa17f636fcb8eac2eb3c63b2c5a635"
+    },
+    {
+      "path": "assets/packaging/artwork/soap-botanical-purple-rose-v1.webp",
+      "size_bytes": 257556,
+      "sha256": "4cb107e2642dae0b5a94673d5809998f6fc11a7aef9d416ddf7754a91fae0d0a"
+    },
+    {
+      "path": "assets/packaging/placeholders/candle-label-package.svg",
+      "size_bytes": 1097,
+      "sha256": "55d2b9af888481d9c436dbf842f5bd25a27accb1cf47432d06ff982a5b4e1abb"
+    },
+    {
+      "path": "assets/packaging/placeholders/jewelry-card-package.svg",
+      "size_bytes": 1438,
+      "sha256": "be8e06be7e002f56df794b6813c6893e2d38df0b86abc94cfc29c2c144e803f2"
+    },
+    {
+      "path": "assets/packaging/placeholders/package-insert-system.svg",
+      "size_bytes": 1230,
+      "sha256": "e31ab0ec67698a68f69462a870df95cf5002e2c9de1955309001c273b4dcb719"
+    },
+    {
+      "path": "assets/packaging/placeholders/soap-base-source-template.svg",
+      "size_bytes": 1626,
+      "sha256": "cd60f2e76f179201339735f833585f63902bab0a5f5821f3e1866b002b4438f5"
+    },
+    {
+      "path": "assets/packaging/reference/wedding-candle-top-john-laurie-approved-reference.png",
+      "size_bytes": 1854790,
+      "sha256": "8abe415ff7fb472fd28697a18638a9b30a7e8f53cce737eb5bc87f13c8cfa056"
+    },
+    {
+      "path": "assets/packaging/soap/reference/Soap_Label_Master_Template.svg",
+      "size_bytes": 782,
+      "sha256": "63276ce56619599b9024cb25f9ea4c82d267217afc733171545643b7f13e74a9"
+    },
+    {
+      "path": "assets/packaging/soap/reference/glacial-purple-aloe-soap-approved-reference.png",
+      "size_bytes": 1565130,
+      "sha256": "297d8a7e737447c307523ea50b04d4967892e86c948f19745e35c114dd0a382c"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/black-rose-v1.webp",
+      "size_bytes": 132650,
+      "sha256": "7b212a6e01e89af036ff2a1e2baa8d714db9fa20371e999ecbf43b543884159b"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/blue-green-rose-v1.webp",
+      "size_bytes": 137930,
+      "sha256": "d859977436b764805f4106f58757166cf1e46adb128fee1142751882c67c0ae5"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/blue-rose-v1.webp",
+      "size_bytes": 139334,
+      "sha256": "7cb5d5da86c4a98b5627e5ab1c951d938b3d60ea6e135fd85e6b7494714cf59e"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/bronze-rose-v1.webp",
+      "size_bytes": 135242,
+      "sha256": "f4bdaea9b92bc783efb64bd31e3ae80f0a48b23a38db67d230b6891d5bc8088b"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/brown-rose-v1.webp",
+      "size_bytes": 137884,
+      "sha256": "43082d71235da4ba96596e8feb9f590aaf8137707f50cc55ecdb73d738bcfb6b"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/charcoal-rose-v1.webp",
+      "size_bytes": 132372,
+      "sha256": "f80c926e637ef972f647ca808f683e1225332a25aef938f42b067b39f519cb4c"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/copper-rose-v1.webp",
+      "size_bytes": 136668,
+      "sha256": "d62eeb3e04f60b5ec940288e9885f319d7c3e910d409c283f0e6ed118f4733fa"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/coral-rose-v1.webp",
+      "size_bytes": 138412,
+      "sha256": "40c656e917ac549bec8173ae96dbbd81a7340602c2d31cb1dbbce6e1828f8bbd"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/gold-rose-v1.webp",
+      "size_bytes": 136704,
+      "sha256": "38863904d0b784327062e7dbb62828ca4fa1973e703735b85d38472d3281957f"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/green-rose-v1.webp",
+      "size_bytes": 138756,
+      "sha256": "01d2ba15bdfe70d4843562a69cf7f90826d540c0acc38f5c4843564394528042"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/grey-rose-v1.webp",
+      "size_bytes": 132372,
+      "sha256": "f80c926e637ef972f647ca808f683e1225332a25aef938f42b067b39f519cb4c"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/honey-rose-v1.webp",
+      "size_bytes": 137372,
+      "sha256": "d86914552cf44a147bc69c571b8b63fef143fb0fe8bff19c7502d2b10d9d64f0"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/lavender-rose-v1.webp",
+      "size_bytes": 135442,
+      "sha256": "d35d4abb669c9e9569c48de6f83f8971c48c5f0af8a3cd95624cdd7cfa1c5991"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/oatmeal-rose-v1.webp",
+      "size_bytes": 133950,
+      "sha256": "3116dacd928e9cf54a17f06add670d66a343362c34d92975b93ea55ba19247b9"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/off-white-rose-v1.webp",
+      "size_bytes": 131606,
+      "sha256": "f0bf09e40ccf1dcd4394d7ff24bc45fee41bf48f47a2384c019eef47bf9a1d41"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/orange-rose-v1.webp",
+      "size_bytes": 140810,
+      "sha256": "5a5a1e9311493c920362fd5b9e79ddd2f50940d93081fbc9ca84172f6a331d9a"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/peach-rose-v1.webp",
+      "size_bytes": 136718,
+      "sha256": "3c4e22f94bbfec4ebb08a69fbefe4433186f3b056e399c3e944fada2e44f9aff"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/pink-rose-v1.webp",
+      "size_bytes": 135044,
+      "sha256": "b120ccae8195181315c49388b43380d9ce84289c0a74e2761b4b623caa7dec19"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/purple-rose-v1.webp",
+      "size_bytes": 136156,
+      "sha256": "92090eb0a85a4f3f701e5f268c6088ee08a973a1297cde5a33b350c5170a9411"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/red-rose-v1.webp",
+      "size_bytes": 138882,
+      "sha256": "a028b556dc326de14bab59c557e05e5f4e8d0ea790baed6233ca951464d22eb3"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/silver-rose-v1.webp",
+      "size_bytes": 131216,
+      "sha256": "94a0e250e7697493f9283782e85fe230682273f028bc0de63c4162b0970c5cd8"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/white-rose-v1.webp",
+      "size_bytes": 131778,
+      "sha256": "f5827d7de904d00fa9d05dc77aba85f872dfb7789ae6da455558d41dc8ebf9f4"
+    },
+    {
+      "path": "assets/packaging/soap/roses/botanical/yellow-rose-v1.webp",
+      "size_bytes": 137894,
+      "sha256": "f883e8625190a59bfb5c8ddb282e0e43be069a54c40709878cf4201052562cf3"
+    },
+    {
+      "path": "assets/packaging/soap/roses/green-rose.svg",
+      "size_bytes": 961,
+      "sha256": "23e0f927aabb27f1c3a20e6fb022528ab28cc284520ee30a7c6294860477ac11"
+    },
+    {
+      "path": "assets/packaging/soap/roses/oatmeal-rose.svg",
+      "size_bytes": 968,
+      "sha256": "f6a2288258ed6aba9777d8e8245f653081c7e903dd880ddbd94b5345148330e7"
+    },
+    {
+      "path": "assets/packaging/soap/roses/purple-rose.svg",
+      "size_bytes": 974,
+      "sha256": "4437aeb0770fa394ac3bc6ddff8ebb0253a5cb0c240a01920b6baefc3de3345a"
+    },
+    {
+      "path": "assets/placeholders/media-content/about-section-visual-1.svg",
+      "size_bytes": 1451,
+      "sha256": "7584a4f70c0991bf39c012f5c9f2bb930cf2613123a51a0b1b0a7d82dff5de28"
+    },
+    {
+      "path": "assets/placeholders/media-content/collections-section-visual-1.svg",
+      "size_bytes": 1483,
+      "sha256": "4d82e9f938720cb6117a735bd1e3c004199627b62d3ddedb60ab9e0143dbf6aa"
+    },
+    {
+      "path": "assets/placeholders/media-content/contact-section-visual-1.svg",
+      "size_bytes": 1467,
+      "sha256": "1f55fd4486a833627d077e4a4df03a52a96068dadf27170a58ba77503dbdca45"
+    },
+    {
+      "path": "assets/placeholders/media-content/creations-section-visual-1.svg",
+      "size_bytes": 1541,
+      "sha256": "6e845167b49a33db5f75e10c34ae37ae312a5e2a3847b136d8e74766a13120fb"
+    },
+    {
+      "path": "assets/placeholders/media-content/custom-candle-making-ontario-section-visual-1.svg",
+      "size_bytes": 1531,
+      "sha256": "3bfd30577ab1cd1072787c673c4525ddb2ff2588e28e4fc8d6bba3f77d7cddec"
+    },
+    {
+      "path": "assets/placeholders/media-content/custom-gifts-southern-ontario-section-visual-1.svg",
+      "size_bytes": 1533,
+      "sha256": "c619ef9270011be9477ba998febe702038015155e8feda84872b83e0a57fb3fc"
+    },
+    {
+      "path": "assets/placeholders/media-content/custom-soap-making-ontario-section-visual-1.svg",
+      "size_bytes": 1523,
+      "sha256": "72b96cb0f10b58ed20b61b57038ac29eaed9dc2407ea77f4abc82611ddf53d97"
+    },
+    {
+      "path": "assets/placeholders/media-content/events-section-visual-1.svg",
+      "size_bytes": 1501,
+      "sha256": "070508456a0d31e64623605e9ee4f97c3c69d3b5b6fc22bb85f08f28e0ef1327"
+    },
+    {
+      "path": "assets/placeholders/media-content/generic-image.svg",
+      "size_bytes": 574,
+      "sha256": "a26e80dbe95ea993076e7fd9e34c8440d6cb0bfa88f0e235f11750bf876203fc"
+    },
+    {
+      "path": "assets/placeholders/media-content/gift-cards-section-visual-1.svg",
+      "size_bytes": 1509,
+      "sha256": "b97162738544b2ba2e69cda81c1c32b3a3f052d7c83cd548e3b0e75c678d38d0"
+    },
+    {
+      "path": "assets/placeholders/media-content/handmade-jewelry-ontario-section-visual-1.svg",
+      "size_bytes": 1531,
+      "sha256": "3aa09090a912c28521a31beea43003022a9b9e956d959cc9204b9bf3072382f5"
+    },
+    {
+      "path": "assets/placeholders/media-content/home-section-visual-1.svg",
+      "size_bytes": 1509,
+      "sha256": "9b6cb0a9df9c8cf893dd6c9e21136b04c51050d03330cc1b7b9467f17d082971"
+    },
+    {
+      "path": "assets/placeholders/media-content/home-what-we-make-2.svg",
+      "size_bytes": 709,
+      "sha256": "bffd47d17ebff8ffa47739971161aeb2f5ac07a87428ff0f0b43aab704957e8d"
+    },
+    {
+      "path": "assets/placeholders/media-content/home-what-we-make-3.svg",
+      "size_bytes": 709,
+      "sha256": "ceaff70b0faf90bee198e233e09f7c8948630accdf5ffb683af08707294a6a37"
+    },
+    {
+      "path": "assets/placeholders/media-content/laser-engraving-ontario-section-visual-1.svg",
+      "size_bytes": 1537,
+      "sha256": "dbdaf68689035bd7334f73f7067641f14a84163044b47e57a8a145aa864604b3"
+    },
+    {
+      "path": "assets/placeholders/media-content/marketplaces-hero-image.svg",
+      "size_bytes": 1457,
+      "sha256": "ba8319a3adedc7e5bf168fa7c819062deb967c77871ea7dafb9f5e0e6404329f"
+    },
+    {
+      "path": "assets/placeholders/media-content/marketplaces-section-visual-1.svg",
+      "size_bytes": 1503,
+      "sha256": "a1556f1c99ea6bc7dfab3be40586393a0e38f91bbaf09e8fa42c0f93d14bf9fe"
+    },
+    {
+      "path": "assets/placeholders/media-content/polymer-clay-earrings-ontario-section-visual-1.svg",
+      "size_bytes": 1541,
+      "sha256": "8843eead6d02b3eb63f1341ec15273003cfc8b06d692fdf73405f79523b66f0c"
+    },
+    {
+      "path": "assets/placeholders/media-content/site-background.svg",
+      "size_bytes": 616,
+      "sha256": "945ddd8784a483ed9aaf9235a9511b05c895744ad68b55c25d6df18bd4e7a8c9"
+    },
+    {
+      "path": "assets/placeholders/media-content/socials-section-visual-1.svg",
+      "size_bytes": 1479,
+      "sha256": "d6f7020ac33c33d18bbbaea5e94d45750b7916818536c2cc52d3c4ae3d889bf0"
+    },
+    {
+      "path": "assets/placeholders/media-content/vintage-finds-ontario-section-visual-1.svg",
+      "size_bytes": 1519,
+      "sha256": "6a3b7f0b2cb62969a0754b19c4c3d6f1538bce450e74f8978c3b78d21d642e61"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-coin-and-spoon-ring-care-hero-image.svg",
+      "size_bytes": 1475,
+      "sha256": "80557ca19fc9c0a998c6e3ed0b1c513de3d84db799809e21800342ba621d30cf"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-coin-and-spoon-ring-care-section-visual-1.svg",
+      "size_bytes": 1501,
+      "sha256": "d8d6e0c4370156ec54df58d2f9e36002134452f9232b5b839fe0dd4b1653709f"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-handmade-vintage-sourced-guide-hero-image.svg",
+      "size_bytes": 1491,
+      "sha256": "26dbdc500dd8390f1d100b2455ae50324b8105b0e03dd8939aca8d751fe2ef1a"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-handmade-vintage-sourced-guide-section-visual-1.svg",
+      "size_bytes": 1505,
+      "sha256": "0eb91376fadc457ba608ce78fedc6bc9d0f2e94b20e23cd0b10d600869ddd5cd"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-polymer-clay-earring-care-hero-image.svg",
+      "size_bytes": 1473,
+      "sha256": "31bf0dd5b905f7e280cdb3af36dbd6fd23f4f5fc6d5ec5d433a2db5f4c4f0b80"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-polymer-clay-earring-care-section-visual-1.svg",
+      "size_bytes": 1503,
+      "sha256": "fc161f629ecb7e95320625de5ed4014bc5929e6ffbad00bfb4b693607b5de94e"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-section-visual-1.svg",
+      "size_bytes": 1521,
+      "sha256": "b4f2174985c32399edbc279e87965ca6a1d3da9a2fa6739962abcd547ebe77e8"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-journal-story-hero-image.svg",
+      "size_bytes": 1467,
+      "sha256": "394d139262167c26c3f8ca0e880dc2f69b940546ea0aef7dee7433869122258b"
+    },
+    {
+      "path": "assets/placeholders/media-content/workshop-made-gifts-ontario-section-visual-1.svg",
+      "size_bytes": 1541,
+      "sha256": "1c08de188cfe83c00850529741f2a86cdb0fc87847ab98273e3ca70e3ebd2233"
+    },
+    {
+      "path": "assets/prelaunch-operations-map.svg",
+      "size_bytes": 840,
+      "sha256": "350e2ec3425fd0e0427dd4c110336d84403e0ddac9d4c622feedcf8f6fba2364"
+    },
+    {
+      "path": "assets/product-cleanup-placeholder.svg",
+      "size_bytes": 842,
+      "sha256": "6cf618fd761b156ffe9d7d99b93f096a21a8680aee22723bc5165b58b989437b"
+    },
+    {
+      "path": "assets/product-media-placeholder.svg",
+      "size_bytes": 851,
+      "sha256": "8ffbf8e38b26c1eb2b25a04bbee254c1b1e0a05b13f4a20cdbd1c887d5104225"
+    },
+    {
+      "path": "assets/product-placeholder.svg",
+      "size_bytes": 813,
+      "sha256": "c0951d80df1b8c932701f6dccbe059b79da5c110d35e588c2e557836633483bd"
+    },
+    {
+      "path": "assets/product-set-pricing-placeholder.svg",
+      "size_bytes": 837,
+      "sha256": "f163a6d537b4b8f50e4fbee791962cb60035aa5a4f377c4b64e0b984283ea8f7"
+    },
+    {
+      "path": "assets/products/fallbacks/DD215-216B.webp",
+      "size_bytes": 185974,
+      "sha256": "c93f6276ab6aa2bacd352b2f29f87b4026d82fc1d5ab1d0847d4e8ab3f31cac0"
+    },
+    {
+      "path": "assets/products/fallbacks/DDM04.webp",
+      "size_bytes": 193404,
+      "sha256": "5a3387d4aed4db4da4c8a398e1cb45068edef7b9c64b596b2e077c3043188c33"
+    },
+    {
+      "path": "assets/products/fallbacks/DDM06.webp",
+      "size_bytes": 190492,
+      "sha256": "36d6d80a0ceb0095c88886f388662fca738e6de1e9d488d2dc7fc5324faa5865"
+    },
+    {
+      "path": "assets/products/fallbacks/DDPR02.webp",
+      "size_bytes": 85314,
+      "sha256": "ba992ec00ebdcf6dcf6f03c4402144a309e5d468b1f9c60a96ff46471662cec4"
+    },
+    {
+      "path": "assets/products/fallbacks/DDPR09.webp",
+      "size_bytes": 194564,
+      "sha256": "945dc46497e100d3d80db4687764e46b7d5d899678e69836cf8c41e24b9cb515"
+    },
+    {
+      "path": "assets/products/fallbacks/DDPR14.webp",
+      "size_bytes": 193996,
+      "sha256": "f682686dd792976feb35040d4321e38ad68f36ee292cdb86dd4728e07e94b857"
+    },
+    {
+      "path": "assets/products/fallbacks/LampLight.webp",
+      "size_bytes": 189994,
+      "sha256": "f0320c55f5a49320f5351e8bcbaa3c594cd8033c0e198af99ca2e6f263fb6d40"
+    },
+    {
+      "path": "assets/real-media/candle-top-reference-photo.webp",
+      "size_bytes": 184244,
+      "sha256": "781da65e90df42c4145c2cad861ea3e2c24994dafb74715c72880a07e1781732"
+    },
+    {
+      "path": "assets/real-media/engraving-process-photo.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/real-media/gift-card-photo.webp",
+      "size_bytes": 84528,
+      "sha256": "baa494361be4487c9fe7a71b78bbb2ba47ed2c1457e175d8fe8da790b97ce41f"
+    },
+    {
+      "path": "assets/real-media/jewelry-macro-photo.webp",
+      "size_bytes": 101802,
+      "sha256": "cab60ee66845d02bb269efe967805b27c85897a37e34f2d56b0312768f3ac46c"
+    },
+    {
+      "path": "assets/real-media/maker-portrait-photo.webp",
+      "size_bytes": 165202,
+      "sha256": "2f956345ad342a962296df34c81d10d576356eda0c66422b280eb2df9239564f"
+    },
+    {
+      "path": "assets/real-media/product-detail-photo.webp",
+      "size_bytes": 143316,
+      "sha256": "d8ba2111ef2dbb264af8cb6730399ff91b4b58e28b8bfd74dce4b5880fd1aeaa"
+    },
+    {
+      "path": "assets/real-media/soap-label-reference-photo.webp",
+      "size_bytes": 147888,
+      "sha256": "69c8a4e14cab9b40aa0b54c30e5adcd13fc9d220c490afeee858da88bf9c074d"
+    },
+    {
+      "path": "assets/real-media/tools-supplies-photo.webp",
+      "size_bytes": 160056,
+      "sha256": "a750095c56bc98a1fb1cd19007612c17b4234620922ae349e9b4b52dc5dc0bf5"
+    },
+    {
+      "path": "assets/real-media/workshop-collage-photo.webp",
+      "size_bytes": 197660,
+      "sha256": "47964984e2a18940e3d514574d924aa6903221afa332b4c8a42dec398b25bf46"
+    },
+    {
+      "path": "assets/real-media/workshop-process-photo.webp",
+      "size_bytes": 163488,
+      "sha256": "8c781eb3ff4a3182245d1471feb333e533f412da9b942d6a63a53f6db771b591"
+    },
+    {
+      "path": "assets/release-preflight-placeholder.svg",
+      "size_bytes": 834,
+      "sha256": "49ef96de408573a8f4eae2c179c6f4dbed9fff37584c5b8f9f9cd912d61a4f58"
+    },
+    {
+      "path": "assets/soap-ribbon-scalloped-reference.svg",
+      "size_bytes": 3598,
+      "sha256": "d5fafe2c88dcf66bd018ee59dfe21955581510cacd41cc26b19a9dd9f1caa7d9"
+    },
+    {
+      "path": "assets/social-platform-preflight-placeholder.svg",
+      "size_bytes": 841,
+      "sha256": "42afd47884b931047c782667bc8f9b12f7892b9234d662585186c32da7ad0b8a"
+    },
+    {
+      "path": "assets/social-publishing-placeholder.svg",
+      "size_bytes": 839,
+      "sha256": "53d2f8f9290f6adaf6aad0ee9e94fd65319578ae20dc465900aa27a855cd9b6d"
+    },
+    {
+      "path": "assets/visual-placeholders/before-after.svg",
+      "size_bytes": 829,
+      "sha256": "0e17b693009ab9f7606c95ea7a7882bb1ab71184e4ed4e97e6a008cc0d9abb5e"
+    },
+    {
+      "path": "assets/visual-placeholders/candle-colour.svg",
+      "size_bytes": 853,
+      "sha256": "873a577228773aa8519082256d24521354b98a37cc2e6b05cc792dfadf2dfa9e"
+    },
+    {
+      "path": "assets/visual-placeholders/creative-asset-intelligence.svg",
+      "size_bytes": 1909,
+      "sha256": "431619c512365c026d557f78f3eff323428f8c77e64c20b482950e2713eb962c"
+    },
+    {
+      "path": "assets/visual-placeholders/engraving-detail.svg",
+      "size_bytes": 658,
+      "sha256": "3367c2c075de69bc791263c533f8f9bcddb6a761a3a9e91653346b6829f664f6"
+    },
+    {
+      "path": "assets/visual-placeholders/engraving-proof.svg",
+      "size_bytes": 849,
+      "sha256": "a3c4fa057781d699f8f0b018c89092f2162ec34b706f5b8cf3b24d3078945bb5"
+    },
+    {
+      "path": "assets/visual-placeholders/events.svg",
+      "size_bytes": 822,
+      "sha256": "8dea8c46fcfa5ace5dc69978c08524a583231f21a91e070a8106911bdc342d66"
+    },
+    {
+      "path": "assets/visual-placeholders/jewelry-macro.svg",
+      "size_bytes": 830,
+      "sha256": "f05500b8fa0a32ea4ef19c289860c3009748bd93e0b883f1566a65bc5129f71e"
+    },
+    {
+      "path": "assets/visual-placeholders/material-detail.svg",
+      "size_bytes": 655,
+      "sha256": "187b0db8738ba4691889b32865da8377340e8501e91f5f4c7d2b2cc5e026cf62"
+    },
+    {
+      "path": "assets/visual-placeholders/mobile-upload-safety.svg",
+      "size_bytes": 1692,
+      "sha256": "4bfd0ef6403f8ac23e402f8335be6152ea179fbd8972518118c31d0bc8b782ef"
+    },
+    {
+      "path": "assets/visual-placeholders/pickup.svg",
+      "size_bytes": 813,
+      "sha256": "b0b6a26579c7aa52a18e14dd6eccbc0873b51f5218e43c37bf7f244744bfe549"
+    },
+    {
+      "path": "assets/visual-placeholders/product-care.svg",
+      "size_bytes": 832,
+      "sha256": "44438f40ecc12692e8d24a9461fdab7be638082865a2fec773c448c651e26dbe"
+    },
+    {
+      "path": "assets/visual-placeholders/product-detail.svg",
+      "size_bytes": 833,
+      "sha256": "b056200cff7077ddda185c42182cdef2a3aefa2a326122578401774e59d778d7"
+    },
+    {
+      "path": "assets/visual-placeholders/product-grid.svg",
+      "size_bytes": 651,
+      "sha256": "0fd6fa0a55fb3f665a15b8d7f98e7f4be780167101892e6ec2715d21332ebb3e"
+    },
+    {
+      "path": "assets/visual-placeholders/product-material.svg",
+      "size_bytes": 835,
+      "sha256": "3e4edb7563b235ea837312928bbd09bf5c3cba6c4b9a7f61b628b57d949d6808"
+    },
+    {
+      "path": "assets/visual-placeholders/product-media-roles.svg",
+      "size_bytes": 833,
+      "sha256": "eafb05c241871d0423f941b5658d8074a39dd6811eda9e392dc4ba509222d00f"
+    },
+    {
+      "path": "assets/visual-placeholders/product-photo-coming-soon.svg",
+      "size_bytes": 861,
+      "sha256": "cc107e41251511051188074ca8786a3146cfaf101ace1e0ca3909d339d030f2b"
+    },
+    {
+      "path": "assets/visual-placeholders/product-process.svg",
+      "size_bytes": 838,
+      "sha256": "b953a67ab31acd7d1c78448f9356f353cc76e1b31f1ae298c8a475eb84fcc1ec"
+    },
+    {
+      "path": "assets/visual-placeholders/product-scale.svg",
+      "size_bytes": 835,
+      "sha256": "9b5507af62f8c1fe0fd0543354cf8462c90b89564dbf642a1c1aa7acac54721b"
+    },
+    {
+      "path": "assets/visual-placeholders/soap-texture.svg",
+      "size_bytes": 839,
+      "sha256": "326b444be612ee6762ded68ce2b4fcc75a67efb37a7a842e9d992267f682a3d8"
+    },
+    {
+      "path": "assets/visual-placeholders/tools.svg",
+      "size_bytes": 835,
+      "sha256": "9cdf601b763245a966988e4af8ddf29ca9747c8447f6b14b9a95a43d53c4031e"
+    },
+    {
+      "path": "assets/visual-placeholders/vintage-condition.svg",
+      "size_bytes": 834,
+      "sha256": "8a1555af08ee5ab4380897d036a0b97fe3ed7cf7c08e6618c7e40b4dadea4ffa"
+    },
+    {
+      "path": "assets/visual-placeholders/workshop-discovery.svg",
+      "size_bytes": 837,
+      "sha256": "f107a6ddd29774bedc7d4ffd02f562c70637831d23f03837ef74749ef2a0f9cd"
+    },
+    {
+      "path": "assets/visual-placeholders/workshop-journal.svg",
+      "size_bytes": 838,
+      "sha256": "050c74fd9f86e0afe5fd496d317949a806fae4e05fd9ae7d2878b296eebbcf47"
+    },
+    {
+      "path": "assets/visual-placeholders/workshop-process.svg",
+      "size_bytes": 834,
+      "sha256": "efe170a7bb0151ca902b4a7b67fe8f8e0bafe580533f0efce08db76f7b6fffb3"
     },
     {
       "path": "css/styles.css",
@@ -4141,8 +3347,8 @@
     },
     {
       "path": "data/site/current-release.json",
-      "size_bytes": 3871,
-      "sha256": "126fba5dc5a866b1ea02ae334d27b7c6d4834a3e8857558b333e9914889f3ca9"
+      "size_bytes": 4704,
+      "sha256": "f698de747d7f1af877f7e76f1535380d4ec4fb9428bd2a90709b2391baa00649"
     },
     {
       "path": "data/site/deployment-preflight.json",
@@ -4615,11 +3821,6 @@
       "sha256": "fce5b92b31e16c8b34d23905c8743a9aac29e54aea6e942e1a2750e80e6d0c26"
     },
     {
-      "path": "DATABASE_SCHEMA_REFERENCE.md",
-      "size_bytes": 12388,
-      "sha256": "9ba2d83713309a2264d5821282d604bbee7fa54079aab456c3e304ab7b4480d5"
-    },
-    {
       "path": "database_store_schema.sql",
       "size_bytes": 762598,
       "sha256": "ede33976157e717bca3f149b516c3869c1c5a00951893f8063b995966d62cb35"
@@ -4638,16 +3839,6 @@
       "path": "database_upgrade_current_pass.sql",
       "size_bytes": 188354,
       "sha256": "f839b720fcd31782c9f9a48b43a7efe755044746d6a55cc9e040097be56726ae"
-    },
-    {
-      "path": "DEVELOPMENT_ROADMAP.md",
-      "size_bytes": 367,
-      "sha256": "2f6378575b03c90c118a4e48c8d18b5c48f7f2aba9f65f6219c808a3a6cc0d98"
-    },
-    {
-      "path": "DEVIL_N_DOVE_SOAP_LABEL_AUTOMATION_SPEC_V1.md",
-      "size_bytes": 807,
-      "sha256": "4328eb20689aa1d76544060982e9baa33ee10879ce76b2be304059b86172af04"
     },
     {
       "path": "docs/architecture/BUILD282_ARCHITECTURE_LOCK.md",
@@ -5180,6 +4371,21 @@
       "sha256": "e0dd86ebc80be3a826d698970391a9fd3c5b4f4af6877869ce38466e32ee7b9c"
     },
     {
+      "path": "docs/archive/DEVELOPMENT_ROADMAP_HISTORY_THROUGH_BUILD189.md",
+      "size_bytes": 188045,
+      "sha256": "167056b90c9e8d63bd31ec0f0c9c7b0ca0a8a7682e04d7b155a1485f8b94a637"
+    },
+    {
+      "path": "docs/archive/KNOWN_GAPS_AND_RISKS_HISTORY_THROUGH_BUILD189.md",
+      "size_bytes": 130241,
+      "sha256": "02a142cb1cbd2d64b5d5b12f28f1220ea7b8fd1e4c8a1032e29bde9cbfa8cd80"
+    },
+    {
+      "path": "docs/archive/NEW_CHAT_STATUS_HISTORY_THROUGH_BUILD189.md",
+      "size_bytes": 64731,
+      "sha256": "1f4e6977dae954a32d6e887ac0a0c7ffd85f7911537db1e76fb0ed63c6054fb4"
+    },
+    {
       "path": "docs/archive/build-history/BUILD194_TESTING_GUIDE.md",
       "size_bytes": 6631,
       "sha256": "bd5789f93f5524a925506b70fb8ace38e9c289957a4ad423205a783b86b4fa82"
@@ -5710,21 +4916,6 @@
       "sha256": "b8207c737d1a4ef8ac05466393ff2336e049fdd06dfb8b680ae561062b7d678c"
     },
     {
-      "path": "docs/archive/DEVELOPMENT_ROADMAP_HISTORY_THROUGH_BUILD189.md",
-      "size_bytes": 188045,
-      "sha256": "167056b90c9e8d63bd31ec0f0c9c7b0ca0a8a7682e04d7b155a1485f8b94a637"
-    },
-    {
-      "path": "docs/archive/KNOWN_GAPS_AND_RISKS_HISTORY_THROUGH_BUILD189.md",
-      "size_bytes": 130241,
-      "sha256": "02a142cb1cbd2d64b5d5b12f28f1220ea7b8fd1e4c8a1032e29bde9cbfa8cd80"
-    },
-    {
-      "path": "docs/archive/NEW_CHAT_STATUS_HISTORY_THROUGH_BUILD189.md",
-      "size_bytes": 64731,
-      "sha256": "1f4e6977dae954a32d6e887ac0a0c7ffd85f7911537db1e76fb0ed63c6054fb4"
-    },
-    {
       "path": "docs/creative-asset-intelligence-platform/00_Project_Charter.md",
       "size_bytes": 3243,
       "sha256": "726dc2227195cc745514cdfa89c70d5bb71e3798d9c4817e5046675175ddd3b9"
@@ -5980,14 +5171,14 @@
       "sha256": "7b89de2ce6f27c557c9b29e8f18fe484b62955ae6cfca23388ef856528c51777"
     },
     {
-      "path": "functions/api/_lib/accountingVendorsReadService.js",
-      "size_bytes": 3346,
-      "sha256": "a96eed00cb9cdb73aa7c97135fcaab8621988f66aa77ea3fc1f05168e4483b1b"
-    },
-    {
       "path": "functions/api/_lib/accountingVendorStatementsReadService.js",
       "size_bytes": 1901,
       "sha256": "74ddc0372113019416a506731cc3c18dca36e26a3de314d53f806519d5e489ba"
+    },
+    {
+      "path": "functions/api/_lib/accountingVendorsReadService.js",
+      "size_bytes": 3346,
+      "sha256": "a96eed00cb9cdb73aa7c97135fcaab8621988f66aa77ea3fc1f05168e4483b1b"
     },
     {
       "path": "functions/api/_lib/accountingWriteoffsReadService.js",
@@ -7490,6 +6681,11 @@
       "sha256": "5e32aa4df8a376a9116caefb465a4cfba291ec684bd375f2b11a300a93812403"
     },
     {
+      "path": "functions/api/auth-login.js",
+      "size_bytes": 293,
+      "sha256": "6ce8a927a960231f08987d17d7bedd8821d7d72e8d7c15a3d6ac50607a6786e2"
+    },
+    {
       "path": "functions/api/auth/account-help-request.js",
       "size_bytes": 3682,
       "sha256": "493f7e11af0a3e7f387cff42f9fe58a5dfc35bb8677a7724e2a234c0e1915185"
@@ -7538,11 +6734,6 @@
       "path": "functions/api/auth/session-info.js",
       "size_bytes": 3641,
       "sha256": "e3a79ffeb8bd14ab3ddc8da61414f4b6a5eeae38bb6a0163ee8806487e1422bc"
-    },
-    {
-      "path": "functions/api/auth-login.js",
-      "size_bytes": 293,
-      "sha256": "6ce8a927a960231f08987d17d7bedd8821d7d72e8d7c15a3d6ac50607a6786e2"
     },
     {
       "path": "functions/api/before-after-gallery.js",
@@ -7735,6 +6926,11 @@
       "sha256": "27f52f75fa32dcf14cdddd9832116bbe8ac8369637d352efcb7370f90b721678"
     },
     {
+      "path": "functions/api/social-feed.js",
+      "size_bytes": 4771,
+      "sha256": "f04ae02bbc3ba0d45568b0c656426e48133e67bdfef9b0baec88906f0ad27032"
+    },
+    {
       "path": "functions/api/social/integration-readiness.js",
       "size_bytes": 1397,
       "sha256": "9730cce8e3ca74a3dea07c14e5ecd094388be4fedc803d5a6528899170f8a212"
@@ -7785,11 +6981,6 @@
       "sha256": "de94f79070bba9a0255737fef99a05c45ebf1eeb06ec855e3ad8eb4072edd395"
     },
     {
-      "path": "functions/api/social-feed.js",
-      "size_bytes": 4771,
-      "sha256": "f04ae02bbc3ba0d45568b0c656426e48133e67bdfef9b0baec88906f0ad27032"
-    },
-    {
       "path": "functions/api/stripe-return.js",
       "size_bytes": 7850,
       "sha256": "8db5432577b18d632d247364159277ce7fe5287a59da95cc90e66e7a4889481f"
@@ -7835,21 +7026,6 @@
       "sha256": "a662e478687e42537c187280893a99ef3f22eb39413a0ef0a7de615d58ca35e7"
     },
     {
-      "path": "GENERATED_VISUAL_ASSET_REGISTER.md",
-      "size_bytes": 8451,
-      "sha256": "788a7982e26673133375a1127006074c0796d3c3f9418c7327a159c3228a78f7"
-    },
-    {
-      "path": "IMAGES.md",
-      "size_bytes": 3346,
-      "sha256": "ead9971cdcc06dc105f58ab095250054ac0732a11c5332dc43bcd9cddcf46563"
-    },
-    {
-      "path": "IMAGES_REQUIRED.md",
-      "size_bytes": 36576,
-      "sha256": "85985e605e4a3ba1575ab8fb0a686fc51e3f6974ed03ad8202b85318531efaff"
-    },
-    {
       "path": "java.md",
       "size_bytes": 2,
       "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
@@ -7858,91 +7034,6 @@
       "path": "js/main.js",
       "size_bytes": 37992,
       "sha256": "e35eab647063e942581010fbfdeec3981a38ee537215f4ddb8d919938a1eaf5c"
-    },
-    {
-      "path": "KNOWN_GAPS_AND_RISKS.md",
-      "size_bytes": 715,
-      "sha256": "85346b94e47908d20eb4c51e3870e0fc9564befec5d7bce63fc0324c18faaece"
-    },
-    {
-      "path": "LIVE_TESTING_GUIDE.md",
-      "size_bytes": 9654,
-      "sha256": "192a1a466287554476f592ffa6c9fb8ecc0d88a5eadffabc7a61b2a7c020ae44"
-    },
-    {
-      "path": "local_backups/build425_dev_before_product_numbers_20260826T000217Z.sql",
-      "size_bytes": 9537038,
-      "sha256": "ae71702ef512b34627f4b3fc673367da703ee90802f865d79de50d29d2c65ede"
-    },
-    {
-      "path": "local_backups/build427_prod_before_product_numbers_20260826T003614Z.sql",
-      "size_bytes": 19002028,
-      "sha256": "5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed"
-    },
-    {
-      "path": "local_backups/build428_prod_before_annotation_20260826T015019Z.sql",
-      "size_bytes": 19003438,
-      "sha256": "049a2b85313ac1d411f4c12d736a44f4a5f4f3efb12f3b72e15f7f5d58b481de"
-    },
-    {
-      "path": "local_backups/build428_prod_before_gift_20260826T011440Z.sql",
-      "size_bytes": 19002028,
-      "sha256": "8860e0b76e240f74ae0c5de538292cf827f742d3f88ecf3f6cf40ff8d05fd29f"
-    },
-    {
-      "path": "local_backups/build428_prod_before_membership_20260826T025115Z.sql",
-      "size_bytes": 19003564,
-      "sha256": "2f94f5bcd0006f98c4cdfcc2bc6de9441d047a4f97ccc702c735191a90cf5513"
-    },
-    {
-      "path": "local_backups/build428_prod_before_notification_20260826T013708Z.sql",
-      "size_bytes": 19002868,
-      "sha256": "e4b4e4ea2f328aaf244b6f080f1bdc1d1bd599a421e19d914ce6b45545acd149"
-    },
-    {
-      "path": "LOCAL_SEO_PLAYBOOK.md",
-      "size_bytes": 14443,
-      "sha256": "9f5b21658af358f266f339244994d5183082f3bc52f6a89ce86203b125e1d96b"
-    },
-    {
-      "path": "MARKDOWN_INDEX.md",
-      "size_bytes": 2797,
-      "sha256": "925eca23adcab38f71f3a585706598cb97f1379423759cdd68376ae59a57e67b"
-    },
-    {
-      "path": "NEW_CHAT_STATUS.md",
-      "size_bytes": 1234,
-      "sha256": "ee8cd47422bb394b9c1bd52c47f3d05303f3469fef67a85a5bae1eec7aed62c2"
-    },
-    {
-      "path": "OPERATIONAL_CONTINUITY_BUILD240.md",
-      "size_bytes": 5857,
-      "sha256": "2dca0afd609c1df8ede79dd365b18496120c1ca3e8593ed7eb3ae2a4b1677a1f"
-    },
-    {
-      "path": "PACKAGING_REFERENCE_BASELINE.md",
-      "size_bytes": 4765,
-      "sha256": "e82eec85bc160566e2b5e7e7df6b39829c806fd6a63d88b7b520e579efb5c166"
-    },
-    {
-      "path": "PACKAGING_STUDIO.md",
-      "size_bytes": 39275,
-      "sha256": "36c69ff571b92cfaf2c6248dffca0b17edefe701f0da7d220898cae1f94c6c6c"
-    },
-    {
-      "path": "POST_DEPLOY_SMOKE_TEST.md",
-      "size_bytes": 14081,
-      "sha256": "d3213b3e6729a5140c0c58f3a82abc6cf0fc533df57dc4bfc3427d0b5ee25b8e"
-    },
-    {
-      "path": "PRELAUNCH_PROCESS_PLAYBOOKS.md",
-      "size_bytes": 14736,
-      "sha256": "7586b948e6827f3d99a7786f1d35523633169e4c889e25b6d8d0bc7a84f57320"
-    },
-    {
-      "path": "PROJECT_STATUS_AND_ROADMAP.md",
-      "size_bytes": 66167,
-      "sha256": "6530901b4ea3997db6e9fc0f6749cbc6d4de9a48f6f3b9d7ddbfd0a865c7059e"
     },
     {
       "path": "public/js/account-help.js",
@@ -9095,39 +8186,9 @@
       "sha256": "091ee27e84758f4257d09cfb3fbe4535bcc9be002d80bc69445623c8aaab24d3"
     },
     {
-      "path": "PUBLIC_VISUAL_AUDIT_BUILD238.md",
-      "size_bytes": 2972,
-      "sha256": "dcd0f31fc33b007b67ee8085ed2b563d67279c5b6b3328864d36628c606dfe5d"
-    },
-    {
-      "path": "PUBLIC_VISUAL_AUDIT_BUILD239.md",
-      "size_bytes": 1556,
-      "sha256": "2d5c50c0532caa82a3e9c489f87d0dbcfe412d0caa1607c891642ba98e24acee"
-    },
-    {
       "path": "readme.md",
       "size_bytes": 36610,
       "sha256": "8eb195ea328b0f08f2b8882809e6abe079aabfbc83cc066f6ef027401bb9c0b3"
-    },
-    {
-      "path": "RELEASE_NOTES.md",
-      "size_bytes": 3722,
-      "sha256": "e08af34055b7f937bc0440266cb00ffcaa929a1c5d1dc100480706cb9c8e619b"
-    },
-    {
-      "path": "REPO_BASE_GUIDE.md",
-      "size_bytes": 45637,
-      "sha256": "8f8f9400988ea5a3de9153841843d936335af05e9817b93ceb07ce0d8a269166"
-    },
-    {
-      "path": "REPO_RULES.md",
-      "size_bytes": 44325,
-      "sha256": "e0d2b8ad49d8dd5a492440e98bc1b4f4b683f9df26ec05c7fb61758db1abf63a"
-    },
-    {
-      "path": "SANITY_HEALTH_CHECK.md",
-      "size_bytes": 2989,
-      "sha256": "9eaf7d1c425c8d3b437b3c40ecedfc72d786822e3bf31627be260bcf08e2988c"
     },
     {
       "path": "scripts/apply_build298_packaging_native_client_cutover.py",
@@ -10191,8 +9252,8 @@
     },
     {
       "path": "scripts/build437_membership_release_regression.py",
-      "size_bytes": 7475,
-      "sha256": "6c29075847c62ad396f35659ea2e588bd6827adae1b388deb32959a0a8ca0021"
+      "size_bytes": 8075,
+      "sha256": "95b8e386e0e2334439589a4399cd76c96c5577bd9564cab3f769928410b2e3c8"
     },
     {
       "path": "scripts/build437_production_membership_rebuild.py",
@@ -10231,13 +9292,13 @@
     },
     {
       "path": "scripts/generate_release_manifest.py",
-      "size_bytes": 2230,
-      "sha256": "5bd96647f7a8ff70ad331297153ed66517d8da8affa72af59481da3372c0c449"
+      "size_bytes": 3424,
+      "sha256": "e24b78f6627b62b4f34d8a0e5c733a91cd275a3059f8cca141d4ec6a081d4c08"
     },
     {
       "path": "scripts/generate_release_notes.py",
-      "size_bytes": 3090,
-      "sha256": "00cd0ed320deb2d43ef336843da02ef58611e0e39fc4ab9bfc173a3e6ff13524"
+      "size_bytes": 4666,
+      "sha256": "7396bb3fc266bfc042079132058d8026fa405b51dd63de79840695ce27ea8a63"
     },
     {
       "path": "scripts/lazify-amazon-inventory-matches.mjs",
@@ -10298,16 +9359,6 @@
       "path": "scripts/sync-startup-client-fallback.mjs",
       "size_bytes": 1037,
       "sha256": "6cf890b032aaffaf1dce7eba5b88c9e0b92d57bec566c0bf81d153b393892add"
-    },
-    {
-      "path": "SOCIAL_PUBLISHING_CONNECTION_GUIDE.md",
-      "size_bytes": 37910,
-      "sha256": "621def753ccfed9e3fb5a0c85c99d0bda015a681f607d8d889aa108ef5f16d9b"
-    },
-    {
-      "path": "STARTUP_GO_LIVE_GUIDE.md",
-      "size_bytes": 134064,
-      "sha256": "9ba99921bad24763d06c8404a261e56b9a45ce9bfd185c1ad58ef9bff8b1bdb8"
     },
     {
       "path": "updated.md",

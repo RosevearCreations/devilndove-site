@@ -4,19 +4,34 @@
 
 ## Summary
 
-- Completes the Membership Build 395 legacy-to-canonical transition as one guarded release package.
-- Preserves the three existing bronze/silver/gold rows, policy IDs, complete business values, AUTOINCREMENT sequence, UNIQUE tier constraint, and the reviewed sort index.
-- Translates idx_membership_tier_policies_sort from legacy (sort_order, code) to canonical (sort_order, tier_code).
-- Keeps Membership reads compatible before the Production swap while locking writes until the exact canonical schema is active.
-- Routes member tier-policy reads through the shared non-mutating compatibility service, aligns platform DB sanity with canonical policy_id, and removes the unreferenced root duplicate member/tier-policies.js.
-- Records explicit Membership-only Production rebuild authorization; execution remains guarded and Production promotion remains closed.
-- Repairs the Build 418 SQL-guard compatibility issue for sort-index metadata reads in both pre-write and post-write validation without widening mutation scope.
+- Completes and proves the Membership Build 395 legacy-to-canonical Production transition.
+- Preserves the three existing bronze/silver/gold rows, policy IDs, complete business values, AUTOINCREMENT sequence, UNIQUE tier constraint, and reviewed sort-index semantics.
+- Translates idx_membership_tier_policies_sort from legacy (sort_order, code) to canonical (sort_order, tier_code) and independently verifies the resulting index columns.
+- Keeps shared Membership reads compatibility-safe while canonical Production writes now target the proven ten-column schema.
+- Routes member tier-policy reads through the shared non-mutating service, aligns platform DB sanity with canonical policy_id, and removes the stale root duplicate member/tier-policies.js.
+- Records the successful full Production backup, guarded 13-query rebuild, immediate postcheck, and independent read-only postcheck.
+- Closes Membership micro-gates; all other rebuild families and broad Production promotion remain separately locked.
+
+## Production completion evidence
+
+- Database: `devilndove-prod`
+- Database ID: `0dc8fa3e-319c-45f7-a515-34c8acd89fcf`
+- Backup: `local_backups\build428_prod_before_membership_20260826T025115Z.sql`
+- Backup bytes: `19003564`
+- Backup SHA-256: `2f94f5bcd0006f98c4cdfcc2bc6de9441d047a4f97ccc702c735191a90cf5513`
+- Rows: `3 -> 3`
+- Queries executed: `13`
+- Final bookmark: `00000d48-00000006-000050d3-dc23940f2dba8f8defefe8c58f115840`
+- Canonical values preserved: `True`
+- Canonical sort index columns: `["sort_order", "tier_code"]`
+- Independent read-only postcheck: `PASS`
 
 ## Release package manifest
 
 - Static manifest: `data/site/release-package-manifest.json`
-- Manifest build label: `Build 246`
-- Regenerate the manifest after source/release-note changes so hashes are current.
+- Manifest build label: `Build 437`
+- Manifest source scope: `git_tracked_release_files`
+- Generation order: regenerate `RELEASE_NOTES.md` first, then regenerate the manifest so the manifest hashes the final notes.
 
 ## Changed files
 
@@ -38,19 +53,21 @@
 
 ## D1 migration summary
 
-- Production Membership is not upgraded by running database_membership_tier_policy_runtime_parity.sql directly. Use only the guarded Build 436/437 Membership rebuild controller with the exact authorized token.
-- The guarded rebuild creates the canonical Build 395 table, copies all three existing rows losslessly, recreates idx_membership_tier_policies_sort on (sort_order, tier_code), and validates the result.
+- Production Membership Build 395 rebuild is complete/proven through the guarded Build 436/437 controller; do not rerun the canonical migration or spent token.
+- The three live policy rows were copied losslessly to the canonical table and idx_membership_tier_policies_sort was recreated on (sort_order, tier_code).
 
 ## Required post-deploy actions
 
-- Run the single Build 437 guarded Membership backup -> apply -> independent read-only postcheck chain using scripts/build437_production_membership_rebuild.py and the exact authorized token.
-- Regenerate RELEASE_NOTES.md and data/site/release-package-manifest.json only after the Membership postcheck passes.
-- Mark the Membership authorization token spent/complete after successful execution.
-- Keep Production promotion closed until the broader parity/release gates are complete.
+- Do not rerun Membership backup/apply/postcheck unless a future Membership source change explicitly invalidates the proof.
+- Retain the successful local backup and generated Build 437 release evidence.
+- Resume non-Membership application work or open a separately authorized parity family when desired.
+- Keep broad Production promotion closed until the remaining release/parity gates are complete.
 
 ## Validation
 
-- Build 435 complete-row source SHA-256 remains 5db4bfd5f948a33432834210fd232a1e4b222dd6400193d65c644b501ba92057 before the authorized rebuild.
-- Canonical preview SHA-256 remains 5d2d8369acd086bfa701de7ec19bd9d67537cd8736cd2c228d42a098ca71e2c8 before the authorized rebuild.
-- The prior authorized attempts stopped before backup or DDL because direct PRAGMA index_info was rejected by the Build 418 SQL guard; no Production mutation occurred.
-- Build 437 release regression, fresh read-only preflight, and authorization gate must pass before the Membership Production backup/write sequence can advance.
+- Build 437 consolidated Membership release regression passed 20/20.
+- Build 436 Membership rebuild safety regression passed 20/20.
+- Fresh Build 436/437 Production authorization preflight passed with no unhandled indexes/triggers/FKs/collisions.
+- Production Membership rebuild postcheck passed with 3 -> 3 rows and exact canonical value fingerprint preservation.
+- Independent read-only Production postcheck passed and proved canonical sort-index columns [sort_order, tier_code].
+- Production promotion remains closed.
