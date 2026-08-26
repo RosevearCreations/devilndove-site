@@ -4,12 +4,19 @@
 Authorized scope:
 - READ current Development D1 Tool/Supply image authority.
 - READ public https://assets.devilndove.com source objects.
-- WRITE only missing canonical objects to devilndove-toolshed-images-dev.
+- WRITE only the 498 current canonical D1 objects to devilndove-toolshed-images-dev.
 - NEVER write/delete/rename Production R2, mutate D1, or overwrite an existing Dev object.
 
-The script is deliberately two-phase:
-  --dry-run  validates the exact D1/manifest key set and verifies every public source
-             by recorded byte size + SHA-256. No R2 writes.
+Important authority rule:
+The historical source inventory may contain more objects than the current Development
+catalogue. Current Development D1 is the restore authority. The historical manifest is
+used only as an integrity-metadata lookup for those current D1 keys. Historical
+manifest-only objects are reported and ignored; they are never restored automatically.
+
+Two phases:
+  --dry-run  validates the exact current D1 key set, resolves recorded byte size +
+             SHA-256 metadata for every authorized key, and verifies every public
+             source. No R2 writes.
   --apply    repeats those checks, verifies/skips any already-present Dev object,
              writes only missing objects, then downloads each written object back and
              verifies byte size + SHA-256.
@@ -65,7 +72,8 @@ class Asset:
     @property
     def cache_path(self) -> Path:
         suffix = Path(self.key).suffix or ".bin"
-        return CACHE_SOURCE / f"{hashlib.sha256(self.key.encode('utf-8')).hexdigest()}{suffix}"
+        token = hashlib.sha256(self.key.encode("utf-8")).hexdigest()
+        return CACHE_SOURCE / f"{token}{suffix}"
 
 
 def log(message: str) -> None:
@@ -79,22 +87,22 @@ def fail(message: str, code: int = 2) -> "NoReturn":
 
 
 def sha256_file(path: Path) -> str:
-    h = hashlib.sha256()
+    digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            h.update(chunk)
-    return h.hexdigest()
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def validate_file(path: Path, asset: Asset) -> tuple[bool, str]:
     if not path.exists():
         return False, "missing"
-    size = path.stat().st_size
-    if size != asset.size:
-        return False, f"size {size} != {asset.size}"
-    digest = sha256_file(path)
-    if digest.lower() != asset.sha256.lower():
-        return False, f"sha256 {digest} != {asset.sha256}"
+    actual_size = path.stat().st_size
+    if actual_size != asset.size:
+        return False, f"size {actual_size} != {asset.size}"
+    actual_sha = sha256_file(path)
+    if actual_sha.lower() != asset.sha256.lower():
+        return False, f"sha256 {actual_sha} != {asset.sha256}"
     return True, "verified"
 
 
@@ -112,6 +120,7 @@ def current_branch() -> str:
 def validate_environment() -> None:
     if current_branch() != DEV_BRANCH:
         fail(f"Restore must run from branch {DEV_BRANCH!r}.")
+
     wrangler_toml = (ROOT / "wrangler.toml").read_text(encoding="utf-8")
     required = [
         f'database_name = "{DEV_D1}"',
@@ -122,44 +131,53 @@ def validate_environment() -> None:
     missing = [value for value in required if value not in wrangler_toml]
     if missing:
         fail(f"Development binding guard failed; wrangler.toml is missing: {missing}")
-    if "devilndove-toolshed-images\"" in wrangler_toml and f'bucket_name = "{DEV_BUCKET}"' not in wrangler_toml:
-        fail("Production toolshed bucket appears to be selected; refusing restore.")
+
+    # The destination constant itself is fixed above; this additional check ensures
+    # the checked-in Development binding still names that same bucket.
+    if f'bucket_name = "{DEV_BUCKET}"' not in wrangler_toml:
+        fail("Development Product Media bucket is not selected; refusing restore.")
 
 
-def load_manifest() -> list[Asset]:
+def load_manifest_index() -> dict[str, Asset]:
+    """Load all historical source integrity metadata without making it authority."""
     if not MANIFEST_PATH.exists():
         fail(f"Source manifest not found: {MANIFEST_PATH}")
+
     by_key: dict[str, Asset] = {}
     with MANIFEST_PATH.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         required = {"r2_object_key", "file_size_bytes", "sha256"}
         if not required.issubset(set(reader.fieldnames or [])):
             fail(f"Source manifest is missing required columns: {sorted(required)}")
+
         for row in reader:
             key = str(row.get("r2_object_key") or "").strip()
             if not key:
                 continue
             if not (key.startswith("Supplies/") or key.startswith("Tools/")):
                 fail(f"Unsupported R2 key outside Tool/Supply scope: {key}")
+
             try:
                 size = int(str(row.get("file_size_bytes") or "0").strip())
             except ValueError:
                 fail(f"Invalid file_size_bytes for {key}")
+
             digest = str(row.get("sha256") or "").strip().lower()
             if size <= 0 or not HEX64.fullmatch(digest):
                 fail(f"Missing/invalid integrity metadata for {key}")
+
             asset = Asset(key=key, size=size, sha256=digest)
             previous = by_key.get(key)
             if previous and previous != asset:
                 fail(f"Conflicting manifest metadata for duplicate key {key}")
             by_key[key] = asset
-    assets = sorted(by_key.values(), key=lambda item: item.key.casefold())
-    if len(assets) != AUTHORIZED_EXPECTED_KEYS:
+
+    if len(by_key) < AUTHORIZED_EXPECTED_KEYS:
         fail(
-            f"Authorization expected exactly {AUTHORIZED_EXPECTED_KEYS} unique keys, "
-            f"but source manifest contains {len(assets)}."
+            f"Historical manifest contains only {len(by_key)} unique keys, fewer than "
+            f"the authorized current D1 set of {AUTHORIZED_EXPECTED_KEYS}."
         )
-    return assets
+    return by_key
 
 
 def npx_executable() -> str:
@@ -194,13 +212,14 @@ def parse_json_stdout(text: str):
 
 def canonical_key(value: str) -> str:
     raw = str(value or "").strip()
-    prefix = PUBLIC_ORIGIN + "/"
-    if raw.lower().startswith(prefix.lower()):
-        key = raw[len(prefix):]
+    public_prefix = PUBLIC_ORIGIN + "/"
+    if raw.lower().startswith(public_prefix.lower()):
+        key = raw[len(public_prefix):]
     elif raw.startswith("Tools/") or raw.startswith("Supplies/"):
         key = raw
     else:
         return ""
+
     try:
         return unquote(key)
     except Exception:
@@ -208,6 +227,7 @@ def canonical_key(value: str) -> str:
 
 
 def load_d1_expected_keys() -> set[str]:
+    """Read the current Development D1 authority. This defines restore scope."""
     sql = """
 SELECT catalog_item_id,item_kind,image_url
 FROM catalog_items
@@ -217,27 +237,34 @@ WHERE item_kind IN ('tool','supply')
 ORDER BY item_kind ASC,catalog_item_id ASC
 LIMIT 1200;
 """.strip()
+
     result = wrangler([
         "d1", "execute", DEV_D1,
         "--remote", "--json", "--command", sql,
     ], timeout=240)
     if result.returncode != 0:
         fail(f"Development D1 read failed: {(result.stderr or result.stdout)[-1200:]}")
+
     payload = parse_json_stdout(result.stdout)
     rows: list[dict] = []
     blocks = payload if isinstance(payload, list) else [payload]
     for block in blocks:
         if isinstance(block, dict) and isinstance(block.get("results"), list):
             rows.extend(block["results"])
+
     keys: set[str] = set()
     unsupported: list[str] = []
     for row in rows:
         raw = str(row.get("image_url") or "").strip()
         key = canonical_key(raw)
         if key:
-            keys.add(key)
+            if not (key.startswith("Supplies/") or key.startswith("Tools/")):
+                unsupported.append(raw)
+            else:
+                keys.add(key)
         else:
             unsupported.append(raw)
+
     if unsupported:
         fail(f"Development D1 contains unsupported Tool/Supply image URLs: {unsupported[:8]}")
     if len(keys) != AUTHORIZED_EXPECTED_KEYS:
@@ -248,18 +275,39 @@ LIMIT 1200;
     return keys
 
 
-def validate_d1_manifest_alignment(assets: list[Asset]) -> None:
-    manifest_keys = {asset.key for asset in assets}
+def select_authorized_assets(manifest_index: dict[str, Asset]) -> list[Asset]:
+    """Select exactly the current D1 keys from the larger historical manifest."""
     d1_keys = load_d1_expected_keys()
-    missing_from_manifest = sorted(d1_keys - manifest_keys)
-    stale_manifest = sorted(manifest_keys - d1_keys)
-    if missing_from_manifest or stale_manifest:
+    manifest_keys = set(manifest_index)
+    missing_metadata = sorted(d1_keys - manifest_keys)
+    historical_only = sorted(manifest_keys - d1_keys)
+
+    log(f"Historical manifest keys available: {len(manifest_keys)}")
+    log(f"Current Development D1 authorized keys: {len(d1_keys)}")
+    log(f"Historical manifest-only keys ignored: {len(historical_only)}")
+    log(f"Current D1 keys missing integrity metadata: {len(missing_metadata)}")
+
+    if missing_metadata:
         fail(
-            "D1/source manifest key mismatch. "
-            f"Missing from manifest: {missing_from_manifest[:8]}; "
-            f"not currently expected by D1: {stale_manifest[:8]}"
+            "Current D1 restore authority contains key(s) without recorded source "
+            f"size/SHA metadata: {missing_metadata[:8]}"
         )
-    log(f"D1 / source-manifest exact key alignment: PASS ({len(d1_keys)}/{len(manifest_keys)})")
+
+    assets = sorted(
+        (manifest_index[key] for key in d1_keys),
+        key=lambda item: item.key.casefold(),
+    )
+    if len(assets) != AUTHORIZED_EXPECTED_KEYS:
+        fail(
+            f"Authorized asset selection produced {len(assets)} objects; expected "
+            f"exactly {AUTHORIZED_EXPECTED_KEYS}."
+        )
+
+    log(
+        f"Current D1 / source-manifest coverage: PASS "
+        f"({len(assets)}/{len(d1_keys)} current keys; {len(historical_only)} historical-only ignored)"
+    )
+    return assets
 
 
 def verify_public_source(asset: Asset) -> tuple[Asset, str]:
@@ -271,7 +319,10 @@ def verify_public_source(asset: Asset) -> tuple[Asset, str]:
 
     temp = path.with_suffix(path.suffix + ".part")
     temp.unlink(missing_ok=True)
-    request = Request(asset.source_url, headers={"User-Agent": "DevilNDove-Build440-Dev-R2-Restore/1.0"})
+    request = Request(
+        asset.source_url,
+        headers={"User-Agent": "DevilNDove-Build440-Dev-R2-Restore/1.1"},
+    )
     try:
         with urlopen(request, timeout=60) as response, temp.open("wb") as handle:
             status = int(getattr(response, "status", 200) or 200)
@@ -298,6 +349,7 @@ def verify_all_sources(assets: list[Asset], workers: int) -> int:
     log(f"Verifying {len(assets)} public source objects before any R2 write...")
     total_bytes = 0
     completed = 0
+
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futures = {pool.submit(verify_public_source, asset): asset for asset in assets}
         try:
@@ -311,6 +363,7 @@ def verify_all_sources(assets: list[Asset], workers: int) -> int:
             for pending in futures:
                 pending.cancel()
             fail(str(exc))
+
     log(f"Public source integrity: PASS ({len(assets)}/{len(assets)}, {total_bytes} bytes)")
     return total_bytes
 
@@ -329,11 +382,13 @@ def get_dev_object(asset: Asset, stage: str) -> tuple[str, str]:
         "--remote", "--file", str(target),
     ], timeout=180)
     combined = f"{result.stdout}\n{result.stderr}".lower()
+
     if result.returncode != 0:
         target.unlink(missing_ok=True)
         if "specified key does not exist" in combined or "key does not exist" in combined:
             return "missing", ""
         return "error", (result.stderr or result.stdout)[-1200:]
+
     okay, reason = validate_file(target, asset)
     target.unlink(missing_ok=True)
     if not okay:
@@ -359,17 +414,22 @@ def restore_one(asset: Asset) -> tuple[str, str]:
     if status == "present_verified":
         return "already_present_verified", asset.key
     if status == "mismatch":
-        raise RuntimeError(f"existing Dev object differs from authorized source; refusing overwrite: {asset.key} ({detail})")
+        raise RuntimeError(
+            f"existing Dev object differs from authorized source; refusing overwrite: "
+            f"{asset.key} ({detail})"
+        )
     if status == "error":
         raise RuntimeError(f"Dev R2 preflight failed for {asset.key}: {detail}")
 
-    # Re-check immediately before PUT. This protects resumptions/concurrent restores
-    # without ever overwriting an object that appeared after the first probe.
+    # Re-check immediately before PUT so resumptions/concurrent restores cannot
+    # silently overwrite an object that appeared after the first probe.
     status, detail = get_dev_object(asset, "before-put")
     if status == "present_verified":
         return "already_present_verified", asset.key
     if status == "mismatch":
-        raise RuntimeError(f"Dev object appeared with different bytes; refusing overwrite: {asset.key} ({detail})")
+        raise RuntimeError(
+            f"Dev object appeared with different bytes; refusing overwrite: {asset.key} ({detail})"
+        )
     if status == "error":
         raise RuntimeError(f"Dev R2 second preflight failed for {asset.key}: {detail}")
 
@@ -384,11 +444,15 @@ def restore_one(asset: Asset) -> tuple[str, str]:
         "--content-type", content_type_for(asset),
     ], timeout=240)
     if result.returncode != 0:
-        raise RuntimeError(f"Dev R2 PUT failed for {asset.key}: {(result.stderr or result.stdout)[-1200:]}")
+        raise RuntimeError(
+            f"Dev R2 PUT failed for {asset.key}: {(result.stderr or result.stdout)[-1200:]}"
+        )
 
     status, detail = get_dev_object(asset, "after")
     if status != "present_verified":
-        raise RuntimeError(f"Dev R2 post-write verification failed for {asset.key}: {status} {detail}")
+        raise RuntimeError(
+            f"Dev R2 post-write verification failed for {asset.key}: {status} {detail}"
+        )
     return "restored_verified", asset.key
 
 
@@ -418,29 +482,34 @@ def apply_restore(assets: list[Asset], workers: int) -> None:
         for future in as_completed(futures):
             asset = futures[future]
             try:
-                outcome, key = future.result()
+                outcome, _key = future.result()
             except Exception as exc:
                 failures.append(str(exc))
                 log(f"  FAIL — {asset.key}: {exc}")
                 continue
+
             if outcome == "restored_verified":
                 restored += 1
             elif outcome == "already_present_verified":
                 already += 1
+
             done = restored + already
             if done and (done % 20 == 0 or done == len(assets)):
-                log(f"  Dev R2 verified: {done}/{len(assets)} (restored {restored}, already present {already})")
+                log(
+                    f"  Dev R2 verified: {done}/{len(assets)} "
+                    f"(restored {restored}, already present {already})"
+                )
 
     if failures:
         fail(
-            f"Restore stopped with {len(failures)} failure(s). No existing Dev object was overwritten. "
-            f"First failure: {failures[0]}"
+            f"Restore stopped with {len(failures)} failure(s). No existing Dev object was "
+            f"overwritten. First failure: {failures[0]}"
         )
 
     if restored + already != len(assets):
         fail(
-            f"Restore did not process the full authorized set: restored={restored}, already={already}, "
-            f"expected={len(assets)}. Re-run --apply to resume safely."
+            f"Restore did not process the full authorized set: restored={restored}, "
+            f"already={already}, expected={len(assets)}. Re-run --apply to resume safely."
         )
 
     log("BUILD 440 DEVELOPMENT TOOL/SUPPLY R2 RESTORE: PASS / EXACT")
@@ -454,30 +523,48 @@ def apply_restore(assets: list[Asset], workers: int) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build 440 guarded Development Tool/Supply R2 restore")
+    parser = argparse.ArgumentParser(
+        description="Build 440 guarded Development Tool/Supply R2 restore"
+    )
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--dry-run", action="store_true", help="Verify exact D1/manifest/source set; no R2 writes")
-    mode.add_argument("--apply", action="store_true", help="Restore only missing Development R2 objects")
+    mode.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Verify current D1 scope + manifest metadata + sources; no R2 writes",
+    )
+    mode.add_argument(
+        "--apply",
+        action="store_true",
+        help="Restore only missing current Development D1 R2 objects",
+    )
     parser.add_argument(
         "--authorization",
         default="",
         help=f"Required with --apply; must equal {APPLY_TOKEN}",
     )
-    parser.add_argument("--workers", type=int, default=3, help="Bounded parallelism, 1-4 (default 3)")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=3,
+        help="Bounded parallelism, 1-4 (default 3)",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     workers = max(1, min(int(args.workers or 3), 4))
+
     validate_environment()
-    assets = load_manifest()
-    validate_d1_manifest_alignment(assets)
+    manifest_index = load_manifest_index()
+    assets = select_authorized_assets(manifest_index)
     verify_all_sources(assets, workers=max(workers, 3))
 
     if args.dry_run:
         print("BUILD 440 DEVELOPMENT TOOL/SUPPLY R2 RESTORE DRY RUN: PASS / EXACT")
         print(f"Authorized expected keys: {len(assets)}")
+        print(f"Historical manifest keys available: {len(manifest_index)}")
+        print(f"Historical manifest-only keys ignored: {len(manifest_index) - len(assets)}")
         print("Public sources: ALL SIZE/SHA VERIFIED")
         print(f"Destination: {DEV_BUCKET}")
         print("Development R2 mutation executed: NO")
@@ -488,6 +575,7 @@ def main() -> int:
 
     if args.authorization != APPLY_TOKEN:
         fail(f"--apply requires --authorization {APPLY_TOKEN}")
+
     apply_restore(assets, workers=workers)
     return 0
 
