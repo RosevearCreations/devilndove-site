@@ -2,7 +2,7 @@
 
 ## Immediate objective
 
-Close the Build 197 annotation-index boundary, then move into the first data-preserving rebuild family only after separate evidence and authorization.
+The Build 197 annotation-index authorization boundary is now green. Await explicit annotation authorization, then move into the first data-preserving rebuild family only after separate evidence and authorization.
 
 ## Ordered path
 
@@ -23,12 +23,17 @@ Close the Build 197 annotation-index boundary, then move into the first data-pre
    - `notification_outbox` rows preserved 0 -> 0;
    - independent read-only postcheck PASS.
 
-4. **Build 197 annotation-index authorization boundary — current**
-   - local 20-check regression;
-   - live read-only index/required-column/row evidence;
-   - stop for explicit annotation authorization.
+4. **Build 197 annotation-index authorization boundary — complete**
+   - local 20-check regression: PASS;
+   - live read-only index/required-column/row evidence: PASS;
+   - composite index absent;
+   - required `product_id` and `product_image_id` columns present;
+   - `product_image_annotations` preservation boundary: 70 rows;
+   - final authorization gate: PASS (20/20).
 
-5. **Build 197 annotation-index execution — after exact token only**
+5. **Build 197 annotation-index execution — awaiting exact token**
+   - require `AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX`;
+   - rerun targeted annotation preflight;
    - fresh full Production D1 backup;
    - bytes/SHA/UUID/age proof;
    - targeted reread;
@@ -77,7 +82,10 @@ Close the Build 197 annotation-index boundary, then move into the first data-pre
 Product numbers                              COMPLETE / PROVEN
 Gift Card                                    COMPLETE / PROVEN
 Full Build 403 Notification                  COMPLETE / PROVEN
-Build 197 annotation boundary                CURRENT / NOT AUTHORIZED
+Build 197 annotation boundary                PASS (20/20)
+Build 197 annotation authorization           NOT RECEIVED
+Annotation Production backup                 NOT CREATED
+Annotation Production mutation               NOT EXECUTED
 Membership rebuild                           LOCKED
 Fractional rebuilds                          LOCKED
 Product/FK rebuilds                          LOCKED
