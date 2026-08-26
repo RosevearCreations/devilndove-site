@@ -24,6 +24,8 @@ EXPECTED_DATABASE_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'
 WRANGLER_VERSION = '4.126.0'
 EXPECTED_MODULE_KEYS = 'business-administration|commerce-operations|creative-production'
 
+# Avoid a literal pipe metacharacter in the Windows npx.cmd command argument. SQLite
+# char(124) produces the same separator without giving cmd.exe a pipe token to parse.
 STRICT_VERIFY_SQL = """
 SELECT
   (SELECT COUNT(*) FROM app_modules) AS module_count,
@@ -31,7 +33,7 @@ SELECT
   (SELECT COUNT(*) FROM app_modules WHERE is_enabled=1) AS enabled_module_count,
   (SELECT COUNT(*) FROM app_modules WHERE background_activity_enabled=1) AS background_enabled_count,
   (SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND name IN ('idx_app_modules_enabled_priority','idx_app_module_role_access_role')) AS expected_index_count,
-  (SELECT group_concat(module_key, '|') FROM (SELECT module_key FROM app_modules ORDER BY module_key)) AS module_keys;
+  (SELECT group_concat(module_key, char(124)) FROM (SELECT module_key FROM app_modules ORDER BY module_key)) AS module_keys;
 """.strip()
 
 
@@ -133,8 +135,13 @@ def auth_check() -> None:
 
 def classify_failure(result: subprocess.CompletedProcess[str], label: str) -> None:
     lower = (result.stdout or '').lower()
-    if '7403' in lower or '7500' in lower or 'not authorized' in lower or 'sqlite_auth' in lower:
+    # D1 error code 7500 is also used for ordinary SQLite failures (for example
+    # SQLITE_ERROR / incomplete input), so never classify the numeric code alone
+    # as authorization. Require explicit authorization semantics instead.
+    if '7403' in lower or 'not authorized' in lower or 'sqlite_auth' in lower:
         fail(f'Cloudflare authorization blocked {label}. Treat this as an access interruption; do not infer schema failure.')
+    if 'sqlite_error' in lower or 'incomplete input' in lower or 'syntax error' in lower:
+        fail(f'{label} was rejected as SQLite/query-form failure; do not infer authorization or schema drift.')
     fail(f'{label} failed with exit code {result.returncode}.')
 
 
