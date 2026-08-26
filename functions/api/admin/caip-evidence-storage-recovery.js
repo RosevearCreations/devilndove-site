@@ -1,11 +1,11 @@
 // Devil n Dove Build 439 — verified CAIP missing-binary recovery control.
-// Explicit Admin action only. Restores a missing Development/private binary under a new immutable R2 key,
-// verifies it, then preserves the existing creative_asset_id so evidence/story references remain stable.
+// Explicit Admin action only. Recovery is allowed only when the selected CAIP asset has a linked historical
+// caip_media_upload_files authority. A new private R2 key is created and verified; the existing creative_asset_id
+// is then preserved so evidence/story references remain stable. No old R2 key is deleted and no provider executes.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
   CONTENT_FINGERPRINT_VERSION,
   createSafeReplacementUpload,
-  createUploadSession,
   privateBucketAvailable,
   retryUploadedFileRegistration,
   setUploadFileContentFingerprint,
@@ -32,9 +32,6 @@ function text(value, max = 0) {
 function fingerprint(value) {
   const clean = text(value, 180).toLowerCase();
   return /^[a-f0-9]{64}$/.test(clean) ? clean : '';
-}
-function sameProject(row, projectId) {
-  return integer(row?.creative_project_id) === integer(projectId);
 }
 function safeFile(row) {
   if (!row) return null;
@@ -82,18 +79,17 @@ async function access(context) {
 async function assetRow(db, projectId, assetId) {
   return db.prepare(`
     SELECT ca.creative_asset_id,ca.creative_project_id,ca.asset_key,ca.original_filename,ca.media_type,ca.mime_type,
-           ca.media_asset_id,ca.rights_status,ca.source_safety_status,
-           ma.file_size_bytes AS media_file_size_bytes,ma.object_key AS media_object_key
+           ca.media_asset_id,ca.rights_status,ca.source_safety_status
     FROM creative_assets ca
-    LEFT JOIN media_assets ma ON ma.media_asset_id=ca.media_asset_id
     WHERE ca.creative_project_id=? AND ca.creative_asset_id=? LIMIT 1
   `).bind(projectId, assetId).first();
 }
-async function latestUploadForAsset(db, projectId, assetId, requestedFileId = 0) {
+async function linkedUpload(db, projectId, assetId, requestedFileId = 0) {
   if (requestedFileId) {
-    const row = await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(requestedFileId).first();
-    if (!row || !sameProject(row, projectId) || integer(row.creative_asset_id) !== integer(assetId)) return null;
-    return row;
+    return db.prepare(`
+      SELECT * FROM caip_media_upload_files
+      WHERE caip_media_upload_file_id=? AND creative_project_id=? AND creative_asset_id=? LIMIT 1
+    `).bind(requestedFileId, projectId, assetId).first();
   }
   return db.prepare(`
     SELECT * FROM caip_media_upload_files
@@ -102,74 +98,49 @@ async function latestUploadForAsset(db, projectId, assetId, requestedFileId = 0)
   `).bind(projectId, assetId).first();
 }
 async function reusableRecovery(db, oldFileId) {
-  if (!oldFileId) return null;
   return db.prepare(`
     SELECT * FROM caip_media_upload_files
     WHERE recovery_of_file_id=? AND upload_status NOT IN ('archived','aborted')
     ORDER BY caip_media_upload_file_id DESC LIMIT 1
   `).bind(oldFileId).first();
 }
+
 async function prepareRecovery(state, context, body) {
   const projectId = integer(body.creative_project_id || body.project_id);
   const assetId = integer(body.creative_asset_id || body.asset_id);
   const requestedUploadId = integer(body.caip_media_upload_file_id || body.upload_file_id);
   const localName = text(body.filename || body.original_filename, 300);
   const localSize = Math.max(0, Math.floor(numeric(body.file_size_bytes || body.size)));
-  const localMime = text(body.mime_type || body.type, 180).toLowerCase();
   const localFingerprint = fingerprint(body.content_fingerprint);
   if (!projectId || !assetId) throw new Error('CAIP project and creative asset are required.');
-  if (!localName || !localSize || !localFingerprint) throw new Error('Choose the original local file so CAIP can verify filename/size/content fingerprint before recovery.');
+  if (!localName || !localSize || !localFingerprint) throw new Error('Choose the original local file so CAIP can verify filename, size and content fingerprint before recovery.');
   if (!privateBucketAvailable(context.env)) throw new Error('CAIP_PRIVATE_MEDIA_BUCKET is unavailable; missing-binary recovery cannot start.');
 
   const asset = await assetRow(state.db, projectId, assetId);
   if (!asset) throw new Error('CAIP asset not found for this project.');
   if (!['video','audio'].includes(text(asset.media_type).toLowerCase())) throw new Error('Build 439 missing-binary recovery is limited to temporal video/audio assets.');
 
-  const old = await latestUploadForAsset(state.db, projectId, assetId, requestedUploadId);
-  let replacement = null;
-  let recoveryMode = 'asset_only_recovery';
-
-  if (old) {
-    const expectedSize = numeric(old.file_size_bytes);
-    if (expectedSize > 0 && expectedSize !== localSize) throw new Error(`Selected file size does not match the recorded CAIP source (${expectedSize} bytes expected; ${localSize} selected).`);
-    const recordedFingerprint = fingerprint(old.content_fingerprint);
-    if (recordedFingerprint && recordedFingerprint !== localFingerprint) throw new Error('Selected local file content fingerprint does not match the recorded CAIP source.');
-    if (!recordedFingerprint && text(old.original_filename).toLowerCase() !== localName.toLowerCase()) throw new Error(`No strong source fingerprint is recorded, so the original filename must match ${old.original_filename}.`);
-
-    replacement = await reusableRecovery(state.db, old.caip_media_upload_file_id);
-    if (!replacement) replacement = (await createSafeReplacementUpload(state.db, context.env, old.caip_media_upload_file_id, state.adminUser.user_id)).file;
-    recoveryMode = 'upload_row_recovery';
-  } else {
-    const expectedSize = numeric(asset.media_file_size_bytes);
-    if (expectedSize > 0 && expectedSize !== localSize) throw new Error(`Selected file size does not match the recorded media asset (${expectedSize} bytes expected; ${localSize} selected).`);
-    if (text(asset.original_filename) && text(asset.original_filename).toLowerCase() !== localName.toLowerCase()) throw new Error(`The selected filename must match the existing CAIP asset (${asset.original_filename}).`);
-    const session = await createUploadSession(state.db, context.env, projectId, [{
-      name: localName,
-      type: localMime,
-      size: localSize,
-      lastModified: numeric(body.last_modified_ms),
-      content_fingerprint: localFingerprint,
-      content_fingerprint_version: CONTENT_FINGERPRINT_VERSION,
-    }], state.adminUser.user_id, {
-      source_note: `Build 439 missing-binary recovery for creative asset #${assetId}. Existing creative_asset_id must be preserved after R2 verification.`,
-      media_role: 'reference',
-      privacy_state: 'private',
-      consent_state: 'internal_only',
-      rights_status: text(asset.rights_status).toLowerCase() === 'blocked' ? 'blocked' : 'internal_only',
-      upload_device: text(body.upload_device, 180) || 'browser_missing_binary_recovery',
-    });
-    replacement = (session.files || [])[0] || null;
-    if (replacement?.reused_existing) {
-      const existing = await context.env.CAIP_PRIVATE_MEDIA_BUCKET.head(replacement.object_key).catch(() => null);
-      if (!existing || numeric(existing.size) !== localSize) {
-        replacement = (await createSafeReplacementUpload(state.db, context.env, replacement.caip_media_upload_file_id, state.adminUser.user_id)).file;
-        recoveryMode = 'discovered_upload_row_recovery';
-      }
-    }
+  const old = await linkedUpload(state.db, projectId, assetId, requestedUploadId);
+  if (!old) {
+    throw new Error('This CAIP asset has no linked historical upload row. One-click recovery is intentionally blocked so another asset or dedupe row cannot be repointed by mistake. Use the normal CAIP intake path until an asset-only recovery authority is added.');
   }
 
+  if (numeric(old.file_size_bytes) !== localSize) {
+    throw new Error(`Selected file size does not match the recorded CAIP source (${numeric(old.file_size_bytes)} bytes expected; ${localSize} selected).`);
+  }
+  const recordedFingerprint = fingerprint(old.content_fingerprint);
+  if (recordedFingerprint && recordedFingerprint !== localFingerprint) throw new Error('Selected local file content fingerprint does not match the recorded CAIP source.');
+  if (!recordedFingerprint && text(old.original_filename).toLowerCase() !== localName.toLowerCase()) {
+    throw new Error(`No strong source fingerprint is recorded, so the original filename must match ${old.original_filename}.`);
+  }
+
+  let replacement = await reusableRecovery(state.db, old.caip_media_upload_file_id);
+  if (!replacement) replacement = (await createSafeReplacementUpload(state.db, context.env, old.caip_media_upload_file_id, state.adminUser.user_id)).file;
   if (!replacement?.caip_media_upload_file_id) throw new Error('CAIP could not prepare a recovery upload row.');
-  replacement = await setUploadFileContentFingerprint(state.db, replacement.caip_media_upload_file_id, localFingerprint, CONTENT_FINGERPRINT_VERSION, state.adminUser.user_id);
+
+  replacement = await setUploadFileContentFingerprint(
+    state.db, replacement.caip_media_upload_file_id, localFingerprint, CONTENT_FINGERPRINT_VERSION, state.adminUser.user_id
+  );
   const stateRows = await uploadedPartState(state.db, replacement.caip_media_upload_file_id);
 
   await auditAdminAction(context.env, context.request, state.adminUser, {
@@ -177,18 +148,16 @@ async function prepareRecovery(state, context, body) {
     target_type: 'creative_asset', target_id: assetId, target_key: asset.asset_key || null,
     details: {
       build: BUILD, creative_project_id: projectId, creative_asset_id: assetId,
-      original_upload_file_id: integer(old?.caip_media_upload_file_id) || null,
+      original_upload_file_id: integer(old.caip_media_upload_file_id),
       replacement_upload_file_id: integer(replacement.caip_media_upload_file_id),
-      recovery_mode: recoveryMode, selected_size: localSize,
-      source_media_unchanged: true, previous_missing_object_not_deleted: true,
-      provider_execution_active: false, production_promotion: 'closed',
+      selected_size: localSize, source_media_unchanged: true,
+      previous_missing_object_not_deleted: true, provider_execution_active: false,
     }
   }).catch(() => null);
 
   return {
-    ok: true, build: BUILD, action: 'prepare', recovery_mode: recoveryMode,
-    creative_project_id: projectId, target_creative_asset_id: assetId,
-    original_upload_file_id: integer(old?.caip_media_upload_file_id) || null,
+    ok: true, build: BUILD, action: 'prepare', creative_project_id: projectId,
+    target_creative_asset_id: assetId, original_upload_file_id: integer(old.caip_media_upload_file_id),
     file: safeFile(stateRows.file), parts: safeParts(stateRows.parts),
     content_fingerprint_version: CONTENT_FINGERPRINT_VERSION,
     source_media_unchanged: true, r2_object_created_yet: false, provider_execution_active: false,
@@ -203,21 +172,26 @@ async function finalizeRecovery(state, context, body) {
 
   let replacement = await state.db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(replacementId).first();
   if (!replacement) throw new Error('Recovery upload row was not found.');
+  if (!integer(replacement.recovery_of_file_id)) throw new Error('Recovery finalization requires a replacement row linked to its historical upload authority.');
+
   if (replacement.upload_status !== 'uploaded' || !integer(replacement.creative_asset_id)) {
     await retryUploadedFileRegistration(state.db, context.env, replacementId, state.adminUser.user_id);
     replacement = await state.db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(replacementId).first();
   }
-  if (replacement.upload_status !== 'uploaded' || !integer(replacement.creative_asset_id)) throw new Error('Recovery binary is not fully uploaded/registered yet. Finish the upload before finalizing recovery.');
+  if (replacement.upload_status !== 'uploaded' || !integer(replacement.creative_asset_id)) {
+    throw new Error('Recovery binary is not fully uploaded/registered yet. Finish the upload before finalizing recovery.');
+  }
 
   const head = await context.env.CAIP_PRIVATE_MEDIA_BUCKET.head(replacement.object_key).catch(() => null);
   if (!head) throw new Error('Recovery finalization failed closed because the replacement R2 object is missing.');
-  if (numeric(head.size) !== numeric(replacement.file_size_bytes)) throw new Error(`Recovery finalization failed closed because R2 size ${numeric(head.size)} does not match ${numeric(replacement.file_size_bytes)} expected bytes.`);
+  if (numeric(head.size) !== numeric(replacement.file_size_bytes)) {
+    throw new Error(`Recovery finalization failed closed because R2 size ${numeric(head.size)} does not match ${numeric(replacement.file_size_bytes)} expected bytes.`);
+  }
 
-  const old = integer(replacement.recovery_of_file_id)
-    ? await state.db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(integer(replacement.recovery_of_file_id)).first()
-    : null;
-  const targetAssetId = requestedTargetId || integer(old?.creative_asset_id);
-  if (!targetAssetId) throw new Error('Existing CAIP asset identity could not be resolved for recovery finalization.');
+  const old = await state.db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(integer(replacement.recovery_of_file_id)).first();
+  if (!old || !integer(old.creative_asset_id)) throw new Error('Historical upload authority no longer resolves to the existing CAIP asset.');
+  const targetAssetId = integer(old.creative_asset_id);
+  if (requestedTargetId && requestedTargetId !== targetAssetId) throw new Error('Requested CAIP asset does not match the historical upload authority.');
   const target = await state.db.prepare(`SELECT * FROM creative_assets WHERE creative_asset_id=? LIMIT 1`).bind(targetAssetId).first();
   if (!target || integer(target.creative_project_id) !== integer(replacement.creative_project_id)) throw new Error('Recovery target asset does not belong to the replacement project.');
 
@@ -258,7 +232,7 @@ async function finalizeRecovery(state, context, body) {
 
   await state.db.prepare(`INSERT INTO creative_project_events(creative_project_id,event_type,actor_user_id,details_json,created_at) VALUES(?, 'caip_missing_binary_recovered', ?, ?, CURRENT_TIMESTAMP)`).bind(
     replacement.creative_project_id, integer(state.adminUser.user_id) || null,
-    JSON.stringify({ build: BUILD, creative_asset_id: targetAssetId, replacement_upload_file_id: replacementId, replacement_registration_asset_id: replacementAssetId, verified_object_key: replacement.object_key, verified_bytes: numeric(head.size), previous_upload_file_id: integer(replacement.recovery_of_file_id) || null, existing_asset_identity_preserved: true, old_object_not_deleted: true, provider_execution_active: false })
+    JSON.stringify({ build: BUILD, creative_asset_id: targetAssetId, replacement_upload_file_id: replacementId, replacement_registration_asset_id: replacementAssetId, verified_object_key: replacement.object_key, verified_bytes: numeric(head.size), previous_upload_file_id: integer(replacement.recovery_of_file_id), existing_asset_identity_preserved: true, old_object_not_deleted: true, provider_execution_active: false })
   ).run().catch(() => null);
 
   await auditAdminAction(context.env, context.request, state.adminUser, {
