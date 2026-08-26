@@ -2,63 +2,13 @@
 
 ## Status
 
-**READY — NOTIFICATION READ-ONLY AUTHORIZATION PREFLIGHT + LOCAL 20/20 GATES / NO NOTIFICATION PRODUCTION MUTATION AUTHORIZED**
+**PASS (20/20) — NOTIFICATION READ-ONLY AUTHORIZATION BOUNDARY CLOSED / NOTIFICATION PRODUCTION AUTHORIZATION STILL NOT RECEIVED / PRODUCTION PROMOTION CLOSED**
 
 Product numbers and Gift Card Production parity are complete/proven. Notification is now the only active authorization decision.
 
-## Run now
+## Owner-run Build 430 evidence
 
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-python -m py_compile \
-  scripts/build430_notification_authorization_preflight.py \
-  scripts/build430_notification_authorization_regression.py \
-  scripts/build430_notification_authorization_gate.py \
-  scripts/build428_production_additive_execution.py
-
-python scripts/build430_notification_authorization_regression.py
-
-python -u scripts/build430_notification_authorization_preflight.py --run \
-  2>&1 | tee build430_notification_authorization_preflight.txt
-
-python scripts/build430_notification_authorization_gate.py
-```
-
-Only the live preflight contacts Cloudflare/D1 and it performs read-only schema/count queries.
-
-## Expected regression
-
-```text
-BUILD 430 NOTIFICATION AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
-Gift Card Production stage prerequisite: SOURCE-GATED
-Notification Production authorization inferred: NO
-Production backup created by regression: NO
-Production mutation executed: NO
-Annotation/rebuild authorization inferred: NO
-PRODUCTION PROMOTION: CLOSED
-```
-
-## Expected live preflight
-
-```text
-=== BUILD 430 NOTIFICATION AUTHORIZATION BOUNDARY ===
-metadata_json exists: False
-Missing Notification indexes: ['idx_notification_outbox_kind_destination', 'idx_notification_outbox_order', 'idx_notification_outbox_payment', 'idx_notification_outbox_product']
-notification_outbox rows: <live>
-Exact known Build 403 gap: YES
-Safe to request Notification authorization: YES
-Production backup created: NO
-Notification authorization received: NO
-Production mutation executed: NO
-Annotation/rebuild authorization: NOT RECEIVED
-PRODUCTION PROMOTION: CLOSED
-BUILD 430 NOTIFICATION AUTHORIZATION PREFLIGHT: PASS
-```
-
-## Expected final gate
+The Notification authorization-boundary gate passed all twenty checks:
 
 ```text
 BUILD 430 TWENTY-ITEM NOTIFICATION AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
@@ -73,36 +23,71 @@ PRODUCTION PROMOTION: CLOSED
 NEXT: explicit Notification Production authorization is required before its backup/apply sequence.
 ```
 
-## Do not run yet
+A PASS here proves the prerequisite artifacts and reviewed Notification boundary are green. It does **not** authorize a Notification Production write.
 
-Until the owner explicitly authorizes Notification, do not run any `--stage notification --backup` or `--stage notification --apply` invocation.
+## Reviewed Notification scope
 
-Prepared token:
+Canonical authority: `database_notification_runtime_parity.sql` (Build 403).
+
+The bounded Notification Production stage, if separately authorized, may only add:
+
+```text
+metadata_json
+idx_notification_outbox_kind_destination
+idx_notification_outbox_order
+idx_notification_outbox_payment
+idx_notification_outbox_product
+```
+
+The existing `idx_notification_outbox_status_due` remains outside the gap and must stay intact. The `notification_outbox` row count must be preserved exactly.
+
+## Explicit authorization boundary
+
+The required owner authorization token is:
 
 ```text
 AUTHORIZE-BUILD428-PROD-NOTIFICATION
 ```
 
-Merely seeing or validating this token does not authorize it.
+Merely seeing this token, Build 430 PASS, or successful prior Product-number/Gift Card work does not authorize it.
 
-## Failure handling
+After explicit authorization only, the sequence is:
 
-- Cloudflare `7403`: classify as authorization/read interruption and stop.
-- Different metadata/index state: treat as live drift and re-plan from current evidence.
-- Missing/failed Gift Card prerequisite artifact: stop; do not bypass it.
-- Local regression/gate failure: patch source only; do not create a Production backup as a workaround.
-- Any gate failure: Notification remains unauthorized.
+1. rerun targeted Notification before-state;
+2. create a fresh full Production D1 backup dedicated to Notification;
+3. verify target UUID, path, nonzero byte count, SHA-256 and <=30-minute age;
+4. reread targeted Notification state and refuse unexpected drift;
+5. apply only `metadata_json` if still missing and the four reviewed indexes;
+6. prove `notification_outbox` row count is unchanged;
+7. prove `metadata_json` and all four reviewed indexes now exist while `idx_notification_outbox_status_due` remains intact;
+8. run the independent read-only Notification postcheck;
+9. keep Production promotion closed.
 
-## Safety
+## Still locked
 
 ```text
-Product numbers                    complete / proven
-Gift Card                          complete / proven
-Notification reads                bounded / read-only
-Notification backup               not created
-Notification authorization        not received
-Notification mutation             locked
-Annotation/rebuild families       locked
-R2/provider mutation              disabled
-Production promotion              closed
+Annotation-index authorization            NOT RECEIVED
+Membership rebuild authorization          NOT RECEIVED
+Fractional Inventory rebuild authorization NOT RECEIVED
+Product/FK rebuild authorization          NOT RECEIVED
+Accounting/default rebuild authorization  NOT RECEIVED
+R2/provider mutation                      DISABLED
+Production promotion                      CLOSED
+```
+
+## Gate state
+
+```text
+Build 425  Development Product-number backfill       PASS (20/20)
+Build 426  Production release-candidate assembly     PASS (20/20)
+Build 427  Production Product-number stage           PASS
+Build 428  Remaining parity authorization boundary   PASS (20/20)
+Build 429  Gift Card authorization boundary          PASS (20/20)
+Build 430  Gift Card Production stage                PASS
+Build 430  Notification authorization boundary       PASS (20/20)
+
+Notification Production backup                       NOT CREATED
+Notification Production authorization                NOT RECEIVED
+Notification Production mutation                     NOT EXECUTED
+Production promotion                                 CLOSED
 ```
