@@ -2,12 +2,28 @@
 // Read-only and bounded. This endpoint never creates or repairs schema.
 
 import { BUILD, availableModulesForRequest } from './_lib/appModules.js';
+import {
+  appModuleSessionUnavailableResponse,
+  isAppModuleSessionVerificationUnavailable,
+  resolveAppModuleRequestUser,
+} from './_lib/appModuleSessionGuard.js';
 import { jsonResponse } from './_lib/adminAudit.js';
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const force = url.searchParams.get('fresh') === '1';
-  const result = await availableModulesForRequest(request, env, { force });
+
+  let user = null;
+  try {
+    user = await resolveAppModuleRequestUser(request, env);
+  } catch (error) {
+    if (isAppModuleSessionVerificationUnavailable(error)) {
+      return appModuleSessionUnavailableResponse({ api: true });
+    }
+    throw error;
+  }
+
+  const result = await availableModulesForRequest(request, env, { force, user });
   return jsonResponse({
     ok: true,
     build: BUILD,
