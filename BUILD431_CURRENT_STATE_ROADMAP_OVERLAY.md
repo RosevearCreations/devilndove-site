@@ -2,19 +2,21 @@
 
 ## Immediate objective
 
-Correct the Notification Build 403 boundary using live Production evidence, then continue remaining Production parity one separately authorized family at a time.
+The corrected full Build 403 Notification authorization boundary is now green. Await a new explicit full-scope Notification authorization, then continue remaining Production parity one separately authorized family at a time.
 
 ## Ordered path
 
-1. **Corrected full Build 403 Notification authorization boundary — current**
-   - local 20-check regression;
-   - live read-only corrected preflight;
-   - prove `metadata_json` plus all five canonical indexes are missing;
-   - capture `notification_outbox` row boundary;
-   - prove old four-index token is insufficient;
-   - stop for new explicit authorization.
+1. **Corrected full Build 403 Notification authorization boundary — complete**
+   - local 20-check regression: PASS;
+   - live read-only corrected preflight: PASS;
+   - proved `metadata_json` plus all five canonical indexes are missing;
+   - captured `notification_outbox` row boundary at 0;
+   - proved old four-index token is insufficient;
+   - final corrected authorization gate: PASS (20/20).
 
-2. **Full Build 403 Notification execution — after new token only**
+2. **Full Build 403 Notification execution — awaiting new token**
+   - require exact token `AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403`;
+   - rerun the corrected preflight;
    - fresh full Production D1 export;
    - bytes/SHA/UUID/age proof;
    - exact targeted reread;
@@ -64,7 +66,10 @@ Correct the Notification Build 403 boundary using live Production evidence, then
 Product numbers                              COMPLETE / PROVEN
 Gift Card                                    COMPLETE / PROVEN
 Old four-index Notification authorization    SUPERSEDED / INSUFFICIENT
-Full Build 403 Notification boundary         CURRENT / NOT AUTHORIZED
+Full Build 403 Notification boundary         PASS (20/20)
+Full Build 403 Notification authorization    NOT RECEIVED
+Notification Production backup               NOT CREATED
+Notification Production mutation             NOT EXECUTED
 Annotation index                             LOCKED
 Membership rebuild                           LOCKED
 Fractional rebuilds                          LOCKED
