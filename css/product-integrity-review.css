@@ -1,0 +1,30 @@
+/* Devil n Dove Build 440 — read-only Product ingredient/media integrity queues. */
+.product-integrity-review{margin:0 0 18px}
+.product-integrity-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.product-integrity-heading h3{margin:.15rem 0 .35rem}
+.product-integrity-summary{gap:10px;margin:14px 0}
+.product-integrity-summary .card{margin:0;padding:12px;display:flex;flex-direction:column;gap:4px}
+.product-integrity-summary strong{font-size:1.25rem}
+.product-integrity-controls{display:grid;grid-template-columns:minmax(190px,240px) minmax(240px,1fr) auto;gap:10px;align-items:end;margin:12px 0}
+.product-integrity-section{border:1px solid var(--border,#444);border-radius:14px;padding:12px;margin-top:12px}
+.product-integrity-section>summary{cursor:pointer}
+.product-integrity-list{display:grid;gap:10px;margin-top:12px}
+.product-integrity-item{border-top:1px solid var(--border,#444);padding:12px 0 2px}
+.product-integrity-item:first-child{border-top:0}
+.product-integrity-row-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.product-integrity-row-head h4{margin:.15rem 0}
+.product-integrity-badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.product-integrity-badges span{border:1px solid var(--border,#555);border-radius:999px;padding:3px 8px;font-size:.72rem;font-weight:700}
+.product-integrity-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;font-size:.82rem}
+.product-integrity-pager{display:flex;justify-content:flex-end;align-items:center;gap:9px;margin-top:12px}
+#productIntegrityMessage{padding:8px 10px;border-radius:8px;margin:8px 0}
+#productIntegrityMessage.is-error{border:1px solid rgba(220,80,80,.45)}
+@media(max-width:900px){
+  .product-integrity-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .product-integrity-controls{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .product-integrity-heading,.product-integrity-row-head{flex-direction:column}
+  .product-integrity-summary,.product-integrity-facts{grid-template-columns:1fr!important}
+  .product-integrity-pager{justify-content:stretch;flex-wrap:wrap}.product-integrity-pager .btn{flex:1}
+}
