@@ -4,9 +4,10 @@ import {
   IMPLEMENTATION_BUILD as MEMBERSHIP_TIER_POLICY_READ_IMPLEMENTATION_BUILD,
   mapTierPolicyRow,
   readMembershipTierPolicies,
+  readMembershipTierPolicySchemaState,
 } from "../_lib/membershipTierPolicyReadService.js";
 
-const MUTATION_BUILD = 395;
+const MUTATION_BUILD = 437;
 const MUTATION_OWNER = 'operations';
 const MIGRATION_AUTHORITY = 'database_membership_tier_policy_runtime_parity.sql';
 
@@ -78,16 +79,17 @@ export async function onRequestPost(context) {
     return jsonResponse({ ok: false, build: MUTATION_BUILD, error: "Admin access required." }, 401);
   }
 
-  const readiness = await readMembershipTierPolicies(db);
-  if (!readiness.schema_ready) {
+  const schemaState = await readMembershipTierPolicySchemaState(db);
+  if (!schemaState.canonical_schema_ready) {
     return jsonResponse({
       ok: false,
       build: MUTATION_BUILD,
       owner: MUTATION_OWNER,
       error_code: 'membership_tier_policy_schema_not_ready',
-      error: 'Membership tier-policy schema is not ready. Apply the migration authority before saving policy changes.',
-      schema_ready: false,
-      missing_tables: readiness.missing_tables,
+      error: 'Membership tier-policy writes are locked until the canonical Build 395 schema is active.',
+      schema_ready: schemaState.table_exists,
+      canonical_schema_ready: false,
+      schema_columns: schemaState.columns,
       migration_authority: MIGRATION_AUTHORITY,
       request_time_schema_mutation: false,
       request_time_default_seeding: false,
@@ -175,6 +177,7 @@ export async function onRequestPost(context) {
     build: MUTATION_BUILD,
     owner: MUTATION_OWNER,
     migration_authority: MIGRATION_AUTHORITY,
+    canonical_schema_ready: true,
     request_time_schema_mutation: false,
     request_time_default_seeding: false,
     item: mapTierPolicyRow(row),
