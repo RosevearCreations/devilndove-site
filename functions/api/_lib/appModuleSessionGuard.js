@@ -1,0 +1,89 @@
+// Devil n Dove Build 438 resilient session verification for application-module routing.
+// A transient D1/session read failure must not be converted into a false 401/logout.
+
+import { getDb, getRequestToken, normalizeText } from './adminAudit.js';
+
+export const APP_MODULE_SESSION_UNAVAILABLE_CODE = 'module_session_verification_unavailable';
+
+export class AppModuleSessionVerificationUnavailable extends Error {
+  constructor(reason = 'session_verification_failed') {
+    super(APP_MODULE_SESSION_UNAVAILABLE_CODE);
+    this.name = 'AppModuleSessionVerificationUnavailable';
+    this.code = APP_MODULE_SESSION_UNAVAILABLE_CODE;
+    this.reason = normalizeText(reason) || 'session_verification_failed';
+  }
+}
+
+export function isAppModuleSessionVerificationUnavailable(error) {
+  return Boolean(
+    error instanceof AppModuleSessionVerificationUnavailable
+    || error?.code === APP_MODULE_SESSION_UNAVAILABLE_CODE,
+  );
+}
+
+export async function resolveAppModuleRequestUser(request, env) {
+  const token = getRequestToken(request);
+  if (!token) return null;
+
+  const db = getDb(env);
+  if (!db) {
+    throw new AppModuleSessionVerificationUnavailable('database_binding_missing');
+  }
+
+  try {
+    const row = await db.prepare(`
+      SELECT s.session_id, s.expires_at,
+             u.user_id, u.email, u.display_name, u.role, u.is_active
+      FROM sessions s
+      INNER JOIN users u ON u.user_id = s.user_id
+      WHERE (s.session_token = ? OR s.token = ?)
+        AND s.expires_at > datetime('now')
+      LIMIT 1
+    `).bind(token, token).first();
+
+    if (!row || Number(row.is_active || 0) !== 1) return null;
+
+    return {
+      user_id: Number(row.user_id || 0),
+      email: row.email || '',
+      display_name: row.display_name || '',
+      role: normalizeText(row.role).toLowerCase() || 'member',
+      is_active: 1,
+      session_id: Number(row.session_id || 0),
+      expires_at: row.expires_at || null,
+    };
+  } catch (error) {
+    if (isAppModuleSessionVerificationUnavailable(error)) throw error;
+    throw new AppModuleSessionVerificationUnavailable('session_query_failed');
+  }
+}
+
+export function appModuleSessionUnavailableResponse({ api = true } = {}) {
+  const headers = {
+    'Cache-Control': 'no-store',
+    'Retry-After': '5',
+    'X-Content-Type-Options': 'nosniff',
+  };
+
+  if (api) {
+    return new Response(JSON.stringify({
+      ok: false,
+      error: 'Session verification is temporarily unavailable. Retry without clearing sign-in state.',
+      code: APP_MODULE_SESSION_UNAVAILABLE_CODE,
+      retryable: true,
+      build: 438,
+    }), {
+      status: 503,
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    });
+  }
+
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Temporarily unavailable — Devil n Dove</title><link rel="stylesheet" href="/css/styles.css"></head><body><main class="container"><section class="card" style="margin-top:32px"><h1>Temporarily unavailable</h1><p>We could not verify your current sign-in session. Your sign-in state has not been rejected. Please retry.</p><p><a class="btn" href="javascript:location.reload()">Retry</a></p></section></main></body></html>`, {
+    status: 503,
+    headers: {
+      ...headers,
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Robots-Tag': 'noindex, nofollow',
+    },
+  });
+}
