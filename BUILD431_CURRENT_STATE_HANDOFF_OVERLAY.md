@@ -10,8 +10,8 @@ Build 428  Remaining parity authorization boundary         PASS (20/20)
 Build 429  Gift Card authorization boundary                PASS (20/20)
 Build 430  Gift Card Production stage                      PASS
 Build 430  Notification four-index authorization boundary  SUPERSEDED BY LIVE EVIDENCE
-Build 431  First Notification execution attempt             SAFE STOP BEFORE BACKUP
-Build 431  Full Build 403 Notification boundary             READY FOR READ-ONLY VALIDATION
+Build 431  First Notification execution attempt            SAFE STOP BEFORE BACKUP
+Build 431  Full Build 403 Notification boundary            PASS (20/20)
 ```
 
 ## Proven completed Production families
@@ -41,7 +41,7 @@ gift_card_redemptions: 0 -> 0
 
 The first authorized Notification attempt stopped safely before backup because live Production proved the pre-existing `idx_notification_outbox_status_due` assumption was wrong.
 
-Corrected current Production gap:
+Fresh corrected Build 431 evidence now proves:
 
 ```text
 metadata_json: absent
@@ -52,9 +52,11 @@ Missing indexes:
   idx_notification_outbox_payment
   idx_notification_outbox_product
 notification_outbox rows: 0
+Exact full Build 403 gap: YES
+Corrected full Notification boundary: PASS (20/20)
 ```
 
-The prior token `AUTHORIZE-BUILD428-PROD-NOTIFICATION` is superseded/insufficient for this larger scope.
+The prior token `AUTHORIZE-BUILD428-PROD-NOTIFICATION` is superseded/insufficient for this larger scope and must not be reused.
 
 Prepared corrected token, not authorized:
 
@@ -62,7 +64,7 @@ Prepared corrected token, not authorized:
 AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
 ```
 
-No Notification backup was created and no Notification DDL was executed.
+No Notification backup has been created and no Notification DDL has executed.
 
 ## Still locked
 
@@ -89,6 +91,7 @@ CAIP D1-only copy: FORBIDDEN
 Product-number Production stage           COMPLETE / PROVEN
 Gift Card Production stage                COMPLETE / PROVEN
 Old Notification authorization            SUPERSEDED / INSUFFICIENT
+Full Build 403 Notification boundary      PASS (20/20)
 Full Build 403 Notification authorization NOT RECEIVED
 Notification Production backup            NOT CREATED
 Notification Production mutation          NOT EXECUTED
@@ -100,4 +103,10 @@ Production promotion                      CLOSED
 
 ## Immediate next action
 
-Run only the corrected Build 431 local regression, read-only full-Build-403 Notification preflight, and local 20-item authorization gate. Stop for a new explicit authorization if all are green.
+Stop at the corrected explicit full-Build-403 Notification authorization boundary. Proceed only if the owner supplies exactly:
+
+```text
+AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
+```
+
+That token authorizes only the corrected Notification Build 403 column/index scope. Annotation, rebuild families, provider/R2 work, CAIP copy, and Production promotion remain excluded.
