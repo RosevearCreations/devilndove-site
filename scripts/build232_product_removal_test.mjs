@@ -29,10 +29,10 @@ assert(owned.has('product_review_actions.product_id'),'Product-owned review acti
 assert(detached.has('soap_products.product_id'),'Soap packaging records must be preserved and detached.');
 assert(!/PRAGMA\s+foreign_key_list/i.test(api),'Removal preflight must not inspect every foreign key at request time.');
 assert(!api.includes("name NOT LIKE 'sqlite_%'"),'Removal preflight must not enumerate every D1 table.');
-assert(api.includes("cleanup_profile: 'bounded_registry_v1'"),'Bounded removal response profile is missing.');
-assert(api.includes('await Promise.all(['),'Reference and material preflight reads should run together.');
+assert(api.includes("cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup'"),'Bounded v2 removal response profile is missing.');
+assert(api.includes('await Promise.all(['),'Reference, material and managed-shell preflight reads should run together.');
 assert(api.includes('await db.batch(statements)'),'Reviewed inventory actions and product cleanup must use one D1 batch.');
-assert(api.includes('runCleanup(db, productId, materialPlan.statements)'),'Inventory actions are not included in the final cleanup batch.');
+assert(api.includes('runCleanup(db, productId, materialPlan.statements, managedShells)'),'Inventory actions and reviewed generated-shell cleanup are not included in the final cleanup batch.');
 
 for(const source of [correction,deleteClient,cleanupClient]){
   assert(source.includes('window.DDAuth?.readApiJson'),'A product-removal browser path still parses responses unsafely.');
@@ -79,9 +79,11 @@ const response=await onRequestGet({request:new Request('https://devilndove.com/a
 const payload=await response.json();
 assert(response.status===200&&payload.ok===true,'Archived product removal preflight must return valid JSON.');
 assert(payload.product?.status==='archived'&&payload.deletion_allowed===1,'Archive status alone must not block unused-product deletion.');
-assert(payload.cleanup_profile==='bounded_registry_v1','Removal preflight did not return the bounded profile.');
+assert(payload.cleanup_profile==='bounded_registry_v2_generated_shell_cleanup','Removal preflight did not return the bounded v2 profile.');
 assert(!calls.some((call)=>/PRAGMA\s+foreign_key_list|name NOT LIKE 'sqlite_%'/i.test(call.sql)),'Mock removal preflight performed unbounded schema discovery.');
-assert(calls.length<=2+protectedRefs.size+1,`Removal preflight exceeded its bounded query budget: ${calls.length} calls.`);
+// Bounded GET budget: auth + product + protected registry + materials + two managed-shell reads.
+const boundedGetBudget=protectedRefs.size+5;
+assert(calls.length<=boundedGetBudget,`Removal preflight exceeded its bounded v2 query budget: ${calls.length} calls > ${boundedGetBudget}.`);
 
 const password='test-password';
 const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(password));
@@ -142,4 +144,4 @@ assert(deletePayload.material_summary?.release_quantity===1,'Reviewed reservatio
 const migration=read('database_build230_visual_image_manifest.sql');
 assert(migration.includes('build230_visual_image_manifest'),'Retained Build 230 migration ledger marker is missing.');
 
-console.log(`Build 232 archived-product removal, bounded preflight, registry coverage, safe parser and code-only schema checks: PASS (${calls.length} mock DB calls)`);
+console.log(`Build 232 archived-product removal, bounded v2 preflight, registry coverage, safe parser and code-only schema checks: PASS (${calls.length}/${boundedGetBudget} mock GET DB calls)`);
