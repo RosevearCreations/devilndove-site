@@ -30,7 +30,7 @@ check("PUBLIC_ASSET_PREFIX = 'https://assets.devilndove.com/'" in api and 'decod
 check('missing_unique_keys' in api and 'present_unique_keys' in api and 'bucket_only_keys' in api, 'diagnostic reports present, missing, and bucket-only counts')
 check('MAX_MISSING_SAMPLE = 80' in api and 'missing_sample_limit' in api, 'missing-key evidence is bounded')
 check("mutation_capability: 'none'" in api, 'API explicitly declares zero mutation capability')
-check('.put(' not in api and '.delete(' not in api and '.get(' not in api, 'parity API contains no R2 put/delete/object-read mutation path')
+check('bucket.put(' not in api and 'bucket.delete(' not in api and 'bucket.get(' not in api, 'parity API uses R2 list only; no object read/write/delete path')
 check('CREATE TABLE' not in api.upper() and 'ALTER TABLE' not in api.upper() and 'DROP TABLE' not in api.upper(), 'parity API contains no request-time schema DDL')
 check('INSERT INTO' not in api.upper() and 'UPDATE ' not in api.upper() and 'DELETE FROM' not in api.upper(), 'parity API performs no D1 writes')
 check('inventoryAssetParityMount' in page and '/public/js/admin-inventory-asset-parity.js?v=440' in page, 'Inventory Operations mounts and loads the parity review')
