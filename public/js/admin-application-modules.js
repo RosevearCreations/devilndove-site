@@ -11,6 +11,33 @@
     Object.freeze({ label: 'Creative & Production', path: '/admin/creative-process/', module_key: 'creative-production' }),
     Object.freeze({ label: 'Business & Administration', path: '/admin/accounting/', module_key: 'business-administration' }),
   ]);
+  const AUTH_ACCEPTANCE_CASES = Object.freeze([
+    Object.freeze({
+      label: 'Commerce & Operations',
+      module_key: 'commerce-operations',
+      direct_path: '/admin/catalog/',
+      shared_path: '/api/admin/contracts/inventory-read?limit=1',
+      shared_contract: '/api/admin/contracts/inventory-read',
+    }),
+    Object.freeze({
+      label: 'Creative & Production',
+      module_key: 'creative-production',
+      direct_path: '/admin/creative-process/',
+      shared_path: '/api/admin/contracts/content-media?limit=1',
+      shared_contract: '/api/admin/contracts/content-media',
+    }),
+    Object.freeze({
+      label: 'Business & Administration',
+      module_key: 'business-administration',
+      direct_path: '/admin/accounting/',
+      shared_path: '/api/admin/contracts/accounting-read?limit=1',
+      shared_contract: '/api/admin/contracts/accounting-read',
+    }),
+  ]);
+  const READ_LEVEL_PROBE = Object.freeze({
+    module_key: 'business-administration',
+    path: '/api/admin/startup-readiness',
+  });
 
   const byId = (id) => document.getElementById(id);
   const text = (value) => String(value ?? '').trim();
@@ -19,6 +46,7 @@
   let state = { schema_ready: false, source: 'unknown', reason: null, modules: [], role_access: [], diagnostics: null };
   let busy = false;
   let proofBusy = false;
+  let acceptanceBusy = false;
 
   function moduleRow(key) {
     return state.modules.find((row) => row.module_key === key) || null;
@@ -54,6 +82,28 @@
     return window.DDAuth.readApiJson(response, { fallbackMessage: 'Application module request failed.' });
   }
 
+  async function apiResponse(url, options = {}) {
+    if (!window.DDAuth?.apiFetch) throw new Error('Authentication request helper is unavailable.');
+    return window.DDAuth.apiFetch(url, { cache: 'no-store', ...options });
+  }
+
+  async function responseJson(response) {
+    try { return await response.clone().json(); }
+    catch { return null; }
+  }
+
+  function guardBuild(response) {
+    return text(response?.headers?.get('X-DND-Module-Guard'));
+  }
+
+  function guardModule(response) {
+    return text(response?.headers?.get('X-DND-Module-Key'));
+  }
+
+  function guardContract(response) {
+    return text(response?.headers?.get('X-DND-Shared-Contract'));
+  }
+
   function renderHealth() {
     const mount = byId('applicationModuleHealthMount');
     if (!mount) return;
@@ -86,7 +136,7 @@
   function moduleCard(module) {
     const enabled = Number(module.is_enabled || 0) === 1;
     const background = Number(module.background_activity_enabled || 0) === 1;
-    const controlsDisabled = !state.schema_ready || busy;
+    const controlsDisabled = !state.schema_ready || busy || acceptanceBusy;
     const backgroundDisabled = controlsDisabled || !enabled;
     return `
       <section class="card" data-module-key="${esc(module.module_key)}">
@@ -122,7 +172,7 @@
   function roleControl(module, roleCode) {
     const row = roleRow(module.module_key, roleCode) || { is_allowed: 0, access_level: 'none' };
     const allowed = Number(row.is_allowed || 0) === 1;
-    const disabled = !state.schema_ready || busy;
+    const disabled = !state.schema_ready || busy || acceptanceBusy;
     const levels = roleCode === 'admin' ? ['manage', 'read', 'none'] : ['member', 'read', 'none'];
     return `
       <div class="card" style="padding:12px">
@@ -177,10 +227,31 @@
       diagnostics: data.diagnostics || null,
     };
     render();
+    return data;
+  }
+
+  async function refreshClientModules() {
+    if (window.DDApplicationModules?.refresh) {
+      try { await window.DDApplicationModules.refresh(); }
+      catch (error) { console.warn('[Build 438 modules] client refresh failed', error); }
+    }
+  }
+
+  async function controlPost(payload) {
+    return apiJson(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async function refreshAuthorityAndClient() {
+    await load();
+    await refreshClientModules();
   }
 
   async function runRouteProof() {
-    if (proofBusy) return;
+    if (proofBusy || acceptanceBusy) return;
     proofBusy = true;
     const button = byId('runModuleRouteProofButton');
     const mount = byId('applicationModuleRouteProofMount');
@@ -193,7 +264,7 @@
         let status = 0;
         let errorMessage = '';
         try {
-          const response = await window.DDAuth.apiFetch(item.path, { method: 'HEAD', cache: 'no-store' });
+          const response = await apiResponse(item.path, { method: 'HEAD' });
           status = Number(response.status || 0);
         } catch (error) {
           errorMessage = error?.message || 'request failed';
@@ -219,18 +290,183 @@
     }
   }
 
+  function renderAcceptance(results, running = true) {
+    const mount = byId('authenticatedModuleAcceptanceMount');
+    if (!mount) return;
+    const passed = results.filter((row) => row.pass).length;
+    const failed = results.filter((row) => row.pass === false).length;
+    mount.innerHTML = `
+      <div class="card" style="padding:12px">
+        <strong>Authenticated acceptance: ${running ? 'RUNNING' : (failed ? 'CHECK' : 'PASS')} (${passed}/${results.length}${failed ? `, ${failed} failed` : ''})</strong>
+        <div class="small" style="margin-top:6px">Audited control changes are automatically restored. Shared-contract probes are read-only. The read-level POST probe is intentionally rejected by middleware before endpoint mutation.</div>
+        <div style="display:grid;gap:6px;margin-top:8px">
+          ${results.map((row) => `<div class="small"><strong>${row.pass ? 'PASS' : 'FAIL'}</strong> — ${esc(row.label)}${row.detail ? ` · ${esc(row.detail)}` : ''}</div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  async function runAuthenticatedAcceptance() {
+    if (acceptanceBusy || busy || proofBusy) return;
+    const button = byId('runAuthenticatedModuleAcceptanceButton');
+    const results = [];
+    const record = (pass, label, detail = '') => {
+      results.push({ pass: Boolean(pass), label, detail });
+      renderAcceptance(results, true);
+      if (!pass) throw new Error(`${label}${detail ? `: ${detail}` : ''}`);
+    };
+
+    acceptanceBusy = true;
+    busy = true;
+    if (button) button.disabled = true;
+    render();
+    renderAcceptance([], true);
+
+    try {
+      await load();
+      record(state.schema_ready === true && state.source === 'd1', 'D1 module authority', `${state.source} / schema_ready=${state.schema_ready}`);
+      record(Boolean(state.diagnostics?.healthy), 'Core Health', state.diagnostics?.healthy ? 'PASS' : 'diagnostics require review');
+      record(state.modules.length === 3 && MODULE_ORDER.every((key) => Number(moduleRow(key)?.is_enabled || 0) === 1), 'Three-module enabled baseline', `${state.modules.length} module rows`);
+      record(MODULE_ORDER.every((key) => Number(moduleRow(key)?.background_activity_enabled || 0) === 0), 'Background permission baseline', 'all three OFF');
+      record(MODULE_ORDER.every((key) => {
+        const row = roleRow(key, 'admin');
+        return Number(row?.is_allowed || 0) === 1 && text(row?.access_level).toLowerCase() === 'manage';
+      }), 'Admin role baseline', 'manage on all three modules');
+
+      const coreResponse = await apiResponse(API, { method: 'GET' });
+      record(coreResponse.status === 200, 'Shared Core recovery/control API', `HTTP ${coreResponse.status}`);
+
+      for (const item of AUTH_ACCEPTANCE_CASES) {
+        const original = { ...moduleRow(item.module_key) };
+        let restored = false;
+        try {
+          await controlPost({ action: 'set_module_state', module_key: item.module_key, is_enabled: false });
+          await refreshAuthorityAndClient();
+          record(Number(moduleRow(item.module_key)?.is_enabled || 0) === 0, `${item.label} audited disable`, 'D1/control API reports disabled');
+          record(Number(moduleRow(item.module_key)?.background_activity_enabled || 0) === 0, `${item.label} background suppression`, 'background permission OFF');
+
+          const direct = await apiResponse(item.direct_path, { method: 'GET' });
+          const directBody = await direct.clone().text().catch(() => '');
+          record(
+            direct.status === 403 && guardBuild(direct) === String(BUILD) && guardModule(direct) === item.module_key && directBody.toLowerCase().includes('currently disabled'),
+            `${item.label} direct surface`,
+            `HTTP ${direct.status} / guard=${guardBuild(direct) || 'missing'} / module=${guardModule(direct) || 'missing'}`,
+          );
+
+          if (typeof window.DDApplicationModules?.isAvailable === 'function') {
+            record(window.DDApplicationModules.isAvailable(item.module_key) === false, `${item.label} client availability`, 'unavailable while disabled');
+          }
+
+          const shared = await apiResponse(item.shared_path, { method: 'GET' });
+          const sharedData = await responseJson(shared);
+          record(
+            shared.status === 200 && sharedData?.ok === true && guardBuild(shared) === String(BUILD) && guardContract(shared) === item.shared_contract,
+            `${item.label} cross-module shared read`,
+            `HTTP ${shared.status} / contract=${guardContract(shared) || 'missing'}`,
+          );
+        } finally {
+          try {
+            await controlPost({ action: 'set_module_state', module_key: item.module_key, is_enabled: Number(original.is_enabled || 0) === 1 });
+            if (Number(original.is_enabled || 0) === 1 && Number(original.background_activity_enabled || 0) === 1) {
+              await controlPost({ action: 'set_background_activity', module_key: item.module_key, background_activity_enabled: true });
+            }
+            await refreshAuthorityAndClient();
+            const after = moduleRow(item.module_key);
+            restored = Boolean(
+              Number(after?.is_enabled || 0) === Number(original.is_enabled || 0) &&
+              Number(after?.background_activity_enabled || 0) === Number(original.background_activity_enabled || 0)
+            );
+            if (restored && typeof window.DDApplicationModules?.isAvailable === 'function' && Number(original.is_enabled || 0) === 1) {
+              restored = window.DDApplicationModules.isAvailable(item.module_key) === true;
+            }
+          } catch (error) {
+            console.error(`[Build 438 modules] restore failed for ${item.module_key}`, error);
+            restored = false;
+          }
+          record(restored, `${item.label} exact restore`, restored ? 'module/runtime state restored' : 'restore did not complete');
+        }
+      }
+
+      const originalAdmin = { ...(roleRow(READ_LEVEL_PROBE.module_key, 'admin') || {}) };
+      let roleRestored = false;
+      try {
+        await controlPost({
+          action: 'set_role_access',
+          module_key: READ_LEVEL_PROBE.module_key,
+          role_code: 'admin',
+          is_allowed: true,
+          access_level: 'read',
+        });
+        await refreshAuthorityAndClient();
+        record(text(roleRow(READ_LEVEL_PROBE.module_key, 'admin')?.access_level).toLowerCase() === 'read', 'Admin read-level transition', 'Business & Administration admin=read');
+
+        const readResponse = await apiResponse(READ_LEVEL_PROBE.path, { method: 'GET' });
+        record(
+          readResponse.status === 200 && guardBuild(readResponse) === String(BUILD) && guardModule(readResponse) === READ_LEVEL_PROBE.module_key,
+          'Read-level GET remains available',
+          `HTTP ${readResponse.status} / guard=${guardBuild(readResponse) || 'missing'}`,
+        );
+
+        const writeProbe = await apiResponse(READ_LEVEL_PROBE.path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: '__build438_read_guard_probe__' }),
+        });
+        const writeData = await responseJson(writeProbe);
+        record(
+          writeProbe.status === 403 && writeData?.code === 'module_access_level_read_only' && guardBuild(writeProbe) === String(BUILD) && guardModule(writeProbe) === READ_LEVEL_PROBE.module_key,
+          'Read-level mutation guard',
+          `HTTP ${writeProbe.status} / code=${writeData?.code || 'missing'} / endpoint write not reached`,
+        );
+      } finally {
+        try {
+          await controlPost({
+            action: 'set_role_access',
+            module_key: READ_LEVEL_PROBE.module_key,
+            role_code: 'admin',
+            is_allowed: Number(originalAdmin.is_allowed || 0) === 1,
+            access_level: text(originalAdmin.access_level).toLowerCase() || 'manage',
+          });
+          await refreshAuthorityAndClient();
+          const restoredRole = roleRow(READ_LEVEL_PROBE.module_key, 'admin');
+          roleRestored = Boolean(
+            Number(restoredRole?.is_allowed || 0) === Number(originalAdmin.is_allowed || 0) &&
+            text(restoredRole?.access_level).toLowerCase() === text(originalAdmin.access_level).toLowerCase()
+          );
+        } catch (error) {
+          console.error('[Build 438 modules] admin role restore failed', error);
+          roleRestored = false;
+        }
+        record(roleRestored, 'Admin role exact restore', roleRestored ? 'manage restored' : 'role restore did not complete');
+      }
+
+      await load();
+      record(Boolean(state.diagnostics?.healthy), 'Final Core Health', state.diagnostics?.healthy ? 'PASS' : 'diagnostics require review');
+      record(MODULE_ORDER.every((key) => Number(moduleRow(key)?.is_enabled || 0) === 1), 'Final module state', 'all three enabled');
+      record(MODULE_ORDER.every((key) => Number(moduleRow(key)?.background_activity_enabled || 0) === 0), 'Final background state', 'all three OFF');
+
+      renderAcceptance(results, false);
+      setStatus(`Build ${BUILD} authenticated module acceptance PASS. ${results.length}/${results.length} checks green; temporary module/role changes restored.`, 'ok');
+    } catch (error) {
+      console.error('[Build 438 authenticated acceptance]', error);
+      results.push({ pass: false, label: 'Acceptance stopped', detail: error?.message || 'unknown failure' });
+      renderAcceptance(results, false);
+      setStatus(`Build ${BUILD} authenticated acceptance stopped: ${error?.message || 'unknown failure'}. Review restore results before retrying.`, 'error');
+      try { await load(); } catch {}
+    } finally {
+      acceptanceBusy = false;
+      busy = false;
+      if (button) button.disabled = false;
+      render();
+    }
+  }
+
   async function post(payload) {
-    if (busy) return;
+    if (busy || acceptanceBusy) return;
     busy = true;
     render();
     try {
-      await apiJson(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      await load();
-      if (window.DDApplicationModules?.refresh) await window.DDApplicationModules.refresh();
+      await controlPost(payload);
+      await refreshAuthorityAndClient();
     } finally {
       busy = false;
       render();
@@ -240,6 +476,10 @@
   document.addEventListener('click', (event) => {
     if (event.target.closest('#runModuleRouteProofButton')) {
       void runRouteProof();
+      return;
+    }
+    if (event.target.closest('#runAuthenticatedModuleAcceptanceButton')) {
+      void runAuthenticatedAcceptance();
       return;
     }
     if (event.target.closest('#refreshModuleAuthorityButton')) {
@@ -274,7 +514,7 @@
 
   document.addEventListener('change', (event) => {
     const select = event.target.closest('[data-role-level]');
-    if (!select) return;
+    if (!select || acceptanceBusy) return;
     const [moduleKey, roleCode] = String(select.dataset.roleLevel || '').split(':');
     const level = select.value || 'none';
     void post({ action: 'set_role_access', module_key: moduleKey, role_code: roleCode, is_allowed: level !== 'none', access_level: level });
