@@ -1,4 +1,5 @@
 import { getDb, getRequestToken, jsonResponse } from "../_lib/adminAudit.js";
+import { readMembershipTierPolicies } from "../_lib/membershipTierPolicyReadService.js";
 
 function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
@@ -40,31 +41,23 @@ export async function onRequestGet(context) {
     WHERE uat.user_id=?
     ORDER BY at.code ASC
   `).bind(memberUser.user_id).all();
-  const codes = normalizeResults(assigned).map((row) => String(row.code || '').toLowerCase()).filter(Boolean);
-  if (!codes.length) return jsonResponse({ ok:true, policies: [] });
+  const codes = new Set(
+    normalizeResults(assigned)
+      .map((row) => String(row.code || '').trim().toLowerCase())
+      .filter(Boolean)
+  );
+  if (!codes.size) return jsonResponse({ ok:true, policies: [] });
 
-  const placeholders = codes.map(() => '?').join(',');
-  const result = await db.prepare(`
-    SELECT policy_id, tier_code, title, short_description, benefits_json, badge_color, is_visible, sort_order
-    FROM membership_tier_policies
-    WHERE is_visible=1 AND LOWER(tier_code) IN (${placeholders})
-    ORDER BY sort_order ASC, tier_code ASC
-  `).bind(...codes).all();
+  const read = await readMembershipTierPolicies(db);
+  const policies = read.items.filter((item) => item.is_visible && codes.has(item.tier_code));
 
-  const policies = normalizeResults(result).map((row) => {
-    let benefits = [];
-    try { benefits = JSON.parse(row.benefits_json || '[]'); } catch {}
-    return {
-      policy_id: Number(row.policy_id || 0),
-      tier_code: String(row.tier_code || '').toLowerCase(),
-      title: String(row.title || '').trim(),
-      short_description: String(row.short_description || '').trim(),
-      benefits: Array.isArray(benefits) ? benefits : [],
-      badge_color: String(row.badge_color || '').trim(),
-      is_visible: Number(row.is_visible || 0) === 1,
-      sort_order: Number(row.sort_order || 0)
-    };
+  return jsonResponse({
+    ok: true,
+    build: read.build,
+    implementation_build: read.implementation_build,
+    schema_ready: read.schema_ready,
+    source: read.source,
+    request_time_schema_mutation: false,
+    policies,
   });
-
-  return jsonResponse({ ok:true, policies });
 }
