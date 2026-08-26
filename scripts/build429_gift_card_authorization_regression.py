@@ -40,7 +40,12 @@ check(
 )
 check('hashlib.sha256' in EXEC and 'backup_sha256' in EXEC and 'MAX_BACKUP_AGE_SECONDS = 1800' in EXEC, 'Gift Card backup records SHA-256 and has a 30-minute age limit')
 check('verify_backup(stage)' in EXEC and 'current_state(stage)' in EXEC, 'Gift Card apply re-verifies backup and targeted before-state')
-check('stage_complete(stage, after)' in EXEC and "after['row_count'] == before['row_count']" in EXEC, 'Gift Card apply requires schema completion plus lookup-row preservation')
+check(
+    'stage_complete(stage, after)' in EXEC
+    and 'gift_rows_preserved(before, after)' in EXEC
+    and all(key in EXEC for key in ['lookup_attempt_rows','gift_cards_rows','gift_card_redemptions_rows']),
+    'Gift Card apply requires schema completion plus all three Gift Card row-preservation boundaries',
+)
 check('gift_sql(before)' in EXEC and 'notification_sql(before)' in EXEC and 'annotation_sql()' in EXEC, 'additive families remain separately generated rather than broad candidate execution')
 check('membership' not in EXEC.lower() and 'fractional' not in EXEC.lower() and 'accounting' not in EXEC.lower(), 'Gift Card/additive executor contains no rebuild-family path')
 check(all(column in AUTH for column in ['lookup_email','code_suffix','ip_hash','user_agent','result_status']), 'Build 384 authority contains all five lookup columns')
