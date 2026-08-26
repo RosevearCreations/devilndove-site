@@ -2,7 +2,7 @@
 
 ## Status
 
-**FULL BUILD 403 NOTIFICATION PRODUCTION PASS / BUILD 197 ANNOTATION READ-ONLY AUTHORIZATION BOUNDARY READY / ANNOTATION AUTHORIZATION PENDING / PRODUCTION PROMOTION CLOSED**
+**FULL BUILD 403 NOTIFICATION PRODUCTION PASS / BUILD 197 ANNOTATION AUTHORIZATION BOUNDARY PASS (20/20) / ANNOTATION AUTHORIZATION PENDING / PRODUCTION PROMOTION CLOSED**
 
 ## Build 432 — 20 completed source/safety changes
 
@@ -43,6 +43,26 @@ All five canonical indexes present: True
 Independent read-only postcheck: PASS
 ```
 
+## Proven Build 197 annotation authorization boundary
+
+Owner-run Build 432 evidence:
+
+```text
+BUILD 432 ANNOTATION AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
+Annotation index exists: False
+Required product_id/product_image_id columns present: True
+product_image_annotations rows: 70
+Exact Build 197 index gap: YES
+Safe to request annotation authorization: YES
+Production backup created: NO
+Annotation authorization received: NO
+Production mutation executed: NO
+Rebuild authorization: NOT RECEIVED
+PRODUCTION PROMOTION: CLOSED
+BUILD 432 ANNOTATION AUTHORIZATION PREFLIGHT: PASS
+BUILD 432 TWENTY-ITEM BUILD 197 ANNOTATION AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
+```
+
 ## Build 197 annotation-index authority
 
 Canonical authority: `database_build197_application_resilience_media_catalog.sql`.
@@ -54,7 +74,7 @@ CREATE INDEX IF NOT EXISTS idx_product_image_annotations_product_image_build197
   ON product_image_annotations(product_id, product_image_id);
 ```
 
-The live preflight must prove the required `product_id` and `product_image_id` columns exist, capture the exact `product_image_annotations` row count, and determine whether the index is still absent.
+The authorized stage, if separately approved, must preserve the exact `product_image_annotations` row count observed immediately before DDL. Current boundary evidence is 70 rows.
 
 ## Annotation authorization token — prepared, not authorized
 
@@ -113,7 +133,10 @@ Build 429  Gift Card authorization boundary                   PASS (20/20)
 Build 430  Gift Card Production stage                         PASS
 Build 431  Full Build 403 Notification boundary               PASS (20/20)
 Build 432  Full Build 403 Notification Production stage       PASS
-Build 432  Build 197 annotation-index authorization boundary  READY
+Build 432  Build 197 annotation-index authorization boundary  PASS (20/20)
 
+Annotation Production backup                                  NOT CREATED
+Annotation Production authorization                           NOT RECEIVED
+Annotation Production mutation                                NOT EXECUTED
 Production promotion                                          CLOSED
 ```
