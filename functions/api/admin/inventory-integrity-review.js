@@ -39,6 +39,7 @@ function mode(value, fallback = 'exact') {
 }
 function legacyUsageSetupRequired(row = {}) {
   if (String(row.source_type || '').trim().toLowerCase() !== 'supply') return false;
+  if (!Number(row.usage_profile_id || 0)) return true;
   if (mode(row.usage_tracking_mode, 'log_only') !== 'log_only') return false;
   const notes = String(row.usage_profile_notes || '').trim().toLowerCase();
   return !notes
@@ -73,6 +74,7 @@ function shape(row = {}) {
     usage_units_per_stock_unit: Math.max(0.000001, num(row.usage_units_per_stock_unit, 1)),
     usage_tracking_mode: mode(row.usage_tracking_mode, String(row.source_type || '').toLowerCase() === 'tool' ? 'reusable' : 'exact'),
     minimum_usage_increment: Math.max(0.0001, num(row.minimum_usage_increment, 0.001)),
+    usage_profile_id: Number(row.usage_profile_id || 0) || null,
     usage_profile_notes: row.usage_profile_notes || '',
     last_counted_at: row.last_counted_at || null,
     updated_at: row.updated_at || null,
@@ -81,6 +83,25 @@ function shape(row = {}) {
     usage_setup_required,
   };
 }
+
+const COUNT_DUE_SQL = `(sii.last_counted_at IS NULL OR datetime(sii.last_counted_at) < datetime('now','-90 days'))`;
+const USAGE_SETUP_SQL = `(
+  LOWER(TRIM(COALESCE(sii.source_type,'')))='supply'
+  AND (
+    siup.site_item_inventory_id IS NULL
+    OR (
+      LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'log_only')))='log_only'
+      AND (
+        TRIM(COALESCE(siup.notes,''))=''
+        OR LOWER(COALESCE(siup.notes,'')) LIKE '%until unit conversion is reviewed%'
+        OR LOWER(COALESCE(siup.notes,'')) LIKE '%until unit conversion review%'
+        OR LOWER(COALESCE(siup.notes,'')) LIKE '%legacy safe%'
+        OR LOWER(COALESCE(siup.notes,'')) LIKE '%legacy supply%'
+        OR LOWER(COALESCE(siup.notes,'')) LIKE '%catalog reconciliation%'
+      )
+    )
+  )
+)`;
 
 async function access(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
@@ -93,6 +114,7 @@ async function access(context) {
 async function loadItem(db, id) {
   return db.prepare(`
     SELECT sii.*,
+      siup.site_item_inventory_id AS usage_profile_id,
       COALESCE(siup.usage_tracking_mode,
         CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END
       ) AS usage_tracking_mode,
@@ -112,9 +134,11 @@ async function listAttention(db, options = {}) {
   const limit = Math.max(10, Math.min(MAX_LIMIT, Math.trunc(num(options.limit, 40)) || 40));
   const offset = Math.max(0, Math.trunc(num(options.offset, 0)) || 0);
   const like = `%${q}%`;
+  const attentionSql = queue === 'count_due' ? COUNT_DUE_SQL : (queue === 'usage_setup' ? USAGE_SETUP_SQL : `(${COUNT_DUE_SQL} OR ${USAGE_SETUP_SQL})`);
 
   const result = await db.prepare(`
     SELECT sii.*,
+      siup.site_item_inventory_id AS usage_profile_id,
       COALESCE(siup.usage_tracking_mode,
         CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END
       ) AS usage_tracking_mode,
@@ -125,53 +149,48 @@ async function listAttention(db, options = {}) {
       ON siup.site_item_inventory_id=sii.site_item_inventory_id
     WHERE COALESCE(sii.is_active,1)=1
       AND (?='' OR LOWER(COALESCE(sii.item_name,'')) LIKE ? OR LOWER(COALESCE(sii.external_key,'')) LIKE ? OR LOWER(COALESCE(sii.category,'')) LIKE ?)
+      AND ${attentionSql}
     ORDER BY
       CASE WHEN sii.last_counted_at IS NULL THEN 0 ELSE 1 END,
       COALESCE(sii.last_counted_at,'1970-01-01') ASC,
       LOWER(COALESCE(sii.item_name,'')) ASC,
       sii.site_item_inventory_id ASC
     LIMIT ? OFFSET ?
-  `).bind(q, like, like, like, Math.min(240, limit * 3), offset).all();
+  `).bind(q, like, like, like, limit + 1, offset).all();
 
   const shaped = rows(result).map(shape);
-  const filtered = shaped.filter((item) => {
-    if (queue === 'count_due') return item.physical_count_due === 1;
-    if (queue === 'usage_setup') return item.usage_setup_required === 1;
-    return item.physical_count_due === 1 || item.usage_setup_required === 1;
-  }).slice(0, limit);
-
-  const summaryRows = rows(await db.prepare(`
-    SELECT sii.*,
-      COALESCE(siup.usage_tracking_mode,
-        CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END
-      ) AS usage_tracking_mode,
-      COALESCE(siup.notes,'') AS usage_profile_notes,
-      COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
+  const hasMore = shaped.length > limit;
+  const items = shaped.slice(0, limit);
+  const summaryRow = await db.prepare(`
+    SELECT
+      COUNT(*) AS active_items,
+      SUM(CASE WHEN ${COUNT_DUE_SQL} THEN 1 ELSE 0 END) AS count_due,
+      SUM(CASE WHEN sii.last_counted_at IS NULL THEN 1 ELSE 0 END) AS never_counted,
+      SUM(CASE WHEN sii.last_counted_at IS NOT NULL AND datetime(sii.last_counted_at) < datetime('now','-90 days') THEN 1 ELSE 0 END) AS stale_count,
+      SUM(CASE WHEN ${USAGE_SETUP_SQL} THEN 1 ELSE 0 END) AS usage_setup_required
     FROM site_item_inventory sii
     LEFT JOIN site_inventory_usage_profiles siup
       ON siup.site_item_inventory_id=sii.site_item_inventory_id
     WHERE COALESCE(sii.is_active,1)=1
-  `).all()).map(shape);
-
-  const summary = {
-    active_items: summaryRows.length,
-    count_due: summaryRows.filter((item) => item.physical_count_due === 1).length,
-    never_counted: summaryRows.filter((item) => item.count_status === 'never_counted').length,
-    stale_count: summaryRows.filter((item) => item.count_status === 'stale_count').length,
-    usage_setup_required: summaryRows.filter((item) => item.usage_setup_required === 1).length,
-  };
+  `).first();
 
   return {
-    items: filtered,
-    summary,
+    items,
+    summary: {
+      active_items: Number(summaryRow?.active_items || 0),
+      count_due: Number(summaryRow?.count_due || 0),
+      never_counted: Number(summaryRow?.never_counted || 0),
+      stale_count: Number(summaryRow?.stale_count || 0),
+      usage_setup_required: Number(summaryRow?.usage_setup_required || 0),
+    },
     queue,
     limit,
     offset,
-    next_offset: filtered.length === limit ? offset + Math.min(240, limit * 3) : null,
+    next_offset: hasMore ? offset + limit : null,
   };
 }
 
-async function logCountMovement(db, item, countedQuantity, reason, userId) {
+function conditionalCountMovement(db, item, countedQuantity, reason, userId) {
   const previous = num(item.on_hand_quantity);
   const next = num(countedQuantity);
   return db.prepare(`
@@ -179,14 +198,20 @@ async function logCountMovement(db, item, countedQuantity, reason, userId) {
       site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,
       previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,
       previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at
-    ) VALUES(?,?,?,?, 'correction', ?,?,?,?,?,?,?,?, ?,?,CURRENT_TIMESTAMP)
+    )
+    SELECT site_item_inventory_id,source_type,external_key,item_name,'correction',?,
+           COALESCE(on_hand_quantity,0),?,COALESCE(reserved_quantity,0),COALESCE(reserved_quantity,0),
+           COALESCE(incoming_quantity,0),COALESCE(incoming_quantity,0),?,?,CURRENT_TIMESTAMP
+    FROM site_item_inventory
+    WHERE site_item_inventory_id=? AND ABS(COALESCE(on_hand_quantity,0)-?)<?
   `).bind(
-    Number(item.site_item_inventory_id), item.source_type || null, item.external_key || null, item.item_name || null,
     next - previous,
-    previous, next,
-    num(item.reserved_quantity), num(item.reserved_quantity),
-    num(item.incoming_quantity), num(item.incoming_quantity),
-    `Physical count. ${reason}`.slice(0, 500), Number(userId || 0) || null,
+    next,
+    `Physical count. ${reason}`.slice(0, 500),
+    Number(userId || 0) || null,
+    Number(item.site_item_inventory_id),
+    previous,
+    EPSILON,
   );
 }
 
@@ -208,12 +233,12 @@ async function recordPhysicalCount(context, granted, body) {
 
   const previous = num(item.on_hand_quantity);
   const statements = [
+    conditionalCountMovement(granted.db, item, counted, reason, granted.adminUser.user_id),
     granted.db.prepare(`
       UPDATE site_item_inventory
       SET on_hand_quantity=?,last_counted_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP
       WHERE site_item_inventory_id=? AND ABS(COALESCE(on_hand_quantity,0)-?)<?
     `).bind(counted, id, previous, EPSILON),
-    await logCountMovement(granted.db, item, counted, reason, granted.adminUser.user_id),
   ];
 
   let results;
@@ -222,7 +247,7 @@ async function recordPhysicalCount(context, granted, body) {
   } catch (error) {
     throw Object.assign(new Error('The physical-count transaction failed safely.'), { code: 'inventory_count_transaction_failed', cause: error });
   }
-  if (Number(results?.[0]?.meta?.changes || 0) !== 1) {
+  if (Number(results?.[0]?.meta?.changes || 0) !== 1 || Number(results?.[1]?.meta?.changes || 0) !== 1) {
     throw Object.assign(new Error('Inventory changed while the physical count was being saved. Refresh and count again.'), { status: 409, code: 'inventory_count_concurrent_change' });
   }
 
@@ -272,7 +297,7 @@ async function saveUsageSetup(context, granted, body) {
   }
 
   const reviewedNote = reviewNote || `Build 440 usage setup reviewed as ${trackingMode}.`;
-  const statements = [
+  await granted.db.batch([
     granted.db.prepare(`
       UPDATE site_item_inventory
       SET stock_unit_label=?,usage_unit_label=?,usage_units_per_stock_unit=?,updated_at=CURRENT_TIMESTAMP
@@ -289,8 +314,7 @@ async function saveUsageSetup(context, granted, body) {
         updated_by_user_id=excluded.updated_by_user_id,
         updated_at=CURRENT_TIMESTAMP
     `).bind(id, trackingMode, minimum, reviewedNote, Number(granted.adminUser.user_id || 0) || null),
-  ];
-  await granted.db.batch(statements);
+  ]);
 
   const saved = shape(await loadItem(granted.db, id));
   await auditAdminAction(context.env, context.request, granted.adminUser, {
