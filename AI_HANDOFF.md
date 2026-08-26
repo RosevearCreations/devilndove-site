@@ -1,151 +1,254 @@
-# Devil n Dove AI Handoff — Build 437
+# Devil n Dove AI Handoff — Build 438 Source / Build 437 Production Baseline
 
-This is the **first of two canonical current project files**. Read this file first for architecture, data authority, safety and current release state. Read `PROJECT_STATUS_AND_ROADMAP.md` second for the current open functionality and ordered next work.
+This is the **first of two canonical current project files**. Read this file first for architecture, authority, safety and current release state. Read `PROJECT_STATUS_AND_ROADMAP.md` second for open functionality and ordered next work.
 
-Historical Build validation/changed-file prose is evidence only and does not override these two canonical files. Specialist documents remain authoritative for their specialist implementation details.
+Historical Build validation/changed-file prose is evidence only and does not override these two canonical files. Specialist documents remain authoritative for specialist implementation details.
 
-## Current release
+## Current release boundary
 
-**Build 437 — Membership canonical completion and release alignment** is the current completed release baseline.
+**Build 437 — Membership canonical completion and release alignment** remains the current completed Production-proven release baseline.
 
-The local/remote `dev` baseline after deterministic release-artifact generation is clean and Build 437 release notes/manifest are current.
+Build 438 is the current **source/development architecture release in progress**. Its Production D1 migration is not authorized.
 
-Build 437 completed and proved these Production parity families:
-
-```text
-Product numbers                              COMPLETE / PROVEN
-Gift Card                                    COMPLETE / PROVEN
-Full Build 403 Notification                  COMPLETE / PROVEN
-Build 197 annotation index                   COMPLETE / PROVEN
-Membership Build 395                         COMPLETE / PROVEN
-```
-
-Membership Production evidence is retained in `BUILD437_MEMBERSHIP_COMPLETION_RELEASE.md` and `BUILD437_CURRENT_STATE_HANDOFF_OVERLAY.md`. The Membership Production authorization token is **SPENT / COMPLETE** and must never be reused.
-
-## Current application architecture
-
-Devil n Dove is one Cloudflare application built from:
-
-- Cloudflare Pages/static frontend and Pages Functions/Workers runtime;
-- Cloudflare D1 as structured application/business data authority;
-- Cloudflare R2 for media/binary storage where applicable;
-- `users` + `sessions` as current authentication/session authority;
-- server-side role/authorization checks as the security boundary;
-- shared browser auth/navigation/error helpers;
-- specialist admin/member/public surfaces rather than separate repositories.
-
-The application already contains four substantial functional surfaces:
-
-1. **Customer Commerce** — public website, Shop, Cart/checkout, product discovery, custom requests, registration/login and customer-facing content.
-2. **Customer / Member Account** — `/members/`, profile/account tools, orders/order detail, wishlist, reviews, downloads and Membership presentation.
-3. **Creative & Production Operations** — Creative Process / Creative Project Workflow, CAIP / Creative Assets, Packaging Studio, Content Studio, production/material workflows and operational evidence/review.
-4. **Business Administration** — Catalog/Inventory administration, Members, Orders/Payments, Accounting, Analytics, settings/security, Application Sanity, Release & Go-Live and other business-management tools.
-
-### Important modularity truth
-
-These four surfaces are functionally separate, but the application does **not yet** have a central module registry/activation layer. Current separation is primarily route + authentication/role based.
-
-A disabled module therefore cannot yet be guaranteed to suppress its navigation, route access, startup API calls, timers, polling, autosave/sync and provider work as one central contract.
-
-The next planned architecture release is:
-
-**Build 438 — Application Core / Module Registry**
-
-See `BUILD438_APPLICATION_CORE_MODULE_PLAN.md`.
-
-Build 438 must wrap existing working subsystems rather than rewrite them. Its job is to make modules centrally discoverable, enabled/disabled, role-aware and runtime-gated.
-
-## Planned module keys
+Build 437 completed/proved:
 
 ```text
-customer_commerce   Customer Commerce
-member_account      Customer / Member Account
-operations          Creative & Production Operations
-business_admin      Business Administration
+Build 427 Product numbers                  COMPLETE / PROVEN
+Build 430 Gift Card                        COMPLETE / PROVEN
+Build 432 Notification Build 403           COMPLETE / PROVEN
+Build 433 Build 197 annotation index       COMPLETE / PROVEN
+Build 437 Membership Build 395             COMPLETE / PROVEN
 ```
 
-The planned runtime rule is stronger than hiding menu items: an unavailable/inactive module must not initialize its module-owned polling, autosave, sync, startup API calls or provider work, and direct routes/APIs must fail closed.
+The Membership authorization token is SPENT / COMPLETE and must never be reused.
+
+Build 437 deterministic release artifacts:
+
+```text
+RELEASE_NOTES.md                           Build 437
+release-package-manifest.json              Build 437
+manifest source scope                      git_tracked_release_files
+manifest file count                        1872
+manifest total size                        66279989 bytes
+```
+
+## Application architecture truth
+
+The repo already contains an Application Core and three top-level application modules created progressively in Builds 281–397.
+
+```text
+Devil n Dove Application Core
+    |
+    +-- commerce-operations
+    +-- creative-production
+    +-- business-administration
+```
+
+### Commerce & Operations
+
+Composes public/storefront, Catalog, Inventory and Operations domains.
+
+Representative surfaces include Shop, Cart/Checkout, customer/member account, Catalog/Product admin, Inventory, Orders, Membership, Gift Cards, customer documents, custom requests and Today Tasks.
+
+### Creative & Production
+
+Composes Creative, CAIP, Packaging and Content domains.
+
+Representative surfaces include Creative Process/Creative Project Workflow, CAIP/Creative Assets, Packaging Studio, Website Media & Content Studio, Content Studio, visual enrichment/image-manifest/stage-photo/content-publication workflows.
+
+### Business & Administration
+
+Composes Marketing, Accounting, Platform and Administration domains.
+
+Representative surfaces include Accounting, Analytics/SEO/marketing, users/settings/security, Application Sanity, Release & Go-Live and deployment/runtime/platform controls.
+
+### Customer/member clarification
+
+Customer Commerce and Member Account remain important distinct UX surfaces, but they are **not separate top-level runtime modules**. They are part of Commerce & Operations. Do not create a competing fourth top-level module merely to mirror UI surfaces.
+
+## Existing modular runtime foundation
+
+Key existing files:
+
+```text
+public/js/core/dd-module-registry.mjs
+public/js/core/dd-module-definitions.mjs
+public/js/core/dd-module-contracts.mjs
+public/js/core/dd-module-service-adapters.mjs
+public/js/core/dd-application-module-groups.mjs
+public/js/core/dd-admin-module-runtime.mjs
+public/js/modules/commerce-operations/runtime.mjs
+public/js/modules/creative-production/runtime.mjs
+public/js/modules/business-administration/runtime.mjs
+```
+
+The existing registry is passive and already supports route resolution, role checks, lazy loading and lifecycle state. The top-level runtimes are intentionally passive and do not create network transport merely by import.
+
+Business-domain extraction is still incremental. Do not claim every mutation is owned by an umbrella runtime merely because the top-level module exists.
+
+## Build 438 purpose
+
+Build 438 adds the missing **persistent/server-authoritative activation layer** around the existing three-module architecture.
+
+Source authority added in Build 438:
+
+```text
+database_build438_application_module_activation.sql
+functions/api/_lib/appModules.js
+functions/api/_lib/appModuleRoutes.js
+functions/_middleware.js
+functions/api/modules.js
+functions/api/admin/app-modules.js
+admin/application-modules/index.html
+public/js/admin-application-modules.js
+public/js/core/dd-application-module-bootstrap.mjs
+public/js/core/dd-public-module-visibility.mjs
+BUILD438_D1_VERIFICATION.sql
+scripts/build438_application_module_core_regression.py
+BUILD438_APPLICATION_CORE_MODULE_PLAN.md
+```
+
+Build 438 provides:
+
+- D1 `app_modules` authority;
+- D1 `app_module_role_access` authority;
+- all three modules enabled by default;
+- current `member`/`admin` access seeded explicitly;
+- bounded module-config caching only for non-request-specific configuration;
+- request-scoped session/user evaluation;
+- server route/API module mapping;
+- root Pages middleware fail-closed module enforcement;
+- read-only access-level enforcement for non-read API methods;
+- read-only `/api/modules` bootstrap;
+- Admin Application Modules recovery/control screen;
+- audited enable/disable/background/role-access changes;
+- authoritative browser bootstrap before legacy umbrella runtime activation;
+- public/member navigation visibility pass;
+- no request-time module-schema DDL;
+- no new polling loop.
+
+## Build 438 safety behavior
+
+Before the Build 438 D1 schema exists, server reads use a safe all-enabled compatibility fallback so source deployment does not unexpectedly disable the application. Module-control writes are blocked until the canonical migration is present.
+
+Once the D1 authority exists, module state is authoritative.
+
+A disabled/unavailable module should:
+
+- disappear from normal module-aware navigation;
+- fail closed on direct page/API access;
+- suppress top-level runtime activation;
+- not be implicitly allowed to run module-owned polling/sync/provider work;
+- retain all business data for later re-enable.
+
+The recovery/control route is shared core and intentionally exempt from module disablement:
+
+```text
+/admin/application-modules/
+/api/admin/app-modules
+```
+
+## Background activity rule
+
+`background_activity_enabled` is a permission, not a scheduler.
+
+Existing/future background operations owned by a module must explicitly check module authority before running. Build 438 exposes `canBackground(moduleKey)` client-side and the same D1 authority server-side.
+
+All three default module records start with background activity OFF.
+
+## Current roles
+
+Current user-role authority remains:
+
+```text
+member
+admin
+```
+
+Build 438 intentionally does not invent creator/operator/supervisor roles. Add them later only through a deliberate user/authorization design.
+
+Initial module access:
+
+```text
+member -> commerce-operations       allowed
+member -> creative-production       denied
+member -> business-administration   denied
+
+admin  -> all three                 allowed/manage
+```
 
 ## Shared core authority
 
-The following remain shared application core rather than switchable business modules:
+Shared core remains outside switchable business modules:
 
 - authentication/session handling;
-- authorization helpers;
-- D1 access wrappers and schema/read helpers;
+- common authorization helpers;
+- D1 access wrappers/read helpers;
+- module registry/availability service;
+- route guard/recovery control;
 - common security/CSP/error/fallback behavior;
 - responsive shell/navigation primitives;
-- bounded analytics where applicable;
-- release/build metadata;
-- future module-registry read/route guards.
+- bounded shared analytics where applicable;
+- release/build metadata.
 
 ## Major subsystem authority boundaries
 
 ### Creative Process
 
-Creative Process is project/process/material/time/cost authority. Planned timeline material facts do not change Inventory. Inventory changes only through explicit reviewed actual-use posting. Posted usage is audit data: corrections/removals use compensating reversals rather than silent deletion.
+Project/process/material/time/cost authority. Planned material facts do not change Inventory. Actual reviewed use changes stock only through explicit posting. Posted usage is audit data and corrections use compensating reversals.
 
 ### CAIP / Creative Assets
 
-CAIP owns private source media, upload/recovery integrity, technical/evidence review, story evidence and derivative planning. Private R2 originals remain private. Multipart completion is fail-closed and must prove actual parts/ETags/ranges/bytes plus final R2 object size before successful promotion.
+Private source-media/intake/recovery/evidence/story/derivative-plan authority. Multipart completion remains fail-closed and must prove actual parts/ETags/ranges/bytes and final R2 size.
 
 ### Content Studio
 
-Content Studio owns reviewed channel/package/deliverable preparation. It does not create a duplicate Creative Process project identity. Human-reviewed evidence remains the source for public claims/story copy.
+Reviewed channel-package/deliverable preparation. It does not create duplicate Creative Process project identity and must not invent public claims unsupported by reviewed evidence.
 
 ### Packaging Studio
 
-Packaging Studio owns label/package presentation and reviewed printed ingredient/claim evidence. Inventory links in structured Packaging ingredients are identity/source traceability only; Packaging must not consume/reserve Inventory. Current owner direction is separate visible English and French ingredient declarations, with print approval blocked rather than silently clipping long formulas.
+Label/package presentation plus reviewed printed ingredient/claim evidence. Inventory links are source/identity traceability only and must not consume/reserve stock. English/French printed declarations remain review/fit gated.
 
 ### Media & Content Studio
 
-Website Media & Content Studio owns static/public-site placements and visual/content editing. Product/Inventory specialist records and private CAIP source footage remain outside that authority.
+Static/public-site content/media placement authority. Product/Inventory specialist records and private CAIP originals remain outside it.
 
 ### Catalog / Inventory / Production
 
-Catalog/Inventory owns product/supply/tool identities and stock facts. Finished production and Creative Process actual usage must preserve immutable/reversible evidence. Historical generic units/classification still need review queues rather than silent normalization.
+Product/supply/tool identity and stock facts. Actual production/material posting must retain immutable/reversible evidence.
 
 ## Worker/resource-efficiency rules
 
-Cloudflare resource efficiency remains an application-wide requirement:
+- no routine request-time schema creation/repair;
+- no automatic retry of CPU/resource-limit failures;
+- keep polling bounded/opt-in;
+- avoid whole-workspace refresh after small mutations;
+- disabled modules should not initialize avoidable runtime work;
+- analytics/fallback diagnostics must not block business actions;
+- server authorization, not hidden UI, is the security boundary;
+- never cache request-specific session/user state globally.
 
-- do not perform routine request-time schema creation/repair;
-- do not automatically retry resource-limit/CPU failures;
-- keep polling bounded and opt-in where practical;
-- avoid loading expensive whole-workspace state after every small mutation;
-- inactive future modules must not create background traffic;
-- analytics/fallback diagnostics must not block primary business actions;
-- use server-side authorization, not hidden UI, as the security boundary.
+### Build 438 efficiency note
 
-## SEO/public-site rules
+The first secure middleware boundary can introduce one additional indexed session lookup on authenticated module-owned requests because many legacy endpoints also verify auth independently. Measure this after Development deployment. A future consolidation can pass verified request identity through shared request context, but do not weaken endpoint authorization or use global user caches merely to remove the query.
 
-- Keep one clear H1 per exposed public page.
-- Use truthful concise titles/descriptions/canonicals and natural searcher language.
-- Prefer real product/process/workshop imagery and descriptive alt text near matching content.
-- Preserve meaningful mobile content parity.
-- Do not manufacture location pages, unsupported claims, transformations or fake social proof.
-- Measure Search Console/Business Profile/query outcomes after deployment; static scores do not guarantee first-page placement.
+## SEO/public rules
+
+- one clear H1 per exposed page;
+- truthful concise titles/descriptions/canonicals;
+- natural searcher language rather than stuffing;
+- crawlable descriptive internal links;
+- descriptive alt text and real product/process/workshop evidence;
+- meaningful mobile content parity;
+- no manufactured local pages/claims/social proof;
+- measure Search Console/Business Profile outcomes;
 - Admin/private workflow pages remain `noindex`.
-
-## Release/package state
-
-Build 437 deterministic release artifacts use Git-tracked release files only.
-
-```text
-Release notes:                         RELEASE_NOTES.md / Build 437
-Release manifest:                      data/site/release-package-manifest.json
-Manifest source scope:                 git_tracked_release_files
-Manifest file count:                   1872
-Manifest total size:                   66279989 bytes
-Generation order:                      release notes first, manifest second
-```
-
-Local `.wrangler`, `__pycache__`, local backups and local `build*.txt` evidence are excluded from release packaging.
 
 ## Production safety state
 
 ```text
-Membership Build 395 authorization               SPENT / COMPLETE
+Build 437 Membership authorization               SPENT / COMPLETE
+Build 438 Production D1 migration                NOT AUTHORIZED
 Fractional Inventory/Creative rebuilds            NOT AUTHORIZED
 Product/FK rebuilds                               NOT AUTHORIZED
 Accounting/default/nullability rebuilds           NOT AUTHORIZED
@@ -155,20 +258,10 @@ Broad Production promotion                        CLOSED
 Main/Production broad promotion                   FROZEN pending broader acceptance
 ```
 
-A generic request such as “continue”, “next release”, feature work or pasted logs does not authorize a Production mutation. Production writes require an explicit, narrow, current scope when genuinely needed.
+A generic “continue”, “next release”, pasted output or feature request does not authorize Production mutation.
 
-## Current high-value functional direction
+## Development next step
 
-After the Build 438 module core, continue:
+Complete the Build 438 local source gate, then apply the focused Build 438 migration to **Development only**, run `BUILD438_D1_VERIFICATION.sql`, deploy/preview Development and prove enable/disable/re-enable behavior for all three modules.
 
-1. CAIP first-class video review with exact timecode/range evidence.
-2. Verified bounded proxy/frame/audio/transcript provider adapters.
-3. Reviewed Creative Process -> CAIP -> Content Studio story/package handoff.
-4. Packaging physical proof, bilingual overflow/extended-label strategy and supplier/INCI/allergen/French review.
-5. Product/Inventory reversal, lot-aware costing/provenance, delete-reference inspection and review queues.
-6. Media & Content Studio P1/P2 real-image replacement and public-page polish.
-7. Reviewed social scheduling/publishing and downstream analytics.
-8. Dedicated mobile operator/admin workflows.
-9. Final reliability/go-live evidence before broad Production promotion.
-
-Read `PROJECT_STATUS_AND_ROADMAP.md` for the prioritized open-functionality list and Build 438 execution order.
+Read `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` for the activation contract and `PROJECT_STATUS_AND_ROADMAP.md` for the remaining functional roadmap.
