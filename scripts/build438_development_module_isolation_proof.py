@@ -11,6 +11,9 @@ Safety:
   devilndove-dev UUID dbc1615b-dcbe-4951-973b-b47c99c73bfa;
 - refuses to toggle unless the deployed Development site already reports Build 438,
   schema_ready=true, source=d1, exactly three modules, and all three enabled;
+- requires X-DND-Module-Guard: 438 on every representative module route before any
+  toggle, proving the current Pages deployment routes static module pages through
+  functions/_middleware.js;
 - records each enabled route's actual healthy anonymous baseline before any toggle;
 - temporary writes touch app_modules only;
 - no Product/Inventory/Creative/CAIP/Packaging/Content/Accounting/Order/Member data;
@@ -80,7 +83,11 @@ def clean_base_url(value: str) -> str:
     return url
 
 
-def request_text(base_url: str, path: str) -> tuple[int, str]:
+def normalize_headers(headers) -> dict[str, str]:
+    return {str(key).lower(): str(value) for key, value in headers.items()}
+
+
+def request_detail(base_url: str, path: str) -> tuple[int, str, dict[str, str]]:
     url = f'{base_url}{path}'
     request = Request(
         url,
@@ -93,13 +100,22 @@ def request_text(base_url: str, path: str) -> tuple[int, str]:
     )
     try:
         with urlopen(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
-            return int(response.status), response.read().decode('utf-8', errors='replace')
+            return (
+                int(response.status),
+                response.read().decode('utf-8', errors='replace'),
+                normalize_headers(response.headers),
+            )
     except HTTPError as error:
         body = error.read().decode('utf-8', errors='replace')
-        return int(error.code), body
+        return int(error.code), body, normalize_headers(error.headers)
     except URLError as error:
         fail(f'Development HTTP request failed for {url}: {error}')
     raise AssertionError('unreachable')
+
+
+def request_text(base_url: str, path: str) -> tuple[int, str]:
+    status, body, _ = request_detail(base_url, path)
+    return status, body
 
 
 def read_module_bootstrap(base_url: str) -> dict[str, Any]:
@@ -151,15 +167,24 @@ def require_deployed_baseline(base_url: str) -> tuple[dict[str, dict[str, Any]],
     baseline_statuses: dict[str, int] = {}
     for key in EXPECTED_MODULES:
         route = REPRESENTATIVE_ROUTES[key]
-        status, _ = request_text(base_url, route)
+        status, _, headers = request_detail(base_url, route)
         allowed = BASELINE_ALLOWED_STATUS[key]
         if status not in allowed:
             fail(
                 f'Enabled baseline route {route} returned HTTP {status}; expected one of '
                 f'{sorted(allowed)}. Refusing to toggle modules.'
             )
+        guard_build = headers.get('x-dnd-module-guard', '')
+        guard_module = headers.get('x-dnd-module-key', '')
+        if guard_build != str(BUILD) or guard_module != key:
+            fail(
+                f'Enabled baseline route {route} is not passing through the deployed Build 438 '
+                f'Pages module guard (X-DND-Module-Guard={guard_build!r}, '
+                f'X-DND-Module-Key={guard_module!r}). Wait for the current dev deployment; '
+                'no module state was changed.'
+            )
         baseline_statuses[key] = status
-        print(f'BASELINE {key}: {route} -> HTTP {status}')
+        print(f'BASELINE {key}: {route} -> HTTP {status} / X-DND-Module-Guard={guard_build}')
 
     return modules, baseline_statuses
 
@@ -246,6 +271,9 @@ def prove_one_module(
         status, body = wait_for_route_status(base_url, route, 403)
         if 'currently disabled' not in body.lower():
             fail(f'{route} returned 403 but did not identify the module as disabled.')
+        guard_status, _, guard_headers = request_detail(base_url, route)
+        if guard_status != 403 or guard_headers.get('x-dnd-module-guard') != str(BUILD):
+            fail(f'{route} disabled response did not retain the Build 438 module-guard diagnostic.')
         print(f'PASS disabled bootstrap: {module_key} is_enabled=0 / background=0')
         print(f'PASS disabled direct route: {route} -> HTTP {status}')
 
@@ -308,7 +336,7 @@ def main() -> int:
     print('Production target capability: NONE')
 
     baseline, baseline_statuses = require_deployed_baseline(base_url)
-    print('BASELINE: PASS / BUILD 438 / D1 / ALL THREE ENABLED / BACKGROUND OFF')
+    print('BASELINE: PASS / BUILD 438 / D1 / ALL THREE ENABLED / BACKGROUND OFF / PAGES GUARD ACTIVE')
     print(f'BASELINE ROUTE STATUS: {baseline_statuses}')
 
     failures: list[str] = []
@@ -337,6 +365,7 @@ def main() -> int:
         return 1
 
     print('BUILD 438 DEVELOPMENT MODULE ISOLATION PROOF: PASS (3/3 MODULES)')
+    print('Pages module guard invocation: PROVEN')
     print('Enabled baseline behavior: RECORDED / RESTORED EXACTLY')
     print('Direct module disablement: PROVEN')
     print('Core recovery availability: PROVEN')
