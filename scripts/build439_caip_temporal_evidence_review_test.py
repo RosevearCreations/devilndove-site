@@ -139,7 +139,7 @@ def main() -> int:
         ('processing artifact verification uses bound R2 HEAD only', 'resolveCaipBucket' in service and 'bucket.head' in service and 'fetch(' not in service),
         ('Admin API degrades reads and blocks writes until migration exists', 'schema_ready: false' in api and "required_migration: 'database_build439_caip_temporal_evidence_review.sql'" in api and 'status = 409' in api),
         ('Admin API audits mutations and caps request body', 'auditAdminAction' in api and '262144' in api and 'captureRuntimeIncident' in api),
-        ('private review proxy uses streamed R2 range reads', 'range: request.headers' in proxy and 'object.body' in proxy and 'status = 206' in proxy and 'arrayBuffer' not in proxy),
+        ('private review proxy sanitizes browser headers and streams R2 ranges', 'r2GetOptions(request)' in proxy and "rangeHeaders.set('Range', rangeValue)" in proxy and "options.range = rangeHeaders" in proxy and "options.onlyIf = conditionalHeaders" in proxy and "request.headers.get('If-Range')" in proxy and 'object.body' in proxy and 'status = 206' in proxy and 'arrayBuffer' not in proxy and 'range: request.headers' not in proxy and 'onlyIf: request.headers' not in proxy),
         ('video range seeking does not write an audit row for every chunk', 'shouldRecordGrantUse' in proxy and 'access_count' in proxy),
         ('new UI is mounted, cache-busted and responsive', 'caipEvidenceReviewMount' in page and 'admin-caip-evidence-review.js?v=439' in page and 'caip-evidence-review.css?v=439' in page and '@media' in css),
         ('review UI has no polling and supports secure private review', 'setInterval' not in ui and 'create_secure_review_link' in ui and 'max_access_count: 100' in ui),
@@ -167,7 +167,7 @@ def main() -> int:
     print('Temporal point/range authority: SOURCE READY')
     print('Reviewed evidence -> existing story ledger: SOURCE READY')
     print('Verified processing artifact gate: FAIL-CLOSED / SOURCE READY')
-    print('Private R2 review: RANGE-STREAMED / NO BUFFERING')
+    print('Private R2 review: RANGE-STREAMED / SANITIZED HEADERS / NO BUFFERING')
     print('Provider execution: DISABLED')
     print('Automatic publication: NONE')
     print('PRODUCTION PROMOTION: CLOSED')
