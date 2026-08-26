@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Application Modules — Devil n Dove</title>
+  <meta name="description" content="Admin control surface for Devil n Dove top-level application modules."/>
+  <link href="/css/styles.css" rel="stylesheet"/>
+  <link href="/assets/mark.png" rel="icon" type="image/png"/>
+</head>
+<body>
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand">
+        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
+        <div>
+          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
+          <div class="small">Application Modules</div>
+        </div>
+      </div>
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/admin/">Admin</a>
+        <button class="btn" data-nav-logout="" type="button">Logout</button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <h1>Application Modules</h1>
+        <p>Control the three top-level Devil n Dove application modules. Disabling a module blocks access and suppresses its runtime activation; it never deletes business data.</p>
+      </div>
+    </div>
+
+    <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+
+    <div class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Module authority</h2>
+      <p class="small" id="moduleAuthorityStatus">Loading Build 438 module state…</p>
+      <div class="small" style="display:grid;gap:6px;margin-top:10px">
+        <div><strong>Current design:</strong> Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration.</div>
+        <div><strong>Safety:</strong> this page and its control API remain in shared core so an administrator can recover from an accidental module disable.</div>
+        <div><strong>Background rule:</strong> module-owned polling/sync/provider work must check the background permission before running.</div>
+      </div>
+    </div>
+
+    <div id="applicationModulesMount" style="margin-top:18px"></div>
+
+    <div class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Role access</h2>
+      <p class="small">Current account roles are <code>member</code> and <code>admin</code>. Build 438 does not invent additional staff roles. Future operator/creator roles can be added deliberately when the user model supports them.</p>
+      <div id="applicationModuleRolesMount"></div>
+    </div>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+
+  <script src="/js/main.js?v=279"></script>
+  <script src="/public/js/auth.js?v=279"></script>
+  <script src="/public/js/site-auth-ui.js?v=245"></script>
+  <script src="/public/js/admin-self-protect.js?v=245"></script>
+  <script src="/public/js/admin.js?v=438"></script>
+  <script src="/public/js/admin-application-modules.js?v=438"></script>
+</body>
+</html>
