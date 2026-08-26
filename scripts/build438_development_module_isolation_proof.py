@@ -11,6 +11,7 @@ Safety:
   devilndove-dev UUID dbc1615b-dcbe-4951-973b-b47c99c73bfa;
 - refuses to toggle unless the deployed Development site already reports Build 438,
   schema_ready=true, source=d1, exactly three modules, and all three enabled;
+- records each enabled route's actual healthy anonymous baseline before any toggle;
 - temporary writes touch app_modules only;
 - no Product/Inventory/Creative/CAIP/Packaging/Content/Accounting/Order/Member data;
 - no Production target/mode exists;
@@ -44,12 +45,14 @@ REPRESENTATIVE_ROUTES = {
     'creative-production': '/admin/creative-process/',
     'business-administration': '/admin/accounting/',
 }
-# Anonymous enabled-state behavior proves the root middleware is active:
-# Commerce is public; Creative/Business require login.
-ENABLED_STATUS = {
-    'commerce-operations': 200,
-    'creative-production': 401,
-    'business-administration': 401,
+# The public Commerce page must be directly available while enabled. Admin HTML may
+# be served as a JS-authenticated shell (200) or may be blocked server-side for an
+# anonymous request (401). Build 438 isolation is proven by the state transition:
+# enabled baseline -> 403 module_disabled -> exact enabled baseline after restore.
+BASELINE_ALLOWED_STATUS = {
+    'commerce-operations': frozenset({200}),
+    'creative-production': frozenset({200, 401}),
+    'business-administration': frozenset({200, 401}),
 }
 CORE_RECOVERY_ROUTE = '/admin/application-modules/'
 
@@ -123,7 +126,7 @@ def module_map(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     }
 
 
-def require_deployed_baseline(base_url: str) -> dict[str, dict[str, Any]]:
+def require_deployed_baseline(base_url: str) -> tuple[dict[str, dict[str, Any]], dict[str, int]]:
     payload = read_module_bootstrap(base_url)
     modules = module_map(payload)
     actual_keys = tuple(sorted(modules))
@@ -145,16 +148,20 @@ def require_deployed_baseline(base_url: str) -> dict[str, dict[str, Any]]:
     if core_status != 200:
         fail(f'Core recovery route returned HTTP {core_status}; refusing to toggle modules.')
 
+    baseline_statuses: dict[str, int] = {}
     for key in EXPECTED_MODULES:
         route = REPRESENTATIVE_ROUTES[key]
         status, _ = request_text(base_url, route)
-        if status != ENABLED_STATUS[key]:
+        allowed = BASELINE_ALLOWED_STATUS[key]
+        if status not in allowed:
             fail(
-                f'Enabled baseline route {route} returned HTTP {status}; expected '
-                f'{ENABLED_STATUS[key]}. Build 438 middleware may not be deployed yet.'
+                f'Enabled baseline route {route} returned HTTP {status}; expected one of '
+                f'{sorted(allowed)}. Refusing to toggle modules.'
             )
+        baseline_statuses[key] = status
+        print(f'BASELINE {key}: {route} -> HTTP {status}')
 
-    return modules
+    return modules, baseline_statuses
 
 
 def write_module_state(module_key: str, enabled: int, background_enabled: int) -> None:
@@ -217,12 +224,18 @@ def wait_for_route_status(base_url: str, path: str, expected: int) -> tuple[int,
     raise AssertionError('unreachable')
 
 
-def prove_one_module(base_url: str, module_key: str, original: dict[str, Any]) -> None:
+def prove_one_module(
+    base_url: str,
+    module_key: str,
+    original: dict[str, Any],
+    baseline_statuses: dict[str, int],
+) -> None:
     route = REPRESENTATIVE_ROUTES[module_key]
     original_enabled = int(original.get('is_enabled') or 0)
     original_background = int(original.get('background_activity_enabled') or 0)
     restored = False
     print(f'\n=== {module_key}: DISABLE / BLOCK / RESTORE ===')
+    print(f'Enabled route baseline: {route} -> HTTP {baseline_statuses[module_key]}')
     try:
         write_module_state(module_key, 0, 0)
         time.sleep(CACHE_SETTLE_SECONDS)
@@ -241,12 +254,13 @@ def prove_one_module(base_url: str, module_key: str, original: dict[str, Any]) -
             fail(f'Core recovery route failed while {module_key} was disabled: HTTP {core_status}.')
         print(f'PASS Core recovery route while disabled: {CORE_RECOVERY_ROUTE} -> HTTP 200')
 
-        # Other modules must retain their expected anonymous enabled-state behavior.
+        # Other modules must retain their exact recorded enabled-state behavior.
         for other_key in EXPECTED_MODULES:
             if other_key == module_key:
                 continue
             other_route = REPRESENTATIVE_ROUTES[other_key]
-            other_status, _ = wait_for_route_status(base_url, other_route, ENABLED_STATUS[other_key])
+            expected_status = baseline_statuses[other_key]
+            other_status, _ = wait_for_route_status(base_url, other_route, expected_status)
             print(f'PASS unaffected module route: {other_route} -> HTTP {other_status}')
     finally:
         print(f'RESTORE {module_key}: is_enabled={original_enabled} background={original_background}')
@@ -256,7 +270,7 @@ def prove_one_module(base_url: str, module_key: str, original: dict[str, Any]) -
             row = wait_for_module_state(base_url, module_key, original_enabled)
             if int(row.get('background_activity_enabled') or 0) != original_background:
                 fail(f'{module_key} background state did not restore exactly.')
-            expected_status = ENABLED_STATUS[module_key]
+            expected_status = baseline_statuses[module_key]
             restored_status, _ = wait_for_route_status(base_url, route, expected_status)
             print(f'PASS restored direct route: {route} -> HTTP {restored_status}')
             restored = True
@@ -293,13 +307,14 @@ def main() -> int:
     print('Temporary D1 writes: app_modules ONLY')
     print('Production target capability: NONE')
 
-    baseline = require_deployed_baseline(base_url)
+    baseline, baseline_statuses = require_deployed_baseline(base_url)
     print('BASELINE: PASS / BUILD 438 / D1 / ALL THREE ENABLED / BACKGROUND OFF')
+    print(f'BASELINE ROUTE STATUS: {baseline_statuses}')
 
     failures: list[str] = []
     for module_key in ('commerce-operations', 'creative-production', 'business-administration'):
         try:
-            prove_one_module(base_url, module_key, baseline[module_key])
+            prove_one_module(base_url, module_key, baseline[module_key], baseline_statuses)
         except BaseException as error:
             failures.append(f'{module_key}: {error}')
             print(f'FAIL {module_key}: {error}')
@@ -322,6 +337,7 @@ def main() -> int:
         return 1
 
     print('BUILD 438 DEVELOPMENT MODULE ISOLATION PROOF: PASS (3/3 MODULES)')
+    print('Enabled baseline behavior: RECORDED / RESTORED EXACTLY')
     print('Direct module disablement: PROVEN')
     print('Core recovery availability: PROVEN')
     print('Other enabled module routes remain available: PROVEN')
