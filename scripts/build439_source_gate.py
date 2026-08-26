@@ -2,9 +2,10 @@
 """Build 439 local-only source validation and deterministic full-schema sync gate.
 
 Runs the Build 439 CAIP regression, provider fail-closed rerun regression, the
-read-only storage-diagnostic regression, synchronizes database_full_schema.sql
-deterministically, checks the synchronized aggregate, and reruns the main
-regression. This script never contacts Cloudflare, D1, R2 or an external provider.
+read-only storage-diagnostic regression, the verified missing-binary recovery
+regression, synchronizes database_full_schema.sql deterministically, checks the
+synchronized aggregate, and reruns the main regression. This script never contacts
+Cloudflare, D1, R2 or an external provider.
 """
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ STEPS = (
     ('Build 439 CAIP regression', [PYTHON, 'scripts/build439_caip_temporal_evidence_review_test.py']),
     ('Build 439 provider fail-closed rerun regression', [PYTHON, 'scripts/build439_provider_fail_closed_rerun_test.py']),
     ('Build 439 storage diagnostic regression', [PYTHON, 'scripts/build439_storage_diagnostic_regression_test.py']),
+    ('Build 439 missing-binary recovery regression', [PYTHON, 'scripts/build439_missing_binary_recovery_regression_test.py']),
     ('Build 439 deterministic full-schema sync', [PYTHON, 'scripts/build439_sync_full_schema.py', '--sync']),
     ('Build 439 deterministic full-schema check', [PYTHON, 'scripts/build439_sync_full_schema.py', '--check']),
     ('Build 439 CAIP regression after full-schema sync', [PYTHON, 'scripts/build439_caip_temporal_evidence_review_test.py']),
@@ -56,6 +58,7 @@ def main() -> int:
     print('Focused migration regression: PASS')
     print('Provider fail-closed rerun regression: PASS')
     print('Storage diagnostic regression: PASS / READ-ONLY')
+    print('Missing-binary recovery regression: PASS / VERIFIED RECOVERY CONTRACT')
     print('database_full_schema.sql: SYNCHRONIZED / CHECKED')
     print('Cloudflare/D1/R2/provider access: NONE')
     print('Development D1 mutation executed: NO')
