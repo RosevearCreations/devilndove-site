@@ -24,6 +24,7 @@ def main() -> int:
         'product_production_runs.product_id',
         'creative_project_cost_allocations.product_id',
         'accounting_overhead_product_allocations.product_id',
+        'product_costs.product_id',
         'packaging_projects.product_id',
         'product_bundle_components.component_product_id',
         'marketplace_margin_override_history.product_id',
@@ -37,6 +38,8 @@ def main() -> int:
 
     checks = [
         ('delete API keeps bounded protected-reference registry', all(token in api for token in protected) and 'PROTECTED_PRODUCT_REFERENCES' in api),
+        ('historical product costs remain protected accounting evidence', "'product_costs.product_id'" in api and 'PROTECTED_PRODUCT_REFERENCES' in api),
+        ('media integrity snapshots are product-owned diagnostic cleanup', "'product_media_integrity_snapshots.product_id'" in api and 'PRODUCT_OWNED_CLEANUP_RELATIONS' in api),
         ('delete API blocks permanent removal when protected history exists', 'requires_archive: true' in api and 'cannot be permanently deleted. Archive it instead.' in api),
         ('delete API preserves reusable media by detaching rather than deleting it', 'PRODUCT_DETACH_RELATIONS' in api and 'SET ${quoteIdentifier(columnName)} = NULL' in api),
         ('delete API preserves generated project work unless it is unreviewed automation shell', 'discoverManagedProductProjectShells' in api and 'meaningful_evidence_count' in api and 'AUTO_CLEAN_GENERATED_SHELL' in api),
@@ -68,7 +71,8 @@ def main() -> int:
         return 1
 
     print(f'\nBUILD 440 PRODUCT DELETE REFERENCE INSPECTOR REGRESSION: PASS ({len(checks)}/{len(checks)})')
-    print('Protected business/customer history: PRESERVED')
+    print('Protected business/customer/accounting history: PRESERVED')
+    print('Product media diagnostic snapshots: PRODUCT-OWNED CLEANUP')
     print('Permanent deletion authority: UNCHANGED / UNUSED PRODUCTS ONLY')
     print('Blocked-product resolution: INSPECT / OPEN OWNER / ARCHIVE')
     print('Production promotion: CLOSED')
