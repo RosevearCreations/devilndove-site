@@ -7,6 +7,7 @@ import {
   jsonResponse,
   normalizeText,
 } from '../_lib/adminAudit.js';
+import { updateCreativeStoryEvidence } from '../_lib/creativeAssetIntelligence.js';
 import {
   CAIP_EVIDENCE_REVIEW_BUILD,
   archiveTemporalEvidenceMarker,
@@ -129,6 +130,10 @@ export async function onRequestPost(context) {
       result = await archiveTemporalEvidenceMarker(state.db, projectId, body.creative_media_evidence_range_id, state.adminUser.user_id);
     } else if (action === 'promote_marker') {
       result = await promoteMarkerToStoryEvidence(state.db, projectId, body.creative_media_evidence_range_id, state.adminUser.user_id);
+    } else if (action === 'review_story_evidence') {
+      const evidenceId = integer(body.creative_story_evidence_id);
+      if (!evidenceId) throw new Error('Choose linked story evidence first.');
+      result = await updateCreativeStoryEvidence(state.db, projectId, evidenceId, { review_status: body.review_status }, state.adminUser.user_id);
     } else if (action === 'draft_story_segment') {
       result = await draftStorySegmentFromMarkers(state.db, projectId, body.marker_ids, body, state.adminUser.user_id);
     } else if (action === 'register_processing_artifact') {
@@ -163,6 +168,7 @@ export async function onRequestPost(context) {
         action,
         creative_asset_id: integer(body.creative_asset_id) || null,
         temporal_marker_id: integer(body.creative_media_evidence_range_id) || null,
+        story_evidence_id: integer(body.creative_story_evidence_id) || null,
         processing_job_id: integer(body.caip_media_processing_job_id) || null,
         processing_artifact_id: integer(body.caip_media_processing_artifact_id) || null,
         source_media_unchanged: true,
