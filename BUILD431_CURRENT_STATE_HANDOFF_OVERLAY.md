@@ -12,6 +12,7 @@ Build 430  Gift Card Production stage                      PASS
 Build 430  Notification four-index authorization boundary  SUPERSEDED BY LIVE EVIDENCE
 Build 431  First Notification execution attempt            SAFE STOP BEFORE BACKUP
 Build 431  Full Build 403 Notification boundary            PASS (20/20)
+Build 432  Full Build 403 Notification execution           AUTHORIZED / PENDING
 ```
 
 ## Proven completed Production families
@@ -39,9 +40,7 @@ gift_card_redemptions: 0 -> 0
 
 ## Current Notification Build 403 state
 
-The first authorized Notification attempt stopped safely before backup because live Production proved the pre-existing `idx_notification_outbox_status_due` assumption was wrong.
-
-Fresh corrected Build 431 evidence now proves:
+Fresh corrected Build 431 evidence proves:
 
 ```text
 metadata_json: absent
@@ -56,15 +55,15 @@ Exact full Build 403 gap: YES
 Corrected full Notification boundary: PASS (20/20)
 ```
 
-The prior token `AUTHORIZE-BUILD428-PROD-NOTIFICATION` is superseded/insufficient for this larger scope and must not be reused.
+The prior token `AUTHORIZE-BUILD428-PROD-NOTIFICATION` is superseded/insufficient and must not be reused.
 
-Prepared corrected token, not authorized:
+The owner has explicitly authorized the corrected scope using:
 
 ```text
 AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
 ```
 
-No Notification backup has been created and no Notification DDL has executed.
+This authorization is limited to `metadata_json` plus the five canonical Build 403 `notification_outbox` indexes. No Notification backup has been created and no Notification DDL has executed yet under this authorization.
 
 ## Still locked
 
@@ -92,7 +91,7 @@ Product-number Production stage           COMPLETE / PROVEN
 Gift Card Production stage                COMPLETE / PROVEN
 Old Notification authorization            SUPERSEDED / INSUFFICIENT
 Full Build 403 Notification boundary      PASS (20/20)
-Full Build 403 Notification authorization NOT RECEIVED
+Full Build 403 Notification authorization RECEIVED
 Notification Production backup            NOT CREATED
 Notification Production mutation          NOT EXECUTED
 Annotation-index authorization            NOT RECEIVED
@@ -103,10 +102,4 @@ Production promotion                      CLOSED
 
 ## Immediate next action
 
-Stop at the corrected explicit full-Build-403 Notification authorization boundary. Proceed only if the owner supplies exactly:
-
-```text
-AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
-```
-
-That token authorizes only the corrected Notification Build 403 column/index scope. Annotation, rebuild families, provider/R2 work, CAIP copy, and Production promotion remain excluded.
+Run the guarded Build 432 full-Build-403 Notification sequence only: local regression, fresh corrected preflight, dedicated full Production backup, exact-state reread, bounded additive DDL, and independent read-only postcheck. Stop on any failure. Annotation/rebuild/provider/R2/promotion work remains excluded.
