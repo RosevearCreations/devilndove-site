@@ -2,9 +2,9 @@
 
 ## Status
 
-**PASS (20/20) — GIFT CARD READ-ONLY AUTHORIZATION BOUNDARY CLOSED / GIFT CARD PRODUCTION AUTHORIZATION STILL NOT RECEIVED / PRODUCTION PROMOTION CLOSED**
+**PASS (20/20) — GIFT CARD READ-ONLY AUTHORIZATION BOUNDARY CLOSED / GIFT CARD PRODUCTION AUTHORIZATION RECEIVED / GIFT CARD BACKUP+WRITE PENDING / PRODUCTION PROMOTION CLOSED**
 
-Build 428 is closed PASS (20/20). Product numbers remain proven in both environments and every remaining Production family is separately locked.
+Build 428 is closed PASS (20/20). Product numbers remain proven in both environments and every remaining Production family is separately locked unless explicitly stated below.
 
 ## Owner-run Build 429 evidence
 
@@ -58,37 +58,50 @@ PRODUCTION PROMOTION: CLOSED
 
 ## Build 429 disposition
 
-Build 429 is fully green and closed. This PASS does **not** authorize a Gift Card Production write.
+Build 429 is fully green and closed. That PASS did not itself authorize a Gift Card Production write.
 
-The next stage remains Gift Card only. It may begin only after the owner explicitly supplies:
+## Explicit Gift Card Production authorization — RECEIVED
+
+The owner subsequently supplied the exact stage token:
 
 ```text
 AUTHORIZE-BUILD428-PROD-GIFT-CARD
 ```
 
-That token authorizes only the bounded Build 384 Gift Card lookup-attempt/lockout additive stage. It does not authorize Notification, annotation-index, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, or promotion work.
+This authorization applies **only** to the bounded Build 384 Gift Card lookup-attempt/lockout additive stage. It does not authorize Notification, annotation-index, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, or promotion work.
 
-## Future authorized Gift Card sequence
+Before using the authorization, the Gift Card executor was further hardened so post-write PASS now requires preservation of all three Build 429 row boundaries:
 
-After explicit authorization only:
+```text
+gift_card_lookup_attempts
+gift_cards
+gift_card_redemptions
+```
 
-1. rerun targeted Gift Card before-state;
-2. create a fresh full Production D1 backup dedicated to Gift Card;
-3. verify target UUID, path, nonzero byte count, SHA-256 and <=30-minute age;
-4. reread targeted Gift Card state and reject unexpected drift;
-5. apply only the missing Build 384 lookup columns/indexes/lockout table;
-6. prove `gift_card_lookup_attempts`, `gift_cards`, and `gift_card_redemptions` row counts are preserved;
-7. prove all five canonical columns, all three canonical indexes, and the lockout table exist;
-8. keep Production promotion closed.
+The local safety regression was also strengthened to verify those three preservation checks in source.
+
+## Authorized Gift Card execution sequence
+
+The authorized stage must proceed in this order:
+
+1. compile and rerun the local Gift Card safety regression after the preservation hardening;
+2. rerun the targeted Build 429 Gift Card before-state and require the exact reviewed Build 384 gap;
+3. create a fresh full Production D1 backup dedicated to Gift Card;
+4. verify target UUID, path, nonzero byte count, SHA-256 and <=30-minute age;
+5. reread targeted Gift Card state after backup;
+6. apply only the missing Build 384 lookup columns/indexes/lockout table;
+7. prove `gift_card_lookup_attempts`, `gift_cards`, and `gift_card_redemptions` row counts are preserved;
+8. prove all five canonical columns, all three canonical indexes, and the lockout table exist;
+9. keep Production promotion closed.
 
 ## Safety
 
 ```text
 Product-number prerequisite              COMPLETE / PROVEN
 Build 429 Gift Card boundary             PASS (20/20)
-Gift Card Production backup              NOT CREATED
-Gift Card Production authorization       NOT RECEIVED
-Gift Card Production mutation            NOT EXECUTED
+Gift Card Production authorization       RECEIVED — GIFT CARD ONLY
+Gift Card Production backup              NOT YET CREATED FOR AUTHORIZED WRITE
+Gift Card Production mutation            NOT YET EXECUTED
 Notification authorization               NOT RECEIVED
 Annotation-index authorization           NOT RECEIVED
 Rebuild-family authorization             NOT RECEIVED
