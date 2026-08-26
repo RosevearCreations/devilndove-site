@@ -7,7 +7,7 @@
     "Preserves the three existing bronze/silver/gold rows, policy IDs, complete business values, AUTOINCREMENT sequence, UNIQUE tier constraint, and the reviewed sort index.",
     "Translates idx_membership_tier_policies_sort from legacy (sort_order, code) to canonical (sort_order, tier_code).",
     "Keeps Membership reads compatible before the Production swap while locking writes until the exact canonical schema is active.",
-    "Routes member tier-policy reads through the shared non-mutating compatibility service and aligns platform DB sanity with canonical policy_id.",
+    "Routes member tier-policy reads through the shared non-mutating compatibility service, aligns platform DB sanity with canonical policy_id, and removes the unreferenced root duplicate member/tier-policies.js.",
     "Keeps every later rebuild family and Production promotion separately locked."
   ],
   "changed_files": [
@@ -16,6 +16,7 @@
     "functions/api/admin/tier-policies.js",
     "functions/api/member/tier-policies.js",
     "functions/api/_lib/platformDbSanityReadService.js",
+    "member/tier-policies.js (removed)",
     "scripts/build436_membership_rebuild_authorization_preflight.py",
     "scripts/build436_production_membership_rebuild.py",
     "scripts/build436_membership_rebuild_regression.py",
