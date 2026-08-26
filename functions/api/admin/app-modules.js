@@ -46,7 +46,7 @@ export async function onRequestGet({ request, env }) {
     recovery_surface: true,
     notes: config.schema_ready
       ? 'Module changes are audited and never delete module business data.'
-      : 'Build 438 module schema is not applied yet. Current defaults remain active; writes are blocked.',
+      : 'Build 438 module schema is not applied yet or is unavailable. Writes are blocked.',
   });
 }
 
@@ -61,8 +61,10 @@ export async function onRequestPost({ request, env }) {
   if (!config.schema_ready) {
     return json({
       ok: false,
-      error: 'Build 438 application-module schema is not ready. Apply the canonical migration before changing module state.',
+      error: 'Build 438 application-module schema is not ready. Apply/restore the canonical module authority before changing module state.',
       code: 'app_module_schema_not_ready',
+      source: config.source || 'unknown',
+      reason: config.reason || null,
       build: BUILD,
     }, 409);
   }
@@ -86,19 +88,34 @@ export async function onRequestPost({ request, env }) {
 
     await db.prepare(`
       UPDATE app_modules
-      SET is_enabled=?, updated_at=CURRENT_TIMESTAMP
+      SET is_enabled=?,
+          background_activity_enabled=CASE WHEN ?=0 THEN 0 ELSE background_activity_enabled END,
+          updated_at=CURRENT_TIMESTAMP
       WHERE module_key=?
-    `).bind(isEnabled, moduleKey).run();
+    `).bind(isEnabled, isEnabled, moduleKey).run();
     clearModuleConfigCache();
 
+    const afterBackground = isEnabled ? Number(before.background_activity_enabled || 0) : 0;
     await auditAdminAction(env, request, auth.admin, {
       action_type: 'application_module_state_changed',
       target_type: 'app_module',
       target_key: moduleKey,
-      details: { before_is_enabled: Number(before.is_enabled || 0), after_is_enabled: isEnabled },
+      details: {
+        before_is_enabled: Number(before.is_enabled || 0),
+        after_is_enabled: isEnabled,
+        before_background_activity_enabled: Number(before.background_activity_enabled || 0),
+        after_background_activity_enabled: afterBackground,
+        background_cleared_by_disable: isEnabled === 0 && Number(before.background_activity_enabled || 0) === 1,
+      },
     });
 
-    return json({ ok: true, build: BUILD, module_key: moduleKey, is_enabled: isEnabled });
+    return json({
+      ok: true,
+      build: BUILD,
+      module_key: moduleKey,
+      is_enabled: isEnabled,
+      background_activity_enabled: afterBackground,
+    });
   }
 
   if (action === 'set_background_activity') {
@@ -107,6 +124,9 @@ export async function onRequestPost({ request, env }) {
 
     const before = await db.prepare('SELECT module_key,is_enabled,background_activity_enabled FROM app_modules WHERE module_key=? LIMIT 1').bind(moduleKey).first();
     if (!before) return json({ ok: false, error: 'Application module record was not found.' }, 404);
+    if (enabled === 1 && Number(before.is_enabled || 0) !== 1) {
+      return json({ ok: false, error: 'Enable the module before allowing module-owned background activity.', code: 'module_disabled_background_denied' }, 409);
+    }
 
     await db.prepare(`
       UPDATE app_modules
@@ -128,10 +148,14 @@ export async function onRequestPost({ request, env }) {
   if (action === 'set_role_access') {
     const roleCode = normalizeText(body?.role_code).toLowerCase();
     const isAllowed = boolInt(body?.is_allowed);
-    const accessLevel = normalizeText(body?.access_level).toLowerCase() || (isAllowed ? 'read' : 'none');
+    let accessLevel = normalizeText(body?.access_level).toLowerCase() || (isAllowed ? 'read' : 'none');
     if (!ALLOWED_ROLES.has(roleCode)) return json({ ok: false, error: 'role_code must be member or admin.' }, 400);
     if (isAllowed == null) return json({ ok: false, error: 'is_allowed must be true/false or 1/0.' }, 400);
     if (!ALLOWED_ACCESS_LEVELS.has(accessLevel)) return json({ ok: false, error: 'Unsupported access_level.' }, 400);
+    if (isAllowed === 0) accessLevel = 'none';
+    if (isAllowed === 1 && accessLevel === 'none') {
+      return json({ ok: false, error: 'An allowed role must have a non-none access_level.' }, 400);
+    }
 
     const before = await db.prepare(`
       SELECT module_key,role_code,is_allowed,access_level
