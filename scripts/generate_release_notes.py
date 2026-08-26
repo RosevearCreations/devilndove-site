@@ -3,8 +3,9 @@
 
 Build 437 uses data/site/current-release.json as the mutable release truth.
 Historical data/site/release-notes.json remains preserved as a fallback only when
-the current descriptor is absent. A stale previously generated manifest must not
-be allowed to overwrite the current release build label in the notes.
+the current descriptor is absent. Release notes intentionally do not depend on
+volatile values from a previously generated manifest because the manifest hashes
+RELEASE_NOTES.md; generate notes first, then regenerate the manifest.
 """
 from __future__ import annotations
 
@@ -41,9 +42,6 @@ if manifest_path.exists():
         manifest = {}
 
 release_build = str(data.get('build_label') or 'Release Notes')
-manifest_build = str(manifest.get('build_label') or '').strip()
-manifest_scope = str(manifest.get('source_scope') or '').strip()
-manifest_current = manifest_build == release_build
 
 changed = data.get('changed_files', [])
 if not changed and manifest.get('files'):
@@ -76,21 +74,15 @@ if isinstance(production, dict) and production:
             rendered = json.dumps(value, ensure_ascii=False) if isinstance(value, (list, dict)) else str(value)
             lines.append(f'- {label}: `{rendered}`')
 
-if manifest_path.exists():
-    lines += [
-        '',
-        '## Release package manifest',
-        '',
-        '- Static manifest: `data/site/release-package-manifest.json`',
-        f'- Manifest build label: `{release_build}`',
-    ]
-    if manifest_current:
-        lines.append(f'- Manifest file count: `{manifest.get("file_count", "unknown")}`')
-        if manifest_scope:
-            lines.append(f'- Manifest source scope: `{manifest_scope}`')
-    else:
-        lines.append('- Manifest status: `STALE — regenerate for the current release before packaging/deployment`')
-    lines.append('- Regenerate the manifest after source/release-note changes so hashes are current.')
+lines += [
+    '',
+    '## Release package manifest',
+    '',
+    '- Static manifest: `data/site/release-package-manifest.json`',
+    f'- Manifest build label: `{release_build}`',
+    '- Manifest source scope: `git_tracked_release_files`',
+    '- Generation order: regenerate `RELEASE_NOTES.md` first, then regenerate the manifest so the manifest hashes the final notes.',
+]
 
 lines += ['', '## Changed files', ''] + [f"- `{x}`" for x in changed]
 lines += ['', '## D1 migration summary', ''] + [f"- {x}" for x in data.get('d1_migrations', [])]
@@ -107,6 +99,7 @@ if validation:
 print(json.dumps({
     'release_notes': 'RELEASE_NOTES.md',
     'build_label': release_build,
-    'manifest_current': manifest_current,
+    'manifest_source_scope': 'git_tracked_release_files',
+    'next': 'run scripts/generate_release_manifest.py after these notes are final',
     'source': current_path.relative_to(root).as_posix() if current_path.exists() else history_path.relative_to(root).as_posix(),
 }, indent=2))
