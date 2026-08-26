@@ -11,6 +11,7 @@ MIGRATION = ROOT / 'database_membership_tier_policy_runtime_parity.sql'
 READ_SERVICE = ROOT / 'functions/api/_lib/membershipTierPolicyReadService.js'
 ADMIN_API = ROOT / 'functions/api/admin/tier-policies.js'
 MEMBER_API = ROOT / 'functions/api/member/tier-policies.js'
+STALE_MEMBER_DUPLICATE = ROOT / 'member/tier-policies.js'
 DB_SANITY = ROOT / 'functions/api/_lib/platformDbSanityReadService.js'
 PREFLIGHT = ROOT / 'scripts/build436_membership_rebuild_authorization_preflight.py'
 CONTROLLER = ROOT / 'scripts/build436_production_membership_rebuild.py'
@@ -66,7 +67,7 @@ def main() -> int:
     check('readMembershipTierPolicySchemaState' in read_service and 'canonical_schema_ready' in read_service, 'shared service exposes non-mutating canonical write readiness')
     check('const MUTATION_BUILD = 437;' in admin_api and 'readMembershipTierPolicySchemaState' in admin_api and 'if (!schemaState.canonical_schema_ready)' in admin_api, 'admin Membership writes fail closed until canonical schema is active')
     check('CREATE TABLE membership_tier_policies' not in admin_api and 'ALTER TABLE membership_tier_policies' not in admin_api, 'admin request handler performs no Membership DDL')
-    check('readMembershipTierPolicies' in member_api and 'FROM membership_tier_policies' not in member_api, 'member tier-policy endpoint uses the shared compatibility read service')
+    check('readMembershipTierPolicies' in member_api and 'FROM membership_tier_policies' not in member_api and not STALE_MEMBER_DUPLICATE.exists(), 'member endpoint uses shared compatibility reads and the stale root duplicate is retired')
     check("membership_tier_policies: ['policy_id']" in db_sanity, 'platform DB sanity expects canonical Membership policy_id')
     check("'membership_tier_policies'" in db_sanity and 'membership_tier_policies' in db_sanity.split('indexChecks', 1)[1], 'platform DB sanity includes Membership index visibility')
     check('legacy_sort_index_compatible' in preflight and "LEGACY_SORT_COLUMNS = ['sort_order', 'code']" in preflight and 'no_unhandled_user_objects' in preflight, 'preflight handles only the reviewed legacy sort index')
@@ -92,6 +93,7 @@ def main() -> int:
     print('Legacy/canonical read compatibility: PASS')
     print('Canonical write readiness gate: PASS')
     print('Member/admin runtime alignment: PASS')
+    print('Stale duplicate Membership endpoint: RETIRED')
     print('DB sanity Membership identity: CANONICAL')
     print('Guarded lossless rebuild + sort-index preservation: SOURCE-GATED')
     print('Membership Production authorization inferred: NO')
