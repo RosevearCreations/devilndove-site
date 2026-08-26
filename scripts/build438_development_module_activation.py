@@ -7,6 +7,7 @@ mode and refuses to run outside branch `dev` or against a different wrangler.tom
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from pathlib import Path
 import re
@@ -21,6 +22,17 @@ VERIFY = ROOT / 'BUILD438_D1_VERIFICATION.sql'
 DATABASE = 'devilndove-dev'
 EXPECTED_DATABASE_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'
 WRANGLER_VERSION = '4.126.0'
+EXPECTED_MODULE_KEYS = 'business-administration|commerce-operations|creative-production'
+
+STRICT_VERIFY_SQL = """
+SELECT
+  (SELECT COUNT(*) FROM app_modules) AS module_count,
+  (SELECT COUNT(*) FROM app_module_role_access) AS role_access_count,
+  (SELECT COUNT(*) FROM app_modules WHERE is_enabled=1) AS enabled_module_count,
+  (SELECT COUNT(*) FROM app_modules WHERE background_activity_enabled=1) AS background_enabled_count,
+  (SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND name IN ('idx_app_modules_enabled_priority','idx_app_module_role_access_role')) AS expected_index_count,
+  (SELECT group_concat(module_key, '|') FROM (SELECT module_key FROM app_modules ORDER BY module_key)) AS module_keys;
+""".strip()
 
 
 def fail(message: str, code: int = 1) -> None:
@@ -28,7 +40,7 @@ def fail(message: str, code: int = 1) -> None:
     raise SystemExit(code)
 
 
-def run(args: list[str]) -> subprocess.CompletedProcess[str]:
+def run(args: list[str], *, echo: bool = True) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         args,
         cwd=ROOT,
@@ -40,7 +52,8 @@ def run(args: list[str]) -> subprocess.CompletedProcess[str]:
         env={**os.environ, 'NO_COLOR': '1', 'FORCE_COLOR': '0'},
         check=False,
     )
-    print(result.stdout, end='' if result.stdout.endswith('\n') else '\n')
+    if echo:
+        print(result.stdout, end='' if result.stdout.endswith('\n') else '\n')
     return result
 
 
@@ -52,10 +65,7 @@ def npx() -> str:
 
 
 def require_dev_branch() -> None:
-    result = subprocess.run(
-        ['git', 'branch', '--show-current'], cwd=ROOT, text=True,
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
-    )
+    result = run(['git', 'branch', '--show-current'], echo=False)
     if result.returncode != 0:
         fail('Could not determine the current Git branch.')
     branch = result.stdout.strip()
@@ -79,12 +89,20 @@ def require_exact_dev_config() -> None:
         )
 
 
-def command(file_path: Path) -> list[str]:
+def base_command() -> list[str]:
     return [
         npx(), '--yes', f'wrangler@{WRANGLER_VERSION}',
         'd1', 'execute', DATABASE,
-        '--remote', '--config', str(CONFIG), '--file', str(file_path), '--yes',
+        '--remote', '--config', str(CONFIG), '--yes',
     ]
+
+
+def file_command(file_path: Path) -> list[str]:
+    return [*base_command(), '--file', str(file_path)]
+
+
+def json_command(sql: str) -> list[str]:
+    return [*base_command(), '--command', sql, '--json']
 
 
 def auth_check() -> None:
@@ -93,18 +111,44 @@ def auth_check() -> None:
         fail('Wrangler authentication check failed. No D1 command was attempted.')
 
 
+def classify_failure(result: subprocess.CompletedProcess[str], label: str) -> None:
+    lower = (result.stdout or '').lower()
+    if '7403' in lower or '7500' in lower or 'not authorized' in lower or 'sqlite_auth' in lower:
+        fail(f'Cloudflare authorization blocked {label}. Treat this as an access interruption; do not infer schema failure.')
+    fail(f'{label} failed with exit code {result.returncode}.')
+
+
+def parse_json_payload(output: str) -> list[dict]:
+    decoder = json.JSONDecoder()
+    for index, char in enumerate(output):
+        if char != '[':
+            continue
+        try:
+            value, _ = decoder.raw_decode(output[index:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, list):
+            return [item for item in value if isinstance(item, dict)]
+    return []
+
+
+def first_result_row(payload: list[dict]) -> dict | None:
+    for item in payload:
+        results = item.get('results')
+        if isinstance(results, list) and results and isinstance(results[0], dict):
+            return results[0]
+    return None
+
+
 def apply() -> None:
     if not MIGRATION.exists():
         fail(f'Missing migration: {MIGRATION.name}')
     print('=== BUILD 438 DEVELOPMENT MODULE AUTHORITY APPLY ===')
     print(f'Target: {DATABASE} ({EXPECTED_DATABASE_ID})')
     print('Production target capability: NONE')
-    result = run(command(MIGRATION))
+    result = run(file_command(MIGRATION))
     if result.returncode != 0:
-        lower = (result.stdout or '').lower()
-        if '7403' in lower or '7500' in lower or 'not authorized' in lower or 'sqlite_auth' in lower:
-            fail('Cloudflare authorization blocked the Development migration. Treat this as an access interruption; do not infer schema failure.')
-        fail(f'Development migration failed with exit code {result.returncode}.')
+        classify_failure(result, 'the Development migration')
     print('BUILD 438 DEVELOPMENT MODULE AUTHORITY APPLY: PASS')
 
 
@@ -113,13 +157,47 @@ def verify() -> None:
         fail(f'Missing verification SQL: {VERIFY.name}')
     print('=== BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION ===')
     print(f'Target: {DATABASE} ({EXPECTED_DATABASE_ID})')
-    result = run(command(VERIFY))
-    if result.returncode != 0:
-        lower = (result.stdout or '').lower()
-        if '7403' in lower or '7500' in lower or 'not authorized' in lower or 'sqlite_auth' in lower:
-            fail('Cloudflare authorization blocked the Development verification. Treat this as an access interruption; no Production action is implied.')
-        fail(f'Development verification failed with exit code {result.returncode}.')
-    print('BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION: PASS')
+
+    human = run(file_command(VERIFY))
+    if human.returncode != 0:
+        classify_failure(human, 'the Development verification SQL')
+
+    print('\n=== BUILD 438 STRICT MACHINE VERIFICATION ===')
+    strict = run(json_command(STRICT_VERIFY_SQL), echo=False)
+    if strict.returncode != 0:
+        print(strict.stdout, end='' if strict.stdout.endswith('\n') else '\n')
+        classify_failure(strict, 'the strict Development module verification')
+
+    payload = parse_json_payload(strict.stdout or '')
+    row = first_result_row(payload)
+    if not row:
+        print(strict.stdout, end='' if strict.stdout.endswith('\n') else '\n')
+        fail('Strict verification returned no parseable D1 result row.')
+
+    actual = {
+        'module_count': int(row.get('module_count') or 0),
+        'role_access_count': int(row.get('role_access_count') or 0),
+        'enabled_module_count': int(row.get('enabled_module_count') or 0),
+        'background_enabled_count': int(row.get('background_enabled_count') or 0),
+        'expected_index_count': int(row.get('expected_index_count') or 0),
+        'module_keys': str(row.get('module_keys') or ''),
+    }
+    expected = {
+        'module_count': 3,
+        'role_access_count': 6,
+        'enabled_module_count': 3,
+        'background_enabled_count': 0,
+        'expected_index_count': 2,
+        'module_keys': EXPECTED_MODULE_KEYS,
+    }
+
+    for key in expected:
+        print(f'{key}: {actual[key]}')
+    mismatches = [key for key, value in expected.items() if actual.get(key) != value]
+    if mismatches:
+        fail('Strict Development verification mismatch: ' + ', '.join(mismatches))
+
+    print('BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION: PASS / EXACT')
 
 
 def main() -> int:
