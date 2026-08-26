@@ -2,19 +2,9 @@
 
 ## Status
 
-**SOURCE/RUNTIME/REBUILD PACKAGE COMPLETE / PRODUCTION MEMBERSHIP REBUILD AUTHORIZATION RECEIVED / FINAL GUARDED EXECUTION PENDING / PRODUCTION PROMOTION CLOSED**
+**SOURCE/RUNTIME/REBUILD PACKAGE COMPLETE / PRODUCTION MEMBERSHIP REBUILD AUTHORIZATION RECEIVED / SQL-GUARD TRANSPORT REPAIRED / AUTHORIZED EXECUTION PENDING / PRODUCTION PROMOTION CLOSED**
 
 Build 437 supersedes the fragmented Membership working notes from Builds 434–436 as the current Membership completion authority. Those earlier artifacts remain historical evidence only.
-
-## Authorization state
-
-The owner explicitly supplied the exact Membership-only Production authorization token:
-
-```text
-AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
-```
-
-Authorization is now **RECEIVED / UNSPENT** and applies only to the guarded Membership Build 395 rebuild described below. It does not authorize Fractional Inventory/Creative Project rebuilds, Product/FK rebuilds, Accounting/default/nullability rebuilds, R2/provider mutation, CAIP copying, or Production promotion.
 
 ## What is complete in source
 
@@ -31,13 +21,15 @@ Authorization is now **RECEIVED / UNSPENT** and applies only to the guarded Memb
 11. Platform DB Sanity now expects canonical `policy_id`.
 12. Platform DB Sanity includes Membership in index visibility.
 13. Build 436 D1-compatible fixed-table FK discovery remains enforced.
-14. Build 436 rebuild simulation now includes the real legacy sort index and proves canonical preservation.
+14. Build 436 rebuild simulation includes the real legacy sort index and proves canonical preservation.
 15. Build 436 authorization gate accepts only that reviewed sort index and still blocks every other unknown user object.
 16. Build 437 adds one consolidated 20-check Membership release regression.
 17. `data/site/current-release.json` is the current Build 437 release descriptor.
-18. Release-note generation now reads the current release descriptor while preserving historical release data separately.
-19. Release manifest generation now labels the tree as Build 437.
+18. Release-note generation reads the current release descriptor while preserving historical release data separately.
+19. Release manifest generation labels the tree as Build 437.
 20. Every later rebuild family and Production promotion remains separately locked.
+21. Build 437 repairs Build 418 compatibility for sort-index metadata reads by using `SELECT ... FROM pragma_index_info(...)` instead of direct `PRAGMA index_info(...)`.
+22. `scripts/build437_production_membership_rebuild.py` wraps the guarded controller so post-write sort-index verification uses the same accepted read-only query form.
 
 ## Proven Production legacy boundary
 
@@ -59,23 +51,53 @@ Legacy user object: idx_membership_tier_policies_sort
 Legacy index columns: sort_order, code
 ```
 
-No Membership backup has been created and no Membership Production mutation has occurred yet.
+## Owner authorization
 
-## Exact authorized Production scope
+The owner supplied the exact Membership Production token:
 
-The authorized Membership rebuild may only transform:
+```text
+AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
+```
+
+Authorization scope is Membership Build 395 rebuild only. It does not authorize Fractional Inventory/Creative Project, Product/FK, Accounting/default/nullability, R2/provider, CAIP-copy, or broad Production promotion work.
+
+The token remains **RECEIVED / UNSPENT** until the guarded Membership Production rebuild actually executes successfully.
+
+## Safe execution-stop evidence
+
+Two authorized attempts stopped before backup/export or DDL because the Build 418 read-only SQL guard rejected direct:
+
+```sql
+PRAGMA index_info("idx_membership_tier_policies_sort");
+```
+
+This was a query-form/transport guard issue, not schema drift. Both attempts re-proved the three source rows and source fingerprint first; no backup was created and no Production mutation occurred.
+
+Build 437 now uses the equivalent guard-compatible form:
+
+```sql
+SELECT seqno,cid,name
+FROM pragma_index_info('idx_membership_tier_policies_sort')
+ORDER BY seqno;
+```
+
+The same compatibility repair applies to the post-write index verifier through `scripts/build437_production_membership_rebuild.py`.
+
+## Exact final Production scope
+
+The final authorized Membership rebuild may only transform:
 
 ```text
 membership_tier_policy_id -> policy_id
 code                      -> tier_code
 name/display_title         -> title (exact equality already proven)
-short_description         -> short_description
-benefits_json             -> benefits_json
-badge_color               -> badge_color
-sort_order                -> sort_order
-is_visible                -> is_visible
-created_at                -> created_at
-updated_at                -> updated_at
+short_description          -> short_description
+benefits_json              -> benefits_json
+badge_color                -> badge_color
+sort_order                 -> sort_order
+is_visible                 -> is_visible
+created_at                 -> created_at
+updated_at                 -> updated_at
 ```
 
 and recreate:
@@ -87,9 +109,19 @@ CREATE INDEX idx_membership_tier_policies_sort
 
 No Build 395 seed value may overwrite an existing Production business value.
 
-## One final owner-run sequence — AUTHORIZED
+## Exact authorization token
 
-Use this one guarded command chain only:
+Only this literal token authorizes the Membership Production rebuild:
+
+```text
+AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
+```
+
+The owner has supplied it. It is valid only for the exact Membership scope above and becomes spent after a successful Membership rebuild/postcheck.
+
+## One final owner-run sequence
+
+Use one guarded command chain only:
 
 ```bash
 cd /c/Dev/devilndove-site
@@ -102,6 +134,7 @@ python -m py_compile \
   scripts/build435_membership_value_mapping_preflight.py \
   scripts/build436_membership_rebuild_authorization_preflight.py \
   scripts/build436_production_membership_rebuild.py \
+  scripts/build437_production_membership_rebuild.py \
   scripts/build436_membership_rebuild_regression.py \
   scripts/build436_membership_rebuild_authorization_gate.py \
   scripts/build437_membership_release_regression.py \
@@ -112,15 +145,15 @@ python -m py_compile \
 && python -u scripts/build436_membership_rebuild_authorization_preflight.py --run \
   2>&1 | tee build437_membership_final_preflight.txt \
 && python scripts/build436_membership_rebuild_authorization_gate.py \
-&& python -u scripts/build436_production_membership_rebuild.py \
+&& python -u scripts/build437_production_membership_rebuild.py \
   --backup \
   --confirm AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD \
   2>&1 | tee build437_membership_backup.txt \
-&& python -u scripts/build436_production_membership_rebuild.py \
+&& python -u scripts/build437_production_membership_rebuild.py \
   --apply \
   --confirm AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD \
   2>&1 | tee build437_membership_apply.txt \
-&& python -u scripts/build436_production_membership_rebuild.py \
+&& python -u scripts/build437_production_membership_rebuild.py \
   --postcheck \
   2>&1 | tee build437_membership_postcheck.txt \
 && python scripts/generate_release_notes.py \
@@ -145,11 +178,11 @@ Canonical values fingerprint preserved: True
 PRODUCTION PROMOTION: CLOSED
 ```
 
-If any command fails, stop at that command. If Cloudflare returns an authorization error before DDL, treat it as a safe access interruption. If an error occurs after DDL may have started, do not rerun `--apply`; run only the read-only `--postcheck` and retain the completed backup.
+If any command fails before `--apply`, no Membership DDL has executed. If Cloudflare returns an authorization error before DDL, treat it as a safe access interruption. If an error occurs after `--apply` may have begun, do not rerun `--apply`; run only the read-only `--postcheck` and retain the completed backup.
 
 ## Release state after successful final execution
 
-After the successful final sequence, Membership is considered **COMPLETE / PROVEN** and this Membership-specific authorization token becomes **SPENT / COMPLETE**. The next work may move to another feature or family without continuing Membership micro-gates.
+After the successful final sequence, Membership is **COMPLETE / PROVEN** and the Membership-specific authorization token is spent. The next work may move to another feature or family without continuing Membership micro-gates.
 
 The following remain explicitly outside Membership authorization:
 
