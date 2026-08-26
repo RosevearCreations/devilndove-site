@@ -56,6 +56,7 @@ Production is not a target of this validation pass.
 
 - `scripts/build438_application_module_core_regression.py`
 - `scripts/build438_module_route_map_test.mjs`
+- `scripts/build438_module_catalog_alignment_test.mjs`
 - `scripts/build438_development_module_activation.py`
 - `BUILD438_APPLICATION_CORE_MODULE_PLAN.md`
 - `AI_HANDOFF.md`
@@ -78,6 +79,7 @@ python -m py_compile \
 
 python scripts/build438_application_module_core_regression.py
 node scripts/build438_module_route_map_test.mjs
+node scripts/build438_module_catalog_alignment_test.mjs
 
 node --check functions/_middleware.js
 node --check functions/api/_lib/appModules.js
@@ -108,11 +110,13 @@ Production D1 migration executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-Route matrix should finish:
+Route checks should finish:
 
 ```text
-BUILD 438 MODULE ROUTE MAP TEST: PASS
+BUILD 438 MODULE ROUTE MAP TEST: PASS (... routes)
+BUILD 438 MODULE CATALOG ALIGNMENT TEST: PASS (.../...)
 Core recovery/auth surfaces: UNOWNED / AVAILABLE
+Existing Build 305 domain catalog -> Build 438 server top-level ownership: ALIGNED
 Production mutation capability: NONE
 ```
 
@@ -241,6 +245,10 @@ code: module_access_level_read_only
 
 4. Restore Admin access to `manage`.
 
+### Data preservation proof
+
+Before/after toggling, compare representative business row counts for the affected module. Module-control changes must only modify `app_modules`, `app_module_role_access` and audit evidence. No Catalog, Inventory, Creative, CAIP, Packaging, Content, Accounting, Orders, Membership or other business records may be deleted because a module was disabled.
+
 ### Module-authority failure behavior
 
 Build 438 intentionally distinguishes:
@@ -252,6 +260,12 @@ transient D1/config failure   -> last-known module state, otherwise fail closed
 ```
 
 A real module-authority read failure must never silently turn a disabled module back on.
+
+## Public-shell scope
+
+Build 438 gates concrete transactional/customer Commerce surfaces such as Shop, Cart, Checkout, Product/Member workflows and their APIs. The unrelated informational/static public shell (for example About/Gallery-style pages) is intentionally not globally disabled by the Commerce switch in this first activation release.
+
+This keeps a public informational presence available while Commerce can be taken offline. If a later business requirement calls for a full public-site maintenance switch, add that deliberately rather than overloading the transactional module flag.
 
 ## Audit behavior
 
@@ -269,7 +283,7 @@ Disabling a module must never delete its Catalog, Inventory, Order, Membership, 
 
 Build 438 adds no recurring polling loop.
 
-- Admin `/api/modules` is one bootstrap read and explicit refresh after control changes.
+- Admin `/api/modules` is one bootstrap read and explicit fresh refresh after control changes.
 - Public/member visibility uses a short per-tab `sessionStorage` cache rather than one Worker request for every public navigation.
 - server module config cache is brief and non-user-specific;
 - session/user identity stays request-scoped;
@@ -305,12 +319,13 @@ Build 438 may be called Development-proven only after:
 
 1. local 20/20 regression passes;
 2. executable route matrix passes;
-3. JS/Python syntax checks pass;
-4. Development D1 migration succeeds;
-5. D1 verification proves exact three-module/six-role state;
-6. all three modules pass disable/re-enable direct page/API proof;
-7. recovery surface remains reachable;
-8. read-only access-level enforcement is proven;
-9. business data preservation is proven;
-10. no new recurring background traffic is observed;
-11. canonical Markdown is updated with owner-run Development evidence.
+3. existing client-domain catalog/server ownership alignment passes;
+4. JS/Python syntax checks pass;
+5. Development D1 migration succeeds;
+6. D1 verification proves exact three-module/six-role state;
+7. all three modules pass disable/re-enable direct page/API proof;
+8. recovery surface remains reachable;
+9. read-only access-level enforcement is proven;
+10. business data preservation is proven;
+11. no new recurring background traffic is observed;
+12. canonical Markdown is updated with owner-run Development evidence.
