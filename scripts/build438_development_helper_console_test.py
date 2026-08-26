@@ -8,6 +8,7 @@ import sqlite3
 
 ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / 'scripts' / 'build438_development_module_activation.py'
+STRICT_VERIFY = ROOT / 'BUILD438_D1_STRICT_VERIFICATION.sql'
 
 spec = importlib.util.spec_from_file_location('build438_dev_helper', HELPER)
 if spec is None or spec.loader is None:
@@ -15,6 +16,7 @@ if spec is None or spec.loader is None:
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 source = HELPER.read_text(encoding='utf-8')
+strict_sql = STRICT_VERIFY.read_text(encoding='utf-8') if STRICT_VERIFY.exists() else ''
 
 
 class Cp1252Probe:
@@ -38,8 +40,8 @@ probe = Cp1252Probe()
 module.emit_output('Wrangler ✓ — authenticated 😀', stream=probe)
 rendered = ''.join(probe.parts)
 
-# Execute the exact strict SQL locally so Windows argument hardening cannot hide a
-# malformed verification query. char(124) must still produce the expected | join.
+# Execute the exact strict SQL file locally so file transport cannot hide a malformed
+# verification query. char(124) must still produce the expected | join.
 conn = sqlite3.connect(':memory:')
 try:
     conn.executescript('''
@@ -66,18 +68,20 @@ try:
         ('creative-production','admin'),
         ('creative-production','member');
     ''')
-    strict_row = conn.execute(module.STRICT_VERIFY_SQL).fetchone()
+    strict_row = conn.execute(strict_sql).fetchone()
 finally:
     conn.close()
 
+json_file_args = module.json_file_command(module.STRICT_VERIFY)
 checks = [
     ('emit_output helper exists', callable(getattr(module, 'emit_output', None))),
     ('CP1252 probe received output', bool(rendered)),
     ('unsupported Unicode was replaced safely', '?' in rendered),
     ('captured subprocess path remains UTF-8 decoded', "encoding='utf-8'" in source),
     ('subprocess decoding uses replacement protection', "errors='replace'" in source),
-    ('strict SQL avoids literal Windows pipe metacharacter', "char(124)" in module.STRICT_VERIFY_SQL and "'|'" not in module.STRICT_VERIFY_SQL),
-    ('strict SQL executes locally and preserves exact module-key join', bool(strict_row) and strict_row[0:5] == (3, 6, 3, 0, 2) and strict_row[5] == module.EXPECTED_MODULE_KEYS),
+    ('strict verification moved out of Windows --command transport', '--command' not in json_file_args and '--file' in json_file_args and '--json' in json_file_args),
+    ('strict SQL file avoids literal Windows pipe metacharacter', 'char(124)' in strict_sql and "'|'" not in strict_sql),
+    ('strict SQL file executes locally and preserves exact module-key join', bool(strict_row) and strict_row[0:5] == (3, 6, 3, 0, 2) and strict_row[5] == module.EXPECTED_MODULE_KEYS),
     ('bare D1 code 7500 is not classified as authorization', "'7500' in lower" not in source and "'sqlite_error' in lower" in source),
 ]
 
@@ -96,6 +100,7 @@ if failures:
 
 print(f'BUILD 438 DEVELOPMENT HELPER CONSOLE/STRICT QUERY TEST: PASS ({len(checks)}/{len(checks)})')
 print('Windows CP1252 UnicodeEncodeError path: PREVENTED')
-print('Windows npx.cmd literal-pipe truncation path: PREVENTED')
+print('Windows npx.cmd --command truncation path: REMOVED')
+print('Strict D1 verification transport: FILE-BASED')
 print('D1 7500 SQLite error misclassification: PREVENTED')
 print('Cloudflare/D1 access: NONE')
