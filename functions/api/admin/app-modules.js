@@ -9,10 +9,15 @@ import {
   clearModuleConfigCache,
   readModuleConfig,
 } from '../_lib/appModules.js';
+import { snapshotRouteOwnership } from '../_lib/appModuleRoutes.js';
 
 const ALLOWED_MODULES = new Set(Object.values(MODULE_KEYS));
 const ALLOWED_ROLES = new Set(['member', 'admin']);
 const ALLOWED_ACCESS_LEVELS = new Set(['none', 'read', 'member', 'manage']);
+const EXPECTED_MODULE_KEYS = Object.freeze([...ALLOWED_MODULES].sort());
+const EXPECTED_ROLE_KEYS = Object.freeze(
+  EXPECTED_MODULE_KEYS.flatMap((moduleKey) => ['admin', 'member'].map((role) => `${moduleKey}:${role}`)).sort()
+);
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { 'Cache-Control': 'no-store' });
@@ -22,6 +27,60 @@ function boolInt(value) {
   if (value === true || value === 1 || value === '1') return 1;
   if (value === false || value === 0 || value === '0') return 0;
   return null;
+}
+
+function diagnosticsFor(config) {
+  const modules = Array.isArray(config?.modules) ? config.modules : [];
+  const roleAccess = Array.isArray(config?.role_access) ? config.role_access : [];
+  const moduleKeys = modules.map((row) => normalizeText(row?.module_key).toLowerCase()).filter(Boolean).sort();
+  const roleKeys = roleAccess.map((row) => `${normalizeText(row?.module_key).toLowerCase()}:${normalizeText(row?.role_code).toLowerCase()}`).sort();
+  const missingModules = EXPECTED_MODULE_KEYS.filter((key) => !moduleKeys.includes(key));
+  const unexpectedModules = moduleKeys.filter((key) => !EXPECTED_MODULE_KEYS.includes(key));
+  const missingRoleRows = EXPECTED_ROLE_KEYS.filter((key) => !roleKeys.includes(key));
+  const unexpectedRoleRows = roleKeys.filter((key) => !EXPECTED_ROLE_KEYS.includes(key));
+  const invalidRoleRows = roleAccess.filter((row) => {
+    const allowed = Number(row?.is_allowed || 0) === 1;
+    const level = normalizeText(row?.access_level).toLowerCase() || 'none';
+    return (allowed && level === 'none') || (!allowed && level !== 'none') || !ALLOWED_ACCESS_LEVELS.has(level);
+  });
+  const disabledWithBackground = modules.filter((row) => Number(row?.is_enabled || 0) !== 1 && Number(row?.background_activity_enabled || 0) === 1);
+  const adminRecoveryRisks = EXPECTED_MODULE_KEYS.filter((moduleKey) => {
+    const row = roleAccess.find((entry) => normalizeText(entry?.module_key).toLowerCase() === moduleKey && normalizeText(entry?.role_code).toLowerCase() === 'admin');
+    return !row || Number(row.is_allowed || 0) !== 1 || normalizeText(row.access_level).toLowerCase() === 'none';
+  });
+  const routeSnapshot = snapshotRouteOwnership();
+
+  const healthy = Boolean(
+    config?.schema_ready &&
+    modules.length === EXPECTED_MODULE_KEYS.length &&
+    roleAccess.length === EXPECTED_ROLE_KEYS.length &&
+    missingModules.length === 0 &&
+    unexpectedModules.length === 0 &&
+    missingRoleRows.length === 0 &&
+    unexpectedRoleRows.length === 0 &&
+    invalidRoleRows.length === 0 &&
+    disabledWithBackground.length === 0 &&
+    adminRecoveryRisks.length === 0 &&
+    routeSnapshot.sharedServiceContracts?.length === 7
+  );
+
+  return {
+    healthy,
+    module_count: modules.length,
+    expected_module_count: EXPECTED_MODULE_KEYS.length,
+    role_access_count: roleAccess.length,
+    expected_role_access_count: EXPECTED_ROLE_KEYS.length,
+    enabled_module_count: modules.filter((row) => Number(row?.is_enabled || 0) === 1).length,
+    background_enabled_count: modules.filter((row) => Number(row?.background_activity_enabled || 0) === 1).length,
+    shared_service_contract_count: Number(routeSnapshot.sharedServiceContracts?.length || 0),
+    missing_modules: missingModules,
+    unexpected_modules: unexpectedModules,
+    missing_role_rows: missingRoleRows,
+    unexpected_role_rows: unexpectedRoleRows,
+    invalid_role_rows: invalidRoleRows.map((row) => `${row.module_key}:${row.role_code}`),
+    disabled_with_background: disabledWithBackground.map((row) => row.module_key),
+    admin_recovery_risks: adminRecoveryRisks,
+  };
 }
 
 async function requireAdmin(request, env) {
@@ -43,6 +102,7 @@ export async function onRequestGet({ request, env }) {
     reason: config.reason || null,
     modules: config.modules,
     role_access: config.role_access,
+    diagnostics: diagnosticsFor(config),
     recovery_surface: true,
     notes: config.schema_ready
       ? 'Module changes are audited and never delete module business data.'
@@ -125,7 +185,7 @@ export async function onRequestPost({ request, env }) {
     const before = await db.prepare('SELECT module_key,is_enabled,background_activity_enabled FROM app_modules WHERE module_key=? LIMIT 1').bind(moduleKey).first();
     if (!before) return json({ ok: false, error: 'Application module record was not found.' }, 404);
     if (enabled === 1 && Number(before.is_enabled || 0) !== 1) {
-      return json({ ok: false, error: 'Enable the module before allowing module-owned background activity.', code: 'module_disabled_background_denied' }, 409);
+      return json({ ok: false, error: 'Enable the module before allowing module-owned background activity.', code: 'inactive_module_background_forbidden' }, 409);
     }
 
     await db.prepare(`
