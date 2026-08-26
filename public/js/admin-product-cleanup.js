@@ -1,4 +1,4 @@
-// Build 232 — bounded draft/archive cleanup preflight with safe API response parsing.
+// Build 440 — bounded draft/archive cleanup preflight with Product Delete Reference Inspector.
 (() => {
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
   let products = [];
@@ -84,7 +84,7 @@
     const deleteButton = document.querySelector(`[data-cleanup-delete="${productId}"]`);
     if (deleteButton) deleteButton.disabled = true;
     if (result) result.innerHTML = '<span class="small">Checking references…</span>';
-    const response = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`);
+    const response = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`, { cache: 'no-store' });
     const data = await readApiJson(response, 'Removal preflight failed.');
     const blockers = Array.isArray(data.blocking_references) ? data.blocking_references : [];
     const materials = Array.isArray(data.materials) ? data.materials : [];
@@ -93,7 +93,7 @@
     const allowed = historyAllowsRemoval && materialReviewRows.length === 0;
     if (result) {
       if (!historyAllowsRemoval) {
-        result.innerHTML = `<span class="status-pill is-error">Archive only</span><p class="small">Protected history: ${blockers.map((row) => `${Number(row.count || 0)} ${esc(row.table_name || 'record')}`).join(', ') || 'one or more business records'}.</p>`;
+        result.innerHTML = `<span class="status-pill is-error">Archive only</span><p class="small">${blockers.length} protected reference type${blockers.length === 1 ? '' : 's'} found. Open the reference inspector to see why each record is retained and where to review it.</p><button class="btn" type="button" data-cleanup-inspect="${productId}">Inspect protected references</button>`;
       } else if (materialReviewRows.length) {
         result.innerHTML = `<span class="status-pill is-warning">Inventory review required</span><p class="small">${materialReviewRows.length} linked material row(s) may involve reserved stock. Review the quantities before removal.</p><button class="btn" type="button" data-open-product-correction="${productId}">Review linked materials &amp; remove</button>`;
       } else {
@@ -104,6 +104,10 @@
       }
     }
     if (deleteButton) deleteButton.disabled = !allowed;
+    if (!historyAllowsRemoval && window.DDProductReferenceInspector?.open) {
+      const product = products.find((row) => Number(row.product_id) === Number(productId));
+      window.DDProductReferenceInspector.open(data, { productId, productName: label(product || data.product || {}) });
+    }
     return { data, allowed, materialReviewRows };
   }
   async function remove(productId) {
@@ -145,16 +149,20 @@
     node('productCleanupStatus')?.addEventListener('change', render);
     node('productCleanupList')?.addEventListener('click', async (event) => {
       const check = event.target.closest('[data-cleanup-preflight]');
+      const inspect = event.target.closest('[data-cleanup-inspect]');
       const removeButton = event.target.closest('[data-cleanup-delete]');
       const archiveButton = event.target.closest('[data-cleanup-archive]');
       try {
         if (check) await preflight(Number(check.dataset.cleanupPreflight || 0));
+        if (inspect) await preflight(Number(inspect.dataset.cleanupInspect || 0));
         if (removeButton) await remove(Number(removeButton.dataset.cleanupDelete || 0));
         if (archiveButton) await archive(Number(archiveButton.dataset.cleanupArchive || 0));
       } catch (error) { message(error.message || 'Cleanup action failed.', 'error'); }
     });
     document.addEventListener('dd:product-created', load);
     document.addEventListener('dd:product-updated', load);
+    document.addEventListener('dd:product-archived', load);
+    document.addEventListener('dd:product-deleted', load);
   }
   document.addEventListener('DOMContentLoaded', () => { bind(); load(); });
 })();
