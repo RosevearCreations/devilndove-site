@@ -27,6 +27,18 @@ function isReadMethod(method) {
   return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase());
 }
 
+function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) {
+  const headers = new Headers(response.headers);
+  headers.set('X-DND-Module-Guard', String(BUILD));
+  if (moduleKey) headers.set('X-DND-Module-Key', moduleKey);
+  if (contractPath) headers.set('X-DND-Shared-Contract', contractPath);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 function readOnlyDeniedResponse(access) {
   return new Response(JSON.stringify({
     ok: false,
@@ -76,32 +88,38 @@ export async function onRequest(context) {
   const sharedContract = sharedServiceContractForPath(pathname);
   if (sharedContract) {
     const resolvedUser = await resolveGuardUser(request, env, pathname);
-    if (resolvedUser instanceof Response) return resolvedUser;
+    if (resolvedUser instanceof Response) {
+      return withGuardHeaders(resolvedUser, { contractPath: sharedContract.path });
+    }
 
     const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract, { user: resolvedUser });
     context.data.ddSharedServiceAccess = sharedAccess;
     context.data.ddModuleBuild = BUILD;
-    if (!sharedAccess.allowed) return sharedServiceUnavailableResponse(sharedAccess);
-    return await context.next();
+    if (!sharedAccess.allowed) {
+      return withGuardHeaders(sharedServiceUnavailableResponse(sharedAccess), { contractPath: sharedContract.path });
+    }
+    return withGuardHeaders(await context.next(), { contractPath: sharedContract.path });
   }
 
   const moduleKey = moduleKeyForPath(pathname);
   if (!moduleKey) return await context.next();
 
   const resolvedUser = await resolveGuardUser(request, env, pathname);
-  if (resolvedUser instanceof Response) return resolvedUser;
+  if (resolvedUser instanceof Response) {
+    return withGuardHeaders(resolvedUser, { moduleKey });
+  }
 
   const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
   context.data.ddModuleAccess = access;
   context.data.ddModuleBuild = BUILD;
 
   if (!access.allowed) {
-    return moduleUnavailableResponse(access, { api: isApiPath(pathname) });
+    return withGuardHeaders(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), { moduleKey });
   }
 
   if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
-    return readOnlyDeniedResponse(access);
+    return withGuardHeaders(readOnlyDeniedResponse(access), { moduleKey });
   }
 
-  return await context.next();
+  return withGuardHeaders(await context.next(), { moduleKey });
 }
