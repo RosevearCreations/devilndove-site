@@ -1,54 +1,121 @@
-# Build 431 — Authorized Notification Production Execution Validation
+# Build 431 — Notification Production Execution Validation
 
 ## Status
 
-**NOTIFICATION PRODUCTION AUTHORIZED / EXECUTION CONTROLLER HARDENED / FRESH BACKUP + APPLY + POSTCHECK PENDING / ALL LATER PRODUCTION FAMILIES LOCKED**
+**SAFE STOP BEFORE BACKUP / PRIOR FOUR-INDEX AUTHORIZATION SUPERSEDED / CORRECTED FULL BUILD 403 AUTHORIZATION BOUNDARY READY / PRODUCTION PROMOTION CLOSED**
 
-Build 430 Notification authorization boundary is closed PASS (20/20). The owner explicitly authorized only:
+Build 430 closed its Notification boundary at 20/20 under the reviewed assumption that `idx_notification_outbox_status_due` already existed and would be preserved.
+
+The owner then explicitly supplied:
 
 ```text
 AUTHORIZE-BUILD428-PROD-NOTIFICATION
 ```
 
-This authorization applies only to the reviewed Build 403 `notification_outbox` additive gap:
+That authorization covered only:
 
 ```text
-Missing column:
-  metadata_json
-
-Missing indexes:
-  idx_notification_outbox_kind_destination
-  idx_notification_outbox_order
-  idx_notification_outbox_payment
-  idx_notification_outbox_product
+metadata_json
+idx_notification_outbox_kind_destination
+idx_notification_outbox_order
+idx_notification_outbox_payment
+idx_notification_outbox_product
 ```
 
-The existing `idx_notification_outbox_status_due` must remain present. The `notification_outbox` row count must be preserved exactly.
+with `idx_notification_outbox_status_due` expected to remain intact.
 
-No annotation-index, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, CAIP-copy, or Production-promotion operation is authorized.
+## Owner-run Build 431 safe stop
 
-## Additional execution hardening
+The local execution safety regression passed 20/20, but the immediate live pre-write state found:
 
-Build 431 adds `scripts/build431_production_notification_execution.py`, a Notification-only execution controller around the already-proven Build 428 additive primitives.
+```text
+metadata_json exists: False
+Missing reviewed indexes: [
+  'idx_notification_outbox_kind_destination',
+  'idx_notification_outbox_order',
+  'idx_notification_outbox_payment',
+  'idx_notification_outbox_product'
+]
+idx_notification_outbox_status_due intact: False
+notification_outbox rows: 0
+Exact reviewed Build 403 gap: NO
+BUILD 431 PRODUCTION NOTIFICATION: FAIL — Notification state drifted from the exact reviewed Build 403 gap before backup.
+```
 
-Before backup/apply it requires:
+The stop occurred **before** the Production export call and before any DDL.
 
-1. green Build 427 Product-number postcheck;
-2. green completed Gift Card Production postcheck with row preservation;
-3. exact Notification authorization token;
-4. hard Production target inherited from the backed-up additive controller;
-5. fresh Build 430 Notification read-only preflight;
-6. exact pre-write state: `metadata_json` absent, all four reviewed indexes absent, and `idx_notification_outbox_status_due` present;
-7. a fresh full Production D1 export dedicated to Notification;
-8. backup byte/SHA/age verification before DDL;
-9. an immediate targeted reread after backup and before DDL;
-10. exact `notification_outbox` row preservation plus status-due-index preservation after DDL.
+```text
+Notification Production backup              NOT CREATED
+Notification Production mutation            NOT EXECUTED
+Production promotion                         CLOSED
+```
 
-The controller exposes only `--backup`, `--apply`, and `--postcheck` for Notification. It has no annotation or rebuild-family execution action.
+This is a boundary/evidence correction, not a failed schema write.
 
-## Authorized run sequence
+## Corrected canonical Build 403 scope
 
-Run from `dev` only. Stop if any stage reports FAIL/BLOCKED or exits nonzero.
+`database_notification_runtime_parity.sql` defines `metadata_json` plus five canonical `notification_outbox` indexes:
+
+```text
+idx_notification_outbox_status_due
+idx_notification_outbox_kind_destination
+idx_notification_outbox_order
+idx_notification_outbox_payment
+idx_notification_outbox_product
+```
+
+Live Production currently lacks all five canonical indexes and `metadata_json`, with `notification_outbox` row count `0` at the safe stop.
+
+## Authorization disposition
+
+The previous token:
+
+```text
+AUTHORIZE-BUILD428-PROD-NOTIFICATION
+```
+
+is **SUPERSEDED / INSUFFICIENT** for the corrected scope. It must not be reused to create the additional missing `idx_notification_outbox_status_due` index.
+
+A new prepared token is:
+
+```text
+AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
+```
+
+It is not authorized merely by appearing in source or documentation.
+
+## Corrected source boundary
+
+Build 431 now provides:
+
+- `scripts/build431_notification_full_authorization_preflight.py`
+  - read-only;
+  - requires Product-number + Gift Card proofs;
+  - requires `metadata_json` absent;
+  - requires all five canonical Build 403 indexes absent;
+  - captures `notification_outbox` row count;
+  - records old authorization insufficient;
+  - cannot create a backup or mutate Production.
+
+- `scripts/build431_production_notification_execution.py`
+  - requires the new full-Build-403 token;
+  - reruns the corrected preflight before backup;
+  - requires exact five-index + metadata pre-write state;
+  - creates a separate full Production D1 backup through the proven additive backup primitive;
+  - verifies backup bytes/SHA/UUID/<=30-minute age;
+  - generates only missing full Build 403 Notification DDL;
+  - requires exact `notification_outbox` row preservation;
+  - proves `metadata_json` plus all five canonical indexes after execution.
+
+- `scripts/build431_notification_execution_regression.py`
+  - local-only 20-check source/safety regression for the corrected scope.
+
+- `scripts/build431_notification_full_authorization_gate.py`
+  - local-only 20-item corrected authorization boundary.
+
+## Run now — corrected read-only/local boundary only
+
+Do not create a backup or run Notification DDL yet.
 
 ```bash
 cd /c/Dev/devilndove-site
@@ -56,91 +123,67 @@ cd /c/Dev/devilndove-site
 git pull origin dev
 
 python -m py_compile \
+  scripts/build431_notification_full_authorization_preflight.py \
   scripts/build431_production_notification_execution.py \
   scripts/build431_notification_execution_regression.py \
-  scripts/build430_notification_authorization_preflight.py \
-  scripts/build428_production_additive_execution.py
+  scripts/build431_notification_full_authorization_gate.py
 
 python scripts/build431_notification_execution_regression.py
 
-python -u scripts/build431_production_notification_execution.py \
-  --backup \
-  --confirm AUTHORIZE-BUILD428-PROD-NOTIFICATION
+python -u scripts/build431_notification_full_authorization_preflight.py --run \
+  2>&1 | tee build431_notification_full_authorization_preflight.txt
 
-python -u scripts/build431_production_notification_execution.py \
-  --apply \
-  --confirm AUTHORIZE-BUILD428-PROD-NOTIFICATION
-
-python -u scripts/build431_production_notification_execution.py --postcheck
+python scripts/build431_notification_full_authorization_gate.py
 ```
 
-## Expected safety regression
+Expected live core:
 
 ```text
-BUILD 431 NOTIFICATION EXECUTION SAFETY REGRESSION: PASS (20/20)
-Notification Production authorization token path: PRESENT / NOT EXERCISED
-Notification full-backup boundary: PASS
-Exact pre-write drift refusal: PASS
-notification_outbox row preservation: PASS
-idx_notification_outbox_status_due preservation: PASS
-Annotation/rebuild execution path: NONE
-Cloudflare access: NONE
+metadata_json exists: False
+Missing canonical Notification indexes: [
+  'idx_notification_outbox_kind_destination',
+  'idx_notification_outbox_order',
+  'idx_notification_outbox_payment',
+  'idx_notification_outbox_product',
+  'idx_notification_outbox_status_due'
+]
+notification_outbox rows: 0
+Exact full Build 403 gap: YES
+Prior four-index authorization sufficient: NO
+Safe to request full Notification authorization: YES
+Production backup created: NO
+Full Notification authorization received: NO
 Production mutation executed: NO
 PRODUCTION PROMOTION: CLOSED
+BUILD 431 FULL NOTIFICATION AUTHORIZATION PREFLIGHT: PASS
 ```
 
-## Expected backup boundary
-
-The backup action reruns the fresh Notification preflight and immediate exact state check, then creates the full remote D1 export. It must end with both the underlying backup PASS and:
+Expected final local gate:
 
 ```text
-BUILD 431 NOTIFICATION BACKUP BOUNDARY: PASS
-Production mutation executed: NO
+BUILD 431 TWENTY-ITEM FULL NOTIFICATION AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
+Product-number Production stage: COMPLETE / PROVEN
+Gift Card Production stage: COMPLETE / PROVEN
+Prior four-index Notification authorization: SUPERSEDED / INSUFFICIENT
+Full Build 403 Notification backup: NOT CREATED
+Full Build 403 Notification authorization: NOT RECEIVED
+Notification mutation executed: NO
+Annotation-index authorization: NOT RECEIVED
+Rebuild-family authorization: NOT RECEIVED
 PRODUCTION PROMOTION: CLOSED
 ```
 
-If `metadata_json`, any of the four reviewed missing indexes, or `idx_notification_outbox_status_due` differ from the exact reviewed state, the backup/apply sequence fails closed.
-
-## Expected apply/post-proof
+## Safety state
 
 ```text
-BUILD 431 PRODUCTION NOTIFICATION ADDITIVE POSTCHECK: PASS
-notification_outbox rows preserved: <before> -> <same after>
-metadata_json present: True
-Four reviewed indexes present: True
-idx_notification_outbox_status_due preserved: True
-PRODUCTION PROMOTION: CLOSED
-```
-
-Final independent read-only proof:
-
-```text
-BUILD 431 PRODUCTION NOTIFICATION READ-ONLY POSTCHECK: PASS
-notification_outbox rows: <preserved>
-metadata_json present: True
-Four reviewed indexes present: True
-idx_notification_outbox_status_due preserved: True
-PRODUCTION PROMOTION: CLOSED
-```
-
-## Stop conditions
-
-- Any local regression failure: do not contact Production; repair source first.
-- Cloudflare `7403`: stop and classify as authorization/read interruption unless DDL already began; if DDL may have begun, run only the read-only Notification postcheck and retain the backup.
-- Unexpected Notification state before backup or apply: stop; do not normalize unreviewed drift.
-- Missing/stale/hash-mismatched backup: stop and recreate only the Notification backup using the same authorized token.
-- Apply/postcheck failure: stop all later Production families and retain the Notification backup.
-
-## Current safety state
-
-```text
-Product-number Production stage          COMPLETE / PROVEN
-Gift Card Production stage               COMPLETE / PROVEN
-Notification authorization               RECEIVED
-Notification Production backup           PENDING
-Notification Production mutation         PENDING
-Annotation-index authorization           NOT RECEIVED
-Rebuild-family authorization             NOT RECEIVED
-R2/provider mutation                     DISABLED
-Production promotion                     CLOSED
+Product-number Production stage           COMPLETE / PROVEN
+Gift Card Production stage                COMPLETE / PROVEN
+Old Notification authorization            SUPERSEDED / INSUFFICIENT
+Full Build 403 Notification authorization NOT RECEIVED
+Notification Production backup            NOT CREATED
+Notification Production mutation          NOT EXECUTED
+Annotation-index authorization            NOT RECEIVED
+Rebuild-family authorization              NOT RECEIVED
+R2/provider mutation                      DISABLED
+Production promotion                      CLOSED
 ```
