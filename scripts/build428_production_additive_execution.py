@@ -9,6 +9,9 @@ Prepared only. No stage is authorized by source creation. Each stage requires:
 - backup path/bytes/SHA-256/age verification;
 - targeted before/after row-preservation proof.
 
+For the Gift Card stage, preservation covers all three Build 429 boundaries:
+`gift_card_lookup_attempts`, `gift_cards`, and `gift_card_redemptions`.
+
 Rebuild families are intentionally absent.
 """
 from __future__ import annotations
@@ -124,8 +127,19 @@ def current_state(stage: str) -> dict:
             cols = {str(r.get('name') or '') for r in q(npx, cfg, "SELECT name FROM pragma_table_info('gift_card_lookup_attempts') ORDER BY cid;", 'GIFT COLUMNS')}
             lockout = bool(q(npx, cfg, "SELECT name FROM sqlite_schema WHERE type='table' AND name='gift_card_lookup_lockouts';", 'GIFT LOCKOUT TABLE'))
             idx = {str(r.get('name') or '') for r in q(npx, cfg, "SELECT name FROM sqlite_schema WHERE type='index' AND tbl_name IN ('gift_card_lookup_attempts','gift_card_lookup_lockouts') AND sql IS NOT NULL;", 'GIFT INDEXES')}
-            rows = q(npx, cfg, 'SELECT COUNT(*) AS row_count FROM gift_card_lookup_attempts;', 'GIFT ROW COUNT')
-            return {'columns': sorted(cols), 'lockout_exists': lockout, 'indexes': sorted(idx), 'row_count': int(rows[0].get('row_count') or 0)}
+            lookup_rows = q(npx, cfg, 'SELECT COUNT(*) AS row_count FROM gift_card_lookup_attempts;', 'GIFT LOOKUP ROW COUNT')
+            gift_rows = q(npx, cfg, 'SELECT COUNT(*) AS row_count FROM gift_cards;', 'GIFT CARD ROW COUNT')
+            redemption_rows = q(npx, cfg, 'SELECT COUNT(*) AS row_count FROM gift_card_redemptions;', 'GIFT REDEMPTION ROW COUNT')
+            lookup_count = int(lookup_rows[0].get('row_count') or 0)
+            return {
+                'columns': sorted(cols),
+                'lockout_exists': lockout,
+                'indexes': sorted(idx),
+                'row_count': lookup_count,
+                'lookup_attempt_rows': lookup_count,
+                'gift_cards_rows': int(gift_rows[0].get('row_count') or 0),
+                'gift_card_redemptions_rows': int(redemption_rows[0].get('row_count') or 0),
+            }
         if stage == 'notification':
             cols = {str(r.get('name') or '') for r in q(npx, cfg, "SELECT name FROM pragma_table_info('notification_outbox') ORDER BY cid;", 'NOTIFICATION COLUMNS')}
             idx = {str(r.get('name') or '') for r in q(npx, cfg, "SELECT name FROM sqlite_schema WHERE type='index' AND tbl_name='notification_outbox' AND sql IS NOT NULL;", 'NOTIFICATION INDEXES')}
@@ -142,6 +156,13 @@ def stage_complete(stage: str, state: dict) -> bool:
     if stage == 'notification':
         return 'metadata_json' in state['columns'] and NOTIFICATION_INDEXES.issubset(set(state['indexes']))
     return ANNOTATION_INDEX in state['indexes']
+
+
+def gift_rows_preserved(before: dict, after: dict) -> bool:
+    return all(
+        before.get(key) == after.get(key)
+        for key in ('lookup_attempt_rows', 'gift_cards_rows', 'gift_card_redemptions_rows')
+    )
 
 
 def export_backup(stage: str) -> dict:
@@ -265,20 +286,26 @@ def apply(stage: str, supplied: str | None) -> None:
     sql = gift_sql(before) if stage == 'gift' else notification_sql(before) if stage == 'notification' else annotation_sql()
     execute_sql(stage, sql)
     after = current_state(stage)
-    passed = stage_complete(stage, after) and after['row_count'] == before['row_count']
+    row_preserved = gift_rows_preserved(before, after) if stage == 'gift' else after['row_count'] == before['row_count']
+    passed = stage_complete(stage, after) and row_preserved
     payload = {
         'artifact': f'Build 428 Production {stage} additive postcheck',
         'stage': stage,
         'pass': passed,
         'before': before,
         'after': after,
-        'row_count_preserved': after['row_count'] == before['row_count'],
+        'row_count_preserved': row_preserved,
         'production_mutation_executed': True,
         'production_promotion_open': False,
     }
     stage_evidence_path(stage).write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
     print(f'BUILD 428 PRODUCTION {stage.upper()} ADDITIVE POSTCHECK:', 'PASS' if passed else 'FAIL')
-    print(f'Rows preserved: {before["row_count"]} -> {after["row_count"]}')
+    if stage == 'gift':
+        print(f'gift_card_lookup_attempts rows preserved: {before["lookup_attempt_rows"]} -> {after["lookup_attempt_rows"]}')
+        print(f'gift_cards rows preserved: {before["gift_cards_rows"]} -> {after["gift_cards_rows"]}')
+        print(f'gift_card_redemptions rows preserved: {before["gift_card_redemptions_rows"]} -> {after["gift_card_redemptions_rows"]}')
+    else:
+        print(f'Rows preserved: {before["row_count"]} -> {after["row_count"]}')
     print('PRODUCTION PROMOTION: CLOSED')
     if not passed:
         raise SystemExit(1)
@@ -289,7 +316,12 @@ def postcheck(stage: str) -> None:
     state = current_state(stage)
     passed = stage_complete(stage, state)
     print(f'BUILD 428 PRODUCTION {stage.upper()} READ-ONLY POSTCHECK:', 'PASS' if passed else 'PENDING')
-    print(f'Rows: {state["row_count"]}')
+    if stage == 'gift':
+        print(f'gift_card_lookup_attempts rows: {state["lookup_attempt_rows"]}')
+        print(f'gift_cards rows: {state["gift_cards_rows"]}')
+        print(f'gift_card_redemptions rows: {state["gift_card_redemptions_rows"]}')
+    else:
+        print(f'Rows: {state["row_count"]}')
     print('PRODUCTION PROMOTION: CLOSED')
     raise SystemExit(0 if passed else 1)
 
