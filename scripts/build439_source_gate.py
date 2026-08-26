@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Build 439 local-only source validation and deterministic full-schema sync gate.
 
-Runs the Build 439 CAIP regression, the provider fail-closed rerun regression,
-synchronizes database_full_schema.sql deterministically, checks the synchronized
-aggregate, and reruns the main regression. This script never contacts Cloudflare,
-D1, R2 or an external provider.
+Runs the Build 439 CAIP regression, provider fail-closed rerun regression, the
+read-only storage-diagnostic regression, synchronizes database_full_schema.sql
+deterministically, checks the synchronized aggregate, and reruns the main
+regression. This script never contacts Cloudflare, D1, R2 or an external provider.
 """
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ PYTHON = sys.executable
 STEPS = (
     ('Build 439 CAIP regression', [PYTHON, 'scripts/build439_caip_temporal_evidence_review_test.py']),
     ('Build 439 provider fail-closed rerun regression', [PYTHON, 'scripts/build439_provider_fail_closed_rerun_test.py']),
+    ('Build 439 storage diagnostic regression', [PYTHON, 'scripts/build439_storage_diagnostic_regression_test.py']),
     ('Build 439 deterministic full-schema sync', [PYTHON, 'scripts/build439_sync_full_schema.py', '--sync']),
     ('Build 439 deterministic full-schema check', [PYTHON, 'scripts/build439_sync_full_schema.py', '--check']),
     ('Build 439 CAIP regression after full-schema sync', [PYTHON, 'scripts/build439_caip_temporal_evidence_review_test.py']),
@@ -54,6 +55,7 @@ def main() -> int:
     print('=' * 60)
     print('Focused migration regression: PASS')
     print('Provider fail-closed rerun regression: PASS')
+    print('Storage diagnostic regression: PASS / READ-ONLY')
     print('database_full_schema.sql: SYNCHRONIZED / CHECKED')
     print('Cloudflare/D1/R2/provider access: NONE')
     print('Development D1 mutation executed: NO')
