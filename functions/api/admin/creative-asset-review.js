@@ -13,6 +13,32 @@ function numeric(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+// R2 accepts Headers for range/conditional reads, but its conditional Headers input
+// deliberately does not support If-Range. Media elements can emit If-Range while
+// seeking, so never forward the browser's full header collection into either R2 option.
+// Pass Range only to range, and only R2-supported HTTP conditionals to onlyIf.
+function r2GetOptions(request) {
+  const options = {};
+  const rangeValue = request.headers.get('Range');
+  if (rangeValue) {
+    const rangeHeaders = new Headers();
+    rangeHeaders.set('Range', rangeValue);
+    options.range = rangeHeaders;
+  }
+
+  const conditionalHeaders = new Headers();
+  let hasConditional = false;
+  for (const name of ['If-Match', 'If-None-Match', 'If-Modified-Since', 'If-Unmodified-Since']) {
+    const value = request.headers.get(name);
+    if (value) {
+      conditionalHeaders.set(name, value);
+      hasConditional = true;
+    }
+  }
+  if (hasConditional) options.onlyIf = conditionalHeaders;
+  return options;
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const adminUser = await getAdminUserFromRequest(request, env);
@@ -25,12 +51,10 @@ export async function onRequestGet(context) {
     const bucket = resolveCaipBucket(env, authorized.storage_provider, authorized.bucket_name);
     if (!bucket || typeof bucket.get !== 'function') throw new Error('R2 review proxy is unavailable because the matching public/private media bucket binding is not configured.');
 
-    // Cloudflare R2 accepts conditional/range request Headers directly. The returned
-    // body remains a ReadableStream, so large video/audio is never buffered in Worker memory.
-    const object = await bucket.get(authorized.object_key, {
-      onlyIf: request.headers,
-      range: request.headers,
-    });
+    // Cloudflare R2 accepts conditional/range Headers and returns a ReadableStream.
+    // Header inputs are sanitized above so unsupported browser conditionals cannot abort
+    // the binding call. Large video/audio is never buffered in Worker memory.
+    const object = await bucket.get(authorized.object_key, r2GetOptions(request));
     if (!object) throw new Error('The R2 review object was not found. Source media has not been changed.');
 
     const headers = new Headers();
@@ -89,7 +113,12 @@ export async function onRequestGet(context) {
     await captureRuntimeIncident(env, request, {
       incident_scope: 'creative_asset_secure_review', incident_code: 'caip_secure_review_failed', severity: 'warning',
       message: error?.message || 'Secure asset review failed.', related_user_id: adminUser.user_id,
-      details: { raw_token_not_logged: true, range_requested: Boolean(request.headers.get('Range')), error: String(error?.message || error) }
+      details: {
+        raw_token_not_logged: true,
+        range_requested: Boolean(request.headers.get('Range')),
+        if_range_present: Boolean(request.headers.get('If-Range')),
+        error: String(error?.message || error)
+      }
     });
     return json({ ok: false, error: error?.message || 'Secure asset review failed.' }, 400);
   }
