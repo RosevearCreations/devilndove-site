@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
+import vm from 'node:vm';
 
 const root = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
 const moduleUrl = url.pathToFileURL(path.join(root, 'functions/api/admin/product-resource-search.js')).href + `?build440=${Date.now()}`;
@@ -49,7 +50,49 @@ check(transportGuard.includes("Object.getOwnPropertyDescriptor(Element.prototype
 check(transportGuard.includes('insertAdjacentHTML') && transportGuard.includes('sanitizeGeneratedHtml(html)'), 'Inventory transport guard must also cover insertAdjacentHTML transport.');
 check(transportGuard.includes("HTMLImageElement?.prototype, 'src'") && transportGuard.includes("HTMLAnchorElement?.prototype, 'href'"), 'Inventory transport guard must cover direct src/href property assignment.');
 check(transportGuard.includes("window.location.pathname.startsWith('/admin/inventory-operations')"), 'Inventory transport guard must remain narrowly page-scoped.');
+check(transportGuard.includes('HTML_ENTITY_RE') && transportGuard.includes('safeGeneratedAssetUrl'), 'Generated-HTML transport must distinguish HTML entities from R2 object-key fragment characters.');
 check(!transportGuard.includes('fetch(') && !transportGuard.includes('setInterval(') && !transportGuard.includes('setTimeout('), 'Inventory transport guard must add no network calls or polling.');
+
+// Execute the real browser guard in a small mock window so the exact saw-blade
+// filename is proven through the generated-HTML sanitizer rather than only by
+// static source inspection. This protects the apostrophe entity (&#039;) while
+// encoding the six real object-key # characters.
+class MockElement {}
+const sandbox = {
+  window: {
+    location: { pathname: '/admin/inventory-operations/', origin: 'https://devilndove-site-dev.pages.dev' },
+    DDAuth: {
+      readApiJson: async (value) => value,
+      apiJson: async () => ({ ok: true }),
+    },
+    Element: MockElement,
+  },
+  Element: MockElement,
+  URL,
+  Symbol,
+  Object,
+  WeakSet,
+  Array,
+  String,
+  Number,
+};
+vm.runInNewContext(transportGuard, sandbox, { filename: 'admin-inventory-asset-transport-guard.js' });
+const runtimeGuard = sandbox.window.DDInventoryAssetTransportGuard;
+check(runtimeGuard?.installed === true, 'Inventory transport guard did not install in the browser-contract harness.');
+
+const escapedProblematic = problematic
+  .replaceAll('&', '&amp;')
+  .replaceAll("'", '&#039;');
+const generatedHtml = `<a href="${escapedProblematic}"><img src="${escapedProblematic}" alt="Saw blades"></a>`;
+const sanitizedHtml = runtimeGuard.sanitizeGeneratedHtml(generatedHtml);
+check((sanitizedHtml.match(/%23/g) || []).length === 12, 'Generated HTML must encode all six object-key # characters in both href and src.');
+check((sanitizedHtml.match(/&#039;/g) || []).length === 2, 'Generated HTML must preserve the apostrophe HTML entity in both href and src.');
+check(!sanitizedHtml.includes('&%23039;') && !sanitizedHtml.includes('&%2339;'), 'Generated HTML must never corrupt the apostrophe entity into the transport path.');
+check(sanitizedHtml.includes('Jeweler&#039;s%20Saw%20Blades%20Set'), 'Apostrophe entity and following path must survive generated-HTML normalization.');
+const decodedAttributeUrl = sanitizedHtml.match(/src="([^"]+)"/)?.[1]?.replaceAll('&#039;', "'").replaceAll('&amp;', '&') || '';
+const decodedUrl = new URL(decodedAttributeUrl);
+check(decodedUrl.hash === '', 'Sanitized generated image URL must not leave a browser fragment.');
+check((decodedUrl.pathname.match(/%23/g) || []).length === 6, 'Sanitized generated image URL must preserve all six object-key # characters in the request path.');
 
 // Keep the regression anchored to the exact UI path that exposed the live browser
 // failure: the Inventory row thumbnail still renders the API-provided image_url
@@ -63,7 +106,7 @@ check(
 );
 
 const safetyIndex = inventoryPage.indexOf('/public/js/admin-asset-url-safety.js?v=440.2');
-const transportIndex = inventoryPage.indexOf('/public/js/admin-inventory-asset-transport-guard.js?v=440.3');
+const transportIndex = inventoryPage.indexOf('/public/js/admin-inventory-asset-transport-guard.js?v=440.4');
 check(safetyIndex > 0, 'Inventory Operations page does not load the Admin asset URL safety layer with the new cache-busting version.');
 check(transportIndex > safetyIndex, 'Inventory Operations page must load the transport guard after the shared safety layer.');
 for (const script of [
@@ -79,6 +122,7 @@ console.log(`BUILD 440 RESOURCE ASSET URL REGRESSION: PASS (${checks}/${checks})
 console.log('Literal # object-key characters: %23 / PRESERVED');
 console.log('Inventory Admin API payload boundary: NORMALIZED BEFORE RENDER');
 console.log('Inventory generated-HTML boundary: NORMALIZED BEFORE HTML PARSE');
+console.log('Generated-HTML entities: PRESERVED / APOSTROPHE SAFE');
 console.log('Direct Inventory src/href assignment: GUARDED');
 console.log('Cached/shared Admin API payloads: COVERED');
 console.log('Literal path spaces: PERCENT-ENCODED');
