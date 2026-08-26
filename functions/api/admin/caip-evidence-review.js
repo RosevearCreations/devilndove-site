@@ -1,0 +1,174 @@
+// Devil n Dove Build 439 — authenticated CAIP temporal evidence-review API.
+import {
+  auditAdminAction,
+  captureRuntimeIncident,
+  getAdminUserFromRequest,
+  getDb,
+  jsonResponse,
+  normalizeText,
+} from '../_lib/adminAudit.js';
+import {
+  CAIP_EVIDENCE_REVIEW_BUILD,
+  archiveTemporalEvidenceMarker,
+  buildEvidenceReviewManifest,
+  completeVerifiedProcessingJob,
+  draftStorySegmentFromMarkers,
+  getCaipEvidenceReviewReadiness,
+  loadCaipEvidenceReviewBundle,
+  promoteMarkerToStoryEvidence,
+  registerProcessingArtifact,
+  saveTemporalEvidenceMarker,
+  verifyProcessingArtifact,
+} from '../_lib/caipEvidenceReview.js';
+
+function json(data, status = 200) {
+  return jsonResponse(data, status, { 'Cache-Control': 'no-store' });
+}
+function integer(value) {
+  const parsed = Number(value || 0);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+}
+function boundedBodyLength(request) {
+  const value = Number(request.headers.get('Content-Length') || 0);
+  return Number.isFinite(value) ? value : 0;
+}
+
+async function access(context) {
+  const adminUser = await getAdminUserFromRequest(context.request, context.env);
+  if (!adminUser) return { error: json({ ok: false, error: 'Admin access required.' }, 401) };
+  const db = getDb(context.env);
+  if (!db) return { error: json({ ok: false, error: 'Database binding is not configured.' }, 500) };
+  return { adminUser, db };
+}
+
+function readinessResponse(readiness, projectId) {
+  return json({
+    ok: true,
+    build: CAIP_EVIDENCE_REVIEW_BUILD,
+    schema_ready: false,
+    source: 'migration_required',
+    creative_project_id: projectId || null,
+    missing_tables: readiness.missing_tables || [],
+    required_migration: 'database_build439_caip_temporal_evidence_review.sql',
+    source_media_unchanged: true,
+    provider_execution_active: false,
+    message: 'Build 439 temporal evidence schema is not installed yet. Existing CAIP remains available; evidence-review writes are blocked.',
+  });
+}
+
+export async function onRequestGet(context) {
+  const state = await access(context);
+  if (state.error) return state.error;
+  const url = new URL(context.request.url);
+  const projectId = integer(url.searchParams.get('creative_project_id') || url.searchParams.get('project_id'));
+  try {
+    const readiness = await getCaipEvidenceReviewReadiness(state.db);
+    if (!projectId) {
+      return json({
+        ok: true,
+        build: CAIP_EVIDENCE_REVIEW_BUILD,
+        schema_ready: readiness.schema_ready,
+        missing_tables: readiness.missing_tables,
+        creative_project_id: null,
+        source_media_unchanged: true,
+        provider_execution_active: false,
+      });
+    }
+    const bundle = await loadCaipEvidenceReviewBundle(state.db, projectId);
+    if (!bundle.project) return json({ ok: false, error: 'CAIP project not found.' }, 404);
+    return json({ ok: true, ...bundle });
+  } catch (error) {
+    await captureRuntimeIncident(context.env, context.request, {
+      incident_scope: 'caip_evidence_review',
+      incident_code: 'caip_evidence_review_get_failed',
+      severity: 'warning',
+      message: error?.message || 'CAIP evidence review could not load.',
+      related_user_id: state.adminUser.user_id,
+      details: { creative_project_id: projectId || null, error: String(error?.stack || error) },
+    });
+    return json({ ok: false, error: error?.message || 'CAIP evidence review could not load.' }, 503);
+  }
+}
+
+export async function onRequestPost(context) {
+  const state = await access(context);
+  if (state.error) return state.error;
+  if (boundedBodyLength(context.request) > 262144) return json({ ok: false, error: 'CAIP evidence-review request body is too large.' }, 413);
+  let body = {};
+  try { body = await context.request.json(); } catch { return json({ ok: false, error: 'Expected a JSON request body.' }, 400); }
+  const action = normalizeText(body.action).toLowerCase();
+  const projectId = integer(body.creative_project_id || body.project_id);
+  if (!projectId) return json({ ok: false, error: 'Choose a CAIP project first.' }, 400);
+
+  try {
+    const readiness = await getCaipEvidenceReviewReadiness(state.db);
+    if (!readiness.schema_ready) return readinessResponse(readiness, projectId);
+
+    let result = null;
+    if (action === 'save_marker') {
+      result = await saveTemporalEvidenceMarker(state.db, projectId, body, state.adminUser.user_id);
+    } else if (action === 'archive_marker') {
+      result = await archiveTemporalEvidenceMarker(state.db, projectId, body.creative_media_evidence_range_id, state.adminUser.user_id);
+    } else if (action === 'promote_marker') {
+      result = await promoteMarkerToStoryEvidence(state.db, projectId, body.creative_media_evidence_range_id, state.adminUser.user_id);
+    } else if (action === 'draft_story_segment') {
+      result = await draftStorySegmentFromMarkers(state.db, projectId, body.marker_ids, body, state.adminUser.user_id);
+    } else if (action === 'register_processing_artifact') {
+      result = await registerProcessingArtifact(state.db, projectId, body, state.adminUser.user_id);
+    } else if (action === 'verify_processing_artifact') {
+      result = await verifyProcessingArtifact(state.db, context.env, projectId, body.caip_media_processing_artifact_id, state.adminUser.user_id);
+    } else if (action === 'complete_processing_job') {
+      result = await completeVerifiedProcessingJob(state.db, projectId, body.caip_media_processing_job_id, state.adminUser.user_id);
+    } else if (action === 'manifest') {
+      const bundle = await loadCaipEvidenceReviewBundle(state.db, projectId);
+      if (!bundle.project) return json({ ok: false, error: 'CAIP project not found.' }, 404);
+      const manifest = buildEvidenceReviewManifest(bundle);
+      return new Response(JSON.stringify(manifest, null, 2), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Disposition': `attachment; filename="${bundle.project.creative_project_key || 'caip-project'}-temporal-evidence.json"`,
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    } else {
+      return json({ ok: false, error: 'Unsupported Build 439 CAIP evidence-review action.' }, 400);
+    }
+
+    await auditAdminAction(context.env, context.request, state.adminUser, {
+      action_type: `caip_evidence_${action}`,
+      target_type: 'creative_project',
+      target_id: projectId,
+      target_key: null,
+      details: {
+        action,
+        creative_asset_id: integer(body.creative_asset_id) || null,
+        temporal_marker_id: integer(body.creative_media_evidence_range_id) || null,
+        processing_job_id: integer(body.caip_media_processing_job_id) || null,
+        processing_artifact_id: integer(body.caip_media_processing_artifact_id) || null,
+        source_media_unchanged: true,
+        provider_execution_active: false,
+      },
+    });
+
+    const bundle = await loadCaipEvidenceReviewBundle(state.db, projectId);
+    return json({
+      ok: true,
+      build: CAIP_EVIDENCE_REVIEW_BUILD,
+      message: 'CAIP evidence review saved. Source originals remain unchanged and no content was published.',
+      result,
+      ...bundle,
+    });
+  } catch (error) {
+    await captureRuntimeIncident(context.env, context.request, {
+      incident_scope: 'caip_evidence_review',
+      incident_code: 'caip_evidence_review_post_failed',
+      severity: 'warning',
+      message: error?.message || 'CAIP evidence review could not save.',
+      related_user_id: state.adminUser.user_id,
+      details: { action, creative_project_id: projectId, error: String(error?.stack || error) },
+    });
+    return json({ ok: false, error: error?.message || 'CAIP evidence review could not save.' }, 400);
+  }
+}
