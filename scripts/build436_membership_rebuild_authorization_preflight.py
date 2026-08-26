@@ -162,7 +162,7 @@ def main() -> int:
             legacy_sort_index_info = q(
                 npx,
                 cfg,
-                f'PRAGMA index_info({quote_identifier(LEGACY_SORT_INDEX)});',
+                f"SELECT seqno,cid,name FROM pragma_index_info('{LEGACY_SORT_INDEX}') ORDER BY seqno;",
                 'PRODUCTION MEMBERSHIP LEGACY SORT INDEX COLUMNS',
             )
         outbound_fks = q(
