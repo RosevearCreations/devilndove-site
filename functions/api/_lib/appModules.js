@@ -3,15 +3,12 @@
 // Session/user identity is always resolved per request.
 
 import { getDb, getRequestToken, normalizeText } from './adminAudit.js';
+import { MODULE_KEYS, moduleKeyForPath } from './appModuleRoutes.js';
+
+export { MODULE_KEYS, moduleKeyForPath } from './appModuleRoutes.js';
 
 export const BUILD = 438;
 export const MODULE_CACHE_TTL_MS = 30_000;
-
-export const MODULE_KEYS = Object.freeze({
-  COMMERCE_OPERATIONS: 'commerce-operations',
-  CREATIVE_PRODUCTION: 'creative-production',
-  BUSINESS_ADMINISTRATION: 'business-administration',
-});
 
 const DEFAULT_MODULES = Object.freeze([
   Object.freeze({
@@ -239,57 +236,6 @@ export async function availableModulesForRequest(request, env, options = {}) {
     };
   });
   return { config, user, modules };
-}
-
-const CREATIVE_ROUTE_PREFIXES = Object.freeze([
-  '/admin/packaging-studio',
-  '/admin/creative-project',
-  '/admin/creative-process',
-  '/admin/creative-automation',
-  '/admin/creative-assets',
-  '/admin/caip',
-  '/admin/content-studio',
-]);
-
-const CORE_ADMIN_ROUTE_PREFIXES = Object.freeze([
-  '/admin/application-modules',
-]);
-
-const COMMERCE_ROUTE_PREFIXES = Object.freeze([
-  '/shop', '/cart', '/checkout', '/product', '/products', '/custom-request', '/members',
-]);
-
-const COMMERCE_API_PREFIXES = Object.freeze([
-  '/api/member/', '/api/cart', '/api/checkout', '/api/products', '/api/product', '/api/custom-request',
-]);
-
-const CREATIVE_API_PREFIXES = Object.freeze([
-  '/api/admin/packaging', '/api/admin/creative', '/api/admin/caip', '/api/admin/content-studio',
-]);
-
-export function moduleKeyForPath(pathname) {
-  const path = `/${String(pathname || '').split(/[?#]/, 1)[0].replace(/^\/+/, '')}`.replace(/\/{2,}/g, '/');
-  if (CORE_ADMIN_ROUTE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) return null;
-  if (path === '/admin' || path.startsWith('/admin/')) {
-    if (CREATIVE_ROUTE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
-      return MODULE_KEYS.CREATIVE_PRODUCTION;
-    }
-    return MODULE_KEYS.BUSINESS_ADMINISTRATION;
-  }
-  if (CREATIVE_API_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix))) {
-    return MODULE_KEYS.CREATIVE_PRODUCTION;
-  }
-  if (path.startsWith('/api/admin/')) {
-    if (path === '/api/admin/app-modules' || path.startsWith('/api/admin/app-modules/')) return null;
-    return MODULE_KEYS.BUSINESS_ADMINISTRATION;
-  }
-  if (COMMERCE_API_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix))) {
-    return MODULE_KEYS.COMMERCE_OPERATIONS;
-  }
-  if (COMMERCE_ROUTE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
-    return MODULE_KEYS.COMMERCE_OPERATIONS;
-  }
-  return null;
 }
 
 export function moduleUnavailableResponse(moduleAccess, { api = false } = {}) {
