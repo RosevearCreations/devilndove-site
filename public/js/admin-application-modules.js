@@ -10,7 +10,7 @@
   const text = (value) => String(value ?? '').trim();
   const esc = (value) => text(value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
-  let state = { schema_ready: false, modules: [], role_access: [] };
+  let state = { schema_ready: false, source: 'unknown', reason: null, modules: [], role_access: [] };
   let busy = false;
 
   function moduleRow(key) {
@@ -40,7 +40,8 @@
   function moduleCard(module) {
     const enabled = Number(module.is_enabled || 0) === 1;
     const background = Number(module.background_activity_enabled || 0) === 1;
-    const disabled = !state.schema_ready || busy;
+    const controlsDisabled = !state.schema_ready || busy;
+    const backgroundDisabled = controlsDisabled || !enabled;
     return `
       <section class="card" data-module-key="${esc(module.module_key)}">
         <div style="display:flex;gap:14px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap">
@@ -52,12 +53,12 @@
               <div><strong>Status:</strong> ${enabled ? 'Enabled' : 'Disabled'}</div>
               <div><strong>Default route:</strong> <code>${esc(module.default_route)}</code></div>
               <div><strong>Requires login:</strong> ${Number(module.requires_login || 0) === 1 ? 'Yes' : 'No'}</div>
-              <div><strong>Background activity permission:</strong> ${background ? 'Allowed' : 'Off'}</div>
+              <div><strong>Background activity permission:</strong> ${background ? 'Allowed' : 'Off'}${!enabled ? ' (module disabled)' : ''}</div>
             </div>
           </div>
           <div style="display:grid;gap:8px;min-width:190px">
-            <button class="btn" type="button" data-module-toggle="${esc(module.module_key)}" data-next="${enabled ? '0' : '1'}" ${disabled ? 'disabled' : ''}>${enabled ? 'Disable module' : 'Enable module'}</button>
-            <button class="btn" type="button" data-background-toggle="${esc(module.module_key)}" data-next="${background ? '0' : '1'}" ${disabled ? 'disabled' : ''}>${background ? 'Turn background off' : 'Allow background work'}</button>
+            <button class="btn" type="button" data-module-toggle="${esc(module.module_key)}" data-next="${enabled ? '0' : '1'}" ${controlsDisabled ? 'disabled' : ''}>${enabled ? 'Disable module' : 'Enable module'}</button>
+            <button class="btn" type="button" data-background-toggle="${esc(module.module_key)}" data-next="${background ? '0' : '1'}" ${backgroundDisabled ? 'disabled' : ''}>${!enabled ? 'Enable module first' : (background ? 'Turn background off' : 'Allow background work')}</button>
           </div>
         </div>
       </section>`;
@@ -107,8 +108,10 @@
     if (state.schema_ready) {
       const enabled = state.modules.filter((module) => Number(module.is_enabled || 0) === 1).length;
       setStatus(`Build ${BUILD} D1 module authority is ready. ${enabled}/${state.modules.length} modules enabled. Changes are audited.`, 'ok');
+    } else if (state.source === 'fail_closed') {
+      setStatus(`Build 438 module authority is temporarily unavailable (${state.reason || 'read failure'}). Module-control writes are blocked and module-owned access fails closed until authority recovers.`, 'error');
     } else {
-      setStatus('Build 438 module tables are not applied yet. Current defaults stay enabled, but this screen will not write or self-create schema. Apply database_build438_application_module_activation.sql through the normal migration process first.', 'warning');
+      setStatus('Build 438 module tables are not applied yet. Current compatibility defaults stay enabled, but this screen will not write or self-create schema. Apply database_build438_application_module_activation.sql through the normal migration process first.', 'warning');
     }
     renderModules();
     renderRoles();
@@ -120,6 +123,7 @@
     state = {
       schema_ready: Boolean(data.schema_ready),
       source: data.source || 'unknown',
+      reason: data.reason || null,
       modules: Array.isArray(data.modules) ? data.modules : [],
       role_access: Array.isArray(data.role_access) ? data.role_access : [],
     };
@@ -131,7 +135,11 @@
     busy = true;
     render();
     try {
-      await apiJson(API, { method: 'POST', body: JSON.stringify(payload) });
+      await apiJson(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
       await load();
       if (window.DDApplicationModules?.refresh) await window.DDApplicationModules.refresh();
     } finally {
@@ -145,7 +153,7 @@
     if (toggle) {
       const moduleKey = toggle.dataset.moduleToggle;
       const next = Number(toggle.dataset.next || 0) === 1;
-      if (!next && !window.confirm(`Disable ${moduleRow(moduleKey)?.display_name || moduleKey}? Existing business data will remain intact, but routes and runtime activation will be blocked until re-enabled.`)) return;
+      if (!next && !window.confirm(`Disable ${moduleRow(moduleKey)?.display_name || moduleKey}? Existing business data will remain intact. Module-owned routes/runtime will be blocked and background permission will be cleared until deliberately re-enabled.`)) return;
       void post({ action: 'set_module_state', module_key: moduleKey, is_enabled: next });
       return;
     }
