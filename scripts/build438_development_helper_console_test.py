@@ -26,8 +26,6 @@ class Cp1252Probe:
         self.parts: list[str] = []
 
     def write(self, value: str) -> int:
-        # Emulate a Windows CP1252 console: unsupported Unicode must raise if the
-        # helper failed to sanitize before writing.
         value.encode(self.encoding, errors='strict')
         self.parts.append(value)
         return len(value)
@@ -40,8 +38,6 @@ probe = Cp1252Probe()
 module.emit_output('Wrangler ✓ — authenticated 😀', stream=probe)
 rendered = ''.join(probe.parts)
 
-# Execute the exact strict SQL file locally so file transport cannot hide a malformed
-# verification query. char(124) must still produce the expected | join.
 conn = sqlite3.connect(':memory:')
 try:
     conn.executescript('''
@@ -52,7 +48,8 @@ try:
       );
       CREATE TABLE app_module_role_access (
         module_key TEXT NOT NULL,
-        role_code TEXT NOT NULL
+        role_code TEXT NOT NULL,
+        PRIMARY KEY (module_key, role_code)
       );
       CREATE INDEX idx_app_modules_enabled_priority ON app_modules(is_enabled, module_key);
       CREATE INDEX idx_app_module_role_access_role ON app_module_role_access(role_code, module_key);
@@ -69,19 +66,27 @@ try:
         ('creative-production','member');
     ''')
     strict_row = conn.execute(strict_sql).fetchone()
+    conn.execute("UPDATE app_modules SET is_enabled=0 WHERE module_key='creative-production'")
+    strict_mismatch_failed = False
+    try:
+        conn.execute(strict_sql).fetchone()
+    except sqlite3.DatabaseError:
+        strict_mismatch_failed = True
 finally:
     conn.close()
 
-json_file_args = module.json_file_command(module.STRICT_VERIFY)
+file_args = module.file_command(module.STRICT_VERIFY)
+upper_sql = strict_sql.upper()
 checks = [
     ('emit_output helper exists', callable(getattr(module, 'emit_output', None))),
     ('CP1252 probe received output', bool(rendered)),
     ('unsupported Unicode was replaced safely', '?' in rendered),
     ('captured subprocess path remains UTF-8 decoded', "encoding='utf-8'" in source),
     ('subprocess decoding uses replacement protection', "errors='replace'" in source),
-    ('strict verification moved out of Windows --command transport', '--command' not in json_file_args and '--file' in json_file_args and '--json' in json_file_args),
-    ('strict SQL file avoids literal Windows pipe metacharacter', 'char(124)' in strict_sql and "'|'" not in strict_sql),
-    ('strict SQL file executes locally and preserves exact module-key join', bool(strict_row) and strict_row[0:5] == (3, 6, 3, 0, 2) and strict_row[5] == module.EXPECTED_MODULE_KEYS),
+    ('strict verification uses file transport and no command-line SQL', '--file' in file_args and '--command' not in source),
+    ('strict SQL is read-only', not any(token in upper_sql for token in ('INSERT INTO', 'UPDATE ', 'DELETE FROM', 'CREATE TABLE', 'DROP TABLE', 'ALTER TABLE'))),
+    ('strict SQL self-assertion passes exact module state locally', strict_row == (1,)),
+    ('strict SQL self-assertion fails a mismatched module state locally', strict_mismatch_failed),
     ('bare D1 code 7500 is not classified as authorization', "'7500' in lower" not in source and "'sqlite_error' in lower" in source),
 ]
 
@@ -100,7 +105,8 @@ if failures:
 
 print(f'BUILD 438 DEVELOPMENT HELPER CONSOLE/STRICT QUERY TEST: PASS ({len(checks)}/{len(checks)})')
 print('Windows CP1252 UnicodeEncodeError path: PREVENTED')
-print('Windows npx.cmd --command truncation path: REMOVED')
-print('Strict D1 verification transport: FILE-BASED')
+print('Windows npx.cmd --command SQL transport: REMOVED')
+print('Strict D1 verification transport: FILE-BASED / SELF-ASSERTING')
+print('Strict mismatch behavior: FAILS CLOSED')
 print('D1 7500 SQLite error misclassification: PREVENTED')
 print('Cloudflare/D1 access: NONE')
