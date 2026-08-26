@@ -14,6 +14,8 @@ MIDDLEWARE = ROOT / 'functions/_middleware.js'
 BOOTSTRAP_API = ROOT / 'functions/api/modules.js'
 CONTROL_API = ROOT / 'functions/api/admin/app-modules.js'
 CONTROL_PAGE = ROOT / 'admin/application-modules/index.html'
+CONTROL_JS = ROOT / 'public/js/admin-application-modules.js'
+ADMIN_INDEX = ROOT / 'admin/index.html'
 ADMIN_JS = ROOT / 'public/js/admin.js'
 AUTH_UI = ROOT / 'public/js/site-auth-ui.js'
 ADMIN_BOOTSTRAP = ROOT / 'public/js/core/dd-application-module-bootstrap.mjs'
@@ -22,6 +24,7 @@ APP_GROUPS = ROOT / 'public/js/core/dd-application-module-groups.mjs'
 PLAN = ROOT / 'BUILD438_APPLICATION_CORE_MODULE_PLAN.md'
 VERIFY_SQL = ROOT / 'BUILD438_D1_VERIFICATION.sql'
 ROUTE_TEST = ROOT / 'scripts/build438_module_route_map_test.mjs'
+ACCESS_POLICY_TEST = ROOT / 'scripts/build438_module_access_policy_test.mjs'
 DEV_HELPER = ROOT / 'scripts/build438_development_module_activation.py'
 
 EXPECTED_MODULES = ['business-administration', 'commerce-operations', 'creative-production']
@@ -74,6 +77,8 @@ def main() -> int:
     bootstrap_api = read(BOOTSTRAP_API)
     control_api = read(CONTROL_API)
     control_page = read(CONTROL_PAGE)
+    control_js = read(CONTROL_JS)
+    admin_index = read(ADMIN_INDEX)
     admin_js = read(ADMIN_JS)
     auth_ui = read(AUTH_UI)
     admin_bootstrap = read(ADMIN_BOOTSTRAP)
@@ -82,6 +87,7 @@ def main() -> int:
     plan = read(PLAN)
     verify_sql = read(VERIFY_SQL)
     route_test = read(ROUTE_TEST)
+    access_policy_test = read(ACCESS_POLICY_TEST)
     dev_helper = read(DEV_HELPER)
     sim = migration_simulation()
 
@@ -99,15 +105,15 @@ def main() -> int:
     check("'commerce-operations'" in routes and "'creative-production'" in routes and "'business-administration'" in routes and 'SHARED_SERVICE_CONTRACTS' in routes and "'/api/admin/contracts/inventory-post'" in routes and 'path.startsWith(`${prefix}-`)' in routes, 'server route catalog recognizes all modules, reviewed shared contracts and hyphenated API families')
     check('/admin/catalog' in routes and '/admin/inventory' in routes and '/admin/orders' in routes and '/admin/membership' in routes, 'Commerce & Operations owns Catalog/Inventory/Orders/Membership routes')
     check('/admin/packaging-studio' in routes and '/admin/creative-process' in routes and '/admin/content-studio' in routes and '/admin/media-content-studio' in routes, 'Creative & Production owns Packaging/Creative/Content/Media routes')
-    check("return MODULE_KEYS.BUSINESS_ADMINISTRATION" in routes and 'BUILD 438 MODULE ROUTE MAP TEST: PASS' in route_test and 'Cross-module service contracts: EXPLICIT / CONSUMER-GATED' in route_test, 'Business/Admin fallback plus executable route/shared-service ownership matrix are present')
+    check("return MODULE_KEYS.BUSINESS_ADMINISTRATION" in routes and 'BUILD 438 MODULE ROUTE MAP TEST: PASS' in route_test and 'BUILD 438 MODULE ACCESS POLICY TEST: PASS' in access_policy_test and 'Creative can consume Inventory post while Commerce UI is disabled' in access_policy_test, 'Business/Admin fallback plus executable route and cross-module access-policy proofs are present')
     check("moduleAccessForRequest" in middleware and "moduleUnavailableResponse" in middleware and "module_access_level_read_only" in middleware and 'sharedServiceAccessForRequest' in middleware and 'sharedServiceUnavailableResponse' in middleware and "await context.next()" in middleware, 'root Pages middleware enforces direct module access plus consumer-gated shared service contracts')
     check("/admin/application-modules" in middleware and "/api/admin/app-modules" in middleware, 'module control/recovery surface is exempt from its own module switch')
     check('availableModulesForRequest' in bootstrap_api and "searchParams.get('fresh') === '1'" in bootstrap_api and 'CREATE TABLE' not in bootstrap_api, 'current-user /api/modules bootstrap is read-only and supports explicit fresh reads')
-    check('auditAdminAction' in control_api and 'application_module_state_changed' in control_api and 'DELETE FROM app_modules' not in control_api and 'background_activity_enabled=CASE WHEN ?=0 THEN 0' in control_api, 'module state changes are audited, never delete business rows and clear background permission on disable')
+    check('auditAdminAction' in control_api and 'application_module_state_changed' in control_api and 'diagnosticsFor' in control_api and 'shared_service_contract_count' in control_api and 'DELETE FROM app_modules' not in control_api and 'background_activity_enabled=CASE WHEN ?=0 THEN 0' in control_api, 'module controls are audited, expose core diagnostics, never delete business rows and clear background permission on disable')
     check('app_module_schema_not_ready' in control_api and 'Build 438 application-module schema is not ready' in control_api and 'inactive_module_background_forbidden' in control_api, 'Admin writes fail closed before schema and background work cannot be enabled for an inactive module')
-    check('Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration' in control_page and 'admin-application-modules.js?v=438' in control_page, 'Admin Application Modules control/recovery screen is present')
+    check('Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration' in control_page and 'applicationModuleHealthMount' in control_page and 'runModuleRouteProofButton' in control_page and 'data-dd-module-control-card="1"' in admin_index and 'admin-application-modules.js?v=438' in control_page and 'Current-state route proof' in control_js, 'Admin dashboard/control surface exposes permanent module entry, health diagnostics and current-state route proof')
     check("fetch(force ? '/api/modules?fresh=1' : '/api/modules'" in admin_bootstrap and "dd-admin-module-runtime.mjs?v=438" in admin_bootstrap and 'setInterval' not in admin_bootstrap, 'Admin availability is read before existing umbrella runtime activation with explicit fresh refresh and no polling')
-    check("dd-application-module-bootstrap.mjs?v=438" in admin_js and 'dd-admin-module-runtime.mjs?v=397' not in admin_js, 'Admin shell now enters through Build 438 authoritative bootstrap')
+    check("dd-application-module-bootstrap.mjs?v=438" in admin_js and 'dd-admin-module-runtime.mjs?v=397' not in admin_js and 'site-auth-ui.js?v=438' in admin_index and 'admin.js?v=438' in admin_index, 'Admin shell enters through Build 438 authoritative bootstrap with current cache-busted shared scripts')
     check("dd-public-module-visibility.mjs?v=438" in auth_ui and 'sessionStorage' in public_visibility and 'CORE_RECOVERY_PREFIX' in public_visibility and 'setInterval' not in public_visibility, 'public/member navigation uses bounded per-tab visibility caching and preserves recovery access without polling')
     check('DD_APPLICATION_MODULES' in app_groups and "id: 'commerce-operations'" in app_groups and "id: 'creative-production'" in app_groups and "id: 'business-administration'" in app_groups and 'three top-level' in plan.lower() and 'SELECT' in verify_sql and EXPECTED_MODULES[1] in dev_helper and 'EXPECTED_DATABASE_ID' in dev_helper, 'Build 438 extends the existing three-module architecture with read-only verification and a hard-pinned Development helper')
 
@@ -125,8 +131,9 @@ def main() -> int:
     print('Read-only module access enforcement: SOURCE READY')
     print('Cross-module shared service preservation: SOURCE READY / CONSUMER-GATED')
     print('Route ownership matrix: SOURCE READY')
+    print('Module access policy unit proof: SOURCE READY')
     print('Authoritative client bootstrap: SOURCE READY')
-    print('Admin Application Modules control: SOURCE READY')
+    print('Admin Application Modules control + health + route proof: SOURCE READY')
     print('Request-time schema mutation: NONE')
     print('Background polling introduced by Build 438: NONE')
     print('Production D1 migration executed: NO')
