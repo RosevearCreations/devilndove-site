@@ -2,7 +2,7 @@
 
 ## Immediate objective
 
-The Build 197 annotation-index authorization boundary is now green. Await explicit annotation authorization, then move into the first data-preserving rebuild family only after separate evidence and authorization.
+Execute the separately authorized Build 197 annotation-index stage through the guarded Build 433 workflow, then move into the first data-preserving rebuild family only after separate evidence and authorization.
 
 ## Ordered path
 
@@ -31,15 +31,17 @@ The Build 197 annotation-index authorization boundary is now green. Await explic
    - `product_image_annotations` preservation boundary: 70 rows;
    - final authorization gate: PASS (20/20).
 
-5. **Build 197 annotation-index execution — awaiting exact token**
-   - require `AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX`;
+5. **Build 197 annotation-index execution — authorized/current**
+   - exact token `AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX` received;
+   - use only `scripts/build433_production_annotation_execution.py`;
    - rerun targeted annotation preflight;
    - fresh full Production D1 backup;
    - bytes/SHA/UUID/age proof;
    - targeted reread;
    - create only `idx_product_image_annotations_product_image_build197` if still missing;
    - preserve annotation row count;
-   - independent postcheck.
+   - independent postcheck;
+   - do not manually run SQL in the D1 console.
 
 6. **Membership Build 395 rebuild authorization boundary**
    - refresh exact three-row/tier Production state;
@@ -83,7 +85,7 @@ Product numbers                              COMPLETE / PROVEN
 Gift Card                                    COMPLETE / PROVEN
 Full Build 403 Notification                  COMPLETE / PROVEN
 Build 197 annotation boundary                PASS (20/20)
-Build 197 annotation authorization           NOT RECEIVED
+Build 197 annotation authorization           RECEIVED
 Annotation Production backup                 NOT CREATED
 Annotation Production mutation               NOT EXECUTED
 Membership rebuild                           LOCKED
