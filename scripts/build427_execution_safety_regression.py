@@ -25,7 +25,13 @@ def check(condition: bool, label: str) -> None:
 
 
 # 1-5 read-only preflight boundaries.
-check('production_mutation_executed' in PRE and "'production_mutation_executed': False" in PRE, 'preflight explicitly records zero Production mutation')
+check(
+    'production_mutation_executed' in PRE
+    and "'production_mutation_executed': False" in PRE
+    and 'configure_console()' in PRE
+    and "stream.reconfigure(encoding='utf-8', errors='replace')" in PRE,
+    'preflight records zero Production mutation and uses Windows-safe UTF-8 console transport',
+)
 check('build426_live_release_candidate_evidence.py' in PRE, 'preflight refreshes bounded live evidence instead of trusting stale local SQL')
 check("'production_backup_created': False" in PRE, 'preflight does not claim a Production backup exists')
 check("'production_authorization_received': False" in PRE, 'preflight does not infer Production authorization')
