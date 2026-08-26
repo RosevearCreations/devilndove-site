@@ -1,0 +1,34 @@
+/* Devil n Dove Build 440 — Inventory physical count / usage setup review. */
+.inventory-integrity-review{margin:0 0 18px}
+.inventory-integrity-summary{gap:10px;margin:14px 0}
+.inventory-integrity-summary .card{margin:0;padding:12px;display:flex;flex-direction:column;gap:4px}
+.inventory-integrity-summary strong{font-size:1.25rem}
+.inventory-integrity-controls{display:grid;grid-template-columns:minmax(180px,240px) minmax(240px,1fr) auto;gap:10px;align-items:end;margin:12px 0}
+.inventory-integrity-list{display:grid;gap:12px;margin-top:12px}
+.inventory-integrity-item{border:1px solid var(--border,#444);border-radius:14px;padding:14px;background:rgba(255,255,255,.025)}
+.inventory-integrity-item-head{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.inventory-integrity-item-head img,.inventory-integrity-placeholder{width:64px;height:64px;border-radius:10px;object-fit:cover;border:1px solid var(--border,#444)}
+.inventory-integrity-placeholder{display:grid;place-items:center;font-size:.75rem;font-weight:800}
+.inventory-integrity-item h4{margin:4px 0}
+.inventory-integrity-badges{display:flex;gap:6px;flex-wrap:wrap}
+.inventory-integrity-badges span{border:1px solid var(--border,#555);border-radius:999px;padding:2px 7px;font-size:.72rem;font-weight:700;letter-spacing:.03em}
+.inventory-integrity-subpanel{border-top:1px solid var(--border,#444);padding-top:12px;margin-top:10px}
+.inventory-integrity-subpanel summary{cursor:pointer;margin-bottom:10px}
+.inventory-integrity-row-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.inventory-integrity-count-controls{display:grid;grid-template-columns:minmax(150px,220px) minmax(240px,1fr) auto;gap:10px;align-items:end;margin-top:10px}
+.inventory-integrity-form{gap:10px;margin:10px 0}
+.inventory-integrity-pager{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+#inventoryIntegrityMessage{padding:8px 10px;border-radius:8px;margin:8px 0}
+#inventoryIntegrityMessage.is-error{border:1px solid rgba(220,80,80,.45)}
+#inventoryIntegrityMessage.is-success{border:1px solid rgba(80,180,110,.35)}
+@media(max-width:900px){
+  .inventory-integrity-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .inventory-integrity-controls,.inventory-integrity-count-controls{grid-template-columns:1fr}
+  .inventory-integrity-form{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:620px){
+  .inventory-integrity-summary,.inventory-integrity-form{grid-template-columns:1fr!important}
+  .inventory-integrity-item-head,.inventory-integrity-row-head{align-items:flex-start;flex-direction:column}
+  .inventory-integrity-item-head img,.inventory-integrity-placeholder{width:56px;height:56px}
+  .inventory-integrity-pager{justify-content:stretch}.inventory-integrity-pager .btn{flex:1}
+}
