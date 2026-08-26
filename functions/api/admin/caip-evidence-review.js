@@ -28,6 +28,7 @@ function integer(value) {
   const parsed = Number(value || 0);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
 }
+function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function boundedBodyLength(request) {
   const value = Number(request.headers.get('Content-Length') || 0);
   return Number.isFinite(value) ? value : 0;
@@ -41,9 +42,24 @@ async function access(context) {
   return { adminUser, db };
 }
 
-function readinessResponse(readiness, projectId) {
+async function projectOptions(db) {
+  try {
+    return rows(await db.prepare(`
+      SELECT cp.creative_project_id,cp.creative_project_key,cp.project_title,cp.project_status,cp.governance_status,
+             cp.product_id,p.name AS product_name,
+             (SELECT COUNT(*) FROM creative_assets ca WHERE ca.creative_project_id=cp.creative_project_id AND ca.asset_status<>'archived') AS asset_count,
+             (SELECT COUNT(*) FROM creative_assets ca WHERE ca.creative_project_id=cp.creative_project_id AND ca.asset_status<>'archived' AND ca.media_type IN ('video','audio')) AS temporal_asset_count
+      FROM creative_projects cp
+      LEFT JOIN products p ON p.product_id=cp.product_id
+      ORDER BY cp.updated_at DESC,cp.creative_project_id DESC
+      LIMIT 120
+    `).all());
+  } catch { return []; }
+}
+
+function readinessResponse(readiness, projectId, status = 409) {
   return json({
-    ok: true,
+    ok: false,
     build: CAIP_EVIDENCE_REVIEW_BUILD,
     schema_ready: false,
     source: 'migration_required',
@@ -53,7 +69,7 @@ function readinessResponse(readiness, projectId) {
     source_media_unchanged: true,
     provider_execution_active: false,
     message: 'Build 439 temporal evidence schema is not installed yet. Existing CAIP remains available; evidence-review writes are blocked.',
-  });
+  }, status);
 }
 
 export async function onRequestGet(context) {
@@ -63,6 +79,7 @@ export async function onRequestGet(context) {
   const projectId = integer(url.searchParams.get('creative_project_id') || url.searchParams.get('project_id'));
   try {
     const readiness = await getCaipEvidenceReviewReadiness(state.db);
+    const projects = await projectOptions(state.db);
     if (!projectId) {
       return json({
         ok: true,
@@ -70,13 +87,14 @@ export async function onRequestGet(context) {
         schema_ready: readiness.schema_ready,
         missing_tables: readiness.missing_tables,
         creative_project_id: null,
+        projects,
         source_media_unchanged: true,
         provider_execution_active: false,
       });
     }
     const bundle = await loadCaipEvidenceReviewBundle(state.db, projectId);
     if (!bundle.project) return json({ ok: false, error: 'CAIP project not found.' }, 404);
-    return json({ ok: true, ...bundle });
+    return json({ ok: true, projects, ...bundle });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'caip_evidence_review',
@@ -102,7 +120,7 @@ export async function onRequestPost(context) {
 
   try {
     const readiness = await getCaipEvidenceReviewReadiness(state.db);
-    if (!readiness.schema_ready) return readinessResponse(readiness, projectId);
+    if (!readiness.schema_ready) return readinessResponse(readiness, projectId, 409);
 
     let result = null;
     if (action === 'save_marker') {
@@ -158,6 +176,7 @@ export async function onRequestPost(context) {
       build: CAIP_EVIDENCE_REVIEW_BUILD,
       message: 'CAIP evidence review saved. Source originals remain unchanged and no content was published.',
       result,
+      projects: await projectOptions(state.db),
       ...bundle,
     });
   } catch (error) {
