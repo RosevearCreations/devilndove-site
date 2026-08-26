@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,7 +11,7 @@ BUILD435 = ROOT / 'build435_membership_value_mapping_preflight.local.json'
 BUILD436 = ROOT / 'build436_membership_rebuild_authorization_preflight.local.json'
 CONTROLLER = ROOT / 'scripts' / 'build436_production_membership_rebuild.py'
 REGRESSION = ROOT / 'scripts' / 'build436_membership_rebuild_regression.py'
-DOC = ROOT / 'BUILD436_TWENTY_ITEM_MEMBERSHIP_REBUILD_AUTHORIZATION_BOUNDARY.md'
+COMPLETION_DOC = ROOT / 'BUILD437_MEMBERSHIP_COMPLETION_RELEASE.md'
 AUTH_TOKEN = 'AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD'
 EXPECTED_TIERS = {'bronze', 'silver', 'gold'}
 EXPECTED_LEGACY_SORT_COLUMNS = ['sort_order', 'code']
@@ -44,10 +43,7 @@ def main() -> int:
     b436 = load(BUILD436)
     controller_text = CONTROLLER.read_text(encoding='utf-8') if CONTROLLER.exists() else ''
     regression_text = REGRESSION.read_text(encoding='utf-8') if REGRESSION.exists() else ''
-    doc_text = DOC.read_text(encoding='utf-8') if DOC.exists() else ''
-    next_section = doc_text.split('## Next 20 ordered changes — Build 437', 1)[1] if '## Next 20 ordered changes — Build 437' in doc_text else ''
-    next_block = next_section.split('## Current safety state', 1)[0] if next_section else ''
-    next_items = re.findall(r'(?m)^\d+\.\s+', next_block)
+    completion_text = COMPLETION_DOC.read_text(encoding='utf-8') if COMPLETION_DOC.exists() else ''
 
     check(branch == 'dev', 'current git branch is dev')
     check(b435.get('lossless_mapping_possible') is True and b435.get('safe_to_prepare_membership_execution_boundary') is True, 'Build 435 lossless Membership mapping remains green')
@@ -73,7 +69,13 @@ def main() -> int:
     check(b436.get('safe_to_request_membership_rebuild_authorization') is True, 'preflight is safe to request separate Membership rebuild authorization')
     check(b436.get('production_backup_created') is False and b436.get('membership_rebuild_authorization_received') is False and b436.get('production_mutation_executed') is False, 'no Membership backup, authorization, or mutation is inferred')
     check(AUTH_TOKEN in controller_text and "export_backup('membership')" in controller_text and 'Legacy sort index -> canonical sort index: PASS' in regression_text, 'future Membership execution is token-gated, backup-gated, and sort-index regression-tested')
-    check(len(next_items) == 20 and 'Production promotion' in doc_text and 'CLOSED' in doc_text, 'Build 436 records exactly next 20 and keeps Production promotion closed')
+    check(
+        'Build 437 — Membership Completion Release' in completion_text
+        and AUTH_TOKEN in completion_text
+        and 'Production promotion' in completion_text
+        and 'CLOSED' in completion_text,
+        'Build 437 consolidated Membership completion authority is present and keeps Production promotion closed',
+    )
 
     print()
     if failures:
