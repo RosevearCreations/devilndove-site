@@ -67,6 +67,61 @@ function verifiedRestoreMetadata(object, key) {
     && Number(object?.size || 0) > 0;
 }
 
+function ascii(bytes, start, length) {
+  return String.fromCharCode(...bytes.slice(start, start + length));
+}
+
+function hasJpegEoi(bytes) {
+  const start = Math.max(0, bytes.length - 64);
+  for (let index = bytes.length - 2; index >= start; index -= 1) {
+    if (bytes[index] === 0xff && bytes[index + 1] === 0xd9) return true;
+  }
+  return false;
+}
+
+function validateImageSignature(buffer, contentType) {
+  const bytes = new Uint8Array(buffer);
+  const type = normalizeText(contentType).toLowerCase();
+  if (!bytes.length) return false;
+
+  if (type === 'image/jpeg') {
+    return bytes.length >= 4 && bytes[0] === 0xff && bytes[1] === 0xd8 && hasJpegEoi(bytes);
+  }
+  if (type === 'image/png') {
+    const sig = [0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a];
+    return bytes.length >= sig.length && sig.every((value, index) => bytes[index] === value);
+  }
+  if (type === 'image/gif') {
+    const header = ascii(bytes, 0, 6);
+    return header === 'GIF87a' || header === 'GIF89a';
+  }
+  if (type === 'image/webp') {
+    return bytes.length >= 12 && ascii(bytes, 0, 4) === 'RIFF' && ascii(bytes, 8, 4) === 'WEBP';
+  }
+  if (type === 'image/avif') {
+    if (bytes.length < 16 || ascii(bytes, 4, 4) !== 'ftyp') return false;
+    const brandWindow = ascii(bytes, 8, Math.min(32, bytes.length - 8));
+    return brandWindow.includes('avif') || brandWindow.includes('avis');
+  }
+  if (type === 'image/svg+xml') {
+    const sample = new TextDecoder().decode(bytes.slice(0, Math.min(bytes.length, 2048))).replace(/^\uFEFF/, '').trimStart();
+    return sample.startsWith('<svg') || (sample.startsWith('<?xml') && sample.includes('<svg'));
+  }
+  return false;
+}
+
+function rowFailure(row, error) {
+  return {
+    status: 'failed',
+    site_item_inventory_id: Number(row?.site_item_inventory_id || 0),
+    item_kind: normalizeText(row?.item_kind),
+    source_key: normalizeText(row?.source_key),
+    key: canonicalR2Key(row?.image_url) || '',
+    code: normalizeText(error?.code) || 'inventory_asset_restore_item_failed',
+    error: normalizeText(error?.message) || 'Development inventory asset restore failed for this object.',
+  };
+}
+
 async function restoreOne(bucket, row) {
   const key = canonicalR2Key(row.image_url);
   if (!key) {
@@ -128,6 +183,11 @@ async function restoreOne(bucket, row) {
   if (!contentType || !contentType.startsWith('image/')) {
     const error = new Error(`Public source is not a supported image for ${key}.`);
     error.code = 'source_content_type_invalid';
+    throw error;
+  }
+  if (!validateImageSignature(buffer, contentType)) {
+    const error = new Error(`Public source image bytes failed signature/completeness validation for ${key}.`);
+    error.code = 'source_image_invalid';
     throw error;
   }
 
@@ -241,19 +301,25 @@ export async function onRequestPost({ request, env }) {
         cursor,
         next_cursor: cursor,
         done: true,
-        batch: { processed: 0, restored_verified: 0, already_verified: 0, bytes_restored: 0 },
+        has_failures: false,
+        batch: { processed: 0, restored_verified: 0, already_verified: 0, failed: 0, bytes_restored: 0 },
         results: [],
       });
     }
 
     const results = [];
     for (const row of batchRows) {
-      results.push(await restoreOne(bucket, row));
+      try {
+        results.push(await restoreOne(bucket, row));
+      } catch (error) {
+        results.push(rowFailure(row, error));
+      }
     }
 
     const nextCursor = Number(batchRows[batchRows.length - 1]?.site_item_inventory_id || cursor);
     const restored = results.filter((entry) => entry.status === 'restored_verified');
     const already = results.filter((entry) => entry.status === 'already_verified');
+    const failed = results.filter((entry) => entry.status === 'failed');
 
     return json({
       ok: true,
@@ -268,10 +334,12 @@ export async function onRequestPost({ request, env }) {
       cursor,
       next_cursor: nextCursor,
       done: batchRows.length < limit,
+      has_failures: failed.length > 0,
       batch: {
         processed: results.length,
         restored_verified: restored.length,
         already_verified: already.length,
+        failed: failed.length,
         bytes_restored: restored.reduce((total, entry) => total + Number(entry.bytes || 0), 0),
       },
       results,
@@ -291,4 +359,4 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
-export { canonicalR2Key, publicUrlForKey, isDevelopmentHost, sha256Hex };
+export { canonicalR2Key, publicUrlForKey, isDevelopmentHost, sha256Hex, validateImageSignature };
