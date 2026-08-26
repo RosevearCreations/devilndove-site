@@ -5,6 +5,12 @@
   const BUILD = 438;
   const API = '/api/admin/app-modules';
   const MODULE_ORDER = ['commerce-operations', 'creative-production', 'business-administration'];
+  const ROUTE_PROOF_CASES = Object.freeze([
+    Object.freeze({ label: 'Shared Core recovery', path: '/admin/application-modules/', module_key: null }),
+    Object.freeze({ label: 'Commerce & Operations', path: '/admin/catalog/', module_key: 'commerce-operations' }),
+    Object.freeze({ label: 'Creative & Production', path: '/admin/creative-process/', module_key: 'creative-production' }),
+    Object.freeze({ label: 'Business & Administration', path: '/admin/accounting/', module_key: 'business-administration' }),
+  ]);
 
   const byId = (id) => document.getElementById(id);
   const text = (value) => String(value ?? '').trim();
@@ -12,6 +18,7 @@
 
   let state = { schema_ready: false, source: 'unknown', reason: null, modules: [], role_access: [], diagnostics: null };
   let busy = false;
+  let proofBusy = false;
 
   function moduleRow(key) {
     return state.modules.find((row) => row.module_key === key) || null;
@@ -19,6 +26,16 @@
 
   function roleRow(moduleKey, roleCode) {
     return state.role_access.find((row) => row.module_key === moduleKey && row.role_code === roleCode) || null;
+  }
+
+  function adminCanReadModule(moduleKey) {
+    const module = moduleRow(moduleKey);
+    const role = roleRow(moduleKey, 'admin');
+    return Boolean(
+      module && Number(module.is_enabled || 0) === 1 &&
+      role && Number(role.is_allowed || 0) === 1 &&
+      text(role.access_level).toLowerCase() !== 'none'
+    );
   }
 
   function setStatus(message, tone = '') {
@@ -162,6 +179,46 @@
     render();
   }
 
+  async function runRouteProof() {
+    if (proofBusy) return;
+    proofBusy = true;
+    const button = byId('runModuleRouteProofButton');
+    const mount = byId('applicationModuleRouteProofMount');
+    if (button) button.disabled = true;
+    if (mount) mount.innerHTML = '<div class="small">Checking current route enforcement…</div>';
+    try {
+      const results = [];
+      for (const item of ROUTE_PROOF_CASES) {
+        const expectedAllowed = item.module_key ? adminCanReadModule(item.module_key) : true;
+        let status = 0;
+        let errorMessage = '';
+        try {
+          const response = await window.DDAuth.apiFetch(item.path, { method: 'HEAD', cache: 'no-store' });
+          status = Number(response.status || 0);
+        } catch (error) {
+          errorMessage = error?.message || 'request failed';
+        }
+        const actualAllowed = status >= 200 && status < 400;
+        const actualDenied = status === 401 || status === 403;
+        const pass = expectedAllowed ? actualAllowed : actualDenied;
+        results.push({ ...item, expectedAllowed, status, errorMessage, pass });
+      }
+      const passed = results.filter((row) => row.pass).length;
+      if (mount) {
+        mount.innerHTML = `
+          <div class="card" style="padding:12px">
+            <strong>Current-state route proof: ${passed === results.length ? 'PASS' : 'CHECK'} (${passed}/${results.length})</strong>
+            <div style="display:grid;gap:6px;margin-top:8px">
+              ${results.map((row) => `<div class="small"><strong>${row.pass ? 'PASS' : 'FAIL'}</strong> — ${esc(row.label)} · expected ${row.expectedAllowed ? 'available' : 'blocked'} · HTTP ${row.status || 'error'}${row.errorMessage ? ` · ${esc(row.errorMessage)}` : ''}</div>`).join('')}
+            </div>
+          </div>`;
+      }
+    } finally {
+      proofBusy = false;
+      if (button) button.disabled = false;
+    }
+  }
+
   async function post(payload) {
     if (busy) return;
     busy = true;
@@ -181,6 +238,15 @@
   }
 
   document.addEventListener('click', (event) => {
+    if (event.target.closest('#runModuleRouteProofButton')) {
+      void runRouteProof();
+      return;
+    }
+    if (event.target.closest('#refreshModuleAuthorityButton')) {
+      void load();
+      return;
+    }
+
     const toggle = event.target.closest('[data-module-toggle]');
     if (toggle) {
       const moduleKey = toggle.dataset.moduleToggle;
