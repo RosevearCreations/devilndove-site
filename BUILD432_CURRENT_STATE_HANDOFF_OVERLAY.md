@@ -11,7 +11,7 @@ Build 429  Gift Card authorization boundary                   PASS (20/20)
 Build 430  Gift Card Production stage                         PASS
 Build 431  Full Build 403 Notification boundary               PASS (20/20)
 Build 432  Full Build 403 Notification Production stage       PASS
-Build 432  Build 197 annotation-index authorization boundary  READY
+Build 432  Build 197 annotation-index authorization boundary  PASS (20/20)
 ```
 
 ## Proven completed Production families
@@ -60,7 +60,15 @@ idx_product_image_annotations_product_image_build197
 ON product_image_annotations(product_id, product_image_id)
 ```
 
-Build 432 prepares a read-only/local authorization boundary. The preflight must prove the required columns, current row boundary, and whether the index remains absent.
+Owner-run Build 432 boundary evidence is now green:
+
+```text
+Annotation index exists: False
+Required product_id/product_image_id columns present: True
+product_image_annotations rows: 70
+Exact Build 197 index gap: YES
+Annotation authorization boundary: PASS (20/20)
+```
 
 Prepared token, not authorized:
 
@@ -68,7 +76,7 @@ Prepared token, not authorized:
 AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX
 ```
 
-No annotation backup or mutation is authorized yet.
+No annotation backup or mutation has occurred.
 
 ## Still locked
 
@@ -94,6 +102,7 @@ CAIP D1-only copy: FORBIDDEN
 Product-number Production stage             COMPLETE / PROVEN
 Gift Card Production stage                  COMPLETE / PROVEN
 Full Build 403 Notification stage           COMPLETE / PROVEN
+Build 197 annotation boundary               PASS (20/20)
 Build 197 annotation authorization          NOT RECEIVED
 Annotation Production backup                NOT CREATED
 Annotation Production mutation              NOT EXECUTED
@@ -104,4 +113,10 @@ Production promotion                        CLOSED
 
 ## Immediate next action
 
-Run only the Build 432 annotation source regression, live read-only preflight, and local 20-item authorization-boundary gate. If all are green, stop for the explicit annotation authorization token.
+Stop at the explicit Build 197 annotation authorization boundary. Proceed only if the owner supplies exactly:
+
+```text
+AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX
+```
+
+That token authorizes only the Build 197 annotation composite index stage. Membership/rebuild families, provider/R2 work, CAIP copy, and Production promotion remain excluded.
