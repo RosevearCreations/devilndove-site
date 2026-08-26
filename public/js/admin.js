@@ -4,6 +4,7 @@
 // Build 296: Packaging exposes an explicit client transport facade over the proven read/write bridges.
 // Builds 303–397: Core and the three top-level application-module runtimes progressively add proven page-specific read coverage.
 // Build 397: Commerce & Operations gives /admin/customer-documents/ its Operations-owned read boundary.
+// Build 438: authoritative server module availability is loaded before any top-level runtime activation.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -41,5 +42,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 });
 
-void import('/public/js/core/dd-admin-module-runtime.mjs?v=397')
-  .catch((error) => console.warn('[DD modules] runtime bridge unavailable', error));
+void import('/public/js/core/dd-application-module-bootstrap.mjs?v=438')
+  .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
