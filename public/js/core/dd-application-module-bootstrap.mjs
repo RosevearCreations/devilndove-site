@@ -113,7 +113,7 @@ function publish() {
     canBackground,
     moduleForPath,
     applicationModuleIdForPath,
-    refresh: load,
+    refresh: () => load({ force: true }),
     applyNavigation: () => annotateAndFilterLinks(document),
   });
   window.DDApplicationModules = api;
@@ -126,20 +126,21 @@ function publish() {
   return api;
 }
 
-async function load() {
+async function load({ force = false } = {}) {
   try {
-    const response = await fetch('/api/modules', { method: 'GET', credentials: 'same-origin', cache: 'no-store' });
+    const response = await fetch(force ? '/api/modules?fresh=1' : '/api/modules', { method: 'GET', credentials: 'same-origin', cache: 'no-store' });
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok || !Array.isArray(data.modules)) throw new Error(data?.error || `Module bootstrap failed (${response.status}).`);
     snapshot = Object.freeze({
       build: Number(data.build || BUILD),
       schema_ready: Boolean(data.schema_ready),
       source: String(data.source || 'server'),
+      reason: data.reason || null,
       user: data.user || null,
       modules: Object.freeze(data.modules.map((module) => Object.freeze({ ...module }))),
     });
   } catch (error) {
-    console.warn('[DD modules] authoritative availability bootstrap unavailable; retaining safe enabled defaults for presentation only', error);
+    console.warn('[DD modules] authoritative availability bootstrap unavailable; retaining the last presentation snapshot', error);
     snapshot = Object.freeze({ ...snapshot, source: 'client_fallback' });
   }
   return publish();
