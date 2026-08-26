@@ -2,15 +2,11 @@
 
 ## Status
 
-**SOURCE IMPLEMENTATION IN PROGRESS / DEVELOPMENT-FIRST / NO PRODUCTION D1 MUTATION AUTHORIZED / PRODUCTION PROMOTION CLOSED**
+**SOURCE CONTROL PLANE READY FOR OWNER VALIDATION / DEVELOPMENT-FIRST / DEVELOPMENT D1 APPLY PENDING / NO PRODUCTION D1 AUTHORIZATION / PRODUCTION PROMOTION CLOSED**
 
-Build 438 completes the activation and access-control layer around modular work that already exists in the repository. It does **not** invent a competing module system and it does not reopen Build 437 Membership work.
+Build 438 completes the missing persistent/server-authoritative control plane around modular work already present from Builds 281–397. It does not create a competing module framework and it does not reopen Build 437 Membership work.
 
-## Architecture discovered in the existing codebase
-
-Builds 281–397 already established a passive client-side module registry, business-domain catalog, service contracts and three top-level umbrella runtimes under `public/js/core/` and `public/js/modules/`.
-
-The real application architecture is therefore:
+## Canonical architecture
 
 ```text
 Devil n Dove Application Core
@@ -20,71 +16,41 @@ Devil n Dove Application Core
     +-- business-administration
 ```
 
-The Customer storefront and Member account are important application **surfaces**, but they are not separate top-level runtime modules. They live inside the Commerce & Operations authority together with Catalog, Inventory, Orders, Membership and fulfillment.
+Customer/storefront and Member Account are important UX surfaces inside `commerce-operations`; they are not separate top-level runtime modules.
 
-## Existing top-level modules
+### `commerce-operations`
 
-### 1. `commerce-operations` — Commerce & Operations
+Composes public/customer/storefront, Catalog, Inventory and Operations domains. Representative direct surfaces include Shop, Cart, Checkout, Members, Catalog/Product admin, Inventory, Orders, Membership, Gift Cards, customer documents, custom requests and Today Tasks.
 
-Owns or composes the existing public/customer/storefront, Catalog, Inventory and day-to-day Operations domains.
+### `creative-production`
 
-Representative surfaces:
+Composes Creative, CAIP, Packaging and Content domains. Representative direct surfaces include Creative Process, Creative Assets/CAIP, Packaging Studio, Website Media & Content Studio, Content Studio, visual enrichment, image manifest, stage-photo moderation and content-publication workflows.
 
-- public Shop, Cart, Checkout and product/customer workflows;
-- Members account surface;
-- Catalog/Product administration;
-- Inventory administration;
-- Orders and customer documents;
-- Membership and Gift Cards;
-- custom requests and Today Tasks.
+### `business-administration`
 
-Existing umbrella runtime: `public/js/modules/commerce-operations/runtime.mjs`.
+Composes Marketing, Accounting, Platform and Administration domains. Representative direct surfaces include Accounting, Analytics/SEO/marketing, users/settings/security, Application Sanity, Release & Go-Live and deployment/runtime/platform controls.
 
-### 2. `creative-production` — Creative & Production
+## Existing runtime foundation retained
 
-Owns or composes the Creative, CAIP, Packaging and Content domains.
+Build 438 reuses:
 
-Representative surfaces:
+```text
+public/js/core/dd-module-registry.mjs
+public/js/core/dd-module-definitions.mjs
+public/js/core/dd-module-contracts.mjs
+public/js/core/dd-module-service-adapters.mjs
+public/js/core/dd-application-module-groups.mjs
+public/js/core/dd-admin-module-runtime.mjs
+public/js/modules/commerce-operations/runtime.mjs
+public/js/modules/creative-production/runtime.mjs
+public/js/modules/business-administration/runtime.mjs
+```
 
-- Creative Process / Creative Project Workflow;
-- CAIP / Creative Assets;
-- Packaging Studio;
-- Website Media & Content Studio;
-- Content Studio;
-- visual enrichment/image-manifest/stage-photo/content-publication workflows.
+The existing top-level runtime extraction remains incremental. Build 438 controls whether a top-level module may be used; it does not falsely move every legacy mutation into an umbrella runtime.
 
-Existing umbrella runtime: `public/js/modules/creative-production/runtime.mjs`.
+## Build 438 D1 authority
 
-### 3. `business-administration` — Business & Administration
-
-Owns or composes Marketing, Accounting, Platform and Administration domains.
-
-Representative surfaces:
-
-- Accounting;
-- Analytics, SEO, marketing and marketplace controls;
-- users/security/settings;
-- Application Sanity;
-- Release & Go-Live / deployment / promotion / runtime diagnostics.
-
-Existing umbrella runtime: `public/js/modules/business-administration/runtime.mjs`.
-
-## What Build 438 adds
-
-Before Build 438, the existing registry/runtime framework was intentionally passive and largely client-side. It could classify routes and lazy-load proven domain runtimes, but there was no single persistent authority for:
-
-- globally enabling/disabling a top-level module;
-- role-to-module access;
-- blocking direct module-owned page/API access;
-- suppressing runtime activation for a disabled module;
-- granting or denying module-owned background activity;
-- auditing module configuration changes.
-
-Build 438 adds that missing central control plane while preserving the existing module/domain extraction work.
-
-## Canonical D1 authority
-
-Focused migration:
+Migration:
 
 `database_build438_application_module_activation.sql`
 
@@ -115,192 +81,241 @@ updated_at
 PRIMARY KEY (module_key, role_code)
 ```
 
-Default module records are exactly:
+Default state:
 
 ```text
-commerce-operations       enabled
-creative-production       enabled
-business-administration   enabled
+commerce-operations       enabled / background OFF
+creative-production       enabled / background OFF
+business-administration   enabled / background OFF
 ```
 
-All default background activity permissions are OFF. This is deliberate: a module may be enabled for interactive use without being implicitly authorized to create polling/sync/provider traffic.
-
-Current account roles remain only `member` and `admin`. Build 438 does not invent an operator/creator role before the user model supports one.
-
-Initial access:
+Current roles remain `member` and `admin`:
 
 ```text
-member -> commerce-operations allowed
-member -> creative-production denied
-member -> business-administration denied
+member -> commerce-operations       allowed/member
+member -> creative-production       denied/none
+member -> business-administration   denied/none
 
-admin  -> commerce-operations allowed/manage
-admin  -> creative-production allowed/manage
-admin  -> business-administration allowed/manage
+admin  -> all three                 allowed/manage
 ```
 
-No per-user override table is added in Build 438. Add one only when a real use case requires it.
+No per-user module override table is added until a real use case requires one.
 
-## Shared-core server authority
+## Server/shared-core authority
 
 `functions/api/_lib/appModules.js` owns:
 
-- bounded non-user module configuration reads;
-- request-scoped current-session identity;
+- short non-user D1 module-config caching;
+- request-scoped user/session resolution;
 - module availability decisions;
 - role/access-level evaluation;
-- read-only current-user module summaries;
-- standard unavailable responses.
+- cross-module service-consumer evaluation;
+- standard fail-closed responses.
 
-`functions/api/_lib/appModuleRoutes.js` owns the server-side route/API-to-top-level-module map and mirrors the existing Build 302+ domain ownership.
+`functions/api/_lib/appModuleRoutes.js` is the single server route-to-module ownership authority and mirrors the existing Build 305 client-domain catalog.
 
-The server module configuration may be cached briefly per isolate because it is not request-specific. Session/user identity is never stored as global request state.
+`functions/_middleware.js` is the direct page/API enforcement boundary.
 
-Request handlers must never create or repair `app_modules` or `app_module_role_access` at runtime.
+No request handler creates or repairs the Build 438 tables.
 
-## Pages middleware boundary
+### Failure semantics
 
-Root `functions/_middleware.js` applies the module decision before module-owned page/API execution.
+Build 438 distinguishes rollout compatibility from real authority failure:
 
-For a disabled or unauthorized module:
+```text
+schema absent during rollout   -> all-enabled compatibility defaults; writes blocked
+healthy D1 authority           -> D1 module state is authoritative
+transient read failure         -> last-known module state when available
+cold real authority failure    -> fail closed
+```
 
-- direct page access fails closed;
-- direct API access fails closed;
-- module page JavaScript never gets a chance to initialize;
-- `read` access cannot perform non-read API methods;
-- static assets and auth routes remain available;
-- the Application Modules recovery/control surface remains available to an administrator.
+A D1/config interruption must never silently turn a disabled module back on.
 
-The recovery surface exemption is intentional:
+## Direct module switch behavior
+
+For a disabled/unauthorized module:
+
+- direct module page access fails closed;
+- broad/legacy module API access fails closed;
+- module-aware navigation hides the direct destination;
+- top-level Admin runtime activation is suppressed;
+- background permission is cleared when the module is disabled;
+- re-enabling does not restore old background permission automatically;
+- all business data remains intact.
+
+`read` module access permits reads but blocks non-read direct module API methods with:
+
+```text
+module_access_level_read_only
+```
+
+## Shared cross-module service contracts
+
+A top-level module may depend on a narrow service owned by another module. Disabling an owner module must not force an enabled consumer back to broad legacy APIs.
+
+Build 438 therefore treats exactly seven reviewed contracts as Application Core boundaries:
+
+| Contract | Owner | Reviewed consumers | Mutation |
+|---|---|---|---|
+| `/api/admin/contracts/catalog-read` | Commerce | Commerce, Creative, Business | No |
+| `/api/admin/contracts/inventory-read` | Commerce | Commerce, Creative | No |
+| `/api/admin/contracts/inventory-cost` | Commerce | Commerce, Business | No |
+| `/api/admin/contracts/inventory-post` | Commerce | Commerce, Creative | Yes |
+| `/api/admin/contracts/inventory-reverse` | Commerce | Commerce, Creative | Yes |
+| `/api/admin/contracts/accounting-read` | Business | Business, Commerce | No |
+| `/api/admin/contracts/content-media` | Creative | Creative, Commerce | No |
+
+Policy:
+
+1. Direct owner UI/broad API remains disabled when the owner module is off.
+2. A shared contract remains available only when a reviewed consumer module is enabled and accessible to the current user.
+3. Shared mutation contracts require a qualifying `manage` consumer.
+4. Adding an exception requires a named contract + consumer list + regression; never exempt a broad API family.
+
+This makes cases such as **Commerce off + Creative on** viable: Creative can still use the reviewed Inventory post/reverse authority without reopening Commerce pages or general Inventory APIs.
+
+## Application Modules recovery/control surface
+
+Shared Core permanently owns:
 
 ```text
 /admin/application-modules/
 /api/admin/app-modules
 ```
 
-An administrator must not be able to lock themselves out of the switch used to re-enable a module.
+The control route cannot be disabled by any business-module switch.
+
+The Admin Dashboard now includes a permanent **Application Modules** card.
+
+The control screen supports:
+
+- module enable/disable;
+- background permission;
+- member/admin role access;
+- Core Health diagnostics;
+- Current-State Route Proof;
+- explicit recovery guidance.
+
+Control mutations are audited through `admin_action_audit`:
+
+```text
+application_module_state_changed
+application_module_background_changed
+application_module_role_access_changed
+```
+
+### Core Health diagnostics
+
+The Admin API/UI verifies:
+
+- exactly 3 expected modules;
+- exactly 6 expected role rows;
+- no unexpected/missing rows;
+- no contradictory role access;
+- no disabled module with background permission;
+- no Admin recovery-access risk;
+- exactly 7 shared service contracts.
+
+### Current-State Route Proof
+
+The control screen can HEAD-check representative routes without changing state:
+
+```text
+Shared Core                    /admin/application-modules/
+Commerce & Operations          /admin/catalog/
+Creative & Production          /admin/creative-process/
+Business & Administration      /admin/accounting/
+```
+
+The expected availability is calculated from current module + Admin role state and compared with the actual middleware response.
 
 ## Client activation authority
 
-`public/js/core/dd-application-module-bootstrap.mjs` performs one authoritative `/api/modules` read before the existing Admin module runtime is imported.
+`public/js/core/dd-application-module-bootstrap.mjs` loads `/api/modules` before the older Admin umbrella runtime and exposes:
 
-It exposes `window.DDApplicationModules` with:
+```text
+DDApplicationModules.isEnabled(...)
+DDApplicationModules.isAvailable(...)
+DDApplicationModules.canBackground(...)
+DDApplicationModules.moduleForPath(...)
+DDApplicationModules.refresh(...)
+```
 
-- module snapshot/list/get;
-- `isEnabled(moduleKey)`;
-- `isAvailable(moduleKey)`;
-- `canBackground(moduleKey)`;
-- route-to-module lookup;
-- navigation filtering;
-- explicit refresh after a control change.
+No polling loop is introduced.
 
-It adds no polling loop.
+`public/js/core/dd-public-module-visibility.mjs` is presentation-only. It uses a short per-tab cache and preserves the Application Modules recovery link. Server middleware remains the security boundary.
 
-If the current top-level module is unavailable, the older umbrella/domain runtime is not imported/activated.
+## Public shell scope
 
-`public/js/core/dd-public-module-visibility.mjs` provides the smaller public/member presentation pass. It may hide disabled commerce/admin destinations, but server middleware remains the access/security boundary.
+The Commerce switch controls concrete transactional/customer surfaces such as Shop, Cart, Checkout, Product/Member workflows and their APIs. General informational public pages are not automatically blanked by Commerce disablement.
 
-## Admin Application Modules control
-
-`/admin/application-modules/` is a shared-core Admin screen.
-
-It can:
-
-1. enable/disable one of the three top-level modules;
-2. allow/disallow module-owned background activity;
-3. update current `member`/`admin` role access and access level;
-4. display whether the Build 438 D1 authority is actually present.
-
-All mutations use `/api/admin/app-modules` and are written to the existing `admin_action_audit` authority.
-
-If the Build 438 schema is absent, the screen is read-only and explicitly says so. It does not self-heal schema.
-
-Disabling a module never deletes module business data. Re-enabling it must restore access without reconstructing business records.
-
-## Existing runtime extraction remains incremental
-
-Build 438 central activation can be complete while individual business-domain extraction remains `in-progress`.
-
-Do not falsely claim that every mutation has moved into a top-level umbrella runtime. Existing Build 302–397 contracts deliberately preserve many compatibility mutation authorities while moving/covering proven reads.
-
-Examples:
-
-- Commerce & Operations has substantial Catalog/Inventory/Operations read coverage but does not magically own every mutation.
-- Creative & Production covers Packaging, Creative Process, Content Studio and CAIP activation/read boundaries while legacy mutation authorities still exist where explicitly preserved.
-- Business & Administration has proven Accounting runtime coverage; other Marketing/Platform/Admin domains may remain domain-bridge surfaces.
-
-Build 438 controls whether a top-level module may run; it does not rewrite every underlying business subsystem.
+A future full-site maintenance switch should be a separate Core feature, not an overloaded Commerce flag.
 
 ## Resource-efficiency contract
 
-Build 438 introduces no recurring polling.
+Build 438 adds no recurring polling.
 
-A disabled module must not initiate avoidable:
+A disabled module must not start avoidable:
 
-- startup/bootstrap business reads;
-- umbrella/domain runtime imports;
+- direct page/business startup work;
+- umbrella runtime activation;
 - module polling;
 - autosave/sync;
 - provider/R2 work;
-- module-specific background diagnostics.
+- background diagnostics.
 
-`background_activity_enabled` is a permission, not a scheduler. Existing/future module-owned background code must explicitly check `canBackground()`/server authority before running.
+`background_activity_enabled` is a permission, not a scheduler. Future background logic must explicitly check module authority.
 
-The existing top-level runtimes are intentionally passive and report that importing them creates no network transport.
+Known item to measure in Development: middleware can add one indexed session lookup while a legacy endpoint also authenticates independently. Do not solve that with global request/user caching.
 
-### Known efficiency consideration
-
-The root middleware performs an indexed session/user resolution for authenticated module-owned requests so role access can be enforced centrally. Many legacy endpoints also perform their own authentication query. That creates a temporary duplicate indexed session read on some paths.
-
-This is accepted for the first secure activation boundary, but should be measured. A future runtime/auth consolidation may pass verified request identity through shared middleware context to eliminate duplicate auth reads without weakening endpoint authorization.
-
-Do **not** cache request-specific user/session identity globally merely to remove that query.
-
-## Build 438 source validation
-
-Local regression:
-
-`scripts/build438_application_module_core_regression.py`
-
-The regression executes the migration twice against in-memory SQLite and verifies 20 source/security/architecture contracts.
-
-Read-only D1 verification:
-
-`BUILD438_D1_VERIFICATION.sql`
-
-Expected post-migration D1 identities:
+## Source/test package
 
 ```text
-module_count          3
-role_access_count     6
-enabled_module_count  3
-expected_module_count 3
+database_build438_application_module_activation.sql
+BUILD438_D1_VERIFICATION.sql
+scripts/build438_application_module_core_regression.py
+scripts/build438_module_route_map_test.mjs
+scripts/build438_module_catalog_alignment_test.mjs
+scripts/build438_module_access_policy_test.mjs
+scripts/build438_development_module_activation.py
+BUILD438_VALIDATION.md
 ```
+
+The local gate includes:
+
+- migration rerun safety;
+- exact module/role/index seeds;
+- route ownership;
+- Build305 client-domain alignment;
+- hyphenated API families;
+- direct read-only enforcement;
+- cross-module service policy;
+- Commerce-off/Creative-on Inventory contract proof;
+- fail-closed authority behavior;
+- Admin recovery/core health/current-route proof source;
+- no request-time DDL;
+- no new polling.
 
 ## Development-first rollout
 
-1. Compile/check Build 438 source locally.
-2. Run the Build 438 20-check local regression.
-3. Back up Development D1 if desired under normal parity discipline.
-4. Apply `database_build438_application_module_activation.sql` to **Development only**.
-5. Run `BUILD438_D1_VERIFICATION.sql` against Development.
-6. Deploy/preview Development.
-7. Verify `/api/modules` shows D1 authority and three modules.
-8. Open `/admin/application-modules/`.
-9. In Development, disable/re-enable each module one at a time.
-10. Prove disabled module routes/APIs fail closed and the control page remains reachable.
-11. Prove no business rows are deleted.
-12. Prove navigation/runtime activation follows module state.
-13. Prove read-only access blocks mutation methods.
-14. Review request counts/Worker behavior for regressions.
-15. Update canonical Markdown with Development evidence.
-16. Only after Development is green decide whether Production needs the additive Build 438 migration.
+1. Run local source/syntax/regression gates.
+2. Apply the focused migration to **Development only** through the hard-pinned helper.
+3. Require exact D1 verification: 3 modules, 6 role rows, 3 enabled, 0 background-enabled, 2 indexes, exact keys.
+4. Deploy/preview Development.
+5. Require Core Health PASS.
+6. Require Current-State Route Proof PASS with the baseline state.
+7. Disable/re-enable each direct module one at a time and rerun route proof.
+8. Prove shared read contracts remain available to enabled reviewed consumers.
+9. Do not create fake stock movements to prove mutation contracts; use real reviewed Creative material usage/reversal if/when live mutation proof is needed.
+10. Prove no business data is deleted by module switches.
+11. Prove read-only direct module access blocks mutation methods.
+12. Observe request counts/Worker behavior.
+13. Record Development evidence in canonical Markdown.
+14. Only then decide whether a narrow Production migration authorization boundary should be prepared.
 
 ## Production safety
 
 Build 438 Production D1 mutation is **NOT AUTHORIZED**.
-
-The completed Build 437 Membership token is spent and unrelated.
 
 This work does not authorize:
 
@@ -314,14 +329,14 @@ CAIP D1-only media copy
 Broad Production promotion
 ```
 
-A normal “continue” or feature request is source/development authorization, not Production DDL/DML authorization.
+A normal `continue`, feature request or pasted Development output is not Production authorization.
 
-## Functional roadmap after the activation core
+## Functional roadmap after Build 438 Development proof
 
-After Build 438 Development proof, continue the existing requested feature work inside the correct module:
+Continue requested feature work inside the appropriate module:
 
 1. CAIP video review with exact timecode/range evidence.
-2. Verified bounded proxy/frame/audio/transcript processing.
+2. Bounded proxy/frame/audio/transcript processing and verified outputs.
 3. Reviewed Creative Process -> CAIP -> Content Studio handoff.
 4. Packaging physical print/wrap proof and regulatory/source review ergonomics.
 5. Product/Inventory reversal, lot-aware costing, reference inspection and review queues.
