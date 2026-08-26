@@ -2,7 +2,7 @@
 
 ## Status
 
-**DEVELOPMENT D1 AUTHORITY APPLIED / EXACTLY VERIFIED / PAGES GUARD PROVEN / LIVE DISABLE-BLOCK-RESTORE PASS 3/3 / AUTHENTICATED ADMIN ACCEPTANCE NEXT / PRODUCTION NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
+**DEVELOPMENT-PROVEN / D1 AUTHORITY EXACT / PAGES GUARD PROVEN / LIVE ISOLATION PASS 3/3 / AUTHENTICATED ADMIN ACCEPTANCE PASS 31/31 / PRODUCTION NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
 
 This file records owner-run evidence for the Build 438 Application Core + three top-level application-module authority.
 
@@ -49,6 +49,7 @@ Cross-module access policy                   PASS (12/12)
 Session resilience                           PASS (6/6)
 Windows console/strict-query regression      PASS (10/10)
 Pages invocation routes regression           PASS (10/10)
+Authenticated acceptance safety regression  PASS (18/18)
 JavaScript/Python syntax checks              PASS
 ```
 
@@ -64,6 +65,8 @@ Windows npx.cmd --command SQL transport      REMOVED
 Strict D1 verification transport             FILE-BASED / SELF-ASSERTING
 General informational/static public pages    NOT FORCED THROUGH FUNCTIONS
 Admin + transactional Commerce pages         FUNCTIONS-GUARDED
+Authenticated acceptance direct SQL          NONE
+Dummy Inventory post/reverse probe            ABSENT
 ```
 
 ## Development D1 apply evidence
@@ -228,66 +231,107 @@ Production D1 mutation executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Development authority now proven
+## Authenticated Admin acceptance — PASS 31/31
+
+Owner-run browser acceptance was executed from `/admin/application-modules/` under a real authenticated Admin session.
+
+Baseline/current-state route proof:
 
 ```text
-Application Core authority                 INSTALLED / PROVEN
-commerce-operations                        ENABLED / ISOLATION PROVEN
-creative-production                        ENABLED / ISOLATION PROVEN
-business-administration                    ENABLED / ISOLATION PROVEN
+Current-state route proof: PASS (4/4)
+Shared Core recovery                 HTTP 200
+Commerce & Operations               HTTP 200
+Creative & Production               HTTP 200
+Business & Administration           HTTP 200
+```
+
+Authenticated acceptance result:
+
+```text
+Authenticated acceptance: PASS (31/31)
+```
+
+The acceptance proved:
+
+```text
+D1 module authority                              PASS / source=d1 / schema_ready=true
+Core Health                                      PASS
+Three-module enabled baseline                    PASS / 3 rows
+Background baseline                              PASS / all three OFF
+Admin baseline                                   PASS / manage on all three
+Shared Core control API                          PASS / HTTP 200
+
+Commerce audited disable                         PASS
+Commerce background suppression                  PASS
+Commerce guarded direct surface                  PASS / HTTP 403 / guard=438
+Commerce client availability suppression         PASS
+Commerce cross-module inventory-read             PASS / HTTP 200
+Commerce exact restore                           PASS
+
+Creative audited disable                         PASS
+Creative background suppression                  PASS
+Creative guarded direct surface                  PASS / HTTP 403 / guard=438
+Creative client availability suppression         PASS
+Creative cross-module content-media              PASS / HTTP 200
+Creative exact restore                           PASS
+
+Business audited disable                         PASS
+Business background suppression                  PASS
+Business guarded direct surface                  PASS / HTTP 403 / guard=438
+Business client availability suppression         PASS
+Business cross-module accounting-read            PASS / HTTP 200
+Business exact restore                           PASS
+
+Admin Business role manage -> read               PASS
+Read-level GET remains available                 PASS / HTTP 200
+Read-level non-read request denied               PASS / HTTP 403
+Canonical denial code                            module_access_level_read_only
+Endpoint mutation reached                        NO
+Admin role restored                              PASS / manage
+
+Final Core Health                                PASS
+Final module state                               PASS / all three enabled
+Final background state                           PASS / all three OFF
+```
+
+### Authenticated acceptance safety
+
+All temporary module/role changes used `/api/admin/app-modules`, whose implementation writes only module authority/access state and normal `admin_action_audit` evidence for these actions.
+
+The browser acceptance runner:
+
+- contains no direct SQL mutation;
+- invokes only safe shared GET/read contracts;
+- never calls `inventory-post` or `inventory-reverse`;
+- uses `action=__build438_read_guard_probe__` for the read-level POST test so a middleware regression still cannot create a valid endpoint mutation;
+- restores temporary module and role changes in `finally` paths;
+- ended with all three modules enabled, all backgrounds OFF and Admin `manage` restored.
+
+A separate before/after business-table row-count snapshot was **not** captured, so Build 438 does not claim that specific measurement. Business-data preservation for this acceptance is instead structurally supported by the constrained control API and read-only probe set.
+
+## Development completion verdict
+
+```text
+Application Core authority                 INSTALLED / EXACT / PROVEN
+commerce-operations                        ENABLED / ISOLATION + AUTH ACCEPTANCE PROVEN
+creative-production                        ENABLED / ISOLATION + AUTH ACCEPTANCE PROVEN
+business-administration                    ENABLED / ISOLATION + AUTH ACCEPTANCE PROVEN
 Pages middleware invocation                PROVEN
+Shared read contracts                      LIVE-PROVEN
+Role read/manage enforcement               LIVE-PROVEN
+Client availability suppression            LIVE-PROVEN
+Core recovery                              LIVE-PROVEN
 All module background permissions          OFF
 Admin/member role rows                     EXACT / 6
 Required indexes                           EXACT / 2
 Fresh-install aggregate                    SYNCHRONIZED
-Business data mutation from isolation      NONE
 Production D1 mutation                     NO
 Production promotion                       CLOSED
 ```
 
-## Authenticated Admin acceptance — next
+**Build 438 is DEVELOPMENT-PROVEN.**
 
-The remaining Build 438 Development acceptance is now concentrated in the authenticated Admin surface:
-
-```text
-/admin/application-modules/
-```
-
-The screen now includes **Run authenticated acceptance proof**. It uses the logged-in Admin session and automatically restores temporary module/role changes.
-
-It is designed to prove:
-
-1. D1 `source=d1` and Core Health PASS;
-2. exact 3-module enabled/background-off/admin-manage baseline;
-3. shared Core control API remains available;
-4. each module can be disabled through the audited Admin API;
-5. direct module surface returns guarded HTTP 403 while disabled;
-6. client `DDApplicationModules.isAvailable()` becomes false while disabled;
-7. a reviewed shared read contract remains available to another enabled consumer:
-   - Commerce owner disabled -> `inventory-read` remains available to Creative;
-   - Creative owner disabled -> `content-media` remains available to Commerce;
-   - Business owner disabled -> `accounting-read` remains available to Commerce;
-8. each module is restored exactly;
-9. Business Admin can be temporarily changed from `manage` to `read`;
-10. GET remains available at read level;
-11. an intentionally unsupported POST is intercepted with `module_access_level_read_only` before endpoint mutation;
-12. Admin role restores exactly to `manage`;
-13. final Core Health/module/background state returns to exact baseline.
-
-Safety rules:
-
-- all module changes go through `/api/admin/app-modules` and therefore create normal Admin audit evidence;
-- shared live probes are GET/read-only only;
-- the acceptance runner never calls `inventory-post` or `inventory-reverse`;
-- it never creates dummy stock movement;
-- the read-level POST probe uses `action=__build438_read_guard_probe__`; if middleware failed, the endpoint would reject it as unsupported rather than mutate business data;
-- temporary module and role changes restore in `finally` paths.
-
-Local safety regression:
-
-```text
-scripts/build438_authenticated_acceptance_regression.py
-```
+This does not authorize Production deployment or mutation. A separate narrow Build 438 Production authorization boundary would be required before any Production D1 work.
 
 ## Production boundary
 
