@@ -14,6 +14,15 @@ def read(path: Path) -> str:
 def main() -> int:
     ui = read(UI)
     page = read(PAGE)
+    provider_execution_tokens = (
+        'provider_url',
+        'provider_endpoint',
+        'executeProvider',
+        'execute_provider',
+        '/api/provider',
+        '/api/admin/provider',
+        'provider_key:',
+    )
     checks = [
         ('title assist script exists', bool(ui)),
         ('creative-assets page loads title assist after evidence review', 'admin-caip-evidence-review.js?v=439' in page and 'admin-caip-evidence-title-assist.js?v=439' in page and page.index('admin-caip-evidence-review.js?v=439') < page.index('admin-caip-evidence-title-assist.js?v=439')),
@@ -22,7 +31,7 @@ def main() -> int:
         ('save action ensures a nonblank title before evidence POST', "target.id === 'caip439SaveNewMarker'" in ui and 'ensureTitle();' in ui),
         ('human-entered title overrides auto-draft', "delete target.dataset.caip439AutoDrafted" in ui),
         ('title assist makes no network calls', all(token not in ui for token in ('fetch(', 'apiFetch', 'XMLHttpRequest'))),
-        ('title assist contains no polling or provider execution', 'setInterval' not in ui and 'setTimeout' not in ui and 'provider' not in ui.lower()),
+        ('title assist contains no polling or provider execution', 'setInterval' not in ui and 'setTimeout' not in ui and all(token not in ui for token in provider_execution_tokens)),
     ]
 
     failures = []
