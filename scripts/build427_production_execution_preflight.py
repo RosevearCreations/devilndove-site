@@ -22,12 +22,22 @@ EXPECTED_NEXT = 1129
 EXPECTED_PRODUCTS = 45
 
 
+def configure_console() -> None:
+    """Keep Windows/Git Bash console transport UTF-8/replacement safe."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding='utf-8', errors='replace')
+        except (AttributeError, ValueError):
+            pass
+
+
 def fail(message: str) -> None:
     print(f'BUILD 427 PRODUCTION EXECUTION PREFLIGHT: FAIL — {message}', file=sys.stderr)
     raise SystemExit(1)
 
 
 def main() -> int:
+    configure_console()
     if len(sys.argv) != 2 or sys.argv[1] != '--run':
         print('Run explicitly with:')
         print('  python -u scripts/build427_production_execution_preflight.py --run')
