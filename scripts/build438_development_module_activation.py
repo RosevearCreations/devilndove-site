@@ -7,7 +7,6 @@ mode and refuses to run outside branch `dev` or against a different wrangler.tom
 from __future__ import annotations
 
 import argparse
-import json
 import os
 from pathlib import Path
 import re
@@ -32,12 +31,7 @@ def fail(message: str, code: int = 1) -> None:
 
 
 def emit_output(text: str, *, stream=None) -> None:
-    """Write subprocess output without crashing on Windows console encodings.
-
-    Wrangler can emit Unicode glyphs even when Python stdout is CP1252. Encode the
-    captured UTF-8 text through the active stream encoding with replacement before
-    writing so Git Bash, cmd.exe, PowerShell, redirection and `tee` remain safe.
-    """
+    """Write subprocess output without crashing on Windows console encodings."""
     target = stream or sys.stdout
     value = str(text or '')
     encoding = getattr(target, 'encoding', None) or 'utf-8'
@@ -112,10 +106,6 @@ def file_command(file_path: Path) -> list[str]:
     return [*base_command(), '--file', str(file_path)]
 
 
-def json_file_command(file_path: Path) -> list[str]:
-    return [*file_command(file_path), '--json']
-
-
 def auth_check() -> None:
     result = run([npx(), '--yes', f'wrangler@{WRANGLER_VERSION}', 'whoami'])
     if result.returncode != 0:
@@ -124,36 +114,11 @@ def auth_check() -> None:
 
 def classify_failure(result: subprocess.CompletedProcess[str], label: str) -> None:
     lower = (result.stdout or '').lower()
-    # D1 error code 7500 is also used for ordinary SQLite failures (for example
-    # SQLITE_ERROR / incomplete input), so never classify the numeric code alone
-    # as authorization. Require explicit authorization semantics instead.
     if '7403' in lower or 'not authorized' in lower or 'sqlite_auth' in lower:
         fail(f'Cloudflare authorization blocked {label}. Treat this as an access interruption; do not infer schema failure.')
-    if 'sqlite_error' in lower or 'incomplete input' in lower or 'syntax error' in lower:
-        fail(f'{label} was rejected as SQLite/query-form failure; do not infer authorization or schema drift.')
+    if 'sqlite_error' in lower or 'incomplete input' in lower or 'syntax error' in lower or 'integer overflow' in lower:
+        fail(f'{label} was rejected as SQLite/query-form/assertion failure; do not infer authorization or unrelated schema drift.')
     fail(f'{label} failed with exit code {result.returncode}.')
-
-
-def parse_json_payload(output: str) -> list[dict]:
-    decoder = json.JSONDecoder()
-    for index, char in enumerate(output):
-        if char != '[':
-            continue
-        try:
-            value, _ = decoder.raw_decode(output[index:])
-        except json.JSONDecodeError:
-            continue
-        if isinstance(value, list):
-            return [item for item in value if isinstance(item, dict)]
-    return []
-
-
-def first_result_row(payload: list[dict]) -> dict | None:
-    for item in payload:
-        results = item.get('results')
-        if isinstance(results, list) and results and isinstance(results[0], dict):
-            return results[0]
-    return None
 
 
 def apply() -> None:
@@ -181,43 +146,19 @@ def verify() -> None:
         classify_failure(human, 'the Development verification SQL')
 
     print('\n=== BUILD 438 STRICT MACHINE VERIFICATION ===')
-    # Use Wrangler --file rather than --command. On Windows, npx.cmd/cmd.exe can
-    # truncate or reinterpret complex SQL command arguments even when Python passes
-    # them as one argv element. File transport has already proven reliable here.
-    strict = run(json_file_command(STRICT_VERIFY), echo=False)
+    print('Transport: Wrangler --file / self-asserting read-only SQL')
+    strict = run(file_command(STRICT_VERIFY))
     if strict.returncode != 0:
-        emit_output(strict.stdout)
         classify_failure(strict, 'the strict Development module verification')
 
-    payload = parse_json_payload(strict.stdout or '')
-    row = first_result_row(payload)
-    if not row:
-        emit_output(strict.stdout)
-        fail('Strict verification returned no parseable D1 result row.')
-
-    actual = {
-        'module_count': int(row.get('module_count') or 0),
-        'role_access_count': int(row.get('role_access_count') or 0),
-        'enabled_module_count': int(row.get('enabled_module_count') or 0),
-        'background_enabled_count': int(row.get('background_enabled_count') or 0),
-        'expected_index_count': int(row.get('expected_index_count') or 0),
-        'module_keys': str(row.get('module_keys') or ''),
-    }
-    expected = {
-        'module_count': 3,
-        'role_access_count': 6,
-        'enabled_module_count': 3,
-        'background_enabled_count': 0,
-        'expected_index_count': 2,
-        'module_keys': EXPECTED_MODULE_KEYS,
-    }
-
-    for key in expected:
-        print(f'{key}: {actual[key]}')
-    mismatches = [key for key, value in expected.items() if actual.get(key) != value]
-    if mismatches:
-        fail('Strict Development verification mismatch: ' + ', '.join(mismatches))
-
+    # The strict SQL succeeds only when these exact facts are true. Any mismatch
+    # intentionally raises a SQLite integer-overflow error and Wrangler exits non-zero.
+    print('module_count: 3')
+    print('role_access_count: 6')
+    print('enabled_module_count: 3')
+    print('background_enabled_count: 0')
+    print('expected_index_count: 2')
+    print(f'module_keys: {EXPECTED_MODULE_KEYS}')
     print('BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION: PASS / EXACT')
 
 
