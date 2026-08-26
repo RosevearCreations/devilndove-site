@@ -2,7 +2,7 @@
 
 ## Status
 
-**READY FOR GIFT CARD LIVE READ-ONLY PREFLIGHT + LOCAL 20/20 GATES / GIFT CARD AUTHORIZATION PENDING / ALL OTHER PRODUCTION FAMILIES LOCKED / PROMOTION CLOSED**
+**PASS (20/20) — GIFT CARD AUTHORIZATION BOUNDARY CLOSED / GIFT CARD AUTHORIZATION PENDING / ALL OTHER PRODUCTION FAMILIES LOCKED / PROMOTION CLOSED**
 
 Build 428 passed its repaired twenty-item authorization-boundary gate:
 
@@ -17,7 +17,7 @@ Production mutation executed by Build 428: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-Build 429 narrows the next Production decision to the Build 384 Gift Card lookup-attempt/lockout additive family only. It does not authorize or execute a Production write.
+Build 429 narrowed the next Production decision to the Build 384 Gift Card lookup-attempt/lockout additive family only. It did not authorize or execute a Production write.
 
 ## Build 429 — 20 completed source/safety changes
 
@@ -41,6 +41,31 @@ Build 429 narrows the next Production decision to the Build 384 Gift Card lookup
 18. The regression proves the additive executor contains no Membership, fractional Inventory, Product/FK, or Accounting rebuild path.
 19. Added a local 20-check Gift Card authorization-boundary gate requiring fresh live Gift evidence and no inferred authorization.
 20. Build 429 contains no Production backup/apply invocation; Gift Card authorization remains a separate explicit owner decision and Production promotion remains closed.
+
+## Owner-run Build 429 closure evidence
+
+```text
+BUILD 429 GIFT CARD AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
+BUILD 429 GIFT CARD AUTHORIZATION PREFLIGHT: PASS
+BUILD 429 TWENTY-ITEM GIFT CARD AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
+```
+
+Fresh live Gift Card evidence:
+
+```text
+Missing lookup columns: ['code_suffix', 'ip_hash', 'lookup_email', 'result_status', 'user_agent']
+Missing Gift Card indexes: ['idx_gift_card_lookup_attempts_created', 'idx_gift_card_lookup_attempts_email', 'idx_gift_card_lookup_lockouts_status']
+Gift Card lockout table exists: False
+gift_card_lookup_attempts rows: 0
+gift_cards rows: 0
+gift_card_redemptions rows: 0
+Exact known Build 384 gap: YES
+Safe to request Gift Card authorization: YES
+Production backup created: NO
+Gift Card authorization received: NO
+Production mutation executed: NO
+PRODUCTION PROMOTION: CLOSED
+```
 
 ## Reviewed Build 384 Gift Card gap
 
@@ -104,8 +129,9 @@ Notification, annotation-index and rebuild families remain separately locked.
 
 ```text
 Product-number Production remediation        COMPLETE / PROVEN
+Build 429 Gift Card boundary                 PASS (20/20)
 Gift Card Production authorization           NOT RECEIVED
-Gift Card Production backup                  NOT CREATED FOR BUILD 429 EXECUTION
+Gift Card Production backup                  NOT CREATED
 Gift Card Production mutation                NOT EXECUTED
 Notification Production authorization        NOT RECEIVED
 Annotation-index Production authorization    NOT RECEIVED
@@ -145,7 +171,8 @@ Build 425  Development Product-number backfill       PASS (20/20)
 Build 426  Production release-candidate assembly     PASS (20/20)
 Build 427  Production Product-number stage           PASS
 Build 428  Remaining parity authorization boundary   PASS (20/20)
-Build 429  Gift Card authorization boundary          READY
+Build 429  Gift Card authorization boundary          PASS (20/20)
 
+Gift Card authorization                              NOT RECEIVED
 Production promotion                                 CLOSED
 ```
