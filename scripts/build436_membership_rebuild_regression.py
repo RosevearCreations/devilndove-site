@@ -68,7 +68,14 @@ def main() -> int:
     check('safe_to_request_membership_rebuild_authorization' in preflight_text, 'execution preflight exposes an explicit safe-to-request decision')
     check("export_backup('membership')" in controller_text and "verify_backup('membership')" in controller_text, 'controller requires a dedicated full Membership backup and recheck')
     check('source_rows_sha256' in controller_text and 'canonical_preview_sha256' in controller_text, 'controller preserves source and canonical fingerprints')
-    check('no_inbound_foreign_keys' in preflight_text and 'no_outbound_foreign_keys' in preflight_text, 'preflight blocks Membership foreign-key dependencies')
+    check(
+        'no_inbound_foreign_keys' in preflight_text
+        and 'no_outbound_foreign_keys' in preflight_text
+        and 'def inbound_foreign_keys' in preflight_text
+        and 'PRAGMA foreign_key_list(' in preflight_text
+        and 'JOIN pragma_foreign_key_list' not in preflight_text,
+        'preflight blocks Membership FK dependencies using D1-compatible per-table PRAGMA discovery',
+    )
     check('no_user_defined_indexes_or_triggers' in preflight_text, 'preflight blocks unhandled Membership indexes/triggers')
     check('no_rebuild_name_collisions' in preflight_text, 'preflight blocks shadow/assert object-name collisions')
     check(f'CREATE TABLE {executor.SHADOW_TABLE}' in sql and 'policy_id INTEGER PRIMARY KEY AUTOINCREMENT' in sql, 'SQL creates the exact canonical shadow table')
