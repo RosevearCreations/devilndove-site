@@ -13,6 +13,29 @@ function isApiPath(pathname) {
   return String(pathname || '').startsWith('/api/');
 }
 
+function isReadMethod(method) {
+  return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase());
+}
+
+function readOnlyDeniedResponse(access) {
+  return new Response(JSON.stringify({
+    ok: false,
+    error: 'This module access level is read-only.',
+    code: 'module_access_level_read_only',
+    module_key: access?.module?.module_key || null,
+    module_name: access?.module?.display_name || null,
+    access_level: access?.access_level || 'read',
+    build: BUILD,
+  }), {
+    status: 403,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+
 function shouldBypass(pathname) {
   const path = String(pathname || '');
   if (!path) return true;
@@ -37,6 +60,10 @@ export async function onRequest(context) {
 
   if (!access.allowed) {
     return moduleUnavailableResponse(access, { api: isApiPath(pathname) });
+  }
+
+  if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
+    return readOnlyDeniedResponse(access);
   }
 
   return await context.next();
