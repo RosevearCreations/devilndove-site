@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const RESTORE_AUTHORIZATION = 'BUILD440_DEV_R2_RESTORE';
   const RESTORE_BATCH_SIZE = 8;
-  const MAX_RESTORE_BATCHES = 100;
+  const MAX_RESTORE_BATCHES = 150;
 
   const esc = (value) => String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const missing = Array.isArray(result?.missing) ? result.missing : [];
     const canRestore = Boolean(summary)
       && Number(summary.missing_unique_keys || 0) > 0
+      && Number(summary.unsupported_image_url_rows || 0) === 0
       && !summary.listing_truncated;
 
     mount.innerHTML = `
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div>
             <p class="inventory-operations-eyebrow">Development storage proof</p>
             <h3 id="inventoryAssetParityHeading" style="margin:0">Tool &amp; Supply R2 Asset Parity</h3>
-            <p class="small">Compare canonical D1 Tool/Supply image keys with the currently bound Development <code>PRODUCT_MEDIA_BUCKET</code>. Checks and restore actions run only when requested.</p>
+            <p class="small">Compare the operational Tool/Supply image authority in <code>site_item_inventory</code> with the bound Development <code>PRODUCT_MEDIA_BUCKET</code>. <code>catalog_items</code> is shown only as drift evidence.</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn" type="button" id="runInventoryAssetParity" ${running || restoring ? 'disabled' : ''}>${running ? 'Checking…' : 'Run R2 parity check'}</button>
@@ -63,25 +64,32 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="inventoryAssetParityMessage" class="small ${errorMessage ? 'is-error' : ''}" ${!errorMessage && !result ? 'hidden' : ''}>${esc(errorMessage || (result ? 'Parity check completed against the bound Development bucket.' : ''))}</div>
         ${summary ? `
           <div class="grid cols-4" style="margin-top:12px">
-            ${summaryCard('Catalogue rows', summary.catalog_rows)}
+            ${summaryCard('Operational Inventory rows', summary.authority_rows ?? summary.inventory_rows ?? summary.catalog_rows)}
             ${summaryCard('Expected image keys', summary.expected_unique_keys)}
             ${summaryCard('Present in Dev R2', summary.present_unique_keys)}
             ${summaryCard('Missing from Dev R2', summary.missing_unique_keys)}
           </div>
           <div class="small" style="margin-top:10px">
-            R2 objects: ${esc(summary.r2_unique_keys)} total (${esc(summary.r2_tool_keys)} Tools / ${esc(summary.r2_supply_keys)} Supplies) ·
-            blank catalogue image URLs: ${esc(summary.blank_image_url_rows)} · unsupported image URLs: ${esc(summary.unsupported_image_url_rows)} ·
+            R2 objects: ${esc(summary.r2_unique_keys)} total (${esc(summary.r2_tool_keys)} Tool / ${esc(summary.r2_supply_keys)} Supply) ·
+            canonical Tool namespace: Toolshed ${esc(summary.r2_toolshed_keys ?? 0)} + legacy Tools ${esc(summary.r2_legacy_tool_keys ?? 0)} ·
+            blank operational image URLs: ${esc(summary.blank_image_url_rows)} · unsupported operational URLs: ${esc(summary.unsupported_image_url_rows)} ·
             bucket-only keys: ${esc(summary.bucket_only_keys)} · listing truncated: <strong>${summary.listing_truncated ? 'YES — result incomplete' : 'no'}</strong>
           </div>
-          ${canRestore ? '<p class="small" style="margin-top:10px"><strong>Development repair:</strong> the restore reads current D1 rows through the deployed app, fetches the public source read-only, hashes each image, refuses overwrites, writes only missing objects to the bound Development R2 bucket, and verifies each write. It does not use Wrangler or mutate D1.</p>' : ''}
+          <div class="small" style="margin-top:8px">
+            <strong>Authority drift:</strong> Catalog rows ${esc(summary.catalog_rows ?? '—')} · Catalog blank image URLs ${esc(summary.catalog_blank_image_url_rows ?? '—')} ·
+            Inventory image / Catalog blank ${esc(summary.inventory_only_image_rows ?? '—')} · Catalog image / Inventory blank ${esc(summary.catalog_only_image_rows ?? '—')} ·
+            different canonical image keys ${esc(summary.image_authority_mismatch_rows ?? '—')}.
+          </div>
+          ${canRestore ? '<p class="small" style="margin-top:10px"><strong>Development repair:</strong> restore reads the same active Inventory rows used by Product Tools & Supplies Used, accepts the canonical <code>Toolshed/</code> and <code>Supplies/</code> namespaces, fetches the public source read-only, hashes each image, refuses overwrites, writes only missing objects to the bound Development R2 bucket, and verifies each write.</p>' : ''}
           ${missing.length ? `
             <details style="margin-top:12px" open>
               <summary><strong>Missing Development R2 keys (${esc(summary.missing_unique_keys)})</strong> — showing up to ${esc(result.missing_sample_limit)}</summary>
               <div class="admin-table-wrap" style="margin-top:8px">
                 <table>
-                  <thead><tr><th>R2 key</th><th>Catalogue item</th><th>Kind</th></tr></thead>
+                  <thead><tr><th>R2 key</th><th>Inventory item</th><th>Kind</th></tr></thead>
                   <tbody>${missing.map((entry) => {
-                    const first = Array.isArray(entry.catalog_rows) ? entry.catalog_rows[0] : null;
+                    const authorityRows = Array.isArray(entry.authority_rows) ? entry.authority_rows : (Array.isArray(entry.catalog_rows) ? entry.catalog_rows : []);
+                    const first = authorityRows[0] || null;
                     return `<tr><td><code>${esc(entry.key)}</code></td><td>${esc(first?.name || first?.source_key || '—')}</td><td>${esc(first?.item_kind || '—')}</td></tr>`;
                   }).join('')}</tbody>
                 </table>
@@ -140,10 +148,15 @@ document.addEventListener('DOMContentLoaded', () => {
       render();
       return;
     }
+    if (Number(result.summary.unsupported_image_url_rows || 0) > 0) {
+      errorMessage = 'Operational Inventory contains unsupported image URLs; restore is blocked until those rows are reviewed.';
+      render();
+      return;
+    }
 
     restoring = true;
     errorMessage = '';
-    restoreMessage = 'Starting native Development restore — no Wrangler/npm/local subprocess path.';
+    restoreMessage = 'Starting native Development restore from operational Inventory authority.';
     restoreStats = { processed: 0, restored: 0, already: 0, bytes: 0, batches: 0 };
     render();
 
@@ -159,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreStats.already += Number(batch.already_verified || 0);
         restoreStats.bytes += Number(batch.bytes_restored || 0);
         restoreStats.batches = batchNumber;
-        restoreMessage = `Verified ${restoreStats.restored + restoreStats.already} catalogue image objects in Development R2.`;
+        restoreMessage = `Verified ${restoreStats.restored + restoreStats.already} operational image objects in Development R2.`;
         render();
 
         if (data?.done) break;
