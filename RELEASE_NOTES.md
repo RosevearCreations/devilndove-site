@@ -1,533 +1,109 @@
-# Build 279 — Worker Efficiency & Go-Live Hardening
+# Build 437
 
-- Lightweight fail-open public analytics; no request-time analytics DDL/schema introspection or IP hashing; admin excluded and repeat page views throttled.
-- Checkout-recovery and analytics events throttled/deduplicated.
-- Removed 30-second Live Activity polling and automatic Dashboard smoke/preflight/release loads.
-- Scoped Dashboard summary APIs and prevented retry amplification on Cloudflare resource-limit failures.
-- Removed repeated schema probes from several public hot paths and cached Featured Products schema capabilities.
-- Slimmed CAIP multipart per-part/control-plane work while retaining exact part/byte/R2 integrity gates.
-- Uses Cloudflare Pages/Functions logging rather than a Workers-only `[observability]` block; compatibility date unchanged.
-- Fresh full schema now explicitly includes analytics UTM columns and the live schema manifest is regenerated for Build 279. No new production D1 migration.
-
-# Build 278 — Page-wide Media Edit Mode & Image Requirements
-
-- Administrator public-page editing now uses one page-wide Edit switch; individual badges are hidden in clean preview mode.
-- Media & Content Studio now has a live D1-aware checklist of 139 editable visual locations with recommended sizes and CSV export.
-- Added static image-space requirements Markdown/CSV reports.
-- No D1 migration.
-
-## Build 277 — Bilingual ingredient panels restored + claim clearance
-
-- Restored separate English and French ingredient lists on soap ribbons at owner request.
-- Retained Build 276 Inventory-reference-only ingredient links and ordering controls.
-- Added fail-closed per-language capacity checks; neither language may be silently clipped.
-- Increased printed claim icon/text spacing and row separation, plus wider claim-editor horizontal gaps.
-- No D1 migration; Build 276 remains the Packaging schema boundary.
-
-## Build 276 — Packaging ingredient Inventory links and long-INCI label handling
-
-- Structured Packaging Studio ingredient rows can reference real Devil n Dove Inventory items for source identity and traceability without changing stock.
-- Added type-to-search Inventory ingredient insertion; linked Material Library templates import reviewed Master INCI rows. Packaging Studio requests no usage quantity and creates no Inventory movement; row arrows control reviewed printed INCI order only.
-- Soap-ribbon labels now render one ordered INCI declaration across both side panels, with explicit overflow blocking instead of clipping.
-- Added current Canadian fragrance-declaration guidance in the operator UI: use `Parfum` where appropriate, while retaining individually required fragrance-allergen disclosure.
-- Increased claims icon/text spacing again.
-- Adds `database_build276_packaging_inventory_inci_capacity.sql`; run `BUILD276_D1_VERIFICATION.sql` after migration.
-
-
-## Build 274 — Creative Process lifecycle correction boundary
-
-Build 274 adds `database_build274_creative_process_lifecycle_corrections.sql` after Build 269. `creative_work_events` gains `entry_status`, `void_reason`, `voided_by`, and `voided_at` plus a project/status index. Posted material usage is never hard-deleted: corrections/voids reverse stock through existing compensating inventory tables and preserve the superseded timeline event for audit. Current project direction remains in `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
-## Build 273 — CAIP / Creative Process / Content Studio workflow consolidation
-
-- Added type-to-search Inventory selection in Creative Process direct usage and reviewed timeline-material posting.
-- Content Studio now lists existing Creative Process projects, accepts `creative_project_id`, and creates/refreshes a package from the existing project instead of requiring a duplicate Gray Hair/standalone project.
-- Existing standalone CAIP identity is preserved and linked to the Content Studio package; private CAIP media is archived as reference-only media identity, not copied/publicized.
-- Creative Process may create a draft Content Studio package before timeline evidence is selected; evidence/story/public-release approval remains separate.
-- Automatic Output Blueprint now shows CAIP assets/probes/evidence/story/derivative plans and Content Studio deliverables as the feed behind each destination. It is explicitly not a renderer or publisher.
-- Standalone deliverable templates use evidence/project-journal language and avoid product/listing/irrelevant local SEO assumptions.
-- Responsive CSS hardening added for search, bridge panels, long filenames and output controls.
-- Markdown continuity reduced to two mutable authorities: `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
-- No D1 migration; Build 269 remains the focused CAIP schema boundary.
-
-## Build 271 — CAIP operator clarity and complete plan access
-
-- Added an **Open CAIP project** selector sourced from all Creative Projects, including standalone/social CAIP projects with no Content Studio package.
-- Moved Content Studio package selection into an explicit create/refresh subsection so the two identities are no longer confused.
-- Removed the six-plan display cap; all derivative plans are reachable in a bounded scroll region and pending plans sort first.
-- Added plain-language CAIP stage guidance explaining private upload, safe probe, immutable derivative plan, internal plan approval, evidence review and story structure.
-- Clarified that derivative plans are optional and that plan approval does not render or publish media.
-- No D1 migration; Build 269 remains the CAIP schema boundary.
-
-## Build 270 — CAIP integrity-failure presentation hardening
-
-- Preserved failed multipart rows now appear under **Source replacement required**, separate from normal project media.
-- Historical percentages such as 105/121 are explicitly labeled as non-running forensic state.
-- Recovery still creates a fresh R2 multipart upload; no Build 270 schema migration is required.
-
-# Build 260 — Media Studio bounded bootstrap and library loading
-
-- Fixed the Media Studio GET path that could return HTTP 503 while opening Home by removing the all-in-one slots + 180-media + usage bootstrap.
-- Added explicit `mode=page`, `mode=media`, and `mode=uses` GET paths.
-- Site media now loads only when an image picker is opened, 48 records at a time with keyset pagination.
-- Removed per-row assignment-count correlation from the media-list query; exact uses load only for the selected image.
-- Kept Product/Inventory/Supply/Tool exclusions unchanged.
-- Handled Media Studio errors now return structured 500 JSON instead of ambiguous application-generated 503 responses.
-- Code-only release; D1 migration remains Build 259.
-
-# Build 254 — Startup Readiness and Post-Deploy Smoke runtime hardening
-
-- Replaced the CPU-heavy full-guide Startup API response with compact D1 status/history payloads and patch/batch synchronization.
-- Moved Post-Deploy Smoke schema creation from request handlers into the Build 254 migration and added structured degraded/error handling.
-- Added same-origin bounded smoke quick-runs, D1 batch result writes, current 46-gate static guide authority, and v254 cache busts.
-
-# Build 248 — Purchased Source Materials, Soap-Base Inheritance and 2026 Compliance Evidence
-
-- Split reusable Packaging Studio data into **Purchased Source Materials** versus **Finished Soap Formulas** so supplier facts are not confused with what Devil n Dove actually makes.
-- Added source templates for soap bases, fragrance oils, colourants and additives with supplier/product/SKU/source URLs, optional source image and supplier-document links, raw supplier ingredient wording, structured Master INCI review rows, allergen evidence, supplier benefits/claims, usage notes and verification state.
-- Seeded the owner-provided Goat’s Milk Melt & Pour base with nine source ingredient names, the supplied allergen statement and six supplier benefit/characteristic sections; Master INCI rows remain review-required until the real supplier INCI source is checked.
-- Saved finished formulas may inherit one soap-base source dependency. Fragrance, colourant and additive sources remain separate project attachments so their provenance/allergen evidence remains visible.
-- Applying a source base populates the ingredient editor; supplier claims enter only as unapproved drafts, while supplier benefits remain reusable source evidence with deliberate “add as draft claim” controls.
-- Added current Canadian fragrance-allergen review fields/gates for source fragrance oils and blocks print-readiness while an attached fragrance source remains unreviewed.
-- Added source-material cards, supplier image/document references, a neutral source-material visual fallback and responsive/mobile layouts.
-- Retained Build 247 label deletion, Truth-reference soap geometry/ingredient clipping, reusable layout templates and the full botanical/custom rose palette.
-- Updated SEO/competitive playbooks to current Google guidance: useful people-first content, accurate normal structured data and relevant imagery remain the priority; special `llms.txt`/AI markup is not required for Google Search.
-- Consolidated Markdown release history by retiring superseded root `BUILD*.md` duplicates into `docs/archive/build-history/`; `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` remain the two current cross-project authorities.
-- Current D1 migration: `database_build248_packaging_source_material_templates_compliance.sql`, byte-identical to `database_upgrade_current_pass.sql`; service-worker shell v24.
-
-# Build 247 — Packaging Studio Truth Layout, Rose Palette and Libraries
-
-- Added explicit **Delete label** with exact packaging-project-key confirmation; Archive remains available for non-destructive retirement.
-- Repaired the soap renderer against the approved Glacial Purple/Truth reference: English and French ingredient panels have fixed clipped zones and no longer intrude into the front oval.
-- Decoupled soap rose artwork from the old generic purple artwork path; the advanced field can no longer silently force the purple rose for soap.
-- Added 23 detailed botanical rose assets plus a custom-colour generated rose, and product defaults for Glacial Purple, Earth Shea & Pumice, Health Oatmeal & Goat Milk, Sea Breeze, Charcoal, Honey and Rose.
-- Added an in-editor reusable layout-template gallery.
-- Added persistent soap formula/content libraries for ingredients, fragrance oils, colourants and bilingual claims.
-- Seeded the owner-provided Health Oatmeal & Goat Milk formula and four reusable bilingual claim presets.
-- Added `database_build247_packaging_library_truth_layout_rose_palette.sql`; it is synchronized to `database_upgrade_current_pass.sql` and integrated into aggregate schema files.
-
-# Build 246 — Product/Project/Production/Packaging Integrity
-
-- Fixed Product Editor selected-ID persistence and Update Product fallback.
-- Preserved and exposed the selected SEO/social image independently of featured/gallery images.
-- Product deletion can clean only empty generated Content Studio/CAIP shells; meaningful project/production/history references remain protected.
-- Creative Project deletion can return unreversed raw inventory with correction movements and immutable deletion audit.
-- Added idempotent Finished Product Production Release with fractional stock depletion plus immutable material/ingredient snapshots.
-- Added D1 label-ingredient/INCI profiles to Product Resources and seeded linked soap packaging from reviewed product facts.
-- Added review-required curated French packaging drafts and translation evidence.
-- Locked soap rendering to approved `soap_reference_v2`; removed invented pseudo-ingredient reference rows from the reference action.
-- Added same-project CAIP duplicate media skipping.
-- Current D1 migration: `database_build246_product_project_production_packaging.sql`; service-worker shell v23.
-
-# Build 245 Release Notes
-
-- Fixed the admin-refresh false-login state: cached admin identity is provisional UI continuity, explicit 401/403 is the only automatic rejection path, and temporary 5xx/timeouts retain the admin shell with a degraded-session message while all APIs remain server-authenticated.
-- Staggered dashboard summary/Today/smoke/preflight/release reads and moved them to shared deduplicated safe-GET handling to reduce refresh-time Worker/D1 fan-out.
-- Added a lightweight Inventory Operations bootstrap and server-side pagination; inline table editing now includes classification, category, supplier, stock/usage units, conversion, tracking mode, quantity, reorder level, cost and active status.
-- Rebuilt Product Detail/Product Editor media loading around four D1 sources (`product_images`, `media_assets`, media-role assignments and annotations), deduped to seven editor slots while preserving the chosen featured image.
-- Added non-destructive migration-time gallery recovery and `product_media_integrity_snapshots`; missing linked/history image URLs can be restored without deleting current gallery rows.
-- Fixed Product Readiness blocker navigation and added a visible retry/catalog fallback instead of a blank page during temporary API failure.
-- Removed request-time schema repair from the changed hot paths and advanced service-worker shell to v22 with high-contrast responsive admin CSS.
-- Build 245 includes the complete Build 244 D1 inventory/fractional transition, uses no TEMP/DROP helper and is byte-identical to `database_upgrade_current_pass.sql`.
-- Local validation: 36/36 public SEO pages passed, 120/120 local asset references resolved, 2,509 database identifiers had zero mixed-case object identifiers, and the 109-page predeploy sanity check passed.
-
-# Build 244 Release Notes
-
-- Moved normal tool/supply runtime authority fully to D1: the migration carries 897 legacy master rows (399 tools + 498 supplies), preserves reviewed D1 state, and database-side populates missing operational inventory.
-- Legacy tool/supply JSON remains read-only provenance/emergency fallback; runtime Catalog Sync can no longer re-import it over reviewed D1 classifications.
-- Added editable tool↔supply classification, inline review controls and safe consolidation when a corrected target identity already exists.
-- Added fractional material usage profiles/movements with exact, estimated, log-only and reusable modes; legacy supplies default safely to log-only until their unit breakdown is reviewed.
-- Product Resources, mobile capture and Creative Project inventory posting now accept real fractional usage and convert usage units into stock-unit fractions instead of forcing a whole unit/use.
-- Added the 500 g mica / few-sprinkles workflow directly to Inventory Operations and server-side bounded catalog search so all D1 rows remain findable without loading the whole catalog.
-- Build 244 migration uses no TEMP table and no DROP TABLE, avoiding the D1 SQLITE_AUTH warning encountered by the Build 243 helper cleanup.
-- Static SEO audit remains 36/36 passed; `/assets/` remains 120/120 resolved; service-worker shell advanced to v21.
-- Build 244 is the current D1 migration boundary; `database_build244_inventory_authority_fractional_usage.sql` and `database_upgrade_current_pass.sql` are byte-identical.
-
-# Build 243 Release Notes
-
-- Reduced Inventory Operations request fan-out with one-shot startup, in-flight GET deduplication, bounded retry/backoff, stale read-only fallback and deferred noncritical admin telemetry.
-- Split Product Resources into lightweight bootstrap/search reads and removed large Amazon registry expansion plus schema probing from normal resource loads.
-- Removed request-time schema DDL/PRAGMA work from Site Inventory, Purchase Lots and Product Stock; migrations now own these schemas and missing dependencies return structured diagnostics.
-- Added browser inventory draft recovery, duplicate-submit protection and consistent non-JSON/Cloudflare HTML error handling with Ray-ID diagnostics across all scripts loaded by Inventory Operations.
-- Normalized controlled product/catalog/inventory classifications and option lists to lower case; Build 243 migration non-destructively combines active case-only inventory identity duplicates and adds identity/search indexes.
-- Corrected light-on-light Inventory Operations buttons and stacked important actions for narrow mobile screens.
-- Build 243 static SEO audit: 36/36 indexable pages passed; `/assets/` audit: 120 references, zero missing; database object case audit: zero mixed-case identifiers.
-- Build 243 is the current D1 migration boundary; `database_build243_inventory_resilience_case_normalization.sql` and `database_upgrade_current_pass.sql` are byte-identical.
-
-# Build 242 Release Notes
-
-- Fixed the Site Inventory manual-create SQL bind mismatch that produced a production HTTP 500 after Amazon metadata was loaded and the item was saved.
-- Inventory create/schema failures now return structured JSON and record bounded runtime incidents instead of falling through to Cloudflare HTML errors.
-- Inventory Operations now handles non-JSON error responses safely and surfaces HTTP status plus Cloudflare Ray ID for troubleshooting.
-- Added a Build 242 regression for the 27-value inventory create contract.
-- Build 242 is code-only; Build 241 remains the current D1 migration boundary.
-
-
-# Build 241 Release Notes
-
-- Rewrote the supplied Rosie Dazzlers DAIP large-media design into Devil n Dove CAIP architecture, roles, storage prefixes, privacy and content-output boundaries.
-- Added private CAIP raw-media sessions/files/parts, multipart R2 recovery, internal-only immutable raw asset registration, planned processors and review-only public-promotion requests.
-- Added responsive CAIP large-media intake UI, secure private-bucket probe/review resolution, structured errors and sanitized manifest export.
-- Added migration `database_build241_caip_large_media_intake.sql`, byte-identical current-pass SQL, synchronized aggregate schemas, the 21st workstream and 46th Startup gate.
-- Rewrote CAIP storage/ingestion/governance/API/reliability/roadmap/testing docs and consolidated current project authority into `AI_HANDOFF.md` + `PROJECT_STATUS_AND_ROADMAP.md`.
-- Build 241 public SEO audit: 36/36 indexable pages passed; local `/assets/` reference audit: zero missing files.
-- Service-worker shell advanced to v19.
-
-# Build 240 Release Notes
-
-- Completed twenty roadmap foundations in a new D1-backed Operational Continuity authority.
-- Added production evidence cases/events, idempotency claims, packaging reservation/formula/lock/prepress records, provider/notification reconciliation, mobile draft recovery, deployed asset/media-role checks, support/accounting/batch approval records, local SEO observations, public page audits, fallback policies and mobile operation cards.
-- Added `/admin/operational-continuity/` with authenticated bounded API, explicit degraded fallback and responsive phone/desktop interface.
-- Added the 45th Startup gate and regenerated the Startup guide/fallback.
-- Synchronized the numbered current migration, current-pass SQL and all three aggregate schema files.
-- Audited 36 indexable public pages: one H1, title, description, canonical, links, image alt/assets and structured data all passed.
-- Moved mutable cross-workflow status from duplicated planning lists into D1 while retaining JSON only as reproducible release evidence.
-
-
-# Build 239 Release Notes
-
-- Completed a real desktop/mobile Chromium visual audit across the 18 most image-heavy public routes.
-- Added route-specific hero, Open Graph and structured-data images under `/assets/images/site/`.
-- Added seven honest local representative fallbacks for remote item photography under `/assets/products/fallbacks/`.
-- Replaced visible placeholder language and unfinished contact/about instructions with final public copy.
-- Added responsive hero/media CSS and representative-fallback badges.
-- Archived superseded Build 236–238 release records and refreshed the two canonical handoff documents.
-
-
-
-# Build 238 Release Notes
-
-- Completed a page-by-page public visual audit on the most image-heavy pages.
-- Replaced representative placeholder usage with route-specific real-image fallbacks on key public pages.
-- Added new representative route media under `/assets/images/site/`.
-- Completed a targeted mobile/desktop CSS drift pass for image-heavy sections.
-- Rechecked that all `/assets/...` references resolve in the build.
-
-
-
-# Build 237 Release Notes
-
-- Added real-image fallback files for the remaining missing image-manifest and schema-referenced site assets.
-- Added concrete wrappers for product-grid, engraving-detail and material-detail visual assets.
-- Extended the representative image library under `/assets/images/site/` while preserving existing placeholder asset paths.
-- Updated image requirements notes and the current release trail.
-
-
-# Build 236 Release Notes
-
-- Polished the reusable soap-ribbon SVG label preview so it better matches the approved Glacial Purple structure.
-- Replaced common placeholder SVGs with photo-backed wrappers while preserving existing asset paths.
-- Added reusable raster assets under `assets/real-media/` and missing compatibility placeholder routes.
-- Updated the release trail and current-status pointers for Build 236.
-
-
-# Build 235 — Creative readiness, exception queue and evidence packets
-
-Date: 2026-08-05
+## Membership canonical completion and release alignment
 
 ## Summary
 
-- Compute all seven Creative Automation stage-readiness results from existing specialist authorities with explicit expected/actual checks and correction guidance.
-- Surface blocked, overdue, due-soon and unassigned work in one responsive queue.
-- Export an authenticated project as machine-readable JSON or accessible print-ready HTML evidence.
-- Correct public-release counting to use `content_status`.
-- Preserve human review, guarded duplicate cleanup, specialist data authority and Build 234 as the current schema boundary.
-- Move 47 superseded Build Markdown files to `docs/archive/build-history/` and update automated release references.
-
-## Deployment
-
-No D1 migration or new secret is required. Deploy the complete Build 235 package, hard refresh to service-worker shell v16, and follow `docs/archive/build-history/BUILD235_VALIDATION.md`. Apply the Build 234/current-pass migration only when its ledger key is genuinely absent.
-
----
-
-# Release Notes — Build 234
-
-## Reference-faithful packaging templates and safe Creative cleanup
-
-- Made the selected Packaging Studio template authoritative in the browser and server so an older project type cannot silently choose the wrong renderer.
-- Rebuilt the soap ribbon with permanent Rosevear/Devil n Dove, website, Canadian-origin, small-batch, claims and weight elements; centred live SVG wording; bilingual panels; rear seal; botanical rose and embedded-artwork export.
-- Registered the approved soap visual and wedding candle-top sample with exact checksums, bringing adopted packaging references to five.
-- Added editable 4-inch/3.5-inch wedding candle tops, 3-inch general candle top, 4-inch round maker/coaster mark and 2×1.5-inch oval label, plus exact custom dimensions and reusable D1 templates.
-- Added generated text-free soap and candle art with PNG/WebP variants, hashes, prompts and strict production-use boundaries.
-- Added guarded Creative Automation deletion for untouched accidental shells with exact project-key confirmation; real products and meaningful outputs, events, reviews, evidence, inventory, cost and linked work remain protected.
-- Removed request-time schema creation/bulk seeding from Packaging Studio, Creative Process, Creative Automation and Startup Readiness.
-- Added the detailed Critical `candle_top_template_proof` gate for exactly 44 Startup gates and moved all canonical Startup definitions to the idempotent migration without overwriting mutable evidence/status.
-- Updated responsive soap/round previews, source-reference layout, phone destructive controls, one-H1/SEO rules, schema aggregates, current handoff and validation tooling.
-
-Back up D1 and confirm Build 229 and Build 230 ledger keys. Apply `database_build234_packaging_templates_creative_cleanup.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the whole package, hard refresh to service-worker shell v15 and follow `docs/archive/build-history/BUILD234_VALIDATION.md`. Soap and candle-top production remain blocked until measured physical proofs and applicable label/material reviews pass.
-
-# Release Notes — Build 233
-
-## Bounded login and temporary-session retention
-
-- Removed D1 ping/table enumeration/three `PRAGMA table_info` calls from every login POST; full schema diagnostics now require explicit `?diagnostic=full`.
-- Validated login JSON and required fields before D1, and changed successful authentication to one indexed user read plus one D1 batch for session creation and last-login time.
-- Removed the unnecessary new-session reread and added `auth_login_bounded_v1` response/header evidence.
-- Reduced `/api/auth/me` to one indexed `session_token` query and a compact `auth_session_bounded_v1` response.
-- Corrected unexpected logout: temporary 5xx, Cloudflare 1102, offline and malformed session-verification responses retain the existing browser token/cached identity and show degraded verification; real 401/403 decisions still clear access.
-- Added concise login resource-limit guidance, service-worker shell v14, two-operation mocked regression and explicit invalid-input/binding-only/503-retention/401-clearing checks.
-- Compressed the 897-row private Amazon inventory reference from a 1.1 MB eager object payload to a 211,860-byte demand-loaded helper. The catalog, inventory and product-resource routes retain every match, while login, session, autosave, detail and deletion routes no longer allocate its rows or indexes at Worker startup.
-- Expanded the Critical Startup login gate to fourteen detailed deployment, Network, Cloudflare log, invalid-password, request-blocking, reset, logout-all and expiry steps.
-- Preserved Build 230 as the current D1 migration boundary; Build 233 adds no schema change.
-
-Deploy the complete package, hard refresh to service-worker shell v14, and follow `docs/archive/build-history/BUILD233_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 233.
-
-# Release Notes — Build 232
-
-## Archived unused-product correction and removal recovery
-
-- Replaced request-time enumeration of every D1 table and foreign key in `/api/admin/delete-product` with a bounded protected-history registry and `bounded_registry_v1` response profile.
-- Corrected the archive/removal conflict: ordinary media-change and product review audit rows are product-owned cleanup data, so archiving an otherwise unused product no longer makes it permanently undeletable.
-- Preserved permanent-removal blockers for orders, customer/accounting, packaging, creative projects, recalls, trust/public-proof and other retained business history.
-- Combined reviewed reservation release/physical return, product-owned cleanup, preserved record/media detachment and final product deletion in one D1 batch.
-- Added aggregate-schema registry coverage plus mocked archived-product GET/POST, inventory, cleanup, detachment, rollback-boundary and query-budget regression tests.
-- Extended the shared safe API response parser to the correction panel, table-row delete action and Draft & Archive Cleanup centre.
-- Expanded Startup’s destructive-action gate to a twelve-step unused-archived versus protected-history production proof.
-- Preserved Build 230 as the current D1 migration boundary; Build 232 adds no schema change.
-
-Deploy the complete package, hard refresh to service-worker shell v13, and follow `docs/archive/build-history/BUILD232_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 232.
-
-# Release Notes — Build 231
-
-## Product draft autosave and reload resource-limit recovery
-
-- Added one shared API response parser that accepts valid JSON and turns Cloudflare HTML/1102 pages into a short retryable message without exposing raw markup or a `JSON.parse` exception.
-- Changed Draft autosave to one request in flight with a queued-newer-edit pass, a 2.2-second debounce and a visible browser recovery copy that is cleared only after the matching server save.
-- Added explicit `save_intent=autosave`; create/update routes skip approval/content/social preparation and repetitive update/media audit work for that intent while deliberate saves keep their normal automation/audit path.
-- Moved unapproved products out of social automation before schema/settings inspection and stopped text-only autosaves from rewriting unchanged image rows.
-- Replaced request-time schema introspection in `/api/admin/product-detail` with five bounded database calls including authentication, independent optional reads and a seven-image compact JSON response.
-- Added a structured 96 KiB product payload guard, paused autosave while a stored product is programmatically loaded and refreshed narrow-screen error/recovery layout.
-- Expanded the Startup runtime gate and Cloudflare checklist with exact product load, queued autosave, reload, offline recovery, `exceededCpu` and `exceededMemory` tests.
-- Preserved Build 230 as the current D1 migration boundary; Build 231 adds no schema change.
-
-Deploy the complete package, hard refresh to service-worker shell v12, and follow `docs/archive/build-history/BUILD231_VALIDATION.md`. If `build230_visual_image_manifest` is already recorded, do not reapply a migration for Build 231.
-
-# Release Notes — Build 230
-
-## Visual Image Manifest and honest editorial enrichment
-
-- Added `/admin/image-manifest/` with 20 D1-backed image requirements, visual filters/previews, owner, rights, public-use, final URL, alternative text, phone/desktop review and append-only history.
-- Added approval validation, admin audit/runtime incidents and a complete read-only Unsynced browser fallback so service failure cannot appear empty or approved.
-- Generated three intentional editorial illustrations and responsive derivatives for homepage discovery, general jewelry techniques and gift-card decoration; all six WebPs include intrinsic dimensions and remain below 270 KB.
-- Preserved generated prompts, dimensions, hashes, intended use and prohibitions in `GENERATED_VISUAL_ASSET_REGISTER.md` and D1. Generated art never satisfies real-product/process/condition proof.
-- Updated the Critical Startup image gate with 12 step-by-step test/correction instructions and regenerated all 43 gates without removing prior keys.
-- Synchronized the D1-safe Build 230 migration to all aggregate schemas/current-pass SQL and retired the older synchronizer.
-- Refreshed one-H1, mobile/desktop CSS, image SEO, Markdown consolidation, current handoff, schema, smoke, sanity and next-step guidance.
-
-Back up D1 and confirm Build 229. Apply `database_build230_visual_image_manifest.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `docs/archive/build-history/BUILD230_VALIDATION.md`.
-
-# Release Notes — Build 229
-
-## Adopted packaging sources and explicit missing-image blocker
-
-- Preserved and registered the supplied soap-label automation specification, guide PDF and master SVG with repository paths, SHA-256 values, dimensional summaries and active/adopted state.
-- Added Packaging Studio source cards and `PACKAGING_REFERENCE_BASELINE.md` so future work must reconcile all three directions rather than relying on an unlabeled copy.
-- Kept the source SVG unchanged and documented that it renders a 25 mm rear seal while the specification/PDF request 50 mm on a 38.1 mm-high artboard; a 100%-scale physical proof must select an approved profile.
-- Preserved all 42 Startup gates and added `missing_launch_images` as a distinct Critical gate, for exactly 43.
-- Made `IMAGES_REQUIRED.md` the detailed missing/broken/fallback/placeholder/right-clearance evidence manifest and added phone/desktop, structured-data and social-preview checks.
-- Regenerated the complete Startup guide and degraded browser fallback; HTML, empty or incomplete API responses still show all gates rather than an empty-filter message.
-- Synchronized the D1-safe Build 229 migration to all aggregate schemas/current-pass SQL and added Release Sanity plus deployment-preflight checks for the three-source authority and exact gate count.
-- Refreshed canonical handoff, status, schema, release, image, mobile/CSS, SEO/H1 and prelaunch documentation.
-
-Back up D1 and confirm Build 228. Apply `database_build229_packaging_reference_authority.sql` or identical `database_upgrade_current_pass.sql`, not both. Deploy the complete package and follow `docs/archive/build-history/BUILD229_VALIDATION.md`.
-
-# Release Notes — Build 228
-
-## Master creative workflow and separate prelaunch stages
-
-- Added a seven-stage Creative Automation Studio while preserving Creative Process, CAIP, Content Studio, Social Publishing and Content Release Board specialist features/authorities.
-- Added D1 master workflow, stage-review and append-only event tables; mutable status/evidence stays in D1 rather than duplicated JSON.
-- Added a Prelaunch Operations Map and detailed separate Product Preflight, Deployment Preflight, Safe Deploy, Smoke, Deploy Readiness, Go-Live and Live Ops playbooks.
-- Preserved 37 Startup gates and added five standalone process gates for exactly 42; regenerated detailed correction/evidence/retest instructions.
-- Added regression coverage for HTML/incomplete readiness responses and the full 42-gate honest fallback.
-- Added responsive master/prelaunch layouts, direct specialist fallbacks, runtime incident handling and two internal planning SVG placeholders.
-- Added D1 migration compatibility checks that reject explicit SQL transactions and require numbered/current migrations to match.
-- Refreshed the two canonical handoff files, schema reference, SEO direction, smoke guide, image inventory and ordered next steps.
-
-Back up D1 and confirm Build 227. Apply `database_build228_creative_automation_prelaunch_stages.sql` or identical `database_upgrade_current_pass.sql`, not both. Do not add `BEGIN TRANSACTION`/`SAVEPOINT`. Deploy the complete package and follow `docs/archive/build-history/BUILD228_VALIDATION.md` plus `PRELAUNCH_PROCESS_PLAYBOOKS.md`.
-
-# Release Notes — Build 227
-
-## Unified business operations
-
-- Unified Soap Label Studio and Packaging Studio into one Labeling & Packaging System.
-- Added general label/card/insert templates, generic SVG preview and inventory-linked packaging BOM/cost controls.
-- Added sequential immutable invoices, receipts, packing slips, credit notes and refund confirmations with formal void history.
-- Added read-only Facebook Page and Instagram professional-account credential tests plus optional Meta token validity/scope/expiry evidence.
-- Added preparation, gate-specific correction, evidence and retest guidance to all 37 Startup Readiness gates; All statuses is now the safe initial view.
-- Consolidated current project memory into `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
-- Added Build 227 schema, responsive UI rules, planning SVG placeholders, Release Sanity checks and validation.
-
-Back up D1. Apply `database_build227_unified_business_operations.sql` or the identical `database_upgrade_current_pass.sql`, not both, after confirming the Build 225 baseline. Deploy the complete package and follow `docs/archive/build-history/BUILD227_VALIDATION.md`.
-
-# Release Notes — Build 226
-
-## Startup Readiness loading repair
-- Corrected a malformed newline string that prevented the Build 225 Startup Readiness Pages Function from parsing as an ES module.
-- Stopped the browser from accepting empty, malformed, or HTML HTTP 200 responses as a successfully loaded readiness list.
-- Preserved all 37 built-in gates in visibly degraded mode whenever the API is unavailable.
-- Added honest reset/show-all guidance when active filters have no matches or all gates are closed.
-- Added response diagnostics (`expected_total`) and status normalization without overwriting stored evidence.
-- Strengthened the final deployment blocker so Pages Functions are parsed as ES modules.
-- No D1 schema migration is required; the Build 225 readiness tables and 37 seeded gates remain authoritative.
-
-Deploy the complete Build 226 package and follow `docs/archive/build-history/BUILD226_VALIDATION.md`.
-
-# Release Notes — Build 225
-
-## Startup Readiness Cockpit and Packaging Authority
-- Replaced the static launch guide interface with a D1-backed status cockpit.
-- Added owner, due date, status, severity, evidence, blocked reason, completion, filters, progress, history, local unsynced recovery, and Markdown status export.
-- Expanded the launch guide to 37 detailed gates covering every current opening dependency.
-- Made `PACKAGING_STUDIO.md` the single packaging source of truth and converted duplicate specification files into compatibility pointers.
-- Added direct Packaging Studio interface links to the authoritative specification and packaging launch gates.
-- Added `startup_readiness_items` and `startup_readiness_history` to the current and aggregate schemas.
-- Build 223–224 product-detail and seven-image gallery fixes remain included.
-
-## Deployment
-Back up D1. Apply `database_build225_startup_readiness_packaging_authority.sql` or the identical `database_upgrade_current_pass.sql`, but not both. Deploy the full ZIP and follow `docs/archive/build-history/BUILD225_VALIDATION.md`.
-
-# Release Notes — Build 224
-
-## Complete storefront gallery hotfix — Build 224
-- Corrected the production condition that could leave a product detail page with only its featured image even though up to seven product images existed.
-- Replaced the fragile core gallery join with schema-aware product-image loading plus independent optional media-asset enrichment.
-- Added compatibility for legacy `media_assets` tables without `deleted_at`, `variant_role`, or ordering columns.
-- Reconciled product-image and annotation records, de-duplicated URLs, and preserved the featured image first.
-- Recalculated role groups after explicit media-role assignments.
-- Added an `Image X of Y` storefront indicator and complete thumbnail main-image/alt/caption switching.
-- Added `image_summary` API diagnostics, `Cache-Control: no-store`, and a Build 224 script cache buster.
-- No D1 schema migration is required.
-
-## Product detail runtime hotfix — Build 223
-- Corrected the public product-detail API failure `normalizeResults(...).catch is not a function` that occurred whenever the image-annotation table was available.
-- Moved the database promise fallback inside `normalizeResults(...)` so image annotations resolve to an empty result safely instead of taking the entire page offline.
-- Isolated optional quantity-pricing, set-reservation, gallery-media and resource-story queries so an out-of-sync optional table no longer prevents basic product details from loading.
-- Preserved the product featured image when optional gallery tables cannot be read.
-- Corrected the browser fallback so valid JSON errors such as HTTP 503 now trigger the public catalog fallback; previously only malformed/non-JSON responses did.
-- Added slug to public catalog search and added a complete-catalog retry for older deployed endpoints.
-- Added runtime incident capture for any future unhandled public product-detail failure.
-- No D1 schema migration is required for Build 223. Deploy the complete package after Build 222 and run `docs/archive/build-history/BUILD223_VALIDATION.md`.
-
-## Soap Label Studio and startup readiness
-- Added `/admin/packaging/soap-labels/` with a nine-tab exact-size bilingual soap-label editor.
-- Rebuilt the ribbon preview to follow the approved Glacial Purple structure.
-- Added photo-fit and true-50-mm-seal dimension profiles instead of silently clipping the conflicting specification.
-- Added normalized D1 soap templates, products, ingredient rows, claim rows, export evidence and physical print-test records.
-- Added purple, green and oatmeal reusable rose SVG assets.
-- Added SVG, PNG, WebP, JPG and browser-print preparation with predictable filenames and SHA-256 evidence.
-- Added a passed 100%-scale physical print-test requirement before label approval.
-- Added browser-local draft recovery for Packaging Studio save failures.
-- Added `/admin/startup-readiness/` and `STARTUP_GO_LIVE_GUIDE.md` with 20 ordered launch gates and detailed pass conditions.
-- Added direct Admin Dashboard cards for Startup Readiness and Soap Label Studio.
-- Updated the soap-label specification, Packaging Studio guide, canonical roadmap/handoff, schema reference, aggregate schemas, current migration and validation documents.
-
-## Build 222 deployment
-Apply `database_build222_soap_label_startup_readiness.sql` after Build 221, or the identical `database_upgrade_current_pass.sql`, but not both. Then deploy the complete package and follow `docs/archive/build-history/BUILD222_VALIDATION.md`.
-
----
-
-# Build 221
-
-- Added a visible Draft & Archive Cleanup Centre and corrected product-owned reference classification so unused archived or draft duplicates can be removed after live preflight.
-- Streamlined duplicate cleanup so unused recipe/material links no longer force the full correction panel unless reserved stock may be involved; hardened Archive with DB/DD_DB compatibility, audit logging and safe runtime fallback.
-- Expanded deletion discovery to include older product-reference tables without declared foreign keys while explicitly protecting order, accounting, project, packaging, customer-story, recall and public-proof history.
-- Added the missing canonical and Open Graph metadata to the public custom-request page during the SEO pass.
-- Added Packaging Studio with structured D1 projects, templates, review versions and export history.
-- Added the supplied scalloped soap-ribbon reference with extended medallion canvas, curved upper/lower text, bilingual centre identity and botanical ornaments.
-- Added SVG, PNG, JPG and Print/Save PDF preparation plus browser-local draft fallback.
-- Added common Canadian cosmetic-label field preflight while preserving explicit legal/formula/print review boundaries.
-- Added purchase-lot reconciliation evidence, discrepancy display, deliberate audited application to main on-hand and manual/FIFO/FEFO policy preferences.
-- Repaired the fresh aggregate schemas by restoring missing Build 213–215 Creative Process parent tables, and reset `database_upgrade_current_pass.sql` to the Build 221 additive migration only.
-- Updated core/full/store/current schema guidance, canonical handoff documents, specialist Packaging Studio guide, validation and changed-file manifest.
-
-# Build 220
-
-- Added protected permanent cleanup for unused duplicate draft products.
-- Added server-validated quantity price breaks.
-- Added limited product sets with finished-component reservations and component availability protection.
-- Added purchase-lot tracking for repeated supplier/Amazon purchases.
-- Added explicit content-only Creative Projects that can create Content Studio plans without products.
-- Added offer/set checks to Product Release Preflight.
-- Added responsive visual placeholders and consolidated the canonical Markdown pair.
-
-# Build 219
-
-- Added fast table-row editing to Tools & Supplies Inventory Operations.
-- Added row-level authenticated saves while preserving audit and inventory movement history.
-- Improved mobile responsiveness for inventory operations.
-- Refreshed the authoritative roadmap with the next 20 launch-readiness steps.
-- Documented the seven-image product-gallery operating rule and launch validation requirements.
-
-# Build 216 — Reviewed Inventory and CAIP Evidence
-
-Adds explicit approved material-to-inventory posting, duplicate prevention, audited stock movements, internal review-required CAIP evidence mirroring, reusable cost templates, mobile-safe controls and updated canonical handoff documents.
-
-# Build 210 — Social Publishing Workspace & Product Draft Automation
-
-- Added `/admin/social-publishing/` with a focused product-social automation configuration, platform status cards, full queue, Social Media Privacy Guard, and practical in-app connection guide.
-- Added a disabled-by-default `product_social_automation_settings` table and `database_build210_social_publishing_product_automation.sql`.
-- Added a safe, idempotent product trigger:
-  - An eligible Active + Approved/Published product can create one linked social **draft**.
-  - The draft is initially `needs_review`, `draft`, `privacy_status=needs_review`, and `approved_for_public_post=0`.
-  - It never auto-publishes or bypasses privacy/conset/release review.
-- Wired the trigger into both Create Product and Update Product while preserving product-save success when the social draft cannot be prepared.
-- Added UTM-tagged canonical product links to generated social drafts.
-- Added secret-safe connection status for Facebook, Instagram, Pinterest, X, TikTok, and YouTube.
-- Updated existing Meta Graph API default from v20.0 to v25.0, while retaining environment override.
-- Added `SOCIAL_PUBLISHING_CONNECTION_GUIDE.md`.
-- Updated `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, `NEW_CHAT_STATUS.md`, and schema reference pointers.
-
-## Deployment note
-
-Apply `database_build210_social_publishing_product_automation.sql` in D1 if desired. It is additive and leaves automation disabled. The runtime code also creates the minimal settings row safely when the Social Publishing admin page is opened.
-
-## Known separate incident
-
-Production auth maintenance completed on 2026-08-17: `users`/`sessions` are the current authority, while `members_legacy`/`member_sessions_legacy` remain intentionally because historical blog foreign keys still depend on `members_legacy`. Do not rerun the old auth migration or drop the legacy tables; capture sanitized Function/D1 evidence before any further auth schema change.
-
-
-# Build 212 — Social platform policy and callback prerequisites
-
-The following production prerequisites now exist directly in the application:
-
-- `https://devilndove.com/privacy/` and `/privacy.html`
-- `https://devilndove.com/terms/` and `/terms.html`
-- `https://devilndove.com/data-deletion/` and `/data-deletion.html`
-- `https://devilndove.com/social-connections/` and `/social-connections.html`
-- Exact OAuth callback routes for Meta/Facebook/Instagram, Pinterest, X, TikTok, and YouTube
-- `https://devilndove.com/api/social/meta/data-deletion`
-- `https://devilndove.com/api/social/integration-readiness`
-
-The Pinterest verification meta tag is present in every HTML head. Callback routes are currently safe readiness endpoints: they do not exchange codes or store tokens until one-time state storage, encrypted token persistence, refresh, and disconnect controls are implemented.
-
-## Build 214
-- Added optional many-to-many Creative Project/product links.
-- Preserved independent phone capture and direct catalog product creation.
-- Added project-aware phone capture preselection, link/unlink, and primary-product controls.
-- Added responsive flexible-entry workflow visual and Build 214 validation guide.
-
-
-## Build 215 — Creative Intelligence Integration
-Added reviewed project evidence handoffs, material-usage approval, profitability, optional Catalog project convenience controls, responsive integration panels, and an internal workflow visual.
-
-## Build 217
-Added authorized inventory reversals, cost-template application, revenue-percentage channel fees, shared linked-product cost allocation, CAIP-derived reviewed knowledge summaries, and a scoped dark contrast repair for Creative Asset Intelligence.
-
-## Build 218
-- Added a review-first Amazon link importer to Tools & Supplies Inventory Operations.
-- Added authenticated Amazon metadata preview with ASIN/canonical-link extraction and safe fallbacks.
-- Added mobile-responsive import controls and explicit no-auto-create safeguards.
-- Consolidated Markdown authority around `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
-
-### Build 272 — CAIP intake readiness diagnostics
-- Added server/client prerequisite checks for Build 269 duplicate-safe D1 columns and private CAIP R2 binding.
-- Prevents Select and Upload from beginning when required production prerequisites are missing.
-- Surfaces exact missing-column/migration guidance instead of a generic HTTP 400.
-- No new D1 migration; Build 269 remains the required additive CAIP migration.
-
-## Build 275 — Packaging Studio ingredient / French / rose repair
-- Persist source-template Master INCI rows into structured project ingredients when applying a base.
-- Add attached-base reload recovery and stronger French draft reconstruction.
-- Keep inherited supplier claims unapproved and review-first.
-- Increase claim icon spacing, use brand script for the bold soap identity, and expose a larger actual-rose direction palette.
-- No D1 migration; Packaging Studio assets cache-busted to v275.
+- Completes the Membership Build 395 legacy-to-canonical transition as one guarded release package.
+- Preserves the three existing `bronze` / `silver` / `gold` rows, policy IDs, complete business values, `AUTOINCREMENT` sequence, UNIQUE tier constraint, and the reviewed Membership sort index.
+- Translates `idx_membership_tier_policies_sort` from legacy `(sort_order, code)` to canonical `(sort_order, tier_code)`.
+- Keeps Membership reads compatible with the reviewed legacy table until the guarded Production swap is complete.
+- Locks admin Membership writes until the exact canonical ten-column schema is active, rather than allowing canonical SQL to fail against the legacy table.
+- Routes member tier-policy reads through the shared non-mutating compatibility service.
+- Aligns Platform DB Sanity with canonical `membership_tier_policies.policy_id` and includes Membership index visibility.
+- Advances the release manifest generator and current release descriptor to Build 437.
+- Keeps fractional Inventory, Product/FK, Accounting/default, R2/provider, CAIP-copy, and Production promotion separately locked.
+
+## Canonical Membership authority
+
+`database_membership_tier_policy_runtime_parity.sql` remains the fresh-install/canonical authority. The canonical table is:
+
+```text
+policy_id
+tier_code
+title
+short_description
+benefits_json
+badge_color
+sort_order
+is_visible
+created_at
+updated_at
+```
+
+The canonical performance index is:
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_membership_tier_policies_sort
+  ON membership_tier_policies(sort_order ASC, tier_code ASC);
+```
+
+Do **not** run this authority directly against the existing legacy Production table. Production uses only the guarded Build 436/437 shadow-table rebuild controller after exact authorization.
+
+## Proven Production source boundary before rebuild
+
+```text
+Membership rows: 3
+Raw tiers: bronze,silver,gold
+Policy IDs: 1,2,3
+name == display_title: TRUE for all three tiers
+Source-row SHA-256: 5db4bfd5f948a33432834210fd232a1e4b222dd6400193d65c644b501ba92057
+Canonical-preview SHA-256: 5d2d8369acd086bfa701de7ec19bd9d67537cd8736cd2c228d42a098ca71e2c8
+Outbound Membership FKs: 0
+Inbound Membership FKs: 0
+Rebuild-name collisions: 0
+Legacy sqlite_sequence: 3 / compatible
+Legacy sort index: idx_membership_tier_policies_sort(sort_order, code)
+```
+
+## Required Production execution boundary
+
+The only prepared Membership Production authorization token is:
+
+```text
+AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
+```
+
+Source preparation does not authorize it. After explicit authorization, only `scripts/build436_production_membership_rebuild.py` may create the Membership backup or execute the rebuild.
+
+The guarded controller must:
+
+1. rerun the full live lossless/dependency preflight;
+2. prove the reviewed legacy sort index is the only user object;
+3. create and verify a fresh full Production D1 backup;
+4. require identical source/canonical fingerprints after backup;
+5. create the exact canonical shadow table;
+6. copy all three rows through explicit mappings;
+7. run in-batch row/tier/title/value assertions;
+8. drop the legacy table and rename the validated shadow;
+9. recreate `idx_membership_tier_policies_sort` on `(sort_order, tier_code)`;
+10. independently verify schema, values, UNIQUE, AUTOINCREMENT, index columns, sequence, and helper cleanup.
+
+## Release validation
+
+Run `scripts/build437_membership_release_regression.py` before any Membership Production backup/write. It is local-only and validates the entire Membership release surface in one 20-check gate.
+
+The Build 436 rebuild simulation remains local-only and must also pass 20/20.
+
+## Release package manifest
+
+- Mutable release truth: `data/site/current-release.json` — Build 437.
+- Manifest generator: `scripts/generate_release_manifest.py` — Build 437.
+- Release-note generator: `scripts/generate_release_notes.py` — reads `data/site/current-release.json`.
+- `data/site/release-package-manifest.json` must be regenerated from the checked-out Build 437 source before packaging/deployment so its file hashes reflect the actual release tree.
+- Historical release-note data remains preserved in `data/site/release-notes.json` and archived build-history documents.
+
+## Current lock state
+
+```text
+Membership source/runtime completion              PREPARED
+Membership Production rebuild authorization       NOT RECEIVED
+Membership Production backup                      NOT CREATED
+Membership Production mutation                    NOT EXECUTED
+Fractional Inventory authorization                 NOT RECEIVED
+Product/FK authorization                          NOT RECEIVED
+Accounting/default authorization                  NOT RECEIVED
+R2/provider mutation                              DISABLED
+CAIP D1-only copy                                 FORBIDDEN
+Production promotion                              CLOSED
+```
