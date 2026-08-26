@@ -21,7 +21,14 @@ function setValues(name){
 const owned=setValues('PRODUCT_OWNED_CLEANUP_RELATIONS');
 const detached=setValues('PRODUCT_DETACH_RELATIONS');
 const protectedRefs=setValues('PROTECTED_PRODUCT_REFERENCES');
-const classified=new Set([...owned,...detached,...protectedRefs]);
+// Content Studio and CAIP product references are deliberately conditional rather than
+// globally owned/protected: generated untouched shells are safe to remove, while any
+// meaningful review/output/access evidence converts the same FK into protected history.
+const managedProjectRefs=new Set([
+  'content_projects.product_id',
+  'creative_projects.product_id'
+]);
+const classified=new Set([...owned,...detached,...protectedRefs,...managedProjectRefs]);
 
 assert(owned.has('product_media_change_audit.product_id'),'Editor media audit rows must not make an unused archived product undeletable.');
 assert(!protectedRefs.has('product_media_change_audit.product_id'),'Editor media audit rows remain incorrectly classified as protected history.');
@@ -33,12 +40,17 @@ assert(api.includes("cleanup_profile: 'bounded_registry_v2_generated_shell_clean
 assert(api.includes('await Promise.all(['),'Reference, material and managed-shell preflight reads should run together.');
 assert(api.includes('await db.batch(statements)'),'Reviewed inventory actions and product cleanup must use one D1 batch.');
 assert(api.includes('runCleanup(db, productId, materialPlan.statements, managedShells)'),'Inventory actions and reviewed generated-shell cleanup are not included in the final cleanup batch.');
+assert(api.includes('FROM content_projects cp')&&api.includes("table_name: 'content_projects'")&&api.includes('contentProjectIds.push'),'Content Studio product references are not conditionally classified as generated shell vs protected history.');
+assert(api.includes('FROM creative_projects cp')&&api.includes("table_name: 'creative_projects'")&&api.includes('creativeProjectIds.push'),'CAIP product references are not conditionally classified as generated shell vs protected history.');
+assert(api.includes('for (const creativeProjectId of (managedShells?.creative_project_ids || []))')&&api.includes('DELETE FROM creative_projects WHERE creative_project_id = ?'),'Reviewed safe CAIP shells are not included in atomic product cleanup.');
+assert(api.includes('for (const contentProjectId of (managedShells?.content_project_ids || []))')&&api.includes('DELETE FROM content_projects WHERE content_project_id = ?'),'Reviewed safe Content Studio shells are not included in atomic product cleanup.');
 
 for(const source of [correction,deleteClient,cleanupClient]){
   assert(source.includes('window.DDAuth?.readApiJson'),'A product-removal browser path still parses responses unsafely.');
 }
 assert(auth.includes('error.payload = data'),'Shared API errors must retain structured response details.');
 
+const unclassified=[];
 for(const schemaName of ['database_schema.sql','database_full_schema.sql','database_store_schema.sql']){
   const schema=read(schemaName);
   const pattern=/FOREIGN KEY\s*\(\s*["`\[]?([A-Za-z_][A-Za-z0-9_]*)["`\]]?\s*\)\s*REFERENCES\s+["`\[]?products["`\]]?/gi;
@@ -47,9 +59,10 @@ for(const schemaName of ['database_schema.sql','database_full_schema.sql','datab
     const creates=[...before.matchAll(/CREATE TABLE(?: IF NOT EXISTS)?\s+["`\[]?([A-Za-z_][A-Za-z0-9_]*)["`\]]?/gi)];
     const table=creates.at(-1)?.[1]||'';
     const key=`${table}.${match[1]}`;
-    assert(classified.has(key),`${schemaName} has unclassified product reference ${key}.`);
+    if(!classified.has(key)) unclassified.push(`${schemaName}: ${key}`);
   }
 }
+assert(!unclassified.length,`Aggregate schemas have unclassified product references:\n - ${[...new Set(unclassified)].join('\n - ')}`);
 
 const calls=[];
 const db={
@@ -144,4 +157,4 @@ assert(deletePayload.material_summary?.release_quantity===1,'Reviewed reservatio
 const migration=read('database_build230_visual_image_manifest.sql');
 assert(migration.includes('build230_visual_image_manifest'),'Retained Build 230 migration ledger marker is missing.');
 
-console.log(`Build 232 archived-product removal, bounded v2 preflight, registry coverage, safe parser and code-only schema checks: PASS (${calls.length}/${boundedGetBudget} mock GET DB calls)`);
+console.log(`Build 232 archived-product removal, bounded v2 preflight, registry coverage, managed-project classification, safe parser and code-only schema checks: PASS (${calls.length}/${boundedGetBudget} mock GET DB calls)`);
