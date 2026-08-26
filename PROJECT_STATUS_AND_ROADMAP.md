@@ -1,6 +1,6 @@
-# Devil n Dove Project Status and Roadmap — Build 438 Development-Proven / Build 437 Production Baseline
+# Devil n Dove Project Status and Roadmap — Build 439 Development Feature Work / Build 437 Production Baseline
 
-This is the **second of two canonical current project files**. Read `AI_HANDOFF.md` first for architecture, authority and safety. This file owns ordered open functionality.
+This is the **second of two canonical current project files**. Read `AI_HANDOFF.md` first for architecture, authority and safety. This file owns ordered open functionality and the definition of done for subsystem completion.
 
 ## Current baseline
 
@@ -10,18 +10,259 @@ This is the **second of two canonical current project files**. Read `AI_HANDOFF.
 
 Build 438 is **DEVELOPMENT-PROVEN**. Production Build 438 D1 is not authorized.
 
-## Module architecture
+**Current active feature family: Build 439 — CAIP Media / Video Evidence Review.**
+
+Build 439 source/schema/D1 authority is Development-proven, but live browser acceptance remains open because the selected Development CAIP asset points to an R2 object key that is not present in the bound Development private-media bucket. A read-only storage-linkage/inventory diagnostic now exists to distinguish healthy bindings, recoverable metadata drift, missing Development R2 objects and missing bindings without mutating D1/R2/provider state.
+
+## Application/module architecture
+
+Devil n Dove remains **one application with three top-level modules**, not a collection of independent applications:
 
 | Layer/module | Scope | Development state |
 |---|---|---|
 | Application Core | auth/session, module lifecycle, route/service authority, recovery/security/runtime helpers | PROVEN |
-| `commerce-operations` | storefront/member, Catalog, Inventory, Orders, Membership, Gift Cards, customer/operations workflows | enabled; isolation + authenticated acceptance proven |
-| `creative-production` | Creative Process, CAIP, Packaging, Media/Content, Content Studio | enabled; isolation + authenticated acceptance proven |
-| `business-administration` | Accounting, Analytics/SEO, users/settings/security, release/platform controls | enabled; isolation + authenticated acceptance proven |
+| `commerce-operations` | storefront/member, Catalog, Product, Inventory, Tools, Shop, Collections, Movies, Orders, Membership, Gift Cards, customer/operations workflows | enabled; isolation + authenticated acceptance proven |
+| `creative-production` | Creative Process, CAIP, Packaging, Media/Content, Content Studio, creative evidence and publishing preparation | enabled; isolation + authenticated acceptance proven |
+| `business-administration` | Accounting, Analytics/SEO/marketing, users/settings/security, release/platform controls | enabled; isolation + authenticated acceptance proven |
 
-Customer Commerce and Member Account remain separate UX surfaces inside Commerce & Operations.
+Customer Commerce and Member Account remain separate UX surfaces inside Commerce & Operations. Specialist areas such as Inventory, Tools, Movies, Collections, CAIP and Packaging may have their own pages/APIs/workspaces, but they should remain submodules/features under the correct top-level module unless a future isolation/security requirement justifies a new top-level module.
 
-## Build 438 completion
+## Mandatory subsystem definition of done
+
+An open subsystem is **not complete** merely because source code exists or one API call works. Before we close a subsystem in Development, we require all applicable gates below:
+
+1. **Authority/schema** — one clear data authority; aggregate schema synchronized; no duplicate/legacy authority ambiguity.
+2. **Source regression** — deterministic local/source tests for safety, route ownership, error handling and no forbidden side effects.
+3. **Development data gate** — required Development migration/apply completed and read-only/strict verification exact.
+4. **API acceptance** — authenticated/anonymous behavior, authorization, failure/degraded behavior and no unexpected writes proven.
+5. **Browser workflow acceptance** — the real end-to-end user/admin workflow succeeds in Development.
+6. **Mobile/desktop/CSS** — responsive behavior, no overlap/drift, usable controls and low-bandwidth behavior where relevant.
+7. **Integrity/recovery** — retries/recovery are bounded; missing data/resources fail clearly; no silent corruption or infinite polling.
+8. **SEO/public quality** — public surfaces use one clear H1, truthful title/meta/canonical, crawlable links, descriptive alt text and real evidence.
+9. **Observability** — meaningful failures can be diagnosed without exposing secrets or requiring database guesswork.
+10. **Canonical documentation** — `AI_HANDOFF.md` and this roadmap reflect final state and remaining work.
+11. **Production promotion remains separate** — Development completion does not authorize Production mutation.
+
+We finish one coherent subsystem family through these gates before calling it complete and moving the main focus to the next family.
+
+## Ordered completion queue to go-live
+
+### 1. Build 439 — CAIP Media / Video Evidence Review — **ACTIVE / MUST CLOSE FIRST**
+
+Goal: turn the existing CAIP private-media/intake foundation into a first-class reviewed evidence workflow without duplicating Creative Process or Content Studio authority.
+
+Implemented/proven in Development so far:
+
+- first-class temporal point/range evidence authority;
+- evidence categories, review/verification state, transcript excerpts and reviewer identity;
+- reviewed temporal evidence -> existing story evidence -> internal story segment flow;
+- provider-output artifact authority and fail-closed completion triggers;
+- provider profiles remain disabled/zero-budget on rerun;
+- no automatic publication;
+- private R2 range-streaming proxy with sanitized browser headers;
+- Build 439 source regression green;
+- deterministic `database_full_schema.sql` synchronization;
+- Development D1 exact verification: 3 tables / 7 indexes / 2 triggers / 2 disabled providers / 1 ledger row;
+- Build 439 API readiness live: HTTP 200 / schema ready / providers inactive;
+- read-only per-asset and paginated storage-linkage diagnostic using D1 reads + R2 HEAD only.
+
+Still required before CAIP closes:
+
+1. audit all Development temporal assets for D1 <-> R2 parity;
+2. identify at least one healthy private Development media object or prove Development private R2 population is incomplete;
+3. repair metadata-only drift when an existing verified candidate object is available;
+4. never create a D1-only media copy/link without a matching R2 object;
+5. provide a clear re-upload/recovery path for metadata whose binary is genuinely absent from Development R2;
+6. prove secure private playback and seeking with HTTP 206 / Content-Range / Accept-Ranges;
+7. save reviewed timecode/range evidence;
+8. seek back to the saved marker;
+9. promote approved marker to existing story evidence;
+10. approve story evidence;
+11. draft an internal story segment from reviewed evidence;
+12. download the evidence manifest;
+13. prove no provider execution/publication/source-media mutation;
+14. mobile/desktop CAIP review acceptance;
+15. update canonical docs and mark Build 439 Development-complete.
+
+### 2. Commerce/Product/Inventory/Tools operational completion — **NEXT**
+
+Treat Product, Inventory and Tools as closely related specialist workspaces inside `commerce-operations`, sharing Product/Inventory identity rather than creating duplicate stock systems.
+
+Open items include:
+
+- Product Delete Reference Inspector with Open/Resolve;
+- audited Finished Production reversal and compensating movement workflow;
+- downstream sale/commit guards;
+- lot-aware material selection/costing/provenance;
+- Inventory Usage Setup Required queue;
+- Product Ingredient Review queue;
+- Media Integrity Review;
+- classification and physical-count adjustment workflow with actor/reason/before/after evidence;
+- supplier/source provenance cleanup;
+- barcode-first receiving;
+- kit/component depletion behavior;
+- duplicate/normalization cleanup across JSON and D1;
+- correct linked-item/product names instead of opaque external keys;
+- reliable use/batch persistence and defaults;
+- Tools catalogue/admin completeness, condition/service/usage history and appropriate Inventory links;
+- no accidental cross-mutation between Tools, Supplies, Inventory and Product authorities;
+- mobile/desktop acceptance for receiving, counts, use, reversal and tool workflows.
+
+Completion requires real Development end-to-end posting **and reversal** evidence, not only static source checks.
+
+### 3. Shop / Collections / merchandising — **THEN**
+
+The storefront and Collections are Commerce surfaces, using the existing Product/Catalog authority.
+
+Open/explicit completion work:
+
+- finish Shop browsing/filter/search/category UX;
+- verify collection paths for handmade, vintage, collectible, antique, oddity and pre-built groupings;
+- ensure out-of-stock/archived/private records never leak into public merchandising;
+- preserve truthful pricing, availability, shipping/tax and product-number identity;
+- define deterministic public merchandising authority using the existing `public_display_priorities`/catalog signals rather than hard-coded duplicates;
+- add **automated Top Sellers** ranking from real completed sales/order-line evidence with bounded fallback when insufficient sales exist;
+- create a responsive **Top Sellers carousel on the front page**;
+- allow reviewed manual pin/priority override without falsifying sales rank;
+- prevent the carousel from triggering heavy background work on unrelated pages;
+- provide accessible keyboard/touch controls and sensible no-JavaScript/static fallback;
+- confirm home/shop/collection SEO, one-H1 discipline, alt text and mobile layout.
+
+### 4. Movies / personal collection catalogue — **THEN**
+
+Movies remains a specialist catalogue surface under `commerce-operations`; it does not need a new top-level application module unless future privacy/access requirements demand isolation.
+
+Current code already has a public movie API/page and Admin API, with JSON base plus optional D1 overlay. Remaining completion work must include:
+
+- audit JSON vs D1 authority and remove ambiguous duplicate/stale overlays;
+- confirm all intended DVD/Blu-ray records, edition/version/UPC identity and format data;
+- Criterion/special-edition/version details where known;
+- cover front/back integrity and Development R2/environment correctness;
+- metadata enrichment status/source provenance;
+- search/filter by title, UPC, year, actor, director, genre, studio and format;
+- collection notes, rarity/value/research fields without presenting estimates as guaranteed sale values;
+- admin add/edit/archive/dedupe workflow;
+- mobile/desktop public browsing acceptance;
+- SEO/noindex decisions based on whether the collection is intended for public discovery;
+- no illegal media-streaming functionality: catalogue/trailer/reference links are metadata, not redistribution of owned discs.
+
+### 5. Creative Process / production proof and reversals — **THEN**
+
+Open:
+
+- real correction/reversal end-to-end test;
+- polished audited Finished Production reversal UI;
+- downstream sale/commit guards;
+- lot-aware material selection/costing/provenance;
+- Inventory Usage Setup Required queue;
+- physical count/adjustment workflow with actor/reason/before/after evidence;
+- reviewed lessons/future-project recommendations from evidence;
+- profitability using materials, time, packaging and channel fees;
+- selected evidence -> Content Studio package/handoff.
+
+Creative Process remains the project/process/material/time/cost authority. Inventory changes only through explicit reviewed shared contracts.
+
+### 6. Packaging Studio physical/regulatory acceptance — **THEN**
+
+Open:
+
+- finish reusable template/library behavior for soap labels, candle tops and additional sizes;
+- delete/archive labels/projects safely;
+- fix preview/state drift and ingredient/oval overlap;
+- static-vs-editable template fields verified against approved reference layout;
+- soap type/ingredient/claim libraries and repeat-job templates;
+- botanical/color variants and generic/white artwork behavior;
+- 100%-size physical bilingual soap-ribbon proof;
+- claim/text clearance proof;
+- extended/peel-back bilingual template if required;
+- supplier Master INCI evidence;
+- fragrance allergen review;
+- French Review cockpit/history/hard print gate;
+- visual/reference diff and owner physical acceptance.
+
+### 7. Media & Content Studio / site enrichment — **THEN**
+
+Open:
+
+- replace P1 required placeholders first;
+- replace P2 recommended visuals with real workshop/project evidence;
+- page-wide edit mode production test desktop/mobile;
+- image assignment/target visibility and before/after pairing quality;
+- keep products/inventory/supplies/tools outside inappropriate static-page editing authority;
+- CSS/mobile parity checks;
+- one H1 and descriptive alt text;
+- static page/header/banner/showcase coverage without exposing private CAIP originals.
+
+### 8. Content Studio / social publishing downstream — **THEN**
+
+Open:
+
+- reviewed Creative/CAIP evidence -> channel package;
+- scheduling/calendar handoff;
+- provider/social publishing connections where supported;
+- human approval immediately before release;
+- retry/error/dead-letter evidence;
+- post-release analytics feeding reviewed lessons;
+- never imply an output plan equals publication;
+- no unsupported public claim beyond reviewed evidence.
+
+### 9. Business Administration / Accounting / mobile operations — **THEN**
+
+Open:
+
+- finish Accounting workbench and remaining extraction/parity issues;
+- row-level approval/posting and AR/AP/journal integrity;
+- bank CSV promotion/matching and close/lock workflows;
+- accountant month/quarter/year export presets;
+- phone dashboard / Today;
+- Quick Add Expense;
+- Quick Add Write-Off;
+- Quick New Product;
+- phone-camera evidence/write-off capture;
+- responsive low-bandwidth operational surfaces;
+- users/settings/security/Application Sanity/release controls acceptance.
+
+### 10. Customer/member experience — **THEN**
+
+Members is functional with profile/account tools, orders, wishlist, reviews and downloads. Finish evidence-driven polish within Commerce & Operations without creating a second customer identity system. Validate checkout/account/order/gift-card/membership recovery paths on mobile and desktop.
+
+### 11. SEO/public discovery pass — **CROSS-CUTTING + FINAL PASS**
+
+Apply continuously during each public subsystem, then run a final public-site pass:
+
+- one clear H1 per exposed page;
+- truthful titles/descriptions/canonicals;
+- natural searcher wording;
+- crawlable descriptive links;
+- descriptive alt text;
+- real product/process evidence;
+- correct structured data where appropriate;
+- noindex for private/admin workflows;
+- mobile parity/performance;
+- Search Console/Business Profile measurement rather than ranking guarantees.
+
+### 12. Go-live / reliability certification — **FINAL DEVELOPMENT GATE**
+
+Before broad Production promotion:
+
+- representative Worker metrics/log review;
+- payment/refund smoke proof;
+- email delivery proof;
+- D1 restore drill;
+- R2 Development/Production separation proof;
+- critical mobile/desktop screenshots;
+- large-media interruption/recovery proof;
+- controlled release evidence;
+- confirm unrelated pages do not start unnecessary background work;
+- module disable/read/manage behavior remains intact;
+- final security/session/authorization regression;
+- final schema aggregate/fresh-install proof;
+- final public navigation/404/error/fallback smoke;
+- canonical docs show no P0/P1 go-live blockers.
+
+Only after this gate should we prepare a controlled Production promotion plan. Development completion never silently authorizes Production mutation.
+
+## Build 438 completion evidence
 
 Green evidence:
 
@@ -57,129 +298,9 @@ read-level non-read enforcement live-proven
 final module/role state restored
 ```
 
-The browser acceptance runner contains no direct SQL, does not invoke `inventory-post`/`inventory-reverse`, and uses read-only shared probes. A separate before/after business-row-count sample was not captured; do not claim that specific measurement.
+## Existing public merchandising authority
 
-## Build 439 — P0 / NEXT
-
-### CAIP Media / Video Evidence Review
-
-**Status: NEXT COHERENT FEATURE FAMILY**
-
-Goal: turn the existing CAIP private-media/intake foundation into a first-class reviewed evidence workflow without duplicating Creative Process or Content Studio authority.
-
-Planned Build 439 scope:
-
-1. playable video/media review in CAIP;
-2. exact point timecodes and bounded start/end ranges;
-3. evidence categories: technique, problem, result, lesson, material/process proof, safety/quality note;
-4. evidence notes, confidence/review state and reviewer identity;
-5. evidence markers tied to the existing CAIP media/project identity;
-6. timeline/list review UI with seek-to-marker behavior;
-7. draft story segments generated only from reviewed evidence;
-8. explicit human approval before Content Studio refresh/handoff;
-9. derivative requests generated only from approved story needs;
-10. bounded processing-job foundation for proxy/thumbnail/frame/audio/transcript;
-11. provider-output verification before a processing job can be complete;
-12. retry/failure state that does not loop on Cloudflare CPU/resource failures;
-13. private originals remain private and authoritative;
-14. large-media resumability/integrity rules remain intact;
-15. no automatic publication or unsupported public claims;
-16. no Product/Inventory identity duplication;
-17. no D1-only copying of CAIP media without matching R2 objects;
-18. mobile/desktop review usability;
-19. local/source regression package;
-20. Markdown handoff/roadmap update after the coherent family is implemented.
-
-## P1 — Creative Process / production proof and reversals
-
-Still open:
-
-- real correction/reversal end-to-end test;
-- polished audited Finished Production reversal UI;
-- downstream sale/commit guards;
-- lot-aware material selection/costing/provenance;
-- Inventory Usage Setup Required queue;
-- physical count/adjustment workflow with actor/reason/before/after evidence.
-
-## P1 — Packaging Studio physical/regulatory acceptance
-
-Still open:
-
-- 100%-size physical bilingual soap-ribbon proof;
-- claim/text clearance proof;
-- extended/peel-back bilingual template if required;
-- supplier Master INCI evidence;
-- fragrance allergen review;
-- French Review cockpit/history/hard print gate;
-- visual/reference diff and owner physical acceptance.
-
-## P1 — Product / Inventory operational completion
-
-Still open:
-
-- Product Delete Reference Inspector with Open/Resolve;
-- audited Finished Production reversal;
-- lot-aware costing/provenance;
-- Product Ingredient Review queue;
-- Media Integrity Review;
-- classification/physical-count adjustments;
-- supplier/source provenance cleanup.
-
-## P1 — Media & Content Studio
-
-Still open:
-
-- replace P1 required placeholders first;
-- replace P2 recommended visuals with real workshop/project evidence;
-- production-test page-wide Edit mode desktop/mobile;
-- continue CSS/mobile parity checks;
-- keep one H1 and descriptive alt text.
-
-## P1 — Content/social publishing downstream
-
-Still open:
-
-- reviewed scheduling/calendar handoff;
-- provider/social publishing connections where supported;
-- human approval immediately before release;
-- retry/error/dead-letter evidence;
-- post-release analytics feeding reviewed lessons;
-- never imply an output plan equals publication.
-
-## P2 — Mobile operator/business workflows
-
-Still requested:
-
-- phone dashboard / Today;
-- Quick Add Expense;
-- Quick Add Write-Off;
-- Quick New Product;
-- barcode-first receiving;
-- phone-camera evidence/write-off capture;
-- accountant month/quarter/year export presets;
-- responsive low-bandwidth operational surfaces.
-
-## P2 — Customer/member experience
-
-Members is functional with profile/account tools, orders, wishlist, reviews and downloads. Continue evidence-driven polish within Commerce & Operations; do not create a second customer identity system.
-
-## P2 — Go-live / reliability
-
-Before broad Production promotion:
-
-- representative Worker metrics/log review;
-- payment/refund smoke proof;
-- email delivery proof;
-- D1 restore drill;
-- R2 environment/separation proof;
-- critical mobile/desktop screenshots;
-- large-media interruption/recovery proof;
-- controlled release evidence;
-- confirm unrelated pages do not start unnecessary background work.
-
-## P2 — SEO/local search
-
-Continue one clear H1, truthful titles/descriptions/canonicals, natural searcher wording, crawlable links, descriptive alt text, real product/process evidence, mobile parity and measured Search Console/Business Profile outcomes. No first-page guarantee.
+Build 264 already introduced `public_display_priorities` plus editable Home/Shop/Collections content slots. Future Top Sellers/front-page carousel work must extend these existing authorities rather than create hard-coded parallel merchandising data.
 
 ## Remaining schema/parity technical debt
 
@@ -192,13 +313,15 @@ Accounting default / nullability rebuilds
 Other structural drift
 ```
 
+Address structural drift when a coherent subsystem completion gate proves it is required; do not perform broad rebuilds merely because they are listed here.
+
 ## Release safety state
 
 ```text
 Build 437 Membership token                     SPENT / COMPLETE
 Build 438 Development                          PROVEN
 Build 438 Production migration                 NOT AUTHORIZED
-Build 439                                      DEVELOPMENT FEATURE WORK NEXT
+Build 439                                      ACTIVE / DEVELOPMENT BROWSER ACCEPTANCE OPEN
 R2/provider mutation                           DISABLED unless explicitly scoped
 CAIP D1-only copy                              FORBIDDEN
 Broad Production promotion                     CLOSED
@@ -207,4 +330,4 @@ Main/Production broad promotion                FROZEN
 
 ## Documentation rule
 
-`AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` are the two canonical current cross-project authorities. `BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md` is the detailed Build 438 proof. Build-specific files remain specialist/history evidence and do not override these canonical files.
+`AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` are the two canonical current cross-project authorities. Build-specific files remain specialist/history evidence and do not override these canonical files. Every coherent subsystem completion must update these canonical files so a new AI/chat can resume without rediscovering the backlog.
