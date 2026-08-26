@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,7 +12,7 @@ LIVE = ROOT / 'build428_live_remaining_parity_evidence.local.json'
 POST = ROOT / 'build427_production_product_number_postcheck.local.json'
 MEM_PREVIEW = ROOT / 'build428_membership_rebuild_preview.local.sql'
 DOC = ROOT / 'BUILD428_TWENTY_ITEM_REMAINING_PARITY_BOUNDARY.md'
-ADD_SOURCE = (ROOT / 'scripts' / 'build427_production_additive_execution.py').read_text(encoding='utf-8')
+ADD_SOURCE = (ROOT / 'scripts' / 'build428_production_additive_execution.py').read_text(encoding='utf-8')
 
 checks = 0
 failures: list[str] = []
@@ -46,6 +47,8 @@ def main() -> int:
     fractional = live.get('fractional_tables') or {}
     preview_text = MEM_PREVIEW.read_text(encoding='utf-8') if MEM_PREVIEW.exists() else ''
     doc_text = DOC.read_text(encoding='utf-8') if DOC.exists() else ''
+    next_section = doc_text.split('## Next 20 ordered changes — Build 429', 1)[1] if '## Next 20 ordered changes — Build 429' in doc_text else ''
+    next_items = re.findall(r'(?m)^\d+\.\s+Build 429:', next_section.split('## Gate state', 1)[0]) if next_section else []
 
     check(branch == 'dev', 'current git branch is dev')
     check(post.get('pass') is True, 'Build 427 Production Product-number postcheck remains green')
@@ -66,7 +69,7 @@ def main() -> int:
     check(live.get('caip_media_upload_files_rows') == 113, 'CAIP 113-row/private-R2 delta remains excluded from parity execution')
     check(all(live.get(key) is False for key in ['gift_card_authorized','notification_authorized','annotation_authorized','rebuild_authorized']), 'no remaining Production authorization is inferred')
     check(bool(preview_text) and all(line.lstrip().startswith('--') or not line.strip() for line in preview_text.splitlines()), 'Membership preview exists and contains zero executable statements')
-    check(doc_text.count('\n1.') == 1 and 'Next 20 ordered changes — Build 429' in doc_text and 'Production promotion' in doc_text and 'CLOSED' in doc_text, 'Build 428 records the next 20 and keeps Production promotion closed')
+    check(len(next_items) == 20 and all(token in ADD_SOURCE for token in ['AUTHORIZE-BUILD428-PROD-GIFT-CARD','AUTHORIZE-BUILD428-PROD-NOTIFICATION','AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX']) and 'Production promotion' in doc_text and 'CLOSED' in doc_text, 'Build 428 records exactly next 20, backed-up token gates, and closed promotion')
 
     print()
     if failures:
