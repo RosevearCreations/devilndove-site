@@ -2,7 +2,7 @@
 
 ## Status
 
-**CORRECTED FULL BUILD 403 AUTHORIZATION BOUNDARY PASS (20/20) / PRIOR FOUR-INDEX AUTHORIZATION SUPERSEDED / FULL NOTIFICATION AUTHORIZATION NOT RECEIVED / NO BACKUP OR MUTATION / PRODUCTION PROMOTION CLOSED**
+**CORRECTED FULL BUILD 403 AUTHORIZATION BOUNDARY PASS (20/20) / FULL NOTIFICATION AUTHORIZATION RECEIVED / BACKUP + MUTATION PENDING / PRODUCTION PROMOTION CLOSED**
 
 Build 430 originally closed a four-index Notification boundary under the assumption that `idx_notification_outbox_status_due` already existed. The first authorized Build 431 attempt correctly stopped before backup when live Production proved that assumption false.
 
@@ -28,7 +28,7 @@ is **SUPERSEDED / INSUFFICIENT** and must not be reused.
 
 ## Corrected full Build 403 evidence — PASS
 
-The owner reran the corrected Build 431 source/regression/read-only boundary and proved:
+The corrected Build 431 source/regression/read-only boundary proved:
 
 ```text
 BUILD 431 FULL NOTIFICATION AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
@@ -83,7 +83,7 @@ PRODUCTION PROMOTION: CLOSED
 
 ## Corrected canonical scope
 
-`database_notification_runtime_parity.sql` is authoritative. The separately authorized full Notification stage may create only:
+`database_notification_runtime_parity.sql` is authoritative. The authorized full Notification stage may create only:
 
 ```text
 metadata_json
@@ -96,17 +96,21 @@ idx_notification_outbox_product
 
 `notification_outbox` row count must remain exactly unchanged.
 
-## Required new authorization
+## Full-scope authorization received
 
-The prepared token is:
+The owner explicitly supplied:
 
 ```text
 AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
 ```
 
-It has **not** been authorized merely by the successful Build 431 boundary.
+This authorizes only the corrected full Build 403 `notification_outbox` additive stage described above. It does not authorize the Build 197 annotation index, Membership, fractional Inventory, Product/FK, Accounting/default rebuilds, R2/provider work, CAIP copying, or Production promotion.
 
-After explicit authorization only, Build 432 may:
+No Notification backup or mutation has yet been executed under this authorization.
+
+## Authorized Build 432 execution sequence
+
+Build 432 may now:
 
 1. rerun the corrected targeted Notification preflight;
 2. prove `metadata_json` and all five indexes remain absent;
@@ -127,7 +131,7 @@ Product-number Production stage             COMPLETE / PROVEN
 Gift Card Production stage                  COMPLETE / PROVEN
 Old Notification authorization              SUPERSEDED / INSUFFICIENT
 Full Build 403 Notification boundary        PASS (20/20)
-Full Build 403 Notification authorization   NOT RECEIVED
+Full Build 403 Notification authorization   RECEIVED
 Notification Production backup              NOT CREATED
 Notification Production mutation            NOT EXECUTED
 Annotation-index authorization              NOT RECEIVED
