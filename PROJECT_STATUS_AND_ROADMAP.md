@@ -1,4 +1,4 @@
-# Devil n Dove Project Status and Roadmap — Build 438 Source / Build 437 Production Baseline
+# Devil n Dove Project Status and Roadmap — Build 438 Development Authority / Build 437 Production Baseline
 
 This is the **second of two canonical current project files**. Read `AI_HANDOFF.md` first for architecture, authority and safety. This file is the current open-functionality roadmap.
 
@@ -10,7 +10,7 @@ Historical Build-number prose remains evidence only. Specialist documents own sp
 
 **Current source/development release: Build 438 — Application Core / Module Activation Authority.**
 
-Build 438 source control-plane work is now **READY FOR OWNER VALIDATION**. Development D1 apply/live proof remains pending. Production Build 438 D1 is not authorized.
+Build 438 is now **APPLIED AND EXACTLY VERIFIED IN DEVELOPMENT**. The next release gate is live module disable/re-enable isolation plus authenticated Admin/browser acceptance. Production Build 438 D1 is not authorized.
 
 Completed/proven Production parity families:
 
@@ -26,60 +26,89 @@ Do not reopen these for unrelated later feature failures.
 
 ## Module architecture sanity check
 
-Current architecture:
-
 | Layer/module | Functional scope | Current state |
 |---|---|---|
-| Application Core | auth/session, module lifecycle, route/service authority, shared recovery/security/runtime helpers | Existing; Build 438 control plane source ready |
-| `commerce-operations` | storefront/customer/member, Catalog, Inventory, Orders, Membership, Gift Cards, fulfillment/customer operations | Existing top-level module; runtime extraction still incremental |
-| `creative-production` | Creative Process, CAIP, Packaging, Media/Content, Content Studio, reviewed production workflows | Existing top-level module; strong four-domain activation/read coverage |
-| `business-administration` | Accounting, Analytics/SEO/marketing, users/settings/security, platform/release/admin controls | Existing top-level module; Accounting runtime proven, other domains incremental/domain-bridge |
+| Application Core | auth/session, module lifecycle, route/service authority, shared recovery/security/runtime helpers | Build 438 authority installed/proven in Development |
+| `commerce-operations` | storefront/customer/member, Catalog, Inventory, Orders, Membership, Gift Cards, fulfillment/customer operations | Existing top-level module; enabled in Development |
+| `creative-production` | Creative Process, CAIP, Packaging, Media/Content, Content Studio, reviewed production workflows | Existing top-level module; enabled in Development |
+| `business-administration` | Accounting, Analytics/SEO/marketing, users/settings/security, platform/release/admin controls | Existing top-level module; enabled in Development |
 
 Customer Commerce and Member Account are separate UX surfaces inside Commerce & Operations, not separate top-level runtimes.
 
 ## Build 438 — P0 / current release
 
-**Status: SOURCE READY FOR OWNER VALIDATION / DEVELOPMENT D1 + LIVE PROOF PENDING / PRODUCTION NOT AUTHORIZED**
+**Status: DEVELOPMENT D1 AUTHORITY APPLIED + EXACT / LIVE ISOLATION + AUTHENTICATED ACCEPTANCE PENDING / PRODUCTION NOT AUTHORIZED**
 
-Build 438 source now includes:
+Build 438 now includes:
 
-1. additive `app_modules` D1 authority;
+1. additive `app_modules` authority;
 2. additive `app_module_role_access` authority;
 3. exact three-module seed;
 4. explicit member/admin role mapping;
 5. short non-user module-config cache;
 6. request-scoped session/user evaluation;
 7. fail-closed real authority-error semantics with safe pre-migration compatibility defaults;
-8. canonical server route/API ownership map aligned to the existing Build 305 domain catalog;
-9. hyphenated API-family classification;
-10. root Pages direct module enforcement;
-11. direct `read` access blocking non-read API methods;
-12. seven explicit cross-module shared service contracts;
-13. consumer-gated shared-service access;
-14. `manage` requirement for shared mutation contracts;
-15. read-only `/api/modules` bootstrap with explicit fresh refresh;
-16. audited `/api/admin/app-modules` controls;
-17. shared-core `/admin/application-modules/` recovery surface;
-18. permanent Admin Dashboard **Application Modules** card;
-19. Admin-only account-widget recovery link;
-20. module Core Health diagnostics;
-21. browser Current-State Route Proof;
-22. authoritative Admin bootstrap before umbrella runtime activation;
-23. disabled runtime suppression;
-24. public/member module-aware navigation with short per-tab cache;
-25. background permission default OFF and auto-clear on module disable;
-26. no request-time module DDL;
-27. no new recurring polling;
-28. exact D1 verification SQL;
-29. hard-pinned Development-only D1 apply/verify helper;
-30. local 20-check regression;
-31. executable route/shared-contract matrix test;
-32. existing client-domain/server ownership alignment test;
-33. executable 12-check module access-policy test.
+8. retryable 503 session-verification boundary that prevents false logout;
+9. canonical server route/API ownership aligned to the existing Build 305 catalog;
+10. hyphenated API-family classification;
+11. root Pages direct module enforcement;
+12. direct `read` access blocking non-read API methods;
+13. seven explicit cross-module shared service contracts;
+14. consumer-gated shared-service access;
+15. `manage` requirement for shared mutation contracts;
+16. read-only `/api/modules` bootstrap with explicit fresh refresh;
+17. audited `/api/admin/app-modules` controls;
+18. shared-core `/admin/application-modules/` recovery surface;
+19. permanent Admin Dashboard **Application Modules** card;
+20. Admin-only account-widget recovery link;
+21. module Core Health diagnostics;
+22. browser Current-State Route Proof;
+23. authoritative Admin bootstrap before umbrella runtime activation;
+24. disabled runtime suppression;
+25. public/member module-aware navigation with short per-tab cache;
+26. background permission default OFF and auto-clear on module disable;
+27. no request-time module DDL;
+28. no new recurring polling;
+29. deterministic fresh-install `database_full_schema.sql` synchronization;
+30. file-based self-asserting strict D1 verification;
+31. hard-pinned Development-only D1 apply/verify helper;
+32. local 20-check regression;
+33. executable route/shared-contract matrix;
+34. Build305 domain/server ownership alignment;
+35. executable 12-check module access-policy proof;
+36. executable 6-check session-resilience proof;
+37. Windows console/strict verification regression;
+38. Development-only live module isolation/auto-restore harness.
 
-### Shared contract independence now supported
+### Development authority evidence now green
 
-Direct owner-module disablement no longer incorrectly severs a narrow contract legitimately used by another enabled module.
+See `BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md`.
+
+```text
+Full schema                         PASS / synchronized
+Application Core regression         PASS (20/20)
+Route map                            PASS (53 + 7 contracts)
+Catalog/server alignment             PASS (61/61)
+Access policy                        PASS (12/12)
+Session resilience                   PASS (6/6)
+Console/strict helper                PASS (10/10)
+Development migration                APPLIED / PASS
+Human read-only verification         PASS / 0 writes
+Strict self-asserting verification   PASS / 0 writes
+```
+
+Exact Development state:
+
+```text
+module_count:               3
+role_access_count:          6
+enabled_module_count:       3
+background_enabled_count:   0
+expected_index_count:       2
+module_keys:                business-administration|commerce-operations|creative-production
+```
+
+### Shared contract independence
 
 Reviewed shared contracts:
 
@@ -95,34 +124,29 @@ content-media      Creative -> Creative / Commerce
 
 Shared mutation contracts require a qualifying consumer with `manage` access.
 
-This means, for example, Commerce may be disabled for direct user access while Creative remains enabled and can still use the explicit reviewed Inventory contract boundary. Broad Commerce/Inventory pages and legacy APIs remain blocked.
+The 12/12 unit proof already establishes Commerce-disabled + Creative-enabled Inventory contract eligibility without fabricating business mutations.
 
-### Build 438 Development acceptance still required
+### Build 438 acceptance still required
 
-1. Pull current `dev`.
-2. Run the Build 438 Python compile checks.
-3. Run the 20/20 source regression.
-4. Run the route/shared-contract matrix.
-5. Run Build305 domain/server alignment.
-6. Run the 12/12 access-policy test.
-7. Run JavaScript syntax checks.
-8. Apply `database_build438_application_module_activation.sql` to **Development D1 only** through the hard-pinned helper.
-9. Require exact D1 verification: 3 module rows, 6 role rows, 3 enabled, 0 background enabled, 2 indexes, exact keys.
-10. Deploy/preview Development.
-11. Verify `/api/modules?fresh=1` returns `schema_ready=true`, `source=d1`.
-12. Open `/admin/application-modules/` and require Core Health PASS.
-13. Require Current-State Route Proof PASS with all modules enabled.
-14. Disable/re-enable Commerce; direct Commerce routes block/return correctly and data stays intact.
-15. While Commerce is disabled and Creative remains enabled, prove appropriate shared read contracts remain usable by Creative.
-16. Do not fabricate Inventory movements merely to test `inventory-post`/`inventory-reverse`; use a real reviewed Creative fixture if live mutation proof is needed.
-17. Disable/re-enable Creative and prove direct Creative surfaces/runtime block/return correctly; Commerce may still consume explicit `content-media` where required.
-18. Disable/re-enable Business and prove direct Business surfaces block/return while Core recovery stays available; Commerce may still consume explicit `accounting-read` where required.
-19. Prove a direct module set to `read` blocks non-read methods with `module_access_level_read_only`.
-20. Prove business row counts do not change because a module was disabled.
-21. Observe Worker/request behavior and confirm no new recurring polling.
-22. Record Development evidence in canonical Markdown.
-23. Only after all Development proof is green decide whether a narrow Production migration authorization boundary should be prepared.
-24. Keep broad Production promotion closed.
+1. run `scripts/build438_development_module_isolation_proof.py` against deployed Development;
+2. prove Commerce direct route blocks/restores;
+3. prove Creative direct route blocks/restores;
+4. prove Business direct route blocks/restores;
+5. prove Core `/admin/application-modules/` remains reachable during every toggle;
+6. prove other enabled module routes retain expected behavior;
+7. prove final module state is restored exactly;
+8. login as Admin and require Core Health PASS;
+9. require Current-State Route Proof PASS with all modules enabled;
+10. exercise module changes through the audited Admin control API/UI;
+11. prove navigation/runtime suppression while a module is disabled;
+12. prove one non-essential Admin module at `read` allows reads but rejects non-read API methods with `module_access_level_read_only`;
+13. prove reviewed shared read contracts remain available to an authenticated enabled consumer when the owner UI is disabled;
+14. do not fabricate Inventory movements for `inventory-post`/`inventory-reverse`; use a real reviewed Creative fixture only if live mutation proof is actually needed;
+15. compare representative business row counts before/after and confirm module toggles do not alter business data;
+16. observe Worker/request behavior and confirm no new recurring polling;
+17. record final Development browser/isolation evidence in canonical Markdown;
+18. only then decide whether to prepare a narrow Build 438 Production authorization boundary;
+19. keep broad Production promotion closed.
 
 ## Open requested functionality — prioritized sanity check
 
@@ -130,13 +154,7 @@ This means, for example, Commerce may be disabled for direct user access while C
 
 **Status: PARTIAL / HIGH VALUE**
 
-Already strong:
-
-- private R2 intake/recovery;
-- bounded multipart integrity checks;
-- duplicate/recovery handling;
-- project-first CAIP navigation;
-- evidence/story/derivative-plan foundations.
+Already strong: private R2 intake/recovery, bounded multipart integrity, duplicate/recovery handling, project-first navigation, evidence/story/derivative-plan foundations.
 
 Still open:
 
@@ -153,14 +171,6 @@ Still open:
 
 **Status: PARTIAL**
 
-Already built:
-
-- planned vs actual material distinction;
-- reviewed actual-use posting;
-- compensating inventory reversal/correction model;
-- voided/corrected audit history;
-- Creative Process -> CAIP -> Content Studio lifecycle.
-
 Still open:
 
 1. production-test real correction/reversal flows end to end;
@@ -173,17 +183,6 @@ Still open:
 ### P1 — Packaging Studio physical acceptance / regulatory evidence
 
 **Status: PARTIAL**
-
-Already built:
-
-- reusable Packaging/template architecture;
-- soap-reference visual direction;
-- structured ingredients;
-- Inventory/source identity linkage without stock consumption;
-- separate English/French ingredient presentation;
-- print-readiness blocking instead of silent clipping;
-- French draft/review concepts;
-- claims/warnings/template/version foundations.
 
 Still open:
 
@@ -213,18 +212,7 @@ Still open/high value:
 
 **Status: PARTIAL**
 
-Build 278 baseline recorded:
-
-```text
-71 image slots
-68 background slots
-6 P1 required placeholder replacements
-23 P2 recommended placeholder replacements
-68 P3 optional blank backgrounds
-42 authored/default locations
-```
-
-Live D1 assignments supersede baseline counts.
+Build 278 baseline recorded 71 image slots, 68 background slots, 6 P1 required placeholder replacements, 23 P2 recommended replacements, 68 optional backgrounds and 42 authored/default locations. Live D1 assignments supersede baseline counts.
 
 Still open:
 
@@ -308,9 +296,10 @@ When one is chosen, begin with fresh read-only scope and a new family-specific a
 
 ```text
 Build 437 Membership token                     SPENT / COMPLETE
-Build 438 source control plane                  READY FOR OWNER VALIDATION
-Build 438 Development migration                PENDING OWNER RUN
-Build 438 Production migration                 NOT AUTHORIZED
+Build 438 Development D1 authority              APPLIED / EXACTLY VERIFIED
+Build 438 Development live isolation            PENDING OWNER RUN
+Build 438 authenticated browser acceptance      PENDING
+Build 438 Production migration                  NOT AUTHORIZED
 R2/provider mutation                           DISABLED
 CAIP D1-only copy                              FORBIDDEN
 Broad Production promotion                     CLOSED
@@ -319,4 +308,4 @@ Main/Production broad promotion                FROZEN pending broader acceptance
 
 ## Documentation rule
 
-`AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` are the two canonical current cross-project authorities. `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` is the current specialist architecture plan and `BUILD438_VALIDATION.md` is the owner-run validation authority. Build 437 overlays remain historical release evidence and do not override current Build 438 source state.
+`AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` are the two canonical current cross-project authorities. `BUILD438_APPLICATION_CORE_MODULE_PLAN.md` is the specialist architecture plan, `BUILD438_VALIDATION.md` is the owner-run validation authority, and `BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md` records the applied/exact Development D1 evidence. Build 437 overlays remain historical release evidence and do not override current Build 438 state.
