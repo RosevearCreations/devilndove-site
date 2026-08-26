@@ -1,6 +1,6 @@
-// Devil n Dove Build 341 — Platform-owned non-mutating database sanity read service.
+// Devil n Dove Build 437 — Platform-owned non-mutating database sanity read service.
 
-export const BUILD = 341;
+export const BUILD = 437;
 export const CONTRACT_ID = 'platform-db-sanity-read';
 export const OWNER = 'platform';
 
@@ -47,7 +47,7 @@ export const EXPECTED_TABLES = Object.freeze({
   media_assets: ['media_asset_id'],
   product_image_annotations: ['product_image_annotation_id'],
   product_media_score_history: ['product_media_score_history_id'],
-  membership_tier_policies: ['membership_tier_policy_id'],
+  membership_tier_policies: ['policy_id'],
   gift_cards: ['gift_card_id'],
   gift_card_delivery_audit: ['gift_card_delivery_audit_id'],
   general_ledger_accounts: ['gl_account_id', 'code', 'name', 'category', 'parent_group', 'normal_balance', 'sort_order', 'gifi_code', 'gifi_label', 'gifi_section', 'tax_deductibility_percent', 'gifi_review_state', 'gifi_review_note', 'gifi_reviewed_by_user_id', 'gifi_reviewed_at'],
@@ -101,7 +101,7 @@ export async function readPlatformDbSanity(db){
     if(missingColumns.length) staleTables.push({table_name:tableName,missing_columns:missingColumns,column_count:cols.size}); else okTables.push({table_name:tableName,column_count:cols.size});
   }
   const unexpectedTables=[...existing].filter((name)=>!Object.prototype.hasOwnProperty.call(EXPECTED_TABLES,name));
-  const indexChecks=[]; for(const tableName of ['catalog_items','site_item_inventory','product_resource_links','accounting_journal_entries','schema_migration_ledger']) if(existing.has(tableName)) indexChecks.push({table_name:tableName,indexes:await getIndexNames(db,tableName)});
+  const indexChecks=[]; for(const tableName of ['catalog_items','site_item_inventory','product_resource_links','accounting_journal_entries','schema_migration_ledger','membership_tier_policies']) if(existing.has(tableName)) indexChecks.push({table_name:tableName,indexes:await getIndexNames(db,tableName)});
   const catalog_counts=existing.has('catalog_items')?await safeAll(db,`SELECT item_kind,COUNT(*) AS total,SUM(CASE WHEN COALESCE(amazon_url,'')<>'' THEN 1 ELSE 0 END) AS with_amazon_url FROM catalog_items WHERE item_kind IN ('tool','supply','creation') GROUP BY item_kind ORDER BY item_kind ASC`):[];
   const inventory_counts=existing.has('site_item_inventory')?await safeAll(db,`SELECT source_type,COUNT(*) AS total,SUM(CASE WHEN COALESCE(amazon_url,'')<>'' THEN 1 ELSE 0 END) AS with_amazon_url,SUM(CASE WHEN COALESCE(unit_cost_cents,0)>0 THEN 1 ELSE 0 END) AS with_unit_cost,SUM(CASE WHEN COALESCE(on_hand_quantity,0)>=1 THEN 1 ELSE 0 END) AS in_stock_rows,SUM(CASE WHEN COALESCE(usage_units_per_stock_unit,1)>1 THEN 1 ELSE 0 END) AS package_sized_rows FROM site_item_inventory WHERE source_type IN ('tool','supply') GROUP BY source_type ORDER BY source_type ASC`):[];
   const journal_balance=existing.has('accounting_journal_entries')?await safeFirst(db,`SELECT COUNT(*) AS unbalanced_entry_count,COALESCE(SUM(ABS(imbalance_cents)),0) AS total_imbalance_cents FROM accounting_journal_entries WHERE COALESCE(imbalance_cents,0)!=0`,[],{unbalanced_entry_count:0,total_imbalance_cents:0}):{unbalanced_entry_count:0,total_imbalance_cents:0};
