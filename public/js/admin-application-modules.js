@@ -10,7 +10,7 @@
   const text = (value) => String(value ?? '').trim();
   const esc = (value) => text(value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
-  let state = { schema_ready: false, source: 'unknown', reason: null, modules: [], role_access: [] };
+  let state = { schema_ready: false, source: 'unknown', reason: null, modules: [], role_access: [], diagnostics: null };
   let busy = false;
 
   function moduleRow(key) {
@@ -35,6 +35,35 @@
     }
     const response = await window.DDAuth.apiFetch(url, options);
     return window.DDAuth.readApiJson(response, { fallbackMessage: 'Application module request failed.' });
+  }
+
+  function renderHealth() {
+    const mount = byId('applicationModuleHealthMount');
+    if (!mount) return;
+    const d = state.diagnostics;
+    if (!d) {
+      mount.innerHTML = '<div class="small">Module diagnostics are not available yet.</div>';
+      return;
+    }
+    const warnings = [
+      ...(d.missing_modules || []).map((value) => `Missing module: ${value}`),
+      ...(d.unexpected_modules || []).map((value) => `Unexpected module: ${value}`),
+      ...(d.missing_role_rows || []).map((value) => `Missing role row: ${value}`),
+      ...(d.unexpected_role_rows || []).map((value) => `Unexpected role row: ${value}`),
+      ...(d.invalid_role_rows || []).map((value) => `Invalid role state: ${value}`),
+      ...(d.disabled_with_background || []).map((value) => `Disabled module still permits background work: ${value}`),
+      ...(d.admin_recovery_risks || []).map((value) => `Admin access risk: ${value}`),
+    ];
+    mount.innerHTML = `
+      <div class="admin-summary-grid">
+        <div class="admin-stat"><div class="admin-stat-label">Core health</div><div class="admin-stat-value">${d.healthy ? 'PASS' : 'CHECK'}</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Modules</div><div class="admin-stat-value">${Number(d.module_count || 0)}/${Number(d.expected_module_count || 0)}</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Role rows</div><div class="admin-stat-value">${Number(d.role_access_count || 0)}/${Number(d.expected_role_access_count || 0)}</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Enabled</div><div class="admin-stat-value">${Number(d.enabled_module_count || 0)}</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Background enabled</div><div class="admin-stat-value">${Number(d.background_enabled_count || 0)}</div></div>
+        <div class="admin-stat"><div class="admin-stat-label">Shared contracts</div><div class="admin-stat-value">${Number(d.shared_service_contract_count || 0)}</div></div>
+      </div>
+      ${warnings.length ? `<div class="card" style="margin-top:10px;padding:12px"><strong>Review required</strong><ul class="small compact-list">${warnings.map((warning) => `<li>${esc(warning)}</li>`).join('')}</ul></div>` : '<div class="small" style="margin-top:8px">Registry shape, role rows, recovery access, background invariants and shared-service catalog are internally consistent.</div>'}`;
   }
 
   function moduleCard(module) {
@@ -107,12 +136,14 @@
   function render() {
     if (state.schema_ready) {
       const enabled = state.modules.filter((module) => Number(module.is_enabled || 0) === 1).length;
-      setStatus(`Build ${BUILD} D1 module authority is ready. ${enabled}/${state.modules.length} modules enabled. Changes are audited.`, 'ok');
+      const health = state.diagnostics?.healthy ? ' Core health PASS.' : ' Core health requires review.';
+      setStatus(`Build ${BUILD} D1 module authority is ready. ${enabled}/${state.modules.length} modules enabled. Changes are audited.${health}`, state.diagnostics?.healthy ? 'ok' : 'warning');
     } else if (state.source === 'fail_closed') {
       setStatus(`Build 438 module authority is temporarily unavailable (${state.reason || 'read failure'}). Module-control writes are blocked and module-owned access fails closed until authority recovers.`, 'error');
     } else {
       setStatus('Build 438 module tables are not applied yet. Current compatibility defaults stay enabled, but this screen will not write or self-create schema. Apply database_build438_application_module_activation.sql through the normal migration process first.', 'warning');
     }
+    renderHealth();
     renderModules();
     renderRoles();
   }
@@ -126,6 +157,7 @@
       reason: data.reason || null,
       modules: Array.isArray(data.modules) ? data.modules : [],
       role_access: Array.isArray(data.role_access) ? data.role_access : [],
+      diagnostics: data.diagnostics || null,
     };
     render();
   }
