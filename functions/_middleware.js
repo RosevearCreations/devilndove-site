@@ -6,8 +6,13 @@ import {
   BUILD,
   moduleAccessForRequest,
   moduleUnavailableResponse,
+  sharedServiceAccessForRequest,
+  sharedServiceUnavailableResponse,
 } from './api/_lib/appModules.js';
-import { moduleKeyForPath } from './api/_lib/appModuleRoutes.js';
+import {
+  moduleKeyForPath,
+  sharedServiceContractForPath,
+} from './api/_lib/appModuleRoutes.js';
 
 function isApiPath(pathname) {
   return String(pathname || '').startsWith('/api/');
@@ -50,6 +55,18 @@ export async function onRequest(context) {
   const { request, env } = context;
   const pathname = new URL(request.url).pathname;
   if (shouldBypass(pathname)) return await context.next();
+
+  // Explicit cross-module service contracts are Application Core boundaries. They
+  // remain callable only when at least one reviewed consumer module is enabled for
+  // the current user. Mutation contracts additionally require a manage-level consumer.
+  const sharedContract = sharedServiceContractForPath(pathname);
+  if (sharedContract) {
+    const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract);
+    context.data.ddSharedServiceAccess = sharedAccess;
+    context.data.ddModuleBuild = BUILD;
+    if (!sharedAccess.allowed) return sharedServiceUnavailableResponse(sharedAccess);
+    return await context.next();
+  }
 
   const moduleKey = moduleKeyForPath(pathname);
   if (!moduleKey) return await context.next();
