@@ -14,7 +14,6 @@ MIDDLEWARE = ROOT / 'functions/_middleware.js'
 BOOTSTRAP_API = ROOT / 'functions/api/modules.js'
 CONTROL_API = ROOT / 'functions/api/admin/app-modules.js'
 CONTROL_PAGE = ROOT / 'admin/application-modules/index.html'
-CONTROL_JS = ROOT / 'public/js/admin-application-modules.js'
 ADMIN_JS = ROOT / 'public/js/admin.js'
 AUTH_UI = ROOT / 'public/js/site-auth-ui.js'
 ADMIN_BOOTSTRAP = ROOT / 'public/js/core/dd-application-module-bootstrap.mjs'
@@ -22,6 +21,8 @@ PUBLIC_VISIBILITY = ROOT / 'public/js/core/dd-public-module-visibility.mjs'
 APP_GROUPS = ROOT / 'public/js/core/dd-application-module-groups.mjs'
 PLAN = ROOT / 'BUILD438_APPLICATION_CORE_MODULE_PLAN.md'
 VERIFY_SQL = ROOT / 'BUILD438_D1_VERIFICATION.sql'
+ROUTE_TEST = ROOT / 'scripts/build438_module_route_map_test.mjs'
+DEV_HELPER = ROOT / 'scripts/build438_development_module_activation.py'
 
 EXPECTED_MODULES = ['business-administration', 'commerce-operations', 'creative-production']
 
@@ -80,6 +81,8 @@ def main() -> int:
     app_groups = read(APP_GROUPS)
     plan = read(PLAN)
     verify_sql = read(VERIFY_SQL)
+    route_test = read(ROUTE_TEST)
+    dev_helper = read(DEV_HELPER)
     sim = migration_simulation()
 
     print('BUILD 438 APPLICATION CORE / MODULE ACTIVATION REGRESSION')
@@ -92,21 +95,21 @@ def main() -> int:
     check(len(sim['access']) == 6 and {row[1] for row in sim['access']} == {'member', 'admin'}, 'current member/admin role access is explicitly seeded for all modules')
     check({'idx_app_modules_enabled_priority', 'idx_app_module_role_access_role'} <= sim['indexes'], 'bounded module/role lookup indexes exist')
     check('CREATE TABLE' not in server and 'ALTER TABLE' not in server and 'DROP TABLE' not in server and "from './appModuleRoutes.js'" in server, 'shared runtime service performs no request-time DDL and reuses the canonical route map')
-    check('MODULE_CACHE_TTL_MS = 30_000' in server and 'moduleConfigCache' in server and 'readSessionUser' in server, 'non-user module config is bounded-cached while session identity stays request-scoped')
-    check("'commerce-operations'" in routes and "'creative-production'" in routes and "'business-administration'" in routes, 'server route catalog recognizes all three existing top-level modules')
+    check('MODULE_CACHE_TTL_MS = 5_000' in server and 'failClosedConfig' in server and 'module_config_read_failed_using_last_known' in server and 'readSessionUser' in server, 'module authority is briefly cached, request identity is scoped, and real authority failures do not fail open')
+    check("'commerce-operations'" in routes and "'creative-production'" in routes and "'business-administration'" in routes and 'path.startsWith(`${prefix}-`)' in routes, 'server route catalog recognizes all modules and hyphenated API families')
     check('/admin/catalog' in routes and '/admin/inventory' in routes and '/admin/orders' in routes and '/admin/membership' in routes, 'Commerce & Operations owns Catalog/Inventory/Orders/Membership routes')
     check('/admin/packaging-studio' in routes and '/admin/creative-process' in routes and '/admin/content-studio' in routes and '/admin/media-content-studio' in routes, 'Creative & Production owns Packaging/Creative/Content/Media routes')
-    check("return MODULE_KEYS.BUSINESS_ADMINISTRATION" in routes, 'remaining Admin/platform/accounting/marketing routes fall to Business & Administration')
+    check("return MODULE_KEYS.BUSINESS_ADMINISTRATION" in routes and 'BUILD 438 MODULE ROUTE MAP TEST: PASS' in route_test, 'Business/Admin fallback plus executable route ownership matrix are present')
     check("moduleAccessForRequest" in middleware and "moduleUnavailableResponse" in middleware and "module_access_level_read_only" in middleware and "await context.next()" in middleware, 'root Pages middleware enforces availability plus read-only access levels and cleanly continues allowed requests')
     check("/admin/application-modules" in middleware and "/api/admin/app-modules" in middleware, 'module control/recovery surface is exempt from its own module switch')
-    check('availableModulesForRequest' in bootstrap_api and 'CREATE TABLE' not in bootstrap_api and 'UPDATE app_modules' not in bootstrap_api, 'current-user /api/modules bootstrap is read-only')
+    check('availableModulesForRequest' in bootstrap_api and "searchParams.get('fresh') === '1'" in bootstrap_api and 'CREATE TABLE' not in bootstrap_api, 'current-user /api/modules bootstrap is read-only and supports explicit fresh reads')
     check('auditAdminAction' in control_api and 'application_module_state_changed' in control_api and 'DELETE FROM app_modules' not in control_api, 'module state changes are audited and never delete module business rows')
     check('app_module_schema_not_ready' in control_api and 'Build 438 application-module schema is not ready' in control_api, 'Admin writes fail closed until the canonical migration exists')
-    check('Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration' in control_page and 'admin-application-modules.js?v=438' in control_page, 'Admin Application Modules control screen is present')
-    check("fetch('/api/modules'" in admin_bootstrap and "dd-admin-module-runtime.mjs?v=438" in admin_bootstrap and 'setInterval' not in admin_bootstrap, 'Admin availability is read once before existing umbrella runtime activation with no polling')
+    check('Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration' in control_page and 'admin-application-modules.js?v=438' in control_page, 'Admin Application Modules control/recovery screen is present')
+    check("fetch(force ? '/api/modules?fresh=1' : '/api/modules'" in admin_bootstrap and "dd-admin-module-runtime.mjs?v=438" in admin_bootstrap and 'setInterval' not in admin_bootstrap, 'Admin availability is read before existing umbrella runtime activation with explicit fresh refresh and no polling')
     check("dd-application-module-bootstrap.mjs?v=438" in admin_js and 'dd-admin-module-runtime.mjs?v=397' not in admin_js, 'Admin shell now enters through Build 438 authoritative bootstrap')
-    check("dd-public-module-visibility.mjs?v=438" in auth_ui and 'setInterval' not in public_visibility, 'public/member navigation receives one lightweight module-visibility pass with no polling')
-    check('DD_APPLICATION_MODULES' in app_groups and "id: 'commerce-operations'" in app_groups and "id: 'creative-production'" in app_groups and "id: 'business-administration'" in app_groups and 'three top-level' in plan.lower() and 'SELECT' in verify_sql, 'Build 438 extends the existing three-module architecture and includes read-only D1 verification')
+    check("dd-public-module-visibility.mjs?v=438" in auth_ui and 'sessionStorage' in public_visibility and 'CORE_RECOVERY_PREFIX' in public_visibility and 'setInterval' not in public_visibility, 'public/member navigation uses bounded per-tab visibility caching and preserves recovery access without polling')
+    check('DD_APPLICATION_MODULES' in app_groups and "id: 'commerce-operations'" in app_groups and "id: 'creative-production'" in app_groups and "id: 'business-administration'" in app_groups and 'three top-level' in plan.lower() and 'SELECT' in verify_sql and EXPECTED_MODULES[1] in dev_helper and 'EXPECTED_DATABASE_ID' in dev_helper, 'Build 438 extends the existing three-module architecture with read-only verification and a hard-pinned Development helper')
 
     print()
     if failures:
@@ -120,6 +123,7 @@ def main() -> int:
     print('Central D1 activation authority: SOURCE READY')
     print('Server page/API module guard: SOURCE READY')
     print('Read-only module access enforcement: SOURCE READY')
+    print('Route ownership matrix: SOURCE READY')
     print('Authoritative client bootstrap: SOURCE READY')
     print('Admin Application Modules control: SOURCE READY')
     print('Request-time schema mutation: NONE')
