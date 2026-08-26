@@ -11,7 +11,7 @@ Build 427  Production Product-number stage           PASS
 Build 428  Remaining parity authorization boundary   PASS (20/20)
 Build 429  Gift Card authorization boundary          PASS (20/20)
 Build 430  Gift Card Production stage                PASS
-Build 430  Notification authorization boundary       READY
+Build 430  Notification authorization boundary       PASS (20/20)
 ```
 
 ## Proven completed Production families
@@ -39,22 +39,23 @@ gift_cards: 0 -> 0
 gift_card_redemptions: 0 -> 0
 ```
 
-The five lookup columns, three reviewed indexes, and `gift_card_lookup_lockouts` are now proven present in Production.
+The five lookup columns, three reviewed indexes, and `gift_card_lookup_lockouts` are proven present in Production.
 
 ## Current next Production family — Notification Build 403
 
-Latest reviewed pre-boundary state:
+The read-only/local authorization boundary is green at 20/20. The separately authorized stage is limited to the reviewed Build 403 gap:
 
 ```text
-metadata_json: absent
-Missing indexes:
-  idx_notification_outbox_kind_destination
-  idx_notification_outbox_order
-  idx_notification_outbox_payment
-  idx_notification_outbox_product
+metadata_json
+idx_notification_outbox_kind_destination
+idx_notification_outbox_order
+idx_notification_outbox_payment
+idx_notification_outbox_product
 ```
 
-Build 430 prepares a Notification-only read-only authorization boundary. No Notification authorization, backup, or write has been granted yet.
+`idx_notification_outbox_status_due` must remain intact. `notification_outbox` rows must be preserved exactly.
+
+Notification authorization has **not** been received yet. No Notification backup or mutation has occurred.
 
 ## Still locked
 
@@ -90,4 +91,10 @@ Production promotion                      CLOSED
 
 ## Immediate next action
 
-Run the Build 430 Notification source regression, live read-only Notification preflight, and local 20-item authorization-boundary gate. If all are green, stop at the explicit Notification authorization boundary.
+Stop at the explicit Notification authorization boundary. Notification may proceed only after the owner supplies exactly:
+
+```text
+AUTHORIZE-BUILD428-PROD-NOTIFICATION
+```
+
+That token authorizes Notification only and does not authorize annotation, rebuild families, provider/R2 work, or Production promotion.
