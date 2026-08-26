@@ -35,7 +35,8 @@ const PRODUCT_OWNED_CLEANUP_RELATIONS = new Set([
   'marketplace_export_image_selections.product_id',
   'marketplace_export_row_validation_results.product_id',
   'creative_project_product_links.product_id',
-  'product_media_change_audit.product_id'
+  'product_media_change_audit.product_id',
+  'product_media_integrity_snapshots.product_id'
 ]);
 
 // These records are useful independently of a disposable product row. Preserve them and
@@ -54,6 +55,7 @@ const PROTECTED_PRODUCT_REFERENCES = new Set([
   'product_production_runs.product_id',
   'creative_project_cost_allocations.product_id',
   'accounting_overhead_product_allocations.product_id',
+  'product_costs.product_id',
   'packaging_projects.product_id',
   'product_bundle_components.component_product_id',
   'marketplace_margin_override_history.product_id',
