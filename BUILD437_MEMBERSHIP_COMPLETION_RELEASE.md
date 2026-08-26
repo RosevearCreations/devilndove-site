@@ -2,95 +2,91 @@
 
 ## Status
 
-**SOURCE/RUNTIME/REBUILD PACKAGE COMPLETE / PRODUCTION MEMBERSHIP REBUILD AUTHORIZATION RECEIVED / SQL-GUARD TRANSPORT REPAIRED / AUTHORIZED EXECUTION PENDING / PRODUCTION PROMOTION CLOSED**
+**MEMBERSHIP BUILD 395 PRODUCTION REBUILD COMPLETE / PROVEN / AUTHORIZATION TOKEN SPENT / RELEASE METADATA REGENERATED LOCALLY / PRODUCTION PROMOTION CLOSED**
 
-Build 437 supersedes the fragmented Membership working notes from Builds 434–436 as the current Membership completion authority. Those earlier artifacts remain historical evidence only.
+Build 437 is the final Membership completion authority. Builds 434–436 remain historical evidence only and must not be treated as current execution instructions.
 
-## What is complete in source
+## Final proven Production result
 
-1. Build 395 canonical ten-column Membership schema is retained.
-2. Canonical `idx_membership_tier_policies_sort(sort_order, tier_code)` is now part of Membership schema authority.
-3. The reviewed Production legacy sort index `(sort_order, code)` is classified as handled, not unknown drift.
-4. The guarded rebuild recreates the same index name on canonical columns.
-5. Rebuild postchecks require the exact canonical sort-index column order.
-6. Build 435 source rows remain fully fingerprinted and losslessly mapped.
-7. Shared Membership reads recognize legacy `membership_tier_policy_id` and canonical `policy_id`.
-8. Shared Membership reads recognize legacy `display_title`/`name` and canonical `title`.
-9. Admin Membership writes are fail-closed until the exact canonical schema is active.
-10. Member tier-policy reads use the shared compatibility service instead of canonical-only SQL.
-11. Platform DB Sanity now expects canonical `policy_id`.
-12. Platform DB Sanity includes Membership in index visibility.
-13. Build 436 D1-compatible fixed-table FK discovery remains enforced.
-14. Build 436 rebuild simulation includes the real legacy sort index and proves canonical preservation.
-15. Build 436 authorization gate accepts only that reviewed sort index and still blocks every other unknown user object.
-16. Build 437 adds one consolidated 20-check Membership release regression.
-17. `data/site/current-release.json` is the current Build 437 release descriptor.
-18. Release-note generation reads the current release descriptor while preserving historical release data separately.
-19. Release manifest generation labels the tree as Build 437.
-20. Every later rebuild family and Production promotion remains separately locked.
-21. Build 437 repairs Build 418 compatibility for sort-index metadata reads by using `SELECT ... FROM pragma_index_info(...)` instead of direct `PRAGMA index_info(...)`.
-22. `scripts/build437_production_membership_rebuild.py` wraps the guarded controller so post-write sort-index verification uses the same accepted read-only query form.
-
-## Proven Production legacy boundary
-
-Owner-run read-only evidence established:
+The owner-run final Build 437 sequence completed successfully against:
 
 ```text
-Membership rows: 3
-Raw tier codes: bronze,silver,gold
-Policy IDs: [1,2,3]
-name == display_title: True for every tier
+Production database: devilndove-prod
+Production database ID: 0dc8fa3e-319c-45f7-a515-34c8acd89fcf
+Membership rows before: 3
+Membership rows after: 3
+Raw/canonical tiers: bronze,silver,gold
+Policy IDs protected: [1,2,3]
 Source-row SHA-256: 5db4bfd5f948a33432834210fd232a1e4b222dd6400193d65c644b501ba92057
 Canonical-preview SHA-256: 5d2d8369acd086bfa701de7ec19bd9d67537cd8736cd2c228d42a098ca71e2c8
-Outbound foreign keys: 0
-Inbound foreign keys: 0
-Rebuild-name collisions: 0
-sqlite_sequence: 3 / compatible
-Legacy user object count: 1
-Legacy user object: idx_membership_tier_policies_sort
-Legacy index columns: sort_order, code
+Canonical columns exact: True
+Canonical tier identities exact: True
+Canonical values fingerprint preserved: True
+Tier UNIQUE constraint present: True
+AUTOINCREMENT present: True
+Canonical sort index present: True
+Canonical sort-index columns: sort_order,tier_code
+Leftover rebuild helper objects: 0
+Independent read-only postcheck: PASS
+Production promotion: CLOSED
 ```
 
-## Owner authorization
+## Final Production backup
 
-The owner supplied the exact Membership Production token:
+The successful authorized stage created a fresh full Production D1 export before the rebuild:
 
 ```text
-AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
+Backup: local_backups\build428_prod_before_membership_20260826T025115Z.sql
+Bytes: 19003564
+SHA-256: 2f94f5bcd0006f98c4cdfcc2bc6de9441d047a4f97ccc702c735191a90cf5513
+Backup age at verification: 31–32 seconds
+Production mutation executed during backup: NO
 ```
 
-Authorization scope is Membership Build 395 rebuild only. It does not authorize Fractional Inventory/Creative Project, Product/FK, Accounting/default/nullability, R2/provider, CAIP-copy, or broad Production promotion work.
+Retain this backup as the Membership pre-rebuild recovery point.
 
-The token remains **RECEIVED / UNSPENT** until the guarded Membership Production rebuild actually executes successfully.
+## Final Production write evidence
 
-## Safe execution-stop evidence
+The guarded D1 file execution completed successfully:
 
-Two authorized attempts stopped before backup/export or DDL because the Build 418 read-only SQL guard rejected direct:
-
-```sql
-PRAGMA index_info("idx_membership_tier_policies_sort");
+```text
+Wrangler: 4.126.0
+Queries processed: 13
+Queries executed: 13
+Rows read: 14300
+Rows written: 550
+D1 reported changes: 9
+Database size after: 20.53 MB / 20525056 bytes
+Final bookmark: 00000d48-00000006-000050d3-dc23940f2dba8f8defefe8c58f115840
+Attempts: 1
+Success: true
 ```
 
-This was a query-form/transport guard issue, not schema drift. Both attempts re-proved the three source rows and source fingerprint first; no backup was created and no Production mutation occurred.
+The high D1 rows-written number is engine-level rebuild work for the guarded table/index replacement; the application-level Membership boundary remained exactly three preserved policy rows.
 
-Build 437 now uses the equivalent guard-compatible form:
+## Canonical Membership contract now active in Production
 
-```sql
-SELECT seqno,cid,name
-FROM pragma_index_info('idx_membership_tier_policies_sort')
-ORDER BY seqno;
+The active `membership_tier_policies` table is the canonical ten-column Build 395 shape:
+
+```text
+policy_id
+tier_code
+title
+short_description
+benefits_json
+badge_color
+sort_order
+is_visible
+created_at
+updated_at
 ```
 
-The same compatibility repair applies to the post-write index verifier through `scripts/build437_production_membership_rebuild.py`.
-
-## Exact final Production scope
-
-The final authorized Membership rebuild may only transform:
+The legacy mappings were applied losslessly:
 
 ```text
 membership_tier_policy_id -> policy_id
 code                      -> tier_code
-name/display_title         -> title (exact equality already proven)
+name/display_title         -> title
 short_description          -> short_description
 benefits_json              -> benefits_json
 badge_color                -> badge_color
@@ -100,91 +96,94 @@ created_at                 -> created_at
 updated_at                 -> updated_at
 ```
 
-and recreate:
+`name == display_title` had already been proven for all three live tiers before the write, so the canonical `title` mapping discarded no distinct value.
+
+## Canonical index contract
+
+The reviewed legacy index:
+
+```sql
+CREATE INDEX idx_membership_tier_policies_sort
+  ON membership_tier_policies(sort_order ASC, code ASC);
+```
+
+was intentionally translated and preserved as:
 
 ```sql
 CREATE INDEX idx_membership_tier_policies_sort
   ON membership_tier_policies(sort_order ASC, tier_code ASC);
 ```
 
-No Build 395 seed value may overwrite an existing Production business value.
+The post-write verifier and independent read-only postcheck both proved exact column order:
 
-## Exact authorization token
+```text
+['sort_order', 'tier_code']
+```
 
-Only this literal token authorizes the Membership Production rebuild:
+## Runtime/source completion
+
+Build 437 also completed the Membership runtime and release surface:
+
+1. Canonical Build 395 Membership schema remains the focused authority.
+2. The canonical sort index is part of that authority.
+3. Shared Membership reads support legacy and canonical field names during transition/recovery.
+4. Admin Membership writes fail closed unless the canonical schema is active.
+5. Member tier-policy reads use the shared compatibility service.
+6. Platform DB sanity expects canonical `policy_id` and exposes Membership indexes.
+7. The stale root duplicate `member/tier-policies.js` is retired.
+8. Build 418-compatible metadata reads are used in both pre-write and post-write verification.
+9. The local rebuild regression simulates the real legacy index and proves its canonical preservation.
+10. Release-note and release-manifest generators label the current release Build 437.
+
+## Authorization disposition
+
+The exact token:
 
 ```text
 AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
 ```
 
-The owner has supplied it. It is valid only for the exact Membership scope above and becomes spent after a successful Membership rebuild/postcheck.
+is now **SPENT / COMPLETE**.
 
-## One final owner-run sequence
+It must never be reused for Membership or interpreted as authorization for any other Production mutation.
 
-Use one guarded command chain only:
+## Release metadata
 
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-set -o pipefail
-
-python -m py_compile \
-  scripts/build435_membership_value_mapping_preflight.py \
-  scripts/build436_membership_rebuild_authorization_preflight.py \
-  scripts/build436_production_membership_rebuild.py \
-  scripts/build437_production_membership_rebuild.py \
-  scripts/build436_membership_rebuild_regression.py \
-  scripts/build436_membership_rebuild_authorization_gate.py \
-  scripts/build437_membership_release_regression.py \
-  scripts/generate_release_notes.py \
-  scripts/generate_release_manifest.py \
-&& python scripts/build437_membership_release_regression.py \
-&& python scripts/build436_membership_rebuild_regression.py \
-&& python -u scripts/build436_membership_rebuild_authorization_preflight.py --run \
-  2>&1 | tee build437_membership_final_preflight.txt \
-&& python scripts/build436_membership_rebuild_authorization_gate.py \
-&& python -u scripts/build437_production_membership_rebuild.py \
-  --backup \
-  --confirm AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD \
-  2>&1 | tee build437_membership_backup.txt \
-&& python -u scripts/build437_production_membership_rebuild.py \
-  --apply \
-  --confirm AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD \
-  2>&1 | tee build437_membership_apply.txt \
-&& python -u scripts/build437_production_membership_rebuild.py \
-  --postcheck \
-  2>&1 | tee build437_membership_postcheck.txt \
-&& python scripts/generate_release_notes.py \
-&& python scripts/generate_release_manifest.py
-```
-
-The `&&` chain prevents advancement after any failed stage. Do not use `set -e`.
-
-## Required successful ending
+The successful owner-run chain regenerated locally:
 
 ```text
-BUILD 437 CONSOLIDATED MEMBERSHIP RELEASE REGRESSION: PASS (20/20)
-BUILD 436 MEMBERSHIP REBUILD SAFETY REGRESSION: PASS (20/20)
-BUILD 436 MEMBERSHIP REBUILD AUTHORIZATION PREFLIGHT: PASS
-BUILD 436/437 TWENTY-ITEM MEMBERSHIP BUILD 395 REBUILD AUTHORIZATION GATE: PASS (20/20)
-BUILD 436/437 MEMBERSHIP BACKUP/FINGERPRINT BOUNDARY: PASS
-BUILD 436/437 PRODUCTION MEMBERSHIP BUILD 395 REBUILD POSTCHECK: PASS
-BUILD 436/437 PRODUCTION MEMBERSHIP BUILD 395 READ-ONLY POSTCHECK: PASS
-Canonical sort index present: True / ['sort_order', 'tier_code']
-Membership rows: 3
-Canonical values fingerprint preserved: True
-PRODUCTION PROMOTION: CLOSED
+RELEASE_NOTES.md                        Build 437
+data/site/release-package-manifest.json Build 437
+Manifest file count: 2062
+Manifest total size: 407707002 bytes
 ```
 
-If any command fails before `--apply`, no Membership DDL has executed. If Cloudflare returns an authorization error before DDL, treat it as a safe access interruption. If an error occurs after `--apply` may have begun, do not rerun `--apply`; run only the read-only `--postcheck` and retain the completed backup.
+Those generated local files should be retained with the successful release evidence. They are not a new Production mutation boundary.
 
-## Release state after successful final execution
+## Membership closure
 
-After the successful final sequence, Membership is **COMPLETE / PROVEN** and the Membership-specific authorization token is spent. The next work may move to another feature or family without continuing Membership micro-gates.
+Membership is now:
 
-The following remain explicitly outside Membership authorization:
+```text
+Schema authority                         COMPLETE
+Legacy-to-canonical mapping              COMPLETE / PROVEN
+Production backup                        COMPLETE / VERIFIED
+Production rebuild                       COMPLETE / PROVEN
+Three policy rows                        PRESERVED 3 -> 3
+Canonical values                         PRESERVED
+UNIQUE tier constraint                   PRESENT
+AUTOINCREMENT                            PRESENT
+Sort index                               PRESENT / canonical columns
+Independent read-only postcheck          PASS
+Membership authorization token           SPENT / COMPLETE
+Membership micro-gates                   CLOSED
+```
+
+No further Membership-specific parity/rebuild work is required unless a future source change explicitly invalidates this proof.
+
+## Work still outside Build 437
+
+Build 437 does **not** authorize or complete:
 
 ```text
 Fractional Inventory/Creative Project rebuilds   NOT AUTHORIZED
@@ -192,5 +191,7 @@ Product/FK rebuilds                              NOT AUTHORIZED
 Accounting/default/nullability rebuilds          NOT AUTHORIZED
 R2/provider mutation                             DISABLED
 CAIP D1-only copy                                FORBIDDEN
-Production promotion                             CLOSED
+Broad Production promotion                       CLOSED
 ```
+
+Those are separate future scopes. Devil n Dove feature/application work may now proceed without continuing Membership micro-gates.
