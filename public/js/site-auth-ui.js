@@ -1,6 +1,7 @@
 // File: /public/js/site-auth-ui.js
 // Build 245: resilient authentication UI. A temporary Worker/D1/network failure never becomes a false logout.
 // Only an explicit 401/403 clears stored credentials. Cached identity is provisional until /api/auth/me verifies it.
+// Build 438: public/member navigation receives one bounded module-availability read; Admin has its own richer bootstrap.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
@@ -163,3 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   refreshAuthState();
 });
+
+if (!window.location.pathname.startsWith('/admin')) {
+  void import('/public/js/core/dd-public-module-visibility.mjs?v=438')
+    .catch((error) => console.warn('[DD modules] public navigation module visibility unavailable', error));
+}
