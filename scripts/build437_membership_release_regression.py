@@ -79,8 +79,21 @@ def main() -> int:
     check('Legacy sort index -> canonical sort index: PASS' in rebuild_regression and "CREATE INDEX idx_membership_tier_policies_sort" in rebuild_regression, 'local rebuild regression simulates legacy-to-canonical index preservation')
     check('legacy_sort_index_compatible' in auth_gate and 'no_unhandled_user_objects' in auth_gate, 'authorization gate accepts only the reviewed handled sort index')
     check(EXPECTED_TOKEN in controller and EXPECTED_TOKEN in auth_gate, 'one exact Membership Production authorization token remains enforced')
-    check("'build_label': 'Build 437'" in manifest_generator and release.get('build_label') == 'Build 437', 'release manifest/current-release truth is advanced to Build 437')
-    check('data/site/current-release.json' in notes_generator and release.get('title') == 'Membership canonical completion and release alignment', 'release-note generator uses the Build 437 current-release descriptor')
+    check(
+        "['git', 'ls-files', '-z']" in manifest_generator
+        and "'source_scope': 'git_tracked_release_files'" in manifest_generator
+        and 'ROOT.rglob' not in manifest_generator
+        and release.get('build_label') == 'Build 437',
+        'release manifest is Build 437 and inventories Git-tracked release files only',
+    )
+    check(
+        'release_build' in notes_generator
+        and 'manifest_current' in notes_generator
+        and 'production_evidence' in notes_generator
+        and "data/site/current-release.json" in notes_generator
+        and release.get('authorization_state') == 'membership_production_rebuild_complete_token_spent',
+        'release notes use completed Build 437 current-release truth and cannot inherit a stale manifest label',
+    )
     check('Production promotion' in completion_doc and 'CLOSED' in completion_doc and 'Fractional' in completion_doc, 'completion release keeps later families and Production promotion locked')
 
     print()
@@ -98,7 +111,8 @@ def main() -> int:
     print('Stale duplicate Membership endpoint: RETIRED')
     print('DB sanity Membership identity: CANONICAL')
     print('Build 418 SQL-guard compatibility: PASS')
-    print('Guarded lossless rebuild + sort-index preservation: SOURCE-GATED')
+    print('Tracked-file release manifest determinism: PASS')
+    print('Completed current-release note authority: PASS')
     print('Membership Production authorization inferred: NO')
     print('Later rebuild authorization inferred: NO')
     print('PRODUCTION PROMOTION: CLOSED')
