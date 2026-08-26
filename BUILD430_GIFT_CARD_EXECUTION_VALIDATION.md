@@ -1,119 +1,44 @@
-# Build 430 — Authorized Gift Card Production Execution Validation
+# Build 430 — Gift Card Production Execution + Notification Authorization Boundary
 
 ## Status
 
-**GIFT CARD PRODUCTION AUTHORIZED / SOURCE HARDENED / FRESH GIFT BACKUP + APPLY + POSTCHECK PENDING / ALL OTHER PRODUCTION FAMILIES LOCKED**
+**GIFT CARD PRODUCTION STAGE PASS / NOTIFICATION READ-ONLY AUTHORIZATION BOUNDARY NEXT / PRODUCTION PROMOTION CLOSED**
 
-Build 429 is closed PASS (20/20). The owner explicitly authorized only:
+Build 429 closed PASS (20/20). The owner explicitly authorized only the Gift Card additive stage with:
 
 ```text
 AUTHORIZE-BUILD428-PROD-GIFT-CARD
 ```
 
-The authorized scope is limited to the reviewed Build 384 Gift Card lookup-attempt/lockout additive gap:
+## Owner-run Gift Card Production proof — PASS
+
+Fresh targeted preflight remained exact:
 
 ```text
-Missing lookup columns:
-  code_suffix
-  ip_hash
-  lookup_email
-  result_status
-  user_agent
-
-Missing indexes:
-  idx_gift_card_lookup_attempts_created
-  idx_gift_card_lookup_attempts_email
-  idx_gift_card_lookup_lockouts_status
-
-Missing table:
-  gift_card_lookup_lockouts
-```
-
-No default-template seed, Gift Card table rebuild, Notification, annotation-index, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, or promotion operation is authorized.
-
-## Additional pre-write hardening
-
-Before exercising the authorization, `scripts/build428_production_additive_execution.py` was tightened so a Gift Card PASS requires all three preservation boundaries to remain unchanged:
-
-```text
-gift_card_lookup_attempts
-gift_cards
-gift_card_redemptions
-```
-
-The local Build 429 regression was updated to prove those checks exist.
-
-## Authorized run sequence
-
-Run from `dev` only:
-
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-python -m py_compile \
-  scripts/build428_production_additive_execution.py \
-  scripts/build429_gift_card_authorization_preflight.py \
-  scripts/build429_gift_card_authorization_regression.py
-
-python scripts/build429_gift_card_authorization_regression.py
-
-python -u scripts/build429_gift_card_authorization_preflight.py --run \
-  2>&1 | tee build430_gift_card_fresh_prewrite.txt
-
-python -u scripts/build428_production_additive_execution.py \
-  --stage gift \
-  --backup \
-  --confirm AUTHORIZE-BUILD428-PROD-GIFT-CARD \
-  2>&1 | tee build430_gift_card_backup.txt
-
-python -u scripts/build428_production_additive_execution.py \
-  --stage gift \
-  --apply \
-  --confirm AUTHORIZE-BUILD428-PROD-GIFT-CARD \
-  2>&1 | tee build430_gift_card_apply.txt
-
-python -u scripts/build428_production_additive_execution.py \
-  --stage gift \
-  --postcheck \
-  2>&1 | tee build430_gift_card_postcheck.txt
-```
-
-Do not continue to a later command if the immediately preceding stage reports FAIL/BLOCKED or exits nonzero.
-
-## Expected pre-write proof
-
-The fresh read-only preflight must still show:
-
-```text
-Exact known Build 384 gap: YES
-Safe to request Gift Card authorization: YES
+Missing lookup columns: ['code_suffix', 'ip_hash', 'lookup_email', 'result_status', 'user_agent']
+Missing Gift Card indexes: ['idx_gift_card_lookup_attempts_created', 'idx_gift_card_lookup_attempts_email', 'idx_gift_card_lookup_lockouts_status']
+Gift Card lockout table exists: False
 gift_card_lookup_attempts rows: 0
 gift_cards rows: 0
 gift_card_redemptions rows: 0
-Production mutation executed: NO
-PRODUCTION PROMOTION: CLOSED
+Exact known Build 384 gap: YES
+Safe to request Gift Card authorization: YES
 BUILD 429 GIFT CARD AUTHORIZATION PREFLIGHT: PASS
 ```
 
-The preflight intentionally prints `Gift Card authorization received: NO`; the read-only helper never infers authorization from conversation state. Authorization is enforced separately by the literal token passed to the executor.
-
-## Expected backup proof
+The dedicated full Production D1 backup passed before mutation:
 
 ```text
 BUILD 428 PRODUCTION GIFT BACKUP: PASS
-Backup: local_backups/<gift-specific full Production export>.sql
-Bytes: <nonzero>
-SHA-256: <digest>
+Backup: local_backups\build428_prod_before_gift_20260826T011440Z.sql
+Bytes: 19002028
+SHA-256: 8860e0b76e240f74ae0c5de538292cf827f742d3f88ecf3f6cf40ff8d05fd29f
 Production mutation executed: NO
 ```
 
-The apply stage re-verifies the backup file, target UUID, byte count, SHA-256 and <=30-minute age.
+The backup was revalidated immediately before the write at age 0 seconds.
 
-## Expected apply/post-proof
-
-The authorized apply may modify only the bounded Build 384 lookup/lockout schema. It must finish with:
+The bounded Build 384 additive apply completed successfully against Production D1 `0dc8fa3e-319c-45f7-a515-34c8acd89fcf`. Wrangler reported 10 queries processed and the executor then proved:
 
 ```text
 BUILD 428 PRODUCTION GIFT ADDITIVE POSTCHECK: PASS
@@ -123,7 +48,7 @@ gift_card_redemptions rows preserved: 0 -> 0
 PRODUCTION PROMOTION: CLOSED
 ```
 
-The final read-only postcheck must report:
+The independent final read-only postcheck also passed:
 
 ```text
 BUILD 428 PRODUCTION GIFT READ-ONLY POSTCHECK: PASS
@@ -133,22 +58,41 @@ gift_card_redemptions rows: 0
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Stop conditions
+## Gift Card disposition
 
-- Any Cloudflare `7403`: stop; classify as authorization/read interruption unless it occurs after DDL submission, then run only the read-only Gift Card postcheck and retain the backup.
-- Backup missing/stale/hash mismatch: stop and recreate only the Gift Card backup with the same authorized token.
-- Unexpected Gift Card preflight drift: stop; do not force the reviewed candidate.
-- Apply/postcheck failure: stop all later Production families and retain the Gift Card backup.
+Build 384 Gift Card lookup-attempt/lockout Production parity is now complete and proven for the authorized scope:
 
-## Safety boundary
+- all five canonical lookup columns exist;
+- all three canonical Gift Card indexes exist;
+- `gift_card_lookup_lockouts` exists;
+- lookup-attempt rows preserved 0 -> 0;
+- Gift Card rows preserved 0 -> 0;
+- redemption rows preserved 0 -> 0.
+
+No default-template seed, unrelated Gift Card rebuild, Notification, annotation, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, or promotion operation was part of this write.
+
+## Next boundary — Notification only
+
+The next Production family is Build 403 Notification parity. Build 430 may prepare only a read-only/local authorization boundary for:
+
+```text
+metadata_json
+idx_notification_outbox_kind_destination
+idx_notification_outbox_order
+idx_notification_outbox_payment
+idx_notification_outbox_product
+```
+
+No Notification authorization has been received. A separate explicit token remains required before any Notification backup or write.
+
+## Safety state
 
 ```text
 Product-number Production stage          COMPLETE / PROVEN
-Build 429 Gift Card boundary             PASS (20/20)
-Gift Card Production authorization       RECEIVED
-Gift Card Production backup              PENDING
-Gift Card Production mutation            PENDING
+Gift Card Production stage               COMPLETE / PROVEN
 Notification authorization               NOT RECEIVED
+Notification Production backup           NOT CREATED
+Notification Production mutation         NOT EXECUTED
 Annotation-index authorization           NOT RECEIVED
 Rebuild-family authorization             NOT RECEIVED
 R2/provider mutation                     DISABLED
