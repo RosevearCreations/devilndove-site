@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     summary: {},
     loading: false,
   };
+  let startRequested = false;
 
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
   const fmt = (value) => Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 6 });
@@ -254,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function saveUsage(id, button) {
-    const value = (selector) => String(mount.querySelector(`${selector}[data-${selector.includes('mode') ? 'usage-mode' : ''}]`) || '');
     const trackingMode = String(mount.querySelector(`[data-usage-mode="${id}"]`)?.value || 'exact');
     const stockUnit = String(mount.querySelector(`[data-stock-unit="${id}"]`)?.value || 'unit').trim();
     const usageUnit = String(mount.querySelector(`[data-usage-unit="${id}"]`)?.value || 'unit').trim();
@@ -299,7 +299,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function start() {
+    if (startRequested) return;
+    startRequested = true;
+    load();
+  }
+
   render();
-  document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) load(); }, { once: true });
-  if (window.DDAuth?.isLoggedIn()) load();
+  document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) start(); }, { once: true });
+  if (window.DDAuth?.isLoggedIn()) start();
 });
