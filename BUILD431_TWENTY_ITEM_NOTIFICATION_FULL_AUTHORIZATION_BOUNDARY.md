@@ -2,45 +2,26 @@
 
 ## Status
 
-**SAFE STOP RECORDED / LIVE DRIFT REVIEWED / FULL BUILD 403 NOTIFICATION AUTHORIZATION PENDING / NO NOTIFICATION BACKUP OR MUTATION EXECUTED / PRODUCTION PROMOTION CLOSED**
+**PASS (20/20) / SAFE STOP RECORDED / PRIOR FOUR-INDEX AUTHORIZATION SUPERSEDED / FULL BUILD 403 NOTIFICATION AUTHORIZATION PENDING / NO BACKUP OR MUTATION / PRODUCTION PROMOTION CLOSED**
 
-The first authorized Notification attempt stopped before backup because the immediate live pre-write state proved `idx_notification_outbox_status_due` is also absent.
-
-The earlier four-index authorization was explicitly scoped to preserving that index, so it cannot be reused to create a fifth index.
+The first authorized Notification attempt stopped before backup because live Production proved `idx_notification_outbox_status_due` is also absent. The earlier four-index authorization was explicitly scoped to preserving that index, so it cannot be reused to create a fifth index.
 
 ## Safe-stop evidence
 
-The owner-run Build 431 sequence reached:
-
 ```text
-=== BUILD 431 NOTIFICATION IMMEDIATE PRE-WRITE STATE ===
 metadata_json exists: False
-Missing reviewed indexes: [
-  'idx_notification_outbox_kind_destination',
-  'idx_notification_outbox_order',
-  'idx_notification_outbox_payment',
-  'idx_notification_outbox_product'
-]
 idx_notification_outbox_status_due intact: False
 notification_outbox rows: 0
-Exact reviewed Build 403 gap: NO
-BUILD 431 PRODUCTION NOTIFICATION: FAIL — Notification state drifted from the exact reviewed Build 403 gap before backup.
-```
-
-Disposition:
-
-```text
-Notification Production backup              NOT CREATED
-Notification Production mutation            NOT EXECUTED
-Prior four-index authorization               SUPERSEDED / INSUFFICIENT
-Production promotion                         CLOSED
+Exact reviewed four-index gap: NO
+Notification Production backup: NOT CREATED
+Notification Production mutation: NOT EXECUTED
+Prior four-index authorization: SUPERSEDED / INSUFFICIENT
+Production promotion: CLOSED
 ```
 
 ## Corrected canonical Build 403 gap
 
 Canonical authority: `database_notification_runtime_parity.sql`.
-
-Current reviewed full Production gap:
 
 ```text
 Missing column:
@@ -67,7 +48,7 @@ Previously supplied token:
 AUTHORIZE-BUILD428-PROD-NOTIFICATION
 ```
 
-That authorization covered a four-index scope in which `idx_notification_outbox_status_due` was expected to remain intact. Because live Production proves that index is absent, using the old token for the expanded five-index stage would exceed the authorized scope.
+That authorization is **SUPERSEDED / INSUFFICIENT** for the expanded five-index scope.
 
 ## New prepared authorization token — not authorized
 
@@ -75,7 +56,36 @@ That authorization covered a four-index scope in which `idx_notification_outbox_
 AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403
 ```
 
-This new token is prepared only. Merely seeing it, running the corrected preflight, or passing the local gate does not authorize it.
+Merely seeing the token or passing this boundary does not authorize it.
+
+## Corrected boundary evidence — PASS
+
+```text
+BUILD 431 FULL NOTIFICATION AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
+BUILD 431 FULL NOTIFICATION AUTHORIZATION PREFLIGHT: PASS
+BUILD 431 TWENTY-ITEM FULL NOTIFICATION AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
+```
+
+Fresh live evidence proved:
+
+```text
+metadata_json exists: False
+Missing canonical Notification indexes: [
+  'idx_notification_outbox_kind_destination',
+  'idx_notification_outbox_order',
+  'idx_notification_outbox_payment',
+  'idx_notification_outbox_product',
+  'idx_notification_outbox_status_due'
+]
+notification_outbox rows: 0
+Exact full Build 403 gap: YES
+Prior four-index authorization sufficient: NO
+Safe to request full Notification authorization: YES
+Production backup created: NO
+Full Notification authorization received: NO
+Production mutation executed: NO
+PRODUCTION PROMOTION: CLOSED
+```
 
 ## Build 431 — 20 completed source/safety corrections
 
@@ -97,7 +107,7 @@ This new token is prepared only. Merely seeing it, running the corrected preflig
 16. Added creation of `idx_notification_outbox_status_due` only when missing.
 17. Retained separate full Production backup, SHA-256, target UUID and <=30-minute age verification.
 18. Retained immediate before/after state checks and exact outbox row preservation.
-19. Added a corrected 20-check local full-Notification safety regression and authorization gate.
+19. Added a corrected 20-check local full-Notification safety regression and authorization gate and proved both green.
 20. Kept annotation, Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider and Production promotion outside this scope.
 
 ## Next 20 ordered changes — Build 432
@@ -131,8 +141,11 @@ Build 428  Remaining parity authorization boundary         PASS (20/20)
 Build 429  Gift Card authorization boundary                PASS (20/20)
 Build 430  Gift Card Production stage                      PASS
 Build 430  Notification four-index authorization boundary  SUPERSEDED BY LIVE EVIDENCE
-Build 431  First Notification execution attempt             SAFE STOP BEFORE BACKUP
-Build 431  Full Build 403 Notification boundary             READY FOR READ-ONLY VALIDATION
+Build 431  First Notification execution attempt            SAFE STOP BEFORE BACKUP
+Build 431  Full Build 403 Notification boundary            PASS (20/20)
 
+Full Build 403 Notification authorization                  NOT RECEIVED
+Notification Production backup                             NOT CREATED
+Notification Production mutation                           NOT EXECUTED
 Production promotion                                       CLOSED
 ```
