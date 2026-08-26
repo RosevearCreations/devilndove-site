@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
-import { MODULE_KEYS, moduleKeyForPath, snapshotRouteOwnership } from '../functions/api/_lib/appModuleRoutes.js';
+import {
+  MODULE_KEYS,
+  moduleKeyForPath,
+  sharedServiceContractForPath,
+  snapshotRouteOwnership,
+} from '../functions/api/_lib/appModuleRoutes.js';
 
 const cases = [
   // Shared core / unowned.
@@ -8,6 +13,16 @@ const cases = [
   ['/api/admin/app-modules', null],
   ['/api/auth/me', null],
   ['/about/', null],
+
+  // Explicit cross-module contracts resolve through Application Core rather than
+  // inheriting the owner module's direct-route switch.
+  ['/api/admin/contracts/catalog-read', null],
+  ['/api/admin/contracts/inventory-read', null],
+  ['/api/admin/contracts/inventory-cost', null],
+  ['/api/admin/contracts/inventory-post', null],
+  ['/api/admin/contracts/inventory-reverse', null],
+  ['/api/admin/contracts/accounting-read', null],
+  ['/api/admin/contracts/content-media', null],
 
   // Commerce & Operations pages.
   ['/shop/', MODULE_KEYS.COMMERCE_OPERATIONS],
@@ -70,14 +85,37 @@ for (const [path, expected] of cases) {
   if (!ok) failures += 1;
 }
 
+const sharedCases = [
+  ['/api/admin/contracts/catalog-read', MODULE_KEYS.COMMERCE_OPERATIONS, [MODULE_KEYS.CREATIVE_PRODUCTION, MODULE_KEYS.BUSINESS_ADMINISTRATION], false],
+  ['/api/admin/contracts/inventory-read', MODULE_KEYS.COMMERCE_OPERATIONS, [MODULE_KEYS.CREATIVE_PRODUCTION], false],
+  ['/api/admin/contracts/inventory-cost', MODULE_KEYS.COMMERCE_OPERATIONS, [MODULE_KEYS.BUSINESS_ADMINISTRATION], false],
+  ['/api/admin/contracts/inventory-post', MODULE_KEYS.COMMERCE_OPERATIONS, [MODULE_KEYS.CREATIVE_PRODUCTION], true],
+  ['/api/admin/contracts/inventory-reverse', MODULE_KEYS.COMMERCE_OPERATIONS, [MODULE_KEYS.CREATIVE_PRODUCTION], true],
+  ['/api/admin/contracts/accounting-read', MODULE_KEYS.BUSINESS_ADMINISTRATION, [MODULE_KEYS.COMMERCE_OPERATIONS], false],
+  ['/api/admin/contracts/content-media', MODULE_KEYS.CREATIVE_PRODUCTION, [MODULE_KEYS.COMMERCE_OPERATIONS], false],
+];
+
+for (const [path, expectedOwner, expectedExternalConsumers, expectedMutation] of sharedCases) {
+  const contract = sharedServiceContractForPath(path);
+  const externalConsumers = (contract?.consumer_module_keys || []).filter((key) => key !== expectedOwner);
+  const ok = Boolean(
+    contract &&
+    contract.owner_module_key === expectedOwner &&
+    contract.mutation === expectedMutation &&
+    expectedExternalConsumers.every((key) => externalConsumers.includes(key))
+  );
+  console.log(`${ok ? 'PASS' : 'FAIL'} shared ${path} -> owner=${contract?.owner_module_key || 'missing'} consumers=${(contract?.consumer_module_keys || []).join(',')}`);
+  if (!ok) failures += 1;
+}
+
 const snapshot = snapshotRouteOwnership();
 const moduleSet = new Set([
   MODULE_KEYS.COMMERCE_OPERATIONS,
   MODULE_KEYS.CREATIVE_PRODUCTION,
   MODULE_KEYS.BUSINESS_ADMINISTRATION,
 ]);
-if (moduleSet.size !== 3 || snapshot.build !== 438) {
-  console.error('FAIL route ownership snapshot does not describe Build 438 / three top-level modules.');
+if (moduleSet.size !== 3 || snapshot.build !== 438 || snapshot.sharedServiceContracts?.length !== 7) {
+  console.error('FAIL route ownership snapshot does not describe Build 438 / three top-level modules / seven shared contracts.');
   failures += 1;
 }
 
@@ -86,6 +124,7 @@ if (failures) {
   console.error(`BUILD 438 MODULE ROUTE MAP TEST: FAIL (${failures} failure${failures === 1 ? '' : 's'})`);
   process.exit(1);
 }
-console.log(`BUILD 438 MODULE ROUTE MAP TEST: PASS (${cases.length} routes)`);
+console.log(`BUILD 438 MODULE ROUTE MAP TEST: PASS (${cases.length} routes + ${sharedCases.length} shared contracts)`);
 console.log('Core recovery/auth surfaces: UNOWNED / AVAILABLE');
+console.log('Cross-module service contracts: EXPLICIT / CONSUMER-GATED');
 console.log('Production mutation capability: NONE');
