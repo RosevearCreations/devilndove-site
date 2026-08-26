@@ -135,6 +135,7 @@ const COMMERCE_ADMIN_APIS = Object.freeze([
   '/api/admin/membership',
   '/api/admin/gift-card',
   '/api/admin/customer-document',
+  '/api/admin/customer-documents',
   '/api/admin/custom-request',
   '/api/admin/today-task',
   '/api/admin/contracts/operations-',
