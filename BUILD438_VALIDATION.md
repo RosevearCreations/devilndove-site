@@ -2,7 +2,7 @@
 
 ## Status
 
-**SOURCE IMPLEMENTATION READY FOR OWNER VALIDATION / DEVELOPMENT D1 MIGRATION NOT YET APPLIED / PRODUCTION D1 MIGRATION NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
+**SOURCE IMPLEMENTATION READY FOR OWNER VALIDATION / FULL-SCHEMA LOCAL SYNC PENDING OWNER RUN / DEVELOPMENT D1 MIGRATION NOT YET APPLIED / PRODUCTION D1 MIGRATION NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
 
 Build 438 completes the central activation/access authority around the existing Application Core + three top-level application modules.
 
@@ -30,10 +30,12 @@ Production is not a target of this validation pass.
 
 ## Source package
 
-### D1
+### D1 / fresh-install
 
 - `database_build438_application_module_activation.sql`
 - `BUILD438_D1_VERIFICATION.sql`
+- `scripts/build438_sync_full_schema.py`
+- `DATABASE_SCHEMA_REFERENCE.md`
 
 ### Server/shared core
 
@@ -64,6 +66,35 @@ Production is not a target of this validation pass.
 - `AI_HANDOFF.md`
 - `PROJECT_STATUS_AND_ROADMAP.md`
 
+## Fresh-install aggregate synchronization
+
+The Build 438 focused migration is the schema source of truth for the two new module-control tables. The large `database_full_schema.sql` aggregate did not yet contain those Build 438 tables when this source pass began.
+
+The GitHub connector cannot safely rewrite the ~780 KB aggregate from a partial/truncated fetch, so Build 438 includes a deterministic **local-only** sync helper instead of risking aggregate truncation:
+
+```text
+scripts/build438_sync_full_schema.py
+```
+
+Run before the source gate:
+
+```bash
+python scripts/build438_sync_full_schema.py --sync
+python scripts/build438_sync_full_schema.py --check
+```
+
+The helper:
+
+- contacts no Cloudflare/D1 resource;
+- appends the exact focused Build 438 migration only when both Build 438 CREATE TABLE authorities are absent;
+- refuses a partial/ambiguous aggregate state;
+- validates one `app_modules` authority;
+- validates one `app_module_role_access` authority;
+- validates both indexes and all three module seed keys;
+- no-ops when rerun after synchronization.
+
+After it runs, review and commit the generated `database_full_schema.sql` aggregate update. Do not manually copy/edit a partial migration fragment into the aggregate.
+
 ## Shared cross-module service policy
 
 A module switch controls the module's **direct UI, broad/legacy API surface and runtime activation**. It does not sever an explicitly reviewed shared service contract that another enabled module legitimately consumes.
@@ -92,19 +123,19 @@ This preserves real module independence. Example: Commerce may be disabled for d
 
 ## Local source validation
 
-Run from Git Bash:
+After the full-schema sync/check is green:
 
 ```bash
 cd /c/Dev/devilndove-site
 
-git pull origin dev
-
 set -o pipefail
 
 python -m py_compile \
+  scripts/build438_sync_full_schema.py \
   scripts/build438_application_module_core_regression.py \
   scripts/build438_development_module_activation.py
 
+python scripts/build438_sync_full_schema.py --check
 python scripts/build438_application_module_core_regression.py
 node scripts/build438_module_route_map_test.mjs
 node scripts/build438_module_catalog_alignment_test.mjs
@@ -135,6 +166,7 @@ Route ownership matrix: SOURCE READY
 Module access policy unit proof: SOURCE READY
 Authoritative client bootstrap: SOURCE READY
 Admin Application Modules control + health + route proof: SOURCE READY
+Deterministic full-schema sync helper: SOURCE READY / OWNER RUN REQUIRED
 Request-time schema mutation: NONE
 Background polling introduced by Build 438: NONE
 Production D1 migration executed: NO
@@ -313,9 +345,9 @@ A real module-authority read failure must never silently turn a disabled module 
 
 ## Public-shell scope
 
-Build 438 gates concrete transactional/customer Commerce surfaces such as Shop, Cart, Checkout, Product/Member workflows and their APIs. The unrelated informational/static public shell (for example About/Gallery-style pages) is intentionally not globally disabled by the Commerce switch in this first activation release.
+Build 438 gates concrete transactional/customer Commerce surfaces such as Shop, Cart, Checkout, Product/Member workflows and their APIs. The unrelated informational/static public shell is intentionally not globally disabled by the Commerce switch in this first activation release.
 
-This preserves a public informational presence while Commerce can be taken offline. A future full-site maintenance switch should be separate and deliberate.
+A future full-site maintenance switch should be separate and deliberate.
 
 ## Audit behavior
 
@@ -334,14 +366,14 @@ Disabling a module also clears its background permission. Re-enabling it does no
 Build 438 adds no recurring polling loop.
 
 - Admin `/api/modules` is one bootstrap read and an explicit fresh refresh after control changes.
-- Public/member visibility uses a short per-tab `sessionStorage` cache rather than one Worker request for every public navigation.
+- Public/member visibility uses a short per-tab `sessionStorage` cache.
 - server module config cache is brief and non-user-specific;
 - session/user identity stays request-scoped;
 - disabled direct module page runtime never initializes because middleware blocks access;
 - top-level Admin runtime is imported only after authoritative availability is known;
 - `background_activity_enabled=0` by default;
 - no request-time module DDL exists;
-- explicit cross-module service contracts prevent an enabled consumer from having to fall back to broad owner-module APIs.
+- explicit cross-module service contracts prevent enabled consumers from falling back to broad owner-module APIs.
 
 Known item to observe: root middleware can add one indexed session read to authenticated module-owned requests while legacy endpoints also perform their own auth verification. Measure this in Development; do not replace it with global user/session caching.
 
@@ -351,7 +383,7 @@ Known item to observe: root middleware can add one indexed session read to authe
 
 Do not run the Build 438 migration against `devilndove-prod` from this document.
 
-A Production authorization boundary may be prepared only after the Development disable/re-enable, role-level, recovery, data-preservation, runtime-suppression and shared-contract proofs are green.
+A Production authorization boundary may be prepared only after the Development aggregate sync, disable/re-enable, role-level, recovery, data-preservation, runtime-suppression and shared-contract proofs are green.
 
 Still separately locked:
 
@@ -368,20 +400,21 @@ Broad Production promotion                          CLOSED
 
 Build 438 may be called Development-proven only after:
 
-1. local 20/20 regression passes;
-2. executable route/shared-contract matrix passes;
-3. existing client-domain catalog/server ownership alignment passes;
-4. executable access-policy test passes 12/12;
-5. JS/Python syntax checks pass;
-6. Development D1 migration succeeds;
-7. exact D1 verification passes;
-8. Core Health passes;
-9. all three modules pass disable/re-enable direct page/API proof;
-10. Current-State Route Proof follows each toggle;
-11. recovery surface remains reachable;
-12. read-only access-level enforcement is proven;
-13. reviewed cross-module shared read contracts remain available to enabled consumers;
-14. any live shared mutation proof uses a real reviewed fixture, never dummy stock movements;
-15. business data preservation is proven;
-16. no new recurring background traffic is observed;
-17. canonical Markdown is updated with owner-run Development evidence.
+1. full-schema sync helper updates/validates `database_full_schema.sql` and the generated aggregate change is committed;
+2. local 20/20 regression passes;
+3. executable route/shared-contract matrix passes;
+4. existing client-domain catalog/server ownership alignment passes;
+5. executable access-policy test passes 12/12;
+6. JS/Python syntax checks pass;
+7. Development D1 migration succeeds;
+8. exact D1 verification passes;
+9. Core Health passes;
+10. all three modules pass disable/re-enable direct page/API proof;
+11. Current-State Route Proof follows each toggle;
+12. recovery surface remains reachable;
+13. read-only access-level enforcement is proven;
+14. reviewed cross-module shared read contracts remain available to enabled consumers;
+15. any live shared mutation proof uses a real reviewed fixture, never dummy stock movements;
+16. business data preservation is proven;
+17. no new recurring background traffic is observed;
+18. canonical Markdown is updated with owner-run Development evidence.
