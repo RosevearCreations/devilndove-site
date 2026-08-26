@@ -2,7 +2,7 @@
 
 ## Status
 
-**SOURCE GATES GREEN / FULL SCHEMA SYNCHRONIZED / DEVELOPMENT D1 AUTHORITY APPLIED + EXACTLY VERIFIED / LIVE MODULE ISOLATION PROOF NEXT / AUTHENTICATED ADMIN ACCEPTANCE PENDING / PRODUCTION D1 NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
+**SOURCE GATES GREEN / FULL SCHEMA SYNCHRONIZED / DEVELOPMENT D1 AUTHORITY APPLIED + EXACTLY VERIFIED / PAGES GUARD PROVEN / LIVE MODULE ISOLATION PASS 3/3 / AUTHENTICATED ADMIN ACCEPTANCE NEXT / PRODUCTION D1 NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
 
 Build 438 completes the central activation/access authority around the existing Application Core + three top-level application modules.
 
@@ -33,7 +33,7 @@ Production is not a target of this validation document.
 
 Authoritative owner-run evidence is recorded in `BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md`.
 
-Green source/local gates:
+Green gates:
 
 ```text
 Full-schema check                         PASS
@@ -43,35 +43,15 @@ Build305 catalog/server alignment          PASS (61/61)
 Cross-module access policy                 PASS (12/12)
 Session resilience                         PASS (6/6)
 Windows console/strict helper              PASS (10/10)
+Pages invocation routing                   PASS (10/10)
 JavaScript/Python syntax                    PASS
-```
-
-Development D1 apply:
-
-```text
-queries executed:        7
-rows read:               6
-rows written:            35
-result:                  PASS
-bookmark:                000000c2-00000006-000050d3-87153a5ac93157f6e9d565afd6f51a90
-```
-
-Final human read-only verification:
-
-```text
-queries executed:        6
-rows read:               6465
-rows written:            0
-bookmark:                000000c4-00000004-000050d3-d3fa52bb96c72b911140b3ab5b3bddcf
-```
-
-Final strict self-asserting verification:
-
-```text
-queries executed:        1
-rows read:               1327
-rows written:            0
-bookmark:                000000c4-00000008-000050d3-8acce3c6f0616f33b2aa34301dffe52f
+Development D1 migration                   APPLIED / PASS
+Human read-only verification               PASS / 0 writes
+Strict self-asserting verification         PASS / 0 writes
+Pages module guard live markers            PROVEN
+Three-module live isolation                PASS (3/3)
+Final module state                         RESTORED / EXACT
+Business data mutation from isolation      NONE
 ```
 
 Exact Development authority:
@@ -101,6 +81,7 @@ scripts/build438_development_module_activation.py
 ### Shared Core/server
 
 ```text
+_routes.json
 functions/api/_lib/appModules.js
 functions/api/_lib/appModuleRoutes.js
 functions/api/_lib/appModuleSessionGuard.js
@@ -130,12 +111,14 @@ scripts/build438_module_catalog_alignment_test.mjs
 scripts/build438_module_access_policy_test.mjs
 scripts/build438_module_session_resilience_test.mjs
 scripts/build438_development_helper_console_test.py
+scripts/build438_pages_invocation_routes_test.py
 scripts/build438_development_module_isolation_proof.py
+scripts/build438_authenticated_acceptance_regression.py
 ```
 
 ## Fresh-install aggregate authority
 
-`database_full_schema.sql` has been synchronized with the exact focused Build 438 module migration through `scripts/build438_sync_full_schema.py`.
+`database_full_schema.sql` is synchronized with the exact focused Build 438 module migration through `scripts/build438_sync_full_schema.py`.
 
 Commit evidence:
 
@@ -144,6 +127,71 @@ Commit evidence:
 ```
 
 The helper is deterministic, local-only, refuses partial/ambiguous aggregate state and no-ops when the Build 438 block is already present.
+
+## Pages invocation boundary — proven
+
+An early live toggle proved D1 changed correctly but `/shop/` stayed HTTP 200 because tracked `_routes.json` invoked Functions only for `/api/*`.
+
+Build 438 now routes only module-owned static surfaces through Functions:
+
+```text
+/api/*
+/admin + /admin/*
+/shop + /shop/*
+/cart + /cart/*
+/checkout + /checkout/*
+/product + /product/*
+/products + /products/*
+/custom-request + /custom-request/*
+/members + /members/*
+```
+
+General informational/static pages remain outside Functions.
+
+Live deployment diagnostics:
+
+```text
+X-DND-Module-Guard: 438
+X-DND-Module-Key: <module-key>
+X-DND-Shared-Contract: <contract-path>
+```
+
+Owner-run baseline after deployment:
+
+```text
+/admin/accounting/        HTTP 401 / X-DND-Module-Guard=438
+/shop/                    HTTP 200 / X-DND-Module-Guard=438
+/admin/creative-process/  HTTP 401 / X-DND-Module-Guard=438
+```
+
+## Three-module Development isolation — DONE
+
+Owner-run final result:
+
+```text
+Commerce   /shop/                    200 -> disabled 403 -> restored 200
+Creative   /admin/creative-process/  401 -> disabled 403 -> restored 401
+Business   /admin/accounting/        401 -> disabled 403 -> restored 401
+Core       /admin/application-modules/ stayed HTTP 200 throughout
+Other enabled module routes          retained recorded baseline behavior
+Final module state                    RESTORED / EXACT
+Business data mutation               NONE
+Production D1 mutation               NO
+```
+
+Final harness verdict:
+
+```text
+BUILD 438 DEVELOPMENT MODULE ISOLATION PROOF: PASS (3/3 MODULES)
+Pages module guard invocation: PROVEN
+Enabled baseline behavior: RECORDED / RESTORED EXACTLY
+Direct module disablement: PROVEN
+Core recovery availability: PROVEN
+Other enabled module routes remain available: PROVEN
+Automatic exact restore: PROVEN
+Business data mutation by proof harness: NONE
+PRODUCTION PROMOTION: CLOSED
+```
 
 ## Shared cross-module service policy
 
@@ -166,7 +214,7 @@ Rules:
 1. Shared contracts are Application Core boundaries, not broad owner-module bypasses.
 2. At least one reviewed consumer must be enabled and accessible.
 3. Mutation contracts require `manage` access.
-4. Direct owner module pages/broad APIs stay blocked while the owner is disabled.
+4. Direct owner-module pages/broad APIs stay blocked while the owner is disabled.
 5. Never exempt a broad API prefix simply for convenience.
 
 The 12/12 policy test proves Commerce-disabled + Creative-enabled Inventory contract eligibility and rejects read-only Creative access for shared Inventory mutation contracts.
@@ -186,112 +234,95 @@ invalid/expired session       -> normal unauthenticated state
 
 Request-specific user/session state is never globally cached.
 
-## Current Development next step — automated module isolation
+## Current Development next step — authenticated Admin acceptance
 
-Run:
+The remaining Development gate is now centered in:
+
+```text
+/admin/application-modules/
+```
+
+The page contains **Run authenticated acceptance proof**.
+
+### Local safety gate first
 
 ```bash
 cd /c/Dev/devilndove-site
 git pull origin dev
-python -m py_compile scripts/build438_development_module_isolation_proof.py
-python -u scripts/build438_development_module_isolation_proof.py \
-  2>&1 | tee build438_development_module_isolation_proof.txt
+
+python -m py_compile \
+  scripts/build438_authenticated_acceptance_regression.py
+
+python scripts/build438_authenticated_acceptance_regression.py
+node --check public/js/admin-application-modules.js
 ```
 
-Default deployed Development URL:
+Expected ending:
 
 ```text
-https://devilndove-site-dev.pages.dev
+BUILD 438 AUTHENTICATED ACCEPTANCE SAFETY REGRESSION: PASS (.../...)
+Audited temporary module controls: PRESENT / RESTORING
+Shared live probes: READ-ONLY ONLY
+Inventory post/reverse dummy mutation probes: ABSENT
+Read-level mutation probe: PRE-ENDPOINT / UNSUPPORTED ACTION / FAIL-SAFE
+Production mutation capability: NONE
 ```
 
-If Development uses another current preview/custom URL, provide it explicitly:
+### Browser acceptance
 
-```bash
-python -u scripts/build438_development_module_isolation_proof.py \
-  --base-url https://YOUR-DEVELOPMENT-URL \
-  2>&1 | tee build438_development_module_isolation_proof.txt
-```
-
-### Isolation harness safety
-
-The harness:
-
-- requires branch `dev`;
-- reuses the hard-pinned `devilndove-dev` database/UUID helper;
-- refuses all toggles unless deployed `/api/modules?fresh=1` first proves Build 438 + `schema_ready=true` + `source=d1` + exact three enabled/background-off modules;
-- verifies Core recovery and representative baseline route behavior before the first write;
-- changes only `app_modules`;
-- disables only one module at a time;
-- checks deployed state through `/api/modules?fresh=1`;
-- checks a representative direct route reaches HTTP 403 with disabled messaging;
-- proves `/admin/application-modules/` remains HTTP 200;
-- proves other enabled module routes retain expected behavior;
-- restores the exact original module/background state in `finally`;
-- stops before starting another toggle if one module proof fails;
-- verifies final state equals baseline;
-- has no Production target/mode.
-
-Expected final ending:
-
-```text
-BUILD 438 DEVELOPMENT MODULE ISOLATION PROOF: PASS (3/3 MODULES)
-Direct module disablement: PROVEN
-Core recovery availability: PROVEN
-Other enabled module routes remain available: PROVEN
-Automatic exact restore: PROVEN
-Business data mutation by proof harness: NONE
-Production D1 mutation executed: NO
-PRODUCTION PROMOTION: CLOSED
-```
-
-If the deployed source is not yet Build 438 or the Development hostname is wrong, the harness must stop **before any D1 toggle**.
-
-## Authenticated Admin acceptance after isolation proof
-
-After the automated isolation proof is green:
-
-### Baseline/Core Health
-
-1. Login as Admin.
+1. Login as Admin in Development.
 2. Open `/admin/application-modules/`.
-3. Require Core Health PASS:
-   - Modules 3/3;
-   - Role rows 6/6;
-   - Shared contracts 7;
-   - no missing/unexpected rows;
-   - no invalid role rows;
-   - no disabled module with background permission;
-   - no Admin recovery risk.
-4. Require all background activity OFF.
-5. Run **Current-State Route Proof** and require PASS (4/4) with all modules enabled.
+3. Require Core Health PASS and 3 enabled / 0 background enabled / 7 shared contracts.
+4. Click **Run current-state route proof** and require PASS (4/4).
+5. Click **Run authenticated acceptance proof**.
+6. Capture the complete rendered result and browser console if any item fails.
 
-### Audited control proof
-
-Use the UI/API—not direct D1—for final operator acceptance:
-
-- disable/re-enable each module and prove module-aware navigation/runtime suppression;
-- prove `/admin/application-modules/` remains the recovery path;
-- set one non-essential Admin module to `read`;
-- prove GET/HEAD remains available;
-- prove a non-read direct module API request is rejected with `module_access_level_read_only`;
-- restore `manage`;
-- confirm module actions appear in `admin_action_audit`.
-
-### Shared-contract live proof
-
-Use a real authenticated consumer context. Safe read contracts may be exercised while the owner UI is disabled. Do **not** manufacture Inventory movements merely to prove `inventory-post`/`inventory-reverse`; their mutation policy is already unit-proven. Any live mutation proof must use a real reviewed Creative material-use/reversal fixture.
-
-### Data preservation proof
-
-Compare representative business row counts before/after operator toggles. Module changes may modify only:
+The authenticated runner uses the logged-in Admin session and performs a restoring proof:
 
 ```text
-app_modules
-app_module_role_access
-admin_action_audit
+D1 source/schema                         exact
+Core Health                              PASS
+3 module baseline                       enabled/background OFF
+Admin baseline                           manage on all three
+Core control API                        available
+
+Commerce audited disable                direct 403 / guard 438
+Commerce client availability            false
+inventory-read while Commerce disabled  GET 200 through Creative consumer
+Commerce restore                        exact
+
+Creative audited disable                direct 403 / guard 438
+Creative client availability            false
+content-media while Creative disabled   GET 200 through Commerce consumer
+Creative restore                        exact
+
+Business audited disable                direct 403 / guard 438
+Business client availability            false
+accounting-read while Business disabled GET 200 through Commerce consumer
+Business restore                        exact
+
+Business Admin manage -> read           audited
+read-level GET                           allowed
+read-level POST                          403 module_access_level_read_only
+Business Admin role restore             exact/manage
+
+Final Core Health                       PASS
+Final modules                            all enabled
+Final backgrounds                        all OFF
 ```
 
-No Catalog, Inventory, Creative, CAIP, Packaging, Content, Accounting, Orders, Membership or other business rows may be deleted because a module was disabled.
+### Authenticated runner safety
+
+The runner:
+
+- uses `/api/admin/app-modules`, so module/role changes are normally audited;
+- restores each module in `finally` before moving to the next owner;
+- restores the Admin role in `finally`;
+- uses only the read-only `inventory-read`, `content-media`, and `accounting-read` shared contracts;
+- never invokes `inventory-post` or `inventory-reverse`;
+- uses an intentionally unsupported `__build438_read_guard_probe__` POST for the read-level test, so even if middleware failed the endpoint would reject it instead of performing a business mutation;
+- never contains Product/Inventory/Creative business-table SQL;
+- has no Production mode.
 
 ## Resource-efficiency proof
 
@@ -304,7 +335,8 @@ Build 438 adds no recurring polling loop.
 - disabled direct module runtime does not initialize;
 - top-level Admin runtime imports only after authority is known;
 - module background permission defaults OFF;
-- no request-time module DDL exists.
+- no request-time module DDL exists;
+- `_routes.json` deliberately avoids forcing general static pages/assets through Functions.
 
 Observe one remaining performance item: authenticated module-owned requests can add one indexed session lookup before a legacy endpoint performs its own authentication. Measure it in Development; do not solve it with global request-user caching.
 
@@ -314,7 +346,7 @@ Observe one remaining performance item: authenticated module-owned requests can 
 
 Do not run Build 438 module migration/toggle proof against `devilndove-prod`.
 
-A Production authorization boundary may be prepared only after Development isolation, authenticated Core Health/route proof, role-level enforcement, shared-contract consumer proof, data preservation and runtime/background behavior are green.
+A Production authorization boundary may be prepared only after authenticated Development acceptance and final evidence are green.
 
 Still locked:
 
@@ -340,11 +372,13 @@ Build 438 may be called Development-proven only after:
 7. syntax checks — **DONE**;
 8. Development migration — **DONE**;
 9. exact read-only D1 verification — **DONE**;
-10. automated 3-module disable/block/restore proof — **PENDING**;
-11. authenticated Core Health + Current-State Route Proof — **PENDING**;
-12. audited UI/API toggle proof — **PENDING**;
-13. role-level `read` enforcement — **PENDING**;
-14. authenticated shared read-contract consumer proof — **PENDING**;
-15. business data preservation — **PENDING**;
-16. no recurring background traffic — **PENDING OBSERVATION**;
-17. final canonical Markdown evidence update — **PENDING AFTER LIVE PROOF**.
+10. Pages invocation routing — **DONE**;
+11. automated 3-module disable/block/restore proof — **DONE / PASS 3/3**;
+12. final isolation state restored exactly — **DONE**;
+13. authenticated Core Health + Current-State Route Proof — **PENDING**;
+14. audited Admin module toggle/client suppression proof — **PENDING**;
+15. role-level `read` enforcement — **PENDING**;
+16. authenticated shared read-contract consumer proof — **PENDING**;
+17. final authenticated restore/Core Health — **PENDING**;
+18. no recurring background traffic — **PENDING OBSERVATION**;
+19. final canonical Markdown evidence update — **PENDING AFTER AUTHENTICATED PROOF**.
