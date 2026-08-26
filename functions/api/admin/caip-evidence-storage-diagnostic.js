@@ -1,6 +1,6 @@
 // Devil n Dove Build 439 — read-only CAIP secure-review storage linkage diagnostic.
 // Admin-only. Performs D1 reads and R2 HEAD requests only; never reads object bodies or mutates D1/R2/provider state.
-import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
+import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { resolveCaipBucket } from '../_lib/caipMediaIntake.js';
 
 const BUILD = 439;
@@ -180,14 +180,15 @@ export async function onRequestGet(context) {
       candidates,
     });
   } catch (error) {
-    await captureRuntimeIncident(env, request, {
-      incident_scope: 'caip_evidence_storage_diagnostic',
-      incident_code: 'caip_evidence_storage_diagnostic_failed',
-      severity: 'warning',
-      message: error?.message || 'CAIP storage diagnostic failed.',
-      related_user_id: adminUser.user_id,
-      details: { creative_project_id: projectId, creative_asset_id: assetId, read_only: true, error: String(error?.message || error) },
-    });
-    return json({ ok: false, error: error?.message || 'CAIP storage diagnostic failed.' }, 400);
+    return json({
+      ok: false,
+      build: BUILD,
+      error: text(error?.message || error, 900) || 'CAIP storage diagnostic failed.',
+      source_media_unchanged: true,
+      d1_mutation_executed: false,
+      r2_body_read_executed: false,
+      r2_mutation_executed: false,
+      provider_execution_active: false,
+    }, 400);
   }
 }
