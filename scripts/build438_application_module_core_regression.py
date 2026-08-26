@@ -49,10 +49,18 @@ def migration_simulation() -> dict:
         modules = conn.execute('SELECT module_key,is_enabled,requires_login,background_activity_enabled FROM app_modules ORDER BY module_key').fetchall()
         access = conn.execute('SELECT module_key,role_code,is_allowed,access_level FROM app_module_role_access ORDER BY module_key,role_code').fetchall()
         indexes = {row[0] for row in conn.execute("SELECT name FROM sqlite_schema WHERE type='index' AND name LIKE 'idx_app_module%'").fetchall()}
-        # Prove rerun safety.
         conn.executescript(sql)
         rerun_count = conn.execute('SELECT COUNT(*) FROM app_modules').fetchone()[0]
-        return {'modules': modules, 'access': access, 'indexes': indexes, 'rerun_count': rerun_count}
+        enabled_count = conn.execute('SELECT COUNT(*) FROM app_modules WHERE is_enabled=1').fetchone()[0]
+        background_count = conn.execute('SELECT COUNT(*) FROM app_modules WHERE background_activity_enabled=1').fetchone()[0]
+        return {
+            'modules': modules,
+            'access': access,
+            'indexes': indexes,
+            'rerun_count': rerun_count,
+            'enabled_count': enabled_count,
+            'background_count': background_count,
+        }
     finally:
         conn.close()
 
@@ -65,7 +73,6 @@ def main() -> int:
     bootstrap_api = read(BOOTSTRAP_API)
     control_api = read(CONTROL_API)
     control_page = read(CONTROL_PAGE)
-    control_js = read(CONTROL_JS)
     admin_js = read(ADMIN_JS)
     auth_ui = read(AUTH_UI)
     admin_bootstrap = read(ADMIN_BOOTSTRAP)
@@ -81,16 +88,16 @@ def main() -> int:
     print()
 
     check('CREATE TABLE IF NOT EXISTS app_modules' in migration and 'CREATE TABLE IF NOT EXISTS app_module_role_access' in migration, 'canonical additive module and role-access tables exist')
-    check([row[0] for row in sim['modules']] == EXPECTED_MODULES and sim['rerun_count'] == 3, 'migration seeds exactly the existing three top-level modules and is rerun-safe')
+    check([row[0] for row in sim['modules']] == EXPECTED_MODULES and sim['rerun_count'] == 3 and sim['enabled_count'] == 3 and sim['background_count'] == 0, 'migration seeds exactly three enabled modules, background-off defaults, and is rerun-safe')
     check(len(sim['access']) == 6 and {row[1] for row in sim['access']} == {'member', 'admin'}, 'current member/admin role access is explicitly seeded for all modules')
     check({'idx_app_modules_enabled_priority', 'idx_app_module_role_access_role'} <= sim['indexes'], 'bounded module/role lookup indexes exist')
-    check('CREATE TABLE' not in server and 'ALTER TABLE' not in server and 'DROP TABLE' not in server, 'shared runtime service performs no request-time DDL')
+    check('CREATE TABLE' not in server and 'ALTER TABLE' not in server and 'DROP TABLE' not in server and "from './appModuleRoutes.js'" in server, 'shared runtime service performs no request-time DDL and reuses the canonical route map')
     check('MODULE_CACHE_TTL_MS = 30_000' in server and 'moduleConfigCache' in server and 'readSessionUser' in server, 'non-user module config is bounded-cached while session identity stays request-scoped')
     check("'commerce-operations'" in routes and "'creative-production'" in routes and "'business-administration'" in routes, 'server route catalog recognizes all three existing top-level modules')
     check('/admin/catalog' in routes and '/admin/inventory' in routes and '/admin/orders' in routes and '/admin/membership' in routes, 'Commerce & Operations owns Catalog/Inventory/Orders/Membership routes')
     check('/admin/packaging-studio' in routes and '/admin/creative-process' in routes and '/admin/content-studio' in routes and '/admin/media-content-studio' in routes, 'Creative & Production owns Packaging/Creative/Content/Media routes')
     check("return MODULE_KEYS.BUSINESS_ADMINISTRATION" in routes, 'remaining Admin/platform/accounting/marketing routes fall to Business & Administration')
-    check("moduleAccessForRequest" in middleware and "moduleUnavailableResponse" in middleware and "await context.next()" in middleware, 'root Pages middleware enforces module availability and cleanly continues allowed requests')
+    check("moduleAccessForRequest" in middleware and "moduleUnavailableResponse" in middleware and "module_access_level_read_only" in middleware and "await context.next()" in middleware, 'root Pages middleware enforces availability plus read-only access levels and cleanly continues allowed requests')
     check("/admin/application-modules" in middleware and "/api/admin/app-modules" in middleware, 'module control/recovery surface is exempt from its own module switch')
     check('availableModulesForRequest' in bootstrap_api and 'CREATE TABLE' not in bootstrap_api and 'UPDATE app_modules' not in bootstrap_api, 'current-user /api/modules bootstrap is read-only')
     check('auditAdminAction' in control_api and 'application_module_state_changed' in control_api and 'DELETE FROM app_modules' not in control_api, 'module state changes are audited and never delete module business rows')
@@ -112,6 +119,7 @@ def main() -> int:
     print('Existing top-level modules: commerce-operations / creative-production / business-administration')
     print('Central D1 activation authority: SOURCE READY')
     print('Server page/API module guard: SOURCE READY')
+    print('Read-only module access enforcement: SOURCE READY')
     print('Authoritative client bootstrap: SOURCE READY')
     print('Admin Application Modules control: SOURCE READY')
     print('Request-time schema mutation: NONE')
