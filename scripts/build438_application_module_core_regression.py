@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = ROOT / 'database_build438_application_module_activation.sql'
 SERVER = ROOT / 'functions/api/_lib/appModules.js'
 ROUTES = ROOT / 'functions/api/_lib/appModuleRoutes.js'
+SESSION_GUARD = ROOT / 'functions/api/_lib/appModuleSessionGuard.js'
 MIDDLEWARE = ROOT / 'functions/_middleware.js'
 BOOTSTRAP_API = ROOT / 'functions/api/modules.js'
 CONTROL_API = ROOT / 'functions/api/admin/app-modules.js'
@@ -25,6 +26,7 @@ PLAN = ROOT / 'BUILD438_APPLICATION_CORE_MODULE_PLAN.md'
 VERIFY_SQL = ROOT / 'BUILD438_D1_VERIFICATION.sql'
 ROUTE_TEST = ROOT / 'scripts/build438_module_route_map_test.mjs'
 ACCESS_POLICY_TEST = ROOT / 'scripts/build438_module_access_policy_test.mjs'
+SESSION_RESILIENCE_TEST = ROOT / 'scripts/build438_module_session_resilience_test.mjs'
 DEV_HELPER = ROOT / 'scripts/build438_development_module_activation.py'
 FULL_SCHEMA_SYNC = ROOT / 'scripts/build438_sync_full_schema.py'
 SCHEMA_REFERENCE = ROOT / 'DATABASE_SCHEMA_REFERENCE.md'
@@ -75,6 +77,7 @@ def main() -> int:
     migration = read(MIGRATION)
     server = read(SERVER)
     routes = read(ROUTES)
+    session_guard = read(SESSION_GUARD)
     middleware = read(MIDDLEWARE)
     bootstrap_api = read(BOOTSTRAP_API)
     control_api = read(CONTROL_API)
@@ -90,6 +93,7 @@ def main() -> int:
     verify_sql = read(VERIFY_SQL)
     route_test = read(ROUTE_TEST)
     access_policy_test = read(ACCESS_POLICY_TEST)
+    session_resilience_test = read(SESSION_RESILIENCE_TEST)
     dev_helper = read(DEV_HELPER)
     full_schema_sync = read(FULL_SCHEMA_SYNC)
     schema_reference = read(SCHEMA_REFERENCE)
@@ -105,21 +109,35 @@ def main() -> int:
     check(len(sim['access']) == 6 and {row[1] for row in sim['access']} == {'member', 'admin'}, 'current member/admin role access is explicitly seeded for all modules')
     check({'idx_app_modules_enabled_priority', 'idx_app_module_role_access_role'} <= sim['indexes'], 'bounded module/role lookup indexes exist')
     check('CREATE TABLE' not in server and 'ALTER TABLE' not in server and 'DROP TABLE' not in server and "from './appModuleRoutes.js'" in server, 'shared runtime service performs no request-time DDL and reuses the canonical route map')
-    check('MODULE_CACHE_TTL_MS = 5_000' in server and 'failClosedConfig' in server and 'module_config_read_failed_using_last_known' in server and 'readSessionUser' in server, 'module authority is briefly cached, request identity is scoped, and real authority failures do not fail open')
+    check('MODULE_CACHE_TTL_MS = 5_000' in server and 'failClosedConfig' in server and 'module_config_read_failed_using_last_known' in server and 'APP_MODULE_SESSION_UNAVAILABLE_CODE' in session_guard and 'status: 503' in session_guard, 'module authority is briefly cached, fails closed, and transient session verification has a retryable 503 boundary')
     check("'commerce-operations'" in routes and "'creative-production'" in routes and "'business-administration'" in routes and 'SHARED_SERVICE_CONTRACTS' in routes and "'/api/admin/contracts/inventory-post'" in routes and 'path.startsWith(`${prefix}-`)' in routes, 'server route catalog recognizes all modules, reviewed shared contracts and hyphenated API families')
     check('/admin/catalog' in routes and '/admin/inventory' in routes and '/admin/orders' in routes and '/admin/membership' in routes, 'Commerce & Operations owns Catalog/Inventory/Orders/Membership routes')
     check('/admin/packaging-studio' in routes and '/admin/creative-process' in routes and '/admin/content-studio' in routes and '/admin/media-content-studio' in routes, 'Creative & Production owns Packaging/Creative/Content/Media routes')
     check("return MODULE_KEYS.BUSINESS_ADMINISTRATION" in routes and 'BUILD 438 MODULE ROUTE MAP TEST: PASS' in route_test and 'BUILD 438 MODULE ACCESS POLICY TEST: PASS' in access_policy_test and 'Creative can consume Inventory post while Commerce UI is disabled' in access_policy_test, 'Business/Admin fallback plus executable route and cross-module access-policy proofs are present')
-    check("moduleAccessForRequest" in middleware and "moduleUnavailableResponse" in middleware and "module_access_level_read_only" in middleware and 'sharedServiceAccessForRequest' in middleware and 'sharedServiceUnavailableResponse' in middleware and "await context.next()" in middleware, 'root Pages middleware enforces direct module access plus consumer-gated shared service contracts')
+    check("moduleAccessForRequest" in middleware and "moduleUnavailableResponse" in middleware and "module_access_level_read_only" in middleware and 'sharedServiceAccessForRequest' in middleware and 'sharedServiceUnavailableResponse' in middleware and 'resolveAppModuleRequestUser' in middleware and 'appModuleSessionUnavailableResponse' in middleware and "await context.next()" in middleware, 'root Pages middleware enforces module/shared-contract access and resilient session verification')
     check("/admin/application-modules" in middleware and "/api/admin/app-modules" in middleware, 'module control/recovery surface is exempt from its own module switch')
-    check('availableModulesForRequest' in bootstrap_api and "searchParams.get('fresh') === '1'" in bootstrap_api and 'CREATE TABLE' not in bootstrap_api, 'current-user /api/modules bootstrap is read-only and supports explicit fresh reads')
+    check('availableModulesForRequest' in bootstrap_api and "searchParams.get('fresh') === '1'" in bootstrap_api and 'resolveAppModuleRequestUser' in bootstrap_api and 'appModuleSessionUnavailableResponse' in bootstrap_api and 'CREATE TABLE' not in bootstrap_api, 'current-user /api/modules bootstrap is read-only, refreshable and resilient to transient session verification failure')
     check('auditAdminAction' in control_api and 'application_module_state_changed' in control_api and 'diagnosticsFor' in control_api and 'shared_service_contract_count' in control_api and 'DELETE FROM app_modules' not in control_api and 'background_activity_enabled=CASE WHEN ?=0 THEN 0' in control_api, 'module controls are audited, expose core diagnostics, never delete business rows and clear background permission on disable')
     check('app_module_schema_not_ready' in control_api and 'Build 438 application-module schema is not ready' in control_api and 'inactive_module_background_forbidden' in control_api, 'Admin writes fail closed before schema and background work cannot be enabled for an inactive module')
     check('Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration' in control_page and 'applicationModuleHealthMount' in control_page and 'runModuleRouteProofButton' in control_page and 'data-dd-module-control-card="1"' in admin_index and 'admin-application-modules.js?v=438' in control_page and 'Current-state route proof' in control_js, 'Admin dashboard/control surface exposes permanent module entry, health diagnostics and current-state route proof')
     check("fetch(force ? '/api/modules?fresh=1' : '/api/modules'" in admin_bootstrap and "dd-admin-module-runtime.mjs?v=438" in admin_bootstrap and 'setInterval' not in admin_bootstrap, 'Admin availability is read before existing umbrella runtime activation with explicit fresh refresh and no polling')
     check("dd-application-module-bootstrap.mjs?v=438" in admin_js and 'dd-admin-module-runtime.mjs?v=397' not in admin_js and 'site-auth-ui.js?v=438' in admin_index and 'admin.js?v=438' in admin_index, 'Admin shell enters through Build 438 authoritative bootstrap with current cache-busted shared scripts')
     check("dd-public-module-visibility.mjs?v=438" in auth_ui and 'sessionStorage' in public_visibility and 'CORE_RECOVERY_PREFIX' in public_visibility and 'setInterval' not in public_visibility, 'public/member navigation uses bounded per-tab visibility caching and preserves recovery access without polling')
-    check('DD_APPLICATION_MODULES' in app_groups and "id: 'commerce-operations'" in app_groups and "id: 'creative-production'" in app_groups and "id: 'business-administration'" in app_groups and 'three top-level' in plan.lower() and 'SELECT' in verify_sql and EXPECTED_MODULES[1] in dev_helper and 'EXPECTED_DATABASE_ID' in dev_helper and 'BUILD 438 FULL-SCHEMA SYNC' in full_schema_sync and 'database_full_schema.sql' in schema_reference and 'database_build438_application_module_activation.sql' in schema_reference, 'Build 438 extends the three-module architecture with exact D1 verification, hard-pinned Development apply and deterministic fresh-schema synchronization')
+    check(
+        'DD_APPLICATION_CORE' in app_groups
+        and 'DD_APPLICATION_MODULES' in app_groups
+        and all(f"id: '{module_key}'" in app_groups for module_key in EXPECTED_MODULES)
+        and all(module_key in plan for module_key in EXPECTED_MODULES)
+        and 'Devil n Dove Application Core' in plan
+        and 'SELECT' in verify_sql
+        and EXPECTED_MODULES[1] in dev_helper
+        and 'EXPECTED_DATABASE_ID' in dev_helper
+        and 'BUILD 438 FULL-SCHEMA SYNC' in full_schema_sync
+        and 'database_full_schema.sql' in schema_reference
+        and 'database_build438_application_module_activation.sql' in schema_reference
+        and 'BUILD 438 MODULE SESSION RESILIENCE TEST: PASS' in session_resilience_test,
+        'Build 438 structurally proves Core + exact three modules, exact D1 verification, resilient sessions, hard-pinned Development apply and deterministic fresh-schema synchronization',
+    )
 
     print()
     if failures:
@@ -136,9 +154,10 @@ def main() -> int:
     print('Cross-module shared service preservation: SOURCE READY / CONSUMER-GATED')
     print('Route ownership matrix: SOURCE READY')
     print('Module access policy unit proof: SOURCE READY')
+    print('Resilient session verification: SOURCE READY / 503 ON VERIFICATION INTERRUPTION')
     print('Authoritative client bootstrap: SOURCE READY')
     print('Admin Application Modules control + health + route proof: SOURCE READY')
-    print('Deterministic full-schema sync helper: SOURCE READY / OWNER RUN REQUIRED')
+    print('Deterministic full-schema sync helper: SOURCE READY / SYNCHRONIZABLE')
     print('Request-time schema mutation: NONE')
     print('Background polling introduced by Build 438: NONE')
     print('Production D1 migration executed: NO')
