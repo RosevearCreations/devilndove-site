@@ -2,7 +2,7 @@
 
 ## Immediate objective
 
-Validate the prepared Membership Build 395 rebuild execution boundary without mutating Production. Only after the Build 436 read-only/local gate is green may the exact Membership-specific token be requested.
+Rerun the repaired Membership Build 395 rebuild authorization boundary without mutating Production. The first owner run safely stopped on D1 `SQLITE_AUTH` 7500 during a dynamic inbound-FK discovery query; source now uses fixed-table `PRAGMA foreign_key_list("TABLE_NAME")` only for schema-text candidates. Only after the repaired Build 436 read-only/local gate is green may the exact Membership-specific token be requested.
 
 ## Ordered path
 
@@ -40,8 +40,12 @@ Validate the prepared Membership Build 395 rebuild execution boundary without mu
    - source-row SHA-256 `5db4bfd5f948a33432834210fd232a1e4b222dd6400193d65c644b501ba92057`;
    - lossless canonical mapping gate PASS (20/20).
 
-7. **Membership Build 436 rebuild authorization boundary — current**
-   - run local 20-check SQL simulation;
+7. **Membership Build 436 rebuild authorization boundary — current / repaired rerun pending**
+   - local rebuild simulation already PASS (20/20) on first owner run;
+   - first live preflight safely stopped on dynamic inbound-FK query with D1 `SQLITE_AUTH` 7500;
+   - no backup or Production mutation occurred;
+   - replace dynamic `JOIN pragma_foreign_key_list(...)` with schema candidate filtering + fixed-table PRAGMA checks;
+   - rerun local 20-check SQL simulation;
    - rerun live complete-row proof;
    - prove zero unhandled indexes/triggers/FKs/collisions;
    - capture canonical-preview SHA-256;
@@ -86,6 +90,8 @@ Validate the prepared Membership Build 395 rebuild execution boundary without mu
 
 ```text
 Membership rebuild authorization              NOT RECEIVED
+Membership Production backup                  NOT CREATED
+Membership Production mutation                NOT EXECUTED
 Fractional rebuild authorization              NOT RECEIVED
 Product/FK authorization                      NOT RECEIVED
 Accounting/default authorization              NOT RECEIVED
