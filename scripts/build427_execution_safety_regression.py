@@ -24,7 +24,7 @@ def check(condition: bool, label: str) -> None:
         failures.append(label)
 
 
-# 1-5 read-only preflight boundaries.
+# 1-5 read-only authorization-boundary preflight.
 check(
     'production_mutation_executed' in PRE
     and "'production_mutation_executed': False" in PRE
@@ -32,20 +32,26 @@ check(
     and "stream.reconfigure(encoding='utf-8', errors='replace')" in PRE,
     'preflight records zero Production mutation and uses Windows-safe UTF-8 console transport',
 )
-check('build426_live_release_candidate_evidence.py' in PRE, 'preflight refreshes bounded live evidence instead of trusting stale local SQL')
-check("'production_backup_created': False" in PRE, 'preflight does not claim a Production backup exists')
-check("'production_authorization_received': False" in PRE, 'preflight does not infer Production authorization')
-check("special.get('search_query_terms') == 5" in PRE and "special.get('__sql_test') == 0" in PRE, 'preflight preserves one-sided-table evidence boundaries')
+check('build426_live_release_candidate_evidence.py' in PRE, 'authorization-boundary preflight refreshes bounded full live evidence')
+check("'production_backup_created': False" in PRE, 'authorization-boundary preflight does not claim a Production backup exists')
+check("'production_authorization_received': False" in PRE, 'authorization-boundary preflight does not infer Production authorization')
+check("special.get('search_query_terms') == 5" in PRE and "special.get('__sql_test') == 0" in PRE, 'authorization-boundary preflight preserves one-sided-table evidence boundaries')
 
 # 6-13 Product-number executor safety.
 check("PROD_NAME = 'devilndove-prod'" in PROD and "PROD_ID = '0dc8fa3e-319c-45f7-a515-34c8acd89fcf'" in PROD, 'Product-number executor hard-pins Production name and UUID')
-check("DEV_NAME = 'devilndove-dev'" in PROD and "DEV_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'" in PROD, 'Product-number postcheck hard-pins Development evidence target')
-check("AUTH_TOKEN = 'AUTHORIZE-BUILD427-PROD-PRODUCT-NUMBERS'" in PROD, 'Product-number executor requires a literal authorization token')
-check("'d1', 'export', PROD_NAME" in PROD and "'--remote'" in PROD and "'--skip-confirmation'" in PROD, 'Product-number executor requires a remote Production export stage')
-check('hashlib.sha256' in PROD and 'backup_sha256' in PROD, 'Production backup records SHA-256 evidence')
-check('fresh_preflight()' in PROD and PROD.count('fresh_preflight()') >= 2, 'backup/apply paths rerun fresh live preflight')
+check("DEV_NAME = 'devilndove-dev'" in PROD and "DEV_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'" in PROD, 'Product-number focused/postcheck paths hard-pin Development evidence target')
+check("AUTH_TOKEN = 'AUTHORIZE-BUILD427-PROD-PRODUCT-NUMBERS'" in PROD, 'Product-number executor requires the literal authorization token')
+check("'d1', 'export', PROD_NAME" in PROD and "'--remote'" in PROD and "'--skip-confirmation'" in PROD, 'Product-number executor retains a remote Production export stage')
+check('hashlib.sha256' in PROD and 'backup_sha256' in PROD and 'validate_existing_backup()' in PROD, 'Production backup SHA-256 is recorded and reverified before write')
+check(
+    'focused_product_number_recheck()' in PROD
+    and PROD.count('focused_product_number_recheck()') >= 2
+    and "for table in ('product_costs', 'product_deletion_audit')" in PROD
+    and "'unrelated_schema_families_queried': False" in PROD,
+    'backup/apply use a focused immediate Product-number recheck rather than rerunning unrelated schema families',
+)
 check("scope': 'product_numbers_only'" in PROD and 'Gift Card/Notification/index/rebuild families: NOT EXECUTED' in PROD, 'first Production mutation scope is Product numbers only')
-check('len(updates) != EXPECTED_PRODUCTS' in PROD and 'EXPECTED_PRODUCTS = 45' in PROD, 'Product-number SQL refuses any map other than exactly 45 guarded rows')
+check('len(updates) != EXPECTED_PRODUCTS' in PROD and 'EXPECTED_PRODUCTS = 45' in PROD and 'MAX_BACKUP_AGE_SECONDS = 1800' in PROD, 'Product-number SQL requires exactly 45 rows and a recent backup')
 
 # 14-18 Additive stage isolation.
 check("'gift': 'AUTHORIZE-BUILD427-PROD-GIFT-CARD'" in ADD, 'Gift Card stage has a separate authorization token')
@@ -68,5 +74,6 @@ print(f'BUILD 427 PRODUCTION EXECUTION SAFETY REGRESSION: PASS ({checks}/{checks
 print('Production live access: NONE')
 print('Production mutation executed: NO')
 print('Authorization tokens exercised: NO')
+print('Immediate Product-number recheck scope: Product identity/number/sequence/history only')
 print('Broad Build 426 candidate execution path: NONE')
 print('PRODUCTION PROMOTION: CLOSED')
