@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const RESTORE_AUTHORIZATION = 'BUILD440_DEV_R2_RESTORE';
   const RESTORE_BATCH_SIZE = 8;
   const MAX_RESTORE_BATCHES = 150;
+  const MAX_FAILURE_DETAILS = 40;
 
   const esc = (value) => String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -21,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let result = null;
   let errorMessage = '';
   let restoreMessage = '';
-  let restoreStats = { processed: 0, restored: 0, already: 0, bytes: 0, batches: 0 };
+  let restoreStats = { processed: 0, restored: 0, already: 0, failed: 0, bytes: 0, batches: 0 };
+  let restoreFailures = [];
 
   function summaryCard(label, value) {
     return `<div class="card"><span class="small">${esc(label)}</span><div style="font-size:1.35rem;font-weight:800">${esc(value)}</div></div>`;
@@ -35,8 +37,23 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="small" style="margin-top:6px">${esc(restoreMessage || 'Preparing bounded restore…')}</div>
         <div class="small" style="margin-top:6px">
           processed: ${esc(restoreStats.processed)} · restored + verified: ${esc(restoreStats.restored)} ·
-          already verified: ${esc(restoreStats.already)} · batches: ${esc(restoreStats.batches)}
+          already verified: ${esc(restoreStats.already)} · failed safely: ${esc(restoreStats.failed)} · batches: ${esc(restoreStats.batches)}
         </div>
+        ${restoreFailures.length ? `
+          <details style="margin-top:10px" open>
+            <summary><strong>Object-level failures (${esc(restoreStats.failed)})</strong> — showing up to ${esc(MAX_FAILURE_DETAILS)}</summary>
+            <div class="admin-table-wrap" style="margin-top:8px">
+              <table>
+                <thead><tr><th>R2 key</th><th>Code</th><th>Reason</th></tr></thead>
+                <tbody>${restoreFailures.map((entry) => `
+                  <tr>
+                    <td><code>${esc(entry.key || entry.source_key || '—')}</code></td>
+                    <td>${esc(entry.code || 'restore_failed')}</td>
+                    <td>${esc(entry.error || 'Object restore failed safely.')}</td>
+                  </tr>`).join('')}</tbody>
+              </table>
+            </div>
+          </details>` : ''}
       </div>`;
   }
 
@@ -80,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Inventory image / Catalog blank ${esc(summary.inventory_only_image_rows ?? '—')} · Catalog image / Inventory blank ${esc(summary.catalog_only_image_rows ?? '—')} ·
             different canonical image keys ${esc(summary.image_authority_mismatch_rows ?? '—')}.
           </div>
-          ${canRestore ? '<p class="small" style="margin-top:10px"><strong>Development repair:</strong> restore reads the same active Inventory rows used by Product Tools & Supplies Used, accepts the canonical <code>Toolshed/</code> and <code>Supplies/</code> namespaces, fetches the public source read-only, hashes each image, refuses overwrites, writes only missing objects to the bound Development R2 bucket, and verifies each write.</p>' : ''}
+          ${canRestore ? '<p class="small" style="margin-top:10px"><strong>Development repair:</strong> restore reads the same active Inventory rows used by Product Tools & Supplies Used, accepts the canonical <code>Toolshed/</code> and <code>Supplies/</code> namespaces, validates image bytes, refuses overwrites, writes only missing objects to the bound Development R2 bucket, verifies each write, and reports any bad source object individually without crashing the entire batch.</p>' : ''}
           ${missing.length ? `
             <details style="margin-top:12px" open>
               <summary><strong>Missing Development R2 keys (${esc(summary.missing_unique_keys)})</strong> — showing up to ${esc(result.missing_sample_limit)}</summary>
@@ -140,6 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
     return window.DDAuth.readApiJson(response, 'Development R2 restore batch failed.');
   }
 
+  function recordBatchFailures(data) {
+    const failures = (Array.isArray(data?.results) ? data.results : []).filter((entry) => entry?.status === 'failed');
+    restoreStats.failed += Number(data?.batch?.failed || failures.length || 0);
+    for (const failure of failures) {
+      if (restoreFailures.length >= MAX_FAILURE_DETAILS) break;
+      const signature = `${failure.key || failure.source_key || ''}::${failure.code || ''}`;
+      if (!restoreFailures.some((entry) => `${entry.key || entry.source_key || ''}::${entry.code || ''}` === signature)) {
+        restoreFailures.push(failure);
+      }
+    }
+  }
+
   async function runRestore() {
     if (running || restoring || !window.DDAuth?.isLoggedIn()) return;
     if (!result?.summary || Number(result.summary.missing_unique_keys || 0) <= 0) return;
@@ -157,7 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
     restoring = true;
     errorMessage = '';
     restoreMessage = 'Starting native Development restore from operational Inventory authority.';
-    restoreStats = { processed: 0, restored: 0, already: 0, bytes: 0, batches: 0 };
+    restoreStats = { processed: 0, restored: 0, already: 0, failed: 0, bytes: 0, batches: 0 };
+    restoreFailures = [];
     render();
 
     let cursor = 0;
@@ -172,7 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreStats.already += Number(batch.already_verified || 0);
         restoreStats.bytes += Number(batch.bytes_restored || 0);
         restoreStats.batches = batchNumber;
-        restoreMessage = `Verified ${restoreStats.restored + restoreStats.already} operational image objects in Development R2.`;
+        recordBatchFailures(data);
+        restoreMessage = `Verified ${restoreStats.restored + restoreStats.already} operational image objects; ${restoreStats.failed} failed safely and were not written.`;
         render();
 
         if (data?.done) break;
@@ -191,7 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const expected = Number(result?.summary?.expected_unique_keys || 0);
       const present = Number(result?.summary?.present_unique_keys || 0);
       if (remaining !== 0 || expected !== present) {
-        throw new Error(`Final Development R2 parity is not exact: ${present}/${expected} present, ${remaining} missing.`);
+        const failureNote = restoreStats.failed > 0 ? ` ${restoreStats.failed} object(s) failed safely; see details below.` : '';
+        throw new Error(`Final Development R2 parity is not exact: ${present}/${expected} present, ${remaining} missing.${failureNote}`);
       }
       restoreMessage = `Development R2 restore complete: ${present}/${expected} expected image keys present, 0 missing.`;
     } catch (error) {
