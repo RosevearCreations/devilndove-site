@@ -27,6 +27,7 @@ STEPS = (
     ('Build 440 delete-product UI JavaScript syntax', ['node', '--check', 'public/js/admin-delete-product.js']),
     ('Build 440 cleanup-centre UI JavaScript syntax', ['node', '--check', 'public/js/admin-product-cleanup.js']),
     ('Build 440 resource-search API JavaScript syntax', ['node', '--check', 'functions/api/admin/product-resource-search.js']),
+    ('Build 440 Admin asset URL safety JavaScript syntax', ['node', '--check', 'public/js/admin-asset-url-safety.js']),
     ('Build 440 production-reversal API JavaScript syntax', ['node', '--check', 'functions/api/admin/product-production-reversal.js']),
     ('Build 440 production-reversal UI JavaScript syntax', ['node', '--check', 'public/js/admin-product-production-reversal.js']),
     ('Build 440 Inventory Integrity API JavaScript syntax', ['node', '--check', 'functions/api/admin/inventory-integrity-review.js']),
@@ -67,6 +68,7 @@ def main() -> int:
     print('Inventory fractional authority baseline: PASS')
     print('Product Delete Reference Inspector: PASS / SOURCE READY')
     print('Resource image object-key URL handling: PASS / # -> %23')
+    print('Inventory Admin asset payload boundary: PASS / NORMALIZED BEFORE RENDER')
     print('Finished Production reversal: PASS / SOURCE READY')
     print('Production reversal ledger: EXISTING product_production_runs AUTHORITY')
     print('Reversal raw-stock basis: IMMUTABLE RUN SNAPSHOT')
@@ -76,7 +78,7 @@ def main() -> int:
     print('Usage Setup Required: PASS / LEGACY SAFE DEFAULT REVIEW')
     print('Inventory integrity authority: EXISTING TABLES / NO NEW SCHEMA')
     print('Protected history deletion authority: UNCHANGED')
-    print('R2 object mutation executed: NO')
+    print('D1/R2 object mutation executed by asset URL fix: NO')
     print('Schema migration required for this slice: NO')
     print('Development D1 mutation executed: NO')
     print('Production D1 mutation executed: NO')
