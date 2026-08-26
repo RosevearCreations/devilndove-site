@@ -2,6 +2,7 @@
 // Build 245: resilient authentication UI. A temporary Worker/D1/network failure never becomes a false logout.
 // Only an explicit 401/403 clears stored credentials. Cached identity is provisional until /api/auth/me verifies it.
 // Build 438: public/member navigation receives one bounded module-availability read; Admin has its own richer bootstrap.
+// The Application Modules recovery link remains visible to a verified/cached Admin even if Business Administration is disabled.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="dd-auth-widget-links">
             <a href="/members/index.html">Settings</a><a href="/members/index.html#orders">Orders</a>
             <a href="/admin/index.html" id="ddAuthWidgetAdminLink" style="display:none">Admin Dashboard</a>
+            <a href="/admin/application-modules/" id="ddAuthWidgetModuleLink" style="display:none">Application Modules</a>
             <button class="btn" type="button" id="ddAuthWidgetLogout">Logout</button>
           </div>
         </div>
@@ -78,6 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (label) label.textContent = loggedIn ? `Signed in as ${name} (${user?.email || 'no email'})` : '';
       const adminLink = widget.querySelector('#ddAuthWidgetAdminLink');
       if (adminLink) adminLink.style.display = isAdmin ? '' : 'none';
+      const moduleLink = widget.querySelector('#ddAuthWidgetModuleLink');
+      if (moduleLink) moduleLink.style.display = isAdmin ? '' : 'none';
       show(widget.querySelector('#ddAuthWidgetLoggedIn'), loggedIn);
       show(widget.querySelector('#ddAuthWidgetLoggedOut'), !loggedIn);
     }
@@ -115,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cachedUser = window.DDAuth.getStoredUser?.() || null;
     window.DDAuthUiState = { phase: cachedUser ? 'provisional' : 'checking', user: cachedUser, verified: false, degraded: false, last_error: null };
     applyUi(cachedUser);
-    // Queue the provisional event so other DOMContentLoaded listeners can attach first.
     queueMicrotask(() => emitAuthEvents(cachedUser, null, { force: true, verified: false }));
 
     if (!window.DDAuth.isLoggedIn()) {
@@ -148,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const retainedUser = window.DDAuth.getStoredUser?.() || cachedUser || null;
       window.DDAuthUiState = { phase: 'degraded', user: retainedUser, verified: false, degraded: true, last_error: error };
       applyUi(retainedUser, { degraded: true });
-      // Force a second admin-ready event even if the cached identity is unchanged.
       emitAuthEvents(retainedUser, null, { force: true, degraded: true, error });
       document.dispatchEvent(new CustomEvent('dd:auth-degraded', { detail: { ok: false, session_retained: Boolean(retainedUser), user: retainedUser, http_status: status, code: String(error?.code || 'session_verification_unavailable'), ray: String(error?.cloudflareRay || '') } }));
     }
