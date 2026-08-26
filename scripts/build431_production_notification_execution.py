@@ -3,14 +3,15 @@
 
 This controller wraps the already-proven Build 428 additive primitives but adds
 Notification-specific fail-closed checks promised by the Build 430 boundary:
+- Product-number and Gift Card Production prerequisites must remain green;
 - exact Build 403 pre-write gap only;
 - idx_notification_outbox_status_due must already exist and survive;
 - notification_outbox row count must be preserved;
 - separate full Production D1 backup with byte/SHA/age verification;
 - exact Notification authorization token only.
 
-No Gift Card, annotation-index, Membership, fractional Inventory, Product/FK,
-Accounting/default, R2/provider, or promotion mutation path exists here.
+No Gift Card mutation, annotation-index, Membership, fractional Inventory,
+Product/FK, Accounting/default, R2/provider, or promotion mutation path exists.
 """
 from __future__ import annotations
 
@@ -26,6 +27,7 @@ import build428_production_additive_execution as additive
 ROOT = Path(__file__).resolve().parents[1]
 PREFLIGHT_SCRIPT = ROOT / 'scripts' / 'build430_notification_authorization_preflight.py'
 PREFLIGHT_ARTIFACT = ROOT / 'build430_notification_authorization_preflight.local.json'
+GIFT_POSTCHECK = ROOT / 'build428_production_gift_postcheck.local.json'
 EVIDENCE = ROOT / 'build431_production_notification_postcheck.local.json'
 AUTH_TOKEN = 'AUTHORIZE-BUILD428-PROD-NOTIFICATION'
 STATUS_DUE_INDEX = 'idx_notification_outbox_status_due'
@@ -53,6 +55,17 @@ def fail(message: str) -> None:
 def require_token(value: str | None) -> None:
     if value != AUTH_TOKEN:
         fail('explicit Notification Production authorization token is missing or incorrect.')
+
+
+def require_gift_postcheck() -> dict:
+    if not GIFT_POSTCHECK.exists():
+        fail('Gift Card Production postcheck artifact is missing.')
+    payload = json.loads(GIFT_POSTCHECK.read_text(encoding='utf-8'))
+    if payload.get('pass') is not True or payload.get('stage') != 'gift':
+        fail('Gift Card Production prerequisite is not green.')
+    if payload.get('row_count_preserved') is not True:
+        fail('Gift Card Production prerequisite does not prove row preservation.')
+    return payload
 
 
 def fresh_preflight() -> dict:
@@ -111,6 +124,8 @@ def print_before(state: dict) -> None:
 
 def backup(confirm: str | None) -> None:
     require_token(confirm)
+    additive.require_product_postcheck()
+    require_gift_postcheck()
     fresh_preflight()
     before = additive.current_state('notification')
     print_before(before)
@@ -128,6 +143,7 @@ def backup(confirm: str | None) -> None:
 def apply(confirm: str | None) -> None:
     require_token(confirm)
     additive.require_product_postcheck()
+    require_gift_postcheck()
     additive.hard_target_guard()
     additive.verify_backup('notification')
     before = additive.current_state('notification')
@@ -167,6 +183,7 @@ def apply(confirm: str | None) -> None:
 
 def postcheck() -> None:
     additive.require_product_postcheck()
+    require_gift_postcheck()
     additive.hard_target_guard()
     state = additive.current_state('notification')
     passed = complete_after_state(state)
