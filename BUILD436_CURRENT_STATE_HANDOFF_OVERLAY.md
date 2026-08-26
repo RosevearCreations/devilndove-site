@@ -9,7 +9,7 @@ Full Notification Build 403                          COMPLETE / PROVEN
 Build 197 annotation index                           COMPLETE / PROVEN
 Membership Build 434 authorization boundary          PASS (20/20)
 Membership Build 435 lossless mapping boundary       PASS (20/20)
-Membership Build 436 rebuild source                  PREPARED / NOT AUTHORIZED
+Membership Build 436 rebuild source                  PREPARED / D1 FK DISCOVERY REPAIRED / RERUN PENDING
 Membership Production backup                         NOT CREATED
 Membership Production mutation                       NOT EXECUTED
 Fractional rebuild authorization                     NOT RECEIVED
@@ -47,6 +47,28 @@ created_at                -> created_at
 updated_at                -> updated_at
 ```
 
+## Build 436 first owner-run result
+
+The first Build 436 owner run passed the 20/20 local rebuild simulation and reran Build 435 successfully. It then stopped during a read-only inbound-FK discovery query with Cloudflare D1:
+
+```text
+not authorized: SQLITE_AUTH [code: 7500]
+```
+
+The failed query used a dynamic `JOIN pragma_foreign_key_list(m.name)` over `sqlite_schema`. Because the preflight stopped before writing its artifact, the later Build 436 gate correctly showed 14 downstream failures for missing preflight evidence.
+
+Safety classification:
+
+```text
+Membership Production backup        NOT CREATED
+Membership Production DDL/DML       NOT EXECUTED
+Membership partial rebuild          NO
+Build 435 source fingerprint        STILL PROVEN
+Production promotion                CLOSED
+```
+
+Source is now repaired to use a D1-compatible two-step read-only inbound-FK proof: narrow candidate tables from `sqlite_schema`, then run fixed-table `PRAGMA foreign_key_list("TABLE_NAME")` only for those candidates. Actual PRAGMA results, not schema text, determine whether an inbound FK exists.
+
 ## Current Build 436 boundary
 
 Prepared files:
@@ -60,7 +82,7 @@ BUILD436_MEMBERSHIP_REBUILD_AUTHORIZATION_VALIDATION.md
 BUILD436_TWENTY_ITEM_MEMBERSHIP_REBUILD_AUTHORIZATION_BOUNDARY.md
 ```
 
-Build 436 must be owner-run read-only/local first. The live preflight adds checks for:
+The repaired Build 436 must be owner-run read-only/local again. The live preflight checks:
 
 - exact three-row/fingerprint boundary;
 - canonical-preview fingerprint;
@@ -68,7 +90,7 @@ Build 436 must be owner-run read-only/local first. The live preflight adds check
 - non-null canonical values;
 - zero user-defined Membership indexes/triggers;
 - zero outbound Membership foreign keys;
-- zero inbound Membership foreign keys;
+- zero PRAGMA-confirmed inbound Membership foreign keys;
 - zero reserved rebuild-name collisions;
 - compatible Membership sqlite_sequence.
 
@@ -78,7 +100,7 @@ Build 436 must be owner-run read-only/local first. The live preflight adds check
 AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD
 ```
 
-Do not infer this token from continuation language or from the successful Build 435 mapping proof.
+Do not infer this token from continuation language, Build 435 success, or the repaired Build 436 source. It remains unauthorized until the repaired Build 436 owner-run gate passes and the owner sends the exact token separately.
 
 ## Production mutation rules
 
