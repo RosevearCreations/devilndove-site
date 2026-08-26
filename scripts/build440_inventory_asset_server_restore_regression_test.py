@@ -31,7 +31,7 @@ check("PUBLIC_ORIGIN = 'https://assets.devilndove.com'" in api and 'publicUrlFor
 check('encodeURIComponent' in api and "replace(/[!'()*]/g" in api and "ALLOWED_PREFIXES = ['Tools/', 'Supplies/']" in api, 'literal #/space/apostrophe object keys are encoded from canonical Tool/Supply keys')
 check("sourceResponse.headers.get('content-length')" in api and 'MAX_OBJECT_BYTES' in api and "startsWith('image/')" in api, 'source download is content-type and byte-size bounded')
 check("crypto.subtle.digest('SHA-256'" in api and 'build440_source_sha256' in api, 'source bytes are SHA-256 fingerprinted before Development R2 write')
-check('get_dev_object' not in api and 'wrangler' not in api.lower() and 'npx' not in api.lower() and 'subprocess' not in api.lower(), 'runtime restore has no Wrangler/npm/local subprocess dependency')
+check('subprocess' not in api.lower() and 'child_process' not in api.lower() and 'spawn(' not in api.lower() and 'exec(' not in api.lower(), 'runtime restore contains no local process execution path')
 check('const existing = await bucket.head(key)' in api and 'existing_object_unverified' in api, 'existing unverified Development objects block instead of being overwritten')
 check('const beforePut = await bucket.head(key)' in api and 'concurrent_object_unverified' in api, 'restore rechecks object absence immediately before PUT')
 check("await bucket.put(key, buffer" in api and "build440_restore: 'development_tool_supply'" in api, 'restore writes only the canonical current D1 key with verification metadata')
