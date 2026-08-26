@@ -2,9 +2,9 @@
 
 ## Status
 
-**LIVE READ-ONLY EVIDENCE PASS / MEMBERSHIP INERT PREVIEW PASS / LOCAL GATE SOURCE REPAIRED / NO REMAINING PRODUCTION MUTATION AUTHORIZED**
+**PASS (20/20) — LIVE REMAINING-PARITY EVIDENCE PASS / MEMBERSHIP INERT PREVIEW PASS / ALL REMAINING PRODUCTION MUTATIONS STILL LOCKED / PROMOTION CLOSED**
 
-Build 427 Product-number Production remediation is complete and proven:
+Build 427 Product-number Production remediation remains complete and proven:
 
 ```text
 Production Product numbers: 1084..1128 (45 unique)
@@ -14,8 +14,6 @@ Development sequence next: 1129
 Product identities equal: True
 BUILD 427 PRODUCTION PRODUCT-NUMBER POSTCHECK: PASS
 ```
-
-Build 428 does not execute any remaining Production schema mutation.
 
 ## Owner-run Build 428 evidence
 
@@ -65,27 +63,14 @@ PRODUCTION PROMOTION: CLOSED
 
 ## Initial local-gate result and correction
 
-The first Build 428 authorization-boundary gate returned 18/20 because of two source assumptions, not because of a Production mutation or schema-write failure:
+The first Build 428 authorization-boundary gate returned 18/20 because of two local source assumptions, not because of a Production mutation or schema-write failure:
 
-1. The gate still expected the older three-index Notification gap. The fresh Build 428 `sqlite_schema` evidence proves that all four Build 403 Notification indexes are currently absent, including `idx_notification_outbox_order`.
-2. The gate counted the documented Build 429 items using a regex that incorrectly required every numbered action to begin with the literal text `Build 429:`. The Markdown correctly contains twenty numbered actions but does not repeat that prefix on every item.
+1. The gate still expected the older three-index Notification gap. Fresh Build 428 `sqlite_schema` evidence proved that all four Build 403 Notification indexes are currently absent, including `idx_notification_outbox_order`.
+2. The gate counted the documented Build 429 items using a regex that incorrectly required every numbered action to begin with the literal text `Build 429:`.
 
-The gate has been repaired to use the current four-index live evidence and to count ordinary numbered items inside the `Next 20 ordered changes — Build 429` section. The live evidence artifact and Membership preview remain valid; neither source correction changes their semantics.
+The gate was repaired to accept the current four-index live Notification evidence and to count ordinary numbered actions inside the Build 429 section. No live D1 evidence needed to be rerun because the corrections changed only local gate/document assumptions.
 
-## Rerun now — local gate only
-
-Do not rerun the live D1 evidence merely because these local gate assumptions were repaired.
-
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-python -m py_compile scripts/build428_twenty_item_remaining_parity_gate.py
-python scripts/build428_twenty_item_remaining_parity_gate.py
-```
-
-Expected:
+## Repaired owner-run local gate — PASS
 
 ```text
 BUILD 428 TWENTY-ITEM REMAINING PARITY AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
@@ -96,28 +81,38 @@ Annotation-index authorization: NOT RECEIVED
 Rebuild-family authorization: NOT RECEIVED
 Production mutation executed by Build 428: NO
 PRODUCTION PROMOTION: CLOSED
+NEXT: explicit per-family Production authorization is required before any remaining mutation stage.
 ```
 
-## Do not run yet
+## Build 428 closed state
 
-The Build 428 additive controller is source-ready but no remaining mutation is authorized. Do not run any `--backup` or `--apply` form yet.
+```text
+Build 425  Development Product-number backfill       PASS (20/20)
+Build 426  Production release-candidate assembly     PASS (20/20)
+Build 427  Production Product-number stage           PASS
+Build 428  Remaining parity authorization boundary   PASS (20/20)
 
-Prepared future stage tokens are documented in `BUILD428_TWENTY_ITEM_REMAINING_PARITY_BOUNDARY.md`; each token authorizes one family only and each family requires its own fresh full Production D1 backup.
+Gift Card Production mutation                        NOT AUTHORIZED
+Notification Production mutation                     NOT AUTHORIZED
+Annotation-index Production mutation                 NOT AUTHORIZED
+Membership rebuild                                   NOT AUTHORIZED
+Fractional Inventory rebuilds                        NOT AUTHORIZED
+Product/FK rebuilds                                  NOT AUTHORIZED
+Accounting/default rebuilds                          NOT AUTHORIZED
+Production promotion                                 CLOSED
+```
 
-## Failure handling
+## Next boundary
 
-- Source/regression failure: patch source only; do not contact Production to work around it.
-- Live evidence `7403`: classify as Cloudflare authorization/read interruption; do not infer schema state.
-- Live evidence drift: keep the relevant family blocked and regenerate its plan from current evidence.
-- Membership preview failure: do not make a rebuild executable.
-- Any gate failure: no remaining Production authorization should be exercised.
+Build 429 begins with the Gift Card family only. Gift Card authorization must be explicit and stage-specific. A successful Build 428 gate does not authorize Gift Card, Notification, annotation-index, or rebuild mutations.
+
+The Build 428 additive controller is source-ready and requires a fresh full Production D1 backup, hard Production target guard, backup byte/SHA/age verification, targeted before-state read, row preservation, and the exact stage token before the Gift Card write.
 
 ## Safety
 
 ```text
 Product-number Production remediation    complete / proven
-Remaining Production reads               bounded / read-only
-Gift Card mutation                       locked
+Gift Card mutation                       locked pending explicit token
 Notification mutation                    locked
 Annotation-index mutation                locked
 Rebuild families                         locked
