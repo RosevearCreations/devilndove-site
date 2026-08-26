@@ -1,4 +1,4 @@
-# Devil n Dove AI Handoff — Build 438 Source / Build 437 Production Baseline
+# Devil n Dove AI Handoff — Build 438 Development Authority / Build 437 Production Baseline
 
 This is the **first of two canonical current project files**. Read it first for architecture, authority, safety and current release state. Read `PROJECT_STATUS_AND_ROADMAP.md` second for open functionality and ordered next work.
 
@@ -8,7 +8,7 @@ Historical Build validation/changed-file prose is evidence only. Specialist docu
 
 **Build 437** remains the current completed Production-proven baseline.
 
-**Build 438** is the current source/development architecture release. Its source control plane is ready for owner validation; its Development D1 migration is still pending owner execution and its Production D1 migration is not authorized.
+**Build 438** is the current source/development architecture release. Its Application Core + three-module D1 authority is now **APPLIED AND EXACTLY VERIFIED IN DEVELOPMENT**. Live disable/re-enable isolation proof and authenticated Admin/browser acceptance remain open. Build 438 Production D1 is not authorized.
 
 Build 437 completed/proved:
 
@@ -34,7 +34,7 @@ manifest total size                        66279989 bytes
 
 ## Application architecture truth
 
-Builds 281–397 already established the real module architecture:
+Builds 281–397 established the retained top-level architecture:
 
 ```text
 Devil n Dove Application Core
@@ -48,19 +48,19 @@ Customer/storefront and Member Account are distinct UX surfaces **inside Commerc
 
 ### Commerce & Operations
 
-Composes public/customer/storefront, Catalog, Inventory and Operations domains: Shop, Cart/Checkout, Members, Catalog/Product admin, Inventory, Orders, Membership, Gift Cards, customer documents, custom requests and Today Tasks.
+Public/customer/storefront, Catalog, Inventory and Operations domains: Shop, Cart/Checkout, Members, Catalog/Product admin, Inventory, Orders, Membership, Gift Cards, customer documents, custom requests and Today Tasks.
 
 ### Creative & Production
 
-Composes Creative, CAIP, Packaging and Content domains: Creative Process/Project Workflow, Creative Assets/CAIP, Packaging Studio, Website Media & Content Studio, Content Studio, visual enrichment/image manifest/stage-photo/content-publication workflows.
+Creative, CAIP, Packaging and Content domains: Creative Process/Project Workflow, Creative Assets/CAIP, Packaging Studio, Website Media & Content Studio, Content Studio, visual enrichment/image manifest/stage-photo/content-publication workflows.
 
 ### Business & Administration
 
-Composes Marketing, Accounting, Platform and Administration domains: Accounting, Analytics/SEO/marketing, users/settings/security, Application Sanity, Release & Go-Live and deployment/runtime/platform controls.
+Marketing, Accounting, Platform and Administration domains: Accounting, Analytics/SEO/marketing, users/settings/security, Application Sanity, Release & Go-Live and deployment/runtime/platform controls.
 
 ## Existing modular runtime foundation
 
-Key retained files:
+Retained core/runtime files:
 
 ```text
 public/js/core/dd-module-registry.mjs
@@ -74,18 +74,22 @@ public/js/modules/creative-production/runtime.mjs
 public/js/modules/business-administration/runtime.mjs
 ```
 
-The existing registry/runtime is passive/lazy. Top-level extraction is still incremental; do not claim every mutation moved into an umbrella runtime.
+The registry/runtime is passive/lazy. Top-level extraction is still incremental; do not claim every legacy mutation moved into an umbrella runtime.
 
-## Build 438 source authority
+## Build 438 activation authority
 
 Build 438 adds the persistent/server-authoritative activation/access layer around the existing three-module architecture.
 
-Primary source:
+Primary authority:
 
 ```text
 database_build438_application_module_activation.sql
+database_full_schema.sql                         synchronized with Build 438
+BUILD438_D1_VERIFICATION.sql
+BUILD438_D1_STRICT_VERIFICATION.sql
 functions/api/_lib/appModules.js
 functions/api/_lib/appModuleRoutes.js
+functions/api/_lib/appModuleSessionGuard.js
 functions/_middleware.js
 functions/api/modules.js
 functions/api/admin/app-modules.js
@@ -96,26 +100,65 @@ public/js/admin.js
 public/js/site-auth-ui.js
 public/js/core/dd-application-module-bootstrap.mjs
 public/js/core/dd-public-module-visibility.mjs
-BUILD438_D1_VERIFICATION.sql
 scripts/build438_application_module_core_regression.py
 scripts/build438_module_route_map_test.mjs
 scripts/build438_module_catalog_alignment_test.mjs
 scripts/build438_module_access_policy_test.mjs
+scripts/build438_module_session_resilience_test.mjs
 scripts/build438_development_module_activation.py
+scripts/build438_development_module_isolation_proof.py
 BUILD438_APPLICATION_CORE_MODULE_PLAN.md
 BUILD438_VALIDATION.md
+BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md
 ```
 
-## Build 438 D1 authority
+## Build 438 Development authority — proven
 
-Tables:
+Target:
+
+```text
+Pages project:  devilndove-site-dev
+D1 database:    devilndove-dev
+D1 UUID:        dbc1615b-dcbe-4951-973b-b47c99c73bfa
+Wrangler:       4.126.0
+```
+
+Owner-run evidence is recorded in `BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md`.
+
+Green gates:
+
+```text
+Full-schema Build 438 authority              PASS / SINGLE AUTHORITY
+Application Core regression                 PASS (20/20)
+Route map                                    PASS (53 routes + 7 shared contracts)
+Build305 catalog/server alignment            PASS (61/61)
+Cross-module access policy                   PASS (12/12)
+Session resilience                           PASS (6/6)
+Windows/strict verification regression       PASS (10/10)
+Development migration                        APPLIED / PASS
+Development human read-only verification     PASS / 0 writes
+Development strict self-asserting verify     PASS / 0 writes
+```
+
+Exact Development D1 state:
+
+```text
+module_count:               3
+role_access_count:          6
+enabled_module_count:       3
+background_enabled_count:   0
+expected_index_count:       2
+module_keys:                business-administration|commerce-operations|creative-production
+```
+
+## Build 438 D1 tables/default role state
 
 ```text
 app_modules
 app_module_role_access
 ```
 
-Expected default state:
+Expected/default state:
 
 ```text
 commerce-operations       enabled / background OFF
@@ -130,7 +173,7 @@ admin  -> all three allowed/manage
 
 No per-user override table exists yet.
 
-## Build 438 direct module behavior
+## Direct module behavior contract
 
 A disabled/unavailable module must:
 
@@ -147,7 +190,7 @@ A role with module access level `read` may read direct module APIs but non-read 
 module_access_level_read_only
 ```
 
-The Admin recovery/control surface is Application Core and cannot be disabled by a business-module switch:
+Core recovery/control surfaces are never owned by a business module:
 
 ```text
 /admin/application-modules/
@@ -181,9 +224,9 @@ Rules:
 - shared mutation contracts require a qualifying consumer with `manage` access;
 - no broad API prefix may be exempted merely for convenience.
 
-The executable Build 438 policy test proves cases including **Commerce disabled + Creative enabled -> Inventory post/reverse consumer authority remains eligible**, while Creative `read` access cannot qualify for those mutation contracts.
+The 12/12 policy test proves Commerce-disabled + Creative-enabled Inventory contract eligibility and rejects a read-only Creative consumer for shared Inventory mutation contracts.
 
-## Module authority failure semantics
+## Module authority/session failure semantics
 
 Build 438 distinguishes rollout from real failure:
 
@@ -194,7 +237,7 @@ transient D1/config failure   -> last-known module state when available
 cold real authority failure   -> fail closed
 ```
 
-A real authority read failure must never silently re-enable a disabled module.
+A transient session-verification failure returns a retryable 503 and does **not** masquerade as a false 401/logout. Invalid/expired sessions still behave as ordinary unauthenticated state.
 
 Only non-user module configuration is briefly cached. User/session identity remains request-scoped.
 
@@ -221,7 +264,26 @@ no disabled module with background permission
 no Admin recovery-access risk
 ```
 
-Current-State Route Proof HEAD-checks representative Core, Commerce, Creative and Business routes against current configuration without changing module state.
+## Development live isolation proof — next
+
+`build438_development_module_isolation_proof.py` is the current owner-run next step. It is hard-pinned through the Development activation helper and refuses to toggle anything unless the deployed site first reports Build 438 + `schema_ready=true` + `source=d1` + exact three enabled/background-off modules.
+
+The harness temporarily changes **`app_modules` only**, one module at a time, and always restores the original state in `finally`.
+
+It must prove:
+
+```text
+commerce-operations       direct route blocked while disabled / restored
+creative-production       direct route blocked while disabled / restored
+business-administration   direct route blocked while disabled / restored
+Core recovery page        reachable throughout
+Other enabled modules     retain expected route behavior
+Final module state        restored / exact
+Business table mutation   none
+Production mutation       none
+```
+
+After automated anonymous-route isolation is green, finish authenticated Admin acceptance through `/admin/application-modules/`: Core Health, Current-State Route Proof, role-level `read` enforcement, navigation/runtime suppression, and real consumer-context shared-contract proof. Do not manufacture Inventory movements to test shared mutation contracts.
 
 ## Background activity rule
 
@@ -229,13 +291,11 @@ Current-State Route Proof HEAD-checks representative Core, Commerce, Creative an
 
 All three modules default background OFF. Disabling a module clears its background permission and re-enabling does not silently restore it.
 
-Existing/future module-owned background work must explicitly check module authority before running.
-
 Build 438 introduces no recurring polling loop.
 
 ## Public shell scope
 
-The Commerce switch gates transactional/customer surfaces such as Shop, Cart, Checkout and Product/Member workflows. General informational public pages remain available in this release.
+The Commerce switch gates transactional/customer surfaces such as Shop, Cart, Checkout and Product/Member workflows. General informational public pages remain available.
 
 A future full-site maintenance mode should be a separate Application Core feature, not an overloaded Commerce switch.
 
@@ -270,7 +330,7 @@ Product/supply/tool identity and stock facts. Actual production/material posting
 - server authorization, not hidden UI, is the security boundary;
 - never cache request-specific session/user state globally.
 
-Known Build 438 observation item: middleware can add one indexed session lookup on authenticated module-owned requests while a legacy endpoint also authenticates independently. Measure this in Development; do not solve it with global user caches.
+Known Build 438 observation item: root middleware can add one indexed session lookup on authenticated module-owned requests while a legacy endpoint also authenticates independently. Measure this in Development; do not solve it with global user caches.
 
 ## SEO/public rules
 
@@ -288,8 +348,9 @@ Known Build 438 observation item: middleware can add one indexed session lookup 
 
 ```text
 Build 437 Membership authorization               SPENT / COMPLETE
-Build 438 Development D1 migration               PENDING OWNER RUN
-Build 438 Production D1 migration                NOT AUTHORIZED
+Build 438 Development D1 authority                APPLIED / EXACTLY VERIFIED
+Build 438 Development live isolation              PENDING OWNER RUN
+Build 438 Production D1 migration                 NOT AUTHORIZED
 Fractional Inventory/Creative rebuilds            NOT AUTHORIZED
 Product/FK rebuilds                               NOT AUTHORIZED
 Accounting/default/nullability rebuilds           NOT AUTHORIZED
@@ -303,8 +364,8 @@ A generic `continue`, `next release`, pasted output or feature request does not 
 
 ## Immediate Development next step
 
-Run the consolidated Build 438 source gate, route/catalog/access-policy tests and syntax checks. Then run the hard-pinned Development-only D1 apply/verify helper. After Development deployment, require Core Health PASS and prove disable/re-enable/recovery/data-preservation/shared-contract behavior for all three modules.
+Run `scripts/build438_development_module_isolation_proof.py` against the deployed Development site. If it passes 3/3, complete the authenticated Admin/Core Health/role/shared-contract acceptance and record the evidence.
 
 Do not prepare a Production authorization boundary until those Development proofs are green.
 
-Read `BUILD438_VALIDATION.md` for the exact owner-run procedure and `PROJECT_STATUS_AND_ROADMAP.md` for the remaining feature roadmap.
+Read `BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md` and `BUILD438_VALIDATION.md` for owner-run evidence/procedure, then `PROJECT_STATUS_AND_ROADMAP.md` for the remaining feature roadmap.
