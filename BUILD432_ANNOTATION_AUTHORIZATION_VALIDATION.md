@@ -2,9 +2,9 @@
 
 ## Status
 
-**PASS (20/20) — ANNOTATION READ-ONLY AUTHORIZATION BOUNDARY CLOSED / ANNOTATION PRODUCTION AUTHORIZATION STILL NOT RECEIVED / PRODUCTION PROMOTION CLOSED**
+**PASS (20/20) / ANNOTATION PRODUCTION AUTHORIZATION RECEIVED / BACKUP + MUTATION PENDING / PRODUCTION PROMOTION CLOSED**
 
-Product numbers, Gift Card, and full Build 403 Notification Production parity are complete/proven. Build 197 annotation-index is now the only active authorization decision.
+Product numbers, Gift Card, and full Build 403 Notification Production parity are complete/proven. Build 197 annotation-index authorization boundary is closed PASS (20/20).
 
 ## Owner-run Build 432 evidence
 
@@ -51,55 +51,59 @@ PRODUCTION PROMOTION: CLOSED
 NEXT: explicit Build 197 annotation-index Production authorization is required before backup/apply.
 ```
 
-A PASS here proves the prerequisite artifacts, exact Build 197 index gap, and 70-row preservation boundary. It does **not** authorize a Production write.
+## Authorization received
+
+The owner subsequently supplied exactly:
+
+```text
+AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX
+```
+
+This authorizes only the bounded Build 197 composite index stage. It does not authorize any Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, CAIP-copy, or Production-promotion operation.
+
+No annotation Production backup or DDL has executed merely because authorization was supplied.
 
 ## Reviewed Build 197 scope
 
 Canonical authority: `database_build197_application_resilience_media_catalog.sql`.
 
-Only this composite index belongs to the bounded stage:
+Only this composite index belongs to the authorized stage:
 
 ```sql
 CREATE INDEX IF NOT EXISTS idx_product_image_annotations_product_image_build197
   ON product_image_annotations(product_id, product_image_id);
 ```
 
-The future authorized stage must preserve the exact `product_image_annotations` row count observed immediately before DDL. The owner-run boundary currently records 70 rows; if legitimate activity changes that count before execution, the fresh pre-write count becomes the preservation boundary.
+The authorized execution must preserve the exact `product_image_annotations` row count observed immediately before DDL. The Build 432 boundary recorded 70 rows; if legitimate activity changes that count before execution, the fresh pre-write count becomes the preservation boundary.
 
-## Explicit authorization boundary
+## Build 433 guarded execution
 
-The required owner authorization token is:
+Use only `scripts/build433_production_annotation_execution.py` for the authorized Production stage. It requires:
 
-```text
-AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX
-```
-
-Merely seeing this token, Build 432 PASS, or successful Product/Gift/Notification work does not authorize it.
-
-After explicit annotation authorization only, execution must:
-
-1. require the proven Product-number, Gift Card, and full Notification Production prerequisites;
-2. hard-pin Production name/UUID;
-3. rerun the targeted annotation read-only state;
-4. prove `product_id` and `product_image_id` still exist and the Build 197 index is still absent;
-5. capture the immediate pre-write `product_image_annotations` row count;
-6. create a fresh full Production D1 backup dedicated to annotation;
-7. verify backup path, bytes, SHA-256, target UUID and <=30-minute age;
-8. re-read the targeted annotation state after backup and refuse drift;
-9. create only `idx_product_image_annotations_product_image_build197` if still absent;
-10. prove the annotation row count is unchanged and the index exists;
-11. run an independent read-only postcheck;
-12. keep Production promotion closed.
+1. green Product-number Production proof;
+2. green Gift Card Production proof;
+3. green corrected full Build 403 Notification Production proof;
+4. exact annotation authorization token;
+5. fresh Build 432 annotation read-only preflight;
+6. required `product_id` and `product_image_id` columns present;
+7. Build 197 composite index still absent;
+8. fresh full Production D1 backup dedicated to annotation;
+9. backup target/bytes/SHA-256/<=30-minute verification;
+10. exact state reread after backup;
+11. only the canonical Build 197 index DDL;
+12. exact `product_image_annotations` row preservation;
+13. independent read-only postcheck;
+14. Production promotion closed.
 
 ## Still locked
 
 ```text
-Membership rebuild authorization            NOT RECEIVED
-Fractional Inventory rebuild authorization NOT RECEIVED
-Product/FK rebuild authorization           NOT RECEIVED
-Accounting/default rebuild authorization  NOT RECEIVED
-R2/provider mutation                       DISABLED
-Production promotion                       CLOSED
+Membership rebuild authorization             NOT RECEIVED
+Fractional Inventory rebuild authorization   NOT RECEIVED
+Product/FK rebuild authorization             NOT RECEIVED
+Accounting/default rebuild authorization     NOT RECEIVED
+R2/provider mutation                         DISABLED
+Production promotion                         CLOSED
 ```
 
 ## Gate state
@@ -113,8 +117,8 @@ Build 431  Full Build 403 Notification boundary               PASS (20/20)
 Build 432  Full Build 403 Notification Production stage       PASS
 Build 432  Build 197 annotation-index authorization boundary  PASS (20/20)
 
+Annotation Production authorization                           RECEIVED
 Annotation Production backup                                  NOT CREATED
-Annotation Production authorization                           NOT RECEIVED
 Annotation Production mutation                                NOT EXECUTED
 Production promotion                                          CLOSED
 ```
