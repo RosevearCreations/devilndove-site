@@ -3,12 +3,12 @@
 // Session/user identity is always resolved per request.
 
 import { getDb, getRequestToken, normalizeText } from './adminAudit.js';
-import { MODULE_KEYS, moduleKeyForPath } from './appModuleRoutes.js';
+import { MODULE_KEYS } from './appModuleRoutes.js';
 
 export { MODULE_KEYS, moduleKeyForPath } from './appModuleRoutes.js';
 
 export const BUILD = 438;
-export const MODULE_CACHE_TTL_MS = 30_000;
+export const MODULE_CACHE_TTL_MS = 5_000;
 
 const DEFAULT_MODULES = Object.freeze([
   Object.freeze({
@@ -83,12 +83,22 @@ function normalizeRoleRow(row) {
   };
 }
 
-function fallbackConfig(reason = 'schema_not_ready') {
+function compatibilityConfig(reason = 'schema_not_ready') {
   return {
     schema_ready: false,
     source: 'build438_defaults',
     reason,
     modules: cloneRows(DEFAULT_MODULES),
+    role_access: cloneRows(DEFAULT_ROLE_ACCESS),
+  };
+}
+
+function failClosedConfig(reason = 'module_config_read_failed') {
+  return {
+    schema_ready: false,
+    source: 'fail_closed',
+    reason,
+    modules: cloneRows(DEFAULT_MODULES).map((module) => ({ ...module, is_enabled: 0, background_activity_enabled: 0 })),
     role_access: cloneRows(DEFAULT_ROLE_ACCESS),
   };
 }
@@ -105,11 +115,13 @@ export async function readModuleConfig(env, { force = false } = {}) {
 
   const db = getDb(env);
   if (!db) {
-    const config = fallbackConfig('database_binding_missing');
+    const config = failClosedConfig('database_binding_missing');
     moduleConfigCache = config;
     moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
     return config;
   }
+
+  const priorConfig = moduleConfigCache;
 
   try {
     const [moduleResult, roleResult] = await Promise.all([
@@ -144,9 +156,28 @@ export async function readModuleConfig(env, { force = false } = {}) {
   } catch (error) {
     const message = normalizeText(error?.message).toLowerCase();
     const missingSchema = message.includes('no such table') || message.includes('app_modules') || message.includes('app_module_role_access');
-    const config = fallbackConfig(missingSchema ? 'schema_not_ready' : 'module_config_read_failed');
+
+    if (missingSchema) {
+      const config = compatibilityConfig('schema_not_ready');
+      moduleConfigCache = config;
+      moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
+      return config;
+    }
+
+    if (priorConfig?.modules?.length) {
+      const stale = {
+        ...priorConfig,
+        source: `${priorConfig.source || 'd1'}_stale`,
+        reason: 'module_config_read_failed_using_last_known',
+      };
+      moduleConfigCache = stale;
+      moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
+      return stale;
+    }
+
+    const config = failClosedConfig('module_config_read_failed');
     moduleConfigCache = config;
-    moduleConfigExpiresAt = Date.now() + Math.min(MODULE_CACHE_TTL_MS, 10_000);
+    moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
     return config;
   }
 }
