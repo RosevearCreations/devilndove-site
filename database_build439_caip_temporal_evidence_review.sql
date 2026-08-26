@@ -138,9 +138,12 @@ INSERT INTO creative_provider_profiles(
 ON CONFLICT(provider_key) DO UPDATE SET
   display_name=excluded.display_name,
   capability_key=excluded.capability_key,
+  lifecycle_status='disabled',
   endpoint_policy=excluded.endpoint_policy,
   config_redacted_json=excluded.config_redacted_json,
   consent_required=excluded.consent_required,
+  default_budget_cap_cents=0,
+  disabled_at=CURRENT_TIMESTAMP,
   updated_at=CURRENT_TIMESTAMP;
 
 INSERT INTO schema_migration_ledger (migration_key,file_name,applied_at,notes)
