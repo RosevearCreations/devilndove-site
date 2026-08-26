@@ -31,7 +31,13 @@ check('gift_card_lookup_attempt_rows' in PRE and 'gift_cards_rows' in PRE and 'g
 check("'production_backup_created': False" in PRE and "'gift_card_authorization_received': False" in PRE, 'Gift Card preflight cannot infer backup or authorization')
 check("'production_mutation_executed': False" in PRE and "'production_promotion_open': False" in PRE, 'Gift Card preflight cannot claim mutation or promotion')
 check("'gift': 'AUTHORIZE-BUILD428-PROD-GIFT-CARD'" in EXEC, 'Gift Card executor requires exact separate authorization token')
-check('export_backup(stage)' in EXEC and "'d1', 'export', PROD_NAME" in EXEC, 'Gift Card executor requires a full remote Production D1 export')
+check(
+    'def export_backup(stage: str)' in EXEC
+    and "'d1', 'export', PROD_NAME" in EXEC
+    and "'--remote'" in EXEC
+    and "'--skip-confirmation'" in EXEC,
+    'Gift Card executor requires a full remote Production D1 export',
+)
 check('hashlib.sha256' in EXEC and 'backup_sha256' in EXEC and 'MAX_BACKUP_AGE_SECONDS = 1800' in EXEC, 'Gift Card backup records SHA-256 and has a 30-minute age limit')
 check('verify_backup(stage)' in EXEC and 'current_state(stage)' in EXEC, 'Gift Card apply re-verifies backup and targeted before-state')
 check('stage_complete(stage, after)' in EXEC and "after['row_count'] == before['row_count']" in EXEC, 'Gift Card apply requires schema completion plus lookup-row preservation')
