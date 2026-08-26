@@ -1,11 +1,16 @@
-// Build 202 — authenticated same-origin CAIP review proxy.
+// Build 439 — authenticated same-origin CAIP review proxy with bounded R2 range streaming.
 // Token is opaque, short lived, bound to the issuing administrator, and never stored raw in D1.
+// Large media is streamed directly from the bound bucket; the Worker never buffers the object.
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { authorizeSecureReviewGrant, recordSecureReviewServed } from '../_lib/creativeAssetOperations.js';
 import { resolveCaipBucket } from '../_lib/caipMediaIntake.js';
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+}
+function numeric(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 export async function onRequestGet(context) {
@@ -19,34 +24,72 @@ export async function onRequestGet(context) {
     const authorized = await authorizeSecureReviewGrant(db, token, adminUser);
     const bucket = resolveCaipBucket(env, authorized.storage_provider, authorized.bucket_name);
     if (!bucket || typeof bucket.get !== 'function') throw new Error('R2 review proxy is unavailable because the matching public/private media bucket binding is not configured.');
-    const object = await bucket.get(authorized.object_key);
+
+    // Cloudflare R2 accepts conditional/range request Headers directly. The returned
+    // body remains a ReadableStream, so large video/audio is never buffered in Worker memory.
+    const object = await bucket.get(authorized.object_key, {
+      onlyIf: request.headers,
+      range: request.headers,
+    });
     if (!object) throw new Error('The R2 review object was not found. Source media has not been changed.');
-    const http = object.httpMetadata || {};
-    const mime = http.contentType || authorized.mime_type || 'application/octet-stream';
-    await recordSecureReviewServed(db, authorized.grant, adminUser.user_id, {
-      source_storage_provider: authorized.storage_provider || 'r2', object_key_present: true,
-      content_type: mime, no_copy: true, no_cache: true
-    });
-    const headers = new Headers({
-      'Content-Type': mime,
-      'Cache-Control': 'private, no-store, max-age=0',
-      'Pragma': 'no-cache',
-      'X-Content-Type-Options': 'nosniff',
-      'Cross-Origin-Resource-Policy': 'same-origin',
-      'Referrer-Policy': 'no-referrer',
-      'X-Frame-Options': 'DENY',
-      'Content-Disposition': `inline; filename="${authorized.filename}"`,
-      'Vary': 'Cookie'
-    });
-    if (Number.isFinite(Number(object.size)) && Number(object.size) > 0) headers.set('Content-Length', String(object.size));
-    if (object.etag) headers.set('ETag', object.etag);
-    if (http.cacheControl) headers.set('X-Source-Cache-Control', http.cacheControl);
-    return new Response(object.body, { status: 200, headers });
+
+    const headers = new Headers();
+    if (typeof object.writeHttpMetadata === 'function') object.writeHttpMetadata(headers);
+    const mime = headers.get('Content-Type') || object.httpMetadata?.contentType || authorized.mime_type || 'application/octet-stream';
+    headers.set('Content-Type', mime);
+    headers.set('Cache-Control', 'private, no-store, max-age=0');
+    headers.set('Pragma', 'no-cache');
+    headers.set('X-Content-Type-Options', 'nosniff');
+    headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+    headers.set('Referrer-Policy', 'no-referrer');
+    headers.set('X-Frame-Options', 'DENY');
+    headers.set('Content-Disposition', `inline; filename="${authorized.filename}"`);
+    headers.set('Vary', 'Cookie, Range');
+    headers.set('Accept-Ranges', 'bytes');
+    headers.set('X-DND-CAIP-Review', '439');
+    if (object.httpEtag || object.etag) headers.set('ETag', object.httpEtag || `"${object.etag}"`);
+
+    // R2 returns metadata-only when an HTTP precondition fails.
+    if (!('body' in object) || !object.body) {
+      return new Response(null, { status: 412, headers });
+    }
+
+    const requestedRange = request.headers.get('Range') || '';
+    const range = object.range || null;
+    let status = 200;
+    if (requestedRange && range && Number.isFinite(Number(range.offset)) && Number.isFinite(Number(range.length))) {
+      const offset = Math.max(0, numeric(range.offset));
+      const length = Math.max(0, numeric(range.length));
+      const end = Math.max(offset, offset + Math.max(0, length - 1));
+      headers.set('Content-Range', `bytes ${offset}-${end}/${Math.max(0, numeric(object.size))}`);
+      headers.set('Content-Length', String(length));
+      status = 206;
+    } else if (Number.isFinite(Number(object.size)) && Number(object.size) >= 0) {
+      headers.set('Content-Length', String(object.size));
+    }
+
+    // A video player may issue many range requests. Count/audit the first served request
+    // for a grant, but do not turn every seek/chunk into D1 writes. The token remains
+    // short-lived and bound to the issuing administrator.
+    const shouldRecordGrantUse = !requestedRange || numeric(authorized.grant?.access_count) === 0;
+    if (shouldRecordGrantUse) {
+      await recordSecureReviewServed(db, authorized.grant, adminUser.user_id, {
+        source_storage_provider: authorized.storage_provider || 'r2',
+        object_key_present: true,
+        content_type: mime,
+        ranged_streaming: Boolean(requestedRange),
+        no_copy: true,
+        no_cache: true,
+        build: 439,
+      });
+    }
+
+    return new Response(object.body, { status, headers });
   } catch (error) {
     await captureRuntimeIncident(env, request, {
       incident_scope: 'creative_asset_secure_review', incident_code: 'caip_secure_review_failed', severity: 'warning',
       message: error?.message || 'Secure asset review failed.', related_user_id: adminUser.user_id,
-      details: { raw_token_not_logged: true, error: String(error?.message || error) }
+      details: { raw_token_not_logged: true, range_requested: Boolean(request.headers.get('Range')), error: String(error?.message || error) }
     });
     return json({ ok: false, error: error?.message || 'Secure asset review failed.' }, 400);
   }
