@@ -1,171 +1,312 @@
-# Build 438 — Application Core / Module Registry Plan
+# Build 438 — Application Core / Module Activation Authority
 
 ## Status
 
-**PLANNED NEXT APPLICATION RELEASE / NO PRODUCTION MUTATION AUTHORIZED**
+**SOURCE IMPLEMENTATION IN PROGRESS / DEVELOPMENT-FIRST / NO PRODUCTION D1 MUTATION AUTHORIZED / PRODUCTION PROMOTION CLOSED**
 
-Build 438 is the next planned application-architecture release after the completed Build 437 Membership/release work. It does not reopen Membership and it does not authorize any Production schema mutation by itself.
+Build 438 completes the activation and access-control layer around modular work that already exists in the repository. It does **not** invent a competing module system and it does not reopen Build 437 Membership work.
 
-## Why Build 438 exists
+## Architecture discovered in the existing codebase
 
-Devil n Dove already has several substantial application surfaces, but they are currently separated mainly by routes and authentication. The missing architectural layer is one central authority that defines which application modules exist, whether each module is active, which roles/users may load it, which routes belong to it, and whether any module-specific background activity is allowed to run.
+Builds 281–397 already established a passive client-side module registry, business-domain catalog, service contracts and three top-level umbrella runtimes under `public/js/core/` and `public/js/modules/`.
 
-The goal is **one application with separately loadable modules**, not several disconnected applications and not one monolithic Admin surface.
+The real application architecture is therefore:
 
-## Current functional application surfaces
+```text
+Devil n Dove Application Core
+    |
+    +-- commerce-operations
+    +-- creative-production
+    +-- business-administration
+```
 
-The existing codebase already maps naturally into four modules.
+The Customer storefront and Member account are important application **surfaces**, but they are not separate top-level runtime modules. They live inside the Commerce & Operations authority together with Catalog, Inventory, Orders, Membership and fulfillment.
 
-### 1. `customer_commerce` — Customer Commerce
+## Existing top-level modules
 
-Existing capabilities include the public website, Shop, Cart/checkout, product discovery, custom requests, registration/login and customer-facing content.
+### 1. `commerce-operations` — Commerce & Operations
 
-Initial activation rule: public module, normally enabled globally.
+Owns or composes the existing public/customer/storefront, Catalog, Inventory and day-to-day Operations domains.
 
-### 2. `member_account` — Customer / Member Account
+Representative surfaces:
 
-Existing capabilities include `/members/`, profile/account tools, orders/order detail, wishlist, reviews, downloads and Membership tier presentation.
+- public Shop, Cart, Checkout and product/customer workflows;
+- Members account surface;
+- Catalog/Product administration;
+- Inventory administration;
+- Orders and customer documents;
+- Membership and Gift Cards;
+- custom requests and Today Tasks.
 
-Initial activation rule: requires authenticated user; access may later vary by account state or registration.
+Existing umbrella runtime: `public/js/modules/commerce-operations/runtime.mjs`.
 
-### 3. `operations` — Creative & Production Operations
+### 2. `creative-production` — Creative & Production
 
-Existing capabilities include Creative Process / Creative Project Workflow, CAIP / Creative Assets, Packaging Studio, Content Studio, production/material usage workflows, operational Inventory use and related review/evidence tools.
+Owns or composes the Creative, CAIP, Packaging and Content domains.
 
-Initial activation rule: authenticated staff/operator roles only. When inactive, no Operations navigation, startup API reads, timers, polling, sync or provider work should run.
+Representative surfaces:
 
-### 4. `business_admin` — Business Administration
+- Creative Process / Creative Project Workflow;
+- CAIP / Creative Assets;
+- Packaging Studio;
+- Website Media & Content Studio;
+- Content Studio;
+- visual enrichment/image-manifest/stage-photo/content-publication workflows.
 
-Existing capabilities include Catalog administration, Inventory administration, Members, Orders/Payments, Accounting, Analytics, Operations/settings/security, Application Sanity, Release & Go-Live and other business-management surfaces.
+Existing umbrella runtime: `public/js/modules/creative-production/runtime.mjs`.
 
-Initial activation rule: authenticated business-admin roles only.
+### 3. `business-administration` — Business & Administration
 
-## Current modularity truth
+Owns or composes Marketing, Accounting, Platform and Administration domains.
 
-The four functional surfaces exist, but the true module control layer does **not** yet exist. Current separation is primarily route/auth based.
+Representative surfaces:
 
-A repository search at the Build 437 baseline found no central `module_registry`, `app_modules` or `enabled_modules` authority. Therefore Build 438 must add the control layer without rewriting the working subsystems.
+- Accounting;
+- Analytics, SEO, marketing and marketplace controls;
+- users/security/settings;
+- Application Sanity;
+- Release & Go-Live / deployment / promotion / runtime diagnostics.
 
-## Required core data model
+Existing umbrella runtime: `public/js/modules/business-administration/runtime.mjs`.
 
-Preferred canonical model:
+## What Build 438 adds
+
+Before Build 438, the existing registry/runtime framework was intentionally passive and largely client-side. It could classify routes and lazy-load proven domain runtimes, but there was no single persistent authority for:
+
+- globally enabling/disabling a top-level module;
+- role-to-module access;
+- blocking direct module-owned page/API access;
+- suppressing runtime activation for a disabled module;
+- granting or denying module-owned background activity;
+- auditing module configuration changes.
+
+Build 438 adds that missing central control plane while preserving the existing module/domain extraction work.
+
+## Canonical D1 authority
+
+Focused migration:
+
+`database_build438_application_module_activation.sql`
+
+Tables:
 
 ```text
 app_modules
-────────────────────────────────────────
-module_key                TEXT PRIMARY KEY
-name                      TEXT NOT NULL
-description               TEXT NOT NULL DEFAULT ''
-is_enabled                INTEGER NOT NULL DEFAULT 1
-requires_login            INTEGER NOT NULL DEFAULT 0
-default_route             TEXT NOT NULL DEFAULT '/'
-load_priority             INTEGER NOT NULL DEFAULT 100
-background_activity       INTEGER NOT NULL DEFAULT 0
-created_at                TEXT NOT NULL
-updated_at                TEXT NOT NULL
-```
+----------------------------------------
+module_key                 PRIMARY KEY
+display_name
+description
+is_enabled
+requires_login
+default_route
+load_priority
+background_activity_enabled
+created_at
+updated_at
 
-Per-role access should be explicit rather than encoded only in browser navigation:
-
-```text
 app_module_role_access
-────────────────────────────────────────
+----------------------------------------
 module_key
 role_code
 is_allowed
 access_level
+created_at
+updated_at
+PRIMARY KEY (module_key, role_code)
 ```
 
-Optional per-user overrides may be added only if a real use case requires them:
+Default module records are exactly:
 
 ```text
-app_module_user_access
-────────────────────────────────────────
-user_id
-module_key
-is_allowed
-access_level
+commerce-operations       enabled
+creative-production       enabled
+business-administration   enabled
 ```
 
-Do not add per-user overrides merely because the schema can support them.
+All default background activity permissions are OFF. This is deliberate: a module may be enabled for interactive use without being implicitly authorized to create polling/sync/provider traffic.
 
-## Required runtime contract
+Current account roles remain only `member` and `admin`. Build 438 does not invent an operator/creator role before the user model supports one.
 
-A module that is disabled or unavailable to the current user must be **inactive**, not merely hidden.
-
-For an inactive module:
-
-1. Do not show module navigation/cards.
-2. Direct browser routes fail closed with an appropriate access/unavailable response.
-3. Module JavaScript bundles should not initialize when avoidable.
-4. Module startup/bootstrap API calls do not run.
-5. Module timers/polling do not run.
-6. Module autosave/synchronization does not run.
-7. Module provider/R2 work does not run.
-8. Module-specific diagnostics do not continuously poll.
-9. Shared core services may remain available only when another enabled module genuinely needs them.
-
-This is both an architecture requirement and a Cloudflare resource-efficiency requirement.
-
-## Required shared core
-
-The following stay in the shared application core and are not individually switchable business modules:
-
-- authentication/session handling;
-- authorization helpers;
-- D1 access wrappers and schema/read helpers;
-- common error/fallback handling;
-- shared navigation shell and responsive design primitives;
-- core security/CSP behavior;
-- bounded analytics where applicable;
-- shared release/build metadata;
-- module-registry read service and route guard.
-
-## Build 438 implementation sequence
-
-1. Add the canonical module registry authority and default four module records.
-2. Add role-to-module access authority using existing role semantics rather than inventing a second unrelated role system.
-3. Add one shared server-side module-access service.
-4. Add a read-only client bootstrap endpoint returning only the current user's available module summary.
-5. Add server-side route/API guards for module-owned endpoints where needed.
-6. Add a client module loader/guard that does not initialize inactive surfaces.
-7. Map existing routes to the four module keys.
-8. Update Admin Dashboard navigation/cards to render by module availability.
-9. Update member/customer navigation similarly where appropriate.
-10. Gate module timers, polling, autosave, sync and expensive startup work.
-11. Add an Admin **Application Modules** screen showing module state, roles and dependencies.
-12. Changes to module activation must be audited.
-13. Disabling a module must never delete its business data.
-14. Re-enabling a module must restore access without data reconstruction.
-15. Add mobile/desktop regression checks for module-aware navigation.
-16. Add API tests proving hidden navigation is not the security boundary.
-17. Add tests proving direct access to a disabled module fails closed.
-18. Add tests proving inactive modules generate no startup/background requests.
-19. Update `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md` with implementation evidence when complete.
-20. Only then consider Build 438 complete.
-
-## Initial role direction
-
-Do not hard-code this as irreversible policy, but use it as the first mapping unless existing role evidence requires a narrower rule:
+Initial access:
 
 ```text
-customer/member roles     -> customer_commerce + member_account
-operator/creator roles    -> operations
-admin/business roles      -> business_admin + operations
+member -> commerce-operations allowed
+member -> creative-production denied
+member -> business-administration denied
+
+admin  -> commerce-operations allowed/manage
+admin  -> creative-production allowed/manage
+admin  -> business-administration allowed/manage
 ```
 
-An administrator may have access to all enabled modules, but global module disablement should still win unless a deliberate break-glass mechanism is later designed.
+No per-user override table is added in Build 438. Add one only when a real use case requires it.
 
-## Build 438 non-goals
+## Shared-core server authority
 
-Build 438 should not rewrite Creative Process, CAIP, Packaging Studio, Content Studio, Catalog, Accounting or Member functionality.
+`functions/api/_lib/appModules.js` owns:
 
-It should not automatically begin the remaining schema-parity families.
+- bounded non-user module configuration reads;
+- request-scoped current-session identity;
+- module availability decisions;
+- role/access-level evaluation;
+- read-only current-user module summaries;
+- standard unavailable responses.
 
-It should not authorize:
+`functions/api/_lib/appModuleRoutes.js` owns the server-side route/API-to-top-level-module map and mirrors the existing Build 302+ domain ownership.
+
+The server module configuration may be cached briefly per isolate because it is not request-specific. Session/user identity is never stored as global request state.
+
+Request handlers must never create or repair `app_modules` or `app_module_role_access` at runtime.
+
+## Pages middleware boundary
+
+Root `functions/_middleware.js` applies the module decision before module-owned page/API execution.
+
+For a disabled or unauthorized module:
+
+- direct page access fails closed;
+- direct API access fails closed;
+- module page JavaScript never gets a chance to initialize;
+- `read` access cannot perform non-read API methods;
+- static assets and auth routes remain available;
+- the Application Modules recovery/control surface remains available to an administrator.
+
+The recovery surface exemption is intentional:
 
 ```text
-Fractional Inventory / Creative Project Production rebuilds
+/admin/application-modules/
+/api/admin/app-modules
+```
+
+An administrator must not be able to lock themselves out of the switch used to re-enable a module.
+
+## Client activation authority
+
+`public/js/core/dd-application-module-bootstrap.mjs` performs one authoritative `/api/modules` read before the existing Admin module runtime is imported.
+
+It exposes `window.DDApplicationModules` with:
+
+- module snapshot/list/get;
+- `isEnabled(moduleKey)`;
+- `isAvailable(moduleKey)`;
+- `canBackground(moduleKey)`;
+- route-to-module lookup;
+- navigation filtering;
+- explicit refresh after a control change.
+
+It adds no polling loop.
+
+If the current top-level module is unavailable, the older umbrella/domain runtime is not imported/activated.
+
+`public/js/core/dd-public-module-visibility.mjs` provides the smaller public/member presentation pass. It may hide disabled commerce/admin destinations, but server middleware remains the access/security boundary.
+
+## Admin Application Modules control
+
+`/admin/application-modules/` is a shared-core Admin screen.
+
+It can:
+
+1. enable/disable one of the three top-level modules;
+2. allow/disallow module-owned background activity;
+3. update current `member`/`admin` role access and access level;
+4. display whether the Build 438 D1 authority is actually present.
+
+All mutations use `/api/admin/app-modules` and are written to the existing `admin_action_audit` authority.
+
+If the Build 438 schema is absent, the screen is read-only and explicitly says so. It does not self-heal schema.
+
+Disabling a module never deletes module business data. Re-enabling it must restore access without reconstructing business records.
+
+## Existing runtime extraction remains incremental
+
+Build 438 central activation can be complete while individual business-domain extraction remains `in-progress`.
+
+Do not falsely claim that every mutation has moved into a top-level umbrella runtime. Existing Build 302–397 contracts deliberately preserve many compatibility mutation authorities while moving/covering proven reads.
+
+Examples:
+
+- Commerce & Operations has substantial Catalog/Inventory/Operations read coverage but does not magically own every mutation.
+- Creative & Production covers Packaging, Creative Process, Content Studio and CAIP activation/read boundaries while legacy mutation authorities still exist where explicitly preserved.
+- Business & Administration has proven Accounting runtime coverage; other Marketing/Platform/Admin domains may remain domain-bridge surfaces.
+
+Build 438 controls whether a top-level module may run; it does not rewrite every underlying business subsystem.
+
+## Resource-efficiency contract
+
+Build 438 introduces no recurring polling.
+
+A disabled module must not initiate avoidable:
+
+- startup/bootstrap business reads;
+- umbrella/domain runtime imports;
+- module polling;
+- autosave/sync;
+- provider/R2 work;
+- module-specific background diagnostics.
+
+`background_activity_enabled` is a permission, not a scheduler. Existing/future module-owned background code must explicitly check `canBackground()`/server authority before running.
+
+The existing top-level runtimes are intentionally passive and report that importing them creates no network transport.
+
+### Known efficiency consideration
+
+The root middleware performs an indexed session/user resolution for authenticated module-owned requests so role access can be enforced centrally. Many legacy endpoints also perform their own authentication query. That creates a temporary duplicate indexed session read on some paths.
+
+This is accepted for the first secure activation boundary, but should be measured. A future runtime/auth consolidation may pass verified request identity through shared middleware context to eliminate duplicate auth reads without weakening endpoint authorization.
+
+Do **not** cache request-specific user/session identity globally merely to remove that query.
+
+## Build 438 source validation
+
+Local regression:
+
+`scripts/build438_application_module_core_regression.py`
+
+The regression executes the migration twice against in-memory SQLite and verifies 20 source/security/architecture contracts.
+
+Read-only D1 verification:
+
+`BUILD438_D1_VERIFICATION.sql`
+
+Expected post-migration D1 identities:
+
+```text
+module_count          3
+role_access_count     6
+enabled_module_count  3
+expected_module_count 3
+```
+
+## Development-first rollout
+
+1. Compile/check Build 438 source locally.
+2. Run the Build 438 20-check local regression.
+3. Back up Development D1 if desired under normal parity discipline.
+4. Apply `database_build438_application_module_activation.sql` to **Development only**.
+5. Run `BUILD438_D1_VERIFICATION.sql` against Development.
+6. Deploy/preview Development.
+7. Verify `/api/modules` shows D1 authority and three modules.
+8. Open `/admin/application-modules/`.
+9. In Development, disable/re-enable each module one at a time.
+10. Prove disabled module routes/APIs fail closed and the control page remains reachable.
+11. Prove no business rows are deleted.
+12. Prove navigation/runtime activation follows module state.
+13. Prove read-only access blocks mutation methods.
+14. Review request counts/Worker behavior for regressions.
+15. Update canonical Markdown with Development evidence.
+16. Only after Development is green decide whether Production needs the additive Build 438 migration.
+
+## Production safety
+
+Build 438 Production D1 mutation is **NOT AUTHORIZED**.
+
+The completed Build 437 Membership token is spent and unrelated.
+
+This work does not authorize:
+
+```text
+Build 438 Production D1 migration
+Fractional Inventory / Creative Project rebuilds
 Product / foreign-key rebuilds
 Accounting default/nullability rebuilds
 R2/provider mutation
@@ -173,22 +314,18 @@ CAIP D1-only media copy
 Broad Production promotion
 ```
 
-## Functional roadmap after the module core
+A normal “continue” or feature request is source/development authorization, not Production DDL/DML authorization.
 
-Once Build 438 is complete, high-value functionality continues inside the appropriate module:
+## Functional roadmap after the activation core
+
+After Build 438 Development proof, continue the existing requested feature work inside the correct module:
 
 1. CAIP video review with exact timecode/range evidence.
-2. Verified bounded proxy/frame/audio/transcript provider integration.
-3. Reviewed Creative Process -> CAIP -> Content Studio story/package handoff.
-4. Packaging physical print/wrap proof, bilingual overflow strategy and source/INCI/allergen review.
+2. Verified bounded proxy/frame/audio/transcript processing.
+3. Reviewed Creative Process -> CAIP -> Content Studio handoff.
+4. Packaging physical print/wrap proof and regulatory/source review ergonomics.
 5. Product/Inventory reversal, lot-aware costing, reference inspection and review queues.
-6. Media & Content Studio P1/P2 real-image replacement and public-page polish.
-7. Reviewed social scheduling/publishing and downstream analytics.
-8. Dedicated mobile operator/admin workflows including quick expense/write-off/product/receiving actions.
-9. Final go-live reliability evidence and controlled broad promotion when the remaining release gates are genuinely green.
-
-## Release safety
-
-Build 437 is the current completed release baseline. Membership Build 395 is complete/proven and its Production authorization token is spent.
-
-Production mutation remains explicit and scope-specific. A normal feature-development request does not authorize Production DDL/DML. Broad Production promotion remains closed until separately approved.
+6. Media & Content Studio P1/P2 real-image replacement.
+7. Reviewed social scheduling/publishing and post-release analytics.
+8. Dedicated mobile operator/business workflows.
+9. Final go-live reliability evidence before broad Production promotion.
