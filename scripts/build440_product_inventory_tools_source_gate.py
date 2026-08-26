@@ -3,8 +3,9 @@
 
 Build 440 preserves proven Product removal and fractional Inventory authority,
 adds the Product Delete Reference Inspector, safe resource-asset URL handling,
-and audited Finished Production reversal. It syntax-checks touched APIs/UI and
-never contacts Cloudflare, D1, R2, or providers.
+audited Finished Production reversal, and Inventory physical-count / usage-setup
+review. It syntax-checks touched APIs/UI and never contacts Cloudflare, D1, R2,
+or providers.
 """
 from __future__ import annotations
 
@@ -22,11 +23,14 @@ STEPS = (
     ('Build 440 Product Delete Reference Inspector regression', [PYTHON, 'scripts/build440_product_reference_inspector_regression_test.py']),
     ('Build 440 Resource Asset URL regression', ['node', 'scripts/build440_resource_asset_url_regression_test.mjs']),
     ('Build 440 Finished Production Reversal regression', [PYTHON, 'scripts/build440_finished_production_reversal_regression_test.py']),
+    ('Build 440 Inventory Integrity Review regression', [PYTHON, 'scripts/build440_inventory_integrity_review_regression_test.py']),
     ('Build 440 delete-product UI JavaScript syntax', ['node', '--check', 'public/js/admin-delete-product.js']),
     ('Build 440 cleanup-centre UI JavaScript syntax', ['node', '--check', 'public/js/admin-product-cleanup.js']),
     ('Build 440 resource-search API JavaScript syntax', ['node', '--check', 'functions/api/admin/product-resource-search.js']),
     ('Build 440 production-reversal API JavaScript syntax', ['node', '--check', 'functions/api/admin/product-production-reversal.js']),
     ('Build 440 production-reversal UI JavaScript syntax', ['node', '--check', 'public/js/admin-product-production-reversal.js']),
+    ('Build 440 Inventory Integrity API JavaScript syntax', ['node', '--check', 'functions/api/admin/inventory-integrity-review.js']),
+    ('Build 440 Inventory Integrity UI JavaScript syntax', ['node', '--check', 'public/js/admin-inventory-integrity-review.js']),
     ('Build 440 Admin loader JavaScript syntax', ['node', '--check', 'public/js/admin.js']),
     ('Tools public API JavaScript syntax baseline', ['node', '--check', 'functions/api/tools.js']),
 )
@@ -68,6 +72,9 @@ def main() -> int:
     print('Reversal raw-stock basis: IMMUTABLE RUN SNAPSHOT')
     print('Reversal finished-stock guard: FAIL-CLOSED CURRENT QUANTITY')
     print('Double reversal: BLOCKED')
+    print('Inventory physical count: PASS / AUDITED / CONCURRENCY-GUARDED')
+    print('Usage Setup Required: PASS / LEGACY SAFE DEFAULT REVIEW')
+    print('Inventory integrity authority: EXISTING TABLES / NO NEW SCHEMA')
     print('Protected history deletion authority: UNCHANGED')
     print('R2 object mutation executed: NO')
     print('Schema migration required for this slice: NO')
