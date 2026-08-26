@@ -1,8 +1,8 @@
-# Build 433 — Authorized Build 197 Annotation-Index Production Execution Validation
+# Build 433 — Build 197 Annotation-Index Production Execution Validation
 
 ## Status
 
-**ANNOTATION AUTHORIZED / GUARDED BACKUP + APPLY + POSTCHECK PENDING / ALL REBUILD FAMILIES LOCKED / PRODUCTION PROMOTION CLOSED**
+**PASS — BUILD 197 ANNOTATION PRODUCTION STAGE COMPLETE / BACKUP + APPLY + INDEPENDENT POSTCHECK PROVEN / ALL REBUILD FAMILIES LOCKED / PRODUCTION PROMOTION CLOSED**
 
 The owner explicitly authorized only:
 
@@ -10,184 +10,111 @@ The owner explicitly authorized only:
 AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX
 ```
 
-The authorized scope is exactly:
+The authorized and executed scope was exactly:
 
 ```sql
 CREATE INDEX IF NOT EXISTS idx_product_image_annotations_product_image_build197
   ON product_image_annotations(product_id, product_image_id);
 ```
 
-Do not run this SQL manually in the Cloudflare D1 console. Use the guarded Build 433 controller so the backup, exact-state checks, row-preservation proof, and independent postcheck are all enforced.
+No Membership, fractional Inventory, Product/FK, Accounting/default, R2/provider, CAIP-copy, or Production-promotion action was authorized or executed.
 
-## Preconditions already proven
-
-```text
-Product-number Production stage                    COMPLETE / PROVEN
-Gift Card Production stage                         COMPLETE / PROVEN
-Full Build 403 Notification Production stage       COMPLETE / PROVEN
-Build 197 annotation authorization boundary        PASS (20/20)
-Boundary product_image_annotations rows             70
-Build 197 annotation index                          ABSENT
-Required product_id/product_image_id columns        PRESENT
-```
-
-The immediate pre-write row count is live. If legitimate activity changes the count from 70 before execution, the fresh preflight count becomes the preservation boundary.
-
-## Guarded controller
-
-Use only:
+## Owner-run Build 433 source/safety proof
 
 ```text
-scripts/build433_production_annotation_execution.py
+BUILD 433 ANNOTATION EXECUTION SAFETY REGRESSION: PASS (20/20)
+Annotation Production authorization token path: PRESENT / NOT EXERCISED
+Product/Gift/Notification prerequisites: SOURCE-GATED
+Annotation full-backup boundary: PASS
+Exact pre-write drift refusal: PASS
+product_image_annotations row preservation: PASS
+Membership/rebuild execution path: NONE
+Cloudflare access: NONE
+Production mutation executed: NO
+PRODUCTION PROMOTION: CLOSED
 ```
 
-It requires:
-
-1. exact annotation authorization token;
-2. green Product-number Production proof;
-3. green Gift Card Production proof;
-4. green corrected full Build 403 Notification Production proof;
-5. fresh Build 432 annotation read-only preflight;
-6. both required annotation columns present;
-7. Build 197 composite index still absent;
-8. exact live annotation row boundary;
-9. fresh full Production D1 backup;
-10. backup UUID/bytes/SHA-256/<=30-minute verification;
-11. post-backup state reread with drift refusal;
-12. only the canonical Build 197 composite index DDL;
-13. exact annotation-row preservation;
-14. independent read-only postcheck;
-15. Production promotion closed.
-
-## Run sequence
-
-Run from `dev` only. `set -o pipefail` prevents `tee` from hiding a failed Python stage. The `&&` chain prevents advancement after any non-zero result.
-
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-set -o pipefail
-
-python -m py_compile \
-  scripts/build433_production_annotation_execution.py \
-  scripts/build433_annotation_execution_regression.py \
-  scripts/build432_annotation_authorization_preflight.py \
-  scripts/build428_production_additive_execution.py \
-&& \
-python scripts/build433_annotation_execution_regression.py \
-&& \
-echo \
-&& echo "============================================================" \
-&& echo "BUILD 433 FRESH BUILD 197 ANNOTATION PRE-WRITE CHECK" \
-&& echo "============================================================" \
-&& python -u scripts/build432_annotation_authorization_preflight.py --run \
-  2>&1 | tee build433_annotation_fresh_prewrite.txt \
-&& \
-echo \
-&& echo "============================================================" \
-&& echo "BUILD 433 AUTHORIZED ANNOTATION PRODUCTION BACKUP" \
-&& echo "============================================================" \
-&& python -u scripts/build433_production_annotation_execution.py \
-  --backup \
-  --confirm AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX \
-  2>&1 | tee build433_annotation_backup.txt \
-&& \
-echo \
-&& echo "============================================================" \
-&& echo "BUILD 433 AUTHORIZED BUILD 197 ANNOTATION INDEX WRITE" \
-&& echo "============================================================" \
-&& python -u scripts/build433_production_annotation_execution.py \
-  --apply \
-  --confirm AUTHORIZE-BUILD428-PROD-ANNOTATION-INDEX \
-  2>&1 | tee build433_annotation_apply.txt \
-&& \
-echo \
-&& echo "============================================================" \
-&& echo "BUILD 433 FINAL ANNOTATION READ-ONLY POSTCHECK" \
-&& echo "============================================================" \
-&& python -u scripts/build433_production_annotation_execution.py \
-  --postcheck \
-  2>&1 | tee build433_annotation_postcheck.txt
-```
-
-## Required pre-write proof
-
-Before backup:
+Fresh immediate Production evidence before backup proved:
 
 ```text
 Annotation index exists: False
 Required product_id/product_image_id columns present: True
-product_image_annotations rows: <live>
-Exact Build 197 index gap: YES
-BUILD 432 ANNOTATION AUTHORIZATION PREFLIGHT: PASS
-```
-
-The Build 433 controller then repeats the exact state boundary:
-
-```text
-=== BUILD 433 BUILD 197 ANNOTATION PRE-WRITE STATE ===
-Required columns present: True
-Annotation index exists: False
-product_image_annotations rows: <same live count>
+product_image_annotations rows: 70
 Exact Build 197 index gap: YES
 ```
 
-## Required backup proof
+## Dedicated Production backup — PASS
 
 ```text
-BUILD 428 PRODUCTION ANNOTATION BACKUP: PASS
-Backup: local_backups/<annotation-specific full Production export>.sql
-Bytes: <nonzero>
-SHA-256: <digest>
+Production database: devilndove-prod
+Production UUID: 0dc8fa3e-319c-45f7-a515-34c8acd89fcf
+Backup: local_backups\build428_prod_before_annotation_20260826T015019Z.sql
+Bytes: 19003438
+SHA-256: 049a2b85313ac1d411f4c12d736a44f4a5f4f3efb12f3b72e15f7f5d58b481de
 Production mutation executed: NO
+```
 
+The post-export reread proved the targeted state did not change:
+
+```text
 BUILD 433 BUILD 197 ANNOTATION BACKUP BOUNDARY: PASS
-product_image_annotations rows preserved across backup: <before> -> <same>
+product_image_annotations rows preserved across backup: 70 -> 70
 Production mutation executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Required apply proof
+## Authorized index execution — PASS
+
+The backup was reverified at 20 seconds old. The exact pre-write state remained green immediately before DDL.
+
+Wrangler execution evidence:
+
+```text
+Queries processed: 1
+Rows read: 142
+Rows written: 71
+Final bookmark: 00000d41-00000006-000050d3-91cad770acd03e354b46c9ceabfb33de
+```
+
+The Wrangler `rows written` count reflects D1 index/schema implementation work; the business-table preservation proof is the independent `product_image_annotations` count, which remained unchanged.
+
+Immediate postcheck:
 
 ```text
 BUILD 433 PRODUCTION BUILD 197 ANNOTATION POSTCHECK: PASS
-product_image_annotations rows preserved: <before> -> <same>
+product_image_annotations rows preserved: 70 -> 70
 Build 197 annotation index present: True
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Required independent postcheck
+## Independent final read-only postcheck — PASS
 
 ```text
 BUILD 433 PRODUCTION BUILD 197 ANNOTATION READ-ONLY POSTCHECK: PASS
-product_image_annotations rows: <preserved>
+product_image_annotations rows: 70
 Build 197 annotation index present: True
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Stop conditions
-
-- Local regression failure: stop before Cloudflare access.
-- Fresh annotation preflight drift: stop before backup.
-- Build 197 index already exists: do not force a write; reclassify the stage from current state.
-- Required indexed column missing: stop and investigate schema drift.
-- Cloudflare `7403`: stop and classify as authorization/read interruption unless DDL may have started; if DDL may have started, run only the read-only annotation postcheck and retain any completed backup.
-- Backup missing/stale/hash mismatch: stop and recreate only the annotation backup under the same authorized token.
-- Apply/postcheck failure: stop every rebuild family and retain the annotation backup.
-
-## Safety state before execution
+## Closed stage state
 
 ```text
-Annotation Production authorization          RECEIVED
-Annotation Production backup                 NOT CREATED
-Annotation Production mutation               NOT EXECUTED
-Membership rebuild authorization             NOT RECEIVED
-Fractional Inventory authorization           NOT RECEIVED
-Product/FK authorization                     NOT RECEIVED
-Accounting/default authorization             NOT RECEIVED
-R2/provider mutation                         DISABLED
-CAIP D1-only copy                            FORBIDDEN
-Production promotion                         CLOSED
+Product-number Production stage             COMPLETE / PROVEN
+Gift Card Production stage                  COMPLETE / PROVEN
+Full Build 403 Notification stage           COMPLETE / PROVEN
+Build 197 annotation Production stage       COMPLETE / PROVEN
+Annotation backup                           COMPLETE / VERIFIED
+Annotation row preservation                 70 -> 70
+Annotation composite index                  PRESENT / PROVEN
+Membership rebuild authorization            NOT RECEIVED
+Fractional Inventory authorization          NOT RECEIVED
+Product/FK authorization                    NOT RECEIVED
+Accounting/default authorization            NOT RECEIVED
+R2/provider mutation                        DISABLED
+CAIP D1-only copy                           FORBIDDEN
+Production promotion                        CLOSED
 ```
+
+## Next boundary
+
+Build 434 is the Membership Build 395 read-only/inert authorization boundary. It may inspect live Production Membership schema/rows and create a zero-executable-statement preview only. No Membership backup or rebuild is authorized by Build 433 completion.
