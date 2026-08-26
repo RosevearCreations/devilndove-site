@@ -19,22 +19,11 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / 'wrangler.toml'
 MIGRATION = ROOT / 'database_build438_application_module_activation.sql'
 VERIFY = ROOT / 'BUILD438_D1_VERIFICATION.sql'
+STRICT_VERIFY = ROOT / 'BUILD438_D1_STRICT_VERIFICATION.sql'
 DATABASE = 'devilndove-dev'
 EXPECTED_DATABASE_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'
 WRANGLER_VERSION = '4.126.0'
 EXPECTED_MODULE_KEYS = 'business-administration|commerce-operations|creative-production'
-
-# Avoid a literal pipe metacharacter in the Windows npx.cmd command argument. SQLite
-# char(124) produces the same separator without giving cmd.exe a pipe token to parse.
-STRICT_VERIFY_SQL = """
-SELECT
-  (SELECT COUNT(*) FROM app_modules) AS module_count,
-  (SELECT COUNT(*) FROM app_module_role_access) AS role_access_count,
-  (SELECT COUNT(*) FROM app_modules WHERE is_enabled=1) AS enabled_module_count,
-  (SELECT COUNT(*) FROM app_modules WHERE background_activity_enabled=1) AS background_enabled_count,
-  (SELECT COUNT(*) FROM sqlite_schema WHERE type='index' AND name IN ('idx_app_modules_enabled_priority','idx_app_module_role_access_role')) AS expected_index_count,
-  (SELECT group_concat(module_key, char(124)) FROM (SELECT module_key FROM app_modules ORDER BY module_key)) AS module_keys;
-""".strip()
 
 
 def fail(message: str, code: int = 1) -> None:
@@ -123,8 +112,8 @@ def file_command(file_path: Path) -> list[str]:
     return [*base_command(), '--file', str(file_path)]
 
 
-def json_command(sql: str) -> list[str]:
-    return [*base_command(), '--command', sql, '--json']
+def json_file_command(file_path: Path) -> list[str]:
+    return [*file_command(file_path), '--json']
 
 
 def auth_check() -> None:
@@ -182,6 +171,8 @@ def apply() -> None:
 def verify() -> None:
     if not VERIFY.exists():
         fail(f'Missing verification SQL: {VERIFY.name}')
+    if not STRICT_VERIFY.exists():
+        fail(f'Missing strict verification SQL: {STRICT_VERIFY.name}')
     print('=== BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION ===')
     print(f'Target: {DATABASE} ({EXPECTED_DATABASE_ID})')
 
@@ -190,7 +181,10 @@ def verify() -> None:
         classify_failure(human, 'the Development verification SQL')
 
     print('\n=== BUILD 438 STRICT MACHINE VERIFICATION ===')
-    strict = run(json_command(STRICT_VERIFY_SQL), echo=False)
+    # Use Wrangler --file rather than --command. On Windows, npx.cmd/cmd.exe can
+    # truncate or reinterpret complex SQL command arguments even when Python passes
+    # them as one argv element. File transport has already proven reliable here.
+    strict = run(json_file_command(STRICT_VERIFY), echo=False)
     if strict.returncode != 0:
         emit_output(strict.stdout)
         classify_failure(strict, 'the strict Development module verification')
