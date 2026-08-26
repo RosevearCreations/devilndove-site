@@ -8,7 +8,7 @@ Historical Build validation/changed-file prose is evidence only. Specialist docu
 
 **Build 437** remains the current completed Production-proven baseline.
 
-**Build 438** is the current source/development architecture release. Its Application Core + three-module D1 authority is now **APPLIED AND EXACTLY VERIFIED IN DEVELOPMENT**. Live disable/re-enable isolation proof and authenticated Admin/browser acceptance remain open. Build 438 Production D1 is not authorized.
+**Build 438** is the current source/development architecture release. Its Application Core + three-module D1 authority is **APPLIED AND EXACTLY VERIFIED IN DEVELOPMENT**, the Pages module guard is live, and all three modules have passed Development disable/block/restore isolation. The remaining Build 438 Development acceptance is authenticated Admin/Core Health/role/shared-contract proof. Build 438 Production D1 is not authorized.
 
 Build 437 completed/proved:
 
@@ -87,6 +87,7 @@ database_build438_application_module_activation.sql
 database_full_schema.sql                         synchronized with Build 438
 BUILD438_D1_VERIFICATION.sql
 BUILD438_D1_STRICT_VERIFICATION.sql
+_routes.json
 functions/api/_lib/appModules.js
 functions/api/_lib/appModuleRoutes.js
 functions/api/_lib/appModuleSessionGuard.js
@@ -105,8 +106,10 @@ scripts/build438_module_route_map_test.mjs
 scripts/build438_module_catalog_alignment_test.mjs
 scripts/build438_module_access_policy_test.mjs
 scripts/build438_module_session_resilience_test.mjs
+scripts/build438_pages_invocation_routes_test.py
 scripts/build438_development_module_activation.py
 scripts/build438_development_module_isolation_proof.py
+scripts/build438_authenticated_acceptance_regression.py
 BUILD438_APPLICATION_CORE_MODULE_PLAN.md
 BUILD438_VALIDATION.md
 BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md
@@ -135,9 +138,13 @@ Build305 catalog/server alignment            PASS (61/61)
 Cross-module access policy                   PASS (12/12)
 Session resilience                           PASS (6/6)
 Windows/strict verification regression       PASS (10/10)
+Pages invocation routing                     PASS (10/10)
 Development migration                        APPLIED / PASS
 Development human read-only verification     PASS / 0 writes
 Development strict self-asserting verify     PASS / 0 writes
+Development module isolation                 PASS (3/3)
+Pages module guard invocation                PROVEN
+Final isolation state                        RESTORED / EXACT
 ```
 
 Exact Development D1 state:
@@ -149,6 +156,42 @@ enabled_module_count:       3
 background_enabled_count:   0
 expected_index_count:       2
 module_keys:                business-administration|commerce-operations|creative-production
+```
+
+## Pages invocation boundary — proven
+
+An early live isolation attempt exposed that the tracked `_routes.json` invoked Functions only for `/api/*`; static `/shop/` and `/admin/...` pages therefore bypassed root middleware even though D1 module state changed correctly.
+
+Build 438 now invokes Functions narrowly for:
+
+```text
+/api/*
+/admin + /admin/*
+/shop + /shop/*
+/cart + /cart/*
+/checkout + /checkout/*
+/product + /product/*
+/products + /products/*
+/custom-request + /custom-request/*
+/members + /members/*
+```
+
+General informational/static public pages remain outside Functions.
+
+Module-owned responses expose:
+
+```text
+X-DND-Module-Guard: 438
+X-DND-Module-Key: <module-key>
+X-DND-Shared-Contract: <contract-path>  when applicable
+```
+
+Live baseline evidence:
+
+```text
+business-administration   /admin/accounting/        HTTP 401 / guard=438
+commerce-operations       /shop/                    HTTP 200 / guard=438
+creative-production       /admin/creative-process/  HTTP 401 / guard=438
 ```
 
 ## Build 438 D1 tables/default role state
@@ -173,7 +216,7 @@ admin  -> all three allowed/manage
 
 No per-user override table exists yet.
 
-## Direct module behavior contract
+## Direct module behavior contract — live proven
 
 A disabled/unavailable module must:
 
@@ -183,6 +226,19 @@ A disabled/unavailable module must:
 - suppress top-level runtime activation;
 - clear its background permission;
 - retain all business data for later re-enable.
+
+Development live proof established:
+
+```text
+commerce-operations       /shop/                    enabled 200 -> disabled 403 -> restored 200
+creative-production       /admin/creative-process/  enabled 401 -> disabled 403 -> restored 401
+business-administration   /admin/accounting/        enabled 401 -> disabled 403 -> restored 401
+Core recovery             /admin/application-modules/ stayed HTTP 200 throughout
+Other enabled modules     retained recorded baseline behavior
+Final module state        RESTORED / EXACT
+Business table mutation   NONE
+Production mutation       NONE
+```
 
 A role with module access level `read` may read direct module APIs but non-read methods are denied with:
 
@@ -250,7 +306,8 @@ The control screen/API supports:
 - member/admin role access;
 - audited changes;
 - Core Health diagnostics;
-- Current-State Route Proof.
+- Current-State Route Proof;
+- **Authenticated Acceptance Proof** with automatic module/role restoration.
 
 Core Health checks:
 
@@ -264,26 +321,47 @@ no disabled module with background permission
 no Admin recovery-access risk
 ```
 
-## Development live isolation proof — next
+## Authenticated Admin acceptance — current next step
 
-`build438_development_module_isolation_proof.py` is the current owner-run next step. It is hard-pinned through the Development activation helper and refuses to toggle anything unless the deployed site first reports Build 438 + `schema_ready=true` + `source=d1` + exact three enabled/background-off modules.
-
-The harness temporarily changes **`app_modules` only**, one module at a time, and always restores the original state in `finally`.
-
-It must prove:
+Open:
 
 ```text
-commerce-operations       direct route blocked while disabled / restored
-creative-production       direct route blocked while disabled / restored
-business-administration   direct route blocked while disabled / restored
-Core recovery page        reachable throughout
-Other enabled modules     retain expected route behavior
-Final module state        restored / exact
-Business table mutation   none
-Production mutation       none
+/admin/application-modules/
 ```
 
-After automated anonymous-route isolation is green, finish authenticated Admin acceptance through `/admin/application-modules/`: Core Health, Current-State Route Proof, role-level `read` enforcement, navigation/runtime suppression, and real consumer-context shared-contract proof. Do not manufacture Inventory movements to test shared mutation contracts.
+while logged in as Admin and run **Run authenticated acceptance proof**.
+
+The runner is designed to prove in one restoring pass:
+
+```text
+Core Health                            PASS
+3 modules enabled/background OFF      exact baseline
+Admin access                           manage on all three
+Commerce audited disable              direct 403 + client unavailable
+Commerce shared Inventory read        remains available through Creative consumer
+Creative audited disable              direct 403 + client unavailable
+Creative shared content-media read    remains available through Commerce consumer
+Business audited disable              direct 403 + client unavailable
+Business shared accounting-read       remains available through Commerce consumer
+Admin Business access -> read         GET allowed
+Admin Business read-level POST        403 module_access_level_read_only
+All modules/roles                     restored exactly
+Final Core Health                     PASS
+```
+
+Safety:
+
+- module/role changes go through the audited Core control API;
+- shared live probes are GET/read-only only;
+- no `inventory-post` or `inventory-reverse` dummy calls are made;
+- the read-level POST probe uses an intentionally unsupported action so even a guard regression cannot create a business write;
+- restore paths are in `finally` blocks.
+
+Local source safety authority:
+
+```text
+scripts/build438_authenticated_acceptance_regression.py
+```
 
 ## Background activity rule
 
@@ -328,9 +406,10 @@ Product/supply/tool identity and stock facts. Actual production/material posting
 - disabled modules do not initialize avoidable runtime work;
 - analytics/fallback diagnostics must not block business actions;
 - server authorization, not hidden UI, is the security boundary;
-- never cache request-specific session/user state globally.
+- never cache request-specific session/user state globally;
+- `_routes.json` must stay narrow: do not route the entire static site through Functions merely to implement module switches.
 
-Known Build 438 observation item: root middleware can add one indexed session lookup on authenticated module-owned requests while a legacy endpoint also authenticates independently. Measure this in Development; do not solve it with global user caches.
+Known Build 438 observation item: middleware can add one indexed session lookup on authenticated module-owned requests while a legacy endpoint also authenticates independently. Measure this in Development; do not solve it with global user caches.
 
 ## SEO/public rules
 
@@ -349,7 +428,9 @@ Known Build 438 observation item: root middleware can add one indexed session lo
 ```text
 Build 437 Membership authorization               SPENT / COMPLETE
 Build 438 Development D1 authority                APPLIED / EXACTLY VERIFIED
-Build 438 Development live isolation              PENDING OWNER RUN
+Build 438 Pages module guard                      PROVEN
+Build 438 Development live isolation              PASS (3/3) / RESTORED EXACT
+Build 438 authenticated Admin acceptance          PENDING
 Build 438 Production D1 migration                 NOT AUTHORIZED
 Fractional Inventory/Creative rebuilds            NOT AUTHORIZED
 Product/FK rebuilds                               NOT AUTHORIZED
@@ -364,8 +445,6 @@ A generic `continue`, `next release`, pasted output or feature request does not 
 
 ## Immediate Development next step
 
-Run `scripts/build438_development_module_isolation_proof.py` against the deployed Development site. If it passes 3/3, complete the authenticated Admin/Core Health/role/shared-contract acceptance and record the evidence.
-
-Do not prepare a Production authorization boundary until those Development proofs are green.
+Run the local authenticated-acceptance safety regression, deploy/pull the current Build 438 Admin control bundle, then log in to `/admin/application-modules/` and click **Run authenticated acceptance proof**. Record the complete output/result. Do not prepare a Production authorization boundary until that authenticated Development proof is green.
 
 Read `BUILD438_DEVELOPMENT_AUTHORITY_EVIDENCE.md` and `BUILD438_VALIDATION.md` for owner-run evidence/procedure, then `PROJECT_STATUS_AND_ROADMAP.md` for the remaining feature roadmap.
