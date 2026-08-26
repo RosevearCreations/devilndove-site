@@ -6,10 +6,6 @@
 
 Build 438 completes the central activation/access authority around the existing Application Core + three top-level application modules.
 
-This document is the owner-run validation authority for the Build 438 source package.
-
-## Existing architecture retained
-
 ```text
 Application Core
     |
@@ -18,7 +14,7 @@ Application Core
     +-- business-administration
 ```
 
-Build 438 does not replace the Build 281–397 module registry/domain/runtime work. It adds the missing persistent D1 activation/access authority and server enforcement.
+Build 438 extends the Build 281–397 module registry/domain/runtime work; it does not replace it.
 
 ## Development target
 
@@ -32,7 +28,7 @@ D1 database ID:  dbc1615b-dcbe-4951-973b-b47c99c73bfa
 
 Production is not a target of this validation pass.
 
-## Build 438 source package
+## Source package
 
 ### D1
 
@@ -47,7 +43,7 @@ Production is not a target of this validation pass.
 - `functions/api/modules.js`
 - `functions/api/admin/app-modules.js`
 
-### Browser/control surfaces
+### Browser/control
 
 - `public/js/core/dd-application-module-bootstrap.mjs`
 - `public/js/core/dd-public-module-visibility.mjs`
@@ -56,9 +52,11 @@ Production is not a target of this validation pass.
 - `admin/application-modules/index.html`
 - `public/js/admin-application-modules.js`
 
-### Regression/docs
+### Regression/rollout
 
 - `scripts/build438_application_module_core_regression.py`
+- `scripts/build438_module_route_map_test.mjs`
+- `scripts/build438_development_module_activation.py`
 - `BUILD438_APPLICATION_CORE_MODULE_PLAN.md`
 - `AI_HANDOFF.md`
 - `PROJECT_STATUS_AND_ROADMAP.md`
@@ -74,8 +72,12 @@ git pull origin dev
 
 set -o pipefail
 
-python -m py_compile scripts/build438_application_module_core_regression.py
+python -m py_compile \
+  scripts/build438_application_module_core_regression.py \
+  scripts/build438_development_module_activation.py
+
 python scripts/build438_application_module_core_regression.py
+node scripts/build438_module_route_map_test.mjs
 
 node --check functions/_middleware.js
 node --check functions/api/_lib/appModules.js
@@ -97,6 +99,7 @@ Existing top-level modules: commerce-operations / creative-production / business
 Central D1 activation authority: SOURCE READY
 Server page/API module guard: SOURCE READY
 Read-only module access enforcement: SOURCE READY
+Route ownership matrix: SOURCE READY
 Authoritative client bootstrap: SOURCE READY
 Admin Application Modules control: SOURCE READY
 Request-time schema mutation: NONE
@@ -105,37 +108,35 @@ Production D1 migration executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-If any source/syntax check fails, stop. Do not apply the Development migration yet.
+Route matrix should finish:
 
-## Development-only D1 apply
+```text
+BUILD 438 MODULE ROUTE MAP TEST: PASS
+Core recovery/auth surfaces: UNOWNED / AVAILABLE
+Production mutation capability: NONE
+```
 
-After the local 20/20/source checks are green:
+If any local check fails, stop. Do not apply the Development migration.
+
+## Preferred Development-only D1 apply/verify
+
+The preferred owner path is the hard-pinned helper. It validates branch `dev`, database name and the exact Development UUID before it contacts D1, and it has **no Production mode**.
 
 ```bash
 cd /c/Dev/devilndove-site
 
-npx --yes wrangler@4.126.0 d1 execute devilndove-dev \
-  --remote \
-  --config wrangler.toml \
-  --file=database_build438_application_module_activation.sql \
-  --yes
+python -u scripts/build438_development_module_activation.py --apply-and-verify \
+  2>&1 | tee build438_development_module_activation.txt
 ```
 
-This is an additive Development-only migration. It creates the two module-control tables/indexes and seeds three enabled top-level modules plus six member/admin role rows.
+The helper uses pinned Wrangler `4.126.0` and targets only:
 
-It does not delete or rewrite existing business-domain data.
-
-## Development read-only verification
-
-```bash
-npx --yes wrangler@4.126.0 d1 execute devilndove-dev \
-  --remote \
-  --config wrangler.toml \
-  --file=BUILD438_D1_VERIFICATION.sql \
-  --yes
+```text
+devilndove-dev
+UUID dbc1615b-dcbe-4951-973b-b47c99c73bfa
 ```
 
-Expected logical result:
+Expected logical result after apply/verify:
 
 ```text
 app_modules exists
@@ -154,18 +155,43 @@ business-administration
 indexes:
 idx_app_modules_enabled_priority
 idx_app_module_role_access_role
+
+background_activity_enabled = 0 for all three
+
+BUILD 438 DEVELOPMENT MODULE AUTHORITY APPLY: PASS
+BUILD 438 DEVELOPMENT MODULE AUTHORITY READ-ONLY VERIFICATION: PASS
+Production D1 mutation executed: NO
+PRODUCTION PROMOTION: CLOSED
 ```
 
-Default `background_activity_enabled` must be 0 for all three modules.
+### Equivalent manual Development commands
+
+If the helper itself has a local execution problem, the equivalent Development-only commands are:
+
+```bash
+npx --yes wrangler@4.126.0 d1 execute devilndove-dev \
+  --remote \
+  --config wrangler.toml \
+  --file=database_build438_application_module_activation.sql \
+  --yes
+
+npx --yes wrangler@4.126.0 d1 execute devilndove-dev \
+  --remote \
+  --config wrangler.toml \
+  --file=BUILD438_D1_VERIFICATION.sql \
+  --yes
+```
+
+Do not substitute `devilndove-prod`.
 
 ## Development browser/API proof
 
-After Development code is deployed/previewable:
+After the Build 438 source is deployed/previewable in Development:
 
 ### Baseline
 
 1. Login as Admin.
-2. Open `/api/modules`.
+2. Open `/api/modules?fresh=1`.
 3. Require:
    - `ok=true`
    - `build=438`
@@ -174,30 +200,34 @@ After Development code is deployed/previewable:
    - exactly three modules
    - all three `is_enabled=1`.
 4. Open `/admin/application-modules/`.
-5. Confirm all three top-level modules are visible and enabled.
+5. Confirm all three top-level modules are visible/enabled and background activity is OFF.
 
-### Commerce & Operations disable/re-enable
+### Commerce & Operations
 
-1. Disable `commerce-operations`.
-2. Verify normal navigation hides its destinations where module-aware navigation is loaded.
-3. Verify direct module-owned page/API routes fail closed, including representative Shop/Member/Catalog/Inventory/Orders surfaces.
-4. Verify `/admin/application-modules/` remains reachable.
-5. Re-enable Commerce & Operations.
-6. Verify access returns without reconstructing data.
+1. Record representative row counts first.
+2. Disable `commerce-operations`.
+3. Verify normal module-aware navigation hides its destinations.
+4. Verify representative Shop/Member/Catalog/Inventory/Orders pages/APIs fail closed.
+5. Verify `/admin/application-modules/` remains reachable.
+6. Verify the account widget still exposes **Application Modules** to an Admin.
+7. Re-enable Commerce & Operations.
+8. Prove access returns and business row counts are unchanged.
 
-### Creative & Production disable/re-enable
+### Creative & Production
 
-1. Disable `creative-production`.
-2. Verify representative Packaging/Creative Process/CAIP/Content routes fail closed.
-3. Verify the current page cannot activate the Creative & Production umbrella runtime while unavailable.
-4. Re-enable it and verify access returns.
+1. Record representative Creative/CAIP/Packaging/Content row counts.
+2. Disable `creative-production`.
+3. Verify representative Packaging/Creative Process/CAIP/Content pages/APIs fail closed.
+4. Verify the unavailable module umbrella runtime is not imported/activated.
+5. Re-enable and prove access/data return unchanged.
 
-### Business & Administration disable/re-enable
+### Business & Administration
 
 1. Disable `business-administration`.
 2. Verify representative Accounting/Analytics/Admin/Platform routes fail closed.
 3. Verify `/admin/application-modules/` and `/api/admin/app-modules` remain reachable as shared-core recovery surfaces.
-4. Re-enable Business & Administration.
+4. Verify the public account widget retains the Admin-only **Application Modules** recovery link even if the Admin Dashboard link is hidden.
+5. Re-enable Business & Administration.
 
 ### Role/access-level proof
 
@@ -209,15 +239,23 @@ After Development code is deployed/previewable:
 code: module_access_level_read_only
 ```
 
-4. Restore the Admin access level to `manage`.
+4. Restore Admin access to `manage`.
 
-### Data preservation proof
+### Module-authority failure behavior
 
-Before/after toggling, compare representative business row counts for the affected module. Module-control changes must only modify `app_modules`, `app_module_role_access` and audit evidence. No Catalog, Inventory, Creative, CAIP, Packaging, Content, Accounting, Orders, Membership or other business records may be deleted because a module was disabled.
+Build 438 intentionally distinguishes:
 
-## Expected audit behavior
+```text
+schema missing during rollout -> all-enabled compatibility defaults
+healthy D1 authority          -> D1 module state
+transient D1/config failure   -> last-known module state, otherwise fail closed
+```
 
-Admin control mutations write existing `admin_action_audit` events:
+A real module-authority read failure must never silently turn a disabled module back on.
+
+## Audit behavior
+
+Module-control changes use existing `admin_action_audit` with:
 
 ```text
 application_module_state_changed
@@ -225,33 +263,30 @@ application_module_background_changed
 application_module_role_access_changed
 ```
 
+Disabling a module must never delete its Catalog, Inventory, Order, Membership, Creative, CAIP, Packaging, Content, Accounting or other business data.
+
 ## Resource-efficiency proof
 
-Build 438 adds no polling loop.
+Build 438 adds no recurring polling loop.
 
-Required checks:
-
-- `/api/modules` is a one-shot bootstrap read, not a timer;
-- disabled Admin module runtime is not imported/activated for its blocked page;
+- Admin `/api/modules` is one bootstrap read and explicit refresh after control changes.
+- Public/member visibility uses a short per-tab `sessionStorage` cache rather than one Worker request for every public navigation.
+- server module config cache is brief and non-user-specific;
+- session/user identity stays request-scoped;
+- disabled module page runtime never initializes because middleware blocks direct access;
+- top-level Admin runtime is imported only after authoritative availability is known;
 - `background_activity_enabled=0` by default;
-- module background permission is opt-in;
 - no request-time module DDL exists.
 
-Known item to observe: middleware centrally resolves the current session/role for authenticated module-owned requests, while many legacy endpoints also perform their own auth verification. This can temporarily mean two indexed session reads on a request. Measure rather than guessing. Do not replace this with global request/user caching.
-
-## Fail-safe behavior before migration
-
-If Build 438 source is deployed before the Development migration, read paths use the all-enabled Build 438 compatibility defaults. The Admin control screen must clearly show schema not ready and block writes.
-
-This prevents an absent migration from accidentally disabling existing functionality while still preserving the no-request-time-DDL rule.
+Known item to observe: root middleware can add one indexed session read to authenticated module-owned requests while legacy endpoints also perform their own auth verification. Measure this in Development; do not replace it with global user/session caching.
 
 ## Production boundary
 
 **No Build 438 Production D1 authorization exists.**
 
-Do not run the migration against `devilndove-prod` from this document.
+Do not run the Build 438 migration against `devilndove-prod` from this document.
 
-A separate Production authorization boundary may be prepared only after Development disable/re-enable/access/data-preservation proof is green.
+A Production authorization boundary may be prepared only after the Development disable/re-enable, role-level, recovery, data-preservation and runtime-suppression proofs are green.
 
 Still separately locked:
 
@@ -264,19 +299,18 @@ CAIP D1-only copy                                   FORBIDDEN
 Broad Production promotion                          CLOSED
 ```
 
-## Completion definition
-
-Build 438 is not complete merely because the migration exists.
+## Development completion definition
 
 Build 438 may be called Development-proven only after:
 
 1. local 20/20 regression passes;
-2. source syntax checks pass;
-3. Development D1 migration succeeds;
-4. Development D1 verification proves exact three-module/six-role state;
-5. all three modules pass disable/re-enable route/API/runtime proof;
-6. Application Modules recovery surface remains reachable;
-7. read-only access-level enforcement is proven;
-8. business data preservation is proven;
-9. no new recurring background traffic is observed;
-10. canonical Markdown is updated with the owner-run evidence.
+2. executable route matrix passes;
+3. JS/Python syntax checks pass;
+4. Development D1 migration succeeds;
+5. D1 verification proves exact three-module/six-role state;
+6. all three modules pass disable/re-enable direct page/API proof;
+7. recovery surface remains reachable;
+8. read-only access-level enforcement is proven;
+9. business data preservation is proven;
+10. no new recurring background traffic is observed;
+11. canonical Markdown is updated with owner-run Development evidence.
