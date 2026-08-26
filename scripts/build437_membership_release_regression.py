@@ -88,11 +88,12 @@ def main() -> int:
     )
     check(
         'release_build' in notes_generator
-        and 'manifest_current' in notes_generator
         and 'production_evidence' in notes_generator
-        and "data/site/current-release.json" in notes_generator
+        and "Manifest source scope: `git_tracked_release_files`" in notes_generator
+        and 'generate `RELEASE_NOTES.md` first' in notes_generator
+        and 'manifest_current' not in notes_generator
         and release.get('authorization_state') == 'membership_production_rebuild_complete_token_spent',
-        'release notes use completed Build 437 current-release truth and cannot inherit a stale manifest label',
+        'release notes use completed Build 437 truth and enforce notes-before-manifest generation order',
     )
     check('Production promotion' in completion_doc and 'CLOSED' in completion_doc and 'Fractional' in completion_doc, 'completion release keeps later families and Production promotion locked')
 
@@ -112,6 +113,7 @@ def main() -> int:
     print('DB sanity Membership identity: CANONICAL')
     print('Build 418 SQL-guard compatibility: PASS')
     print('Tracked-file release manifest determinism: PASS')
+    print('Notes-before-manifest generation order: PASS')
     print('Completed current-release note authority: PASS')
     print('Membership Production authorization inferred: NO')
     print('Later rebuild authorization inferred: NO')
