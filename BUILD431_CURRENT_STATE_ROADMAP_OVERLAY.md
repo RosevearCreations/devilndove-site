@@ -2,7 +2,7 @@
 
 ## Immediate objective
 
-The corrected full Build 403 Notification authorization boundary is now green. Await a new explicit full-scope Notification authorization, then continue remaining Production parity one separately authorized family at a time.
+Execute the now-authorized corrected full Build 403 Notification stage with a fresh Production backup and exact row-preservation proof, then continue remaining Production parity one separately authorized family at a time.
 
 ## Ordered path
 
@@ -14,8 +14,8 @@ The corrected full Build 403 Notification authorization boundary is now green. A
    - proved old four-index token is insufficient;
    - final corrected authorization gate: PASS (20/20).
 
-2. **Full Build 403 Notification execution — awaiting new token**
-   - require exact token `AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403`;
+2. **Full Build 403 Notification execution — authorized / current**
+   - exact token `AUTHORIZE-BUILD431-PROD-NOTIFICATION-FULL-BUILD403` received;
    - rerun the corrected preflight;
    - fresh full Production D1 export;
    - bytes/SHA/UUID/age proof;
@@ -67,7 +67,7 @@ Product numbers                              COMPLETE / PROVEN
 Gift Card                                    COMPLETE / PROVEN
 Old four-index Notification authorization    SUPERSEDED / INSUFFICIENT
 Full Build 403 Notification boundary         PASS (20/20)
-Full Build 403 Notification authorization    NOT RECEIVED
+Full Build 403 Notification authorization    RECEIVED
 Notification Production backup               NOT CREATED
 Notification Production mutation             NOT EXECUTED
 Annotation index                             LOCKED
