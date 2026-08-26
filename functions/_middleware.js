@@ -5,9 +5,9 @@
 import {
   BUILD,
   moduleAccessForRequest,
-  moduleKeyForPath,
   moduleUnavailableResponse,
 } from './api/_lib/appModules.js';
+import { moduleKeyForPath } from './api/_lib/appModuleRoutes.js';
 
 function isApiPath(pathname) {
   return String(pathname || '').startsWith('/api/');
