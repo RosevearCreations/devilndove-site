@@ -2,46 +2,17 @@
 
 ## Status
 
-**SOURCE/READ-ONLY AUTHORIZATION BOUNDARY READY — NO PRODUCTION MUTATION AUTHORIZED**
+**PASS — AUTHORIZATION BOUNDARY 20/20 / EXPLICIT PRODUCTION AUTHORIZATION PENDING / PRODUCTION PROMOTION CLOSED**
 
-Build 426 is green. Build 427 prepares the staged Production execution tooling but does not authorize or execute it.
-
-## Run now — safe before Production authorization
-
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-python -m py_compile \
-  scripts/build427_production_execution_preflight.py \
-  scripts/build427_production_product_number_execution.py \
-  scripts/build427_production_additive_execution.py \
-  scripts/build427_execution_safety_regression.py \
-  scripts/build427_authorization_boundary_gate.py
-
-python scripts/build427_execution_safety_regression.py
-
-python -u scripts/build427_production_execution_preflight.py --run \
-  2>&1 | tee build427_production_execution_preflight.txt
-
-python scripts/build427_authorization_boundary_gate.py
-```
-
-The safety regression and authorization-boundary gate are local-only. The Production execution preflight contacts Development/Production D1 using SELECT/inspection-only evidence inherited from Build 426.
-
-## Expected result
+Owner-run validation completed successfully after the Windows UTF-8 console repair.
 
 ```text
 BUILD 427 PRODUCTION EXECUTION SAFETY REGRESSION: PASS (20/20)
-Production live access: NONE
-Production mutation executed: NO
-Authorization tokens exercised: NO
-Broad Build 426 candidate execution path: NONE
-PRODUCTION PROMOTION: CLOSED
+BUILD 427 PRODUCTION EXECUTION PREFLIGHT: PASS
+BUILD 427 TWENTY-ITEM PRODUCTION AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
 ```
 
-Fresh live preflight should retain:
+Fresh live preflight proved:
 
 ```text
 Product-number candidate fresh: YES
@@ -57,23 +28,46 @@ Production backup created: NO
 Production authorization received: NO
 Production mutation executed: NO
 PRODUCTION PROMOTION: CLOSED
-BUILD 427 PRODUCTION EXECUTION PREFLIGHT: PASS
 ```
 
-The final local gate should end:
+The local authorization-boundary gate also proved:
 
 ```text
-BUILD 427 TWENTY-ITEM PRODUCTION AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
-Production backup for execution: NOT CREATED
-Production authorization received: NO
-Production mutation executed: NO
-PRODUCTION PROMOTION: CLOSED
-NEXT: explicit Production authorization is required before the Build 427 backup/apply sequence may be invoked.
+fresh Product-number mapping              45 unique IDs / 1084..1128
+fresh Product/FK orphan gate              zero
+site_item_inventory preservation boundary 1041
+search_query_terms preservation boundary  5
+__sql_test no-action boundary              0
+CAIP parity exclusion                      113 rows
+Production execution backup               NOT CREATED
+Production authorization                   NOT RECEIVED
+Production mutation                        NOT EXECUTED
+Production promotion                       CLOSED
 ```
 
-## Do not run yet
+## Current boundary
 
-Do not invoke any of these until a separate explicit Production authorization is given:
+Build 427 source tooling is ready and the read-only authorization boundary is green. This does **not** authorize a Production write.
+
+The first Production stage is Product numbers only. Before it can write anything it must:
+
+1. rerun the fresh Product-number preflight;
+2. hard-pin `devilndove-prod` and Production D1 UUID `0dc8fa3e-319c-45f7-a515-34c8acd89fcf`;
+3. create a fresh full Production D1 export;
+4. record backup byte size and SHA-256;
+5. receive the exact explicit authorization token;
+6. apply only the 45 guarded Product-number updates plus monotonic sequence advance;
+7. immediately run the Production/Development Product-number postcheck.
+
+The required authorization token is:
+
+```text
+AUTHORIZE-BUILD427-PROD-PRODUCT-NUMBERS
+```
+
+Do not treat prior `continue`, `next`, successful Build 426/427 output, or this PASS record as authorization.
+
+## Do not run before authorization
 
 ```text
 scripts/build427_production_product_number_execution.py --backup
@@ -83,18 +77,17 @@ scripts/build427_production_additive_execution.py --apply-notification
 scripts/build427_production_additive_execution.py --apply-annotation-index
 ```
 
-The Product-number stage requires the literal token documented in `BUILD427_TWENTY_ITEM_PRODUCTION_EXECUTION_BOUNDARY.md`. The additive stages each require their own separate token and cannot run until the Product-number Production postcheck is green.
+The Gift Card, Notification, and annotation-index stages remain separately authorized and cannot run until the Product-number Production postcheck is green. Membership, fractional Inventory, Product/FK, and Accounting/default rebuild families remain separate later backed-up operations.
 
-## Safety
+## Gate state
 
 ```text
-Production D1 reads during preflight      allowed / bounded
-Production backup                         not created yet
-Production Product-number write           locked
-Production Gift Card write                locked
-Production Notification write             locked
-Production annotation-index write         locked
-Production rebuild families               not part of additive executor
-R2/provider mutation                      disabled
-Production promotion                      closed
+Build 425  Development Product-number backfill       PASS (20/20)
+Build 426  Production release-candidate assembly     PASS (20/20)
+Build 427  Production authorization boundary         PASS (20/20)
+
+Production backup for execution                      NOT CREATED
+Production authorization                             PENDING
+Production mutation                                  NOT EXECUTED
+Production promotion                                 CLOSED
 ```
