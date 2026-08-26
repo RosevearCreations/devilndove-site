@@ -143,9 +143,13 @@ def main() -> int:
         and 'BUILD 438 MODULE SESSION RESILIENCE TEST: PASS' in session_resilience_test
         and 'DEFAULT_BASE_URL' in dev_isolation
         and 'Temporary D1 writes: app_modules ONLY' in dev_isolation
+        and 'BASELINE_ALLOWED_STATUS' in dev_isolation
+        and 'Enabled route baseline:' in dev_isolation
+        and 'wait_for_route_status(base_url, route, 403)' in dev_isolation
+        and 'baseline_statuses[module_key]' in dev_isolation
         and 'finally:' in dev_isolation
         and 'FINAL MODULE STATE: RESTORED / EXACT' in dev_isolation,
-        'Build 438 structurally proves Core + exact three modules, exact D1 verification, resilient sessions, hard-pinned Development apply, deterministic fresh-schema synchronization and safe live isolation restore',
+        'Build 438 structurally proves Core + exact three modules, exact D1 verification, resilient sessions, hard-pinned Development apply, deterministic fresh-schema synchronization and baseline-aware safe live isolation restore',
     )
 
     print()
@@ -167,7 +171,7 @@ def main() -> int:
     print('Authoritative client bootstrap: SOURCE READY')
     print('Admin Application Modules control + health + route proof: SOURCE READY')
     print('Deterministic full-schema sync helper: SOURCE READY / SYNCHRONIZABLE')
-    print('Development isolation harness: SOURCE READY / APP_MODULES-ONLY / AUTO-RESTORE')
+    print('Development isolation harness: SOURCE READY / BASELINE-AWARE / APP_MODULES-ONLY / AUTO-RESTORE')
     print('Request-time schema mutation: NONE')
     print('Background polling introduced by Build 438: NONE')
     print('Production D1 migration executed: NO')
