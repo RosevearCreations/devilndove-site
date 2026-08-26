@@ -2,13 +2,15 @@
   "build_label": "Build 437",
   "date": "2026-08-25",
   "title": "Membership canonical completion and release alignment",
+  "authorization_state": "membership_production_rebuild_authorized_execution_pending",
+  "authorization_token": "AUTHORIZE-BUILD436-PROD-MEMBERSHIP-BUILD395-REBUILD",
   "summary": [
     "Completes the Membership Build 395 legacy-to-canonical transition as one guarded release package.",
     "Preserves the three existing bronze/silver/gold rows, policy IDs, complete business values, AUTOINCREMENT sequence, UNIQUE tier constraint, and the reviewed sort index.",
     "Translates idx_membership_tier_policies_sort from legacy (sort_order, code) to canonical (sort_order, tier_code).",
     "Keeps Membership reads compatible before the Production swap while locking writes until the exact canonical schema is active.",
     "Routes member tier-policy reads through the shared non-mutating compatibility service, aligns platform DB sanity with canonical policy_id, and removes the unreferenced root duplicate member/tier-policies.js.",
-    "Keeps every later rebuild family and Production promotion separately locked."
+    "Records explicit Membership-only Production rebuild authorization; execution remains guarded and Production promotion remains closed."
   ],
   "changed_files": [
     "database_membership_tier_policy_runtime_parity.sql",
@@ -27,18 +29,18 @@
     "BUILD437_MEMBERSHIP_COMPLETION_RELEASE.md"
   ],
   "d1_migrations": [
-    "Production Membership is not upgraded by running database_membership_tier_policy_runtime_parity.sql directly. Use only the guarded Build 436/437 Membership rebuild controller after exact authorization.",
+    "Production Membership is not upgraded by running database_membership_tier_policy_runtime_parity.sql directly. Use only the guarded Build 436/437 Membership rebuild controller with the exact authorized token.",
     "The guarded rebuild creates the canonical Build 395 table, copies all three existing rows losslessly, recreates idx_membership_tier_policies_sort on (sort_order, tier_code), and validates the result."
   ],
   "post_deploy_actions": [
-    "Run the Build 437 local release regression and repaired Membership read-only preflight/gate.",
-    "After exact Membership Production authorization, run the single guarded backup -> apply -> read-only postcheck sequence.",
-    "Regenerate RELEASE_NOTES.md and data/site/release-package-manifest.json with the Build 437 generators after source is current.",
+    "Run the single Build 437 guarded Membership backup -> apply -> independent read-only postcheck chain using the exact authorized token.",
+    "Regenerate RELEASE_NOTES.md and data/site/release-package-manifest.json only after the Membership postcheck passes.",
+    "Mark the Membership authorization token spent/complete after successful execution.",
     "Keep Production promotion closed until the broader parity/release gates are complete."
   ],
   "validation": [
     "Build 435 complete-row source SHA-256 remains 5db4bfd5f948a33432834210fd232a1e4b222dd6400193d65c644b501ba92057 before the authorized rebuild.",
     "Canonical preview SHA-256 remains 5d2d8369acd086bfa701de7ec19bd9d67537cd8736cd2c228d42a098ca71e2c8 before the authorized rebuild.",
-    "Build 437 release regression must pass before any Membership Production backup or write."
+    "Build 437 release regression, fresh read-only preflight, and authorization gate must pass before the Membership Production backup/write sequence can advance."
   ]
 }
