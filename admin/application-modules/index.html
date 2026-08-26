@@ -41,14 +41,17 @@
       <div id="applicationModuleHealthMount" style="margin-top:12px"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
         <button class="btn" id="runModuleRouteProofButton" type="button">Run current-state route proof</button>
+        <button class="btn" id="runAuthenticatedModuleAcceptanceButton" type="button">Run authenticated acceptance proof</button>
         <button class="btn" id="refreshModuleAuthorityButton" type="button">Refresh module authority</button>
       </div>
       <div id="applicationModuleRouteProofMount" style="margin-top:12px"></div>
+      <div id="authenticatedModuleAcceptanceMount" style="margin-top:12px"></div>
       <div class="small" style="display:grid;gap:6px;margin-top:12px">
         <div><strong>Current design:</strong> Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration.</div>
         <div><strong>Safety:</strong> this page and its control API remain in shared core so an administrator can recover from an accidental module disable.</div>
         <div><strong>Dependency rule:</strong> only explicit reviewed service contracts may cross a disabled owner-module boundary, and only while an enabled consumer is authorized.</div>
         <div><strong>Background rule:</strong> module-owned polling/sync/provider work must check the background permission before running; disabling a module clears that permission.</div>
+        <div><strong>Authenticated acceptance:</strong> temporarily exercises audited module controls and one Admin read-level guard, automatically restoring every changed module/role in a finally path. Shared tests are read-only; no dummy Inventory movement is created.</div>
       </div>
     </div>
 
@@ -68,6 +71,6 @@
   <script src="/public/js/site-auth-ui.js?v=438"></script>
   <script src="/public/js/admin-self-protect.js?v=245"></script>
   <script src="/public/js/admin.js?v=438"></script>
-  <script src="/public/js/admin-application-modules.js?v=438"></script>
+  <script src="/public/js/admin-application-modules.js?v=438-auth"></script>
 </body>
 </html>
