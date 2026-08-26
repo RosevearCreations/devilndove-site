@@ -104,6 +104,30 @@ CREATE INDEX IF NOT EXISTS idx_caip_processing_artifacts_job
 CREATE INDEX IF NOT EXISTS idx_caip_processing_artifacts_project
   ON caip_media_processing_artifacts(creative_project_id,creative_asset_id,artifact_role,verification_status);
 
+-- A future provider may not mark a media-producing job complete until at least one
+-- artifact has been verified. Metadata/story/plan-only jobs are intentionally excluded.
+CREATE TRIGGER IF NOT EXISTS trg_caip_processing_complete_requires_verified_artifact
+BEFORE UPDATE OF job_status ON caip_media_processing_jobs
+WHEN NEW.job_status='complete'
+  AND NEW.job_type IN ('proxy_video','thumbnail','frame_extract','audio_extract','transcript')
+  AND NOT EXISTS (
+    SELECT 1
+    FROM caip_media_processing_artifacts a
+    WHERE a.caip_media_processing_job_id=NEW.caip_media_processing_job_id
+      AND a.verification_status IN ('head_verified','checksum_verified')
+  )
+BEGIN
+  SELECT RAISE(ABORT,'CAIP_PROCESSING_ARTIFACT_VERIFICATION_REQUIRED');
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_caip_processing_insert_complete_requires_verified_artifact
+BEFORE INSERT ON caip_media_processing_jobs
+WHEN NEW.job_status='complete'
+  AND NEW.job_type IN ('proxy_video','thumbnail','frame_extract','audio_extract','transcript')
+BEGIN
+  SELECT RAISE(ABORT,'CAIP_PROCESSING_ARTIFACT_VERIFICATION_REQUIRED');
+END;
+
 -- Provider metadata only. No endpoint, credential, queue or provider execution is enabled here.
 INSERT INTO creative_provider_profiles(
   provider_key,display_name,capability_key,lifecycle_status,endpoint_policy,
@@ -124,7 +148,7 @@ VALUES (
   'build_439_caip_temporal_evidence_review',
   'database_build439_caip_temporal_evidence_review.sql',
   CURRENT_TIMESTAMP,
-  'Adds first-class CAIP point/range timecode evidence, normalized story-segment evidence links, and provider-output artifact verification metadata. Source originals remain immutable/private; providers remain disabled and no output is accepted as complete without reviewed verification.'
+  'Adds first-class CAIP point/range timecode evidence, normalized story-segment evidence links, provider-output artifact verification metadata, and fail-closed verified-artifact requirements for media-processing completion. Source originals remain immutable/private; providers remain disabled.'
 )
 ON CONFLICT(migration_key) DO UPDATE SET
   file_name=excluded.file_name,
