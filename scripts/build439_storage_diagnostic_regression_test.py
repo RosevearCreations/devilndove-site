@@ -18,6 +18,8 @@ def main() -> int:
         ('diagnostic classifies recoverable drift vs missing Dev R2 object', 'recoverable_metadata_drift' in source and 'recorded_keys_missing_from_dev_r2' in source),
         ('diagnostic explicitly reports no source/provider mutation', 'source_media_unchanged: true' in source and 'r2_mutation_executed: false' in source and 'provider_execution_active: false' in source),
         ('diagnostic failure path stays read-only', 'captureRuntimeIncident' not in source and 'auditAdminAction' not in source),
+        ('inventory audit is explicit and paginated', "scope === 'all'" in source and 'next_offset' in source and 'offset' in source),
+        ('inventory audit is bounded to eight temporal assets per request', 'MAX_AUDIT_ASSETS = 8' in source and 'LOWER(COALESCE(ca.media_type' in source),
     ]
     failures = []
     print('BUILD 439 STORAGE DIAGNOSTIC REGRESSION')
@@ -31,6 +33,7 @@ def main() -> int:
         return 1
     print(f'\nBUILD 439 STORAGE DIAGNOSTIC REGRESSION: PASS ({len(checks)}/{len(checks)})')
     print('Runtime diagnostic contract: D1 READS + R2 HEAD ONLY')
+    print('Inventory audit: PAGINATED / MAX 8 ASSETS PER REQUEST')
     print('Source media mutation: NONE')
     print('PRODUCTION PROMOTION: CLOSED')
     return 0
