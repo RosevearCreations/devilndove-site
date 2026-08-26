@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build 436 read-only Membership Build 395 rebuild-execution preflight.
+"""Build 436/437 read-only Membership Build 395 rebuild-execution preflight.
 
-Reruns the complete-row Build 435 mapping proof and then inspects live Production
-for dependency/collision conditions that matter to a table rebuild. This script
-has no backup or mutation capability.
+Reruns the complete-row Build 435 mapping proof and inspects live Production for
+dependency/collision conditions that matter to a table rebuild. Build 437
+classifies the known legacy sort index as a handled object that must be recreated
+on canonical tier_code. This script has no backup or mutation capability.
 """
 from __future__ import annotations
 
@@ -27,6 +28,9 @@ PROD_ID = '0dc8fa3e-319c-45f7-a515-34c8acd89fcf'
 SHADOW_TABLE = 'membership_tier_policies_build436_shadow'
 ASSERT_TABLE = '_build436_membership_assert'
 EXPECTED_TIERS = {'bronze', 'silver', 'gold'}
+LEGACY_SORT_INDEX = 'idx_membership_tier_policies_sort'
+LEGACY_SORT_COLUMNS = ['sort_order', 'code']
+CANONICAL_SORT_COLUMNS = ['sort_order', 'tier_code']
 CANONICAL_COLUMNS = [
     'policy_id', 'tier_code', 'title', 'short_description', 'benefits_json',
     'badge_color', 'sort_order', 'is_visible', 'created_at', 'updated_at',
@@ -86,14 +90,7 @@ def quote_identifier(value: str) -> str:
 
 
 def inbound_foreign_keys(npx: str, cfg: Path) -> tuple[list[str], list[dict]]:
-    """Find inbound Membership FKs without a dynamic table-valued PRAGMA join.
-
-    D1 documents PRAGMA foreign_key_list("TABLE_NAME") for a fixed table. First
-    narrow sqlite_schema to CREATE TABLE statements mentioning the Membership
-    table, then inspect only those candidate tables with the documented PRAGMA.
-    The schema-text search is only a candidate filter; the PRAGMA result is the
-    authoritative FK evidence.
-    """
+    """Find inbound Membership FKs with fixed-table PRAGMA calls only."""
     candidates = q(
         npx,
         cfg,
@@ -146,7 +143,7 @@ def main() -> int:
     hard_target_guard()
     npx = base.npx_path()
 
-    print('BUILD 436 MEMBERSHIP BUILD 395 REBUILD AUTHORIZATION PREFLIGHT')
+    print('BUILD 436 MEMBERSHIP BUILD 395 REBUILD AUTHORIZATION PREFLIGHT / BUILD 437 INDEX COMPLETION')
     print(f'Production target: {PROD_NAME} ({PROD_ID})')
     print('Build 435 lossless complete-row mapping: PASS')
     print('D1 mutation capability: NONE')
@@ -160,6 +157,14 @@ def main() -> int:
             "SELECT type,name,sql FROM sqlite_schema WHERE tbl_name='membership_tier_policies' AND type IN ('index','trigger') AND sql IS NOT NULL ORDER BY type,name;",
             'PRODUCTION MEMBERSHIP USER OBJECTS',
         )
+        legacy_sort_index_info = []
+        if any(str(obj.get('type') or '') == 'index' and str(obj.get('name') or '') == LEGACY_SORT_INDEX for obj in user_objects):
+            legacy_sort_index_info = q(
+                npx,
+                cfg,
+                f'PRAGMA index_info({quote_identifier(LEGACY_SORT_INDEX)});',
+                'PRODUCTION MEMBERSHIP LEGACY SORT INDEX COLUMNS',
+            )
         outbound_fks = q(
             npx,
             cfg,
@@ -179,7 +184,6 @@ def main() -> int:
         )
 
     canonical_rows = list(mapping.get('canonical_preview_rows') or [])
-    source_rows = list(mapping.get('source_rows') or [])
     canonical_sha = stable_fingerprint(canonical_rows)
     source_sha = str(mapping.get('source_rows_sha256') or '')
     policy_ids = [row.get('policy_id') for row in canonical_rows]
@@ -193,7 +197,19 @@ def main() -> int:
         and all(all(row.get(column) is not None for column in CANONICAL_COLUMNS) for row in canonical_rows)
     )
     tiers_exact = {row.get('tier_code') for row in canonical_rows} == EXPECTED_TIERS
-    no_user_objects = len(user_objects) == 0
+
+    legacy_sort_columns = [str(row.get('name') or '') for row in sorted(legacy_sort_index_info, key=lambda row: int(row.get('seqno') or row.get('seq') or 0))]
+    legacy_sort_objects = [
+        obj for obj in user_objects
+        if str(obj.get('type') or '') == 'index' and str(obj.get('name') or '') == LEGACY_SORT_INDEX
+    ]
+    legacy_sort_index_compatible = len(legacy_sort_objects) == 1 and legacy_sort_columns == LEGACY_SORT_COLUMNS
+    unhandled_user_objects = [
+        obj for obj in user_objects
+        if not (str(obj.get('type') or '') == 'index' and str(obj.get('name') or '') == LEGACY_SORT_INDEX)
+    ]
+    no_unhandled_user_objects = legacy_sort_index_compatible and len(unhandled_user_objects) == 0
+
     no_outbound_fks = len(outbound_fks) == 0
     no_inbound_fks = len(inbound_fks) == 0
     no_collisions = len(collisions) == 0
@@ -211,7 +227,8 @@ def main() -> int:
         ids_valid,
         required_values_nonnull,
         tiers_exact,
-        no_user_objects,
+        legacy_sort_index_compatible,
+        no_unhandled_user_objects,
         no_outbound_fks,
         no_inbound_fks,
         no_collisions,
@@ -219,7 +236,7 @@ def main() -> int:
     ])
 
     payload = {
-        'artifact': 'Build 436 Membership Build 395 rebuild authorization preflight',
+        'artifact': 'Build 436/437 Membership Build 395 rebuild authorization preflight',
         'production_database': PROD_NAME,
         'production_database_id': PROD_ID,
         'build435_mapping_green': mapping.get('lossless_mapping_possible') is True,
@@ -233,7 +250,12 @@ def main() -> int:
         'canonical_required_values_nonnull': required_values_nonnull,
         'canonical_tiers_exact': tiers_exact,
         'user_defined_indexes_or_triggers': user_objects,
-        'no_user_defined_indexes_or_triggers': no_user_objects,
+        'legacy_sort_index_name': LEGACY_SORT_INDEX,
+        'legacy_sort_index_columns': legacy_sort_columns,
+        'legacy_sort_index_compatible': legacy_sort_index_compatible,
+        'canonical_sort_index_columns': CANONICAL_SORT_COLUMNS,
+        'unhandled_user_objects': unhandled_user_objects,
+        'no_unhandled_user_objects': no_unhandled_user_objects,
         'outbound_foreign_keys': outbound_fks,
         'no_outbound_foreign_keys': no_outbound_fks,
         'inbound_fk_candidate_tables': inbound_fk_candidates,
@@ -252,14 +274,15 @@ def main() -> int:
     }
     OUTPUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
-    print('\n=== BUILD 436 MEMBERSHIP REBUILD AUTHORIZATION BOUNDARY ===')
+    print('\n=== BUILD 436/437 MEMBERSHIP REBUILD AUTHORIZATION BOUNDARY ===')
     print(f'Membership rows: {payload["membership_row_count"]}')
     print(f'Source-row SHA-256: {source_sha}')
     print(f'Canonical-preview SHA-256: {canonical_sha}')
     print(f'Policy IDs valid/unique/positive: {ids_valid} / {policy_ids}')
     print(f'Canonical required values non-null: {required_values_nonnull}')
     print(f'Canonical tiers exact: {tiers_exact}')
-    print(f'User-defined Membership indexes/triggers: {len(user_objects)}')
+    print(f'Legacy sort index: {LEGACY_SORT_INDEX} / columns={legacy_sort_columns} / compatible={legacy_sort_index_compatible}')
+    print(f'Unhandled Membership indexes/triggers: {len(unhandled_user_objects)}')
     print(f'Outbound Membership foreign keys: {len(outbound_fks)}')
     print(f'Inbound FK candidate tables: {len(inbound_fk_candidates)} / {inbound_fk_candidates}')
     print(f'Inbound Membership foreign keys: {len(inbound_fks)}')
