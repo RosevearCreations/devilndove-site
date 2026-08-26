@@ -3,10 +3,10 @@
 
 Runs the Build 439 CAIP regression, provider fail-closed rerun regression, the
 read-only storage-diagnostic regression, the verified missing-binary recovery
-regression, recovered-evidence linkage regression, JavaScript syntax checks,
-synchronizes `database_full_schema.sql` deterministically, checks the synchronized
-aggregate, and reruns the main regression. This script never contacts Cloudflare,
-D1, R2 or an external provider.
+regression, recovered-evidence linkage regression, evidence-title UX regression,
+JavaScript syntax checks, synchronizes `database_full_schema.sql` deterministically,
+checks the synchronized aggregate, and reruns the main regression. This script never
+contacts Cloudflare, D1, R2 or an external provider.
 """
 from __future__ import annotations
 
@@ -24,9 +24,11 @@ STEPS = (
     ('Build 439 storage diagnostic regression', [PYTHON, 'scripts/build439_storage_diagnostic_regression_test.py']),
     ('Build 439 missing-binary recovery regression', [PYTHON, 'scripts/build439_missing_binary_recovery_regression_test.py']),
     ('Build 439 recovered evidence linkage regression', [PYTHON, 'scripts/build439_recovered_evidence_linkage_regression_test.py']),
+    ('Build 439 evidence title UX regression', [PYTHON, 'scripts/build439_evidence_title_ux_regression_test.py']),
     ('Build 439 evidence API JavaScript syntax', ['node', '--check', 'functions/api/admin/caip-evidence-review.js']),
     ('Build 439 recovery endpoint JavaScript syntax', ['node', '--check', 'functions/api/admin/caip-evidence-storage-recovery.js']),
     ('Build 439 recovery UI JavaScript syntax', ['node', '--check', 'public/js/admin-caip-storage-audit.js']),
+    ('Build 439 evidence title UX JavaScript syntax', ['node', '--check', 'public/js/admin-caip-evidence-title-assist.js']),
     ('Build 439 deterministic full-schema sync', [PYTHON, 'scripts/build439_sync_full_schema.py', '--sync']),
     ('Build 439 deterministic full-schema check', [PYTHON, 'scripts/build439_sync_full_schema.py', '--check']),
     ('Build 439 CAIP regression after full-schema sync', [PYTHON, 'scripts/build439_caip_temporal_evidence_review_test.py']),
@@ -65,7 +67,8 @@ def main() -> int:
     print('Storage diagnostic regression: PASS / READ-ONLY')
     print('Missing-binary recovery regression: PASS / VERIFIED RECOVERY CONTRACT')
     print('Recovered evidence linkage regression: PASS / SERVER-CANONICALIZED')
-    print('Recovery/evidence JavaScript syntax: PASS')
+    print('Evidence title UX regression: PASS / BLANK POST PREVENTED')
+    print('Recovery/evidence/title JavaScript syntax: PASS')
     print('database_full_schema.sql: SYNCHRONIZED / CHECKED')
     print('Cloudflare/D1/R2/provider access: NONE')
     print('Development D1 mutation executed: NO')
