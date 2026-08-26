@@ -24,10 +24,12 @@ PUBLIC_VISIBILITY = ROOT / 'public/js/core/dd-public-module-visibility.mjs'
 APP_GROUPS = ROOT / 'public/js/core/dd-application-module-groups.mjs'
 PLAN = ROOT / 'BUILD438_APPLICATION_CORE_MODULE_PLAN.md'
 VERIFY_SQL = ROOT / 'BUILD438_D1_VERIFICATION.sql'
+STRICT_VERIFY_SQL = ROOT / 'BUILD438_D1_STRICT_VERIFICATION.sql'
 ROUTE_TEST = ROOT / 'scripts/build438_module_route_map_test.mjs'
 ACCESS_POLICY_TEST = ROOT / 'scripts/build438_module_access_policy_test.mjs'
 SESSION_RESILIENCE_TEST = ROOT / 'scripts/build438_module_session_resilience_test.mjs'
 DEV_HELPER = ROOT / 'scripts/build438_development_module_activation.py'
+DEV_ISOLATION = ROOT / 'scripts/build438_development_module_isolation_proof.py'
 FULL_SCHEMA_SYNC = ROOT / 'scripts/build438_sync_full_schema.py'
 SCHEMA_REFERENCE = ROOT / 'DATABASE_SCHEMA_REFERENCE.md'
 
@@ -91,10 +93,12 @@ def main() -> int:
     app_groups = read(APP_GROUPS)
     plan = read(PLAN)
     verify_sql = read(VERIFY_SQL)
+    strict_verify_sql = read(STRICT_VERIFY_SQL)
     route_test = read(ROUTE_TEST)
     access_policy_test = read(ACCESS_POLICY_TEST)
     session_resilience_test = read(SESSION_RESILIENCE_TEST)
     dev_helper = read(DEV_HELPER)
+    dev_isolation = read(DEV_ISOLATION)
     full_schema_sync = read(FULL_SCHEMA_SYNC)
     schema_reference = read(SCHEMA_REFERENCE)
     sim = migration_simulation()
@@ -129,14 +133,19 @@ def main() -> int:
         and all(f"id: '{module_key}'" in app_groups for module_key in EXPECTED_MODULES)
         and all(module_key in plan for module_key in EXPECTED_MODULES)
         and 'Devil n Dove Application Core' in plan
-        and 'SELECT' in verify_sql
+        and 'verification_pass' in strict_verify_sql
+        and 'ELSE abs(-9223372036854775808)' in strict_verify_sql
         and EXPECTED_MODULES[1] in dev_helper
         and 'EXPECTED_DATABASE_ID' in dev_helper
         and 'BUILD 438 FULL-SCHEMA SYNC' in full_schema_sync
         and 'database_full_schema.sql' in schema_reference
         and 'database_build438_application_module_activation.sql' in schema_reference
-        and 'BUILD 438 MODULE SESSION RESILIENCE TEST: PASS' in session_resilience_test,
-        'Build 438 structurally proves Core + exact three modules, exact D1 verification, resilient sessions, hard-pinned Development apply and deterministic fresh-schema synchronization',
+        and 'BUILD 438 MODULE SESSION RESILIENCE TEST: PASS' in session_resilience_test
+        and 'DEFAULT_BASE_URL' in dev_isolation
+        and 'Temporary D1 writes: app_modules ONLY' in dev_isolation
+        and 'finally:' in dev_isolation
+        and 'FINAL MODULE STATE: RESTORED / EXACT' in dev_isolation,
+        'Build 438 structurally proves Core + exact three modules, exact D1 verification, resilient sessions, hard-pinned Development apply, deterministic fresh-schema synchronization and safe live isolation restore',
     )
 
     print()
@@ -158,6 +167,7 @@ def main() -> int:
     print('Authoritative client bootstrap: SOURCE READY')
     print('Admin Application Modules control + health + route proof: SOURCE READY')
     print('Deterministic full-schema sync helper: SOURCE READY / SYNCHRONIZABLE')
+    print('Development isolation harness: SOURCE READY / APP_MODULES-ONLY / AUTO-RESTORE')
     print('Request-time schema mutation: NONE')
     print('Background polling introduced by Build 438: NONE')
     print('Production D1 migration executed: NO')
