@@ -35,23 +35,42 @@ check(browserSafeResourceImageUrl('') === '', 'Blank image URL should remain bla
 check(browserSafeResourceImageUrl('data:image/png;base64,AAAA') === 'data:image/png;base64,AAAA', 'Data URL should remain untouched.');
 
 const adminSafety = fs.readFileSync(path.join(root, 'public/js/admin-asset-url-safety.js'), 'utf8');
+const transportGuard = fs.readFileSync(path.join(root, 'public/js/admin-inventory-asset-transport-guard.js'), 'utf8');
 const inventoryPage = fs.readFileSync(path.join(root, 'admin/inventory-operations/index.html'), 'utf8');
+const inventoryUi = fs.readFileSync(path.join(root, 'public/js/admin-site-item-inventory.js'), 'utf8');
+
 check(adminSafety.includes("raw.replace(/#/g, '%23')") && adminSafety.includes("PUBLIC_ASSET_HOST = 'assets.devilndove.com'"), 'Inventory Admin safety layer must encode literal # before URL parsing.');
 check(adminSafety.includes('normalizePayload') && adminSafety.includes('DDAuth.readApiJson') && adminSafety.includes('DDAuth.apiJson'), 'Inventory Admin safety layer must normalize both direct and cached/shared API JSON payloads.');
 check(!adminSafety.includes('fetch(') && !adminSafety.includes('setInterval(') && !adminSafety.includes('setTimeout('), 'Inventory Admin safety layer must not add network calls or polling.');
-const safetyIndex = inventoryPage.indexOf('/public/js/admin-asset-url-safety.js?v=440');
-check(safetyIndex > 0, 'Inventory Operations page does not load the Admin asset URL safety layer.');
+
+check(transportGuard.includes("raw.replace(/#/g, '%23')") && transportGuard.includes("const HOST = 'assets.devilndove.com'"), 'Inventory transport guard must encode literal # before URL parsing.');
+check(transportGuard.includes('normalizePayload') && transportGuard.includes('DDAuth.readApiJson') && transportGuard.includes('DDAuth.apiJson'), 'Inventory transport guard must normalize API payloads independently of the older safety layer.');
+check(transportGuard.includes("Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML')") && transportGuard.includes('sanitizeGeneratedHtml(value)'), 'Inventory transport guard must sanitize generated HTML before the browser parses image/link attributes.');
+check(transportGuard.includes('insertAdjacentHTML') && transportGuard.includes('sanitizeGeneratedHtml(html)'), 'Inventory transport guard must also cover insertAdjacentHTML transport.');
+check(transportGuard.includes("HTMLImageElement?.prototype, 'src'") && transportGuard.includes("HTMLAnchorElement?.prototype, 'href'"), 'Inventory transport guard must cover direct src/href property assignment.');
+check(transportGuard.includes("window.location.pathname.startsWith('/admin/inventory-operations')"), 'Inventory transport guard must remain narrowly page-scoped.');
+check(!transportGuard.includes('fetch(') && !transportGuard.includes('setInterval(') && !transportGuard.includes('setTimeout('), 'Inventory transport guard must add no network calls or polling.');
+
+check(inventoryUi.includes('${x.image_url ?') && inventoryUi.includes('src=\\"${escapeHtml(x.image_url)}\\"'), 'Regression must continue covering the direct Inventory thumbnail renderer that exposed the browser defect.');
+
+const safetyIndex = inventoryPage.indexOf('/public/js/admin-asset-url-safety.js?v=440.2');
+const transportIndex = inventoryPage.indexOf('/public/js/admin-inventory-asset-transport-guard.js?v=440.3');
+check(safetyIndex > 0, 'Inventory Operations page does not load the Admin asset URL safety layer with the new cache-busting version.');
+check(transportIndex > safetyIndex, 'Inventory Operations page must load the transport guard after the shared safety layer.');
 for (const script of [
   '/public/js/admin-inventory-integrity-review.js?v=440',
+  '/public/js/admin-tool-lifecycle-review.js?v=440',
   '/public/js/admin-product-resources.js?v=253',
-  '/public/js/admin-site-item-inventory.js?v=261',
+  '/public/js/admin-site-item-inventory.js?v=440.3',
 ]) {
-  check(inventoryPage.indexOf(script) > safetyIndex, `Admin asset URL safety must load before ${script}.`);
+  check(inventoryPage.indexOf(script) > transportIndex, `Inventory transport guard must load before ${script}.`);
 }
 
 console.log(`BUILD 440 RESOURCE ASSET URL REGRESSION: PASS (${checks}/${checks})`);
 console.log('Literal # object-key characters: %23 / PRESERVED');
 console.log('Inventory Admin API payload boundary: NORMALIZED BEFORE RENDER');
+console.log('Inventory generated-HTML boundary: NORMALIZED BEFORE HTML PARSE');
+console.log('Direct Inventory src/href assignment: GUARDED');
 console.log('Cached/shared Admin API payloads: COVERED');
 console.log('Literal path spaces: PERCENT-ENCODED');
 console.log('D1/R2 mutation: NONE');
