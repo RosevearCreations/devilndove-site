@@ -269,6 +269,61 @@ export async function availableModulesForRequest(request, env, options = {}) {
   return { config, user, modules };
 }
 
+function mutationLevelAllowed(accessLevel) {
+  return normalizeText(accessLevel).toLowerCase() === 'manage';
+}
+
+export async function sharedServiceAccessForRequest(request, env, contract, options = {}) {
+  const config = await readModuleConfig(env, options);
+  const user = options.user === undefined ? await readSessionUser(request, env) : options.user;
+  const consumers = Array.isArray(contract?.consumer_module_keys) ? contract.consumer_module_keys : [];
+  const requireManage = Boolean(contract?.mutation);
+  const consumerAccess = consumers.map((moduleKey) => {
+    const access = evaluateModuleAccess(config, moduleKey, user);
+    return {
+      module_key: moduleKey,
+      allowed: access.allowed,
+      reason: access.reason,
+      access_level: access.access_level,
+      qualifies: access.allowed && (!requireManage || mutationLevelAllowed(access.access_level)),
+    };
+  });
+  const qualifying = consumerAccess.find((row) => row.qualifies) || null;
+  return {
+    allowed: Boolean(qualifying),
+    reason: qualifying ? 'enabled_consumer' : (requireManage ? 'no_manage_consumer' : 'no_enabled_consumer'),
+    config,
+    user,
+    contract,
+    consumer_access: consumerAccess,
+    qualifying_consumer: qualifying,
+  };
+}
+
+export function sharedServiceUnavailableResponse(access) {
+  const contract = access?.contract || null;
+  return new Response(JSON.stringify({
+    ok: false,
+    error: contract?.mutation
+      ? 'No enabled application module with manage access is available to consume this shared service.'
+      : 'No enabled application module is available to consume this shared service.',
+    code: access?.reason === 'no_manage_consumer'
+      ? 'shared_service_manage_consumer_required'
+      : 'shared_service_no_enabled_consumer',
+    contract_path: contract?.path || null,
+    owner_module_key: contract?.owner_module_key || null,
+    consumer_module_keys: contract?.consumer_module_keys || [],
+    build: BUILD,
+  }), {
+    status: 403,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
+}
+
 export function moduleUnavailableResponse(moduleAccess, { api = false } = {}) {
   const module = moduleAccess?.module || null;
   const reason = moduleAccess?.reason || 'module_unavailable';
