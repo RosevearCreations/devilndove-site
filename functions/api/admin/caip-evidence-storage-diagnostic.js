@@ -4,12 +4,19 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit
 import { resolveCaipBucket } from '../_lib/caipMediaIntake.js';
 
 const BUILD = 439;
+const MAX_AUDIT_ASSETS = 8;
+
 function json(data, status = 200) {
   return jsonResponse(data, status, { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
 }
 function integer(value) {
   const parsed = Number(value || 0);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+}
+function boundedInteger(value, min, max, fallback) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) return fallback;
+  return Math.max(min, Math.min(max, parsed));
 }
 function text(value, max = 0) {
   const clean = String(value ?? '').trim();
@@ -18,6 +25,7 @@ function text(value, max = 0) {
 function safeJson(value, fallback = {}) {
   try { return JSON.parse(String(value || '')); } catch { return fallback; }
 }
+function resultRows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function candidateKey(candidate) {
   return [candidate.storage_provider, candidate.bucket_alias, candidate.object_key].map((value) => text(value)).join('|');
 }
@@ -64,6 +72,87 @@ async function diagnosticRows(db, projectId, assetId) {
   `).bind(projectId, assetId).first().catch(() => null);
 
   return { asset, upload, observation };
+}
+
+async function auditRows(db, limit, offset) {
+  const result = await db.prepare(`
+    SELECT
+      ca.creative_asset_id,ca.creative_project_id,ca.asset_key,ca.original_filename,ca.media_type,
+      ca.source_url,ca.source_metadata_json,ca.media_asset_id,
+      ma.storage_provider AS media_storage_provider,ma.bucket_name AS media_bucket_name,
+      ma.object_key AS media_object_key,ma.file_size_bytes AS media_file_size_bytes,ma.mime_type AS media_mime_type,
+      f.caip_media_upload_file_id AS upload_file_id,f.upload_status AS upload_status,
+      f.storage_provider AS upload_storage_provider,f.bucket_alias AS upload_bucket_alias,f.object_key AS upload_object_key,
+      f.original_filename AS upload_original_filename,f.mime_type AS upload_mime_type,f.file_size_bytes AS upload_file_size_bytes,
+      f.checksum_status AS upload_checksum_status,f.last_error AS upload_last_error,f.updated_at AS upload_updated_at,
+      o.creative_asset_technical_observation_id AS observation_id,o.storage_provider AS observation_storage_provider,
+      o.bucket_name AS observation_bucket_name,o.object_key AS observation_object_key,o.mime_type AS observation_mime_type,
+      o.file_size_bytes AS observation_file_size_bytes,o.probe_status AS observation_probe_status,
+      o.probe_scope AS observation_probe_scope,o.observed_at AS observation_observed_at
+    FROM creative_assets ca
+    LEFT JOIN media_assets ma ON ma.media_asset_id=ca.media_asset_id
+    LEFT JOIN caip_media_upload_files f ON f.caip_media_upload_file_id=(
+      SELECT f2.caip_media_upload_file_id
+      FROM caip_media_upload_files f2
+      WHERE f2.creative_project_id=ca.creative_project_id AND f2.creative_asset_id=ca.creative_asset_id
+      ORDER BY f2.caip_media_upload_file_id DESC LIMIT 1
+    )
+    LEFT JOIN creative_asset_technical_observations o ON o.creative_asset_technical_observation_id=(
+      SELECT o2.creative_asset_technical_observation_id
+      FROM creative_asset_technical_observations o2
+      WHERE o2.creative_project_id=ca.creative_project_id AND o2.creative_asset_id=ca.creative_asset_id
+      ORDER BY o2.observed_at DESC,o2.creative_asset_technical_observation_id DESC LIMIT 1
+    )
+    WHERE ca.asset_status<>'archived' AND LOWER(COALESCE(ca.media_type,'')) IN ('video','audio')
+    ORDER BY ca.creative_project_id,ca.creative_asset_id
+    LIMIT ? OFFSET ?
+  `).bind(limit, offset).all();
+  return resultRows(result);
+}
+
+function bundleFromAuditRow(row) {
+  return {
+    asset: {
+      creative_asset_id: row.creative_asset_id,
+      creative_project_id: row.creative_project_id,
+      asset_key: row.asset_key,
+      original_filename: row.original_filename,
+      media_type: row.media_type,
+      source_url: row.source_url,
+      source_metadata_json: row.source_metadata_json,
+      media_asset_id: row.media_asset_id,
+      media_storage_provider: row.media_storage_provider,
+      media_bucket_name: row.media_bucket_name,
+      media_object_key: row.media_object_key,
+      media_file_size_bytes: row.media_file_size_bytes,
+      media_mime_type: row.media_mime_type,
+    },
+    upload: row.upload_file_id ? {
+      caip_media_upload_file_id: row.upload_file_id,
+      creative_asset_id: row.creative_asset_id,
+      upload_status: row.upload_status,
+      storage_provider: row.upload_storage_provider,
+      bucket_alias: row.upload_bucket_alias,
+      object_key: row.upload_object_key,
+      original_filename: row.upload_original_filename,
+      mime_type: row.upload_mime_type,
+      file_size_bytes: row.upload_file_size_bytes,
+      checksum_status: row.upload_checksum_status,
+      last_error: row.upload_last_error,
+      updated_at: row.upload_updated_at,
+    } : null,
+    observation: row.observation_id ? {
+      creative_asset_technical_observation_id: row.observation_id,
+      storage_provider: row.observation_storage_provider,
+      bucket_name: row.observation_bucket_name,
+      object_key: row.observation_object_key,
+      mime_type: row.observation_mime_type,
+      file_size_bytes: row.observation_file_size_bytes,
+      probe_status: row.observation_probe_status,
+      probe_scope: row.observation_probe_scope,
+      observed_at: row.observation_observed_at,
+    } : null,
+  };
 }
 
 async function testCandidates(env, rows) {
@@ -133,6 +222,46 @@ function classification(results) {
   return 'r2_binding_unavailable';
 }
 
+function safetyEnvelope() {
+  return {
+    source_media_unchanged: true,
+    d1_mutation_executed: false,
+    r2_body_read_executed: false,
+    r2_mutation_executed: false,
+    provider_execution_active: false,
+  };
+}
+
+async function inventoryAudit(db, env, limit, offset) {
+  const totalRow = await db.prepare(`
+    SELECT COUNT(*) AS count_value
+    FROM creative_assets
+    WHERE asset_status<>'archived' AND LOWER(COALESCE(media_type,'')) IN ('video','audio')
+  `).first();
+  const total = Number(totalRow?.count_value || 0) || 0;
+  const rawRows = await auditRows(db, limit, offset);
+  const items = [];
+  for (const raw of rawRows) {
+    const rows = bundleFromAuditRow(raw);
+    const candidates = await testCandidates(env, rows);
+    items.push({
+      creative_project_id: integer(rows.asset.creative_project_id),
+      creative_asset_id: integer(rows.asset.creative_asset_id),
+      asset_key: rows.asset.asset_key,
+      original_filename: rows.asset.original_filename,
+      media_type: rows.asset.media_type,
+      classification: classification(candidates),
+      media_asset_id: integer(rows.asset.media_asset_id) || null,
+      upload_file_id: integer(rows.upload?.caip_media_upload_file_id) || null,
+      candidates,
+    });
+  }
+  const counts = {};
+  for (const item of items) counts[item.classification] = Number(counts[item.classification] || 0) + 1;
+  const nextOffset = offset + items.length < total ? offset + items.length : null;
+  return { total, limit, offset, next_offset: nextOffset, counts, items };
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const adminUser = await getAdminUserFromRequest(request, env);
@@ -140,11 +269,19 @@ export async function onRequestGet(context) {
   const db = getDb(env);
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const url = new URL(request.url);
+  const scope = text(url.searchParams.get('scope')).toLowerCase();
   const projectId = integer(url.searchParams.get('creative_project_id') || url.searchParams.get('project_id'));
   const assetId = integer(url.searchParams.get('creative_asset_id') || url.searchParams.get('asset_id'));
-  if (!projectId || !assetId) return json({ ok: false, error: 'creative_project_id and creative_asset_id are required.' }, 400);
 
   try {
+    if (scope === 'all') {
+      const limit = boundedInteger(url.searchParams.get('limit'), 1, MAX_AUDIT_ASSETS, MAX_AUDIT_ASSETS);
+      const offset = boundedInteger(url.searchParams.get('offset'), 0, 100000, 0);
+      const audit = await inventoryAudit(db, env, limit, offset);
+      return json({ ok: true, build: BUILD, scope: 'all', ...audit, ...safetyEnvelope() });
+    }
+
+    if (!projectId || !assetId) return json({ ok: false, error: 'creative_project_id and creative_asset_id are required, or use scope=all.' }, 400);
     const rows = await diagnosticRows(db, projectId, assetId);
     const candidates = await testCandidates(env, rows);
     return json({
@@ -153,11 +290,7 @@ export async function onRequestGet(context) {
       creative_project_id: projectId,
       creative_asset_id: assetId,
       classification: classification(candidates),
-      source_media_unchanged: true,
-      d1_mutation_executed: false,
-      r2_body_read_executed: false,
-      r2_mutation_executed: false,
-      provider_execution_active: false,
+      ...safetyEnvelope(),
       asset: {
         asset_key: rows.asset.asset_key,
         original_filename: rows.asset.original_filename,
@@ -184,11 +317,7 @@ export async function onRequestGet(context) {
       ok: false,
       build: BUILD,
       error: text(error?.message || error, 900) || 'CAIP storage diagnostic failed.',
-      source_media_unchanged: true,
-      d1_mutation_executed: false,
-      r2_body_read_executed: false,
-      r2_mutation_executed: false,
-      provider_execution_active: false,
+      ...safetyEnvelope(),
     }, 400);
   }
 }
