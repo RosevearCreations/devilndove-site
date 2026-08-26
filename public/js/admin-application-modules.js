@@ -47,6 +47,8 @@
   let busy = false;
   let proofBusy = false;
   let acceptanceBusy = false;
+  let lastAcceptanceResults = [];
+  let lastAcceptanceStatus = 'NOT RUN';
 
   function moduleRow(key) {
     return state.modules.find((row) => row.module_key === key) || null;
@@ -305,6 +307,46 @@
       </div>`;
   }
 
+  function publishAcceptanceResults(status, results) {
+    lastAcceptanceStatus = status;
+    lastAcceptanceResults = results.map((row) => ({ ...row }));
+    window.DDBuild438Acceptance = {
+      build: BUILD,
+      status,
+      completed_at: new Date().toISOString(),
+      results: lastAcceptanceResults.map((row) => ({ ...row })),
+    };
+    console.group(`[Build ${BUILD}] authenticated module acceptance — ${status}`);
+    console.table(lastAcceptanceResults);
+    console.groupEnd();
+  }
+
+  function acceptanceReportText() {
+    const header = `BUILD ${BUILD} AUTHENTICATED MODULE ACCEPTANCE: ${lastAcceptanceStatus}`;
+    if (!lastAcceptanceResults.length) return `${header}\nNo acceptance results are available yet.`;
+    const passed = lastAcceptanceResults.filter((row) => row.pass).length;
+    const lines = [header, `Checks: ${passed}/${lastAcceptanceResults.length}`, ''];
+    for (const row of lastAcceptanceResults) {
+      lines.push(`${row.pass ? 'PASS' : 'FAIL'} — ${row.label}${row.detail ? ` — ${row.detail}` : ''}`);
+    }
+    lines.push('', 'Production mutation capability: NONE');
+    return lines.join('\n');
+  }
+
+  async function copyAcceptanceResults() {
+    const report = acceptanceReportText();
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(report);
+        setStatus(`Build ${BUILD} acceptance results copied to clipboard.`, 'ok');
+        return;
+      }
+    } catch (error) {
+      console.warn('[Build 438 modules] clipboard write failed', error);
+    }
+    window.prompt('Copy Build 438 acceptance results:', report);
+  }
+
   async function runAuthenticatedAcceptance() {
     if (acceptanceBusy || busy || proofBusy) return;
     const button = byId('runAuthenticatedModuleAcceptanceButton');
@@ -320,6 +362,7 @@
     if (button) button.disabled = true;
     render();
     renderAcceptance([], true);
+    publishAcceptanceResults('RUNNING', []);
 
     try {
       await load();
@@ -444,11 +487,13 @@
       record(MODULE_ORDER.every((key) => Number(moduleRow(key)?.is_enabled || 0) === 1), 'Final module state', 'all three enabled');
       record(MODULE_ORDER.every((key) => Number(moduleRow(key)?.background_activity_enabled || 0) === 0), 'Final background state', 'all three OFF');
 
+      publishAcceptanceResults('PASS', results);
       renderAcceptance(results, false);
       setStatus(`Build ${BUILD} authenticated module acceptance PASS. ${results.length}/${results.length} checks green; temporary module/role changes restored.`, 'ok');
     } catch (error) {
       console.error('[Build 438 authenticated acceptance]', error);
       results.push({ pass: false, label: 'Acceptance stopped', detail: error?.message || 'unknown failure' });
+      publishAcceptanceResults('CHECK', results);
       renderAcceptance(results, false);
       setStatus(`Build ${BUILD} authenticated acceptance stopped: ${error?.message || 'unknown failure'}. Review restore results before retrying.`, 'error');
       try { await load(); } catch {}
@@ -480,6 +525,10 @@
     }
     if (event.target.closest('#runAuthenticatedModuleAcceptanceButton')) {
       void runAuthenticatedAcceptance();
+      return;
+    }
+    if (event.target.closest('#copyAuthenticatedModuleAcceptanceButton')) {
+      void copyAcceptanceResults();
       return;
     }
     if (event.target.closest('#refreshModuleAuthorityButton')) {
