@@ -2,9 +2,11 @@
 
 ## Status
 
-**AUTHORIZATION BOUNDARY PASS (20/20) / PRODUCT-NUMBER STAGE AUTHORIZED / BACKUP PASS / APPLY NOT YET EXECUTED / PRODUCTION PROMOTION CLOSED**
+**PASS — PRODUCTION PRODUCT-NUMBER STAGE COMPLETE / DEV+PROD 1084..1128 / PRODUCTION PROMOTION CLOSED**
 
-The Build 427 source/read-only authorization boundary passed after the Windows UTF-8 console repair:
+Build 427 first closed its source/read-only authorization boundary at 20/20, then received explicit authorization for the Product-number-only Production stage.
+
+## Authorization boundary — PASS
 
 ```text
 BUILD 427 PRODUCTION EXECUTION SAFETY REGRESSION: PASS (20/20)
@@ -12,60 +14,32 @@ BUILD 427 PRODUCTION EXECUTION PREFLIGHT: PASS
 BUILD 427 TWENTY-ITEM PRODUCTION AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
 ```
 
-Fresh live preflight proved:
+The Product-number authorization applied only to:
 
 ```text
-Product-number candidate fresh: YES
-Candidate block: 1084..1128
-Candidate next: 1129
-Product/FK zero-orphan gate: True
-site_item_inventory rows: 1041
-search_query_terms rows preserved: 5
-__sql_test rows untouched: 0
-CAIP rows excluded: 113
-Safe to open Product-number execution phase: YES
-Production backup created: NO
-Production authorization received: NO
-Production mutation executed: NO
-PRODUCTION PROMOTION: CLOSED
+45 guarded products.product_number assignments
+catalog_product_number_sequence monotonic advance
 ```
 
-## Explicit Product-number authorization received
+Gift Card, Notification, Product-image annotation, Membership, fractional Inventory, Product/FK and Accounting/default families were not authorized by that token.
 
-The owner subsequently supplied the exact token:
+## Production backup — PASS
 
-```text
-AUTHORIZE-BUILD427-PROD-PRODUCT-NUMBERS
-```
-
-That authorization applies **only** to the Product-number legacy backfill/sequence stage. Gift Card, Notification, Product-image annotation index, Membership, fractional Inventory, Product/FK and Accounting/default families remain separately locked.
-
-## Authorized Production backup — PASS
-
-The authorized backup phase reran the green preflight and created a full remote Production D1 export before any mutation:
+A full remote Production D1 export was created before mutation and revalidated immediately before the successful write:
 
 ```text
-BUILD 427 PRODUCTION BACKUP: PASS
 Backup: local_backups\build427_prod_before_product_numbers_20260826T003614Z.sql
 Bytes: 19002028
 SHA-256: 5ec4fd7731706c598e2958e831ad5a9ddce327b2a78c4dec261a718b0261ceed
-Production mutation executed: NO
+Existing backup recheck: PASS
+Backup age at successful apply: 369 seconds
 ```
 
-## First apply attempt — safely blocked before mutation
+## First apply attempt — safely blocked before DML
 
-The first authorized `--apply-product-numbers` invocation did **not** reach the D1 write. Its second full Build 426 evidence refresh received Cloudflare authorization code `7403` while reading the unrelated Development `site_inventory_movements` count:
+The first authorized apply attempt received Cloudflare authorization code `7403` during an unrelated Development Inventory read in the broad Build 426 evidence refresh. It stopped before Product-number DML was submitted.
 
-```text
-The given account is not valid or is not authorized to access this service [code: 7403]
-BUILD 418 LIVE SEMANTIC CLASSIFICATION: FAIL — BUILD 426 DEVELOPMENT site_inventory_movements COUNT blocked by Cloudflare authorization (7403).
-BUILD 427 PRODUCTION EXECUTION PREFLIGHT: FAIL — Build 426 fresh live evidence returned 1.
-BUILD 427 PRODUCTION PRODUCT NUMBERS: FAIL — fresh Build 427 preflight failed with exit code 1.
-```
-
-This is classified as an **authorization/read interruption**, not schema evidence. No Product-number DML was submitted.
-
-The immediate read-only Product-number postcheck then proved the safe no-write state:
+The immediate postcheck proved Production remained unchanged at that point:
 
 ```text
 Production Product numbers: 0..0 (0 unique)
@@ -73,72 +47,59 @@ Production sequence next: 1084
 Development Product numbers: 1084..1128 (45 unique)
 Development sequence next: 1129
 Product identities equal: True
-PRODUCTION PROMOTION: CLOSED
-BUILD 427 PRODUCTION PRODUCT-NUMBER POSTCHECK: FAIL
 ```
 
-The postcheck is expected to report FAIL here because Production intentionally remained unchanged; it confirms there was no partial Product-number write.
+Build 427 therefore classified `7403` as an authorization/read interruption rather than schema evidence or a partial write.
 
-## Build 427 focused-prewrite repair
+## Focused pre-write repair — PASS
 
-The Product-number executor has been tightened so the immediate pre-write check no longer reruns unrelated Build 426 schema families after the authorization boundary is already green.
+The Product-number executor was narrowed so the immediate-before-write recheck covers only facts that can invalidate the Product-number stage:
 
-Immediately before the Product-number write it now re-proves only facts capable of invalidating this stage:
-
-1. exact 45 Product IDs/slugs/names in Development and Production;
-2. exact Development Product-number map `1084..1128`;
-3. all 45 Production Product numbers still NULL;
-4. Production sequence still `1084`;
+1. exact 45 Product identities in both environments;
+2. Development map exactly `1084..1128`;
+3. all 45 Production Product numbers still NULL before write;
+4. Production sequence still `1084` before write;
 5. Development sequence still `>=1129`;
-6. no candidate-number collision in Production `product_costs` or `product_deletion_audit`.
+6. no candidate collisions in Production Product-number history tables.
 
-It does **not** query Gift Card, Notification, CAIP, Inventory row counts, FK-orphan families, Membership or Accounting/default families during this immediate Product-number-only write check. Those remain separate later gates.
-
-Before accepting an existing Production backup, the executor now also re-verifies:
-
-- hard Production name + UUID;
-- backup file still exists;
-- byte count still matches recorded evidence;
-- SHA-256 still matches recorded evidence;
-- backup age is no more than 1,800 seconds (30 minutes).
-
-If any backup check fails, the Product-number write remains blocked and the authorized `--backup` stage must be rerun first.
-
-## Current Product-number stage state
+The focused retry reported:
 
 ```text
-Production Product-number authorization              RECEIVED
-Production backup                                     CREATED / MUST PASS RECHECK
-Production Product-number mutation                    NOT YET EXECUTED
-Production Product-number values                      still NULL
-Production Product-number sequence                    1084
-Development Product-number values                     1084..1128
-Development Product-number sequence                   1129
-Gift Card/Notification/index/rebuild mutation         NOT AUTHORIZED
-Production promotion                                  CLOSED
+Production identities unchanged: True
+Development mapping unchanged: True
+Production Product numbers still all NULL: True
+Production sequence next: 1084
+Development sequence next: 1129
+Candidate history collisions: []
+Safe for Product-number-only write: YES
 ```
 
-## Continue only this authorized scope
+## Production Product-number apply — COMPLETE
 
-After pulling the focused-prewrite repair:
+Wrangler executed the explicitly authorized Product-number-only SQL against:
 
-```bash
-python -m py_compile \
-  scripts/build427_production_product_number_execution.py \
-  scripts/build427_execution_safety_regression.py
-
-python scripts/build427_execution_safety_regression.py
-
-python -u scripts/build427_production_product_number_execution.py \
-  --apply-product-numbers \
-  --confirm AUTHORIZE-BUILD427-PROD-PRODUCT-NUMBERS
-
-python -u scripts/build427_production_product_number_execution.py --postcheck
+```text
+devilndove-prod
+0dc8fa3e-319c-45f7-a515-34c8acd89fcf
 ```
 
-If the existing backup is older than 30 minutes when the apply command runs, the helper will fail closed. In that case rerun the already-authorized Product-number backup stage, then apply and postcheck.
+Execution summary:
 
-## Expected successful Product-number postcheck
+```text
+Processed queries: 47
+Rows read: 46
+Rows written: 91
+Database changed: true
+Scope: Product numbers only
+Gift Card/Notification/index/rebuild families: NOT EXECUTED
+PRODUCTION PROMOTION: CLOSED
+```
+
+The row-write count includes the guarded Product updates plus SQLite/index/sequence bookkeeping; scope authority is the generated Product-number-only SQL and the subsequent exact postcheck.
+
+## Immediate Production/Development postcheck — PASS
+
+Owner-run postcheck completed successfully:
 
 ```text
 Production Product numbers: 1084..1128 (45 unique)
@@ -150,16 +111,34 @@ PRODUCTION PROMOTION: CLOSED
 BUILD 427 PRODUCTION PRODUCT-NUMBER POSTCHECK: PASS
 ```
 
-## Gate state
+This closes the Product-number blocker for both environments.
+
+## Current parity boundary
 
 ```text
 Build 425  Development Product-number backfill       PASS (20/20)
 Build 426  Production release-candidate assembly     PASS (20/20)
 Build 427  Production authorization boundary         PASS (20/20)
 Build 427  Production Product-number backup          PASS
-Build 427  Production Product-number apply           PENDING — prior attempt safely blocked before DML
+Build 427  Production Product-number apply           PASS
+Build 427  Production Product-number postcheck       PASS
 
-Production Product-number authorization              RECEIVED
-Production mutation                                  NOT YET EXECUTED
+Development Product numbers                          1084..1128
+Development sequence next                            1129
+Production Product numbers                           1084..1128
+Production sequence next                             1129
+Product identity parity                              EXACT
+
+Gift Card additive mutation                          NOT AUTHORIZED
+Notification additive mutation                       NOT AUTHORIZED
+Product-image annotation index mutation              NOT AUTHORIZED
+Membership rebuild                                   NOT AUTHORIZED
+Fractional Inventory rebuilds                        NOT AUTHORIZED
+Product/FK rebuilds                                  NOT AUTHORIZED
+Accounting/default rebuilds                          NOT AUTHORIZED
 Production promotion                                 CLOSED
 ```
+
+## Handoff
+
+Proceed to Build 428 as a source/read-only preparation and authorization-boundary pass for the remaining additive and rebuild families. Do not infer authorization for any remaining Production mutation from the successful Product-number stage.
