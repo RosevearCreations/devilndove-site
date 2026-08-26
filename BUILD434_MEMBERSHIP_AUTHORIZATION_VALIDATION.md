@@ -2,9 +2,9 @@
 
 ## Status
 
-**READY — LIVE READ-ONLY MEMBERSHIP EVIDENCE + INERT REBUILD PREVIEW + LOCAL 20/20 GATES / MEMBERSHIP REBUILD NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
+**PASS (20/20) / LIVE LEGACY THREE-TIER STATE PROVEN / INERT PREVIEW PASS / MEMBERSHIP REBUILD NOT AUTHORIZED / PRODUCTION PROMOTION CLOSED**
 
-Build 433 annotation-index Production work is complete/proven. Build 434 begins the first rebuild-family boundary, but it remains strictly read-only/inert.
+Build 433 annotation-index Production work is complete/proven. The owner-run Build 434 Membership evidence, inert preview, safety regression, and final authorization gate are now all green.
 
 ## Canonical authority
 
@@ -19,32 +19,7 @@ name                      -> title
 display_title             -> title
 ```
 
-## Run now
-
-```bash
-cd /c/Dev/devilndove-site
-
-git pull origin dev
-
-python -m py_compile \
-  scripts/build434_membership_authorization_preflight.py \
-  scripts/build434_membership_rebuild_preview.py \
-  scripts/build434_membership_authorization_regression.py \
-  scripts/build434_membership_authorization_gate.py
-
-python scripts/build434_membership_authorization_regression.py
-
-python -u scripts/build434_membership_authorization_preflight.py --run \
-  2>&1 | tee build434_membership_authorization_preflight.txt
-
-python scripts/build434_membership_rebuild_preview.py
-
-python scripts/build434_membership_authorization_gate.py
-```
-
-Only `build434_membership_authorization_preflight.py --run` contacts Cloudflare/D1, and it performs read-only SELECT/PRAGMA queries. The preview, regression, and gate are local-only.
-
-## Expected safety regression
+## Owner-run Build 434 evidence
 
 ```text
 BUILD 434 MEMBERSHIP AUTHORIZATION SAFETY REGRESSION: PASS (20/20)
@@ -57,13 +32,10 @@ Later rebuild authorizations inferred: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-## Expected live preflight core
-
-The current reviewed state is expected to remain a three-row legacy shape. The exact printed column list comes from live Production.
+Fresh live Production evidence:
 
 ```text
-=== BUILD 434 MEMBERSHIP BUILD 395 AUTHORIZATION BOUNDARY ===
-Production columns: <live legacy columns>
+Production columns: ['membership_tier_policy_id', 'code', 'name', 'display_title', 'short_description', 'benefits_json', 'badge_color', 'is_visible', 'sort_order', 'created_at', 'updated_at']
 Membership rows: 3
 Normalized tiers: ['bronze', 'gold', 'silver']
 Exactly bronze/silver/gold: True
@@ -79,17 +51,12 @@ PRODUCTION PROMOTION: CLOSED
 BUILD 434 MEMBERSHIP AUTHORIZATION PREFLIGHT: PASS
 ```
 
-The normalized tier list is alphabetically sorted by the script, so `bronze`, `gold`, `silver` is expected display order even though the canonical business tiers are Bronze/Silver/Gold.
-
-If Production is already canonical, if row count is not exactly three, if tier identities differ, or if the reviewed aliases are absent, the preflight must report BLOCKED and no rebuild should be authorized.
-
-## Expected inert preview
+The inert preview passed:
 
 ```text
 BUILD 434 MEMBERSHIP REBUILD PREVIEW: PASS / INERT
 Membership rows protected: 3
 Normalized tiers: ['bronze', 'gold', 'silver']
-Legacy aliases: {'membership_tier_policy_id': 'policy_id', 'code': 'tier_code', 'name': 'title', 'display_title': 'title'}
 Executable SQL statements: 0
 Cloudflare access: NONE
 Production backup created: NO
@@ -97,9 +64,7 @@ Production mutation executed: NO
 PRODUCTION PROMOTION: CLOSED
 ```
 
-The preview intentionally contains no executable SQL, no backup action, no shadow-table action, and no mutation capability.
-
-## Expected final gate
+The final gate passed:
 
 ```text
 BUILD 434 TWENTY-ITEM MEMBERSHIP BUILD 395 AUTHORIZATION-BOUNDARY GATE: PASS (20/20)
@@ -111,14 +76,13 @@ Membership rebuild authorization: NOT RECEIVED
 Membership Production mutation executed: NO
 Later rebuild-family authorization: NOT RECEIVED
 PRODUCTION PROMOTION: CLOSED
-NEXT: explicit Membership rebuild Production authorization would be required before any backup/rebuild controller is created or exercised.
 ```
 
-## Do not run
+## Newly identified mapping proof still required before executable rebuild source
 
-Do not run Build 395 migration SQL directly against Production. Do not create a Membership backup, shadow table, data copy, rename/swap, drop, or seed operation in this Build 434 boundary.
+The legacy table contains both `name` and `display_title`, while Build 395 has only canonical `title`. Build 434 proves both reviewed aliases exist, but does not prove whether the three live `name` and `display_title` values are identical.
 
-A future rebuild token is deliberately **not prepared yet**. It should only be created after owner-run Build 434 evidence proves the exact live three-tier legacy state and the inert preview/gate are green.
+Build 435 must therefore capture complete source rows and compare those two fields before any executable rebuild controller or token is created. No field may be silently discarded or replaced by Build 395 seed defaults.
 
 ## Safety state
 
@@ -127,7 +91,7 @@ Product numbers                              COMPLETE / PROVEN
 Gift Card                                    COMPLETE / PROVEN
 Full Build 403 Notification                  COMPLETE / PROVEN
 Build 197 annotation index                   COMPLETE / PROVEN
-Membership Build 395 boundary                READY / READ-ONLY / INERT
+Membership Build 395 boundary                PASS (20/20)
 Membership Production backup                 NOT CREATED
 Membership rebuild authorization             NOT RECEIVED
 Membership Production mutation               NOT EXECUTED
