@@ -48,7 +48,8 @@ def main() -> int:
     preview_text = MEM_PREVIEW.read_text(encoding='utf-8') if MEM_PREVIEW.exists() else ''
     doc_text = DOC.read_text(encoding='utf-8') if DOC.exists() else ''
     next_section = doc_text.split('## Next 20 ordered changes — Build 429', 1)[1] if '## Next 20 ordered changes — Build 429' in doc_text else ''
-    next_items = re.findall(r'(?m)^\d+\.\s+Build 429:', next_section.split('## Gate state', 1)[0]) if next_section else []
+    next_block = next_section.split('## Gate state', 1)[0] if next_section else ''
+    next_items = re.findall(r'(?m)^\d+\.\s+\S', next_block)
 
     check(branch == 'dev', 'current git branch is dev')
     check(post.get('pass') is True, 'Build 427 Production Product-number postcheck remains green')
@@ -59,7 +60,15 @@ def main() -> int:
     check(set(gift.get('missing_columns') or []) == {'lookup_email','code_suffix','ip_hash','user_agent','result_status'}, 'Gift Card live gap remains exactly five lookup-attempt columns')
     check(gift.get('lockout_table_exists') is False, 'Gift Card lockout table is still absent before separate authorization')
     check(notification.get('metadata_json_exists') is False, 'Notification metadata_json is still absent before separate authorization')
-    check(set(notification.get('missing_indexes') or []) == {'idx_notification_outbox_kind_destination','idx_notification_outbox_payment','idx_notification_outbox_product'}, 'Notification live missing-index set remains the proven three-index gap')
+    check(
+        set(notification.get('missing_indexes') or []) == {
+            'idx_notification_outbox_kind_destination',
+            'idx_notification_outbox_order',
+            'idx_notification_outbox_payment',
+            'idx_notification_outbox_product',
+        },
+        'Notification live missing-index set is the current four-index Build 403 gap',
+    )
     check(annotation.get('build197_index_exists') is False, 'Build 197 Product-image annotation index remains absent before authorization')
     check(membership.get('production_rows') == 3 and membership.get('requires_rebuild') is True, 'Membership remains a three-row data-preserving rebuild family')
     check(set(fractional.keys()) == {'site_item_inventory','site_inventory_movements','creative_project_inventory_posts','creative_project_inventory_reversals','product_material_return_audit'}, 'fractional rebuild evidence remains bounded to five tables')
