@@ -81,6 +81,60 @@ def q(npx: str, cfg: Path, sql: str, label: str) -> list[dict]:
     return base.query_rows(npx, cfg, sql, f'BUILD 436 {label}')
 
 
+def quote_identifier(value: str) -> str:
+    return '"' + value.replace('"', '""') + '"'
+
+
+def inbound_foreign_keys(npx: str, cfg: Path) -> tuple[list[str], list[dict]]:
+    """Find inbound Membership FKs without a dynamic table-valued PRAGMA join.
+
+    D1 documents PRAGMA foreign_key_list("TABLE_NAME") for a fixed table. First
+    narrow sqlite_schema to CREATE TABLE statements mentioning the Membership
+    table, then inspect only those candidate tables with the documented PRAGMA.
+    The schema-text search is only a candidate filter; the PRAGMA result is the
+    authoritative FK evidence.
+    """
+    candidates = q(
+        npx,
+        cfg,
+        "SELECT name,sql FROM sqlite_schema "
+        "WHERE type='table' "
+        "AND name NOT LIKE 'sqlite_%' "
+        "AND name<>'membership_tier_policies' "
+        "AND lower(COALESCE(sql,'')) LIKE '%membership_tier_policies%' "
+        "ORDER BY name;",
+        'PRODUCTION MEMBERSHIP INBOUND FK CANDIDATES',
+    )
+    candidate_names: list[str] = []
+    inbound: list[dict] = []
+    for candidate in candidates:
+        table_name = str(candidate.get('name') or '')
+        if not table_name:
+            continue
+        candidate_names.append(table_name)
+        fk_rows = q(
+            npx,
+            cfg,
+            f'PRAGMA foreign_key_list({quote_identifier(table_name)});',
+            f'PRODUCTION MEMBERSHIP INBOUND FK CHECK {table_name}',
+        )
+        for fk in fk_rows:
+            parent = str(fk.get('table') or fk.get('parent_table') or '')
+            if parent != 'membership_tier_policies':
+                continue
+            inbound.append({
+                'child_table': table_name,
+                'id': fk.get('id'),
+                'seq': fk.get('seq'),
+                'from_col': fk.get('from') if 'from' in fk else fk.get('from_col'),
+                'to_col': fk.get('to') if 'to' in fk else fk.get('to_col'),
+                'on_update': fk.get('on_update'),
+                'on_delete': fk.get('on_delete'),
+                'match': fk.get('match'),
+            })
+    return candidate_names, inbound
+
+
 def main() -> int:
     configure_console()
     if len(sys.argv) != 2 or sys.argv[1] != '--run':
@@ -107,15 +161,12 @@ def main() -> int:
             'PRODUCTION MEMBERSHIP USER OBJECTS',
         )
         outbound_fks = q(
-            npx, cfg,
-            "SELECT id,seq,\"table\" AS parent_table,\"from\" AS from_col,\"to\" AS to_col,on_update,on_delete,match FROM pragma_foreign_key_list('membership_tier_policies') ORDER BY id,seq;",
+            npx,
+            cfg,
+            'PRAGMA foreign_key_list("membership_tier_policies");',
             'PRODUCTION MEMBERSHIP OUTBOUND FKS',
         )
-        inbound_fks = q(
-            npx, cfg,
-            "SELECT m.name AS child_table,fk.id,fk.seq,fk.\"from\" AS from_col,fk.\"to\" AS to_col,fk.on_update,fk.on_delete,fk.match FROM sqlite_schema AS m JOIN pragma_foreign_key_list(m.name) AS fk WHERE m.type='table' AND m.name NOT LIKE 'sqlite_%' AND fk.\"table\"='membership_tier_policies' ORDER BY m.name,fk.id,fk.seq;",
-            'PRODUCTION MEMBERSHIP INBOUND FKS',
-        )
+        inbound_fk_candidates, inbound_fks = inbound_foreign_keys(npx, cfg)
         collisions = q(
             npx, cfg,
             f"SELECT type,name,sql FROM sqlite_schema WHERE name IN ('{SHADOW_TABLE}','{ASSERT_TABLE}') ORDER BY name;",
@@ -185,6 +236,7 @@ def main() -> int:
         'no_user_defined_indexes_or_triggers': no_user_objects,
         'outbound_foreign_keys': outbound_fks,
         'no_outbound_foreign_keys': no_outbound_fks,
+        'inbound_fk_candidate_tables': inbound_fk_candidates,
         'inbound_foreign_keys': inbound_fks,
         'no_inbound_foreign_keys': no_inbound_fks,
         'rebuild_name_collisions': collisions,
@@ -209,6 +261,7 @@ def main() -> int:
     print(f'Canonical tiers exact: {tiers_exact}')
     print(f'User-defined Membership indexes/triggers: {len(user_objects)}')
     print(f'Outbound Membership foreign keys: {len(outbound_fks)}')
+    print(f'Inbound FK candidate tables: {len(inbound_fk_candidates)} / {inbound_fk_candidates}')
     print(f'Inbound Membership foreign keys: {len(inbound_fks)}')
     print(f'Rebuild-name collisions: {len(collisions)}')
     print(f'Legacy sqlite_sequence: {sequence_value!r} / compatible={sequence_compatible}')
