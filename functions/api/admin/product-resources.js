@@ -1,6 +1,6 @@
 // File: /functions/api/admin/product-resources.js
-// Build 243: compatibility endpoint for product/resource links. GET now uses bounded,
-// migration-owned schema reads and no longer expands the private Amazon registry or runs PRAGMA.
+// Build 440: bounded Product/resource compatibility endpoint with atomic link persistence.
+// Missing/non-positive use-per-batch and lot-size values default to 1; submitted identities are deduplicated.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
@@ -12,6 +12,36 @@ import {
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 function number(value, fallback = 0) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; }
+function positive(value, fallback = 1) { const parsed = number(value, fallback); return parsed > 0 ? parsed : fallback; }
+
+function normalizeSubmittedLinks(input = []) {
+  const out = [];
+  const seen = new Set();
+  for (let i = 0; i < input.length; i += 1) {
+    const row = input[i] || {};
+    const resourceKind = normalizeText(row.resource_kind).toLowerCase();
+    const sourceKey = normalizeText(row.source_key);
+    if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
+    const identity = `${resourceKind}\u0000${sourceKey}`;
+    if (seen.has(identity)) continue;
+    seen.add(identity);
+    out.push({
+      resource_kind: resourceKind,
+      source_key: sourceKey,
+      quantity_used: positive(row.quantity_used, 1),
+      consumption_mode: normalizeConsumptionMode(row.consumption_mode),
+      lot_size_units: positive(row.lot_size_units, 1),
+      usage_notes: normalizeText(row.usage_notes) || null,
+      sort_order: Number.isFinite(Number(row.sort_order)) ? Number(row.sort_order) : i,
+      is_label_ingredient: Number(row.is_label_ingredient || 0) === 1 ? 1 : 0,
+      ingredient_name_en: normalizeText(row.ingredient_name_en) || null,
+      ingredient_name_fr: normalizeText(row.ingredient_name_fr) || null,
+      inci_name: normalizeText(row.inci_name) || null,
+      label_sort_order: Number.isFinite(Number(row.label_sort_order)) ? Number(row.label_sort_order) : i,
+    });
+  }
+  return out;
+}
 
 export async function onRequestGet({ request, env }) {
   const db = getDb(env);
@@ -46,69 +76,54 @@ export async function onRequestPost({ request, env }) {
 
   try {
     const productId = Number(body.product_id || 0);
-    const links = Array.isArray(body.links) ? body.links : [];
     if (!productId) return json({ ok: false, error: 'product_id is required.' }, 400);
-
     const product = await db.prepare(`SELECT product_id FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
     if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
 
-    await db.prepare(`DELETE FROM product_resource_links WHERE product_id = ?`).bind(productId).run();
+    const links = normalizeSubmittedLinks(Array.isArray(body.links) ? body.links : []);
+    const statements = [db.prepare(`DELETE FROM product_resource_links WHERE product_id = ?`).bind(productId)];
 
-    let saved = 0;
-    for (let i = 0; i < links.length; i += 1) {
-      const row = links[i] || {};
-      const resourceKind = normalizeText(row.resource_kind).toLowerCase();
-      const sourceKey = normalizeText(row.source_key);
-      if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
-
-      const inserted = await db.prepare(`
+    for (const row of links) {
+      statements.push(db.prepare(`
         INSERT INTO product_resource_links (
           product_id, resource_kind, source_key, quantity_used,
           consumption_mode, lot_size_units, usage_notes, sort_order,
           created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `).bind(
-        productId,
-        resourceKind,
-        sourceKey,
-        Math.max(0, number(row.quantity_used, 0)),
-        normalizeConsumptionMode(row.consumption_mode),
-        Math.max(1, number(row.lot_size_units, 1)),
-        normalizeText(row.usage_notes) || null,
-        Number(row.sort_order ?? i)
-      ).run();
-      const linkId = Number(inserted?.meta?.last_row_id || 0);
-      if (linkId && resourceKind === 'supply') {
-        await db.prepare(`
+        productId,row.resource_kind,row.source_key,row.quantity_used,row.consumption_mode,
+        row.lot_size_units,row.usage_notes,row.sort_order
+      ));
+      if (row.resource_kind === 'supply') {
+        statements.push(db.prepare(`
           INSERT INTO product_resource_ingredient_profiles (
             product_resource_link_id,is_label_ingredient,ingredient_name_en,ingredient_name_fr,inci_name,
             label_sort_order,translation_review_status,updated_by_user_id,created_at,updated_at
-          ) VALUES (?,?,?,?,?,?,'needs_review',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-          ON CONFLICT(product_resource_link_id) DO UPDATE SET
-            is_label_ingredient=excluded.is_label_ingredient,
-            ingredient_name_en=excluded.ingredient_name_en,
-            ingredient_name_fr=excluded.ingredient_name_fr,
-            inci_name=excluded.inci_name,
-            label_sort_order=excluded.label_sort_order,
-            translation_review_status='needs_review',
-            updated_by_user_id=excluded.updated_by_user_id,
-            updated_at=CURRENT_TIMESTAMP
+          )
+          SELECT product_resource_link_id,?,?,?,?,?,'needs_review',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+          FROM product_resource_links
+          WHERE product_id=? AND resource_kind=? AND source_key=?
+          ORDER BY product_resource_link_id DESC LIMIT 1
         `).bind(
-          linkId,
-          Number(row.is_label_ingredient || 0) === 1 ? 1 : 0,
-          normalizeText(row.ingredient_name_en) || null,
-          normalizeText(row.ingredient_name_fr) || null,
-          normalizeText(row.inci_name) || null,
-          Number(row.label_sort_order ?? i),
-          Number(adminUser.user_id || 0) || null
-        ).run();
+          row.is_label_ingredient,row.ingredient_name_en,row.ingredient_name_fr,row.inci_name,
+          row.label_sort_order,Number(adminUser.user_id || 0) || null,
+          productId,row.resource_kind,row.source_key
+        ));
       }
-      saved += 1;
+    }
+
+    try { await db.batch(statements); }
+    catch (error) {
+      const wrapped = new Error('Product resource links were not saved; the atomic D1 batch failed safely.');
+      wrapped.cause = error;
+      throw wrapped;
     }
 
     const persistedLinks = await loadProductLinks(db, productId);
-    return json({ ok: true, saved_links: saved, links: persistedLinks });
+    return json({ ok: true, saved_links: links.length, links: persistedLinks });
   } catch (error) {
     return json({ ok: false, error: error?.message || 'Failed to save product links.' }, 500);
   }
 }
+
+export { normalizeSubmittedLinks };
