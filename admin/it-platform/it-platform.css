@@ -1,0 +1,25 @@
+.it442-heading-row,.it442-card-heading{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.it442-heading-row h2,.it442-feature-register h2{margin:0}
+.it442-eyebrow{margin:0 0 6px;color:var(--muted,#8fa0b3);font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.it442-actions{display:flex;gap:8px;flex-wrap:wrap}
+.it442-live-status{margin-top:12px;padding:10px 12px;border:1px solid rgba(148,163,184,.35);border-radius:10px;background:rgba(15,23,42,.28)}
+.it442-live-status[data-tone="ok"]{border-color:rgba(74,222,128,.55)}
+.it442-live-status[data-tone="warning"]{border-color:rgba(251,191,36,.6)}
+.it442-live-status[data-tone="error"]{border-color:rgba(248,113,113,.65)}
+.it442-obstacle-grid,.it442-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.it442-obstacle,.it442-feature-grid>div{min-width:0;padding:15px;border:1px solid rgba(148,163,184,.3);border-radius:14px;background:rgba(15,23,42,.2)}
+.it442-obstacle h3,.it442-feature-grid h3{margin:3px 0 8px;font-size:1.05rem}
+.it442-id{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;color:var(--muted,#a8b3c3)}
+.it442-state{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border-radius:999px;font-size:.75rem;font-weight:850;letter-spacing:.04em;white-space:nowrap}
+.it442-state.is-hold,.it442-state.is-warning{background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.45)}
+.it442-state.is-pass{background:rgba(74,222,128,.15);color:#86efac;border:1px solid rgba(74,222,128,.45)}
+.it442-state.is-fail{background:rgba(248,113,113,.15);color:#fca5a5;border:1px solid rgba(248,113,113,.5)}
+.it442-state.is-unknown{background:rgba(148,163,184,.14);color:#cbd5e1;border:1px solid rgba(148,163,184,.4)}
+.it442-obstacle details{margin-top:10px;border-top:1px solid rgba(148,163,184,.25);padding-top:10px}
+.it442-obstacle summary{cursor:pointer;font-weight:750}
+.it442-obstacle details[open] summary{margin-bottom:10px}
+.it442-obstacle code{overflow-wrap:anywhere}
+.it442-source-links{margin-bottom:0}
+@media (max-width:820px){.it442-obstacle-grid,.it442-feature-grid{grid-template-columns:1fr}}
+@media (max-width:520px){.it442-actions,.it442-actions .btn{width:100%}.it442-actions .btn{text-align:center}.it442-obstacle,.it442-feature-grid>div{padding:12px}}
+@media (prefers-reduced-motion:reduce){.it442-bridge *,.it442-feature-register *{scroll-behavior:auto!important;transition:none!important}}

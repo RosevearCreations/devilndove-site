@@ -9,6 +9,7 @@ steps=[
  ('release contract',[sys.executable,'scripts/build442_release_contract_integrity_test.py']),
  ('repository hygiene',[sys.executable,'scripts/build441_repository_hygiene_test.py']),
  ('I.T. migration and runner',[sys.executable,'scripts/build442_it_platform_migration_regression.py']),
+ ('I.T. release obstacle bridge',[sys.executable,'scripts/build442_it_release_obstacle_bridge_test.py']),
  ('cross-mutation responsive regression',[sys.executable,'scripts/build442_cross_mutation_responsive_acceptance_test.py']),
 ]
 for label,cmd in steps:
@@ -19,5 +20,6 @@ print('\nBUILD 442 CURRENT SANITY: PASS')
 print('Build 441 exact green checkpoint: 96e3256b608190a8780829ea9e6409670a898fb4')
 print('Build 442 I.T. D1 migration: PACKAGED / REMOTE APPLY NOT PERFORMED BY CI')
 print('Build 442 runtime I.T. enforcement: HOLD UNTIL D1 PROOF')
+print('Stripe/PayPal Development acceptance: CURRENT BUILD 442 HOLDS / CORRECTION MECHANICS PUBLISHED')
 print('CAIP private-media live evidence: HOLD / carried forward')
 print('Separate live Production mutation capability: NONE')

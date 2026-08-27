@@ -7,13 +7,22 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store"
     }
   });
 }
 
 function isConfigured(value) {
   return String(value || "").trim().length > 0;
+}
+
+function stripeEnvironment(publishableKey, secretKey) {
+  const publishable = String(publishableKey || "").trim().toLowerCase();
+  const secret = String(secretKey || "").trim().toLowerCase();
+  if (publishable.startsWith("pk_test_") && secret.startsWith("sk_test_")) return "test";
+  if (publishable.startsWith("pk_live_") && secret.startsWith("sk_live_")) return "live";
+  return "unknown";
 }
 
 export async function onRequestGet(context) {
@@ -23,6 +32,7 @@ export async function onRequestGet(context) {
   const paypalWebhookConfigured = isConfigured(env.PAYPAL_WEBHOOK_ID);
   const stripeConfigured = isConfigured(env.STRIPE_PUBLISHABLE_KEY) && isConfigured(env.STRIPE_SECRET_KEY);
   const stripeWebhookConfigured = isConfigured(env.STRIPE_WEBHOOK_SECRET);
+  const stripeMode = stripeConfigured ? stripeEnvironment(env.STRIPE_PUBLISHABLE_KEY, env.STRIPE_SECRET_KEY) : "stub";
   const squareConfigured = isConfigured(env.SQUARE_APPLICATION_ID) && isConfigured(env.SQUARE_ACCESS_TOKEN);
 
   return json({
@@ -41,6 +51,7 @@ export async function onRequestGet(context) {
         label: "Card / Stripe",
         ready: stripeConfigured,
         mode: stripeConfigured ? "hosted_checkout" : "stub",
+        environment: stripeMode,
         checkout_kind: "hosted_checkout",
         webhook_ready: stripeWebhookConfigured
       },

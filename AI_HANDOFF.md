@@ -1,4 +1,4 @@
-# AI Handoff — Development Build 441
+# AI Handoff — Development Build 442
 
 Updated: 2026-08-27
 
@@ -6,14 +6,14 @@ Read this first, then `PROJECT_STATUS_AND_ROADMAP.md`. These are the two full mu
 
 ## Current release
 
-- Development release: **Build 441**
+- Development release: **Build 442 — I.T. enforcement rollout / Phase A migration-first boundary**
 - Source branch: `dev`
 - Development Pages project: `devilndove-site-dev`
 - Development D1: `devilndove-dev`
 - Separate live Production: `main` / `devilndove-site`, baseline Build 437
 - Production promotion: **CLOSED**
 
-Build 441 is a system convergence release. Builds 439/440 remain regression provenance; unfinished proof is carried forward as a Build 441 **HOLD**, never as a separate active release and never as a false PASS.
+Build 441 closed its exact Development checkpoint at `96e3256b608190a8780829ea9e6409670a898fb4`. Build 442 packages the fourth-module/user-grant database authority before activating runtime enforcement. Historical payment/CAIP/build work remains provenance; unfinished proof is carried forward as a Build 442 **HOLD**, never as an obsolete active requirement and never as a false PASS.
 
 ## Accepted inherited evidence
 
@@ -23,7 +23,10 @@ Automated live responsive viewport proof was blocked by the correct CSP `frame-a
 
 ## Current HOLDs
 
-- **CAIP private media evidence HOLD:** source/schema/fail-closed artifact safeguards are retained, but Development private R2 delivery, byte/range seeking, exact timecode/range evidence, storage audit and expected provider-off behavior still need live proof. This blocks separate live Production promotion, not continued Development development.
+- **IT-442-H1/H2:** apply/verify the Development D1 `it-platform`/explicit user-grant authority before activating Phase B route/API/UI enforcement.
+- **PAY-442-H1:** Stripe Development test configuration, simulated checkout, return, signed webhook and duplicate replay evidence.
+- **PAY-442-H2:** PayPal sandbox configuration, approval/capture, return, verified webhook and duplicate replay evidence.
+- **CAIP-442-H1:** source/schema/fail-closed artifact safeguards are retained, but Development private R2 delivery, byte/range seeking, exact timecode/range evidence, storage audit and expected provider-off behavior still need live proof.
 - **Separate live Production promotion HOLD:** deliberate until explicit owner authorization and all promotion gates are green.
 
 ## Authority invariants
@@ -38,14 +41,14 @@ Automated live responsive viewport proof was blocked by the correct CSP `frame-a
 
 ## I.T. & Platform
 
-Build 441 activates a read-only operator hub at `/admin/it-platform/` and makes I.T. the documentation/operational home for Preflight, Startup Release Guide, technical HOLDs, deployment/schema/runtime/storage/recovery evidence and release stop conditions. Full fourth-module registry integration and explicit per-user I.T. read/manage enforcement remain Build 442+ work; do not imply those controls are already complete.
+Build 442 Phase A registers the fourth-module and explicit per-user grant authority through an additive guarded Development migration, but runtime enforcement remains intentionally off until remote D1 proof. `/admin/it-platform/` now keeps current-release payment/CAIP/I.T. obstacles, correction mechanics, safe payment readiness and pass conditions together. It also details the likely Build 443 Home-carousel contract. Do not imply Phase B or provider acceptance is complete from source/configuration evidence alone.
 
 ## Development workflow
 
 1. Work on `dev` only.
-2. Run `.github/workflows/build441-system-gate.yml` on the exact resulting head.
+2. Run `.github/workflows/build442-system-gate.yml` on the exact resulting head.
 3. Treat inherited 439/440 scripts as regression provenance, not active release numbers.
-4. Record unresolved evidence as a Build 441 HOLD.
+4. Record unresolved evidence as a Build 442 HOLD, then renumber it forward if Development advances.
 5. Deploy only to `devilndove-site-dev` for Development acceptance.
 6. Never mutate `main` / `devilndove-site` without explicit authorization.
 
@@ -55,4 +58,4 @@ Historical root build reports with exact copies under `docs/archive/build-histor
 
 ## Feature direction
 
-The active feature register is in `PROJECT_STATUS_AND_ROADMAP.md` and includes I.T./preflight, Shop/customer experience, Home carousel/merchandising, Catalog/Collections, Inventory, Tools, Creative/CAIP, Gallery, Movies/media, Packaging, Orders/Payments/Accounting, SEO/content/analytics, reliability/security/backup and go-live work.
+The active feature register is in `PROJECT_STATUS_AND_ROADMAP.md`. The next probable bounded major direction is an editable responsive Home carousel after Build 442 reaches a safe checkpoint; its purpose, ownership, operator workflow, public behavior, failure/fallback, accessibility/SEO and release acceptance are also visible in the I.T. hub.

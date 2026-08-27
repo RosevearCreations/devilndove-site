@@ -17,6 +17,8 @@ This file and `AI_HANDOFF.md` are the two full mutable current-state authorities
 - Responsive/cross-mutation source evidence: **GREEN 35/35 provenance carried forward**
 - Build 442 I.T. user-grant migration: **PHASE A — packaged; remote Development apply pending**
 - Build 442 runtime I.T. enforcement: **HOLD until Development D1 proof**
+- Build 442 Stripe Development checkout evidence: **HOLD — current-release test bridge active in I.T.**
+- Build 442 PayPal Development checkout evidence: **HOLD — current-release test bridge active in I.T.**
 - CAIP private-media live evidence: **HOLD carried into Build 442**
 - Separate live Production baseline/project: `main` / `devilndove-site`
 - Production promotion: **CLOSED**
@@ -50,6 +52,8 @@ A HOLD always travels into the active release with its reason, completed evidenc
 | --- | --- | --- |
 | IT-442-H1 | Apply/verify fourth-module and user-grant schema in `devilndove-dev` | **HOLD — blocks Phase B** |
 | IT-442-H2 | Runtime `it-platform` per-user route/API enforcement | **HOLD — intentionally off until IT-442-H1 passes** |
+| PAY-442-H1 | Stripe test configuration, checkout, return, signed webhook and duplicate replay on exact Development deployment | **HOLD — earlier payment builds are provenance, not the active requirement** |
+| PAY-442-H2 | PayPal sandbox configuration, approval/capture, return, verified webhook and duplicate replay on exact Development deployment | **HOLD — earlier payment builds are provenance, not the active requirement** |
 | CAIP-442-H1 | Private R2 delivery/range seeking/timecode/storage live evidence | **HOLD — promotion blocking** |
 | UI-442-N1 | Automated authenticated viewport evidence | **NOTE — source 35/35 green; no known defect** |
 | OPS-442-H1 | Separate live Production promotion | **HOLD BY POLICY** |
@@ -60,7 +64,7 @@ A HOLD always travels into the active release with its reason, completed evidenc
 Continue Shop information architecture, product discovery, filters/search, truthful availability, cart/checkout readiness, customer documents, policies and mobile usability. Never expose internal Inventory-only Tool/Supply rows.
 
 ### Home & merchandising
-Add an editable responsive Home carousel with approved assets/text/CTA authority, accessibility, performance and fallback behavior. Continue featured creations, seasonal/editorial merchandising and display-order controls.
+The next probable bounded major direction is a **Build 443 editable responsive Home carousel**, after Build 442 reaches a safe checkpoint. Its in-application delivery contract now covers purpose/ownership, draft-preview-publish administration, scheduling/order, approved assets/text/CTA authority, static-hero fallback, reduced motion, keyboard/pause controls, one-H1/SEO protection, responsive performance and exact release acceptance. Continue featured creations, seasonal/editorial merchandising and display-order controls.
 
 ### Catalog, Shop & Collections
 Strengthen catalog editing, collection/taxonomy management, merchandising rules, import/duplicate safeguards, SEO and public/private eligibility while keeping Collections distinct from raw Inventory identity.
@@ -81,7 +85,7 @@ Strengthen approved Gallery storytelling and reviewed video/media presentation w
 Continue exact-size templates, reusable ingredient/soap/formula libraries, prepress PDF, proof photos, barcode/QR, transactional packaging consumption, bilingual/INCI/claim review and physical print/laser evidence.
 
 ### Orders, Payments & Accounting
-Continue order lifecycle, customer documents, provider-confirmed payments/refunds/disputes, webhook replay, reconciliation, AR/AP/journal/tax/fees/profitability/export/close, percentage marketplace fees and shared project-cost allocation.
+Build 442 owns the unresolved Stripe and PayPal testing requirements through `PAY-442-H1/H2`; do not tell operators to finish an obsolete payment build. The I.T. page shows safe readiness flags and exact correction/pass mechanics without exposing secret values. Continue order lifecycle, customer documents, provider-confirmed payments/refunds/disputes, webhook replay, reconciliation, AR/AP/journal/tax/fees/profitability/export/close, percentage marketplace fees and shared project-cost allocation.
 
 ### SEO, content & analytics
 Preserve one H1, truthful metadata/schema, noindex Admin and appropriate Canadian/local quality. Continue unified search, consent-aware analytics, social publishing proof, Search Console/sitemap/indexing, Merchant Center and Business Profile evidence.
@@ -97,7 +101,8 @@ Freeze a small launch list only after facts, stock, media, packaging and ownersh
 - **Build 441:** closed Development convergence checkpoint at `96e3256b608190a8780829ea9e6409670a898fb4`.
 - **Build 442 Phase A:** additive I.T. module/user-grant migration package, guarded Development D1 apply/verification, no runtime enforcement race.
 - **Build 442 Phase B:** activate explicit per-user I.T. enforcement only after D1 proof; close or carry remaining HOLDs.
-- **Build 443+:** next bounded roadmap work. Never reopen old build numbers; unresolved items carry forward as current-release HOLD/OPEN items.
+- **Build 443 candidate:** editable responsive Home carousel, provided Build 442 reaches a safe checkpoint; otherwise carry every unresolved item forward under Build 443 IDs without reopening an old build.
+- **Build 443+:** continue bounded roadmap work. Never reopen old build numbers; unresolved items carry forward as current-release HOLD/OPEN items.
 
 ## Environment terminology
 

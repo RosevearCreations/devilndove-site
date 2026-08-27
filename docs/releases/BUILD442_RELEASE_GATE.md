@@ -57,6 +57,8 @@ After the exact Development migration/verifier is GREEN:
 | --- | --- | --- | --- | --- |
 | IT-442-H1 | Development D1 fourth-module/user-grant authority not yet applied | Additive migration, verification SQL, guarded runner and local regression packaged in Phase A | Run guarded migration against `devilndove-dev`; verifier must prove exact module row, denied role rows, >=1 active explicit I.T. manager and clean FKs | **HOLD — blocks Phase B activation; does not block safe Phase A deployment** |
 | IT-442-H2 | Runtime I.T. per-user enforcement not yet active | Build 438 three-module middleware remains proven and unchanged during Phase A | Phase B registry/routes/middleware/API/UI implementation + source and authenticated isolation acceptance | **HOLD — implementation boundary, not a false PASS** |
+| PAY-442-H1 | Stripe Development checkout evidence incomplete | Provider-return/webhook/idempotency implementation and Build 409 mutation gate remain source provenance | Development test keys + endpoint-specific webhook secret; safe readiness check; owner-controlled simulated checkout; return and signed webhook reconciliation; duplicate-event no-side-effect proof | **HOLD — carried as Build 442 payment evidence, never as an obsolete Build 409 requirement** |
+| PAY-442-H2 | PayPal Development checkout evidence incomplete | Sandbox-capable approval/capture return and webhook/idempotency implementation remain source provenance | `PAYPAL_ENV=sandbox`; sandbox credentials/webhook ID; safe readiness check; owner-controlled approval/capture; return and verified webhook reconciliation; duplicate-event no-side-effect proof | **HOLD — carried as Build 442 payment evidence, never as an obsolete earlier-build requirement** |
 | CAIP-442-H1 | Private R2/media evidence still incomplete | Temporal-evidence schema/source safeguards and verified-artifact fail-closed behavior retained | Development private R2 delivery, byte/range seeking, exact timecode/range evidence, storage audit and expected provider-off behavior | **HOLD — blocks separate live Production promotion; does not block continued Development** |
 | UI-442-N1 | Authenticated automated viewport harness | 35/35 source/responsive regression retained | Future suitable authenticated top-level viewport evidence | **NOTE — no known UI defect** |
 | OPS-442-H1 | Separate live Production promotion | Development and live projects remain isolated | Explicit owner promotion decision after all promotion-blocking HOLDs are resolved | **HOLD BY POLICY** |
@@ -64,5 +66,9 @@ After the exact Development migration/verifier is GREEN:
 ## Phase A acceptance
 
 Phase A may be deployed to `devilndove-site-dev` when its source gate is GREEN. It is not Phase B-complete until the guarded Development D1 runner returns PASS. CI must never apply the remote migration automatically.
+
+The Build 442 I.T. page is the operator-facing bridge for payment/provider and CAIP obstacles. It may read `/api/payment-providers` once on explicit user request to display safe configuration flags. That read does not prove checkout, webhook verification, replay safety or provider mutation, and it never returns secret values.
+
+The next probable bounded direction is the Build 443 editable Home carousel described in the I.T. feature register and current roadmap. It is not active release scope until Build 442 reaches a safe checkpoint.
 
 No Build 442 action may mutate `main`, `devilndove-site`, Production D1/R2, or Production provider configuration.

@@ -1,7 +1,7 @@
-# Development Roadmap compatibility pointer — Build 441
+# Development Roadmap compatibility pointer — Build 442
 
 The authoritative roadmap is `PROJECT_STATUS_AND_ROADMAP.md`; technical handoff is `AI_HANDOFF.md`.
 
-Build 441 is the active Development release. Old 439/440 work is provenance; unresolved CAIP private-media evidence is a Build 441 HOLD. The roadmap explicitly covers I.T./Preflight, Shop, Home carousel, Catalog/Collections, Inventory, Tools, Creative/CAIP, Gallery, Movies/media, Packaging, Orders/Payments/Accounting, SEO/content/analytics, reliability/security/backup and go-live.
+Build 442 is the active Development release. Build 441 is the accepted checkpoint; older work is provenance. I.T. D1/enforcement, Stripe, PayPal and CAIP evidence are current Build 442 HOLDs with correction mechanics on `/admin/it-platform/`. The next probable bounded major direction is the detailed Build 443 editable responsive Home carousel after Build 442 reaches a safe checkpoint.
 
-Build 442/443 continue forward from 441; do not revive old build numbers for unfinished work. Separate live Production promotion remains closed.
+Never revive old build numbers for unfinished work. Carry every unresolved item into the active release. Separate live Production promotion remains closed.

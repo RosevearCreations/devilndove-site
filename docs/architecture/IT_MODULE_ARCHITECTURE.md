@@ -127,7 +127,13 @@ The first I.T. contracts remain read-only: release-health, schema-health, runtim
 
 - `IT-442-H1`: apply and verify the additive authority in Development D1.
 - `IT-442-H2`: activate runtime per-user enforcement only after H1 passes.
+- `PAY-442-H1`: Stripe test configuration, checkout return, signed webhook and duplicate-replay evidence on the exact Development deployment.
+- `PAY-442-H2`: PayPal sandbox approval/capture return, verified webhook and duplicate-replay evidence on the exact Development deployment.
 - `CAIP-442-H1`: private-media Development evidence remains carried forward.
 - separate live Production promotion remains closed by policy.
+
+The operator-facing I.T. hub lists the correction mechanic and pass condition for each current-release obstacle. Payment configuration uses the existing safe public readiness endpoint and exposes only configuration booleans/mode—not credentials. A readiness flag is diagnostic evidence only; it cannot close payment acceptance without the matching end-to-end and replay proof.
+
+The same hub includes a detailed candidate-delivery contract for the next probable major direction, an editable responsive Home carousel. Business owners retain message/image/link authority; I.T. owns its release health, failure evidence and rollback proof.
 
 Separate live `main` / `devilndove-site` Production remains untouched unless explicitly authorized.

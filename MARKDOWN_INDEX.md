@@ -1,4 +1,4 @@
-# Markdown Documentation Index — Build 441
+# Markdown Documentation Index — Build 442
 
 ## Canonical mutable documents
 
@@ -12,15 +12,17 @@
 - `DEVELOPMENT_ROADMAP.md`
 - `MARKDOWN_INDEX.md`
 
-## Current Build 441 authorities
+## Current Build 442 authorities
 
 - `development-release.json`
-- `.github/workflows/build441-system-gate.yml`
-- `scripts/build441_development_release_alignment_test.py`
-- `scripts/build441_release_contract_integrity_test.py`
+- `.github/workflows/build442-system-gate.yml`
+- `scripts/build442_development_release_alignment_test.py`
+- `scripts/build442_release_contract_integrity_test.py`
+- `scripts/build442_it_platform_migration_regression.py`
+- `scripts/build442_it_release_obstacle_bridge_test.py`
 - `scripts/build441_repository_hygiene_test.py`
-- `scripts/build441_current_sanity_check.py`
-- `docs/releases/BUILD441_RELEASE_GATE.md`
+- `scripts/build442_current_sanity_check.py`
+- `docs/releases/BUILD442_RELEASE_GATE.md`
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 - `docs/operations/REPOSITORY_HYGIENE.md`
 - `docs/architecture/IT_MODULE_ARCHITECTURE.md`
@@ -31,4 +33,4 @@ Build 439/440-named migrations/tests are historical provenance and may remain ac
 
 Historical validation/change/manifest Markdown belongs under `docs/archive/build-history/`; exact root/archive duplicates are retired.
 
-Current summary: Development **Build 441**; CAIP private-media evidence **HOLD carried forward**; separate live Production baseline **Build 437**; Production promotion **CLOSED**.
+Current summary: Development **Build 442 Phase A**; I.T. D1/enforcement, Stripe, PayPal and CAIP evidence **current-release HOLDs**; next probable direction **Build 443 editable Home carousel**; separate live Production baseline **Build 437**; Production promotion **CLOSED**.
