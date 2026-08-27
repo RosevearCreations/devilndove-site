@@ -28,7 +28,7 @@ c('auditAdminAction' in api and 'captureRuntimeIncident' in api,'successful acti
 c('onRequestGet' in api and 'onRequestPost' in api,'Tool lifecycle has bounded read and explicit mutation surfaces')
 c('toolLifecycleReviewMount' in page and 'admin-tool-lifecycle-review.js?v=440' in page,'Inventory Operations mounts Tool lifecycle workspace')
 c('tool-lifecycle-review.css?v=440' in page,'Tool workspace has scoped CSS')
-c('Tool Condition &amp; Service' in ui,'UI exposes Tool Condition & Service workspace')
+c('Tool Inventory, Condition &amp; Service' in ui and 'One view over the existing authorities' in ui,'UI exposes expanded Tool Inventory, Condition & Service workspace')
 c('Record inspection' in ui and 'Record service' in ui and 'Record repair' in ui,'UI exposes lifecycle evidence actions')
 c('Retire Tool' in ui and 'Reactivate Tool' in ui,'UI exposes explicit retirement/reactivation')
 c('do not reuse' in ui.lower() and 'only explicit Reactivate Tool' in ui,'UI explains fail-closed reuse safety')
