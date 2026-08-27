@@ -6,12 +6,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Tools & Supplies Inventory Operations — Devil n Dove</title>
   <link rel="stylesheet" href="/css/styles.css?v=249"/>
+  <link rel="stylesheet" href="/css/inventory-receiving.css?v=440.1"/>
   <link rel="stylesheet" href="/css/inventory-integrity-review.css?v=440"/>
   <link rel="stylesheet" href="/css/product-integrity-review.css?v=440"/>
   <link rel="stylesheet" href="/css/tool-lifecycle-review.css?v=440"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, product resource reservations, and catalog sync."/>
+  <meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, product resource reservations, receiving, and catalog sync."/>
 </head>
 <body data-admin-page="products" class="inventory-operations-page">
   <div class="container admin-shell">
@@ -23,7 +24,7 @@
       <div>
         <p class="inventory-operations-eyebrow">Admin workspace</p>
         <h1>Tools & Supplies Inventory Operations</h1>
-        <p>Manage tools, supplies, stock, product resource reservations, and catalog sync without the long product editor page.</p>
+        <p>Manage tools, supplies, stock, receiving, product resource reservations, and catalog sync without the long product editor page.</p>
         <p class="small inventory-operations-hero-note">Use this workspace for internal stock control only. Product facts, public images, consent, Content Studio, CAIP, and Release Board approvals stay in their own deliberate workflows.</p>
       </div>
       <div class="inventory-operations-hero-art" aria-hidden="true">
@@ -37,10 +38,13 @@
         <div>
           <p class="inventory-operations-eyebrow">Stock, tools & supplies</p>
           <h2>Inventory Operations Desk</h2>
-          <p class="small">Focused workspace for product resources, reserve/release, supply/tool inventory, stock reporting, catalog sync, and option sets.</p>
+          <p class="small">Focused workspace for receiving, product resources, reserve/release, supply/tool inventory, stock reporting, catalog sync, and option sets.</p>
         </div>
         <a class="btn" href="#siteInventoryForm">Add or edit inventory item</a>
       </div>
+
+      <div id="inventoryReceivingMount"></div>
+      <div id="inventoryReceivingReversalMount"></div>
 
       <section class="card" id="inventoryAssetRestoreStaticCard" style="margin-bottom:18px;border:2px solid currentColor">
         <div class="section-heading-row">
@@ -77,6 +81,8 @@
   <script src="/public/js/site-analytics.js?v=279"></script>
   <script src="/public/js/admin-self-protect.js?v=245"></script>
   <script src="/public/js/admin.js?v=312"></script>
+  <script src="/public/js/admin-inventory-receiving.js?v=440.1"></script>
+  <script src="/public/js/admin-inventory-receiving-reversal.js?v=440.1"></script>
   <script src="/public/js/admin-inventory-asset-restore-direct.js?v=440.2"></script>
   <script src="/public/js/admin-inventory-asset-parity.js?v=440.8"></script>
   <script src="/public/js/admin-inventory-integrity-review.js?v=440"></script>
