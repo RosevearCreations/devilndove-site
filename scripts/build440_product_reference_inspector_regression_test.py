@@ -22,6 +22,7 @@ def main() -> int:
     protected = [
         'order_items.product_id',
         'product_production_runs.product_id',
+        'product_finished_inventory_lots.product_id',
         'creative_project_cost_allocations.product_id',
         'accounting_overhead_product_allocations.product_id',
         'product_costs.product_id',
@@ -38,6 +39,7 @@ def main() -> int:
 
     checks = [
         ('delete API keeps bounded protected-reference registry', all(token in api for token in protected) and 'PROTECTED_PRODUCT_REFERENCES' in api),
+        ('finished inventory lot provenance blocks destructive Product deletion', "'product_finished_inventory_lots.product_id'" in api and 'PROTECTED_PRODUCT_REFERENCES' in api),
         ('historical product costs remain protected accounting evidence', "'product_costs.product_id'" in api and 'PROTECTED_PRODUCT_REFERENCES' in api),
         ('media integrity snapshots are product-owned diagnostic cleanup', "'product_media_integrity_snapshots.product_id'" in api and 'PRODUCT_OWNED_CLEANUP_RELATIONS' in api),
         ('delete API blocks permanent removal when protected history exists', 'requires_archive: true' in api and 'cannot be permanently deleted. Archive it instead.' in api),
@@ -71,7 +73,7 @@ def main() -> int:
         return 1
 
     print(f'\nBUILD 440 PRODUCT DELETE REFERENCE INSPECTOR REGRESSION: PASS ({len(checks)}/{len(checks)})')
-    print('Protected business/customer/accounting history: PRESERVED')
+    print('Protected business/customer/accounting/inventory provenance history: PRESERVED')
     print('Product media diagnostic snapshots: PRODUCT-OWNED CLEANUP')
     print('Permanent deletion authority: UNCHANGED / UNUSED PRODUCTS ONLY')
     print('Blocked-product resolution: INSPECT / OPEN OWNER / ARCHIVE')
