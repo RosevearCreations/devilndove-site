@@ -112,7 +112,7 @@ check(transportIndex > safetyIndex, 'Inventory Operations page must load the tra
 for (const script of [
   '/public/js/admin-inventory-integrity-review.js?v=440',
   '/public/js/admin-tool-lifecycle-review.js?v=440',
-  '/public/js/admin-product-resources.js?v=253',
+  '/public/js/admin-product-resources.js?v=440',
   '/public/js/admin-site-item-inventory.js?v=440.3',
 ]) {
   check(inventoryPage.indexOf(script) > transportIndex, `Inventory transport guard must load before ${script}.`);
