@@ -41,6 +41,8 @@ def main() -> int:
         ('delete API keeps bounded protected-reference registry', all(token in api for token in protected) and 'PROTECTED_PRODUCT_REFERENCES' in api),
         ('finished inventory lot provenance blocks destructive Product deletion', "'product_finished_inventory_lots.product_id'" in api and 'PROTECTED_PRODUCT_REFERENCES' in api),
         ('historical product costs remain protected accounting evidence', "'product_costs.product_id'" in api and 'PROTECTED_PRODUCT_REFERENCES' in api),
+        ('finished inventory lot inspector opens Creative Process owner', "product_finished_inventory_lots: { label: 'Finished inventory lot provenance'" in ui and '/admin/creative-process/?product_id=' in ui),
+        ('historical Product cost inspector opens Accounting owner', "product_costs: { label: 'Historical Product costs'" in ui and "href: '/admin/accounting/'" in ui),
         ('media integrity snapshots are product-owned diagnostic cleanup', "'product_media_integrity_snapshots.product_id'" in api and 'PRODUCT_OWNED_CLEANUP_RELATIONS' in api),
         ('delete API blocks permanent removal when protected history exists', 'requires_archive: true' in api and 'cannot be permanently deleted. Archive it instead.' in api),
         ('delete API preserves reusable media by detaching rather than deleting it', 'PRODUCT_DETACH_RELATIONS' in api and 'SET ${quoteIdentifier(columnName)} = NULL' in api),
