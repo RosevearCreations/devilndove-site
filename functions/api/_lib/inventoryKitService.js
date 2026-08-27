@@ -51,7 +51,13 @@ export function planKitComponentUsage(row={}, requestedUsage=0){
 
 async function ensureComponentItem(db,adminUser,kitTemplateId,component){
   let id=positiveId(component.component_inventory_item_id);
-  if(id){ const found=await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id=? LIMIT 1`).bind(id).first(); if(found) return found; }
+  if(id){
+    const found=await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id=? LIMIT 1`).bind(id).first();
+    if(found){
+      if(clean(found.source_type,20).toLowerCase()==='product') throw statusError('inventory_kit_component_wrong_owner','A purchased-kit component cannot link to Product stock. Link it to Supply/Tool Inventory instead.',409);
+      return found;
+    }
+  }
   const name=clean(component.component_name,180); if(!name) throw statusError('inventory_kit_component_name_required','Every kit component needs a name.');
   const sourceRaw=clean(component.component_source_type,20).toLowerCase();
   if(sourceRaw==='product') throw statusError('inventory_kit_component_wrong_owner','A purchased-kit component cannot create or mutate Product stock. Link it as a Supply/Tool component instead.',409);
@@ -70,26 +76,61 @@ async function ensureComponentItem(db,adminUser,kitTemplateId,component){
   return await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id=? LIMIT 1`).bind(id).first();
 }
 
-async function recalcLotPolicy(db,itemId,onHand){
+async function loadPolicyState(db,itemId){
+  if(!itemId) return null;
+  return await db.prepare(`SELECT site_item_inventory_id,depletion_method,reconcile_status,last_reconciled_quantity,last_reconciled_at,updated_by_user_id,updated_at FROM inventory_lot_policies WHERE site_item_inventory_id=? LIMIT 1`).bind(itemId).first().catch(()=>null);
+}
+
+async function restorePolicyState(db,itemId,state){
+  if(!itemId) return;
+  if(!state){ await db.prepare(`DELETE FROM inventory_lot_policies WHERE site_item_inventory_id=?`).bind(itemId).run(); return; }
+  await db.prepare(`INSERT INTO inventory_lot_policies(site_item_inventory_id,depletion_method,reconcile_status,last_reconciled_quantity,last_reconciled_at,updated_by_user_id,updated_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(site_item_inventory_id) DO UPDATE SET depletion_method=excluded.depletion_method,reconcile_status=excluded.reconcile_status,last_reconciled_quantity=excluded.last_reconciled_quantity,last_reconciled_at=excluded.last_reconciled_at,updated_by_user_id=excluded.updated_by_user_id,updated_at=excluded.updated_at`).bind(itemId,state.depletion_method,state.reconcile_status,state.last_reconciled_quantity,state.last_reconciled_at,state.updated_by_user_id,state.updated_at).run();
+}
+
+async function recalcLotPolicy(db,itemId,onHand,{createIfMissing=false}={}){
+  const existing=await loadPolicyState(db,itemId);
+  if(!existing && !createIfMissing) return;
+  if(!existing){
+    await db.prepare(`INSERT INTO inventory_lot_policies(site_item_inventory_id,depletion_method,reconcile_status,last_reconciled_quantity,last_reconciled_at,updated_by_user_id,updated_at) VALUES (?,'fifo',CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN 'reconciled' ELSE 'needs_review' END,?,CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN CURRENT_TIMESTAMP ELSE NULL END,NULL,CURRENT_TIMESTAMP)`).bind(itemId,onHand,itemId,EPSILON,onHand,onHand,itemId,EPSILON).run();
+    return;
+  }
   await db.prepare(`UPDATE inventory_lot_policies SET reconcile_status=CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN 'reconciled' ELSE 'needs_review' END,last_reconciled_quantity=?,last_reconciled_at=CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN CURRENT_TIMESTAMP ELSE last_reconciled_at END,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?`).bind(onHand,itemId,EPSILON,onHand,onHand,itemId,EPSILON,itemId).run();
+}
+
+async function applyLotAllocations(db,allocations,stateTarget,errorCode){
+  for(const allocation of allocations||[]){
+    const before=round6(allocation.quantity_remaining); const after=round6(allocation.quantity_remaining_after); const beforeStatus=allocation.lot_status||'available';
+    const update=await db.prepare(`UPDATE inventory_purchase_lots SET quantity_remaining=?,lot_status=CASE WHEN ?<=? THEN 'consumed' ELSE lot_status END,updated_at=CURRENT_TIMESTAMP WHERE inventory_purchase_lot_id=? AND ABS(quantity_remaining-?)<? AND lot_status='available'`).bind(after,after,EPSILON,allocation.inventory_purchase_lot_id,before,EPSILON).run();
+    if(Number(update?.meta?.changes||0)!==1) throw statusError(errorCode,`Purchase lot ${allocation.lot_code} changed before depletion could post. The operation was compensated.`,409);
+    stateTarget.push({id:positiveId(allocation.inventory_purchase_lot_id),before,after,beforeStatus});
+  }
+}
+
+async function restoreLotAllocations(db,allocations,failures,prefix){
+  for(const lot of [...allocations].reverse()){
+    const r=await db.prepare(`UPDATE inventory_purchase_lots SET quantity_remaining=?,lot_status=?,updated_at=CURRENT_TIMESTAMP WHERE inventory_purchase_lot_id=? AND ABS(quantity_remaining-?)<?`).bind(lot.before,lot.beforeStatus,lot.id,lot.after,EPSILON).run().catch(()=>null);
+    if(Number(r?.meta?.changes||0)!==1) failures.push(`${prefix}:${lot.id}`);
+  }
 }
 
 async function compensateKitOpen(db,state){
   const failures=[];
+  for(const movementId of [...state.movementIds].reverse()) await db.prepare(`DELETE FROM site_inventory_movements WHERE site_inventory_movement_id=?`).bind(movementId).run().catch(()=>failures.push(`movement:${movementId}`));
   for(const lot of [...state.createdLots].reverse()){
     const r=await db.prepare(`DELETE FROM inventory_purchase_lots WHERE inventory_purchase_lot_id=? AND ABS(quantity_remaining-?)<?`).bind(lot.id,lot.quantity,EPSILON).run().catch(()=>null);
-    if(Number(r?.meta?.changes||0)!==1) failures.push(`lot:${lot.id}`);
+    if(Number(r?.meta?.changes||0)!==1) failures.push(`child-lot:${lot.id}`);
   }
+  await restoreLotAllocations(db,state.parentLots,failures,'parent-lot');
   for(const child of [...state.children].reverse()){
     const r=await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,unit_cost_cents=?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<?`).bind(child.oldQty,child.oldCost,child.id,child.newQty,EPSILON).run().catch(()=>null);
     if(Number(r?.meta?.changes||0)!==1) failures.push(`child:${child.id}`);
   }
-  if(state.eventId){ await db.prepare(`DELETE FROM inventory_kit_open_events WHERE inventory_kit_open_event_id=?`).bind(state.eventId).run().catch(()=>null); }
+  if(state.eventId) await db.prepare(`DELETE FROM inventory_kit_open_events WHERE inventory_kit_open_event_id=?`).bind(state.eventId).run().catch(()=>failures.push(`event:${state.eventId}`));
   if(state.parent){
     const r=await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<?`).bind(state.parent.oldQty,state.parent.id,state.parent.newQty,EPSILON).run().catch(()=>null);
     if(Number(r?.meta?.changes||0)!==1) failures.push(`parent:${state.parent.id}`);
   }
-  for(const child of state.children.filter(row=>row.sourceType==='supply')) await recalcLotPolicy(db,child.id,child.oldQty).catch(()=>failures.push(`policy:${child.id}`));
+  for(const [itemId,policy] of state.policyStates.entries()) await restorePolicyState(db,itemId,policy).catch(()=>failures.push(`policy:${itemId}`));
   return failures;
 }
 
@@ -98,21 +139,35 @@ export async function openInventoryKit(db,adminUser,{inventory_kit_template_id,k
   if(!templateId) throw statusError('inventory_kit_template_required','Choose a kit template.');
   const template=await db.prepare(`SELECT t.*,s.item_name,s.source_type,s.external_key,s.on_hand_quantity,s.reserved_quantity,s.incoming_quantity,s.unit_cost_cents,s.stock_unit_label,s.supplier_name,s.supplier_sku,s.source_url FROM inventory_kit_templates t JOIN site_item_inventory s ON s.site_item_inventory_id=t.kit_inventory_item_id WHERE t.inventory_kit_template_id=? AND t.is_active=1 LIMIT 1`).bind(templateId).first();
   if(!template) throw statusError('inventory_kit_template_not_found','Kit template was not found.',404);
+  if(clean(template.source_type,20).toLowerCase()==='product') throw statusError('inventory_kit_wrong_owner','Product stock cannot be opened as a purchased Inventory kit.',409);
   const parentOnHand=Math.max(0,number(template.on_hand_quantity)); const parentReserved=Math.max(0,number(template.reserved_quantity));
   if(qty>Math.max(0,parentOnHand-parentReserved)+EPSILON) throw statusError('inventory_kit_insufficient_available',`Only ${Math.max(0,parentOnHand-parentReserved)} unreserved kit(s) are available; ${qty} requested.`,409);
   const components=rows(await db.prepare(`SELECT * FROM inventory_kit_template_components WHERE inventory_kit_template_id=? ORDER BY sort_order,inventory_kit_template_component_id`).bind(templateId).all());
   if(!components.length) throw statusError('inventory_kit_components_required','This kit has no components.');
   if(components.length>50) throw statusError('inventory_kit_component_limit','Kit opening is limited to 50 components per template.',400);
+  const parentSource=clean(template.source_type,20).toLowerCase();
+  let parentLotPlan={ready:1,allocations:[],blockers:[]};
+  if(parentSource==='supply'){
+    parentLotPlan=await loadMaterialLotPlan(db,template.kit_inventory_item_id,qty);
+    if(!parentLotPlan.ready) throw statusError('inventory_kit_parent_lot_not_ready',`Purchased-kit lot provenance is not ready. ${parentLotPlan.blockers.join(' ')}`,409,{blockers:parentLotPlan.blockers});
+  }
   const resolved=[]; for(const component of components){ const item=await ensureComponentItem(db,adminUser,templateId,component); resolved.push({...component,item}); }
   const openKey=`kit-open-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
   const kitUnit=Math.max(0,Math.round(number(template.unit_cost_cents))); const kitTotal=Math.round(kitUnit*qty); const shareCount=resolved.length;
-  const state={parent:null,eventId:0,children:[],createdLots:[]};
+  const state={parent:null,parentLots:[],eventId:0,children:[],createdLots:[],movementIds:[],policyStates:new Map()};
   try{
+    if(parentSource==='supply') state.policyStates.set(positiveId(template.kit_inventory_item_id),await loadPolicyState(db,template.kit_inventory_item_id));
+    for(const component of resolved){ const itemId=positiveId(component.item.site_item_inventory_id); if(clean(component.item.source_type,20).toLowerCase()==='supply' && !state.policyStates.has(itemId)) state.policyStates.set(itemId,await loadPolicyState(db,itemId)); }
     const parentNew=round6(parentOnHand-qty);
     const parentUpdate=await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<? AND COALESCE(reserved_quantity,0)<=?`).bind(parentNew,template.kit_inventory_item_id,parentOnHand,EPSILON,parentNew+EPSILON).run();
     if(Number(parentUpdate?.meta?.changes||0)!==1) throw statusError('inventory_kit_concurrent_change','The purchased-kit balance changed before the opening could post. Refresh and review the quantity.',409);
     state.parent={id:positiveId(template.kit_inventory_item_id),oldQty:parentOnHand,newQty:parentNew};
-    const event=await db.prepare(`INSERT INTO inventory_kit_open_events(open_key,inventory_kit_template_id,kit_inventory_item_id,kit_quantity_opened,kit_unit_cost_cents,kit_total_cost_cents,source_lot_code,note,opened_by_user_id,opened_at) VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(openKey,templateId,template.kit_inventory_item_id,qty,kitUnit,kitTotal,clean(source_lot_code,120)||null,clean(note,1000)||null,adminUser.user_id).run();
+    await applyLotAllocations(db,parentLotPlan.allocations,state.parentLots,'inventory_kit_parent_lot_concurrent_change');
+    if(parentSource==='supply') await recalcLotPolicy(db,template.kit_inventory_item_id,parentNew);
+    const parentLotEvidence=(parentLotPlan.allocations||[]).map(row=>`${row.lot_code}:${Number(row.quantity_consumed).toFixed(6)}`).join('|');
+    const sourceReference=parentLotEvidence || clean(source_lot_code,120) || null;
+    const evidenceNote=[clean(note,900),clean(source_lot_code,120) && parentLotEvidence?`Operator source reference: ${clean(source_lot_code,120)}.`:'',parentLotEvidence?`Parent kit lot allocation: ${parentLotEvidence}.`:''].filter(Boolean).join(' ').slice(0,1000)||null;
+    const event=await db.prepare(`INSERT INTO inventory_kit_open_events(open_key,inventory_kit_template_id,kit_inventory_item_id,kit_quantity_opened,kit_unit_cost_cents,kit_total_cost_cents,source_lot_code,note,opened_by_user_id,opened_at) VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(openKey,templateId,template.kit_inventory_item_id,qty,kitUnit,kitTotal,sourceReference,evidenceNote,adminUser.user_id).run();
     state.eventId=positiveId(event?.meta?.last_row_id); if(!state.eventId) throw statusError('inventory_kit_event_create_failed','Kit opening evidence could not be created.',500);
     let allocatedSoFar=0;
     for(let index=0;index<resolved.length;index+=1){
@@ -125,33 +180,36 @@ export async function openInventoryKit(db,adminUser,{inventory_kit_template_id,k
       if(Number(childUpdate?.meta?.changes||0)!==1) throw statusError('inventory_kit_component_concurrent_change',`${item.item_name} changed while the kit was being opened. The opening was cancelled and compensated.`,409);
       state.children.push({id:positiveId(item.site_item_inventory_id),oldQty,oldCost,newQty,sourceType});
       await db.prepare(`INSERT INTO inventory_kit_open_components(inventory_kit_open_event_id,inventory_kit_template_component_id,component_inventory_item_id,quantity_added,allocated_cost_cents,component_unit_cost_cents,previous_on_hand_quantity,new_on_hand_quantity,created_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(state.eventId,component.inventory_kit_template_component_id,item.site_item_inventory_id,addQty,allocated,componentUnit,oldQty,newQty).run();
-      await db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(item.site_item_inventory_id,item.source_type,item.external_key,item.item_name,addQty,oldQty,newQty,number(item.reserved_quantity),number(item.reserved_quantity),number(item.incoming_quantity),number(item.incoming_quantity),`Released from purchased kit: ${template.item_name}. Allocated cost ${(allocated/100).toFixed(2)} CAD.`,adminUser.user_id).run();
       if(sourceType==='supply' && addQty>EPSILON){
         const lotCode=`KIT-B440-${state.eventId}-${positiveId(component.inventory_kit_template_component_id)}`;
-        const lot=await db.prepare(`INSERT INTO inventory_purchase_lots(site_item_inventory_id,lot_code,purchase_date,received_date,supplier_name,supplier_order_number,supplier_sku,asin,source_url,quantity_received,quantity_remaining,unit_cost_cents,shipping_cost_cents,tax_cost_cents,expiry_date,storage_location,lot_status,notes,created_by_user_id,created_at,updated_at) VALUES (?,?,NULL,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,0,0,NULL,NULL,'available',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(item.site_item_inventory_id,lotCode,clean(template.supplier_name,180)||'Purchased kit',clean(source_lot_code,120)||openKey,clean(component.supplier_sku,180)||clean(item.supplier_sku,180)||null,null,clean(template.source_url,1000)||null,addQty,addQty,componentUnit,`Build 440 kit release from ${template.item_name}; component ${component.component_name}.`,adminUser.user_id).run();
+        const lot=await db.prepare(`INSERT INTO inventory_purchase_lots(site_item_inventory_id,lot_code,purchase_date,received_date,supplier_name,supplier_order_number,supplier_sku,asin,source_url,quantity_received,quantity_remaining,unit_cost_cents,shipping_cost_cents,tax_cost_cents,expiry_date,storage_location,lot_status,notes,created_by_user_id,created_at,updated_at) VALUES (?,?,NULL,CURRENT_TIMESTAMP,?,?,?,?,?,?,?,?,0,0,NULL,NULL,'available',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(item.site_item_inventory_id,lotCode,clean(template.supplier_name,180)||'Purchased kit',openKey,clean(component.supplier_sku,180)||clean(item.supplier_sku,180)||null,null,clean(template.source_url,1000)||null,addQty,addQty,componentUnit,`Build 440 kit release from ${template.item_name}; component ${component.component_name}; parent allocation ${parentLotEvidence||'untracked non-supply parent'}.`,adminUser.user_id).run();
         const lotId=positiveId(lot?.meta?.last_row_id); if(!lotId) throw statusError('inventory_kit_component_lot_create_failed',`Purchase-lot evidence could not be created for ${item.item_name}.`,500);
         state.createdLots.push({id:lotId,quantity:addQty,itemId:positiveId(item.site_item_inventory_id)});
-        await db.prepare(`INSERT INTO inventory_lot_policies(site_item_inventory_id,depletion_method,reconcile_status,last_reconciled_quantity,last_reconciled_at,updated_by_user_id,updated_at) SELECT ?,'fifo',CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN 'reconciled' ELSE 'needs_review' END,?,CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN CURRENT_TIMESTAMP ELSE NULL END,NULL,CURRENT_TIMESTAMP ON CONFLICT(site_item_inventory_id) DO UPDATE SET reconcile_status=excluded.reconcile_status,last_reconciled_quantity=excluded.last_reconciled_quantity,last_reconciled_at=CASE WHEN excluded.reconcile_status='reconciled' THEN CURRENT_TIMESTAMP ELSE inventory_lot_policies.last_reconciled_at END,updated_at=CURRENT_TIMESTAMP`).bind(item.site_item_inventory_id,newQty,item.site_item_inventory_id,EPSILON,newQty,newQty,item.site_item_inventory_id,EPSILON).run();
+        await recalcLotPolicy(db,item.site_item_inventory_id,newQty,{createIfMissing:true});
       }
+      const childMovement=await db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(item.site_item_inventory_id,item.source_type,item.external_key,item.item_name,addQty,oldQty,newQty,number(item.reserved_quantity),number(item.reserved_quantity),number(item.incoming_quantity),number(item.incoming_quantity),`Released from purchased kit: ${template.item_name}. Open event ${openKey}. Allocated cost ${(allocated/100).toFixed(2)} CAD.`,adminUser.user_id).run();
+      const childMovementId=positiveId(childMovement?.meta?.last_row_id); if(!childMovementId) throw statusError('inventory_kit_component_movement_failed',`Inventory movement evidence could not be recorded for ${item.item_name}.`,500); state.movementIds.push(childMovementId);
     }
-    await db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(template.kit_inventory_item_id,template.source_type,template.external_key,template.item_name,-qty,parentOnHand,parentNew,parentReserved,parentReserved,number(template.incoming_quantity),number(template.incoming_quantity),`Opened purchased kit into ${resolved.length} component inventory item(s).`,adminUser.user_id).run();
-    return {message:`Opened ${qty} kit(s). Components now remain as independent inventory balances with Supply purchase-lot provenance.`,open_key:openKey,inventory_kit_open_event_id:state.eventId,component_count:resolved.length,kit_quantity_opened:qty,kit_total_cost_cents:kitTotal};
+    const parentMovement=await db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(template.kit_inventory_item_id,template.source_type,template.external_key,template.item_name,-qty,parentOnHand,parentNew,parentReserved,parentReserved,number(template.incoming_quantity),number(template.incoming_quantity),`Opened purchased kit into ${resolved.length} component inventory item(s). Open event ${openKey}. Parent lots: ${parentLotEvidence||'not applicable'}.`,adminUser.user_id).run();
+    const parentMovementId=positiveId(parentMovement?.meta?.last_row_id); if(!parentMovementId) throw statusError('inventory_kit_parent_movement_failed','Purchased-kit movement evidence could not be recorded.',500); state.movementIds.push(parentMovementId);
+    return {message:`Opened ${qty} kit(s). Components now remain as independent inventory balances with Supply purchase-lot provenance.`,open_key:openKey,inventory_kit_open_event_id:state.eventId,component_count:resolved.length,kit_quantity_opened:qty,kit_total_cost_cents:kitTotal,parent_lot_allocations:parentLotPlan.allocations||[]};
   }catch(error){
     const failures=await compensateKitOpen(db,state);
-    if(failures.length){ throw statusError('inventory_kit_compensation_failed',`Kit opening failed and compensation was incomplete (${failures.join(', ')}). Stop further kit activity and review Inventory incidents.`,500,{original_error:String(error?.message||error),compensation_failures:failures}); }
+    if(failures.length) throw statusError('inventory_kit_compensation_failed',`Kit opening failed and compensation was incomplete (${failures.join(', ')}). Stop further kit activity and review Inventory incidents.`,500,{original_error:String(error?.message||error),compensation_failures:failures});
     throw error;
   }
 }
 
 async function compensateUsage(db,state){
   const failures=[];
-  for(const lot of [...state.lots].reverse()){
-    const r=await db.prepare(`UPDATE inventory_purchase_lots SET quantity_remaining=?,lot_status=?,updated_at=CURRENT_TIMESTAMP WHERE inventory_purchase_lot_id=? AND ABS(quantity_remaining-?)<?`).bind(lot.before,lot.beforeStatus,lot.id,lot.after,EPSILON).run().catch(()=>null);
-    if(Number(r?.meta?.changes||0)!==1) failures.push(`lot:${lot.id}`);
+  if(state.usageMovementId) await db.prepare(`DELETE FROM site_inventory_usage_movements WHERE site_inventory_usage_movement_id=?`).bind(state.usageMovementId).run().catch(()=>failures.push(`usage:${state.usageMovementId}`));
+  if(state.movementId) await db.prepare(`DELETE FROM site_inventory_movements WHERE site_inventory_movement_id=?`).bind(state.movementId).run().catch(()=>failures.push(`movement:${state.movementId}`));
+  await restoreLotAllocations(db,state.lots,failures,'lot');
+  if(state.item){
+    const r=await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<?`).bind(state.item.before,state.item.id,state.item.after,EPSILON).run().catch(()=>null);
+    if(Number(r?.meta?.changes||0)!==1) failures.push(`item:${state.item.id}`);
   }
-  if(state.item){ const r=await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<?`).bind(state.item.before,state.item.id,state.item.after,EPSILON).run().catch(()=>null); if(Number(r?.meta?.changes||0)!==1) failures.push(`item:${state.item.id}`); }
-  if(state.movementId) await db.prepare(`DELETE FROM site_inventory_movements WHERE site_inventory_movement_id=?`).bind(state.movementId).run().catch(()=>null);
-  if(state.item?.sourceType==='supply') await recalcLotPolicy(db,state.item.id,state.item.before).catch(()=>failures.push(`policy:${state.item.id}`));
+  if(state.item?.sourceType==='supply') await restorePolicyState(db,state.item.id,state.policyState).catch(()=>failures.push(`policy:${state.item.id}`));
   return failures;
 }
 
@@ -162,7 +220,6 @@ export async function consumeKitComponent(db,adminUser,{inventory_kit_template_c
   if(!positiveId(row.site_item_inventory_id)) throw statusError('inventory_kit_component_unlinked','Open the kit at least once so this component has a real Inventory identity before recording use.',409);
   const reason=clean(note,800); if(reason.length<8) throw statusError('inventory_kit_component_note_required','Enter a short usage note (at least 8 characters) so the depletion remains auditable.',400);
   const plan=planKitComponentUsage(row,usage_quantity);
-  const state={item:null,lots:[],movementId:0};
   if(['log_only','reusable'].includes(plan.tracking_mode)){
     await db.prepare(`INSERT INTO site_inventory_usage_movements(site_inventory_movement_id,site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) VALUES (NULL,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(row.site_item_inventory_id,-plan.quantity,plan.usage_unit_label,0,plan.stock_unit_label,plan.tracking_mode,0,`Kit component use: ${reason}`,adminUser.user_id).run();
     return {message:`Recorded ${plan.quantity} ${plan.usage_unit_label} used from ${row.item_name || row.component_name}; stock quantity was not reduced because tracking is ${plan.tracking_mode}.`,component:row,plan};
@@ -172,19 +229,17 @@ export async function consumeKitComponent(db,adminUser,{inventory_kit_template_c
     lotPlan=await loadMaterialLotPlan(db,row.site_item_inventory_id,plan.stock_quantity);
     if(!lotPlan.ready) throw statusError('inventory_kit_component_lot_not_ready',lotPlan.blockers.join(' '),409,{blockers:lotPlan.blockers});
   }
+  const state={item:null,lots:[],movementId:0,usageMovementId:0,policyState:null};
   try{
+    if(plan.source_type==='supply') state.policyState=await loadPolicyState(db,row.site_item_inventory_id);
     const update=await db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=? AND ABS(on_hand_quantity-?)<? AND COALESCE(reserved_quantity,0)<=?`).bind(plan.new_on_hand_quantity,row.site_item_inventory_id,plan.previous_on_hand_quantity,EPSILON,plan.new_on_hand_quantity+EPSILON).run();
     if(Number(update?.meta?.changes||0)!==1) throw statusError('inventory_kit_component_concurrent_change','The component balance changed before the depletion could post. Refresh and try again.',409);
     state.item={id:positiveId(row.site_item_inventory_id),before:plan.previous_on_hand_quantity,after:plan.new_on_hand_quantity,sourceType:plan.source_type};
-    for(const allocation of lotPlan.allocations||[]){
-      const before=round6(allocation.quantity_remaining); const after=round6(allocation.quantity_remaining_after); const beforeStatus=allocation.lot_status||'available';
-      const lotUpdate=await db.prepare(`UPDATE inventory_purchase_lots SET quantity_remaining=?,lot_status=CASE WHEN ?<=? THEN 'consumed' ELSE lot_status END,updated_at=CURRENT_TIMESTAMP WHERE inventory_purchase_lot_id=? AND ABS(quantity_remaining-?)<? AND lot_status='available'`).bind(after,after,EPSILON,allocation.inventory_purchase_lot_id,before,EPSILON).run();
-      if(Number(lotUpdate?.meta?.changes||0)!==1) throw statusError('inventory_kit_component_lot_concurrent_change',`Purchase lot ${allocation.lot_code} changed before depletion could post. The inventory change was compensated.`,409);
-      state.lots.push({id:positiveId(allocation.inventory_purchase_lot_id),before,after,beforeStatus});
-    }
+    await applyLotAllocations(db,lotPlan.allocations,state.lots,'inventory_kit_component_lot_concurrent_change');
     const movement=await db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(row.site_item_inventory_id,row.source_type,row.external_key,row.item_name,-plan.stock_quantity,plan.previous_on_hand_quantity,plan.new_on_hand_quantity,plan.reserved_quantity,plan.reserved_quantity,number(row.incoming_quantity),number(row.incoming_quantity),`Kit component use: ${reason}`,adminUser.user_id).run();
     state.movementId=positiveId(movement?.meta?.last_row_id); if(!state.movementId) throw statusError('inventory_kit_component_movement_failed','Inventory movement evidence could not be recorded.',500);
-    await db.prepare(`INSERT INTO site_inventory_usage_movements(site_inventory_movement_id,site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(state.movementId,row.site_item_inventory_id,-plan.quantity,plan.usage_unit_label,-plan.stock_quantity,plan.stock_unit_label,plan.tracking_mode,plan.is_estimated,`Kit component use: ${reason}`,adminUser.user_id).run();
+    const usageMovement=await db.prepare(`INSERT INTO site_inventory_usage_movements(site_inventory_movement_id,site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(state.movementId,row.site_item_inventory_id,-plan.quantity,plan.usage_unit_label,-plan.stock_quantity,plan.stock_unit_label,plan.tracking_mode,plan.is_estimated,`Kit component use: ${reason}`,adminUser.user_id).run();
+    state.usageMovementId=positiveId(usageMovement?.meta?.last_row_id); if(!state.usageMovementId) throw statusError('inventory_kit_component_usage_evidence_failed','Usage evidence could not be recorded.',500);
     if(plan.source_type==='supply') await recalcLotPolicy(db,row.site_item_inventory_id,plan.new_on_hand_quantity);
     return {message:`Recorded ${plan.quantity} ${plan.usage_unit_label} used from ${row.item_name || row.component_name}.`,component:row,plan,lot_allocations:lotPlan.allocations||[]};
   }catch(error){
