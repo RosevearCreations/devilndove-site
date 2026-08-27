@@ -39,7 +39,7 @@ jobs:
           fi
           git config user.name 'RosevearCreations'
           git config user.email 'jfrosevear@gmail.com'
-          git add -- '*.html' 'admin/**/*.html' 'js/**/*.js' 'public/js/**/*.js' 'sw.js'
+          git add -A
           git commit -m 'Build 440 align all Development runtime versions'
           git push origin HEAD:dev
       - name: Safety statement
