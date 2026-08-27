@@ -1,6 +1,6 @@
-// Build 442 — safe, read-only I.T. release-obstacle bridge.
+// Build 443 — safe, read-only I.T. release-obstacle bridge.
 // This script performs one user-triggered/public readiness read. It never polls, mutates
-// provider state, receives secret values or activates Build 442 Phase B enforcement.
+// provider state, receives secret values or activates carried I.T. Phase B enforcement.
 (function () {
   'use strict';
 
@@ -26,7 +26,7 @@
     if (!row) {
       badge.textContent = 'CHECK FAILED';
       badge.className = 'it442-state is-fail';
-      detail.textContent = 'The safe readiness endpoint did not return this provider. Keep the Build 442 HOLD open and inspect Public API Health.';
+      detail.textContent = 'The safe readiness endpoint did not return this provider. Keep the Build 443 HOLD open and inspect Public API Health.';
       return false;
     }
 

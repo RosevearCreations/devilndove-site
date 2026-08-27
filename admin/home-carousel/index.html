@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Home Carousel — Devil n Dove</title>
+  <meta name="description" content="Create, preview, schedule, order, publish, pause and archive approved Home carousel slides.">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/css/styles.css?v=443">
+  <link rel="stylesheet" href="/css/home-carousel.css?v=443">
+  <link rel="icon" href="/assets/mark.png" type="image/png">
+</head>
+<body>
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"><div><strong>Devil n Dove</strong><div class="small">Admin / Home Carousel</div></div></div>
+      <div class="links"><a href="/admin/">Dashboard</a><a href="/admin/media-content-studio/">Media Studio</a><a href="/">Home</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+    </div>
+
+    <section class="hero home-carousel-admin-hero">
+      <div>
+        <p class="eyebrow">Build 443 merchandising</p>
+        <h1>Editable Home carousel</h1>
+        <p>Create and preview drafts, set display order and schedules, then publish deliberately. A saved draft never appears publicly. If the schema, API, slide list or first image is unavailable, Home keeps its existing static hero.</p>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px" aria-labelledby="carouselContractHeading">
+      <h2 id="carouselContractHeading" style="margin-top:0">Feature contract and safety boundary</h2>
+      <div class="home-carousel-contract-grid small">
+        <div><strong>Owner and purpose</strong><p>Commerce/merchandising owns approved copy, imagery and same-site destinations. The carousel highlights current creations and stories without changing product availability.</p></div>
+        <div><strong>Public behavior</strong><p>Responsive media, previous/next, position indicators, keyboard support and a visible pause control. Reduced-motion visitors receive no automatic rotation.</p></div>
+        <div><strong>SEO and accessibility</strong><p>The existing Home H1 stays authoritative. Every slide needs descriptive alt text; automatic changes are not repeatedly announced.</p></div>
+        <div><strong>Failure and audit</strong><p>Invalid or off-site paths fail closed. Every save/publish/pause/archive/reorder creates an audit snapshot. Failed writes preserve the last saved state.</p></div>
+      </div>
+    </section>
+
+    <section class="card home-carousel-editor" style="margin-top:18px" aria-labelledby="carouselEditorHeading">
+      <div class="section-heading-row">
+        <div><h2 id="carouselEditorHeading" style="margin-top:0">Slide editor</h2><p class="small">Use same-site paths beginning with <code>/</code>. Choose media that is already approved for public website use.</p></div>
+        <div class="home-carousel-admin-actions"><button class="btn" id="homeCarouselNew" type="button">New draft</button><button class="btn" id="homeCarouselReload" type="button">Reload</button></div>
+      </div>
+      <div id="homeCarouselMessage" class="small" role="status" aria-live="polite"></div>
+      <form id="homeCarouselForm" class="home-carousel-form" novalidate>
+        <input id="homeCarouselSlideId" type="hidden">
+        <div class="grid cols-2">
+          <label><span>Title *</span><input id="homeCarouselTitle" maxlength="120" required></label>
+          <label><span>Status</span><select id="homeCarouselStatus"><option value="draft">Draft</option><option value="paused">Paused</option><option value="archived">Archived</option></select></label>
+          <label class="home-carousel-wide"><span>Body</span><textarea id="homeCarouselBody" maxlength="320" rows="3"></textarea></label>
+          <label><span>Approved image path *</span><input id="homeCarouselImage" maxlength="500" placeholder="/assets/images/site/example.webp" required></label>
+          <label><span>Descriptive alt text *</span><input id="homeCarouselAlt" maxlength="220" required></label>
+          <label><span>CTA label</span><input id="homeCarouselCtaLabel" maxlength="80" placeholder="Shop this collection"></label>
+          <label><span>CTA same-site URL</span><input id="homeCarouselCtaUrl" maxlength="500" placeholder="/shop/"></label>
+          <label><span>Display order</span><input id="homeCarouselSort" type="number" min="1" max="999999" value="100"></label>
+          <label><span>Rotation seconds</span><input id="homeCarouselSeconds" type="number" min="5" max="20" value="7"></label>
+          <label><span>Starts (optional)</span><input id="homeCarouselStarts" type="datetime-local"></label>
+          <label><span>Ends (optional)</span><input id="homeCarouselEnds" type="datetime-local"></label>
+        </div>
+        <div class="home-carousel-admin-actions" style="margin-top:14px"><button class="btn" id="homeCarouselPreview" type="button">Preview draft</button><button class="btn" id="homeCarouselSave" type="submit">Save draft</button><button class="btn primary" id="homeCarouselPublish" type="button">Publish</button></div>
+      </form>
+      <div id="homeCarouselPreviewMount" class="home-carousel-preview" hidden></div>
+    </section>
+
+    <section class="card" style="margin-top:18px" aria-labelledby="carouselSlidesHeading">
+      <div class="section-heading-row"><div><h2 id="carouselSlidesHeading" style="margin-top:0">Saved slides</h2><p class="small">Lower display-order numbers appear first. Save order after changing ranks.</p></div><button class="btn" id="homeCarouselSaveOrder" type="button">Save order</button></div>
+      <div id="homeCarouselSlides" class="home-carousel-admin-list"></div>
+    </section>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=443"></script>
+  <script src="/public/js/auth.js?v=443"></script>
+  <script src="/public/js/site-auth-ui.js?v=443"></script>
+  <script src="/public/js/admin-home-carousel.js?v=443"></script>
+</body>
+</html>

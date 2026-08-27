@@ -1,4 +1,4 @@
-# AI Handoff — Development Build 442
+# AI Handoff — Development Build 443
 
 Updated: 2026-08-27
 
@@ -6,14 +6,14 @@ Read this first, then `PROJECT_STATUS_AND_ROADMAP.md`. These are the two full mu
 
 ## Current release
 
-- Development release: **Build 442 — I.T. enforcement rollout / Phase A migration-first boundary**
+- Development release: **Build 443 — editable Home carousel / safe static fallback**
 - Source branch: `dev`
 - Development Pages project: `devilndove-site-dev`
 - Development D1: `devilndove-dev`
 - Separate live Production: `main` / `devilndove-site`, baseline Build 437
 - Production promotion: **CLOSED**
 
-Build 441 closed its exact Development checkpoint at `96e3256b608190a8780829ea9e6409670a898fb4`. Build 442 packages the fourth-module/user-grant database authority before activating runtime enforcement. Historical payment/CAIP/build work remains provenance; unfinished proof is carried forward as a Build 442 **HOLD**, never as an obsolete active requirement and never as a false PASS.
+Build 442 closed its exact Development checkpoint at `b8868c9b77ad12de4fee4984274fe80e1d096613`, with source gate, Windows D1 transport and Cloudflare deployment `b72eb8b4-ac52-4b12-bdd2-cd85ea6b400d` green. Build 443 implements the Home carousel schema/API/editor/runtime with a static-hero fallback. Historical payment/CAIP/build work remains provenance; unfinished proof is carried forward as a Build 443 **HOLD**, never as an obsolete active requirement or false PASS.
 
 ## Accepted inherited evidence
 
@@ -23,10 +23,11 @@ Automated live responsive viewport proof was blocked by the correct CSP `frame-a
 
 ## Current HOLDs
 
-- **IT-442-H1/H2:** apply/verify the Development D1 `it-platform`/explicit user-grant authority before activating Phase B route/API/UI enforcement.
-- **PAY-442-H1:** Stripe Development test configuration, simulated checkout, return, signed webhook and duplicate replay evidence.
-- **PAY-442-H2:** PayPal sandbox configuration, approval/capture, return, verified webhook and duplicate replay evidence.
-- **CAIP-442-H1:** source/schema/fail-closed artifact safeguards are retained, but Development private R2 delivery, byte/range seeking, exact timecode/range evidence, storage audit and expected provider-off behavior still need live proof.
+- **CAR-443-H1:** apply/verify the additive carousel schema, then prove audited draft/preview/publish/pause/schedule and all public fallback behavior.
+- **IT-443-H1/H2:** apply/verify the Development D1 `it-platform`/explicit user-grant authority before activating Phase B route/API/UI enforcement.
+- **PAY-443-H1:** Stripe Development test configuration, simulated checkout, return, signed webhook and duplicate replay evidence.
+- **PAY-443-H2:** PayPal sandbox configuration, approval/capture, return, verified webhook and duplicate replay evidence.
+- **CAIP-443-H1:** source/schema/fail-closed artifact safeguards are retained, but Development private R2 delivery, byte/range seeking, exact timecode/range evidence, storage audit and expected provider-off behavior still need live proof.
 - **Separate live Production promotion HOLD:** deliberate until explicit owner authorization and all promotion gates are green.
 
 ## Authority invariants
@@ -41,14 +42,14 @@ Automated live responsive viewport proof was blocked by the correct CSP `frame-a
 
 ## I.T. & Platform
 
-Build 442 Phase A registers the fourth-module and explicit per-user grant authority through an additive guarded Development migration, but runtime enforcement remains intentionally off until remote D1 proof. `/admin/it-platform/` now keeps current-release payment/CAIP/I.T. obstacles, correction mechanics, safe payment readiness and pass conditions together. It also details the likely Build 443 Home-carousel contract. Do not imply Phase B or provider acceptance is complete from source/configuration evidence alone.
+The carried Build 442 migration registers the fourth-module and explicit per-user grant authority, but runtime enforcement remains intentionally off until remote D1 proof. `/admin/it-platform/` now keeps the Build 443 carousel, payment, CAIP and I.T. obstacles, correction mechanics, safe payment readiness and pass conditions together. Do not imply live carousel editing, I.T. Phase B or provider acceptance is complete from source evidence alone.
 
 ## Development workflow
 
 1. Work on `dev` only.
-2. Run `.github/workflows/build442-system-gate.yml` on the exact resulting head.
+2. Run `.github/workflows/build443-system-gate.yml` on the exact resulting head.
 3. Treat inherited 439/440 scripts as regression provenance, not active release numbers.
-4. Record unresolved evidence as a Build 442 HOLD, then renumber it forward if Development advances.
+4. Record unresolved evidence as a Build 443 HOLD, then renumber it forward if Development advances.
 5. Deploy only to `devilndove-site-dev` for Development acceptance.
 6. Never mutate `main` / `devilndove-site` without explicit authorization.
 
@@ -58,4 +59,4 @@ Historical root build reports with exact copies under `docs/archive/build-histor
 
 ## Feature direction
 
-The active feature register is in `PROJECT_STATUS_AND_ROADMAP.md`. The next probable bounded major direction is an editable responsive Home carousel after Build 442 reaches a safe checkpoint; its purpose, ownership, operator workflow, public behavior, failure/fallback, accessibility/SEO and release acceptance are also visible in the I.T. hub.
+The active feature register is in `PROJECT_STATUS_AND_ROADMAP.md`. Build 443 delivers the editable responsive Home carousel source/editor/runtime/fallback. The next bounded increment is guarded D1/live carousel acceptance, followed by approved-media selection and restore/version review after the exact Development checkpoint.

@@ -1,5 +1,5 @@
-// Build 442: fourth-module I.T. authority Phase A, explicit user-grant migration package, carried HOLDs, and retained Build 441 regressions.
-const CACHE_NAME = 'devilndove-shell-v442';
+// Build 443: editable Home carousel Phase A with static fallback and carried current-release HOLDs.
+const CACHE_NAME = 'devilndove-shell-v443';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

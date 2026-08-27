@@ -1,6 +1,6 @@
-# I.T. Preflight / Startup Release Guide — Build 442
+# I.T. Preflight / Startup Release Guide — Build 443
 
-This is the operator authority for open technical release issues. Business/product feature work belongs in `PROJECT_STATUS_AND_ROADMAP.md`; technical release HOLDs belong here and in `docs/releases/BUILD442_RELEASE_GATE.md`.
+This is the operator authority for open technical release issues. Business/product feature work belongs in `PROJECT_STATUS_AND_ROADMAP.md`; technical release HOLDs belong here and in `docs/releases/BUILD443_RELEASE_GATE.md`.
 
 ## Startup sequence
 
@@ -18,7 +18,8 @@ This is the operator authority for open technical release issues. Business/produ
 
 ## Current technical HOLDs
 
-- **I.T. authority/enforcement HOLD:** apply and verify the guarded Development D1 migration before Phase B runtime enforcement.
+- **Carousel authority/live acceptance HOLD:** apply/verify the Build 443 additive Development D1 migration, then prove draft/preview/publish/pause/schedule/audit and every public static-hero fallback.
+- **I.T. authority/enforcement HOLD:** apply and verify the carried guarded Development D1 migration before Phase B runtime enforcement.
 - **Stripe Development HOLD:** test configuration, simulated checkout, return, signed webhook and duplicate replay must agree on the exact current deployment.
 - **PayPal Development HOLD:** sandbox configuration, approval/capture, return, verified webhook and duplicate replay must agree on the exact current deployment.
 - **CAIP private media evidence HOLD:** private R2 media delivery/range seeking, exact timecode/range and storage evidence remain to be proven live.
@@ -29,7 +30,7 @@ This is the operator authority for open technical release issues. Business/produ
 
 Use the I.T. hub `/admin/it-platform/` as the parent index. Existing specialist pages remain separate authorities for Startup Readiness, Release & Go-Live, Deployment Preflight, Release Evidence, Deploy Readiness, Application Sanity, Runtime Incidents, Public API Health, Route Usage, Schema Drift, Markdown Sanity, Operational Continuity, Promotion Control, Go-Live Execution and Live Ops Follow-through.
 
-The I.T. hub contains the exact current-release correction mechanic and pass condition for each bridged obstacle. Earlier build documents remain historical evidence only. The safe payment readiness button checks configuration booleans/mode and never exposes secrets or proves end-to-end payment acceptance.
+The I.T. hub contains the exact Build 443 correction mechanic and pass condition for each bridged obstacle. Earlier build documents remain historical evidence only. The safe payment readiness button checks configuration booleans/mode and never exposes secrets or proves end-to-end payment acceptance. The Home carousel editor is source-complete but reports its missing-schema boundary honestly while Home retains the static hero.
 
 ## Stop conditions
 

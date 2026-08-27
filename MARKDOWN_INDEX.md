@@ -1,36 +1,29 @@
-# Markdown Documentation Index — Build 442
+# Markdown Documentation Index — Build 443
 
-## Canonical mutable documents
+## Current authorities
 
-1. `AI_HANDOFF.md` — architecture, authority boundaries, release/deployment rules and technical handoff.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — ordered status, HOLDs, business feature work and release sequence.
-
-## Thin compatibility pointers
-
-- `AI_CONTEXT.md`
-- `NEW_CHAT_STATUS.md`
-- `DEVELOPMENT_ROADMAP.md`
-- `MARKDOWN_INDEX.md`
-
-## Current Build 442 authorities
-
+- `AI_HANDOFF.md`
+- `PROJECT_STATUS_AND_ROADMAP.md`
 - `development-release.json`
-- `.github/workflows/build442-system-gate.yml`
-- `scripts/build442_development_release_alignment_test.py`
-- `scripts/build442_release_contract_integrity_test.py`
-- `scripts/build442_it_platform_migration_regression.py`
-- `scripts/build442_it_release_obstacle_bridge_test.py`
-- `scripts/build441_repository_hygiene_test.py`
-- `scripts/build442_current_sanity_check.py`
-- `docs/releases/BUILD442_RELEASE_GATE.md`
+- `docs/releases/BUILD443_RELEASE_GATE.md`
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
-- `docs/operations/REPOSITORY_HYGIENE.md`
-- `docs/architecture/IT_MODULE_ARCHITECTURE.md`
+- `.github/workflows/build443-system-gate.yml`
+- `scripts/build443_development_release_alignment_test.py`
+- `scripts/build443_release_contract_integrity_test.py`
+- `scripts/build443_home_carousel_regression.py`
+- `scripts/build443_apply_development_home_carousel.py`
+- `scripts/build443_current_sanity_check.py`
 
-Build 439/440-named migrations/tests are historical provenance and may remain active regression inputs. Their filename does not make them the active release number.
+## Carried guarded authorities
 
-`database_upgrade_current_pass.sql` remains a legacy Build 264 compatibility snapshot, not current migration/release authority.
+- `database_build442_it_platform_user_access.sql`
+- `scripts/build442_apply_development_it_platform.py`
+- `database_build443_home_carousel.sql`
+- `BUILD443_HOME_CAROUSEL_D1_VERIFICATION.sql`
 
-Historical validation/change/manifest Markdown belongs under `docs/archive/build-history/`; exact root/archive duplicates are retired.
+## Historical checkpoint authority
 
-Current summary: Development **Build 442 Phase A**; I.T. D1/enforcement, Stripe, PayPal and CAIP evidence **current-release HOLDs**; next probable direction **Build 443 editable Home carousel**; separate live Production baseline **Build 437**; Production promotion **CLOSED**.
+- `docs/releases/BUILD442_RELEASE_GATE.md`
+- Git history and `docs/archive/build-history/`
+
+Current summary: Development **Build 443**; carousel D1/live proof, I.T. D1/enforcement, Stripe, PayPal and CAIP evidence are current-release HOLDs; separate live Production promotion is **CLOSED**.

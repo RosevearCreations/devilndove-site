@@ -1,6 +1,6 @@
 # Devil n Dove I.T. & Platform Module
 
-Status: **BUILD 442 PHASE A — USER-GRANT AUTHORITY PACKAGED / RUNTIME ENFORCEMENT HELD UNTIL DEVELOPMENT D1 PROOF**
+Status: **BUILD 443 CARRY-FORWARD HOLD — USER-GRANT AUTHORITY PACKAGED / RUNTIME ENFORCEMENT HELD UNTIL DEVELOPMENT D1 PROOF**
 
 Updated: 2026-08-27
 
@@ -12,14 +12,14 @@ Top-level module key: `it-platform`.
 
 ## Proven starting point
 
-Build 441 established `/admin/it-platform/` as the operator parent for existing Preflight/Startup/Release/Schema/Runtime/Continuity authorities and closed its exact Development checkpoint at `96e3256b608190a8780829ea9e6409670a898fb4` with source, Windows D1 transport and Cloudflare `devilndove-site-dev` deployment green.
+Build 441 established `/admin/it-platform/` as the operator parent. Build 442 then closed its exact Development checkpoint at `b8868c9b77ad12de4fee4984274fe80e1d096613`, with source, Windows D1 transport and Cloudflare deployment `b72eb8b4-ac52-4b12-bdd2-cd85ea6b400d` green.
 
-The three existing business modules remain proven Build 438 runtime authority during Build 442 Phase A:
+The three existing business modules remain proven Build 438 runtime authority while Build 443 carries the I.T. D1 boundary:
 - `commerce-operations`
 - `creative-production`
 - `business-administration`
 
-## Build 442 Phase A — schema first
+## Carried Build 442 Phase A — schema first
 
 Build 442 adds, but does not yet activate at runtime:
 
@@ -32,7 +32,7 @@ Build 442 adds, but does not yet activate at runtime:
 
 Runtime route/API enforcement stays unchanged until the Development D1 migration has been applied and verified. This is intentional: code that depends on `app_module_user_access` must not auto-deploy before that table exists.
 
-## Build 442 Phase B — after D1 verification
+## Build 443 I.T. HOLD / Phase B — after D1 verification
 
 Phase B will:
 
@@ -125,11 +125,11 @@ The first I.T. contracts remain read-only: release-health, schema-health, runtim
 
 ## Current HOLDs
 
-- `IT-442-H1`: apply and verify the additive authority in Development D1.
-- `IT-442-H2`: activate runtime per-user enforcement only after H1 passes.
-- `PAY-442-H1`: Stripe test configuration, checkout return, signed webhook and duplicate-replay evidence on the exact Development deployment.
-- `PAY-442-H2`: PayPal sandbox approval/capture return, verified webhook and duplicate-replay evidence on the exact Development deployment.
-- `CAIP-442-H1`: private-media Development evidence remains carried forward.
+- `IT-443-H1`: apply and verify the additive authority in Development D1.
+- `IT-443-H2`: activate runtime per-user enforcement only after H1 passes.
+- `PAY-443-H1`: Stripe test configuration, checkout return, signed webhook and duplicate-replay evidence on the exact Development deployment.
+- `PAY-443-H2`: PayPal sandbox approval/capture return, verified webhook and duplicate-replay evidence on the exact Development deployment.
+- `CAIP-443-H1`: private-media Development evidence remains carried forward.
 - separate live Production promotion remains closed by policy.
 
 The operator-facing I.T. hub lists the correction mechanic and pass condition for each current-release obstacle. Payment configuration uses the existing safe public readiness endpoint and exposes only configuration booleans/mode—not credentials. A readiness flag is diagnostic evidence only; it cannot close payment acceptance without the matching end-to-end and replay proof.

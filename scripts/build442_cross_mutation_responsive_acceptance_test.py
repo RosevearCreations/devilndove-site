@@ -20,7 +20,7 @@ tools_api=text('functions/api/tools.js'); supplies_api=text('functions/api/suppl
 tool_lifecycle=text('functions/api/admin/tool-lifecycle-review.js'); tool_ui=text('public/js/admin-tool-lifecycle-review.js')
 styles=text('css/styles.css'); tool_css=text('css/tool-lifecycle-review.css')
 inv_html=text('admin/inventory-operations/index.html'); products_html=text('admin/products/index.html'); mobile_inv_html=text('admin/mobile-inventory/index.html')
-check('canonical acceptance release is Build 442',release==442)
+check('canonical acceptance release is Build 442 or later',release>=442)
 for label,source in (('desktop Product API',desktop_product),('mobile Product API',mobile_product)):
     check(f'{label} imports shared Product resource persistence','_productResourcePersistence.js' in source and 'persistProductResourceLinks' in source)
     check(f'{label} contains no request-time Product-resource schema DDL','CREATE TABLE' not in source and 'ALTER TABLE' not in source)
