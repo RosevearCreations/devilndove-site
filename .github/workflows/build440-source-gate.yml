@@ -1,4 +1,4 @@
-# Build 440 gate revision 7 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and kit D1 runtime contracts before handoff.
+# Build 440 gate revision 8 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and runtime contracts before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -81,7 +81,19 @@ jobs:
         run: python scripts/build440_final_verifier_regression_test.py
 
       - name: Validate kit D1 runtime batch contract
-        run: node scripts/build440_inventory_kit_runtime_contract_test.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/build440_inventory_kit_runtime_contract_test.mjs 2>&1 | tee build440-kit-runtime.log
+
+      - name: Preserve kit runtime diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build440-kit-runtime-${{ github.run_id }}
+          path: build440-kit-runtime.log
+          if-no-files-found: ignore
+          retention-days: 3
 
       - name: Build 440 source gate before aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
