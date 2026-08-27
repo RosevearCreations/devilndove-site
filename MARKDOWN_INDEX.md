@@ -32,7 +32,7 @@ They point to the canonical pair rather than maintaining independent roadmaps.
 - `scripts/build440_product_inventory_tools_source_gate.py`
 - `database_full_schema.sql` plus required ledgered/focused migrations and aggregate-schema synchronization
 
-The most recent fully green Build 440 code baseline before this documentation refresh was GitHub Actions gate #71 at `98bd53f2`. Every later `dev` head must pass the same gate again.
+Currentness is not pinned to a historical SHA. Every `dev` head must pass the Build 440 gate and the Cloudflare Pages `devilndove-site-dev` deployment check on that same commit.
 
 ## Legacy compatibility SQL
 
@@ -58,7 +58,8 @@ Historical numbers must not become active runtime cache majors or current releas
 
 - Development: **Build 440**
 - Build 440 source/CI: **GREEN**
-- Development live acceptance: **NEXT**
+- Exact-head Development Pages deployment: **GREEN**
+- Development live/authenticated acceptance: **NEXT**
 - Build 439 CAIP media/video live-browser acceptance: **OPEN / SEPARATE**
 - Production baseline: **Build 437**
 - Production promotion: **CLOSED**

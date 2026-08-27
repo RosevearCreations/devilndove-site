@@ -9,23 +9,25 @@ This is the ordered execution companion to `AI_HANDOFF.md`. Those two files are 
 - Current Development release: **Build 440**
 - Canonical marker: `development-release.json`
 - Build 440 source/CI: **CLOSED / GREEN**
-- Full green baseline: GitHub Actions Build 440 gate #71 at `98bd53f2`
-- Development live acceptance: **NEXT**
+- Exact-head Development Pages deployment: **GREEN**
+- Development live/authenticated acceptance: **NEXT**
 - Build 439 CAIP media/video live-browser acceptance: **OPEN / SEPARATE**
 - Production baseline: **Build 437**
 - Production promotion: **CLOSED**
 
-A newer `dev` commit supersedes the baseline SHA only after the same Build 440 gate and Development Pages deployment check pass on that exact commit.
+Do not infer currentness from an old commit number. The current `dev` head is release-valid only when the Build 440 GitHub Actions gate and the `devilndove-site-dev` Cloudflare Pages deployment check both pass on that exact commit.
 
 ## What is complete
 
 ### Release alignment
 - Active Development runtime cache/version majors are Build 440.
+- Minor cache revisions may use the Build 440 major, for example `440.3`.
 - Service worker shell identity is Build 440.
 - `development-release.json` is the canonical release authority.
 - Old one-time self-writing GitHub Actions synchronization workflows are retired.
 - Active CI is repository-read-only.
 - Retained compatibility regressions derive current cache release instead of demanding obsolete cache versions.
+- Canonical AI/status documentation and compatibility pointers are Build 440-aligned.
 
 ### Product
 - Desktop/mobile Product resource persistence is shared and atomic.
@@ -60,11 +62,10 @@ A newer `dev` commit supersedes the baseline SHA only after the same Build 440 g
 ## What remains open
 
 ### 1. Exact-head Development live acceptance
-Source/CI green is necessary but not sufficient. We still need proof against the deployed `devilndove-site-dev` commit:
+Source/CI and deployment are green, but live application behavior still needs explicit proof:
 
-- exact commit deployed successfully
 - Admin authentication succeeds
-- relevant Admin APIs return expected Build/current authority responses
+- relevant Admin APIs return expected current authority responses
 - Product resource read/save behavior works through the deployed app
 - mobile Product capture uses the shared Product resource authority
 - Inventory/kit paths enforce owner and stock safety
@@ -88,15 +89,13 @@ After live acceptance, confirm:
 
 ## Ordered next steps
 
-1. Finish this Build 440 canonical-document/currentness update and obtain a green Build 440 gate on its exact commit.
-2. Confirm Cloudflare Pages Development deployment is green on that same commit.
-3. Run Build 440 Development live acceptance: Admin auth, Product, mobile Product, Inventory/kit, Tool lifecycle/publication and responsive views.
-4. Resolve any live defect as Build 440 and re-run the full exact-head gate; do not skip forward around failures.
-5. Complete Build 439 CAIP media/video live-browser evidence acceptance.
-6. Run final Development schema/data/current-authority sanity checks.
-7. Record a Build 440 closure checkpoint.
-8. Define the next Development release only after the above acceptance items are closed.
-9. Consider Production promotion only as a separate explicit decision; until then, Production promotion remains **CLOSED**.
+1. Run Build 440 Development live acceptance: Admin auth, Product, mobile Product, Inventory/kit, Tool lifecycle/publication and responsive views.
+2. Resolve any live defect as Build 440 and re-run the full exact-head gate; do not skip forward around failures.
+3. Complete Build 439 CAIP media/video live-browser evidence acceptance.
+4. Run final Development schema/data/current-authority sanity checks.
+5. Record a Build 440 closure checkpoint.
+6. Define the next Development release only after the above acceptance items are closed.
+7. Consider Production promotion only as a separate explicit decision; until then, Production promotion remains **CLOSED**.
 
 ## Definition of Build 440 Development closure
 
@@ -110,7 +109,7 @@ Build 440 is Development-closed only when all are true:
 - exact-head Cloudflare Pages Development deployment green
 - authenticated live Development acceptance green
 - remaining Build 439 media/video live acceptance explicitly resolved or separately documented as intentionally deferred
-- canonical docs reflect that exact state
+- canonical docs reflect the actual state
 - Production has not been mutated during Development acceptance
 
 ## Documentation rule

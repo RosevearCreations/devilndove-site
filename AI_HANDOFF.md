@@ -10,12 +10,15 @@ This is one of two canonical mutable project documents. Read this first, then `P
 - Canonical Development release marker: `development-release.json`
 - Development branch: `dev`
 - Development Pages project: `devilndove-site-dev`
+- Build 440 source/CI: **CLOSED / GREEN**
+- Exact-head Development Pages deployment: **GREEN**
+- Development live/authenticated acceptance: **NEXT**
 - Production baseline: **Build 437**
 - Production branch: `main`
 - Production promotion: **CLOSED**
 - Broad Production changes require separate explicit authorization.
 
-Build 440 received a complete green source/CI proof on GitHub Actions run **#71** at commit `98bd53f2`. That proof included Windows D1 transport, canonical release alignment, release-contract integrity, Product/Inventory/Tools cross-mutation acceptance, mobile/desktop responsive authority checks, pre-sync source gate, lot-provenance aggregate sync, receiving aggregate sync, post-sync source gate, and whitespace/safety checks. A later `dev` head is current only when the same gate is green again.
+Build 440 release health is enforced on the exact current `dev` head rather than by a permanently hard-coded commit. The current head is acceptable only when the Build 440 GitHub Actions gate and the Cloudflare Pages `devilndove-site-dev` deployment check both pass on that same commit. The gate includes Windows D1 transport, canonical release alignment, release-contract integrity, Product/Inventory/Tools cross-mutation acceptance, mobile/desktop responsive authority checks, pre-sync source gate, lot-provenance aggregate sync, receiving aggregate sync, post-sync source gate, and whitespace/safety checks.
 
 ## Acceptance boundaries
 
@@ -26,7 +29,7 @@ Development browser/module acceptance is closed and retained as prior evidence.
 The source/schema work remains part of the current application. Its live Development media/browser evidence review is a separate open acceptance item; do not falsely mark it closed merely because Build 440 source/CI is green.
 
 ### Build 440 — Product / Inventory / Tools
-Source and CI are closed/green. The release-alignment and cross-authority work now establishes these contracts:
+Source and CI are closed/green. The release-alignment and cross-authority work establishes these contracts:
 
 - Desktop and mobile Product resource saves use the same shared atomic D1 persistence authority.
 - Product resource identities are normalized case-insensitively by resource kind + source key.
@@ -83,15 +86,7 @@ Primary operational identity is `site_item_inventory`.
 
 ## Tool authority
 
-Tool identity remains Inventory-owned. Build 440 adds a bounded completeness/lifecycle view over:
-
-- Inventory identity and balance
-- supplier metadata
-- catalog/publication linkage
-- lifecycle profile/history
-- reusable usage history
-
-Lifecycle mutation is explicit and audited. There is no polling/retry loop and no R2/provider mutation in the Tool lifecycle path.
+Tool identity remains Inventory-owned. Build 440 adds a bounded completeness/lifecycle view over Inventory identity and balance, supplier metadata, catalog/publication linkage, lifecycle profile/history, and reusable usage history. Lifecycle mutation is explicit and audited. There is no polling/retry loop and no R2/provider mutation in the Tool lifecycle path.
 
 ## Release/version authority
 
@@ -111,21 +106,20 @@ The permanent gates are:
 
 1. Work only on `dev`.
 2. Keep `development-release.json` canonical.
-3. Run/allow the Build 440 gate on the exact resulting commit.
-4. Require both source-gate jobs green.
-5. Require the Cloudflare Pages `devilndove-site-dev` deployment check green on that same commit.
-6. Perform Development live/authenticated acceptance against that exact deployed head.
-7. Record unresolved defects instead of weakening gates.
-8. Do not promote to `main` until explicitly authorized.
+3. Require the Build 440 gate green on the exact resulting commit.
+4. Require the Cloudflare Pages `devilndove-site-dev` deployment check green on that same commit.
+5. Perform Development live/authenticated acceptance against that exact deployed head.
+6. Record unresolved defects instead of weakening gates.
+7. Do not promote to `main` until explicitly authorized.
 
 ## Immediate next work
 
-1. Finish the current-authority/documentation sweep and keep its Build 440 gate green.
-2. Perform exact-head Development deployment/live acceptance for Build 440.
-3. Exercise authenticated desktop/mobile Product, Inventory and Tool paths against Development with reversible or read-only evidence as appropriate.
-4. Close the remaining Build 439 CAIP media/video live-browser evidence acceptance.
-5. Re-run a Development schema/data sanity check after live acceptance.
-6. Only then define the next numbered Development release.
+1. Perform exact-head Development live/authenticated acceptance for Build 440.
+2. Exercise authenticated desktop/mobile Product, Inventory and Tool paths against Development with reversible or read-only evidence as appropriate.
+3. Close the remaining Build 439 CAIP media/video live-browser evidence acceptance.
+4. Re-run a Development schema/data/current-authority sanity check after live acceptance.
+5. Record the Build 440 Development closure checkpoint only when those acceptance items are resolved.
+6. Define the next numbered Development release after closure.
 7. Keep Production promotion closed until a separate promotion decision.
 
 ## Non-negotiable safety rules
