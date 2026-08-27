@@ -1,14 +1,21 @@
 from pathlib import Path
+import json
 import re
 import sqlite3
 
 ROOT = Path(__file__).resolve().parents[1]
 checks = []
+release_doc = json.loads((ROOT/'development-release.json').read_text(encoding='utf-8'))
+release = int(release_doc.get('release') or 0)
 
 def check(label, condition):
     ok = bool(condition)
     checks.append(ok)
     print(('PASS' if ok else 'FAIL') + ': ' + label)
+
+def has_current_asset(html, asset_name):
+    pattern = rf"{re.escape(asset_name)}\?v={release}(?:\.\d+)?(?![\d.])"
+    return bool(re.search(pattern, html))
 
 resources_js = (ROOT/'public/js/admin-product-resources.js').read_text()
 inventory_js = (ROOT/'public/js/admin-site-item-inventory.js').read_text()
@@ -18,6 +25,7 @@ products_html = (ROOT/'admin/products/index.html').read_text()
 mobile_html = (ROOT/'admin/mobile-inventory/index.html').read_text()
 css = (ROOT/'css/styles.css').read_text()
 
+check('canonical Development release is available', release > 0)
 check('saved product-resource links resolve a server-side resource name', 'AS resource_name' in data_js and 'sii.item_name' in data_js and 'ci.name' in data_js)
 check('linked inventory lookup is bounded to one authoritative row', 'sii.site_item_inventory_id = (' in data_js and 'LIMIT 1' in data_js)
 check('linked resource response exposes resolved name', 'name: row.resource_name || row.source_key ||' in data_js)
@@ -25,10 +33,10 @@ check('linked resource response carries usage metadata', 'usage_units_per_stock_
 check('browser preserves server-linked resource outside current search', '|| x.resource || {}' in resources_js)
 check('browser preserves server-provided linked name before external key fallback', 'resource.name || x.name || x.source_key' in resources_js)
 check('linked-item dropdown displays name before source key fallback', 'link.name || link.source_key' in resources_js)
-check('Inventory Operations uses product-resource bundle v253', 'admin-product-resources.js?v=253' in inv_html)
-check('Products uses product-resource bundle v253', 'admin-product-resources.js?v=253' in products_html)
-check('Inventory Operations uses inventory bundle v253 or newer', bool(re.search(r'admin-site-item-inventory\.js\?v=(?:25[3-9]|2[6-9][0-9]|[3-9][0-9]{2,})',inv_html)))
-check('Mobile Inventory uses inventory bundle v253', bool(re.search(r'admin-site-item-inventory\.js\?v=(?:25[3-9]|2[6-9][0-9]|[3-9][0-9]{2,})',mobile_html)))
+check(f'Inventory Operations uses current Product-resource bundle v{release}', has_current_asset(inv_html, 'admin-product-resources.js'))
+check(f'Products uses current Product-resource bundle v{release}', has_current_asset(products_html, 'admin-product-resources.js'))
+check(f'Inventory Operations uses current Inventory bundle v{release}', has_current_asset(inv_html, 'admin-site-item-inventory.js'))
+check(f'Mobile Inventory uses current Inventory bundle v{release}', has_current_asset(mobile_html, 'admin-site-item-inventory.js'))
 check('inventory form exposes Start New Item', 'id="siteInventoryResetButton">Start New Item</button>' in inventory_js)
 check('inventory form exposes separate Clear / Reset Fields action', 'id="siteInventoryClearFieldsButton">Clear / Reset Fields</button>' in inventory_js)
 check('clear action has its own handler', "siteInventoryClearFieldsButton')?.addEventListener('click', clearInventoryWorkspaceFields)" in inventory_js)
@@ -65,5 +73,6 @@ check('exact loadProductLinks SQL returns human names and tool usage metadata', 
 check('aggregate schema foreign keys remain clean', con.execute('PRAGMA foreign_key_check').fetchall() == [])
 
 passed = sum(checks)
-print(f"\nBuild 253 linked-item/reset regression: {passed}/{len(checks)} passed")
+print(f"\nBuild {release} retained linked-item/reset compatibility regression: {passed}/{len(checks)} passed")
+print(f"Runtime asset authority: development-release.json / Build {release}")
 raise SystemExit(0 if passed == len(checks) else 1)
