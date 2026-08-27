@@ -82,8 +82,8 @@ jobs:
           python scripts/build440_public_inventory_authority_regression.py
           node --check functions/api/tools.js
           node --check functions/api/supplies.js
-      - name: Validate inherited Product/Inventory/Tool cross-mutation and responsive contract
-        run: python scripts/build440_cross_mutation_responsive_acceptance_test.py
+      - name: Validate Build 441 Product/Inventory/Tool cross-mutation and responsive contract
+        run: python scripts/build441_cross_mutation_responsive_acceptance_test.py
       - name: Build 441 source sanity
         run: python scripts/build441_current_sanity_check.py --quick
       - name: Product/Inventory/Tools source gate before aggregate sync
