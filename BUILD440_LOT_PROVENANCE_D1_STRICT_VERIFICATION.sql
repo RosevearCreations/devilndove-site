@@ -1,5 +1,6 @@
 -- Devil n Dove Build 440 — strict Product / Inventory lot-provenance verification.
 -- READ ONLY. Any invariant failure intentionally raises integer overflow.
+-- D1 transport note: schema-text checks use instr(), never LIKE/GLOB patterns.
 SELECT CASE WHEN
   (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('product_production_run_material_lots','product_finished_inventory_lots'))=2
   AND (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN (
@@ -13,7 +14,9 @@ SELECT CASE WHEN
     'trg_orders_build440_inventory_commit_guard_reactivate'))=4
   AND (SELECT COUNT(*) FROM schema_migration_ledger WHERE migration_key IN (
     'build440_product_inventory_lot_provenance','build440_product_inventory_lot_provenance_hardening'))=2
+  AND (SELECT COUNT(*) FROM schema_migration_ledger WHERE migration_key='build440_product_inventory_lot_provenance_d1_trigger_compat')=1
   AND (SELECT COUNT(*) FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' AND TRIM(COALESCE(setting_value,''))<>'')=1
+  AND (SELECT COUNT(*) FROM app_settings WHERE setting_key='site.product.finished_inventory_guard_d1_trigger_compat')=1
   AND (SELECT COUNT(*) FROM inventory_purchase_lots WHERE COALESCE(quantity_remaining,0)<0)=0
   AND (SELECT COUNT(*)
        FROM inventory_lot_policies p
@@ -39,10 +42,11 @@ SELECT CASE WHEN
        JOIN product_production_run_materials prm ON prm.product_production_run_material_id=pml.product_production_run_material_id
        WHERE pml.product_production_run_id<>prm.product_production_run_id
           OR pml.site_item_inventory_id<>prm.site_item_inventory_id)=0
-  AND (SELECT COUNT(*) FROM sqlite_master WHERE type='view' AND name='product_inventory_active_commitments' AND LOWER(COALESCE(sql,'')) LIKE '%refunded%')=1
+  AND (SELECT COUNT(*) FROM sqlite_master WHERE type='view' AND name='product_inventory_active_commitments'
+       AND instr(LOWER(COALESCE(sql,'')), 'refunded') > 0)=1
   AND (SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name='trg_order_items_build440_inventory_commit_guard_insert'
-       AND LOWER(COALESCE(sql,'')) LIKE '%raise(fail%'
-       AND LOWER(COALESCE(sql,'')) LIKE '%order_status=''cancelled''%')=1
+       AND instr(LOWER(COALESCE(sql,'')), 'raise(fail') > 0
+       AND instr(LOWER(COALESCE(sql,'')), 'order_status=''cancelled''') > 0)=1
   AND (SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name='trg_products_build440_inventory_commit_guard_decrease'
-       AND LOWER(COALESCE(sql,'')) LIKE '%build440_finished_inventory_below_active_commitments%')=1
+       AND instr(LOWER(COALESCE(sql,'')), 'build440_finished_inventory_below_active_commitments') > 0)=1
 THEN 1 ELSE abs(-9223372036854775808) END AS verification_pass;
