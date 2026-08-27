@@ -168,6 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 if (!window.location.pathname.startsWith('/admin')) {
-  void import('/public/js/core/dd-public-module-visibility.mjs?v=438')
+  void import('/public/js/core/dd-public-module-visibility.mjs?v=440')
     .catch((error) => console.warn('[DD modules] public navigation module visibility unavailable', error));
 }

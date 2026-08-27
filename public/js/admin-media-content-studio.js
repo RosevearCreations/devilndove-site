@@ -58,7 +58,7 @@
     const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='devilndove-editable-image-space-checklist.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
 
-  async function loadCatalog(){const res=await fetch('/public/data/media-content-slot-catalog.json?v=278',{cache:'no-store'});if(!res.ok)throw new Error('The built-in website slot catalog could not be loaded.');state.catalog=await res.json();renderSiteMap();renderImagePlan();}
+  async function loadCatalog(){const res=await fetch('/public/data/media-content-slot-catalog.json?v=440',{cache:'no-store'});if(!res.ok)throw new Error('The built-in website slot catalog could not be loaded.');state.catalog=await res.json();renderSiteMap();renderImagePlan();}
   function renderSiteMap(){
     id('mediaSitewideLinks').innerHTML=`<button class="media-map-button" data-page="@site"><strong>Shared site</strong><span>Logo • header • page background • footer</span></button>`;
     id('mediaPageMap').innerHTML=(state.catalog?.groups||[]).map(g=>`<section class="media-map-group"><h3>${esc(g.label)}</h3>${(g.pages||[]).map(p=>`<button class="media-map-button" data-page="${esc(p.path)}"><strong>${esc(p.label)}</strong><span>${esc(p.description||'')}</span><em>${(p.slots||[]).filter(s=>!isContentSlot(s)).length} visual • ${(p.slots||[]).filter(isContentSlot).length} text/link/colour</em></button>`).join('')}</section>`).join('');

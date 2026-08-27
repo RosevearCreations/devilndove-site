@@ -7,7 +7,7 @@
 
   function loadModule() {
     if (!modulePromise) {
-      modulePromise = import('/public/js/modules/packaging/native-client-v298.mjs?v=298');
+      modulePromise = import('/public/js/modules/packaging/native-client-v298.mjs?v=440');
     }
     return modulePromise;
   }

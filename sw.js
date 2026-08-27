@@ -1,5 +1,5 @@
-// Build 243: inventory resilience/contrast refresh, CAIP/Operational Continuity, public audit assets, and retained offline/error fallbacks.
-const CACHE_NAME = 'devilndove-shell-v24';
+// Build 440: inventory resilience/contrast refresh, CAIP/Operational Continuity, public audit assets, and retained offline/error fallbacks.
+const CACHE_NAME = 'devilndove-shell-v440';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

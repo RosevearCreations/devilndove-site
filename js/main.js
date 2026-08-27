@@ -531,7 +531,7 @@
     injectLowBandwidthToggle();
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
-    ensureGlobalScript('/public/js/site-analytics.js?v=279');
+    ensureGlobalScript('/public/js/site-analytics.js?v=440');
   });
 })();
 

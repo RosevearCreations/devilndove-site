@@ -48,5 +48,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-void import('/public/js/core/dd-application-module-bootstrap.mjs?v=438')
+void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
   .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
