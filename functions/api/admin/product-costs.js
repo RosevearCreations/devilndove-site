@@ -1,52 +1,8 @@
 // File: /functions/api/admin/product-costs.js
+// Build 440: Accounting-owned product-cost schema is migration-owned. This endpoint never creates/alters schema at request time.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction, normalizeText } from "../_lib/adminAudit.js";
 import { assertAccountingPeriodOpen, monthFromDateish } from './_accountingPeriods.js';
 import { readAccountingProductCosts } from '../_lib/accountingProductCostsReadService.js';
-
-function nr(result) {
-  return Array.isArray(result?.results) ? result.results : [];
-}
-
-async function getTableColumnSet(db, tableName) {
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-    return new Set(nr(result).map((row) => String(row?.name || "").trim()).filter(Boolean));
-  } catch {
-    return new Set();
-  }
-}
-
-async function ensureTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS product_costs (
-      product_cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      product_number TEXT NOT NULL,
-      cost_per_unit REAL NOT NULL DEFAULT 0,
-      effective_date TEXT,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-
-  const cols = await getTableColumnSet(db, 'product_costs');
-  const additions = [
-    ['product_number', `ALTER TABLE product_costs ADD COLUMN product_number TEXT`],
-    ['cost_per_unit', `ALTER TABLE product_costs ADD COLUMN cost_per_unit REAL NOT NULL DEFAULT 0`],
-    ['effective_date', `ALTER TABLE product_costs ADD COLUMN effective_date TEXT`],
-    ['notes', `ALTER TABLE product_costs ADD COLUMN notes TEXT`],
-    ['created_at', `ALTER TABLE product_costs ADD COLUMN created_at TEXT`],
-    ['updated_at', `ALTER TABLE product_costs ADD COLUMN updated_at TEXT`]
-  ];
-
-  for (const [name, sql] of additions) {
-    if (!cols.has(name)) {
-      await db.prepare(sql).run().catch(() => null);
-    }
-  }
-
-  return getTableColumnSet(db, 'product_costs');
-}
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
@@ -71,42 +27,62 @@ export async function onRequestPost(context) {
   if (!db) return jsonResponse({ ok: false, error: "Database binding is not configured." }, 500);
 
   let body = {};
-  try { body = await context.request.json(); } catch {}
+  try { body = await context.request.json(); }
+  catch { return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400); }
 
   const product_number = normalizeText(body.product_number).toUpperCase();
-  const cost_per_unit = Number(body.cost_per_unit || 0);
+  const cost_per_unit = Number(body.cost_per_unit);
   const effective_date = normalizeText(body.effective_date);
   const notes = normalizeText(body.notes);
 
-  if (!product_number || !Number.isFinite(cost_per_unit)) {
-    return jsonResponse({ ok: false, error: "Product number and cost are required." }, 400);
+  if (!product_number || !Number.isFinite(cost_per_unit) || cost_per_unit < 0) {
+    return jsonResponse({ ok: false, error: "Product number and a non-negative cost are required." }, 400);
   }
 
   try {
-    const cols = await ensureTable(db);
-    await assertAccountingPeriodOpen(db, monthFromDateish(effective_date || new Date().toISOString().slice(0, 10)), 'Product costs');
-    const insertCols = [];
-    const insertVals = [];
-    const binds = [];
+    const readiness = await readAccountingProductCosts(db, { limit: 1 });
+    if (!readiness.schema_ready) {
+      return jsonResponse({
+        ok: false,
+        code: 'product_cost_schema_not_ready',
+        error: 'Product cost schema is not ready. Apply the migration through the release workflow before saving costs.',
+        owner: 'accounting',
+        missing_tables: readiness.missing_tables || [],
+        missing_columns: readiness.missing_columns || [],
+        request_time_schema_mutation: false,
+      }, 409);
+    }
 
-    if (cols.has('product_number')) { insertCols.push('product_number'); insertVals.push('?'); binds.push(product_number); }
-    if (cols.has('cost_per_unit')) { insertCols.push('cost_per_unit'); insertVals.push('?'); binds.push(cost_per_unit); }
-    if (cols.has('effective_date')) { insertCols.push('effective_date'); insertVals.push('?'); binds.push(effective_date || null); }
-    if (cols.has('notes')) { insertCols.push('notes'); insertVals.push('?'); binds.push(notes || null); }
-    if (cols.has('created_at')) { insertCols.push('created_at'); insertVals.push('CURRENT_TIMESTAMP'); }
-    if (cols.has('updated_at')) { insertCols.push('updated_at'); insertVals.push('CURRENT_TIMESTAMP'); }
+    await assertAccountingPeriodOpen(
+      db,
+      monthFromDateish(effective_date || new Date().toISOString().slice(0, 10)),
+      'Product costs'
+    );
 
-    await db.prepare(`INSERT INTO product_costs (${insertCols.join(', ')}) VALUES (${insertVals.join(', ')})`).bind(...binds).run();
+    const result = await db.prepare(`
+      INSERT INTO product_costs (
+        product_number,cost_per_unit,effective_date,notes,created_at,updated_at
+      ) VALUES (?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+    `).bind(product_number,cost_per_unit,effective_date || null,notes || null).run();
 
     await auditAdminAction(context.env, context.request, adminUser, {
       action_type: "create_product_cost",
       target_type: "product_cost",
+      target_id: Number(result?.meta?.last_row_id || 0) || null,
       target_key: product_number,
-      details: { cost_per_unit, effective_date }
+      details: { cost_per_unit, effective_date: effective_date || null }
     });
 
-    return jsonResponse({ ok: true });
+    return jsonResponse({
+      ok: true,
+      product_cost_id: Number(result?.meta?.last_row_id || 0) || null,
+      product_number,
+      cost_per_unit,
+      effective_date: effective_date || null,
+      request_time_schema_mutation: false,
+    });
   } catch (error) {
-    return jsonResponse({ ok: false, error: error?.message || 'Failed to save product cost.' }, 500);
+    const status = Number(error?.status || 0) || 500;
+    return jsonResponse({ ok: false, error: error?.message || 'Failed to save product cost.' }, status);
   }
 }
