@@ -94,8 +94,9 @@ assert(response.status===200&&payload.ok===true,'Archived product removal prefli
 assert(payload.product?.status==='archived'&&payload.deletion_allowed===1,'Archive status alone must not block unused-product deletion.');
 assert(payload.cleanup_profile==='bounded_registry_v2_generated_shell_cleanup','Removal preflight did not return the bounded v2 profile.');
 assert(!calls.some((call)=>/PRAGMA\s+foreign_key_list|name NOT LIKE 'sqlite_%'/i.test(call.sql)),'Mock removal preflight performed unbounded schema discovery.');
-// Bounded GET budget: auth + product + protected registry + materials + two managed-shell reads.
-const boundedGetBudget=protectedRefs.size+5;
+// Bounded GET budget: auth + product + every explicitly classified relation + materials + two managed-shell reads.
+// This grows only when a developer deliberately adds a relation to one of the three bounded registries.
+const boundedGetBudget=owned.size+detached.size+protectedRefs.size+5;
 assert(calls.length<=boundedGetBudget,`Removal preflight exceeded its bounded v2 query budget: ${calls.length} calls > ${boundedGetBudget}.`);
 
 const password='test-password';
