@@ -150,9 +150,11 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const response = await window.DDAuth.apiFetch(`/api/admin/delete-product?product_id=${encodeURIComponent(productId)}`, { cache: 'no-store' });
           const data = await readApiJson(response, 'Could not refresh product references.');
-          if (Number(data.deletion_allowed || 0) === 1) {
+          if (Number(data.history_allows_removal || 0) === 1) {
             closeInspector();
-            alert('Protected references are now clear. Run the normal removal preflight again before deleting.');
+            alert(Number(data.material_review_required || 0) === 1
+              ? 'Protected history is clear. Linked material reservations still require the reviewed Correct / remove workflow before permanent deletion.'
+              : 'Protected references are now clear. Run the normal removal preflight again before deleting.');
           } else {
             renderInspector(data, { productId, productName: name });
           }
@@ -216,14 +218,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (String(preview.product?.status || '').toLowerCase() !== 'draft' && draftCleanup) {
         throw new Error('Only draft products use the duplicate-draft cleanup action. Archive or use the full correction workflow for other products.');
       }
-      if (Number(preview.deletion_allowed || 0) !== 1) {
+      const linkedMaterials = Array.isArray(preview.materials) ? preview.materials : [];
+      const materialReviewRows = Array.isArray(preview.materials_requiring_review) ? preview.materials_requiring_review : [];
+      const historyAllowsRemoval = Number(preview.history_allows_removal ?? (Array.isArray(preview.blocking_references) && preview.blocking_references.length === 0 ? 1 : 0));
+      if (historyAllowsRemoval !== 1) {
         renderInspector(preview, { productId, productName: label });
         return;
       }
-      const linkedMaterials = Array.isArray(preview.materials) ? preview.materials : [];
-      const materialReviewRows = Array.isArray(preview.materials_requiring_review) ? preview.materials_requiring_review : [];
-      if (materialReviewRows.length) {
-        throw new Error('This draft has linked material rows that may involve reserved stock. Use Correct / remove so reservation releases or physical returns can be reviewed.');
+      if (materialReviewRows.length || Number(preview.material_review_required || 0) === 1) {
+        throw new Error('This draft has linked material rows with reserved stock. Use Correct / remove so reservation releases or physical returns can be reviewed explicitly before permanent deletion.');
+      }
+      if (Number(preview.deletion_allowed || 0) !== 1) {
+        throw new Error('This product is not currently eligible for permanent removal. Refresh the correction workflow and review its remaining blockers.');
       }
       const recipeNote = linkedMaterials.length
         ? `\n\n${linkedMaterials.length} linked recipe/material row(s) will be removed with the duplicate. Main inventory quantities will not be changed.`
