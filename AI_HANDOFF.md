@@ -11,14 +11,21 @@ This is one of two canonical mutable project documents. Read this first, then `P
 - Development branch: `dev`
 - Development Pages project: `devilndove-site-dev`
 - Build 440 source/CI: **CLOSED / GREEN**
-- Exact-head Development Pages deployment: **GREEN**
-- Development live/authenticated acceptance: **NEXT**
-- Production baseline: **Build 437**
-- Production branch: `main`
-- Production promotion: **CLOSED**
-- Broad Production changes require separate explicit authorization.
+- Exact-head `devilndove-site-dev` Cloudflare Pages **Production deployment**: **GREEN**
+- Development live/authenticated acceptance against that Dev-project Production deployment: **NEXT**
+- Separate live Production baseline: **Build 437**
+- Separate live Production branch/project: `main` / `devilndove-site`
+- Separate live Production promotion: **CLOSED**
+- Broad changes to the separate live Production site require separate explicit authorization.
 
-Build 440 release health is enforced on the exact current `dev` head rather than by a permanently hard-coded commit. The current head is acceptable only when the Build 440 GitHub Actions gate and the Cloudflare Pages `devilndove-site-dev` deployment check both pass on that same commit. The gate includes Windows D1 transport, canonical release alignment, release-contract integrity, Product/Inventory/Tools cross-mutation acceptance, mobile/desktop responsive authority checks, pre-sync source gate, lot-provenance aggregate sync, receiving aggregate sync, post-sync source gate, and whitespace/safety checks.
+Build 440 release health is enforced on the exact current `dev` head rather than by a permanently hard-coded commit. The current head is acceptable only when the Build 440 GitHub Actions gate and the Cloudflare Pages `devilndove-site-dev` **Production deployment** check both pass on that same commit. A preview deployment from another branch is not release evidence for this Development application. The gate includes Windows D1 transport, canonical release alignment, release-contract integrity, Product/Inventory/Tools cross-mutation acceptance, mobile/desktop responsive authority checks, pre-sync source gate, lot-provenance aggregate sync, receiving aggregate sync, post-sync source gate, and whitespace/safety checks.
+
+## Environment terminology
+
+- **Dev-project Production** = the Cloudflare Pages Production deployment of `devilndove-site-dev`, sourced from branch `dev`. This is the deployed Development application and may be updated as part of Development release work.
+- **Separate live Production** = branch `main` and the `devilndove-site` Pages project. This is a different promotion boundary and remains closed unless explicitly authorized.
+
+Never use the word “Production” without preserving that distinction when release scope could be ambiguous.
 
 ## Acceptance boundaries
 
@@ -26,7 +33,7 @@ Build 440 release health is enforced on the exact current `dev` head rather than
 Development browser/module acceptance is closed and retained as prior evidence.
 
 ### Build 439 — CAIP media/video evidence
-The source/schema work remains part of the current application. Its live Development media/browser evidence review is a separate open acceptance item; do not falsely mark it closed merely because Build 440 source/CI is green.
+The source/schema work remains part of the current application. Its live Development media/browser evidence review is a separate open acceptance item against the `devilndove-site-dev` Production deployment; do not falsely mark it closed merely because Build 440 source/CI is green.
 
 ### Build 440 — Product / Inventory / Tools
 Source and CI are closed/green. The release-alignment and cross-authority work establishes these contracts:
@@ -107,24 +114,25 @@ The permanent gates are:
 1. Work only on `dev`.
 2. Keep `development-release.json` canonical.
 3. Require the Build 440 gate green on the exact resulting commit.
-4. Require the Cloudflare Pages `devilndove-site-dev` deployment check green on that same commit.
-5. Perform Development live/authenticated acceptance against that exact deployed head.
+4. Require the Cloudflare Pages `devilndove-site-dev` **Production deployment** check green on that same commit; a branch preview is not sufficient.
+5. Perform Development live/authenticated acceptance against that exact Dev-project Production deployment.
 6. Record unresolved defects instead of weakening gates.
-7. Do not promote to `main` until explicitly authorized.
+7. Do not promote or mutate the separate `main` / `devilndove-site` live Production site until explicitly authorized.
 
 ## Immediate next work
 
-1. Perform exact-head Development live/authenticated acceptance for Build 440.
-2. Exercise authenticated desktop/mobile Product, Inventory and Tool paths against Development with reversible or read-only evidence as appropriate.
-3. Close the remaining Build 439 CAIP media/video live-browser evidence acceptance.
+1. Perform exact-head Development live/authenticated acceptance for Build 440 against the `devilndove-site-dev` Production deployment.
+2. Exercise authenticated desktop/mobile Product, Inventory and Tool paths against that deployment with reversible or read-only evidence as appropriate.
+3. Close the remaining Build 439 CAIP media/video live-browser evidence acceptance against the same Dev-project Production release.
 4. Re-run a Development schema/data/current-authority sanity check after live acceptance.
 5. Record the Build 440 Development closure checkpoint only when those acceptance items are resolved.
 6. Define the next numbered Development release after closure.
-7. Keep Production promotion closed until a separate promotion decision.
+7. Keep the separate live Production promotion closed until a distinct promotion decision.
 
 ## Non-negotiable safety rules
 
-- Never contact or mutate Production unless explicitly authorized.
+- Updating `devilndove-site-dev` Production is part of the authorized Development release path.
+- Never contact or mutate the separate live `main` / `devilndove-site` Production site unless explicitly authorized.
 - Never fabricate historical lot/media/usage provenance.
 - Never convert a failed write into a partial success silently.
 - Never use request-time DDL as a substitute for migration ownership.
