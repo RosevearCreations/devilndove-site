@@ -1,7 +1,7 @@
 // File: /functions/api/admin/delete-product.js
-// Build 232: resource-bounded correction preflight and atomic reviewed removal.
-// Permanent deletion is intentionally limited to unused products. Ordered or referenced
-// products stay in history and must be archived instead.
+// Build 440: bounded protected-reference preflight plus atomic reviewed removal.
+// Permanent deletion is intentionally limited to unused products. Protected business/history
+// references require Archive; material reservations require explicit reviewed release/return actions.
 
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 import { requireAdminStepUp } from "../_lib/adminStepUp.js";
@@ -39,8 +39,6 @@ const PRODUCT_OWNED_CLEANUP_RELATIONS = new Set([
   'product_media_integrity_snapshots.product_id'
 ]);
 
-// These records are useful independently of a disposable product row. Preserve them and
-// remove only the product association when permanent cleanup is allowed.
 const PRODUCT_DETACH_RELATIONS = new Set([
   'media_assets.product_id',
   'mobile_resumable_upload_runtime_rows.attached_product_id',
@@ -48,9 +46,6 @@ const PRODUCT_DETACH_RELATIONS = new Set([
   'soap_products.product_id'
 ]);
 
-// A permissive FK action such as SET NULL or CASCADE must not make customer, accounting,
-// publishing, inventory provenance or project history disposable. These relations always
-// block permanent removal.
 const PROTECTED_PRODUCT_REFERENCES = new Set([
   'order_items.product_id',
   'product_production_runs.product_id',
@@ -79,41 +74,12 @@ function quoteIdentifier(value) {
   return `"${String(value || "").replaceAll('"', '""')}"`;
 }
 
-async function getTableColumnSet(db, tableName) {
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${quoteIdentifier(tableName)})`).all();
-    const rows = Array.isArray(result?.results) ? result.results : [];
-    return new Set(rows.map((row) => String(row?.name || "").trim()).filter(Boolean));
-  } catch {
-    return new Set();
-  }
-}
-
-async function tableExists(db, tableName) {
-  try {
-    const row = await db.prepare(`
-      SELECT name
-      FROM sqlite_master
-      WHERE type = 'table' AND name = ?
-      LIMIT 1
-    `).bind(tableName).first();
-    return Boolean(row?.name);
-  } catch {
-    return false;
-  }
-}
-
-
 async function discoverManagedProductProjectShells(db, productId) {
   const safeReferences = [];
   const blockingReferences = [];
   const contentProjectIds = [];
   const creativeProjectIds = [];
 
-  // Product approval can automatically create Content Studio + CAIP rows. Those generated
-  // shells should not make an otherwise-unused product undeletable. We only auto-clean
-  // shells that have never been reviewed, published, rendered, linked to a provider output,
-  // or deliberately edited by an operator.
   try {
     const contentRows = (await db.prepare(`
       SELECT cp.*,
@@ -181,7 +147,7 @@ async function discoverManagedProductProjectShells(db, productId) {
       }
     }
   } catch {
-    // Optional legacy schemas may not have the Content Studio tables.
+    // Optional legacy schema family.
   }
 
   try {
@@ -261,7 +227,7 @@ async function discoverManagedProductProjectShells(db, productId) {
       }
     }
   } catch {
-    // Optional legacy schemas may not have the Creative/CAIP tables.
+    // Optional legacy schema family.
   }
 
   return {
@@ -302,15 +268,12 @@ async function collectReferences(db, productId) {
               : 'Product-owned disposable record is included in bounded cleanup.'
         });
       } catch {
-        // Optional schema families can be absent on older databases. Missing tables do not add references.
+        // Optional schema family may be absent on an older database.
       }
     }
   }
   const managed = await discoverManagedProductProjectShells(db, productId);
-  return {
-    references,
-    managed
-  };
+  return { references, managed };
 }
 
 async function loadProduct(db, productId) {
@@ -471,22 +434,76 @@ async function runCleanup(db, productId, materialStatements = [], managedShells 
   return db.batch(statements);
 }
 
+async function buildPreflight(db, productId, product = null) {
+  const loadedProduct = product || await loadProduct(db, productId);
+  if (!loadedProduct) {
+    return {
+      product: null,
+      deletion_allowed: 0,
+      history_allows_removal: 0,
+      material_review_required: 0,
+      requires_archive: 0,
+      blocking_references: [],
+      automatically_safe_references: [],
+      materials: [],
+      materials_requiring_review: [],
+      managed_shells: { content_project_ids: [], creative_project_ids: [], safe_references: [], blocking_references: [] },
+      cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup'
+    };
+  }
+
+  const [{ references, managed }, materials] = await Promise.all([
+    collectReferences(db, productId),
+    loadMaterialReview(db, productId)
+  ]);
+  const blocking = [
+    ...references.filter((reference) => reference.protected_history),
+    ...(managed.blocking_references || [])
+  ];
+  const safe = [
+    ...references.filter((reference) => reference.automatically_safe),
+    ...(managed.safe_references || [])
+  ];
+  const materialsRequiringReview = materials.filter((row) => Number(row.site_item_inventory_id || 0) > 0 && Number(row.reserved_quantity || 0) > 0);
+  const historyAllowsRemoval = blocking.length === 0 ? 1 : 0;
+  const materialReviewRequired = materialsRequiringReview.length > 0 ? 1 : 0;
+  return {
+    product: loadedProduct,
+    history_allows_removal: historyAllowsRemoval,
+    material_review_required: materialReviewRequired,
+    requires_archive: historyAllowsRemoval ? 0 : 1,
+    deletion_allowed: historyAllowsRemoval && !materialReviewRequired ? 1 : 0,
+    blocking_references: blocking,
+    automatically_safe_references: safe,
+    materials,
+    materials_requiring_review: materialsRequiringReview,
+    managed_shells: managed,
+    cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup'
+  };
+}
+
 async function handleDelete(context) {
   const { request, env } = context;
   const db = getDb(env);
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const auth = await requireAdmin(request, env);
   if (auth.error) return auth.error;
+
   let body;
   try { body = await request.json(); }
   catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+
   const productId = Number(body?.product_id || 0);
   if (!Number.isInteger(productId) || productId <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
   const product = await loadProduct(db, productId);
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
 
   const preflight = await buildPreflight(db, productId, product);
-  if (!preflight.deletion_allowed) {
+
+  // Protected history is fundamentally different from a reviewable Inventory reservation.
+  // History always requires Archive. Material reservations may proceed only through the explicit
+  // reviewed material plan below, in the same final D1 batch as product-owned cleanup.
+  if (Number(preflight.history_allows_removal || 0) !== 1) {
     return json({
       ok: false,
       error: `${product.name || `Product #${productId}`} cannot be permanently deleted. Archive it instead.`,
@@ -507,7 +524,14 @@ async function handleDelete(context) {
 
   const materialPlan = await resolveMaterialPlan(db, productId, body);
   if (!materialPlan.ok) {
-    return json({ ok: false, error: materialPlan.error, code: materialPlan.code, materials_requiring_review: materialPlan.review || [] }, materialPlan.status || 409);
+    return json({
+      ok: false,
+      error: materialPlan.error,
+      code: materialPlan.code,
+      requires_archive: false,
+      material_review_required: true,
+      materials_requiring_review: materialPlan.review || []
+    }, materialPlan.status || 409);
   }
 
   try {
@@ -549,34 +573,6 @@ async function handleDelete(context) {
     },
     r2_cleanup_note: 'Reusable media assets are preserved and detached; no R2 objects are deleted by product removal.'
   });
-}
-
-async function buildPreflight(db, productId, product = null) {
-  const loadedProduct = product || await loadProduct(db, productId);
-  if (!loadedProduct) return { product: null, deletion_allowed: 0, blocking_references: [], automatically_safe_references: [], materials: [], materials_requiring_review: [], cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup' };
-  const [{ references, managed }, materials] = await Promise.all([
-    collectReferences(db, productId),
-    loadMaterialReview(db, productId)
-  ]);
-  const blocking = [
-    ...references.filter((reference) => reference.protected_history),
-    ...(managed.blocking_references || [])
-  ];
-  const safe = [
-    ...references.filter((reference) => reference.automatically_safe),
-    ...(managed.safe_references || [])
-  ];
-  const materialsRequiringReview = materials.filter((row) => Number(row.site_item_inventory_id || 0) > 0 && Number(row.reserved_quantity || 0) > 0);
-  return {
-    product: loadedProduct,
-    deletion_allowed: blocking.length === 0 && materialsRequiringReview.length === 0 ? 1 : 0,
-    blocking_references: blocking,
-    automatically_safe_references: safe,
-    materials,
-    materials_requiring_review: materialsRequiringReview,
-    managed_shells: managed,
-    cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup'
-  };
 }
 
 export async function onRequestGet(context) {
