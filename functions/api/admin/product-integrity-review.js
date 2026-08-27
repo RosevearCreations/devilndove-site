@@ -20,9 +20,7 @@ function mediaIssues(row = {}) {
   const uniqueGalleryCount = n(row.unique_gallery_count);
   const recoverableCount = n(row.recoverable_unique_image_count);
   const snapshotGalleryCount = n(row.snapshot_product_image_count);
-  if (recoverableCount > snapshotGalleryCount) {
-    issues.push({ code: 'recoverable_gap', label: `${recoverableCount - snapshotGalleryCount} recoverable image(s) not represented in the latest gallery snapshot` });
-  }
+  if (recoverableCount > snapshotGalleryCount) issues.push({ code: 'recoverable_gap', label: `${recoverableCount - snapshotGalleryCount} recoverable image(s) not represented in the latest gallery snapshot` });
   if (galleryCount > 7) issues.push({ code: 'gallery_over_limit', label: `${galleryCount} gallery rows; review the seven-image product limit` });
   if (galleryCount > uniqueGalleryCount) issues.push({ code: 'duplicate_gallery_url', label: `${galleryCount - uniqueGalleryCount} duplicate gallery URL row(s)` });
   if (!normalizeText(row.featured_image_url) && galleryCount > 0) issues.push({ code: 'featured_missing', label: 'Gallery exists but featured image is blank' });
@@ -73,11 +71,24 @@ async function loadIngredientQueue(db, { q = '', limit = 40, offset = 0 } = {}) 
     JOIN products p ON p.product_id=prl.product_id
     JOIN product_resource_ingredient_profiles prip ON prip.product_resource_link_id=prl.product_resource_link_id
     LEFT JOIN site_item_inventory sii
-      ON LOWER(TRIM(COALESCE(sii.source_type,'')))='supply'
-     AND sii.external_key=prl.source_key
-     AND COALESCE(sii.is_active,1)=1
+      ON sii.site_item_inventory_id=(
+        SELECT sii2.site_item_inventory_id
+        FROM site_item_inventory sii2
+        WHERE COALESCE(sii2.is_active,1)=1
+          AND LOWER(TRIM(COALESCE(sii2.source_type,'')))='supply'
+          AND LOWER(TRIM(COALESCE(sii2.external_key,'')))=LOWER(TRIM(COALESCE(prl.source_key,'')))
+        ORDER BY sii2.site_item_inventory_id DESC
+        LIMIT 1
+      )
     LEFT JOIN catalog_items ci
-      ON ci.item_kind='supply' AND ci.source_key=prl.source_key
+      ON ci.catalog_item_id=(
+        SELECT ci2.catalog_item_id
+        FROM catalog_items ci2
+        WHERE LOWER(TRIM(COALESCE(ci2.item_kind,'')))='supply'
+          AND LOWER(TRIM(COALESCE(ci2.source_key,'')))=LOWER(TRIM(COALESCE(prl.source_key,'')))
+        ORDER BY ci2.catalog_item_id DESC
+        LIMIT 1
+      )
     WHERE LOWER(TRIM(COALESCE(prl.resource_kind,'')))='supply'
       AND COALESCE(prip.is_label_ingredient,0)=1
       AND (
@@ -143,19 +154,24 @@ async function mediaSummary(db) {
       SUM(CASE WHEN COALESCE(s.recoverable_unique_image_count,0)>COALESCE(s.product_image_count,0) THEN 1 ELSE 0 END) AS recoverable_gap,
       SUM(CASE WHEN COALESCE(g.gallery_count,0)>7 THEN 1 ELSE 0 END) AS gallery_over_limit,
       SUM(CASE WHEN COALESCE(g.gallery_count,0)>COALESCE(g.unique_gallery_count,0) THEN 1 ELSE 0 END) AS duplicate_gallery_url,
-      SUM(CASE WHEN TRIM(COALESCE(p.featured_image_url,''))='' AND COALESCE(g.gallery_count,0)>0 THEN 1 ELSE 0 END) AS featured_missing
+      SUM(CASE WHEN TRIM(COALESCE(p.featured_image_url,''))='' AND COALESCE(g.gallery_count,0)>0 THEN 1 ELSE 0 END) AS featured_missing,
+      SUM(CASE WHEN
+        COALESCE(s.recoverable_unique_image_count,0)>COALESCE(s.product_image_count,0)
+        OR COALESCE(g.gallery_count,0)>7
+        OR COALESCE(g.gallery_count,0)>COALESCE(g.unique_gallery_count,0)
+        OR (TRIM(COALESCE(p.featured_image_url,''))='' AND COALESCE(g.gallery_count,0)>0)
+        THEN 1 ELSE 0 END) AS review_products
     FROM products p
     LEFT JOIN gallery g ON g.product_id=p.product_id
     LEFT JOIN latest_snapshot s ON s.product_id=p.product_id
   `).first();
-  const summary = {
+  return {
+    review_products: n(row?.review_products),
     recoverable_gap: n(row?.recoverable_gap),
     gallery_over_limit: n(row?.gallery_over_limit),
     duplicate_gallery_url: n(row?.duplicate_gallery_url),
     featured_missing: n(row?.featured_missing),
   };
-  summary.review_products = summary.recoverable_gap + summary.gallery_over_limit + summary.duplicate_gallery_url + summary.featured_missing;
-  return summary;
 }
 
 async function loadMediaQueue(db, { q = '', limit = 40, offset = 0 } = {}) {
@@ -251,10 +267,7 @@ export async function onRequestGet({ request, env }) {
       ingredient,
       media,
       summary: { ingredient: ingredient_summary, media: media_summary },
-      owner_workspaces: {
-        ingredient: '/admin/catalog/',
-        media: '/admin/catalog-media/',
-      },
+      owner_workspaces: { ingredient: '/admin/catalog/', media: '/admin/catalog-media/' },
     });
   } catch (error) {
     return json({
