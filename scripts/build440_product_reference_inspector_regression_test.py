@@ -44,10 +44,15 @@ def main() -> int:
         ('finished inventory lot inspector opens Creative Process owner', "product_finished_inventory_lots: { label: 'Finished inventory lot provenance'" in ui and '/admin/creative-process/?product_id=' in ui),
         ('historical Product cost inspector opens Accounting owner', "product_costs: { label: 'Historical Product costs'" in ui and "href: '/admin/accounting/'" in ui),
         ('media integrity snapshots are product-owned diagnostic cleanup', "'product_media_integrity_snapshots.product_id'" in api and 'PRODUCT_OWNED_CLEANUP_RELATIONS' in api),
+        ('delete API distinguishes protected history from material review', 'history_allows_removal' in api and 'material_review_required' in api and 'requires_archive: historyAllowsRemoval ? 0 : 1' in api),
+        ('POST requires Archive only when protected history exists', 'if (Number(preflight.history_allows_removal || 0) !== 1)' in api and "code: 'protected_product_references'" in api),
+        ('reviewable material reservations fail closed without masquerading as archive', "code: 'material_review_required'" in api and 'requires_archive: false' in api),
         ('delete API blocks permanent removal when protected history exists', 'requires_archive: true' in api and 'cannot be permanently deleted. Archive it instead.' in api),
         ('delete API preserves reusable media by detaching rather than deleting it', 'PRODUCT_DETACH_RELATIONS' in api and 'SET ${quoteIdentifier(columnName)} = NULL' in api),
         ('delete API preserves generated project work unless it is unreviewed automation shell', 'discoverManagedProductProjectShells' in api and 'meaningful_evidence_count' in api and 'AUTO_CLEAN_GENERATED_SHELL' in api),
         ('reference inspector replaces blocker alert with structured dialog', 'DDProductReferenceInspector' in ui and 'Product Delete Reference Inspector' in ui and 'renderInspector' in ui),
+        ('direct delete UI sends material reservations to reviewed correction instead of history inspector', 'historyAllowsRemoval' in ui and 'material_review_required' in ui and 'Use Correct / remove' in ui),
+        ('inspector refresh exits once protected history is clear even if material review remains', 'Protected history is clear. Linked material reservations still require the reviewed Correct / remove workflow' in ui),
         ('inspector explains protected history instead of encouraging destructive reference deletion', 'Do not delete those records simply to make the product removable.' in ui and 'Archive product instead' in ui),
         ('inspector provides owning-workspace links for key blocker families', all(token in ui for token in ('/admin/orders/', '/admin/accounting/', '/admin/packaging-studio/', '/admin/creative-assets/', '/admin/content-studio/'))),
         ('inspector can refresh the live preflight before any later delete attempt', 'data-dd-product-ref-refresh' in ui and '/api/admin/delete-product?product_id=' in ui and "cache: 'no-store'" in ui),
@@ -76,6 +81,7 @@ def main() -> int:
 
     print(f'\nBUILD 440 PRODUCT DELETE REFERENCE INSPECTOR REGRESSION: PASS ({len(checks)}/{len(checks)})')
     print('Protected business/customer/accounting/inventory provenance history: PRESERVED')
+    print('Material reservations: REVIEW REQUIRED / NOT MISCLASSIFIED AS HISTORY')
     print('Product media diagnostic snapshots: PRODUCT-OWNED CLEANUP')
     print('Permanent deletion authority: UNCHANGED / UNUSED PRODUCTS ONLY')
     print('Blocked-product resolution: INSPECT / OPEN OWNER / ARCHIVE')
