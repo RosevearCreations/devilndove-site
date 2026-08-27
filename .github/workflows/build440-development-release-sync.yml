@@ -1,0 +1,48 @@
+name: Build 440 Development Release Sync
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/build440_sync_development_release.py'
+      - '.github/workflows/build440-development-release-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-development-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout dev source
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synchronize Development runtime versions
+        run: python scripts/build440_sync_development_release.py
+      - name: Validate synchronization before commit
+        run: |
+          python scripts/build440_development_release_alignment_test.py
+          git diff --check
+      - name: Commit synchronized Development runtime versions
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'Development runtime versions already aligned.'
+            exit 0
+          fi
+          git config user.name 'RosevearCreations'
+          git config user.email 'jfrosevear@gmail.com'
+          git add -- '*.html' 'admin/**/*.html' 'js/**/*.js' 'public/js/**/*.js' 'sw.js'
+          git commit -m 'Build 440 align all Development runtime versions'
+          git push origin HEAD:dev
+      - name: Safety statement
+        run: |
+          echo 'Cloudflare/D1/R2/provider access: NONE'
+          echo 'Production mutation capability: NONE'
+          echo 'Target branch: dev only'
