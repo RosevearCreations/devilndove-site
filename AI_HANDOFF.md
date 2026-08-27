@@ -53,6 +53,30 @@ Source and CI are closed/green. The release-alignment and cross-authority work e
 - Mobile and desktop must not have separate mutation authorities for the same business action.
 - Active GitHub Actions workflows are read-only with respect to repository contents; one-time self-pushing synchronization workflows are retired.
 
+## Approved post-Build-440 architecture
+
+The architectural target is now Application Core plus four top-level modules:
+
+```text
+commerce-operations
+creative-production
+business-administration
+it-platform
+```
+
+Build 440 still deploys the three proven Build 438 business modules. Do not add
+the fourth runtime or define a new release until Build 440 live acceptance
+closes. The approved `it-platform` module will own deployment, schema/runtime,
+storage, recovery and technical maintenance so ordinary creators do not have to
+interact with technical controls.
+
+An ordinary `admin` role will not automatically grant I.T. access. The next
+release must add explicit per-user I.T. read/manage grants enforced by
+middleware and APIs. Application Modules recovery remains Core-owned.
+
+Detailed authority:
+`docs/architecture/IT_MODULE_ARCHITECTURE.md`.
+
 ## Data and schema authority
 
 D1/SQLite is authoritative for application state. JSON may remain for fixtures, import provenance, emergency read-only fallback, or static content where explicitly designed, but it must not silently become a competing write authority.
@@ -107,6 +131,7 @@ The permanent gates are:
 - `scripts/build440_release_contract_integrity_test.py`
 - `scripts/build440_cross_mutation_responsive_acceptance_test.py`
 - `scripts/build440_product_inventory_tools_source_gate.py`
+- `scripts/build440_current_sanity_check.py`
 - `.github/workflows/build440-source-gate.yml`
 
 ## Development workflow
@@ -127,7 +152,9 @@ The permanent gates are:
 4. Re-run a Development schema/data/current-authority sanity check after live acceptance.
 5. Record the Build 440 Development closure checkpoint only when those acceptance items are resolved.
 6. Define the next numbered Development release after closure.
-7. Keep the separate live Production promotion closed until a distinct promotion decision.
+7. Implement the approved I.T. & Platform module first, with creator isolation and explicit I.T. grants.
+8. Continue the complete task register in `PROJECT_STATUS_AND_ROADMAP.md` section by section.
+9. Keep the separate live Production promotion closed until a distinct promotion decision.
 
 ## Non-negotiable safety rules
 

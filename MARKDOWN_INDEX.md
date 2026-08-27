@@ -30,7 +30,9 @@ They point to the canonical pair rather than maintaining independent roadmaps.
 - `scripts/build440_release_contract_integrity_test.py`
 - `scripts/build440_cross_mutation_responsive_acceptance_test.py`
 - `scripts/build440_product_inventory_tools_source_gate.py`
+- `scripts/build440_current_sanity_check.py`
 - `database_full_schema.sql` plus required ledgered/focused migrations and aggregate-schema synchronization
+- `docs/architecture/IT_MODULE_ARCHITECTURE.md` — approved post-Build-440 fourth-module boundary; not current runtime evidence
 
 Currentness is not pinned to a historical SHA. Every `dev` head must pass the Build 440 gate and the Cloudflare Pages `devilndove-site-dev` deployment check on that same commit.
 

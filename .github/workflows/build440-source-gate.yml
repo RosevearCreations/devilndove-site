@@ -101,6 +101,8 @@ jobs:
           node --check functions/api/supplies.js
       - name: Validate cross-mutation and responsive acceptance
         run: python scripts/build440_cross_mutation_responsive_acceptance_test.py
+      - name: Validate current Build 440 sanity authority
+        run: python scripts/build440_current_sanity_check.py --quick
       - name: Build 440 source gate before aggregate sync
         shell: bash
         run: |

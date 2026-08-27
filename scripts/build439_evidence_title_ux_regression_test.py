@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build 439 local-only regression for CAIP evidence-title UX guard."""
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,10 @@ def read(path: Path) -> str:
 def main() -> int:
     ui = read(UI)
     page = read(PAGE)
+    release = json.loads(read(ROOT / 'development-release.json') or '{}')
+    asset_version = str(release.get('release') or 439)
+    evidence_asset = f'admin-caip-evidence-review.js?v={asset_version}'
+    title_asset = f'admin-caip-evidence-title-assist.js?v={asset_version}'
     provider_execution_tokens = (
         'provider_url',
         'provider_endpoint',
@@ -25,7 +30,7 @@ def main() -> int:
     )
     checks = [
         ('title assist script exists', bool(ui)),
-        ('creative-assets page loads title assist after evidence review', 'admin-caip-evidence-review.js?v=439' in page and 'admin-caip-evidence-title-assist.js?v=439' in page and page.index('admin-caip-evidence-review.js?v=439') < page.index('admin-caip-evidence-title-assist.js?v=439')),
+        ('creative-assets page loads title assist after evidence review', evidence_asset in page and title_asset in page and page.index(evidence_asset) < page.index(title_asset)),
         ('auto title is neutral source/category/time metadata', 'selectedFilename()' in ui and 'categoryLabel()' in ui and 'capturedTimeLabel()' in ui),
         ('capture actions auto-draft the title', all(token in ui for token in ('caip439CaptureStart', 'caip439CaptureEnd', 'caip439ClearEnd')) and 'queueMicrotask' in ui),
         ('save action ensures a nonblank title before evidence POST', "target.id === 'caip439SaveNewMarker'" in ui and 'ensureTitle();' in ui),

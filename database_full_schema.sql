@@ -26076,3 +26076,654 @@ ON CONFLICT(migration_key) DO UPDATE SET
   file_name=excluded.file_name,
   notes=excluded.notes;
 -- END BUILD 440 TOOL LIFECYCLE AUTHORITY
+
+-- BEGIN BUILD 440 PRODUCT INVENTORY LOT PROVENANCE AGGREGATE SYNC --
+-- Aggregate source: database_build440_product_inventory_lot_provenance.sql (superseded commitment views/triggers omitted)
+-- Devil n Dove Build 440 — Product / Inventory lot provenance and downstream commitment guards.
+-- Additive/idempotent. Existing pre-cutover stock is preserved as explicit legacy opening balance;
+-- historical production/sales are never falsely reconstructed.
+
+CREATE TABLE IF NOT EXISTS product_production_run_material_lots (
+  product_production_run_material_lot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_production_run_material_id INTEGER NOT NULL,
+  product_production_run_id INTEGER NOT NULL,
+  inventory_purchase_lot_id INTEGER NOT NULL,
+  site_item_inventory_id INTEGER NOT NULL,
+  allocation_sequence INTEGER NOT NULL DEFAULT 0,
+  allocation_method TEXT NOT NULL DEFAULT 'fifo' CHECK(allocation_method IN ('manual','fifo','fefo','single_lot')),
+  lot_code_snapshot TEXT NOT NULL,
+  quantity_consumed REAL NOT NULL DEFAULT 0 CHECK(quantity_consumed >= 0),
+  stock_unit_label TEXT NOT NULL DEFAULT 'unit',
+  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  landed_unit_cost_cents REAL NOT NULL DEFAULT 0,
+  extended_cost_cents INTEGER NOT NULL DEFAULT 0,
+  supplier_name_snapshot TEXT,
+  supplier_sku_snapshot TEXT,
+  source_url_snapshot TEXT,
+  purchase_date_snapshot TEXT,
+  received_date_snapshot TEXT,
+  expiry_date_snapshot TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(product_production_run_material_id, inventory_purchase_lot_id),
+  FOREIGN KEY(product_production_run_material_id) REFERENCES product_production_run_materials(product_production_run_material_id) ON DELETE CASCADE,
+  FOREIGN KEY(product_production_run_id) REFERENCES product_production_runs(product_production_run_id) ON DELETE CASCADE,
+  FOREIGN KEY(inventory_purchase_lot_id) REFERENCES inventory_purchase_lots(inventory_purchase_lot_id) ON DELETE RESTRICT,
+  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE RESTRICT
+);
+CREATE INDEX IF NOT EXISTS idx_product_production_material_lots_run
+  ON product_production_run_material_lots(product_production_run_id, product_production_run_material_id, allocation_sequence);
+CREATE INDEX IF NOT EXISTS idx_product_production_material_lots_purchase
+  ON product_production_run_material_lots(inventory_purchase_lot_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS product_finished_inventory_lots (
+  product_finished_inventory_lot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lot_key TEXT NOT NULL UNIQUE,
+  product_id INTEGER NOT NULL,
+  product_production_run_id INTEGER,
+  source_kind TEXT NOT NULL DEFAULT 'production_run' CHECK(source_kind IN ('legacy_opening','production_run','manual_adjustment')),
+  quantity_created REAL NOT NULL DEFAULT 0 CHECK(quantity_created >= 0),
+  unit_material_cost_cents INTEGER NOT NULL DEFAULT 0,
+  lot_status TEXT NOT NULL DEFAULT 'available' CHECK(lot_status IN ('available','reversed','quarantined')),
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(product_id) REFERENCES products(product_id) ON DELETE RESTRICT,
+  FOREIGN KEY(product_production_run_id) REFERENCES product_production_runs(product_production_run_id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_finished_inventory_lots_run_unique
+  ON product_finished_inventory_lots(product_production_run_id)
+  WHERE product_production_run_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_product_finished_inventory_lots_product
+  ON product_finished_inventory_lots(product_id, lot_status, created_at, product_finished_inventory_lot_id);
+
+-- Preserve the exact forward-provenance cutover. Re-running the migration must never move it.
+INSERT OR IGNORE INTO app_settings(setting_key, setting_value, is_public)
+VALUES ('site.product.finished_lot_provenance_cutover_at', CURRENT_TIMESTAMP, 0);
+
+-- Raw-material lot bootstrap: preserve known purchase lots and add only the positive difference
+-- needed to reconcile current active Supply on-hand quantity. No negative/history fabrication.
+INSERT OR IGNORE INTO inventory_purchase_lots (
+  site_item_inventory_id, lot_code, purchase_date, received_date, supplier_name, supplier_order_number,
+  supplier_sku, asin, source_url, quantity_received, quantity_remaining, unit_cost_cents,
+  shipping_cost_cents, tax_cost_cents, expiry_date, storage_location, lot_status, notes,
+  created_by_user_id, created_at, updated_at
+)
+SELECT
+  sii.site_item_inventory_id,
+  'LEGACY-B440-' || sii.site_item_inventory_id,
+  NULL,
+  CURRENT_TIMESTAMP,
+  'Legacy opening balance',
+  NULL,
+  sii.supplier_sku,
+  NULL,
+  sii.source_url,
+  ROUND(COALESCE(sii.on_hand_quantity,0) - COALESCE((
+    SELECT SUM(CASE WHEN ipl.lot_status IN ('available','consumed') THEN COALESCE(ipl.quantity_remaining,0) ELSE 0 END)
+    FROM inventory_purchase_lots ipl
+    WHERE ipl.site_item_inventory_id=sii.site_item_inventory_id
+  ),0), 6),
+  ROUND(COALESCE(sii.on_hand_quantity,0) - COALESCE((
+    SELECT SUM(CASE WHEN ipl.lot_status IN ('available','consumed') THEN COALESCE(ipl.quantity_remaining,0) ELSE 0 END)
+    FROM inventory_purchase_lots ipl
+    WHERE ipl.site_item_inventory_id=sii.site_item_inventory_id
+  ),0), 6),
+  COALESCE(sii.unit_cost_cents,0),
+  0,0,NULL,NULL,'available',
+  'Build 440 forward-provenance opening balance. Represents only current stock not already covered by known purchase-lot remaining quantities.',
+  NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+FROM site_item_inventory sii
+WHERE COALESCE(sii.is_active,1)=1
+  AND LOWER(TRIM(COALESCE(sii.source_type,'')))='supply'
+  AND COALESCE(sii.on_hand_quantity,0) > COALESCE((
+    SELECT SUM(CASE WHEN ipl.lot_status IN ('available','consumed') THEN COALESCE(ipl.quantity_remaining,0) ELSE 0 END)
+    FROM inventory_purchase_lots ipl
+    WHERE ipl.site_item_inventory_id=sii.site_item_inventory_id
+  ),0) + 0.000001;
+
+-- Create missing policies only. Existing human-selected manual/FIFO/FEFO policies are preserved.
+INSERT OR IGNORE INTO inventory_lot_policies (
+  site_item_inventory_id, depletion_method, reconcile_status, last_reconciled_quantity,
+  last_reconciled_at, updated_by_user_id, updated_at
+)
+SELECT
+  sii.site_item_inventory_id,
+  'fifo',
+  CASE WHEN ABS(COALESCE(sii.on_hand_quantity,0) - COALESCE((
+    SELECT SUM(COALESCE(ipl.quantity_remaining,0)) FROM inventory_purchase_lots ipl
+    WHERE ipl.site_item_inventory_id=sii.site_item_inventory_id AND ipl.lot_status IN ('available','consumed')
+  ),0)) < 0.000001 THEN 'reconciled' ELSE 'blocked' END,
+  COALESCE(sii.on_hand_quantity,0),
+  CURRENT_TIMESTAMP,
+  NULL,
+  CURRENT_TIMESTAMP
+FROM site_item_inventory sii
+WHERE COALESCE(sii.is_active,1)=1
+  AND LOWER(TRIM(COALESCE(sii.source_type,'')))='supply';
+
+-- Legacy default manual policies that were never human-reviewed become FIFO; explicit user choices stay intact.
+UPDATE inventory_lot_policies
+SET depletion_method='fifo', updated_at=CURRENT_TIMESTAMP
+WHERE depletion_method='manual'
+  AND updated_by_user_id IS NULL
+  AND site_item_inventory_id IN (
+    SELECT site_item_inventory_id FROM site_item_inventory
+    WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,'')))='supply'
+  );
+
+-- Refresh reconciliation status after the opening-balance seed.
+UPDATE inventory_lot_policies
+SET reconcile_status = CASE
+      WHEN ABS(COALESCE((SELECT on_hand_quantity FROM site_item_inventory sii WHERE sii.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id),0)
+        - COALESCE((SELECT SUM(COALESCE(ipl.quantity_remaining,0)) FROM inventory_purchase_lots ipl
+                    WHERE ipl.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id
+                      AND ipl.lot_status IN ('available','consumed')),0)) < 0.000001
+      THEN 'reconciled' ELSE 'blocked' END,
+    last_reconciled_quantity = COALESCE((SELECT on_hand_quantity FROM site_item_inventory sii WHERE sii.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id),0),
+    last_reconciled_at = CASE
+      WHEN ABS(COALESCE((SELECT on_hand_quantity FROM site_item_inventory sii WHERE sii.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id),0)
+        - COALESCE((SELECT SUM(COALESCE(ipl.quantity_remaining,0)) FROM inventory_purchase_lots ipl
+                    WHERE ipl.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id
+                      AND ipl.lot_status IN ('available','consumed')),0)) < 0.000001
+      THEN CURRENT_TIMESTAMP ELSE last_reconciled_at END,
+    updated_at=CURRENT_TIMESTAMP
+WHERE site_item_inventory_id IN (
+  SELECT site_item_inventory_id FROM site_item_inventory
+  WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,'')))='supply'
+);
+
+-- Existing finished stock is explicitly a legacy opening balance. We do not attach it to old runs.
+INSERT OR IGNORE INTO product_finished_inventory_lots (
+  lot_key, product_id, product_production_run_id, source_kind, quantity_created,
+  unit_material_cost_cents, lot_status, notes, created_at, updated_at
+)
+SELECT
+  'LEGACY-B440-PRODUCT-' || p.product_id,
+  p.product_id,
+  NULL,
+  'legacy_opening',
+  COALESCE(p.inventory_quantity,0),
+  0,
+  'available',
+  'Build 440 forward-provenance opening balance. Historical sales/production are intentionally not reconstructed.',
+  (SELECT setting_value FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' LIMIT 1),
+  CURRENT_TIMESTAMP
+FROM products p
+WHERE COALESCE(p.inventory_tracking,0)=1
+  AND COALESCE(p.inventory_quantity,0) > 0;
+
+-- Final Build 440 commitment views/triggers are supplied by the hardening aggregate source below.
+
+INSERT OR IGNORE INTO app_settings(setting_key,setting_value,is_public)
+VALUES ('site.product.production_lot_policy','purchase_lot_fifo_fefo_provenance_v440',0);
+INSERT OR IGNORE INTO app_settings(setting_key,setting_value,is_public)
+VALUES ('site.product.finished_inventory_commitment_policy','forward_cutover_fifo_commitment_guard_v440',0);
+
+INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,destructive,applied_at,notes,created_at,updated_at)
+VALUES (
+  'build440_product_inventory_lot_provenance',
+  'database_build440_product_inventory_lot_provenance.sql',
+  NULL,'applied',0,CURRENT_TIMESTAMP,
+  'Adds forward-only raw purchase-lot production provenance, legacy opening balances, finished-production lots, FIFO downstream order commitment attribution, and checkout commitment guards. Historical provenance is not fabricated.',
+  CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+)
+ON CONFLICT(migration_key) DO UPDATE SET
+  file_name=excluded.file_name,status='applied',destructive=0,
+  applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),
+  notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+
+-- Aggregate source: database_build440_product_inventory_lot_provenance_hardening.sql (final commitment authority)
+-- Devil n Dove Build 440 — lot-provenance hardening.
+-- Apply immediately after database_build440_product_inventory_lot_provenance.sql.
+-- This corrects physical-lot opening-balance treatment and makes oversell failures
+-- leave the parent order safely cancelled instead of active/partially committed.
+
+-- Physical stock can still exist in quarantined/expired lots even though those lots are
+-- unavailable to production. They must count toward physical reconciliation so the legacy
+-- opening balance never duplicates known quarantined/expired stock.
+UPDATE inventory_purchase_lots
+SET
+  quantity_received = MAX(0, ROUND(
+    COALESCE((SELECT sii.on_hand_quantity FROM site_item_inventory sii
+              WHERE sii.site_item_inventory_id=inventory_purchase_lots.site_item_inventory_id),0)
+    - COALESCE((SELECT SUM(COALESCE(other.quantity_remaining,0))
+                FROM inventory_purchase_lots other
+                WHERE other.site_item_inventory_id=inventory_purchase_lots.site_item_inventory_id
+                  AND other.inventory_purchase_lot_id<>inventory_purchase_lots.inventory_purchase_lot_id
+                  AND other.lot_status<>'returned'),0), 6)),
+  quantity_remaining = MAX(0, ROUND(
+    COALESCE((SELECT sii.on_hand_quantity FROM site_item_inventory sii
+              WHERE sii.site_item_inventory_id=inventory_purchase_lots.site_item_inventory_id),0)
+    - COALESCE((SELECT SUM(COALESCE(other.quantity_remaining,0))
+                FROM inventory_purchase_lots other
+                WHERE other.site_item_inventory_id=inventory_purchase_lots.site_item_inventory_id
+                  AND other.inventory_purchase_lot_id<>inventory_purchase_lots.inventory_purchase_lot_id
+                  AND other.lot_status<>'returned'),0), 6)),
+  lot_status = CASE
+    WHEN COALESCE((SELECT sii.on_hand_quantity FROM site_item_inventory sii
+                   WHERE sii.site_item_inventory_id=inventory_purchase_lots.site_item_inventory_id),0)
+       - COALESCE((SELECT SUM(COALESCE(other.quantity_remaining,0))
+                   FROM inventory_purchase_lots other
+                   WHERE other.site_item_inventory_id=inventory_purchase_lots.site_item_inventory_id
+                     AND other.inventory_purchase_lot_id<>inventory_purchase_lots.inventory_purchase_lot_id
+                     AND other.lot_status<>'returned'),0) > 0.000001
+    THEN 'available' ELSE 'consumed' END,
+  notes = 'Build 440 forward-provenance opening balance. Represents only current physical stock not already covered by known non-returned purchase-lot quantities. Quarantined/expired lots remain unavailable to production but are not duplicated.',
+  updated_at = CURRENT_TIMESTAMP
+WHERE lot_code='LEGACY-B440-' || site_item_inventory_id;
+
+-- Reconciliation is physical: all non-returned remaining lot stock counts. Production
+-- allocation remains stricter and uses only available, non-expired lots.
+UPDATE inventory_lot_policies
+SET
+  reconcile_status = CASE
+    WHEN ABS(
+      COALESCE((SELECT sii.on_hand_quantity FROM site_item_inventory sii
+                WHERE sii.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id),0)
+      - COALESCE((SELECT SUM(COALESCE(ipl.quantity_remaining,0))
+                  FROM inventory_purchase_lots ipl
+                  WHERE ipl.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id
+                    AND ipl.lot_status<>'returned'),0)
+    ) < 0.000001 THEN 'reconciled' ELSE 'blocked' END,
+  last_reconciled_quantity = COALESCE((SELECT sii.on_hand_quantity FROM site_item_inventory sii
+                                       WHERE sii.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id),0),
+  last_reconciled_at = CASE
+    WHEN ABS(
+      COALESCE((SELECT sii.on_hand_quantity FROM site_item_inventory sii
+                WHERE sii.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id),0)
+      - COALESCE((SELECT SUM(COALESCE(ipl.quantity_remaining,0))
+                  FROM inventory_purchase_lots ipl
+                  WHERE ipl.site_item_inventory_id=inventory_lot_policies.site_item_inventory_id
+                    AND ipl.lot_status<>'returned'),0)
+    ) < 0.000001 THEN CURRENT_TIMESTAMP ELSE last_reconciled_at END,
+  updated_at=CURRENT_TIMESTAMP
+WHERE site_item_inventory_id IN (
+  SELECT site_item_inventory_id FROM site_item_inventory
+  WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,'')))='supply'
+);
+
+-- A refund does not prove the physical item was returned. Pending, paid, fulfilled and
+-- refunded post-cutover order lines remain downstream commitments. Only cancellation (or a
+-- future explicit return/restock workflow) releases the finished-lot attribution.
+DROP VIEW IF EXISTS product_finished_lot_commitment_attribution;
+DROP VIEW IF EXISTS product_inventory_active_commitments;
+CREATE VIEW product_inventory_active_commitments AS
+SELECT
+  oi.product_id,
+  COALESCE(SUM(oi.quantity),0) AS committed_quantity
+FROM order_items oi
+INNER JOIN orders o ON o.order_id=oi.order_id
+WHERE oi.product_id IS NOT NULL
+  AND LOWER(COALESCE(o.order_status,'pending')) IN ('pending','paid','fulfilled','refunded')
+  AND o.created_at >= COALESCE((SELECT setting_value FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' LIMIT 1),'9999-12-31')
+GROUP BY oi.product_id;
+
+CREATE VIEW product_finished_lot_commitment_attribution AS
+WITH ordered_lots AS (
+  SELECT
+    l.*,
+    COALESCE(SUM(CASE WHEN l.lot_status='available' THEN l.quantity_created ELSE 0 END) OVER (
+      PARTITION BY l.product_id
+      ORDER BY l.created_at, l.product_finished_inventory_lot_id
+      ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+    ),0) AS prior_available_quantity
+  FROM product_finished_inventory_lots l
+), commitments AS (
+  SELECT product_id, committed_quantity FROM product_inventory_active_commitments
+)
+SELECT
+  ol.product_finished_inventory_lot_id,
+  ol.lot_key,
+  ol.product_id,
+  ol.product_production_run_id,
+  ol.source_kind,
+  ol.quantity_created,
+  ol.unit_material_cost_cents,
+  ol.lot_status,
+  ol.created_at,
+  COALESCE(c.committed_quantity,0) AS product_committed_quantity,
+  ol.prior_available_quantity,
+  CASE WHEN ol.lot_status<>'available' THEN 0
+       ELSE MAX(0, MIN(ol.quantity_created, COALESCE(c.committed_quantity,0) - ol.prior_available_quantity)) END AS attributed_committed_quantity,
+  CASE WHEN ol.lot_status<>'available' THEN 0
+       ELSE MAX(0, ol.quantity_created - MAX(0, MIN(ol.quantity_created, COALESCE(c.committed_quantity,0) - ol.prior_available_quantity))) END AS attributed_uncommitted_quantity
+FROM ordered_lots ol
+LEFT JOIN commitments c ON c.product_id=ol.product_id;
+
+-- Never allow any path (Admin bulk edit, correction, reversal, etc.) to lower a tracked
+-- finished Product below already-active post-cutover commitments.
+DROP TRIGGER IF EXISTS trg_products_build440_inventory_commit_guard_decrease;
+CREATE TRIGGER trg_products_build440_inventory_commit_guard_decrease
+BEFORE UPDATE OF inventory_quantity ON products
+WHEN COALESCE(NEW.inventory_tracking,0)=1
+ AND COALESCE(NEW.inventory_quantity,0) < COALESCE((
+   SELECT committed_quantity FROM product_inventory_active_commitments WHERE product_id=NEW.product_id
+ ),0)
+BEGIN
+  SELECT RAISE(ABORT,'build440_finished_inventory_below_active_commitments');
+END;
+
+-- Checkout creates the parent order before its line items. If a line would oversubscribe
+-- stock, cancel the parent order first and use RAISE(FAIL), which preserves that safe
+-- cancellation while rejecting the offending line. Earlier lines remain attached only to
+-- a cancelled (therefore non-committing) order. Reactivation is separately guarded.
+DROP TRIGGER IF EXISTS trg_order_items_build440_inventory_commit_guard_insert;
+CREATE TRIGGER trg_order_items_build440_inventory_commit_guard_insert
+BEFORE INSERT ON order_items
+WHEN NEW.product_id IS NOT NULL
+ AND COALESCE((SELECT inventory_tracking FROM products WHERE product_id=NEW.product_id),0)=1
+ AND LOWER(COALESCE((SELECT order_status FROM orders WHERE order_id=NEW.order_id),'pending')) IN ('pending','paid','fulfilled','refunded')
+ AND COALESCE((SELECT created_at FROM orders WHERE order_id=NEW.order_id),'') >= COALESCE((SELECT setting_value FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' LIMIT 1),'9999-12-31')
+BEGIN
+  UPDATE orders
+  SET order_status='cancelled',updated_at=CURRENT_TIMESTAMP
+  WHERE order_id=NEW.order_id
+    AND COALESCE((SELECT inventory_quantity FROM products WHERE product_id=NEW.product_id),0)
+      - COALESCE((SELECT committed_quantity FROM product_inventory_active_commitments WHERE product_id=NEW.product_id),0)
+      < COALESCE(NEW.quantity,0);
+
+  INSERT INTO order_status_history(order_id,old_status,new_status,changed_by_user_id,note,created_at)
+  SELECT NEW.order_id,NULL,'cancelled',NULL,
+         'Build 440 automatically cancelled this incomplete checkout because finished inventory was already committed.',
+         CURRENT_TIMESTAMP
+  WHERE changes()=1;
+
+  SELECT CASE WHEN changes()=1
+    THEN RAISE(FAIL,'build440_finished_inventory_commitment_exceeds_available') END;
+END;
+
+DROP TRIGGER IF EXISTS trg_order_items_build440_inventory_commit_guard_update;
+CREATE TRIGGER trg_order_items_build440_inventory_commit_guard_update
+BEFORE UPDATE OF product_id, quantity ON order_items
+WHEN NEW.product_id IS NOT NULL
+ AND COALESCE((SELECT inventory_tracking FROM products WHERE product_id=NEW.product_id),0)=1
+ AND LOWER(COALESCE((SELECT order_status FROM orders WHERE order_id=NEW.order_id),'pending')) IN ('pending','paid','fulfilled','refunded')
+ AND COALESCE((SELECT created_at FROM orders WHERE order_id=NEW.order_id),'') >= COALESCE((SELECT setting_value FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' LIMIT 1),'9999-12-31')
+BEGIN
+  UPDATE orders
+  SET order_status='cancelled',updated_at=CURRENT_TIMESTAMP
+  WHERE order_id=NEW.order_id
+    AND COALESCE((SELECT inventory_quantity FROM products WHERE product_id=NEW.product_id),0)
+      - COALESCE((SELECT SUM(oi.quantity) FROM order_items oi INNER JOIN orders o ON o.order_id=oi.order_id
+                  WHERE oi.product_id=NEW.product_id AND oi.order_item_id<>OLD.order_item_id
+                    AND LOWER(COALESCE(o.order_status,'pending')) IN ('pending','paid','fulfilled','refunded')
+                    AND o.created_at >= COALESCE((SELECT setting_value FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' LIMIT 1),'9999-12-31')),0)
+      < COALESCE(NEW.quantity,0);
+
+  INSERT INTO order_status_history(order_id,old_status,new_status,changed_by_user_id,note,created_at)
+  SELECT NEW.order_id,NULL,'cancelled',NULL,
+         'Build 440 automatically cancelled this order because an item quantity update exceeded finished inventory commitments.',
+         CURRENT_TIMESTAMP
+  WHERE changes()=1;
+
+  SELECT CASE WHEN changes()=1
+    THEN RAISE(FAIL,'build440_finished_inventory_commitment_exceeds_available') END;
+END;
+
+DROP TRIGGER IF EXISTS trg_orders_build440_inventory_commit_guard_reactivate;
+CREATE TRIGGER trg_orders_build440_inventory_commit_guard_reactivate
+BEFORE UPDATE OF order_status ON orders
+WHEN LOWER(COALESCE(NEW.order_status,'')) IN ('pending','paid','fulfilled','refunded')
+ AND LOWER(COALESCE(OLD.order_status,'')) NOT IN ('pending','paid','fulfilled','refunded')
+ AND NEW.created_at >= COALESCE((SELECT setting_value FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' LIMIT 1),'9999-12-31')
+BEGIN
+  SELECT CASE WHEN EXISTS (
+    SELECT 1
+    FROM (
+      SELECT oi.product_id, SUM(oi.quantity) AS order_quantity
+      FROM order_items oi
+      WHERE oi.order_id=NEW.order_id AND oi.product_id IS NOT NULL
+      GROUP BY oi.product_id
+    ) x
+    INNER JOIN products p ON p.product_id=x.product_id
+    WHERE COALESCE(p.inventory_tracking,0)=1
+      AND COALESCE(p.inventory_quantity,0)
+        - COALESCE((SELECT SUM(oi2.quantity) FROM order_items oi2 INNER JOIN orders o2 ON o2.order_id=oi2.order_id
+                    WHERE oi2.product_id=x.product_id AND o2.order_id<>NEW.order_id
+                      AND LOWER(COALESCE(o2.order_status,'pending')) IN ('pending','paid','fulfilled','refunded')
+                      AND o2.created_at >= COALESCE((SELECT setting_value FROM app_settings WHERE setting_key='site.product.finished_lot_provenance_cutover_at' LIMIT 1),'9999-12-31')),0)
+        < x.order_quantity
+  ) THEN RAISE(ABORT,'build440_finished_inventory_commitment_exceeds_available') END;
+END;
+
+INSERT OR IGNORE INTO app_settings(setting_key,setting_value,is_public)
+VALUES ('site.product.finished_inventory_guard_hardening','cancel_partial_checkout_count_physical_lots_refund_stays_committed_v440',0);
+
+INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,destructive,applied_at,notes,created_at,updated_at)
+VALUES (
+  'build440_product_inventory_lot_provenance_hardening',
+  'database_build440_product_inventory_lot_provenance_hardening.sql',
+  NULL,'applied',0,CURRENT_TIMESTAMP,
+  'Counts quarantined/expired physical purchase-lot remainder without making it production-available; safely cancels incomplete checkout on commitment conflict; keeps refunded physical orders committed until explicit return/restock; prevents finished inventory from being reduced below active commitments.',
+  CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+)
+ON CONFLICT(migration_key) DO UPDATE SET
+  file_name=excluded.file_name,status='applied',destructive=0,
+  applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),
+  notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+-- END BUILD 440 PRODUCT INVENTORY LOT PROVENANCE AGGREGATE SYNC --
+
+-- BEGIN BUILD 440 INVENTORY RECEIVING SOURCE PROVENANCE AGGREGATE SYNC --
+-- Aggregate source: database_build440_inventory_receiving_source_provenance.sql
+-- Devil n Dove Build 440 — barcode-first Inventory receiving and supplier/source provenance.
+-- Additive/idempotent. Stock remains authoritative in site_item_inventory + site_inventory_movements;
+-- purchase-lot quantity/cost remains authoritative in inventory_purchase_lots.
+-- inventory_receiving_claims is only an idempotency/audit claim and is not a second stock ledger.
+
+CREATE TABLE IF NOT EXISTS inventory_item_identifiers (
+  inventory_item_identifier_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_item_inventory_id INTEGER NOT NULL,
+  identifier_type TEXT NOT NULL CHECK(identifier_type IN (
+    'barcode','upc','ean','gtin','supplier_sku','manufacturer_sku','asin','external_key','internal_sku'
+  )),
+  identifier_value TEXT NOT NULL,
+  normalized_value TEXT NOT NULL,
+  source_name TEXT NOT NULL DEFAULT '',
+  is_primary INTEGER NOT NULL DEFAULT 0 CHECK(is_primary IN (0,1)),
+  verification_status TEXT NOT NULL DEFAULT 'needs_review' CHECK(verification_status IN ('needs_review','verified','rejected')),
+  verified_by_user_id INTEGER,
+  verified_at TEXT,
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(site_item_inventory_id, identifier_type, normalized_value, source_name),
+  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE,
+  FOREIGN KEY(verified_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+  FOREIGN KEY(created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_item_identifiers_lookup
+  ON inventory_item_identifiers(normalized_value, identifier_type, verification_status);
+CREATE INDEX IF NOT EXISTS idx_inventory_item_identifiers_item
+  ON inventory_item_identifiers(site_item_inventory_id, is_primary DESC, identifier_type);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_inventory_item_identifiers_global_barcode
+  ON inventory_item_identifiers(normalized_value)
+  WHERE identifier_type IN ('barcode','upc','ean','gtin') AND verification_status <> 'rejected';
+
+CREATE TABLE IF NOT EXISTS inventory_item_sources (
+  inventory_item_source_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  site_item_inventory_id INTEGER NOT NULL,
+  source_kind TEXT NOT NULL DEFAULT 'supplier' CHECK(source_kind IN ('supplier','manufacturer','retailer','amazon','marketplace','import','manual')),
+  source_name TEXT NOT NULL DEFAULT '',
+  source_name_normalized TEXT NOT NULL DEFAULT '',
+  supplier_sku TEXT NOT NULL DEFAULT '',
+  supplier_sku_normalized TEXT NOT NULL DEFAULT '',
+  source_url TEXT NOT NULL DEFAULT '',
+  source_url_normalized TEXT NOT NULL DEFAULT '',
+  source_reference TEXT,
+  is_preferred INTEGER NOT NULL DEFAULT 0 CHECK(is_preferred IN (0,1)),
+  verification_status TEXT NOT NULL DEFAULT 'needs_review' CHECK(verification_status IN ('needs_review','verified','rejected')),
+  receipt_count INTEGER NOT NULL DEFAULT 0,
+  last_received_at TEXT,
+  last_verified_at TEXT,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(site_item_inventory_id, source_kind, source_name_normalized, supplier_sku_normalized, source_url_normalized),
+  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE,
+  FOREIGN KEY(created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+  FOREIGN KEY(updated_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_item_sources_item
+  ON inventory_item_sources(site_item_inventory_id, is_preferred DESC, verification_status, last_received_at DESC);
+CREATE INDEX IF NOT EXISTS idx_inventory_item_sources_supplier
+  ON inventory_item_sources(source_name_normalized, supplier_sku_normalized, site_item_inventory_id);
+
+CREATE TABLE IF NOT EXISTS inventory_receiving_claims (
+  inventory_receiving_claim_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  receive_key TEXT NOT NULL UNIQUE,
+  site_item_inventory_id INTEGER NOT NULL,
+  supplier_purchase_order_item_id INTEGER,
+  inventory_purchase_lot_id INTEGER,
+  lot_code TEXT NOT NULL,
+  quantity_received REAL NOT NULL CHECK(quantity_received > 0),
+  quantity_incoming_cleared REAL NOT NULL DEFAULT 0 CHECK(quantity_incoming_cleared >= 0),
+  unit_cost_cents INTEGER NOT NULL DEFAULT 0,
+  shipping_cost_cents INTEGER NOT NULL DEFAULT 0,
+  tax_cost_cents INTEGER NOT NULL DEFAULT 0,
+  source_kind TEXT NOT NULL DEFAULT 'manual',
+  source_name TEXT,
+  supplier_sku TEXT,
+  source_url TEXT,
+  scanned_identifier TEXT,
+  previous_on_hand_quantity REAL NOT NULL DEFAULT 0,
+  new_on_hand_quantity REAL NOT NULL DEFAULT 0,
+  previous_incoming_quantity REAL NOT NULL DEFAULT 0,
+  new_incoming_quantity REAL NOT NULL DEFAULT 0,
+  claim_status TEXT NOT NULL DEFAULT 'applying' CHECK(claim_status IN ('applying','completed','failed')),
+  error_note TEXT,
+  received_by_user_id INTEGER,
+  received_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  completed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE RESTRICT,
+  FOREIGN KEY(inventory_purchase_lot_id) REFERENCES inventory_purchase_lots(inventory_purchase_lot_id) ON DELETE RESTRICT,
+  FOREIGN KEY(received_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_receiving_claims_item
+  ON inventory_receiving_claims(site_item_inventory_id, received_at DESC, inventory_receiving_claim_id DESC);
+CREATE INDEX IF NOT EXISTS idx_inventory_receiving_claims_po_item
+  ON inventory_receiving_claims(supplier_purchase_order_item_id, received_at DESC)
+  WHERE supplier_purchase_order_item_id IS NOT NULL;
+
+-- Backfill identities already present in the canonical Inventory rows. We do not invent barcodes.
+INSERT OR IGNORE INTO inventory_item_identifiers (
+  site_item_inventory_id,identifier_type,identifier_value,normalized_value,source_name,is_primary,
+  verification_status,verified_at,created_at,updated_at
+)
+SELECT
+  site_item_inventory_id,'external_key',TRIM(external_key),UPPER(TRIM(external_key)),LOWER(TRIM(COALESCE(source_type,''))),1,
+  'verified',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+FROM site_item_inventory
+WHERE TRIM(COALESCE(external_key,''))<>'';
+
+INSERT OR IGNORE INTO inventory_item_identifiers (
+  site_item_inventory_id,identifier_type,identifier_value,normalized_value,source_name,is_primary,
+  verification_status,verified_at,created_at,updated_at
+)
+SELECT
+  site_item_inventory_id,'supplier_sku',TRIM(supplier_sku),UPPER(REPLACE(TRIM(supplier_sku),' ','')),LOWER(TRIM(COALESCE(supplier_name,''))),0,
+  'verified',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+FROM site_item_inventory
+WHERE TRIM(COALESCE(supplier_sku,''))<>'';
+
+-- Preserve the existing Inventory supplier/source fields as the initial preferred source record.
+INSERT OR IGNORE INTO inventory_item_sources (
+  site_item_inventory_id,source_kind,source_name,source_name_normalized,supplier_sku,supplier_sku_normalized,
+  source_url,source_url_normalized,source_reference,is_preferred,verification_status,receipt_count,
+  last_verified_at,created_at,updated_at
+)
+SELECT
+  site_item_inventory_id,
+  CASE WHEN TRIM(COALESCE(amazon_url,''))<>'' THEN 'amazon'
+       WHEN TRIM(COALESCE(supplier_name,''))<>'' THEN 'supplier'
+       ELSE 'import' END,
+  TRIM(COALESCE(supplier_name,'')),
+  LOWER(TRIM(COALESCE(supplier_name,''))),
+  TRIM(COALESCE(supplier_sku,'')),
+  UPPER(REPLACE(TRIM(COALESCE(supplier_sku,'')),' ','')),
+  TRIM(CASE WHEN TRIM(COALESCE(source_url,''))<>'' THEN source_url ELSE COALESCE(amazon_url,'') END),
+  LOWER(TRIM(CASE WHEN TRIM(COALESCE(source_url,''))<>'' THEN source_url ELSE COALESCE(amazon_url,'') END)),
+  'Build 440 normalized from the existing site_item_inventory supplier/source fields.',
+  1,'verified',0,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+FROM site_item_inventory
+WHERE TRIM(COALESCE(supplier_name,''))<>''
+   OR TRIM(COALESCE(supplier_sku,''))<>''
+   OR TRIM(COALESCE(source_url,''))<>''
+   OR TRIM(COALESCE(amazon_url,''))<>'';
+
+INSERT OR IGNORE INTO app_settings(setting_key,setting_value,is_public)
+VALUES ('site.inventory.receiving_authority','site_inventory_movements_plus_inventory_purchase_lots_v440',0);
+INSERT OR IGNORE INTO app_settings(setting_key,setting_value,is_public)
+VALUES ('site.inventory.barcode_resolver_policy','verified_identifier_exact_match_fail_ambiguous_v440',0);
+INSERT OR IGNORE INTO app_settings(setting_key,setting_value,is_public)
+VALUES ('site.inventory.source_provenance_policy','normalized_multi_source_preferred_review_v440',0);
+
+INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,destructive,applied_at,notes,created_at,updated_at)
+VALUES (
+  'build440_inventory_receiving_source_provenance',
+  'database_build440_inventory_receiving_source_provenance.sql',
+  NULL,'applied',0,CURRENT_TIMESTAMP,
+  'Adds normalized Inventory identifiers and supplier/source provenance plus idempotent receiving claims. Stock remains in site_item_inventory/site_inventory_movements and lot quantity/cost remains in inventory_purchase_lots. No historical barcode values are invented.',
+  CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+)
+ON CONFLICT(migration_key) DO UPDATE SET
+  file_name=excluded.file_name,status='applied',destructive=0,
+  applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),
+  notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+
+-- Aggregate source: database_build440_inventory_receiving_reversal.sql
+-- Devil n Dove Build 440 — audited reversal for Tool/Supply receipts.
+-- Additive/idempotent. The original inventory_receiving_claim remains immutable completed evidence;
+-- this table records the one allowed compensating reversal rather than rewriting history.
+
+CREATE TABLE IF NOT EXISTS inventory_receiving_reversals (
+  inventory_receiving_reversal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  inventory_receiving_claim_id INTEGER NOT NULL UNIQUE,
+  reversal_key TEXT NOT NULL UNIQUE,
+  site_item_inventory_id INTEGER NOT NULL,
+  inventory_purchase_lot_id INTEGER NOT NULL,
+  supplier_purchase_order_item_id INTEGER,
+  quantity_reversed REAL NOT NULL CHECK(quantity_reversed > 0),
+  quantity_incoming_restored REAL NOT NULL DEFAULT 0 CHECK(quantity_incoming_restored >= 0),
+  previous_on_hand_quantity REAL NOT NULL DEFAULT 0,
+  new_on_hand_quantity REAL NOT NULL DEFAULT 0,
+  previous_incoming_quantity REAL NOT NULL DEFAULT 0,
+  new_incoming_quantity REAL NOT NULL DEFAULT 0,
+  previous_lot_received_quantity REAL NOT NULL DEFAULT 0,
+  new_lot_received_quantity REAL NOT NULL DEFAULT 0,
+  previous_lot_remaining_quantity REAL NOT NULL DEFAULT 0,
+  new_lot_remaining_quantity REAL NOT NULL DEFAULT 0,
+  previous_po_received_quantity REAL,
+  new_po_received_quantity REAL,
+  reversal_reason TEXT NOT NULL,
+  reversed_by_user_id INTEGER,
+  reversed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(inventory_receiving_claim_id) REFERENCES inventory_receiving_claims(inventory_receiving_claim_id) ON DELETE RESTRICT,
+  FOREIGN KEY(site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE RESTRICT,
+  FOREIGN KEY(inventory_purchase_lot_id) REFERENCES inventory_purchase_lots(inventory_purchase_lot_id) ON DELETE RESTRICT,
+  FOREIGN KEY(reversed_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_receiving_reversals_item
+  ON inventory_receiving_reversals(site_item_inventory_id, reversed_at DESC, inventory_receiving_reversal_id DESC);
+CREATE INDEX IF NOT EXISTS idx_inventory_receiving_reversals_lot
+  ON inventory_receiving_reversals(inventory_purchase_lot_id, reversed_at DESC);
+
+INSERT OR IGNORE INTO app_settings(setting_key,setting_value,is_public)
+VALUES ('site.inventory.receiving_reversal_policy','single_compensating_reversal_unconsumed_lot_v440',0);
+
+INSERT INTO schema_migration_ledger(migration_key,file_name,checksum,status,destructive,applied_at,notes,created_at,updated_at)
+VALUES (
+  'build440_inventory_receiving_reversal',
+  'database_build440_inventory_receiving_reversal.sql',
+  NULL,'applied',0,CURRENT_TIMESTAMP,
+  'Adds one immutable compensating reversal per completed Tool/Supply receiving claim. Reversal is blocked once the received quantity cannot be proven to remain in the linked purchase lot.',
+  CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+)
+ON CONFLICT(migration_key) DO UPDATE SET
+  file_name=excluded.file_name,status='applied',destructive=0,
+  applied_at=COALESCE(schema_migration_ledger.applied_at,CURRENT_TIMESTAMP),
+  notes=excluded.notes,updated_at=CURRENT_TIMESTAMP;
+-- END BUILD 440 INVENTORY RECEIVING SOURCE PROVENANCE AGGREGATE SYNC --

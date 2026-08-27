@@ -2,6 +2,7 @@
 """Build 439 local-only CAIP temporal evidence / ranged-review regression."""
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 
@@ -114,6 +115,8 @@ def simulate() -> dict:
 def main() -> int:
     migration = read(MIGRATION); service = read(SERVICE); api = read(API); proxy = read(REVIEW_PROXY)
     page = read(PAGE); ui = read(UI); audit_ui = read(AUDIT_UI); css = read(CSS); sync = read(SYNC); route_map = read(ROUTE_MAP)
+    release = json.loads(read(ROOT / 'development-release.json') or '{}')
+    asset_version = str(release.get('release') or 439)
     sim = simulate(); checks = []
     expected_tables = {'creative_media_evidence_ranges','creative_story_segment_evidence_links','caip_media_processing_artifacts'}
     expected_indexes = {
@@ -142,8 +145,8 @@ def main() -> int:
         ('Admin API audits mutations and caps request body', 'auditAdminAction' in api and '262144' in api and 'captureRuntimeIncident' in api),
         ('private review proxy sanitizes browser headers and streams R2 ranges', 'r2GetOptions(request)' in proxy and "rangeHeaders.set('Range', rangeValue)" in proxy and "options.range = rangeHeaders" in proxy and "options.onlyIf = conditionalHeaders" in proxy and "request.headers.get('If-Range')" in proxy and 'object.body' in proxy and 'status = 206' in proxy and 'arrayBuffer' not in proxy and 'range: request.headers' not in proxy and 'onlyIf: request.headers' not in proxy),
         ('video range seeking does not write an audit row for every chunk', 'shouldRecordGrantUse' in proxy and 'access_count' in proxy),
-        ('new UI is mounted, cache-busted and responsive', 'caipEvidenceReviewMount' in page and 'admin-caip-evidence-review.js?v=439' in page and 'caip-evidence-review.css?v=439' in page and '@media' in css),
-        ('storage audit UI is mounted and user-triggered', 'caipStorageAuditMount' in page and 'admin-caip-storage-audit.js?v=439' in page and 'Audit all temporal media' in audit_ui and 'scope=all' in audit_ui),
+        ('new UI is mounted, cache-busted and responsive', 'caipEvidenceReviewMount' in page and f'admin-caip-evidence-review.js?v={asset_version}' in page and f'caip-evidence-review.css?v={asset_version}' in page and '@media' in css),
+        ('storage audit UI is mounted and user-triggered', 'caipStorageAuditMount' in page and f'admin-caip-storage-audit.js?v={asset_version}' in page and 'Audit all temporal media' in audit_ui and 'scope=all' in audit_ui),
         ('storage audit UI is bounded and contains no polling', 'PAGE_SIZE = 8' in audit_ui and 'setInterval' not in audit_ui and 'setTimeout' not in audit_ui),
         ('review UI has no polling and supports secure private review', 'setInterval' not in ui and 'create_secure_review_link' in ui and 'max_access_count: 100' in ui),
         ('review UI captures timecodes, promotes evidence and drafts internal story', 'caip439CaptureStart' in ui and 'caip439CaptureEnd' in ui and "action: 'promote_marker'" in ui and "action: 'draft_story_segment'" in ui),

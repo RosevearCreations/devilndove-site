@@ -1,12 +1,30 @@
-# Devil n Dove Modular Application Architecture — Core + Three Modules
+# Devil n Dove Modular Application Architecture — Core + Four Modules
 
-## Status
+## Current status
+
+Updated: 2026-08-27
+
+The approved target is now **one Application Core + four top-level application
+modules**. The fourth module, **I.T. & Platform** (`it-platform`), separates
+web/deployment/database/storage/recovery maintenance from ordinary creator and
+business workflows. Its detailed authority is
+`docs/architecture/IT_MODULE_ARCHITECTURE.md`.
+
+The deployed Build 440 runtime still has the three proven Build 438 business
+modules. The fourth-module runtime and D1 authority are intentionally gated
+until Build 440 authenticated live acceptance closes and the next Development
+release is deliberately opened.
+
+The Build 302 history below remains useful migration provenance, but its
+“exactly three” target is superseded by this approved four-module boundary.
+
+## Historical normalization status
 
 Build 280 remains the frozen Production baseline. Development intentionally diverged after Build 280 to modularize the application safely.
 
 Builds 281–301 established the modular registry, route classification, service contracts and the first real domain extraction through Packaging. Build 302 normalizes the architectural target so Devil n Dove is no longer described as if every business domain will become a separate top-level application module.
 
-**Authoritative target: one Application Core + exactly three top-level application modules.**
+**Historical Build 302 target: one Application Core + exactly three top-level application modules.**
 
 The existing domain boundaries remain valuable. They become internal ownership boundaries inside the three application modules rather than twelve separate top-level applications.
 
@@ -19,16 +37,20 @@ Devil n Dove remains one application platform with one authentication authority,
 ```text
                      DEVIL N DOVE APPLICATION CORE
                                |
-              +----------------+----------------+
-              |                |                |
-              v                v                v
-       COMMERCE &         CREATIVE &       BUSINESS &
-       OPERATIONS          PRODUCTION      ADMINISTRATION
+        +-------------+-------------+-------------+
+        |             |             |             |
+        v             v             v             v
+   COMMERCE &     CREATIVE &    BUSINESS &      I.T. &
+   OPERATIONS      PRODUCTION   ADMINISTRATION  PLATFORM
 ```
 
-The three top-level modules are independently loadable business application areas. Each contains multiple internal domains with explicit ownership and service contracts.
+The four top-level modules are independently loadable application areas. The
+three business modules contain their business domains; I.T. & Platform contains
+technical operations that creators should not need to use.
 
-The goal is not three repositories, three databases, or three Cloudflare applications. The goal is three runtime/business boundaries inside one Devil n Dove platform.
+The goal is not four repositories, four databases, or four Cloudflare
+applications. The goal is four runtime/authority boundaries inside one Devil n
+Dove platform.
 
 ## Application Core
 
@@ -164,7 +186,9 @@ It must not become Catalog or Inventory.
 
 ### Purpose
 
-Own business control, downstream distribution, financial treatment, analytics, platform administration and operational readiness.
+Own business control, downstream distribution, financial treatment, analytics
+and business administration. Technical platform maintenance is owned by I.T. &
+Platform.
 
 ### Internal domains
 
@@ -179,10 +203,6 @@ Content Studio creates/reviews content; Marketing distributes it.
 Owns journals, ledgers, AR/AP, payments, reconciliation, statement imports, fees, profitability, tax reporting, financial reporting and close controls.
 
 Other modules emit operational facts; Accounting owns accounting treatment.
-
-#### Platform & Runtime (`platform`)
-
-Owns schema/runtime health, release mechanics, route/system diagnostics, deployment evidence and infrastructure-facing operational state.
 
 #### Administration (`admin`)
 
@@ -200,21 +220,6 @@ Owns users, roles, permissions, administrator-facing configuration, security and
 /admin/public-display-order*
 /admin/search-console*
 /admin/accounting*
-/admin/startup-readiness*
-/admin/operational-continuity*
-/admin/prelaunch*
-/admin/deployment-preflight*
-/admin/release-control*
-/admin/deploy-readiness*
-/admin/promotion-control*
-/admin/go-live-execution*
-/admin/live-ops-followthrough*
-/admin/application-sanity*
-/admin/readiness*
-/admin/markdown-sanity*
-/admin/route-usage*
-/admin/public-api-health*
-/admin/schema-drift*
 /admin/
 /admin/users*
 /admin/settings*
@@ -223,6 +228,42 @@ Owns users, roles, permissions, administrator-facing configuration, security and
 /admin/access-tier*
 /admin/user-profiles*
 ```
+
+## Module 4 — I.T. & Platform
+
+### Purpose
+
+Own web hosting, release/deployment, runtime, schema, storage, recovery and
+technical maintenance so creators can work without interacting with technical
+controls.
+
+### Internal domain
+
+#### I.T. & Platform (`platform`)
+
+Owns schema/runtime health, release mechanics, route/API diagnostics, deployment
+evidence, Cloudflare/D1/R2 health, backup/restore evidence, technical incident
+review and bounded recovery utilities.
+
+### Representative current routes to reclassify
+
+```text
+/admin/operational-continuity*
+/admin/deployment-preflight*
+/admin/release-control*
+/admin/deploy-readiness*
+/admin/promotion-control*
+/admin/go-live-execution*
+/admin/live-ops-followthrough*
+/admin/application-sanity*
+/admin/markdown-sanity*
+/admin/route-usage*
+/admin/public-api-health*
+/admin/schema-drift*
+/admin/runtime-incidents*
+```
+
+`/admin/application-modules*` remains Application Core recovery authority.
 
 ## Domain-to-module migration map
 
@@ -240,7 +281,7 @@ The current Build 290 domain catalog remains active during migration. Build 302 
 | `content` | Creative & Production | shadow/contract provider |
 | `marketing` | Business & Administration | shadow/legacy |
 | `accounting` | Business & Administration | shadow/legacy |
-| `platform` | Business & Administration | shadow/platform |
+| `platform` | I.T. & Platform | shadow/platform; fourth-module extraction pending |
 | `admin` | Business & Administration | shadow/platform-admin |
 
 The current domain identifiers remain useful for ownership, route classification and service contracts. They are not intended to remain twelve top-level independently loaded application modules.
@@ -256,9 +297,12 @@ core
 commerce-operations
 creative-production
 business-administration
+it-platform (approved target; not present in the historical Build 302 catalog)
 ```
 
-and maps the existing twelve domain IDs into exactly three top-level modules.
+and historically mapped the existing twelve domain IDs into exactly three
+top-level modules. The next release must add `it-platform` and move
+`platform` ownership without changing business-data authority.
 
 The file is intentionally passive and is not imported by the live Build 301 runtime in Build 302. This prevents an architecture-documentation correction from changing proven Packaging behavior.
 
@@ -274,7 +318,8 @@ packaging -> ../modules/packaging/runtime.mjs?v=290
 
 All other current domain definitions remain `entry: null` and therefore run as shadow/legacy classifications.
 
-This is expected during migration. Build 302 does not pretend the three-module runtime conversion is already complete.
+This was expected during migration. Build 440 proves the three existing business
+modules; the approved fourth I.T. runtime remains pending.
 
 ## Two-gate activation rule
 
@@ -354,7 +399,7 @@ Recommended sequence:
 
 1. **Build 302 — architecture normalization**
    - pin completed Build 301 historically;
-   - establish Core + exactly three application modules;
+   - establish the historical Core + three business-module baseline;
    - map all existing domains/routes;
    - keep Build 301 runtime unchanged.
 
@@ -369,11 +414,16 @@ Recommended sequence:
    - remove Packaging's older compatibility dependencies only after equivalent umbrella startup/service readiness exists.
 
 4. **Business & Administration extraction**
-   - group Marketing, Accounting, Platform and Admin under one gated runtime;
+   - group Marketing, Accounting and Admin under one gated runtime;
    - retain internal domain ownership and authorization.
 
-5. **Legacy cleanup**
-   - remove obsolete shadow classifications, compatibility layers and dead loaders only after the three top-level module runtimes are independently proven.
+5. **I.T. & Platform extraction**
+   - add the fourth gated runtime and explicit per-user I.T. grant;
+   - move Platform route ownership without mass-renaming URLs;
+   - keep ordinary creator workflows free of technical runtime/polling.
+
+6. **Legacy cleanup**
+   - remove obsolete shadow classifications, compatibility layers and dead loaders only after all four top-level module runtimes are independently proven.
 
 ## Build 301 preservation rule
 
@@ -391,6 +441,7 @@ Every extraction must remain independently reviewable and reversible in Git.
 
 ## Production safety
 
-Real Production remains frozen at Build 280 unless deliberately promoted through the separate Production workflow.
+Separate live Production remains at the documented Build 437 baseline unless
+deliberately promoted through its distinct workflow.
 
 Build 302 architecture work is Development-only and must not contact or mutate Production resources.

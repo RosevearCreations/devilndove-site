@@ -1,28 +1,70 @@
-# Sanity Health Check — Build 246
+# Sanity Health Check — Development Build 440
 
-Build 246 local/static/synthetic sanity status: **PASS**. Production D1/R2/Cloudflare and physical packaging evidence remain deployment tasks.
+Updated: 2026-08-27
 
-- Product edit identity / defensive Update Product ID regression: PASS.
-- Product gallery / featured / SEO-social role persistence regression: PASS; Build 246 verification retains the Build 245 media-integrity queries.
-- Generated empty Content Studio/CAIP product-shell cleanup versus meaningful-history blocking: PASS.
-- Creative Project delete-and-return code path: PASS; only unreversed inventory posts are returned, reversal evidence is unique per post, and meaningful downstream output still blocks deletion.
-- Finished Product Production Release: PASS in static/synthetic checks; idempotency, fractional stock conversion, guarded inventory updates, ingredient/material snapshots and partial-post compensation are present.
-- CAIP same-project exact duplicate skip: PASS; cross-project reuse remains a warning rather than a destructive dedupe.
-- Soap packaging: PASS in code regression for `soap_reference_v2`, INCI-first ingredients, curated French draft/review evidence, no hard-coded pseudo ingredients, no invented default marketing claims, and explicit missing-net-quantity draft warning.
-- Build 243 inventory resilience regression: PASS.
-- Build 244 D1 inventory-authority/fractional-usage regression: PASS; 897 legacy master rows retained in the D1 transition foundation.
-- Build 245 admin degraded-auth/startup/media recovery regression: PASS.
-- Build 241 CAIP private large-media regression: PASS.
-- Modified JavaScript syntax: 15/15 PASS.
-- Current migration identity: PASS; `database_build246_product_project_production_packaging.sql` and `database_upgrade_current_pass.sql` are byte-identical.
-- Current migration synthetic repeat application: PASS; one Build 246 ledger row after repeat execution.
-- `BUILD246_D1_VERIFICATION.sql`: read-only synthetic execution PASS, including retained media-integrity/SEO-role diagnostics.
-- Database object case audit: PASS; 2,547 database object identifiers checked, 0 mixed-case identifiers; controlled classifications remain lower-case while human/external values retain meaningful case.
-- Public SEO/static audit: 36/36 indexable pages passed; 0 warnings/failures; 0 multiple-H1 failures.
-- Local asset audit: 120 `/assets/...` references, 0 missing.
-- Predeploy sanity: 109 pages, 0 issues, PASS.
-- Dark-theme regression: PASS.
-- Deployment preflight: READY, 0 blockers, 0 warnings.
-- Final deployment blocker check: PASS.
+Current local/source sanity status: **PASS after closure repairs**. Authenticated
+live Development acceptance is still open, so this is not Build 440 closure or
+live-deployment evidence.
 
-Production-only evidence still required: production D1 backup/migration results, real historical product/project shapes, remote R2 image reachability, Cloudflare Worker/D1 behavior under sustained use, private CAIP R2 multipart proof, payment/email/restore gates, real mobile/desktop deployed rendering, and physical soap-label wrap/print approval. Static checks do not claim those live results.
+## Current repeatable authority
+
+Run:
+
+```bash
+python scripts/build440_current_sanity_check.py
+```
+
+The runner is source-only. It contacts no Cloudflare, D1, R2, payment, email or
+other provider and has no Production mutation capability.
+
+## Results
+
+- Canonical Development release alignment: **PASS**.
+- Release-contract/read-only CI integrity: **PASS**.
+- Product/Inventory/Tools cross-mutation and responsive authority: **PASS
+  (35/35)**.
+- Full Build 440 Product/Inventory/Tools source gate: **PASS**.
+- Predeploy static scan: **PASS (114 pages, 0 issues)**.
+- Local asset reference audit: **PASS (151 references, 0 missing)**.
+- Build 439 CAIP source gate: **PASS** after its historical UI-cache assertions
+  were changed to derive the current canonical release.
+- Fresh-install aggregate schema: **PASS for Build 440 lot provenance,
+  receiving/reversal and Tool lifecycle authority**.
+- Git whitespace safety: must remain **PASS** on the final commit.
+
+## Repairs made during this sanity pass
+
+1. Synchronized the focused Build 440 Product/Inventory lot-provenance authority
+   into `database_full_schema.sql`.
+2. Synchronized the focused Build 440 Inventory receiving/source/reversal
+   authority into `database_full_schema.sql`.
+3. Replaced an obsolete Today Tasks token check with its current
+   Operations-owned read-service/failure contract.
+4. Added a current Build 440 sanity runner instead of treating the historical
+   Build 246 deployment-preflight artifact as current evidence.
+5. Made the retained Build 439 UI regression derive the current cache/release
+   major instead of requiring obsolete `?v=439` asset URLs.
+
+## Historical artifact warning
+
+`data/site/deployment-preflight.json` and
+`scripts/deployment_preflight_static_check.py` are Build 246-era evidence and
+must not approve or block Build 440 by themselves. They remain historical until
+a future bounded release-operations replacement is implemented in the I.T. &
+Platform module.
+
+## Evidence still required
+
+- authenticated live Admin acceptance on the exact resulting
+  `devilndove-site-dev` Production deployment;
+- Product desktop/mobile read/save and restoration proof;
+- Inventory/kit stock-owner and failure proof;
+- Tool lifecycle/history/publication proof;
+- phone/tablet/laptop/wide visual proof;
+- Build 439 private media/timecode/storage live evidence;
+- remote Development D1 migration-ledger and current-authority verification;
+- exact-head Build 440 GitHub gate and Dev-project Production deployment after
+  these closure repairs.
+
+Separate live `main` / `devilndove-site` Production remains untouched and
+promotion remains closed.

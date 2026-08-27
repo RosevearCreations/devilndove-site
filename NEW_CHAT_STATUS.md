@@ -8,6 +8,7 @@ Current state:
 - Build 440 full source/CI gate: **GREEN**
 - Exact-head Development live acceptance: **NEXT**
 - Build 439 CAIP media/video live-browser acceptance: **OPEN / SEPARATE**
+- Approved next architecture after Build 440 closure: fourth `it-platform` module with explicit per-user I.T. grants and creator-safe isolation.
 - Production baseline: **Build 437**
 - Production promotion: **CLOSED**
 

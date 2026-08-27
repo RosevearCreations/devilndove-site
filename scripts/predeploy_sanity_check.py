@@ -428,7 +428,12 @@ def check_build166_assets(root: Path):
     checks = [
         ('build166_gift_balance_api_missing', 'functions/api/gift-card-balance.js', ['gift_cards', 'gift_card_redemptions', 'remaining_amount_cents'], assets['gift_balance_api']),
         ('build166_gift_actions_api_missing', 'functions/api/admin/gift-card-actions.js', ['activate_paid', 'reissue', 'gift_card_admin_events'], assets['gift_actions_api']),
-        ('build166_today_tasks_api_missing', 'functions/api/admin/today-tasks.js', ['readiness', 'failed_api', 'accounting'], assets['today_tasks_api']),
+        (
+            'today_tasks_current_read_contract_missing',
+            'functions/api/admin/today-tasks.js',
+            ['readiness metadata', 'today_tasks_read_failed', "owner: 'operations'"],
+            assets['today_tasks_api'],
+        ),
         ('build166_trust_placements_api_missing', 'functions/api/admin/trust-block-placements.js', ['trust_block_placements', 'page_context', 'is_enabled'], assets['trust_placements_api']),
         ('build166_local_seo_api_missing', 'functions/api/admin/local-seo-review.js', ['local_seo_landing_page_reviews', 'target_keyword', 'review_status'], assets['local_seo_api']),
         ('build166_public_trust_loader_missing', 'public/js/trust-block-context.js', ['/api/trust-blocks', 'public-trust-context-card', 'data-trust-block-context-mount'], assets['trust_context_js']),

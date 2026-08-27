@@ -88,6 +88,123 @@ After live acceptance, confirm:
 - Inventory/Product/Tool authority relationships match source contracts
 - no Development repair utility can reach or mutate the separate live Production project
 
+### 4. Complete outstanding-task register
+
+This is the single current task inventory. Historical `BUILD*.md` lists do not
+add work unless an item is retained here. Every item requires its applicable
+source/schema, fallback, responsive, regression, deployment and live or physical
+evidence before closure.
+
+#### Release, sanity and architecture
+
+| ID | Task | State |
+| --- | --- | --- |
+| REL-01 | Finish exact-head Build 440 authenticated Development acceptance | **IN PROGRESS / LOGIN REQUIRED** |
+| REL-02 | Correct live defects, rerun the full gate and redeploy the exact corrected head | **CONDITIONAL** |
+| REL-03 | Finish Build 439 CAIP media/video live acceptance | **OPEN** |
+| REL-04 | Verify Development D1 ledger/data/current authorities after browser acceptance | **OPEN** |
+| REL-05 | Record Build 440 closure; keep separate live Production promotion closed | **OPEN / PROMOTION LOCKED** |
+| MOD-01 | Preserve the three proven business modules while adding approved fourth module `it-platform` | **NEXT RELEASE** |
+| MOD-02 | Finish incremental shadow/legacy route-runtime extraction and remove compatibility only after proof | **OPEN** |
+| MOD-03 | Keep named cross-module contracts, shared desktop/mobile authorities and zero inactive-module work | **PERMANENT GATE** |
+
+#### I.T. & Platform module
+
+Detailed authority: `docs/architecture/IT_MODULE_ARCHITECTURE.md`.
+
+| ID | Task | State |
+| --- | --- | --- |
+| IT-01 | Add `it-platform` to registry, route maps, D1 seeds and four-module health | **APPROVED NEXT** |
+| IT-02 | Add explicit per-user I.T. read/manage grants; ordinary admin role alone is insufficient | **APPROVED** |
+| IT-03 | Reclassify deployment, schema, runtime, storage, recovery and incident routes to I.T. | **APPROVED** |
+| IT-04 | Add plain-language I.T. health with collapsible technical evidence | **APPROVED** |
+| IT-05 | Show creators only Healthy / Needs I.T. review / Maintenance active | **APPROVED** |
+| IT-06 | Prove creator, ungranted-admin and read-only denial at navigation/page/API/runtime levels | **OPEN** |
+| IT-07 | Add bounded read-only release/schema/runtime/storage/provider/module health contracts | **OPEN** |
+| IT-08 | Add environment-locked audited repair controls one workstream at a time | **FUTURE / GATED** |
+| IT-09 | Add scheduled/event-driven technical checks only with module, job and background permission | **FUTURE / GATED** |
+
+#### CAIP, Creative Projects and knowledge
+
+| ID | Task | State |
+| --- | --- | --- |
+| CAIP-01 | Prove exact timecode/range evidence, private R2 review/range seeking and storage audit live | **OPEN** |
+| CAIP-02 | Add bounded proxy, thumbnail/frame, audio and transcript execution with verified artifacts | **OPEN / PROVIDERS OFF** |
+| CAIP-03 | Add capped retry/dead-letter behavior without Worker retry amplification | **OPEN** |
+| CAIP-04 | Complete reviewed Creative Project → CAIP → Content Studio package handoff | **OPEN** |
+| CAIP-05 | Require explicit material-usage review before Inventory consumption/reversal | **OPEN** |
+| CAIP-06 | Generate reviewed lessons and future-project recommendations from selected evidence | **OPEN** |
+| CAIP-07 | Calculate project profitability from material lots, time, packaging and channel fees | **OPEN** |
+| CAIP-08 | Support optional client storyboard/private notes without public leakage | **OPEN** |
+| CAIP-09 | Keep human approval before story, derivative, release, calendar or publication handoff | **PERMANENT GATE** |
+
+#### Packaging and labeling
+
+| ID | Task | State |
+| --- | --- | --- |
+| PKG-01 | Print/wrap soap profiles at 100% and settle 38.1 mm versus 50 mm geometry | **OWNER PHYSICAL EVIDENCE** |
+| PKG-02 | Add true prepress PDF, verified boxes/fonts, printer calibration and deterministic overflow | **OPEN** |
+| PKG-03 | Add R2 proof-photo upload and immutable approved-version supersession | **OPEN** |
+| PKG-04 | Add verified barcode/QR and transactional batch/lot packaging consumption | **OPEN** |
+| PKG-05 | Link reviewed recipe/formula facts to labels without duplicate authority | **OPEN** |
+| PKG-06 | Complete bilingual/INCI/formula/claim/net-quantity review per sale product | **OWNER REVIEW** |
+| PKG-07 | Measure every candle lid/blank/custom size and complete physical laser/print proof | **OWNER PHYSICAL EVIDENCE** |
+| PKG-08 | Add reviewed vector tracing only where a laser workflow requires paths | **OPEN AS NEEDED** |
+
+#### Product, Inventory, Tools and custom commerce
+
+| ID | Task | State |
+| --- | --- | --- |
+| COM-01 | Finish live Product desktop/mobile, Inventory/kit and Tool lifecycle acceptance | **REL-01** |
+| COM-02 | Work physical-count, usage-setup, ingredient and media-integrity queues | **OWNER DATA REVIEW** |
+| COM-03 | Reconcile uncertain purchase lots/sources without fabricated history | **OWNER DATA REVIEW** |
+| COM-04 | Keep import preview/duplicate validation current; add supplier rules from real failures | **ONGOING** |
+| COM-05 | Convert approved payment drafts into processor links and reviewed order drafts into full orders | **OPEN / PROVIDER GATED** |
+| COM-06 | Add custom-order status, quote revisions/resend, marketplace CSV validation and related proof | **OPEN** |
+| COM-07 | Add public consent capture, review/photo prompts and post-order proof workflow | **OPEN** |
+| COM-08 | Keep deletion, reversal, receiving, kit and stock actions atomic/audited/fail-closed | **PERMANENT GATE** |
+
+#### Media and public visuals
+
+| ID | Task | State |
+| --- | --- | --- |
+| MED-01 | Replace 6 P1 required placeholders with truthful approved images | **OWNER MEDIA NEEDED** |
+| MED-02 | Replace 23 P2 recommended placeholders where they improve credibility | **OPEN** |
+| MED-03 | Complete item-specific galleries, image roles, alt text, consent and SEO/social images | **OWNER MEDIA REVIEW** |
+| MED-04 | Add replace-in-place, thumbnails/variants and reviewed featured-image suggestions | **OPEN** |
+| MED-05 | Complete approved before/after, technique, evidence and result proof displays | **OPEN** |
+| MED-06 | Keep Product/Inventory/Supply/Tool facts outside Media Studio authority | **PERMANENT BOUNDARY** |
+
+#### Payments, Accounting, SEO and publishing
+
+| ID | Task | State |
+| --- | --- | --- |
+| BUS-01 | Add scheduled webhook retry/replay/dispatch beyond manual Admin requeue | **OPEN** |
+| BUS-02 | Add provider-confirmed refund/dispute sync and exact-once reconciliation | **OPEN** |
+| BUS-03 | Prove Stripe/refund/notification/email with owner-controlled live tests; keep PayPal hidden until proven | **LIVE EVIDENCE** |
+| BUS-04 | Complete Accounting mappings, AR/AP/journal, tax, fees, profitability, export and close | **OWNER/ACCOUNTANT REVIEW** |
+| BUS-05 | Add percentage marketplace fees and shared project-cost allocation | **OPEN** |
+| BUS-06 | Preserve one H1, truthful metadata/schema, noindex Admin and local Ontario quality every pass | **PERMANENT GATE** |
+| BUS-07 | Replace first-pass search with one bounded unified search authority | **OPEN** |
+| BUS-08 | Add consent-aware funnel/campaign/marketplace/post-release analytics | **OPEN** |
+| BUS-09 | Complete reviewed social scheduling/publishing and provider/OAuth proof | **OPEN / PROVIDER GATED** |
+| BUS-10 | Complete Search Console, sitemap/indexing, Merchant Center and Google Business Profile evidence | **OWNER/EXTERNAL** |
+
+#### Reliability, security, backup and go-live
+
+| ID | Task | State |
+| --- | --- | --- |
+| OPS-01 | Keep failures structured, sanitized, honest and recoverable without raw HTML/false success | **PERMANENT GATE** |
+| OPS-02 | Test roles/permissions for every destructive, financial, approval and I.T. action | **OPEN / RECURRING** |
+| OPS-03 | Complete isolated D1/R2/config backup-restore rehearsal and recovery-time evidence | **OPEN** |
+| OPS-04 | Monitor Worker CPU/subrequests/5xx and suppress polling/sync when no current job needs it | **ONGOING** |
+| OPS-05 | Verify cache/service-worker identity and offline/low-bandwidth recovery each release | **RECURRING** |
+| OPS-06 | Complete phone/tablet/laptop/wide responsive, accessibility and performance acceptance | **OPEN / RECURRING** |
+| LIVE-01 | Freeze a small launch list with verified facts, stock, media, packaging and owner | **OWNER DECISION** |
+| LIVE-02 | Rehearse tax, delivery/pickup, checkout, email, payment, refund and fulfilment | **OPEN** |
+| LIVE-03 | Finalize support, policies, privacy/consent, stop conditions and rollback ownership | **OWNER REVIEW** |
+| LIVE-04 | Run controlled opening and first-window cross-system reconciliation only after promotion opens | **FUTURE / LOCKED** |
+
 ## Ordered next steps
 
 1. Run Build 440 Development live acceptance against the exact-head `devilndove-site-dev` Production deployment: Admin auth, Product, mobile Product, Inventory/kit, Tool lifecycle/publication and responsive views.
@@ -96,7 +213,9 @@ After live acceptance, confirm:
 4. Run final Development schema/data/current-authority sanity checks.
 5. Record a Build 440 closure checkpoint.
 6. Define the next Development release only after the above acceptance items are closed.
-7. Consider promotion to the separate live `main` / `devilndove-site` Production site only as a distinct explicit decision; until then that promotion remains **CLOSED**.
+7. Implement the approved I.T. & Platform module as the first post-Build-440 section, including creator isolation and explicit I.T. grants.
+8. Continue the task register section by section, closing each item through live/physical evidence rather than parallel partial implementation.
+9. Consider promotion to the separate live `main` / `devilndove-site` Production site only as a distinct explicit decision; until then that promotion remains **CLOSED**.
 
 ## Definition of Build 440 Development closure
 

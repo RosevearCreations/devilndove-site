@@ -21,6 +21,9 @@ Important current invariants:
 - Numbered Build/migration documents are historical evidence unless the canonical handoff explicitly names them as active.
 - `database_upgrade_current_pass.sql` is a legacy Build 264 compatibility snapshot, not the Build 440 release authority.
 - Build 440 source/CI is green; exact-head Development live acceptance is the next release-closing stage.
+- The approved first post-Build-440 section is a creator-isolated fourth
+  `it-platform` module with explicit per-user I.T. grants; runtime
+  implementation waits for Build 440 closure.
 - Build 439 CAIP media/video live-browser acceptance remains a separate open item.
 
 Do not restore older “current release” descriptions from historical chats or files.
