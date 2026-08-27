@@ -1,4 +1,4 @@
-# Build 440 gate revision 13 — one canonical Development release; read-only CI validates Product/Inventory/Tools, D1 transport and cross-mutation responsive contracts.
+# Build 440 gate revision 14 — one canonical Development release; read-only CI validates Product/Inventory/Tools, D1 transport, cross-mutation responsive contracts and canonical current-state docs.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -16,6 +16,12 @@ on:
       - 'scripts/**'
       - 'database*.sql'
       - 'BUILD440*.sql'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'AI_CONTEXT.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'NEW_CHAT_STATUS.md'
+      - 'DEVELOPMENT_ROADMAP.md'
       - '.github/workflows/**'
   pull_request:
     branches: [dev]

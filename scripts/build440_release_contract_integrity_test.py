@@ -51,6 +51,18 @@ for required in (
     if required not in workflow_gate and required not in source_gate:
         failures.append(f"active Build 440 gate does not invoke {required}")
 
+canonical_docs = (
+    "AI_HANDOFF.md",
+    "PROJECT_STATUS_AND_ROADMAP.md",
+    "AI_CONTEXT.md",
+    "MARKDOWN_INDEX.md",
+    "NEW_CHAT_STATUS.md",
+    "DEVELOPMENT_ROADMAP.md",
+)
+for rel in canonical_docs:
+    if f"- '{rel}'" not in workflow_gate:
+        failures.append(f"Build 440 workflow does not trigger when current-state document changes: {rel}")
+
 # Scan only regression scripts actually named by the active Build 440 gate.
 # Historical files may retain their build numbers, but active tests must not
 # demand an obsolete runtime cache major from an earlier release.
@@ -137,6 +149,7 @@ print(f"Canonical Development release: Build {release}")
 print(f"Active workflows scanned: {len(workflow_files)}")
 print(f"Active gate scripts scanned for cache majors: {cache_scanned}")
 print(f"Legacy current-pass compatibility snapshot: Build {legacy_build or 'unknown'} / NOT RELEASE AUTHORITY")
+print("Canonical-document workflow triggers: ENFORCED")
 print("Workflow repository mutation: FORBIDDEN")
 print("Canonical current-state documents: ENFORCED")
 print("Production mutation capability: NONE")
@@ -150,4 +163,4 @@ if failures:
     raise SystemExit(1)
 
 print("BUILD 440 RELEASE CONTRACT INTEGRITY: PASS")
-print("One Development release authority, current docs, and read-only CI contract are enforced.")
+print("One Development release authority, current docs, doc-triggered gating, and read-only CI are enforced.")
