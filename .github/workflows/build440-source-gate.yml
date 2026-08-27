@@ -1,4 +1,4 @@
-# Build 440 gate revision 10 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and runtime contracts before handoff.
+# Build 440 gate revision 11 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and runtime contracts before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -26,24 +26,18 @@ jobs:
     steps:
       - name: Checkout dev source
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Compile guarded Development D1 runners on Windows
         run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py scripts/build440_verify_development_d1_final.py
-
       - name: Validate exact Windows npx.cmd D1 transport contract
         run: python scripts/build440_development_d1_runner_regression_test.py
-
       - name: Validate partial-apply resume and D1-safe trigger compatibility on Windows
         run: python scripts/build440_development_d1_resume_regression_test.py
-
       - name: Validate pattern-free final D1 verifier on Windows
         run: python scripts/build440_final_verifier_regression_test.py
-
       - name: Windows safety statement
         shell: bash
         run: |
@@ -57,35 +51,27 @@ jobs:
     steps:
       - name: Checkout dev source
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-
       - name: Compile guarded Development D1 runners
         run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py scripts/build440_verify_development_d1_final.py
-
       - name: Validate guarded Development D1 runner transport policy
         run: python scripts/build440_development_d1_runner_regression_test.py
-
       - name: Validate partial-apply resume and D1-safe trigger compatibility
         run: python scripts/build440_development_d1_resume_regression_test.py
-
       - name: Validate pattern-free final D1 verifier
         run: python scripts/build440_final_verifier_regression_test.py
-
       - name: Validate kit D1 runtime batch contract
         shell: bash
         run: |
           set -o pipefail
           node scripts/build440_inventory_kit_runtime_contract_test.mjs 2>&1 | tee build440-kit-runtime.log
-
       - name: Preserve kit runtime diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -94,13 +80,11 @@ jobs:
           path: build440-kit-runtime.log
           if-no-files-found: ignore
           retention-days: 3
-
       - name: Validate legacy Inventory case-normalization authority
         shell: bash
         run: |
           set -o pipefail
           python scripts/build243_inventory_resilience_regression.py 2>&1 | tee build243-normalization.log
-
       - name: Preserve legacy normalization diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -109,33 +93,47 @@ jobs:
           path: build243-normalization.log
           if-no-files-found: ignore
           retention-days: 3
-
       - name: Validate public Tool Supply Inventory authority
         run: |
           python scripts/build440_public_inventory_authority_regression.py
           node --check functions/api/tools.js
           node --check functions/api/supplies.js
-
       - name: Build 440 source gate before aggregate sync
-        run: python scripts/build440_product_inventory_tools_source_gate.py
-
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/build440_product_inventory_tools_source_gate.py 2>&1 | tee build440-source-gate-before.log
+      - name: Preserve pre-sync source gate diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build440-source-gate-before-${{ github.run_id }}
+          path: build440-source-gate-before.log
+          if-no-files-found: ignore
+          retention-days: 3
       - name: Exercise lot provenance aggregate sync
         run: python scripts/build440_sync_lot_provenance_full_schema.py
-
       - name: Exercise receiving aggregate sync
         run: python scripts/build440_sync_receiving_full_schema.py
-
       - name: Build 440 source gate after aggregate sync
-        run: python scripts/build440_product_inventory_tools_source_gate.py
-
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/build440_product_inventory_tools_source_gate.py 2>&1 | tee build440-source-gate-after.log
+      - name: Preserve post-sync source gate diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build440-source-gate-after-${{ github.run_id }}
+          path: build440-source-gate-after.log
+          if-no-files-found: ignore
+          retention-days: 3
       - name: Whitespace validation
         run: git diff --check
-
       - name: Report aggregate sync delta
         run: |
           git status --short
           git diff --stat -- database_full_schema.sql
-
       - name: Safety statement
         run: |
           echo 'Cloudflare/D1/R2/provider access: NONE'
