@@ -1,5 +1,6 @@
 // File: /functions/api/supplies.js
-// Build 244: D1 catalog_items is the runtime authority for supplies. Legacy JSON is read-only emergency fallback only when D1 itself cannot be read.
+// Build 440: catalog_items is the public publication registry; active site_item_inventory is the operational identity/metadata authority when linked.
+// Legacy JSON is read-only emergency fallback only when D1 itself cannot be read.
 
 import { captureRuntimeIncident } from "./_lib/adminAudit.js";
 
@@ -23,10 +24,11 @@ function normalizeFromCatalog(row) {
   let source = {};
   try { source = row.source_record_json ? JSON.parse(row.source_record_json) : {}; } catch { source = {}; }
   const rawName = row.name || source.item_name_suggested || source.name || source.display_name || source.title || source.example_image_file || 'Supply';
+  const inventoryId = Number(row.site_item_inventory_id || 0);
   return Object.assign({}, source, {
     id: source.id || row.source_key || row.catalog_item_id,
     slug: row.slug || source.slug || slugify(rawName),
-    item_name_suggested: source.item_name_suggested || rawName,
+    item_name_suggested: rawName,
     name: rawName,
     category: row.category || source.category || source.consumable_type || '',
     subcategory: row.subcategory || source.subcategory || source.type || '',
@@ -35,8 +37,10 @@ function normalizeFromCatalog(row) {
     notes: row.notes || source.notes || source.notes_public || source.how_we_use || '',
     image_url: row.image_url || source.image_url || source.image || source.src || '',
     source_key: row.source_key || source.source_key || '',
+    site_item_inventory_id: inventoryId || null,
+    inventory_linked: inventoryId > 0,
     updated_at: row.updated_at || null,
-    source: 'catalog_items'
+    source: inventoryId > 0 ? 'inventory+catalog_publication' : 'catalog_publication'
   });
 }
 
@@ -51,7 +55,7 @@ async function loadJsonFallback(request) {
         id: item.id || item.item_group_key_strict || item.item_group_key_loose || item.slug || `${slugify(item.item_name_suggested || item.name || 'supply')}-${index + 1}`,
         slug: item.slug || slugify(item.item_name_suggested || item.name || item.example_image_file || 'supply'),
         image_url: item.image_url || item.image || item.src || '',
-        source: 'json'
+        source: 'json_fallback'
       })),
       error: ''
     };
@@ -74,28 +78,45 @@ export async function onRequestGet(context) {
 
   if (db) {
     try {
-      const rows = normalizeResults(await db.prepare(`
-        SELECT catalog_item_id, source_key, slug, name, category, subcategory, item_type, short_description,
-               notes, image_url, amazon_url, source_record_json, updated_at
-        FROM catalog_items
-        WHERE item_kind = 'supply'
-          AND COALESCE(visible_public, 1) = 1
-          AND COALESCE(status, 'active') = 'active'
+      const result = await db.prepare(`
+        SELECT ci.catalog_item_id, ci.source_key, ci.slug,
+               COALESCE(NULLIF(TRIM(sii.item_name),''),ci.name) AS name,
+               COALESCE(NULLIF(TRIM(sii.category),''),ci.category) AS category,
+               ci.subcategory, ci.item_type, ci.short_description, ci.notes,
+               COALESCE(NULLIF(TRIM(sii.image_url),''),ci.image_url) AS image_url,
+               COALESCE(NULLIF(TRIM(sii.amazon_url),''),ci.amazon_url) AS amazon_url,
+               ci.source_record_json,
+               COALESCE(sii.updated_at,ci.updated_at) AS updated_at,
+               sii.site_item_inventory_id
+        FROM catalog_items ci
+        LEFT JOIN site_item_inventory sii
+          ON sii.site_item_inventory_id = (
+            SELECT sii2.site_item_inventory_id
+            FROM site_item_inventory sii2
+            WHERE COALESCE(sii2.is_active,1)=1
+              AND LOWER(TRIM(COALESCE(sii2.source_type,'')))='supply'
+              AND LOWER(TRIM(COALESCE(sii2.external_key,'')))=LOWER(TRIM(COALESCE(ci.source_key,'')))
+            ORDER BY sii2.site_item_inventory_id DESC
+            LIMIT 1
+          )
+        WHERE LOWER(TRIM(COALESCE(ci.item_kind,''))) = 'supply'
+          AND COALESCE(ci.visible_public, 1) = 1
+          AND COALESCE(ci.status, 'active') = 'active'
           AND (
             ? = ''
-            OR LOWER(COALESCE(name, '')) LIKE ?
-            OR LOWER(COALESCE(category, '')) LIKE ?
-            OR LOWER(COALESCE(subcategory, '')) LIKE ?
-            OR LOWER(COALESCE(item_type, '')) LIKE ?
-            OR LOWER(COALESCE(short_description, '')) LIKE ?
-            OR LOWER(COALESCE(notes, '')) LIKE ?
+            OR LOWER(COALESCE(NULLIF(TRIM(sii.item_name),''),ci.name,'')) LIKE ?
+            OR LOWER(COALESCE(NULLIF(TRIM(sii.category),''),ci.category,'')) LIKE ?
+            OR LOWER(COALESCE(ci.subcategory, '')) LIKE ?
+            OR LOWER(COALESCE(ci.item_type, '')) LIKE ?
+            OR LOWER(COALESCE(ci.short_description, '')) LIKE ?
+            OR LOWER(COALESCE(ci.notes, '')) LIKE ?
           )
-        ORDER BY COALESCE(sort_order, 0) ASC, LOWER(COALESCE(name, '')) ASC
+        ORDER BY COALESCE(ci.sort_order, 0) ASC, LOWER(COALESCE(NULLIF(TRIM(sii.item_name),''),ci.name,'')) ASC
         LIMIT ?
-      `).bind(query, like, like, like, like, like, like, limit).all());
-      items = rows.map(normalizeFromCatalog);
+      `).bind(query, like, like, like, like, like, like, limit).all();
+      items = normalizeResults(result).map(normalizeFromCatalog);
       d1ReadSucceeded = true;
-      authority = 'd1';
+      authority = 'inventory_with_catalog_publication';
     } catch (error) {
       warnings.push('d1_supply_read_failed');
       await captureRuntimeIncident(env, request, {
