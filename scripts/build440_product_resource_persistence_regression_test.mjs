@@ -5,10 +5,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const apiPath=path.join(root,'functions/api/admin/product-resources.js');
+const persistencePath=path.join(root,'functions/api/admin/_productResourcePersistence.js');
 const dataPath=path.join(root,'functions/api/admin/_productResourcesData.js');
 const apiSource=fs.readFileSync(apiPath,'utf8');
+const persistenceSource=fs.readFileSync(persistencePath,'utf8');
 const dataSource=fs.readFileSync(dataPath,'utf8');
-const { normalizeSubmittedLinks }=await import(pathToFileURL(apiPath).href);
+const { normalizeSubmittedLinks }=await import(pathToFileURL(persistencePath).href);
 const { resourcePreview }=await import(pathToFileURL(dataPath).href);
 
 const checks=[];
@@ -38,12 +40,13 @@ check(normalized[1].consumption_mode==='story_only','valid consumption mode surv
 const preview=resourcePreview({unit_cost_cents:100,on_hand_quantity:2,usage_units_per_stock_unit:10},{quantity_used:0,lot_size_units:0,consumption_mode:'per_unit'});
 check(preview.estimated_cost_per_product_cents===10 && preview.buildable_products===20,'read-side preview treats historical zero use-per-batch as safe default one');
 
-check(apiSource.includes("const identity = `${resourceKind}\\u0000${sourceKey.toLowerCase()}`"),'save dedupe identity is case-insensitive');
-check(apiSource.includes('const statements = [db.prepare(`DELETE FROM product_resource_links WHERE product_id = ?`).bind(productId)]'),'existing links are deleted inside the atomic statement list');
-check(apiSource.includes('try { await db.batch(statements); }'),'Product resource replacement executes as one D1 batch');
-check(!/DELETE FROM product_resource_links[^;]+\.run\(\)/s.test(apiSource),'Product resource replacement has no destructive pre-batch DELETE');
-check(apiSource.includes('INSERT INTO product_resource_ingredient_profiles') && apiSource.includes('SELECT product_resource_link_id') && apiSource.includes('FROM product_resource_links'),'Supply ingredient profile is linked inside the same atomic batch without a second write phase');
-check(apiSource.includes('const persistedLinks = await loadProductLinks(db, productId)'),'saved use/batch values are read back from D1 before response');
+check(apiSource.includes("from './_productResourcePersistence.js'"),'desktop Product resource endpoint uses the shared persistence authority');
+check(persistenceSource.includes("const identity = `${resourceKind}\\u0000${sourceKey.toLowerCase()}`"),'save dedupe identity is case-insensitive');
+check(persistenceSource.includes("db.prepare('DELETE FROM product_resource_links WHERE product_id = ?').bind(normalizedProductId)"),'existing links are deleted inside the atomic statement list');
+check(persistenceSource.includes('await db.batch(statements);'),'Product resource replacement executes as one D1 batch');
+check(!/DELETE FROM product_resource_links[^;]+\.run\(\)/s.test(persistenceSource),'shared Product resource replacement has no destructive pre-batch DELETE');
+check(persistenceSource.includes('INSERT INTO product_resource_ingredient_profiles') && persistenceSource.includes('SELECT product_resource_link_id') && persistenceSource.includes('FROM product_resource_links'),'Supply ingredient profile is linked inside the same atomic batch without a second write phase');
+check(apiSource.includes('const persistedLinks = await loadProductLinks(db, productId)'),'saved use/batch values are read back from D1 before desktop response');
 
 check(dataSource.includes("LOWER(TRIM(COALESCE(sii2.external_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))"),'linked Inventory lookup normalizes case and whitespace');
 check(dataSource.includes("LOWER(TRIM(COALESCE(ci2.source_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))"),'linked catalog fallback lookup normalizes case and whitespace');
