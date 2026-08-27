@@ -1,4 +1,4 @@
-# Build 440 gate revision 9 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and runtime contracts before handoff.
+# Build 440 gate revision 10 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and runtime contracts before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -96,7 +96,19 @@ jobs:
           retention-days: 3
 
       - name: Validate legacy Inventory case-normalization authority
-        run: python scripts/build243_inventory_resilience_regression.py
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/build243_inventory_resilience_regression.py 2>&1 | tee build243-normalization.log
+
+      - name: Preserve legacy normalization diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build243-normalization-${{ github.run_id }}
+          path: build243-normalization.log
+          if-no-files-found: ignore
+          retention-days: 3
 
       - name: Validate public Tool Supply Inventory authority
         run: |
