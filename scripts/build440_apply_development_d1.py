@@ -16,6 +16,7 @@ import sqlite3
 import subprocess
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "wrangler.toml"
@@ -38,7 +39,7 @@ VERIFICATIONS = (
 )
 
 
-def die(message: str, code: int = 2) -> "NoReturn":
+def die(message: str, code: int = 2) -> NoReturn:
     print(f"STOP: {message}", file=sys.stderr)
     raise SystemExit(code)
 
@@ -84,8 +85,16 @@ def npx_executable() -> str:
     return executable
 
 
-def run_query(sql: str, label: str) -> None:
-    args = [
+def build_wrangler_query_args(sql: str) -> list[str]:
+    """Build an unambiguous Wrangler query command on Windows and POSIX.
+
+    SQL is deliberately attached to the option as --command=<SQL>. A separate value that
+    begins with a SQL line comment (for example '-- Build 440 ...') can otherwise be parsed
+    by Wrangler/Yargs as another command-line option instead of as SQL.
+    """
+    if not sql.strip():
+        die("Refusing to execute an empty SQL statement.")
+    return [
         npx_executable(),
         "--yes",
         f"wrangler@{WRANGLER_VERSION}",
@@ -93,20 +102,22 @@ def run_query(sql: str, label: str) -> None:
         "execute",
         DATABASE_NAME,
         "--remote",
-        "--command",
-        sql,
+        f"--command={sql}",
         "--config",
         str(CONFIG),
         "--yes",
     ]
+
+
+def run_query(sql: str, label: str) -> None:
     print(f"\n--- {label} ---", flush=True)
-    result = subprocess.run(args, cwd=ROOT, check=False)
+    result = subprocess.run(build_wrangler_query_args(sql), cwd=ROOT, check=False)
     if result.returncode:
         print(
-            "\nThe D1 query path failed. No automatic retry was attempted.\n"
-            "If Cloudflare reports authentication code 10000 here as well, refresh the local\n"
-            "Wrangler login or use a Cloudflare API token with D1 Edit permission, then rerun.\n"
-            "Do not paste any token into chat.",
+            "\nThe D1 query command failed. No automatic retry was attempted.\n"
+            "The runner stopped before the next statement. Review the Wrangler error above;\n"
+            "the statement label identifies the exact file and statement number.\n"
+            "Do not paste Cloudflare tokens or credentials into chat.",
             file=sys.stderr,
         )
         raise SystemExit(result.returncode)
@@ -138,7 +149,7 @@ def main() -> int:
     assert_development_config()
     print("BUILD 440 DEVELOPMENT D1 GUARDED QUERY RUNNER")
     print(f"Database: {DATABASE_NAME} ({DATABASE_ID})")
-    print("Transport: Wrangler d1 execute --command / D1 query API")
+    print("Transport: Wrangler d1 execute --command=<SQL> / D1 query API")
     print("Bulk import transport: NOT USED")
     print("Automatic retries: NONE")
     print("R2/provider mutation: NONE")
