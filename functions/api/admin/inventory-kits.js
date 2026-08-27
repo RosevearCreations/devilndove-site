@@ -1,94 +1,178 @@
-// Build 249 — purchased kit breakdown, child inventory creation, provenance and allocated costing.
-import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+// Devil n Dove Build 440 — purchased-kit template + lot-aware opening API.
+// Build 249 tables remain canonical; stock opening delegates to inventoryKitService.
+import {
+  auditAdminAction,
+  captureRuntimeIncident,
+  getAdminUserFromRequest,
+  getDb,
+  jsonResponse,
+  normalizeText,
+} from '../_lib/adminAudit.js';
+import { openInventoryKit } from '../_lib/inventoryKitService.js';
 
-const json = (data, status=200) => jsonResponse(data,status);
-const rows = (r) => Array.isArray(r?.results) ? r.results : [];
-const num = (v,d=0) => Number.isFinite(Number(v)) ? Number(v) : d;
-const whole = (v) => Math.max(0, Math.floor(num(v)));
-const text = (v,n=500) => normalizeText(v).slice(0,n);
-const allowedClass = new Set(['raw_material','consumable','packaging','reusable_equipment','kit','component','finished_good','sample','waste','other']);
-const allowedMode = new Set(['exact','estimated','log_only','reusable']);
+const BUILD=440;
+const MAX_COMPONENTS=50;
+const CLASSES=new Set(['raw_material','consumable','packaging','reusable_equipment','kit','component','finished_good','sample','waste','other']);
+const MODES=new Set(['exact','estimated','log_only','reusable']);
+const SOURCES=new Set(['tool','supply','other']);
+const json=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store'});
+const rows=(result)=>Array.isArray(result?.results)?result.results:[];
+const num=(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback;
+const id=(value)=>{const n=Number(value||0);return Number.isInteger(n)&&n>0?n:0;};
+const text=(value,max=500)=>normalizeText(value).slice(0,max);
+
+function codedError(code,message,status=400){const error=new Error(message);error.code=code;error.status=status;return error;}
+function failure(error){const status=[400,401,403,404,409].includes(Number(error?.status))?Number(error.status):500;return json({ok:false,build:BUILD,code:error?.code||'inventory_kit_action_failed',error:String(error?.message||'Kit inventory action failed.')},status);}
 
 async function access(context){
-  const db=getDb(context.env); const adminUser=await getAdminUserFromRequest(context.request,context.env);
-  if(!adminUser) return {error:json({ok:false,error:'Unauthorized.'},401)};
+  const adminUser=await getAdminUserFromRequest(context.request,context.env);
+  if(!adminUser)return {response:json({ok:false,build:BUILD,error:'Admin access required.'},401)};
+  const db=getDb(context.env);
+  if(!db)return {response:json({ok:false,build:BUILD,error:'Database binding is not configured.'},500)};
   return {db,adminUser};
 }
-function slug(value){return text(value,120).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||'component';}
 
 async function load(db){
-  const items=rows(await db.prepare(`SELECT sii.site_item_inventory_id,sii.source_type,sii.external_key,sii.item_name,sii.category,sii.on_hand_quantity,sii.unit_cost_cents,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit,sii.supplier_name,sii.supplier_sku,COALESCE(p.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) inventory_class,COALESCE(p.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) lifecycle_mode,COALESCE(u.usage_tracking_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'exact' END) usage_tracking_mode FROM site_item_inventory sii LEFT JOIN inventory_item_profiles p ON p.site_item_inventory_id=sii.site_item_inventory_id LEFT JOIN site_inventory_usage_profiles u ON u.site_item_inventory_id=sii.site_item_inventory_id WHERE COALESCE(sii.is_active,1)=1 ORDER BY LOWER(sii.item_name),sii.site_item_inventory_id`).all());
-  const templates=rows(await db.prepare(`SELECT t.*,s.item_name kit_item_name,s.on_hand_quantity kit_on_hand_quantity,s.unit_cost_cents kit_unit_cost_cents,s.stock_unit_label kit_stock_unit_label FROM inventory_kit_templates t JOIN site_item_inventory s ON s.site_item_inventory_id=t.kit_inventory_item_id WHERE t.is_active=1 ORDER BY LOWER(t.template_name)`).all());
-  const components=rows(await db.prepare(`SELECT c.*,s.item_name linked_item_name,s.on_hand_quantity linked_on_hand_quantity FROM inventory_kit_template_components c LEFT JOIN site_item_inventory s ON s.site_item_inventory_id=c.component_inventory_item_id ORDER BY c.inventory_kit_template_id,c.sort_order,c.inventory_kit_template_component_id`).all());
-  const byTemplate=new Map(); for(const c of components){const k=Number(c.inventory_kit_template_id); if(!byTemplate.has(k))byTemplate.set(k,[]); byTemplate.get(k).push(c);}
-  const events=rows(await db.prepare(`SELECT e.*,t.template_name,s.item_name kit_item_name,(SELECT COUNT(*) FROM inventory_kit_open_components oc WHERE oc.inventory_kit_open_event_id=e.inventory_kit_open_event_id) component_count FROM inventory_kit_open_events e JOIN inventory_kit_templates t ON t.inventory_kit_template_id=e.inventory_kit_template_id JOIN site_item_inventory s ON s.site_item_inventory_id=e.kit_inventory_item_id ORDER BY e.opened_at DESC,e.inventory_kit_open_event_id DESC LIMIT 30`).all().catch(()=>({results:[]})));
-  return {items,templates:templates.map(t=>({...t,components:byTemplate.get(Number(t.inventory_kit_template_id))||[]})),events};
+  const items=rows(await db.prepare(`
+    SELECT sii.site_item_inventory_id,sii.source_type,sii.external_key,sii.item_name,sii.category,
+      sii.on_hand_quantity,sii.reserved_quantity,sii.incoming_quantity,sii.unit_cost_cents,
+      sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit,sii.supplier_name,sii.supplier_sku,
+      COALESCE(p.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) inventory_class,
+      COALESCE(p.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) lifecycle_mode,
+      COALESCE(u.usage_tracking_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'exact' END) usage_tracking_mode
+    FROM site_item_inventory sii
+    LEFT JOIN inventory_item_profiles p ON p.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN site_inventory_usage_profiles u ON u.site_item_inventory_id=sii.site_item_inventory_id
+    WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.source_type,'')))<>'product'
+    ORDER BY LOWER(COALESCE(sii.item_name,'')),sii.site_item_inventory_id
+    LIMIT 500
+  `).all());
+  const templates=rows(await db.prepare(`
+    SELECT t.*,s.item_name kit_item_name,s.source_type kit_source_type,
+      s.on_hand_quantity kit_on_hand_quantity,s.reserved_quantity kit_reserved_quantity,
+      s.unit_cost_cents kit_unit_cost_cents,s.stock_unit_label kit_stock_unit_label
+    FROM inventory_kit_templates t
+    JOIN site_item_inventory s ON s.site_item_inventory_id=t.kit_inventory_item_id
+    WHERE t.is_active=1
+    ORDER BY LOWER(t.template_name),t.inventory_kit_template_id
+    LIMIT 100
+  `).all());
+  const components=rows(await db.prepare(`
+    SELECT c.*,s.item_name linked_item_name,s.source_type linked_source_type,s.on_hand_quantity linked_on_hand_quantity
+    FROM inventory_kit_template_components c
+    LEFT JOIN site_item_inventory s ON s.site_item_inventory_id=c.component_inventory_item_id
+    WHERE c.inventory_kit_template_id IN (SELECT inventory_kit_template_id FROM inventory_kit_templates WHERE is_active=1)
+    ORDER BY c.inventory_kit_template_id,c.sort_order,c.inventory_kit_template_component_id
+    LIMIT 500
+  `).all());
+  const grouped=new Map();
+  for(const component of components){const key=Number(component.inventory_kit_template_id);if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(component);}
+  const events=rows(await db.prepare(`
+    SELECT e.*,t.template_name,s.item_name kit_item_name,
+      (SELECT COUNT(*) FROM inventory_kit_open_components oc WHERE oc.inventory_kit_open_event_id=e.inventory_kit_open_event_id) component_count
+    FROM inventory_kit_open_events e
+    JOIN inventory_kit_templates t ON t.inventory_kit_template_id=e.inventory_kit_template_id
+    JOIN site_item_inventory s ON s.site_item_inventory_id=e.kit_inventory_item_id
+    ORDER BY e.opened_at DESC,e.inventory_kit_open_event_id DESC
+    LIMIT 30
+  `).all());
+  return {items,templates:templates.map(template=>({...template,components:grouped.get(Number(template.inventory_kit_template_id))||[]})),events};
+}
+
+async function validateTemplate(db,body){
+  const kitId=id(body.kit_inventory_item_id);
+  if(!kitId)throw codedError('inventory_kit_parent_required','Choose the Inventory item that represents the purchased kit.');
+  const kit=await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id=? AND COALESCE(is_active,1)=1 LIMIT 1`).bind(kitId).first();
+  if(!kit)throw codedError('inventory_kit_parent_missing','The purchased-kit Inventory item was not found.',404);
+  if(text(kit.source_type,20).toLowerCase()==='product')throw codedError('inventory_kit_wrong_owner','Product stock cannot be configured as a purchased Inventory kit.',409);
+  const incoming=Array.isArray(body.components)?body.components:[];
+  if(!incoming.length)throw codedError('inventory_kit_components_required','Add at least one kit component.');
+  if(incoming.length>MAX_COMPONENTS)throw codedError('inventory_kit_component_limit',`A kit template is limited to ${MAX_COMPONENTS} components.`);
+  const shares=incoming.map(component=>Math.max(0,num(component.cost_share_percent))).filter(value=>value>0);
+  const shareTotal=shares.reduce((sum,value)=>sum+value,0);
+  const allocationMethod=shares.length?'percentage':'equal';
+  if(allocationMethod==='percentage'&&Math.abs(shareTotal-100)>0.05)throw codedError('inventory_kit_cost_share_invalid',`Component cost shares must total 100%. Current total: ${shareTotal.toFixed(2)}%.`);
+  const components=[];
+  for(let index=0;index<incoming.length;index+=1){
+    const candidate=incoming[index]||{};
+    const linkedId=id(candidate.component_inventory_item_id);
+    let linked=null;
+    if(linkedId){
+      linked=await db.prepare(`SELECT site_item_inventory_id,source_type,item_name FROM site_item_inventory WHERE site_item_inventory_id=? AND COALESCE(is_active,1)=1 LIMIT 1`).bind(linkedId).first();
+      if(!linked)throw codedError('inventory_kit_component_link_missing',`Component ${index+1} links to an Inventory item that no longer exists.`,409);
+      if(text(linked.source_type,20).toLowerCase()==='product')throw codedError('inventory_kit_component_wrong_owner',`Component ${index+1} links to Product stock. Purchased-kit components must use Supply/Tool Inventory.`,409);
+    }
+    const requestedSource=text(candidate.component_source_type,20).toLowerCase();
+    if(requestedSource==='product')throw codedError('inventory_kit_component_wrong_owner',`Component ${index+1} cannot use Product stock.`,409);
+    const source=linked?text(linked.source_type,20).toLowerCase():(SOURCES.has(requestedSource)?requestedSource:'supply');
+    const name=text(candidate.component_name,180)||text(linked?.item_name,180);
+    if(!name)throw codedError('inventory_kit_component_name_required',`Component ${index+1} needs a name or linked Inventory item.`);
+    const modeRaw=text(candidate.usage_tracking_mode,30).toLowerCase();
+    const mode=MODES.has(modeRaw)?modeRaw:(source==='tool'?'reusable':'exact');
+    const classRaw=text(candidate.inventory_class,40);
+    const inventoryClass=CLASSES.has(classRaw)?classRaw:(source==='tool'?'reusable_equipment':'component');
+    components.push({
+      linkedId,
+      name,
+      source,
+      mode,
+      inventoryClass,
+      category:text(candidate.component_category,120).toLowerCase()||null,
+      quantity:Math.max(0.0001,num(candidate.quantity_per_kit,1)),
+      stockUnit:text(candidate.stock_unit_label,40).toLowerCase()||'unit',
+      usageUnit:text(candidate.usage_unit_label,40).toLowerCase()||'unit',
+      perStock:Math.max(0.001,num(candidate.usage_units_per_stock_unit,1)),
+      share:Math.max(0,num(candidate.cost_share_percent)),
+      supplierSku:text(candidate.supplier_sku,180)||null,
+      notes:text(candidate.notes,500)||null,
+      sortOrder:index+1,
+    });
+  }
+  return {kitId,kit,name:text(body.template_name,180)||`${kit.item_name} breakdown`,notes:text(body.notes,1000)||null,allocationMethod,components};
+}
+
+async function saveTemplate(context,granted,body){
+  const planned=await validateTemplate(granted.db,body);
+  const templateId=id(body.inventory_kit_template_id);
+  const statements=[];
+  if(templateId){
+    statements.push(granted.db.prepare(`UPDATE inventory_kit_templates SET kit_inventory_item_id=?,template_name=?,allocation_method=?,notes=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE inventory_kit_template_id=? AND is_active=1`).bind(planned.kitId,planned.name,planned.allocationMethod,planned.notes,granted.adminUser.user_id,templateId));
+  }else{
+    statements.push(granted.db.prepare(`INSERT INTO inventory_kit_templates(kit_inventory_item_id,template_name,allocation_method,notes,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(kit_inventory_item_id) DO UPDATE SET template_name=excluded.template_name,allocation_method=excluded.allocation_method,notes=excluded.notes,is_active=1,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(planned.kitId,planned.name,planned.allocationMethod,planned.notes,granted.adminUser.user_id,granted.adminUser.user_id));
+  }
+  const templateSelector=templateId?'?':'(SELECT inventory_kit_template_id FROM inventory_kit_templates WHERE kit_inventory_item_id=?)';
+  statements.push(granted.db.prepare(`DELETE FROM inventory_kit_template_components WHERE inventory_kit_template_id=${templateSelector}`).bind(templateId||planned.kitId));
+  for(const component of planned.components){
+    statements.push(granted.db.prepare(`INSERT INTO inventory_kit_template_components(inventory_kit_template_id,component_inventory_item_id,component_name,component_source_type,component_category,quantity_per_kit,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,usage_tracking_mode,inventory_class,cost_share_percent,supplier_sku,notes,sort_order,created_at,updated_at) SELECT inventory_kit_template_id,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP FROM inventory_kit_templates WHERE ${templateId?'inventory_kit_template_id=?':'kit_inventory_item_id=?'}`).bind(component.linkedId||null,component.name,component.source,component.category,component.quantity,component.stockUnit,component.usageUnit,component.perStock,component.mode,component.inventoryClass,component.share,component.supplierSku,component.notes,component.sortOrder,templateId||planned.kitId));
+  }
+  statements.push(granted.db.prepare(`INSERT INTO inventory_item_profiles(site_item_inventory_id,inventory_class,lifecycle_mode,lot_tracking_recommended,notes,updated_by_user_id,created_at,updated_at) VALUES (?,'kit','kit',1,'Purchased kit/bundle; open it to release child Inventory.',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id) DO UPDATE SET inventory_class='kit',lifecycle_mode='kit',lot_tracking_recommended=1,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(planned.kitId,granted.adminUser.user_id));
+  try{await granted.db.batch(statements);}catch(error){throw codedError('inventory_kit_template_atomic_save_failed',`Kit template was not saved because its transaction failed. ${String(error?.message||'').slice(0,220)}`,409);}
+  const saved=await granted.db.prepare(`SELECT inventory_kit_template_id FROM inventory_kit_templates WHERE ${templateId?'inventory_kit_template_id=?':'kit_inventory_item_id=?'} LIMIT 1`).bind(templateId||planned.kitId).first();
+  const savedId=id(saved?.inventory_kit_template_id);
+  await auditAdminAction(context.env,context.request,granted.adminUser,{action_type:'inventory_kit_template_save',target_type:'inventory_kit_template',target_id:savedId||null,target_key:planned.name,details:{kit_inventory_item_id:planned.kitId,component_count:planned.components.length,allocation_method:planned.allocationMethod}});
+  return json({ok:true,build:BUILD,message:'Kit breakdown template saved.',...await load(granted.db)});
 }
 
 export async function onRequestGet(context){
-  const a=await access(context); if(a.error)return a.error;
-  try{return json({ok:true,...await load(a.db)});}catch(error){return json({ok:false,error:error?.message||'Kit inventory could not load.'},500);}
-}
-
-async function ensureComponentItem(db, adminUser, kitTemplateId, component){
-  let id=whole(component.component_inventory_item_id);
-  if(id){const found=await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id=?`).bind(id).first(); if(found)return found;}
-  const name=text(component.component_name,180); if(!name)throw new Error('Every kit component needs a name.');
-  const sourceType=['tool','supply','product','other'].includes(text(component.component_source_type,20).toLowerCase())?text(component.component_source_type,20).toLowerCase():'supply';
-  const key=`kit-${kitTemplateId}-${whole(component.inventory_kit_template_component_id)}-${slug(name)}`;
-  await db.prepare(`INSERT OR IGNORE INTO site_item_inventory(source_type,external_key,item_name,category,on_hand_quantity,unit_cost_cents,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,supplier_sku,is_active,created_at,updated_at) VALUES (?,?,?,?,0,0,?,?,?,?,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(sourceType,key,name,text(component.component_category,120).toLowerCase()||null,text(component.stock_unit_label,40).toLowerCase()||'unit',text(component.usage_unit_label,40).toLowerCase()||'unit',Math.max(.001,num(component.usage_units_per_stock_unit,1)),text(component.supplier_sku,180)||null).run();
-  const found=await db.prepare(`SELECT * FROM site_item_inventory WHERE source_type=? AND external_key=?`).bind(sourceType,key).first();
-  if(!found)throw new Error(`Could not create inventory component ${name}.`);
-  id=Number(found.site_item_inventory_id);
-  await db.prepare(`UPDATE inventory_kit_template_components SET component_inventory_item_id=?,updated_at=CURRENT_TIMESTAMP WHERE inventory_kit_template_component_id=?`).bind(id,whole(component.inventory_kit_template_component_id)).run();
-  const inventoryClass=allowedClass.has(text(component.inventory_class,40))?text(component.inventory_class,40):'component';
-  const lifecycle=sourceType==='tool'||text(component.usage_tracking_mode,30)==='reusable'?'reusable':'consumable';
-  await db.prepare(`INSERT INTO inventory_item_profiles(site_item_inventory_id,inventory_class,lifecycle_mode,lot_tracking_recommended,source_material_recommended,notes,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,'Created from opened purchased kit.',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id) DO UPDATE SET inventory_class=excluded.inventory_class,lifecycle_mode=excluded.lifecycle_mode,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(id,inventoryClass,lifecycle,sourceType==='supply'?1:0,sourceType==='supply'?1:0,adminUser.user_id).run();
-  const mode=allowedMode.has(text(component.usage_tracking_mode,30))?text(component.usage_tracking_mode,30):(sourceType==='tool'?'reusable':'exact');
-  await db.prepare(`INSERT INTO site_inventory_usage_profiles(site_item_inventory_id,usage_tracking_mode,minimum_usage_increment,notes,updated_by_user_id,created_at,updated_at) VALUES (?,?,0.001,'Created from kit component.',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id) DO UPDATE SET usage_tracking_mode=excluded.usage_tracking_mode,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(id,mode,adminUser.user_id).run();
-  return await db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id=?`).bind(id).first();
+  const granted=await access(context);if(granted.response)return granted.response;
+  try{return json({ok:true,build:BUILD,owner:'inventory',request_time_schema_repair:false,background_polling:false,...await load(granted.db)});}
+  catch(error){await captureRuntimeIncident(context.env,context.request,error,{area:'inventory_kits',operation:'get'}).catch(()=>{});return failure(error);}
 }
 
 export async function onRequestPost(context){
-  const a=await access(context); if(a.error)return a.error;
-  let body={}; try{body=await context.request.json();}catch{return json({ok:false,error:'Invalid JSON body.'},400)}
+  const granted=await access(context);if(granted.response)return granted.response;
+  let body={};try{body=await context.request.json();}catch{return json({ok:false,build:BUILD,code:'invalid_json',error:'Invalid JSON body.'},400);}
   const action=text(body.action,60).toLowerCase();
   try{
-    if(action==='save_template'){
-      const kitId=whole(body.kit_inventory_item_id); if(!kitId)throw new Error('Choose the inventory item that represents the purchased kit.');
-      const kit=await a.db.prepare(`SELECT * FROM site_item_inventory WHERE site_item_inventory_id=?`).bind(kitId).first(); if(!kit)throw new Error('The kit inventory item was not found.');
-      const name=text(body.template_name,180)||`${kit.item_name} breakdown`;
-      const components=Array.isArray(body.components)?body.components:[]; if(!components.length)throw new Error('Add at least one kit component.');
-      const positiveShares=components.map(c=>Math.max(0,num(c.cost_share_percent))).filter(v=>v>0); const shareTotal=positiveShares.reduce((a,b)=>a+b,0);
-      const method=positiveShares.length?'percentage':'equal'; if(method==='percentage'&&Math.abs(shareTotal-100)>0.05)throw new Error(`Component cost shares must total 100%. Current total: ${shareTotal.toFixed(2)}%.`);
-      let templateId=whole(body.inventory_kit_template_id);
-      if(templateId){await a.db.prepare(`UPDATE inventory_kit_templates SET kit_inventory_item_id=?,template_name=?,allocation_method=?,notes=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE inventory_kit_template_id=?`).bind(kitId,name,method,text(body.notes,1000)||null,a.adminUser.user_id,templateId).run(); await a.db.prepare(`DELETE FROM inventory_kit_template_components WHERE inventory_kit_template_id=?`).bind(templateId).run();}
-      else {const r=await a.db.prepare(`INSERT INTO inventory_kit_templates(kit_inventory_item_id,template_name,allocation_method,notes,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(kit_inventory_item_id) DO UPDATE SET template_name=excluded.template_name,allocation_method=excluded.allocation_method,notes=excluded.notes,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(kitId,name,method,text(body.notes,1000)||null,a.adminUser.user_id,a.adminUser.user_id).run(); templateId=Number(r?.meta?.last_row_id||0); if(!templateId)templateId=Number((await a.db.prepare(`SELECT inventory_kit_template_id FROM inventory_kit_templates WHERE kit_inventory_item_id=?`).bind(kitId).first())?.inventory_kit_template_id||0); await a.db.prepare(`DELETE FROM inventory_kit_template_components WHERE inventory_kit_template_id=?`).bind(templateId).run();}
-      let order=0; for(const c of components){order++; const cname=text(c.component_name,180)||text((await a.db.prepare(`SELECT item_name FROM site_item_inventory WHERE site_item_inventory_id=?`).bind(whole(c.component_inventory_item_id)).first().catch(()=>null))?.item_name,180); if(!cname)throw new Error(`Component ${order} needs a name or linked inventory item.`); const source=['tool','supply','product','other'].includes(text(c.component_source_type,20))?text(c.component_source_type,20):'supply'; const mode=allowedMode.has(text(c.usage_tracking_mode,30))?text(c.usage_tracking_mode,30):(source==='tool'?'reusable':'exact'); const cls=allowedClass.has(text(c.inventory_class,40))?text(c.inventory_class,40):(source==='tool'?'reusable_equipment':'component'); await a.db.prepare(`INSERT INTO inventory_kit_template_components(inventory_kit_template_id,component_inventory_item_id,component_name,component_source_type,component_category,quantity_per_kit,stock_unit_label,usage_unit_label,usage_units_per_stock_unit,usage_tracking_mode,inventory_class,cost_share_percent,supplier_sku,notes,sort_order,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(templateId,whole(c.component_inventory_item_id)||null,cname,source,text(c.component_category,120).toLowerCase()||null,Math.max(.0001,num(c.quantity_per_kit,1)),text(c.stock_unit_label,40).toLowerCase()||'unit',text(c.usage_unit_label,40).toLowerCase()||'unit',Math.max(.001,num(c.usage_units_per_stock_unit,1)),mode,cls,Math.max(0,num(c.cost_share_percent)),text(c.supplier_sku,180)||null,text(c.notes,500)||null,order).run(); }
-      await a.db.prepare(`INSERT INTO inventory_item_profiles(site_item_inventory_id,inventory_class,lifecycle_mode,lot_tracking_recommended,notes,updated_by_user_id,created_at,updated_at) VALUES (?,'kit','kit',1,'Purchased kit/bundle; open it to release child inventory.',?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id) DO UPDATE SET inventory_class='kit',lifecycle_mode='kit',updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(kitId,a.adminUser.user_id).run();
-      await auditAdminAction(context.env,context.request,a.adminUser,{action_type:'inventory_kit_template_save',target_type:'inventory_kit_template',target_id:templateId,target_key:name,details:{kit_inventory_item_id:kitId,component_count:components.length,allocation_method:method}});
-      return json({ok:true,message:'Kit breakdown template saved.',...await load(a.db)});
-    }
+    if(action==='save_template')return await saveTemplate(context,granted,body);
     if(action==='open_kit'){
-      const templateId=whole(body.inventory_kit_template_id); const qty=Math.max(.0001,num(body.kit_quantity_opened,1)); if(!templateId)throw new Error('Choose a kit template.');
-      const template=await a.db.prepare(`SELECT t.*,s.item_name,s.source_type,s.external_key,s.on_hand_quantity,s.reserved_quantity,s.incoming_quantity,s.unit_cost_cents FROM inventory_kit_templates t JOIN site_item_inventory s ON s.site_item_inventory_id=t.kit_inventory_item_id WHERE t.inventory_kit_template_id=? AND t.is_active=1`).bind(templateId).first(); if(!template)throw new Error('Kit template was not found.');
-      if(num(template.on_hand_quantity)<qty)throw new Error(`Only ${num(template.on_hand_quantity)} kit(s) are on hand; ${qty} requested.`);
-      const comps=rows(await a.db.prepare(`SELECT * FROM inventory_kit_template_components WHERE inventory_kit_template_id=? ORDER BY sort_order,inventory_kit_template_component_id`).bind(templateId).all()); if(!comps.length)throw new Error('This kit has no components.');
-      const shareCount=comps.length; const resolved=[]; for(const c of comps){const item=await ensureComponentItem(a.db,a.adminUser,templateId,c); resolved.push({...c,item});}
-      const openKey=`kit-open-${Date.now()}-${Math.random().toString(36).slice(2,10)}`; const kitUnit=Math.max(0,whole(template.unit_cost_cents)); const kitTotal=Math.round(kitUnit*qty); const statements=[];
-      statements.push(a.db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=on_hand_quantity-?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=? AND on_hand_quantity>=?`).bind(qty,template.kit_inventory_item_id,qty));
-      statements.push(a.db.prepare(`INSERT INTO inventory_kit_open_events(open_key,inventory_kit_template_id,kit_inventory_item_id,kit_quantity_opened,kit_unit_cost_cents,kit_total_cost_cents,source_lot_code,note,opened_by_user_id,opened_at) VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(openKey,templateId,template.kit_inventory_item_id,qty,kitUnit,kitTotal,text(body.source_lot_code,120)||null,text(body.note,1000)||null,a.adminUser.user_id));
-      let allocatedSoFar=0;
-      resolved.forEach((c,i)=>{const addQty=Math.max(0,num(c.quantity_per_kit))*qty; const pct=template.allocation_method==='percentage'?Math.max(0,num(c.cost_share_percent))/100:1/shareCount; let allocated=i===resolved.length-1?kitTotal-allocatedSoFar:Math.round(kitTotal*pct); if(allocated<0)allocated=0; allocatedSoFar+=allocated; const oldQty=Math.max(0,num(c.item.on_hand_quantity)); const oldCost=Math.max(0,whole(c.item.unit_cost_cents)); const newQty=oldQty+addQty; const newUnit=newQty>0?Math.round(((oldQty*oldCost)+allocated)/newQty):oldCost; const compUnit=addQty>0?Math.round(allocated/addQty):0;
-        statements.push(a.db.prepare(`UPDATE site_item_inventory SET on_hand_quantity=?,unit_cost_cents=?,updated_at=CURRENT_TIMESTAMP WHERE site_item_inventory_id=?`).bind(newQty,newUnit,c.item.site_item_inventory_id));
-        statements.push(a.db.prepare(`INSERT INTO inventory_kit_open_components(inventory_kit_open_event_id,inventory_kit_template_component_id,component_inventory_item_id,quantity_added,allocated_cost_cents,component_unit_cost_cents,previous_on_hand_quantity,new_on_hand_quantity,created_at) SELECT inventory_kit_open_event_id,?,?,?,?,?,?,?,CURRENT_TIMESTAMP FROM inventory_kit_open_events WHERE open_key=?`).bind(c.inventory_kit_template_component_id,c.item.site_item_inventory_id,addQty,allocated,compUnit,oldQty,newQty,openKey));
-        statements.push(a.db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(c.item.site_item_inventory_id,c.item.source_type,c.item.external_key,c.item.item_name,addQty,oldQty,newQty,num(c.item.reserved_quantity),num(c.item.reserved_quantity),num(c.item.incoming_quantity),num(c.item.incoming_quantity),`Released from purchased kit: ${template.item_name}. Allocated cost ${(allocated/100).toFixed(2)} CAD.`,a.adminUser.user_id));
-      });
-      statements.push(a.db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(template.kit_inventory_item_id,template.source_type,template.external_key,template.item_name,-qty,num(template.on_hand_quantity),num(template.on_hand_quantity)-qty,num(template.reserved_quantity),num(template.reserved_quantity),num(template.incoming_quantity),num(template.incoming_quantity),`Opened purchased kit into ${resolved.length} component inventory item(s).`,a.adminUser.user_id));
-      if(typeof a.db.batch==='function')await a.db.batch(statements); else for(const s of statements)await s.run();
-      await auditAdminAction(context.env,context.request,a.adminUser,{action_type:'inventory_kit_open',target_type:'inventory_kit_template',target_id:templateId,target_key:template.template_name,details:{kit_quantity_opened:qty,component_count:resolved.length,kit_total_cost_cents:kitTotal,source_lot_code:text(body.source_lot_code,120)}});
-      return json({ok:true,message:`Opened ${qty} kit(s). Wax, colours, fragrance, hardware and reusable tools now remain as their own inventory balances.`,...await load(a.db)});
+      const result=await openInventoryKit(granted.db,granted.adminUser,body);
+      await auditAdminAction(context.env,context.request,granted.adminUser,{action_type:'inventory_kit_open',target_type:'inventory_kit_template',target_id:id(body.inventory_kit_template_id)||null,target_key:result.open_key,details:{kit_quantity_opened:result.kit_quantity_opened,component_count:result.component_count,kit_total_cost_cents:result.kit_total_cost_cents,parent_lot_allocation_count:Array.isArray(result.parent_lot_allocations)?result.parent_lot_allocations.length:0}});
+      return json({ok:true,build:BUILD,...result,...await load(granted.db)});
     }
-    return json({ok:false,error:'Unsupported kit inventory action.'},400);
-  }catch(error){await captureRuntimeIncident(context.env,context.request,{incident_scope:'inventory_kits',incident_code:'inventory_kit_action_failed',severity:'warning',message:error?.message||'Kit inventory action failed.',related_user_id:a.adminUser.user_id,details:{action,error:String(error?.stack||error)}}).catch(()=>null); return json({ok:false,error:error?.message||'Kit inventory action failed.'},400);}
+    return json({ok:false,build:BUILD,code:'unsupported_action',error:'Unsupported kit inventory action.'},400);
+  }catch(error){
+    await captureRuntimeIncident(context.env,context.request,error,{area:'inventory_kits',operation:action||'post'}).catch(()=>{});
+    return failure(error);
+  }
 }
