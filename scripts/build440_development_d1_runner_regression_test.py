@@ -23,15 +23,53 @@ def main() -> int:
     text = RUNNER.read_text(encoding='utf-8') if RUNNER.exists() else ''
     runner = load_runner() if text else None
 
-    comment_sql = '-- Devil n Dove Build 440 migration\nPRAGMA foreign_keys = ON;'
     command_arg_ok = False
     no_standalone_command_option = False
+    leading_comment_stripped = False
+    pragma_skipped = False
+    interior_double_dash_preserved = False
+    all_files_preflight = False
+    migration_pragma_skip_count = False
+    trigger_uppercase_guard = False
+
     if runner is not None:
+        normalized, reason = runner.normalize_remote_statement(
+            '-- Build 440 comment\n-- second comment\nCREATE TABLE IF NOT EXISTS x(id INTEGER);'
+        )
+        leading_comment_stripped = normalized == 'CREATE TABLE IF NOT EXISTS x(id INTEGER);' and reason is None
+
+        pragma_sql, pragma_reason = runner.normalize_remote_statement(
+            '-- Build 440 comment\nPRAGMA foreign_keys = ON;'
+        )
+        pragma_skipped = pragma_sql is None and pragma_reason == 'D1 already enforces foreign keys'
+
+        string_sql = "INSERT INTO x(id) SELECT 1 WHERE '-- preserved inside string' <> '';"
+        normalized_string, _ = runner.normalize_remote_statement(string_sql)
+        interior_double_dash_preserved = normalized_string == string_sql
+
         with patch.object(runner, 'npx_executable', return_value='npx.cmd'):
-            args = runner.build_wrangler_query_args(comment_sql)
+            args = runner.build_wrangler_query_args('CREATE TABLE IF NOT EXISTS x(id INTEGER);')
         command_args = [arg for arg in args if arg.startswith('--command=')]
-        command_arg_ok = len(command_args) == 1 and command_args[0] == f'--command={comment_sql}'
+        command_arg_ok = len(command_args) == 1 and command_args[0] == '--command=CREATE TABLE IF NOT EXISTS x(id INTEGER);'
         no_standalone_command_option = '--command' not in args
+
+        try:
+            skip_count = 0
+            trigger_ok = True
+            for filename in (*runner.MIGRATIONS, *runner.VERIFICATIONS):
+                prepared, skipped = runner.prepared_remote_statements(filename)
+                if not prepared:
+                    raise AssertionError(f'no prepared statements for {filename}')
+                if filename in runner.MIGRATIONS:
+                    skip_count += sum('D1 already enforces foreign keys' in item for item in skipped)
+                for statement in prepared:
+                    if statement.lstrip().upper().startswith('CREATE TRIGGER'):
+                        trigger_ok = trigger_ok and ('BEGIN' in statement) and ('END;' in statement)
+            all_files_preflight = True
+            migration_pragma_skip_count = skip_count == 4
+            trigger_uppercase_guard = trigger_ok
+        except SystemExit:
+            all_files_preflight = False
 
     checks = [
         ('runner exists', bool(text)),
@@ -39,7 +77,15 @@ def main() -> int:
         ('runner hard-codes exact Development D1 id', 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' in text),
         ('runner refuses Production targets', 'Production target detected' in text and 'Production mutation capability: NONE' in text),
         ('runner uses Wrangler query command transport', 'f"--command={sql}"' in text and 'D1 query API' in text),
-        ('runner binds SQL to --command option so leading SQL comments cannot become CLI options', command_arg_ok and no_standalone_command_option),
+        ('runner binds SQL to --command option', command_arg_ok and no_standalone_command_option),
+        ('runner strips leading SQL comments before remote transport', leading_comment_stripped),
+        ('runner skips redundant PRAGMA foreign_keys = ON for D1', pragma_skipped),
+        ('runner preserves -- text inside SQL string bodies', interior_double_dash_preserved),
+        ('all migration and verification files preflight under D1 remote normalization', all_files_preflight),
+        ('exactly four migration foreign-key pragmas are deliberately skipped', migration_pragma_skip_count),
+        ('remote trigger statements pass uppercase BEGIN/END guard', trigger_uppercase_guard),
+        ('runner blocks explicit transaction control', 'Refusing explicit transaction-control statement' in text),
+        ('runner guards Windows command length', 'WINDOWS_SAFE_COMMAND_LIMIT' in text),
         ('runner does not invoke bulk file import', '"--file"' not in text),
         ('runner performs read-only auth probe before mutations', 'build440_development_query_auth_probe' in text and 'auth_probe()' in text),
         ('runner uses SQLite completeness parser for trigger-safe splitting', 'sqlite3.complete_statement' in text),
@@ -72,8 +118,10 @@ def main() -> int:
             print(' -', failure)
         return 1
     print(f'\nPASS ({len(checks)}/{len(checks)})')
-    print('Remote execution transport: QUERY / --command=<SQL> / NO BULK IMPORT')
-    print('Leading SQL comment argument ambiguity: REGRESSED / BLOCKED')
+    print('Remote execution transport: QUERY / NORMALIZED SQL / --command=<SQL> / NO BULK IMPORT')
+    print('Leading SQL comments: STRIPPED')
+    print('PRAGMA foreign_keys = ON: SKIPPED / D1 DEFAULT ENFORCEMENT')
+    print('Remote trigger casing: GUARDED')
     return 0
 
 
