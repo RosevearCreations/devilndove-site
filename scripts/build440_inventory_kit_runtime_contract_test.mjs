@@ -65,8 +65,10 @@ const db=new FakeD1();const admin={user_id:1};
 const opened=await openInventoryKit(db,admin,{inventory_kit_template_id:7,kit_quantity_opened:1,note:'Runtime contract opening'});
 check(opened.component_count===2 && opened.parent_lot_allocations.length===1,'kit opening plans exact parent lot allocation');
 check(db.batches.length===1,'linked-component kit opening is one atomic stock transaction');
-const openBatch=db.batches[0].map(s=>s.sql).join('\n');
-check(openBatch.includes('UPDATE inventory_purchase_lots') && openBatch.includes('KIT-B440-'),'opening batch depletes parent lot and creates child Supply lot');
+const openStatements=db.batches[0];
+const openBatch=openStatements.map(s=>s.sql).join('\n');
+const openBindings=openStatements.flatMap(s=>s.bindings);
+check(openBatch.includes('UPDATE inventory_purchase_lots') && openBatch.includes('INSERT INTO inventory_purchase_lots') && openBindings.some(v=>String(v).startsWith('KIT-B440-')),'opening batch depletes parent lot and creates parameter-bound child Supply lot');
 check(openBatch.includes('inventory_kit_open_events') && openBatch.includes('inventory_kit_open_components'),'opening batch includes provenance event and component evidence');
 check(openBatch.includes('site_inventory_movements'),'opening batch includes parent/child Inventory movement evidence');
 
