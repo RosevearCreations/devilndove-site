@@ -60,7 +60,11 @@ for forbidden in ['ensureSiteInventorySchema(', 'PRAGMA table_info', 'CREATE TAB
 
 # Admin page does not spend critical startup capacity on public social/analytics/route usage.
 require('js/main.js', "startsWith('/admin/')) return;")
-require('public/js/site-analytics.js', "!path.startsWith('/admin/')")
+analytics = text('public/js/site-analytics.js')
+if "const isAdmin = path === '/admin' || path.startsWith('/admin/');" not in analytics:
+    errors.append('site-analytics.js does not define the current admin-path exclusion guard.')
+if 'if (isAdmin) return false;' not in analytics or 'if (isAdmin) return { ok: true, skipped: true };' not in analytics:
+    errors.append('site-analytics.js does not apply the admin exclusion to page-view and POST tracking paths.')
 route_usage = text('public/js/admin-route-usage.js')
 if 'requestIdleCallback' not in route_usage and 'setTimeout' not in route_usage:
     errors.append('admin-route-usage.js does not defer route telemetry.')
@@ -74,10 +78,11 @@ require('css/styles.css', '#siteInventorySaveButton')
 # Migration identity and required lower-case/identity controls.
 numbered = text('database_build243_inventory_resilience_case_normalization.sql')
 current = text('database_upgrade_current_pass.sql')
-# Historical regression: current upgrade advances on later builds. Only require byte identity
-# while Build 243 itself is still the active current migration.
-if not any(marker in current for marker in ['build244_inventory_authority_fractional_usage','build245_admin_media_resilience','build246_product_project_production_packaging']) and numbered != current:
-    errors.append('Build 243 numbered migration and database_upgrade_current_pass.sql differ while Build 243 is current.')
+# Historical regression: require byte identity only if the current-pass file itself is explicitly Build 243.
+# Later current-pass builds are expected to differ and must not be inferred from a hard-coded list of future build markers.
+current_header = '\n'.join(current.splitlines()[:3]).lower()
+if 'build 243' in current_header and numbered != current:
+    errors.append('Build 243 numbered migration and database_upgrade_current_pass.sql differ while the current-pass header explicitly identifies Build 243.')
 for marker in [
     'idx_site_item_inventory_identity_lower_active',
     "site.inventory.classification_case_policy",
