@@ -1,4 +1,4 @@
-# Build 440 gate revision 2 — validate current Product deletion/material-review contract before handoff.
+# Build 440 gate revision 3 — validate current Product deletion/material-review contract and guarded Development D1 runner before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -36,6 +36,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+
+      - name: Compile guarded Development D1 runner
+        run: python -m py_compile scripts/build440_apply_development_d1.py
+
+      - name: Validate guarded Development D1 runner transport policy
+        run: python scripts/build440_development_d1_runner_regression_test.py
 
       - name: Build 440 source gate before aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
