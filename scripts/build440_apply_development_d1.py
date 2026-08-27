@@ -2,8 +2,15 @@
 """Build 440 guarded Development D1 migration + verification runner.
 
 This runner deliberately avoids Wrangler's bulk-import transport. It first proves the
-normal D1 query path with a read-only SELECT, then applies each complete SQLite statement
-from the four Build 440 migrations to devilndove-dev only. There are no automatic retries.
+normal D1 query path with a read-only SELECT, preflights every remote statement, then
+applies the Build 440 lot/receiving migrations to devilndove-dev only.
+
+Remote execution is D1-aware:
+- leading SQL comments are removed before transport;
+- PRAGMA foreign_keys = ON is skipped because D1 already enforces foreign keys;
+- explicit transaction-control statements are rejected;
+- trigger statements must use uppercase BEGIN for the current D1 remote splitter;
+- there are no automatic retries.
 
 Production is not a supported target.
 """
@@ -23,6 +30,7 @@ CONFIG = ROOT / "wrangler.toml"
 DATABASE_NAME = "devilndove-dev"
 DATABASE_ID = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
 WRANGLER_VERSION = "4.126.0"
+WINDOWS_SAFE_COMMAND_LIMIT = 24000
 
 MIGRATIONS = (
     "database_build440_product_inventory_lot_provenance.sql",
@@ -62,7 +70,7 @@ def strip_comment_only_tail(text: str) -> str:
 
 
 def split_complete_statements(path: Path) -> list[str]:
-    """Split SQL with SQLite's own completeness parser so trigger bodies stay intact."""
+    """Split SQL with SQLite's completeness parser so trigger bodies remain intact."""
     raw = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
     statements: list[str] = []
     buffer: list[str] = []
@@ -78,6 +86,96 @@ def split_complete_statements(path: Path) -> list[str]:
     return statements
 
 
+def strip_leading_sql_comments(sql: str) -> str:
+    """Remove only comments that occur before the statement itself.
+
+    This intentionally does not rewrite comments or '--' text inside the SQL body/string
+    literals. It repeatedly removes leading line/block comments plus surrounding whitespace.
+    """
+    text = sql.replace("\r\n", "\n").replace("\r", "\n").lstrip()
+    while text:
+        if text.startswith("--"):
+            newline = text.find("\n")
+            if newline < 0:
+                return ""
+            text = text[newline + 1 :].lstrip()
+            continue
+        if text.startswith("/*"):
+            close = text.find("*/", 2)
+            if close < 0:
+                die("Remote SQL contains an unterminated leading block comment.")
+            text = text[close + 2 :].lstrip()
+            continue
+        break
+    return text.strip()
+
+
+def normalize_remote_statement(sql: str) -> tuple[str | None, str | None]:
+    """Return D1-safe SQL or a deliberate skip reason for a local-only directive."""
+    statement = strip_leading_sql_comments(sql)
+    if not statement:
+        return None, "comment-only"
+
+    compact = re.sub(r"\s+", " ", statement).strip()
+    if re.fullmatch(r"PRAGMA\s+foreign_keys\s*=\s*(?:ON|1)\s*;?", compact, flags=re.I):
+        return None, "D1 already enforces foreign keys"
+    if re.match(r"^PRAGMA\s+foreign_keys\s*=", compact, flags=re.I):
+        die(f"Refusing unsupported remote foreign-key mode change: {compact}")
+
+    if re.match(r"^(BEGIN(?:\s+TRANSACTION)?|COMMIT|ROLLBACK)\b", compact, flags=re.I):
+        die(f"Refusing explicit transaction-control statement on per-statement D1 runner: {compact[:120]}")
+
+    if re.match(r"^CREATE\s+TRIGGER\b", compact, flags=re.I):
+        if not re.search(r"\bBEGIN\b", statement):
+            die("Remote CREATE TRIGGER must use uppercase BEGIN for the current D1 splitter.")
+        if not re.search(r"\bEND\s*;\s*$", statement):
+            die("Remote CREATE TRIGGER is missing an uppercase END terminator.")
+
+    if len(statement) > WINDOWS_SAFE_COMMAND_LIMIT:
+        die(
+            f"Remote SQL statement is {len(statement)} characters, exceeding the guarded "
+            f"Windows command transport limit of {WINDOWS_SAFE_COMMAND_LIMIT}."
+        )
+
+    return statement, None
+
+
+def prepared_remote_statements(filename: str) -> tuple[list[str], list[str]]:
+    path = ROOT / filename
+    if not path.exists():
+        die(f"Required file is missing: {filename}")
+    raw_statements = split_complete_statements(path)
+    if not raw_statements:
+        die(f"No executable SQL found in {filename}")
+
+    prepared: list[str] = []
+    skipped: list[str] = []
+    for index, raw in enumerate(raw_statements, 1):
+        statement, reason = normalize_remote_statement(raw)
+        if statement is None:
+            skipped.append(f"statement {index}: {reason or 'skipped'}")
+        else:
+            prepared.append(statement)
+    if not prepared:
+        die(f"No remote-executable SQL remains after normalization: {filename}")
+    return prepared, skipped
+
+
+def preflight_all_files() -> None:
+    print("\nBUILD 440 DEVELOPMENT D1 REMOTE STATEMENT PREFLIGHT")
+    total = 0
+    skipped_total = 0
+    for filename in (*MIGRATIONS, *VERIFICATIONS):
+        statements, skipped = prepared_remote_statements(filename)
+        total += len(statements)
+        skipped_total += len(skipped)
+        print(f"PASS — {filename}: {len(statements)} remote statements, {len(skipped)} deliberate skips")
+        for detail in skipped:
+            print(f"       {detail}")
+    print(f"Remote statements preflighted: {total}")
+    print(f"Local/session directives deliberately skipped: {skipped_total}")
+
+
 def npx_executable() -> str:
     executable = shutil.which("npx.cmd") or shutil.which("npx")
     if not executable:
@@ -86,12 +184,7 @@ def npx_executable() -> str:
 
 
 def build_wrangler_query_args(sql: str) -> list[str]:
-    """Build an unambiguous Wrangler query command on Windows and POSIX.
-
-    SQL is deliberately attached to the option as --command=<SQL>. A separate value that
-    begins with a SQL line comment (for example '-- Build 440 ...') can otherwise be parsed
-    by Wrangler/Yargs as another command-line option instead of as SQL.
-    """
+    """Build an unambiguous Wrangler query command on Windows and POSIX."""
     if not sql.strip():
         die("Refusing to execute an empty SQL statement.")
     return [
@@ -116,7 +209,7 @@ def run_query(sql: str, label: str) -> None:
         print(
             "\nThe D1 query command failed. No automatic retry was attempted.\n"
             "The runner stopped before the next statement. Review the Wrangler error above;\n"
-            "the statement label identifies the exact file and statement number.\n"
+            "the statement label identifies the exact file and remote statement number.\n"
             "Do not paste Cloudflare tokens or credentials into chat.",
             file=sys.stderr,
         )
@@ -128,32 +221,36 @@ def auth_probe() -> None:
 
 
 def execute_sql_file(filename: str, *, read_only: bool) -> None:
-    path = ROOT / filename
-    if not path.exists():
-        die(f"Required file is missing: {filename}")
-    statements = split_complete_statements(path)
-    if not statements:
-        die(f"No executable SQL found in {filename}")
+    statements, skipped = prepared_remote_statements(filename)
     mode = "VERIFY" if read_only else "APPLY"
-    print(f"\n{'=' * 72}\n{mode}: {filename} ({len(statements)} complete statements)\n{'=' * 72}")
+    print(
+        f"\n{'=' * 72}\n{mode}: {filename} "
+        f"({len(statements)} remote statements; {len(skipped)} local/session directives skipped)\n{'=' * 72}"
+    )
     for index, statement in enumerate(statements, 1):
-        run_query(statement, f"{filename} statement {index}/{len(statements)}")
+        run_query(statement, f"{filename} remote statement {index}/{len(statements)}")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build 440 Development D1 guarded query runner")
     parser.add_argument("--auth-only", action="store_true", help="Run only the read-only D1 query auth probe.")
-    parser.add_argument("--verify-only", action="store_true", help="Run the auth probe and read-only verification files only.")
+    parser.add_argument("--verify-only", action="store_true", help="Run preflight, auth probe and read-only verification files only.")
     args = parser.parse_args()
 
     assert_development_config()
     print("BUILD 440 DEVELOPMENT D1 GUARDED QUERY RUNNER")
     print(f"Database: {DATABASE_NAME} ({DATABASE_ID})")
     print("Transport: Wrangler d1 execute --command=<SQL> / D1 query API")
+    print("Leading SQL comments: STRIPPED BEFORE REMOTE TRANSPORT")
+    print("PRAGMA foreign_keys = ON: SKIPPED / D1 ENFORCES FOREIGN KEYS")
+    print("Explicit transaction control: BLOCKED")
     print("Bulk import transport: NOT USED")
     print("Automatic retries: NONE")
     print("R2/provider mutation: NONE")
     print("Production mutation capability: NONE")
+
+    if not args.auth_only:
+        preflight_all_files()
 
     auth_probe()
     if args.auth_only:
