@@ -1,4 +1,4 @@
-# Build 440 gate revision 5 — validate Product/Inventory/Tools source plus guarded D1 transport/resume on Linux and Windows before handoff.
+# Build 440 gate revision 6 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification on Linux and Windows before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -33,7 +33,7 @@ jobs:
           python-version: '3.12'
 
       - name: Compile guarded Development D1 runners on Windows
-        run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py
+        run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py scripts/build440_verify_development_d1_final.py
 
       - name: Validate exact Windows npx.cmd D1 transport contract
         run: python scripts/build440_development_d1_runner_regression_test.py
@@ -41,12 +41,15 @@ jobs:
       - name: Validate partial-apply resume and D1-safe trigger compatibility on Windows
         run: python scripts/build440_development_d1_resume_regression_test.py
 
+      - name: Validate pattern-free final D1 verifier on Windows
+        run: python scripts/build440_final_verifier_regression_test.py
+
       - name: Windows safety statement
         shell: bash
         run: |
           echo 'Remote Cloudflare/D1 access: NONE'
           echo 'Production mutation capability: NONE'
-          echo 'Purpose: reproduce Windows command-boundary and partial-resume behavior before user handoff'
+          echo 'Purpose: reproduce Windows command-boundary, partial-resume and final-verification behavior before user handoff'
 
   source-gate:
     runs-on: ubuntu-latest
@@ -66,13 +69,16 @@ jobs:
           node-version: '24'
 
       - name: Compile guarded Development D1 runners
-        run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py
+        run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py scripts/build440_verify_development_d1_final.py
 
       - name: Validate guarded Development D1 runner transport policy
         run: python scripts/build440_development_d1_runner_regression_test.py
 
       - name: Validate partial-apply resume and D1-safe trigger compatibility
         run: python scripts/build440_development_d1_resume_regression_test.py
+
+      - name: Validate pattern-free final D1 verifier
+        run: python scripts/build440_final_verifier_regression_test.py
 
       - name: Build 440 source gate before aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
