@@ -38,8 +38,8 @@ assert(!/PRAGMA\s+foreign_key_list/i.test(api),'Removal preflight must not inspe
 assert(!api.includes("name NOT LIKE 'sqlite_%'"),'Removal preflight must not enumerate every D1 table.');
 assert(api.includes("cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup'"),'Bounded v2 removal response profile is missing.');
 assert(api.includes('await Promise.all(['),'Reference, material and managed-shell preflight reads should run together.');
-assert(api.includes('await db.batch(statements)'),'Reviewed inventory actions and product cleanup must use one D1 batch.');
-assert(api.includes('runCleanup(db, productId, materialPlan.statements, managedShells)'),'Inventory actions and reviewed generated-shell cleanup are not included in the final cleanup batch.');
+assert(/async function runCleanup\([\s\S]*?const statements = \[\.\.\.materialStatements\];[\s\S]*?statements\.push\(db\.prepare\(`DELETE FROM products WHERE product_id = \?`\)[\s\S]*?return db\.batch\(statements\);/.test(api),'Reviewed inventory actions and product cleanup must be submitted through one D1 batch with Product deletion in that same statement list.');
+assert(api.includes('runCleanup(db, productId, materialPlan.statements, preflight.managed_shells)'),'Inventory actions and reviewed generated-shell cleanup are not included in the final cleanup batch.');
 assert(api.includes('FROM content_projects cp')&&api.includes("table_name: 'content_projects'")&&api.includes('contentProjectIds.push'),'Content Studio product references are not conditionally classified as generated shell vs protected history.');
 assert(api.includes('FROM creative_projects cp')&&api.includes("table_name: 'creative_projects'")&&api.includes('creativeProjectIds.push'),'CAIP product references are not conditionally classified as generated shell vs protected history.');
 assert(api.includes('for (const creativeProjectId of (managedShells?.creative_project_ids || []))')&&api.includes('DELETE FROM creative_projects WHERE creative_project_id = ?'),'Reviewed safe CAIP shells are not included in atomic product cleanup.');
