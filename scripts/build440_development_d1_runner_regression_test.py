@@ -31,6 +31,8 @@ def main() -> int:
     all_files_preflight = False
     migration_pragma_skip_count = False
     trigger_uppercase_guard = False
+    smoke_shape_ok = False
+    smoke_before_real_migrations = False
 
     if runner is not None:
         normalized, reason = runner.normalize_remote_statement(
@@ -71,6 +73,32 @@ def main() -> int:
         except SystemExit:
             all_files_preflight = False
 
+        smoke_calls = []
+        def capture_query(sql, label):
+            smoke_calls.append((sql, label))
+        with patch.object(runner, 'run_query', side_effect=capture_query):
+            runner.transport_smoke_probe()
+        smoke_sql = [sql for sql, _ in smoke_calls]
+        smoke_shape_ok = (
+            len(smoke_sql) == 8
+            and smoke_sql[0] == f'DROP TRIGGER IF EXISTS {runner.SMOKE_TRIGGER};'
+            and smoke_sql[1] == f'DROP TABLE IF EXISTS {runner.SMOKE_TABLE};'
+            and smoke_sql[2].startswith(f'CREATE TABLE {runner.SMOKE_TABLE}')
+            and smoke_sql[3].startswith(f'CREATE TRIGGER {runner.SMOKE_TRIGGER}')
+            and ' BEGIN ' in smoke_sql[3]
+            and smoke_sql[4].startswith(f'INSERT INTO {runner.SMOKE_TABLE}')
+            and 'build440_query_transport_smoke' in smoke_sql[5]
+            and smoke_sql[6] == f'DROP TRIGGER IF EXISTS {runner.SMOKE_TRIGGER};'
+            and smoke_sql[7] == f'DROP TABLE IF EXISTS {runner.SMOKE_TABLE};'
+        )
+
+        main_source = text[text.find('def main()'):]
+        smoke_before_real_migrations = (
+            main_source.find('transport_smoke_probe()') >= 0
+            and main_source.find('for filename in MIGRATIONS') >= 0
+            and main_source.find('transport_smoke_probe()') < main_source.find('for filename in MIGRATIONS')
+        )
+
     checks = [
         ('runner exists', bool(text)),
         ('runner hard-codes Development database', 'DATABASE_NAME = "devilndove-dev"' in text),
@@ -86,6 +114,9 @@ def main() -> int:
         ('remote trigger statements pass uppercase BEGIN/END guard', trigger_uppercase_guard),
         ('runner blocks explicit transaction control', 'Refusing explicit transaction-control statement' in text),
         ('runner guards Windows command length', 'WINDOWS_SAFE_COMMAND_LIMIT' in text),
+        ('runner performs disposable DDL + trigger transport smoke', smoke_shape_ok),
+        ('remote transport smoke runs before first real migration', smoke_before_real_migrations),
+        ('runner exposes transport-smoke-only safe mode', '--transport-smoke-only' in text),
         ('runner does not invoke bulk file import', '"--file"' not in text),
         ('runner performs read-only auth probe before mutations', 'build440_development_query_auth_probe' in text and 'auth_probe()' in text),
         ('runner uses SQLite completeness parser for trigger-safe splitting', 'sqlite3.complete_statement' in text),
@@ -121,6 +152,7 @@ def main() -> int:
     print('Remote execution transport: QUERY / NORMALIZED SQL / --command=<SQL> / NO BULK IMPORT')
     print('Leading SQL comments: STRIPPED')
     print('PRAGMA foreign_keys = ON: SKIPPED / D1 DEFAULT ENFORCEMENT')
+    print('Remote DDL + trigger transport: DISPOSABLE SMOKE REQUIRED BEFORE MIGRATIONS')
     print('Remote trigger casing: GUARDED')
     return 0
 
