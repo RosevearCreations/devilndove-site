@@ -1,6 +1,6 @@
 // File: /functions/api/admin/product-resources.js
 // Build 440: bounded Product/resource compatibility endpoint with atomic link persistence.
-// Missing/non-positive use-per-batch and lot-size values default to 1; submitted identities are deduplicated.
+// Missing/non-positive use-per-batch and lot-size values default to 1; submitted identities are deduplicated case-insensitively.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
@@ -22,7 +22,7 @@ function normalizeSubmittedLinks(input = []) {
     const resourceKind = normalizeText(row.resource_kind).toLowerCase();
     const sourceKey = normalizeText(row.source_key);
     if (!['tool', 'supply'].includes(resourceKind) || !sourceKey) continue;
-    const identity = `${resourceKind}\u0000${sourceKey}`;
+    const identity = `${resourceKind}\u0000${sourceKey.toLowerCase()}`;
     if (seen.has(identity)) continue;
     seen.add(identity);
     out.push({
