@@ -1,4 +1,4 @@
-# Build 440 gate revision 8 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and runtime contracts before handoff.
+# Build 440 gate revision 9 — validate Product/Inventory/Tools source plus guarded D1 transport/resume/final verification and runtime contracts before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -94,6 +94,15 @@ jobs:
           path: build440-kit-runtime.log
           if-no-files-found: ignore
           retention-days: 3
+
+      - name: Validate legacy Inventory case-normalization authority
+        run: python scripts/build243_inventory_resilience_regression.py
+
+      - name: Validate public Tool Supply Inventory authority
+        run: |
+          python scripts/build440_public_inventory_authority_regression.py
+          node --check functions/api/tools.js
+          node --check functions/api/supplies.js
 
       - name: Build 440 source gate before aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
