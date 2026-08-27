@@ -1,11 +1,14 @@
-# New Chat Status — Build 279 Pointer
+# New Chat Status — Build 440 Pointer
 
-Start with `AI_HANDOFF.md`, then `PROJECT_STATUS_AND_ROADMAP.md`. Creative Process now follows Concept/Estimate → Do/Document → Review Actual Materials → CAIP Media/Evidence → Content Studio → Complete/Archive. Do not hard-delete posted inventory usage: Build 274 reverses stock through audit movements and voids/supersedes timeline events. Standalone/content-only projects may consume Inventory without creating a sellable Product. Apply `database_build274_creative_process_lifecycle_corrections.sql` after Build 269.
+Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. Those are the two canonical mutable project documents.
 
+Current state:
 
-Packaging note: Build 276 remains the Packaging schema boundary for reference-only Inventory ingredient links. Build 277 restores separate English/French ingredient lists, keeps French review required, and widens claim spacing.
+- Development: **Build 440**
+- Build 440 full source/CI gate: **GREEN**
+- Exact-head Development live acceptance: **NEXT**
+- Build 439 CAIP media/video live-browser acceptance: **OPEN / SEPARATE**
+- Production baseline: **Build 437**
+- Production promotion: **CLOSED**
 
-Build 279 adds an admin-only page-wide public Edit switch and a live Media Studio checklist for all 139 static visual slots; no D1 migration is required.
-
-
-Build 279 hardens Cloudflare runtime efficiency before go-live: lightweight/fail-open analytics, no idle Live Activity polling, opt-in release checks, bounded retries, slimmer CAIP multipart work and Workers Logs enabled. No new production D1 migration is required.
+Do not revive older “current release” instructions from old chats or historical files. `database_upgrade_current_pass.sql` is a legacy Build 264 compatibility snapshot, not the current Build 440 migration authority.

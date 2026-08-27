@@ -28,16 +28,23 @@ runtime_files.extend(ROOT.glob("*.html"))
 runtime_files.extend((ROOT / "admin").rglob("*.html"))
 runtime_files.extend((ROOT / "js").rglob("*.js"))
 runtime_files.extend((ROOT / "public" / "js").rglob("*.js"))
+runtime_files.extend((ROOT / "css").rglob("*.css"))
 
-version_pattern = re.compile(r"([?&]v=)(\d+)(?=[\"'&#\s)]|$)")
+# Minor cache revisions such as ?v=440.3 are allowed, but the release-major
+# must always equal the canonical Development release.
+version_pattern = re.compile(r"([?&]v=)(\d+)(?:\.(\d+))?(?=[\"'&#\s)]|$)")
 for path in sorted(set(runtime_files)):
     text = path.read_text(encoding="utf-8")
     for match in version_pattern.finditer(text):
-        value = int(match.group(2))
-        if value == release:
+        major = int(match.group(2))
+        if major == release:
             continue
         line = text.count("\n", 0, match.start()) + 1
-        failures.append(f"{path.relative_to(ROOT)}:{line}: live asset cache version v={value}, expected v={release}")
+        advertised = match.group(0).split("=", 1)[1]
+        failures.append(
+            f"{path.relative_to(ROOT)}:{line}: live asset cache version v={advertised}, "
+            f"expected Build {release} major"
+        )
 
 sw_path = ROOT / "sw.js"
 if not sw_path.exists():
@@ -52,7 +59,9 @@ else:
 admin_index = ROOT / "admin" / "index.html"
 if admin_index.exists():
     admin = admin_index.read_text(encoding="utf-8")
-    stale_builds = sorted({int(v) for v in re.findall(r"\bBuild\s+(\d{3,})\b", admin) if int(v) != release})
+    stale_builds = sorted(
+        {int(v) for v in re.findall(r"\bBuild\s+(\d{3,})\b", admin) if int(v) != release}
+    )
     if stale_builds:
         failures.append(
             "admin/index.html contains stale Development-facing Build labels: "
@@ -63,6 +72,7 @@ if admin_index.exists():
 print("BUILD 440 DEVELOPMENT RELEASE ALIGNMENT")
 print(f"Canonical Development release: {release}")
 print(f"Runtime files scanned: {len(set(runtime_files))}")
+print("Cache minor revisions: ALLOWED / RELEASE MAJOR ENFORCED")
 print("Cloudflare/D1/R2/provider access: NONE")
 print("Production mutation capability: NONE")
 print()
