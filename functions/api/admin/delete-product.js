@@ -49,10 +49,12 @@ const PRODUCT_DETACH_RELATIONS = new Set([
 ]);
 
 // A permissive FK action such as SET NULL or CASCADE must not make customer, accounting,
-// publishing or project history disposable. These relations always block permanent removal.
+// publishing, inventory provenance or project history disposable. These relations always
+// block permanent removal.
 const PROTECTED_PRODUCT_REFERENCES = new Set([
   'order_items.product_id',
   'product_production_runs.product_id',
+  'product_finished_inventory_lots.product_id',
   'creative_project_cost_allocations.product_id',
   'accounting_overhead_product_allocations.product_id',
   'product_costs.product_id',
@@ -219,23 +221,24 @@ async function discoverManagedProductProjectShells(db, productId) {
         ) AS meaningful_derivative_count,
         (SELECT COUNT(*) FROM creative_asset_access_grants g
           WHERE g.creative_project_id=cp.creative_project_id
-        ) AS access_grant_count
+            AND COALESCE(g.is_revoked,0)=0
+        ) AS active_grant_count
       FROM creative_projects cp
-      WHERE cp.product_id=? AND LOWER(TRIM(COALESCE(cp.source_type,'')))='product'
+      WHERE cp.product_id=?
     `).bind(productId).all())?.results || [];
 
     for (const row of creativeRows) {
       const meaningful = (
-        String(row.project_status || 'intake').toLowerCase() !== 'intake'
-        || String(row.governance_status || 'needs_review').toLowerCase() !== 'needs_review'
-        || String(row.lifecycle_stage || 'intake').toLowerCase() !== 'intake'
-        || row.approved_at != null || row.approved_by_user_id != null
+        String(row.project_status || 'draft').toLowerCase() !== 'draft'
+        || String(row.review_status || 'needs_review').toLowerCase() !== 'needs_review'
+        || row.reviewed_at != null || row.reviewed_by_user_id != null
+        || String(row.notes || '').trim() !== ''
         || Number(row.meaningful_recommendation_count || 0) > 0
         || Number(row.meaningful_evidence_count || 0) > 0
         || Number(row.meaningful_segment_count || 0) > 0
         || Number(row.meaningful_policy_count || 0) > 0
         || Number(row.meaningful_derivative_count || 0) > 0
-        || Number(row.access_grant_count || 0) > 0
+        || Number(row.active_grant_count || 0) > 0
       );
       const reference = {
         table_name: 'creative_projects',
@@ -248,8 +251,8 @@ async function discoverManagedProductProjectShells(db, productId) {
         automatically_safe: meaningful ? 0 : 1,
         record_id: Number(row.creative_project_id || 0),
         reason: meaningful
-          ? 'CAIP project has reviewed/approved/output/access evidence.'
-          : 'Auto-generated, unreviewed product CAIP shell.'
+          ? 'CAIP / Creative project contains reviewed work, evidence, derivatives, or grants.'
+          : 'Auto-generated, unreviewed product CAIP / Creative project shell.'
       };
       if (meaningful) blockingReferences.push(reference);
       else {
@@ -258,534 +261,338 @@ async function discoverManagedProductProjectShells(db, productId) {
       }
     }
   } catch {
-    // Optional legacy schemas may not have the CAIP tables.
+    // Optional legacy schemas may not have the Creative/CAIP tables.
   }
 
   return {
     safe_references: safeReferences,
     blocking_references: blockingReferences,
-    content_project_ids: contentProjectIds.filter(Boolean),
-    creative_project_ids: creativeProjectIds.filter(Boolean)
+    content_project_ids: contentProjectIds,
+    creative_project_ids: creativeProjectIds
   };
 }
 
-async function discoverProductReferences(db, productId) {
-  // Only retained business/history relations can block deletion. Product-owned editor
-  // rows and detachable media are cleaned in the final atomic batch, so enumerating
-  // every D1 table and foreign key here added hundreds of calls without improving safety.
-  const references = await Promise.all([...PROTECTED_PRODUCT_REFERENCES].map(async (key) => {
-    const separator = key.lastIndexOf('.');
-    const tableName = key.slice(0, separator);
-    const columnName = key.slice(separator + 1);
-    try {
-      const row = await db.prepare(`
-        SELECT COUNT(*) AS count
-        FROM ${quoteIdentifier(tableName)}
-        WHERE ${quoteIdentifier(columnName)} = ?
-      `).bind(productId).first();
-      const count = Number(row?.count || 0);
-      if (count < 1) return null;
-      return {
-        table_name: tableName,
-        column_name: columnName,
-        count,
-        on_delete: 'PROTECTED',
-        cleanup_owned: 0,
-        detach_preserved: 0,
-        protected_history: 1,
-        automatically_safe: 0
-      };
-    } catch {
-      // An older schema may not have this optional history table. The offline Build 232
-      // registry test ensures every product FK in current aggregate schemas is classified.
-      return null;
+async function collectReferences(db, productId) {
+  const references = [];
+  const relationGroups = [
+    [PRODUCT_OWNED_CLEANUP_RELATIONS, 'OWNED_CLEANUP'],
+    [PRODUCT_DETACH_RELATIONS, 'DETACH_PRESERVED'],
+    [PROTECTED_PRODUCT_REFERENCES, 'PROTECTED']
+  ];
+  for (const [relations, onDelete] of relationGroups) {
+    for (const relation of relations) {
+      const [tableName, columnName] = relation.split('.');
+      try {
+        const row = await db.prepare(`SELECT COUNT(*) AS count FROM ${quoteIdentifier(tableName)} WHERE ${quoteIdentifier(columnName)} = ?`).bind(productId).first();
+        const count = Number(row?.count || 0);
+        if (!count) continue;
+        references.push({
+          table_name: tableName,
+          column_name: columnName,
+          count,
+          on_delete: onDelete,
+          cleanup_owned: onDelete === 'OWNED_CLEANUP' ? 1 : 0,
+          detach_preserved: onDelete === 'DETACH_PRESERVED' ? 1 : 0,
+          protected_history: onDelete === 'PROTECTED' ? 1 : 0,
+          automatically_safe: onDelete === 'PROTECTED' ? 0 : 1,
+          reason: onDelete === 'PROTECTED'
+            ? 'Protected business/history reference. Archive the product instead of deleting this evidence.'
+            : onDelete === 'DETACH_PRESERVED'
+              ? 'Reusable/preserved record will be detached from the Product instead of deleted.'
+              : 'Product-owned disposable record is included in bounded cleanup.'
+        });
+      } catch {
+        // Optional schema families can be absent on older databases. Missing tables do not add references.
+      }
     }
-  }));
-  return references.filter(Boolean).sort((a, b) => `${a.table_name}.${a.column_name}`.localeCompare(`${b.table_name}.${b.column_name}`));
+  }
+  const managed = await discoverManagedProductProjectShells(db, productId);
+  return {
+    references,
+    managed
+  };
 }
 
-async function safeProductImages(db, productId) {
+async function loadProduct(db, productId) {
+  return db.prepare(`SELECT * FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
+}
+
+async function loadMaterialReview(db, productId) {
   try {
-    const result = await db.prepare(`SELECT * FROM product_images WHERE product_id = ? LIMIT 20`).bind(productId).all();
-    return (Array.isArray(result?.results) ? result.results : []).sort((a, b) => {
-      const orderA = Number(a?.display_order ?? a?.sort_order ?? a?.product_image_id ?? 0);
-      const orderB = Number(b?.display_order ?? b?.sort_order ?? b?.product_image_id ?? 0);
-      return orderA - orderB;
+    const result = await db.prepare(`
+      SELECT prl.product_resource_link_id,prl.product_id,prl.resource_kind,prl.source_key,prl.quantity_used,
+             COALESCE(prl.consumption_mode,'per_unit') AS consumption_mode,
+             sii.site_item_inventory_id,sii.item_name,
+             COALESCE(sii.on_hand_quantity,0) AS on_hand_quantity,
+             COALESCE(sii.reserved_quantity,0) AS reserved_quantity,
+             COALESCE(sii.incoming_quantity,0) AS incoming_quantity,
+             COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents,
+             COALESCE(sii.usage_units_per_stock_unit,1) AS usage_units_per_stock_unit,
+             COALESCE(sii.stock_unit_label,'unit') AS stock_unit_label,
+             COALESCE(sii.usage_unit_label,'unit') AS usage_unit_label
+      FROM product_resource_links prl
+      LEFT JOIN site_item_inventory sii
+        ON LOWER(COALESCE(sii.source_type,''))=LOWER(prl.resource_kind)
+       AND sii.external_key=prl.source_key
+      WHERE prl.product_id=?
+      ORDER BY prl.product_resource_link_id ASC
+    `).bind(productId).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return rows.map((row) => {
+      const linkId = Number(row.product_resource_link_id || 0);
+      const inventoryId = Number(row.site_item_inventory_id || 0);
+      const reserved = Math.max(0, Number(row.reserved_quantity || 0));
+      const requested = Math.max(0, Number(row.quantity_used || 0));
+      const usageUnits = Math.max(0.000001, Number(row.usage_units_per_stock_unit || 1) || 1);
+      const stockEquivalent = requested / usageUnits;
+      return {
+        ...row,
+        product_resource_link_id: linkId,
+        site_item_inventory_id: inventoryId || null,
+        reserved_quantity: reserved,
+        requested_usage_quantity: requested,
+        stock_equivalent_quantity: stockEquivalent,
+        has_inventory_link: inventoryId ? 1 : 0,
+        reservation_release_candidate: inventoryId && reserved > 0 ? Math.min(reserved, stockEquivalent || reserved) : 0
+      };
     });
   } catch {
     return [];
   }
 }
 
-
-async function ensureMaterialReturnAuditTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS product_material_return_audit (
-      product_material_return_audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      product_id_deleted INTEGER NOT NULL,
-      product_resource_link_id INTEGER,
-      site_item_inventory_id INTEGER,
-      resource_kind TEXT,
-      source_key TEXT,
-      item_name TEXT,
-      action_key TEXT NOT NULL,
-      quantity INTEGER NOT NULL DEFAULT 0,
-      previous_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
-      new_on_hand_quantity INTEGER NOT NULL DEFAULT 0,
-      previous_reserved_quantity INTEGER NOT NULL DEFAULT 0,
-      new_reserved_quantity INTEGER NOT NULL DEFAULT 0,
-      note TEXT,
-      created_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run().catch(() => null);
-}
-
-async function loadTableSqlMap(db, tableNames = []) {
-  const names = [...new Set(tableNames.map((value) => String(value || '').trim()).filter(Boolean))];
-  if (!names.length) return new Map();
-  const placeholders = names.map(() => '?').join(',');
-  const result = await db.prepare(`
-    SELECT name, sql
-    FROM sqlite_master
-    WHERE type = 'table' AND name IN (${placeholders})
-  `).bind(...names).all().catch(() => ({ results: [] }));
-  return new Map((Array.isArray(result?.results) ? result.results : []).map((row) => [String(row?.name || ''), String(row?.sql || '')]));
-}
-
-function tableSqlHasColumn(createSql, columnName) {
-  const escaped = String(columnName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(?:^|[,\\(]\\s*)[\"\`\\[]?${escaped}[\"\`\\]]?(?:\\s|,|\\))`, 'im').test(String(createSql || ''));
-}
-
-async function loadProductMaterialPreview(db, productId) {
-  const result = await db.prepare(`
-    SELECT
-      prl.*,
-      sii.*,
-      prl.product_resource_link_id,
-      prl.resource_kind,
-      prl.source_key,
-      COALESCE(prl.quantity_used, 0) AS quantity_used,
-      sii.site_item_inventory_id,
-      sii.item_name,
-      COALESCE(sii.on_hand_quantity, 0) AS on_hand_quantity,
-      COALESCE(sii.reserved_quantity, 0) AS reserved_quantity,
-      COALESCE(sii.incoming_quantity, 0) AS incoming_quantity,
-      COALESCE(sii.unit_cost_cents, 0) AS unit_cost_cents
-    FROM product_resource_links prl
-    LEFT JOIN site_item_inventory sii
-      ON sii.source_type = prl.resource_kind
-     AND sii.external_key = prl.source_key
-    WHERE prl.product_id = ?
-    ORDER BY prl.product_resource_link_id ASC
-  `).bind(productId).all().catch(() => ({ results: [] }));
-  const rows = Array.isArray(result?.results) ? result.results : [];
-  return rows.map((row) => {
-    const mode = String(row?.consumption_mode || 'per_unit').toLowerCase();
-    const perStock = Math.max(1, Number(row?.usage_units_per_stock_unit || 1) || 1);
-    const canRelease = Number(row?.site_item_inventory_id || 0) > 0 && mode === 'per_unit' && perStock === 1;
-    const canReturn = Number(row?.site_item_inventory_id || 0) > 0 && String(row?.resource_kind || '').toLowerCase() === 'supply';
-    return {
-      ...row,
-      quantity_used: Number(row?.quantity_used || 0),
-      on_hand_quantity: Number(row?.on_hand_quantity || 0),
-      reserved_quantity: Number(row?.reserved_quantity || 0),
-      incoming_quantity: Number(row?.incoming_quantity || 0),
-      usage_units_per_stock_unit: perStock,
-      can_release_reservation: canRelease ? 1 : 0,
-      can_return_on_hand: canReturn ? 1 : 0,
-      suggested_release_quantity: canRelease ? Math.max(0, Math.min(Number(row?.quantity_used || 0), Number(row?.reserved_quantity || 0))) : 0
-    };
-  });
-}
-
-function materialRowsRequiringReview(materials = []) {
-  return materials.filter((row) => {
-    const suggestedRelease = Number(row?.suggested_release_quantity || 0);
-    const reserved = Number(row?.reserved_quantity || 0);
-    const linkedQuantity = Number(row?.quantity_used || 0);
-    return suggestedRelease > 0 || (reserved > 0 && linkedQuantity > 0 && Number(row?.can_release_reservation || 0) !== 1);
-  });
-}
-
-function wholeNonNegative(value) {
-  const number = Number(value);
-  return Number.isInteger(number) && number >= 0 ? number : null;
-}
-
-async function prepareReviewedMaterialActions(db, { productId, actions = [], deletionReason = '', actorUserId = null }) {
-  if (!Array.isArray(actions) || !actions.length) {
-    return { summary: { affected_items: 0, release_quantity: 0, returned_on_hand_quantity: 0, rows: [] }, statements: [] };
-  }
-  const previewRows = await loadProductMaterialPreview(db, productId);
-  const rowByLink = new Map(previewRows.map((row) => [Number(row.product_resource_link_id || 0), row]));
-  await ensureMaterialReturnAuditTable(db);
-  const actionTables = await loadTableSqlMap(db, ['site_inventory_movements', 'product_material_return_audit']);
-  const inventoryMovementExists = actionTables.has('site_inventory_movements');
-  const auditExists = actionTables.has('product_material_return_audit');
+async function resolveMaterialPlan(db, productId, body) {
+  const review = await loadMaterialReview(db, productId);
+  const actions = Array.isArray(body?.material_actions) ? body.material_actions : [];
+  const byLink = new Map(actions.map((action) => [Number(action?.product_resource_link_id || 0), action]));
   const statements = [];
-  const outputRows = [];
-  let totalRelease = 0;
-  let totalReturn = 0;
+  const summary = {
+    reviewed_count: review.length,
+    released_reservation_count: 0,
+    returned_on_hand_count: 0,
+    release_quantity: 0,
+    return_quantity: 0
+  };
 
-  for (const action of actions) {
-    const linkId = Number(action?.product_resource_link_id || 0);
-    if (!linkId || !rowByLink.has(linkId)) throw new Error('A requested raw-inventory action no longer matches this product. Refresh the correction panel and review again.');
-    const row = rowByLink.get(linkId);
-    const releaseQuantity = wholeNonNegative(action?.release_quantity);
-    const returnQuantity = wholeNonNegative(action?.return_on_hand_quantity);
-    if (releaseQuantity === null || returnQuantity === null) throw new Error('Raw inventory return quantities must be whole numbers of stock units.');
-    if (!releaseQuantity && !returnQuantity) continue;
-    const inventoryId = Number(row.site_item_inventory_id || 0);
-    if (!inventoryId) throw new Error(`No raw inventory item is linked to ${row.item_name || row.source_key || 'one resource'}. Leave this line at zero and correct the inventory manually.`);
-    if (releaseQuantity && Number(row.can_release_reservation || 0) !== 1) throw new Error(`Reservation release is not available for ${row.item_name || row.source_key || 'this resource'}. Review that item manually.`);
-    if (releaseQuantity > Number(row.reserved_quantity || 0)) throw new Error(`Cannot release more than the currently reserved quantity for ${row.item_name || row.source_key || 'this resource'}.`);
-    if (returnQuantity && Number(row.can_return_on_hand || 0) !== 1) throw new Error(`Only raw supplies can be physically returned through this product correction. Tools should normally only have reservations released.`);
-
-    const previousOnHand = Number(row.on_hand_quantity || 0);
-    const previousReserved = Number(row.reserved_quantity || 0);
-    const previousIncoming = Number(row.incoming_quantity || 0);
-    const newOnHand = previousOnHand + returnQuantity;
-    const newReserved = Math.max(0, previousReserved - releaseQuantity);
-    const note = `Product correction/delete #${productId}. ${deletionReason || 'Unused product correction.'}`;
-
-    statements.push(db.prepare(`
-      UPDATE site_item_inventory
-      SET on_hand_quantity = ?, reserved_quantity = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE site_item_inventory_id = ?
-    `).bind(newOnHand, newReserved, inventoryId));
-
-    if (inventoryMovementExists) {
-      statements.push(db.prepare(`
-        INSERT INTO site_inventory_movements (
-          site_item_inventory_id, source_type, external_key, item_name, movement_type,
-          quantity_delta, previous_on_hand_quantity, new_on_hand_quantity,
-          previous_reserved_quantity, new_reserved_quantity,
-          previous_incoming_quantity, new_incoming_quantity,
-          note, actor_user_id, created_at
-        ) VALUES (?, ?, ?, ?, 'correction', ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      `).bind(
-        inventoryId,
-        row.resource_kind || null,
-        row.source_key || null,
-        row.item_name || null,
-        returnQuantity,
-        previousOnHand,
-        newOnHand,
-        previousReserved,
-        newReserved,
-        previousIncoming,
-        previousIncoming,
-        note,
-        actorUserId || null
-      ));
-    }
-
-    if (auditExists) {
-      if (releaseQuantity) statements.push(db.prepare(`
-        INSERT INTO product_material_return_audit (
-          product_id_deleted, product_resource_link_id, site_item_inventory_id,
-          resource_kind, source_key, item_name, action_key, quantity,
-          previous_on_hand_quantity, new_on_hand_quantity,
-          previous_reserved_quantity, new_reserved_quantity,
-          note, created_by_user_id, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, 'release_reservation', ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      `).bind(productId, linkId, inventoryId, row.resource_kind || null, row.source_key || null, row.item_name || null, releaseQuantity, previousOnHand, newOnHand, previousReserved, newReserved, note, actorUserId || null));
-      if (returnQuantity) statements.push(db.prepare(`
-        INSERT INTO product_material_return_audit (
-          product_id_deleted, product_resource_link_id, site_item_inventory_id,
-          resource_kind, source_key, item_name, action_key, quantity,
-          previous_on_hand_quantity, new_on_hand_quantity,
-          previous_reserved_quantity, new_reserved_quantity,
-          note, created_by_user_id, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, 'return_on_hand', ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      `).bind(productId, linkId, inventoryId, row.resource_kind || null, row.source_key || null, row.item_name || null, returnQuantity, previousOnHand, newOnHand, previousReserved, newReserved, note, actorUserId || null));
-    }
-
-    totalRelease += releaseQuantity;
-    totalReturn += returnQuantity;
-    outputRows.push({
-      product_resource_link_id: linkId,
-      site_item_inventory_id: inventoryId,
-      item_name: row.item_name || row.source_key || '',
-      release_quantity: releaseQuantity,
-      return_on_hand_quantity: returnQuantity,
-      previous_on_hand_quantity: previousOnHand,
-      new_on_hand_quantity: newOnHand,
-      previous_reserved_quantity: previousReserved,
-      new_reserved_quantity: newReserved,
-      previous_incoming_quantity: previousIncoming,
-      new_incoming_quantity: previousIncoming
-    });
+  if (review.length && Number(body?.material_review_confirmed || 0) !== 1) {
+    return {
+      ok: false,
+      error: 'Linked product materials must be reviewed before permanent product removal.',
+      code: 'material_review_required',
+      status: 409,
+      review
+    };
   }
 
-  return {
-    summary: { affected_items: outputRows.length, release_quantity: totalRelease, returned_on_hand_quantity: totalReturn, rows: outputRows },
-    statements
-  };
+  for (const material of review) {
+    const action = byLink.get(Number(material.product_resource_link_id || 0));
+    if (!action) {
+      return {
+        ok: false,
+        error: `Choose a material action for ${material.item_name || material.source_key || 'linked material'}.`,
+        code: 'material_action_required',
+        status: 409,
+        review
+      };
+    }
+    const inventoryId = Number(material.site_item_inventory_id || 0);
+    const releaseQuantity = Math.max(0, Number(action.release_quantity || 0));
+    const returnQuantity = Math.max(0, Number(action.return_on_hand_quantity || 0));
+    if ((releaseQuantity > 0 || returnQuantity > 0) && !inventoryId) {
+      return {
+        ok: false,
+        error: `${material.item_name || material.source_key || 'Linked material'} has no Inventory row to adjust.`,
+        code: 'material_inventory_missing',
+        status: 409,
+        review
+      };
+    }
+    if (releaseQuantity > Number(material.reserved_quantity || 0) + 0.000001) {
+      return {
+        ok: false,
+        error: `Reservation release for ${material.item_name || material.source_key || 'linked material'} exceeds the current reserved quantity.`,
+        code: 'material_release_exceeds_reserved',
+        status: 409,
+        review
+      };
+    }
+    if (releaseQuantity > 0) {
+      statements.push(db.prepare(`
+        UPDATE site_item_inventory
+        SET reserved_quantity=MAX(0,COALESCE(reserved_quantity,0)-?),updated_at=CURRENT_TIMESTAMP
+        WHERE site_item_inventory_id=? AND COALESCE(reserved_quantity,0)>=?
+      `).bind(releaseQuantity, inventoryId, releaseQuantity));
+      summary.released_reservation_count += 1;
+      summary.release_quantity += releaseQuantity;
+    }
+    if (returnQuantity > 0) {
+      statements.push(db.prepare(`
+        UPDATE site_item_inventory
+        SET on_hand_quantity=COALESCE(on_hand_quantity,0)+?,updated_at=CURRENT_TIMESTAMP
+        WHERE site_item_inventory_id=?
+      `).bind(returnQuantity, inventoryId));
+      statements.push(db.prepare(`
+        INSERT INTO site_inventory_movements(
+          site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,
+          previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,
+          previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at
+        )
+        SELECT site_item_inventory_id,source_type,external_key,item_name,'correction',?,
+               COALESCE(on_hand_quantity,0)-?,COALESCE(on_hand_quantity,0),
+               COALESCE(reserved_quantity,0),COALESCE(reserved_quantity,0),
+               COALESCE(incoming_quantity,0),COALESCE(incoming_quantity,0),?,NULL,CURRENT_TIMESTAMP
+        FROM site_item_inventory WHERE site_item_inventory_id=?
+      `).bind(returnQuantity, returnQuantity, `Returned during permanent cleanup of unused Product #${productId}.`, inventoryId));
+      summary.returned_on_hand_count += 1;
+      summary.return_quantity += returnQuantity;
+    }
+  }
+
+  return { ok: true, review, statements, summary };
 }
 
-async function runCleanup(db, productId, prefixStatements = [], managedShells = null) {
-  // Delete only product-owned working rows. Preserve independent uploads/media by
-  // detaching them. Auto-generated, unreviewed product Content Studio/CAIP shells
-  // are also product-owned automation rows and are removed before the product.
-  const statements = [...prefixStatements];
+async function runCleanup(db, productId, materialStatements = [], managedShells = {}) {
+  const statements = [...materialStatements];
+  for (const relation of PRODUCT_OWNED_CLEANUP_RELATIONS) {
+    const [tableName, columnName] = relation.split('.');
+    statements.push(db.prepare(`DELETE FROM ${quoteIdentifier(tableName)} WHERE ${quoteIdentifier(columnName)} = ?`).bind(productId));
+  }
+  for (const relation of PRODUCT_DETACH_RELATIONS) {
+    const [tableName, columnName] = relation.split('.');
+    statements.push(db.prepare(`UPDATE ${quoteIdentifier(tableName)} SET ${quoteIdentifier(columnName)} = NULL WHERE ${quoteIdentifier(columnName)} = ?`).bind(productId));
+  }
   for (const creativeProjectId of (managedShells?.creative_project_ids || [])) {
-    statements.push(db.prepare(`DELETE FROM creative_projects WHERE creative_project_id = ?`).bind(Number(creativeProjectId)));
+    statements.push(db.prepare(`DELETE FROM creative_projects WHERE creative_project_id = ?`).bind(creativeProjectId));
   }
   for (const contentProjectId of (managedShells?.content_project_ids || [])) {
-    statements.push(db.prepare(`DELETE FROM content_projects WHERE content_project_id = ?`).bind(Number(contentProjectId)));
+    statements.push(db.prepare(`DELETE FROM content_projects WHERE content_project_id = ?`).bind(contentProjectId));
   }
-  const relationKeys = [...PRODUCT_OWNED_CLEANUP_RELATIONS, ...PRODUCT_DETACH_RELATIONS];
-  const relationTables = relationKeys.map((key) => key.slice(0, key.lastIndexOf('.')));
-  const tableSql = await loadTableSqlMap(db, relationTables);
-
-  for (const key of PRODUCT_OWNED_CLEANUP_RELATIONS) {
-    const separator = key.lastIndexOf('.');
-    const tableName = key.slice(0, separator);
-    const columnName = key.slice(separator + 1);
-    if (!tableSqlHasColumn(tableSql.get(tableName), columnName)) continue;
-    statements.push(db.prepare(
-      `DELETE FROM ${quoteIdentifier(tableName)} WHERE ${quoteIdentifier(columnName)} = ?`
-    ).bind(productId));
-  }
-
-  for (const key of PRODUCT_DETACH_RELATIONS) {
-    const separator = key.lastIndexOf('.');
-    const tableName = key.slice(0, separator);
-    const columnName = key.slice(separator + 1);
-    if (!tableSqlHasColumn(tableSql.get(tableName), columnName)) continue;
-    statements.push(db.prepare(
-      `UPDATE ${quoteIdentifier(tableName)} SET ${quoteIdentifier(columnName)} = NULL WHERE ${quoteIdentifier(columnName)} = ?`
-    ).bind(productId));
-  }
-
   statements.push(db.prepare(`DELETE FROM products WHERE product_id = ?`).bind(productId));
-
-  if (typeof db.batch === 'function') {
-    const results = await db.batch(statements);
-    const productDeleteResult = Array.isArray(results) ? results[results.length - 1] : null;
-    if (productDeleteResult && Number(productDeleteResult?.meta?.changes || 0) < 1) {
-      throw new Error('The product was not removed. Refresh the cleanup preflight and try again.');
-    }
-  } else {
-    for (let index = 0; index < statements.length; index += 1) {
-      const result = await statements[index].run();
-      if (index === statements.length - 1 && Number(result?.meta?.changes || 0) < 1) {
-        throw new Error('The product was not removed. Refresh the cleanup preflight and try again.');
-      }
-    }
-  }
+  return db.batch(statements);
 }
 
-
-async function handleGet(context) {
+async function handleDelete(context) {
   const { request, env } = context;
   const db = getDb(env);
-  const authCheck = await requireAdmin(request, env);
-  if (authCheck.error) return authCheck.error;
-  const url = new URL(request.url);
-  const productId = Number(url.searchParams.get('product_id') || 0);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
+  const auth = await requireAdmin(request, env);
+  if (auth.error) return auth.error;
+  let body;
+  try { body = await request.json(); }
+  catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
+  const productId = Number(body?.product_id || 0);
   if (!Number.isInteger(productId) || productId <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
-  const product = await db.prepare(`SELECT product_id, product_number, sku, name, slug, status FROM products WHERE product_id = ? LIMIT 1`).bind(productId).first();
+  const product = await loadProduct(db, productId);
   if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
-  const [references, materials, managedShells] = await Promise.all([
-    discoverProductReferences(db, productId),
-    loadProductMaterialPreview(db, productId),
-    discoverManagedProductProjectShells(db, productId)
-  ]);
-  const blockingReferences = [...references, ...(managedShells.blocking_references || [])];
-  const materialsRequiringReview = materialRowsRequiringReview(materials);
+
+  const preflight = await buildPreflight(db, productId, product);
+  if (!preflight.deletion_allowed) {
+    return json({
+      ok: false,
+      error: `${product.name || `Product #${productId}`} cannot be permanently deleted. Archive it instead.`,
+      code: 'protected_product_references',
+      requires_archive: true,
+      product,
+      ...preflight
+    }, 409);
+  }
+
+  const stepUp = await requireAdminStepUp(request, env, auth.sessionUser, body, 'permanently delete product');
+  if (!stepUp.ok) return stepUp.response;
+  if (String(body?.confirmation_phrase || '').trim() !== 'DELETE PRODUCT') {
+    return json({ ok: false, error: 'Type DELETE PRODUCT to confirm permanent deletion.' }, 400);
+  }
+  const reason = String(body?.deletion_reason || '').trim();
+  if (reason.length < 8) return json({ ok: false, error: 'Provide a deletion reason of at least 8 characters.' }, 400);
+
+  const materialPlan = await resolveMaterialPlan(db, productId, body);
+  if (!materialPlan.ok) {
+    return json({ ok: false, error: materialPlan.error, code: materialPlan.code, materials_requiring_review: materialPlan.review || [] }, materialPlan.status || 409);
+  }
+
+  try {
+    await runCleanup(db, productId, materialPlan.statements, preflight.managed_shells);
+  } catch (error) {
+    await captureRuntimeIncident(env, request, {
+      incident_scope: 'product_permanent_delete',
+      incident_code: 'product_delete_transaction_failed',
+      severity: 'error',
+      message: error?.message || 'Permanent product delete batch failed.',
+      related_user_id: auth.sessionUser.user_id,
+      details: { product_id: productId }
+    }).catch(() => null);
+    return json({ ok: false, error: 'Permanent product deletion failed before completion. The product was not intentionally removed.' }, 500);
+  }
+
+  await auditAdminAction(env, request, auth.sessionUser, {
+    action_type: 'product_permanent_delete',
+    target_type: 'product',
+    target_id: productId,
+    target_key: product.sku || product.product_number || String(productId),
+    details: {
+      deletion_reason: reason,
+      cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup',
+      material_summary: materialPlan.summary,
+      generated_content_shells_deleted: Number(preflight.managed_shells?.content_project_ids?.length || 0),
+      generated_creative_shells_deleted: Number(preflight.managed_shells?.creative_project_ids?.length || 0)
+    }
+  });
+
   return json({
     ok: true,
+    message: 'Unused Product permanently deleted after protected-reference and material review.',
     product,
+    material_summary: materialPlan.summary,
+    generated_shell_cleanup: {
+      content_project_count: Number(preflight.managed_shells?.content_project_ids?.length || 0),
+      creative_project_count: Number(preflight.managed_shells?.creative_project_ids?.length || 0)
+    },
+    r2_cleanup_note: 'Reusable media assets are preserved and detached; no R2 objects are deleted by product removal.'
+  });
+}
+
+async function buildPreflight(db, productId, product = null) {
+  const loadedProduct = product || await loadProduct(db, productId);
+  if (!loadedProduct) return { product: null, deletion_allowed: 0, blocking_references: [], automatically_safe_references: [], materials: [], materials_requiring_review: [], cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup' };
+  const [{ references, managed }, materials] = await Promise.all([
+    collectReferences(db, productId),
+    loadMaterialReview(db, productId)
+  ]);
+  const blocking = [
+    ...references.filter((reference) => reference.protected_history),
+    ...(managed.blocking_references || [])
+  ];
+  const safe = [
+    ...references.filter((reference) => reference.automatically_safe),
+    ...(managed.safe_references || [])
+  ];
+  const materialsRequiringReview = materials.filter((row) => Number(row.site_item_inventory_id || 0) > 0 && Number(row.reserved_quantity || 0) > 0);
+  return {
+    product: loadedProduct,
+    deletion_allowed: blocking.length === 0 && materialsRequiringReview.length === 0 ? 1 : 0,
+    blocking_references: blocking,
+    automatically_safe_references: safe,
     materials,
     materials_requiring_review: materialsRequiringReview,
-    material_review_required: materialsRequiringReview.length ? 1 : 0,
-    deletion_allowed: blockingReferences.length ? 0 : 1,
-    references: [...blockingReferences, ...(managedShells.safe_references || [])],
-    blocking_references: blockingReferences,
-    automatically_safe_references: managedShells.safe_references || [],
-    generated_project_shells: {
-      content_project_ids: managedShells.content_project_ids || [],
-      creative_project_ids: managedShells.creative_project_ids || []
-    },
-    cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup',
-    instructions: {
-      release_reservation: 'Use only for raw stock already reserved for this unfinished product. It makes stock available again without changing on-hand quantity.',
-      return_on_hand: 'Use only for unused physical raw supplies that had been removed from on-hand stock and are truly available again. Enter whole stock units.'
-    }
-  });
-}
-
-async function handlePost(context) {
-  const { request, env } = context;
-  const db = getDb(env);
-
-  const authCheck = await requireAdmin(request, env);
-  if (authCheck.error) return authCheck.error;
-
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({ ok: false, error: "Invalid JSON body." }, 400);
-  }
-
-  const stepUp = await requireAdminStepUp(request, env, authCheck.sessionUser, body, 'product deletion');
-  if (!stepUp.ok) return stepUp.response;
-
-  const confirmationPhrase = String(body.confirmation_phrase || '').trim().toUpperCase();
-  if (confirmationPhrase !== 'DELETE PRODUCT') {
-    return json({
-      ok: false,
-      error: 'Type DELETE PRODUCT exactly to permanently delete an unused product.',
-      requires_typed_confirmation: true
-    }, 400);
-  }
-
-  const productId = Number(body.product_id);
-  if (!Number.isInteger(productId) || productId <= 0) {
-    return json({ ok: false, error: "A valid product_id is required." }, 400);
-  }
-
-  const existingProduct = await db.prepare(`
-    SELECT *
-    FROM products
-    WHERE product_id = ?
-    LIMIT 1
-  `).bind(productId).first();
-
-  if (!existingProduct) {
-    return json({ ok: false, error: "Product not found." }, 404);
-  }
-
-  const [references, managedShells] = await Promise.all([
-    discoverProductReferences(db, productId),
-    discoverManagedProductProjectShells(db, productId)
-  ]);
-  const blockingReferences = [...references, ...(managedShells.blocking_references || [])];
-  if (blockingReferences.length) {
-    const summary = blockingReferences.map((row) => `${row.count} ${row.table_name}`).join(', ');
-    return json({
-      ok: false,
-      error: `This product has saved business/history references (${summary}) and cannot be permanently deleted. Archive it instead.`,
-      requires_archive: true,
-      references: blockingReferences
-    }, 409);
-  }
-
-  const materialPreview = await loadProductMaterialPreview(db, productId);
-  const materialReviewRows = materialRowsRequiringReview(materialPreview);
-  if (materialReviewRows.length && Number(body.material_review_confirmed || 0) !== 1) {
-    return json({
-      ok: false,
-      error: 'Linked material rows may involve reserved stock. Open Correct / remove, review the quantities, and confirm the material review before deletion.',
-      requires_material_review: true,
-      materials_requiring_review: materialReviewRows
-    }, 409);
-  }
-
-  const images = await safeProductImages(db, productId);
-  const deletionReason = String(body.deletion_reason || '').trim().slice(0, 500) || 'Incorrect or unused product entry.';
-  const materialPlan = await prepareReviewedMaterialActions(db, {
-    productId,
-    actions: Array.isArray(body.material_actions) ? body.material_actions : [],
-    deletionReason,
-    actorUserId: Number(authCheck.sessionUser?.user_id || 0) || null
-  });
-  const materialSummary = materialPlan.summary;
-  const snapshot = {
-    product: existingProduct,
-    images,
-    material_return_summary: materialSummary,
-    automatically_removed_generated_project_shells: managedShells.safe_references || [],
-    deleted_from_storefront: true,
-    r2_cleanup_note: images.length
-      ? 'Image database rows were removed. Review any R2 objects separately before deleting files because media may be reused outside this product.'
-      : 'No product image rows were attached.'
+    managed_shells: managed,
+    cleanup_profile: 'bounded_registry_v2_generated_shell_cleanup'
   };
-
-  await runCleanup(db, productId, materialPlan.statements, managedShells);
-
-  if (await tableExists(db, 'product_deletion_audit')) {
-    await db.prepare(`
-      INSERT INTO product_deletion_audit (
-        product_id_deleted, product_number, sku, product_name, product_slug,
-        deletion_reason, deleted_by_user_id, product_snapshot_json,
-        orphan_media_urls_json, deleted_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `).bind(
-      productId,
-      existingProduct.product_number || null,
-      existingProduct.sku || null,
-      existingProduct.name || null,
-      existingProduct.slug || null,
-      deletionReason,
-      Number(authCheck.sessionUser?.user_id || 0) || null,
-      JSON.stringify(snapshot),
-      JSON.stringify(images.map((row) => row.image_url).filter(Boolean))
-    ).run().catch(() => null);
-  }
-
-  await auditAdminAction(env, request, authCheck.sessionUser, {
-    action_type: "product_delete",
-    target_type: "product",
-    target_id: productId,
-    target_key: existingProduct?.slug || existingProduct?.sku || String(productId),
-    details: {
-      product_number: existingProduct.product_number || null,
-      sku: existingProduct.sku || null,
-      name: existingProduct.name || null,
-      deletion_reason: deletionReason,
-      image_row_count: images.length,
-      material_return_summary: materialSummary,
-      product_snapshot: snapshot
-    }
-  });
-
-  return json({
-    ok: true,
-    message: "Unused product deleted. Its product number stays retired and will not be reused.",
-    product: existingProduct,
-    deleted_media_rows: images.length,
-    material_summary: materialSummary,
-    r2_cleanup_note: snapshot.r2_cleanup_note,
-    automatically_removed_generated_project_shells: managedShells.safe_references || []
-  });
 }
 
 export async function onRequestGet(context) {
-  try {
-    return await handleGet(context);
-  } catch (error) {
-    const adminUser = await getAdminUserFromRequest(context.request, context.env).catch(() => null);
-    await captureRuntimeIncident(context.env, context.request, {
-      incident_scope: 'product_cleanup',
-      incident_code: 'product_delete_preflight_failed',
-      severity: 'error',
-      message: error?.message || 'Product deletion preflight failed.',
-      related_user_id: adminUser?.user_id || null,
-      details: { error: String(error?.stack || error) }
-    }).catch(() => null);
-    return json({ ok: false, error: 'Product removal preflight could not complete. No product was changed.' }, 500);
-  }
+  const { request, env } = context;
+  const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
+  const auth = await requireAdmin(request, env);
+  if (auth.error) return auth.error;
+  const url = new URL(request.url);
+  const productId = Number(url.searchParams.get('product_id') || 0);
+  if (!Number.isInteger(productId) || productId <= 0) return json({ ok: false, error: 'A valid product_id is required.' }, 400);
+  const product = await loadProduct(db, productId);
+  if (!product) return json({ ok: false, error: 'Product not found.' }, 404);
+  return json({ ok: true, ...(await buildPreflight(db, productId, product)) });
 }
 
 export async function onRequestPost(context) {
-  try {
-    return await handlePost(context);
-  } catch (error) {
-    const adminUser = await getAdminUserFromRequest(context.request, context.env).catch(() => null);
-    await captureRuntimeIncident(context.env, context.request, {
-      incident_scope: 'product_cleanup',
-      incident_code: 'product_delete_failed',
-      severity: 'error',
-      message: error?.message || 'Product deletion failed.',
-      related_user_id: adminUser?.user_id || null,
-      details: { error: String(error?.stack || error) }
-    }).catch(() => null);
-    return json({ ok: false, error: 'Product removal failed safely. The product may still exist; refresh the cleanup list before trying again.' }, 500);
-  }
+  return handleDelete(context);
 }
