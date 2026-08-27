@@ -1,5 +1,6 @@
--- Devil n Dove Build 440 — Product / Inventory lot provenance Development verification.
--- READ ONLY. Run after both Build 440 lot-provenance migrations on devilndove-dev.
+-- Devil n Dove Build 440 — Product / Inventory lot-provenance Development verification.
+-- READ ONLY. Run after Build 440 lot-provenance + D1 compatibility migrations on devilndove-dev.
+-- D1 transport note: schema-text checks use instr(), never LIKE/GLOB patterns.
 
 SELECT 'tables' AS check_name,
        COUNT(*) AS actual,
@@ -48,12 +49,24 @@ WHERE migration_key IN (
   'build440_product_inventory_lot_provenance_hardening'
 );
 
+SELECT 'd1_trigger_compat_ledger' AS check_name,
+       COUNT(*) AS actual,
+       1 AS expected
+FROM schema_migration_ledger
+WHERE migration_key='build440_product_inventory_lot_provenance_d1_trigger_compat';
+
 SELECT 'cutover_setting' AS check_name,
        COUNT(*) AS actual,
        1 AS expected
 FROM app_settings
 WHERE setting_key='site.product.finished_lot_provenance_cutover_at'
   AND TRIM(COALESCE(setting_value,''))<>'';
+
+SELECT 'd1_trigger_compat_setting' AS check_name,
+       COUNT(*) AS actual,
+       1 AS expected
+FROM app_settings
+WHERE setting_key='site.product.finished_inventory_guard_d1_trigger_compat';
 
 SELECT 'active_supply_rows' AS metric, COUNT(*) AS value
 FROM site_item_inventory
@@ -126,14 +139,14 @@ SELECT 'current_finished_commitment_units' AS metric,
 FROM product_inventory_active_commitments;
 
 SELECT 'refund_fail_closed_view' AS check_name,
-       CASE WHEN LOWER(COALESCE(sql,'')) LIKE '%refunded%' THEN 1 ELSE 0 END AS actual,
+       CASE WHEN instr(LOWER(COALESCE(sql,'')), 'refunded') > 0 THEN 1 ELSE 0 END AS actual,
        1 AS expected
 FROM sqlite_master
 WHERE type='view' AND name='product_inventory_active_commitments';
 
 SELECT 'partial_checkout_cancel_trigger' AS check_name,
-       CASE WHEN LOWER(COALESCE(sql,'')) LIKE '%raise(fail%'
-                  AND LOWER(COALESCE(sql,'')) LIKE '%order_status=''cancelled''%'
+       CASE WHEN instr(LOWER(COALESCE(sql,'')), 'raise(fail') > 0
+                  AND instr(LOWER(COALESCE(sql,'')), 'order_status=''cancelled''') > 0
             THEN 1 ELSE 0 END AS actual,
        1 AS expected
 FROM sqlite_master
