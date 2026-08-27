@@ -1,4 +1,4 @@
-# Build 440 gate revision 3 — validate current Product deletion/material-review contract and guarded Development D1 runner before handoff.
+# Build 440 gate revision 4 — validate Product/Inventory/Tools source plus guarded D1 transport on Linux and Windows before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
@@ -20,6 +20,31 @@ permissions:
   contents: read
 
 jobs:
+  windows-d1-transport-gate:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout dev source
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile guarded Development D1 runner on Windows
+        run: python -m py_compile scripts/build440_apply_development_d1.py
+
+      - name: Validate exact Windows npx.cmd D1 transport contract
+        run: python scripts/build440_development_d1_runner_regression_test.py
+
+      - name: Windows safety statement
+        shell: bash
+        run: |
+          echo 'Remote Cloudflare/D1 access: NONE'
+          echo 'Production mutation capability: NONE'
+          echo 'Purpose: reproduce Windows command-boundary behavior before user handoff'
+
   source-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
