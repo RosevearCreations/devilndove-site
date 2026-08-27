@@ -9,13 +9,13 @@ This is the ordered execution companion to `AI_HANDOFF.md`. Those two files are 
 - Current Development release: **Build 440**
 - Canonical marker: `development-release.json`
 - Build 440 source/CI: **CLOSED / GREEN**
-- Exact-head Development Pages deployment: **GREEN**
-- Development live/authenticated acceptance: **NEXT**
+- Exact-head `devilndove-site-dev` Cloudflare Pages **Production deployment**: **GREEN**
+- Development live/authenticated acceptance against that Dev-project Production deployment: **NEXT**
 - Build 439 CAIP media/video live-browser acceptance: **OPEN / SEPARATE**
-- Production baseline: **Build 437**
-- Production promotion: **CLOSED**
+- Separate live Production baseline (`main` / `devilndove-site`): **Build 437**
+- Separate live Production promotion: **CLOSED**
 
-Do not infer currentness from an old commit number. The current `dev` head is release-valid only when the Build 440 GitHub Actions gate and the `devilndove-site-dev` Cloudflare Pages deployment check both pass on that exact commit.
+Do not infer currentness from an old commit number. The current `dev` head is release-valid only when the Build 440 GitHub Actions gate and the `devilndove-site-dev` Cloudflare Pages **Production deployment** check both pass on that exact commit. A preview deployment from another branch is not equivalent evidence. The separate live `devilndove-site` project remains outside this Development release path unless explicitly authorized.
 
 ## What is complete
 
@@ -28,6 +28,7 @@ Do not infer currentness from an old commit number. The current `dev` head is re
 - Active CI is repository-read-only.
 - Retained compatibility regressions derive current cache release instead of demanding obsolete cache versions.
 - Canonical AI/status documentation and compatibility pointers are Build 440-aligned.
+- The `dev` branch is the source branch for the `devilndove-site-dev` Pages project's Production deployment.
 
 ### Product
 - Desktop/mobile Product resource persistence is shared and atomic.
@@ -62,7 +63,7 @@ Do not infer currentness from an old commit number. The current `dev` head is re
 ## What remains open
 
 ### 1. Exact-head Development live acceptance
-Source/CI and deployment are green, but live application behavior still needs explicit proof:
+Source/CI and the `devilndove-site-dev` Production deployment are green, but live application behavior still needs explicit proof against that deployed Dev-project Production surface:
 
 - Admin authentication succeeds
 - relevant Admin APIs return expected current authority responses
@@ -75,7 +76,7 @@ Source/CI and deployment are green, but live application behavior still needs ex
 Use reversible fixtures/no-op writes where practical. Do not create business-history noise merely to prove a test.
 
 ### 2. Build 439 CAIP media/video live evidence acceptance
-Build 439 source/schema work is retained, but its Development media/browser evidence review must be completed explicitly. Do not infer closure from Build 440 CI.
+Build 439 source/schema work is retained, but its Development media/browser evidence review must be completed explicitly against the Dev-project Production deployment. Do not infer closure from Build 440 CI.
 
 ### 3. Development schema/data sanity
 After live acceptance, confirm:
@@ -85,17 +86,17 @@ After live acceptance, confirm:
 - no request-time schema repair has returned
 - no legacy JSON write authority has returned
 - Inventory/Product/Tool authority relationships match source contracts
-- no Development repair utility is accidentally exposed to Production
+- no Development repair utility can reach or mutate the separate live Production project
 
 ## Ordered next steps
 
-1. Run Build 440 Development live acceptance: Admin auth, Product, mobile Product, Inventory/kit, Tool lifecycle/publication and responsive views.
-2. Resolve any live defect as Build 440 and re-run the full exact-head gate; do not skip forward around failures.
-3. Complete Build 439 CAIP media/video live-browser evidence acceptance.
+1. Run Build 440 Development live acceptance against the exact-head `devilndove-site-dev` Production deployment: Admin auth, Product, mobile Product, Inventory/kit, Tool lifecycle/publication and responsive views.
+2. Resolve any live defect as Build 440 and re-run the full exact-head gate plus the Dev-project Production deployment; do not skip forward around failures.
+3. Complete Build 439 CAIP media/video live-browser evidence acceptance against the same Dev-project Production release.
 4. Run final Development schema/data/current-authority sanity checks.
 5. Record a Build 440 closure checkpoint.
 6. Define the next Development release only after the above acceptance items are closed.
-7. Consider Production promotion only as a separate explicit decision; until then, Production promotion remains **CLOSED**.
+7. Consider promotion to the separate live `main` / `devilndove-site` Production site only as a distinct explicit decision; until then that promotion remains **CLOSED**.
 
 ## Definition of Build 440 Development closure
 
@@ -106,11 +107,15 @@ Build 440 is Development-closed only when all are true:
 - cross-mutation/mobile/desktop source acceptance green
 - full pre/post aggregate source gate green
 - Windows D1 transport gate green
-- exact-head Cloudflare Pages Development deployment green
-- authenticated live Development acceptance green
+- exact-head Cloudflare Pages `devilndove-site-dev` **Production deployment** green
+- authenticated live Development acceptance against that deployment green
 - remaining Build 439 media/video live acceptance explicitly resolved or separately documented as intentionally deferred
 - canonical docs reflect the actual state
-- Production has not been mutated during Development acceptance
+- separate live `main` / `devilndove-site` Production has not been mutated during Development acceptance
+
+## Environment terminology rule
+
+Within this repository, **Dev-project Production** means the Cloudflare Pages Production deployment of project `devilndove-site-dev`, sourced from branch `dev`. It is still Development data/runtime authority. **Separate live Production** means branch `main` and the `devilndove-site` Pages project. Never treat those as the same promotion boundary.
 
 ## Documentation rule
 
