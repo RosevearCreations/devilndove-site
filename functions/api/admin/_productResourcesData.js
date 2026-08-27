@@ -1,4 +1,5 @@
-// Build 244: lightweight D1-authoritative product/resource loaders with fractional usage support.
+// Build 440: lightweight D1-authoritative product/resource loaders with fractional usage support.
+// Inventory identity matching is case/whitespace normalized; missing/non-positive use-per-batch reads as 1.
 // Schema creation belongs to numbered migrations; these helpers perform read-only queries only.
 
 import { normalizeText } from '../_lib/adminAudit.js';
@@ -7,6 +8,7 @@ const DEFAULT_PRODUCT_MEDIA_PUBLIC_BASE_URL = 'https://assets.devilndove.com';
 
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
 function number(value, fallback = 0) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : fallback; }
+function positive(value, fallback = 1) { const parsed = number(value, fallback); return parsed > 0 ? parsed : fallback; }
 function money(value) { return Math.max(0, Math.round(number(value, 0))); }
 
 function publicBase(env) {
@@ -32,8 +34,8 @@ export function resourcePreview(resource = {}, link = null) {
   const unitCostCents = money(resource.unit_cost_cents);
   const onHandQuantity = Math.max(0, number(resource.on_hand_quantity, 0));
   const usageUnitsPerStockUnit = Math.max(0.001, number(resource.usage_units_per_stock_unit, 1));
-  const quantityUsed = Math.max(0, number(link?.quantity_used ?? 1, 1));
-  const productsPerLot = Math.max(1, number(link?.lot_size_units ?? 1, 1));
+  const quantityUsed = positive(link?.quantity_used, 1);
+  const productsPerLot = positive(link?.lot_size_units, 1);
   const consumptionMode = normalizeConsumptionMode(link?.consumption_mode);
   const totalUsageUnitsAvailable = onHandQuantity * usageUnitsPerStockUnit;
   let estimatedCostPerProductCents = 0;
@@ -103,7 +105,7 @@ export async function loadProductLinks(db, productId) {
         SELECT sii2.site_item_inventory_id
         FROM site_item_inventory sii2
         WHERE LOWER(TRIM(COALESCE(sii2.source_type, ''))) = LOWER(TRIM(COALESCE(prl.resource_kind, '')))
-          AND sii2.external_key = prl.source_key
+          AND LOWER(TRIM(COALESCE(sii2.external_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))
         ORDER BY COALESCE(sii2.is_active, 1) DESC, sii2.site_item_inventory_id DESC
         LIMIT 1
       )
@@ -113,8 +115,8 @@ export async function loadProductLinks(db, productId) {
       ON ci.catalog_item_id = (
         SELECT ci2.catalog_item_id
         FROM catalog_items ci2
-        WHERE ci2.item_kind = LOWER(TRIM(COALESCE(prl.resource_kind, '')))
-          AND ci2.source_key = prl.source_key
+        WHERE LOWER(TRIM(COALESCE(ci2.item_kind, ''))) = LOWER(TRIM(COALESCE(prl.resource_kind, '')))
+          AND LOWER(TRIM(COALESCE(ci2.source_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))
         ORDER BY ci2.catalog_item_id DESC
         LIMIT 1
       )
@@ -128,11 +130,11 @@ export async function loadProductLinks(db, productId) {
       resource_kind: normalizeText(row.resource_kind).toLowerCase(),
       source_key: row.source_key || '',
       name: row.resource_name || row.source_key || '',
-      quantity_used: Math.max(0, number(row.quantity_used, 0)),
+      quantity_used: positive(row.quantity_used, 1),
       usage_notes: row.usage_notes || '',
       sort_order: Number(row.sort_order || 0),
       consumption_mode: normalizeConsumptionMode(row.consumption_mode),
-      lot_size_units: Math.max(1, number(row.lot_size_units, 1)),
+      lot_size_units: positive(row.lot_size_units, 1),
       is_label_ingredient: Number(row.is_label_ingredient || 0) === 1 ? 1 : 0,
       ingredient_name_en: row.ingredient_name_en || '',
       ingredient_name_fr: row.ingredient_name_fr || '',
@@ -169,7 +171,7 @@ export async function searchResources(db, env, query = '', limit = 240) {
   const safeLimit = Math.max(25, Math.min(400, Number(limit || 240)));
 
   // Inventory is the operational authority. Catalog rows are included only when an
-  // active inventory record does not yet exist for the same kind/key.
+  // active inventory record does not yet exist for the same normalized kind/key.
   const inventoryResult = await db.prepare(`
     SELECT
       LOWER(TRIM(COALESCE(sii.source_type, 'supply'))) AS item_kind,
@@ -242,7 +244,7 @@ export async function searchResources(db, env, query = '', limit = 240) {
     SELECT ci.catalog_item_id, ci.item_kind, ci.source_key, ci.name, ci.image_url, ci.amazon_url,
            ci.category, ci.subcategory
     FROM catalog_items ci
-    WHERE ci.item_kind IN ('tool', 'supply')
+    WHERE LOWER(TRIM(COALESCE(ci.item_kind, ''))) IN ('tool', 'supply')
       AND COALESCE(ci.status, 'active') != 'archived'
       AND (
         ? = ''
@@ -255,8 +257,8 @@ export async function searchResources(db, env, query = '', limit = 240) {
       AND NOT EXISTS (
         SELECT 1 FROM site_item_inventory sii
         WHERE COALESCE(sii.is_active, 1) = 1
-          AND LOWER(TRIM(COALESCE(sii.source_type, ''))) = ci.item_kind
-          AND sii.external_key = ci.source_key
+          AND LOWER(TRIM(COALESCE(sii.source_type, ''))) = LOWER(TRIM(COALESCE(ci.item_kind, '')))
+          AND LOWER(TRIM(COALESCE(sii.external_key, ''))) = LOWER(TRIM(COALESCE(ci.source_key, '')))
       )
     ORDER BY LOWER(COALESCE(ci.name, '')) ASC, ci.item_kind ASC
     LIMIT ?
