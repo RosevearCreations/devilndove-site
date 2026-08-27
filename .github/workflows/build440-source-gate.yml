@@ -1,0 +1,62 @@
+name: Build 440 Product Inventory Tools Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/**'
+      - 'public/js/**'
+      - 'admin/**'
+      - 'css/**'
+      - 'scripts/**'
+      - 'database*.sql'
+      - 'BUILD440*.sql'
+      - '.github/workflows/build440-source-gate.yml'
+  pull_request:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout dev source
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Build 440 source gate before aggregate sync
+        run: python scripts/build440_product_inventory_tools_source_gate.py
+
+      - name: Exercise lot provenance aggregate sync
+        run: python scripts/build440_sync_lot_provenance_full_schema.py
+
+      - name: Exercise receiving aggregate sync
+        run: python scripts/build440_sync_receiving_full_schema.py
+
+      - name: Build 440 source gate after aggregate sync
+        run: python scripts/build440_product_inventory_tools_source_gate.py
+
+      - name: Whitespace validation
+        run: git diff --check
+
+      - name: Report aggregate sync delta
+        run: |
+          git status --short
+          git diff --stat -- database_full_schema.sql
+
+      - name: Safety statement
+        run: |
+          echo 'Cloudflare/D1/R2/provider access: NONE'
+          echo 'Production mutation capability: NONE'
