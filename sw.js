@@ -1,5 +1,5 @@
-// Build 441: system-wide convergence, I.T. preflight/HOLD authority, repository hygiene, and retained Build 440 business regressions.
-const CACHE_NAME = 'devilndove-shell-v441';
+// Build 442: fourth-module I.T. authority Phase A, explicit user-grant migration package, carried HOLDs, and retained Build 441 regressions.
+const CACHE_NAME = 'devilndove-shell-v442';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

@@ -1,11 +1,11 @@
-# Build 441 system gate — current release identity plus inherited 439/440 regression provenance.
-name: Build 441 System Convergence Gate
+# Build 442 system gate — migration-first I.T. Phase A plus inherited business regressions.
+name: Build 442 System Convergence Gate
 
 on:
   push:
     branches: [dev]
     paths:
-      - 'functions/api/**'
+      - 'functions/**'
       - 'public/js/**'
       - 'js/**'
       - 'admin/**'
@@ -15,6 +15,7 @@ on:
       - 'development-release.json'
       - 'scripts/**'
       - 'database*.sql'
+      - 'BUILD442_*.sql'
       - 'AI_HANDOFF.md'
       - 'PROJECT_STATUS_AND_ROADMAP.md'
       - 'SANITY_HEALTH_CHECK.md'
@@ -39,23 +40,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile guarded Development D1 runners retained from Build 440
-        run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py scripts/build440_verify_development_d1_final.py
+      - name: Compile guarded Development D1 runners
+        run: python -m py_compile scripts/build440_apply_development_d1.py scripts/build440_resume_development_d1.py scripts/build440_verify_development_d1_final.py scripts/build442_apply_development_it_platform.py
       - name: Validate Windows D1 transport contract
         run: python scripts/build440_development_d1_runner_regression_test.py
       - name: Validate partial-resume contract
         run: python scripts/build440_development_d1_resume_regression_test.py
       - name: Validate final verifier contract
         run: python scripts/build440_final_verifier_regression_test.py
+      - name: Validate Build 442 I.T. migration and runner source contract
+        run: python scripts/build442_it_platform_migration_regression.py
       - name: Safety statement
         shell: bash
         run: |
           echo 'Remote Cloudflare/D1 access: NONE'
+          echo 'Build 442 D1 migration apply: NEVER FROM CI'
           echo 'Production mutation capability: NONE'
 
   source-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -64,12 +68,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate Build 441 release alignment
-        run: python scripts/build441_development_release_alignment_test.py
-      - name: Validate Build 441 release/HOLD contract
-        run: python scripts/build441_release_contract_integrity_test.py
+      - name: Validate Build 442 release alignment
+        run: python scripts/build442_development_release_alignment_test.py
+      - name: Validate Build 442 release/HOLD contract
+        run: python scripts/build442_release_contract_integrity_test.py
       - name: Validate repository hygiene
         run: python scripts/build441_repository_hygiene_test.py
+      - name: Validate Build 442 I.T. migration and guarded runner
+        run: python scripts/build442_it_platform_migration_regression.py
+      - name: Compile Build 442 Development D1 runner
+        run: python -m py_compile scripts/build442_apply_development_it_platform.py
       - name: Validate inherited D1 transport regressions
         run: |
           python scripts/build440_development_d1_runner_regression_test.py
@@ -82,10 +90,10 @@ jobs:
           python scripts/build440_public_inventory_authority_regression.py
           node --check functions/api/tools.js
           node --check functions/api/supplies.js
-      - name: Validate Build 441 Product/Inventory/Tool cross-mutation and responsive contract
-        run: python scripts/build441_cross_mutation_responsive_acceptance_test.py
-      - name: Build 441 source sanity
-        run: python scripts/build441_current_sanity_check.py --quick
+      - name: Validate Build 442 Product/Inventory/Tool cross-mutation and responsive contract
+        run: python scripts/build442_cross_mutation_responsive_acceptance_test.py
+      - name: Build 442 source sanity
+        run: python scripts/build442_current_sanity_check.py
       - name: Product/Inventory/Tools source gate before aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
       - name: Exercise lot-provenance aggregate sync
@@ -94,8 +102,12 @@ jobs:
         run: python scripts/build440_sync_receiving_full_schema.py
       - name: Product/Inventory/Tools source gate after aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
-      - name: JavaScript syntax for Build 441 I.T. shell dependencies
+      - name: JavaScript syntax for retained Application Core dependencies
         run: |
+          node --check functions/_middleware.js
+          node --check functions/api/_lib/appModules.js
+          node --check functions/api/_lib/appModuleRoutes.js
+          node --check functions/api/admin/app-modules.js
           node --check public/js/auth.js
           node --check public/js/site-auth-ui.js
           node --check public/js/admin-self-protect.js
@@ -104,5 +116,7 @@ jobs:
       - name: Safety statement
         run: |
           echo 'Cloudflare/D1/R2/provider access: NONE'
+          echo 'Build 442 Phase A packages D1 authority but does not apply it from CI.'
+          echo 'Runtime it-platform enforcement remains OFF until guarded Development D1 proof.'
+          echo 'CAIP private-media evidence remains a documented Build 442 HOLD.'
           echo 'Production mutation capability: NONE'
-          echo 'Inherited CAIP live-media evidence remains a documented Build 441 HOLD, not a CI false-pass.'

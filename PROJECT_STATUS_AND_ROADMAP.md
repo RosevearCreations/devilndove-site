@@ -1,4 +1,4 @@
-# Project Status and Roadmap — Development Build 441
+# Project Status and Roadmap — Development Build 442
 
 Updated: 2026-08-27
 
@@ -6,95 +6,98 @@ This file and `AI_HANDOFF.md` are the two full mutable current-state authorities
 
 ## Release status
 
-- Current Development release: **Build 441**
+- Current Development release: **Build 442 — I.T. & Platform enforcement rollout**
 - Source: `dev`
 - Development application: `devilndove-site-dev`
-- Build 439/440: **historical regression provenance carried into 441**
-- Product/Inventory/Tool authenticated functional acceptance: **GREEN provenance**
-- Cross-mutation/responsive source gate: **GREEN 35/35**
-- CAIP private media live evidence: **HOLD in Build 441**
-- Separate live Production baseline: **Build 437**
+- Previous accepted checkpoint: **Build 441 / `96e3256b608190a8780829ea9e6409670a898fb4`**
+- Build 441 source gate: **GREEN**
+- Build 441 Windows D1 transport gate: **GREEN**
+- Build 441 exact Cloudflare Development deployment: **GREEN**, deployment `594c671f-3893-4a06-9eac-becf4e6a1a3e`
+- Product/Inventory/Tool authenticated and source evidence: **GREEN provenance carried forward**
+- Responsive/cross-mutation source evidence: **GREEN 35/35 provenance carried forward**
+- Build 442 I.T. user-grant migration: **PHASE A — packaged; remote Development apply pending**
+- Build 442 runtime I.T. enforcement: **HOLD until Development D1 proof**
+- CAIP private-media live evidence: **HOLD carried into Build 442**
+- Separate live Production baseline/project: `main` / `devilndove-site`
 - Production promotion: **CLOSED**
 
-A HOLD is carried forward with its reason and exact remaining proof. It does not keep an obsolete build active and is never silently converted to PASS.
+A HOLD always travels into the active release with its reason, completed evidence and exact remaining proof. It never leaves an obsolete release artificially open and is never silently converted to PASS.
 
-## Build 441 convergence work
+## Build 442 work
 
-- Make 441 the canonical system release identity and service-worker shell.
-- Retain proven 439/440 source/database/business regressions as permanent gates.
-- Add the I.T. Preflight / Startup Release Guide operator hub.
-- Put technical release issues/HOLDs under I.T. ownership.
-- Consolidate current Markdown authority and remove stale login/old-release instructions.
-- Retire exact archived duplicate historical root reports and prevent their return.
-- Keep separate live Production untouched.
+### Phase A — migration-first safety boundary
 
-## Technical release/HOLD register
+- Add the `it-platform` fourth-module registry row through an additive D1 migration.
+- Add explicit `app_module_user_access` per-user authority with `read` / `manage` access.
+- Keep role-derived I.T. access denied for both current `member` and `admin` roles.
+- Bootstrap explicit manage access only for active administrators present during the first grant initialization; future admins are not auto-granted on migration replay.
+- Reuse the proven guarded Windows-safe Development D1 query transport.
+- Refuse Production targets, automatic retries and bulk import.
+- Keep existing Build 438 three-module runtime enforcement unchanged until the new Development D1 authority is proven.
+
+### Phase B — after D1 proof only
+
+- Add `it-platform` to runtime module registry and route ownership.
+- Require authenticated user + enabled module + explicit user grant.
+- Enforce `read` versus `manage` in middleware/APIs.
+- Add audited I.T. grant management and last-active-manager lockout protection.
+- Extend Application Modules health/acceptance to four modules.
+- Prove authenticated allowed/denied/read-only behavior on the Development deployment.
+
+## Current HOLD register
 
 | ID | Work | State |
 | --- | --- | --- |
-| IT-441-01 | Build 441 source/release/hygiene gates | **ACTIVE GATE** |
-| IT-441-02 | I.T. operator hub and Preflight/Startup parent | **IMPLEMENTED IN 441** |
-| IT-441-03 | Full `it-platform` registry + explicit user read/manage grants + middleware/API enforcement | **NEXT / 442+** |
-| CAIP-441-H1 | Private R2 delivery/range seeking/timecode/storage live evidence | **HOLD — PROMOTION BLOCKING** |
-| UI-441-N1 | Authenticated automated viewport evidence when a suitable top-level browser harness is available | **NOTE — SOURCE 35/35 GREEN** |
-| OPS-441-H1 | Separate live Production promotion | **HOLD BY POLICY** |
+| IT-442-H1 | Apply/verify fourth-module and user-grant schema in `devilndove-dev` | **HOLD — blocks Phase B** |
+| IT-442-H2 | Runtime `it-platform` per-user route/API enforcement | **HOLD — intentionally off until IT-442-H1 passes** |
+| CAIP-442-H1 | Private R2 delivery/range seeking/timecode/storage live evidence | **HOLD — promotion blocking** |
+| UI-442-N1 | Automated authenticated viewport evidence | **NOTE — source 35/35 green; no known defect** |
+| OPS-442-H1 | Separate live Production promotion | **HOLD BY POLICY** |
 
-## Product and business roadmap
+## Business roadmap carried forward
 
 ### Shop & customer experience
-- Continue Shop information architecture, product discovery, filters/search, truthful availability, cart/checkout readiness, customer documents, policies and mobile usability.
-- Ensure Shop never exposes internal Inventory-only Tool/Supply rows.
+Continue Shop information architecture, product discovery, filters/search, truthful availability, cart/checkout readiness, customer documents, policies and mobile usability. Never expose internal Inventory-only Tool/Supply rows.
 
 ### Home & merchandising
-- Add an editable, responsive Home-page carousel with approved assets, text/CTA authority, accessibility, performance and fallback behavior.
-- Continue featured products/creations, seasonal/editorial merchandising and public display-order controls.
+Add an editable responsive Home carousel with approved assets/text/CTA authority, accessibility, performance and fallback behavior. Continue featured creations, seasonal/editorial merchandising and display-order controls.
 
 ### Catalog, Shop & Collections
-- Strengthen catalog editing, collection/taxonomy management, merchandising rules, duplicate/import safeguards, SEO and public/private eligibility.
-- Keep Collections distinct from raw Inventory identity while linking the right Product authorities.
+Strengthen catalog editing, collection/taxonomy management, merchandising rules, import/duplicate safeguards, SEO and public/private eligibility while keeping Collections distinct from raw Inventory identity.
 
 ### Inventory
-- Continue receiving, purchase lots/source provenance, physical counts, usage setup, ingredient review, kits, barcode-first workflows, reversals and atomic/audited stock actions.
-- Reconcile uncertain historical lots without fabricated provenance.
+Continue receiving, purchase lots/source provenance, physical counts, usage setup, ingredient review, kits, barcode-first workflows, reversals and atomic/audited stock actions. Do not fabricate uncertain historical provenance.
 
 ### Tools
-- Continue lifecycle/service/inspection completeness, reusable usage history, publication linkage, maintenance schedules and do-not-reuse safety.
+Continue lifecycle/service/inspection completeness, reusable usage history, publication linkage, maintenance schedules and do-not-reuse safety.
 
 ### Creative Projects & CAIP
-- Resolve the Build 441 CAIP private-media HOLD.
-- Continue verified proxies/thumbnails/frames/audio/transcripts, bounded retry/dead-letter, Creative Project → Content Studio handoff, reviewed material usage, lessons/recommendations, profitability and private storyboard notes.
-- Human approval remains mandatory before public story/release/publication handoff.
+Carry `CAIP-442-H1` until private media evidence is proven. Continue verified processing artifacts, bounded retry/dead-letter, Creative Project → Content Studio handoff, reviewed material usage, lessons/recommendations, profitability and private storyboard notes. Human approval remains mandatory before public handoff.
 
-### Gallery
-- Build stronger public Gallery/storytelling surfaces using approved product/project evidence, before/after/process/technique/result media, consent and SEO/alt-text authority.
-
-### Movies / video / media
-- Continue Movies metadata/shelf editing and connect reviewed video/media presentation to the correct CAIP/Content authority without leaking private source footage.
-- Add thumbnails/posters, responsive playback, captions/transcripts where approved, range-seeking/performance evidence and truthful fallbacks.
+### Gallery / Movies / video / media
+Strengthen approved Gallery storytelling and reviewed video/media presentation without leaking private CAIP source footage. Continue thumbnails/posters, responsive playback, captions/transcripts, range-seeking/performance evidence and truthful fallbacks.
 
 ### Packaging & labels
-- Continue exact-size templates, reusable ingredient/soap/formula libraries, prepress PDF, proof photos, barcode/QR, transactional packaging consumption, bilingual/INCI/claim review and physical print/laser evidence.
+Continue exact-size templates, reusable ingredient/soap/formula libraries, prepress PDF, proof photos, barcode/QR, transactional packaging consumption, bilingual/INCI/claim review and physical print/laser evidence.
 
 ### Orders, Payments & Accounting
-- Continue order drafts/status/quotes, customer documents, provider-confirmed payment/refund/dispute flows, webhook retry/replay, reconciliation, AR/AP/journal/tax/fees/profitability/export/close, percentage marketplace fees and shared project-cost allocation.
+Continue order lifecycle, customer documents, provider-confirmed payments/refunds/disputes, webhook replay, reconciliation, AR/AP/journal/tax/fees/profitability/export/close, percentage marketplace fees and shared project-cost allocation.
 
 ### SEO, content & analytics
-- Preserve one H1, truthful metadata/schema, noindex Admin and Ontario/local quality.
-- Continue unified search, consent-aware funnel/campaign analytics, social scheduling/publishing proof, Search Console/sitemap/indexing, Merchant Center and Business Profile evidence.
+Preserve one H1, truthful metadata/schema, noindex Admin and appropriate Canadian/local quality. Continue unified search, consent-aware analytics, social publishing proof, Search Console/sitemap/indexing, Merchant Center and Business Profile evidence.
 
 ### Reliability, security & backup
-- Keep structured/sanitized failures, permission tests, Worker CPU/subrequest/5xx review, bounded/no-idle polling, cache/service-worker recovery, accessibility/performance and isolated D1/R2/config backup-restore rehearsal.
+Keep structured/sanitized failures, permission tests, Worker CPU/subrequest/5xx review, bounded/no-idle polling, cache/service-worker recovery, accessibility/performance and isolated D1/R2/config backup-restore rehearsal.
 
 ### Go-live
-- Freeze a small launch list only after facts, stock, media, packaging and ownership are verified.
-- Rehearse tax, delivery/pickup, checkout, email, payment, refund and fulfilment.
-- Promotion to separate live Production remains an explicit owner decision.
+Freeze a small launch list only after facts, stock, media, packaging and ownership are verified. Rehearse tax, delivery/pickup, checkout, email, payment, refund and fulfilment. Separate live Production promotion remains an explicit owner decision.
 
 ## Release sequencing
 
-- **Build 441:** system convergence, old-release carry-forward/HOLD model, I.T. operator hub, documentation authority and repository hygiene.
-- **Build 442:** first full I.T. module enforcement increment and next highest-priority bounded feature work after 441 is green.
-- **Build 443+:** continue roadmap in bounded releases; do not reopen old build numbers. Any unfinished item is carried forward as a current-release HOLD/OPEN item with evidence.
+- **Build 441:** closed Development convergence checkpoint at `96e3256b608190a8780829ea9e6409670a898fb4`.
+- **Build 442 Phase A:** additive I.T. module/user-grant migration package, guarded Development D1 apply/verification, no runtime enforcement race.
+- **Build 442 Phase B:** activate explicit per-user I.T. enforcement only after D1 proof; close or carry remaining HOLDs.
+- **Build 443+:** next bounded roadmap work. Never reopen old build numbers; unresolved items carry forward as current-release HOLD/OPEN items.
 
 ## Environment terminology
 

@@ -1,6 +1,6 @@
 # Devil n Dove I.T. & Platform Module
 
-Status: **BUILD 441 OPERATOR HUB ACTIVE / FULL FOURTH-MODULE ACCESS MODEL NEXT**
+Status: **BUILD 442 PHASE A — USER-GRANT AUTHORITY PACKAGED / RUNTIME ENFORCEMENT HELD UNTIL DEVELOPMENT D1 PROOF**
 
 Updated: 2026-08-27
 
@@ -8,13 +8,99 @@ Updated: 2026-08-27
 
 I.T. & Platform owns technical release readiness: deployment, database/storage health, diagnostics, recovery, bindings/secrets presence, cache/service-worker identity, incidents, backup/restore evidence, provider health and technical release HOLDs. It must not silently rewrite Product, Inventory, Tool, Creative, Packaging, Accounting or marketing facts.
 
-Target top-level module key: `it-platform`.
+Top-level module key: `it-platform`.
 
-## Build 441 boundary
+## Proven starting point
 
-Build 441 introduces `/admin/it-platform/` as a read-only operator parent for existing Preflight/Startup/Release/Schema/Runtime/Continuity authorities. It also makes current technical HOLDs visible in `docs/releases/BUILD441_RELEASE_GATE.md` and `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`.
+Build 441 established `/admin/it-platform/` as the operator parent for existing Preflight/Startup/Release/Schema/Runtime/Continuity authorities and closed its exact Development checkpoint at `96e3256b608190a8780829ea9e6409670a898fb4` with source, Windows D1 transport and Cloudflare `devilndove-site-dev` deployment green.
 
-Build 441 does **not** falsely claim that the backend module registry or per-user grant authority already contains a fourth fully enforced module. The three proven business-module controls remain operational while I.T. access enforcement is implemented incrementally.
+The three existing business modules remain proven Build 438 runtime authority during Build 442 Phase A:
+- `commerce-operations`
+- `creative-production`
+- `business-administration`
+
+## Build 442 Phase A — schema first
+
+Build 442 adds, but does not yet activate at runtime:
+
+- an additive `it-platform` row in `app_modules`;
+- denied `member` and `admin` rows for `it-platform` in `app_module_role_access` so role membership alone cannot unlock I.T.;
+- `app_module_user_access` with explicit per-user `read` / `manage` grants;
+- one-time bootstrap of explicit `manage` grants for active administrators present while no I.T. user grants exist;
+- a Development-only guarded migration/apply/verifier using the proven Windows-safe D1 query transport;
+- migration regressions proving consistency constraints, idempotency and no automatic grant for a future admin on replay.
+
+Runtime route/API enforcement stays unchanged until the Development D1 migration has been applied and verified. This is intentional: code that depends on `app_module_user_access` must not auto-deploy before that table exists.
+
+## Build 442 Phase B — after D1 verification
+
+Phase B will:
+
+1. add `IT_PLATFORM: 'it-platform'` to the runtime registry;
+2. map reviewed I.T. routes before the Business Administration fallback;
+3. require an authenticated active user for I.T.;
+4. require an explicit `app_module_user_access` grant even when the user role is `admin`;
+5. enforce `read` versus `manage` on API methods;
+6. add audited grant management to the Application Core module-control API;
+7. require explicit I.T. `manage` authority to change I.T. user grants;
+8. block removal or downgrade of the last active I.T. manager;
+9. extend health diagnostics and authenticated acceptance to four modules.
+
+Hidden navigation is never treated as security.
+
+## I.T. route ownership target
+
+### Release / deployment
+- `/admin/it-platform*`
+- `/admin/startup-readiness*`
+- `/admin/prelaunch*`
+- `/admin/deployment-preflight*`
+- `/admin/release-control*`
+- `/admin/deploy-readiness*`
+- `/admin/promotion-control*`
+
+### Runtime / diagnostics
+- `/admin/application-sanity*`
+- `/admin/runtime-incidents*`
+- `/admin/public-api-health*`
+- `/admin/route-usage*`
+
+### Data / schema / documentation
+- `/admin/schema-drift*`
+- `/admin/markdown-sanity*`
+
+### Recovery / controlled opening
+- `/admin/operational-continuity*`
+- `/admin/go-live-execution*`
+- `/admin/live-ops-followthrough*`
+
+Matching `/api/admin/...` families become I.T.-owned only where they are truly technical authorities. Product/Inventory/Tool/Creative/Packaging/Accounting business APIs remain with their existing modules.
+
+`/admin/application-modules*` and `/api/admin/app-modules*` remain Application Core recovery surfaces. Their future I.T.-grant mutation action is still protected by explicit current-user I.T. `manage` authority, so the exempt route cannot become an admin-role privilege escalation path.
+
+## Access model
+
+For the three existing business modules, role-based access remains the proven behavior unless separately revised.
+
+For `it-platform`, access requires all of:
+
+- module exists and is enabled;
+- user is authenticated and active;
+- an explicit row exists for `(it-platform, user_id)`;
+- `is_allowed = 1`;
+- `access_level` is `read` or `manage`.
+
+No explicit row means denied. An ordinary admin with no I.T. user grant is denied.
+
+`read` permits safe read operations. `manage` is required for I.T.-owned mutations. Background I.T. activity remains off by default and is not introduced by Phase A.
+
+## Lockout protection
+
+The first migration bootstrap is permitted only while no `it-platform` user grant exists. Replaying the migration after a future admin is created does not auto-grant that admin.
+
+Phase B grant mutations must refuse any operation that would leave fewer than one active explicit `manage` user for `it-platform`.
+
+Every grant mutation must be audited with actor, target user, before/after state and timestamp.
 
 ## I.T. owns
 
@@ -33,27 +119,15 @@ Build 441 does **not** falsely claim that the backend module registry or per-use
 
 Product/Inventory/Tool/Order business rules, Creative/CAIP editorial decisions, Packaging formulas/claims, Accounting treatment, marketing/SEO decisions, or ordinary user/business-role administration.
 
-## Future access authority
-
-Full module implementation adds explicit `app_module_user_access` rows with `read` or `manage` access. No explicit I.T. grant means denied, including for an ordinary admin. Middleware/APIs must enforce grants; hidden navigation alone is not security. Every grant and I.T. mutation is audited.
-
-## Existing route ownership map
-
-- Release/deployment: `/admin/deployment-preflight*`, `/admin/release-control*`, `/admin/deploy-readiness*`, `/admin/promotion-control*`
-- Runtime: `/admin/application-sanity*`, `/admin/runtime-incidents*`, `/admin/public-api-health*`, `/admin/route-usage*`
-- Data/schema: `/admin/schema-drift*`, `/admin/markdown-sanity*`
-- Recovery: `/admin/operational-continuity*`
-- Controlled opening: `/admin/go-live-execution*`, `/admin/live-ops-followthrough*`
-- Module recovery remains Application Core-owned.
-
 ## Service and repair rule
 
-Initial I.T. contracts are read-only: release-health, schema-health, runtime-health, storage-health, provider-health and module-health. Any repair must later be a separate bounded mutation with environment refusal rules, explicit authorization, idempotency or compensating reversal, audit evidence and post-action verification. Background activity stays off by default.
+The first I.T. contracts remain read-only: release-health, schema-health, runtime-health, storage-health, provider-health and module-health. Any later repair must be a separate bounded mutation with environment refusal rules, explicit authorization, idempotency or compensating reversal, audit evidence and post-action verification. Background activity stays off by default.
 
-## Acceptance path
+## Current HOLDs
 
-Build 441: operator hub + HOLD ownership + release documentation/gates.
-
-Build 442+: registry integration, explicit per-user grants, route/API enforcement and four-module health contract. Repair actions come only after read-only health and access isolation are proven.
+- `IT-442-H1`: apply and verify the additive authority in Development D1.
+- `IT-442-H2`: activate runtime per-user enforcement only after H1 passes.
+- `CAIP-442-H1`: private-media Development evidence remains carried forward.
+- separate live Production promotion remains closed by policy.
 
 Separate live `main` / `devilndove-site` Production remains untouched unless explicitly authorized.
