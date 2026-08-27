@@ -1,70 +1,35 @@
-# Sanity Health Check — Development Build 440
+# Sanity Health Check — Development Build 441
 
 Updated: 2026-08-27
 
-Current local/source sanity status: **PASS after closure repairs**. Authenticated
-live Development acceptance is still open, so this is not Build 440 closure or
-live-deployment evidence.
+Build 441 is the current Development convergence release. Historical Build 439/440 tests remain source/regression provenance; unfinished evidence is represented as a current Build 441 HOLD.
 
-## Current repeatable authority
+## Repeatable source authority
 
 Run:
 
 ```bash
-python scripts/build440_current_sanity_check.py
+python scripts/build441_current_sanity_check.py
 ```
 
-The runner is source-only. It contacts no Cloudflare, D1, R2, payment, email or
-other provider and has no Production mutation capability.
+The runner is source-only and has no Cloudflare/D1/R2/provider or separate live Production mutation capability.
 
-## Results
+## Green inherited evidence
 
-- Canonical Development release alignment: **PASS**.
-- Release-contract/read-only CI integrity: **PASS**.
-- Product/Inventory/Tools cross-mutation and responsive authority: **PASS
-  (35/35)**.
-- Full Build 440 Product/Inventory/Tools source gate: **PASS**.
-- Predeploy static scan: **PASS (114 pages, 0 issues)**.
-- Local asset reference audit: **PASS (151 references, 0 missing)**.
-- Build 439 CAIP source gate: **PASS** after its historical UI-cache assertions
-  were changed to derive the current canonical release.
-- Fresh-install aggregate schema: **PASS for Build 440 lot provenance,
-  receiving/reversal and Tool lifecycle authority**.
-- Git whitespace safety: must remain **PASS** on the final commit.
+- Build 440 source/Windows D1 transport gates: GREEN.
+- Product reversible save/persist/restore and safe failure: GREEN live provenance.
+- Inventory/kit ownership/failure/no-side-effect checks: GREEN live provenance.
+- Tool lifecycle/history/publication/failure/no-change checks: GREEN live provenance.
+- Public Tool/Supply D1 authority with no fallback: GREEN live provenance.
+- Cross-mutation/responsive source gate: 35/35 GREEN.
+- Fresh-install Product/Inventory/Tool aggregate-schema authority retained.
 
-## Repairs made during this sanity pass
+## Current Build 441 HOLDs/notes
 
-1. Synchronized the focused Build 440 Product/Inventory lot-provenance authority
-   into `database_full_schema.sql`.
-2. Synchronized the focused Build 440 Inventory receiving/source/reversal
-   authority into `database_full_schema.sql`.
-3. Replaced an obsolete Today Tasks token check with its current
-   Operations-owned read-service/failure contract.
-4. Added a current Build 440 sanity runner instead of treating the historical
-   Build 246 deployment-preflight artifact as current evidence.
-5. Made the retained Build 439 UI regression derive the current cache/release
-   major instead of requiring obsolete `?v=439` asset URLs.
+- **CAIP private-media HOLD:** private R2 delivery/range seeking/exact timecode/storage live proof remains outstanding and is promotion-blocking.
+- **Responsive live automation note:** prior iframe/pop-up harnesses were blocked by correct CSP/browser security controls. No responsive defect was thereby observed; source gate remains green.
+- **Separate live Production promotion:** CLOSED by policy.
 
-## Historical artifact warning
+## Repository health
 
-`data/site/deployment-preflight.json` and
-`scripts/deployment_preflight_static_check.py` are Build 246-era evidence and
-must not approve or block Build 440 by themselves. They remain historical until
-a future bounded release-operations replacement is implemented in the I.T. &
-Platform module.
-
-## Evidence still required
-
-- authenticated live Admin acceptance on the exact resulting
-  `devilndove-site-dev` Production deployment;
-- Product desktop/mobile read/save and restoration proof;
-- Inventory/kit stock-owner and failure proof;
-- Tool lifecycle/history/publication proof;
-- phone/tablet/laptop/wide visual proof;
-- Build 439 private media/timecode/storage live evidence;
-- remote Development D1 migration-ledger and current-authority verification;
-- exact-head Build 440 GitHub gate and Dev-project Production deployment after
-  these closure repairs.
-
-Separate live `main` / `devilndove-site` Production remains untouched and
-promotion remains closed.
+Build 441 begins retiring root historical reports when an exact archived copy already exists under `docs/archive/build-history/`. The hygiene gate prevents exact duplicates from returning. Migrations, runtime code and active regressions are not removed merely because their filenames are historical.

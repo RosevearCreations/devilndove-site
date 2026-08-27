@@ -1,5 +1,5 @@
-// Build 440: inventory resilience/contrast refresh, CAIP/Operational Continuity, public audit assets, and retained offline/error fallbacks.
-const CACHE_NAME = 'devilndove-shell-v440';
+// Build 441: system-wide convergence, I.T. preflight/HOLD authority, repository hygiene, and retained Build 440 business regressions.
+const CACHE_NAME = 'devilndove-shell-v441';
 const CORE_ASSETS = [
   '/',
   '/offline.html',

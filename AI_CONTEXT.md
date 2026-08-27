@@ -1,29 +1,14 @@
-# AI Context — Compatibility pointer — Build 440
+# AI Context — Compatibility pointer — Build 441
 
-The current Devil n Dove Development truth is maintained in exactly two mutable canonical documents:
+Current truth lives in `AI_HANDOFF.md` and `PROJECT_STATUS_AND_ROADMAP.md`.
 
-1. `AI_HANDOFF.md` — architecture, authority boundaries, release/deployment rules and current technical state.
-2. `PROJECT_STATUS_AND_ROADMAP.md` — ordered status, open acceptance work and next steps.
-
-Current release markers:
-
-- Development: **Build 440** (`development-release.json`)
-- Production baseline: **Build 437**
-- Production promotion: **CLOSED**
-
-Important current invariants:
-
-- D1 is authoritative for Product/Inventory operational state.
-- Desktop and mobile Product resource saves share one atomic persistence authority.
-- Tool/Supply public eligibility is Catalog-owned; live identity/metadata is Inventory-owned.
-- Legacy Tool/Supply JSON is emergency read-only fallback only.
-- Request-time schema repair is not an accepted Product/Inventory/Tool architecture.
-- Numbered Build/migration documents are historical evidence unless the canonical handoff explicitly names them as active.
-- `database_upgrade_current_pass.sql` is a legacy Build 264 compatibility snapshot, not the Build 440 release authority.
-- Build 440 source/CI is green; exact-head Development live acceptance is the next release-closing stage.
-- The approved first post-Build-440 section is a creator-isolated fourth
-  `it-platform` module with explicit per-user I.T. grants; runtime
-  implementation waits for Build 440 closure.
-- Build 439 CAIP media/video live-browser acceptance remains a separate open item.
-
-Do not restore older “current release” descriptions from historical chats or files.
+- Development: **Build 441**
+- `development-release.json` is active release authority.
+- Old 439/440 tests/migrations are regression provenance, not active releases.
+- Unfinished work is carried forward as a current-release HOLD/OPEN item.
+- CAIP private R2/range/timecode/storage live evidence is a **Build 441 HOLD**.
+- I.T. technical readiness lives under `/admin/it-platform/` plus the Preflight/Startup release guide.
+- D1 remains Product/Inventory operational authority; Catalog controls public Tool/Supply eligibility and Inventory controls live identity/metadata.
+- Legacy JSON is emergency read-only fallback only; request-time schema repair is not accepted architecture.
+- `database_upgrade_current_pass.sql` remains legacy compatibility, not Build 441 migration authority.
+- Separate live Production is `main` / `devilndove-site`, baseline Build 437; promotion **CLOSED**.

@@ -1,15 +1,14 @@
-# New Chat Status — Build 440 Pointer
+# New Chat Status — Build 441 Pointer
 
-Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second. Those are the two canonical mutable project documents.
+Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second.
 
-Current state:
-
-- Development: **Build 440**
-- Build 440 full source/CI gate: **GREEN**
-- Exact-head Development live acceptance: **NEXT**
-- Build 439 CAIP media/video live-browser acceptance: **OPEN / SEPARATE**
-- Approved next architecture after Build 440 closure: fourth `it-platform` module with explicit per-user I.T. grants and creator-safe isolation.
-- Production baseline: **Build 437**
+- Development: **Build 441**
+- Historical 439/440: regression provenance carried into 441
+- Product/Inventory/Tool functional authenticated evidence: **GREEN provenance**
+- CAIP private R2/range/timecode/storage evidence: **BUILD 441 HOLD**
+- I.T. Preflight/Startup operator hub: `/admin/it-platform/`
+- Full fourth-module grants/enforcement: **442+ work**
+- Separate live Production baseline: **Build 437**
 - Production promotion: **CLOSED**
 
-Do not revive older “current release” instructions from old chats or historical files. `database_upgrade_current_pass.sql` is a legacy Build 264 compatibility snapshot, not the current Build 440 migration authority.
+Do not reopen old release numbers. Carry unresolved work forward as a HOLD/OPEN item in the current release.
