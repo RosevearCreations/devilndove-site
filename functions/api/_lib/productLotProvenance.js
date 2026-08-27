@@ -79,8 +79,10 @@ export async function loadMaterialLotPlan(db, siteItemInventoryId, requiredStock
   }
 
   const blockers = [];
-  if (reconcileStatus === 'blocked') {
-    blockers.push('Purchase-lot reconciliation is blocked for this inventory item. Reconcile the lot total before production.');
+  if (reconcileStatus !== 'reconciled') {
+    blockers.push(reconcileStatus === 'blocked'
+      ? 'Purchase-lot reconciliation is blocked for this inventory item. Reconcile the physical lot total before production.'
+      : 'Purchase-lot reconciliation still needs review for this inventory item. Complete the lot reconciliation before production.');
   }
   if (!candidates.length) {
     blockers.push('No available, non-expired purchase lot can cover this material usage.');
