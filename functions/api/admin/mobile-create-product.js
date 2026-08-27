@@ -6,6 +6,7 @@
 
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { DEFAULT_PRODUCT_NUMBER_START, allocateNextProductNumber, ensureProductNumberSequenceAtLeast, getNextProductNumber } from "./_product-numbering.js";
+import { parseProductResourceLinksJson, persistProductResourceLinks } from "./_productResourcePersistence.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -490,64 +491,6 @@ async function uploadImages({ db, env, files, productId, resolvedName, adminUser
   return uploaded;
 }
 
-async function saveResourceLinks({ db, productId, resourceLinksRaw, supportsConsumptionMode, supportsLotSizeUnits }) {
-  if (!(await tableExists(db, 'product_resource_links'))) return;
-  let links = [];
-
-  try {
-    const parsed = JSON.parse(resourceLinksRaw || "[]");
-    links = Array.isArray(parsed) ? parsed : [];
-  } catch {
-    links = [];
-  }
-
-  try {
-    await db.prepare("DELETE FROM product_resource_links WHERE product_id = ?").bind(productId).run();
-  } catch {
-    return;
-  }
-
-  for (let index = 0; index < links.length; index += 1) {
-    const row = links[index] || {};
-    const resourceKind = normalizeText(row.resource_kind).toLowerCase();
-    const sourceKey = normalizeText(row.source_key);
-
-    if (!["tool", "supply"].includes(resourceKind) || !sourceKey) continue;
-
-    const insertCols = ["product_id", "resource_kind", "source_key", "quantity_used", "usage_notes", "sort_order", "created_at", "updated_at"];
-    const insertVals = ["?", "?", "?", "?", "?", "?", "CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP"];
-    const binds = [
-      productId,
-      resourceKind,
-      sourceKey,
-      Math.max(0.001, Number(row.quantity_used || 1) || 1),
-      normalizeText(row.usage_notes) || null,
-      index
-    ];
-
-    if (supportsConsumptionMode) {
-      insertCols.push("consumption_mode");
-      insertVals.push("?");
-      binds.push(["per_unit", "end_of_lot", "story_only"].includes(String(row.consumption_mode || "").trim()) ? String(row.consumption_mode).trim() : "per_unit");
-    }
-
-    if (supportsLotSizeUnits) {
-      insertCols.push("lot_size_units");
-      insertVals.push("?");
-      binds.push(Math.max(1, Number(row.lot_size_units || 1) || 1));
-    }
-
-    await db
-      .prepare(`
-        INSERT INTO product_resource_links (${insertCols.join(", ")})
-        VALUES (${insertVals.join(", ")})
-      `)
-      .bind(...binds)
-      .run()
-      .catch(() => null);
-  }
-}
-
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
@@ -622,9 +565,6 @@ export async function onRequestPost(context) {
     }
 
     const productColumns = await getTableColumnSet(db, "products");
-    const resourceColumns = await getTableColumnSet(db, "product_resource_links");
-    const supportsConsumptionMode = resourceColumns.has("consumption_mode");
-    const supportsLotSizeUnits = resourceColumns.has("lot_size_units");
 
     let resolvedProductId = requestedProductId;
     let productNumber = 0;
@@ -859,21 +799,16 @@ export async function onRequestPost(context) {
       og_image_url: featuredImageUrl || null
     });
 
-    await saveResourceLinks({ db, productId: resolvedProductId, resourceLinksRaw, supportsConsumptionMode, supportsLotSizeUnits });
+    await persistProductResourceLinks({
+      db,
+      productId: resolvedProductId,
+      links: parseProductResourceLinksJson(resourceLinksRaw),
+      adminUserId: Number(adminUser.user_id || 0) || null
+    });
 
     // Build 214: project association is optional. A product created by phone capture may remain independent.
     if (creativeProjectId > 0) {
-      await db.prepare(`CREATE TABLE IF NOT EXISTS creative_project_product_links (
-        creative_project_product_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        creative_work_project_id INTEGER NOT NULL,
-        product_id INTEGER NOT NULL,
-        relationship_type TEXT NOT NULL DEFAULT 'phone_capture',
-        is_primary INTEGER NOT NULL DEFAULT 0,
-        notes TEXT,
-        created_by INTEGER,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(creative_work_project_id, product_id)
-      )`).run();
+      // Build 214 migration owns creative_project_product_links; request-time schema mutation is forbidden.
       const projectExists = await db.prepare("SELECT creative_work_project_id FROM creative_work_projects WHERE creative_work_project_id = ? LIMIT 1").bind(creativeProjectId).first().catch(() => null);
       if (projectExists) {
         const hasPrimary = await db.prepare("SELECT 1 AS found FROM creative_project_product_links WHERE creative_work_project_id = ? AND is_primary = 1 LIMIT 1").bind(creativeProjectId).first().catch(() => null);
