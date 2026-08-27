@@ -13,8 +13,15 @@ if (ROOT/'.github/workflows/build440-source-gate.yml').exists(): fail.append('Bu
 workflow=active.read_text(encoding='utf-8') if active.exists() else ''
 if re.search(r'contents:\s*write',workflow.lower()): fail.append('active workflow grants contents: write')
 if re.search(r'\bgit\s+push\b',workflow): fail.append('active workflow self-pushes')
-for required in ('build440_cross_mutation_responsive_acceptance_test.py','build440_product_inventory_tools_source_gate.py','build441_repository_hygiene_test.py'):
+# The active release owns its release-sensitive acceptance wrapper. Build 440
+# implementation/source gates remain inherited regression provenance where they
+# do not encode the active release number themselves.
+for required in ('build441_cross_mutation_responsive_acceptance_test.py','build440_product_inventory_tools_source_gate.py','build441_repository_hygiene_test.py'):
     if required not in workflow: fail.append(f'active gate does not retain {required}')
+# Historical acceptance remains preserved as provenance, but must not force the
+# active Build 441 workflow to claim the canonical release is still Build 440.
+if not (ROOT/'scripts/build440_cross_mutation_responsive_acceptance_test.py').exists():
+    fail.append('historical Build 440 cross-mutation acceptance provenance is missing')
 for rel in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/releases/BUILD441_RELEASE_GATE.md','docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md','docs/operations/REPOSITORY_HYGIENE.md'):
     if not (ROOT/rel).exists(): fail.append(f'missing current authority: {rel}')
 gate=(ROOT/'docs/releases/BUILD441_RELEASE_GATE.md').read_text(encoding='utf-8') if (ROOT/'docs/releases/BUILD441_RELEASE_GATE.md').exists() else ''
@@ -25,6 +32,8 @@ for route in ('/admin/startup-readiness/','/admin/deployment-preflight/','/admin
     if route not in it: fail.append(f'I.T. hub missing route: {route}')
 print('BUILD 441 RELEASE CONTRACT INTEGRITY')
 print('Historical 439/440 work: REGRESSION PROVENANCE / UNRESOLVED ITEMS CARRIED AS 441 HOLDS')
+print('Build 441 release-sensitive acceptance: ACTIVE')
+print('Build 440 cross-mutation acceptance: PRESERVED HISTORICAL PROVENANCE')
 print('Workflow repository mutation: FORBIDDEN')
 print('Production mutation capability: NONE')
 if fail:
