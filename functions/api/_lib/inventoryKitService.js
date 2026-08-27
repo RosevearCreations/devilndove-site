@@ -22,7 +22,7 @@ export function planKitComponentUsage(row={},requestedUsage=0){
   const sourceType=text(row.source_type,30).toLowerCase();
   if(sourceType==='product') throw codedError('inventory_kit_component_wrong_owner','Product stock cannot be depleted from the Kit workspace. Use Product/Creative production authority.',409);
   const modeRaw=text(row.usage_tracking_mode || row.template_usage_tracking_mode,30).toLowerCase();
-  const mode=MODES.has(modeRaw)?modeRaw:(sourceType==='tool'?'reusable':'exact');
+  const mode=sourceType==='tool'?'reusable':(MODES.has(modeRaw)?modeRaw:'exact');
   if(sourceType==='tool' && Number(row.do_not_reuse||0)===1) throw codedError('inventory_kit_component_do_not_reuse','This Tool is marked do not reuse. Reactivate it through Tool lifecycle controls before recording another use.',409);
   const minimum=Math.max(0.0001,num(row.minimum_usage_increment,0.001)||0.001);
   if(quantity+EPSILON<minimum) throw codedError('inventory_kit_component_below_minimum_increment',`Usage must be at least ${minimum} ${text(row.usage_unit_label,40)||'unit'}.`);
@@ -68,9 +68,9 @@ async function ensureComponentItem(db,adminUser,kitTemplateId,component){
   const created=await db.prepare(`SELECT * FROM site_item_inventory WHERE source_type=? AND external_key=? LIMIT 1`).bind(sourceType,key).first();
   if(!created) throw codedError('inventory_kit_component_create_failed',`Could not create Inventory component ${name}.`,500);
   itemId=id(created.site_item_inventory_id);
-  const inventoryClass=CLASSES.has(text(component.inventory_class,40))?text(component.inventory_class,40):(sourceType==='tool'?'reusable_equipment':'component');
+  const inventoryClass=sourceType==='tool'?'reusable_equipment':(CLASSES.has(text(component.inventory_class,40))?text(component.inventory_class,40):'component');
   const modeRaw=text(component.usage_tracking_mode,30).toLowerCase();
-  const mode=MODES.has(modeRaw)?modeRaw:(sourceType==='tool'?'reusable':'exact');
+  const mode=sourceType==='tool'?'reusable':(MODES.has(modeRaw)?modeRaw:'exact');
   const lifecycle=sourceType==='tool'||mode==='reusable'?'reusable':'consumable';
   await db.batch([
     db.prepare(`UPDATE inventory_kit_template_components SET component_inventory_item_id=?,updated_at=CURRENT_TIMESTAMP WHERE inventory_kit_template_component_id=?`).bind(itemId,id(component.inventory_kit_template_component_id)),
@@ -83,7 +83,7 @@ async function ensureComponentItem(db,adminUser,kitTemplateId,component){
 function lotPolicyStatement(db,itemId,onHand,{createIfMissing=false}={}){
   const updateSql=`reconcile_status=CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN 'reconciled' ELSE 'needs_review' END,last_reconciled_quantity=?,last_reconciled_at=CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN CURRENT_TIMESTAMP ELSE last_reconciled_at END,updated_at=CURRENT_TIMESTAMP`;
   if(createIfMissing){
-    return db.prepare(`INSERT INTO inventory_lot_policies(site_item_inventory_id,depletion_method,reconcile_status,last_reconciled_quantity,last_reconciled_at,updated_by_user_id,updated_at) VALUES (?,'fifo','needs_review',?,NULL,NULL,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id) DO UPDATE SET ${updateSql}`).bind(itemId,onHand,onHand,itemId,EPSILON,onHand,onHand,itemId,EPSILON);
+    return db.prepare(`INSERT INTO inventory_lot_policies(site_item_inventory_id,depletion_method,reconcile_status,last_reconciled_quantity,last_reconciled_at,updated_by_user_id,updated_at) VALUES (?,'fifo',CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN 'reconciled' ELSE 'needs_review' END,?,CASE WHEN ABS(?-COALESCE((SELECT SUM(COALESCE(quantity_remaining,0)) FROM inventory_purchase_lots WHERE site_item_inventory_id=? AND lot_status<>'returned'),0))<? THEN CURRENT_TIMESTAMP ELSE NULL END,NULL,CURRENT_TIMESTAMP) ON CONFLICT(site_item_inventory_id) DO UPDATE SET ${updateSql}`).bind(itemId,onHand,itemId,EPSILON,onHand,onHand,itemId,EPSILON,onHand,itemId,EPSILON,onHand,onHand,itemId,EPSILON);
   }
   return db.prepare(`UPDATE inventory_lot_policies SET ${updateSql} WHERE site_item_inventory_id=?`).bind(onHand,itemId,EPSILON,onHand,onHand,itemId,EPSILON,itemId);
 }
@@ -106,7 +106,7 @@ export async function openInventoryKit(db,adminUser,{inventory_kit_template_id,k
   const template=await db.prepare(`SELECT t.*,s.item_name,s.source_type,s.external_key,s.on_hand_quantity,s.reserved_quantity,s.incoming_quantity,s.unit_cost_cents,s.stock_unit_label,s.supplier_name,s.supplier_sku,s.source_url FROM inventory_kit_templates t JOIN site_item_inventory s ON s.site_item_inventory_id=t.kit_inventory_item_id WHERE t.inventory_kit_template_id=? AND t.is_active=1 LIMIT 1`).bind(templateId).first();
   if(!template) throw codedError('inventory_kit_template_not_found','Kit template was not found.',404);
   const parentSource=text(template.source_type,20).toLowerCase();
-  if(parentSource==='product') throw codedError('inventory_kit_wrong_owner','Product stock cannot be opened as a purchased Inventory kit.',409);
+  if(!['supply','other'].includes(parentSource)) throw codedError('inventory_kit_wrong_owner','A purchased kit must be a Supply/other Inventory item, not Product or Tool stock.',409);
   const parentOnHand=Math.max(0,num(template.on_hand_quantity));
   const parentReserved=Math.max(0,num(template.reserved_quantity));
   if(quantity>Math.max(0,parentOnHand-parentReserved)+EPSILON) throw codedError('inventory_kit_insufficient_available',`Only ${Math.max(0,parentOnHand-parentReserved)} unreserved kit(s) are available; ${quantity} requested.`,409);
@@ -203,9 +203,10 @@ export async function consumeKitComponent(db,adminUser,{inventory_kit_template_c
     ...lotDepletionStatements(db,lotPlan.allocations||[]),
   ];
   if(plan.source_type==='supply') statements.push(lotPolicyStatement(db,id(row.site_item_inventory_id),plan.new_on_hand_quantity));
+  const movementNote=`Kit component use: ${reason}`;
   statements.push(
-    db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(row.site_item_inventory_id,row.source_type,row.external_key,row.item_name,-plan.stock_quantity,plan.previous_on_hand_quantity,plan.new_on_hand_quantity,plan.reserved_quantity,plan.reserved_quantity,num(row.incoming_quantity),num(row.incoming_quantity),`Kit component use: ${reason}`,adminUser.user_id),
-    db.prepare(`INSERT INTO site_inventory_usage_movements(site_inventory_movement_id,site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) SELECT site_inventory_movement_id,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP FROM site_inventory_movements WHERE site_item_inventory_id=? AND actor_user_id=? AND note=? ORDER BY site_inventory_movement_id DESC LIMIT 1`).bind(row.site_item_inventory_id,-plan.quantity,plan.usage_unit_label,-plan.stock_quantity,plan.stock_unit_label,plan.tracking_mode,plan.is_estimated,`Kit component use: ${reason}`,adminUser.user_id,row.site_item_inventory_id,adminUser.user_id,`Kit component use: ${reason}`),
+    db.prepare(`INSERT INTO site_inventory_movements(site_item_inventory_id,source_type,external_key,item_name,movement_type,quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,previous_incoming_quantity,new_incoming_quantity,note,actor_user_id,created_at) VALUES (?,?,?,?, 'adjustment',?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(row.site_item_inventory_id,row.source_type,row.external_key,row.item_name,-plan.stock_quantity,plan.previous_on_hand_quantity,plan.new_on_hand_quantity,plan.reserved_quantity,plan.reserved_quantity,num(row.incoming_quantity),num(row.incoming_quantity),movementNote,adminUser.user_id),
+    db.prepare(`INSERT INTO site_inventory_usage_movements(site_inventory_movement_id,site_item_inventory_id,usage_quantity_delta,usage_unit_label,stock_quantity_delta,stock_unit_label,tracking_mode,is_estimated,note,actor_user_id,created_at) SELECT site_inventory_movement_id,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP FROM site_inventory_movements WHERE site_item_inventory_id=? AND actor_user_id=? AND note=? ORDER BY site_inventory_movement_id DESC LIMIT 1`).bind(row.site_item_inventory_id,-plan.quantity,plan.usage_unit_label,-plan.stock_quantity,plan.stock_unit_label,plan.tracking_mode,plan.is_estimated,movementNote,adminUser.user_id,row.site_item_inventory_id,adminUser.user_id,movementNote),
   );
   try{ await db.batch(statements); }
   catch(error){ throw codedError('inventory_kit_component_atomic_depletion_failed',`Component use failed safely; no stock change was committed. ${String(error?.message||'').slice(0,240)}`,409); }
