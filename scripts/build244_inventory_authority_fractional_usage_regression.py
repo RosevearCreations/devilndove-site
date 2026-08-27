@@ -12,9 +12,6 @@ def check(ok,msg):
 
 sql=MIG.read_text(encoding='utf-8')
 current_sql=UPG.read_text(encoding='utf-8')
-# The current-pass migration has advanced well beyond Build 244. Avoid a brittle hard-coded
-# list of later build names: prove either that the current-pass header is Build 244+ or that
-# the complete Build 244 segment is still present verbatim.
 current_build_match=re.search(r'\bBuild\s+(\d+)\b',current_sql[:1000],re.I)
 current_build=int(current_build_match.group(1)) if current_build_match else 0
 check(current_build>=244 or sql in current_sql,'current upgrade SQL must retain/advance beyond the complete Build 244 migration segment')
@@ -25,8 +22,8 @@ check("'site.inventory.legacy_usage_default','log_only_review_required'" in sql,
 check('site_inventory_usage_profiles' in sql and 'site_inventory_usage_movements' in sql,'fractional usage sidecars missing')
 
 # Build 310 moved Creative posting mutation behind the Inventory-owned inventory-post contract.
-# Keep proving the Build 244 fractional behavior, but at the current ownership boundary rather
-# than requiring historical SQL/table names to remain inside the Creative request handler.
+# Build 440 further split public Tool/Supply authority: catalog_items is publication eligibility,
+# while active site_item_inventory is live operational identity/metadata when a normalized match exists.
 for rel, needles in {
     'functions/api/admin/site-item-inventory.js':['consume_usage','usage_tracking_mode','syncCatalogItemsIntoInventory','classification_merge'],
     'public/js/admin-site-item-inventory.js':['Smallest usage increment','500 g mica jar','data-field="source_type"','loadSeedOptions({ query'],
@@ -34,12 +31,12 @@ for rel, needles in {
     'functions/api/_lib/creativeInventoryPostConsumer.js':['postCreativeInventoryUsage','usageQuantity','inventory-post'],
     'functions/api/_lib/inventoryPostService.js':['creative_project_inventory_usage_details','site_inventory_usage_movements','usage_quantity_consumed','stock_quantity_consumed'],
     'public/js/admin-creative-process.js':['Amount actually used','data-usage-quantity'],
-    'functions/api/tools.js':['D1 catalog_items is the runtime authority'],
-    'functions/api/supplies.js':['D1 catalog_items is the runtime authority'],
+    'functions/api/tools.js':['catalog_items is the public publication registry','site_item_inventory is the operational identity/metadata authority','inventory+catalog_publication'],
+    'functions/api/supplies.js':['catalog_items is the public publication registry','site_item_inventory is the operational identity/metadata authority','inventory+catalog_publication'],
     'functions/api/admin/catalog-sync.js':['Runtime JSON re-import is disabled'],
 }.items():
-    text=(ROOT/rel).read_text(encoding='utf-8')
-    for needle in needles: check(needle in text,f'{rel} missing {needle}')
+    source_text=(ROOT/rel).read_text(encoding='utf-8')
+    for needle in needles: check(needle in source_text,f'{rel} missing {needle}')
 
 # Validate source master counts are represented by provenance INSERTs.
 tools=json.loads((ROOT/'data/toolshed/toolshed_items_master.json').read_text(encoding='utf-8'))
@@ -76,26 +73,21 @@ try:
     modes=dict(conn.execute('select usage_tracking_mode,count(*) from site_inventory_usage_profiles group by usage_tracking_mode'))
     check(modes.get('reusable')==399,'tool defaults should be reusable')
     check(modes.get('log_only')==498,'legacy supply defaults should be log_only until unit conversion review')
-    # Rerun before edits: no duplicates.
     conn.executescript(sql)
     check(conn.execute('select count(*) from catalog_items').fetchone()[0]==897,'rerun created catalog duplicates')
     check(conn.execute('select count(*) from site_item_inventory').fetchone()[0]==897,'rerun created inventory duplicates')
-    # An intentionally inactive operational identity must not be silently recreated/reactivated.
     inactive=conn.execute("select site_item_inventory_id,source_type,external_key from site_item_inventory limit 1").fetchone()
     if inactive:
         conn.execute("update site_item_inventory set is_active=0 where site_item_inventory_id=?",(inactive[0],))
-        conn.commit()
-        conn.executescript(sql)
+        conn.commit(); conn.executescript(sql)
         state=conn.execute("select count(*),sum(case when is_active=1 then 1 else 0 end) from site_item_inventory where lower(source_type)=? and external_key=?",(inactive[1].lower(),inactive[2])).fetchone()
         check(state==(1,0),f'migration rerun resurrected inactive inventory identity: {state}')
-    # Mimic a reviewed reclassification and rerun. Provenance guard must not recreate old type.
     row=conn.execute("select source_key from catalog_items where item_kind='tool' and source_key not in (select source_key from catalog_items where item_kind='supply') limit 1").fetchone()
     if row:
         key=row[0]
         conn.execute("update catalog_items set item_kind='supply' where item_kind='tool' and source_key=?",(key,))
         conn.execute("update site_item_inventory set source_type='supply' where source_type='tool' and external_key=?",(key,))
-        conn.commit()
-        conn.executescript(sql)
+        conn.commit(); conn.executescript(sql)
         check(conn.execute("select count(*) from catalog_items where source_key=? and item_kind='tool'",(key,)).fetchone()[0]==0,'migration rerun recreated stale pre-review tool classification')
         check(conn.execute("select count(*) from site_item_inventory where external_key=? and source_type='tool'",(key,)).fetchone()[0]==0,'migration rerun recreated stale pre-review inventory classification')
 except Exception as exc:
@@ -108,6 +100,7 @@ if failures:
 print('Build 244 inventory authority/fractional usage regression: PASS')
 print('Current-pass build detected:',current_build or 'embedded Build 244 segment')
 print('Creative posting authority: inventory-post / Inventory-owned')
+print('Public Tool/Supply authority: catalog publication registry + live Inventory metadata')
 print('Legacy master rows:',len(tools)+len(supplies),f'({len(tools)} tools + {len(supplies)} supplies)')
 print('D1 catalog and clean-schema inventory rows:',conn.execute('select count(*) from catalog_items').fetchone()[0])
 print('TEMP/DROP migration operations: 0')
