@@ -1,3 +1,4 @@
+# Build 440 gate revision 2 — validate current Product deletion/material-review contract before handoff.
 name: Build 440 Product Inventory Tools Gate
 
 on:
