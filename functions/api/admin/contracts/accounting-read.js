@@ -9,7 +9,7 @@ import {
   normalizeText,
 } from '../../_lib/adminAudit.js';
 
-const RELEASE = 447;
+const RELEASE = 448;
 export const CONTRACT_ID = 'accounting-read';
 export const OWNER = 'accounting';
 export const AUTHORITY_TABLE = 'accounting_order_records';
