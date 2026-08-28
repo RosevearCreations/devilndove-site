@@ -1,14 +1,12 @@
-# New Chat Status — Build 443 Pointer
+# New Chat Status — Build 446 Pointer
 
 Read `AI_HANDOFF.md` first and `PROJECT_STATUS_AND_ROADMAP.md` second.
 
-- Development: **Build 443 — editable Home carousel**
-- Build 442 exact accepted checkpoint: `b8868c9b77ad12de4fee4984274fe80e1d096613`
-- Build 442 source, Windows D1 transport and Cloudflare deployment: **GREEN**
-- Build 443 carousel source/editor/runtime/static fallback: **implemented; Development D1/live proof HOLD**
-- I.T. fourth-module/user grants D1 apply and Phase B: **BUILD 443 HOLD**
-- Stripe/PayPal Development acceptance: **BUILD 443 HOLD with mechanics on `/admin/it-platform/`**
-- CAIP private R2/range/timecode/storage evidence: **BUILD 443 HOLD**
-- Separate live Production baseline: **Build 437; promotion CLOSED**
+- Development: **Build 446 — deep repository retirement / forward sanity**.
+- Previous fully green/deployed checkpoint: Build 445 at `f50e6d61deb31de9c17b12b55d6649a7779fdb95`.
+- Git history is the archive; obsolete Markdown, incremental migrations and build scripts do not belong in the active tree.
+- `database_full_schema.sql` is aggregate schema authority; only current guarded Build 440/442/443 recovery incrementals remain standalone.
+- Carousel/I.T. schema proof, Stripe, PayPal and CAIP evidence are **Build 446 HOLDs**.
+- Separate live Production promotion is **CLOSED**.
 
-Do not reopen old release numbers. Carry unresolved work forward as a current-release HOLD/OPEN item.
+Do not reopen old release numbers. Carry unresolved work into the current release.

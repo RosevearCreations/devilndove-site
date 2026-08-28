@@ -1,37 +1,30 @@
-# I.T. Preflight / Startup Release Guide — Build 443
+# I.T. Preflight / Startup Release Guide — Build 446
 
-This is the operator authority for open technical release issues. Business/product feature work belongs in `PROJECT_STATUS_AND_ROADMAP.md`; technical release HOLDs belong here and in `docs/releases/BUILD443_RELEASE_GATE.md`.
+This is the operator authority for technical release issues. Business feature direction belongs in `PROJECT_STATUS_AND_ROADMAP.md`; current technical HOLDs are recorded there and surfaced in `/admin/it-platform/`.
 
 ## Startup sequence
 
-1. Confirm `development-release.json` is the intended Development build.
-2. Confirm source branch is `dev` and the target is `devilndove-site-dev`, never the separate live Production project.
-3. Run the active GitHub source gate.
-4. Confirm D1 migration/schema ledger and aggregate-schema authority.
-5. Confirm required D1/R2 bindings are present without displaying secret values.
-6. Review runtime incidents, public API health and route usage.
-7. Review service-worker/cache identity and offline behavior.
-8. Review backup/restore and operational-continuity evidence.
-9. Review every current HOLD. A HOLD stays visible until the exact remaining proof exists.
-10. Deploy only the exact green `dev` head to the Development project, then perform bounded live acceptance.
-11. Keep separate live Production promotion closed unless explicitly authorized.
+1. Confirm `development-release.json` and `dev` are the intended Development source.
+2. Confirm target is `devilndove-site-dev`, never separate live `devilndove-site`.
+3. Run the active Build 446 system gate.
+4. Use `/api/admin/infrastructure-readiness` or the I.T. page to check D1/R2 bindings and schema state read-only.
+5. If a retained guarded migration is reported as genuinely missing, use its Development-only recovery runner; otherwise do not run SQL.
+6. Review runtime incidents, public API health, route usage, schema drift and cache/service-worker identity.
+7. Review each current HOLD and its exact pass condition.
+8. Deploy only the exact green `dev` head to Development and perform bounded live acceptance.
+9. Keep separate live Production promotion closed unless explicitly authorized.
+
+## Repository/recovery authority
+
+Git history is the archive. `database_full_schema.sql` is the aggregate fresh-install schema. Only Build 440 Product/Inventory/Tool recovery plus carried Build 442 I.T. and Build 443 carousel recovery remain standalone because current gates/recovery still consume them. Build 446 adds no D1 migration.
 
 ## Current technical HOLDs
 
-- **Carousel authority/live acceptance HOLD:** apply/verify the Build 443 additive Development D1 migration, then prove draft/preview/publish/pause/schedule/audit and every public static-hero fallback.
-- **I.T. authority/enforcement HOLD:** apply and verify the carried guarded Development D1 migration before Phase B runtime enforcement.
-- **Stripe Development HOLD:** test configuration, simulated checkout, return, signed webhook and duplicate replay must agree on the exact current deployment.
-- **PayPal Development HOLD:** sandbox configuration, approval/capture, return, verified webhook and duplicate replay must agree on the exact current deployment.
-- **CAIP private media evidence HOLD:** private R2 media delivery/range seeking, exact timecode/range and storage evidence remain to be proven live.
-- **Responsive automation note:** source contract is green; prior automated live viewport harness was blocked by CSP/browser controls, not an observed application defect.
-- **Production promotion HOLD:** deliberate policy boundary.
+- Carousel schema/live acceptance where readiness reports missing authority.
+- I.T. explicit user-grant schema/enforcement where readiness reports missing authority.
+- Stripe Development end-to-end acceptance.
+- PayPal sandbox end-to-end acceptance.
+- CAIP private R2 delivery/range/timecode/storage evidence.
+- Separate live Production promotion.
 
-## Existing technical authorities
-
-Use the I.T. hub `/admin/it-platform/` as the parent index. Existing specialist pages remain separate authorities for Startup Readiness, Release & Go-Live, Deployment Preflight, Release Evidence, Deploy Readiness, Application Sanity, Runtime Incidents, Public API Health, Route Usage, Schema Drift, Markdown Sanity, Operational Continuity, Promotion Control, Go-Live Execution and Live Ops Follow-through.
-
-The I.T. hub contains the exact Build 443 correction mechanic and pass condition for each bridged obstacle. Earlier build documents remain historical evidence only. The safe payment readiness button checks configuration booleans/mode and never exposes secrets or proves end-to-end payment acceptance. The Home carousel editor is source-complete but reports its missing-schema boundary honestly while Home retains the static hero.
-
-## Stop conditions
-
-Stop a release and record a HOLD when schema authority is uncertain, the exact deployed commit is unknown, a required binding is absent, failures return raw HTML/false success, a destructive action cannot be bounded/reversed, or any command could contact the separate live Production project unintentionally.
+Stop a release when the exact deployed commit is unknown, schema authority is uncertain, a required binding is absent, failures return false success/raw HTML, a destructive action cannot be bounded/reversed, or any command could contact separate live Production unintentionally.

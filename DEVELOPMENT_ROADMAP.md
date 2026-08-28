@@ -1,7 +1,7 @@
-# Development Roadmap compatibility pointer — Build 443
+# Development Roadmap compatibility pointer — Build 446
 
 The authoritative roadmap is `PROJECT_STATUS_AND_ROADMAP.md`; technical handoff is `AI_HANDOFF.md`.
 
-Build 443 is the active Development release. Build 442 is the exact accepted source/Windows/Cloudflare checkpoint. Build 443 implements the editable responsive Home carousel source, audited editor, public API/runtime and static-hero fallback. Carousel D1/live acceptance, I.T. D1/enforcement, Stripe, PayPal and CAIP evidence are current Build 443 HOLDs with correction mechanics on `/admin/it-platform/`.
+Build 446 is the active Development release and retires obsolete repository history from the deployable tree. Current forward work is organized under Storefront, Creators/CAIP, Inventory/Products/Tools, Finance/Accounting and I.T./Platform, with Packaging/Content/SEO and reliability spanning those domains.
 
-Never revive old build numbers for unfinished work. Separate live Production promotion remains closed.
+Carousel/I.T. schema proof, Stripe, PayPal and CAIP evidence remain current Build 446 HOLDs. Separate live Production promotion remains closed.

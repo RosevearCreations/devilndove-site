@@ -1,1 +1,0 @@
-throw new Error('Build 230 synchronization is retired. Run node scripts/sync-build234-aggregate-schema.mjs so the current reusable packaging templates and candle reference cannot be removed accidentally.');

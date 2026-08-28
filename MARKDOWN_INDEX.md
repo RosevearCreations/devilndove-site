@@ -1,29 +1,17 @@
-# Markdown Documentation Index — Build 443
+# Markdown Documentation Index — Build 446
 
 ## Current authorities
 
-- `AI_HANDOFF.md`
-- `PROJECT_STATUS_AND_ROADMAP.md`
-- `development-release.json`
-- `docs/releases/BUILD443_RELEASE_GATE.md`
-- `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
-- `.github/workflows/build443-system-gate.yml`
-- `scripts/build443_development_release_alignment_test.py`
-- `scripts/build443_release_contract_integrity_test.py`
-- `scripts/build443_home_carousel_regression.py`
-- `scripts/build443_apply_development_home_carousel.py`
-- `scripts/build443_current_sanity_check.py`
+1. `AI_HANDOFF.md` — technical/current-state handoff.
+2. `PROJECT_STATUS_AND_ROADMAP.md` — current roadmap and HOLD register.
+3. `SANITY_HEALTH_CHECK.md` — current validation commands/status.
+4. `NEW_CHAT_STATUS.md` / `AI_CONTEXT.md` / `DEVELOPMENT_ROADMAP.md` — compact compatibility pointers.
+5. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — technical release procedure.
+6. `development-release.json` — active Development release identity.
+7. `.github/workflows/build446-system-gate.yml` — active CI gate.
 
-## Carried guarded authorities
+## Historical policy
 
-- `database_build442_it_platform_user_access.sql`
-- `scripts/build442_apply_development_it_platform.py`
-- `database_build443_home_carousel.sql`
-- `BUILD443_HOME_CAROUSEL_D1_VERIFICATION.sql`
+Git history is the archive. Do not recreate `docs/archive`, `docs/releases`, root `BUILD*.md`, per-build validation/change reports, or permanent copies of old system gates.
 
-## Historical checkpoint authority
-
-- `docs/releases/BUILD442_RELEASE_GATE.md`
-- Git history and `docs/archive/build-history/`
-
-Current summary: Development **Build 443**; carousel D1/live proof, I.T. D1/enforcement, Stripe, PayPal and CAIP evidence are current-release HOLDs; separate live Production promotion is **CLOSED**.
+Standalone Build 440/442/443 SQL/scripts are retained only where the current guarded D1 recovery or CI path still consumes them. Everything else must justify its presence as current runtime, current authority, current recovery or active operational tooling.
