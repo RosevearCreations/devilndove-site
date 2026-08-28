@@ -1,10 +1,12 @@
-// Release 448 — Product origin/material/tool lineage readiness over existing Inventory authority.
+// Release 448 — Product origin/material/tool/manufacturer lineage over existing Inventory authority.
 // This helper never creates schema and never changes inventory quantities.
 import { normalizeText } from './adminAudit.js';
 
 export const PRODUCT_LINEAGE_TABLES = Object.freeze([
   'product_lineage_profiles',
   'product_resource_lineage_reviews',
+  'inventory_manufacturers',
+  'inventory_manufacturer_links',
   'inventory_vendor_reviews',
 ]);
 
@@ -45,6 +47,7 @@ export async function loadProductLineageReadiness(db, productId) {
       missing_tables: schema.missing_tables,
       materials: [],
       tools: [],
+      manufacturers: [],
       blockers: [],
       warnings: [`Release 448 lineage schema is not ready (${schema.missing_tables.join(', ')}). Existing publication behavior is preserved until the migration is applied.`],
       publish_blocked: 0,
@@ -65,7 +68,12 @@ export async function loadProductLineageReadiness(db, productId) {
            COALESCE(plr.resource_role,CASE WHEN LOWER(TRIM(COALESCE(prl.resource_kind,'')))='tool' THEN 'tool' ELSE 'material' END) AS resource_role,
            COALESCE(plr.verification_status,'unverified') AS verification_status,
            COALESCE(plr.evidence_reference,'') AS evidence_reference,
-           COALESCE(plr.review_note,'') AS review_note,plr.reviewed_by_user_id,plr.reviewed_at
+           COALESCE(plr.review_note,'') AS review_note,plr.reviewed_by_user_id,plr.reviewed_at,
+           im.manufacturer_id,COALESCE(im.manufacturer_name,'') AS manufacturer_name,
+           COALESCE(im.website_url,'') AS manufacturer_website_url,
+           COALESCE(iml.relationship_type,'') AS manufacturer_relationship,
+           COALESCE(iml.verification_status,'') AS manufacturer_verification_status,
+           COALESCE(iml.external_item_id,'') AS manufacturer_external_item_id
     FROM product_resource_links prl
     LEFT JOIN site_item_inventory sii ON sii.site_item_inventory_id=(
       SELECT sii2.site_item_inventory_id
@@ -76,6 +84,8 @@ export async function loadProductLineageReadiness(db, productId) {
       ORDER BY sii2.site_item_inventory_id DESC LIMIT 1
     )
     LEFT JOIN product_resource_lineage_reviews plr ON plr.product_resource_link_id=prl.product_resource_link_id
+    LEFT JOIN inventory_manufacturer_links iml ON iml.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_manufacturers im ON im.manufacturer_id=iml.manufacturer_id AND im.status='active'
     WHERE prl.product_id=?
     ORDER BY prl.sort_order,prl.product_resource_link_id
   `).bind(productIdValue).all();
@@ -85,6 +95,7 @@ export async function loadProductLineageReadiness(db, productId) {
     product_resource_link_id: id(row.product_resource_link_id),
     product_id: id(row.product_id),
     site_item_inventory_id: id(row.site_item_inventory_id) || null,
+    manufacturer_id: id(row.manufacturer_id) || null,
     quantity_used: Number(row.quantity_used || 0),
     lot_size_units: Number(row.lot_size_units || 1),
     inventory_active: Number(row.inventory_active || 0) === 1 ? 1 : 0,
@@ -107,6 +118,30 @@ export async function loadProductLineageReadiness(db, productId) {
   if (policy === 'legacy_nonblocking' && String(profile.lineage_status || '').toLowerCase() !== 'verified') warnings.push('Historical product lineage remains legacy_pending; reconstruct it when evidence is available.');
   if (policy === 'exempt') warnings.push('Product is explicitly exempt from raw-material consumption lineage.');
 
+  const manufacturerMap = new Map();
+  for (const row of resources) {
+    if (!row.manufacturer_id) continue;
+    if (!manufacturerMap.has(row.manufacturer_id)) {
+      manufacturerMap.set(row.manufacturer_id, {
+        manufacturer_id: row.manufacturer_id,
+        manufacturer_name: row.manufacturer_name,
+        website_url: row.manufacturer_website_url,
+        verified_resource_count: 0,
+        resources: [],
+      });
+    }
+    const manufacturer = manufacturerMap.get(row.manufacturer_id);
+    manufacturer.resources.push({
+      site_item_inventory_id: row.site_item_inventory_id,
+      item_name: row.item_name,
+      resource_kind: row.resource_kind,
+      resource_role: row.resource_role,
+      relationship_type: row.manufacturer_relationship,
+      verification_status: row.manufacturer_verification_status,
+    });
+    if (String(row.manufacturer_verification_status).toLowerCase() === 'verified') manufacturer.verified_resource_count += 1;
+  }
+
   return {
     ok: true,
     product,
@@ -115,6 +150,7 @@ export async function loadProductLineageReadiness(db, productId) {
     missing_tables: [],
     materials,
     tools,
+    manufacturers: [...manufacturerMap.values()],
     summary: {
       material_links: materials.length,
       consuming_material_links: consumingMaterials.length,
@@ -123,6 +159,8 @@ export async function loadProductLineageReadiness(db, productId) {
       verified_material_links: consumingMaterials.length - unverifiedMaterials.length,
       tool_links: tools.length,
       verified_tool_links: tools.filter((row) => String(row.verification_status || '').toLowerCase() === 'verified').length,
+      manufacturer_count: manufacturerMap.size,
+      verified_manufacturer_links: resources.filter((row) => String(row.manufacturer_verification_status || '').toLowerCase() === 'verified').length,
     },
     blockers,
     warnings,
