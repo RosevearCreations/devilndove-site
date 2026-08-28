@@ -1,77 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <meta name="robots" content="noindex,nofollow"/>
-  <title>Application Modules — Devil n Dove</title>
-  <meta name="description" content="Admin control surface for Devil n Dove top-level application modules."/>
-  <link href="/css/styles.css" rel="stylesheet"/>
-  <link href="/assets/mark.png" rel="icon" type="image/png"/>
-</head>
-<body>
-  <div class="container admin-shell">
-    <div class="nav">
-      <div class="brand">
-        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
-        <div>
-          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Application Modules</div>
-        </div>
-      </div>
-      <div class="links">
-        <a href="/">Home</a>
-        <a href="/admin/">Admin</a>
-        <button class="btn" data-nav-logout="" type="button">Logout</button>
-      </div>
-    </div>
-
-    <div class="hero">
-      <div>
-        <h1>Application Modules</h1>
-        <p>Control the three top-level Devil n Dove application modules. Disabling a module blocks its direct surface and runtime activation; reviewed shared service contracts can remain available to another enabled module that explicitly depends on them. No switch deletes business data.</p>
-      </div>
-    </div>
-
-    <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
-
-    <div class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Module authority</h2>
-      <p class="small" id="moduleAuthorityStatus">Loading Build 438 module state…</p>
-      <div id="applicationModuleHealthMount" style="margin-top:12px"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-        <button class="btn" id="runModuleRouteProofButton" type="button">Run current-state route proof</button>
-        <button class="btn" id="runAuthenticatedModuleAcceptanceButton" type="button">Run authenticated acceptance proof</button>
-        <button class="btn" id="copyAuthenticatedModuleAcceptanceButton" type="button">Copy acceptance results</button>
-        <button class="btn" id="refreshModuleAuthorityButton" type="button">Refresh module authority</button>
-      </div>
-      <div id="applicationModuleRouteProofMount" style="margin-top:12px"></div>
-      <div id="authenticatedModuleAcceptanceMount" style="margin-top:12px"></div>
-      <div class="small" style="display:grid;gap:6px;margin-top:12px">
-        <div><strong>Current design:</strong> Application Core + Commerce &amp; Operations + Creative &amp; Production + Business &amp; Administration.</div>
-        <div><strong>Safety:</strong> this page and its control API remain in shared core so an administrator can recover from an accidental module disable.</div>
-        <div><strong>Dependency rule:</strong> only explicit reviewed service contracts may cross a disabled owner-module boundary, and only while an enabled consumer is authorized.</div>
-        <div><strong>Background rule:</strong> module-owned polling/sync/provider work must check the background permission before running; disabling a module clears that permission.</div>
-        <div><strong>Authenticated acceptance:</strong> temporarily exercises audited module controls and one Admin read-level guard, automatically restoring every changed module/role in a finally path. Shared tests are read-only; no dummy Inventory movement is created.</div>
-      </div>
-    </div>
-
-    <div id="applicationModulesMount" style="margin-top:18px"></div>
-
-    <div class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Role access</h2>
-      <p class="small">Current account roles are <code>member</code> and <code>admin</code>. Build 438 does not invent additional staff roles. Future operator/creator roles can be added deliberately when the user model supports them.</p>
-      <div id="applicationModuleRolesMount"></div>
-    </div>
-
-    <div class="footer card" style="margin-top:18px"></div>
-  </div>
-
-  <script src="/js/main.js?v=440"></script>
-  <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/site-auth-ui.js?v=440"></script>
-  <script src="/public/js/admin-self-protect.js?v=440"></script>
-  <script src="/public/js/admin.js?v=440"></script>
-  <script src="/public/js/admin-application-modules.js?v=438-auth2"></script>
-</body>
-</html>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><title>Application Modules — Devil n Dove</title><meta name="description" content="Admin control surface for Devil n Dove canonical application modules."/><link href="/css/styles.css" rel="stylesheet"/><link href="/assets/mark.png" rel="icon" type="image/png"/></head>
+<body><div class="container admin-shell"><div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Application Modules</div></div></div><div class="links"><a href="/">Home</a><a href="/admin/">Admin</a><a href="/admin/it-platform/">I.T.</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
+<div class="hero"><div><h1>Application Modules</h1><p>Release 447 control surface for Storefront, Creators, Socials, Financials and I.T. Disabling a module blocks its owned surface and clears its background permission without deleting business data.</p></div></div>
+<div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+<section class="card" style="margin-top:18px" aria-labelledby="authorityHeading"><div style="display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap"><div><h2 id="authorityHeading" style="margin-top:0">Release 447 module authority</h2><p class="small" id="moduleAuthorityStatus">Loading canonical five-module state…</p></div><button class="btn" id="refreshModuleAuthorityButton" type="button">Refresh module authority</button></div><div id="applicationModuleHealthMount" style="margin-top:12px"></div><div class="small" style="display:grid;gap:6px;margin-top:12px"><div><strong>Canonical owners:</strong> Storefront · Creators · Socials · Financials · I.T.</div><div><strong>Safety:</strong> module switches do not delete business data. A disabled module cannot keep module-owned background work enabled.</div><div><strong>I.T. access:</strong> explicit per-user grant only; role membership alone cannot grant the I.T. module.</div><div><strong>Compatibility:</strong> existing URLs remain stable while route ownership converges behind them.</div></div></section>
+<div id="applicationModulesMount" style="margin-top:18px"></div>
+<section class="card" style="margin-top:18px" aria-labelledby="rolesHeading"><h2 id="rolesHeading" style="margin-top:0">Role access</h2><p class="small">Current account roles are <code>member</code> and <code>admin</code>. I.T. is excluded because it requires explicit user authorization.</p><div id="applicationModuleRolesMount"></div></section>
+<section class="card" style="margin-top:18px" aria-labelledby="routeHeading"><h2 id="routeHeading" style="margin-top:0">Route ownership</h2><p class="small">Runtime ownership is defined in the canonical route map. Existing public/admin paths are preserved; this release changes ownership and authorization, not customer-facing URLs.</p><button class="btn" id="runModuleRouteProofButton" type="button">Show current ownership snapshot</button><pre id="applicationModuleRouteProofMount" style="white-space:pre-wrap;overflow:auto;margin-top:12px"></pre></section>
+<div class="footer card" style="margin-top:18px"></div></div>
+<script src="/js/main.js?v=447"></script><script src="/public/js/auth.js?v=447"></script><script src="/public/js/site-auth-ui.js?v=447"></script><script src="/public/js/admin-self-protect.js?v=447"></script><script src="/public/js/admin.js?v=447"></script><script src="/public/js/admin-application-modules.js?v=447"></script></body></html>
