@@ -19,6 +19,7 @@ on:
       - 'development-release.json'
       - 'scripts/**'
       - 'database*.sql'
+      - '*D1_VERIFICATION.sql'
       - '.github/workflows/**'
   pull_request:
     branches: [dev]
@@ -42,8 +43,10 @@ jobs:
         run: python scripts/repository_forward_sanity.py
       - name: Validate five-module platform architecture
         run: python scripts/module_architecture_gate.py
-      - name: Validate canonical D1 platform migration
+      - name: Execute canonical D1 platform migration locally
         run: python scripts/database_platform_gate.py
+      - name: Validate public SEO structure
+        run: python scripts/public_seo_gate.py
       - name: Validate Product Inventory Tools authority
         run: python scripts/product_inventory_tools_source_gate.py
       - name: JavaScript syntax for Application Core
@@ -59,9 +62,12 @@ jobs:
           node --check functions/api/admin/home-carousel.js
           node --check public/js/home-carousel.js
           node --check public/js/admin-home-carousel.js
+          node --check public/js/admin-application-modules.js
           node --check public/js/admin-it-platform.js
           node --check functions/api/payment-providers.js
           node --check sw.js
+      - name: Compile canonical Python gates
+        run: python -m py_compile scripts/repository_forward_sanity.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/public_seo_gate.py scripts/product_inventory_tools_source_gate.py
       - name: Whitespace validation
         run: git diff --check
       - name: Safety statement
