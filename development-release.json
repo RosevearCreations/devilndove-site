@@ -54,5 +54,66 @@
       "foreign_keys_clean": true
     },
     "recovery": "Use python scripts/cloudflare_development_access.py --auth-only (or --auth-mode oauth) before any future Development D1/R2 operation. Reapply database_platform_convergence.sql only when the read-only readiness/verification authority proves drift."
+  },
+  "acceptance": {
+    "runtime": {
+      "status": "hold_external_execution",
+      "authority": "scripts/development_runtime_acceptance.py",
+      "runbook": "LIVE_TESTING_GUIDE.md",
+      "mode": "authenticated-development-read-only",
+      "production_allowed": false,
+      "credentials_source": "DND_DEV_SESSION_COOKIE",
+      "provider_mutation": false
+    },
+    "stripe": {
+      "configuration_readiness": "unconfirmed_current_deployment",
+      "provider_acceptance": "hold",
+      "required_environment": "test"
+    },
+    "paypal": {
+      "configuration_readiness": "unconfirmed_current_deployment",
+      "provider_acceptance": "hold",
+      "required_environment": "sandbox"
+    },
+    "caip_private_media": {
+      "acceptance": "hold",
+      "required_evidence": ["authenticated_private_delivery", "range_seek", "timecode_range", "verified_derived_artifact"]
+    }
+  },
+  "next_release_preparation": {
+    "release": 448,
+    "state": "scope_ready_not_open",
+    "database_migration_allowed": false,
+    "principle": "prepare schema and interfaces without changing Development D1 until Release 447 live acceptance is closed or a proven Release 447 defect requires repair",
+    "workstreams": [
+      {
+        "key": "product-material-lineage",
+        "scope": "New in-house-created products require real raw-inventory lineage and consumption authority before publication; existing products may remain legacy_pending; antiquity, resale and external finished goods can be explicitly inventory-exempt."
+      },
+      {
+        "key": "product-tool-lineage",
+        "scope": "Record durable tools and molds used to create products separately from consumable inventory; tool association never consumes the durable tool."
+      },
+      {
+        "key": "manufacturer-provenance-reviews",
+        "scope": "Link materials/tools to manufacturer/vendor provenance and store Devil n Dove-authored purchased-item review content locally with external identifiers/source links; do not scrape or depend on copied marketplace review content."
+      },
+      {
+        "key": "it-integration-registry",
+        "scope": "I.T. owns social/provider integration configuration references, purpose, secret or binding name only, callback/webhook, scopes, environment, configured/tested status, last test/error and correction mechanics; never store secret values in D1."
+      },
+      {
+        "key": "carousel-movie-reuse",
+        "scope": "Generalize Storefront carousel presentation for Movie use without duplicating carousel authority or introducing extra public H1 elements."
+      },
+      {
+        "key": "movie-data-convergence",
+        "scope": "Repair provably incorrect Movie names and core metadata; represent unknown/incomplete fields explicitly instead of guessing."
+      },
+      {
+        "key": "unverified-process-states",
+        "scope": "Future D1 additions must reserve explicit pending, legacy_pending, exempt, unverified, verified and evidence-reference states so unconfirmed workflows never masquerade as proven."
+      }
+    ]
   }
 }
