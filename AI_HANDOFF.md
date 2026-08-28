@@ -1,4 +1,4 @@
-# AI Handoff — Release 447 Platform Convergence
+# AI Handoff — Release 448 Platform Expansion
 
 Updated: 2026-08-28
 
@@ -6,46 +6,128 @@ Read this first, then `PROJECT_STATUS_AND_ROADMAP.md`. These are the two mutable
 
 ## Current release
 
-- Development release: **Release 447 — Platform Convergence**
+- Development release: **Release 448 — Platform Expansion**
 - Release track: **one current release**; historical Build numbers are provenance only
 - Source branch: `dev`
 - Development Pages project: `devilndove-site-dev`
 - Development D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
 - Development R2: `devilndove-toolshed-images-dev` and `devilndove-caip-media-dev`
 - Canonical modules: **Storefront, Creators, Socials, Financials, I.T.**
-- Clients: **Web, Phone, Desktop** from the same responsive/PWA application
+- Canonical clients: **Web, Phone, Desktop**
+- Phone/Desktop mode today: shared responsive/installable PWA application with service worker, offline fallback and explicit opt-in notifications
+- Client notifications: **new application releases + newly published items**
 - Separate live Production: `main` / `devilndove-site`
 - Production promotion: **CLOSED**
 
 Always resolve the exact current `dev` SHA from GitHub rather than copying an old checkpoint SHA into a new handoff.
 
-## Development convergence already completed
+## Release 447 closure
 
-- Canonical five-module D1 convergence is **APPLIED AND VERIFIED** in Development.
-- Legacy module registry rows are retired.
-- Canonical role authority is 10 rows.
-- I.T. role-derived access is denied; one active explicit I.T. manager exists.
-- Storefront Home carousel tables are present.
-- D1 foreign-key verification is clean.
-- Read-only Cloudflare preflight has proved the exact Development D1 and both Development R2 buckets are visible.
-- Durable Cloudflare recovery command: `python scripts/cloudflare_development_access.py --auth-only`; use `--auth-mode oauth` when a stale environment API token overrides Wrangler OAuth.
-- `wrangler.toml` must **not** contain `account_id`; the Pages Git deployment owns its account context. Local tooling pins `CLOUDFLARE_ACCOUNT_ID` separately.
+Release 447 — Platform Convergence is **COMPLETE**.
 
-Do not rerun D1 merely because a new chat starts. Run read-only readiness/verification first and only use `database_platform_convergence.sql` if current evidence proves drift.
+Its source/D1/platform/client convergence and exact Development deployment were completed. The following work was deliberately moved forward into the I.T. test environment and **does not gate Release 448 or later feature work**:
 
-## Release-independent runtime acceptance
+- authenticated Development runtime evidence;
+- Stripe test checkout/webhook/reconciliation/replay;
+- PayPal sandbox approval/capture/webhook/reconciliation/replay;
+- CAIP private-media delivery/range/timecode/derived-artifact evidence.
 
-The active authority is now:
+These are deferred, not assumed accepted. Keep them visible until real evidence exists, but never revive them as an old-release gate.
 
-```bash
-python scripts/development_runtime_acceptance.py --self-check
-python scripts/development_runtime_acceptance.py --anonymous-check --evidence-json evidence/runtime-anonymous.json
-python scripts/development_runtime_acceptance.py --evidence-json evidence/runtime-authenticated.json
-```
+## Forward-development rule for external keys/providers
 
-Use `LIVE_TESTING_GUIDE.md` for the complete procedure. Authenticated execution takes the Development session cookie only from `DND_DEV_SESSION_COOKIE`; no password/token/cookie CLI option exists. The harness hard-refuses Production/custom hosts and performs GET requests only.
+Until dedicated I.T. work resumes, implement normal Development features as though required provider/key **references** are populated or use safe mock/provider abstractions. Do not block application work because real external credentials have not yet been entered.
 
-The authenticated pass covers D1/R2 readiness without migration, Storefront, Creators, Socials canonical authority, Financials, I.T. and safe Stripe/PayPal configuration readiness. Provider configuration readiness is deliberately separate from transaction acceptance.
+Never invent a successful provider transaction or claim a real credential was tested. The distinction is:
+
+- feature development: proceed;
+- provider integration metadata/config references: proceed;
+- real credential/provider acceptance: deferred to I.T.;
+- Production credential use/promotion: closed unless explicitly authorized.
+
+## Canonical platform direction
+
+The application has a minimum of five top-level modules:
+
+1. **Storefront** — public commerce presentation, Shop, Collections, Collages, Carousels, product discovery and customer-facing purchase surfaces.
+2. **Creators** — creative projects, production evidence, packaging/formula/content preparation and creator workflow.
+3. **Socials** — publication/campaign/channel workflow and CAIP-facing social distribution behavior.
+4. **Financials** — accounting, payments, refunds/disputes, reconciliation, profitability, tax/fees, journals/export/close.
+5. **I.T.** — bindings, API/provider configuration references, external-platform test environment, release diagnostics, access/security/infrastructure recovery.
+
+One or more future top-level modules may be added when ownership boundaries justify them. Do not invent extra modules merely to split a page; Shop/Collections/Collages/Carousels remain Storefront capabilities unless a stronger domain boundary emerges.
+
+## Web / Phone / Desktop
+
+Web, Phone and Desktop are active first-class clients of the same application authority.
+
+Current client behavior includes:
+
+- responsive layouts;
+- installable PWA mode on supported phone/desktop browsers;
+- service worker and offline fallback;
+- API/admin cache bypass;
+- explicit notification opt-in;
+- new-release alerts;
+- new-item alerts;
+- launch/resume checking rather than idle timer polling.
+
+Do not let future feature work become Web-only. Every new major surface should be evaluated on Web, Phone and Desktop.
+
+## Development D1 / R2 baseline
+
+The Release 447 convergence baseline is **APPLIED AND VERIFIED** in Development:
+
+- five canonical module rows;
+- zero legacy module rows;
+- 10 canonical role rows;
+- one explicit I.T. manager;
+- Storefront Home-carousel tables;
+- clean foreign keys.
+
+Permanent startup rule: **read-only D1/R2 verification first**. Do not rerun `database_platform_convergence.sql` merely because a new chat or release starts.
+
+Release 448 **may add protected Development D1 migrations when current feature work requires them**. Every new migration must be additive/safe, regression tested, included in aggregate schema authority where appropriate and must never target Production from normal Development work.
+
+## Release 448 active workstreams
+
+1. **Client platform continuity.** Preserve Web/Phone/Desktop behavior, release/item notifications, offline safety and no idle polling as features grow.
+2. **Product material lineage.** New Devil n Dove-made products should connect to real raw Inventory and consumption authority before publication. Existing products can be `legacy_pending`; resale/antiquity/external finished goods may be explicitly exempt.
+3. **Product tool/mold lineage.** Record durable tools/molds used to create a product without consuming the durable tool.
+4. **Manufacturer/vendor provenance and Devil n Dove reviews.** Associate supplies/tools with manufacturer/vendor provenance and locally authored reviews. Support ASIN/external IDs plus owner-supplied Amazon review/profile/source links or imports where available. Do not make Amazon reachable at runtime and do not copy third-party review text.
+5. **I.T. integration/test registry.** Build the eventual test-environment authority for provider/platform reference names, callback/webhook, scopes, environment, configured/tested state, last safe result/error and correction mechanics. Real secret values never belong in D1.
+6. **Carousel reuse for Movies.** Reuse/generalize carousel presentation without duplicating Home authority or adding an extra H1.
+7. **Movie data convergence.** Correct provably wrong names/core fields and mark unknown/incomplete values rather than guessing.
+8. **Unverified-process states.** Current/future D1 features should support `pending`, `legacy_pending`, `exempt`, `unverified`, `verified` and evidence references where truth state matters.
+
+## Forward queue after/alongside Release 448
+
+Continue moving through meaningful groups rather than waiting on deferred I.T. work:
+
+- Storefront Shop;
+- Collections;
+- Collages;
+- Carousels;
+- CAIP;
+- Inventory;
+- Supplies;
+- Tools;
+- additional top-level module boundaries if justified.
+
+## Amazon/Vevor review direction
+
+The user has heavily invested in Vevor equipment and has authored Amazon reviews for some tools. Treat those reviews as potentially useful first-party provenance/content.
+
+Design for:
+
+- manufacturer/vendor link (for example Vevor);
+- purchased Tool/Supply link;
+- ASIN or marketplace identifier;
+- public review/profile/source URL when owner-supplied or discoverable legitimately;
+- locally authored Devil n Dove review text/notes when the user provides or imports it;
+- review verification/source state.
+
+Do **not** assume Amazon Business exposes a stable review-list API. Do not scrape behind authentication or make Amazon a live application dependency. Prefer owner-controlled import/linking or an official export/API if one is actually available later.
 
 ## Canonical repository gates
 
@@ -62,51 +144,35 @@ python scripts/cloudflare_development_access.py --transport-preflight
 python scripts/development_runtime_acceptance.py --self-check
 ```
 
-The active CI workflow is `.github/workflows/system-gate.yml`. CI never applies D1 and never mutates Cloudflare R2, payment providers, or Production.
+The active CI workflow is `.github/workflows/system-gate.yml`. CI never applies remote D1 and never mutates Cloudflare R2, payment providers, or Production.
 
-## Current HOLDs
+## Deferred I.T. test environment
 
-- **Release 447 authenticated runtime execution:** deterministic Development-only harness and runbook exist; a fresh authenticated deployed-runtime evidence file is still required before this portion is closed.
-- **Stripe:** configuration readiness may be probed read-only, but test checkout/return, signed webhook, reconciliation and duplicate replay/idempotency evidence are still required.
-- **PayPal:** configuration readiness may be probed read-only, but sandbox approval/capture/return, verified webhook, reconciliation and duplicate replay/idempotency evidence are still required.
-- **CAIP private media:** authenticated private R2 delivery, byte/range playback, exact timecode/range evidence and verified derived-artifact metadata remain required.
-- **Production:** promotion remains closed by policy until deliberately reviewed and authorized.
+`LIVE_TESTING_GUIDE.md` is now the non-blocking I.T. test-environment procedure. Deferred tasks carry forward automatically until evidence exists. They are not release gates.
 
-Do not label any of these PASS from source inspection alone.
-
-## Release 448 preparation — scoped but not open
-
-Release 448 is **prepared only**. No Release 448 D1 migration is authorized while Release 447 remains live-acceptance HOLD unless a proven 447 defect requires a repair.
-
-Prepared workstreams:
-
-1. **Product material lineage.** New in-house-created products must ultimately prove raw-material inventory already existed and record real consumption through the existing inventory ledger before publication. Existing products may be `legacy_pending`. Antiquity/resale/external finished goods can be explicitly inventory-exempt. Never invent historical consumption.
-2. **Product tool/mold lineage.** Record durable tools and molds used during creation separately from consumables; associating a tool must not consume it.
-3. **Manufacturer/provenance/company reviews.** Link tools and raw goods to manufacturer/vendor provenance. Store Devil n Dove-authored purchased-item reviews locally with ASIN/external identifier/source link as appropriate; do not scrape/copy marketplace review text or make Amazon a runtime dependency.
-4. **I.T. integration registry.** I.T. will own social/provider integration configuration references: provider/platform, purpose, secret or binding **name only**, callback/webhook, scopes, environment, configured/tested state, last test/error and correction mechanics. Secret values never belong in D1 or the UI.
-5. **Carousel reuse for Movies.** Generalize the Storefront carousel presentation so Movie pages can use it without creating a duplicate carousel authority and without injecting an extra public H1.
-6. **Movie data convergence.** Correct provably wrong names/core fields and explicitly mark unknown/incomplete data instead of guessing.
-7. **Unverified-process states.** New schema must reserve states such as `pending`, `legacy_pending`, `exempt`, `unverified`, `verified` plus evidence references so unfinished processes cannot masquerade as complete.
+The I.T. page should eventually become the complete test/setup cockpit for external providers and platform integrations: configuration references, callbacks/webhooks, scopes, environment, configured/tested state, errors, correction mechanics and evidence references. Secret values remain in Cloudflare/provider secret authorities, never D1/UI/source/logs.
 
 ## Invariants
 
+- One current release only.
+- Historical Build numbers never become active gates.
 - D1 is operational write authority; no request-time DDL.
 - Legacy JSON is not write authority.
 - Public pages preserve one meaningful H1 and truthful canonical metadata/schema.
 - Home carousel is Storefront-owned and may never inject a second H1.
-- I.T. owns bindings, infrastructure readiness, API/provider configuration references, release diagnostics and recovery mechanics; secret values are never surfaced.
-- Socials owns publication/content workflows; I.T. owns the credentials/configuration references those workflows depend on.
-- Provider readiness probes are read-only; real money/provider mutations require deliberate test execution.
-- Web/Phone/Desktop share the same responsive/installable application authority; notification permission is explicit opt-in and there is no idle background polling.
-- Old build numbers never remain active requirements; unresolved work moves into the one current release.
+- I.T. owns provider/infrastructure configuration references; consuming modules own business workflow.
+- Deferred I.T. work never blocks unrelated forward releases.
+- Web/Phone/Desktop remain first-class clients.
+- Notification permission is explicit opt-in; no idle background polling.
+- Production remains untouched without explicit authorization.
 
 ## Workflow
 
 1. Work on `dev` only.
-2. Run the canonical `System Gate` on the exact resulting head.
-3. Require Cloudflare Pages `devilndove-site-dev` success on the same SHA.
-4. Use read-only D1/R2 readiness before any recovery or migration action.
-5. Execute authenticated runtime acceptance against Development only when a valid Development session is available.
-6. Keep Stripe, PayPal and CAIP provider/media evidence separate from configuration/source readiness.
+2. Move forward within the one current release; do not create parallel build tracks.
+3. Run the canonical System Gate on the exact resulting head.
+4. Require Cloudflare Pages `devilndove-site-dev` success on the same SHA.
+5. Use read-only D1/R2 verification before recovery; apply new Development migrations only when current work requires them.
+6. Carry deferred I.T. tests forward automatically instead of freezing the release.
 7. Keep Production untouched without explicit authorization.
 8. Keep this file, `PROJECT_STATUS_AND_ROADMAP.md`, `development-release.json`, `LIVE_TESTING_GUIDE.md` and the I.T. page synchronized when release state changes.
