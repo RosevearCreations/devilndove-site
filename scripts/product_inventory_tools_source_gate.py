@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Canonical local-only Product / Inventory / Tools source gate (Build 446+).
+"""Canonical local-only Product / Inventory / Tools source gate for the current release.
 
-Historical migration replay baselines live in Git history. This gate exercises current
-runtime/source contracts and the retained guarded Build 440 recovery authorities only.
-It never contacts Cloudflare, D1, R2 or providers.
+Historical regression filenames are retained as implementation provenance only. Their
+old numeric names do not define current release authority and successful child output is
+suppressed so normal System Gate evidence stays release-independent. If a retained
+regression fails, its captured output is emitted for diagnosis.
+
+This gate never contacts Cloudflare, D1, R2 or providers.
 """
 from __future__ import annotations
 import os
@@ -79,15 +82,26 @@ def run(label: str, args: list[str]) -> None:
     print('\n' + '=' * 60)
     print(label.upper())
     print('=' * 60)
-    result = subprocess.run(args, cwd=ROOT, env={**os.environ, 'NO_COLOR': '1', 'FORCE_COLOR': '0'}, check=False)
+    result = subprocess.run(
+        args,
+        cwd=ROOT,
+        env={**os.environ, 'NO_COLOR': '1', 'FORCE_COLOR': '0'},
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
     if result.returncode:
+        if result.stdout:
+            print(result.stdout.rstrip())
         raise SystemExit(f'STOP: {label} failed with exit code {result.returncode}.')
+    print('PASS')
 
 def main() -> int:
     print('PRODUCT / INVENTORY / TOOLS CURRENT SOURCE GATE')
     print('Cloudflare/D1/R2/provider access: NONE')
     print('Production mutation capability: NONE')
-    print('Historical migration replay baselines: GIT HISTORY ONLY')
+    print('Historical regression filenames: PROVENANCE ONLY')
     for label, args in STEPS:
         run(label, list(args))
     for rel in JS_FILES:
