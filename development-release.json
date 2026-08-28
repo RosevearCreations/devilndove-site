@@ -5,7 +5,7 @@
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "in_progress",
+  "convergence_state": "source_and_database_convergence",
   "canonical_modules": [
     { "key": "storefront", "name": "Storefront" },
     { "key": "creators", "name": "Creators" },
@@ -22,11 +22,11 @@
     "d1": {
       "binding": "DB",
       "database_name": "devilndove-dev",
-      "database_id": "5c200587-ade6-4b77-9b20-5e93b14c0c32"
+      "database_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
     },
     "r2": [
-      { "binding": "ASSETS", "bucket_name": "devilndove-assets-dev" },
-      { "binding": "R2", "bucket_name": "devilndove-products-dev" }
+      { "binding": "PRODUCT_MEDIA_BUCKET", "bucket_name": "devilndove-toolshed-images-dev" },
+      { "binding": "CAIP_PRIVATE_MEDIA_BUCKET", "bucket_name": "devilndove-caip-media-dev" }
     ],
     "readiness_endpoint": "/api/admin/infrastructure-readiness"
   },
@@ -39,7 +39,7 @@
   "migration_state": {
     "d1_sql_required": true,
     "file": "database_platform_convergence.sql",
-    "apply_status": "pending_cloudflare_apply",
-    "strategy": "preserve-state-then-retire-legacy-registry-keys"
+    "apply_status": "pending_development_apply",
+    "strategy": "canonical-five-module-and-storefront-schema-convergence"
   }
 }
