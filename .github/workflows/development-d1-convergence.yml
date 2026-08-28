@@ -1,0 +1,70 @@
+# One-time Release 447 Development D1 convergence.
+# This workflow is deliberately removed after successful apply/verification.
+name: One-time Development D1 Convergence
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/development-d1-convergence.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-447-development-d1-convergence
+  cancel-in-progress: false
+
+jobs:
+  apply-development-d1:
+    if: github.ref == 'refs/heads/dev' && github.event.head_commit.message == 'Release 447 authorize guarded Development D1 convergence'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CF_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.CF_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Re-prove Release 447 source before remote mutation
+        run: |
+          python scripts/repository_forward_sanity.py
+          python scripts/module_architecture_gate.py
+          python scripts/database_platform_gate.py
+          python scripts/apply_development_platform_convergence.py --transport-preflight
+          python scripts/public_seo_gate.py
+          python scripts/pwa_platform_gate.py
+          python scripts/product_inventory_tools_source_gate.py
+
+      - name: Refuse missing Cloudflare authorization
+        shell: bash
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
+            echo 'STOP: Cloudflare API token secret is unavailable.' >&2
+            exit 41
+          fi
+          if [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
+            echo 'STOP: Cloudflare account ID secret is unavailable.' >&2
+            exit 42
+          fi
+          echo 'PASS — Cloudflare authorization variables are present (values not printed).'
+
+      - name: Prove exact Development D1 authentication
+        run: python scripts/apply_development_platform_convergence.py --auth-only
+
+      - name: Apply and verify canonical Development D1 convergence
+        run: python scripts/apply_development_platform_convergence.py
+
+      - name: D1 safety statement
+        run: |
+          echo 'Release 447 Development D1 convergence: COMPLETE'
+          echo 'Target: devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa'
+          echo 'Automatic retries: NONE'
+          echo 'R2/provider mutation: NONE'
+          echo 'Production mutation capability: NONE'
