@@ -3,6 +3,16 @@
   'use strict';
   if (window.DDMediaCarousel) return;
 
+  function ensureStyles() {
+    if (document.querySelector('link[data-dd-media-carousel]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/css/media-carousel.css?v=448';
+    link.dataset.ddMediaCarousel = '448';
+    document.head.appendChild(link);
+  }
+  ensureStyles();
+
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
   const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 
