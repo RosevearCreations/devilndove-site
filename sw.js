@@ -1,5 +1,5 @@
-// Release 447 — shared Web / Phone / Desktop service worker.
-const CACHE_NAME = 'devilndove-shell-r447';
+// Release 448 — shared Web / Phone / Desktop service worker.
+const CACHE_NAME = 'devilndove-shell-r448';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
