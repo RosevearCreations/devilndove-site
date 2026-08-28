@@ -17,6 +17,7 @@ on:
       - 'scripts/**'
       - 'database*.sql'
       - 'BUILD*.sql'
+      - 'BUILD*.md'
       - 'AI_HANDOFF.md'
       - 'PROJECT_STATUS_AND_ROADMAP.md'
       - 'SANITY_HEALTH_CHECK.md'
