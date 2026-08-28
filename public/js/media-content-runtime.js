@@ -1,7 +1,6 @@
-// Devil n Dove Build 278 — explicit static-page media/content runtime + page-wide admin edit switch.
-// Public visitors only receive the published D1 overrides. Admin edit controls are created only
-// after dd:admin-ready confirms access. When edit mode is OFF, authored page content is untouched
-// and no per-slot Edit badges are visible.
+// Devil n Dove Release 448 — explicit static-page media/content runtime + page-specific presentation adapters.
+// Public visitors only receive published D1 overrides. Admin edit controls are created only
+// after dd:admin-ready confirms access. Authored content remains the fallback authority.
 (()=>{
   'use strict';
   const EDIT_SESSION_KEY='dd-media-page-edit-mode';
@@ -68,6 +67,11 @@
     toolbar.querySelector('[data-media-page-edit-toggle]')?.addEventListener('click',()=>setEditMode(!document.documentElement.classList.contains('media-page-edit-mode'),{persist:true,focusHash:true}));
   }
 
+  function loadPageEnhancements(){
+    if(pagePath()!=='/movies'||document.querySelector('script[data-dd-movie-carousel-adapter]'))return;
+    const script=document.createElement('script');script.src='/public/js/movie-media-carousel.js?v=448';script.defer=true;script.dataset.ddMovieCarouselAdapter='448';document.head.appendChild(script);
+  }
+
   document.addEventListener('dd:admin-ready',e=>{
     if(!e.detail?.ok)return;
     adminReady=true;ensureEditToolbar();
@@ -75,5 +79,6 @@
   });
 
   async function run(){try{const response=await fetch(`/api/public-media-content-manifest?path=${encodeURIComponent(pagePath())}`,{credentials:'same-origin',headers:{Accept:'application/json'}});if(!response.ok)return;const data=await response.json();if(!data?.ok)return;const images=Array.isArray(data.images)?data.images:[],content=Array.isArray(data.content)?data.content:[];if(!images.length&&!content.length)return;const applyAll=()=>{let unresolved=0;images.forEach(item=>{if(!applyImage(item))unresolved++;});content.forEach(item=>{if(!applyContent(item))unresolved++;});return unresolved;};let unresolved=applyAll();document.documentElement.dataset.mediaContentStudio=unresolved?'partial':'applied';if(unresolved){const observer=new MutationObserver(()=>{unresolved=applyAll();document.documentElement.dataset.mediaContentStudio=unresolved?'partial':'applied';if(!unresolved)observer.disconnect();});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),8000);}}catch{}}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
+  function start(){loadPageEnhancements();run();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
