@@ -1,4 +1,4 @@
-// Release 448 — Product material/tool lineage workspace.
+// Release 448 — Product material/tool/manufacturer lineage workspace.
 (function () {
   'use strict';
   const byId = (id) => document.getElementById(id);
@@ -56,6 +56,7 @@
       <div><strong>${detail.publish_blocked ? 'PUBLICATION BLOCKED' : detail.enforcement_active ? 'Required lineage currently ready' : 'Non-blocking lineage review'}</strong></div>
       <div>Materials: ${Number(s.material_links || 0)} linked • ${Number(s.resolved_material_links || 0)} resolved to Inventory • ${Number(s.verified_material_links || 0)} verified</div>
       <div>Tools/molds: ${Number(s.tool_links || 0)} linked • ${Number(s.verified_tool_links || 0)} verified</div>
+      <div>Manufacturers: ${Number(s.manufacturer_count || 0)} linked • ${Number(s.verified_manufacturer_links || 0)} verified resource link(s)</div>
       ${blockers.length ? `<ul>${blockers.map((row) => `<li>${esc(row)}</li>`).join('')}</ul>` : ''}
       ${warnings.length ? `<ul>${warnings.map((row) => `<li>${esc(row)}</li>`).join('')}</ul>` : ''}`;
   }
@@ -71,6 +72,13 @@
     return ['pending','legacy_pending','unverified','verified','exempt'].map((value) => `<option value="${value}" ${value === current ? 'selected' : ''}>${value.replaceAll('_',' ')}</option>`).join('');
   }
 
+  function manufacturerLine(row) {
+    if (!row.site_item_inventory_id) return '';
+    if (!row.manufacturer_id) return `<div class="small" style="margin-top:6px"><strong>Manufacturer:</strong> not linked • <a href="/admin/vendor-reviews/?inventory_id=${Number(row.site_item_inventory_id)}">review manufacturer</a></div>`;
+    const verified = text(row.manufacturer_verification_status).toLowerCase() === 'verified';
+    return `<div class="small" style="margin-top:6px"><strong>Manufacturer:</strong> ${esc(row.manufacturer_name || 'Unknown')} • ${esc(row.manufacturer_relationship || 'manufacturer')} • ${verified ? 'verified' : esc(row.manufacturer_verification_status || 'unverified')} • <a href="/admin/vendor-reviews/?inventory_id=${Number(row.site_item_inventory_id)}">manufacturer/reviews</a></div>`;
+  }
+
   function renderResources(detail) {
     const node = byId('lineageResources'); if (!node) return;
     const resources = [...(detail.materials || []), ...(detail.tools || [])];
@@ -83,9 +91,10 @@
       const durable = row.resource_kind === 'tool';
       return `<article class="card" data-lineage-link="${Number(row.product_resource_link_id)}" data-kind="${esc(row.resource_kind)}" style="margin-top:10px">
         <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><strong>${esc(row.item_name || row.source_key)}</strong><div class="small">${durable ? 'Durable Tool — never consumed by this link' : `Consumable Supply • ${esc(row.consumption_mode || 'per_unit')}`}</div></div><div class="small"><strong>${resolved ? 'Inventory linked' : 'Inventory unresolved'}</strong>${row.site_item_inventory_id ? ` • #${Number(row.site_item_inventory_id)}` : ''}</div></div>
+        ${manufacturerLine(row)}
         <div class="grid cols-2" style="gap:10px;margin-top:10px"><label><span class="small">Role</span><select class="input" data-role>${roleOptions(row)}</select></label><label><span class="small">Verification</span><select class="input" data-verification>${verificationOptions(row)}</select></label></div>
         <div class="grid cols-2" style="gap:10px;margin-top:10px"><label><span class="small">Evidence reference</span><input class="input" data-evidence maxlength="1000" value="${esc(row.evidence_reference || '')}"/></label><label><span class="small">Review note</span><input class="input" data-note maxlength="2000" value="${esc(row.review_note || '')}"/></label></div>
-        <div class="small" style="margin-top:8px">Source key: <code>${esc(row.source_key)}</code>${row.supplier_name ? ` • Supplier: ${esc(row.supplier_name)}` : ''}${row.supplier_sku ? ` • Supplier SKU: ${esc(row.supplier_sku)}` : ''}</div>
+        <div class="small" style="margin-top:8px">Source key: <code>${esc(row.source_key)}</code>${row.supplier_name ? ` • Supplier/store: ${esc(row.supplier_name)}` : ''}${row.supplier_sku ? ` • Supplier SKU: ${esc(row.supplier_sku)}` : ''}</div>
       </article>`;
     }).join('');
   }
