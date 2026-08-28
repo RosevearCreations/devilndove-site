@@ -1,5 +1,6 @@
-// Build 284 Catalog-owned implementation of the catalog-read module contract.
+// Current-release Catalog-owned implementation of the catalog-read module contract.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../../_lib/adminAudit.js';
+import { currentReleaseMetadata } from '../../_lib/releaseAuthority.js';
 
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -10,9 +11,9 @@ function boundedInt(value, fallback = 250, max = 500) {
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
-  if (!adminUser) return json({ ok: false, error: 'Admin access required.' }, 401);
+  if (!adminUser) return json({ ok: false, ...currentReleaseMetadata(), error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
-  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
+  if (!db) return json({ ok: false, ...currentReleaseMetadata(), error: 'Database binding is not configured.' }, 500);
 
   const url = new URL(context.request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
@@ -35,8 +36,8 @@ export async function onRequestGet(context) {
       product_id: Number(row.product_id || 0),
       weight_grams: row.weight_grams == null ? null : Number(row.weight_grams || 0),
     }));
-    return json({ ok: true, contract: 'catalog-read', owner: 'catalog', requested_by: adminUser, products, count: products.length });
+    return json({ ok: true, ...currentReleaseMetadata(), contract: 'catalog-read', owner: 'catalog', requested_by: adminUser, products, count: products.length });
   } catch (error) {
-    return json({ ok: false, error: 'Catalog read contract failed.', error_code: 'catalog_read_failed', detail: String(error?.message || error) }, 500);
+    return json({ ok: false, ...currentReleaseMetadata(), contract: 'catalog-read', error: 'Catalog read contract failed.', error_code: 'catalog_read_failed', detail: String(error?.message || error) }, 500);
   }
 }
