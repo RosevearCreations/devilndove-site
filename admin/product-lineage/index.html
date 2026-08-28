@@ -13,7 +13,7 @@
   <div class="container admin-shell">
     <div class="nav">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Storefront / Product Lineage</div></div></div>
-      <div class="links"><a href="/admin/">Admin</a><a href="/admin/products/">Products</a><a href="/admin/inventory-operations/">Inventory</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+      <div class="links"><a href="/admin/">Admin</a><a href="/admin/products/">Products</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/vendor-reviews/">Manufacturers</a><button class="btn" data-nav-logout type="button">Logout</button></div>
     </div>
 
     <div class="hero compact-hero"><div><h1>Product Material &amp; Tool Lineage</h1><p>Release 448 workspace for truthful Product origin, raw Inventory lineage, reusable Tool/mold provenance and legacy reconstruction.</p></div></div>
@@ -51,12 +51,13 @@
     <section class="card" id="lineageResourcesCard" style="margin-top:18px" hidden>
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">Linked Supplies, Tools &amp; Molds</h2><p class="small">These rows overlay the existing Product → Tool/Supply links. Supply verification proves the link resolves to Inventory; Tool/mold verification records provenance without consuming the durable item.</p></div><button class="btn" id="lineageVerifyResolved" type="button">Mark resolved materials verified</button></div>
       <div id="lineageResources"></div>
-      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="lineageSave" type="button">Save lineage review</button><a class="btn" href="/admin/products/#product-resources">Edit Product Tool/Supply links</a></div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="lineageSave" type="button">Save lineage review</button><a class="btn" href="/admin/products/#product-resources">Edit Product Tool/Supply links</a><a class="btn" href="/admin/vendor-reviews/">Manufacturer &amp; review library</a></div>
     </section>
 
     <section class="card" style="margin-top:18px">
       <h2 style="margin-top:0">Manufacturer / purchased-item reviews</h2>
-      <p class="small">Release 448 now has a first-party review authority for Inventory items, including manufacturer/vendor, platform, external item ID such as ASIN, source/review links and Devil n Dove-authored review text. The editing surface will be connected to Inventory in the next pass; Amazon is not a runtime dependency and third-party review text is not copied.</p>
+      <p class="small">Manufacturer identity is normalized at the Tool/Supply Inventory item and then inherited by Products through their existing resource links. Devil n Dove-authored reviews can store ASIN/external IDs and source/review links without making Amazon, VEVOR or another marketplace a runtime dependency.</p>
+      <a class="btn" href="/admin/vendor-reviews/">Open Manufacturer &amp; Review workspace</a>
     </section>
 
     <div class="footer card" style="margin-top:18px"></div>
