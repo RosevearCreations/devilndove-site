@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Release 448 Development-only media quality / Movie review / I.T. registry D1 runner."""
+"""Release 448 Development-only media quality / current Movie review / I.T. registry D1 runner."""
 from __future__ import annotations
-import argparse, json, sqlite3, subprocess, sys
+import argparse,json,sqlite3,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 from build440_apply_development_d1 import DATABASE_ID,DATABASE_NAME,WINDOWS_SAFE_COMMAND_LINE_LIMIT,assert_development_config,build_wrangler_query_args,prepared_remote_statements,statement_fingerprint
-RELEASE=448;MIGRATION='database_release448_media_it.sql';VERIFICATION='RELEASE448_MEDIA_IT_VERIFICATION.sql';EXPECTED_NAME='devilndove-dev';EXPECTED_ID='dbc1615b-dcbe-4951-973b-b47c99c73bfa';REQUIRED=('product_image_quality_assessments','movie_metadata_reviews','it_integration_registry')
+RELEASE=448;MIGRATION='database_release448_media_it.sql';VERIFICATION='RELEASE448_MEDIA_IT_VERIFICATION.sql';EXPECTED_NAME='devilndove-dev';EXPECTED_ID='dbc1615b-dcbe-4951-973b-b47c99c73bfa';REQUIRED=('product_image_quality_assessments','movie_catalog','movie_metadata_reviews','it_integration_registry')
 def die(msg,code=2):print(f'STOP: {msg}',file=sys.stderr);raise SystemExit(code)
 def guard():
  assert_development_config()
  if DATABASE_NAME!=EXPECTED_NAME or DATABASE_ID!=EXPECTED_ID:die('Exact Development D1 target changed.')
- if 'prod' in DATABASE_NAME.lower():die('Production target detected.')
+ if 'prod' in DATABASE_NAME.lower() or 'production' in DATABASE_NAME.lower():die('Production target detected.')
 def rows(payload):
  out=[]
  if isinstance(payload,list):
@@ -25,9 +25,12 @@ def query(sql,label):
  if len(subprocess.list2cmdline(args))>WINDOWS_SAFE_COMMAND_LINE_LIMIT:die(f'Query exceeds transport limit: {label}')
  result=subprocess.run(args,cwd=ROOT,check=False,capture_output=True,text=True)
  if result.returncode:
-  print(result.stdout);print(result.stderr,file=sys.stderr);die(f'D1 query failed: {label}',result.returncode)
+  if result.stdout:print(result.stdout)
+  if result.stderr:print(result.stderr,file=sys.stderr)
+  die(f'D1 query failed: {label}',result.returncode)
  try:return rows(json.loads((result.stdout or '').strip()))
- except Exception:print(result.stdout);die(f'Non-JSON Wrangler output: {label}')
+ except Exception:
+  print(result.stdout);die(f'Non-JSON Wrangler output: {label}')
 def execute(filename,read_only=False):
  statements,skipped=prepared_remote_statements(filename);print(f'{filename}: {len(statements)} statements; {len(skipped)} deliberate skips')
  for i,sql in enumerate(statements,1):
@@ -54,12 +57,12 @@ def scalar(sql,field,label):
 def verify():
  names=','.join(f"'{x}'" for x in REQUIRED)
  if scalar(f"SELECT COUNT(*) AS c FROM sqlite_master WHERE type='table' AND name IN ({names});",'c','required tables')!=len(REQUIRED):die('Required Release 448 media/I.T. tables are missing.')
- movies=scalar('SELECT COUNT(*) AS c FROM movies;','c','Movie count');reviews=scalar('SELECT COUNT(*) AS c FROM movie_metadata_reviews;','c','Movie review coverage')
- if movies!=reviews:die(f'Movie metadata review coverage mismatch: movies={movies}, reviews={reviews}')
+ uncovered=scalar('SELECT COUNT(*) AS c FROM movie_catalog mc LEFT JOIN movie_metadata_reviews mr ON mr.movie_catalog_id=mc.movie_catalog_id WHERE mr.movie_key IS NULL;','c','D1 Movie review coverage')
+ if uncovered:die(f'{uncovered} D1 Movie rows do not have a metadata-review state.')
  if scalar('SELECT COUNT(*) AS c FROM product_image_quality_assessments WHERE total_score<0 OR total_score>100;','c','image score range'):die('Invalid image quality score found.')
  if scalar("SELECT COUNT(*) AS c FROM it_integration_registry WHERE credential_reference IS NOT NULL AND (instr(lower(credential_reference),'secret=')>0 OR instr(lower(credential_reference),'token=')>0);",'c','secret-reference guard'):die('Suspicious credential reference found.')
  if query('PRAGMA foreign_key_check;','foreign keys'):die('Foreign-key violations detected.')
- print('PASS — Release 448 media quality, Movie review and I.T. registry schema verified')
+ print('PASS — Release 448 media quality, current Movie review and I.T. registry schema verified')
 def main():
  p=argparse.ArgumentParser();p.add_argument('--transport-preflight',action='store_true');p.add_argument('--verify-only',action='store_true');args=p.parse_args();guard();transport_preflight()
  if args.transport_preflight:return 0
