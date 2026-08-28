@@ -1,1 +1,43 @@
-{"environment":"development","release":446,"label":"Build 446"}
+{
+  "environment": "development",
+  "release": 447,
+  "label": "Platform Convergence",
+  "release_track": "single-current-release",
+  "branch": "dev",
+  "pages_project": "devilndove-site-dev",
+  "convergence_state": "in_progress",
+  "canonical_modules": [
+    { "key": "storefront", "name": "Storefront" },
+    { "key": "creators", "name": "Creators" },
+    { "key": "socials", "name": "Socials" },
+    { "key": "financials", "name": "Financials" },
+    { "key": "it-platform", "name": "I.T." }
+  ],
+  "clients": [
+    { "key": "web", "name": "Web", "status": "active" },
+    { "key": "phone", "name": "Phone", "status": "converging" },
+    { "key": "desktop", "name": "Desktop", "status": "converging" }
+  ],
+  "development_infrastructure": {
+    "d1": {
+      "binding": "DB",
+      "database_name": "devilndove-dev",
+      "database_id": "5c200587-ade6-4b77-9b20-5e93b14c0c32"
+    },
+    "r2": [
+      { "binding": "ASSETS", "bucket_name": "devilndove-assets-dev" },
+      { "binding": "R2", "bucket_name": "devilndove-products-dev" }
+    ],
+    "readiness_endpoint": "/api/admin/infrastructure-readiness"
+  },
+  "release_policy": {
+    "one_current_release": true,
+    "legacy_build_numbers_are_provenance_only": true,
+    "historical_build_gates_allowed": false,
+    "production_promotion": "closed"
+  },
+  "migration_state": {
+    "d1_sql_required_for_this_packet": false,
+    "canonical_module_registry_migration": "pending"
+  }
+}
