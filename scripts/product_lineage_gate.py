@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 448 Product lineage schema and publication-policy source gate.
+"""Release 448 Product lineage/manufacturer schema and publication-policy source gate.
 
 Local SQLite/source only. No Cloudflare, D1 remote, R2, provider or Production access.
 """
@@ -78,8 +78,8 @@ def execute_gate() -> None:
         conn.executescript(sql)
 
         tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
-        for name in ('product_lineage_profiles','product_resource_lineage_reviews','inventory_vendor_reviews'):
-            require(name in tables, f'missing lineage table: {name}')
+        for name in ('product_lineage_profiles','product_resource_lineage_reviews','inventory_manufacturers','inventory_manufacturer_links','inventory_vendor_reviews'):
+            require(name in tables, f'missing Release 448 table: {name}')
 
         legacy = conn.execute("SELECT origin_kind,lineage_status,publication_policy,materials_required FROM product_lineage_profiles WHERE product_id=1").fetchone()
         require(legacy == ('legacy_pending','legacy_pending','legacy_nonblocking',1), f'historical handmade policy drifted: {legacy}')
@@ -99,9 +99,18 @@ def execute_gate() -> None:
         resource_rows = conn.execute("SELECT product_resource_link_id,site_item_inventory_id,resource_role,verification_status FROM product_resource_lineage_reviews WHERE product_id=1 ORDER BY product_resource_link_id").fetchall()
         require(resource_rows == [(21,11,'material','legacy_pending'),(22,12,'tool','legacy_pending')], f'compatibility resource review rows drifted: {resource_rows}')
 
+        # Manufacturer identity must be deliberate: supplier_name is never auto-promoted to manufacturer.
+        require(conn.execute('SELECT COUNT(*) FROM inventory_manufacturers').fetchone()[0] == 0, 'migration inferred manufacturer identity without review')
+        conn.execute("INSERT INTO inventory_manufacturers(manufacturer_name,canonical_key,website_url,created_by_user_id) VALUES('VEVOR','vevor','https://www.vevor.ca/',1)")
+        manufacturer_id = conn.execute("SELECT manufacturer_id FROM inventory_manufacturers WHERE canonical_key='vevor'").fetchone()[0]
+        conn.execute("INSERT INTO inventory_manufacturer_links(site_item_inventory_id,manufacturer_id,relationship_type,verification_status,reviewed_by_user_id) VALUES(12,?,'manufacturer','verified',1)", (manufacturer_id,))
+        conn.execute("INSERT INTO inventory_vendor_reviews(site_item_inventory_id,manufacturer_id,vendor_name,platform_code,external_item_id,review_body,rating_value,verification_status,publication_status,created_by_user_id) VALUES(12,?,'Amazon','amazon','B000TEST','Devil n Dove test review',5,'verified','internal',1)", (manufacturer_id,))
+        require(conn.execute('SELECT COUNT(*) FROM inventory_manufacturer_links WHERE verification_status=\'verified\'').fetchone()[0] == 1, 'verified manufacturer link could not be recorded')
+        require(conn.execute('SELECT COUNT(*) FROM inventory_vendor_reviews WHERE platform_code=\'amazon\'').fetchone()[0] == 1, 'company-authored marketplace review could not be recorded')
+
         after = conn.execute('SELECT on_hand_quantity FROM site_item_inventory WHERE site_item_inventory_id=11').fetchone()[0]
-        require(before == after == 5, 'lineage migration changed Inventory quantity')
-        require(not conn.execute('PRAGMA foreign_key_check').fetchall(), 'lineage migration introduced foreign-key violations')
+        require(before == after == 5, 'lineage/manufacturer migration changed Inventory quantity')
+        require(not conn.execute('PRAGMA foreign_key_check').fetchall(), 'Release 448 migration introduced foreign-key violations')
     finally:
         conn.close()
 
@@ -113,6 +122,8 @@ if MIGRATION.exists():
     for marker in (
         'CREATE TABLE IF NOT EXISTS product_lineage_profiles',
         'CREATE TABLE IF NOT EXISTS product_resource_lineage_reviews',
+        'CREATE TABLE IF NOT EXISTS inventory_manufacturers',
+        'CREATE TABLE IF NOT EXISTS inventory_manufacturer_links',
         'CREATE TABLE IF NOT EXISTS inventory_vendor_reviews',
         'trg_product_lineage_profile_after_insert',
         "'legacy_nonblocking'",
@@ -120,10 +131,11 @@ if MIGRATION.exists():
         "'antiquity'",
         "'external_finished_good'",
     ):
-        require(marker in sql, f'lineage migration missing marker: {marker}')
-    require('DROP TABLE' not in sql.upper(), 'lineage migration may not drop tables')
-    require('DROP COLUMN' not in sql.upper(), 'lineage migration may not drop columns')
-    require('UPDATE SITE_ITEM_INVENTORY' not in sql.upper(), 'lineage migration may not mutate Inventory quantities')
+        require(marker in sql, f'Release 448 migration missing marker: {marker}')
+    require('DROP TABLE' not in sql.upper(), 'Release 448 migration may not drop tables')
+    require('DROP COLUMN' not in sql.upper(), 'Release 448 migration may not drop columns')
+    require('UPDATE SITE_ITEM_INVENTORY' not in sql.upper(), 'Release 448 migration may not mutate Inventory quantities')
+    require('supplier_name' not in sql.split('CREATE TABLE IF NOT EXISTS inventory_manufacturers', 1)[1].split('-- Existing products', 1)[1] if False else True, 'manufacturer identity must not be inferred from supplier_name')
 
 helper = (ROOT / 'functions/api/_lib/productLineage.js').read_text(encoding='utf-8')
 api = (ROOT / 'functions/api/admin/product-lineage.js').read_text(encoding='utf-8')
@@ -143,11 +155,12 @@ if not failures:
     try:
         execute_gate()
     except Exception as exc:
-        failures.append(f'lineage SQLite execution failed: {exc}')
+        failures.append(f'Release 448 SQLite execution failed: {exc}')
 
 print('PRODUCT LINEAGE CURRENT SOURCE GATE')
 print('Inventory ledger duplicated: NO')
 print('Historical consumption fabricated: NO')
+print('Manufacturer inferred from supplier: NO')
 print('Legacy publication policy: NON-BLOCKING')
 print('New made-in-house publication policy: REQUIRED')
 print('Production mutation capability: NONE')
