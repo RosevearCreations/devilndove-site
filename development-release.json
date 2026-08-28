@@ -6,172 +6,48 @@
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
   "convergence_state": "active_platform_expansion",
-  "previous_release": {
-    "release": 447,
-    "label": "Platform Convergence",
-    "state": "complete",
-    "completed_on": "2026-08-28",
-    "completion_note": "Source, D1 baseline, canonical gates and exact Development Pages deployment completed. Authenticated runtime, Stripe test, PayPal sandbox and CAIP private-media evidence moved to the deferred I.T. test environment and do not gate forward releases."
-  },
+  "previous_release": {"release":447,"label":"Platform Convergence","state":"complete","completed_on":"2026-08-28","completion_note":"Source, D1 baseline, canonical gates and exact Development Pages deployment completed. Authenticated runtime, Stripe test, PayPal sandbox and CAIP private-media evidence moved to the deferred I.T. test environment and do not gate forward releases."},
   "canonical_modules": [
-    { "key": "storefront", "name": "Storefront", "status": "active" },
-    { "key": "creators", "name": "Creators", "status": "active" },
-    { "key": "socials", "name": "Socials", "status": "active" },
-    { "key": "financials", "name": "Financials", "status": "active" },
-    { "key": "it-platform", "name": "I.T.", "status": "active" }
+    {"key":"storefront","name":"Storefront","status":"active"},{"key":"creators","name":"Creators","status":"active"},{"key":"socials","name":"Socials","status":"active"},{"key":"financials","name":"Financials","status":"active"},{"key":"it-platform","name":"I.T.","status":"active"}
   ],
-  "module_policy": {
-    "minimum_canonical_modules": 5,
-    "future_modules_allowed": true,
-    "future_modules_are_added_deliberately": true,
-    "shop_collections_collages_carousels_are_storefront_capabilities_until_a_separate_module_is_justified": true
-  },
+  "module_policy": {"minimum_canonical_modules":5,"future_modules_allowed":true,"future_modules_are_added_deliberately":true,"shop_collections_collages_carousels_are_storefront_capabilities_until_a_separate_module_is_justified":true},
   "clients": [
-    { "key": "web", "name": "Web", "status": "active", "mode": "responsive_web", "notifications": ["new_release", "new_item"] },
-    { "key": "phone", "name": "Phone", "status": "active", "mode": "installable_pwa", "notifications": ["new_release", "new_item"] },
-    { "key": "desktop", "name": "Desktop", "status": "active", "mode": "installable_pwa", "notifications": ["new_release", "new_item"] }
+    {"key":"web","name":"Web","status":"active","mode":"responsive_web","notifications":["new_release","new_item"]},{"key":"phone","name":"Phone","status":"active","mode":"installable_pwa","notifications":["new_release","new_item"]},{"key":"desktop","name":"Desktop","status":"active","mode":"installable_pwa","notifications":["new_release","new_item"]}
   ],
   "development_infrastructure": {
-    "cloudflare_account_id": "c0d5bc25df16ae5b7d47c985c4b7b787",
-    "account_selection": "local tooling pins CLOUDFLARE_ACCOUNT_ID; Pages Git deployment owns its account context",
-    "d1": { "binding": "DB", "database_name": "devilndove-dev", "database_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa" },
-    "r2": [
-      { "binding": "PRODUCT_MEDIA_BUCKET", "bucket_name": "devilndove-toolshed-images-dev" },
-      { "binding": "CAIP_PRIVATE_MEDIA_BUCKET", "bucket_name": "devilndove-caip-media-dev" }
-    ],
-    "readiness_endpoint": "/api/admin/infrastructure-readiness",
-    "local_access_preflight": "python scripts/cloudflare_development_access.py --auth-only",
-    "github_d1_credential": {
-      "secret_name": "CLOUDFLARE_API_TOKEN",
-      "status": "missing",
-      "last_guarded_workflow_run": 33198354338,
-      "last_result": "stopped_before_read_or_write",
-      "note": "The Release 448 Development-only D1 workflow failed at its credential guard because the GitHub Actions secret is absent. No migration statement executed."
-    }
+    "cloudflare_account_id":"c0d5bc25df16ae5b7d47c985c4b7b787",
+    "account_selection":"local tooling pins CLOUDFLARE_ACCOUNT_ID; Pages Git deployment owns its account context",
+    "d1":{"binding":"DB","database_name":"devilndove-dev","database_id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
+    "r2":[{"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},{"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media-dev"}],
+    "readiness_endpoint":"/api/admin/infrastructure-readiness",
+    "local_access_preflight":"python scripts/cloudflare_development_access.py --auth-only",
+    "github_d1_credential":{"secret_name":"CLOUDFLARE_API_TOKEN","status":"missing","last_guarded_workflow_run":33198354338,"last_result":"stopped_before_read_or_write","note":"The Release 448 Development-only D1 workflow failed at its credential guard because the GitHub Actions secret is absent. No migration statement executed."}
   },
-  "release_policy": {
-    "one_current_release": true,
-    "legacy_build_numbers_are_provenance_only": true,
-    "historical_build_gates_allowed": false,
-    "production_promotion": "closed",
-    "deferred_it_tasks_block_release": false,
-    "external_credentials_for_feature_development": "assume_available_or_mocked",
-    "current_release_d1_changes_allowed": true
-  },
+  "release_policy": {"one_current_release":true,"legacy_build_numbers_are_provenance_only":true,"historical_build_gates_allowed":false,"production_promotion":"closed","deferred_it_tasks_block_release":false,"external_credentials_for_feature_development":"assume_available_or_mocked","current_release_d1_changes_allowed":true},
   "database_baseline": {
-    "release": 447,
-    "file": "database_platform_convergence.sql",
-    "apply_status": "applied_and_verified_development",
-    "verification": {
-      "canonical_modules": 5,
-      "legacy_modules": 0,
-      "canonical_role_rows": 10,
-      "it_role_grants": 0,
-      "it_explicit_managers": 1,
-      "required_platform_tables": 5,
-      "foreign_keys_clean": true
-    },
-    "startup_rule": "Read-only D1/R2 verification first. Never reapply the baseline migration merely because a new chat or release starts.",
-    "release_448_migrations": "allowed when required by current 448 work and protected by current migration/tests; do not mutate Production"
+    "release":447,"file":"database_platform_convergence.sql","apply_status":"applied_and_verified_development",
+    "verification":{"canonical_modules":5,"legacy_modules":0,"canonical_role_rows":10,"it_role_grants":0,"it_explicit_managers":1,"required_platform_tables":5,"foreign_keys_clean":true},
+    "startup_rule":"Read-only D1/R2 verification first. Never reapply the baseline migration merely because a new chat or release starts.",
+    "release_448_migrations":"allowed when required by current 448 work and protected by current migration/tests; do not mutate Production"
   },
   "current_release_migrations": [
-    {
-      "key": "product-lineage",
-      "file": "database_release448_product_lineage.sql",
-      "verification": "RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql",
-      "runner": "python scripts/apply_development_product_lineage.py",
-      "source_status": "implemented_and_gated",
-      "development_d1_status": "blocked_missing_github_cloudflare_token",
-      "release_gating": false,
-      "inventory_quantity_mutation": false,
-      "production_allowed": false,
-      "note": "Guarded workflow run 33198354338 stopped before any D1 read/write because CLOUDFLARE_API_TOKEN is not present in GitHub Actions. Publication enforcement activates only after verified Development schema application."
-    },
-    {
-      "key": "media-movie-it",
-      "file": "database_release448_media_it.sql",
-      "verification": "RELEASE448_MEDIA_IT_VERIFICATION.sql",
-      "runner": "python scripts/apply_development_release448_media_it.py",
-      "source_status": "implemented_and_gated",
-      "development_d1_status": "blocked_missing_github_cloudflare_token",
-      "release_gating": false,
-      "inventory_quantity_mutation": false,
-      "production_allowed": false,
-      "authorities": ["product_image_quality_assessments", "movie_catalog", "movie_metadata_reviews", "it_integration_registry"],
-      "note": "Current Movie authority is movie_catalog plus enriched JSON, not the legacy movies table. The migration stores no image binaries and no secret values."
-    }
+    {"key":"product-lineage","file":"database_release448_product_lineage.sql","verification":"RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql","runner":"python scripts/apply_development_product_lineage.py","source_status":"implemented_and_gated","development_d1_status":"blocked_missing_github_cloudflare_token","release_gating":false,"inventory_quantity_mutation":false,"production_allowed":false,"note":"Guarded workflow run 33198354338 stopped before any D1 read/write because CLOUDFLARE_API_TOKEN is not present in GitHub Actions. Publication enforcement activates only after verified Development schema application."},
+    {"key":"media-movie-it","file":"database_release448_media_it.sql","verification":"RELEASE448_MEDIA_IT_VERIFICATION.sql","runner":"python scripts/apply_development_release448_media_it.py","source_status":"implemented_and_gated","development_d1_status":"blocked_missing_github_cloudflare_token","release_gating":false,"inventory_quantity_mutation":false,"production_allowed":false,"authorities":["product_image_quality_assessments","movie_catalog","movie_metadata_reviews","it_integration_registry"],"note":"Current Movie authority is movie_catalog plus enriched JSON, not the legacy movies table. The migration stores no image binaries and no secret values."}
   ],
   "deferred_it_test_environment": {
-    "state": "backlog_non_blocking",
-    "release_gating": false,
-    "feature_development_assumption": "Continue implementing against Development test/provider abstractions as though required key references are populated. Real credential/provider/media acceptance is completed later from the I.T. test environment.",
-    "tasks": [
-      { "key": "authenticated-development-runtime", "status": "deferred", "authority": "scripts/development_runtime_acceptance.py", "runbook": "LIVE_TESTING_GUIDE.md" },
-      { "key": "stripe-test", "status": "deferred", "environment": "test", "required_evidence": ["checkout", "signed_webhook", "reconciliation", "idempotent_replay"] },
-      { "key": "paypal-sandbox", "status": "deferred", "environment": "sandbox", "required_evidence": ["approval", "capture", "verified_webhook", "reconciliation", "idempotent_replay"] },
-      { "key": "caip-private-media", "status": "deferred", "required_evidence": ["authenticated_private_delivery", "range_seek", "timecode_range", "verified_derived_artifact"] }
-    ]
+    "state":"backlog_non_blocking","release_gating":false,"feature_development_assumption":"Continue implementing against Development test/provider abstractions as though required key references are populated. Real credential/provider/media acceptance is completed later from the I.T. test environment.",
+    "tasks":[{"key":"authenticated-development-runtime","status":"deferred","authority":"scripts/development_runtime_acceptance.py","runbook":"LIVE_TESTING_GUIDE.md"},{"key":"stripe-test","status":"deferred","environment":"test","required_evidence":["checkout","signed_webhook","reconciliation","idempotent_replay"]},{"key":"paypal-sandbox","status":"deferred","environment":"sandbox","required_evidence":["approval","capture","verified_webhook","reconciliation","idempotent_replay"]},{"key":"caip-private-media","status":"deferred","required_evidence":["authenticated_private_delivery","range_seek","timecode_range","verified_derived_artifact"]}]
   },
   "workstreams": [
-    {
-      "key": "client-platform-continuity",
-      "status": "active",
-      "scope": "Keep Web, Phone and Desktop as active first-class clients of the same responsive/installable application; preserve explicit opt-in notifications, offline/fallback behavior and no idle polling."
-    },
-    {
-      "key": "product-material-lineage",
-      "status": "source_implemented_d1_credential_blocked",
-      "workspace": "/admin/product-lineage/",
-      "scope": "New in-house-created products require real raw-inventory lineage and consumption authority before publication; existing products may remain legacy_pending; antiquity, resale and external finished goods can be explicitly inventory-exempt."
-    },
-    {
-      "key": "product-tool-lineage",
-      "status": "source_implemented_d1_credential_blocked",
-      "workspace": "/admin/product-lineage/",
-      "scope": "Record durable tools and molds used to create products separately from consumable inventory; tool association never consumes the durable tool."
-    },
-    {
-      "key": "manufacturer-provenance-reviews",
-      "status": "source_implemented_d1_credential_blocked",
-      "workspace": "/admin/vendor-reviews/",
-      "scope": "Link materials/tools to normalized manufacturer/vendor provenance and Devil n Dove-authored purchased-item reviews. Support ASIN/external identifiers and safe source/review links; never copy third-party review content or require a marketplace at runtime."
-    },
-    {
-      "key": "product-image-quality",
-      "status": "source_implemented_d1_credential_blocked",
-      "workspace": "/admin/product-image-quality/",
-      "scope": "Score existing Product images on a transparent 100-point rubric: lighting 20, clarity 20, background 15, framing 15, resolution 10, colour balance 10, artifacts 5 and Product-set consistency 5. Deterministic browser evidence is primary; optional vision-assisted review remains advisory."
-    },
-    {
-      "key": "it-integration-registry",
-      "status": "source_implemented_d1_credential_blocked",
-      "workspace": "/admin/it-integrations/",
-      "scope": "I.T.-owned provider/platform registry for purpose, module consumer, secret/binding reference names only, callbacks/webhooks, scopes, environment, configured/tested state, last safe error and correction mechanics. Actual secrets are forbidden."
-    },
-    {
-      "key": "carousel-movie-reuse",
-      "status": "source_implemented",
-      "scope": "Home and Movie cover presentation now reuse one accessible Release 448 carousel authority. Movie records with incomplete cover pairs retain the truthful pending fallback. No extra H1 is introduced."
-    },
-    {
-      "key": "movie-data-convergence",
-      "status": "current_authority_corrected_review_schema_d1_credential_blocked",
-      "scope": "Current Movie authority is enriched JSON plus movie_catalog D1 overlay. Stable UPC/slug review states represent pending, incomplete, unverified and verified metadata; incorrect values are repaired only with evidence and unknown values are never guessed."
-    },
-    {
-      "key": "unverified-process-states",
-      "status": "active_rule",
-      "scope": "Current and future D1 additions reserve explicit pending, legacy_pending, exempt, unverified, verified and evidence-reference states so unconfirmed workflows never masquerade as proven."
-    }
+    {"key":"client-platform-continuity","status":"active","scope":"Keep Web, Phone and Desktop as active first-class clients of the same responsive/installable application; preserve explicit opt-in notifications, offline/fallback behavior and no idle polling."},
+    {"key":"product-material-lineage","status":"source_implemented_d1_credential_blocked","workspace":"/admin/product-lineage/","scope":"New in-house-created products require real raw-inventory lineage and consumption authority before publication; existing products may remain legacy_pending; antiquity, resale and external finished goods can be explicitly inventory-exempt."},
+    {"key":"product-tool-lineage","status":"source_implemented_d1_credential_blocked","workspace":"/admin/product-lineage/","scope":"Record durable tools and molds used to create products separately from consumable inventory; tool association never consumes the durable tool."},
+    {"key":"manufacturer-provenance-reviews","status":"source_implemented_d1_credential_blocked","workspace":"/admin/vendor-reviews/","scope":"Link materials/tools to normalized manufacturer/vendor provenance and Devil n Dove-authored purchased-item reviews. Support ASIN/external identifiers and safe source/review links; never copy third-party review content or require a marketplace at runtime."},
+    {"key":"product-image-quality","status":"source_implemented_d1_credential_blocked","workspace":"/admin/product-image-quality/","scope":"Score existing Product images on a transparent 100-point rubric: lighting 20, clarity 20, background 15, framing 15, resolution 10, colour balance 10, artifacts 5 and Product-set consistency 5. Deterministic browser evidence is primary; optional vision-assisted review remains advisory."},
+    {"key":"it-integration-registry","status":"source_implemented_d1_credential_blocked","workspace":"/admin/it-integrations/","scope":"I.T.-owned provider/platform registry for purpose, module consumer, secret/binding reference names only, callbacks/webhooks, scopes, environment, configured/tested state, last safe error and correction mechanics. Actual secrets are forbidden."},
+    {"key":"carousel-movie-reuse","status":"source_implemented","scope":"Home and Movie cover presentation now reuse one accessible Release 448 carousel authority. Movie records with incomplete cover pairs retain the truthful pending fallback. No extra H1 is introduced."},
+    {"key":"movie-data-convergence","status":"current_authority_corrected_review_schema_d1_credential_blocked","scope":"Current Movie authority is enriched JSON plus movie_catalog D1 overlay. Stable UPC/slug review states represent pending, incomplete, unverified and verified metadata; incorrect values are repaired only with evidence and unknown values are never guessed."},
+    {"key":"unverified-process-states","status":"active_rule","scope":"Current and future D1 additions reserve explicit pending, legacy_pending, exempt, unverified, verified and evidence-reference states so unconfirmed workflows never masquerade as proven."}
   ],
-  "forward_queue": [
-    "Storefront Shop",
-    "Collections",
-    "Collages",
-    "CAIP",
-    "Inventory",
-    "Supplies",
-    "Tools",
-    "additional top-level modules when ownership boundaries justify them"
-  ]
+  "forward_queue":["Storefront Shop","Collections","Collages","Carousels","CAIP","Inventory","Supplies","Tools","additional top-level modules when ownership boundaries justify them"]
 }
