@@ -1,5 +1,5 @@
-# Build 444 system gate — Development infrastructure recovery plus inherited business/I.T. regressions.
-name: Build 444 System Convergence Gate
+# Build 445 system gate — repository retirement and forward sanity plus inherited application regressions.
+name: Build 445 System Convergence Gate
 
 on:
   push:
@@ -16,8 +16,7 @@ on:
       - 'development-release.json'
       - 'scripts/**'
       - 'database*.sql'
-      - 'BUILD442_*.sql'
-      - 'BUILD443_*.sql'
+      - 'BUILD*.sql'
       - 'AI_HANDOFF.md'
       - 'PROJECT_STATUS_AND_ROADMAP.md'
       - 'SANITY_HEALTH_CHECK.md'
@@ -50,14 +49,14 @@ jobs:
         run: python scripts/build440_development_d1_resume_regression_test.py
       - name: Validate final verifier contract
         run: python scripts/build440_final_verifier_regression_test.py
-      - name: Validate carried I.T. migration and runner source contract
+      - name: Validate carried I.T. migration source contract
         run: python scripts/build442_it_platform_migration_regression.py
       - name: Safety statement
         shell: bash
         run: |
-          echo 'Remote Cloudflare/D1 access: NONE'
+          echo 'Remote Cloudflare/D1/R2 access: NONE'
           echo 'Build 442 I.T. and Build 443 carousel D1 applies: NEVER FROM CI'
-          echo 'Build 444 new D1 SQL migration: NONE'
+          echo 'Build 445 new D1 SQL migration: NONE'
           echo 'Production mutation capability: NONE'
 
   source-gate:
@@ -71,14 +70,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate Build 444 release alignment
-        run: python scripts/build444_development_release_alignment_test.py
-      - name: Validate Build 444 release/HOLD contract
-        run: python scripts/build444_release_contract_integrity_test.py
-      - name: Validate Build 444 D1/R2 infrastructure authority
-        run: python scripts/build444_infrastructure_authority_regression.py
-      - name: Validate repository hygiene
-        run: python scripts/build441_repository_hygiene_test.py
+      - name: Validate Build 445 retirement and forward sanity
+        run: python scripts/build445_repository_forward_sanity.py
+      - name: Validate Build 445 aggregate sanity
+        run: python scripts/build445_current_sanity_check.py
       - name: Validate carried Build 443 Home carousel schema/runtime/editor
         run: python scripts/build443_home_carousel_regression.py
       - name: Compile guarded Build 443 carousel runner
@@ -99,8 +94,6 @@ jobs:
           node --check functions/api/supplies.js
       - name: Validate retained Product/Inventory/Tool cross-mutation and responsive contract
         run: python scripts/build442_cross_mutation_responsive_acceptance_test.py
-      - name: Build 444 source sanity
-        run: python scripts/build444_current_sanity_check.py
       - name: Product/Inventory/Tools source gate before aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
       - name: Exercise lot-provenance aggregate sync
@@ -109,7 +102,7 @@ jobs:
         run: python scripts/build440_sync_receiving_full_schema.py
       - name: Product/Inventory/Tools source gate after aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
-      - name: JavaScript syntax for Build 444 and retained Application Core
+      - name: JavaScript syntax for retained Application Core
         run: |
           node --check functions/_middleware.js
           node --check functions/api/_lib/appModules.js
@@ -127,7 +120,7 @@ jobs:
       - name: Safety statement
         run: |
           echo 'Cloudflare/D1/R2/provider writes from CI: NONE'
-          echo 'Build 444 readiness probes are runtime read/list only.'
-          echo 'Build 444 new D1 SQL migration: NONE'
+          echo 'Historical build report archive: RETIRED'
+          echo 'Build 445 new D1 SQL migration: NONE'
           echo 'Carried Build 442/443 schema applies remain guarded and outside CI.'
           echo 'Production mutation capability: NONE'
