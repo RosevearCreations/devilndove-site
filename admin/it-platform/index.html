@@ -3,146 +3,23 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>I.T. &amp; Platform — Devil n Dove</title>
   <meta name="robots" content="noindex,nofollow"/>
+  <title>I.T. &amp; Platform — Devil n Dove</title>
+  <meta name="description" content="Development infrastructure, release and provider readiness for Devil n Dove."/>
   <link href="/css/styles.css" rel="stylesheet"/>
-  <link href="/admin/it-platform/it-platform.css?v=444" rel="stylesheet"/>
+  <link href="/admin/it-platform/it-platform.css?v=447" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
 </head>
 <body>
   <div class="container admin-shell">
     <div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">I.T. &amp; Platform</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/application-modules/">Modules</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
-
-    <div class="hero"><div><h1>I.T. Preflight / Startup Release Guide</h1><p>Build 444 Development release authority. D1 and both R2 bindings now have a durable, read-only readiness bridge; older carousel, I.T., payment and CAIP work stays visible as current-release HOLDs until its exact evidence passes.</p></div></div>
-
-    <div class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Current release</h2>
-      <p><strong>Development: Build 444 — infrastructure recovery authority and carried release convergence</strong></p>
-      <p class="small">Source <code>dev</code> → Development project <code>devilndove-site-dev</code>. Build 443 source checkpoint <code>c5aa6541ec8574c2054578dce765546af9265f7c</code> passed its GitHub system gate. Separate live <code>main</code> / <code>devilndove-site</code> promotion remains <strong>CLOSED</strong>.</p>
-      <p class="small"><strong>Build 444 D1 rule:</strong> this release adds no new D1 SQL migration. The live readiness check is read-only and reports whether the carried Build 442 I.T. and Build 443 carousel tables already exist. If a carried table is missing, its original guarded correction runner remains the authority.</p>
-    </div>
-
-    <div class="card" style="margin-top:18px"><h2 style="margin-top:0">Open technical HOLDs</h2><ul class="small compact-list">
-      <li><strong>CAR-444-H1 — Home carousel Development authority:</strong> carried from Build 443. Schema/editor/runtime/fallback source is retained; live draft/publish acceptance remains held until the exact Development tables and behavior are verified.</li>
-      <li><strong>IT-444-H1 — I.T. explicit user-grant authority:</strong> carried from Build 442. Per-user enforcement remains off until the exact Development user-access authority is present and verified.</li>
-      <li><strong>PAY-444-H1 — Stripe Development checkout:</strong> test configuration, one owner-controlled checkout, return/webhook reconciliation and duplicate-event proof remain required.</li>
-      <li><strong>PAY-444-H2 — PayPal Development checkout:</strong> sandbox configuration, owner-controlled approval/capture, return/webhook reconciliation and duplicate-event proof remain required.</li>
-      <li><strong>CAIP-444-H1 — Private media evidence:</strong> private R2 delivery, byte/range seeking, exact timecode/range evidence, storage audit and expected provider-off behavior remain required.</li>
-      <li><strong>UI-444-N1 — Responsive automation:</strong> retained source acceptance remains provenance; do not weaken CSP to force an automated browser harness.</li>
-      <li><strong>OPS-444-H1 — Separate live Production:</strong> promotion remains deliberately closed until explicitly authorized and promotion-blocking evidence is green.</li>
-    </ul></div>
-
-    <section class="card it442-bridge" id="currentReleaseObstacleBridge" style="margin-top:18px" aria-labelledby="it444BridgeHeading">
-      <div class="it442-heading-row">
-        <div>
-          <p class="it442-eyebrow">Build 444 current-release authority</p>
-          <h2 id="it444BridgeHeading">Release obstacle bridge and correction mechanics</h2>
-          <p class="small">Earlier build numbers below identify the original migration or implementation artifact only. Every unresolved test is owned by Build 444 until it passes or is deliberately carried forward. Safe checks expose names and readiness only—never secret values.</p>
-        </div>
-        <div class="it442-actions">
-          <button class="btn" id="it442RefreshProviderReadiness" type="button">Check safe payment readiness</button>
-          <a class="btn" href="/admin/webhook-events/">Open webhook evidence</a>
-        </div>
-      </div>
-      <div class="small it442-live-status" id="it442ProviderReadinessStatus" role="status" aria-live="polite">Payment readiness has not been checked in this browser session.</div>
-
-      <div class="it442-obstacle-grid" id="it442ObstacleGrid">
-        <article class="it442-obstacle" data-it442-obstacle="home-carousel">
-          <div class="it442-card-heading"><div><span class="it442-id">CAR-444-H1</span><h3>Home carousel Development authority</h3></div><span class="it442-state is-hold">HOLD</span></div>
-          <p class="small"><strong>Origin:</strong> Build 443. <strong>Why held:</strong> the current release must verify the exact Development D1 tables and live draft/publish/fallback behavior before clearing the carousel.</p>
-          <details><summary>Correction mechanic and pass condition</summary><ol class="small compact-list">
-            <li>Use the Build 444 D1/R2 readiness card first. If <code>home_carousel_slides</code> and <code>home_carousel_events</code> are present, do not reapply the migration.</li>
-            <li>If those tables are reported missing, use the original guarded Development runner: <code>python scripts/build443_apply_development_home_carousel.py</code>. It is hard-pinned to <code>devilndove-dev</code>.</li>
-            <li>Open <a href="/admin/home-carousel/">Home Carousel</a>; create a draft, preview it, prove Home retains the static hero before publication, then publish/pause/schedule with audit evidence.</li>
-            <li>Prove keyboard, pause/resume, reduced-motion, phone/tablet/desktop and broken-first-image fallback behavior.</li>
-          </ol><p class="small"><strong>Pass:</strong> schema, audited operator actions, active public slide behavior and failure fallback all agree on the exact Build 444 Development deployment.</p></details>
-        </article>
-
-        <article class="it442-obstacle" data-it442-obstacle="it-d1">
-          <div class="it442-card-heading"><div><span class="it442-id">IT-444-H1</span><h3>I.T. user-grant authority</h3></div><span class="it442-state is-hold">HOLD</span></div>
-          <p class="small"><strong>Origin:</strong> Build 442. <strong>Why held:</strong> Phase B must not read or enforce explicit I.T. grants until <code>app_module_user_access</code> is present and verified in the exact Development D1 database.</p>
-          <details><summary>Correction mechanic and pass condition</summary><ol class="small compact-list">
-            <li>Use the Build 444 D1/R2 readiness card first. If <code>app_module_user_access</code> is present, do not reapply the migration.</li>
-            <li>If it is reported missing, use the original guarded Development runner: <code>python scripts/build442_apply_development_it_platform.py</code>.</li>
-            <li>Require the exact module row, denied role rows, at least one active explicit manager and clean foreign keys before activating Phase B.</li>
-          </ol><p class="small"><strong>Pass:</strong> guarded verifier GREEN plus authenticated four-module isolation; separate live Production unchanged.</p></details>
-        </article>
-
-        <article class="it442-obstacle" data-it442-obstacle="stripe">
-          <div class="it442-card-heading"><div><span class="it442-id">PAY-444-H1</span><h3>Stripe Development checkout</h3></div><span class="it442-state is-unknown" data-provider-state="stripe">NOT CHECKED</span></div>
-          <p class="small"><strong>Safe runtime check:</strong> <span data-provider-detail="stripe">Run the readiness check to confirm configuration and webhook flags.</span></p>
-          <details><summary>Correction mechanic and pass condition</summary><ol class="small compact-list">
-            <li>Configure Development-only Stripe test values in <code>devilndove-site-dev</code>; never paste secrets into this page or source control.</li>
-            <li>Keep provider mutations disabled during ordinary Development use.</li>
-            <li>Complete one owner-controlled test checkout; verify return, signed webhook, local payment/order reconciliation and webhook evidence.</li>
-            <li>Replay the same test event and prove idempotency with no duplicate payment, refund, gift-card or accounting effect.</li>
-          </ol><p class="small"><strong>Pass:</strong> configuration + checkout + return + signed webhook + duplicate replay agree on the exact Build 444 Development deployment.</p>
-          <p class="small it442-source-links">Provider references: <a href="https://docs.stripe.com/keys" rel="noopener noreferrer" target="_blank">test keys</a> · <a href="https://docs.stripe.com/testing/overview" rel="noopener noreferrer" target="_blank">testing</a> · <a href="https://docs.stripe.com/webhooks" rel="noopener noreferrer" target="_blank">webhooks</a></p></details>
-        </article>
-
-        <article class="it442-obstacle" data-it442-obstacle="paypal">
-          <div class="it442-card-heading"><div><span class="it442-id">PAY-444-H2</span><h3>PayPal Development checkout</h3></div><span class="it442-state is-unknown" data-provider-state="paypal">NOT CHECKED</span></div>
-          <p class="small"><strong>Safe runtime check:</strong> <span data-provider-detail="paypal">Run the readiness check to confirm configuration, sandbox mode and webhook flags.</span></p>
-          <details><summary>Correction mechanic and pass condition</summary><ol class="small compact-list">
-            <li>Configure sandbox values and <code>PAYPAL_ENV=sandbox</code> in <code>devilndove-site-dev</code>; never expose credentials.</li>
-            <li>Use owner-controlled sandbox buyer/business accounts and no live money.</li>
-            <li>Complete one sandbox checkout/capture; verify return, webhook reconciliation and event evidence.</li>
-            <li>Replay the same sandbox event and prove idempotency.</li>
-          </ol><p class="small"><strong>Pass:</strong> configuration + sandbox approval/capture + return + verified webhook + duplicate replay agree on the exact Build 444 Development deployment.</p>
-          <p class="small it442-source-links">Provider references: <a href="https://developer.paypal.com/sandbox-testing/overview" rel="noopener noreferrer" target="_blank">sandbox testing</a> · <a href="https://developer.paypal.com/api/rest/webhooks/rest" rel="noopener noreferrer" target="_blank">webhooks</a></p></details>
-        </article>
-
-        <article class="it442-obstacle" data-it442-obstacle="caip">
-          <div class="it442-card-heading"><div><span class="it442-id">CAIP-444-H1</span><h3>Private media evidence</h3></div><span class="it442-state is-hold">HOLD</span></div>
-          <p class="small"><strong>Why held:</strong> source/schema safeguards are retained, but private R2 delivery and temporal-media behavior still need exact Development evidence.</p>
-          <details><summary>Correction mechanic and pass condition</summary><ol class="small compact-list">
-            <li>Use the Build 444 readiness card to prove <code>CAIP_PRIVATE_MEDIA_BUCKET</code> is configured and reachable without public exposure.</li>
-            <li>Use an owner-controlled private test asset to prove authenticated delivery, byte-range seeking and exact point/range review.</li>
-            <li>Verify derived artifact metadata and fail-closed completion, then record storage audit and expected provider-off behavior.</li>
-          </ol><p class="small"><strong>Pass:</strong> private access, range playback, exact timecode/range evidence, verified artifacts and storage audit agree.</p></details>
-        </article>
-      </div>
-    </section>
-
-    <section class="card it442-feature-register" style="margin-top:18px" aria-labelledby="it444FeatureHeading">
-      <p class="it442-eyebrow">Current major feature</p>
-      <h2 id="it444FeatureHeading">Build 444 — durable Development infrastructure recovery authority</h2>
-      <div class="it442-feature-grid">
-        <div><h3>D1 authority</h3><p class="small"><code>DB</code> must resolve to <code>devilndove-dev</code>. The readiness endpoint performs only <code>SELECT</code>/schema reads and reports exact missing carried tables.</p></div>
-        <div><h3>R2 authority</h3><p class="small"><code>PRODUCT_MEDIA_BUCKET</code> and <code>CAIP_PRIVATE_MEDIA_BUCKET</code> are checked with harmless one-object list probes. No object is created, changed or deleted.</p></div>
-        <div><h3>Migration rule</h3><p class="small">Build 444 itself adds no D1 SQL. Carried migrations are never re-run blindly; the readiness result first determines whether their expected tables already exist.</p></div>
-        <div><h3>Recovery ownership</h3><p class="small">The website I.T. page is the operator-facing source of truth for bindings, carried schema state, correction mechanics and release HOLDs. Cloudflare remains the platform authority for D1/R2 runtime and recovery controls.</p></div>
-        <div><h3>Safety</h3><p class="small">No polling, no request-time DDL, no secret display, no provider mutation, no CI Cloudflare writes and no Production mutation capability.</p></div>
-        <div><h3>Acceptance</h3><p class="small">Source gate, exact Development deployment, authenticated readiness JSON, D1/R2 green cards and carried-schema evidence must agree before the infrastructure HOLD clears.</p></div>
-      </div>
-    </section>
-
-    <div class="department-grid" style="margin-top:18px">
-      <a class="card department-card startup-highlight-card" href="/admin/startup-readiness/"><h2>Startup Readiness</h2><p class="small">Owner, evidence, due date and pass-condition readiness tracking.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/prelaunch/"><h2>Release &amp; Go-Live Center</h2><p class="small">Primary guided release path and blocker review.</p></a>
-      <a class="card department-card" href="/admin/deployment-preflight/"><h2>Deployment Preflight</h2><p class="small">Static/schema/release validation before deployment.</p></a>
-      <a class="card department-card" href="/admin/release-control/"><h2>Release Evidence</h2><p class="small">Manifest, deployment history and release proof.</p></a>
-      <a class="card department-card" href="/admin/deploy-readiness/"><h2>Deploy Readiness</h2><p class="small">Promote/hold decision evidence.</p></a>
-      <a class="card department-card" href="/admin/application-sanity/"><h2>Application Sanity</h2><p class="small">System-wide source/runtime sanity and outstanding technical work.</p></a>
-      <a class="card department-card" href="/admin/runtime-incidents/"><h2>Runtime Incidents</h2><p class="small">Structured failures and recovery evidence.</p></a>
-      <a class="card department-card" href="/admin/public-api-health/"><h2>Public API Health</h2><p class="small">Structured public endpoint health.</p></a>
-      <a class="card department-card" href="/admin/route-usage/"><h2>Route Usage</h2><p class="small">Runtime route-use diagnostics.</p></a>
-      <a class="card department-card" href="/admin/schema-drift/"><h2>Schema Drift</h2><p class="small">D1/schema/migration alignment evidence.</p></a>
-      <a class="card department-card" href="/admin/markdown-sanity/"><h2>Documentation Sanity</h2><p class="small">Current authority and stale-document detection.</p></a>
-      <a class="card department-card" href="/admin/operational-continuity/"><h2>Operational Continuity</h2><p class="small">Backup, recovery, provider and operational evidence.</p></a>
-      <a class="card department-card" href="/admin/release-preflight/"><h2>Product Release Preflight</h2><p class="small">Product-by-product release conditions including CAIP evidence.</p></a>
-      <a class="card department-card" href="/admin/promotion-control/"><h2>Promotion Control</h2><p class="small">Separate controlled promotion gate.</p></a>
-      <a class="card department-card" href="/admin/go-live-execution/"><h2>Go-Live Execution</h2><p class="small">Approved final actions only.</p></a>
-      <a class="card department-card" href="/admin/live-ops-followthrough/"><h2>Live Ops Follow-through</h2><p class="small">Post-promotion evidence and monitoring.</p></a>
-    </div>
-
-    <div class="card" style="margin-top:18px"><h2 style="margin-top:0">Build 444 rollout boundary</h2><p class="small"><strong>Infrastructure source phase:</strong> exact Development binding authority, read-only D1/R2 probes, carried-schema classification and current correction mechanics. <strong>Carried feature acceptance:</strong> Build 442/443 migrations are only applied if the readiness result proves their tables are missing. <strong>Provider/CAIP acceptance:</strong> remains evidence-gated. No CI Cloudflare writes, request-time DDL, Production mutation or credential workaround is allowed.</p></div>
+    <div class="hero"><div><h1>I.T. &amp; Platform</h1><p>Release 447 Development authority for infrastructure, release readiness, integrations and non-creator platform settings.</p></div></div>
+    <section class="card" style="margin-top:18px"><h2 style="margin-top:0">Current Development release</h2><p><strong>Release 447 — Platform Convergence</strong></p><p class="small"><code>dev</code> → <code>devilndove-site-dev</code>. Separate live <code>main</code> / <code>devilndove-site</code> promotion remains <strong>CLOSED</strong>.</p><p class="small">Historical Build numbers identify provenance only. Current repair and acceptance work belongs to Release 447.</p></section>
+    <section class="card" style="margin-top:18px" aria-labelledby="infraHeading"><div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div><h2 id="infraHeading" style="margin-top:0">Development D1 / R2 readiness</h2><p class="small">Read-only probes: D1 SELECT/schema reads and R2 one-object list checks. No object, row, provider or secret is changed.</p></div><button class="btn" id="refreshInfrastructure" type="button">Verify D1 / R2 now</button></div><p class="small" id="infrastructureStatus" role="status" aria-live="polite">Not checked in this browser session.</p><div class="department-grid"><div class="card"><h3>D1 · DB</h3><p><strong id="infraDBState">NOT CHECKED</strong></p><p class="small" id="infraDBDetail"><code>devilndove-dev</code></p></div><div class="card"><h3>R2 · Product Media</h3><p><strong id="infraProductState">NOT CHECKED</strong></p><p class="small" id="infraProductDetail"><code>PRODUCT_MEDIA_BUCKET</code></p></div><div class="card"><h3>R2 · CAIP Private Media</h3><p><strong id="infraCaipState">NOT CHECKED</strong></p><p class="small" id="infraCaipDetail"><code>CAIP_PRIVATE_MEDIA_BUCKET</code></p></div></div><div class="card" style="margin-top:12px"><h3>Current D1 correction path</h3><p class="small" id="migrationState">Release 447 migration state has not been checked.</p><p class="small"><code>database_platform_convergence.sql</code> is the only current convergence migration. Historical build migration filenames are not current release instructions.</p></div></section>
+    <section class="card" style="margin-top:18px" aria-labelledby="paymentsHeading"><div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div><h2 id="paymentsHeading" style="margin-top:0">Payment provider readiness</h2><p class="small">Safe configuration check only. Secret values are never displayed.</p></div><button class="btn" id="refreshPayments" type="button">Check Stripe / PayPal</button></div><p class="small" id="paymentStatus" role="status" aria-live="polite">Not checked in this browser session.</p><div class="department-grid"><div class="card"><h3>Stripe</h3><p><strong id="stripeState">NOT CHECKED</strong></p><p class="small" id="stripeDetail">Development test configuration and end-to-end evidence remain required.</p></div><div class="card"><h3>PayPal</h3><p><strong id="paypalState">NOT CHECKED</strong></p><p class="small" id="paypalDetail">Sandbox configuration and end-to-end evidence remain required.</p></div></div></section>
+    <section class="card" style="margin-top:18px" aria-labelledby="holdsHeading"><h2 id="holdsHeading" style="margin-top:0">Current release HOLDs and correction mechanics</h2><ul class="small compact-list"><li><strong>D1 convergence:</strong> apply and verify <code>database_platform_convergence.sql</code> against Development <code>devilndove-dev</code> only; require the five canonical module rows, carousel tables and a clean foreign-key check.</li><li><strong>Stripe:</strong> Development test credentials + signed webhook + owner-controlled test checkout + duplicate replay/idempotency evidence.</li><li><strong>PayPal:</strong> sandbox credentials + return/webhook reconciliation + owner-controlled approval/capture + duplicate replay/idempotency evidence.</li><li><strong>CAIP private media:</strong> authenticated R2 delivery + range playback + exact timecode/range evidence + verified derived artifact metadata.</li><li><strong>Production:</strong> remains closed until an explicitly reviewed Development release is promoted.</li></ul></section>
+    <div class="department-grid" style="margin-top:18px"><a class="card department-card" href="/admin/startup-readiness/"><h2>Startup Readiness</h2><p class="small">Runtime and launch readiness.</p></a><a class="card department-card" href="/admin/prelaunch/"><h2>Release &amp; Go-Live</h2><p class="small">Promotion evidence and blockers.</p></a><a class="card department-card" href="/admin/schema-drift/"><h2>Schema Drift</h2><p class="small">Database/schema alignment evidence.</p></a><a class="card department-card" href="/admin/runtime-incidents/"><h2>Runtime Incidents</h2><p class="small">Structured failure and recovery evidence.</p></a><a class="card department-card" href="/admin/webhook-events/"><h2>Webhook Evidence</h2><p class="small">Payment and integration webhook evidence.</p></a><a class="card department-card" href="/admin/application-sanity/"><h2>Application Sanity</h2><p class="small">System-wide sanity checks.</p></a></div>
     <div class="footer card" style="margin-top:18px"></div>
   </div>
-  <script src="/js/main.js?v=444"></script>
-  <script src="/public/js/auth.js?v=444"></script>
-  <script src="/public/js/site-auth-ui.js?v=444"></script>
-  <script src="/public/js/admin-self-protect.js?v=444"></script>
-  <script src="/public/js/admin-it-platform.js?v=444"></script>
-</body>
-</html>
+  <script src="/js/main.js?v=447"></script><script src="/public/js/auth.js?v=447"></script><script src="/public/js/site-auth-ui.js?v=447"></script><script src="/public/js/admin-self-protect.js?v=447"></script><script src="/public/js/admin.js?v=447"></script><script src="/public/js/admin-it-platform.js?v=447"></script>
+</body></html>
