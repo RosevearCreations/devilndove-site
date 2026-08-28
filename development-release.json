@@ -37,7 +37,9 @@
     "production_promotion": "closed"
   },
   "migration_state": {
-    "d1_sql_required_for_this_packet": false,
-    "canonical_module_registry_migration": "pending"
+    "d1_sql_required": true,
+    "file": "database_platform_convergence.sql",
+    "apply_status": "pending_cloudflare_apply",
+    "strategy": "preserve-state-then-retire-legacy-registry-keys"
   }
 }

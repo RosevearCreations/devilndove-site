@@ -42,6 +42,8 @@ jobs:
         run: python scripts/repository_forward_sanity.py
       - name: Validate five-module platform architecture
         run: python scripts/module_architecture_gate.py
+      - name: Validate canonical D1 platform migration
+        run: python scripts/database_platform_gate.py
       - name: Validate Product Inventory Tools authority
         run: python scripts/product_inventory_tools_source_gate.py
       - name: JavaScript syntax for Application Core
