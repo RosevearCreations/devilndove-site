@@ -1,4 +1,4 @@
--- Devil n Dove Release 448 — media quality, Movie verification, and I.T. integration registry.
+-- Devil n Dove Release 448 — media quality, current Movie verification, and I.T. integration registry.
 -- Development-first additive migration. No image binaries, secret values, provider calls, or Production targets are stored here.
 PRAGMA foreign_keys = ON;
 
@@ -35,8 +35,48 @@ CREATE TABLE IF NOT EXISTS product_image_quality_assessments (
 CREATE INDEX IF NOT EXISTS idx_product_image_quality_product ON product_image_quality_assessments(product_id,total_score DESC,updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_product_image_quality_status ON product_image_quality_assessments(status,total_score,updated_at DESC);
 
+-- Current Movie Shelf authority is movie_catalog plus the enriched JSON base. This definition
+-- makes D1 own the overlay schema that the admin endpoint previously had to create lazily.
+CREATE TABLE IF NOT EXISTS movie_catalog (
+  movie_catalog_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  upc TEXT NOT NULL UNIQUE,
+  slug TEXT,
+  title TEXT,
+  original_title TEXT,
+  sort_title TEXT,
+  summary TEXT,
+  release_year INTEGER,
+  media_format TEXT,
+  genre TEXT,
+  director_names TEXT,
+  actor_names TEXT,
+  front_image_url TEXT,
+  back_image_url TEXT,
+  runtime_minutes INTEGER,
+  studio_name TEXT,
+  trailer_url TEXT,
+  imdb_id TEXT,
+  alternate_identifier TEXT,
+  metadata_status TEXT,
+  metadata_source TEXT,
+  estimated_value_low_cents INTEGER,
+  estimated_value_high_cents INTEGER,
+  estimated_value_currency TEXT,
+  rarity_notes TEXT,
+  collection_notes TEXT,
+  value_search_url TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  featured_rank INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_movie_catalog_sort ON movie_catalog(status,featured_rank,sort_title,title,upc);
+
 CREATE TABLE IF NOT EXISTS movie_metadata_reviews (
-  movie_id INTEGER PRIMARY KEY,
+  movie_key TEXT PRIMARY KEY,
+  movie_catalog_id INTEGER,
+  upc TEXT,
+  slug TEXT,
   name_review_status TEXT NOT NULL DEFAULT 'pending' CHECK (name_review_status IN ('pending','unverified','verified')),
   core_metadata_status TEXT NOT NULL DEFAULT 'pending' CHECK (core_metadata_status IN ('pending','incomplete','unverified','verified')),
   evidence_reference TEXT,
@@ -45,12 +85,14 @@ CREATE TABLE IF NOT EXISTS movie_metadata_reviews (
   reviewed_at TEXT,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
-  FOREIGN KEY (reviewed_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+  FOREIGN KEY (movie_catalog_id) REFERENCES movie_catalog(movie_catalog_id) ON DELETE SET NULL,
+  FOREIGN KEY (reviewed_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+  CHECK (length(trim(movie_key)) > 0)
 );
 CREATE INDEX IF NOT EXISTS idx_movie_metadata_reviews_state ON movie_metadata_reviews(core_metadata_status,name_review_status,updated_at DESC);
-INSERT OR IGNORE INTO movie_metadata_reviews(movie_id,name_review_status,core_metadata_status,review_notes)
-SELECT id,'pending','pending','Release 448 compatibility review: existing Movie metadata remains pending until checked; no title/year data was guessed.' FROM movies;
+CREATE INDEX IF NOT EXISTS idx_movie_metadata_reviews_catalog ON movie_metadata_reviews(movie_catalog_id);
+INSERT OR IGNORE INTO movie_metadata_reviews(movie_key,movie_catalog_id,upc,slug,name_review_status,core_metadata_status,review_notes)
+SELECT COALESCE(NULLIF(trim(upc),''),NULLIF(trim(slug),''),'catalog:'||movie_catalog_id),movie_catalog_id,upc,slug,'pending','pending','Release 448 compatibility review: existing Movie metadata remains pending until checked; no title/year data was guessed.' FROM movie_catalog;
 
 CREATE TABLE IF NOT EXISTS it_integration_registry (
   it_integration_registry_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,5 +122,5 @@ CREATE TABLE IF NOT EXISTS it_integration_registry (
 );
 CREATE INDEX IF NOT EXISTS idx_it_integration_registry_state ON it_integration_registry(consuming_module,environment,configured_status,tested_status,is_active);
 
-SELECT name FROM sqlite_master WHERE type='table' AND name IN ('product_image_quality_assessments','movie_metadata_reviews','it_integration_registry') ORDER BY name;
+SELECT name FROM sqlite_master WHERE type='table' AND name IN ('product_image_quality_assessments','movie_catalog','movie_metadata_reviews','it_integration_registry') ORDER BY name;
 PRAGMA foreign_key_check;
