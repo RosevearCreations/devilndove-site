@@ -1,63 +1,84 @@
-# Project Status and Roadmap — Development Build 446
+# Project Status and Roadmap — Release 447 Platform Convergence
 
 Updated: 2026-08-28
 
-This file and `AI_HANDOFF.md` are the current-state authorities.
+`development-release.json` is the machine-readable current-release authority. This file and `AI_HANDOFF.md` are the current human-readable planning/handoff authorities. Git history is the archive.
 
-## Release status
+## Current Development status
 
-- Current Development release: **Build 446 — deep repository retirement / forward sanity**
+- Current release: **Release 447 — Platform Convergence**
 - Source/runtime: `dev` → `devilndove-site-dev`
-- Previous fully accepted Development checkpoint: **Build 445 / `f50e6d61deb31de9c17b12b55d6649a7779fdb95`**
-- Product/Inventory/Tool inherited source and authenticated evidence: **GREEN provenance carried forward**
-- Repository history policy: **Git history only; obsolete build artifacts do not ship**
-- Build 446 D1 migration: **NONE**
+- Canonical modules: **Storefront / Creators / Socials / Financials / I.T.**
+- Canonical clients: **Web / Phone / Desktop** from the same responsive/installable application
+- D1 convergence: **APPLIED AND VERIFIED** against `devilndove-dev`
+- R2 Development visibility: **PROVEN** for product media and CAIP private media buckets
+- Source gate: **GREEN** on accepted Release 447 deployment checkpoint `80efbdbf880f42838b0c6496432744125752c2b6`
+- Cloudflare Pages: **GREEN** on that same checkpoint after removing the Pages-incompatible `account_id` entry from `wrangler.toml`
+- Public SEO gate: **GREEN**; public HTML keeps exactly one H1 and carousel code is prohibited from injecting H1
+- Installable client/PWA source gate: **GREEN**; service worker, manifest, shared client bootstrap and explicit-opt-in notification behavior are covered
 - Separate live Production promotion: **CLOSED**
 
-## Build 446 scope
+## Development D1 / R2 authority
 
-1. Remove historical root/build Markdown and release/archive copies from the active tree.
-2. Remove superseded incremental `database_build*.sql` and old standalone verification SQL after their schema is represented by `database_full_schema.sql`.
-3. Replace the historical `scripts/` pile with the small current CI/D1 recovery set plus active SEO bake utilities.
-4. Keep guarded Build 440/442/443 recovery assets until read-only Development readiness proves they are no longer needed.
-5. Maintain one current system-gate workflow and a canonical `scripts/repository_forward_sanity.py` so bulk cannot regrow.
-6. Make no Production or provider mutation and no new D1 migration.
+Development D1 is `devilndove-dev` with ID `dbc1615b-dcbe-4951-973b-b47c99c73bfa`. The current migration `database_platform_convergence.sql` produced and verified:
+
+- five canonical module rows,
+- zero legacy module rows,
+- 10 canonical role rows,
+- zero role-derived I.T. grants,
+- one active explicit I.T. manager,
+- required module/user-access/Home-carousel tables,
+- clean foreign-key verification.
+
+Do not reapply this migration on chat startup. Use `python scripts/cloudflare_development_access.py --auth-only` and the read-only `/api/admin/infrastructure-readiness` contract first. Local tooling pins the Development Cloudflare account using `CLOUDFLARE_ACCOUNT_ID`; `wrangler.toml` must remain Pages-compatible and must not contain `account_id`.
 
 ## Current HOLD register
 
-| ID | Work | State |
-| --- | --- | --- |
-| CAR-446-H1 | Determine carousel schema state through read-only readiness; if absent apply retained guarded Development migration, then prove live editor/public fallback | **HOLD** |
-| IT-446-H1 | Determine I.T. grant schema state; if absent apply retained guarded Development migration | **HOLD** |
-| IT-446-H2 | Explicit per-user I.T. route/API/UI enforcement | **HOLD until schema authority is proven** |
-| PAY-446-H1 | Stripe Development checkout/return/signed webhook/duplicate replay | **HOLD** |
-| PAY-446-H2 | PayPal sandbox approval/capture/return/verified webhook/replay | **HOLD** |
-| CAIP-446-H1 | Private R2 delivery/range seeking/timecode/storage evidence | **HOLD** |
-| OPS-446-H1 | Separate live Production promotion | **HOLD BY POLICY** |
+| Work | State |
+| --- | --- |
+| Release 447 authenticated runtime acceptance | **HOLD** — source/D1/deployment are green; authenticated browser D1/R2/module/runtime proof remains |
+| Stripe Development checkout/return/signed webhook/replay | **HOLD** |
+| PayPal sandbox approval/capture/return/verified webhook/replay | **HOLD** |
+| CAIP private media delivery/range/timecode/artifact evidence | **HOLD** |
+| Separate live Production promotion | **HOLD BY POLICY** |
+
+## Completed convergence work
+
+### Application architecture
+The application now has five top-level ownership domains rather than the old broad Build-era groupings. Route ownership and shared-service contracts protect cross-module access without destructive route renames. I.T. remains explicit-user only.
+
+### Storefront
+Home carousel schema and editor/public authority are part of Storefront. Public fallback remains available when no approved slide is published. Storefront public SEO preserves a single meaningful H1.
+
+### I.T. / Platform
+The I.T. page carries the current release, D1/R2 readiness, provider-readiness checks, correction mechanics and current HOLDs. Cloudflare authentication recovery is durable: account/D1/R2 preflight is explicit, credential values are never printed, OAuth can deliberately override a stale environment token, and Production targets are rejected.
+
+### Web / Phone / Desktop
+The responsive web application is installable through the current manifest/service worker. Shared middleware injects one PWA client across public/member/admin HTML responses while APIs/static resources remain untouched. New-item notification permission is explicit opt-in; checks occur on launch/resume with throttling rather than continuous polling. The service worker also supports future real Push events and same-origin notification clicks.
+
+### Reliability and SEO
+The one canonical System Gate now executes the current module architecture, D1 migration simulation/idempotency, public SEO, PWA/client safety and Product/Inventory/Tools source gates. CI has no D1/R2/provider/Production write capability.
 
 ## Forward roadmap
 
 ### Storefront
-Keep Home carousel and merchandising truthful and fail-safe; strengthen Shop/Collections/search/cart/checkout, approved media, customer documents, delivery/pickup and mobile behavior. Every public surface keeps one meaningful H1, truthful canonical metadata/schema, and no internal Inventory leakage.
+Continue Shop/Collections/search/cart/checkout truthfulness, approved-media controls, pickup/delivery, marketplace display, customer documents and responsive purchase flows. Preserve one H1, canonical metadata/schema, truthful inventory/publication state and no internal Inventory leakage.
 
-### Creators / CAIP
-Continue Creative Project → Content Studio handoff, reviewed material usage, verified media evidence, lessons/recommendations, profitability and private storyboard notes. Public handoff remains human-approved; private source media stays private.
+### Creators
+Continue Creative Project → Content Studio handoff, material-usage review, packaging/formula/ingredient templates, lesson/recommendation evidence, profitability context and optional private storyboard notes. Human approval remains required for public handoff.
 
-### Inventory / Products / Tools
-Continue receiving/source provenance, physical counts, kit/component depletion, usage setup, reversals, tool service/inspection/history and publication linkage. D1 remains authoritative and uncertain historical provenance is never fabricated.
+### Socials
+Continue social publication packages, connected-channel readiness, campaign/publication evidence, social proof and content distribution. Keep provider credentials/configuration in I.T.; Socials owns content and publication workflows.
 
-### Finance / Accounting
-Continue provider-confirmed payments/refunds/disputes, reconciliation, AR/AP/journal/tax/fees/profitability/export/close, marketplace percentage fees and shared project-cost allocation. Stripe/PayPal acceptance is current-release work, not an old-build requirement.
+### Financials
+Continue provider-confirmed payments/refunds/disputes, reconciliation, AR/AP/journal/tax/fees/profitability/export/close, percentage marketplace fees and shared-project cost allocation. Stripe/PayPal testing is current-release work, never an old-build gate.
 
-### I.T. / Platform
-Keep API keys/secrets, bindings, readiness, module grants, release health, incident/schema diagnostics and recovery mechanics under the I.T. domain. Readiness probes remain read-only. Old recovery artifacts are retired only when no current gate or recovery path needs them.
+### I.T.
+Continue API/binding/provider configuration references, release/readiness evidence, module/user access, incident/schema diagnostics, backup/restore rehearsal, service-worker recovery, performance/accessibility and exact Development deployment evidence. Never expose secret values.
 
-### Packaging / Content / SEO
-Continue reusable packaging/formula/ingredient templates, proof/prepress, bilingual/INCI review, approved visual assets, social publishing proof, Search Console/sitemap/indexing and consent-aware analytics.
-
-### Reliability / Go-live
-Maintain bounded/no-idle polling, structured failures, permission tests, Worker CPU/subrequest review, service-worker recovery, backup/restore rehearsal, accessibility/performance and exact Development deployment evidence. Production promotion is always a deliberate owner decision.
+### CAIP private media
+Prove authenticated R2 object delivery, Range semantics, playable seeking, exact evidence timecodes/ranges, derived-artifact verification and storage-audit/provider-off behavior before closing the current HOLD.
 
 ## Release rule
 
-A feature is complete only when source authority, database authority where applicable, error/fallback behavior, responsive behavior, tests/CI, exact Development deployment and required authenticated/live evidence agree. Unfinished items are renumbered into the current release instead of keeping obsolete builds open.
+A feature is complete only when source authority, D1 authority where applicable, failure/fallback behavior, responsive behavior, tests/CI, exact Development deployment and required authenticated/live evidence agree. Production remains a separate deliberate promotion decision.
