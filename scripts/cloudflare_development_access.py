@@ -52,7 +52,7 @@ def npx_executable() -> str:
 def assert_source_authority() -> None:
     text = CONFIG.read_text(encoding='utf-8')
     required = (
-        f'account_id = "{EXPECTED_ACCOUNT_ID}"',
+        'name = "devilndove-site-dev"',
         f'database_name = "{EXPECTED_DATABASE_NAME}"',
         f'database_id = "{EXPECTED_DATABASE_ID}"',
         'bucket_name = "devilndove-toolshed-images-dev"',
@@ -61,6 +61,8 @@ def assert_source_authority() -> None:
     missing = [marker for marker in required if marker not in text]
     if missing:
         die(f'wrangler.toml Development authority drifted: missing {missing}')
+    if 'account_id =' in text:
+        die('Pages wrangler.toml must not contain account_id. Local tooling pins CLOUDFLARE_ACCOUNT_ID instead.')
     if 'prod' in EXPECTED_DATABASE_NAME.lower() or 'production' in EXPECTED_DATABASE_NAME.lower():
         die('Production target detected. This preflight is Development-only.')
 
