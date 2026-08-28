@@ -1,22 +1,53 @@
 {
   "environment": "development",
-  "release": 447,
-  "label": "Platform Convergence",
+  "release": 448,
+  "label": "Platform Expansion",
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "source_database_and_client_convergence",
+  "convergence_state": "active_platform_expansion",
+  "previous_release": {
+    "release": 447,
+    "label": "Platform Convergence",
+    "state": "complete",
+    "completed_on": "2026-08-28",
+    "completion_note": "Source, D1 baseline, canonical gates and exact Development Pages deployment completed. Authenticated runtime, Stripe test, PayPal sandbox and CAIP private-media evidence moved to the deferred I.T. test environment and do not gate forward releases."
+  },
   "canonical_modules": [
-    { "key": "storefront", "name": "Storefront" },
-    { "key": "creators", "name": "Creators" },
-    { "key": "socials", "name": "Socials" },
-    { "key": "financials", "name": "Financials" },
-    { "key": "it-platform", "name": "I.T." }
+    { "key": "storefront", "name": "Storefront", "status": "active" },
+    { "key": "creators", "name": "Creators", "status": "active" },
+    { "key": "socials", "name": "Socials", "status": "active" },
+    { "key": "financials", "name": "Financials", "status": "active" },
+    { "key": "it-platform", "name": "I.T.", "status": "active" }
   ],
+  "module_policy": {
+    "minimum_canonical_modules": 5,
+    "future_modules_allowed": true,
+    "future_modules_are_added_deliberately": true,
+    "shop_collections_collages_carousels_are_storefront_capabilities_until_a_separate_module_is_justified": true
+  },
   "clients": [
-    { "key": "web", "name": "Web", "status": "active" },
-    { "key": "phone", "name": "Phone", "status": "converging" },
-    { "key": "desktop", "name": "Desktop", "status": "converging" }
+    {
+      "key": "web",
+      "name": "Web",
+      "status": "active",
+      "mode": "responsive_web",
+      "notifications": ["new_release", "new_item"]
+    },
+    {
+      "key": "phone",
+      "name": "Phone",
+      "status": "active",
+      "mode": "installable_pwa",
+      "notifications": ["new_release", "new_item"]
+    },
+    {
+      "key": "desktop",
+      "name": "Desktop",
+      "status": "active",
+      "mode": "installable_pwa",
+      "notifications": ["new_release", "new_item"]
+    }
   ],
   "development_infrastructure": {
     "cloudflare_account_id": "c0d5bc25df16ae5b7d47c985c4b7b787",
@@ -37,13 +68,15 @@
     "one_current_release": true,
     "legacy_build_numbers_are_provenance_only": true,
     "historical_build_gates_allowed": false,
-    "production_promotion": "closed"
+    "production_promotion": "closed",
+    "deferred_it_tasks_block_release": false,
+    "external_credentials_for_feature_development": "assume_available_or_mocked",
+    "current_release_d1_changes_allowed": true
   },
-  "migration_state": {
-    "d1_sql_required": false,
+  "database_baseline": {
+    "release": 447,
     "file": "database_platform_convergence.sql",
     "apply_status": "applied_and_verified_development",
-    "strategy": "canonical-five-module-and-storefront-schema-convergence",
     "verification": {
       "canonical_modules": 5,
       "legacy_modules": 0,
@@ -53,67 +86,82 @@
       "required_platform_tables": 5,
       "foreign_keys_clean": true
     },
-    "recovery": "Use python scripts/cloudflare_development_access.py --auth-only (or --auth-mode oauth) before any future Development D1/R2 operation. Reapply database_platform_convergence.sql only when the read-only readiness/verification authority proves drift."
+    "startup_rule": "Read-only D1/R2 verification first. Never reapply the baseline migration merely because a new chat or release starts.",
+    "release_448_migrations": "allowed_when_required_by_current_448_work_and protected by current migration/tests; do not mutate Production"
   },
-  "acceptance": {
-    "runtime": {
-      "status": "hold_external_execution",
-      "authority": "scripts/development_runtime_acceptance.py",
-      "runbook": "LIVE_TESTING_GUIDE.md",
-      "mode": "authenticated-development-read-only",
-      "production_allowed": false,
-      "credentials_source": "DND_DEV_SESSION_COOKIE",
-      "provider_mutation": false
-    },
-    "stripe": {
-      "configuration_readiness": "unconfirmed_current_deployment",
-      "provider_acceptance": "hold",
-      "required_environment": "test"
-    },
-    "paypal": {
-      "configuration_readiness": "unconfirmed_current_deployment",
-      "provider_acceptance": "hold",
-      "required_environment": "sandbox"
-    },
-    "caip_private_media": {
-      "acceptance": "hold",
-      "required_evidence": ["authenticated_private_delivery", "range_seek", "timecode_range", "verified_derived_artifact"]
-    }
-  },
-  "next_release_preparation": {
-    "release": 448,
-    "state": "scope_ready_not_open",
-    "database_migration_allowed": false,
-    "principle": "prepare schema and interfaces without changing Development D1 until Release 447 live acceptance is closed or a proven Release 447 defect requires repair",
-    "workstreams": [
+  "deferred_it_test_environment": {
+    "state": "backlog_non_blocking",
+    "release_gating": false,
+    "feature_development_assumption": "Continue implementing against Development test/provider abstractions as though required key references are populated. Real credential/provider/media acceptance is completed later from the I.T. test environment.",
+    "tasks": [
       {
-        "key": "product-material-lineage",
-        "scope": "New in-house-created products require real raw-inventory lineage and consumption authority before publication; existing products may remain legacy_pending; antiquity, resale and external finished goods can be explicitly inventory-exempt."
+        "key": "authenticated-development-runtime",
+        "status": "deferred",
+        "authority": "scripts/development_runtime_acceptance.py",
+        "runbook": "LIVE_TESTING_GUIDE.md"
       },
       {
-        "key": "product-tool-lineage",
-        "scope": "Record durable tools and molds used to create products separately from consumable inventory; tool association never consumes the durable tool."
+        "key": "stripe-test",
+        "status": "deferred",
+        "environment": "test",
+        "required_evidence": ["checkout", "signed_webhook", "reconciliation", "idempotent_replay"]
       },
       {
-        "key": "manufacturer-provenance-reviews",
-        "scope": "Link materials/tools to manufacturer/vendor provenance and store Devil n Dove-authored purchased-item review content locally with external identifiers/source links; do not scrape or depend on copied marketplace review content."
+        "key": "paypal-sandbox",
+        "status": "deferred",
+        "environment": "sandbox",
+        "required_evidence": ["approval", "capture", "verified_webhook", "reconciliation", "idempotent_replay"]
       },
       {
-        "key": "it-integration-registry",
-        "scope": "I.T. owns social/provider integration configuration references, purpose, secret or binding name only, callback/webhook, scopes, environment, configured/tested status, last test/error and correction mechanics; never store secret values in D1."
-      },
-      {
-        "key": "carousel-movie-reuse",
-        "scope": "Generalize Storefront carousel presentation for Movie use without duplicating carousel authority or introducing extra public H1 elements."
-      },
-      {
-        "key": "movie-data-convergence",
-        "scope": "Repair provably incorrect Movie names and core metadata; represent unknown/incomplete fields explicitly instead of guessing."
-      },
-      {
-        "key": "unverified-process-states",
-        "scope": "Future D1 additions must reserve explicit pending, legacy_pending, exempt, unverified, verified and evidence-reference states so unconfirmed workflows never masquerade as proven."
+        "key": "caip-private-media",
+        "status": "deferred",
+        "required_evidence": ["authenticated_private_delivery", "range_seek", "timecode_range", "verified_derived_artifact"]
       }
     ]
-  }
+  },
+  "workstreams": [
+    {
+      "key": "client-platform-continuity",
+      "scope": "Keep Web, Phone and Desktop as active first-class clients of the same responsive/installable application; preserve explicit opt-in notifications for new releases and newly published items, offline/fallback behavior and no idle polling."
+    },
+    {
+      "key": "product-material-lineage",
+      "scope": "New in-house-created products require real raw-inventory lineage and consumption authority before publication; existing products may remain legacy_pending; antiquity, resale and external finished goods can be explicitly inventory-exempt."
+    },
+    {
+      "key": "product-tool-lineage",
+      "scope": "Record durable tools and molds used to create products separately from consumable inventory; tool association never consumes the durable tool."
+    },
+    {
+      "key": "manufacturer-provenance-reviews",
+      "scope": "Link materials/tools to manufacturer/vendor provenance and Devil n Dove-authored purchased-item reviews. Support ASIN/external identifiers and review/profile/source links or owner-supplied import where available; do not make Amazon or another marketplace a runtime dependency and do not copy third-party review content."
+    },
+    {
+      "key": "it-integration-registry",
+      "scope": "Prepare the I.T. test/integration environment for provider/platform reference names, callbacks/webhooks, scopes, environment, configured/tested status, last safe result/error and correction mechanics. Real secret values never belong in D1. Deferred I.T. completion does not gate feature releases."
+    },
+    {
+      "key": "carousel-movie-reuse",
+      "scope": "Generalize Storefront carousel presentation for Movie use without duplicating carousel authority or introducing extra public H1 elements."
+    },
+    {
+      "key": "movie-data-convergence",
+      "scope": "Repair provably incorrect Movie names and core metadata; represent unknown/incomplete fields explicitly instead of guessing."
+    },
+    {
+      "key": "unverified-process-states",
+      "scope": "Current and future D1 additions reserve explicit pending, legacy_pending, exempt, unverified, verified and evidence-reference states so unconfirmed workflows never masquerade as proven."
+    }
+  ],
+  "forward_queue": [
+    "Storefront Shop",
+    "Collections",
+    "Collages",
+    "Carousels",
+    "CAIP",
+    "Inventory",
+    "Supplies",
+    "Tools",
+    "additional top-level modules when ownership boundaries justify them"
+  ]
 }
