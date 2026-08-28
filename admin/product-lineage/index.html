@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Product Lineage — Devil n Dove</title>
+  <meta name="description" content="Review Devil n Dove product material, tool, mold, Inventory and provenance lineage."/>
+  <link rel="stylesheet" href="/css/styles.css?v=448"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="product-lineage">
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Storefront / Product Lineage</div></div></div>
+      <div class="links"><a href="/admin/">Admin</a><a href="/admin/products/">Products</a><a href="/admin/inventory-operations/">Inventory</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+    </div>
+
+    <div class="hero compact-hero"><div><h1>Product Material &amp; Tool Lineage</h1><p>Release 448 workspace for truthful Product origin, raw Inventory lineage, reusable Tool/mold provenance and legacy reconstruction.</p></div></div>
+
+    <section class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Policy</h2>
+      <div class="grid cols-3" style="gap:12px">
+        <div><strong>Made in house</strong><p class="small">New handmade products require consuming Supply links that resolve to active Inventory and are verified before publication.</p></div>
+        <div><strong>Legacy product</strong><p class="small">Historical handmade products stay <code>legacy_pending</code> until evidence is reconstructed. We never fabricate old consumption.</p></div>
+        <div><strong>Outside finished goods</strong><p class="small">Antiquity, resale and externally finished goods are explicitly exempt from raw-material consumption lineage.</p></div>
+      </div>
+      <p class="small"><strong>Inventory authority remains unchanged:</strong> this workspace never changes stock. Actual consumption continues through <code>site_inventory_movements</code>, production runs and purchase-lot provenance.</p>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <div class="grid cols-2" style="gap:12px;align-items:end">
+        <label><span class="small">Product</span><select class="input" id="lineageProduct"><option value="">Loading products…</option></select></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="lineageRefresh" type="button">Refresh</button><a class="btn" id="lineageOpenProduct" href="/admin/products/">Open Product editor</a></div>
+      </div>
+      <p class="small" id="lineageMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card" id="lineageProfileCard" style="margin-top:18px" hidden>
+      <h2 style="margin-top:0">Origin &amp; publication policy</h2>
+      <div class="grid cols-3" style="gap:12px">
+        <label><span class="small">Origin</span><select class="input" id="lineageOrigin"><option value="made_in_house">Made in house</option><option value="legacy_pending">Legacy / history pending</option><option value="antiquity">Antiquity</option><option value="resale">Resale / found finished good</option><option value="external_finished_good">External finished good</option></select></label>
+        <label><span class="small">Lineage status</span><select class="input" id="lineageStatus"><option value="pending">Pending</option><option value="legacy_pending">Legacy pending</option><option value="unverified">Unverified</option><option value="verified">Verified</option><option value="exempt">Exempt</option></select></label>
+        <label><span class="small">Publication policy</span><input class="input" id="lineagePolicy" readonly/></label>
+      </div>
+      <label style="display:block;margin-top:12px"><span class="small">Evidence reference</span><input class="input" id="lineageEvidence" maxlength="1000" placeholder="Production run, photo/evidence record, purchase documentation or internal reference"/></label>
+      <label style="display:block;margin-top:12px"><span class="small">Review notes</span><textarea class="input" id="lineageNotes" rows="3" maxlength="3000" placeholder="What is known, what remains unknown, and why the classification is correct"></textarea></label>
+      <div id="lineageSummary" class="small" style="margin-top:12px"></div>
+    </section>
+
+    <section class="card" id="lineageResourcesCard" style="margin-top:18px" hidden>
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">Linked Supplies, Tools &amp; Molds</h2><p class="small">These rows overlay the existing Product → Tool/Supply links. Supply verification proves the link resolves to Inventory; Tool/mold verification records provenance without consuming the durable item.</p></div><button class="btn" id="lineageVerifyResolved" type="button">Mark resolved materials verified</button></div>
+      <div id="lineageResources"></div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="lineageSave" type="button">Save lineage review</button><a class="btn" href="/admin/products/#product-resources">Edit Product Tool/Supply links</a></div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Manufacturer / purchased-item reviews</h2>
+      <p class="small">Release 448 now has a first-party review authority for Inventory items, including manufacturer/vendor, platform, external item ID such as ASIN, source/review links and Devil n Dove-authored review text. The editing surface will be connected to Inventory in the next pass; Amazon is not a runtime dependency and third-party review text is not copied.</p>
+    </section>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=448"></script>
+  <script src="/public/js/auth.js?v=448"></script>
+  <script src="/public/js/site-auth-ui.js?v=448"></script>
+  <script src="/public/js/admin-self-protect.js?v=448"></script>
+  <script src="/public/js/admin.js?v=448"></script>
+  <script src="/public/js/admin-product-lineage.js?v=448"></script>
+</body>
+</html>
