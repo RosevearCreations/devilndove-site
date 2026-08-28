@@ -2,7 +2,7 @@
 
 Updated: 2026-08-28
 
-`development-release.json` is the machine-readable current-release authority. This file and `AI_HANDOFF.md` are the current human-readable planning/handoff authorities. Git history is the archive.
+`development-release.json` is the machine-readable current-release authority. This file and `AI_HANDOFF.md` are the mutable human-readable authorities. Git history is the archive.
 
 ## Current Development status
 
@@ -14,254 +14,187 @@ Updated: 2026-08-28
 - Phone/Desktop delivery: shared responsive/installable PWA authority
 - Notifications: explicit opt-in **new-release + new-item** alerts
 - D1 baseline: Release 447 convergence **APPLIED AND VERIFIED** against `devilndove-dev`
-- R2 Development visibility: previously proven for product media and CAIP private-media buckets
-- Public SEO authority: one meaningful H1 per public page; carousel code may not inject H1
 - Historical Build numbers: provenance only; no active build-number gates
 - Separate live Production promotion: **CLOSED**
 
-Always resolve the exact current `dev` head and its System Gate/Pages deployment evidence from GitHub.
+Always resolve the exact current `dev` SHA and its System Gate/Pages deployment evidence from GitHub.
 
-## Release rule: forward motion is not blocked by deferred I.T.
+## Forward motion vs deferred I.T.
 
-Authenticated Development runtime, Stripe test acceptance, PayPal sandbox acceptance and CAIP private-media acceptance are now part of the **deferred I.T. test environment**. They carry forward automatically until completed and **do not gate Release 448 or later normal feature development**.
+Authenticated Development runtime, Stripe test acceptance, PayPal sandbox acceptance and CAIP private-media acceptance remain in the **deferred/non-blocking I.T. test environment**. They carry forward automatically and do not stop normal Release 448 work. Real provider evidence remains truthful and separate; Production stays closed.
 
-For feature work, Development provider/key references may be treated as available or safely mocked behind provider abstractions. This keeps implementation moving without pretending real external credentials or transactions have been accepted.
-
-Real credential/provider evidence remains truthful and separate. Production remains explicitly closed.
-
-## Canonical application architecture
+## Application architecture
 
 ### Storefront
-Owns customer/public commerce presentation. Current and forward capabilities include Home, Shop, product discovery, Collections, Collages, Carousels, Movies/showcase presentation, cart/checkout/customer documents, delivery/pickup presentation and SEO truthfulness.
-
-Shop/Collections/Collages/Carousels remain Storefront capabilities unless a future ownership boundary justifies a new top-level module.
+Owns Home, Shop, product discovery, Collections, Collages, Carousels, Movies/showcase presentation, cart/checkout/customer documents and public SEO truthfulness. Shop/Collections/Collages/Carousels remain Storefront capabilities unless a stronger ownership boundary emerges.
 
 ### Creators
-Owns Creative Projects, production/creation evidence, packaging/formula/ingredient templates, Content Studio preparation, material-usage review, lessons/recommendations and creator workflow.
+Owns Creative Projects, creation/production evidence, packaging/formula/ingredient templates, Content Studio preparation, material-usage review, lessons/recommendations and creator workflow.
 
 ### Socials
-Owns social content/publication/campaign/channel workflow and CAIP-facing publication/distribution behavior. I.T. owns the provider connection references that Socials consumes.
+Owns social publication/campaign/channel workflow and CAIP-facing distribution. I.T. owns external connection/config references consumed by Socials.
 
 ### Financials
 Owns accounting, payment-state interpretation, refunds/disputes, reconciliation, AR/AP/journal/tax/fees/profitability/export/close and marketplace economics.
 
 ### I.T.
-Owns infrastructure, API/provider connection references, external-platform test environment, module/user access, release/readiness diagnostics, incidents/schema drift, recovery mechanics and secret-reference governance.
+Owns infrastructure, provider/API reference metadata, the eventual external-platform test cockpit, module/user access, diagnostics and recovery. Deferred I.T. completion does not gate unrelated features.
 
 ### Future modules
-The application has a **minimum** of five canonical modules, not a permanent maximum. Additional modules may be added deliberately when a domain has a clear independent ownership/lifecycle/security boundary. Do not create a module simply to reduce menu length.
+Five is a minimum, not a permanent maximum. Add a module only when a real domain ownership/security/lifecycle boundary justifies it.
 
-## Web / Phone / Desktop platform
+## Web / Phone / Desktop
 
-All three are first-class clients of the same application authority.
+All three remain first-class clients of the same application authority. Enforced behavior includes responsive layout, installable PWA mode, shared service worker, offline fallback, API/admin cache bypass, push/notification-click handling, explicit notification permission, new-release/new-item alerts, and launch/resume checking rather than idle polling.
 
-Current enforced client behavior:
+## D1 baseline and Release 448 migration policy
 
-- responsive layouts;
-- site-wide manifest;
-- standalone installable mode on supported phone/desktop browsers;
-- shared service worker;
-- offline fallback;
-- admin/API cache bypass;
-- push/notification-click support;
-- explicit user notification permission;
-- new-release notifications;
-- newly published item notifications;
-- launch/resume checks instead of idle timer polling.
+Development D1 is `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`). The Release 447 convergence baseline is already applied/verified. Permanent startup rule: **read-only D1/R2 verification first**; never replay baseline migrations merely because a chat/release starts.
 
-Every major future surface should be evaluated on Web, Phone and Desktop rather than implemented as Web-only admin functionality.
+Release 448 may add protected Development migrations. Source readiness never equals applied D1: remote application must be proved separately.
 
-## D1 / R2 baseline and current migration policy
+## Product material/tool lineage — source implemented
 
-Development D1 is `devilndove-dev` with ID `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
+Release 448 now extends the existing Product/Inventory model without creating a second stock authority.
 
-The verified Release 447 baseline produced:
+Existing authorities remain:
 
-- five canonical module rows;
-- zero legacy module rows;
-- 10 canonical role rows;
-- zero role-derived I.T. grants;
-- one active explicit I.T. manager;
-- required module/user-access/Home-carousel tables;
-- clean foreign-key verification.
+- `product_resource_links` — Product → Tool/Supply intent;
+- `site_item_inventory` — operational Inventory;
+- `site_inventory_movements` — actual stock movement;
+- current production-run and purchase-lot authorities — consumption/provenance evidence;
+- durable Tools/molds — usage/provenance links, never consumed merely because they are linked.
 
-Permanent startup rule: **read-only D1/R2 verification first**. Never replay the baseline migration merely because a new chat or release starts.
+New source authority:
 
-Release 448 is now active and **may introduce new protected Development D1 migrations when current work requires them**. New migrations must be additive/safe, idempotent where practical, migration-tested, reflected in aggregate schema authority and must not touch Production through normal Development workflow.
+- migration: `database_release448_product_lineage.sql`
+- read-only verification: `RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql`
+- local behavior gate: `scripts/product_lineage_gate.py`
+- exact Development runner: `scripts/apply_development_product_lineage.py`
+- admin API: `/api/admin/product-lineage`
+- admin workspace: `/admin/product-lineage/`
+
+The migration creates:
+
+- `product_lineage_profiles`
+- `product_resource_lineage_reviews`
+- `inventory_manufacturers`
+- `inventory_manufacturer_links`
+- `inventory_vendor_reviews`
+
+Historical handmade Products are seeded `legacy_pending / legacy_nonblocking`; no historical consumption is fabricated. Antiquity/resale/external finished goods are explicitly exempt. New handmade Products become `made_in_house / pending / required` automatically once the migration is active.
+
+Current publication safeguard: when the Release 448 schema is present, both normal Publish and Override Publish are blocked for a new `made_in_house / required` Product until consuming Supply links resolve to active Inventory, those resource links are verified, and the Product lineage profile is verified. Legacy and exempt products are not retroactively blocked.
+
+**Development D1 status:** pending actual execution/verification. This is tracked accurately but does not block unrelated Release 448 source work.
+
+## Manufacturer / VEVOR / purchased-item reviews — source implemented
+
+Manufacturer identity is normalized at the Tool/Supply Inventory item rather than copied to each Product. Supplier/store and manufacturer are separate authorities; the system never promotes `supplier_name` into a manufacturer without review.
+
+Current source surfaces:
+
+- API: `/api/admin/inventory-vendor-reviews`
+- workspace: `/admin/vendor-reviews/`
+
+The model supports:
+
+- manufacturer such as **VEVOR**;
+- Tool/Supply Inventory association;
+- manufacturer/brand-owner/OEM/private-label/unknown relationship;
+- pending/unverified/verified provenance;
+- evidence/model/external item reference;
+- Devil n Dove-authored purchased-item reviews;
+- Amazon/VEVOR/eBay/Etsy/local/other platform reference;
+- ASIN/external ID;
+- source item URL and direct URL to our external review;
+- rating/date/title/body;
+- private/internal/approved-public state.
+
+Amazon/VEVOR are reference locations only. The API does not scrape or contact a marketplace. Owner-controlled linking/import of **our own authored content** is the intended workflow unless a supported official export/API is established later.
+
+Product manufacturer provenance is derived through:
+
+`Product → product_resource_links → site_item_inventory → inventory_manufacturer_links → inventory_manufacturers`
+
+This means one verified VEVOR Tool can truthfully contribute provenance to every Product linked to that Tool.
 
 ## Deferred I.T. test environment
 
-The following tasks stay visible but are non-blocking:
-
 | I.T. task | State | Release effect |
 | --- | --- | --- |
-| Authenticated Development runtime evidence | **DEFERRED** | does not block forward release work |
-| Stripe test checkout/webhook/reconciliation/replay | **DEFERRED** | does not block forward release work |
-| PayPal sandbox approval/capture/webhook/reconciliation/replay | **DEFERRED** | does not block forward release work |
-| CAIP private media delivery/range/timecode/artifact evidence | **DEFERRED** | does not block forward release work |
+| Authenticated Development runtime evidence | **DEFERRED** | non-blocking |
+| Stripe test checkout/webhook/reconciliation/replay | **DEFERRED** | non-blocking |
+| PayPal sandbox approval/capture/webhook/reconciliation/replay | **DEFERRED** | non-blocking |
+| CAIP private-media delivery/range/timecode/artifact evidence | **DEFERRED** | non-blocking |
 
-`LIVE_TESTING_GUIDE.md` is the non-blocking procedure for completing this work later.
+`LIVE_TESTING_GUIDE.md` remains the later test procedure. The eventual I.T. cockpit should hold safe provider metadata, callbacks/webhooks, scopes, configured/tested state, safe errors/correction mechanics and evidence references—never secret values.
 
-The eventual I.T. test environment should manage safe metadata for all external integrations: platform/provider, capability, consuming module, environment, secret/binding reference name, callback/webhook, scopes, configured state, tested state, last safe result/error, correction mechanics and evidence references. Actual secret values remain outside D1/UI/source/logs.
-
-## Release 448 active workstreams
-
-### 1. Client platform continuity
-
-Keep Web/Phone/Desktop fully usable as capabilities grow. Preserve release/item notifications, offline/fallback behavior, safe caching and responsive UI. Avoid introducing background polling simply to keep installed clients “alive.”
-
-### 2. Product material lineage and publication truth
-
-For Devil n Dove-created products, raw goods should already exist in Inventory and real material consumption should flow through the existing inventory ledger before publication where appropriate.
-
-Required states include:
-
-- in-house created — lineage required;
-- legacy in-house — `legacy_pending` until reconstructed where possible;
-- antiquity/resale/external finished good — explicitly exempt;
-- `pending`, `unverified`, `verified` and evidence-reference states.
-
-Do not fabricate historical consumption for existing products.
-
-### 3. Product tools and molds
-
-Products should record durable Tools/molds used during creation separately from consumable materials. Tool association records provenance/usage but does not consume the durable tool.
-
-### 4. Manufacturer/vendor provenance and Devil n Dove reviews
-
-Supplies and Tools should be linkable to manufacturer/vendor provenance, allowing later truthful manufacturer credit/tagging where appropriate.
-
-Devil n Dove-authored reviews of purchased items should be storable locally and associated with:
-
-- Tool/Supply record;
-- manufacturer/vendor;
-- marketplace/source;
-- ASIN or external identifier;
-- source/review/profile URL if owner-supplied or legitimately discoverable;
-- locally authored review text/notes when imported/provided;
-- verification/source state.
-
-The application must not require Amazon to be reachable for normal operation and must not scrape/copy third-party review content.
-
-For Amazon specifically, design for owner-controlled discovery/import from the user's own profile/review history when practical. Do not assume the Amazon Business account provides a stable review API.
-
-### 5. I.T. social/provider integration registry
-
-Continue building the future I.T. setup/test cockpit. The integration registry should support:
-
-- platform/provider;
-- purpose/capability;
-- consuming module/workflow;
-- Development/Production environment;
-- secret/binding reference **name only**;
-- callback/redirect/webhook locations;
-- requested/granted scopes;
-- configured state;
-- tested/accepted state;
-- last safe test time/result/error;
-- correction/recovery mechanic;
-- evidence reference.
-
-This registry is infrastructure for later I.T. completion, not a reason to stop feature development now.
-
-### 6. Storefront carousel reuse for Movies
-
-Generalize carousel presentation/component behavior so Movie/showcase surfaces can reuse it without duplicating Home-carousel authority. Public rendering must preserve one H1 and appropriate heading hierarchy.
-
-### 7. Movie data convergence
-
-Audit Movie records for incorrect names and missing core data. Correct only values supported by current evidence; unknown values remain explicit rather than guessed. Add completeness/verification state where blanks are ambiguous.
-
-### 8. Unverified-process states
-
-Current/future D1 additions should preserve truth-state distinctions such as:
-
-- `pending`;
-- `legacy_pending`;
-- `exempt`;
-- `unverified`;
-- `verified`;
-- evidence references.
-
-A row existing is never proof that an external provider, inventory history or business process was actually completed.
-
-## Forward queue
-
-We have many meaningful areas to continue without waiting for deferred I.T. acceptance. Move through them in cohesive release-sized groups:
+## Remaining Release 448 workstreams
 
 ### Storefront
 - Shop
 - Collections
 - Collages
 - Carousels
+- reusable carousel presentation on Movies/showcase surfaces
 - product/category merchandising
 - search/filter/discovery
 - cart/checkout truthfulness
 - approved media
-- pickup/delivery presentation
-- customer receipts/documents
-- SEO/schema/local/public conversion work
+- pickup/delivery/customer documents
+- public SEO/schema/conversion work
+
+### Movies
+- reuse/generalize carousel presentation without duplicating Home-carousel authority;
+- preserve one public H1;
+- audit incorrect names/core metadata;
+- mark unknown/incomplete fields explicitly rather than guessing.
 
 ### CAIP / Creators / Socials
 - Creative Project → Content Studio handoff
-- temporal/private media evidence
+- temporal/private-media evidence
 - story/evidence selection
 - lessons/future recommendations
-- publication packages
-- channel-ready media variants
+- publication packages and channel variants
 - manufacturer/tool/material evidence where useful
 - private storyboard/client notes where applicable
 
 ### Inventory / Supplies / Tools
-- material lineage
-- lot/source/manufacturer provenance
+- continue lineage reconstruction
+- purchase-lot/source provenance
+- manufacturer attribution/reviews
 - kit depletion/reversal
-- durable-tool lifecycle
-- molds/tool use association
-- purchased-item reviews
+- durable Tool lifecycle
+- molds/tool-use association
 - reorder/source intelligence
-- truthful availability and publication integration
+- truthful availability/publication integration
 
 ### Financials
 - payment/refund/dispute truth
 - reconciliation
 - marketplace/channel fees
-- shared project cost allocation
+- shared-project cost allocation
 - profitability
 - journal/AR/AP/tax/export/close
 
 ### I.T. — later dedicated work
-- full provider setup/test cockpit
-- secret-reference completion
-- Stripe test acceptance
-- PayPal sandbox acceptance
-- social channel OAuth/webhooks/scopes
+- provider setup/test cockpit
+- real secret-reference completion
+- Stripe/PayPal acceptance
+- social OAuth/webhooks/scopes
 - authenticated runtime evidence
 - CAIP private-media infrastructure acceptance
-- backup/restore rehearsal
-- performance/accessibility/runtime incident tooling
+- backup/restore, performance/accessibility and incident tooling
 
-## Amazon/Vevor review opportunity
-
-There is a useful content/provenance opportunity around the user's substantial Vevor equipment investment and product reviews written on Amazon.
-
-The desired system should be able to capture the user's own review history without making Amazon the authority for normal runtime behavior. A practical future workflow is:
-
-1. identify the user's Amazon profile/review entries or owner-supplied review URLs;
-2. map each review to ASIN/product/source;
-3. link it to the local Tool/Supply and manufacturer/vendor (for example Vevor);
-4. import/store the user's own review content or notes when permitted/provided;
-5. preserve the original source URL and verification date;
-6. later reuse the local first-party review/provenance in creator/social/manufacturer-credit workflows where appropriate.
-
-## Canonical release gates
-
-Normal current-release source gates remain:
+## Canonical current-release gates
 
 ```bash
 python scripts/repository_forward_sanity.py
 python scripts/module_architecture_gate.py
 python scripts/database_platform_gate.py
+python scripts/product_lineage_gate.py
+python scripts/apply_development_product_lineage.py --transport-preflight
 python scripts/public_seo_gate.py
 python scripts/pwa_platform_gate.py
 python scripts/product_inventory_tools_source_gate.py
@@ -269,12 +202,10 @@ python scripts/cloudflare_development_access.py --transport-preflight
 python scripts/development_runtime_acceptance.py --self-check
 ```
 
-These gates validate current source/architecture/safety. The deferred authenticated/provider/media I.T. tests are **not** part of the release-blocking gate.
+The canonical System Gate performs no remote D1/R2/provider/Production writes. Deferred authenticated/provider/media I.T. tests are not release-blocking gates.
 
 ## Forward release policy
 
-A normal feature is considered ready when its source authority, D1 authority where applicable, fallback/error behavior, Web/Phone/Desktop behavior, regression tests/CI and exact Development deployment agree.
-
-External provider/live acceptance is required when we deliberately enter the dedicated I.T. test phase or before Production use of that provider—not as a permanent blocker to unrelated Development releases.
+A normal feature is ready when its source authority, D1 authority where applicable, fallback/error behavior, Web/Phone/Desktop behavior, regression tests/CI and exact Development deployment agree. External-provider acceptance is required when deliberately completing that provider or before Production use—not as a permanent blocker to unrelated Development releases.
 
 Production remains a separate deliberate promotion decision.
