@@ -1,7 +1,7 @@
 // Current-release Content-owned implementation of the content-media module contract.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../../_lib/adminAudit.js';
 
-const RELEASE = 447;
+const RELEASE = 448;
 
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
