@@ -56,10 +56,52 @@ CREATE INDEX IF NOT EXISTS idx_product_resource_lineage_product
 CREATE INDEX IF NOT EXISTS idx_product_resource_lineage_inventory
   ON product_resource_lineage_reviews(site_item_inventory_id,verification_status);
 
+-- Manufacturer identity is normalized separately from vendor/store identity. We never infer
+-- manufacturer from supplier_name because a retailer/distributor is not necessarily the maker.
+CREATE TABLE IF NOT EXISTS inventory_manufacturers (
+  manufacturer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  manufacturer_name TEXT NOT NULL,
+  canonical_key TEXT NOT NULL UNIQUE,
+  website_url TEXT,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+  created_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+  CHECK (length(trim(manufacturer_name)) BETWEEN 1 AND 180),
+  CHECK (length(trim(canonical_key)) BETWEEN 1 AND 180)
+);
+
+CREATE INDEX IF NOT EXISTS idx_inventory_manufacturers_name
+  ON inventory_manufacturers(status,manufacturer_name,manufacturer_id);
+
+CREATE TABLE IF NOT EXISTS inventory_manufacturer_links (
+  site_item_inventory_id INTEGER PRIMARY KEY,
+  manufacturer_id INTEGER NOT NULL,
+  relationship_type TEXT NOT NULL DEFAULT 'manufacturer'
+    CHECK (relationship_type IN ('manufacturer','brand_owner','oem','private_label','unknown')),
+  verification_status TEXT NOT NULL DEFAULT 'unverified'
+    CHECK (verification_status IN ('pending','unverified','verified')),
+  external_item_id TEXT,
+  evidence_reference TEXT,
+  review_note TEXT,
+  reviewed_by_user_id INTEGER,
+  reviewed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE,
+  FOREIGN KEY (manufacturer_id) REFERENCES inventory_manufacturers(manufacturer_id) ON DELETE RESTRICT,
+  FOREIGN KEY (reviewed_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_inventory_manufacturer_links_manufacturer
+  ON inventory_manufacturer_links(manufacturer_id,verification_status,site_item_inventory_id);
+
 CREATE TABLE IF NOT EXISTS inventory_vendor_reviews (
   inventory_vendor_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
   site_item_inventory_id INTEGER NOT NULL,
-  manufacturer_name TEXT,
+  manufacturer_id INTEGER,
   vendor_name TEXT,
   platform_code TEXT NOT NULL DEFAULT 'local',
   external_item_id TEXT,
@@ -79,6 +121,7 @@ CREATE TABLE IF NOT EXISTS inventory_vendor_reviews (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (site_item_inventory_id) REFERENCES site_item_inventory(site_item_inventory_id) ON DELETE CASCADE,
+  FOREIGN KEY (manufacturer_id) REFERENCES inventory_manufacturers(manufacturer_id) ON DELETE SET NULL,
   FOREIGN KEY (created_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL,
   FOREIGN KEY (verified_by_user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
@@ -87,6 +130,8 @@ CREATE INDEX IF NOT EXISTS idx_inventory_vendor_reviews_item
   ON inventory_vendor_reviews(site_item_inventory_id,publication_status,review_date DESC);
 CREATE INDEX IF NOT EXISTS idx_inventory_vendor_reviews_external
   ON inventory_vendor_reviews(platform_code,external_item_id);
+CREATE INDEX IF NOT EXISTS idx_inventory_vendor_reviews_manufacturer
+  ON inventory_vendor_reviews(manufacturer_id,publication_status,review_date DESC);
 
 -- Existing products receive a truthful compatibility profile. Handmade history is not invented:
 -- it remains legacy_pending/non-blocking until reconstructed. Outside finished goods are exempt.
@@ -169,6 +214,6 @@ LEFT JOIN site_item_inventory sii
     LIMIT 1
   );
 
-SELECT name FROM sqlite_master WHERE type='table' AND name IN ('product_lineage_profiles','product_resource_lineage_reviews','inventory_vendor_reviews') ORDER BY name;
+SELECT name FROM sqlite_master WHERE type='table' AND name IN ('product_lineage_profiles','product_resource_lineage_reviews','inventory_manufacturers','inventory_manufacturer_links','inventory_vendor_reviews') ORDER BY name;
 SELECT origin_kind,lineage_status,publication_policy,COUNT(*) AS product_count FROM product_lineage_profiles GROUP BY origin_kind,lineage_status,publication_policy ORDER BY origin_kind,lineage_status;
 PRAGMA foreign_key_check;
