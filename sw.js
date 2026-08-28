@@ -1,10 +1,11 @@
-// Build 443: editable Home carousel Phase A with static fallback and carried current-release HOLDs.
-const CACHE_NAME = 'devilndove-shell-v443';
+// Release 447 — shared Web / Phone / Desktop service worker.
+const CACHE_NAME = 'devilndove-shell-r447';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
   '/css/styles.css',
   '/js/main.js',
+  '/public/js/pwa-platform.js',
   '/assets/logo-clear.png',
   '/assets/mark.png',
   '/assets/images/site/home-hero-products.webp',
@@ -33,17 +34,63 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try { payload = event.data?.json?.() || {}; }
+  catch {
+    try { payload = { body: event.data?.text?.() || '' }; } catch { payload = {}; }
+  }
+  const title = String(payload.title || 'Devil n Dove');
+  const options = {
+    body: String(payload.body || 'There is something new at Devil n Dove.'),
+    icon: String(payload.icon || '/assets/icons/icon-192.png'),
+    badge: String(payload.badge || '/assets/icons/icon-180.png'),
+    tag: String(payload.tag || 'dnd-update'),
+    renotify: Boolean(payload.renotify),
+    data: { url: String(payload.url || payload.data?.url || '/') },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  let target = '/';
+  try {
+    const candidate = new URL(String(event.notification.data?.url || '/'), self.location.origin);
+    if (candidate.origin === self.location.origin) target = `${candidate.pathname}${candidate.search}${candidate.hash}`;
+  } catch {}
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windows) {
+      try {
+        const current = new URL(client.url);
+        if (current.origin === self.location.origin) {
+          await client.focus();
+          if ('navigate' in client) await client.navigate(target);
+          return;
+        }
+      } catch {}
+    }
+    if (self.clients.openWindow) await self.clients.openWindow(target);
+  })());
+});
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+
   if (shouldBypassCache(url)) {
     event.respondWith(
       fetch(event.request).catch(() => {
         if (url.pathname.startsWith('/api/')) {
           return new Response(JSON.stringify({ ok: false, error: 'offline' }), {
             status: 503,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
           });
         }
         return caches.match(event.request).then((cached) => cached || caches.match('/offline.html'));
@@ -56,7 +103,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          if (response && response.ok) {
+          if (response?.ok) {
             const copy = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => null);
           }
