@@ -22,18 +22,25 @@ session = (ROOT / 'functions/api/_lib/appModuleSessionGuard.js').read_text(encod
 middleware = (ROOT / 'functions/_middleware.js').read_text(encoding='utf-8')
 control = (ROOT / 'functions/api/admin/app-modules.js').read_text(encoding='utf-8')
 
-for key in expected:
+constant_markers = {
+    'storefront': 'MODULE_KEYS.STOREFRONT',
+    'creators': 'MODULE_KEYS.CREATORS',
+    'socials': 'MODULE_KEYS.SOCIALS',
+    'financials': 'MODULE_KEYS.FINANCIALS',
+    'it-platform': 'MODULE_KEYS.IT_PLATFORM',
+}
+for key, marker in constant_markers.items():
     require(f"'{key}'" in routes, f'route catalog missing module {key}')
-    require(key in modules, f'module authority missing module {key}')
+    require(marker in modules, f'module authority missing constant {marker}')
 for stale in ('Build 438', 'build: 438'):
     require(stale not in routes + modules + session + middleware + control, f'stale runtime identity remains: {stale}')
 for marker in ('/admin/accounting', '/admin/social-publishing', '/admin/it-platform', '/admin/home-carousel', '/admin/creative-process'):
     require(marker in routes, f'canonical route ownership missing {marker}')
 require('readUserModuleAccess' in session, 'session guard must load explicit user module access')
 require('explicit_user_grant_required' in modules, 'I.T. explicit-user denial path missing')
-require("headers.set(RELEASE_HEADER" in middleware, 'current release response header missing')
+require('headers.set(RELEASE_HEADER' in middleware, 'current release response header missing')
 require('migration_required' in control, 'module control API must expose canonical migration state')
-require("MODULE_KEYS.IT_PLATFORM && isAllowed === 1" in control, 'I.T. role-grant protection missing')
+require('MODULE_KEYS.IT_PLATFORM && isAllowed === 1' in control, 'I.T. role-grant protection missing')
 
 print('MODULE ARCHITECTURE GATE')
 print('Canonical modules:', ', '.join(expected))
