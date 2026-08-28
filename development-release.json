@@ -19,6 +19,7 @@
     { "key": "desktop", "name": "Desktop", "status": "converging" }
   ],
   "development_infrastructure": {
+    "cloudflare_account_id": "c0d5bc25df16ae5b7d47c985c4b7b787",
     "d1": {
       "binding": "DB",
       "database_name": "devilndove-dev",
@@ -28,7 +29,8 @@
       { "binding": "PRODUCT_MEDIA_BUCKET", "bucket_name": "devilndove-toolshed-images-dev" },
       { "binding": "CAIP_PRIVATE_MEDIA_BUCKET", "bucket_name": "devilndove-caip-media-dev" }
     ],
-    "readiness_endpoint": "/api/admin/infrastructure-readiness"
+    "readiness_endpoint": "/api/admin/infrastructure-readiness",
+    "local_access_preflight": "python scripts/cloudflare_development_access.py --auth-only"
   },
   "release_policy": {
     "one_current_release": true,
@@ -39,7 +41,9 @@
   "migration_state": {
     "d1_sql_required": true,
     "file": "database_platform_convergence.sql",
-    "apply_status": "pending_development_apply",
-    "strategy": "canonical-five-module-and-storefront-schema-convergence"
+    "apply_status": "blocked_cloudflare_auth_7403",
+    "strategy": "canonical-five-module-and-storefront-schema-convergence",
+    "last_attempt_boundary": "authentication_probe_before_first_mutation_statement",
+    "recovery": "Run scripts/cloudflare_development_access.py --auth-only. If an environment API token is stale or unauthorized, use --auth-mode oauth after wrangler login or replace the token with Development D1/R2 permissions."
   }
 }
