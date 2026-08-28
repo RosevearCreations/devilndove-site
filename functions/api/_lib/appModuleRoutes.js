@@ -1,98 +1,108 @@
-// Devil n Dove Build 438 server route-to-application-module catalog.
-// Mirrors the existing Build 302+ client domain grouping without importing browser code.
-// Explicit cross-module service contracts are resolved separately from direct module routes.
+// Devil n Dove canonical application-module route catalog.
+// Historical module keys are translated only as a temporary D1 compatibility bridge.
 
 export const MODULE_KEYS = Object.freeze({
-  COMMERCE_OPERATIONS: 'commerce-operations',
-  CREATIVE_PRODUCTION: 'creative-production',
-  BUSINESS_ADMINISTRATION: 'business-administration',
+  STOREFRONT: 'storefront',
+  CREATORS: 'creators',
+  SOCIALS: 'socials',
+  FINANCIALS: 'financials',
+  IT_PLATFORM: 'it-platform',
 });
+
+export const LEGACY_MODULE_KEYS = Object.freeze({
+  'commerce-operations': MODULE_KEYS.STOREFRONT,
+  'creative-production': MODULE_KEYS.CREATORS,
+  'business-administration': MODULE_KEYS.FINANCIALS,
+});
+
+export function canonicalModuleKey(value) {
+  const key = String(value || '').trim().toLowerCase();
+  return LEGACY_MODULE_KEYS[key] || key;
+}
 
 const CORE_EXEMPT = Object.freeze([
   '/admin/application-modules',
   '/api/admin/app-modules',
 ]);
 
-// These are narrow, reviewed service contracts that one top-level module may consume
-// from another. Disabling the owner module blocks its direct UI/legacy API surface,
-// but Application Core may still permit one of these contracts when at least one
-// enabled consumer module has access. This keeps module switches independent without
-// reopening broad owner-module endpoints.
 export const SHARED_SERVICE_CONTRACTS = Object.freeze([
   Object.freeze({
     path: '/api/admin/contracts/catalog-read',
-    owner_module_key: MODULE_KEYS.COMMERCE_OPERATIONS,
+    owner_module_key: MODULE_KEYS.STOREFRONT,
     consumer_module_keys: Object.freeze([
-      MODULE_KEYS.COMMERCE_OPERATIONS,
-      MODULE_KEYS.CREATIVE_PRODUCTION,
-      MODULE_KEYS.BUSINESS_ADMINISTRATION,
+      MODULE_KEYS.STOREFRONT,
+      MODULE_KEYS.CREATORS,
+      MODULE_KEYS.SOCIALS,
+      MODULE_KEYS.FINANCIALS,
     ]),
     mutation: false,
   }),
   Object.freeze({
     path: '/api/admin/contracts/inventory-read',
-    owner_module_key: MODULE_KEYS.COMMERCE_OPERATIONS,
+    owner_module_key: MODULE_KEYS.STOREFRONT,
     consumer_module_keys: Object.freeze([
-      MODULE_KEYS.COMMERCE_OPERATIONS,
-      MODULE_KEYS.CREATIVE_PRODUCTION,
+      MODULE_KEYS.STOREFRONT,
+      MODULE_KEYS.CREATORS,
+      MODULE_KEYS.FINANCIALS,
     ]),
     mutation: false,
   }),
   Object.freeze({
     path: '/api/admin/contracts/inventory-cost',
-    owner_module_key: MODULE_KEYS.COMMERCE_OPERATIONS,
+    owner_module_key: MODULE_KEYS.STOREFRONT,
     consumer_module_keys: Object.freeze([
-      MODULE_KEYS.COMMERCE_OPERATIONS,
-      MODULE_KEYS.BUSINESS_ADMINISTRATION,
+      MODULE_KEYS.STOREFRONT,
+      MODULE_KEYS.FINANCIALS,
     ]),
     mutation: false,
   }),
   Object.freeze({
     path: '/api/admin/contracts/inventory-post',
-    owner_module_key: MODULE_KEYS.COMMERCE_OPERATIONS,
+    owner_module_key: MODULE_KEYS.STOREFRONT,
     consumer_module_keys: Object.freeze([
-      MODULE_KEYS.COMMERCE_OPERATIONS,
-      MODULE_KEYS.CREATIVE_PRODUCTION,
+      MODULE_KEYS.STOREFRONT,
+      MODULE_KEYS.CREATORS,
     ]),
     mutation: true,
   }),
   Object.freeze({
     path: '/api/admin/contracts/inventory-reverse',
-    owner_module_key: MODULE_KEYS.COMMERCE_OPERATIONS,
+    owner_module_key: MODULE_KEYS.STOREFRONT,
     consumer_module_keys: Object.freeze([
-      MODULE_KEYS.COMMERCE_OPERATIONS,
-      MODULE_KEYS.CREATIVE_PRODUCTION,
+      MODULE_KEYS.STOREFRONT,
+      MODULE_KEYS.CREATORS,
     ]),
     mutation: true,
   }),
   Object.freeze({
     path: '/api/admin/contracts/accounting-read',
-    owner_module_key: MODULE_KEYS.BUSINESS_ADMINISTRATION,
+    owner_module_key: MODULE_KEYS.FINANCIALS,
     consumer_module_keys: Object.freeze([
-      MODULE_KEYS.BUSINESS_ADMINISTRATION,
-      MODULE_KEYS.COMMERCE_OPERATIONS,
+      MODULE_KEYS.FINANCIALS,
+      MODULE_KEYS.STOREFRONT,
     ]),
     mutation: false,
   }),
   Object.freeze({
     path: '/api/admin/contracts/content-media',
-    owner_module_key: MODULE_KEYS.CREATIVE_PRODUCTION,
+    owner_module_key: MODULE_KEYS.CREATORS,
     consumer_module_keys: Object.freeze([
-      MODULE_KEYS.CREATIVE_PRODUCTION,
-      MODULE_KEYS.COMMERCE_OPERATIONS,
+      MODULE_KEYS.CREATORS,
+      MODULE_KEYS.STOREFRONT,
+      MODULE_KEYS.SOCIALS,
     ]),
     mutation: false,
   }),
 ]);
 
-const COMMERCE_ADMIN_PAGES = Object.freeze([
+const STOREFRONT_ADMIN_PAGES = Object.freeze([
   '/admin/catalog',
   '/admin/catalog-media',
   '/admin/create-product',
   '/admin/products',
   '/admin/movies',
   '/admin/mobile-product',
-  '/admin/release-preflight',
+  '/admin/mobile-inventory',
   '/admin/site-item-inventory',
   '/admin/inventory',
   '/admin/inventory-operations',
@@ -104,24 +114,58 @@ const COMMERCE_ADMIN_PAGES = Object.freeze([
   '/admin/membership',
   '/admin/custom-request',
   '/admin/today-tasks',
+  '/admin/home-carousel',
+  '/admin/marketplace-exports',
+  '/admin/marketplace-mapping',
+  '/admin/public-display-order',
 ]);
 
-const CREATIVE_ADMIN_PAGES = Object.freeze([
+const CREATOR_ADMIN_PAGES = Object.freeze([
   '/admin/creative-project',
   '/admin/creative-process',
   '/admin/creative-automation',
   '/admin/creative-assets',
   '/admin/caip',
   '/admin/packaging-studio',
+  '/admin/packaging',
   '/admin/media-content-studio',
   '/admin/content-studio',
   '/admin/visual-enrichment-studio',
   '/admin/image-manifest',
   '/admin/stage-photo-moderation',
+]);
+
+const SOCIAL_ADMIN_PAGES = Object.freeze([
+  '/admin/social-publishing',
   '/admin/content-publications',
 ]);
 
-const COMMERCE_ADMIN_APIS = Object.freeze([
+const FINANCIAL_ADMIN_PAGES = Object.freeze([
+  '/admin/accounting',
+]);
+
+const IT_ADMIN_PAGES = Object.freeze([
+  '/admin/it-platform',
+  '/admin/application-sanity',
+  '/admin/deploy-readiness',
+  '/admin/deployment-preflight',
+  '/admin/go-live-execution',
+  '/admin/live-ops-followthrough',
+  '/admin/markdown-sanity',
+  '/admin/operational-continuity',
+  '/admin/post-deploy-smoke-tests',
+  '/admin/prelaunch',
+  '/admin/promotion-control',
+  '/admin/readiness',
+  '/admin/release-control',
+  '/admin/release-notes',
+  '/admin/release-preflight',
+  '/admin/safe-deploy-package',
+  '/admin/startup-readiness',
+  '/admin/users',
+]);
+
+const STOREFRONT_ADMIN_APIS = Object.freeze([
   '/api/admin/catalog',
   '/api/admin/product',
   '/api/admin/create-product',
@@ -138,18 +182,19 @@ const COMMERCE_ADMIN_APIS = Object.freeze([
   '/api/admin/customer-documents',
   '/api/admin/custom-request',
   '/api/admin/today-task',
+  '/api/admin/home-carousel',
+  '/api/admin/marketplace',
   '/api/admin/contracts/operations-',
   '/api/admin/contracts/catalog-',
   '/api/admin/contracts/inventory-',
 ]);
 
-const CREATIVE_ADMIN_APIS = Object.freeze([
+const CREATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/creative',
   '/api/admin/caip',
   '/api/admin/packaging',
   '/api/admin/content-studio',
   '/api/admin/media-content-studio',
-  '/api/admin/content-publication',
   '/api/admin/image-manifest',
   '/api/admin/visual-enrichment',
   '/api/admin/stage-photo',
@@ -159,7 +204,30 @@ const CREATIVE_ADMIN_APIS = Object.freeze([
   '/api/admin/contracts/content-',
 ]);
 
-const COMMERCE_PUBLIC_PAGES = Object.freeze([
+const SOCIAL_ADMIN_APIS = Object.freeze([
+  '/api/admin/social',
+  '/api/admin/content-publication',
+]);
+
+const FINANCIAL_ADMIN_APIS = Object.freeze([
+  '/api/admin/accounting',
+  '/api/admin/payment',
+  '/api/payment-providers',
+]);
+
+const IT_ADMIN_APIS = Object.freeze([
+  '/api/admin/infrastructure-readiness',
+  '/api/admin/payment-provider-testing-blockers',
+  '/api/admin/payment-provider-obstacle-probe',
+  '/api/admin/post-deploy-smoke-tests',
+  '/api/admin/startup-readiness',
+  '/api/admin/deploy',
+  '/api/admin/readiness',
+  '/api/admin/release',
+]);
+
+const STOREFRONT_PUBLIC_PAGES = Object.freeze([
+  '/',
   '/shop',
   '/cart',
   '/checkout',
@@ -169,13 +237,23 @@ const COMMERCE_PUBLIC_PAGES = Object.freeze([
   '/members',
 ]);
 
-const COMMERCE_PUBLIC_APIS = Object.freeze([
+const SOCIAL_PUBLIC_PAGES = Object.freeze([
+  '/socials',
+  '/workshop-journal',
+]);
+
+const STOREFRONT_PUBLIC_APIS = Object.freeze([
   '/api/member',
   '/api/cart',
   '/api/checkout',
   '/api/product',
   '/api/products',
   '/api/custom-request',
+  '/api/home-carousel',
+]);
+
+const SOCIAL_PUBLIC_APIS = Object.freeze([
+  '/api/social',
 ]);
 
 function cleanPath(pathname) {
@@ -186,9 +264,6 @@ function cleanPath(pathname) {
 
 function matches(path, prefix) {
   if (path === prefix || path.startsWith(`${prefix}/`)) return true;
-  // Pages Functions frequently encode a related API family as product-detail,
-  // gift-card-actions, creative-assets, etc. Treat a hyphen suffix as part of
-  // the same reviewed API stem. Contract stems may already end in '-'.
   if (prefix.startsWith('/api/')) {
     return prefix.endsWith('-') ? path.startsWith(prefix) : path.startsWith(`${prefix}-`);
   }
@@ -209,32 +284,36 @@ export function moduleKeyForPath(pathname) {
   if (matchesAny(path, CORE_EXEMPT)) return null;
   if (sharedServiceContractForPath(path)) return null;
 
-  if (matchesAny(path, CREATIVE_ADMIN_PAGES) || matchesAny(path, CREATIVE_ADMIN_APIS)) {
-    return MODULE_KEYS.CREATIVE_PRODUCTION;
-  }
-  if (matchesAny(path, COMMERCE_ADMIN_PAGES) || matchesAny(path, COMMERCE_ADMIN_APIS)) {
-    return MODULE_KEYS.COMMERCE_OPERATIONS;
-  }
-  if (path === '/admin' || path.startsWith('/admin/') || path.startsWith('/api/admin/')) {
-    return MODULE_KEYS.BUSINESS_ADMINISTRATION;
-  }
-  if (matchesAny(path, COMMERCE_PUBLIC_PAGES) || matchesAny(path, COMMERCE_PUBLIC_APIS)) {
-    return MODULE_KEYS.COMMERCE_OPERATIONS;
-  }
+  if (matchesAny(path, IT_ADMIN_PAGES) || matchesAny(path, IT_ADMIN_APIS)) return MODULE_KEYS.IT_PLATFORM;
+  if (matchesAny(path, FINANCIAL_ADMIN_PAGES) || matchesAny(path, FINANCIAL_ADMIN_APIS)) return MODULE_KEYS.FINANCIALS;
+  if (matchesAny(path, SOCIAL_ADMIN_PAGES) || matchesAny(path, SOCIAL_ADMIN_APIS)) return MODULE_KEYS.SOCIALS;
+  if (matchesAny(path, CREATOR_ADMIN_PAGES) || matchesAny(path, CREATOR_ADMIN_APIS)) return MODULE_KEYS.CREATORS;
+  if (matchesAny(path, STOREFRONT_ADMIN_PAGES) || matchesAny(path, STOREFRONT_ADMIN_APIS)) return MODULE_KEYS.STOREFRONT;
+  if (matchesAny(path, SOCIAL_PUBLIC_PAGES) || matchesAny(path, SOCIAL_PUBLIC_APIS)) return MODULE_KEYS.SOCIALS;
+  if (matchesAny(path, STOREFRONT_PUBLIC_PAGES) || matchesAny(path, STOREFRONT_PUBLIC_APIS)) return MODULE_KEYS.STOREFRONT;
+
+  // Unclassified admin surfaces remain Application Core until deliberately assigned.
   return null;
 }
 
 export function snapshotRouteOwnership() {
   return Object.freeze({
-    build: 438,
+    release: 447,
     coreExempt: CORE_EXEMPT,
     sharedServiceContracts: SHARED_SERVICE_CONTRACTS,
-    commerceAdminPages: COMMERCE_ADMIN_PAGES,
-    creativeAdminPages: CREATIVE_ADMIN_PAGES,
-    commerceAdminApis: COMMERCE_ADMIN_APIS,
-    creativeAdminApis: CREATIVE_ADMIN_APIS,
-    commercePublicPages: COMMERCE_PUBLIC_PAGES,
-    commercePublicApis: COMMERCE_PUBLIC_APIS,
-    defaultAdminModule: MODULE_KEYS.BUSINESS_ADMINISTRATION,
+    storefrontAdminPages: STOREFRONT_ADMIN_PAGES,
+    creatorAdminPages: CREATOR_ADMIN_PAGES,
+    socialAdminPages: SOCIAL_ADMIN_PAGES,
+    financialAdminPages: FINANCIAL_ADMIN_PAGES,
+    itAdminPages: IT_ADMIN_PAGES,
+    storefrontAdminApis: STOREFRONT_ADMIN_APIS,
+    creatorAdminApis: CREATOR_ADMIN_APIS,
+    socialAdminApis: SOCIAL_ADMIN_APIS,
+    financialAdminApis: FINANCIAL_ADMIN_APIS,
+    itAdminApis: IT_ADMIN_APIS,
+    storefrontPublicPages: STOREFRONT_PUBLIC_PAGES,
+    socialPublicPages: SOCIAL_PUBLIC_PAGES,
+    storefrontPublicApis: STOREFRONT_PUBLIC_APIS,
+    socialPublicApis: SOCIAL_PUBLIC_APIS,
   });
 }

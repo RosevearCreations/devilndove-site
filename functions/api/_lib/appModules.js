@@ -1,20 +1,24 @@
-// Devil n Dove Build 438 shared application-module authority.
+// Devil n Dove canonical shared application-module authority.
 // Module configuration may be cached per isolate because it is not request-specific.
-// Session/user identity is always resolved per request.
+// Session identity and explicit per-user module grants are always resolved per request.
 
 import { getDb, getRequestToken, normalizeText } from './adminAudit.js';
-import { MODULE_KEYS } from './appModuleRoutes.js';
+import { CURRENT_RELEASE } from './releaseAuthority.js';
+import { canonicalModuleKey, MODULE_KEYS } from './appModuleRoutes.js';
 
-export { MODULE_KEYS, moduleKeyForPath } from './appModuleRoutes.js';
+export { canonicalModuleKey, MODULE_KEYS, moduleKeyForPath } from './appModuleRoutes.js';
+export { CURRENT_RELEASE } from './releaseAuthority.js';
 
-export const BUILD = 438;
+// Temporary source compatibility for code that still imports BUILD. It always resolves
+// to the one current release and is not a historical release gate.
+export const BUILD = CURRENT_RELEASE;
 export const MODULE_CACHE_TTL_MS = 5_000;
 
 const DEFAULT_MODULES = Object.freeze([
   Object.freeze({
-    module_key: MODULE_KEYS.COMMERCE_OPERATIONS,
-    display_name: 'Commerce & Operations',
-    description: 'Customer/storefront, catalog, inventory, orders, memberships, fulfillment and day-to-day customer operations.',
+    module_key: MODULE_KEYS.STOREFRONT,
+    display_name: 'Storefront',
+    description: 'Public storefront, catalog, products, collections, merchandising, inventory, orders, memberships and customer commerce.',
     is_enabled: 1,
     requires_login: 0,
     default_route: '/',
@@ -22,9 +26,9 @@ const DEFAULT_MODULES = Object.freeze([
     background_activity_enabled: 0,
   }),
   Object.freeze({
-    module_key: MODULE_KEYS.CREATIVE_PRODUCTION,
-    display_name: 'Creative & Production',
-    description: 'Creative Process, CAIP, Packaging & Labeling, Content Studio and reviewed production workflows.',
+    module_key: MODULE_KEYS.CREATORS,
+    display_name: 'Creators',
+    description: 'Creative Projects, CAIP, Packaging and Labeling, Content Studio, media evidence and reviewed maker workflows.',
     is_enabled: 1,
     requires_login: 1,
     default_route: '/admin/creative-automation/',
@@ -32,26 +36,52 @@ const DEFAULT_MODULES = Object.freeze([
     background_activity_enabled: 0,
   }),
   Object.freeze({
-    module_key: MODULE_KEYS.BUSINESS_ADMINISTRATION,
-    display_name: 'Business & Administration',
-    description: 'Accounting, marketing, analytics, administration, platform/release tooling and business controls.',
+    module_key: MODULE_KEYS.SOCIALS,
+    display_name: 'Socials',
+    description: 'Public social hub, publication packages, social-channel publishing, campaigns and publication evidence.',
+    is_enabled: 1,
+    requires_login: 0,
+    default_route: '/socials/',
+    load_priority: 30,
+    background_activity_enabled: 0,
+  }),
+  Object.freeze({
+    module_key: MODULE_KEYS.FINANCIALS,
+    display_name: 'Financials',
+    description: 'Accounting, costs, profitability, payment-provider operations, reconciliation, tax and financial reporting.',
     is_enabled: 1,
     requires_login: 1,
-    default_route: '/admin/',
-    load_priority: 30,
+    default_route: '/admin/accounting/',
+    load_priority: 40,
+    background_activity_enabled: 0,
+  }),
+  Object.freeze({
+    module_key: MODULE_KEYS.IT_PLATFORM,
+    display_name: 'I.T.',
+    description: 'Application modules, user access, API/provider configuration, D1/R2 readiness, diagnostics, recovery and release controls.',
+    is_enabled: 1,
+    requires_login: 1,
+    default_route: '/admin/it-platform/',
+    load_priority: 50,
     background_activity_enabled: 0,
   }),
 ]);
 
 const DEFAULT_ROLE_ACCESS = Object.freeze([
-  Object.freeze({ module_key: MODULE_KEYS.COMMERCE_OPERATIONS, role_code: 'member', is_allowed: 1, access_level: 'member' }),
-  Object.freeze({ module_key: MODULE_KEYS.COMMERCE_OPERATIONS, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
-  Object.freeze({ module_key: MODULE_KEYS.CREATIVE_PRODUCTION, role_code: 'member', is_allowed: 0, access_level: 'none' }),
-  Object.freeze({ module_key: MODULE_KEYS.CREATIVE_PRODUCTION, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
-  Object.freeze({ module_key: MODULE_KEYS.BUSINESS_ADMINISTRATION, role_code: 'member', is_allowed: 0, access_level: 'none' }),
-  Object.freeze({ module_key: MODULE_KEYS.BUSINESS_ADMINISTRATION, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
+  Object.freeze({ module_key: MODULE_KEYS.STOREFRONT, role_code: 'member', is_allowed: 1, access_level: 'member' }),
+  Object.freeze({ module_key: MODULE_KEYS.STOREFRONT, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
+  Object.freeze({ module_key: MODULE_KEYS.CREATORS, role_code: 'member', is_allowed: 0, access_level: 'none' }),
+  Object.freeze({ module_key: MODULE_KEYS.CREATORS, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
+  Object.freeze({ module_key: MODULE_KEYS.SOCIALS, role_code: 'member', is_allowed: 1, access_level: 'read' }),
+  Object.freeze({ module_key: MODULE_KEYS.SOCIALS, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
+  Object.freeze({ module_key: MODULE_KEYS.FINANCIALS, role_code: 'member', is_allowed: 0, access_level: 'none' }),
+  Object.freeze({ module_key: MODULE_KEYS.FINANCIALS, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
+  // I.T. is deliberately explicit-user only; role membership alone never grants access.
+  Object.freeze({ module_key: MODULE_KEYS.IT_PLATFORM, role_code: 'member', is_allowed: 0, access_level: 'none' }),
+  Object.freeze({ module_key: MODULE_KEYS.IT_PLATFORM, role_code: 'admin', is_allowed: 0, access_level: 'none' }),
 ]);
 
+const DEFAULT_BY_KEY = new Map(DEFAULT_MODULES.map((row) => [row.module_key, row]));
 let moduleConfigCache = null;
 let moduleConfigExpiresAt = 0;
 
@@ -59,9 +89,15 @@ function cloneRows(rows) {
   return (Array.isArray(rows) ? rows : []).map((row) => ({ ...row }));
 }
 
+function normalizedKey(value) {
+  return canonicalModuleKey(normalizeText(value).toLowerCase());
+}
+
 function normalizeModuleRow(row) {
+  const storageKey = normalizeText(row?.module_key).toLowerCase();
   return {
-    module_key: normalizeText(row?.module_key).toLowerCase(),
+    module_key: normalizedKey(storageKey),
+    storage_module_key: storageKey || null,
     display_name: normalizeText(row?.display_name),
     description: normalizeText(row?.description),
     is_enabled: Number(row?.is_enabled || 0) === 1 ? 1 : 0,
@@ -74,21 +110,70 @@ function normalizeModuleRow(row) {
   };
 }
 
+function mergeModuleRows(rows) {
+  const byKey = new Map();
+  for (const raw of Array.isArray(rows) ? rows : []) {
+    const row = normalizeModuleRow(raw);
+    if (!DEFAULT_BY_KEY.has(row.module_key)) continue;
+    const existing = byKey.get(row.module_key);
+    const rowIsCanonicalStorage = row.storage_module_key === row.module_key;
+    const existingIsCanonicalStorage = existing?.storage_module_key === existing?.module_key;
+    if (!existing || rowIsCanonicalStorage || !existingIsCanonicalStorage) byKey.set(row.module_key, row);
+  }
+  for (const fallback of DEFAULT_MODULES) {
+    if (!byKey.has(fallback.module_key)) {
+      byKey.set(fallback.module_key, { ...fallback, storage_module_key: null, created_at: null, updated_at: null });
+    }
+  }
+  return [...byKey.values()].sort((a, b) => Number(a.load_priority || 100) - Number(b.load_priority || 100));
+}
+
 function normalizeRoleRow(row) {
   return {
-    module_key: normalizeText(row?.module_key).toLowerCase(),
+    module_key: normalizedKey(row?.module_key),
     role_code: normalizeText(row?.role_code).toLowerCase(),
     is_allowed: Number(row?.is_allowed || 0) === 1 ? 1 : 0,
-    access_level: normalizeText(row?.access_level) || 'read',
+    access_level: normalizeText(row?.access_level) || 'none',
   };
+}
+
+function mergeRoleRows(rows) {
+  const byKey = new Map();
+  for (const raw of Array.isArray(rows) ? rows : []) {
+    const row = normalizeRoleRow(raw);
+    const key = `${row.module_key}:${row.role_code}`;
+    if (!row.module_key || !row.role_code) continue;
+    const rawModuleKey = normalizeText(raw?.module_key).toLowerCase();
+    const rowIsCanonicalStorage = rawModuleKey === row.module_key;
+    const existing = byKey.get(key);
+    const existingIsCanonicalStorage = existing?._canonical_storage === true;
+    if (!existing || rowIsCanonicalStorage || !existingIsCanonicalStorage) {
+      byKey.set(key, { ...row, _canonical_storage: rowIsCanonicalStorage });
+    }
+  }
+  for (const fallback of DEFAULT_ROLE_ACCESS) {
+    const key = `${fallback.module_key}:${fallback.role_code}`;
+    if (!byKey.has(key)) byKey.set(key, { ...fallback, _canonical_storage: false });
+  }
+  return [...byKey.values()].map(({ _canonical_storage, ...row }) => row);
+}
+
+function canonicalMigrationRequired(moduleRows, roleRows) {
+  const rawModuleKeys = new Set((moduleRows || []).map((row) => normalizeText(row?.module_key).toLowerCase()).filter(Boolean));
+  const rawRoleKeys = new Set((roleRows || []).map((row) => normalizeText(row?.module_key).toLowerCase()).filter(Boolean));
+  const canonicalKeys = Object.values(MODULE_KEYS);
+  const missingCanonical = canonicalKeys.some((key) => !rawModuleKeys.has(key) || !rawRoleKeys.has(key));
+  const legacyPresent = [...rawModuleKeys, ...rawRoleKeys].some((key) => normalizedKey(key) !== key);
+  return missingCanonical || legacyPresent;
 }
 
 function compatibilityConfig(reason = 'schema_not_ready') {
   return {
     schema_ready: false,
-    source: 'build438_defaults',
+    migration_required: true,
+    source: 'platform_defaults',
     reason,
-    modules: cloneRows(DEFAULT_MODULES),
+    modules: cloneRows(DEFAULT_MODULES).map((row) => ({ ...row, storage_module_key: null })),
     role_access: cloneRows(DEFAULT_ROLE_ACCESS),
   };
 }
@@ -96,9 +181,10 @@ function compatibilityConfig(reason = 'schema_not_ready') {
 function failClosedConfig(reason = 'module_config_read_failed') {
   return {
     schema_ready: false,
+    migration_required: true,
     source: 'fail_closed',
     reason,
-    modules: cloneRows(DEFAULT_MODULES).map((module) => ({ ...module, is_enabled: 0, background_activity_enabled: 0 })),
+    modules: cloneRows(DEFAULT_MODULES).map((module) => ({ ...module, storage_module_key: null, is_enabled: 0, background_activity_enabled: 0 })),
     role_access: cloneRows(DEFAULT_ROLE_ACCESS),
   };
 }
@@ -109,9 +195,7 @@ export function clearModuleConfigCache() {
 }
 
 export async function readModuleConfig(env, { force = false } = {}) {
-  if (!force && moduleConfigCache && Date.now() < moduleConfigExpiresAt) {
-    return moduleConfigCache;
-  }
+  if (!force && moduleConfigCache && Date.now() < moduleConfigExpiresAt) return moduleConfigCache;
 
   const db = getDb(env);
   if (!db) {
@@ -122,7 +206,6 @@ export async function readModuleConfig(env, { force = false } = {}) {
   }
 
   const priorConfig = moduleConfigCache;
-
   try {
     const [moduleResult, roleResult] = await Promise.all([
       db.prepare(`
@@ -139,16 +222,17 @@ export async function readModuleConfig(env, { force = false } = {}) {
       `).all(),
     ]);
 
-    const modules = (moduleResult?.results || []).map(normalizeModuleRow);
-    const roleAccess = (roleResult?.results || []).map(normalizeRoleRow);
-    if (!modules.length) throw new Error('app_modules is empty');
-
+    const rawModules = moduleResult?.results || [];
+    const rawRoles = roleResult?.results || [];
+    if (!rawModules.length) throw new Error('app_modules is empty');
+    const migrationRequired = canonicalMigrationRequired(rawModules, rawRoles);
     const config = {
       schema_ready: true,
-      source: 'd1',
-      reason: null,
-      modules,
-      role_access: roleAccess,
+      migration_required: migrationRequired,
+      source: migrationRequired ? 'd1_compatibility' : 'd1',
+      reason: migrationRequired ? 'canonical_module_registry_migration_required' : null,
+      modules: mergeModuleRows(rawModules),
+      role_access: mergeRoleRows(rawRoles),
     };
     moduleConfigCache = config;
     moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
@@ -156,25 +240,18 @@ export async function readModuleConfig(env, { force = false } = {}) {
   } catch (error) {
     const message = normalizeText(error?.message).toLowerCase();
     const missingSchema = message.includes('no such table') || message.includes('app_modules') || message.includes('app_module_role_access');
-
     if (missingSchema) {
       const config = compatibilityConfig('schema_not_ready');
       moduleConfigCache = config;
       moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
       return config;
     }
-
     if (priorConfig?.modules?.length) {
-      const stale = {
-        ...priorConfig,
-        source: `${priorConfig.source || 'd1'}_stale`,
-        reason: 'module_config_read_failed_using_last_known',
-      };
+      const stale = { ...priorConfig, source: `${priorConfig.source || 'd1'}_stale`, reason: 'module_config_read_failed_using_last_known' };
       moduleConfigCache = stale;
       moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
       return stale;
     }
-
     const config = failClosedConfig('module_config_read_failed');
     moduleConfigCache = config;
     moduleConfigExpiresAt = Date.now() + MODULE_CACHE_TTL_MS;
@@ -182,11 +259,34 @@ export async function readModuleConfig(env, { force = false } = {}) {
   }
 }
 
+export async function readUserModuleAccess(env, userId, { strict = false } = {}) {
+  const db = getDb(env);
+  if (!db || !Number(userId || 0)) return [];
+  try {
+    const result = await db.prepare(`
+      SELECT module_key, user_id, is_allowed, access_level
+      FROM app_module_user_access
+      WHERE user_id=?
+      ORDER BY module_key ASC
+    `).bind(Number(userId)).all();
+    return (result?.results || []).map((row) => ({
+      module_key: normalizedKey(row?.module_key),
+      user_id: Number(row?.user_id || userId),
+      is_allowed: Number(row?.is_allowed || 0) === 1 ? 1 : 0,
+      access_level: normalizeText(row?.access_level) || 'none',
+    }));
+  } catch (error) {
+    const message = normalizeText(error?.message).toLowerCase();
+    if (message.includes('no such table') || message.includes('app_module_user_access')) return [];
+    if (strict) throw error;
+    return [];
+  }
+}
+
 export async function readSessionUser(request, env) {
   const db = getDb(env);
   const token = getRequestToken(request);
   if (!db || !token) return null;
-
   try {
     const row = await db.prepare(`
       SELECT s.session_id, s.expires_at,
@@ -197,7 +297,6 @@ export async function readSessionUser(request, env) {
         AND s.expires_at > datetime('now')
       LIMIT 1
     `).bind(token, token).first();
-
     if (!row || Number(row.is_active || 0) !== 1) return null;
     return {
       user_id: Number(row.user_id || 0),
@@ -207,6 +306,7 @@ export async function readSessionUser(request, env) {
       is_active: 1,
       session_id: Number(row.session_id || 0),
       expires_at: row.expires_at || null,
+      module_access: await readUserModuleAccess(env, row.user_id),
     };
   } catch {
     return null;
@@ -214,30 +314,44 @@ export async function readSessionUser(request, env) {
 }
 
 function roleAccessFor(config, moduleKey, role) {
-  const key = normalizeText(moduleKey).toLowerCase();
+  const key = normalizedKey(moduleKey);
   const roleCode = normalizeText(role).toLowerCase();
   return (config?.role_access || []).find((row) => row.module_key === key && row.role_code === roleCode) || null;
 }
 
+function explicitUserAccessFor(user, moduleKey) {
+  const key = normalizedKey(moduleKey);
+  return (user?.module_access || []).find((row) => row.module_key === key) || null;
+}
+
 export function moduleByKey(config, moduleKey) {
-  const key = normalizeText(moduleKey).toLowerCase();
+  const key = normalizedKey(moduleKey);
   return (config?.modules || []).find((row) => row.module_key === key) || null;
 }
 
 export function evaluateModuleAccess(config, moduleKey, user = null) {
   const module = moduleByKey(config, moduleKey);
-  if (!module) {
-    return { allowed: false, reason: 'unknown_module', module: null, access_level: 'none' };
-  }
-  if (Number(module.is_enabled || 0) !== 1) {
-    return { allowed: false, reason: 'module_disabled', module, access_level: 'none' };
-  }
+  if (!module) return { allowed: false, reason: 'unknown_module', module: null, access_level: 'none' };
+  if (Number(module.is_enabled || 0) !== 1) return { allowed: false, reason: 'module_disabled', module, access_level: 'none' };
 
   if (!user) {
-    if (Number(module.requires_login || 0) === 1) {
-      return { allowed: false, reason: 'login_required', module, access_level: 'none' };
-    }
+    if (Number(module.requires_login || 0) === 1) return { allowed: false, reason: 'login_required', module, access_level: 'none' };
     return { allowed: true, reason: 'public', module, access_level: 'public' };
+  }
+
+  const explicit = explicitUserAccessFor(user, module.module_key);
+  if (explicit) {
+    const allowed = Number(explicit.is_allowed || 0) === 1 && normalizeText(explicit.access_level).toLowerCase() !== 'none';
+    return {
+      allowed,
+      reason: allowed ? 'explicit_user_grant' : 'explicit_user_denial',
+      module,
+      access_level: allowed ? (explicit.access_level || 'read') : 'none',
+    };
+  }
+
+  if (module.module_key === MODULE_KEYS.IT_PLATFORM) {
+    return { allowed: false, reason: 'explicit_user_grant_required', module, access_level: 'none' };
   }
 
   const access = roleAccessFor(config, module.module_key, user.role);
@@ -313,14 +427,10 @@ export function sharedServiceUnavailableResponse(access) {
     contract_path: contract?.path || null,
     owner_module_key: contract?.owner_module_key || null,
     consumer_module_keys: contract?.consumer_module_keys || [],
-    build: BUILD,
+    release: CURRENT_RELEASE,
   }), {
     status: 403,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
-    },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
   });
 }
 
@@ -335,7 +445,7 @@ export function moduleUnavailableResponse(moduleAccess, { api = false } = {}) {
       code: `module_${reason}`,
       module_key: module?.module_key || null,
       module_name: module?.display_name || null,
-      build: BUILD,
+      release: CURRENT_RELEASE,
     }), {
       status,
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },

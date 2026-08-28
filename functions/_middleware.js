@@ -1,23 +1,19 @@
-// Devil n Dove Build 438 application-module route guard.
-// Runs only meaningful module-owned page/API requests through D1-backed availability.
-// Static JS/CSS/assets and shared-core/auth/control routes pass through untouched.
+// Devil n Dove current-release application-module route guard.
+// Static assets and Application Core recovery routes pass through untouched.
 
 import {
-  BUILD,
   moduleAccessForRequest,
   moduleUnavailableResponse,
   sharedServiceAccessForRequest,
   sharedServiceUnavailableResponse,
 } from './api/_lib/appModules.js';
+import { CURRENT_RELEASE, RELEASE_HEADER } from './api/_lib/releaseAuthority.js';
 import {
   appModuleSessionUnavailableResponse,
   isAppModuleSessionVerificationUnavailable,
   resolveAppModuleRequestUser,
 } from './api/_lib/appModuleSessionGuard.js';
-import {
-  moduleKeyForPath,
-  sharedServiceContractForPath,
-} from './api/_lib/appModuleRoutes.js';
+import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
 function isApiPath(pathname) {
   return String(pathname || '').startsWith('/api/');
@@ -29,14 +25,12 @@ function isReadMethod(method) {
 
 function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) {
   const headers = new Headers(response.headers);
-  headers.set('X-DND-Module-Guard', String(BUILD));
+  headers.set(RELEASE_HEADER, String(CURRENT_RELEASE));
+  // Compatibility header for older admin diagnostics; value is always current release.
+  headers.set('X-DND-Module-Guard', String(CURRENT_RELEASE));
   if (moduleKey) headers.set('X-DND-Module-Key', moduleKey);
   if (contractPath) headers.set('X-DND-Shared-Contract', contractPath);
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
 function readOnlyDeniedResponse(access) {
@@ -47,14 +41,10 @@ function readOnlyDeniedResponse(access) {
     module_key: access?.module?.module_key || null,
     module_name: access?.module?.display_name || null,
     access_level: access?.access_level || 'read',
-    build: BUILD,
+    release: CURRENT_RELEASE,
   }), {
     status: 403,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
-    },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
   });
 }
 
@@ -82,22 +72,14 @@ export async function onRequest(context) {
   const pathname = new URL(request.url).pathname;
   if (shouldBypass(pathname)) return await context.next();
 
-  // Explicit cross-module service contracts are Application Core boundaries. They
-  // remain callable only when at least one reviewed consumer module is enabled for
-  // the current user. Mutation contracts additionally require a manage-level consumer.
   const sharedContract = sharedServiceContractForPath(pathname);
   if (sharedContract) {
     const resolvedUser = await resolveGuardUser(request, env, pathname);
-    if (resolvedUser instanceof Response) {
-      return withGuardHeaders(resolvedUser, { contractPath: sharedContract.path });
-    }
-
+    if (resolvedUser instanceof Response) return withGuardHeaders(resolvedUser, { contractPath: sharedContract.path });
     const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract, { user: resolvedUser });
     context.data.ddSharedServiceAccess = sharedAccess;
-    context.data.ddModuleBuild = BUILD;
-    if (!sharedAccess.allowed) {
-      return withGuardHeaders(sharedServiceUnavailableResponse(sharedAccess), { contractPath: sharedContract.path });
-    }
+    context.data.ddModuleRelease = CURRENT_RELEASE;
+    if (!sharedAccess.allowed) return withGuardHeaders(sharedServiceUnavailableResponse(sharedAccess), { contractPath: sharedContract.path });
     return withGuardHeaders(await context.next(), { contractPath: sharedContract.path });
   }
 
@@ -105,21 +87,14 @@ export async function onRequest(context) {
   if (!moduleKey) return await context.next();
 
   const resolvedUser = await resolveGuardUser(request, env, pathname);
-  if (resolvedUser instanceof Response) {
-    return withGuardHeaders(resolvedUser, { moduleKey });
-  }
+  if (resolvedUser instanceof Response) return withGuardHeaders(resolvedUser, { moduleKey });
 
   const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
   context.data.ddModuleAccess = access;
-  context.data.ddModuleBuild = BUILD;
-
-  if (!access.allowed) {
-    return withGuardHeaders(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), { moduleKey });
-  }
-
+  context.data.ddModuleRelease = CURRENT_RELEASE;
+  if (!access.allowed) return withGuardHeaders(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), { moduleKey });
   if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
     return withGuardHeaders(readOnlyDeniedResponse(access), { moduleKey });
   }
-
   return withGuardHeaders(await context.next(), { moduleKey });
 }
