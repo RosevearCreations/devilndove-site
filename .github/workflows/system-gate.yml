@@ -45,6 +45,10 @@ jobs:
         run: python scripts/module_architecture_gate.py
       - name: Execute canonical D1 platform migration locally
         run: python scripts/database_platform_gate.py
+      - name: Validate Release 448 Product lineage locally
+        run: python scripts/product_lineage_gate.py
+      - name: Validate Release 448 Product lineage D1 transport without writes
+        run: python scripts/apply_development_product_lineage.py --transport-preflight
       - name: Validate current Development D1 remote transport without writes
         run: python scripts/cloudflare_development_access.py --transport-preflight
       - name: Validate Development runtime acceptance safety and manifest
@@ -62,6 +66,9 @@ jobs:
           node --check functions/api/_lib/appModules.js
           node --check functions/api/_lib/appModuleRoutes.js
           node --check functions/api/_lib/appModuleSessionGuard.js
+          node --check functions/api/_lib/productLineage.js
+          node --check functions/api/admin/_middleware.js
+          node --check functions/api/admin/product-lineage.js
           node --check functions/api/admin/app-modules.js
           node --check functions/api/admin/infrastructure-readiness.js
           node --check functions/api/admin/contracts/catalog-read.js
@@ -74,11 +81,12 @@ jobs:
           node --check public/js/admin-home-carousel.js
           node --check public/js/admin-application-modules.js
           node --check public/js/admin-it-platform.js
+          node --check public/js/admin-product-lineage.js
           node --check public/js/pwa-platform.js
           node --check functions/api/payment-providers.js
           node --check sw.js
       - name: Compile canonical Python gates
-        run: python -m py_compile scripts/repository_forward_sanity.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/public_seo_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/development_runtime_acceptance.py
+        run: python -m py_compile scripts/repository_forward_sanity.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/product_lineage_gate.py scripts/public_seo_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/apply_development_product_lineage.py scripts/development_runtime_acceptance.py
       - name: Whitespace validation
         run: git diff --check
       - name: Safety statement
