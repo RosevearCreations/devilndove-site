@@ -1,8 +1,10 @@
-# Development Runtime Acceptance
+# Development I.T. Test Environment
 
 Updated: 2026-08-28
 
-This is the active runtime-acceptance procedure for the one current Development release. Historical numbered testing guides remain Git-history provenance only and are not operating instructions.
+This is the release-independent Development testing procedure for deferred I.T. runtime/provider/media evidence. It is **non-blocking** for normal forward release development. Historical numbered testing guides remain Git-history provenance only and are not operating instructions.
+
+The application continues to move through one current release even when an external credential, provider sandbox, authenticated browser session or private-media acceptance task is still pending. Those tasks remain visible on the I.T. page until completed; they do not become old-release gates.
 
 ## Allowed target
 
@@ -15,9 +17,15 @@ This is the active runtime-acceptance procedure for the one current Development 
 
 `scripts/development_runtime_acceptance.py` hard-refuses Production, custom-domain, HTTP and arbitrary hosts. Runtime acceptance performs GET requests only.
 
-## 1. Repository and infrastructure preflight
+## Forward-development rule
 
-Run the canonical source gates first:
+For ordinary feature implementation, treat required Development provider/key **references** as available or use the existing safe mock/provider abstraction. Do not block Storefront, Creators, Socials, Financials, CAIP, Inventory, Supplies, Tools or client work merely because real provider acceptance has not yet been performed.
+
+This does **not** mean that a real Stripe, PayPal, social, Amazon or other credential has been verified. It means external I.T. validation is deferred to the dedicated test environment while source/database/client development continues.
+
+## Read-only repository and infrastructure checks
+
+The canonical source gates remain normal release checks:
 
 ```bash
 python scripts/repository_forward_sanity.py
@@ -30,27 +38,17 @@ python scripts/cloudflare_development_access.py --transport-preflight
 python scripts/development_runtime_acceptance.py --self-check
 ```
 
-Then use the read-only Cloudflare resource preflight:
+Use the read-only Cloudflare resource preflight when infrastructure work requires it:
 
 ```bash
 python scripts/cloudflare_development_access.py --auth-only
 ```
 
-This verifies the exact Development account, D1 and both R2 buckets without applying a migration. Do not reapply `database_platform_convergence.sql` unless read-only readiness proves actual schema drift.
+This verifies the exact Development account, D1 and both R2 buckets without applying a migration. Do not reapply `database_platform_convergence.sql` merely because a release changed. New current-release D1 migrations are allowed when current feature work actually requires them and they pass their migration/regression gates.
 
-## 2. Anonymous authorization boundary
+## Deferred authenticated Development runtime
 
-The acceptance harness can prove that authenticated Development contracts reject anonymous access without sending a password or token:
-
-```bash
-python scripts/development_runtime_acceptance.py --anonymous-check --evidence-json evidence/runtime-anonymous.json
-```
-
-Expected result: protected infrastructure, module and shared-service routes return 401/403. The harness never targets Production.
-
-## 3. Authenticated Development runtime
-
-Use a fresh authenticated Development browser session. Put only the complete Development session-cookie header value in the environment variable `DND_DEV_SESSION_COOKIE`. Do not put a password, cookie, API key or token in a script, Markdown file, shell argument, Git commit or evidence file.
+When I.T. work is scheduled, use a fresh authenticated Development browser session. Put only the complete Development session-cookie header value in the environment variable `DND_DEV_SESSION_COOKIE`. Do not put a password, cookie, API key or token in a script, Markdown file, shell argument, Git commit or evidence file.
 
 PowerShell example using a placeholder only:
 
@@ -60,74 +58,64 @@ python scripts/development_runtime_acceptance.py --evidence-json evidence/runtim
 Remove-Item Env:DND_DEV_SESSION_COOKIE
 ```
 
-The harness verifies, using GET/read-only contracts only:
+The harness verifies D1/R2 readiness, the five canonical modules, Storefront/Creators/Financials read contracts, Socials/I.T. module authority and safe Stripe/PayPal configuration readiness. Generated evidence is sanitized.
 
-- the exact Development Pages target;
-- authenticated D1 plus both R2 bindings;
-- no current D1 migration requirement;
-- D1/R2/provider mutation policy disabled;
-- the five canonical modules and 10 role-access rows;
-- Storefront catalog read authority;
-- Creators content/media read authority;
-- Socials presence in the authenticated canonical module authority without publishing;
-- Financials accounting read authority;
-- I.T. infrastructure/module authority;
-- safe public Stripe/PayPal configuration readiness.
+## Deferred Stripe test
 
-The generated evidence is deliberately sanitized and does not contain the session cookie or provider secrets.
-
-## 4. Stripe acceptance is separate
-
-A runtime result of `Stripe configuration_readiness: READY` means only that Development-safe credential references, test mode and webhook configuration appear ready through the non-secret provider endpoint. It does **not** close Stripe acceptance.
-
-Stripe acceptance requires a deliberate owner-controlled Development test covering:
+Stripe provider acceptance later covers:
 
 1. test-mode checkout creation;
 2. owner-controlled completion/return;
 3. signed webhook receipt;
 4. order/payment reconciliation;
 5. duplicate event replay/idempotency;
-6. evidence containing provider/event references but no secrets or customer information.
+6. sanitized evidence references.
 
-If any item remains unproven, Stripe remains HOLD.
+Until performed, record Stripe as `deferred` in the I.T. test environment—not as a release HOLD.
 
-## 5. PayPal acceptance is separate
+## Deferred PayPal sandbox test
 
-A runtime result of `PayPal configuration_readiness: READY` means only that sandbox credential references and webhook configuration appear ready through the non-secret provider endpoint. It does **not** close PayPal acceptance.
+PayPal provider acceptance later covers:
 
-PayPal acceptance requires a deliberate sandbox test covering:
-
-1. approval flow;
+1. sandbox approval flow;
 2. capture;
 3. owner-controlled return;
 4. verified webhook receipt;
 5. reconciliation;
 6. duplicate replay/idempotency;
-7. sanitized provider/evidence references.
+7. sanitized evidence references.
 
-If any item remains unproven, PayPal remains HOLD.
+Until performed, record PayPal as `deferred` in the I.T. test environment—not as a release HOLD.
 
-## 6. CAIP private-media acceptance is separate
+## Deferred CAIP private-media evidence
 
-Do not substitute public media or R2 bucket visibility for private-media evidence. Closure requires authenticated private object delivery, HTTP Range/seek behavior, exact timecode/range evidence, verified derived-artifact metadata and proof that provider-off/error behavior fails closed where required.
+Later I.T./CAIP acceptance covers authenticated private object delivery, HTTP Range/seek behavior, exact timecode/range evidence, verified derived-artifact metadata and provider-off/error behavior. Public media or simple bucket visibility is not equivalent evidence.
 
-## 7. Evidence and release decision
+## I.T. test-environment direction
 
-A deterministic core runtime `PASS` closes only the authenticated read-only runtime portion of the current release. Provider transaction acceptance and CAIP private-media acceptance stay separate until their real Development evidence exists.
+The I.T. page is the future single place to complete external-platform setup and evidence. It should eventually hold safe configuration metadata for each provider/platform:
 
-After any source change:
+- platform/provider and capability;
+- consuming module/workflow;
+- Development/Production environment;
+- secret/binding **reference name only**;
+- callback/redirect/webhook locations;
+- requested/granted scopes;
+- configured state;
+- tested/accepted state;
+- last safe test result/error;
+- correction/recovery mechanics;
+- evidence reference.
 
-1. require the canonical GitHub `System Gate` to pass on the exact `dev` SHA;
-2. require Cloudflare Pages `devilndove-site-dev` to deploy that same SHA successfully;
-3. rerun authenticated runtime acceptance if runtime behavior changed;
-4. update `development-release.json`, `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md` and the I.T. status surface when evidence changes;
-5. keep Production untouched until explicit promotion authorization.
+Actual secret values never belong in D1, visible HTML, source control, logs or evidence output.
 
 ## Permanent rules
 
 - Historical build numbers are provenance only, never current acceptance requirements.
+- There is one current forward release.
+- Deferred I.T. test work is non-blocking and carries forward automatically until completed.
 - Runtime acceptance is Development-only and GET/read-only.
 - No embedded passwords, tokens, cookies or provider secrets.
-- D1/R2 readiness never implies permission to migrate or write.
+- D1/R2 readiness never authorizes an unrelated migration.
 - Provider readiness never implies provider acceptance.
 - Production mutation is forbidden until a deliberate promotion decision.
