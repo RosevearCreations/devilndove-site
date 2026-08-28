@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Manufacturer &amp; Equipment Reviews — Devil n Dove</title>
+  <meta name="description" content="Link Tool and Supply Inventory to manufacturers and maintain Devil n Dove-authored purchased-item reviews."/>
+  <link rel="stylesheet" href="/css/styles.css?v=448"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="vendor-reviews">
+  <div class="container admin-shell">
+    <div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Inventory Provenance</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/product-lineage/">Product Lineage</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
+    <div class="hero compact-hero"><div><h1>Manufacturers &amp; Purchased-Item Reviews</h1><p>Release 448 first-party provenance for Tools and Supplies, including manufacturer identity, VEVOR/Amazon references and Devil n Dove-authored reviews.</p></div></div>
+
+    <section class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Choose Tool or Supply</h2>
+      <div class="grid cols-2" style="gap:12px;align-items:end">
+        <label><span class="small">Search</span><input class="input" id="vendorReviewSearch" placeholder="Tool, Supply, supplier or manufacturer"/></label>
+        <label><span class="small">Inventory item</span><select class="input" id="vendorReviewItem"><option value="">Loading…</option></select></label>
+      </div>
+      <p class="small" id="vendorReviewMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card" id="manufacturerCard" style="margin-top:18px" hidden>
+      <h2 style="margin-top:0">Manufacturer provenance</h2>
+      <p class="small">Supplier/store and manufacturer are separate. We never infer the manufacturer from the supplier name; this record is saved only after review.</p>
+      <div class="grid cols-3" style="gap:12px">
+        <label><span class="small">Existing manufacturer</span><select class="input" id="manufacturerSelect"><option value="">Create / enter below…</option></select></label>
+        <label><span class="small">Manufacturer name</span><input class="input" id="manufacturerName" maxlength="180" placeholder="e.g. VEVOR"/></label>
+        <label><span class="small">Website</span><input class="input" id="manufacturerWebsite" maxlength="1000" placeholder="https://www.vevor.ca/"/></label>
+      </div>
+      <div class="grid cols-3" style="gap:12px;margin-top:10px">
+        <label><span class="small">Relationship</span><select class="input" id="manufacturerRelationship"><option value="manufacturer">Manufacturer</option><option value="brand_owner">Brand owner</option><option value="oem">OEM</option><option value="private_label">Private label</option><option value="unknown">Unknown</option></select></label>
+        <label><span class="small">Verification</span><select class="input" id="manufacturerVerification"><option value="unverified">Unverified</option><option value="pending">Pending</option><option value="verified">Verified</option></select></label>
+        <label><span class="small">Manufacturer/external item ID</span><input class="input" id="manufacturerExternalId" maxlength="200" placeholder="Model, maker SKU, ASIN if relevant"/></label>
+      </div>
+      <label style="display:block;margin-top:10px"><span class="small">Evidence / note</span><input class="input" id="manufacturerEvidence" maxlength="1000" placeholder="Packaging, manufacturer page, manual, purchase record or other evidence"/></label>
+      <button class="btn primary" id="manufacturerSave" type="button" style="margin-top:12px">Save manufacturer link</button>
+    </section>
+
+    <section class="card" id="reviewCard" style="margin-top:18px" hidden>
+      <h2 style="margin-top:0">Devil n Dove review</h2>
+      <p class="small">Paste or write <strong>our own</strong> review here. Amazon, VEVOR and other marketplaces remain reference locations only; this application does not scrape them or require them at runtime.</p>
+      <input type="hidden" id="vendorReviewId"/>
+      <div class="grid cols-3" style="gap:12px">
+        <label><span class="small">Platform</span><select class="input" id="reviewPlatform"><option value="amazon">Amazon</option><option value="vevor">VEVOR</option><option value="local">Local / direct</option><option value="ebay">eBay</option><option value="etsy">Etsy</option><option value="other">Other</option></select></label>
+        <label><span class="small">Vendor/store</span><input class="input" id="reviewVendor" maxlength="180" placeholder="Amazon.ca, VEVOR.ca…"/></label>
+        <label><span class="small">External item ID / ASIN</span><input class="input" id="reviewExternalId" maxlength="200" placeholder="ASIN, model or marketplace ID"/></label>
+      </div>
+      <div class="grid cols-2" style="gap:12px;margin-top:10px">
+        <label><span class="small">Item/source URL</span><input class="input" id="reviewSourceUrl" maxlength="1000" placeholder="Product listing or manufacturer page"/></label>
+        <label><span class="small">Our external review URL</span><input class="input" id="reviewExternalUrl" maxlength="1000" placeholder="Direct link to our review when available"/></label>
+      </div>
+      <div class="grid cols-3" style="gap:12px;margin-top:10px">
+        <label><span class="small">Review date</span><input class="input" id="reviewDate" type="date"/></label>
+        <label><span class="small">Rating (0–5)</span><input class="input" id="reviewRating" type="number" min="0" max="5" step="0.5"/></label>
+        <label><span class="small">Verification</span><select class="input" id="reviewVerification"><option value="unverified">Unverified</option><option value="pending">Pending</option><option value="verified">Verified</option></select></label>
+      </div>
+      <label style="display:block;margin-top:10px"><span class="small">Title</span><input class="input" id="reviewTitle" maxlength="300"/></label>
+      <label style="display:block;margin-top:10px"><span class="small">Our review text</span><textarea class="input" id="reviewBody" rows="7" maxlength="8000" placeholder="Devil n Dove's first-party review of this Tool or Supply"></textarea></label>
+      <label style="display:block;margin-top:10px"><span class="small">Local publication</span><select class="input" id="reviewPublication"><option value="private">Private</option><option value="internal">Internal</option><option value="approved_public">Approved for public use</option></select></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" id="reviewSave" type="button">Save review</button><button class="btn" id="reviewClear" type="button">New review</button></div>
+    </section>
+
+    <section class="card" id="reviewHistoryCard" style="margin-top:18px" hidden>
+      <h2 style="margin-top:0">Saved reviews</h2>
+      <div id="reviewHistory"><p class="small">No saved reviews.</p></div>
+    </section>
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=448"></script><script src="/public/js/auth.js?v=448"></script><script src="/public/js/site-auth-ui.js?v=448"></script><script src="/public/js/admin-self-protect.js?v=448"></script><script src="/public/js/admin.js?v=448"></script><script src="/public/js/admin-vendor-reviews.js?v=448"></script>
+</body>
+</html>
