@@ -36,7 +36,13 @@ VERIFICATION = 'RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql'
 EXPECTED_DATABASE_NAME = 'devilndove-dev'
 EXPECTED_DATABASE_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'
 REQUIRED_BASE_TABLES = ('users', 'products', 'product_resource_links', 'site_item_inventory')
-REQUIRED_LINEAGE_TABLES = ('product_lineage_profiles', 'product_resource_lineage_reviews', 'inventory_vendor_reviews')
+REQUIRED_LINEAGE_TABLES = (
+    'product_lineage_profiles',
+    'product_resource_lineage_reviews',
+    'inventory_manufacturers',
+    'inventory_manufacturer_links',
+    'inventory_vendor_reviews',
+)
 REQUIRED_TRIGGER = 'trg_product_lineage_profile_after_insert'
 
 
@@ -138,8 +144,8 @@ def execute_file(filename: str, *, read_only: bool) -> None:
             keyword = statement.lstrip().split(None, 1)[0].upper()
             if keyword not in {'SELECT', 'PRAGMA', 'WITH', 'EXPLAIN'}:
                 die(f'Read-only verification file contains a mutation statement at {index}: {keyword}')
-            rows = query_json(statement, f'{filename} statement {index}/{len(statements)}')
-            print(json.dumps(rows, ensure_ascii=False))
+            result = query_json(statement, f'{filename} statement {index}/{len(statements)}')
+            print(json.dumps(result, ensure_ascii=False))
         else:
             run_remote_statement(statement, f'{filename} statement {index}/{len(statements)}')
 
@@ -168,10 +174,10 @@ def verify_remote_state() -> None:
     count = scalar_count(
         f"SELECT COUNT(*) AS lineage_table_count FROM sqlite_master WHERE type='table' AND name IN ({names});",
         'lineage_table_count',
-        'Release 448 lineage-table verification',
+        'Release 448 lineage/manufacturer-table verification',
     )
     if count != len(REQUIRED_LINEAGE_TABLES):
-        die(f'Expected {len(REQUIRED_LINEAGE_TABLES)} lineage tables, got {count}.')
+        die(f'Expected {len(REQUIRED_LINEAGE_TABLES)} Release 448 tables, got {count}.')
 
     trigger_count = scalar_count(
         f"SELECT COUNT(*) AS lineage_trigger_count FROM sqlite_master WHERE type='trigger' AND name='{REQUIRED_TRIGGER}';",
@@ -200,6 +206,7 @@ def verify_remote_state() -> None:
 
     print('PASS — Product lineage profile covers every existing Product')
     print('PASS — outside finished-good exemptions are internally consistent')
+    print('PASS — normalized manufacturer/review tables are present')
     print('PASS — new Product trigger is installed')
     print('PASS — foreign keys clean')
 
