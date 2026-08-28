@@ -87,13 +87,13 @@ jobs:
       - name: Validate Product Inventory Tool cross-mutation and responsive contract
         run: python scripts/build442_cross_mutation_responsive_acceptance_test.py
       - name: Product Inventory Tools source gate before aggregate sync
-        run: python scripts/build440_product_inventory_tools_source_gate.py
+        run: python scripts/product_inventory_tools_source_gate.py
       - name: Exercise lot-provenance aggregate sync
         run: python scripts/build440_sync_lot_provenance_full_schema.py
       - name: Exercise receiving aggregate sync
         run: python scripts/build440_sync_receiving_full_schema.py
       - name: Product Inventory Tools source gate after aggregate sync
-        run: python scripts/build440_product_inventory_tools_source_gate.py
+        run: python scripts/product_inventory_tools_source_gate.py
       - name: JavaScript syntax for retained Application Core
         run: |
           node --check functions/_middleware.js

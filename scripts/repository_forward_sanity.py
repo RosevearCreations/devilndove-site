@@ -14,7 +14,6 @@ def require(condition: bool, message: str) -> None:
 
 release = json.loads((ROOT / 'development-release.json').read_text(encoding='utf-8'))
 require(release == {'environment': 'development', 'release': 446, 'label': 'Build 446'}, 'development-release.json is not exact Build 446 Development authority')
-
 require(not list(ROOT.glob('BUILD*.md')), 'historical BUILD*.md files must not exist in repository root')
 require(not (ROOT / 'docs/archive').exists(), 'docs/archive must not ship; Git history is the archive')
 require(not (ROOT / 'docs/releases').exists(), 'docs/releases must not ship; current release state belongs in authority documents')
@@ -47,8 +46,7 @@ require((ROOT / 'database_full_schema.sql').exists(), 'database_full_schema.sql 
 
 allowed_scripts = {
     'bake_approved_seo_overrides.py', 'bake_localbusiness_from_d1_export.py', 'bake_localbusiness_jsonld.py',
-    'build232_product_removal_test.mjs', 'build243_inventory_resilience_regression.py',
-    'build244_inventory_authority_fractional_usage_regression.py', 'build253_inventory_link_labels_reset_regression.py',
+    'build253_inventory_link_labels_reset_regression.py',
     'build440_apply_development_d1.py', 'build440_cross_mutation_responsive_acceptance_test.py',
     'build440_development_d1_resume_regression_test.py', 'build440_development_d1_runner_regression_test.py',
     'build440_development_inventory_asset_restore.py', 'build440_development_inventory_asset_restore_windows.py',
@@ -58,15 +56,15 @@ allowed_scripts = {
     'build440_inventory_kit_component_depletion_regression_test.mjs', 'build440_inventory_kit_runtime_contract_test.mjs',
     'build440_inventory_receiving_regression_test.py', 'build440_inventory_source_provenance_review_regression_test.py',
     'build440_product_cost_schema_ownership_regression_test.py', 'build440_product_integrity_review_regression_test.py',
-    'build440_product_inventory_lot_provenance_regression_test.py', 'build440_product_inventory_tools_source_gate.py',
-    'build440_product_reference_inspector_regression_test.py', 'build440_product_resource_persistence_regression_test.mjs',
-    'build440_public_inventory_authority_regression.py', 'build440_resource_asset_url_regression_test.mjs',
-    'build440_resume_development_d1.py', 'build440_sync_development_release.py', 'build440_sync_full_schema.py',
-    'build440_sync_lot_provenance_full_schema.py', 'build440_sync_receiving_full_schema.py',
-    'build440_tool_lifecycle_regression_test.py', 'build440_verify_development_d1_final.py',
-    'build442_apply_development_it_platform.py', 'build442_cross_mutation_responsive_acceptance_test.py',
-    'build442_it_platform_migration_regression.py', 'build443_apply_development_home_carousel.py',
-    'build443_home_carousel_regression.py', 'repository_forward_sanity.py',
+    'build440_product_inventory_lot_provenance_regression_test.py', 'build440_product_reference_inspector_regression_test.py',
+    'build440_product_resource_persistence_regression_test.mjs', 'build440_public_inventory_authority_regression.py',
+    'build440_resource_asset_url_regression_test.mjs', 'build440_resume_development_d1.py',
+    'build440_sync_development_release.py', 'build440_sync_full_schema.py', 'build440_sync_lot_provenance_full_schema.py',
+    'build440_sync_receiving_full_schema.py', 'build440_tool_lifecycle_regression_test.py',
+    'build440_verify_development_d1_final.py', 'build442_apply_development_it_platform.py',
+    'build442_cross_mutation_responsive_acceptance_test.py', 'build442_it_platform_migration_regression.py',
+    'build443_apply_development_home_carousel.py', 'build443_home_carousel_regression.py',
+    'product_inventory_tools_source_gate.py', 'repository_forward_sanity.py',
 }
 actual_scripts = {p.name for p in (ROOT / 'scripts').iterdir() if p.is_file()}
 require(actual_scripts == allowed_scripts, f'scripts directory differs from current executable set: {sorted(actual_scripts ^ allowed_scripts)[:20]}')
