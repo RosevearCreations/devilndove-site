@@ -1,9 +1,10 @@
 name = "devilndove-site-dev"
-account_id = "c0d5bc25df16ae5b7d47c985c4b7b787"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
 
 # DEV ENVIRONMENT ONLY.
+# The Pages Git deployment owns account selection. Do not add account_id here;
+# local Development tooling pins CLOUDFLARE_ACCOUNT_ID explicitly instead.
 # Cloudflare Pages projects do not accept the Workers-only [observability] block.
 # Use Cloudflare Pages/Functions Logs or `wrangler pages deployment tail`.
 
