@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PYTHON = sys.executable
 
 STEPS = (
+    ('Product material/tool lineage policy', [PYTHON, 'scripts/product_lineage_gate.py']),
     ('linked human-readable Inventory labels', [PYTHON, 'scripts/build253_inventory_link_labels_reset_regression.py']),
     ('Product Resource persistence and normalization', ['node', 'scripts/build440_product_resource_persistence_regression_test.mjs']),
     ('Product Cost schema ownership', [PYTHON, 'scripts/build440_product_cost_schema_ownership_regression_test.py']),
@@ -39,6 +40,10 @@ STEPS = (
 
 JS_FILES = (
     'functions/api/_middleware.js',
+    'functions/api/admin/_middleware.js',
+    'functions/api/_lib/productLineage.js',
+    'functions/api/admin/product-lineage.js',
+    'public/js/admin-product-lineage.js',
     'functions/api/admin/product-resources.js',
     'functions/api/admin/_productResourcesData.js',
     'functions/api/admin/product-costs.js',
