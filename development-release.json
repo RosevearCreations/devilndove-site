@@ -40,7 +40,14 @@
       { "binding": "CAIP_PRIVATE_MEDIA_BUCKET", "bucket_name": "devilndove-caip-media-dev" }
     ],
     "readiness_endpoint": "/api/admin/infrastructure-readiness",
-    "local_access_preflight": "python scripts/cloudflare_development_access.py --auth-only"
+    "local_access_preflight": "python scripts/cloudflare_development_access.py --auth-only",
+    "github_d1_credential": {
+      "secret_name": "CLOUDFLARE_API_TOKEN",
+      "status": "missing",
+      "last_guarded_workflow_run": 33198354338,
+      "last_result": "stopped_before_read_or_write",
+      "note": "The Release 448 Development-only D1 workflow failed at its credential guard because the GitHub Actions secret is absent. No migration statement executed."
+    }
   },
   "release_policy": {
     "one_current_release": true,
@@ -65,7 +72,7 @@
       "foreign_keys_clean": true
     },
     "startup_rule": "Read-only D1/R2 verification first. Never reapply the baseline migration merely because a new chat or release starts.",
-    "release_448_migrations": "allowed_when_required_by_current_448_work_and protected by current migration/tests; do not mutate Production"
+    "release_448_migrations": "allowed when required by current 448 work and protected by current migration/tests; do not mutate Production"
   },
   "current_release_migrations": [
     {
@@ -74,11 +81,24 @@
       "verification": "RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql",
       "runner": "python scripts/apply_development_product_lineage.py",
       "source_status": "implemented_and_gated",
-      "development_d1_status": "pending_execution",
+      "development_d1_status": "blocked_missing_github_cloudflare_token",
       "release_gating": false,
       "inventory_quantity_mutation": false,
       "production_allowed": false,
-      "note": "Source and transport may move forward while Development D1 execution awaits an authenticated Cloudflare execution surface. Publication enforcement activates only after the lineage schema is present."
+      "note": "Guarded workflow run 33198354338 stopped before any D1 read/write because CLOUDFLARE_API_TOKEN is not present in GitHub Actions. Publication enforcement activates only after verified Development schema application."
+    },
+    {
+      "key": "media-movie-it",
+      "file": "database_release448_media_it.sql",
+      "verification": "RELEASE448_MEDIA_IT_VERIFICATION.sql",
+      "runner": "python scripts/apply_development_release448_media_it.py",
+      "source_status": "implemented_and_gated",
+      "development_d1_status": "blocked_missing_github_cloudflare_token",
+      "release_gating": false,
+      "inventory_quantity_mutation": false,
+      "production_allowed": false,
+      "authorities": ["product_image_quality_assessments", "movie_catalog", "movie_metadata_reviews", "it_integration_registry"],
+      "note": "Current Movie authority is movie_catalog plus enriched JSON, not the legacy movies table. The migration stores no image binaries and no secret values."
     }
   ],
   "deferred_it_test_environment": {
@@ -96,39 +116,47 @@
     {
       "key": "client-platform-continuity",
       "status": "active",
-      "scope": "Keep Web, Phone and Desktop as active first-class clients of the same responsive/installable application; preserve explicit opt-in notifications for new releases and newly published items, offline/fallback behavior and no idle polling."
+      "scope": "Keep Web, Phone and Desktop as active first-class clients of the same responsive/installable application; preserve explicit opt-in notifications, offline/fallback behavior and no idle polling."
     },
     {
       "key": "product-material-lineage",
-      "status": "source_implemented_d1_pending",
+      "status": "source_implemented_d1_credential_blocked",
       "workspace": "/admin/product-lineage/",
       "scope": "New in-house-created products require real raw-inventory lineage and consumption authority before publication; existing products may remain legacy_pending; antiquity, resale and external finished goods can be explicitly inventory-exempt."
     },
     {
       "key": "product-tool-lineage",
-      "status": "source_implemented_d1_pending",
+      "status": "source_implemented_d1_credential_blocked",
       "workspace": "/admin/product-lineage/",
       "scope": "Record durable tools and molds used to create products separately from consumable inventory; tool association never consumes the durable tool."
     },
     {
       "key": "manufacturer-provenance-reviews",
-      "status": "schema_implemented_editor_next",
-      "scope": "Link materials/tools to manufacturer/vendor provenance and Devil n Dove-authored purchased-item reviews. Support ASIN/external identifiers and review/profile/source links or owner-supplied import where available; do not make Amazon or another marketplace a runtime dependency and do not copy third-party review content."
+      "status": "source_implemented_d1_credential_blocked",
+      "workspace": "/admin/vendor-reviews/",
+      "scope": "Link materials/tools to normalized manufacturer/vendor provenance and Devil n Dove-authored purchased-item reviews. Support ASIN/external identifiers and safe source/review links; never copy third-party review content or require a marketplace at runtime."
+    },
+    {
+      "key": "product-image-quality",
+      "status": "source_implemented_d1_credential_blocked",
+      "workspace": "/admin/product-image-quality/",
+      "scope": "Score existing Product images on a transparent 100-point rubric: lighting 20, clarity 20, background 15, framing 15, resolution 10, colour balance 10, artifacts 5 and Product-set consistency 5. Deterministic browser evidence is primary; optional vision-assisted review remains advisory."
     },
     {
       "key": "it-integration-registry",
-      "status": "deferred_non_blocking",
-      "scope": "Prepare the I.T. test/integration environment for provider/platform reference names, callbacks/webhooks, scopes, environment, configured/tested status, last safe result/error and correction mechanics. Real secret values never belong in D1. Deferred I.T. completion does not gate feature releases."
+      "status": "source_implemented_d1_credential_blocked",
+      "workspace": "/admin/it-integrations/",
+      "scope": "I.T.-owned provider/platform registry for purpose, module consumer, secret/binding reference names only, callbacks/webhooks, scopes, environment, configured/tested state, last safe error and correction mechanics. Actual secrets are forbidden."
     },
     {
       "key": "carousel-movie-reuse",
-      "status": "queued",
-      "scope": "Generalize Storefront carousel presentation for Movie use without duplicating carousel authority or introducing extra public H1 elements."
+      "status": "source_implemented",
+      "scope": "Home and Movie cover presentation now reuse one accessible Release 448 carousel authority. Movie records with incomplete cover pairs retain the truthful pending fallback. No extra H1 is introduced."
     },
     {
       "key": "movie-data-convergence",
-      "status": "queued",
-      "scope": "Repair provably incorrect Movie names and core metadata; represent unknown/incomplete fields explicitly instead of guessing."
+      "status": "current_authority_corrected_review_schema_d1_credential_blocked",
+      "scope": "Current Movie authority is enriched JSON plus movie_catalog D1 overlay. Stable UPC/slug review states represent pending, incomplete, unverified and verified metadata; incorrect values are repaired only with evidence and unknown values are never guessed."
     },
     {
       "key": "unverified-process-states",
@@ -140,7 +168,6 @@
     "Storefront Shop",
     "Collections",
     "Collages",
-    "Carousels",
     "CAIP",
     "Inventory",
     "Supplies",
