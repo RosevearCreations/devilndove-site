@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Release 447 installable-client and notification safety invariants."""
+"""Validate current-release installable-client and notification safety invariants."""
 from __future__ import annotations
 
 import json
@@ -21,18 +21,24 @@ require(manifest.get('scope') == '/', 'PWA scope must remain site-wide')
 require(any(row.get('url') == '/admin/it-platform/' for row in manifest.get('shortcuts', [])), 'I.T. shortcut is missing from converged app manifest')
 
 sw = (ROOT / 'sw.js').read_text(encoding='utf-8')
-require("devilndove-shell-r447" in sw, 'service worker cache is not Release 447')
+require("devilndove-shell-r448" in sw, 'service worker cache is not Release 448')
 require("self.addEventListener('push'" in sw, 'service worker push handler is missing')
 require("self.addEventListener('notificationclick'" in sw, 'service worker notification click handler is missing')
 require("'/admin/'" in sw and "'/api/'" in sw, 'admin/API cache bypass is missing')
 require('BUILD' not in sw.upper(), 'service worker must not carry historical Build identity')
 
 client = (ROOT / 'public/js/pwa-platform.js').read_text(encoding='utf-8')
+require('const RELEASE = 448;' in client, 'shared client is not Release 448')
 require("navigator.serviceWorker.register('/sw.js'" in client, 'shared PWA client does not register the service worker')
 require('Notification.requestPermission()' in client, 'explicit notification opt-in action is missing')
-require('setInterval(' not in client, 'PWA new-item notifications must not use background polling')
-require("localStorage.getItem(ENABLE_KEY) !== '1'" in client, 'new-item checks must remain opt-in')
-require("CHECK_INTERVAL_MS = 15 * 60 * 1000" in client, 'launch/resume check throttle drifted')
+require('setInterval(' not in client, 'PWA notifications must not use background polling')
+require("localStorage.getItem(ENABLE_KEY) === '1'" in client, 'notification checks must remain opt-in')
+require("CHECK_INTERVAL_MS = 15 * 60 * 1000" in client, 'launch/resume new-item check throttle drifted')
+require("LAST_RELEASE_KEY = 'dnd:last-seen-release'" in client, 'release notification state is missing')
+require('checkReleaseUpdate' in client, 'new-release notification check is missing')
+require('showReleaseNotification' in client, 'new-release notification surface is missing')
+require('checkNewItems' in client and 'showItemNotification' in client, 'new-item notification surface is missing')
+require('New-release and new-item alerts are enabled.' in client, 'installed-client UI does not describe both alert types')
 
 middleware = (ROOT / 'functions/_middleware.js').read_text(encoding='utf-8')
 require('/public/js/pwa-platform.js?v=${CURRENT_RELEASE}' in middleware, 'shared HTML PWA bootstrap is missing')
@@ -44,8 +50,8 @@ require("COALESCE(review_status,'published') IN ('approved','published','')" in 
 require('SELECT product_id, slug, name, created_at, updated_at' in feed, 'new-item feed exposes an unexpected data shape')
 
 print('PWA PLATFORM GATE')
-print('Clients: Web / Phone / Desktop')
-print('Notifications: explicit opt-in, launch/resume, no timer polling')
+print('Clients: Web / Phone / Desktop — ACTIVE')
+print('Notifications: new release + new item, explicit opt-in, launch/resume, no timer polling')
 if failures:
     for i, failure in enumerate(failures, 1):
         print(f'{i:03d}. FAIL — {failure}')
