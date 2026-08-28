@@ -1,5 +1,6 @@
-// Build 284 Content-owned implementation of the content-media module contract.
+// Current-release Content-owned implementation of the content-media module contract.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../../_lib/adminAudit.js';
+import { currentReleaseMetadata } from '../../_lib/releaseAuthority.js';
 
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
 function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
@@ -17,9 +18,9 @@ function versionUrl(url, updatedAt) {
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
-  if (!adminUser) return json({ ok: false, error: 'Admin access required.' }, 401);
+  if (!adminUser) return json({ ok: false, ...currentReleaseMetadata(), error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
-  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
+  if (!db) return json({ ok: false, ...currentReleaseMetadata(), error: 'Database binding is not configured.' }, 500);
 
   const url = new URL(context.request.url);
   const q = normalizeText(url.searchParams.get('q')).toLowerCase();
@@ -66,8 +67,8 @@ export async function onRequestGet(context) {
       media_type: row.media_type || 'photo',
       source_type: row.source_type || '',
     }));
-    return json({ ok: true, contract: 'content-media', owner: 'content', requested_by: adminUser, media, count: media.length });
+    return json({ ok: true, ...currentReleaseMetadata(), contract: 'content-media', owner: 'content', requested_by: adminUser, media, count: media.length });
   } catch (error) {
-    return json({ ok: false, error: 'Content media contract failed.', error_code: 'content_media_read_failed', detail: String(error?.message || error) }, 500);
+    return json({ ok: false, ...currentReleaseMetadata(), contract: 'content-media', error: 'Content media contract failed.', error_code: 'content_media_read_failed', detail: String(error?.message || error) }, 500);
   }
 }
