@@ -1,5 +1,5 @@
-# Build 443 system gate — Home carousel Phase A plus inherited business/I.T. regressions.
-name: Build 443 System Convergence Gate
+# Build 444 system gate — Development infrastructure recovery plus inherited business/I.T. regressions.
+name: Build 444 System Convergence Gate
 
 on:
   push:
@@ -12,9 +12,11 @@ on:
       - 'css/**'
       - '*.html'
       - 'sw.js'
+      - 'wrangler.toml'
       - 'development-release.json'
       - 'scripts/**'
       - 'database*.sql'
+      - 'BUILD442_*.sql'
       - 'BUILD443_*.sql'
       - 'AI_HANDOFF.md'
       - 'PROJECT_STATUS_AND_ROADMAP.md'
@@ -55,6 +57,7 @@ jobs:
         run: |
           echo 'Remote Cloudflare/D1 access: NONE'
           echo 'Build 442 I.T. and Build 443 carousel D1 applies: NEVER FROM CI'
+          echo 'Build 444 new D1 SQL migration: NONE'
           echo 'Production mutation capability: NONE'
 
   source-gate:
@@ -68,13 +71,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate Build 443 release alignment
-        run: python scripts/build443_development_release_alignment_test.py
-      - name: Validate Build 443 release/HOLD contract
-        run: python scripts/build443_release_contract_integrity_test.py
+      - name: Validate Build 444 release alignment
+        run: python scripts/build444_development_release_alignment_test.py
+      - name: Validate Build 444 release/HOLD contract
+        run: python scripts/build444_release_contract_integrity_test.py
+      - name: Validate Build 444 D1/R2 infrastructure authority
+        run: python scripts/build444_infrastructure_authority_regression.py
       - name: Validate repository hygiene
         run: python scripts/build441_repository_hygiene_test.py
-      - name: Validate Build 443 Home carousel schema/runtime/editor
+      - name: Validate carried Build 443 Home carousel schema/runtime/editor
         run: python scripts/build443_home_carousel_regression.py
       - name: Compile guarded Build 443 carousel runner
         run: python -m py_compile scripts/build443_apply_development_home_carousel.py
@@ -94,8 +99,8 @@ jobs:
           node --check functions/api/supplies.js
       - name: Validate retained Product/Inventory/Tool cross-mutation and responsive contract
         run: python scripts/build442_cross_mutation_responsive_acceptance_test.py
-      - name: Build 443 source sanity
-        run: python scripts/build443_current_sanity_check.py
+      - name: Build 444 source sanity
+        run: python scripts/build444_current_sanity_check.py
       - name: Product/Inventory/Tools source gate before aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
       - name: Exercise lot-provenance aggregate sync
@@ -104,12 +109,13 @@ jobs:
         run: python scripts/build440_sync_receiving_full_schema.py
       - name: Product/Inventory/Tools source gate after aggregate sync
         run: python scripts/build440_product_inventory_tools_source_gate.py
-      - name: JavaScript syntax for Build 443 and retained Application Core
+      - name: JavaScript syntax for Build 444 and retained Application Core
         run: |
           node --check functions/_middleware.js
           node --check functions/api/_lib/appModules.js
           node --check functions/api/_lib/appModuleRoutes.js
           node --check functions/api/admin/app-modules.js
+          node --check functions/api/admin/infrastructure-readiness.js
           node --check functions/api/home-carousel.js
           node --check functions/api/admin/home-carousel.js
           node --check public/js/home-carousel.js
@@ -120,8 +126,8 @@ jobs:
         run: git diff --check
       - name: Safety statement
         run: |
-          echo 'Cloudflare/D1/R2/provider access: NONE'
-          echo 'Carousel schema apply remains guarded and outside CI.'
-          echo 'Home static hero remains the fail-safe until active published slides load.'
-          echo 'I.T., Stripe, PayPal and CAIP remain current Build 443 HOLDs.'
+          echo 'Cloudflare/D1/R2/provider writes from CI: NONE'
+          echo 'Build 444 readiness probes are runtime read/list only.'
+          echo 'Build 444 new D1 SQL migration: NONE'
+          echo 'Carried Build 442/443 schema applies remain guarded and outside CI.'
           echo 'Production mutation capability: NONE'
