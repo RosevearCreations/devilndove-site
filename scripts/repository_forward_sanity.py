@@ -58,7 +58,6 @@ if (workflow_dir / 'system-gate.yml').exists():
 wrangler = (ROOT / 'wrangler.toml').read_text(encoding='utf-8')
 for marker in (
     'name = "devilndove-site-dev"',
-    'account_id = "c0d5bc25df16ae5b7d47c985c4b7b787"',
     'binding = "DB"',
     'database_name = "devilndove-dev"',
     'binding = "PRODUCT_MEDIA_BUCKET"',
@@ -67,13 +66,16 @@ for marker in (
     'bucket_name = "devilndove-caip-media-dev"',
 ):
     require(marker in wrangler, f'Development infrastructure authority missing: {marker}')
+require('account_id =' not in wrangler, 'Pages wrangler.toml must not carry account_id; local tooling pins CLOUDFLARE_ACCOUNT_ID instead')
 
 access_script = (ROOT / 'scripts/cloudflare_development_access.py').read_text(encoding='utf-8')
 for marker in (
+    "EXPECTED_ACCOUNT_ID = 'c0d5bc25df16ae5b7d47c985c4b7b787'",
     "EXPECTED_DATABASE_NAME = 'devilndove-dev'",
     "EXPECTED_DATABASE_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'",
     "'devilndove-toolshed-images-dev'",
     "'devilndove-caip-media-dev'",
+    "env['CLOUDFLARE_ACCOUNT_ID'] = EXPECTED_ACCOUNT_ID",
     "--auth-mode",
     "CLOUDFLARE_API_TOKEN",
     "Credentials printed: NEVER",
@@ -105,7 +107,8 @@ print('PLATFORM FORWARD SANITY')
 print(f"Current release: {release['release']} — {release['label']}")
 print(f"Canonical modules: {', '.join(module_keys)}")
 print(f"Canonical clients: {', '.join(client_keys)}")
-print('Development Cloudflare account: PINNED')
+print('Development Cloudflare account: PINNED BY LOCAL TOOLING')
+print('Pages wrangler account_id: FORBIDDEN')
 print('Historical build numbers: PROVENANCE ONLY')
 print('Production mutation capability: NONE')
 if failures:
