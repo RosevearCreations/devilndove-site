@@ -34,6 +34,10 @@ require(policy.get('one_current_release') is True, 'one-current-release policy m
 require(policy.get('legacy_build_numbers_are_provenance_only') is True, 'legacy build numbers must be provenance only')
 require(policy.get('historical_build_gates_allowed') is False, 'historical build-number gates must remain retired')
 
+infra_release = release.get('development_infrastructure', {})
+require(infra_release.get('cloudflare_account_id') == 'c0d5bc25df16ae5b7d47c985c4b7b787', 'Development Cloudflare account authority drifted')
+require(infra_release.get('local_access_preflight') == 'python scripts/cloudflare_development_access.py --auth-only', 'Development Cloudflare access preflight authority drifted')
+
 require(not list(ROOT.glob('BUILD*.md')), 'historical BUILD*.md files must not exist in repository root')
 require(not (ROOT / 'docs/archive').exists(), 'docs/archive must not ship; Git history is the archive')
 require(not (ROOT / 'docs/releases').exists(), 'docs/releases must not ship; current release belongs in development-release.json')
@@ -41,6 +45,8 @@ require(not (ROOT / 'tmp').exists(), 'tmp must not ship in the repository')
 for junk in ('testfile', 'java.md', 'updated.md'):
     require(not (ROOT / junk).exists(), f'junk placeholder remains: {junk}')
 require((ROOT / 'database_full_schema.sql').exists(), 'database_full_schema.sql aggregate authority missing')
+require((ROOT / 'scripts/cloudflare_development_access.py').exists(), 'durable Development Cloudflare access preflight is missing')
+require((ROOT / 'scripts/apply_development_platform_convergence.py').exists(), 'canonical Development D1 convergence runner is missing')
 
 workflow_dir = ROOT / '.github/workflows'
 require((workflow_dir / 'system-gate.yml').exists(), 'canonical .github/workflows/system-gate.yml is missing')
@@ -52,6 +58,7 @@ if (workflow_dir / 'system-gate.yml').exists():
 wrangler = (ROOT / 'wrangler.toml').read_text(encoding='utf-8')
 for marker in (
     'name = "devilndove-site-dev"',
+    'account_id = "c0d5bc25df16ae5b7d47c985c4b7b787"',
     'binding = "DB"',
     'database_name = "devilndove-dev"',
     'binding = "PRODUCT_MEDIA_BUCKET"',
@@ -60,6 +67,18 @@ for marker in (
     'bucket_name = "devilndove-caip-media-dev"',
 ):
     require(marker in wrangler, f'Development infrastructure authority missing: {marker}')
+
+access_script = (ROOT / 'scripts/cloudflare_development_access.py').read_text(encoding='utf-8')
+for marker in (
+    "EXPECTED_DATABASE_NAME = 'devilndove-dev'",
+    "EXPECTED_DATABASE_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'",
+    "'devilndove-toolshed-images-dev'",
+    "'devilndove-caip-media-dev'",
+    "--auth-mode",
+    "CLOUDFLARE_API_TOKEN",
+    "Credentials printed: NEVER",
+):
+    require(marker in access_script, f'Development Cloudflare access preflight missing safeguard: {marker}')
 
 infra = (ROOT / 'functions/api/admin/infrastructure-readiness.js').read_text(encoding='utf-8')
 for marker in ('SELECT 1 AS ok', 'sqlite_master', 'bucket.list({ limit: 1 })', 'd1_write: false', 'r2_write: false', 'provider_write: false'):
@@ -86,6 +105,7 @@ print('PLATFORM FORWARD SANITY')
 print(f"Current release: {release['release']} — {release['label']}")
 print(f"Canonical modules: {', '.join(module_keys)}")
 print(f"Canonical clients: {', '.join(client_keys)}")
+print('Development Cloudflare account: PINNED')
 print('Historical build numbers: PROVENANCE ONLY')
 print('Production mutation capability: NONE')
 if failures:
