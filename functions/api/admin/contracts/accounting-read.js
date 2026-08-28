@@ -8,8 +8,8 @@ import {
   jsonResponse,
   normalizeText,
 } from '../../_lib/adminAudit.js';
-import { currentReleaseMetadata } from '../../_lib/releaseAuthority.js';
 
+const RELEASE = 447;
 export const CONTRACT_ID = 'accounting-read';
 export const OWNER = 'accounting';
 export const AUTHORITY_TABLE = 'accounting_order_records';
@@ -107,7 +107,7 @@ function shapeRecord(row = {}) {
 function readinessPayload(adminUser, extra = {}) {
   return {
     ok: true,
-    ...currentReleaseMetadata(),
+    release: RELEASE,
     contract: CONTRACT_ID,
     owner: OWNER,
     mode: 'read-only-order-financial-state',
@@ -120,10 +120,10 @@ function readinessPayload(adminUser, extra = {}) {
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
-  if (!adminUser) return json({ ok: false, ...currentReleaseMetadata(), error: 'Admin access required.' }, 401);
+  if (!adminUser) return json({ ok: false, release: RELEASE, error: 'Admin access required.' }, 401);
 
   const db = getDb(context.env);
-  if (!db) return json({ ok: false, ...currentReleaseMetadata(), error: 'Database binding is not configured.' }, 500);
+  if (!db) return json({ ok: false, release: RELEASE, error: 'Database binding is not configured.' }, 500);
 
   const url = new URL(context.request.url);
   const limit = boundedInt(url.searchParams.get('limit'));
@@ -199,7 +199,7 @@ export async function onRequestGet(context) {
   } catch (error) {
     return json({
       ok: false,
-      ...currentReleaseMetadata(),
+      release: RELEASE,
       contract: CONTRACT_ID,
       owner: OWNER,
       error: 'Accounting read contract failed.',
