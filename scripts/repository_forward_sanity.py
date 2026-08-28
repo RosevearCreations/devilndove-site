@@ -147,7 +147,9 @@ for relative in (
 ):
     text = (ROOT / relative).read_text(encoding='utf-8')
     require(not re.search(r'Build\s+\d+', text, flags=re.IGNORECASE), f'active contract carries stale numbered Build identity: {relative}')
-    require('currentReleaseMetadata' in text, f'active contract must expose current release authority: {relative}')
+    require('const RELEASE = 447;' in text, f'active contract must declare the current release without a cross-contract helper import: {relative}')
+    require('release: RELEASE' in text, f'active contract must expose current release metadata: {relative}')
+    require('currentReleaseMetadata' not in text, f'active contract must remain Pages-compatible and not import the release helper: {relative}')
     require(not re.search(r'\bbuild\s*:', text, flags=re.IGNORECASE), f'active contract exposes stale build field: {relative}')
 
 version_pattern = re.compile(r'([?&]v=)(\d+)(?:[.-][\w-]+)?(?=["\'&#\s)]|$)')
