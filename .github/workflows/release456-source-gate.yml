@@ -1,0 +1,77 @@
+name: Release 456 Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/admin/inventory-intelligence.js'
+      - 'functions/api/admin/tool-lifecycle.js'
+      - 'public/js/admin-inventory-intelligence.js'
+      - 'public/js/admin-tool-lifecycle.js'
+      - 'admin/inventory-intelligence/**'
+      - 'admin/tool-lifecycle/**'
+      - 'functions/api/_lib/releaseAuthority.js'
+      - 'scripts/release456_inventory_tool_workflow_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/repository_hygiene_gate.py'
+      - 'development-release.json'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'SANITY_HEALTH_CHECK.md'
+      - 'docs/operations/RELEASE_456_INVENTORY_TOOL_WORKFLOW.md'
+      - 'docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md'
+      - '.github/workflows/release456-source-gate.yml'
+      - '.github/workflows/system-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Refuse non-Development branch
+        run: test "${GITHUB_REF_NAME}" = "dev"
+      - name: Validate Release 456 Inventory + Tool workflow depth
+        run: python scripts/release456_inventory_tool_workflow_gate.py
+      - name: Validate current repository authority
+        run: python scripts/repository_forward_sanity.py
+      - name: Validate hygiene and SEO/privacy boundaries
+        run: python scripts/repository_hygiene_gate.py
+      - name: Carry Release 455 Storefront authority forward
+        run: python scripts/release455_storefront_discovery_gate.py
+      - name: Carry Release 454 Admin authority forward
+        run: python scripts/release454_admin_convergence_gate.py
+      - name: Carry Release 453 D1/provider authority forward
+        run: python scripts/release453_it_provider_readiness_gate.py
+      - name: Syntax check Release 456 runtime
+        run: |
+          node --check functions/api/admin/inventory-intelligence.js
+          node --check functions/api/admin/tool-lifecycle.js
+          node --check public/js/admin-inventory-intelligence.js
+          node --check public/js/admin-tool-lifecycle.js
+          node --check functions/api/_lib/releaseAuthority.js
+      - name: Compile Release 456 gates
+        run: python -m py_compile scripts/release456_inventory_tool_workflow_gate.py scripts/repository_forward_sanity.py scripts/repository_hygiene_gate.py scripts/release455_storefront_discovery_gate.py scripts/release454_admin_convergence_gate.py scripts/release453_it_provider_readiness_gate.py
+      - name: Whitespace validation
+        run: git diff --check
+      - name: Safety statement
+        run: |
+          echo 'Release 456 D1 migration: NONE'
+          echo 'Inventory authority: site_item_inventory'
+          echo 'Tool lifecycle authority: inventory_tool_lifecycle_profiles + inventory_tool_lifecycle_events'
+          echo 'Development D1 schema: CURRENT / VERIFIED THROUGH RELEASE 453'
+          echo 'Release 453 mutation proof: 33258377328'
+          echo 'Release 453 independent verifier: 33258415391'
+          echo 'Development Pages target: devilndove-site-dev'
+          echo 'Provider execution/publication: DISABLED'
+          echo 'Separate live Production mutation capability: NONE'
