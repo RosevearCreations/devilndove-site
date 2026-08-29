@@ -1,8 +1,13 @@
 import { processNotificationOutbox, queueNotification } from './_lib/notificationOutbox.js';
+import {
+  registerWebhookEventAtomic,
+  requireGiftCardWebhookSchema,
+  verifyPayPalWebhook,
+} from './_lib/paymentWebhookSecurity.js';
 
 // File: /functions/api/paypal-webhook.js
-// Brief description: Receives PayPal webhook events, verifies the signature, records idempotent
-// webhook history, and reconciles local payment/order state for payment and refund events.
+// Brief description: Receives PayPal webhook events, requires provider signature verification,
+// records atomic replay authority, and reconciles local payment/order state without request-time schema DDL.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -17,65 +22,6 @@ function normalizeText(value) {
 
 function getDb(env) {
   return env.DB || env.DD_DB;
-}
-
-async function getPaypalAccessToken(env) {
-  const clientId = normalizeText(env.PAYPAL_CLIENT_ID);
-  const secret = normalizeText(env.PAYPAL_SECRET);
-  const mode = normalizeText(env.PAYPAL_ENV || "sandbox").toLowerCase() || "sandbox";
-  if (!clientId || !secret) return null;
-
-  const base = mode === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
-  const basic = btoa(`${clientId}:${secret}`);
-
-  const response = await fetch(`${base}/v1/oauth2/token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${basic}`,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: "grant_type=client_credentials"
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok || !data?.access_token) {
-    throw new Error(data?.error_description || data?.error || "Failed to obtain PayPal access token.");
-  }
-
-  return { access_token: data.access_token, base, mode };
-}
-
-async function verifyWebhook(request, env, bodyText) {
-  const webhookId = normalizeText(env.PAYPAL_WEBHOOK_ID);
-  const auth = await getPaypalAccessToken(env);
-  if (!auth || !webhookId) {
-    return { verified: false, verification_mode: "skipped" };
-  }
-
-  const verificationPayload = {
-    auth_algo: request.headers.get("paypal-auth-algo") || "",
-    cert_url: request.headers.get("paypal-cert-url") || "",
-    transmission_id: request.headers.get("paypal-transmission-id") || "",
-    transmission_sig: request.headers.get("paypal-transmission-sig") || "",
-    transmission_time: request.headers.get("paypal-transmission-time") || "",
-    webhook_id: webhookId,
-    webhook_event: JSON.parse(bodyText)
-  };
-
-  const response = await fetch(`${auth.base}/v1/notifications/verify-webhook-signature`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${auth.access_token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(verificationPayload)
-  });
-  const data = await response.json().catch(() => null);
-  const status = String(data?.verification_status || "").toUpperCase();
-  return {
-    verified: response.ok && status === "SUCCESS",
-    verification_mode: "paypal",
-    raw_status: status || "UNKNOWN"
-  };
 }
 
 async function addHistory(env, orderId, oldStatus, newStatus, note) {
@@ -106,42 +52,9 @@ function deriveOrderStatus(existingOrderStatus, localPaymentStatus) {
   return current;
 }
 
-async function ensureGiftCardWebhookColumns(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
-    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL UNIQUE,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
-    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
-    issued_to_email TEXT,
-    issued_to_name TEXT,
-    note TEXT,
-    status TEXT NOT NULL DEFAULT 'active',
-    expires_at TEXT,
-    last_redeemed_at TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  const additions = [
-    ['recipient_email', 'recipient_email TEXT'],
-    ['recipient_name', 'recipient_name TEXT'],
-    ['recipient_note', 'recipient_note TEXT'],
-    ['purchaser_email', 'purchaser_email TEXT'],
-    ['purchaser_name', 'purchaser_name TEXT'],
-    ['purchaser_user_id', 'purchaser_user_id INTEGER'],
-    ['order_id', 'order_id INTEGER'],
-    ['purchase_source', 'purchase_source TEXT']
-  ];
-  const info = await db.prepare(`PRAGMA table_info(gift_cards)`).all().catch(() => ({ results: [] }));
-  const cols = new Set((Array.isArray(info?.results) ? info.results : []).map((row) => String(row?.name || '').trim()));
-  for (const [name, ddl] of additions) {
-    if (!cols.has(name)) await db.prepare(`ALTER TABLE gift_cards ADD COLUMN ${ddl}`).run().catch(() => null);
-  }
-}
-
 async function activatePendingGiftCardsForOrder(env, order, payment, providerLabel) {
   const db = getDb(env);
-  await ensureGiftCardWebhookColumns(db);
+  await requireGiftCardWebhookSchema(db);
   const pending = (await db.prepare(`
     SELECT gift_card_id, code, currency, initial_amount_cents, remaining_amount_cents,
            COALESCE(recipient_email, issued_to_email) AS recipient_email,
@@ -151,10 +64,10 @@ async function activatePendingGiftCardsForOrder(env, order, payment, providerLab
     WHERE order_id = ?
       AND LOWER(COALESCE(status,'')) = 'pending_activation'
     ORDER BY gift_card_id ASC
-  `).bind(Number(order?.order_id || 0)).all().catch(() => ({ results: [] }))).results || [];
+  `).bind(Number(order?.order_id || 0)).all()).results || [];
   let activated_count = 0;
   for (const row of pending) {
-    await db.prepare(`UPDATE gift_cards SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(Number(row.gift_card_id || 0)).run().catch(() => null);
+    await db.prepare(`UPDATE gift_cards SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(Number(row.gift_card_id || 0)).run();
     activated_count += 1;
     const destination = normalizeText(row.recipient_email || row.issued_to_email).toLowerCase();
     if (destination) {
@@ -201,46 +114,13 @@ async function activatePendingGiftCardsForOrder(env, order, payment, providerLab
 }
 
 async function registerWebhookEvent(env, provider, eventId, eventType, verification, payloadJson) {
-  const db = getDb(env);
-  const existing = await db.prepare(`
-    SELECT webhook_event_id, process_status
-    FROM webhook_events
-    WHERE provider = ? AND provider_event_id = ?
-    LIMIT 1
-  `).bind(provider, eventId).first().catch(() => null);
-
-  if (existing) {
-    return {
-      duplicate: true,
-      webhook_event_id: Number(existing.webhook_event_id || 0),
-      process_status: existing.process_status || "processed"
-    };
-  }
-
-  const inserted = await db.prepare(`
-    INSERT INTO webhook_events (
-      provider,
-      provider_event_id,
-      event_type,
-      verification_status,
-      process_status,
-      payload_json,
-      received_at,
-      updated_at
-    ) VALUES (?, ?, ?, ?, 'received', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).bind(
+  return registerWebhookEventAtomic(getDb(env), {
     provider,
     eventId,
-    eventType || null,
-    verification?.verified ? "verified" : (verification?.verification_mode || "skipped"),
-    payloadJson
-  ).run().catch(() => null);
-
-  return {
-    duplicate: false,
-    webhook_event_id: Number(inserted?.meta?.last_row_id || 0),
-    process_status: "received"
-  };
+    eventType,
+    verification,
+    payloadJson,
+  });
 }
 
 async function markWebhookEvent(env, webhookEventId, processStatus, details = {}) {
@@ -273,12 +153,14 @@ async function markWebhookEvent(env, webhookEventId, processStatus, details = {}
     nextRetryAt,
     processStatus,
     Number(webhookEventId)
-  ).run().catch(() => null);
+  ).run();
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
+  if (!db) return json({ ok: false, error: "Database is not configured." }, 503);
+
   const bodyText = await request.text();
   let body;
   try {
@@ -287,18 +169,33 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "Invalid JSON body." }, 400);
   }
 
-  const verification = await verifyWebhook(request, env, bodyText);
-  if (verification.verification_mode === "paypal" && !verification.verified) {
-    return json({ ok: false, error: "PayPal webhook verification failed.", verification }, 401);
+  const verification = await verifyPayPalWebhook({
+    event: body,
+    headers: request.headers,
+    env,
+  });
+  if (!verification.verified) {
+    const status = verification.code === 'paypal_webhook_not_configured' ? 503 : 401;
+    return json({ ok: false, error: "PayPal webhook verification failed.", code: verification.code }, status);
   }
 
   const eventType = normalizeText(body.event_type).toUpperCase();
-  const eventId = normalizeText(body.id || request.headers.get("paypal-transmission-id") || crypto.randomUUID());
-  const webhookEvent = await registerWebhookEvent(env, "paypal", eventId, eventType, verification, bodyText);
+  const eventId = normalizeText(body.id);
+  if (!eventType || !eventId) {
+    return json({ ok: false, error: "PayPal webhook event is missing id or event_type." }, 400);
+  }
+
+  let webhookEvent;
+  try {
+    webhookEvent = await registerWebhookEvent(env, "paypal", eventId, eventType, verification, bodyText);
+  } catch (error) {
+    console.error('PayPal webhook replay authority unavailable', error);
+    return json({ ok: false, error: "PayPal webhook replay authority is unavailable." }, 503);
+  }
 
   if (webhookEvent.duplicate) {
     await markWebhookEvent(env, webhookEvent.webhook_event_id, "duplicate");
-    return json({ ok: true, duplicate: true, verification, event_type: eventType || null, provider_event_id: eventId });
+    return json({ ok: true, duplicate: true, event_type: eventType || null, provider_event_id: eventId });
   }
 
   const resource = body.resource || {};
@@ -312,7 +209,7 @@ export async function onRequestPost(context) {
 
   if (!providerOrderId) {
     await markWebhookEvent(env, webhookEvent.webhook_event_id, "ignored");
-    return json({ ok: true, ignored: true, reason: "No provider order id present.", verification });
+    return json({ ok: true, ignored: true, reason: "No provider order id present." });
   }
 
   const payment = await db.prepare(`
@@ -326,7 +223,7 @@ export async function onRequestPost(context) {
 
   if (!payment) {
     await markWebhookEvent(env, webhookEvent.webhook_event_id, "ignored");
-    return json({ ok: true, ignored: true, reason: "No local PayPal payment matched this webhook.", provider_order_id: providerOrderId, verification });
+    return json({ ok: true, ignored: true, reason: "No local PayPal payment matched this webhook.", provider_order_id: providerOrderId });
   }
 
   const order = await db.prepare(`
@@ -340,7 +237,7 @@ export async function onRequestPost(context) {
     await markWebhookEvent(env, webhookEvent.webhook_event_id, "ignored", {
       related_payment_id: Number(payment.payment_id || 0)
     });
-    return json({ ok: true, ignored: true, reason: "Local order was not found for matched payment.", verification });
+    return json({ ok: true, ignored: true, reason: "Local order was not found for matched payment." });
   }
 
   await db.prepare(`
@@ -383,9 +280,20 @@ export async function onRequestPost(context) {
     `PayPal webhook reconciled event ${eventType || "UNKNOWN"} for provider order ${providerOrderId}.`
   );
 
-  const giftCardActivationCount = localPaymentStatus === 'paid'
-    ? await activatePendingGiftCardsForOrder(env, order, payment, 'paypal')
-    : 0;
+  let giftCardActivationCount = 0;
+  if (localPaymentStatus === 'paid') {
+    try {
+      giftCardActivationCount = await activatePendingGiftCardsForOrder(env, order, payment, 'paypal');
+    } catch (error) {
+      await markWebhookEvent(env, webhookEvent.webhook_event_id, 'failed', {
+        related_order_id: Number(order.order_id || 0),
+        related_payment_id: Number(payment.payment_id || 0),
+        error_text: 'gift_card_webhook_schema_not_ready',
+      });
+      console.error('PayPal gift-card webhook schema is not ready', error);
+      return json({ ok: false, error: 'Webhook reconciliation schema is not ready.' }, 503);
+    }
+  }
 
   await markWebhookEvent(env, webhookEvent.webhook_event_id, "processed", {
     related_order_id: Number(order.order_id || 0),
@@ -394,7 +302,6 @@ export async function onRequestPost(context) {
 
   return json({
     ok: true,
-    verification,
     event_type: eventType || null,
     provider_order_id: providerOrderId,
     provider_payment_id: providerPaymentId || null,
