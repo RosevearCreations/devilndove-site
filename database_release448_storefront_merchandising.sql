@@ -77,18 +77,18 @@ CREATE TABLE IF NOT EXISTS storefront_collage_presets (
 CREATE INDEX IF NOT EXISTS idx_storefront_collage_presets_public
   ON storefront_collage_presets(status, sort_order, name);
 
--- Origin collections are metadata/rules only. They do not duplicate Products or Product images.
+-- Origin collections are metadata/rules only. Multi-value rule_value uses | as an OR separator.
 INSERT OR IGNORE INTO storefront_collections
   (slug,name,short_description,status,collection_kind,rule_key,rule_value,sort_order)
 VALUES
   ('handmade','Handmade creations','Workshop-made Devil n Dove pieces and finished creative work.','published','origin','merchandise_origin','handmade',10),
-  ('vintage-antique','Vintage & antique finds','Older pieces and finds where condition, age and provenance should remain visible.','published','origin','merchandise_origin','vintage',20),
-  ('collectibles-oddities','Collectibles & oddities','Curious, collectible and unusual stock that is not represented as newly handmade work.','published','origin','merchandise_origin','collectible',30),
+  ('vintage-antique','Vintage & antique finds','Older pieces and finds where condition, age and provenance should remain visible.','published','origin','merchandise_origin','vintage|antique',20),
+  ('collectibles-oddities','Collectibles & oddities','Curious, collectible and unusual stock that is not represented as newly handmade work.','published','origin','merchandise_origin','collectible|oddity',30),
   ('prebuilt-found','Pre-built & found items','Finished outside goods and found stock carried by Devil n Dove without claiming in-house manufacture.','published','origin','merchandise_origin','prebuilt',40);
 
 INSERT OR IGNORE INTO storefront_collage_presets
   (slug,name,storefront_collection_id,layout_kind,max_items,status,heading,body_text,sort_order)
-SELECT 'shop-discovery','Shop discovery collage',NULL,'mosaic',6,'published','Explore the shop visually','A rotating visual sampling of currently public Product images. It never replaces Product image authority.',10;
+SELECT 'shop-discovery','Shop discovery collage',NULL,'mosaic',6,'published','Explore the shop visually','A visual sampling of currently public Product images. It never replaces Product image authority.',10;
 
 SELECT name FROM sqlite_master
 WHERE type='table' AND name IN ('storefront_collections','storefront_collection_products','storefront_collage_presets')
