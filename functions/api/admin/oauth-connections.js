@@ -9,22 +9,57 @@ const expiry=(seconds)=>Number(seconds||0)>0?new Date(Date.now()+Math.min(Number
 const scopes=(value,fallback=[])=>Array.isArray(value)?value:String(value||'').trim()?String(value).split(/[\s,]+/).filter(Boolean):fallback;
 async function event(db,provider,type,outcome,code,actor){try{await db.prepare(`INSERT INTO oauth_security_events(provider_key,event_type,outcome,diagnostic_code,actor_user_id,created_at) VALUES(?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(provider,type,outcome,code||null,actor||null).run();}catch{}}
 
+function parseTime(value){const n=value?Date.parse(String(value)):NaN;return Number.isFinite(n)?n:null;}
+function connectionHealth(row,now=Date.now()){
+  if(String(row?.connection_status||'')==='disconnected')return 'disconnected';
+  const access=parseTime(row?.access_expires_at);
+  const refresh=parseTime(row?.refresh_expires_at);
+  const hasRefresh=Boolean(row?.refresh_token_ciphertext);
+  if(refresh!==null&&refresh<=now)return 'reauthorization_required';
+  if(access===null)return row?.connection_status==='connected'?'connected_expiry_unknown':'attention_required';
+  if(access<=now)return hasRefresh?'refresh_due':'reauthorization_required';
+  if(access-now<=15*60*1000)return hasRefresh?'refresh_due_soon':'reauthorization_due_soon';
+  return row?.connection_status==='refresh_required'?'refresh_due':'healthy';
+}
+function safeConnection(row){
+  let parsedScopes=[]; try{parsedScopes=JSON.parse(row?.scopes_json||'[]');}catch{parsedScopes=[];}
+  return {
+    provider_key:row.provider_key,
+    connection_status:row.connection_status,
+    health:connectionHealth(row),
+    token_type:row.token_type||null,
+    scopes:Array.isArray(parsedScopes)?parsedScopes:[],
+    access_expires_at:row.access_expires_at||null,
+    refresh_expires_at:row.refresh_expires_at||null,
+    last_refresh_at:row.last_refresh_at||null,
+    disconnected_at:row.disconnected_at||null,
+    remote_revoke_state:row.remote_revoke_state||null,
+    diagnostic_code:row.diagnostic_code||null,
+    created_at:row.created_at||null,
+    updated_at:row.updated_at||null,
+    provider_subject_present:Boolean(row.remote_subject_id),
+    provider_subject_emitted:false,
+    intended_account_verification:'required_before_live_provider_acceptance',
+    token_material_present:'redacted'
+  };
+}
+
 export async function onRequestGet({request,env}){
   const admin=await getAdminUserFromRequest(request,env); if(!admin)return json({ok:false,error:'Unauthorized.'},401);
   const db=getDb(env); if(!db)return json({ok:false,code:'oauth_database_unavailable'},503);
   let rows=[]; let pending=0; let replayRejects=0;
   try{
-    rows=(await db.prepare(`SELECT provider_key,remote_subject_id,token_type,scopes_json,access_expires_at,refresh_expires_at,connection_status,last_refresh_at,disconnected_at,remote_revoke_state,diagnostic_code,created_at,updated_at FROM oauth_provider_connections ORDER BY provider_key`).all()).results||[];
+    rows=(await db.prepare(`SELECT provider_key,remote_subject_id,refresh_token_ciphertext,token_type,scopes_json,access_expires_at,refresh_expires_at,connection_status,last_refresh_at,disconnected_at,remote_revoke_state,diagnostic_code,created_at,updated_at FROM oauth_provider_connections ORDER BY provider_key`).all()).results||[];
     pending=Number((await db.prepare(`SELECT COUNT(*) AS n FROM oauth_authorization_transactions WHERE terminal_status='pending' AND expires_at>CURRENT_TIMESTAMP`).first())?.n||0);
     replayRejects=Number((await db.prepare(`SELECT COUNT(*) AS n FROM oauth_security_events WHERE event_type='callback_state_validation' AND outcome='rejected'`).first())?.n||0);
   }catch(error){return json({ok:false,code:'release460_schema_not_ready',error:'Release 460 OAuth schema is not ready.'},503);}
   return json({
     ok:true,authority:'secure-oauth-lifecycle',environment:'development',development_host_only:true,
     remote_authorization_open:oauthRemoteAuthorizationOpen(env,request.url),provider_publication_allowed:false,
-    encryption_key_configured:encryptionKeyConfigured(env),secret_values_emitted:false,
+    encryption_key_configured:encryptionKeyConfigured(env),secret_values_emitted:false,provider_subject_values_emitted:false,
+    intended_account_verification_required:true,refresh_health_is_local_only:true,
     pending_authorization_transactions:pending,replay_or_invalid_state_rejections:replayRejects,
-    contracts:listOAuthContracts(),
-    connections:rows.map((r)=>({...r,scopes:JSON.parse(r.scopes_json||'[]'),scopes_json:undefined,token_material_present:'redacted'}))
+    contracts:listOAuthContracts(),connections:rows.map(safeConnection)
   });
 }
 
