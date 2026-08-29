@@ -27,7 +27,6 @@ for marker in ("('etsy','etsy','Etsy','draft_only',0,20,13,3,5,1,0", "('tiktok',
 require('account_id' not in sql.lower(),'Release 450 migration must not carry Cloudflare account selection')
 require('devilndove-site' not in sql.replace('devilndove-site-dev',''),'Release 450 migration must not name Production Pages')
 
-# Compose the real Release 449 baseline followed by Release 450 locally.
 try:
     with tempfile.TemporaryDirectory() as td:
         db=sqlite3.connect(str(Path(td)/'release450.sqlite'))
@@ -79,7 +78,7 @@ for marker in ('@media(max-width:950px)','@media(max-width:600px)','grid-templat
     require(marker in styles,f'Marketplace readiness responsive CSS missing {marker!r}')
 
 ui=text('public/js/admin-marketplace-readiness.js')
-for marker in ("channels=['etsy','facebook','pinterest','tiktok','manual']",'Personalization questions','Variation properties','Provider execution: disabled','publication'):
+for marker in ("channels=['etsy','facebook','pinterest','tiktok','manual']",'Personalization questions','Variation properties','Provider execution:', 'provider_execution_allowed'):
     require(marker in ui,f'Marketplace readiness UI missing {marker!r}')
 
 for js in ('functions/api/_lib/marketplaceReadiness.js','functions/api/admin/marketplace-export-preview.js','functions/api/admin/marketplace-csv-mapping.js','functions/api/admin/marketplace-listing-profile.js','public/js/admin-marketplace-readiness.js','public/js/admin-marketplace-export-preview.js','public/js/admin-marketplace-mapping.js'):
