@@ -1,9 +1,15 @@
 name: Development D1 Release 459
 
 on:
-  workflow_run:
-    workflows: ['Release 459 Source Gate']
-    types: [completed]
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/dev/20260829_release459_it_provider_setup_authority.sql'
+      - 'functions/api/_lib/releaseAuthority.js'
+      - 'scripts/release459_runtime_acceptance_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'development-release.json'
+      - '.github/workflows/development-d1-release459.yml'
   workflow_dispatch:
 
 permissions:
@@ -11,7 +17,6 @@ permissions:
 
 jobs:
   migrate-development-d1:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -20,7 +25,7 @@ jobs:
       DEV_D1_DATABASE_NAME: devilndove-dev
       EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
     steps:
-      - name: Checkout Development source
+      - name: Checkout exact Development source
         uses: actions/checkout@v4
         with:
           ref: dev
@@ -29,22 +34,23 @@ jobs:
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
-      - name: Require exact successful Release 459 source head
+      - name: Refuse non-Development or stale source
         shell: bash
         run: |
           set -euo pipefail
-          test "${GITHUB_REF_NAME}" = "dev" || true
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_run" ]; then
-            expected='${{ github.event.workflow_run.head_sha }}'
+          test "${GITHUB_REF_NAME}" = "dev"
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
             actual="$(git rev-parse HEAD)"
-            test -n "${expected}"
-            test "${actual}" = "${expected}" || {
-              echo "dev advanced from proven source head ${expected} to ${actual}; refusing D1 mutation."
+            test "${actual}" = "${GITHUB_SHA}" || {
+              echo "Checkout ${actual} does not match pushed Development SHA ${GITHUB_SHA}; refusing D1 mutation."
               exit 1
             }
           fi
+      - name: Re-run Release 459 source safety before any D1 write
+        run: |
           python scripts/release459_runtime_acceptance_gate.py
           python scripts/repository_forward_sanity.py
+          python scripts/development_runtime_acceptance.py --self-check
       - name: Protect exact Development connection authority
         run: |
           grep -q 'name = "devilndove-site-dev"' wrangler.toml

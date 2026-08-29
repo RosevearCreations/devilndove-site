@@ -63,14 +63,14 @@ It may change only safe provider setup/readiness metadata. It must not:
 - target separate live Production;
 - replay Release 447–453 migrations.
 
-Automation chain:
-1. `.github/workflows/release459-source-gate.yml`
-2. `.github/workflows/development-d1-release459.yml`
-3. `.github/workflows/release459-remote-verification.yml`
+Release 459 automation intentionally remains on `dev`; the repository default branch is `main` and is not modified to make Development automation easier. Consequently, the guarded D1 workflow uses a `dev` push trigger rather than GitHub `workflow_run`. Before any D1 write, the job itself re-runs the full Release 459 gate, repository forward sanity and runtime acceptance self-check, then validates exact D1 name/UUID and probes convergence.
 
-The mutation workflow verifies the exact D1 identity, requires the proven source head, probes whether Release 459 is already converged, captures a preservation baseline and applies only the current migration when required.
+The separate remote verifier also starts from the same exact `dev` push, contains no mutation command, verifies the exact D1 identity and waits read-only for Release 459 convergence before validating the snapshot. If the guarded migration does not converge, the verifier fails closed.
 
-The remote verifier is read-only and verifies eight providers, X readiness, corrected Etsy/X/YouTube reference metadata, zero provider-orphan rows, clean foreign keys and zero secret-value columns.
+Workflows:
+- `.github/workflows/release459-source-gate.yml`
+- `.github/workflows/development-d1-release459.yml`
+- `.github/workflows/release459-remote-verification.yml`
 
 ## Secret/configuration boundary
 Actual provider values belong in Cloudflare Workers & Pages → `devilndove-site-dev` → Settings → Variables and Secrets.

@@ -44,9 +44,9 @@ The migration stores only safe provider metadata/reference names. It:
 - does not enable provider execution/publication.
 
 Mutation workflow: `.github/workflows/development-d1-release459.yml`.
-It runs only after a successful Release 459 Source Gate (or an explicit Development dispatch), verifies the exact D1 name/UUID, refuses stale source heads, probes convergence first, and applies only the Release 459 file when needed.
+Because the repository default branch is `main` and Development workflows intentionally live only on `dev`, GitHub `workflow_run` chaining cannot be used without modifying the live branch. Release 459 therefore uses a guarded `dev` push trigger. The mutation job re-runs the full Release 459 source gate and forward sanity itself before any write, verifies exact D1 name/UUID, refuses stale/non-Development source, probes convergence first and applies only the Release 459 file when needed.
 
-Read-only verifier: `.github/workflows/release459-remote-verification.yml` using `scripts/verify_release459_remote_snapshot.py`.
+Independent read-only verifier: `.github/workflows/release459-remote-verification.yml`. It starts independently from the same `dev` checkpoint and polls read-only until Release 459 convergence is visible, then verifies the remote snapshot. It contains no mutation command.
 
 ## I.T. provider setup model
 Actual values remain in Cloudflare Variables and Secrets. The application exposes names/instructions and presence booleans only through `/api/admin/it-provider-setup-guide`.

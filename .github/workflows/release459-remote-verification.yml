@@ -1,9 +1,14 @@
 name: Release 459 Remote Verification
 
 on:
-  workflow_run:
-    workflows: ['Development D1 Release 459']
-    types: [completed]
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/dev/20260829_release459_it_provider_setup_authority.sql'
+      - 'scripts/verify_release459_remote_snapshot.py'
+      - 'development-release.json'
+      - '.github/workflows/development-d1-release459.yml'
+      - '.github/workflows/release459-remote-verification.yml'
   workflow_dispatch:
 
 permissions:
@@ -11,7 +16,6 @@ permissions:
 
 jobs:
   verify-development-d1:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -28,14 +32,17 @@ jobs:
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
-      - name: Require exact successful mutation head
+      - name: Refuse non-Development or stale source
         shell: bash
         run: |
           set -euo pipefail
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_run" ]; then
-            expected='${{ github.event.workflow_run.head_sha }}'
+          test "${GITHUB_REF_NAME}" = "dev"
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
             actual="$(git rev-parse HEAD)"
-            test "${actual}" = "${expected}" || { echo "dev advanced from mutation head ${expected} to ${actual}; refusing stale verification."; exit 1; }
+            test "${actual}" = "${GITHUB_SHA}" || {
+              echo "Checkout ${actual} does not match pushed Development SHA ${GITHUB_SHA}; refusing verification."
+              exit 1
+            }
           fi
       - name: Protect exact Development connection authority
         run: |
@@ -66,9 +73,40 @@ jobs:
                   for x in v:yield from walk(x)
           ids={str(x.get('uuid') or x.get('id') or '') for x in walk(data)}
           names={str(x.get('name') or '') for x in walk(data)}
-          if os.environ['EXPECTED_DEV_D1_DATABASE_ID'] not in ids or os.environ['DEV_D1_DATABASE_NAME'] not in names:raise SystemExit('Refusing verification: exact Development D1 identity did not match.')
+          if os.environ['EXPECTED_DEV_D1_DATABASE_ID'] not in ids or os.environ['DEV_D1_DATABASE_NAME'] not in names:
+              raise SystemExit('Refusing verification: exact Development D1 identity did not match.')
           print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
           PY
+      - name: Wait read-only for Release 459 convergence
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 24); do
+            wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
+              (SELECT COUNT(*) FROM provider_setup_authorities WHERE provider_key='x' AND instr(required_config_keys_json,'X_CLIENT_ID')>0 AND instr(required_config_keys_json,'X_REDIRECT_URI')>0) AS x_provider_ready,
+              (SELECT COUNT(*) FROM provider_setup_authorities WHERE provider_key='youtube' AND instr(required_config_keys_json,'YOUTUBE_CLIENT_ID')>0 AND instr(required_config_keys_json,'GOOGLE_CLIENT_ID')=0) AS youtube_ref_ready,
+              (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='x' AND environment='development') AS x_check_count;" > /tmp/release459-wait.json
+            if python - <<'PY'
+          import json
+          data=json.load(open('/tmp/release459-wait.json',encoding='utf-8'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values():yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v:yield from walk(x)
+          row=next((x for x in walk(data) if 'x_provider_ready' in x),{})
+          raise SystemExit(0 if int(row.get('x_provider_ready') or 0)==1 and int(row.get('youtube_ref_ready') or 0)==1 and int(row.get('x_check_count') or 0)>=4 else 1)
+          PY
+            then
+              echo "Release 459 convergence visible on read-only attempt ${attempt}."
+              exit 0
+            fi
+            echo "Release 459 not visible yet on read-only attempt ${attempt}."
+            sleep 10
+          done
+          echo 'Release 459 convergence did not become visible; verifier fails closed.'
+          exit 1
       - name: Capture Release 459 read-only remote snapshot
         run: |
           wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
