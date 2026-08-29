@@ -6,8 +6,13 @@ on:
     paths:
       - 'functions/api/_lib/oauthSecurity.js'
       - 'functions/api/_lib/oauthProviders.js'
+      - 'functions/api/_lib/socialPublishContracts.js'
       - 'functions/api/admin/oauth-start.js'
       - 'functions/api/admin/oauth-connections.js'
+      - 'functions/api/admin/provider-publication-plan.js'
+      - 'functions/api/admin/_middleware.js'
+      - 'functions/api/admin/social-post-queue.js'
+      - 'functions/api/admin/social-product-automation.js'
       - 'functions/api/social/oauth/**'
       - 'migrations/dev/20260829_release460_secure_oauth_lifecycle.sql'
       - 'scripts/release460_*'
@@ -41,17 +46,25 @@ jobs:
         run: node scripts/release460_oauth_crypto_proof.mjs
       - name: Release 460 provider contract mock proof
         run: node scripts/release460_provider_contract_mock_proof.mjs
+      - name: Release 460 non-executing publication validation proof
+        run: node scripts/release460_publish_contract_mock_proof.mjs
       - name: Carry Release 459 provider/runtime authority
         run: python scripts/release459_runtime_acceptance_gate.py
       - name: JavaScript syntax
         run: |
           node --check functions/api/_lib/oauthSecurity.js
           node --check functions/api/_lib/oauthProviders.js
+          node --check functions/api/_lib/socialPublishContracts.js
           node --check functions/api/admin/oauth-start.js
           node --check functions/api/admin/oauth-connections.js
+          node --check functions/api/admin/provider-publication-plan.js
+          node --check functions/api/admin/_middleware.js
+          node --check functions/api/admin/social-post-queue.js
+          node --check functions/api/admin/social-product-automation.js
           node --check functions/api/social/oauth/_callback.js
           node --check functions/api/social/oauth/etsy/callback.js
           node --check scripts/release460_provider_contract_mock_proof.mjs
+          node --check scripts/release460_publish_contract_mock_proof.mjs
       - name: Production and provider boundary proof
         run: |
           python - <<'PY'

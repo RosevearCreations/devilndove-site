@@ -12,7 +12,13 @@ providers=read('functions/api/_lib/oauthProviders.js')
 start=read('functions/api/admin/oauth-start.js')
 callback=read('functions/api/social/oauth/_callback.js')
 connections=read('functions/api/admin/oauth-connections.js')
+publish_contracts=read('functions/api/_lib/socialPublishContracts.js')
+publish_endpoint=read('functions/api/admin/provider-publication-plan.js')
+admin_middleware=read('functions/api/admin/_middleware.js')
+social_queue=read('functions/api/admin/social-post-queue.js')
+social_product_automation=read('functions/api/admin/social-product-automation.js')
 mock_proof=read('scripts/release460_provider_contract_mock_proof.mjs')
+publish_mock_proof=read('scripts/release460_publish_contract_mock_proof.mjs')
 migration=read('migrations/dev/20260829_release460_secure_oauth_lifecycle.sql')
 authority=read('functions/api/_lib/releaseAuthority.js')
 release=json.loads(read('development-release.json'))
@@ -29,6 +35,35 @@ need(start,'getAdminUserFromRequest','oauth_live_authorization_closed','provider
 need(callback,'consumed_at IS NULL','expires_at>CURRENT_TIMESTAMP','pkce_verifier_ciphertext=NULL','verifyOAuthIdentity','intended_account_verified','encryptOAuthSecret','oauthRemoteAuthorizationOpen')
 need(connections,'secret_values_emitted:false','provider_subject_values_emitted:false','provider_publication_allowed:false','intended_account_verification','expected_subject_configured','providerIdentityStatus','verifyOAuthIdentity','local_token_material_destroyed:true','refreshOAuthToken','revokeOAuthToken')
 need(mock_proof,'INTENDED ACCOUNT MOCK PROOF','oauth_intended_account_not_configured','oauth_intended_account_mismatch','META_EXPECTED_INSTAGRAM_BUSINESS_ID','provider-sensitive-identity-detail')
+
+# Release 460 publication planning is a pure validation/idempotency layer, not provider execution.
+need(publish_contracts,
+     "const PROVIDER_KEYS = ['etsy', 'pinterest', 'meta', 'x', 'tiktok', 'youtube']",
+     'release460_internal_preview_v1','sha256Base64Url','duplicate_blocked','new_or_revised',
+     'provider_execution: false','provider_publication: false','network_calls_allowed: false','token_material_required: false',
+     'provider_subject_values_emitted: false','secret_values_emitted: false')
+assert 'fetch(' not in publish_contracts, 'publication validation contract must not contain provider network execution'
+assert 'decryptOAuthSecret' not in publish_contracts, 'publication validation contract must not read/decrypt OAuth tokens'
+need(publish_endpoint,
+     'getAdminUserFromRequest','isDevelopmentOAuthHost','buildProviderPublicationPlan','listProviderPublicationContracts',
+     'provider_publication_validation_development_only','provider_publication_validation_only',
+     'provider_execution: false','provider_publication: false','network_calls_allowed: false','production_mutation: false')
+assert 'fetch(' not in publish_endpoint, 'publication validation endpoint must not contact providers'
+assert 'decryptOAuthSecret' not in publish_endpoint, 'publication validation endpoint must not read/decrypt OAuth tokens'
+need(publish_mock_proof,
+     'PROVIDER PUBLICATION VALIDATION + IDEMPOTENCY MOCK PROOF','fetchCalls','duplicate_blocked',
+     'provider-secret-must-never-appear','provider-subject-must-never-appear','public_https_image_required','public_https_video_required')
+
+# Retained Build 227-era network publishing/probing code remains source-compatible but is unreachable through admin HTTP while Release 460 closes provider execution.
+need(social_queue,'publish_platforms','publishToFacebook','publishToInstagram','publishToX','publishToPinterest')
+need(social_product_automation,'test_meta_connections','metaGet')
+need(admin_middleware,
+     'guardClosedProviderExecution','/api/admin/social-post-queue','publish_platforms','/api/admin/social-product-automation','test_meta_connections',
+     'provider_execution_closed','legacy_handler_executed: false','/api/admin/provider-publication-plan')
+provider_guard=admin_middleware.index('const providerBlocked = await guardClosedProviderExecution(context)')
+next_handler=admin_middleware.index('const response = await context.next()')
+assert provider_guard < next_handler, 'provider execution guard must run before retained admin route handler'
+
 need(migration,'state_hash TEXT NOT NULL UNIQUE','remote_subject_id','access_token_ciphertext','refresh_token_ciphertext','release460_forbidden_plaintext_columns','PRAGMA foreign_key_check')
 for forbidden in (' state TEXT',' code TEXT',' code_verifier TEXT',' access_token TEXT',' refresh_token TEXT'):
     assert forbidden not in migration, f'plaintext OAuth persistence forbidden: {forbidden.strip()}'
@@ -89,4 +124,4 @@ assert evidence.get('oauth_remote_operator_switch_set') is False
 assert evidence.get('secret_values_stored_in_plaintext') is False
 assert release.get('current_release_migrations')==['migrations/dev/20260829_release460_secure_oauth_lifecycle.sql']
 assert (ROOT/'functions/api/social/oauth/etsy/callback.js').exists()
-print('RELEASE 460 SECURE OAUTH + INTENDED ACCOUNT SOURCE + LOCAL D1 GATE: PASS')
+print('RELEASE 460 SECURE OAUTH + IDENTITY + NON-EXECUTING PUBLICATION SOURCE + LOCAL D1 GATE: PASS')
