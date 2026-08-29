@@ -43,7 +43,7 @@ with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
 context=need('public/js/admin-context-help.js',"trigger.textContent = 'ⓘ'")
 bootstrap=need('public/js/site-auth-ui.js','/public/js/admin-context-help.js?v=448-context-help')
 context_css=need('css/admin-context-help.css','.dd-context-help-trigger:focus-visible')
-for needle in ["trigger.type = 'button'",'aria-controls','aria-expanded',"event.key === 'Escape'","document.addEventListener('click'",'MutationObserver','[data-context-help]','data-context-help-text']:
+for needle in ["trigger.type = 'button'",'aria-controls','aria-expanded',"event.key === 'Escape'","document.addEventListener('click'",'MutationObserver','[data-context-help]','dataset.contextHelpText','dataset.contextHelpTitle']:
  if needle not in context:raise SystemExit(f'FAIL — shared admin contextual help missing {needle!r}')
 for key in ['carousel:','collection:','explicit_membership:','collage:','caip_handoff:','tool_lifecycle:','supply_sourcing:','accounting:','it_platform:','d1_r2_readiness:','provider_configuration:']:
  if key not in context:raise SystemExit(f'FAIL — contextual-help library missing {key!r}')
