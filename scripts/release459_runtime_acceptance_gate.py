@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 459 source gate: authenticated Development acceptance + provider setup authority."""
+"""Historical Release 459 source gate carried by Release 460."""
 from __future__ import annotations
 import json,re,sqlite3,subprocess,sys,tempfile
 from pathlib import Path
@@ -18,7 +18,6 @@ req("('x','X','social'" in mig,'Release 459 migration must add X provider author
 req('provider_execution_allowed' not in mig and 'publication_allowed=1' not in mig,'Release 459 migration must not enable provider execution/publication')
 req('devilndove-site' not in mig.replace('devilndove-site-dev',''),'Release 459 migration must not name separate live Production')
 req(not re.search(r'\b(DROP|ALTER)\s+TABLE\b',mig,re.I),'Release 459 provider metadata migration must not drop/alter tables')
-# Compose real Release 449/450/453/459 schema locally and verify the new metadata.
 try:
  with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
   db=sqlite3.connect(tmp.name);db.execute('PRAGMA foreign_keys=ON');db.execute('CREATE TABLE users(user_id INTEGER PRIMARY KEY)')
@@ -45,23 +44,22 @@ req(not re.search(r'\b(CREATE|ALTER|DROP)\s+(TABLE|INDEX|TRIGGER)\b',guide_api,r
 for marker in ('Copy name','/api/admin/it-provider-setup-guide','configuration_complete'):req(marker in guide_js,f'Provider setup renderer missing {marker}')
 for marker in ('@media(max-width:900px)','@media(max-width:640px)','min-height:44px'):req(marker in guide_css,f'Provider setup responsive CSS missing {marker}')
 req(len(re.findall(r'<h1(?:\s|>)',it_html,re.I))==1 and 'noindex,nofollow' in it_html and 'data-admin-module="it-platform"' in it_html,'I.T. Integrations H1/private/module boundary drifted')
-req('Release 459' in it_html and 'id="itSetupGuide"' in it_html and '/public/js/admin-it-provider-setup-guide.js?v=459' in it_html,'I.T. Integrations must expose Release 459 setup guide')
+req('Release 459' in it_html and 'id="itSetupGuide"' in it_html and '/public/js/admin-it-provider-setup-guide.js?v=459' in it_html,'I.T. Integrations must retain Release 459 setup guide provenance')
 req(len(re.findall(r'<h1(?:\s|>)',runtime_html,re.I))==1 and 'noindex,nofollow' in runtime_html and 'data-admin-module="it-platform"' in runtime_html,'Runtime Acceptance H1/private/module boundary drifted')
 for marker in ('Release 459','Run core acceptance','CAIP private-media range / seek proof','bytes=0-1023'):req(marker in runtime_html or marker in runtime_js,f'Runtime Acceptance missing {marker}')
 for marker in ("method:'GET'","create_secure_review_link","Range:'bytes=0-1023'","ranged.status!==206",'source_media_copied:false','provider_execution:false','publication:false','autoplay:false'):req(marker in runtime_js,f'Runtime Acceptance safety marker missing {marker}')
 for marker in ('@media(max-width:900px)','@media(max-width:640px)','min-height:44px'):req(marker in runtime_css,f'Runtime Acceptance responsive CSS missing {marker}')
 release=json.loads(read('development-release.json'));hist={x.get('release'):x for x in release.get('release_history',[])}
-req(release.get('release')==459 and release.get('label')=='Authenticated Development Acceptance & Provider Setup Authority','current metadata must be Release 459')
-req(release.get('current_release_migrations')==[MIG],'Release 459 metadata must identify exactly the Release 459 migration')
+req(int(release.get('release') or 0)>=459,'current metadata must carry Release 459 or later')
+req(hist.get(459,{}).get('migration')==MIG,'Release 459 migration/history authority must be preserved')
 r458=hist.get(458,{});req(r458.get('state')=='complete_source_proven_no_new_d1_migration' and r458.get('focused_source_gate_run')==33265953249 and r458.get('system_gate_run')==33265953255 and r458.get('exact_head_sha')=='66b48f0445c74247972e14fbdaa0e215e3792fb7' and r458.get('pages_check_run')==99135984965,'Release 458 exact closure evidence must be carried forward')
 policy=release.get('release_policy',{});req(policy.get('production_promotion')=='closed' and policy.get('provider_execution')=='closed' and policy.get('provider_publication')=='closed','Production/provider boundaries must remain closed')
 run('scripts/development_runtime_acceptance.py','--self-check');run('scripts/release458_caip_review_handoff_gate.py');run('scripts/release457_financials_operations_gate.py')
-print('RELEASE 459 RUNTIME + PROVIDER AUTHORITY GATE')
+print('RELEASE 459 HISTORICAL RUNTIME + PROVIDER AUTHORITY GATE')
 print('Provider setup authorities: 8 / secret values stored: NO')
 print('Core runtime acceptance: GET ONLY')
-print('CAIP proof: explicit short-lived grant + bounded range/metadata/seek; source copy NO')
 print('Provider execution/publication and separate live Production: CLOSED')
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
  raise SystemExit(1)
-print('RELEASE 459 RUNTIME + PROVIDER AUTHORITY GATE: PASS')
+print('RELEASE 459 HISTORICAL RUNTIME + PROVIDER AUTHORITY GATE: PASS')
