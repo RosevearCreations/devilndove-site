@@ -42,9 +42,11 @@ jobs:
           node-version: '24'
       - name: Validate current release and repository authority
         run: python scripts/repository_forward_sanity.py
-      - name: Validate Release 452 repository hygiene
+      - name: Validate Release 453 I.T. provider readiness
+        run: python scripts/release453_it_provider_readiness_gate.py
+      - name: Validate current repository hygiene
         run: python scripts/repository_hygiene_gate.py
-      - name: Validate Release 452 application streamlining and UX SEO depth
+      - name: Validate Release 452 carried-forward application streamlining and UX SEO depth
         run: python scripts/release452_application_streamlining_gate.py
       - name: Validate Release 451 carried-forward marketplace calibration and SEO assurance
         run: python scripts/release451_marketplace_calibration_gate.py
@@ -120,6 +122,7 @@ jobs:
           node --check functions/api/admin/supply-sourcing.js
           node --check functions/api/admin/release448-calibration.js
           node --check functions/api/admin/it-integrations.js
+          node --check functions/api/admin/it-provider-readiness.js
           node --check functions/api/admin/storefront-merchandising.js
           node --check functions/api/admin/marketplace-export-preview.js
           node --check functions/api/admin/marketplace-csv-mapping.js
@@ -156,6 +159,7 @@ jobs:
           node --check public/js/admin-supply-sourcing.js
           node --check public/js/admin-release448-calibration.js
           node --check public/js/admin-it-integrations.js
+          node --check public/js/admin-it-provider-readiness.js
           node --check public/js/admin-caip-content-handoff.js
           node --check public/js/admin-home-carousel.js
           node --check public/js/admin-application-modules.js
@@ -166,15 +170,14 @@ jobs:
           node --check functions/api/payment-providers.js
           node --check sw.js
       - name: Compile canonical Python gates
-        run: python -m py_compile scripts/repository_forward_sanity.py scripts/repository_hygiene_gate.py scripts/release452_application_streamlining_gate.py scripts/release451_marketplace_calibration_gate.py scripts/release450_marketplace_seo_gate.py scripts/verify_release450_remote_snapshot.py scripts/release448_expansion_authority_gate.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/release448_fresh_install_gate.py scripts/product_lineage_gate.py scripts/release448_media_it_source_gate.py scripts/release448_storefront_merchandising_gate.py scripts/release448_caip_content_handoff_gate.py scripts/release448_inventory_intelligence_gate.py scripts/release448_tool_lifecycle_gate.py scripts/release448_supply_sourcing_gate.py scripts/release448_calibration_gate.py scripts/release448_financials_depth_gate.py scripts/release448_promotion_rehearsal.py scripts/public_seo_gate.py scripts/public_seo_depth_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/apply_development_product_lineage.py scripts/apply_development_release448_media_it.py scripts/apply_development_release448_storefront_merchandising.py scripts/apply_development_release448_caip_content_handoff.py scripts/apply_development_release448_tool_lifecycle.py scripts/apply_development_release448_supply_sourcing.py scripts/development_runtime_acceptance.py
+        run: python -m py_compile scripts/repository_forward_sanity.py scripts/repository_hygiene_gate.py scripts/release453_it_provider_readiness_gate.py scripts/release452_application_streamlining_gate.py scripts/release451_marketplace_calibration_gate.py scripts/release450_marketplace_seo_gate.py scripts/verify_release450_remote_snapshot.py scripts/release448_expansion_authority_gate.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/release448_fresh_install_gate.py scripts/product_lineage_gate.py scripts/release448_media_it_source_gate.py scripts/release448_storefront_merchandising_gate.py scripts/release448_caip_content_handoff_gate.py scripts/release448_inventory_intelligence_gate.py scripts/release448_tool_lifecycle_gate.py scripts/release448_supply_sourcing_gate.py scripts/release448_calibration_gate.py scripts/release448_financials_depth_gate.py scripts/release448_promotion_rehearsal.py scripts/public_seo_gate.py scripts/public_seo_depth_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/apply_development_product_lineage.py scripts/apply_development_release448_media_it.py scripts/apply_development_release448_storefront_merchandising.py scripts/apply_development_release448_caip_content_handoff.py scripts/apply_development_release448_tool_lifecycle.py scripts/apply_development_release448_supply_sourcing.py scripts/development_runtime_acceptance.py
       - name: Whitespace validation
         run: git diff --check
       - name: Safety statement
         run: |
           echo 'Cloudflare/D1/R2/provider writes from canonical CI: NONE'
-          echo 'Current release: 452 Application Streamlining & UX/SEO Depth'
-          echo 'Release 452 new D1 migration: NONE REQUIRED'
-          echo 'Last verified Development D1 schema release: 450'
+          echo 'Current release: 453 I.T. Provider Readiness & Acceptance Authority'
+          echo 'Release 453 D1 mutation is handled only by the separate guarded Development workflow'
           echo 'Provider execution/publication: DISABLED'
           echo 'Historical release authorities: REGRESSION / PROVENANCE ONLY'
           echo 'Production mutation capability: NONE'
