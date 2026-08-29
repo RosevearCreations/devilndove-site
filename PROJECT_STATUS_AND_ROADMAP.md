@@ -142,16 +142,19 @@ The correct activation path is to add the credential to secure GitHub Actions se
 
 ### Fresh-install protection
 
-Release 448 now explicitly protects against the historical failure mode where incremental Development works but a new database is missing current schema.
+Release 448 explicitly protects against the historical failure mode where incremental Development works but a new database is missing current schema.
 
-`python scripts/release448_fresh_install_gate.py` composes a fresh local database from:
+`python scripts/release448_fresh_install_gate.py` composes a fresh local database in the real authority order:
 
-1. `database_full_schema.sql`
-2. Product-lineage Release 448 migration
-3. Media/Movie/I.T. Release 448 migration
-4. Storefront-merchandising Release 448 migration
+1. `database_full_schema.sql` — historical/base aggregate
+2. `database_platform_convergence.sql` — verified Release 447 five-module, role and explicit I.T.-manager baseline
+3. Product-lineage Release 448 migration
+4. Media/Movie/I.T. Release 448 migration
+5. Storefront-merchandising Release 448 migration
 
-It requires current Release 448 authorities, all five canonical modules and clean foreign keys. Until the large physical aggregate schema is deliberately regenerated, **base aggregate + all current Release 448 migrations is the gated fresh-install authority**.
+The first gate execution intentionally exposed that the old aggregate alone does not contain `app_role_module_access` and `app_user_module_managers`. Those tables are correctly owned by the Release 447 convergence migration. We corrected the composition recipe instead of weakening the gate. The current test requires five canonical modules, 10 canonical role rows, one active explicit I.T. manager, all current Release 448 authorities and clean foreign keys.
+
+Until the physical aggregate schema is deliberately regenerated, **base aggregate + Release 447 convergence + all current Release 448 migrations is the gated fresh-install authority**.
 
 ## Canonical current-release gates
 
