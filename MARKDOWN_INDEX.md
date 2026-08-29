@@ -16,8 +16,12 @@ Current authority order:
 10. `docs/operations/RELEASE_453_IT_PROVIDER_READINESS.md` — carried-forward provider/D1 authority; mutation `33258377328`, verifier `33258415391`.
 11. `SANITY_HEALTH_CHECK.md` — current validation and acceptance summary.
 
+## Exact carried-forward closure evidence
+
+Release 457 closed on exact Development head `33f939c8b6daa733e8a54fa8ded15cde626978a0` with focused Source Gate `33264872362`, canonical System Gate `33264872366`, and Cloudflare Pages check `99133095306`, all successful on that same SHA.
+
 ## Synchronization rule
 
-A release is not converged if these current-authority documents disagree about the current release, D1 state, deployment boundary or next queue. Update them in the release batch before exact-head closure.
+A release is not converged if these current-authority documents disagree about the current release, D1 state, deployment boundary, exact prior-release evidence, or next queue. Update them in the release batch before exact-head closure.
 
 Release 458 has **no D1 migration**. Development D1 remains independently verified through **Release 453**. Separate live Production and provider execution/publication remain closed.
