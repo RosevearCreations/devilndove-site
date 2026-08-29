@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     settled.forEach((r,i)=>r.status==='fulfilled'?data[entries[i][0]]=r.value:failures.push(entries[i][0]));
     const issues=[...reconciliationIssues('Sales tax',data.salesTax),...reconciliationIssues('Processor fees',data.processorFees),...reconciliationIssues('Shipping',data.shipping)];
     const open=arr(data.exceptions?.exceptions).filter(r=>!['resolved','ignored'].includes(String(r.exception_status||'').toLowerCase()));
-    open.forEach(r=>issues.push(issue(String(r.severity||'').toLowerCase()==='critical'?'high':'medium',`Reconciliation exception: ${r.reconciliation_type||r.reference_label||'review'}`,`${r.scope_key||'all'} • ${r.period_month||month} • ${money(r.difference_cents||0)} difference • ${r.exception_status||'open'}`,'#reconciliationExceptionsCard','Exceptions'));
+    open.forEach(r=>issues.push(issue(String(r.severity||'').toLowerCase()==='critical'?'high':'medium',`Reconciliation exception: ${r.reconciliation_type||r.reference_label||'review'}`,`${r.scope_key||'all'} • ${r.period_month||month} • ${money(r.difference_cents||0)} difference • ${r.exception_status||'open'}`,'#reconciliationExceptionsCard','Exceptions')));
     const c=data.costing?.summary||{},uncosted=num(c.uncosted_product_count),missing=num(c.missing_cost_link_count),negative=num(c.negative_margin_count);
     if(uncosted)issues.push(issue('high','Sold/Product costing incomplete',`${uncosted} product${uncosted===1?'':'s'} are uncosted for the monthly costing view.`,'#item-costing','Costing'));
     if(missing)issues.push(issue('medium','Product cost links incomplete',`${missing} product${missing===1?'':'s'} are missing cost-resource linkage.`,'#product-costs','Costing'));
