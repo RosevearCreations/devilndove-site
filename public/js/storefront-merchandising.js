@@ -5,6 +5,10 @@
 
   const text = (value) => String(value == null ? '' : value).trim();
   const esc = (value) => text(value).replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+  const money = (cents, currency = 'CAD') => {
+    try { return new Intl.NumberFormat(undefined, { style:'currency', currency:text(currency) || 'CAD' }).format(Number(cents || 0) / 100); }
+    catch { return `${(Number(cents || 0) / 100).toFixed(2)} ${text(currency) || 'CAD'}`; }
+  };
 
   async function fetchManifest(options = {}) {
     const url = new URL('/api/storefront-merchandising', location.origin);
@@ -32,6 +36,18 @@
     </article>`;
   }
 
+  function productCard(product) {
+    const image = text(product.image_url);
+    return `<article class="card storefront-collection-card">
+      ${image ? `<a href="${esc(product.href || '/shop/')}"><img src="${esc(image)}" alt="${esc(product.name || 'Product')}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:12px;background:rgba(0,0,0,.1)"></a>` : '<div class="media-managed-placeholder" style="aspect-ratio:1/1;display:grid;place-items:center">Product image pending.</div>'}
+      <div class="storefront-collection-meta"><span class="pill">${esc(product.merchandise_origin || 'Product')}</span>${product.product_category ? `<span class="pill">${esc(product.product_category)}</span>` : ''}</div>
+      <h2 style="margin:0;font-size:1.12rem">${esc(product.name || 'Product')}</h2>
+      ${product.short_description ? `<p class="small" style="margin:0">${esc(product.short_description)}</p>` : ''}
+      <div><strong>${esc(money(product.price_cents, product.currency))}</strong></div>
+      <div><a class="btn" href="${esc(product.href || '/shop/')}">View Product</a></div>
+    </article>`;
+  }
+
   function renderCollections(target, collections = [], options = {}) {
     const node = typeof target === 'string' ? document.querySelector(target) : target;
     if (!node) return false;
@@ -43,6 +59,18 @@
     }
     node.innerHTML = `<div class="storefront-collection-grid">${rows.map(collectionCard).join('')}</div>`;
     node.dataset.storefrontMerchandising = 'collections';
+    return true;
+  }
+
+  function renderCollectionDetail(target, collection, options = {}) {
+    const node = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!node || !collection) return false;
+    const products = Array.isArray(collection.products) ? collection.products : [];
+    if (!products.length && options.keepFallback !== false) return false;
+    node.innerHTML = products.length
+      ? `<div class="storefront-collection-grid">${products.map(productCard).join('')}</div>`
+      : '<p class="small">No public Products are currently assigned to this collection.</p>';
+    node.dataset.storefrontMerchandising = 'collection-detail';
     return true;
   }
 
@@ -77,8 +105,11 @@
         if (requestedCollection && rows.length === 1) {
           if (heading) heading.textContent = rows[0].public_heading || rows[0].name || 'Collection';
           if (intro) intro.textContent = rows[0].public_body || rows[0].short_description || '';
+          renderCollectionDetail(collectionMount, rows[0], { keepFallback:true });
+          document.title = `${rows[0].name || 'Collection'} | Devil n Dove Collections`;
+        } else {
+          renderCollections(collectionMount, rows, { keepFallback:true });
         }
-        renderCollections(collectionMount, rows, { keepFallback:true });
       }
       for (const mount of collageMounts) {
         const wanted = text(mount.dataset.storefrontCollageMount);
@@ -96,7 +127,7 @@
     }
   }
 
-  window.DDStorefrontMerchandising = Object.freeze({ fetchManifest, renderCollections, renderCollage });
+  window.DDStorefrontMerchandising = Object.freeze({ fetchManifest, renderCollections, renderCollectionDetail, renderCollage });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hydratePage, { once:true });
   else hydratePage();
 })();
