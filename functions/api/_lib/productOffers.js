@@ -87,8 +87,8 @@ export async function ensureProductOffersSchema(db) {
   for (const sql of statements) await db.prepare(sql).run();
 }
 
-export async function getQuantityPriceTiers(db, productId) {
-  await ensureProductOffersSchema(db);
+export async function getQuantityPriceTiers(db, productId, options = {}) {
+  if (options.ensureSchema !== false) await ensureProductOffersSchema(db);
   const result = await db.prepare(`
     SELECT product_quantity_price_tier_id, product_id, min_quantity, unit_price_cents,
            label, is_active, sort_order, created_at, updated_at
@@ -106,9 +106,9 @@ export async function getQuantityPriceTiers(db, productId) {
   }));
 }
 
-export async function resolveUnitPrice(db, productId, quantity, basePriceCents) {
+export async function resolveUnitPrice(db, productId, quantity, basePriceCents, options = {}) {
   const qty = Math.max(1, Number(quantity || 1));
-  const tiers = await getQuantityPriceTiers(db, productId);
+  const tiers = await getQuantityPriceTiers(db, productId, options);
   const eligible = tiers.filter((row) => row.min_quantity <= qty && row.unit_price_cents >= 0);
   const applied = eligible.length ? eligible[eligible.length - 1] : null;
   return {
@@ -118,8 +118,8 @@ export async function resolveUnitPrice(db, productId, quantity, basePriceCents) 
   };
 }
 
-export async function getBundleDetails(db, bundleProductId) {
-  await ensureProductOffersSchema(db);
+export async function getBundleDetails(db, bundleProductId, options = {}) {
+  if (options.ensureSchema !== false) await ensureProductOffersSchema(db);
   const bundleId = Number(bundleProductId || 0);
   const settings = await db.prepare(`
     SELECT * FROM product_bundle_settings WHERE bundle_product_id = ? LIMIT 1
