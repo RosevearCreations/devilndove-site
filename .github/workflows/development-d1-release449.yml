@@ -1,0 +1,148 @@
+name: Development D1 Release 449
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/dev/20260829_release449_corporate_commerce.sql'
+      - 'scripts/verify_release449_d1.py'
+      - '.github/workflows/development-d1-release449.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migrate-development-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      REQUIRED_SOURCE_CHECKPOINT: 1230de2990bde1bf8e04b6a1a8f52745b45b2973
+    steps:
+      - name: Development-only branch guard
+        run: |
+          test "${GITHUB_REF_NAME}" = "dev" || {
+            echo 'Refusing to run outside dev.'
+            exit 1
+          }
+
+      - name: Checkout Development source
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Require proven Release 449 source checkpoint
+        run: |
+          git merge-base --is-ancestor "${REQUIRED_SOURCE_CHECKPOINT}" HEAD || {
+            echo 'Release 449 source checkpoint is not an ancestor of this migration authority.'
+            exit 1
+          }
+          python scripts/release449_corporate_commerce_source_gate.py
+
+      - name: Protect Pages account-selection authority
+        run: |
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          if grep -q '^account_id[[:space:]]*=' wrangler.toml; then
+            echo 'account_id must not be restored to wrangler.toml.'
+            exit 1
+          fi
+          test -f migrations/dev/20260829_release449_corporate_commerce.sql
+          if grep -Eiq 'devilndove-site([^ -]|$)|production database' migrations/dev/20260829_release449_corporate_commerce.sql; then
+            echo 'Production identifier found in Development migration authority.'
+            exit 1
+          fi
+
+      - name: Install pinned Wrangler
+        run: npm install --global wrangler@4.126.0
+
+      - name: Require Development Cloudflare credential
+        run: |
+          test -n "${CLOUDFLARE_API_TOKEN}" || {
+            echo 'CLOUDFLARE_API_TOKEN is missing. No D1 write was attempted.'
+            exit 1
+          }
+
+      - name: Verify exact Development D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1-info.json
+          python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/d1-info.json', encoding='utf-8'))
+          def dicts(v):
+              if isinstance(v, dict):
+                  yield v
+                  for x in v.values(): yield from dicts(x)
+              elif isinstance(v, list):
+                  for x in v: yield from dicts(x)
+          ids={str(r.get('uuid') or r.get('id') or '') for r in dicts(data)}
+          names={str(r.get('name') or '') for r in dicts(data)}
+          expected_id=os.environ['EXPECTED_DEV_D1_DATABASE_ID']
+          expected_name=os.environ['DEV_D1_DATABASE_NAME']
+          if expected_id not in ids or expected_name not in names:
+              raise SystemExit(f'Refusing D1 mutation: expected {expected_name} ({expected_id}); received another resource.')
+          print(f'VERIFIED DEVELOPMENT D1: {expected_name} ({expected_id})')
+          PY
+
+      - name: Capture authoritative Accounting preservation baseline
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --command "SELECT COUNT(*) AS accounting_details_count FROM accounting_details;" --json \
+            > /tmp/release449-before-accounting.json
+
+      - name: Apply only Release 449 additive Development migration
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --file migrations/dev/20260829_release449_corporate_commerce.sql
+
+      - name: Collect Release 449 Development verification evidence
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --command "SELECT name,type FROM sqlite_master WHERE type='table' AND name IN ('provider_setup_authorities','marketplace_channels','marketplace_syndication_drafts','sales_invoices','sales_refunds','commerce_transaction_costs','gifi_reporting_snapshots') ORDER BY name;" --json \
+            > /tmp/release449-schema.json
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --command "SELECT provider_key,setup_status,enabled FROM provider_setup_authorities ORDER BY provider_key;" --json \
+            > /tmp/release449-providers.json
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --command "SELECT channel_key,syndication_mode,publication_allowed,setup_status FROM marketplace_channels WHERE channel_key='etsy';" --json \
+            > /tmp/release449-etsy.json
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --command "PRAGMA quick_check;" --json > /tmp/release449-quick.json
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --command "PRAGMA integrity_check;" --json > /tmp/release449-integrity.json
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --command "SELECT COUNT(*) AS accounting_details_count FROM accounting_details;" --json \
+            > /tmp/release449-after-accounting.json
+
+      - name: Verify Release 449 Development D1
+        run: |
+          python scripts/verify_release449_d1.py \
+            /tmp/release449-before-accounting.json \
+            /tmp/release449-schema.json \
+            /tmp/release449-providers.json \
+            /tmp/release449-etsy.json \
+            /tmp/release449-quick.json \
+            /tmp/release449-integrity.json \
+            /tmp/release449-after-accounting.json
+
+      - name: Production mutation unavailable
+        run: |
+          echo "Release 449 target: ${DEV_D1_DATABASE_NAME} (${EXPECTED_DEV_D1_DATABASE_ID})"
+          echo 'Production app/database identifiers are intentionally unavailable to this workflow.'
+          echo 'Release 447/448 migrations executed: NO'
