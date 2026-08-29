@@ -1,0 +1,34 @@
+/* Release 448 Financials monthly performance bridge. */
+.accounting-performance-bridge{scroll-margin-top:1rem}
+.accounting-performance-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.accounting-performance-badge{border:1px solid var(--border,#232a36);border-radius:999px;padding:.35rem .65rem;font-size:.8rem;color:var(--muted,#aab3c2);white-space:nowrap}
+.accounting-performance-readiness{margin-top:1rem}
+.accounting-performance-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:14px;margin-top:14px}
+.accounting-performance-formula,.accounting-performance-evidence,.accounting-performance-quality{border:1px solid var(--border,#232a36);border-radius:12px;padding:14px;background:rgba(255,255,255,.02)}
+.accounting-performance-formula h3,.accounting-performance-evidence h3,.accounting-performance-quality h3{margin-top:0}
+.accounting-performance-line,.accounting-performance-result{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;padding:.55rem 0;border-bottom:1px solid var(--border,#232a36)}
+.accounting-performance-line.income strong{font-size:1.05rem}
+.accounting-performance-result{margin-top:.35rem;padding:.75rem;border:1px solid var(--border,#232a36);border-radius:10px}
+.accounting-performance-result strong{font-size:1.2rem}
+.accounting-performance-result.positive{border-color:rgba(79,201,120,.5)}
+.accounting-performance-result.negative{border-color:rgba(255,92,92,.55)}
+.accounting-performance-caution{margin:.8rem 0 0}
+.accounting-performance-dl{display:grid;gap:.45rem;margin:.2rem 0 .8rem}
+.accounting-performance-dl>div{display:flex;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--border,#232a36);padding:.4rem 0}
+.accounting-performance-dl dt{color:var(--muted,#aab3c2)}
+.accounting-performance-dl dd{margin:0;font-weight:700;text-align:right}
+.accounting-performance-quality{grid-column:1/-1}
+.accounting-performance-quality-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+.accounting-performance-quality-grid>div{border:1px solid var(--border,#232a36);border-radius:10px;padding:10px}
+.accounting-performance-quality-grid span{display:block;color:var(--muted,#aab3c2);font-size:.82rem}
+.accounting-performance-quality-grid strong{display:block;font-size:1.2rem;margin-top:.2rem}
+@media(max-width:850px){
+  .accounting-performance-grid{grid-template-columns:1fr}
+  .accounting-performance-quality{grid-column:auto}
+  .accounting-performance-quality-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:520px){
+  .accounting-performance-line,.accounting-performance-result,.accounting-performance-dl>div{align-items:flex-start;flex-direction:column;gap:.25rem}
+  .accounting-performance-dl dd{text-align:left}
+  .accounting-performance-quality-grid{grid-template-columns:1fr}
+}
