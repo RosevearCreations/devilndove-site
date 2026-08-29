@@ -1,0 +1,24 @@
+/* Release 451 marketplace calibration workspace. */
+.calibration-safety{display:flex;gap:.75rem;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap}
+.calibration-safety span{max-width:760px;color:var(--muted,#aab3c2)}
+.calibration-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;flex-wrap:wrap}
+.calibration-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:end}
+.calibration-controls label{display:grid;gap:.25rem;min-width:130px}
+.calibration-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0}
+.calibration-summary>div,.calibration-channel,.calibration-check{border:1px solid var(--border,#2b3442);border-radius:12px;padding:12px;background:rgba(255,255,255,.02)}
+.calibration-summary span,.calibration-channel-meta{display:block;color:var(--muted,#aab3c2);font-size:.82rem}
+.calibration-summary strong{font-size:1.25rem;display:block;margin-top:.2rem}
+.calibration-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.calibration-channel-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+.calibration-pill{border:1px solid var(--border,#2b3442);border-radius:999px;padding:.25rem .55rem;font-size:.78rem;white-space:nowrap}
+.calibration-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}
+.calibration-check{padding:8px;font-size:.82rem}
+.calibration-check.pass::before{content:'✓ ';font-weight:800}
+.calibration-check.fail::before{content:'! ';font-weight:800}
+.calibration-check small{display:block;margin-top:.2rem;color:var(--muted,#aab3c2)}
+.calibration-costs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.calibration-costs>div{border-top:1px solid var(--border,#2b3442);padding-top:8px}
+.calibration-empty{padding:14px;border:1px dashed var(--border,#2b3442);border-radius:10px;margin-top:10px}
+@media(max-width:950px){.calibration-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.calibration-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.calibration-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.calibration-checks{grid-template-columns:1fr}.calibration-costs{grid-template-columns:1fr}.calibration-controls{width:100%}.calibration-controls label,.calibration-controls .btn{width:100%}.calibration-channel-head{flex-direction:column}.calibration-pill{white-space:normal}}
+@media(max-width:420px){.calibration-summary{grid-template-columns:1fr}}
