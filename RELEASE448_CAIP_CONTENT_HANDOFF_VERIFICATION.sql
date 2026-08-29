@@ -1,0 +1,6 @@
+-- Release 448 read-only verification: CAIP reviewed evidence -> Content Studio handoff.
+SELECT COUNT(*) AS required_table_count FROM sqlite_master WHERE type='table' AND name IN ('caip_content_handoffs','caip_content_handoff_evidence');
+SELECT COUNT(*) AS invalid_handoffs FROM caip_content_handoffs WHERE handoff_status NOT IN ('draft','ready_for_review','reviewed','archived') OR approved_marker_count<0 OR approved_story_evidence_count<0 OR approved_segment_count<0;
+SELECT COUNT(*) AS invalid_evidence_links FROM caip_content_handoff_evidence h LEFT JOIN creative_media_evidence_ranges r ON r.creative_media_evidence_range_id=h.creative_media_evidence_range_id LEFT JOIN creative_story_evidence e ON e.creative_story_evidence_id=h.creative_story_evidence_id WHERE r.creative_media_evidence_range_id IS NULL OR e.creative_story_evidence_id IS NULL;
+SELECT COUNT(*) AS unapproved_packaged_evidence FROM caip_content_handoff_evidence h JOIN creative_media_evidence_ranges r ON r.creative_media_evidence_range_id=h.creative_media_evidence_range_id JOIN creative_story_evidence e ON e.creative_story_evidence_id=h.creative_story_evidence_id WHERE r.marker_status<>'active' OR r.review_status<>'approved' OR e.review_status<>'approved' OR e.verification_status='rejected';
+PRAGMA foreign_key_check;
