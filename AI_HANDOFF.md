@@ -16,13 +16,13 @@ Read this first, then `PROJECT_STATUS_AND_ROADMAP.md`. `development-release.json
 - Separate live Production: `main` / `devilndove-site`
 - Production promotion: **CLOSED**
 
-Always resolve the exact current `dev` SHA and exact System Gate/Pages status from GitHub. Never copy an old SHA forward.
+Always resolve the exact current `dev` SHA and exact System Gate/Cloudflare Pages status from GitHub before calling a checkpoint green.
 
 ## D1 baseline and current Release 448 migrations
 
-Release 447 baseline is already applied/verified. Permanent startup rule: **read-only D1/R2 verification first; do not reapply the 447 baseline because a new chat starts.**
+Release 447 baseline is already applied/verified. Permanent startup rule: **read-only D1/R2 verification first; do not reapply the 447 baseline because a chat or release starts.**
 
-Release 448 has two additive Development migrations:
+Release 448 now has three additive Development migrations:
 
 1. `database_release448_product_lineage.sql`
    - verification: `RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql`
@@ -30,116 +30,139 @@ Release 448 has two additive Development migrations:
 2. `database_release448_media_it.sql`
    - verification: `RELEASE448_MEDIA_IT_VERIFICATION.sql`
    - runner: `python scripts/apply_development_release448_media_it.py`
+3. `database_release448_storefront_merchandising.sql`
+   - verification: `RELEASE448_STOREFRONT_MERCHANDISING_VERIFICATION.sql`
+   - runner: `python scripts/apply_development_release448_storefront_merchandising.py`
 
-Both are implemented, locally gated and transport-preflighted. **Neither may be called remotely applied yet.** Guarded GitHub workflow run `33198354338` stopped before any D1 read/write because GitHub Actions has no `CLOUDFLARE_API_TOKEN` secret. No migration statement executed. The only safe next D1 action is to provide that credential through GitHub secret storage (never chat/source), then rerun `.github/workflows/development-d1-release448.yml` and require read-only post-verification.
+All three are source/local/transport gated. None may be called remotely applied until `.github/workflows/development-d1-release448.yml` passes against exact `devilndove-dev` and the final read-only verification passes.
+
+The guarded workflow remains unable to pass its first credential guard because GitHub Actions has no `CLOUDFLARE_API_TOKEN` secret. Earlier guarded execution proved that no migration read/write follows that missing-credential guard. Never put this token in chat/source; it belongs only in secure GitHub Actions secret storage.
+
+Fresh-install composition is now explicitly gated by:
+
+`python scripts/release448_fresh_install_gate.py`
+
+This applies `database_full_schema.sql` followed by all three current Release 448 migrations to a fresh local SQLite database, requires the current authorities and clean foreign keys, and prevents incremental Development from silently diverging from a rebuildable current database.
+
+## Storefront merchandising — Shop / Collections / Collages / Carousels
+
+These remain **Storefront capabilities, not separate application modules**.
+
+Public surfaces:
+- `/shop/` — direct Product search/filter/buying authority
+- `/collections/` — curated or rule-based Product grouping
+- `/collages/` — visual discovery over approved public Product images
+- Home/Movie carousel presentation — shared `public/js/media-carousel.js`
+
+Admin merchandising workspace:
+- `/admin/storefront-merchandising/`
+- API: `/api/admin/storefront-merchandising`
+
+Public projection:
+- `/api/storefront-merchandising`
+
+D1 metadata authorities:
+- `storefront_collections`
+- `storefront_collection_products`
+- `storefront_collage_presets`
+
+Critical boundary: **Collections and Collages never become another Product, Inventory or image catalog.** Product membership stores references only. The public merchandising endpoint consumes the already public-media/consent-gated `/api/products` projection before building collection/collage output, so it does not bypass private-media protection.
+
+Collections can be:
+- curated manually;
+- driven by supported rules (`merchandise_origin`, `product_category`, `product_type`, `sale_channel`);
+- supplemented by explicit include/exclude Product membership.
+
+Current seeded origin paths:
+- Handmade creations
+- Vintage & antique finds (`vintage|antique`)
+- Collectibles & oddities (`collectible|oddity`)
+- Pre-built & found items
+
+Collage presets choose a public Product source (all Products or one Collection), layout (`mosaic`, `feature_grid`, `story_strip`) and 3–12 items. They reference current public Product images; no image binary is copied. Public Collage rendering requires at least three safe images and otherwise preserves static fallback content.
+
+All Shop/Collections/Collages pages use Release 448 assets and exactly one public H1. A dedicated source gate enforces this:
+
+`python scripts/release448_storefront_merchandising_gate.py`
 
 ## Product lineage / tools / manufacturers
 
-Do not create a second inventory ledger. Existing stock/movement authorities remain canonical. Release 448 adds review/policy/provenance over them:
+Do not create a second Inventory ledger. Existing stock/movement authorities remain canonical. Release 448 adds review/policy/provenance over them:
 
 - `/admin/product-lineage/`
 - `/admin/vendor-reviews/`
 - new handmade Product: `made_in_house / pending / required`
 - historical handmade Product: `legacy_pending / legacy_nonblocking`
 - antiquity/resale/external finished goods: explicit exempt state
-- Supplies/materials may consume Inventory through existing movement authorities
-- Tools/molds are durable provenance/use links and are never consumed by the lineage link itself
-- manufacturer is normalized on the Tool/Supply Inventory item; supplier/store is not assumed to be manufacturer
-- Devil n Dove-authored reviews can store safe marketplace/manufacturer references such as ASIN/source URL without scraping or making Amazon/VEVOR a runtime dependency
+- durable Tools/molds are provenance/use links, not consumption
+- supplier/store and manufacturer remain distinct
+- Devil n Dove-authored review provenance may carry safe ASIN/source/review references without scraping or marketplace runtime dependency
 
 Product provenance chain:
 
 `Product → product_resource_links → site_item_inventory → inventory_manufacturer_links → inventory_manufacturers`
 
-## Product Photography Manager — Release 448
+## Product Photography Manager
 
-Workspace: **`/admin/product-image-quality/`**
+Workspace: `/admin/product-image-quality/`
 
-API: **`/api/admin/product-image-quality`**
+API: `/api/admin/product-image-quality`
 
-D1 authority: `product_image_quality_assessments` stores score/review/evidence only. Images remain in their existing Product/R2/media authority. The Product detail endpoint remains the merge authority for Product gallery, Media Library, role assignments and annotation/history; the Photography Manager does not create another image catalog.
+D1 authority: `product_image_quality_assessments` stores score/review/evidence only. Images remain in existing Product/R2/media authorities.
 
 Transparent 100-point deterministic rubric:
+- Lighting 20
+- Clarity 20
+- Background 15
+- Framing 15
+- Resolution 10
+- Colour 10
+- Artifacts 5
+- Product-set consistency 5
 
-- Lighting/exposure/clipping — 20
-- Clarity/sharpness heuristic — 20
-- Background border/uniformity — 15
-- Framing/approximate occupancy and centering — 15
-- Resolution — 10
-- Colour/white-balance spread — 10
-- Compression/artifact heuristic — 5
-- Product-set aspect-ratio consistency — 5
+Operational layer:
+- catalog photography queue;
+- Product-set readiness score;
+- 64-bit perceptual dHash duplicate/near-duplicate evidence;
+- strongest distinct image = best-current-hero recommendation;
+- other distinct 70+ images = gallery candidates;
+- explicit reshoot/improvement reasons;
+- optional human approve/reject;
+- no automatic image deletion, featured-media mutation, Product hiding or publication blocking.
 
-The workspace now adds an operational layer above individual scores:
-
-- **catalog photography queue** — unscored Products first, then weakest scored sets;
-- **Product-set score** — coverage 20 + best hero 25 + average quality 20 + distinctness 15 + up to four good/excellent gallery images 20;
-- **64-bit perceptual dHash** stored in evidence for duplicate review;
-- dHash distance `0–4` = probable duplicate flag;
-- dHash distance `5–8` = possible near-duplicate flag;
-- strongest distinct scored image = **best current hero candidate**;
-- other distinct images at 70+ = **gallery candidates**;
-- lower images receive explicit reshoot/improvement reasons by scoring dimension;
-- admin may mark a persisted assessment approved/rejected without modifying the original image;
-- no automatic deletion, featured-image mutation, Product hiding or publication blocking is performed by photography scoring.
-
-Browser Canvas measurement is the reproducible baseline. Optional vision-assisted scoring may later evaluate subjective issues such as reflections, styling, premium hero suitability, whether a Product is clearly identifiable and background appropriateness. Vision is evidence/advice, not an unexplained automatic publication authority.
-
-Potential operational constraint: cross-origin Product/R2 images must be readable by Canvas (same-origin delivery or suitable CORS) or deterministic pixel scoring reports that it cannot score the image rather than fabricating a result.
+Browser Canvas is the reproducible baseline. Optional vision-assisted review should later assess subjective issues such as reflections, styling, semantic background quality and premium hero suitability, but remains advisory evidence.
 
 ## Shared carousel / Movies
 
-Shared presentation authority: **`public/js/media-carousel.js`** plus `css/media-carousel.css`.
+Shared presentation authority: `public/js/media-carousel.js` + `css/media-carousel.css`.
 
-- Home `public/js/home-carousel.js` is now only a Storefront data adapter to the shared carousel.
-- Movie covers use `public/js/movie-media-carousel.js`, loaded through the media-content runtime.
-- Movie records with both front/back covers get the shared accessible carousel.
-- Movie records with a missing side retain the truthful two-slot pending fallback.
-- Shared behavior covers keyboard arrows, indicators, previous/next, pause/reduced-motion handling, mobile controls and image-error fallback.
-- No carousel may create another public H1.
+Home is a data adapter. Movie front/back cover pairs use the same renderer. Missing cover evidence stays visibly pending. Keyboard, reduced motion, controls, responsive behavior and fallback remain one implementation. No carousel may inject another H1.
 
-Current Movie data authority is **enriched JSON base + `movie_catalog` D1 overlay**, not legacy `movies(id)` planning material. Release 448 migration now owns the `movie_catalog` schema so request handlers should not be the schema authority going forward.
-
-`movie_metadata_reviews` keys evidence by stable UPC/slug (with optional `movie_catalog_id`) and supports `pending`, `incomplete`, `unverified`, `verified`. Repair only demonstrably incorrect Movie metadata; never guess unknown values.
+Current Movie data authority is enriched JSON + `movie_catalog` D1 overlay. `movie_metadata_reviews` uses stable UPC/slug review keys and explicit pending/incomplete/unverified/verified states. Never guess Movie metadata.
 
 ## I.T. integration registry
 
-Workspace: **`/admin/it-integrations/`**
+Workspace: `/admin/it-integrations/`
 
-API: **`/api/admin/it-integrations`**
+API: `/api/admin/it-integrations`
 
-D1 authority: `it_integration_registry`.
+D1: `it_integration_registry`.
 
-I.T. owns:
-- provider/platform key and purpose
-- consuming canonical module
-- Cloudflare secret/binding **reference name only**
-- callback/webhook URL
-- scopes
-- environment
-- configured state
-- tested/accepted state separately
-- last safe error
-- correction mechanics/evidence reference
-
-Actual API keys, OAuth secrets, access/refresh tokens, webhook signing secrets, passwords and private keys are forbidden in D1/UI/source/logs/evidence. The API rejects obvious secret-like values.
-
-## Admin control surface
-
-`/admin/` is currentized to Release 448. It no longer presents Build 443 HOLD language or the pre-convergence module grouping. It now links directly to Product Lineage, Product Photography Manager, Manufacturer/Purchased-item Reviews and the I.T. Integration Registry while retaining the existing operational/release tools.
+I.T. owns provider purpose, consuming module, secret/binding **reference name only**, callback/webhook, scopes, environment, configured state, separately tested/accepted state, last safe error and correction mechanics. Actual secrets are forbidden in D1/UI/source/logs/evidence and obvious secret-like values are rejected by the API.
 
 ## Canonical gates
-
-Run:
 
 ```bash
 python scripts/repository_forward_sanity.py
 python scripts/module_architecture_gate.py
 python scripts/database_platform_gate.py
+python scripts/release448_fresh_install_gate.py
 python scripts/product_lineage_gate.py
 python scripts/apply_development_product_lineage.py --transport-preflight
 python scripts/release448_media_it_source_gate.py
 python scripts/apply_development_release448_media_it.py --transport-preflight
+python scripts/release448_storefront_merchandising_gate.py
+python scripts/apply_development_release448_storefront_merchandising.py --transport-preflight
 python scripts/product_inventory_tools_source_gate.py
 python scripts/public_seo_gate.py
 python scripts/pwa_platform_gate.py
@@ -147,7 +170,7 @@ python scripts/cloudflare_development_access.py --transport-preflight
 python scripts/development_runtime_acceptance.py --self-check
 ```
 
-`.github/workflows/system-gate.yml` performs no remote D1/R2/provider/Production writes. `.github/workflows/development-d1-release448.yml` is the separate exact-Development mutation workflow and currently cannot pass its credential guard until the GitHub secret exists.
+`.github/workflows/system-gate.yml` performs no remote D1/R2/provider/Production writes. `.github/workflows/development-d1-release448.yml` is the separate exact-Development mutation workflow and remains credential-guarded.
 
 ## Deferred/non-blocking I.T. acceptance
 
@@ -157,19 +180,19 @@ Carry forward without pretending complete:
 - PayPal sandbox
 - CAIP private-media evidence
 
-These do not block normal Release 448 feature development, but they remain required before a deliberate Production promotion decision.
+They do not stop normal Release 448 feature development, but Production promotion remains closed until the required operational acceptance is deliberately reviewed.
 
 ## Invariants
 
 - One current release: 448.
 - Production untouched unless explicitly authorized.
-- D1 is operational write authority; request-time schema creation should be retired as migrations converge.
-- No duplicate stock ledger.
-- No duplicate Product image catalog.
-- Photography scores/recommendations are evidence and work-queue authority, not automatic publication authority.
+- D1 is operational write authority; no request-time schema ownership for current features.
+- No duplicate stock ledger, Product catalog or Product image catalog.
+- Collections/Collages are references/presentation over Product authority.
+- Photography scores are evidence/work-queue authority, not automatic publication authority.
 - No fabricated historical consumption/manufacturer/Movie metadata.
 - One meaningful H1 per public page.
-- Home/Movie reuse one carousel presentation authority.
+- Shared presentation components remain shared.
 - I.T. owns provider configuration metadata; consuming modules own workflows.
 - Secrets live only in proper secret stores.
 - Exact source gate + exact Development Pages deployment + applicable authenticated evidence define completion.
