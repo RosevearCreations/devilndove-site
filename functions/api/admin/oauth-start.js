@@ -2,7 +2,7 @@
 // Remote authorization is fail-closed unless the Development-only operator switch is explicitly set.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction } from '../_lib/adminAudit.js';
 import { createStateAndPkce, encryptOAuthSecret, encryptionKeyConfigured, oauthRemoteAuthorizationOpen, randomBase64Url, safeReturnPath } from '../_lib/oauthSecurity.js';
-import { buildAuthorizationUrl, getOAuthContract, providerConfiguration } from '../_lib/oauthProviders.js';
+import { buildAuthorizationUrl, getOAuthContract, providerConfiguration, providerIdentityExpectation } from '../_lib/oauthProviders.js';
 import { CURRENT_RELEASE } from '../_lib/releaseAuthority.js';
 
 const json=(data,status=200)=>jsonResponse({release:CURRENT_RELEASE,...data},status,{'Cache-Control':'no-store'});
@@ -20,16 +20,22 @@ export async function onRequestGet({request,env}) {
   const remoteOpen = oauthRemoteAuthorizationOpen(env, request.url);
   const keyReady = encryptionKeyConfigured(env);
   const cfg = providerConfiguration(contract, env);
+  const intended = providerIdentityExpectation(contract, env);
   if (!remoteOpen) {
     return json({
       ok:false, code:'oauth_live_authorization_closed', error:'Live provider authorization is deliberately closed for Release 460.',
       provider:contract.key, development_only:true, remote_authorization_open:false,
       encryption_authority_ready:keyReady, provider_configuration_ready:cfg.configured,
+      intended_account_configured:intended.configured,
+      identity_lookup_configuration_ready:intended.lookup_configuration_ready,
+      intended_account_label_configured:intended.account_label_configured,
       required_operator_switch:'OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit'
     },423);
   }
   if (!keyReady) return json({ok:false,code:'oauth_encryption_authority_missing',error:'OAuth encryption authority is not configured.'},503);
   if (!cfg.configured) return json({ok:false,code:'oauth_provider_configuration_incomplete',error:'Provider configuration is incomplete.'},409);
+  if (!intended.configured) return json({ok:false,code:'oauth_intended_account_not_configured',error:'The intended provider account must be configured before authorization can start.',expected_subject_reference:intended.expected_subject_reference},409);
+  if (!intended.lookup_configuration_ready) return json({ok:false,code:'oauth_provider_identity_configuration_incomplete',error:'Provider identity verification configuration is incomplete.'},409);
 
   const proof = await createStateAndPkce();
   const transactionId = `oauth_${randomBase64Url(24)}`;
@@ -48,7 +54,7 @@ export async function onRequestGet({request,env}) {
 
   await auditAdminAction(env,request,admin,{
     action_type:'oauth_authorization_started', target_type:'provider', target_key:contract.key,
-    details:{release:460,provider:contract.key,pkce:contract.pkce,state_persisted_as_hash_only:true,remote_authorization_open:true}
+    details:{release:460,provider:contract.key,pkce:contract.pkce,state_persisted_as_hash_only:true,remote_authorization_open:true,intended_account_configured:true,provider_subject_logged:false}
   });
 
   const location = buildAuthorizationUrl(contract, env, {state:proof.state,challenge:usesPkce?proof.challenge:null,scopes});

@@ -1,7 +1,7 @@
-// Release 460 — redacted OAuth connection diagnostics plus guarded refresh/disconnect lifecycle.
+// Release 460 — redacted OAuth connection diagnostics plus guarded refresh/disconnect and intended-account lifecycle.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction } from '../_lib/adminAudit.js';
 import { decryptOAuthSecret, encryptOAuthSecret, encryptionKeyConfigured, oauthRemoteAuthorizationOpen, safeDiagnosticCode } from '../_lib/oauthSecurity.js';
-import { getOAuthContract, listOAuthContracts, refreshOAuthToken, revokeOAuthToken } from '../_lib/oauthProviders.js';
+import { getOAuthContract, listOAuthContracts, providerIdentityExpectation, providerIdentityStatus, refreshOAuthToken, revokeOAuthToken, verifyOAuthIdentity } from '../_lib/oauthProviders.js';
 import { CURRENT_RELEASE } from '../_lib/releaseAuthority.js';
 
 const json=(data,status=200)=>jsonResponse({release:CURRENT_RELEASE,...data},status,{'Cache-Control':'no-store'});
@@ -21,8 +21,9 @@ function connectionHealth(row,now=Date.now()){
   if(access-now<=15*60*1000)return hasRefresh?'refresh_due_soon':'reauthorization_due_soon';
   return row?.connection_status==='refresh_required'?'refresh_due':'healthy';
 }
-function safeConnection(row){
+function safeConnection(row,contract,env){
   let parsedScopes=[]; try{parsedScopes=JSON.parse(row?.scopes_json||'[]');}catch{parsedScopes=[];}
+  const identity=providerIdentityStatus(contract,env,row?.remote_subject_id,row?.connection_status);
   return {
     provider_key:row.provider_key,
     connection_status:row.connection_status,
@@ -39,7 +40,12 @@ function safeConnection(row){
     updated_at:row.updated_at||null,
     provider_subject_present:Boolean(row.remote_subject_id),
     provider_subject_emitted:false,
-    intended_account_verification:'required_before_live_provider_acceptance',
+    intended_account_verification:identity.status,
+    intended_account_label:identity.account_label,
+    intended_account_label_configured:identity.account_label_configured,
+    expected_subject_configured:identity.configured,
+    secondary_subject_configured:identity.secondary_subject_configured,
+    identity_lookup_configuration_ready:identity.lookup_configuration_ready,
     token_material_present:'redacted'
   };
 }
@@ -53,13 +59,17 @@ export async function onRequestGet({request,env}){
     pending=Number((await db.prepare(`SELECT COUNT(*) AS n FROM oauth_authorization_transactions WHERE terminal_status='pending' AND expires_at>CURRENT_TIMESTAMP`).first())?.n||0);
     replayRejects=Number((await db.prepare(`SELECT COUNT(*) AS n FROM oauth_security_events WHERE event_type='callback_state_validation' AND outcome='rejected'`).first())?.n||0);
   }catch(error){return json({ok:false,code:'release460_schema_not_ready',error:'Release 460 OAuth schema is not ready.'},503);}
+  const contracts=listOAuthContracts().map((item)=>({
+    ...item,
+    intended_account:providerIdentityExpectation(getOAuthContract(item.key),env)
+  }));
   return json({
     ok:true,authority:'secure-oauth-lifecycle',environment:'development',development_host_only:true,
     remote_authorization_open:oauthRemoteAuthorizationOpen(env,request.url),provider_publication_allowed:false,
     encryption_key_configured:encryptionKeyConfigured(env),secret_values_emitted:false,provider_subject_values_emitted:false,
     intended_account_verification_required:true,refresh_health_is_local_only:true,
     pending_authorization_transactions:pending,replay_or_invalid_state_rejections:replayRejects,
-    contracts:listOAuthContracts(),connections:rows.map(safeConnection)
+    contracts,connections:rows.map((row)=>safeConnection(row,getOAuthContract(row.provider_key),env))
   });
 }
 
@@ -77,18 +87,22 @@ export async function onRequestPost({request,env}){
     try{
       const refresh=await decryptOAuthSecret(env,row.refresh_token_ciphertext,`oauth-token|${contract.key}|refresh`);
       const token=await refreshOAuthToken(contract,env,refresh);
+
+      // A refreshed credential is never persisted until the provider identity still matches the configured intended account.
+      const identity=await verifyOAuthIdentity(contract,env,token.access_token);
+
       const accessCipher=await encryptOAuthSecret(env,token.access_token,`oauth-token|${contract.key}|access`);
       const nextRefresh=token.refresh_token?await encryptOAuthSecret(env,token.refresh_token,`oauth-token|${contract.key}|refresh`):row.refresh_token_ciphertext;
       const nextScopes=scopes(token.scope,JSON.parse(row.scopes_json||'[]'));
-      await db.prepare(`UPDATE oauth_provider_connections SET access_token_ciphertext=?,refresh_token_ciphertext=?,token_type=?,scopes_json=?,access_expires_at=?,refresh_expires_at=COALESCE(?,refresh_expires_at),connection_status='connected',last_refresh_at=CURRENT_TIMESTAMP,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(accessCipher,nextRefresh,String(token.token_type||row.token_type||'Bearer').slice(0,30),JSON.stringify(nextScopes),expiry(token.expires_in),expiry(token.refresh_expires_in),contract.key).run();
-      await event(db,contract.key,'refresh','complete',null,admin.user_id);
-      await auditAdminAction(env,request,admin,{action_type:'oauth_token_refreshed',target_type:'provider',target_key:contract.key,details:{release:460,token_values_logged:false}});
-      return json({ok:true,provider:contract.key,refreshed:true,token_values_emitted:false});
+      await db.prepare(`UPDATE oauth_provider_connections SET remote_subject_id=?,access_token_ciphertext=?,refresh_token_ciphertext=?,token_type=?,scopes_json=?,access_expires_at=?,refresh_expires_at=COALESCE(?,refresh_expires_at),connection_status='connected',last_refresh_at=CURRENT_TIMESTAMP,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(String(identity.remoteSubject||'').slice(0,180),accessCipher,nextRefresh,String(token.token_type||row.token_type||'Bearer').slice(0,30),JSON.stringify(nextScopes),expiry(token.expires_in),expiry(token.refresh_expires_in),contract.key).run();
+      await event(db,contract.key,'refresh','complete','intended_account_verified',admin.user_id);
+      await auditAdminAction(env,request,admin,{action_type:'oauth_token_refreshed',target_type:'provider',target_key:contract.key,details:{release:460,token_values_logged:false,intended_account_verified:true,provider_subject_logged:false}});
+      return json({ok:true,provider:contract.key,refreshed:true,intended_account_verified:true,token_values_emitted:false,provider_subject_values_emitted:false});
     }catch(error){
       const code=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'oauth_refresh_failed');
       await db.prepare(`UPDATE oauth_provider_connections SET connection_status='refresh_required',diagnostic_code=?,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(code,contract.key).run();
       await event(db,contract.key,'refresh','failed',code,admin.user_id);
-      return json({ok:false,provider:contract.key,code,error:'OAuth refresh failed safely.'},502);
+      return json({ok:false,provider:contract.key,code,error:'OAuth refresh or intended-account verification failed safely.',provider_subject_values_emitted:false},502);
     }
   }
 

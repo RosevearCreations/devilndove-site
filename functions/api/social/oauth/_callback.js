@@ -2,7 +2,7 @@
 // Remote exchange remains fail-closed unless Development authorization is explicitly opened.
 import { getDb } from '../../_lib/adminAudit.js';
 import { decryptOAuthSecret, encryptOAuthSecret, oauthRemoteAuthorizationOpen, safeDiagnosticCode, sha256Base64Url } from '../../_lib/oauthSecurity.js';
-import { exchangeAuthorizationCode, getOAuthContract, providerConfiguration } from '../../_lib/oauthProviders.js';
+import { exchangeAuthorizationCode, getOAuthContract, providerConfiguration, verifyOAuthIdentity } from '../../_lib/oauthProviders.js';
 
 function escapeHtml(value = '') { return String(value).replace(/[&<>'"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function htmlResponse(title,body,status=200){
@@ -65,13 +65,18 @@ export function createOAuthCallback(providerKey){
     try{
       const verifier=tx.pkce_verifier_ciphertext?await decryptOAuthSecret(env,tx.pkce_verifier_ciphertext,`oauth-pkce|${contract.key}|${tx.transaction_id}`):null;
       const token=await exchangeAuthorizationCode(contract,env,{code,verifier});
+
+      // Release 460 fail-closed intended-account gate: provider identity must be retrieved and match
+      // the explicitly configured Development account before any new provider token material is persisted.
+      const identity=await verifyOAuthIdentity(contract,env,token.access_token);
+
       const accessCipher=await encryptOAuthSecret(env,token.access_token,`oauth-token|${contract.key}|access`);
       const refreshCipher=token.refresh_token?await encryptOAuthSecret(env,token.refresh_token,`oauth-token|${contract.key}|refresh`):null;
       const idCipher=token.id_token?await encryptOAuthSecret(env,token.id_token,`oauth-token|${contract.key}|id`):null;
       const scopes=normalizeScopes(token.scope,JSON.parse(tx.scopes_json||'[]'));
       const accessExpiry=expiresAt(token.expires_in);
       const refreshExpiry=expiresAt(token.refresh_expires_in);
-      const remoteSubject=String(token.open_id||token.user_id||'').slice(0,180)||null;
+      const remoteSubject=String(identity.remoteSubject||'').slice(0,180)||null;
 
       await db.prepare(`
         INSERT INTO oauth_provider_connections(provider_key,remote_subject_id,access_token_ciphertext,refresh_token_ciphertext,id_token_ciphertext,token_type,scopes_json,access_expires_at,refresh_expires_at,connection_status,diagnostic_code,connected_by_user_id,created_at,updated_at)
@@ -79,13 +84,13 @@ export function createOAuthCallback(providerKey){
         ON CONFLICT(provider_key) DO UPDATE SET remote_subject_id=excluded.remote_subject_id,access_token_ciphertext=excluded.access_token_ciphertext,refresh_token_ciphertext=excluded.refresh_token_ciphertext,id_token_ciphertext=excluded.id_token_ciphertext,token_type=excluded.token_type,scopes_json=excluded.scopes_json,access_expires_at=excluded.access_expires_at,refresh_expires_at=excluded.refresh_expires_at,connection_status='connected',diagnostic_code=NULL,connected_by_user_id=excluded.connected_by_user_id,disconnected_at=NULL,remote_revoke_state=NULL,updated_at=CURRENT_TIMESTAMP
       `).bind(contract.key,remoteSubject,accessCipher,refreshCipher,idCipher,String(token.token_type||'Bearer').slice(0,30),JSON.stringify(scopes),accessExpiry,refreshExpiry,tx.created_by_user_id||null).run();
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='complete',completed_at=CURRENT_TIMESTAMP,pkce_verifier_ciphertext=NULL,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(tx.transaction_id).run();
-      await securityEvent(db,contract.key,'authorization','complete',null,tx.transaction_id,tx.created_by_user_id);
-      return htmlResponse(`${contract.label} Development connection stored securely`,'<p>The authorization code was consumed once and exchanged server-side. Provider tokens were stored only as encrypted ciphertext.</p><p>Provider publication remains disabled.</p>');
+      await securityEvent(db,contract.key,'authorization','complete','intended_account_verified',tx.transaction_id,tx.created_by_user_id);
+      return htmlResponse(`${contract.label} Development connection stored securely`,'<p>The authorization code was consumed once, exchanged server-side, and the intended provider account was verified before encrypted token persistence.</p><p>Provider publication remains disabled.</p>');
     }catch(error){
-      const diagnostic=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'token_exchange_failed');
+      const diagnostic=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'authorization_finalize_failed');
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='failed',pkce_verifier_ciphertext=NULL,diagnostic_code=?,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(diagnostic,tx.transaction_id).run();
-      await securityEvent(db,contract.key,'token_exchange','failed',diagnostic,tx.transaction_id,tx.created_by_user_id);
-      return htmlResponse(`${contract.label} connection failed safely`,`<p>The server-side token exchange did not complete.</p><p class="code">${escapeHtml(diagnostic)}</p><p>The one-time state has been consumed and cannot be replayed. Start a new connection request after correcting the provider configuration.</p>`,502);
+      await securityEvent(db,contract.key,'authorization_finalize','failed',diagnostic,tx.transaction_id,tx.created_by_user_id);
+      return htmlResponse(`${contract.label} connection failed safely`,`<p>The provider token exchange or intended-account verification did not complete.</p><p class="code">${escapeHtml(diagnostic)}</p><p>No new token material was persisted. The one-time state has been consumed and cannot be replayed.</p>`,502);
     }
   };
 }
