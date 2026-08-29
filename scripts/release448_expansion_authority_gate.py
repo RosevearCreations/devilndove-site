@@ -18,6 +18,7 @@ required_work={
  'inventory-operations-intelligence':'/admin/inventory-intelligence/',
  'tool-lifecycle':'/admin/tool-lifecycle/',
  'supply-sourcing-replenishment':'/admin/supply-sourcing/',
+ 'release448-calibration':'/admin/release448-calibration/',
  'it-integration-registry':'/admin/it-integrations/',
 }
 for key,workspace in required_work.items():
@@ -48,19 +49,29 @@ for key,(file,verification,runner_path) in required_migrations.items():
  req((ROOT/verification).exists(),f'{key} verification file missing')
  req((ROOT/runner_path).exists(),f'{key} runner missing')
 
+program={row.get('key'):row for row in (release.get('completion_program') or {}).get('steps',[])}
+for key in ('development-d1-activation','authenticated-real-data-calibration','supply-sourcing-replenishment-depth','external-private-acceptance','promotion-rehearsal'):
+ req(key in program,f'completion program missing {key}')
+req(release.get('release_policy',{}).get('production_promotion')=='closed','Production promotion must remain closed')
+
 inventory=(ROOT/'functions/api/admin/inventory-intelligence.js').read_text(encoding='utf-8')
 tool=(ROOT/'functions/api/admin/tool-lifecycle.js').read_text(encoding='utf-8')
 supply=(ROOT/'functions/api/admin/supply-sourcing.js').read_text(encoding='utf-8')
 caip=(ROOT/'functions/api/admin/caip-content-handoff.js').read_text(encoding='utf-8')
+calibration=(ROOT/'functions/api/admin/release448-calibration.js').read_text(encoding='utf-8') if (ROOT/'functions/api/admin/release448-calibration.js').exists() else ''
+promotion=(ROOT/'scripts/release448_promotion_rehearsal.py').read_text(encoding='utf-8') if (ROOT/'scripts/release448_promotion_rehearsal.py').exists() else ''
 req('write_authority_duplicated:false' in inventory,'Inventory Intelligence must declare single write authority')
 req('tool_quantity_mutated:false' in tool,'Tool lifecycle must prove quantity is not lifecycle state')
 req("stock_mutation_capability:'none'" in supply and 'automatic_ordering:false' in supply,'Supply sourcing must remain planning-only and non-ordering')
 req('source_media_copied:false' in caip and 'publication_active:false' in caip,'CAIP handoff must remain reference-only and non-publishing')
+req("calibration_ledger_duplicated:false" in calibration and "mutation_capability:'none'" in calibration and 'onRequestPost' not in calibration,'Calibration cockpit must remain derived and read-only')
+req('READ-ONLY' in promotion and '--strict' in promotion and 'production_promotion' in promotion,'Promotion rehearsal authority missing/read-write drifted')
 for marker in ('CAIP','Inventory','Supplies','Tools'):req(marker in release.get('forward_queue',[]),f'forward queue missing canonical anchor {marker}')
 if fail:
  for i,msg in enumerate(fail,1):print(f'{i:03d}. FAIL — {msg}')
  raise SystemExit(1)
 print('RELEASE 448 EXPANSION AUTHORITY: PASS')
 print('Current migrations: 6')
-print('Product / Storefront / CAIP / Inventory / Tool / Supply / I.T. workstreams: RECORDED')
+print('Product / Storefront / CAIP / Inventory / Tool / Supply / Calibration / I.T. workstreams: RECORDED')
+print('Promotion rehearsal: READ-ONLY')
 print('Production mutation authority: NONE')

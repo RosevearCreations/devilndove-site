@@ -75,6 +75,10 @@ jobs:
         run: python scripts/release448_supply_sourcing_gate.py
       - name: Validate Release 448 Supply sourcing D1 transport without writes
         run: python scripts/apply_development_release448_supply_sourcing.py --transport-preflight
+      - name: Validate Release 448 real-data calibration cockpit
+        run: python scripts/release448_calibration_gate.py
+      - name: Validate Release 448 promotion rehearsal authority
+        run: python scripts/release448_promotion_rehearsal.py --source-check
       - name: Validate current Development D1 remote transport without writes
         run: python scripts/cloudflare_development_access.py --transport-preflight
       - name: Validate Development runtime acceptance safety and manifest
@@ -99,6 +103,7 @@ jobs:
           node --check functions/api/admin/inventory-intelligence.js
           node --check functions/api/admin/tool-lifecycle.js
           node --check functions/api/admin/supply-sourcing.js
+          node --check functions/api/admin/release448-calibration.js
           node --check functions/api/admin/it-integrations.js
           node --check functions/api/admin/storefront-merchandising.js
           node --check functions/api/admin/caip-evidence-review.js
@@ -124,6 +129,7 @@ jobs:
           node --check public/js/admin-inventory-intelligence.js
           node --check public/js/admin-tool-lifecycle.js
           node --check public/js/admin-supply-sourcing.js
+          node --check public/js/admin-release448-calibration.js
           node --check public/js/admin-it-integrations.js
           node --check public/js/admin-caip-content-handoff.js
           node --check public/js/admin-home-carousel.js
@@ -134,7 +140,7 @@ jobs:
           node --check functions/api/payment-providers.js
           node --check sw.js
       - name: Compile canonical Python gates
-        run: python -m py_compile scripts/repository_forward_sanity.py scripts/release448_expansion_authority_gate.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/release448_fresh_install_gate.py scripts/product_lineage_gate.py scripts/release448_media_it_source_gate.py scripts/release448_storefront_merchandising_gate.py scripts/release448_caip_content_handoff_gate.py scripts/release448_inventory_intelligence_gate.py scripts/release448_tool_lifecycle_gate.py scripts/release448_supply_sourcing_gate.py scripts/public_seo_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/apply_development_product_lineage.py scripts/apply_development_release448_media_it.py scripts/apply_development_release448_storefront_merchandising.py scripts/apply_development_release448_caip_content_handoff.py scripts/apply_development_release448_tool_lifecycle.py scripts/apply_development_release448_supply_sourcing.py scripts/development_runtime_acceptance.py
+        run: python -m py_compile scripts/repository_forward_sanity.py scripts/release448_expansion_authority_gate.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/release448_fresh_install_gate.py scripts/product_lineage_gate.py scripts/release448_media_it_source_gate.py scripts/release448_storefront_merchandising_gate.py scripts/release448_caip_content_handoff_gate.py scripts/release448_inventory_intelligence_gate.py scripts/release448_tool_lifecycle_gate.py scripts/release448_supply_sourcing_gate.py scripts/release448_calibration_gate.py scripts/release448_promotion_rehearsal.py scripts/public_seo_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/apply_development_product_lineage.py scripts/apply_development_release448_media_it.py scripts/apply_development_release448_storefront_merchandising.py scripts/apply_development_release448_caip_content_handoff.py scripts/apply_development_release448_tool_lifecycle.py scripts/apply_development_release448_supply_sourcing.py scripts/development_runtime_acceptance.py
       - name: Whitespace validation
         run: git diff --check
       - name: Safety statement
