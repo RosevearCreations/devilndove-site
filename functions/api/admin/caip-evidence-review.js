@@ -1,4 +1,5 @@
-// Devil n Dove Build 439 — authenticated CAIP temporal evidence-review API.
+// Devil n Dove Release 448 — authenticated CAIP temporal evidence-review API.
+// The temporal-evidence authority originated in historical Build 439; that number is provenance only.
 import {
   auditAdminAction,
   captureRuntimeIncident,
@@ -22,8 +23,9 @@ import {
   verifyProcessingArtifact,
 } from '../_lib/caipEvidenceReview.js';
 
+const RELEASE = 448;
 function json(data, status = 200) {
-  return jsonResponse(data, status, { 'Cache-Control': 'no-store' });
+  return jsonResponse({ release: RELEASE, ...data }, status, { 'Cache-Control': 'no-store' });
 }
 function integer(value) {
   const parsed = Number(value || 0);
@@ -75,15 +77,16 @@ async function projectOptions(db) {
 function readinessResponse(readiness, projectId, status = 409) {
   return json({
     ok: false,
-    build: CAIP_EVIDENCE_REVIEW_BUILD,
     schema_ready: false,
     source: 'migration_required',
     creative_project_id: projectId || null,
     missing_tables: readiness.missing_tables || [],
-    required_migration: 'database_build439_caip_temporal_evidence_review.sql',
+    required_authority: 'CAIP temporal evidence schema',
+    provenance_build: CAIP_EVIDENCE_REVIEW_BUILD,
+    provenance_migration: 'database_build439_caip_temporal_evidence_review.sql',
     source_media_unchanged: true,
     provider_execution_active: false,
-    message: 'Build 439 temporal evidence schema is not installed yet. Existing CAIP remains available; evidence-review writes are blocked.',
+    message: 'Release 448 requires the established CAIP temporal-evidence authority. Existing CAIP remains available, but evidence-review writes are blocked until the missing tables are restored through the current Development migration process.',
   }, status);
 }
 
@@ -141,9 +144,9 @@ export async function onRequestGet(context) {
     if (!projectId) {
       return json({
         ok: true,
-        build: CAIP_EVIDENCE_REVIEW_BUILD,
         schema_ready: readiness.schema_ready,
         missing_tables: readiness.missing_tables,
+        provenance_build: CAIP_EVIDENCE_REVIEW_BUILD,
         creative_project_id: null,
         projects,
         source_media_unchanged: true,
@@ -152,7 +155,7 @@ export async function onRequestGet(context) {
     }
     const bundle = dedupeBundleAssets(await loadCaipEvidenceReviewBundle(state.db, projectId));
     if (!bundle.project) return json({ ok: false, error: 'CAIP project not found.' }, 404);
-    return json({ ok: true, projects, ...bundle });
+    return json({ ok: true, provenance_build: CAIP_EVIDENCE_REVIEW_BUILD, projects, ...bundle });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'caip_evidence_review',
@@ -160,7 +163,7 @@ export async function onRequestGet(context) {
       severity: 'warning',
       message: error?.message || 'CAIP evidence review could not load.',
       related_user_id: state.adminUser.user_id,
-      details: { creative_project_id: projectId || null, error: String(error?.stack || error) },
+      details: { release: RELEASE, provenance_build: CAIP_EVIDENCE_REVIEW_BUILD, creative_project_id: projectId || null, error: String(error?.stack || error) },
     });
     return json({ ok: false, error: error?.message || 'CAIP evidence review could not load.' }, 503);
   }
@@ -203,7 +206,7 @@ export async function onRequestPost(context) {
     } else if (action === 'manifest') {
       const bundle = dedupeBundleAssets(await loadCaipEvidenceReviewBundle(state.db, projectId));
       if (!bundle.project) return json({ ok: false, error: 'CAIP project not found.' }, 404);
-      const manifest = buildEvidenceReviewManifest(bundle);
+      const manifest = { release: RELEASE, provenance_build: CAIP_EVIDENCE_REVIEW_BUILD, ...buildEvidenceReviewManifest(bundle) };
       return new Response(JSON.stringify(manifest, null, 2), {
         status: 200,
         headers: {
@@ -211,10 +214,11 @@ export async function onRequestPost(context) {
           'Content-Disposition': `attachment; filename="${bundle.project.creative_project_key || 'caip-project'}-temporal-evidence.json"`,
           'Cache-Control': 'no-store',
           'X-Content-Type-Options': 'nosniff',
+          'X-DND-Release': String(RELEASE),
         },
       });
     } else {
-      return json({ ok: false, error: 'Unsupported Build 439 CAIP evidence-review action.', error_code: 'CAIP_EVIDENCE_ACTION_UNSUPPORTED', action }, 400);
+      return json({ ok: false, error: 'Unsupported Release 448 CAIP evidence-review action.', error_code: 'CAIP_EVIDENCE_ACTION_UNSUPPORTED', action }, 400);
     }
 
     await auditAdminAction(context.env, context.request, state.adminUser, {
@@ -223,6 +227,8 @@ export async function onRequestPost(context) {
       target_id: projectId,
       target_key: null,
       details: {
+        release: RELEASE,
+        provenance_build: CAIP_EVIDENCE_REVIEW_BUILD,
         action,
         creative_asset_id: integer(body.creative_asset_id) || null,
         caip_media_upload_file_id: integer(body.caip_media_upload_file_id) || null,
@@ -238,8 +244,8 @@ export async function onRequestPost(context) {
     const bundle = dedupeBundleAssets(await loadCaipEvidenceReviewBundle(state.db, projectId));
     return json({
       ok: true,
-      build: CAIP_EVIDENCE_REVIEW_BUILD,
-      message: 'CAIP evidence review saved. Source originals remain unchanged and no content was published.',
+      provenance_build: CAIP_EVIDENCE_REVIEW_BUILD,
+      message: 'Release 448 CAIP evidence review saved. Source originals remain unchanged and no content was published.',
       result,
       projects: await projectOptions(state.db),
       ...bundle,
@@ -252,11 +258,11 @@ export async function onRequestPost(context) {
       severity: 'warning',
       message: error?.message || 'CAIP evidence review could not save.',
       related_user_id: state.adminUser.user_id,
-      details: { action, creative_project_id: projectId, error_code: code, error: String(error?.stack || error) },
+      details: { release: RELEASE, provenance_build: CAIP_EVIDENCE_REVIEW_BUILD, action, creative_project_id: projectId, error_code: code, error: String(error?.stack || error) },
     });
     return json({
       ok: false,
-      build: CAIP_EVIDENCE_REVIEW_BUILD,
+      provenance_build: CAIP_EVIDENCE_REVIEW_BUILD,
       error: error?.message || 'CAIP evidence review could not save.',
       error_code: code,
       action,
