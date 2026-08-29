@@ -1,0 +1,37 @@
+.accounting-ops{display:grid;gap:16px}
+.accounting-ops-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.accounting-ops-head h2{margin:.15rem 0 .35rem}
+.accounting-ops-period{display:grid;grid-template-columns:minmax(150px,1fr) auto;gap:8px;align-items:end;min-width:min(100%,330px)}
+.accounting-ops-period label{grid-column:1/-1;font-size:.82rem;font-weight:700}
+.accounting-ops-period input,.accounting-ops-period .btn{min-height:44px}
+.accounting-ops-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.accounting-ops-stat{display:flex;min-height:82px;flex-direction:column;justify-content:space-between;gap:8px;padding:12px;border:1px solid rgba(127,127,127,.28);border-radius:12px;text-decoration:none;color:inherit}
+.accounting-ops-stat span{font-size:.8rem}
+.accounting-ops-stat strong{font-size:1.55rem}
+.accounting-ops-snapshot{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.accounting-ops-snapshot>div{display:grid;gap:5px;padding:10px 12px;border-radius:10px;background:rgba(127,127,127,.09)}
+.accounting-ops-snapshot span{font-size:.78rem}
+.accounting-ops-snapshot strong{font-size:1rem}
+.accounting-ops-snapshot .negative strong{font-weight:800}
+.accounting-ops-queue{display:grid;gap:8px}
+.accounting-ops-item{display:grid;grid-template-columns:78px minmax(0,1fr) 110px;gap:12px;align-items:center;padding:12px;border:1px solid rgba(127,127,127,.28);border-radius:12px;color:inherit;text-decoration:none}
+.accounting-ops-item:hover,.accounting-ops-item:focus-visible{border-color:currentColor}
+.accounting-ops-priority{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.accounting-ops-item-body{display:grid;gap:3px;min-width:0}
+.accounting-ops-item-body small{line-height:1.35}
+.accounting-ops-owner{text-align:right;font-size:.78rem;font-weight:700}
+.priority-high{border-left-width:5px}.priority-medium{border-left-width:4px}.priority-low{border-left-width:3px}
+.accounting-ops-empty{display:grid;gap:4px;padding:14px;border:1px dashed rgba(127,127,127,.4);border-radius:12px}
+.accounting-ops-authority{margin:0}
+#accountingOpsStatus[data-state="error"]{font-weight:700}
+@media(max-width:900px){
+ .accounting-ops-head{display:grid}
+ .accounting-ops-summary,.accounting-ops-snapshot{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+ .accounting-ops-period{grid-template-columns:1fr;width:100%}
+ .accounting-ops-period label{grid-column:auto}
+ .accounting-ops-summary,.accounting-ops-snapshot{grid-template-columns:1fr}
+ .accounting-ops-item{grid-template-columns:1fr;gap:5px}
+ .accounting-ops-owner{text-align:left}
+}
