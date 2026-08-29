@@ -44,9 +44,9 @@ req('data-admin-module="financials"' in html,'Accounting page must remain Financ
 req('data-admin-workspace-status' in html,'Accounting page must preserve shared workspace status surface')
 
 for path,marker in (
- ('functions/api/_lib/accountingReconciliationReadService.js',"mode: 'read-only-accounting-reconciliation'"),
- ('functions/api/_lib/accountingProfitLossReadService.js',"mode: 'read-only-accounting-profit-loss'"),
- ('functions/api/_lib/accountingItemCostingReadService.js',"mode: 'read-only-accounting-item-costing'"),
+ ('functions/api/_lib/accountingReconciliationReadService.js','read-only-accounting-reconciliation'),
+ ('functions/api/_lib/accountingProfitLossReadService.js','read-only-accounting-profit-loss'),
+ ('functions/api/_lib/accountingItemCostingReadService.js','read-only-accounting-item-costing'),
 ):
  req(marker in read(path),f'existing Accounting read authority drifted: {path}')
 req('accounting_reconciliation_reviews' in read('functions/api/admin/accounting-reconciliation.js'),'existing reconciliation review authority must remain canonical')
