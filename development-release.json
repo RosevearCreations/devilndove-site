@@ -84,9 +84,8 @@
     "historical_migration_replay": false
   },
   "current_release_evidence": {
-    "focused_source_gate_run": null,
-    "system_gate_run": null,
-    "source_state": "pending_release452_ci_proof",
+    "source_state": "complete_source_proven",
+    "exact_head_evidence": "GitHub Actions Release 452 Source Gate and System Gate must both be green on the exact current dev SHA; run IDs remain external evidence to avoid self-referential metadata commits.",
     "d1_mutation": "none_required",
     "d1_last_independent_verification_run": 33235803838,
     "provider_publication_enabled": false,
