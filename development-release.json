@@ -1,19 +1,19 @@
 {
   "environment": "development",
-  "release": 451,
-  "label": "Marketplace Calibration & SEO Assurance",
+  "release": 452,
+  "label": "Application Streamlining & UX/SEO Depth",
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "marketplace_calibration_source_proven_no_new_d1_migration",
+  "convergence_state": "application_streamlining_ux_seo_depth_source_proven_no_new_d1_migration",
   "previous_release": {
-    "release": 450,
-    "label": "Marketplace & SEO Readiness",
-    "state": "complete_applied_and_verified_development",
+    "release": 451,
+    "label": "Marketplace Calibration & SEO Assurance",
+    "state": "complete_source_proven_no_new_d1_migration",
     "completed_on": "2026-08-29",
-    "d1_mutation_workflow_run": 33235769850,
-    "d1_verification_workflow_run": 33235803838,
-    "completion_note": "Release 450 marketplace/SEO schema was applied only to exact Development D1 and independently verified. Provider execution/publication remained disabled and Production remained unavailable."
+    "focused_source_gate_run": 33252042376,
+    "system_gate_run": 33252156030,
+    "completion_note": "Release 451 added read-only marketplace calibration and SEO assurance without a D1 migration. Release 450 remains the last applied and independently verified D1 schema release."
   },
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
@@ -60,6 +60,7 @@
     "request_time_schema_mutation": "forbidden_for_marketplace_surfaces",
     "seo_gate_required": true,
     "seo_depth_gate_required": true,
+    "repository_hygiene_gate_required": true,
     "external_credentials_for_feature_development": "assume_available_or_mocked"
   },
   "database_baseline": {
@@ -71,25 +72,28 @@
   "release_history": [
     {"release":448,"state":"complete_source_and_regression_authority","note":"Platform Expansion retained by carried-forward gates."},
     {"release":449,"state":"complete_applied_and_verified_development","migration":"migrations/dev/20260829_release449_corporate_commerce.sql","verification_workflow_run":33235075008},
-    {"release":450,"state":"complete_applied_and_verified_development","migration":"migrations/dev/20260829_release450_marketplace_seo_readiness.sql","mutation_workflow_run":33235769850,"verification_workflow_run":33235803838}
+    {"release":450,"state":"complete_applied_and_verified_development","migration":"migrations/dev/20260829_release450_marketplace_seo_readiness.sql","mutation_workflow_run":33235769850,"verification_workflow_run":33235803838},
+    {"release":451,"state":"complete_source_proven_no_new_d1_migration","focused_source_gate_run":33252042376,"system_gate_run":33252156030}
   ],
   "current_release_migrations": [],
   "current_release_database_state": {
     "new_migration_required": false,
     "last_verified_schema_release": 450,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
-    "release451_read_contracts": ["commerce_transaction_costs@449","marketplace_channel_policies@450","marketplace_listing_profiles@450","marketplace_export_image_selections@450"],
+    "release452_read_contracts": ["commerce_transaction_costs@449","marketplace_channel_policies@450","marketplace_listing_profiles@450","marketplace_export_image_selections@450"],
     "historical_migration_replay": false
   },
   "current_release_evidence": {
-    "focused_source_gate_run": 33252042376,
-    "prepromotion_system_gate_run": 33251932656,
+    "focused_source_gate_run": null,
+    "system_gate_run": null,
+    "source_state": "pending_release452_ci_proof",
     "d1_mutation": "none_required",
     "d1_last_independent_verification_run": 33235803838,
     "provider_publication_enabled": false,
     "production_mutation": false,
     "seo_structural_gate": "required",
-    "seo_depth_gate": "required"
+    "seo_depth_gate": "required",
+    "repository_hygiene_gate": "required"
   },
   "workstreams": [
     {"key":"storefront-merchandising","status":"carried_forward","workspace":"/admin/storefront-merchandising/"},
@@ -97,46 +101,49 @@
     {"key":"product-tool-lineage","status":"carried_forward","workspace":"/admin/product-lineage/"},
     {"key":"manufacturer-provenance-reviews","status":"carried_forward","workspace":"/admin/vendor-reviews/"},
     {"key":"product-image-quality","status":"carried_forward","workspace":"/admin/product-image-quality/"},
-    {"key":"inventory-operations-intelligence","status":"carried_forward","workspace":"/admin/inventory-intelligence/"},
-    {"key":"tool-lifecycle","status":"carried_forward","workspace":"/admin/tool-lifecycle/"},
+    {"key":"inventory-operations-intelligence","status":"release452_accessibility_guarded","workspace":"/admin/inventory-intelligence/"},
+    {"key":"tool-lifecycle","status":"release452_accessibility_guarded","workspace":"/admin/tool-lifecycle/"},
     {"key":"supply-sourcing-replenishment","status":"carried_forward","workspace":"/admin/supply-sourcing/"},
     {"key":"release448-calibration","status":"carried_forward","workspace":"/admin/release448-calibration/"},
-    {"key":"caip-reviewed-content-handoff","status":"carried_forward","workspace":"/admin/caip-content-handoff/"},
+    {"key":"caip-reviewed-content-handoff","status":"release452_accessibility_guarded","workspace":"/admin/caip-content-handoff/"},
     {"key":"it-integration-registry","status":"carried_forward_and_extended","workspace":"/admin/it-integrations/"},
+    {"key":"financials-accounting","status":"release452_private_and_accessibility_guarded","workspace":"/admin/accounting/"},
     {"key":"marketplace-readiness","status":"release450_development_verified","workspace":"/admin/marketplace-readiness/"},
     {"key":"marketplace-draft-exports","status":"release450_development_verified","workspace":"/admin/marketplace-exports/"},
     {"key":"marketplace-mapping","status":"release450_development_verified","workspace":"/admin/marketplace-mapping/"},
-    {"key":"marketplace-calibration","status":"release451_source_proven","workspace":"/admin/marketplace-calibration/"},
+    {"key":"marketplace-calibration","status":"release451_source_proven_carried_forward","workspace":"/admin/marketplace-calibration/"},
     {"key":"seo-compliance","status":"active_required_gate","authority":"scripts/public_seo_gate.py"},
-    {"key":"seo-depth","status":"active_required_gate","authority":"scripts/public_seo_depth_gate.py"}
+    {"key":"seo-depth","status":"release452_extended_required_gate","authority":"scripts/public_seo_depth_gate.py"},
+    {"key":"repository-hygiene","status":"release452_required_gate","authority":"scripts/repository_hygiene_gate.py"},
+    {"key":"product-breadcrumb-seo","status":"release452_implemented","authority":"public/js/product-breadcrumb-seo.js"}
   ],
-  "release451_batch": [
-    {"id":1,"change":"Provider setup authority evidence","status":"implemented"},
-    {"id":2,"change":"Provider execution lock evidence","status":"implemented"},
-    {"id":3,"change":"Publication lock evidence","status":"implemented"},
-    {"id":4,"change":"Marketplace title readiness","status":"implemented"},
-    {"id":5,"change":"Marketplace description depth readiness","status":"implemented"},
-    {"id":6,"change":"Positive marketplace price readiness","status":"implemented"},
-    {"id":7,"change":"Positive marketplace quantity readiness","status":"implemented"},
-    {"id":8,"change":"SKU/reference readiness","status":"implemented"},
-    {"id":9,"change":"Public-ready image presence","status":"implemented"},
-    {"id":10,"change":"Multi-image coverage depth","status":"implemented"},
-    {"id":11,"change":"Image alt-text evidence","status":"implemented"},
-    {"id":12,"change":"Canonical product URL/slug evidence","status":"implemented"},
-    {"id":13,"change":"Marketplace taxonomy/category mapping","status":"implemented"},
-    {"id":14,"change":"Marketplace search tags/keyword preparation","status":"implemented"},
-    {"id":15,"change":"Materials preparation","status":"implemented"},
-    {"id":16,"change":"Shipping profile/method preparation","status":"implemented"},
-    {"id":17,"change":"Processing/readiness-state preparation","status":"implemented"},
-    {"id":18,"change":"Return-policy preparation","status":"implemented"},
-    {"id":19,"change":"Typed personalization validity evidence","status":"implemented"},
-    {"id":20,"change":"Variation validity evidence","status":"implemented"},
-    {"id":21,"change":"Marketplace/provider fee-model evidence","status":"implemented"},
-    {"id":22,"change":"Payout-reference reconciliation evidence","status":"implemented"},
-    {"id":23,"change":"Marketplace tax-handling review evidence","status":"implemented"},
-    {"id":24,"change":"Currency-handling review evidence","status":"implemented"},
-    {"id":25,"change":"Channel-specific compliance evidence for Etsy/Meta/Pinterest/TikTok","status":"implemented"},
-    {"id":26,"change":"Public structural/canonical/JSON-LD SEO assurance","status":"implemented"}
+  "release452_batch": [
+    {"id":1,"change":"Retire obsolete root Build-era D1 verification artifact","status":"implemented"},
+    {"id":2,"change":"Permanent obsolete Build verifier detection","status":"implemented"},
+    {"id":3,"change":"Backup/temp artifact detection","status":"implemented"},
+    {"id":4,"change":"Current authority release-drift detection","status":"implemented"},
+    {"id":5,"change":"Principal Storefront one-H1 guard","status":"implemented"},
+    {"id":6,"change":"Canonical URL depth guard","status":"implemented"},
+    {"id":7,"change":"Open Graph depth guard","status":"implemented"},
+    {"id":8,"change":"Twitter card depth guard","status":"implemented"},
+    {"id":9,"change":"Shop/Collections/Collages CollectionPage guard","status":"implemented"},
+    {"id":10,"change":"Existing dynamic Product JSON-LD preservation","status":"implemented"},
+    {"id":11,"change":"Accessible visible Product breadcrumbs","status":"implemented"},
+    {"id":12,"change":"Dynamic Product BreadcrumbList JSON-LD","status":"implemented"},
+    {"id":13,"change":"Product below-fold proof-image async decoding","status":"implemented"},
+    {"id":14,"change":"Public image alt-text guard","status":"implemented"},
+    {"id":15,"change":"Collages sitemap discovery coverage","status":"implemented"},
+    {"id":16,"change":"Principal Storefront dead local-route guard","status":"implemented"},
+    {"id":17,"change":"Accounting admin noindex protection","status":"implemented"},
+    {"id":18,"change":"Inventory dynamic status accessibility","status":"implemented"},
+    {"id":19,"change":"Tool Lifecycle dynamic status accessibility","status":"implemented"},
+    {"id":20,"change":"CAIP handoff dynamic status accessibility","status":"implemented"},
+    {"id":21,"change":"Accounting dynamic status accessibility","status":"implemented"},
+    {"id":22,"change":"Responsive representative admin guard","status":"implemented"},
+    {"id":23,"change":"Release 451 read-only marketplace calibration carry-forward","status":"implemented"},
+    {"id":24,"change":"Release 452 focused source workflow","status":"implemented"},
+    {"id":25,"change":"Release 452 System Gate integration","status":"implemented"},
+    {"id":26,"change":"No-new-D1-migration convergence authority","status":"implemented"}
   ],
   "deferred_it_test_environment": {
     "state": "backlog_non_blocking_for_source_development",
@@ -150,17 +157,15 @@
     ]
   },
   "forward_queue": [
-    "Calibrate real Etsy listings against current taxonomy and shipping profiles",
-    "Capture Etsy fee and payout evidence from sandbox/provider acceptance",
+    "Calibrate real Etsy listings against current taxonomy and shipping profiles when credentials arrive",
+    "Capture Etsy fee and payout evidence from provider acceptance",
     "Meta catalog and commerce-account acceptance",
     "Pinterest business-account/domain/catalog acceptance",
     "TikTok creator-info/consent/verified-media acceptance",
-    "Responsive storefront/admin cleanup across remaining workspaces",
-    "Expand public Product/collection structured-data depth",
     "Authenticated Development runtime acceptance",
     "Stripe test acceptance",
     "PayPal sandbox acceptance",
     "CAIP private-media acceptance",
-    "Production promotion rehearsal"
+    "Deliberate Production promotion rehearsal"
   ]
 }
