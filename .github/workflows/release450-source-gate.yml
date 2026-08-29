@@ -1,0 +1,50 @@
+name: Release 450 Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/dev/20260829_release450_marketplace_seo_readiness.sql'
+      - 'functions/api/_lib/marketplaceReadiness.js'
+      - 'functions/api/admin/marketplace-*.js'
+      - 'admin/marketplace-*/**'
+      - 'public/js/admin-marketplace-*.js'
+      - 'css/admin-marketplace-readiness.css'
+      - 'scripts/release450_marketplace_seo_gate.py'
+      - 'scripts/public_seo_gate.py'
+      - '.github/workflows/release450-source-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Development-only branch guard
+        run: test "${GITHUB_REF_NAME}" = "dev"
+      - name: Validate Release 450 marketplace and SEO readiness
+        run: python scripts/release450_marketplace_seo_gate.py
+      - name: Verify Development connection authority remains safe
+        run: |
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+      - name: Whitespace validation
+        run: git diff --check
+      - name: Safety statement
+        run: |
+          echo 'Release 450 source gate: GREEN SOURCE ONLY'
+          echo 'D1/R2/provider/Production mutation capability: NONE'
