@@ -1,39 +1,48 @@
-# Project Status and Roadmap — Release 456 Inventory & Tool Operational Workflow Depth
+# Project Status and Roadmap — Release 458 Creators / CAIP Private Media, Evidence & Reviewed Handoff Depth
 
 Updated: 2026-08-29
 
 ## Current Development position
 
-- Current release: **456 — Inventory & Tool Operational Workflow Depth**
+- Current release: **458 — Creators / CAIP Private Media, Evidence & Reviewed Handoff Depth**
 - Source: `dev`; Development Pages: `devilndove-site-dev` / `https://devilndove-site-dev.pages.dev`
 - The Development Pages Production deployment is the Development application; separate live Production remains locked.
 - Development data/content were synchronized from locked live Production and are treated as current unless verification proves drift.
 - Development D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
-- Release 456 D1 migration: **none**
+- Release 458 D1 migration: **none**
 - D1 schema: **applied and independently verified through Release 453**
-- Release 453 mutation `33258377328`; independent verifier `33258415391`
+- Release 453 mutation / verifier: `33258377328` / `33258415391`
+- Release 457 closed on exact head `33f939c8b6daa733e8a54fa8ded15cde626978a0`: Source Gate `33264872362`, System Gate `33264872366`, Cloudflare Pages check `99133095306` — all successful.
 - Provider execution/publication: closed
 - Separate live Production promotion: closed
 
-## Release 456 batch
+## Completed application batches
 
-Release 456 deepens the existing Inventory and durable Tool lifecycle workflows without changing schema. `site_item_inventory` remains canonical for Tool identity, quantity and do-not-reuse; `inventory_tool_lifecycle_profiles/events` remain the single durable Tool lifecycle authority.
+- **Release 455:** Storefront discovery, media fallback, accessibility/responsive media and SEO depth.
+- **Release 456:** Inventory Intelligence and Tool lifecycle operational depth over existing durable authorities.
+- **Release 457:** read-only Financial Operations exceptions/reporting depth without a second ledger.
+- **Release 458:** CAIP private-media/evidence readiness and reviewed Content Studio handoff depth over existing CAIP authorities; no new schema.
 
-Implemented: Tool lifecycle context in Inventory Intelligence, blocked/unsafe/out-of-service/service/replacement queues, direct lifecycle cross-links, Tool summary/filtering, acquisition and warranty fields, service-history advancement from maintenance/repair/calibration events, automatic next-service advancement when a service interval exists, and safety guards preventing do-not-reuse or unsafe Tools from being treated as active.
+## Release 458 batch
 
-## Open application objectives after Release 456
+Release 458 adds a read-only CAIP readiness cockpit, current-project exception routing, shared Creators module shell participation for the CAIP page, project-deep links, stale-package detection, frozen-evidence role visibility and server-side guards preventing stale/empty reviewed handoffs.
 
-1. Financials/Accounting: reconciliation, payout/commerce-cost completeness and operational reporting without a second ledger.
-2. Creators/CAIP: private-media/evidence review and reviewed Content Studio handoff while publication stays locked.
-3. Authenticated Development browser acceptance on the deployed `devilndove-site-dev.pages.dev` application.
-4. Provider acceptance for Stripe, PayPal, Etsy and social providers where credentials/environment permit.
-5. Complete the full Development-to-Production transition checklist.
-6. Deliberately converge Development to the separate live Production site only after the checklist is green, while preserving `dev` and `devilndove-site-dev.pages.dev` as ongoing Development.
+The durable private-media/evidence/story/processing/handoff authorities are retained. Private originals are not copied or changed and publication/provider execution stays locked.
 
-SEO, repository hygiene, Release 455 Storefront protections, Release 454 Admin convergence and Release 453 D1/provider evidence remain carried-forward gates.
+## Open application objectives after Release 458 source convergence
+
+1. **Authenticated Development acceptance:** exercise the deployed Development application with an authenticated administrator, including CAIP private R2 secure playback/range seeking, evidence capture/review, reviewed handoff, Storefront/Admin/Inventory/Tools/Financials regression and responsive behavior.
+2. **Provider acceptance:** Stripe test, PayPal sandbox, Etsy and social-provider acceptance where credentials/environment permit. Failures must be tracked against the current release authority rather than historical build numbers.
+3. **Acceptance defect convergence:** repair any real Development defects, run focused gate + System Gate + exact Pages proof, then continue acceptance.
+4. **Development-to-Production transition checklist:** verify application, D1/R2 identities/data, provider state, SEO, deployment configuration, rollback and promotion boundary.
+5. **Deliberate Production convergence:** only after the checklist is green; preserve `dev` and `devilndove-site-dev.pages.dev` as the ongoing Development environment.
+
+## Documentation synchronization requirement
+
+The current release is authoritative only when the machine-readable authority and the human handoff/roadmap/index/sanity/Cloudflare/current-release Markdown agree. These files are updated with each release, not deferred to a later cleanup batch.
 
 ## Mandatory startup rule
 
 > **A new chat is not a migration event.**
 
-Release 453 is already applied/verified and Releases 454–456 are source-only. Read current state first; future D1 writes require genuinely new durable authority, exact Development identity proof, guarded mutation and separate read-only verification.
+Release 453 is already applied/verified and Releases 454–458 are source-only except where earlier durable releases are explicitly recorded. Future D1 writes require genuinely new durable authority, exact Development identity proof, guarded mutation and separate read-only verification.

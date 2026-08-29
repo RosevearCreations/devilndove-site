@@ -2,48 +2,52 @@
 <html lang="en">
 <head>
 <meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Creative Asset Intelligence Platform (CAIP) — Devil n Dove Admin</title>
-  <meta name="description" content="Devil n Dove Creative Asset Intelligence Platform for private raw-media intake, resumable uploads, timecode evidence review, story structure, verified processing plans, and reviewed content candidates."/>
-  <meta name="robots" content="noindex,nofollow"/>
-  <link rel="icon" href="/assets/mark.png" type="image/png"/>
-  <link rel="stylesheet" href="/css/styles.css?v=448"/>
-  <link rel="stylesheet" href="/css/caip-evidence-review.css?v=448"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Creative Asset Intelligence Platform (CAIP) — Devil n Dove Admin</title>
+<meta name="description" content="Devil n Dove Creative Asset Intelligence Platform for private raw-media intake, resumable uploads, timecode evidence review, story structure, verified processing plans, and reviewed content candidates."/>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="icon" href="/assets/mark.png" type="image/png"/>
+<link rel="stylesheet" href="/css/styles.css?v=454"/>
+<link rel="stylesheet" href="/css/admin-convergence.css?v=454"/>
+<link rel="stylesheet" href="/css/caip-evidence-review.css?v=448"/>
+<link rel="stylesheet" href="/css/caip-operations.css?v=458"/>
 </head>
-<body data-admin-page="creative-assets">
-  <div class="container admin-shell">
-    <div class="nav">
-      <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Creators • CAIP Assets and Evidence</div></div></div>
-      <div class="links"><a href="/admin/creative-automation/">Master Studio</a><a href="/admin/creative-process/">Process</a><a href="/admin/content-studio/">Packages</a><a href="/admin/content-publications/">Release</a><button class="btn" data-nav-logout type="button">Logout</button></div>
-    </div>
-    <section class="hero caip-hero">
-      <div>
-        <p class="eyebrow">Release 448 • Creators • Evidence workspace</p>
-        <h1>Creative Asset Intelligence Platform (CAIP)</h1>
-        <p>Capture or import raw workshop photos, video and narration into a private, resumable project archive; preserve immutable originals; then review exact video/audio timecodes, source-backed evidence, story structure, reusable derivatives and reviewed public-content candidates from one CAIP record.</p>
-      </div>
-      <div class="visual-placeholder-card caip-hero-visual"><img src="/assets/caip-planning-placeholder.svg" alt="Representative Devil n Dove workshop media planning and project evidence photo" loading="lazy"/><small>Private originals → timecode evidence review → approved story structure → reviewed derivatives</small></div>
-    </section>
-    <section class="card caip-safety">
-      <strong>Review-first and source-safe.</strong> Release 448 retains the established private CAIP R2 and temporal-evidence authorities: raw project media remains private, ranged review stays authenticated, point/range evidence stays source-backed, and processing artifacts must remain verified before they can be treated as complete. Nothing here silently publishes, overwrites originals, invents rights, executes disabled providers, or upgrades unverified evidence to proven.
-    </section>
-    <div id="caipMediaIntakeMount"></div>
-    <div id="caipEvidenceReviewMount"></div>
-    <div id="caipStorageAuditMount"></div>
-    <div id="creativeAssetIntelligenceMount"></div>
-    <div class="footer card" style="margin-top:18px"></div>
+<body data-admin-page="creative-assets" data-admin-module="creators">
+<div class="container admin-shell">
+  <div class="nav">
+    <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Creators • CAIP Assets and Evidence</div></div></div>
+    <div class="links"><a href="/admin/creative-automation/">Master Studio</a><a href="/admin/creative-process/">Process</a><a href="/admin/caip-content-handoff/">Handoff</a><a href="/admin/content-studio/">Packages</a><a href="/admin/content-publications/">Release</a><button class="btn" data-nav-logout type="button">Logout</button></div>
   </div>
-  <script src="/js/main.js?v=448"></script>
-  <script src="/public/js/auth.js?v=448"></script>
-  <script src="/public/js/admin-route-usage.js"></script>
-  <script src="/public/js/site-auth-ui.js?v=448"></script>
-  <script src="/public/js/admin-self-protect.js?v=448"></script>
-  <script src="/public/js/admin.js?v=448"></script>
-  <script src="/public/js/admin-caip-media-intake.js?v=448"></script>
-  <script src="/public/js/admin-caip-evidence-review.js?v=448"></script>
-  <script src="/public/js/admin-caip-evidence-title-assist.js?v=448"></script>
-  <script src="/public/js/admin-caip-storage-audit.js?v=448"></script>
-  <script src="/public/js/admin-creative-assets.js?v=448"></script>
+  <section class="hero caip-hero">
+    <div>
+      <p class="eyebrow">Release 458 • Creators • Private media and evidence workflow</p>
+      <h1>Creative Asset Intelligence Platform (CAIP)</h1>
+      <p>Capture or import raw workshop photos, video and narration into a private, resumable project archive; preserve immutable originals; then review exact video/audio timecodes, source-backed evidence, story structure, reusable derivatives and reviewed public-content candidates from one CAIP record.</p>
+    </div>
+    <div class="visual-placeholder-card caip-hero-visual"><img src="/assets/caip-planning-placeholder.svg" alt="Representative Devil n Dove workshop media planning and project evidence photo" loading="lazy"/><small>Private originals → timecode evidence review → approved story structure → reviewed Content Studio handoff</small></div>
+  </section>
+  <section class="card caip-safety"><strong>Review-first and source-safe.</strong> Release 458 deepens the established private CAIP R2 and temporal-evidence authorities. Raw project media remains private, ranged review stays authenticated, point/range evidence stays source-backed, processing artifacts must be verified before completion, and Content Studio handoff remains reference-only. Nothing here silently publishes, overwrites originals, invents rights, or executes disabled providers.</section>
+  <div id="caipOperationsMount"><section class="card"><p class="small" role="status" aria-live="polite" data-admin-workspace-status>Loading CAIP readiness…</p></section></div>
+  <div id="caipMediaIntakeMount"></div>
+  <div id="caipEvidenceReviewMount"></div>
+  <div id="caipStorageAuditMount"></div>
+  <div id="creativeAssetIntelligenceMount"></div>
+  <div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js?v=454"></script>
+<script src="/public/js/auth.js?v=454"></script>
+<script src="/public/js/admin-route-usage.js"></script>
+<script src="/public/js/site-auth-ui.js?v=454"></script>
+<script src="/public/js/admin-self-protect.js?v=454"></script>
+<script src="/public/js/admin-module-nav.js?v=454"></script>
+<script src="/public/js/admin-workspace-state.js?v=454"></script>
+<script src="/public/js/admin.js?v=448"></script>
+<script src="/public/js/admin-caip-operations.js?v=458"></script>
+<script src="/public/js/admin-caip-media-intake.js?v=448"></script>
+<script src="/public/js/admin-caip-evidence-review.js?v=448"></script>
+<script src="/public/js/admin-caip-evidence-title-assist.js?v=448"></script>
+<script src="/public/js/admin-caip-storage-audit.js?v=448"></script>
+<script src="/public/js/admin-creative-assets.js?v=448"></script>
 </body>
 </html>
