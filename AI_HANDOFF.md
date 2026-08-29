@@ -1,75 +1,81 @@
-# AI Handoff — Release 452 Application Streamlining & UX/SEO Depth
+# AI Handoff — Release 453 I.T. Provider Readiness & Acceptance Authority
 
 Updated: 2026-08-29
 
 Read in this order:
 
-1. `development-release.json` — machine-readable current release/state.
-2. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` — exact D1/R2/account connection mechanics and new-chat startup rule.
-3. `docs/operations/RELEASE_452_APPLICATION_STREAMLINING.md` — current Release 452 scope and acceptance.
-4. `PROJECT_STATUS_AND_ROADMAP.md` — active execution queue.
-
-Historical Build numbers and Release 448 filenames are provenance/regression authority, not the current release identity. Git history is the archive; obsolete Build-era one-off verification files must not accumulate in the current tree.
+1. `development-release.json` — machine-readable current release and database state.
+2. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` — exact Development D1/R2/account mechanics and startup rule.
+3. `docs/operations/RELEASE_453_IT_PROVIDER_READINESS.md` — Release 453 implementation and remote verification evidence.
+4. `PROJECT_STATUS_AND_ROADMAP.md` — current execution queue.
 
 ## Current Development boundary
 
-- Current release: **Release 452 — Application Streamlining & UX/SEO Depth**
+- Current release: **Release 453 — I.T. Provider Readiness & Acceptance Authority**
 - Source branch: `dev`
 - Development Pages: `devilndove-site-dev`
 - Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
-- D1 schema: **current and independently verified through Release 450**
-- Release 451 D1 migration: **none**
-- Release 452 D1 migration: **none required**
+- D1 schema: **current and independently verified through Release 453**
+- Release 453 migration: `migrations/dev/20260829_release453_it_provider_readiness.sql`
+- Release 453 guarded D1 mutation: **run `33258377328` — SUCCESS**
+- Release 453 independent read-only D1 verification: **run `33258415391` — SUCCESS**
 - Development R2: `devilndove-toolshed-images-dev`, `devilndove-caip-media-dev`
-- Cloudflare account selection: tooling/GitHub Actions pin `CLOUDFLARE_ACCOUNT_ID`; **never add `account_id` to `wrangler.toml`**.
+- `wrangler.toml account_id`: **FORBIDDEN**; account selection remains tooling/GitHub Actions only.
 - Canonical modules: Storefront, Creators, Socials, Financials, I.T.
-- Marketplace/provider publication: **CLOSED**
-- Separate Production: `main` / `devilndove-site`
-- Production promotion/mutation: **CLOSED / NONE**
+- Provider execution/publication: **CLOSED**
+- Separate Production `main` / `devilndove-site`: **UNTOUCHED / promotion closed**
 
 ## Startup rule
 
-**A new chat is not a migration event.**
+> **A new chat is not a migration event.**
 
-Never replay Releases 447, 448, 449 or 450 merely because a chat, workstation, token, or local checkout changed. Read the current authorities first, resolve the exact `dev` SHA, use the read-only Cloudflare identity preflight, and only create a new additive Development migration when a real durable schema requirement exists.
+Release 453 is already applied and independently verified. Never replay Releases 447, 448, 449, 450 or 453 because a chat, workstation, credential, or checkout changed. Read current state first and use read-only identity verification.
 
-Canonical read-only preflight:
+Canonical preflight:
 
 `python scripts/cloudflare_development_access.py --auth-only`
 
-## D1 evidence already proven
+A future D1 write is allowed only for a genuinely new additive release after source gates, exact `devilndove-dev` name/UUID verification, and a separate post-mutation read-only verifier.
 
-- Release 449 independent Development verification: `33235075008`
-- Release 450 guarded D1 mutation: `33235769850`
-- Release 450 independent read-only D1 verification: `33235803838`
-- Release 451 focused source gate: `33252042376`
-- Release 451 full System Gate: `33252156030`
+## Release 453 durable authority
 
-Do not perform meaningless D1 writes to prove access. The exact Development D1 read/write path has already been proven with guarded real migrations and independent read-only verification.
+Release 453 extends Release 449 `provider_setup_authorities`; it does not create a competing provider registry.
 
-## Release 452 source convergence
+New D1 tables:
 
-Release 452 is source-only and concentrates on streamlining and quality guardrails:
+- `it_provider_readiness_checks`
+- `it_provider_readiness_events`
 
-- obsolete root Build-era D1 verifier retired after reference verification;
-- permanent repository hygiene gate added for Build verification debris, backup/temp files, authority drift, Storefront route/SEO regressions, and representative admin privacy/status behavior;
-- Release 452 focused convergence gate and workflow added;
-- existing Product JSON-LD authority retained rather than duplicated;
-- visible accessible Product breadcrumbs plus dynamic `BreadcrumbList` JSON-LD added;
-- below-fold Product proof placeholders now decode asynchronously;
-- `/collages/` added to `sitemap.xml`;
-- Shop, Product, Collections and Collages remain one-H1/canonical/social/JSON-LD guarded;
-- Accounting admin now explicitly uses `noindex,nofollow`;
-- Inventory Intelligence, Tool Lifecycle, Accounting and CAIP handoff now expose polite live status regions;
-- Release 448 regression assets remain because current gates still call them;
-- Release 451 marketplace calibration remains read-only and carried forward.
+Remote verification proved:
 
-## Provider/API boundary
+- 2/2 Release 453 tables;
+- 32 Development readiness checks;
+- seven provider identities;
+- all 32 initial checks deferred;
+- zero fabricated events;
+- zero foreign-key violations;
+- zero unknown-provider rows;
+- zero secret-bearing columns.
 
-Provider credentials are still pending. Continue local application work without them.
+The I.T. readiness workspace now tracks actionable correction/evidence steps for Stripe, PayPal, Etsy, Pinterest, Meta, TikTok and YouTube. The API is Admin-authenticated, refuses secret-like values, performs no request-time DDL/provider call, and keeps provider execution/publication fail-closed.
 
-Do not enable provider publication or provider-side execution for Etsy, Meta/Facebook, Pinterest or TikTok. Stripe test, PayPal sandbox, provider acceptance and CAIP private-media acceptance remain runtime/evidence tasks. Credentials must never be stored in D1.
+## Carried-forward application authority
 
-## Before calling Release 452 green
+Release 452 repository cleanup, Product breadcrumb/SEO work, private-admin safeguards and accessibility remain current regression authority. Release 451 marketplace calibration and Release 450 marketplace/SEO schema remain carried forward. Active Release 448 regression/transport assets remain only where the canonical System Gate still consumes them.
 
-Require the focused Release 452 source workflow and canonical System Gate to pass on the exact current `dev` SHA. The System Gate must retain Release 451, Release 450 and active Release 448 regression authority, both public SEO gates, syntax/compile checks, the read-only Development D1 transport preflight, runtime self-check, and the explicit statement `Production mutation capability: NONE`.
+## Still externally blocked
+
+Provider credentials are still pending and remain non-blocking for unrelated application development. Do not mark these accepted without real evidence:
+
+- Stripe test acceptance;
+- PayPal sandbox acceptance;
+- Etsy provider-side draft acceptance;
+- Pinterest / Meta / TikTok / YouTube provider acceptance;
+- authenticated Development browser acceptance;
+- CAIP private-media browser evidence.
+
+## Current operating sequence
+
+Continue application enhancements in useful batches while the I.T. checklist carries provider blockers forward. Prioritize admin/module navigation, Storefront depth/SEO/responsive work, Inventory/Tools workflow refinement, Financials and CAIP usability where existing authorities support the work.
+
+Before calling any future release complete, require its focused source gate plus the canonical System Gate on the exact current `dev` SHA. Production remains untouched until deliberate promotion.
