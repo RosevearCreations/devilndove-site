@@ -14,6 +14,8 @@ This document exists specifically so a new chat, AI, developer or workstation do
 | D1 binding | `DB` |
 | D1 database | `devilndove-dev` |
 | D1 database ID | `dbc1615b-dcbe-4951-973b-b47c99c73bfa` |
+| D1 schema currently verified through | **Release 450** |
+| Current Development release | **Release 451 — no new D1 migration required** |
 | Product/media R2 binding | `PRODUCT_MEDIA_BUCKET` |
 | Product/media R2 bucket | `devilndove-toolshed-images-dev` |
 | CAIP private-media R2 binding | `CAIP_PRIVATE_MEDIA_BUCKET` |
@@ -79,7 +81,7 @@ The following rule is mandatory:
 
 > **A new chat is not a migration event.**
 
-Do **not** reapply Release 447, 448, 449 or 450 merely because the conversation/workstation changed or D1 connectivity had to be re-established.
+Do **not** reapply Release 447, 448, 449 or 450 merely because the conversation/workstation changed or D1 connectivity had to be re-established. Release 451 has **no migration to apply**.
 
 Historical migration state is authority/provenance. Revisit a historical migration only if read-only inspection proves actual schema drift requiring deliberate repair.
 
@@ -89,8 +91,9 @@ Current proven Development history:
 - Release 448 platform expansion authorities: retained as regression authority.
 - Release 449 corporate/commerce migration: applied to exact Development D1 and independently verified by read-only workflow run `33235075008`.
 - Release 450 marketplace/SEO migration: applied to exact Development D1 by guarded workflow run `33235769850` and independently verified read-only by workflow run `33235803838`.
+- Release 451 marketplace calibration/SEO assurance: **source-only extension using the already-verified Release 449/450 authorities; no new D1 schema migration required**.
 
-Therefore, after Release 450, the default startup action is **verification/read of current state**, not SQL execution.
+Therefore, during Release 451 the default startup action is **verification/read of current state**, not SQL execution.
 
 ## Safe Development migration pattern
 
@@ -114,7 +117,7 @@ It must:
 
 It must be unable to apply a migration. It should read the exact Development D1 and prove the expected tables/configuration/state after mutation.
 
-Release 449 demonstrated why this split matters: a verification-collector issue must never imply that a migration should be blindly replayed. Release 450 additionally demonstrated the preferred replay guard + preservation baseline + independent verifier pattern.
+Release 449 demonstrated why this split matters: a verification-collector issue must never imply that a migration should be blindly replayed. Release 450 additionally demonstrated the preferred replay guard + preservation baseline + independent verifier pattern. Release 451 demonstrates the other important case: **if existing verified schema already supports the feature, do not create a migration merely to advance the release number.**
 
 ## Troubleshooting authorization
 
@@ -147,4 +150,5 @@ It must not mutate:
 - `wrangler.toml` — Development Pages/D1/R2 bindings; no `account_id`.
 - `scripts/cloudflare_development_access.py` — canonical read-only identity/access preflight.
 - `.github/workflows/system-gate.yml` — canonical source/regression/SEO safety gate.
+- `docs/operations/RELEASE_451_D1_STATE.md` — current explicit no-new-migration D1 statement.
 - Release-specific D1 workflow — only when a genuinely new current additive migration is ready.
