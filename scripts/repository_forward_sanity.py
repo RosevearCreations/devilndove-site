@@ -33,9 +33,10 @@ for p in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','MARKDOWN_INDEX.md','S
  req((ROOT/p).exists(),f'canonical Markdown missing: {p}')
 wrangler=read('wrangler.toml');req('name = "devilndove-site-dev"' in wrangler and 'database_name = "devilndove-dev"' in wrangler and 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' in wrangler,'wrangler Development authority drifted');req('account_id =' not in wrangler,'wrangler.toml must never contain account_id')
 authority=read('functions/api/_lib/releaseAuthority.js');req('CURRENT_RELEASE = 460' in authority and 'Secure OAuth Lifecycle & Encrypted Token Authority' in authority,'shared runtime release authority drifted')
-workflow=read('.github/workflows/system-gate.yml');req('python scripts/release460_secure_oauth_gate.py' in workflow and 'node scripts/release460_oauth_crypto_proof.mjs' in workflow,'System Gate must validate Release 460')
+system_workflow=read('.github/workflows/system-gate.yml');focused_workflow=read('.github/workflows/release460-source-gate.yml')
+req('python scripts/release460_secure_oauth_gate.py' in focused_workflow and 'node scripts/release460_oauth_crypto_proof.mjs' in focused_workflow,'Release 460 focused gate must validate secure OAuth source and crypto')
 for gate in ('release459_runtime_acceptance_gate.py','release458_caip_review_handoff_gate.py','release457_financials_operations_gate.py','release456_inventory_tool_workflow_gate.py','release455_storefront_discovery_gate.py','release454_admin_convergence_gate.py','release453_it_provider_readiness_gate.py'):
- req(f'python scripts/{gate}' in workflow,f'System Gate missing carried authority {gate}')
+ req(f'python scripts/{gate}' in system_workflow,f'System Gate missing carried authority {gate}')
 version_pattern=re.compile(r'([?&]v=)(\d+)(?:[.-][\w-]+)?(?=["\'&#\s)]|$)');future=[]
 for p in list(ROOT.glob('*.html'))+list((ROOT/'admin').rglob('*.html'))+list((ROOT/'js').rglob('*.js'))+list((ROOT/'public/js').rglob('*.js'))+list((ROOT/'css').rglob('*.css')):
  for m in version_pattern.finditer(p.read_text(encoding='utf-8',errors='replace')):
