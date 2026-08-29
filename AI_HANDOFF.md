@@ -51,13 +51,13 @@ Product provenance chain:
 
 `Product → product_resource_links → site_item_inventory → inventory_manufacturer_links → inventory_manufacturers`
 
-## Product image quality — Release 448
+## Product Photography Manager — Release 448
 
 Workspace: **`/admin/product-image-quality/`**
 
 API: **`/api/admin/product-image-quality`**
 
-D1 authority: `product_image_quality_assessments` stores score/evidence only. Images remain in their existing Product/R2/media authority.
+D1 authority: `product_image_quality_assessments` stores score/review/evidence only. Images remain in their existing Product/R2/media authority. The Product detail endpoint remains the merge authority for Product gallery, Media Library, role assignments and annotation/history; the Photography Manager does not create another image catalog.
 
 Transparent 100-point deterministic rubric:
 
@@ -70,9 +70,22 @@ Transparent 100-point deterministic rubric:
 - Compression/artifact heuristic — 5
 - Product-set aspect-ratio consistency — 5
 
-Browser Canvas measurement is the reproducible baseline. Optional vision-assisted scoring may later evaluate subjective issues such as reflections, styling, premium hero suitability and background appropriateness. Vision is evidence/advice, not an unexplained automatic publication authority. Originals are never modified by scoring. Initial use is to prioritize reshoots/improvement, not automatically hide Products.
+The workspace now adds an operational layer above individual scores:
 
-Potential operational constraint: cross-origin Product/R2 images must be readable by Canvas (same-origin delivery or suitable CORS) or deterministic pixel scoring will report that it cannot score the image rather than fabricate a result.
+- **catalog photography queue** — unscored Products first, then weakest scored sets;
+- **Product-set score** — coverage 20 + best hero 25 + average quality 20 + distinctness 15 + up to four good/excellent gallery images 20;
+- **64-bit perceptual dHash** stored in evidence for duplicate review;
+- dHash distance `0–4` = probable duplicate flag;
+- dHash distance `5–8` = possible near-duplicate flag;
+- strongest distinct scored image = **best current hero candidate**;
+- other distinct images at 70+ = **gallery candidates**;
+- lower images receive explicit reshoot/improvement reasons by scoring dimension;
+- admin may mark a persisted assessment approved/rejected without modifying the original image;
+- no automatic deletion, featured-image mutation, Product hiding or publication blocking is performed by photography scoring.
+
+Browser Canvas measurement is the reproducible baseline. Optional vision-assisted scoring may later evaluate subjective issues such as reflections, styling, premium hero suitability, whether a Product is clearly identifiable and background appropriateness. Vision is evidence/advice, not an unexplained automatic publication authority.
+
+Potential operational constraint: cross-origin Product/R2 images must be readable by Canvas (same-origin delivery or suitable CORS) or deterministic pixel scoring reports that it cannot score the image rather than fabricating a result.
 
 ## Shared carousel / Movies
 
@@ -111,6 +124,10 @@ I.T. owns:
 
 Actual API keys, OAuth secrets, access/refresh tokens, webhook signing secrets, passwords and private keys are forbidden in D1/UI/source/logs/evidence. The API rejects obvious secret-like values.
 
+## Admin control surface
+
+`/admin/` is currentized to Release 448. It no longer presents Build 443 HOLD language or the pre-convergence module grouping. It now links directly to Product Lineage, Product Photography Manager, Manufacturer/Purchased-item Reviews and the I.T. Integration Registry while retaining the existing operational/release tools.
+
 ## Canonical gates
 
 Run:
@@ -148,6 +165,8 @@ These do not block normal Release 448 feature development, but they remain requi
 - Production untouched unless explicitly authorized.
 - D1 is operational write authority; request-time schema creation should be retired as migrations converge.
 - No duplicate stock ledger.
+- No duplicate Product image catalog.
+- Photography scores/recommendations are evidence and work-queue authority, not automatic publication authority.
 - No fabricated historical consumption/manufacturer/Movie metadata.
 - One meaningful H1 per public page.
 - Home/Movie reuse one carousel presentation authority.
