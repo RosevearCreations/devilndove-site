@@ -24,7 +24,9 @@ for p in ROOT.rglob('*'):
  if p.name.lower().endswith(('.bak','.old','.tmp','.orig','.rej')) or p.name.endswith('~'):bad.append(str(rel))
 req(not bad,f'backup/temp artifacts must not ship: {bad[:20]}')
 for p in ('tmp','docs/archive','docs/releases'):req(not (ROOT/p).exists(),f'{p} must not ship')
-release=json.loads(read('development-release.json'));req(release.get('release')==454,'repository hygiene gate requires current Release 454');req(release.get('current_release_migrations')==[],'Release 454 must remain source-only')
+release=json.loads(read('development-release.json'));current=int(release.get('release') or 0)
+req(current>=454,'repository hygiene gate requires Release 454 or later current authority')
+if current in {454,455}:req(release.get('current_release_migrations')==[],f'Release {current} must remain source-only')
 for page in ('shop/index.html','shop/product/index.html','collections/index.html','collages/index.html'):
  html=read(page);req(len(re.findall(r'<h1(?:\s|>)',html,re.I))==1,f'{page} must contain exactly one H1');req('rel="canonical"' in html or "rel='canonical'" in html,f'{page} missing canonical');req('og:title' in html and 'og:description' in html and 'og:url' in html,f'{page} missing Open Graph depth');req('twitter:card' in html,f'{page} missing Twitter card');req('application/ld+json' in html,f'{page} missing JSON-LD')
  for tag in re.findall(r'<img\b[^>]*>',html,re.I):req(re.search(r'\balt\s*=',tag,re.I) is not None,f'{page} image missing alt')
@@ -37,7 +39,7 @@ for page in ('admin/storefront-merchandising/index.html','admin/creative-automat
  html=read(page);req(len(re.findall(r'<h1(?:\s|>)',html,re.I))==1,f'{page} must contain exactly one H1');req('noindex,nofollow' in html,f'{page} must remain noindex,nofollow');req('/css/admin-convergence.css?v=454' in html,f'{page} missing Release 454 shared responsive shell');req('/public/js/admin-module-nav.js?v=454' in html,f'{page} missing Release 454 module nav')
 req('fetch(' not in read('public/js/admin-module-nav.js') and 'fetch(' not in read('public/js/admin-workspace-state.js'),'Release 454 shell must remain client-only')
 wrangler=read('wrangler.toml');req('account_id =' not in wrangler,'wrangler.toml must never pin account_id');policy=release.get('release_policy',{});req(policy.get('production_promotion')=='closed' and policy.get('provider_publication')=='closed','Production/provider publication must remain closed')
-print('REPOSITORY HYGIENE / UX / SEO GATE');print('Obsolete root Build verification artifacts: NONE');print('Storefront SEO/one-H1/structured data: GUARDED');print('Release 454 Admin module/state/responsive shell: GUARDED');print('Private admin noindex: GUARDED');print('Production/provider publication: CLOSED')
+print('REPOSITORY HYGIENE / UX / SEO GATE');print(f'Current Development release: {current}');print('Obsolete root Build verification artifacts: NONE');print('Storefront SEO/one-H1/structured data: GUARDED');print('Release 454 Admin module/state/responsive shell: CARRIED FORWARD');print('Private admin noindex: GUARDED');print('Production/provider publication: CLOSED')
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
  raise SystemExit(1)
