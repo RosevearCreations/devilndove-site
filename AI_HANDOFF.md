@@ -1,4 +1,4 @@
-# AI Handoff — Release 450 Marketplace & SEO Readiness
+# AI Handoff — Release 452 Application Streamlining & UX/SEO Depth
 
 Updated: 2026-08-29
 
@@ -6,154 +6,70 @@ Read in this order:
 
 1. `development-release.json` — machine-readable current release/state.
 2. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` — exact D1/R2/account connection mechanics and new-chat startup rule.
-3. `PROJECT_STATUS_AND_ROADMAP.md` — current execution scope.
+3. `docs/operations/RELEASE_452_APPLICATION_STREAMLINING.md` — current Release 452 scope and acceptance.
+4. `PROJECT_STATUS_AND_ROADMAP.md` — active execution queue.
 
-Historical Build numbers and Release 448 filenames are provenance/regression authority, not the current release identity.
+Historical Build numbers and Release 448 filenames are provenance/regression authority, not the current release identity. Git history is the archive; obsolete Build-era one-off verification files must not accumulate in the current tree.
 
-## Current boundary
+## Current Development boundary
 
-- Current release: **450 — Marketplace & SEO Readiness**
+- Current release: **Release 452 — Application Streamlining & UX/SEO Depth**
 - Source branch: `dev`
 - Development Pages: `devilndove-site-dev`
 - Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
-- Development Cloudflare account selection: pinned by tooling/GitHub Actions as `CLOUDFLARE_ACCOUNT_ID`; **never add `account_id` to `wrangler.toml`**.
+- D1 schema: **current and independently verified through Release 450**
+- Release 451 D1 migration: **none**
+- Release 452 D1 migration: **none required**
 - Development R2: `devilndove-toolshed-images-dev`, `devilndove-caip-media-dev`
-- Separate live Production: `main` / `devilndove-site`
-- Production promotion: **CLOSED**
+- Cloudflare account selection: tooling/GitHub Actions pin `CLOUDFLARE_ACCOUNT_ID`; **never add `account_id` to `wrangler.toml`**.
+- Canonical modules: Storefront, Creators, Socials, Financials, I.T.
 - Marketplace/provider publication: **CLOSED**
-- Canonical modules: Storefront, Creators, Socials, Financials and I.T.
+- Separate Production: `main` / `devilndove-site`
+- Production promotion/mutation: **CLOSED / NONE**
 
-Always resolve the exact current `dev` SHA and current gates/deployment before calling a new checkpoint green.
+## Startup rule
 
-## Releases 449 and 450 Development state
+**A new chat is not a migration event.**
 
-Release 449 Corporate Commerce Convergence is complete:
+Never replay Releases 447, 448, 449 or 450 merely because a chat, workstation, token, or local checkout changed. Read the current authorities first, resolve the exact `dev` SHA, use the read-only Cloudflare identity preflight, and only create a new additive Development migration when a real durable schema requirement exists.
 
-- additive Development migration applied to exact `devilndove-dev`;
-- read-only verification workflow run `33235075008` passed;
-- seven Release 449 tables/provider authorities retained;
-- Etsy remained `draft_only` / `publication_allowed=0`.
+Canonical read-only preflight:
 
-Release 450 Marketplace & SEO Readiness is also **applied and independently verified in Development**:
+`python scripts/cloudflare_development_access.py --auth-only`
 
-- focused Release 450 source gate run `33235447861`: PASS;
-- canonical pre-mutation System Gate run `33235674706`: PASS;
-- guarded exact-Development D1 mutation run `33235769850`: PASS;
-- read-only remote verification run `33235803838`: PASS;
-- Product count and existing Accounting authority inventory were preserved through the additive migration;
-- provider publication/execution remained disabled;
-- no Release 447/448/449 migration was replayed.
+## D1 evidence already proven
 
-Current migration authority:
+- Release 449 independent Development verification: `33235075008`
+- Release 450 guarded D1 mutation: `33235769850`
+- Release 450 independent read-only D1 verification: `33235803838`
+- Release 451 focused source gate: `33252042376`
+- Release 451 full System Gate: `33252156030`
 
-`migrations/dev/20260829_release450_marketplace_seo_readiness.sql`
+Do not perform meaningless D1 writes to prove access. The exact Development D1 read/write path has already been proven with guarded real migrations and independent read-only verification.
 
-**Do not replay it.** Its state is `applied_and_verified_development` in `development-release.json`.
+## Release 452 source convergence
 
-## Release 450 marketplace work
+Release 452 is source-only and concentrates on streamlining and quality guardrails:
 
-The 26-change Release 450 batch is implemented. It includes:
+- obsolete root Build-era D1 verifier retired after reference verification;
+- permanent repository hygiene gate added for Build verification debris, backup/temp files, authority drift, Storefront route/SEO regressions, and representative admin privacy/status behavior;
+- Release 452 focused convergence gate and workflow added;
+- existing Product JSON-LD authority retained rather than duplicated;
+- visible accessible Product breadcrumbs plus dynamic `BreadcrumbList` JSON-LD added;
+- below-fold Product proof placeholders now decode asynchronously;
+- `/collages/` added to `sitemap.xml`;
+- Shop, Product, Collections and Collages remain one-H1/canonical/social/JSON-LD guarded;
+- Accounting admin now explicitly uses `noindex,nofollow`;
+- Inventory Intelligence, Tool Lifecycle, Accounting and CAIP handoff now expose polite live status regions;
+- Release 448 regression assets remain because current gates still call them;
+- Release 451 marketplace calibration remains read-only and carried forward.
 
-- migration-owned marketplace export/mapping schema instead of request-time DDL;
-- `marketplace_channel_policies`;
-- `marketplace_listing_profiles`;
-- `marketplace_listing_validation_snapshots`;
-- shared marketplace readiness validation;
-- local Etsy listing-profile preparation;
-- local Facebook/Meta, Pinterest, TikTok and manual preparation policies;
-- responsive `/admin/marketplace-readiness/` workspace;
-- aligned `/admin/marketplace-exports/` and `/admin/marketplace-mapping/` surfaces;
-- local CSV preparation with margin/listing blockers;
-- provider execution and publication hard-locked off;
-- Release 450 marketplace/SEO gate wired into the canonical System Gate;
-- current PWA/service-worker identity advanced to Release 450.
+## Provider/API boundary
 
-## Etsy preparation authority
+Provider credentials are still pending. Continue local application work without them.
 
-Release 450 prepares local Etsy drafts only. It models:
+Do not enable provider publication or provider-side execution for Etsy, Meta/Facebook, Pinterest or TikTok. Stripe test, PayPal sandbox, provider acceptance and CAIP private-media acceptance remain runtime/evidence tasks. Credentials must never be stored in D1.
 
-- title / description / price / quantity;
-- taxonomy ID;
-- who-made / when-made;
-- physical / download / both listing type;
-- tags and materials;
-- shipping-profile reference;
-- processing/readiness-state reference;
-- return-policy reference;
-- up to 20 prepared images;
-- up to 13 tags;
-- modern typed personalization questions, up to five;
-- up to three prepared variation properties, with third-variation provider-go-live warning;
-- local validation snapshots;
-- Release 449 syndication draft rows with `publication_requested=0`.
+## Before calling Release 452 green
 
-Actual Etsy OAuth/API publication is absent until explicit provider acceptance.
-
-## Other marketplace preparation
-
-- Facebook/Meta: local catalog/listing preparation only.
-- Pinterest: local pin/catalog preparation only.
-- TikTok: local photo/content metadata preparation only; provider consent/privacy/creator-info rules remain later acceptance work.
-- Manual: local export only.
-
-No Release 450 application endpoint publishes to these providers.
-
-## SEO invariant
-
-Public SEO remains release-gated:
-
-- exactly one source H1 per real public HTML document;
-- non-empty page title;
-- Storefront carousel code must never manufacture an H1;
-- admin marketplace pages remain `noindex,nofollow`;
-- marketplace data reuses canonical Product/Product SEO/media truth rather than becoming a competing public SEO catalog.
-
-Canonical gate: `python scripts/public_seo_gate.py`.
-
-Release 450's focused marketplace/SEO gate also invokes the public SEO gate and is now part of `.github/workflows/system-gate.yml`.
-
-## D1 / Cloudflare startup rule
-
-Do not improvise the connection sequence. Read:
-
-`docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`
-
-Key points:
-
-- `wrangler.toml` contains Development bindings but no `account_id`.
-- Tooling pins Cloudflare account ID `c0d5bc25df16ae5b7d47c985c4b7b787`.
-- GitHub Actions uses repository secret reference `CLOUDFLARE_API_TOKEN`; never print/store its value.
-- Exact Development D1 is `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
-- Run read-only identity checks first.
-- **A new chat is not a migration event.**
-- Release 447/448/449/450 are already Development history/authority; do not replay them on startup.
-- A future new additive migration requires source gates + exact D1 identity + a guarded mutation workflow + a separate read-only verifier.
-
-## Carried-forward platform invariants
-
-Release 448 remains regression authority for Storefront merchandising, Product lineage/provenance, Product image quality, CAIP reviewed handoff, Inventory Intelligence, Supply Sourcing, Tool Lifecycle, calibration and I.T. integration registry.
-
-Existing Product, Inventory, Accounting, media, Tool and Supply systems remain authoritative. Release 450 does not create parallel ledgers/catalogs.
-
-## Deferred I.T. / provider acceptance
-
-Still external/private acceptance work before the associated capability can become active:
-
-- authenticated Development runtime acceptance;
-- Stripe test acceptance;
-- PayPal sandbox acceptance;
-- CAIP private-media acceptance;
-- Etsy provider/OAuth acceptance;
-- Meta/Pinterest/TikTok provider acceptance.
-
-Provider readiness/configuration metadata is not provider acceptance.
-
-## Immediate next sequence
-
-1. Calibrate real Development Products in `/admin/marketplace-readiness/` for Etsy taxonomy, shipping/processing references, selected images, tags/materials and blockers.
-2. Deepen public SEO beyond the existing structural gate: descriptions, canonical URLs and structured-data coverage on important commerce/public pages.
-3. Continue responsive storefront/admin CSS cleanup.
-4. Extend provider fee/accounting completeness using real transaction evidence rather than assumptions.
-5. Complete Etsy/Meta/Pinterest/TikTok provider acceptance later without weakening publication locks first.
-6. Complete Stripe/PayPal/CAIP/authenticated runtime acceptance.
-7. Keep Production untouched until an explicit promotion decision.
+Require the focused Release 452 source workflow and canonical System Gate to pass on the exact current `dev` SHA. The System Gate must retain Release 451, Release 450 and active Release 448 regression authority, both public SEO gates, syntax/compile checks, the read-only Development D1 transport preflight, runtime self-check, and the explicit statement `Production mutation capability: NONE`.
