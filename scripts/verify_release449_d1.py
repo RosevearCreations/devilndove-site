@@ -74,18 +74,22 @@ def main(argv):
     if integrity_value != 'ok':
         raise SystemExit(f'FAIL — PRAGMA integrity_check returned {integrity_value!r}')
 
-    before_count = scalar(before, ('accounting_details_count',))
-    after_count = scalar(after, ('accounting_details_count',))
+    before_count = scalar(before, ('accounting_authority_table_count',))
+    after_count = scalar(after, ('accounting_authority_table_count',))
+    before_tables = str(scalar(before, ('accounting_authority_tables',)) or '')
+    after_tables = str(scalar(after, ('accounting_authority_tables',)) or '')
     if before_count is None or after_count is None:
-        raise SystemExit('FAIL — Accounting preservation count evidence is missing')
-    if int(before_count) != int(after_count):
-        raise SystemExit(f'FAIL — accounting_details row count changed: {before_count} -> {after_count}')
+        raise SystemExit('FAIL — Accounting preservation inventory evidence is missing')
+    if int(before_count) <= 0:
+        raise SystemExit('FAIL — no existing Accounting authority tables were detected before Release 449')
+    if int(before_count) != int(after_count) or before_tables != after_tables:
+        raise SystemExit(f'FAIL — existing Accounting authority inventory changed: {before_count}/{before_tables} -> {after_count}/{after_tables}')
 
     print('RELEASE 449 DEVELOPMENT D1 VERIFICATION: PASS')
     print(f'New tables: {len(EXPECTED_TABLES)} / {len(EXPECTED_TABLES)}')
     print(f'Provider setup seeds: {len(EXPECTED_PROVIDERS)} / {len(EXPECTED_PROVIDERS)}')
     print('Etsy authority: draft_only; publication_allowed=0')
-    print(f'accounting_details rows preserved: {before_count}')
+    print(f'Existing Accounting authority tables preserved: {before_count}')
     print('PRAGMA quick_check: ok')
     print('PRAGMA integrity_check: ok')
 

@@ -103,7 +103,7 @@ jobs:
       - name: Capture authoritative Accounting preservation baseline
         run: |
           wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
-            --command "SELECT COUNT(*) AS accounting_details_count FROM accounting_details;" --json \
+            --command "SELECT COUNT(*) AS accounting_authority_table_count, COALESCE(GROUP_CONCAT(name,'|'),'') AS accounting_authority_tables FROM (SELECT name FROM sqlite_master WHERE type='table' AND (name='general_ledger_accounts' OR name LIKE 'accounting_%') ORDER BY name);" --json \
             > /tmp/release449-before-accounting.json
 
       - name: Apply only Release 449 additive Development migration
@@ -127,7 +127,7 @@ jobs:
           wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
             --command "PRAGMA integrity_check;" --json > /tmp/release449-integrity.json
           wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
-            --command "SELECT COUNT(*) AS accounting_details_count FROM accounting_details;" --json \
+            --command "SELECT COUNT(*) AS accounting_authority_table_count, COALESCE(GROUP_CONCAT(name,'|'),'') AS accounting_authority_tables FROM (SELECT name FROM sqlite_master WHERE type='table' AND (name='general_ledger_accounts' OR name LIKE 'accounting_%') ORDER BY name);" --json \
             > /tmp/release449-after-accounting.json
 
       - name: Verify Release 449 Development D1
