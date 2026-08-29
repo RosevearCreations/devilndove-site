@@ -8,6 +8,10 @@ on:
       - 'functions/api/_lib/oauthProviders.js'
       - 'functions/api/_lib/socialPublishContracts.js'
       - 'functions/api/_lib/paymentWebhookSecurity.js'
+      - 'functions/api/_lib/paymentExecution.js'
+      - 'functions/api/_middleware.js'
+      - 'functions/api/payment-providers.js'
+      - 'functions/api/checkout-prepare-payment.js'
       - 'functions/api/admin/oauth-start.js'
       - 'functions/api/admin/oauth-connections.js'
       - 'functions/api/admin/provider-publication-plan.js'
@@ -55,6 +59,10 @@ jobs:
         run: python scripts/release460_payment_webhook_gate.py
       - name: Release 460 payment webhook security mock proof
         run: node scripts/release460_payment_webhook_security_proof.mjs
+      - name: Release 460 payment execution fail-closed source gate
+        run: python scripts/release460_payment_execution_gate.py
+      - name: Release 460 payment execution boundary proof
+        run: node scripts/release460_payment_execution_proof.mjs
       - name: Carry Release 459 provider/runtime authority
         run: python scripts/release459_runtime_acceptance_gate.py
       - name: JavaScript syntax
@@ -63,6 +71,10 @@ jobs:
           node --check functions/api/_lib/oauthProviders.js
           node --check functions/api/_lib/socialPublishContracts.js
           node --check functions/api/_lib/paymentWebhookSecurity.js
+          node --check functions/api/_lib/paymentExecution.js
+          node --check functions/api/_middleware.js
+          node --check functions/api/payment-providers.js
+          node --check functions/api/checkout-prepare-payment.js
           node --check functions/api/admin/oauth-start.js
           node --check functions/api/admin/oauth-connections.js
           node --check functions/api/admin/provider-publication-plan.js
@@ -76,6 +88,7 @@ jobs:
           node --check scripts/release460_provider_contract_mock_proof.mjs
           node --check scripts/release460_publish_contract_mock_proof.mjs
           node --check scripts/release460_payment_webhook_security_proof.mjs
+          node --check scripts/release460_payment_execution_proof.mjs
       - name: Production and provider boundary proof
         run: |
           python - <<'PY'
