@@ -15,11 +15,16 @@ const CURRENTIZED_ADMIN_PATHS = new Set([
   '/api/admin/inventory-integrity-review',
 ]);
 
+const CLOSED_PROVIDER_DIAGNOSTIC_PATHS = new Set([
+  '/api/admin/social-post-queue',
+  '/api/admin/social-product-automation',
+]);
+
 async function guardClosedProviderExecution(context) {
   const request = context.request;
   if (String(request.method || '').toUpperCase() !== 'POST') return null;
   const pathname = new URL(request.url).pathname.replace(/\/+$/, '');
-  if (!['/api/admin/social-post-queue', '/api/admin/social-product-automation'].includes(pathname)) return null;
+  if (!CLOSED_PROVIDER_DIAGNOSTIC_PATHS.has(pathname)) return null;
 
   let body = {};
   try { body = await request.clone().json(); } catch { return null; }
@@ -43,6 +48,7 @@ async function guardClosedProviderExecution(context) {
     provider_execution: false,
     provider_publication: false,
     provider_live_authorization: false,
+    provider_contacted: false,
     production_mutation: false,
     legacy_handler_executed: false,
   }, 409);
@@ -84,6 +90,63 @@ async function guardProductPublication(context) {
   }, 409);
 }
 
+function closedProviderReadiness(value = {}) {
+  return {
+    ...value,
+    api_ready: 0,
+    connected: false,
+    publish_mode: 'provider_execution_closed',
+    connection_status: 'provider_execution_closed',
+    mode: 'provider_execution_closed',
+    provider_execution: false,
+    provider_publication: false,
+    provider_live_authorization: false,
+    provider_contacted: false,
+    notes: 'Release 460 provider execution is closed. Use secure OAuth readiness plus /api/admin/provider-publication-plan for local validation only.',
+  };
+}
+
+async function currentizeClosedProviderDiagnostics(response, pathname) {
+  if (!CLOSED_PROVIDER_DIAGNOSTIC_PATHS.has(pathname)) return response;
+  const type = String(response?.headers?.get('Content-Type') || '').toLowerCase();
+  if (!type.includes('application/json')) return response;
+  let payload;
+  try { payload = await response.clone().json(); } catch { return response; }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return response;
+
+  payload.release = CURRENT_RELEASE;
+  payload.mode = 'provider_execution_closed';
+  payload.provider_execution = false;
+  payload.provider_publication = false;
+  payload.provider_live_authorization = false;
+  payload.provider_contacted = false;
+  payload.validation_endpoint = '/api/admin/provider-publication-plan';
+
+  if (Array.isArray(payload.platforms)) {
+    payload.platforms = payload.platforms.map((entry) => closedProviderReadiness(entry));
+  }
+  if (payload.platform_readiness && typeof payload.platform_readiness === 'object' && !Array.isArray(payload.platform_readiness)) {
+    payload.platform_readiness = Object.fromEntries(
+      Object.entries(payload.platform_readiness).map(([key, value]) => [key, closedProviderReadiness(value)])
+    );
+  }
+  if (payload.connection_status && typeof payload.connection_status === 'object' && !Array.isArray(payload.connection_status)) {
+    payload.connection_status = Object.fromEntries(
+      Object.entries(payload.connection_status).map(([key, value]) => [key, closedProviderReadiness(value)])
+    );
+  }
+
+  const headers = new Headers(response.headers);
+  headers.set('Content-Type', 'application/json');
+  headers.set('Cache-Control', 'no-store');
+  headers.set('X-DND-Release', String(CURRENT_RELEASE));
+  return new Response(JSON.stringify(payload), {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 async function currentizeRetainedAdminContract(response, pathname) {
   if (!CURRENTIZED_ADMIN_PATHS.has(pathname)) return response;
   const type = String(response?.headers?.get('Content-Type') || '').toLowerCase();
@@ -112,5 +175,6 @@ export async function onRequest(context) {
   const blocked = await guardProductPublication(context);
   if (blocked) return blocked;
   const response = await context.next();
-  return currentizeRetainedAdminContract(response, pathname);
+  const providerCurrent = await currentizeClosedProviderDiagnostics(response, pathname);
+  return currentizeRetainedAdminContract(providerCurrent, pathname);
 }
