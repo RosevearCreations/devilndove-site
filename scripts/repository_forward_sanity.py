@@ -7,6 +7,10 @@ ROOT=Path(__file__).resolve().parents[1];FAIL=[]
 def req(ok,msg):
  if not ok:FAIL.append(msg)
 def read(path):return (ROOT/path).read_text(encoding='utf-8',errors='replace')
+def complete_batch(items,minimum=12):
+ if not isinstance(items,list) or len(items)<minimum:return False
+ ids=[x.get('id') for x in items if isinstance(x,dict)]
+ return len(ids)==len(items) and ids==list(range(1,len(items)+1)) and all(x.get('status')=='implemented' for x in items)
 release=json.loads(read('development-release.json'));current=int(release.get('release') or 0)
 req(release.get('environment')=='development' and release.get('branch')=='dev','current release must remain Development/dev')
 req(current==460,'current Development release must be 460')
@@ -42,7 +46,7 @@ for p in list(ROOT.glob('*.html'))+list((ROOT/'admin').rglob('*.html'))+list((RO
  for m in version_pattern.finditer(p.read_text(encoding='utf-8',errors='replace')):
   if int(m.group(2))>460:future.append(f'{p.relative_to(ROOT)}:{m.group(2)}')
 req(not future,f'future cache majors found: {future[:12]}')
-req(len(release.get('release458_batch',[]))==12 and len(release.get('release459_batch',[]))==12 and len(release.get('release460_batch',[]))==12,'carried/current release batch authority incomplete')
+req(complete_batch(release.get('release458_batch',[])) and complete_batch(release.get('release459_batch',[])) and complete_batch(release.get('release460_batch',[])),'carried/current release batch authority incomplete')
 print('PLATFORM FORWARD SANITY')
 print('Current release: 460 — Secure OAuth Lifecycle & Encrypted Token Authority')
 print(f'Development D1 schema authority: {schema_release} ({"pending Release 460 migration" if schema_release<460 else "Release 460+ verified"})')
