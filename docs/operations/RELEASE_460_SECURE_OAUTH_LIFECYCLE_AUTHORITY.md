@@ -46,6 +46,25 @@ Remote revocation is used only where the provider contract has a generic token-r
 - `POST /api/admin/oauth-connections` supports guarded refresh and idempotent disconnect. A refresh first obtains the provider token, then re-verifies intended-account identity before encrypting/replacing token material. A failed or mismatched refresh cannot overwrite the previous encrypted connection.
 - Disconnect destroys local token ciphertext even while remote revocation is closed.
 
+## Non-executing publication validation and idempotency
+Release 460 now includes a separate local publication-planning layer. Connection readiness does **not** imply publishing permission.
+
+- `functions/api/_lib/socialPublishContracts.js` defines local validation contracts for Etsy, Pinterest, Meta, X, TikTok, and YouTube.
+- `/api/admin/provider-publication-plan` is administrator-only and Development-host-only.
+- The planner normalizes a local publication intent, validates required content/media fields, and derives a deterministic SHA-256 idempotency key from provider + source key/version + canonical normalized payload.
+- Identical normalized intents produce the same key and can be labeled `duplicate_blocked`; revised content/version produces a different key.
+- The planner never imports/decrypts OAuth tokens and contains no provider `fetch` path. Responses explicitly state `validation_only`, `provider_execution:false`, `provider_publication:false`, `provider_contacted:false`, and `network_calls_allowed:false`.
+- Meta/Instagram planning is intentionally marked permission-contract-not-ready rather than implying that current Meta OAuth setup grants Instagram publishing.
+- These contracts are internal validation previews only; they do not claim a live provider would accept the payload.
+
+Release 460 also closes legacy execution paths:
+- Admin middleware rejects `social-post-queue` action `publish_platforms` before the retained Build-era owner handler can execute.
+- Admin middleware rejects `social-product-automation` action `test_meta_connections` before any legacy handler could execute.
+- `social-product-automation.js` is additionally hard-closed in its owner module: its old Meta Graph client has been removed and direct invocation returns `provider_execution_closed` with `provider_contacted:false`.
+- Legacy social readiness responses are currentized at the middleware boundary so credential presence cannot surface as `api_ready`; exposed mode is `provider_execution_closed`.
+- The retained `social-post-queue.js` provider emitters remain historical source behind the mandatory middleware guard and are not an authorized Release 460 execution path. Their later removal is source cleanup, not permission to execute them.
+- Meta data-deletion readiness remains local/fail-closed and contains no provider fetch.
+
 ## D1 migration
 `migrations/dev/20260829_release460_secure_oauth_lifecycle.sql` adds only:
 1. `oauth_authorization_transactions`
@@ -54,31 +73,30 @@ Remote revocation is used only where the provider contract has a generic token-r
 
 Initial guarded Development D1 run `33273087894` applied and verified it. Later convergence run `33273639602` verified the exact Development database, detected Release 460 already converged, **skipped the migration apply step**, and passed read-only post-write proof. Release 459 convergence run `33273639605` likewise skipped its historical migration.
 
-The intended-account layer is source/contract-only and uses the existing internal `remote_subject_id` column. **No new D1 migration is required.**
+The intended-account and publication-planning layers are source/contract-only. **No new D1 migration is required.**
 
 `.github/workflows/development-d1-release459.yml` and `.github/workflows/development-d1-release460.yml` are manual-dispatch-only recovery workflows. Ordinary source or authority-document pushes do not launch either D1 migration path. Manual dispatch is reserved for a future case where read-only verification proves actual drift.
 
 ## Automated proof
-- `scripts/release460_secure_oauth_gate.py` executes the actual migration against a Release 459-compatible local authority and proves state-hash uniqueness/replay constraints plus plaintext-column prohibition. It also asserts that callback and refresh identity verification precede any access-token encryption/persistence.
+- `scripts/release460_secure_oauth_gate.py` executes the actual migration against a Release 459-compatible local authority and proves state-hash uniqueness/replay constraints plus plaintext-column prohibition. It also asserts callback/refresh identity ordering, local publication-planner isolation, provider-execution middleware ordering, hard closure of the legacy Meta probe owner, currentized legacy readiness, and local Meta data-deletion behavior.
 - `scripts/release460_oauth_crypto_proof.mjs` executes the actual cryptographic helper and proves S256, AES-GCM round-trip, AAD authentication failure, diagnostics redaction, Development-host gating, Production-host refusal, and closed-switch refusal.
-- `scripts/release460_provider_contract_mock_proof.mjs` uses only mock credentials and mock fetch responses. It exercises all six provider authorization/exchange/refresh and intended-account identity contracts; missing intended-account configuration; wrong-account failure; Meta Page/Instagram mismatch; safe provider identity failure; supported revoke contracts for X/TikTok/YouTube; and no-network unsupported revoke behavior for Etsy/Pinterest/Meta.
+- `scripts/release460_provider_contract_mock_proof.mjs` uses only mock credentials and mock fetch responses. It exercises all six provider authorization/exchange/refresh and intended-account identity contracts plus safe failure/revoke behavior.
+- `scripts/release460_publish_contract_mock_proof.mjs` monkeypatches `fetch` to fail/count any call and proves six-provider local validation, deterministic same-intent keys, revised-intent keys, duplicate blocking, sensitive-input rejection, Meta alias handling, and invalid-media failures with **zero network calls**.
 - `.github/workflows/release460-source-gate.yml` runs all Release 460 proofs plus the carried Release 459 gate and closed Production/provider boundary proof.
 
-Intended-account implementation checkpoint before this authority synchronization:
-- SHA `0a224a8313bda8fc36002149a000742f45c41a41`
-- Release 460 Source Gate `33277302902`: GREEN
-- System Gate `33277302903`: GREEN
-- Cloudflare Pages check `99166205949`: GREEN
-- Development preview `https://ac063323.devilndove-site-dev.pages.dev`
+Latest hardened implementation checkpoint before authority synchronization:
+- SHA `9eb50239efca5f1c5c34dcd504d49fde718f3033`
+- Release 460 Source Gate `33279263075`: GREEN
+- System Gate `33279263080`: GREEN
+- Cloudflare Pages check `99171549842`: GREEN
+- Development preview `https://95326a5a.devilndove-site-dev.pages.dev`
 
-Only Release 460 Source Gate and System Gate launched for the source-only implementation checkpoint. No Release 459/460 D1 migration workflow was launched. The System Gate also continues to prove the restored carried Release 448 Supply Sourcing and Calibration workstream authority.
-
-No real provider identity endpoint, authorization endpoint, token endpoint, or publication endpoint was contacted by the intended-account mock proof.
+Only source/regression workflows launched for this source-only checkpoint. No Release 459/460 Development D1 migration workflow was launched. No real provider authorization, identity, token, probe, or publication endpoint was contacted by the Release 460 mocks.
 
 ## Remaining automated work before live provider authorization
-- Add non-executing provider publish-payload validation and idempotency authority as a separate layer; connection setup must never imply publication permission.
 - Continue Stripe/PayPal automated contract, replay, webhook/reconciliation preparation.
 - Continue Development-to-Production parity, transition and rollback tooling.
+- Remove retained unreachable legacy social provider emitters as technical-debt cleanup while preserving the closed middleware boundary.
 
 ## Manual boundary
 Do not authorize Etsy/Pinterest/Meta/X/TikTok/YouTube yet. Do not set `OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit` yet. Real provider authorization remains a separate deliberate acceptance activity after automated preparation is exhausted.
