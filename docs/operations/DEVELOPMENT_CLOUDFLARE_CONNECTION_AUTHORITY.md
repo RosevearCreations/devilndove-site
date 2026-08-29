@@ -14,47 +14,37 @@ This document exists so a new chat, AI, developer or workstation does **not** re
 | D1 binding | `DB` |
 | D1 database | `devilndove-dev` |
 | D1 database ID | `dbc1615b-dcbe-4951-973b-b47c99c73bfa` |
-| D1 schema currently verified through | **Release 450** |
-| Current Development release | **Release 452 — no new D1 migration required** |
+| D1 schema currently verified through | **Release 453** |
+| Current Development release | **Release 453 — applied and independently verified** |
 | Product/media R2 binding | `PRODUCT_MEDIA_BUCKET` |
 | Product/media R2 bucket | `devilndove-toolshed-images-dev` |
 | CAIP private-media R2 binding | `CAIP_PRIVATE_MEDIA_BUCKET` |
 | CAIP private-media R2 bucket | `devilndove-caip-media-dev` |
 | GitHub Actions Cloudflare credential | repository secret named `CLOUDFLARE_API_TOKEN` |
 
-The D1 schema remains current through Release 450. Releases 451 and 452 are source-only extensions over already verified authorities and add no D1 migration.
+Release 453 is already active on exact Development D1. Its migration is **not** an outstanding startup action.
 
-These are **Development** resources. Production resources are intentionally absent from Development mutation workflows.
+- migration: `migrations/dev/20260829_release453_it_provider_readiness.sql`
+- guarded mutation run: `33258377328` — SUCCESS
+- independent read-only verification run: `33258415391` — SUCCESS
+
+These are Development resources. Production resources are intentionally absent from Development mutation workflows.
 
 ## The important `account_id` rule
 
 `wrangler.toml` must **not** contain `account_id`.
 
-Cloudflare Pages Git deployment owns its Pages account context. Local scripts and guarded GitHub Actions select the Development account by setting:
+Cloudflare Pages Git deployment owns its Pages account context. Local scripts and guarded GitHub Actions select the Development account by setting `CLOUDFLARE_ACCOUNT_ID=c0d5bc25df16ae5b7d47c985c4b7b787`.
 
-`CLOUDFLARE_ACCOUNT_ID=c0d5bc25df16ae5b7d47c985c4b7b787`
-
-The repository gate treats adding `account_id` back to `wrangler.toml` as an error.
-
-## Authentication precedence
-
-For local Wrangler work, an environment `CLOUDFLARE_API_TOKEN` can take precedence over an OAuth login. An apparently successful `wrangler login` can therefore still produce authorization errors when a stale or wrong environment token exists.
-
-Canonical read-only helper:
+## Canonical read-only connection check
 
 ```text
 python scripts/cloudflare_development_access.py --auth-only
 ```
 
-The helper:
+The helper pins the Development account for its Wrangler child processes, verifies the exact D1 name/ID and both R2 buckets, prints no credentials, and exposes no Production mutation target.
 
-1. pins the Development account ID for its Wrangler child processes;
-2. verifies the exact D1 name **and ID**;
-3. verifies both Development R2 buckets;
-4. never prints credentials;
-5. has no Production mutation target.
-
-To deliberately test OAuth instead of inherited API credentials:
+When deliberately testing OAuth rather than an inherited API token:
 
 ```text
 python scripts/cloudflare_development_access.py --auth-only --auth-mode oauth
@@ -62,97 +52,98 @@ python scripts/cloudflare_development_access.py --auth-only --auth-mode oauth
 
 ## New-chat startup sequence
 
-A new chat must follow this order:
-
 1. Read `development-release.json`.
 2. Read this document.
 3. Read `wrangler.toml` and `scripts/cloudflare_development_access.py`.
 4. Confirm the Git branch is `dev` and record the current `dev` SHA.
 5. Confirm `main` / live Production is not the target.
-6. Use **read-only** Development Cloudflare/D1/R2 identity checks first.
-7. Read the current-release migration/verification state before deciding whether D1 needs a write.
-8. Run source/local gates before authorizing a genuinely new migration.
-9. If a future release truly needs D1 mutation, verify the exact `devilndove-dev` identity immediately before the write.
-10. Apply **only that new current additive migration**.
-11. Run a separate **read-only remote verifier** afterward.
-12. Record successful migration/verification state in `development-release.json` and active handoff documents.
+6. Run read-only Development Cloudflare/D1/R2 identity checks first.
+7. Read the current release migration/verification state before considering any write.
+8. Treat Release 453 as already applied and verified; **do not replay it**.
+9. Run source/local gates before authorizing any genuinely new future migration.
+10. Immediately before any future write, verify exact `devilndove-dev` name and UUID.
+11. Apply only that new additive release migration.
+12. Run a separate read-only remote verifier afterward.
+13. Record the successful state in `development-release.json` and current handoff documents.
 
 ## Do not replay historical migrations on startup
 
 > **A new chat is not a migration event.**
 
-Do **not** reapply Releases 447, 448, 449 or 450 merely because the conversation/workstation changed or D1 connectivity had to be re-established. Releases 451 and 452 have **no migration to apply**.
-
-Historical migration state is authority/provenance. Revisit a historical migration only when read-only inspection proves actual schema drift requiring deliberate repair.
+Do **not** reapply Releases 447, 448, 449, 450 or 453 merely because a conversation, workstation, token or checkout changed. Releases 451 and 452 had no migration.
 
 Current proven Development history:
 
-- Release 447 Development platform baseline: applied and verified.
-- Release 448 platform expansion authorities: retained as regression authority.
-- Release 449 corporate/commerce migration: applied to exact Development D1 and independently verified by read-only workflow run `33235075008`.
-- Release 450 marketplace/SEO migration: applied to exact Development D1 by guarded workflow run `33235769850` and independently verified read-only by workflow run `33235803838`.
-- Release 451 marketplace calibration/SEO assurance: source-only; no new D1 schema migration.
-- Release 452 application streamlining/UX/SEO depth: source-only; no new D1 schema migration.
+- Release 447 platform baseline: applied and verified.
+- Release 448 platform expansion: retained as regression authority.
+- Release 449 corporate/commerce migration: applied and independently verified (`33235075008`).
+- Release 450 marketplace/SEO migration: guarded apply `33235769850`; independent verifier `33235803838`.
+- Release 451 marketplace calibration/SEO assurance: source-only; no migration.
+- Release 452 application streamlining/UX/SEO depth: source-only; no migration.
+- Release 453 I.T. provider readiness: guarded apply `33258377328`; independent read-only verifier `33258415391`.
 
-Therefore, during Release 452 the default startup action is **verification/read of current state**, not SQL execution.
+Therefore the default startup action during/after Release 453 is **read/verify current state**, not SQL execution.
 
-## Safe Development migration pattern
+## Release 453 D1 authority
 
-Every future D1-changing release must use two separate authorities.
+Release 453 extends Release 449 `provider_setup_authorities` with:
 
-### 1. Guarded mutation workflow
+- `it_provider_readiness_checks`
+- `it_provider_readiness_events`
+
+Independent remote verification proved 2/2 tables, 32 Development checks across seven providers, all 32 initially deferred, zero fabricated events, zero foreign-key violations, zero unknown provider references and zero secret-bearing columns.
+
+This D1 metadata tracks safe configuration references, states, correction mechanics and evidence. API keys, client secrets, access/refresh tokens, webhook signing secrets, passwords and private keys remain outside D1.
+
+## Safe future Development migration pattern
+
+Every future D1-changing release must have two separate authorities.
+
+### Guarded mutation workflow
 
 It must:
 
 - run only from `dev`;
-- pin the Development account through environment/tooling, never `wrangler.toml account_id`;
+- pin Development account through environment/tooling, never `wrangler.toml account_id`;
 - require `CLOUDFLARE_API_TOKEN` without printing it;
-- use `wrangler d1 info` to prove both the exact D1 name and ID;
-- run source/local migration gates first;
-- include a blind-replay guard for the new release;
-- capture preservation evidence for existing authoritative areas where relevant;
-- apply one explicitly named current migration;
-- expose no Production database/project identifier or command.
+- prove exact D1 name and UUID;
+- run source/local gates first;
+- refuse blind or partial replay;
+- capture preservation evidence where relevant;
+- apply exactly one explicitly named new additive Development migration;
+- expose no Production mutation target.
 
-### 2. Verification-only workflow
+### Independent verification-only workflow
 
-It must be unable to apply a migration. It should read the exact Development D1 and prove expected schema/state after mutation.
+It must be incapable of applying the migration and must read the exact Development D1 to prove the expected post-mutation state.
 
-Release 449 demonstrated why mutation and verification must be separated. Release 450 added the preferred replay-guard/preservation-baseline/independent-verifier pattern. Releases 451 and 452 demonstrate the other important case: **if existing verified schema already supports the feature, do not create a migration merely to advance the release number.**
+Release 453 is now an example of this complete pattern and must not be re-run merely to prove access.
 
 ## Troubleshooting authorization
 
 If D1/R2 access fails:
 
-- Do **not** change the database ID to make Wrangler accept another resource.
-- Do **not** add `account_id` to `wrangler.toml`.
-- Check whether `CLOUDFLARE_API_TOKEN` belongs to the Development account.
-- Remember environment API credentials may override OAuth.
-- Run the canonical read-only access preflight.
-- If deliberately testing OAuth, use `--auth-mode oauth` so inherited API credentials are suppressed for that process.
-- A connection failure is **not** evidence that D1 needs migration.
+- do not change the database ID to accept another resource;
+- do not add `account_id` to `wrangler.toml`;
+- check whether `CLOUDFLARE_API_TOKEN` belongs to the Development account;
+- remember environment API credentials can override OAuth;
+- run the canonical read-only access preflight;
+- if deliberately testing OAuth, use `--auth-mode oauth`;
+- a connection failure is not evidence that a migration must be replayed.
 
 ## Safety boundary
 
-Development work may mutate the exact Development D1 only through a deliberate guarded **new current-release** workflow when a real additive schema authority is required.
-
-It must not mutate:
-
-- `main`;
-- the live `devilndove-site` Pages application;
-- Production D1/R2 resources;
-- external marketplace/payment providers unless a later explicitly authorized acceptance step enables that specific operation.
+Development may mutate exact Development D1 only through a deliberate guarded **new additive current-release** workflow. It must not mutate `main`, live `devilndove-site`, Production D1/R2 resources, or external marketplace/payment providers unless a later acceptance step explicitly authorizes that specific operation.
 
 ## Related authorities
 
-- `development-release.json` — current machine-readable release/migration state.
-- `AI_HANDOFF.md` — compact current handoff.
-- `PROJECT_STATUS_AND_ROADMAP.md` — current work/next sequence.
-- `wrangler.toml` — Development Pages/D1/R2 bindings; no `account_id`.
-- `scripts/cloudflare_development_access.py` — canonical read-only identity/access preflight.
-- `scripts/repository_hygiene_gate.py` — current-tree cleanup/SEO/usability guard.
-- `scripts/release452_application_streamlining_gate.py` — focused Release 452 source authority.
+- `development-release.json`
+- `AI_HANDOFF.md`
+- `PROJECT_STATUS_AND_ROADMAP.md`
+- `docs/operations/RELEASE_453_IT_PROVIDER_READINESS.md`
+- `wrangler.toml`
+- `scripts/cloudflare_development_access.py`
+- `scripts/release453_it_provider_readiness_gate.py`
+- `.github/workflows/development-d1-release453.yml` — historical guarded Release 453 mutation authority; replay guard now refuses reapplication.
+- `.github/workflows/release453-remote-verification.yml` — Release 453 read-only verifier.
 - `.github/workflows/system-gate.yml` — canonical source/regression/SEO safety gate.
-- `docs/operations/RELEASE_451_D1_STATE.md` — Release 451 no-new-migration statement.
-- `docs/operations/RELEASE_452_APPLICATION_STREAMLINING.md` — Release 452 source-only convergence authority.
-- Release-specific D1 workflow — only when a genuinely new additive migration is ready.
