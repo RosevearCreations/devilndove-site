@@ -46,7 +46,7 @@ for path in ROOT.glob("BUILD*"):
         legacy_root.append(name)
 require(not legacy_root, f"obsolete root Build verification artifacts remain: {legacy_root}")
 
-# 2) Temporary/backup artifacts must not return outside intentionally ignored dependency metadata.
+# 2) Temporary/backup and superseded current-state artifacts must not return.
 bad_suffixes = (".bak", ".old", ".tmp", ".orig", ".rej")
 bad_files: list[str] = []
 for path in ROOT.rglob("*"):
@@ -62,6 +62,10 @@ require(not bad_files, f"backup/temp artifacts must not ship: {bad_files[:20]}")
 require(not (ROOT / "tmp").exists(), "repository tmp/ directory must not ship")
 require(not (ROOT / "docs" / "archive").exists(), "docs/archive must not ship; Git history is the archive")
 require(not (ROOT / "docs" / "releases").exists(), "docs/releases must not ship; current release authority is development-release.json")
+retired_pointers = ("AI_CONTEXT.md", "NEW_CHAT_STATUS.md", "DEVELOPMENT_ROADMAP.md", "KNOWN_GAPS_AND_RISKS.md")
+for retired in retired_pointers:
+    require(not (ROOT / retired).exists(), f"retired compatibility pointer must not return: {retired}")
+require(not (ROOT / "data" / "site" / "release-package-manifest.json").exists(), "stale generated release-package manifest must not ship")
 
 # 3) Current authority must agree everywhere.
 release = json.loads(read("development-release.json"))
@@ -69,7 +73,7 @@ require(release.get("release") == 452, "repository hygiene gate requires current
 require(release.get("label") == "Application Streamlining & UX/SEO Depth", "Release 452 label drifted")
 require(release.get("current_release_migrations") == [], "Release 452 must not invent a D1 migration")
 require(release.get("development_infrastructure", {}).get("d1", {}).get("schema_current_through_release") == 450, "D1 schema authority must remain verified through Release 450")
-for authority in ("AI_HANDOFF.md", "PROJECT_STATUS_AND_ROADMAP.md", "docs/operations/RELEASE_452_APPLICATION_STREAMLINING.md"):
+for authority in ("AI_HANDOFF.md", "PROJECT_STATUS_AND_ROADMAP.md", "MARKDOWN_INDEX.md", "SANITY_HEALTH_CHECK.md", "docs/operations/RELEASE_452_APPLICATION_STREAMLINING.md"):
     value = read(authority)
     require("Release 452" in value, f"{authority} must identify current Release 452")
 
@@ -141,6 +145,7 @@ require(release.get("release_policy", {}).get("provider_publication") == "closed
 print("REPOSITORY HYGIENE / UX / SEO GATE")
 print("Obsolete root Build verification artifacts: NONE")
 print("Backup/temp artifacts: NONE")
+print("Retired current-state pointers/manifests: ABSENT")
 print("Storefront one-H1/canonical/social/JSON-LD: GUARDED")
 print("Product BreadcrumbList + existing Product schema: GUARDED")
 print("Sitemap principal discovery routes: GUARDED")
