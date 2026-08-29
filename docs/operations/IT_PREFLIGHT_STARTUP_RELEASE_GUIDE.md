@@ -1,30 +1,64 @@
-# I.T. Preflight / Startup Release Guide — Build 446
+# I.T. Preflight / Startup Release Guide — Release 450
 
-This is the operator authority for technical release issues. Business feature direction belongs in `PROJECT_STATUS_AND_ROADMAP.md`; current technical HOLDs are recorded there and surfaced in `/admin/it-platform/`.
+This is the short operator guide. The exact Cloudflare/D1/R2 connection details live in `DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` and should be read before database work.
 
 ## Startup sequence
 
-1. Confirm `development-release.json` and `dev` are the intended Development source.
-2. Confirm target is `devilndove-site-dev`, never separate live `devilndove-site`.
-3. Run the active Build 446 system gate.
-4. Use `/api/admin/infrastructure-readiness` or the I.T. page to check D1/R2 bindings and schema state read-only.
-5. If a retained guarded migration is reported as genuinely missing, use its Development-only recovery runner; otherwise do not run SQL.
-6. Review runtime incidents, public API health, route usage, schema drift and cache/service-worker identity.
-7. Review each current HOLD and its exact pass condition.
-8. Deploy only the exact green `dev` head to Development and perform bounded live acceptance.
-9. Keep separate live Production promotion closed unless explicitly authorized.
+1. Read `development-release.json` and confirm the intended branch is `dev`.
+2. Read `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`.
+3. Confirm target Pages project is `devilndove-site-dev`, never separate live `devilndove-site`.
+4. Confirm `wrangler.toml` has no `account_id`.
+5. Resolve the exact current `dev` SHA.
+6. Run current source/System gates.
+7. Check D1/R2 identity/readiness **read-only** before deciding whether any current migration is needed.
+8. Never replay historical Release 447/448/449 migrations merely because a new chat or machine starts.
+9. If the current release has a new additive migration, require source gates + exact Development D1 identity immediately before mutation.
+10. Apply only that current migration through its guarded Development workflow.
+11. Run a separate read-only remote verifier afterward.
+12. Record verified state in `development-release.json`, `AI_HANDOFF.md` and the roadmap.
+13. Keep marketplace/payment provider execution and separate live Production closed until explicit acceptance/promotion authority exists.
 
-## Repository/recovery authority
+## Current Development connection
 
-Git history is the archive. `database_full_schema.sql` is the aggregate fresh-install schema. Only Build 440 Product/Inventory/Tool recovery plus carried Build 442 I.T. and Build 443 carousel recovery remain standalone because current gates/recovery still consume them. Build 446 adds no D1 migration.
+- Cloudflare account ID pinned by tooling: `c0d5bc25df16ae5b7d47c985c4b7b787`
+- Pages: `devilndove-site-dev`
+- D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
+- R2: `devilndove-toolshed-images-dev`
+- CAIP private R2: `devilndove-caip-media-dev`
+- GitHub Actions credential reference: `CLOUDFLARE_API_TOKEN`
+- Local read-only helper: `python scripts/cloudflare_development_access.py --auth-only`
 
-## Current technical HOLDs
+Do not print or store credential values.
 
-- Carousel schema/live acceptance where readiness reports missing authority.
-- I.T. explicit user-grant schema/enforcement where readiness reports missing authority.
-- Stripe Development end-to-end acceptance.
-- PayPal sandbox end-to-end acceptance.
-- CAIP private R2 delivery/range/timecode/storage evidence.
-- Separate live Production promotion.
+## Current release state
 
-Stop a release when the exact deployed commit is unknown, schema authority is uncertain, a required binding is absent, failures return false success/raw HTML, a destructive action cannot be bounded/reversed, or any command could contact separate live Production unintentionally.
+- Release 447 baseline: applied and verified Development.
+- Release 448: retained regression/platform authority.
+- Release 449: complete, applied and read-only remotely verified.
+- Release 450: Marketplace & SEO Readiness; current additive migration is `migrations/dev/20260829_release450_marketplace_seo_readiness.sql`.
+- Production promotion: closed.
+- Marketplace provider publication: closed.
+
+## Release 450 technical gates
+
+Release 450 adds:
+
+`python scripts/release450_marketplace_seo_gate.py`
+
+It composes Release 449 + 450 locally and checks marketplace schema/policy, Etsy fail-closed limits, no request-time marketplace DDL, responsive admin structure, JavaScript syntax and the public SEO structural gate.
+
+The canonical System Gate continues to run carried-forward platform, D1 transport, runtime-safety, SEO and PWA checks.
+
+## Stop conditions
+
+Stop mutation or promotion when:
+
+- exact `dev` SHA is unknown;
+- D1 identity does not exactly match both expected name and ID;
+- an inherited Cloudflare credential targets/authorizes the wrong account;
+- `account_id` has been restored to `wrangler.toml`;
+- current migration state is uncertain;
+- a historical migration is being proposed only because the chat/machine changed;
+- request-time code attempts to create/alter current marketplace schema;
+- provider execution/publication becomes enabled before provider acceptance;
+- a command could touch separate live Production unintentionally.
