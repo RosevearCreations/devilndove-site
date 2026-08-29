@@ -1,8 +1,8 @@
 import { paymentExecutionBoundary, paymentExecutionStatus } from './_lib/paymentExecution.js';
 
 // Devil n Dove Release 460 — API safety middleware.
-// Keeps carried Product/Inventory conflict mapping and closes remote payment execution unless
-// an explicit Development-only sandbox/test operator switch is deliberately opened.
+// Keeps carried Product/Inventory conflict mapping, closes remote payment execution unless
+// explicitly opened for Development test/sandbox use, and enforces Canada-only shipping.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -23,6 +23,23 @@ function errorText(error) {
 function normalizePaymentProvider(value) {
   const provider = String(value || '').trim().toLowerCase();
   return ['paypal', 'stripe', 'square', 'manual', 'other'].includes(provider) ? provider : '';
+}
+
+function isCanadaCountry(value) {
+  const country = String(value || '').trim().toLowerCase().replace(/[^a-z]/g, '');
+  return !country || ['ca', 'can', 'canada'].includes(country);
+}
+
+function shippingCountryClosed(country) {
+  return json({
+    ok: false,
+    code: 'shipping_country_not_supported',
+    error: 'Devil n Dove storefront shipping is currently limited to Canada.',
+    requested_country: String(country || '').trim() || null,
+    allowed_countries: ['CA'],
+    local_order_mutation_performed: false,
+    provider_network_call_performed: false,
+  }, 422);
 }
 
 async function guardPaymentProviderExecution(context) {
@@ -59,9 +76,48 @@ async function guardPaymentProviderExecution(context) {
   }, 423);
 }
 
+async function guardCommerceShippingCountry(context) {
+  const request = context.request;
+  let url;
+  try { url = new URL(request.url); } catch { return null; }
+  if (request.method !== 'POST') return null;
+
+  if (url.pathname === '/api/checkout-create-order') {
+    let body = {};
+    try { body = await request.clone().json(); } catch { return null; }
+    const country = body?.shipping_country;
+    if (!isCanadaCountry(country)) return shippingCountryClosed(country);
+    return null;
+  }
+
+  if (url.pathname === '/api/checkout-prepare-payment') {
+    let body = {};
+    try { body = await request.clone().json(); } catch { return null; }
+    const orderId = Number(body?.order_id || 0);
+    const db = context.env?.DB || context.env?.DD_DB;
+    if (!db || !Number.isInteger(orderId) || orderId <= 0) return null;
+    const order = await db.prepare(`
+      SELECT fulfillment_type, shipping_country
+      FROM orders
+      WHERE order_id = ?
+      LIMIT 1
+    `).bind(orderId).first().catch(() => null);
+    if (!order) return null;
+    const fulfillment = String(order.fulfillment_type || '').trim().toLowerCase();
+    if (['shipping', 'mixed'].includes(fulfillment) && !isCanadaCountry(order.shipping_country)) {
+      return shippingCountryClosed(order.shipping_country);
+    }
+  }
+
+  return null;
+}
+
 export async function onRequest(context) {
   const paymentGuard = await guardPaymentProviderExecution(context);
   if (paymentGuard) return paymentGuard;
+
+  const shippingGuard = await guardCommerceShippingCountry(context);
+  if (shippingGuard) return shippingGuard;
 
   try {
     return await context.next();
