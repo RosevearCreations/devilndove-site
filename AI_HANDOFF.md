@@ -12,36 +12,29 @@ Read this first, then `PROJECT_STATUS_AND_ROADMAP.md`. `development-release.json
 - Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
 - Development R2: `devilndove-toolshed-images-dev`, `devilndove-caip-media-dev`
 - Modules: Storefront, Creators, Socials, Financials, I.T.
-- Clients: Web, Phone, Desktop through one responsive/installable PWA authority
+- Clients: Web, Phone, Desktop from one responsive/installable PWA authority
 - Separate live Production: `main` / `devilndove-site`
 - Production promotion: **CLOSED**
 
-Always resolve the exact current `dev` SHA and exact System Gate/Cloudflare Pages status from GitHub before calling a checkpoint green.
+Always resolve exact current `dev` SHA and exact System Gate/Cloudflare Pages status before calling a checkpoint green.
 
-## D1 baseline and Release 448 migrations
+## D1 baseline and current Release 448 migrations
 
-Release 447 baseline is already applied/verified. Permanent startup rule: **read-only D1/R2 verification first; do not reapply the 447 baseline because a chat or release starts.**
+Release 447 platform convergence is already applied and verified. Permanent startup rule: **read-only D1/R2 verification first; never replay the Release 447 baseline because a new chat/release starts.**
 
-Release 448 now has four additive Development migrations:
+Release 448 now has **five** additive Development migrations:
 
 1. `database_release448_product_lineage.sql`
-   - verification: `RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql`
-   - runner: `python scripts/apply_development_product_lineage.py`
 2. `database_release448_media_it.sql`
-   - verification: `RELEASE448_MEDIA_IT_VERIFICATION.sql`
-   - runner: `python scripts/apply_development_release448_media_it.py`
 3. `database_release448_storefront_merchandising.sql`
-   - verification: `RELEASE448_STOREFRONT_MERCHANDISING_VERIFICATION.sql`
-   - runner: `python scripts/apply_development_release448_storefront_merchandising.py`
 4. `database_release448_caip_content_handoff.sql`
-   - verification: `RELEASE448_CAIP_CONTENT_HANDOFF_VERIFICATION.sql`
-   - runner: `python scripts/apply_development_release448_caip_content_handoff.py`
+5. `database_release448_tool_lifecycle.sql`
 
-All four are source/local/transport gated. None may be called remotely applied until `.github/workflows/development-d1-release448.yml` passes against exact `devilndove-dev` and final read-only verification passes.
+Each has a read-only verification file and exact-Development runner. All five are source/local/transport gated. The guarded workflow `.github/workflows/development-d1-release448.yml` applies them in order and then performs final read-only verification.
 
-The guarded workflow cannot pass its credential guard because GitHub Actions currently has no `CLOUDFLARE_API_TOKEN` secret. Earlier guarded execution proved the workflow stops before D1 read/write. Never put the token in chat/source; it belongs only in secure GitHub Actions secret storage.
+Remote truth: GitHub Actions still lacks the secure `CLOUDFLARE_API_TOKEN` repository secret. The guarded workflow previously stopped at its credential guard before D1 read/write. Therefore **none of the five Release 448 migrations is remotely applied yet**. Never weaken the guard and never put the token in chat/source.
 
-Fresh-install composition is gated by `python scripts/release448_fresh_install_gate.py` in this order:
+Fresh-install composition is gated in this order:
 
 1. `database_full_schema.sql`
 2. `database_platform_convergence.sql`
@@ -49,55 +42,49 @@ Fresh-install composition is gated by `python scripts/release448_fresh_install_g
 4. Media / Movie / I.T.
 5. Storefront merchandising
 6. CAIP reviewed Content Studio handoff
+7. Tool lifecycle
 
-The gate verifies five canonical modules, 10 canonical role-module rows, explicit-user-only I.T. authority, all current Release 448 tables and clean foreign keys. A truly empty database has zero users and therefore zero explicit I.T. managers; if an active admin exists, the Release 447 convergence bootstrap must establish explicit I.T. manage authority. Do not manufacture an admin merely to make a fresh-install count equal one.
+A truly empty database has zero users and therefore zero explicit I.T. managers. Once an active admin exists, Release 447 convergence must bootstrap explicit I.T. manage authority. Do not manufacture user data to satisfy a fresh-install count.
 
-## Storefront — Shop / Collections / Collages / Carousels
+## Storefront
 
-These remain Storefront capabilities, not separate application modules.
+Shop, Collections, Collages and Carousels remain Storefront capabilities.
 
-- `/shop/` — direct Product discovery/buying authority
-- `/collections/` — curated or rule-based Product grouping
+- `/shop/` — direct Product discovery/buying
+- `/collections/` — curated/rule-based Product grouping
 - `/collages/` — visual discovery over approved public Product images
-- Home/Movie presentation — shared `public/js/media-carousel.js`
-- admin merchandising: `/admin/storefront-merchandising/`
-- public projection: `/api/storefront-merchandising`
+- `/admin/storefront-merchandising/` — merchandising curator
+- shared carousel: `public/js/media-carousel.js`
 
-D1 stores only merchandising metadata/references:
-- `storefront_collections`
-- `storefront_collection_products`
-- `storefront_collage_presets`
+D1 stores merchandising metadata/references only: `storefront_collections`, `storefront_collection_products`, `storefront_collage_presets`. Products, Inventory and image binaries remain in their existing authorities. Public merchandising consumes the consent-gated `/api/products` projection. One public H1 per page remains mandatory.
 
-Products, Inventory and image binaries stay in their existing authorities. Public merchandising consumes the consent-gated `/api/products` projection before grouping safe Products. Public pages retain exactly one H1.
+## Product lineage / manufacturer provenance
 
-## Product lineage / Inventory / Tools / manufacturers
-
-Do not create a second Inventory ledger. Existing stock/movement authorities remain canonical:
+Never create another stock ledger. Canonical authorities remain:
 - `site_item_inventory`
 - `site_inventory_movements`
-- Product resource intent through `product_resource_links`
-- current production/lot authorities for actual consumption/provenance
+- `product_resource_links`
+- current production/lot authorities
 
-Release 448 adds policy/review/provenance over those authorities:
+Release 448 overlays policy/provenance:
 - `/admin/product-lineage/`
 - `/admin/vendor-reviews/`
 - new handmade Product: `made_in_house / pending / required`
 - historical handmade Product: `legacy_pending / legacy_nonblocking`
-- antiquity/resale/external finished goods: explicit exempt state
-- durable Tools/molds are use/provenance links, not consumption
-- supplier/store and manufacturer remain distinct
-- first-party equipment/material reviews may carry safe marketplace/source references without scraping or runtime marketplace dependency
+- antiquity/resale/external finished goods may be explicitly exempt
+- durable Tools/molds are provenance/use links, never consumption
+- supplier/store and manufacturer are distinct
 
-Product provenance chain:
+Manufacturer chain:
 `Product → product_resource_links → site_item_inventory → inventory_manufacturer_links → inventory_manufacturers`
 
 ## Product Photography Manager
 
 Workspace: `/admin/product-image-quality/`
 
-D1 authority: `product_image_quality_assessments` stores score/review/evidence only; image ownership remains existing Product/R2/media authority.
+`product_image_quality_assessments` stores score/review evidence only; image ownership stays in Product/R2/media authority.
 
-100-point deterministic rubric:
+100-point objective baseline:
 - Lighting 20
 - Clarity 20
 - Background 15
@@ -107,37 +94,67 @@ D1 authority: `product_image_quality_assessments` stores score/review/evidence o
 - Artifacts 5
 - Product-set consistency 5
 
-Operational layer includes catalog queue, set readiness, perceptual dHash duplicate/near-duplicate evidence, best-current-hero recommendation, gallery candidates and explicit reshoot/improvement reasons. No automatic deletion, featured-image mutation, Product hiding or publication blocking. Optional vision-assisted review is advisory for subjective issues such as reflections/styling/background suitability.
-
-## Movies / shared carousel
-
-Shared presentation authority: `public/js/media-carousel.js` + `css/media-carousel.css`. Home is a data adapter. Movie front/back covers reuse the same renderer; missing evidence stays visibly pending. No carousel injects a second H1.
-
-Current Movie data authority is enriched JSON + `movie_catalog` D1 overlay. `movie_metadata_reviews` uses stable UPC/slug review keys and explicit pending/incomplete/unverified/verified states. Never guess Movie metadata.
+Manager features include catalog queue, Product-set readiness, perceptual duplicate/near-duplicate evidence, strongest-current-hero recommendation, gallery candidates and explicit reshoot reasons. No automatic deletion, featured-image mutation, Product hiding or publication blocking. Vision-assisted review may later advise on subjective matters such as reflections, clutter, styling and hero suitability.
 
 ## CAIP / Creators → Content Studio
 
-CAIP outward runtime identity is now Release 448. Historical Build 439 remains provenance for the temporal-evidence design/migration; Content Studio historical Build 355 remains implementation provenance only.
+CAIP outward runtime identity is Release 448. Historical Build 439 remains provenance for temporal-evidence design; Content Studio Build 355 remains implementation provenance only.
 
-Current surfaces:
-- CAIP workspace: `/admin/creative-assets/`
-- reviewed evidence handoff: `/admin/caip-content-handoff/`
-- handoff API: `/api/admin/caip-content-handoff`
-- Content Studio: `/admin/content-studio/`
+Surfaces:
+- `/admin/creative-assets/`
+- `/admin/caip-content-handoff/`
+- `/admin/content-studio/`
 
-Release 448 handoff authority:
+Release 448 handoff tables:
 - `caip_content_handoffs`
 - `caip_content_handoff_evidence`
 
-Eligibility is fail-closed: a temporal marker must be active + approved, its linked story evidence must be approved and not rejected, and the CAIP project must already be linked to a Content Studio project. The package stores references/counts only. It does **not** copy private media, execute providers, or publish content. Prepare/refresh and reviewed states remain explicit and auditable.
+Eligibility is fail-closed: marker active + approved, linked story evidence approved and not rejected, existing Content Studio linkage required. Handoff stores references/counts only—no private media copy, provider execution or publication. Secure CAIP review remains authenticated/private with range streaming and immutable originals.
 
-Secure CAIP review now emits Release 448 outward headers/contracts while retaining `provenance_build: 439` in evidence/audit metadata. Source originals remain immutable/private and ranged streaming remains authenticated.
+## Inventory Intelligence
+
+Workspace: `/admin/inventory-intelligence/`
+API: `/api/admin/inventory-intelligence`
+
+This is deliberately **read-only intelligence over existing Inventory**, not a ledger/schema replacement. It prioritizes:
+- linked Supply stockouts
+- low stock
+- reorder flags
+- do-not-reuse
+- missing stable Inventory identity
+- missing supplier
+- missing manufacturer provenance
+- missing consumption/usage profile
+- unlinked Tools
+- stocked Supplies with no Product link
+
+Product impact counts come from existing `product_resource_links`. The endpoint explicitly reports `write_authority_duplicated: false`.
+
+## Durable Tool Lifecycle
+
+Workspace: `/admin/tool-lifecycle/`
+API: `/api/admin/tool-lifecycle`
+Migration: `database_release448_tool_lifecycle.sql`
+
+Tables:
+- `inventory_tool_lifecycle_profiles`
+- `inventory_tool_lifecycle_events`
+
+Profiles cover active/maintenance/out-of-service/retired/replaced state, condition, acquired/warranty/service dates, service interval, replacement priority/cost/reference and evidence.
+
+Events cover inspection, maintenance, repair, calibration, damage, out-of-service, returned-to-service, retirement and replacement.
+
+**Hard invariant:** Tool lifecycle never decrements Tool quantity and never writes stock movements. Product contribution is derived from existing `product_resource_links`.
+
+## Movies / shared carousel
+
+Movie authority remains enriched JSON + `movie_catalog` D1 overlay. `movie_metadata_reviews` uses stable UPC/slug keys and explicit pending/incomplete/unverified/verified states. Home and Movie cover pairs share the Release 448 carousel renderer. Unknown Movie metadata is never guessed.
 
 ## I.T. integration registry
 
-Workspace: `/admin/it-integrations/`; API: `/api/admin/it-integrations`; D1: `it_integration_registry`.
+Workspace: `/admin/it-integrations/`; D1: `it_integration_registry`.
 
-I.T. owns provider purpose, consuming module, secret/binding reference name only, callback/webhook, scopes, environment, configured state, separately tested/accepted state, last safe error and correction mechanics. Actual secrets are forbidden.
+Stores provider purpose, consuming module, secret/binding **reference name only**, callback/webhook, scopes, environment, configured/tested state, safe errors and correction mechanics. Actual secrets are forbidden.
 
 ## Canonical gates
 
@@ -154,6 +171,9 @@ python scripts/release448_storefront_merchandising_gate.py
 python scripts/apply_development_release448_storefront_merchandising.py --transport-preflight
 python scripts/release448_caip_content_handoff_gate.py
 python scripts/apply_development_release448_caip_content_handoff.py --transport-preflight
+python scripts/release448_inventory_intelligence_gate.py
+python scripts/release448_tool_lifecycle_gate.py
+python scripts/apply_development_release448_tool_lifecycle.py --transport-preflight
 python scripts/product_inventory_tools_source_gate.py
 python scripts/public_seo_gate.py
 python scripts/pwa_platform_gate.py
@@ -161,25 +181,24 @@ python scripts/cloudflare_development_access.py --transport-preflight
 python scripts/development_runtime_acceptance.py --self-check
 ```
 
-`.github/workflows/system-gate.yml` performs no remote D1/R2/provider/Production writes. `.github/workflows/development-d1-release448.yml` is the separate exact-Development mutation workflow and remains credential-guarded.
+Canonical System Gate performs no remote D1/R2/provider/Production writes. The separate Release 448 D1 workflow owns exact-Development database mutation and remains credential-guarded.
 
 ## Deferred/non-blocking I.T. acceptance
 
-Carry forward truthfully without blocking unrelated feature development:
-- authenticated Development runtime acceptance
+Carry forward truthfully:
+- authenticated Development runtime
 - Stripe test
 - PayPal sandbox
-- CAIP private-media delivery/range/evidence acceptance
+- CAIP private-media delivery/range/timecode/artifact evidence
 
-Production promotion remains closed until required operational evidence is deliberately reviewed.
+These do not block unrelated Release 448 source development. Production remains closed until deliberate review.
 
 ## Next Release 448 direction
 
-Continue in this order unless a stronger dependency emerges:
-1. Inventory operations intelligence over existing stock/movement authority
-2. Supplies sourcing/provenance depth
-3. Tools lifecycle/provenance depth
-4. real Storefront/Photography calibration
+1. Supplies sourcing/provenance depth and real reorder/source intelligence
+2. Inventory Intelligence calibration against real Development data after D1 activation
+3. Tool lifecycle calibration and replacement planning
+4. Storefront/Photography real-data calibration
 5. CAIP runtime/presentation calibration
 6. Financials depth
 
@@ -188,13 +207,12 @@ Continue in this order unless a stronger dependency emerges:
 - One current release: 448.
 - Production untouched unless explicitly authorized.
 - D1 is operational write authority; current feature code does not own request-time schema creation.
-- No duplicate stock ledger, Product catalog or Product image catalog.
+- No duplicate Product, Inventory or Product-image catalog.
 - Collections/Collages are references/presentation over Product authority.
-- CAIP handoff is references/evidence, not private-media duplication.
-- Photography scores are work/evidence authority, not automatic publication authority.
-- No fabricated historical consumption/manufacturer/Movie metadata.
+- CAIP handoff is reference/evidence, not private-media duplication.
+- Photography scores are advisory work/evidence, not automatic publication authority.
+- Tool lifecycle is durable-asset state, not stock consumption.
+- Never fabricate historical consumption, manufacturer identity or Movie metadata.
 - One meaningful H1 per public page.
-- Shared presentation components remain shared.
-- I.T. owns provider configuration metadata; consuming modules own workflows.
 - Secrets live only in proper secret stores.
-- Exact source gate + exact Development Pages deployment + applicable authenticated evidence define completion.
+- Exact System Gate + exact Development Pages + applicable authenticated evidence define completion.
