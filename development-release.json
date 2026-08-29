@@ -5,7 +5,7 @@
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "active_marketplace_seo_readiness",
+  "convergence_state": "marketplace_seo_readiness_development_verified",
   "previous_release": {
     "release": 449,
     "label": "Corporate Commerce Convergence",
@@ -36,14 +36,14 @@
       {"binding": "PRODUCT_MEDIA_BUCKET", "bucket_name": "devilndove-toolshed-images-dev"},
       {"binding": "CAIP_PRIVATE_MEDIA_BUCKET", "bucket_name": "devilndove-caip-media-dev"}
     ],
-    "github_d1_credential": {"secret_name": "CLOUDFLARE_API_TOKEN", "status": "configured_and_proven_release449"},
+    "github_d1_credential": {"secret_name": "CLOUDFLARE_API_TOKEN", "status": "configured_and_proven_release450"},
     "local_access_preflight": "python scripts/cloudflare_development_access.py --auth-only",
     "startup_sequence": [
-      "Read wrangler.toml and this authority first",
+      "Read development-release.json, docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md and wrangler.toml first",
       "Confirm dev branch and exact Development D1/R2 identities read-only",
-      "Never replay Release 447/448/449 merely because a new chat started",
+      "Never replay Release 447/448/449/450 merely because a new chat or workstation started",
       "Run source/local gates before any new D1 migration",
-      "Apply only the current additive Development migration after exact identity verification",
+      "Apply only a genuinely new current additive Development migration after exact identity verification",
       "Run a separate read-only remote verifier after mutation",
       "Production identifiers and mutation commands remain unavailable"
     ]
@@ -74,12 +74,25 @@
       "key": "marketplace-seo-readiness",
       "file": "migrations/dev/20260829_release450_marketplace_seo_readiness.sql",
       "source_status": "implemented_and_gated",
-      "development_d1_status": "pending_guarded_activation",
+      "development_d1_status": "applied_and_verified_development",
+      "mutation_workflow_run": 33235769850,
+      "verification_workflow_run": 33235803838,
       "production_allowed": false,
       "provider_execution_allowed": false,
       "authorities": ["marketplace_channel_policies", "marketplace_listing_profiles", "marketplace_listing_validation_snapshots"]
     }
   ],
+  "current_release_evidence": {
+    "focused_source_gate_run": 33235447861,
+    "canonical_system_gate_run": 33235674706,
+    "development_d1_mutation_run": 33235769850,
+    "development_d1_verification_run": 33235803838,
+    "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+    "historical_migration_replay": false,
+    "product_and_accounting_preservation_checked": true,
+    "provider_publication_enabled": false,
+    "production_mutation": false
+  },
   "workstreams": [
     {"key": "storefront-merchandising", "status": "carried_forward", "workspace": "/admin/storefront-merchandising/"},
     {"key": "product-material-lineage", "status": "carried_forward", "workspace": "/admin/product-lineage/"},
@@ -92,9 +105,9 @@
     {"key": "release448-calibration", "status": "carried_forward", "workspace": "/admin/release448-calibration/"},
     {"key": "caip-reviewed-content-handoff", "status": "carried_forward", "workspace": "/admin/caip-content-handoff/"},
     {"key": "it-integration-registry", "status": "carried_forward_and_extended", "workspace": "/admin/it-integrations/"},
-    {"key": "marketplace-readiness", "status": "release450_source_implemented", "workspace": "/admin/marketplace-readiness/"},
-    {"key": "marketplace-draft-exports", "status": "release450_source_implemented", "workspace": "/admin/marketplace-exports/"},
-    {"key": "marketplace-mapping", "status": "release450_source_implemented", "workspace": "/admin/marketplace-mapping/"},
+    {"key": "marketplace-readiness", "status": "release450_development_verified", "workspace": "/admin/marketplace-readiness/"},
+    {"key": "marketplace-draft-exports", "status": "release450_development_verified", "workspace": "/admin/marketplace-exports/"},
+    {"key": "marketplace-mapping", "status": "release450_development_verified", "workspace": "/admin/marketplace-mapping/"},
     {"key": "seo-compliance", "status": "active_required_gate", "authority": "scripts/public_seo_gate.py"}
   ],
   "release450_batch": [
@@ -122,8 +135,8 @@
     {"id": 22, "change": "Align marketplace export preview with shared readiness validation", "status": "implemented"},
     {"id": 23, "change": "Preserve margin completeness as a CSV preparation blocker", "status": "implemented"},
     {"id": 24, "change": "Require existing public SEO structural gate in Release 450 source acceptance", "status": "implemented"},
-    {"id": 25, "change": "Consolidate Development Cloudflare/D1 connection authority for future chats", "status": "in_progress"},
-    {"id": 26, "change": "Apply and independently verify Release 450 against exact Development D1", "status": "pending_source_green"}
+    {"id": 25, "change": "Consolidate Development Cloudflare/D1 connection authority for future chats", "status": "implemented"},
+    {"id": 26, "change": "Apply and independently verify Release 450 against exact Development D1", "status": "implemented"}
   ],
   "deferred_it_test_environment": {
     "state": "backlog_non_blocking_for_source_development",
@@ -137,18 +150,19 @@
     ]
   },
   "forward_queue": [
-    "Release 450 guarded Development D1 activation",
-    "Release 450 read-only remote verification",
     "Marketplace real-data calibration",
     "Etsy taxonomy and shipping-profile calibration",
+    "Public SEO metadata/canonical/structured-data depth",
+    "Responsive storefront and admin cleanup",
+    "Provider fee/accounting reconciliation",
     "Etsy provider test acceptance",
     "Meta catalog/provider preparation",
     "Pinterest catalog/pin preparation",
     "TikTok content-posting preparation",
-    "Public SEO metadata depth",
-    "Responsive storefront cleanup",
-    "Provider fee/accounting reconciliation",
     "Authenticated Development runtime acceptance",
+    "Stripe test acceptance",
+    "PayPal sandbox acceptance",
+    "CAIP private-media acceptance",
     "Production promotion rehearsal"
   ]
 }
