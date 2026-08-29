@@ -1,7 +1,8 @@
+import { paymentExecutionStatus } from './_lib/paymentExecution.js';
+
 // File: /functions/api/checkout-prepare-payment.js
-// Brief description: Prepares a payment handoff for an existing order. It validates the order,
-// creates or reuses a pending payment record, and returns a live PayPal or Stripe redirect when
-// credentials are configured, while still supporting safe stub/manual fallback flows.
+// Brief description: Prepares a payment handoff for an existing order. Remote Stripe/PayPal
+// execution is Development-only, explicitly operator-gated, and test/sandbox-only.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -309,7 +310,6 @@ async function createStripeCheckoutSession(request, env, order, paymentRecord) {
 
   if (order.shipping_address1 || order.shipping_city || order.shipping_country) {
     params.set("shipping_address_collection[allowed_countries][0]", "CA");
-    params.set("shipping_address_collection[allowed_countries][1]", "US");
   }
 
   lineItems.forEach((lineItem, index) => {
@@ -398,6 +398,29 @@ export async function onRequestPost(context) {
 
   if (!Number.isInteger(order_id) || order_id <= 0) {
     return json({ ok: false, error: "A valid order_id is required." }, 400);
+  }
+
+  if (["paypal", "stripe"].includes(provider)) {
+    const execution = paymentExecutionStatus(request.url, env, provider);
+    if (!execution.execution_authorized) {
+      return json({
+        ok: false,
+        code: execution.code,
+        error: "Remote payment-provider execution is closed. Development test/sandbox execution requires an explicit operator switch and test-only provider credentials.",
+        payment_preparation: {
+          order_id,
+          provider,
+          configured: execution.configured,
+          test_mode: execution.test_mode,
+          environment: execution.environment,
+          development_host: execution.development_host,
+          operator_switch_set: execution.operator_switch_set,
+          execution_authorized: false,
+          local_payment_mutation_performed: false,
+          provider_network_call_performed: false
+        }
+      }, 423);
+    }
   }
 
   const order = await db.prepare(`
