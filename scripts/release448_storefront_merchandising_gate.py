@@ -43,7 +43,7 @@ with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
 context=need('public/js/admin-context-help.js',"trigger.textContent = 'ⓘ'")
 bootstrap=need('public/js/site-auth-ui.js','/public/js/admin-context-help.js?v=448-context-help')
 context_css=need('css/admin-context-help.css','.dd-context-help-trigger:focus-visible')
-for needle in ["trigger.type = 'button'",'aria-controls','aria-expanded',"event.key === 'Escape'","document.addEventListener('click'",'MutationObserver','[data-context-help]','dataset.contextHelpText','dataset.contextHelpTitle']:
+for needle in ["trigger.type = 'button'",'aria-controls','aria-expanded',"event.key === 'Escape'","document.addEventListener('click'",'MutationObserver','[data-context-help]','dataset.contextHelpText','dataset.contextHelpTitle','dd-context-help-field',"replace(/\\/index\\.html$/i, '/')"]:
  if needle not in context:raise SystemExit(f'FAIL — shared admin contextual help missing {needle!r}')
 for key in ['carousel:','collection:','explicit_membership:','collage:','caip_handoff:','tool_lifecycle:','supply_sourcing:','accounting:','it_platform:','d1_r2_readiness:','provider_configuration:']:
  if key not in context:raise SystemExit(f'FAIL — contextual-help library missing {key!r}')
@@ -52,7 +52,7 @@ for path in ['/admin/home-carousel/','/admin/storefront-merchandising/','/admin/
 if 'fetch(' in context or 'apiFetch' in context:raise SystemExit('FAIL — contextual help must remain client-only and must not call APIs')
 if '<h1' in context.lower():raise SystemExit('FAIL — contextual help must not create public/admin H1 elements')
 if "window.location.pathname.startsWith('/admin')" not in bootstrap:raise SystemExit('FAIL — contextual-help bootstrap must remain admin-only')
-for needle in ['.dd-context-help-panel[hidden]','@media(max-width:700px)','@media(prefers-reduced-motion:reduce)']:
+for needle in ['.dd-context-help-field','.dd-context-help-panel--field{grid-column:1/-1}','.dd-context-help-panel[hidden]','@media(max-width:700px)','@media(prefers-reduced-motion:reduce)']:
  if needle not in context_css:raise SystemExit(f'FAIL — contextual-help CSS missing {needle!r}')
 subprocess.run(['node','--check',str(ROOT/'public/js/admin-context-help.js')],check=True)
 subprocess.run(['node','--check',str(ROOT/'public/js/site-auth-ui.js')],check=True)
@@ -63,4 +63,4 @@ print('Public images: inherited from consent-gated /api/products projection')
 print('Collection metadata/membership: D1 ADDITIVE')
 print('Collage image binaries: NOT DUPLICATED')
 print('Public H1 count: 1 per Storefront page')
-print('Shared admin contextual help: ACCESSIBLE / CLIENT-ONLY / NO MUTATION')
+print('Shared admin contextual help: ACCESSIBLE / CLIENT-ONLY / GRID-SAFE / NO MUTATION')

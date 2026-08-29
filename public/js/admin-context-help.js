@@ -187,8 +187,9 @@ let openRecord = null;
 let refreshQueued = false;
 
 function normalizedPath() {
-  const raw = String(window.location.pathname || '/');
+  let raw = String(window.location.pathname || '/');
   if (!raw.startsWith('/admin')) return raw;
+  raw = raw.replace(/\/index\.html$/i, '/');
   return raw.endsWith('/') ? raw : `${raw}/`;
 }
 
@@ -211,7 +212,7 @@ function closeOpen({ restoreFocus = false } = {}) {
   panel.hidden = true;
   trigger.setAttribute('aria-expanded', 'false');
   openRecord = null;
-  if (restoreFocus) trigger.focus();
+  if (restoreFocus && trigger.isConnected) trigger.focus();
 }
 
 function toggle(trigger, panel) {
@@ -227,6 +228,9 @@ function createPanel(helpKey, definition, ordinal) {
   const triggerId = `dd-context-help-trigger-${token}`;
   const panelId = `dd-context-help-panel-${token}`;
   const titleId = `dd-context-help-title-${token}`;
+
+  document.getElementById(triggerId)?.remove();
+  document.getElementById(panelId)?.remove();
 
   const trigger = document.createElement('button');
   trigger.type = 'button';
@@ -284,14 +288,15 @@ function createPanel(helpKey, definition, ordinal) {
 function targetForRule(rule) {
   if (rule.selector) return document.querySelector(rule.selector);
   if (rule.labelControl) return document.querySelector(rule.labelControl)?.closest('label') || null;
-  const candidates = [...document.querySelectorAll('h1,h2,h3,h4,label,.small,strong')];
+  const candidates = [...document.querySelectorAll('h1,h2,h3,h4,label,.small,strong')]
+    .filter((el) => !el.dataset.ddContextHelpMounted);
   if (rule.text) return candidates.find((el) => String(el.textContent || '').trim() === rule.text) || null;
   if (rule.textIncludes) return candidates.find((el) => String(el.textContent || '').includes(rule.textIncludes)) || null;
   return null;
 }
 
 function mountHelp(target, helpKey, definition, ordinal) {
-  if (!target || !definition || target.dataset.ddContextHelpMounted === helpKey) return false;
+  if (!target || !definition || target.dataset.ddContextHelpMounted) return false;
   const { trigger, panel } = createPanel(helpKey, definition, ordinal);
   target.dataset.ddContextHelpMounted = helpKey;
 
@@ -299,8 +304,12 @@ function mountHelp(target, helpKey, definition, ordinal) {
     target.append(' ', trigger);
     target.insertAdjacentElement('afterend', panel);
   } else if (target.tagName === 'LABEL') {
-    target.insertAdjacentElement('afterend', trigger);
-    trigger.insertAdjacentElement('afterend', panel);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'dd-context-help-field';
+    target.insertAdjacentElement('beforebegin', wrapper);
+    wrapper.append(target, trigger);
+    wrapper.insertAdjacentElement('afterend', panel);
+    panel.classList.add('dd-context-help-panel--field');
   } else {
     target.insertAdjacentElement('afterend', trigger);
     trigger.insertAdjacentElement('afterend', panel);
