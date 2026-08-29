@@ -1,15 +1,10 @@
 name: Development D1 Release 460
 
+# Converged Release 460 D1 authority. Never auto-run from source or authority edits.
+# Use manual dispatch only after read-only verification proves actual Release 460 drift.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/dev/20260829_release460_secure_oauth_lifecycle.sql'
-      - 'scripts/release460_secure_oauth_gate.py'
-      - 'scripts/release460_oauth_crypto_proof.mjs'
-      - 'development-release.json'
-      - '.github/workflows/development-d1-release460.yml'
   workflow_dispatch:
+
 permissions: {contents: read}
 jobs:
   migrate-development-d1:
@@ -27,15 +22,15 @@ jobs:
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
-      - name: Refuse stale/non-Development source
+      - name: Refuse non-Development source
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = dev
-          if [ "${GITHUB_EVENT_NAME}" = push ]; then test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"; fi
       - name: Re-run Release 460 safety before write
         run: |
           python scripts/release460_secure_oauth_gate.py
           node scripts/release460_oauth_crypto_proof.mjs
+          node scripts/release460_provider_contract_mock_proof.mjs
           python scripts/release459_runtime_acceptance_gate.py
       - name: Protect exact Development authority
         run: |
@@ -74,9 +69,9 @@ jobs:
             d=json.load(open('/tmp/pre.json')); text=json.dumps(d); converged='"n":3' in text or '"n": 3' in text
           except Exception: converged=False
           open(os.environ['GITHUB_ENV'],'a').write(f"R460_CONVERGED={'1' if converged else '0'}\n")
-          print('Already converged:',converged)
+          print('Release 460 already converged:',converged)
           PY
-      - name: Apply only Release 460 migration
+      - name: Apply only Release 460 migration after explicit drift proof
         if: env.R460_CONVERGED != '1'
         run: wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --file migrations/dev/20260829_release460_secure_oauth_lifecycle.sql
       - name: Read-only post-write proof
@@ -98,5 +93,7 @@ jobs:
       - name: Boundary
         run: |
           echo 'Target: exact Development D1 only'
+          echo 'Automatic D1 mutation path: CLOSED'
+          echo 'Manual dispatch requires prior read-only drift proof'
           echo 'Provider authorization/execution/publication: CLOSED'
           echo 'Separate live Production mutation: NONE'
