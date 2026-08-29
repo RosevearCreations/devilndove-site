@@ -35,11 +35,11 @@ Workspaces:
 - `/admin/product-lineage/`
 - `/admin/vendor-reviews/`
 
-### Product image-quality scoring
+### Product Photography Manager
 
 Implemented source workspace: **`/admin/product-image-quality/`**.
 
-The deterministic browser scorer saves evidence to `product_image_quality_assessments` and uses a transparent 100-point rubric:
+The Photography Manager overlays the existing merged Product/media image authority; it does not create a second image catalog. Individual deterministic browser scores save evidence to `product_image_quality_assessments` with this transparent 100-point rubric:
 
 | Dimension | Points |
 | --- | ---: |
@@ -53,7 +53,20 @@ The deterministic browser scorer saves evidence to `product_image_quality_assess
 | Product-set consistency | 5 |
 | **Total** | **100** |
 
-The baseline is automatable and reproducible. Optional vision-assisted review should later handle subjective issues such as reflections, distracting props, premium hero suitability, styling and semantic background appropriateness. Vision remains advisory evidence, not a blind publication gate. Canvas scoring requires same-origin/CORS-readable image pixels.
+The Release 448 operational layer now also provides:
+
+- catalog-wide photography queue with unscored Products first and weakest scored sets next;
+- Product-set score using coverage 20 + best hero 25 + average quality 20 + distinctness 15 + up to four good/excellent gallery images 20;
+- 64-bit perceptual dHash stored with scoring evidence;
+- probable duplicate flag at dHash distance 0–4;
+- possible near-duplicate flag at distance 5–8;
+- strongest distinct scored image as the best-current-hero recommendation;
+- other distinct 70+ images as gallery candidates;
+- explicit work reasons for lighting, clarity, background, framing, resolution, colour, artifacts and set consistency;
+- admin approval/rejection of an assessment;
+- no automatic deletion, featured-image mutation, Product hiding or publication blocking.
+
+The baseline is automatable and reproducible. Optional vision-assisted review should later handle subjective issues such as reflections, distracting props, premium hero suitability, styling, semantic background appropriateness and whether the Product is clearly identifiable. Vision remains advisory evidence, not a blind publication gate. Canvas scoring requires same-origin/CORS-readable image pixels.
 
 ### Shared carousel / Movies
 
@@ -73,6 +86,10 @@ Implemented source workspace: **`/admin/it-integrations/`**.
 
 The registry tracks provider/platform, purpose, consuming module, environment, scopes, callback/webhook, configured state, separately tested/accepted state, last safe error and correction mechanics. It stores **secret/binding reference names only**. Secret values are rejected by the API and do not belong in D1/UI/source/logs/evidence.
 
+### Admin control surface
+
+`/admin/` is currentized to Release 448. The visible dashboard no longer describes Build 443 HOLDs or the old pre-convergence module grouping. It directly exposes Product Lineage, Product Photography Manager, Manufacturer/Purchased-item Reviews and I.T. Integrations while retaining the existing operational and release tools.
+
 ## Current Release 448 D1 state
 
 Two additive Development migrations are ready:
@@ -84,7 +101,7 @@ Both have local behavior/source gates, Development-only transport guards and rea
 
 The first guarded remote workflow run (`33198354338`) **did not execute either migration**. It stopped at the credential guard because GitHub Actions does not contain `CLOUDFLARE_API_TOKEN`. No D1 read/write followed that failed guard.
 
-This is now the only Release 448 database activation blocker. Do not put the token in chat or source. Add it to secure GitHub Actions secret storage, then rerun `.github/workflows/development-d1-release448.yml`; the workflow is hard-pinned to `devilndove-dev`, has no automatic write retry, and performs final read-only verification.
+This is the Release 448 database activation blocker, but it is not a reason to freeze unrelated source work. Do not put the token in chat or source. Add it to secure GitHub Actions secret storage, then rerun `.github/workflows/development-d1-release448.yml`; the workflow is hard-pinned to `devilndove-dev`, has no automatic write retry, and performs final read-only verification.
 
 ## Canonical gates
 
@@ -110,9 +127,9 @@ Canonical System Gate has no remote D1/R2/provider/Production write capability. 
 ### Immediate convergence
 
 1. Securely provide the GitHub Actions Development Cloudflare token and execute/verify both Release 448 D1 migrations.
-2. Run authenticated Development acceptance for the newly active lineage/image/I.T./Movie authorities.
-3. Inspect Product image-score distribution and calibrate thresholds against real Devil n Dove photography; add optional vision-assisted review after the deterministic baseline is proven.
-4. Continue Storefront Shop / Collections / Collages / Carousels and approved Product merchandising.
+2. Run authenticated Development acceptance for the newly active lineage/Photography/I.T./Movie authorities once D1 is active.
+3. Use real Devil n Dove Product photography to calibrate deterministic thresholds, duplicate distances and Product-set targets; then add optional vision-assisted subjective review.
+4. Continue Storefront Shop / Collections / Collages / Carousels and feed approved Photography Manager recommendations into merchandising deliberately rather than automatically.
 5. Continue Movie evidence cleanup, CAIP, Inventory/Supplies/Tools and Financials depth.
 
 ### Deferred I.T. acceptance carried forward
@@ -126,4 +143,4 @@ These do not freeze unrelated Release 448 source work, but deliberate Production
 
 ## Directional benefit
 
-Release 448 is moving the application from a collection of working features toward a **traceable operating system for the business**: Products know what materials and tools contributed to them; Inventory remains the single quantity authority; manufacturer and review provenance can be reused truthfully; images can be objectively triaged for reshoots; Movies stop accumulating guessed metadata; Storefront presentation logic is reused rather than cloned; and I.T. can see external-provider configuration state without spreading secrets through the database or admin UI.
+Release 448 is moving the application from a collection of working features toward a **traceable operating system for the business**: Products know what materials and tools contributed to them; Inventory remains the single quantity authority; manufacturer and review provenance can be reused truthfully; photography can be ranked into hero/gallery/improve/reshoot queues with duplicate evidence; Movies stop accumulating guessed metadata; Storefront presentation logic is reused rather than cloned; and I.T. can see external-provider configuration state without spreading secrets through the database or admin UI.
