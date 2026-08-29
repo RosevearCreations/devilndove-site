@@ -38,11 +38,19 @@ All three are source/local/transport gated. None may be called remotely applied 
 
 The guarded workflow remains unable to pass its first credential guard because GitHub Actions has no `CLOUDFLARE_API_TOKEN` secret. Earlier guarded execution proved that no migration read/write follows that missing-credential guard. Never put this token in chat/source; it belongs only in secure GitHub Actions secret storage.
 
-Fresh-install composition is now explicitly gated by:
+Fresh-install composition is explicitly gated by:
 
 `python scripts/release448_fresh_install_gate.py`
 
-This applies `database_full_schema.sql` followed by all three current Release 448 migrations to a fresh local SQLite database, requires the current authorities and clean foreign keys, and prevents incremental Development from silently diverging from a rebuildable current database.
+The authoritative composition order is:
+
+1. `database_full_schema.sql` — aggregate historical/base schema
+2. `database_platform_convergence.sql` — verified Release 447 five-module / role / explicit I.T.-manager convergence baseline
+3. `database_release448_product_lineage.sql`
+4. `database_release448_media_it.sql`
+5. `database_release448_storefront_merchandising.sql`
+
+The first version of this gate deliberately exposed that the old aggregate alone did not contain `app_role_module_access` and `app_user_module_managers`; those are correctly owned by the verified Release 447 convergence migration. The gate was corrected to compose the real current authority rather than weakening its expectations. It now requires the five canonical modules, 10 canonical role-module rows, one active explicit I.T. manager, all current Release 448 authorities and clean foreign keys.
 
 ## Storefront merchandising — Shop / Collections / Collages / Carousels
 
