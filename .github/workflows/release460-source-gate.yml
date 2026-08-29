@@ -7,6 +7,7 @@ on:
       - 'functions/api/_lib/oauthSecurity.js'
       - 'functions/api/_lib/oauthProviders.js'
       - 'functions/api/_lib/socialPublishContracts.js'
+      - 'functions/api/_lib/paymentWebhookSecurity.js'
       - 'functions/api/admin/oauth-start.js'
       - 'functions/api/admin/oauth-connections.js'
       - 'functions/api/admin/provider-publication-plan.js'
@@ -14,6 +15,8 @@ on:
       - 'functions/api/admin/social-post-queue.js'
       - 'functions/api/admin/social-product-automation.js'
       - 'functions/api/social/oauth/**'
+      - 'functions/api/stripe-webhook.js'
+      - 'functions/api/paypal-webhook.js'
       - 'migrations/dev/20260829_release460_secure_oauth_lifecycle.sql'
       - 'scripts/release460_*'
       - 'scripts/repository_forward_sanity.py'
@@ -48,6 +51,10 @@ jobs:
         run: node scripts/release460_provider_contract_mock_proof.mjs
       - name: Release 460 non-executing publication validation proof
         run: node scripts/release460_publish_contract_mock_proof.mjs
+      - name: Release 460 payment webhook fail-closed source gate
+        run: python scripts/release460_payment_webhook_gate.py
+      - name: Release 460 payment webhook security mock proof
+        run: node scripts/release460_payment_webhook_security_proof.mjs
       - name: Carry Release 459 provider/runtime authority
         run: python scripts/release459_runtime_acceptance_gate.py
       - name: JavaScript syntax
@@ -55,6 +62,7 @@ jobs:
           node --check functions/api/_lib/oauthSecurity.js
           node --check functions/api/_lib/oauthProviders.js
           node --check functions/api/_lib/socialPublishContracts.js
+          node --check functions/api/_lib/paymentWebhookSecurity.js
           node --check functions/api/admin/oauth-start.js
           node --check functions/api/admin/oauth-connections.js
           node --check functions/api/admin/provider-publication-plan.js
@@ -63,8 +71,11 @@ jobs:
           node --check functions/api/admin/social-product-automation.js
           node --check functions/api/social/oauth/_callback.js
           node --check functions/api/social/oauth/etsy/callback.js
+          node --check functions/api/stripe-webhook.js
+          node --check functions/api/paypal-webhook.js
           node --check scripts/release460_provider_contract_mock_proof.mjs
           node --check scripts/release460_publish_contract_mock_proof.mjs
+          node --check scripts/release460_payment_webhook_security_proof.mjs
       - name: Production and provider boundary proof
         run: |
           python - <<'PY'
