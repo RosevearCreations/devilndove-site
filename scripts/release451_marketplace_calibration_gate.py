@@ -21,9 +21,21 @@ for expected in ('provider_setup','publication_disabled','image_depth','taxonomy
 require('fetch(' not in helper,'calibration helper must not contact providers')
 require('CREATE TABLE' not in helper.upper() and 'ALTER TABLE' not in helper.upper(),'calibration helper must not mutate schema')
 
-api=has('functions/api/admin/marketplace-calibration.js','mode:\'read-only-marketplace-calibration\'','request_time_schema_mutation:false','provider_execution_allowed:false','publication_allowed:false','commerce_transaction_costs','evaluateMarketplaceCalibration')
+api=has('functions/api/admin/marketplace-calibration.js',
+    "mode:'read-only-marketplace-calibration'",'request_time_schema_mutation:false','provider_execution_allowed:false','publication_allowed:false',
+    'commerce_transaction_costs','evaluateMarketplaceCalibration','pr.product_id=p.product_id','selected_image_urls_json',
+    'provider_key,marketplace_key,provider_reference,transaction_date,currency','provider_fee_cents,marketplace_fee_cents,currency_conversion_fee_cents,shipping_cost_cents')
 require('CREATE TABLE' not in api.upper() and 'ALTER TABLE' not in api.upper(),'calibration API must not perform request-time DDL')
 require('fetch(' not in api,'calibration API must not contact marketplace providers')
+for forbidden in ('marketplace_channel','payout_reference','amount_cents','occurred_at','pr.id=p.product_id','channel_key,product_id,image_url'):
+    require(forbidden not in api,f'calibration API contains stale/non-authoritative D1 read contract {forbidden!r}')
+
+migration449=text('migrations/dev/20260829_release449_corporate_commerce.sql')
+for marker in ('provider_key TEXT','marketplace_key TEXT','provider_reference TEXT','transaction_date TEXT NOT NULL','provider_fee_cents INTEGER','marketplace_fee_cents INTEGER','currency_conversion_fee_cents INTEGER','shipping_cost_cents INTEGER'):
+    require(marker in migration449,f'Release 449 commerce authority missing expected column {marker!r}')
+migration450=text('migrations/dev/20260829_release450_marketplace_seo_readiness.sql')
+for marker in ('channel TEXT NOT NULL','product_id INTEGER NOT NULL','selected_image_urls_json TEXT','channel_key TEXT NOT NULL','marketplace_listing_profiles'):
+    require(marker in migration450,f'Release 450 marketplace authority missing expected column {marker!r}')
 
 page=has('admin/marketplace-calibration/index.html','noindex,nofollow','/css/admin-marketplace-calibration.css?v=450.451','/public/js/admin-marketplace-calibration.js?v=450.451','Provider execution remains locked.')
 require(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'calibration admin page must have exactly one H1')
@@ -43,6 +55,7 @@ for gate in ('scripts/release450_marketplace_seo_gate.py','scripts/public_seo_ga
 
 print('RELEASE 451 MARKETPLACE CALIBRATION GATE')
 print('Calibration checks: 26')
+print('Release 449/450 D1 read contracts: PINNED')
 print('Etsy draft/personalization/variation authority: CARRIED FORWARD')
 print('Commerce fee/payout completeness: READ ONLY')
 print('Provider execution/publication: DISABLED')
