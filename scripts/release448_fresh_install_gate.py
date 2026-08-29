@@ -32,9 +32,14 @@ with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
  if db.execute("SELECT COUNT(*) FROM app_modules WHERE module_key IN ('storefront','creators','socials','financials','it-platform')").fetchone()[0]!=5:raise SystemExit('FAIL — canonical module baseline did not survive fresh-install composition')
  if db.execute("SELECT COUNT(*) FROM app_module_role_access WHERE module_key IN ('storefront','creators','socials','financials','it-platform')").fetchone()[0]!=10:raise SystemExit('FAIL — verified Release 447 canonical role-module baseline did not survive fresh-install composition')
  if db.execute("SELECT COUNT(*) FROM app_module_role_access WHERE module_key='it-platform' AND is_allowed<>0").fetchone()[0]!=0:raise SystemExit('FAIL — I.T. role authority must remain explicit-user only')
- if db.execute("SELECT COUNT(*) FROM app_module_user_access WHERE module_key='it-platform' AND is_allowed=1 AND access_level='manage'").fetchone()[0]!=1:raise SystemExit('FAIL — verified Release 447 explicit I.T. manager baseline did not survive fresh-install composition')
+ active_admins=db.execute("SELECT COUNT(*) FROM users WHERE is_active=1 AND lower(trim(role))='admin'").fetchone()[0]
+ it_managers=db.execute("SELECT COUNT(*) FROM app_module_user_access WHERE module_key='it-platform' AND is_allowed=1 AND access_level='manage'").fetchone()[0]
+ if active_admins==0 and it_managers!=0:raise SystemExit('FAIL — fresh database created an I.T. manager without an active admin user')
+ if active_admins>0 and it_managers<1:raise SystemExit('FAIL — active admin exists but explicit I.T. manager bootstrap is missing')
+ if db.execute("SELECT COUNT(*) FROM app_module_user_access a LEFT JOIN users u ON u.user_id=a.user_id WHERE a.module_key='it-platform' AND a.is_allowed=1 AND a.access_level='manage' AND u.user_id IS NULL").fetchone()[0]!=0:raise SystemExit('FAIL — orphan I.T. manager grant found')
 print('RELEASE 448 COMPOSED FRESH INSTALL: PASS')
 print('Base aggregate + Release 447 platform convergence + all Release 448 migrations: COMPATIBLE')
-print('Canonical modules / role rows / explicit I.T. manager: VERIFIED')
+print('Canonical modules / role rows / explicit-user-only I.T. authority: VERIFIED')
+print(f'Fresh-install active admins: {active_admins}; explicit I.T. managers: {it_managers}')
 print('Required Release 448 tables: PRESENT')
 print('Foreign keys: CLEAN')
