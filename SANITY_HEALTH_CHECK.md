@@ -1,34 +1,76 @@
-# Sanity Health Check — Release 458
+# Devil n Dove — Sanity / Health Check
 
-Updated: 2026-08-29
+## Current release
+**Release 459 — Authenticated Development Acceptance & Provider Setup Authority**
 
-- Current branch: `dev`
-- Current release: **458 — Creators / CAIP Private Media, Evidence & Reviewed Handoff Depth**
-- Development Pages: `devilndove-site-dev` / `https://devilndove-site-dev.pages.dev`
-- Development Pages Production deployment: writable Development application
-- Separate live Production: LOCKED / untouched
-- Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
-- Release 458 migration: **NONE**
-- Last independently verified schema release: **453**
-- Release 453 mutation / verifier: `33258377328` / `33258415391`
-- Release 457 exact head: `33f939c8b6daa733e8a54fa8ded15cde626978a0`
-- Release 457 Source / System: `33264872362` / `33264872366` — SUCCESS
-- Release 457 Cloudflare Pages check: `99133095306` — SUCCESS
-- CAIP private R2 binding: `CAIP_PRIVATE_MEDIA_BUCKET` → `devilndove-caip-media-dev`
-- Temporal evidence authority: `creative_media_evidence_ranges`
-- Story evidence/link authority: `creative_story_evidence` + `creative_story_segment_evidence_links`
-- Processing artifact authority: `caip_media_processing_artifacts`
-- Reviewed Content Studio handoff: `caip_content_handoffs` + `caip_content_handoff_evidence`
-- Parallel Release 458 CAIP schema: **FORBIDDEN / NOT REQUIRED**
-- Private original copy/overwrite during review/handoff: FORBIDDEN
-- Stale/empty Content Studio package review: FORBIDDEN
-- Processing completion without verified output artifact: FORBIDDEN
-- Release 457 Financials protections: carried forward
-- Release 456 Inventory/Tool protections: carried forward
-- Release 455 Storefront/SEO protections: carried forward
-- Release 454 Admin convergence: carried forward
-- Provider execution/publication: CLOSED
-- `wrangler.toml account_id`: FORBIDDEN
-- Historical migration replay: FORBIDDEN
+## Hard boundaries
+- [ ] Source branch is `dev`.
+- [ ] Pages target is `devilndove-site-dev`.
+- [ ] Development URL is `https://devilndove-site-dev.pages.dev`.
+- [ ] D1 binding is `DB`.
+- [ ] D1 is exactly `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
+- [ ] `PRODUCT_MEDIA_BUCKET` points to `devilndove-toolshed-images-dev`.
+- [ ] `CAIP_PRIVATE_MEDIA_BUCKET` points to `devilndove-caip-media-dev`.
+- [ ] `wrangler.toml` contains no `account_id`.
+- [ ] Separate live `main` / `devilndove-site` mutation is unavailable.
+- [ ] Provider execution/publication is closed.
 
-Release 458 focused Source Gate and canonical System Gate must be green on the exact final `dev` SHA before the release is called source-proven. Authenticated CAIP private-media acceptance remains a separate next-stage requirement after source convergence.
+## Previous exact checkpoint
+Release 458 must remain recorded as:
+- SHA `66b48f0445c74247972e14fbdaa0e215e3792fb7`
+- Source `33265953249`
+- System `33265953255`
+- Pages `99135984965`
+
+## Release 459 source sanity
+- [ ] `functions/api/_lib/releaseAuthority.js` reports Release 459.
+- [ ] `/admin/it-integrations/` has exactly one H1, is `noindex,nofollow`, and is I.T.-module owned.
+- [ ] `/api/admin/it-provider-setup-guide` is authenticated/read-only and never emits values.
+- [ ] Detailed provider setup covers Stripe, PayPal, Etsy, Pinterest, Meta, X, TikTok and YouTube.
+- [ ] YouTube uses `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REDIRECT_URI`.
+- [ ] X uses `X_CLIENT_ID`, `X_CLIENT_SECRET`, `X_REDIRECT_URI`.
+- [ ] Runtime Acceptance page has exactly one H1 and is `noindex,nofollow`.
+- [ ] Core runtime manifest is GET-only.
+- [ ] `/api/admin/app-modules` is the current-release runtime anchor.
+- [ ] CAIP proof is separate, user-triggered, short-lived and source-preserving.
+- [ ] CAIP ranged read requires `206`, `Accept-Ranges: bytes` and `Content-Range`.
+- [ ] No autoplay/source copy/provider execution/publication is introduced.
+
+## Release 459 D1 sanity
+Current migration: `migrations/dev/20260829_release459_it_provider_setup_authority.sql`.
+
+Before mutation:
+- [ ] Release 459 Source Gate green on exact `dev` SHA.
+- [ ] exact Development D1 identity verified from Cloudflare;
+- [ ] migration convergence probed first;
+- [ ] historical migrations are not replayed.
+
+After mutation:
+- [ ] 8 provider setup authorities exist;
+- [ ] X authority exists and has at least 4 readiness checks;
+- [ ] Etsy safe refs remain `ETSY_API_KEYSTRING` / `ETSY_SHARED_SECRET` / redirect/shop refs;
+- [ ] YouTube safe refs are `YOUTUBE_*`, not stale `GOOGLE_*`;
+- [ ] provider readiness rows have no orphan provider keys;
+- [ ] foreign keys are clean;
+- [ ] `provider_setup_authorities` has no secret/token value columns;
+- [ ] Product/Accounting preservation baseline is unchanged;
+- [ ] read-only Release 459 remote verifier passes.
+
+## Gates
+- [ ] `python scripts/release459_runtime_acceptance_gate.py`
+- [ ] `python scripts/repository_forward_sanity.py`
+- [ ] `python scripts/development_runtime_acceptance.py --self-check`
+- [ ] carried Release 458/457/456/455/454/453 gates
+- [ ] repository hygiene
+- [ ] public SEO structure
+- [ ] public SEO depth
+- [ ] System Gate
+- [ ] exact Cloudflare Pages deployment
+
+## Manual tests are later
+Do not ask for provider credentials/authorization until automated preparation is exhausted. Next automated work after Release 459 proof is the secure OAuth state/PKCE/encrypted-token/refresh/disconnect lifecycle plus provider adapter/payload/idempotency preparation.
+
+Manual acceptance later includes authenticated runtime evidence, CAIP browser evidence, Stripe test, PayPal sandbox, Etsy provider authorization/draft and social/video provider authorization/controlled acceptance.
+
+## Release rule
+A new chat is not a migration event. A release is not complete merely because code exists. Source authority, gate evidence, exact Development deployment and required runtime/provider acceptance must agree before promotion.

@@ -1,54 +1,99 @@
-# Development Cloudflare Connection Authority — Release 458
+# Development Cloudflare Connection Authority
 
-Updated: 2026-08-29
+## Current authority — Release 459
+This file defines the only Cloudflare boundary for ongoing Devil n Dove Development work.
 
-## Exact Development identities
-
-- Git branch: `dev`
-- Writable Development Pages project: `devilndove-site-dev`
+### Source / Pages
+- GitHub branch: `dev`
+- Cloudflare Pages project: `devilndove-site-dev`
 - Development URL: `https://devilndove-site-dev.pages.dev`
-- The `devilndove-site-dev` Pages Production deployment is the Development application.
-- Separate live Production remains untouched until the full transition checklist is green and promotion is deliberate.
-- Cloudflare account ID: `c0d5bc25df16ae5b7d47c985c4b7b787`
-- D1 binding: `DB`
-- D1 database: `devilndove-dev`
-- D1 UUID: `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
-- D1 schema: independently verified through **Release 453**
-- Release 458 D1 migration: **NONE**
-- Release 453 guarded mutation: `33258377328`
-- Release 453 independent read-only verifier: `33258415391`
-- R2 `PRODUCT_MEDIA_BUCKET`: `devilndove-toolshed-images-dev`
-- R2 `CAIP_PRIVATE_MEDIA_BUCKET`: `devilndove-caip-media-dev`
-- GitHub D1 credential: `CLOUDFLARE_API_TOKEN`
+- The Pages **Production deployment of `devilndove-site-dev` is the Development application**.
+- Separate live `main` / `devilndove-site` is a different Production boundary and must remain untouched until deliberate promotion.
 
-Development was synchronized from locked live Production and is treated as data/content-current unless later verification proves drift.
+### Cloudflare account
+- Account ID used by approved tooling/CI: `c0d5bc25df16ae5b7d47c985c4b7b787`
+- Account selection belongs in local tooling/GitHub Actions environment, not repository runtime config.
+- `wrangler.toml` must never contain `account_id`.
 
-## Current release evidence carried forward
+### D1
+- binding: `DB`
+- database name: `devilndove-dev`
+- UUID: `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
 
-Release 457 closed on exact head `33f939c8b6daa733e8a54fa8ded15cde626978a0` with focused Source Gate `33264872362`, System Gate `33264872366`, and Cloudflare Pages check `99133095306` all successful.
+Before any D1 write, tooling must verify both exact name and UUID against Cloudflare. A matching friendly name without the expected UUID is insufficient.
 
-Release 458 is source-only. It deepens CAIP operator/readiness/handoff behavior over already-installed authorities and does not authorize D1 mutation.
+### R2
+- `PRODUCT_MEDIA_BUCKET` → `devilndove-toolshed-images-dev`
+- `CAIP_PRIVATE_MEDIA_BUCKET` → `devilndove-caip-media-dev`
 
-## Account selection
+Release 459 D1 work does not write either R2 bucket.
 
-`wrangler.toml` must **never** contain `account_id`. Local tooling and GitHub Actions pin `CLOUDFLARE_ACCOUNT_ID`; Cloudflare Pages Git deployment owns Pages account context.
+## Startup rule
+A new chat, workstation, clone or shell is **not** a migration event.
 
-Canonical local read-only preflight:
+Startup sequence:
+1. read `development-release.json`;
+2. read `AI_HANDOFF.md`;
+3. verify branch and Cloudflare identities read-only;
+4. use `python scripts/cloudflare_development_access.py --auth-only` or the approved transport preflight when local access is needed;
+5. do not replay historical migrations;
+6. only run the migration belonging to the active current release when the current source gate and exact resource checks authorize it.
 
-`python scripts/cloudflare_development_access.py --auth-only`
+## D1 checkpoint
+Before Release 459 migration, the independently verified durable checkpoint is Release 453:
+- guarded mutation run `33258377328`
+- read-only verifier run `33258415391`
 
-## Mandatory startup rule
+Releases 454–458 introduced no D1 migration. Release 458 exact source/deployment closure is:
+- SHA `66b48f0445c74247972e14fbdaa0e215e3792fb7`
+- Source Gate `33265953249`
+- System Gate `33265953255`
+- Pages check `99135984965`
 
-> **A new chat is not a migration event.**
+## Release 459 D1 permission
+Release 459 has one approved Development migration:
+`migrations/dev/20260829_release459_it_provider_setup_authority.sql`
 
-Never replay historical releases because a chat/workstation changed. Release 453 is already applied and independently verified. Releases 454–458 do not gain permission to mutate D1 merely because their release number is newer.
+It may change only safe provider setup/readiness metadata. It must not:
+- store credential or OAuth token values;
+- alter Product/Inventory/Accounting/CAIP business data;
+- write R2;
+- execute a provider action;
+- enable provider publication;
+- target separate live Production;
+- replay Release 447–453 migrations.
 
-Release 458 retains the established CAIP private-media/evidence/story/processing/handoff authorities. Do not create a parallel CAIP schema merely to match Release 458.
+Automation chain:
+1. `.github/workflows/release459-source-gate.yml`
+2. `.github/workflows/development-d1-release459.yml`
+3. `.github/workflows/release459-remote-verification.yml`
 
-Any future D1-bearing release must first prove a genuinely new durable authority, pass source/local gates, verify exact `devilndove-dev` name/UUID immediately before the write, perform only the new additive migration, and run a separate read-only remote verifier afterward.
+The mutation workflow verifies the exact D1 identity, requires the proven source head, probes whether Release 459 is already converged, captures a preservation baseline and applies only the current migration when required.
 
-## CAIP private-media boundary
+The remote verifier is read-only and verifies eight providers, X readiness, corrected Etsy/X/YouTube reference metadata, zero provider-orphan rows, clean foreign keys and zero secret-value columns.
 
-Private CAIP originals stay in the Development private R2 binding and are reviewed only through authenticated same-origin secure review. Release 458 handoff stores references, not copied media. Authenticated live private-media acceptance is still required after source convergence.
+## Secret/configuration boundary
+Actual provider values belong in Cloudflare Workers & Pages → `devilndove-site-dev` → Settings → Variables and Secrets.
 
-Separate live Production identifiers/mutation remain outside normal Development execution until deliberate promotion. The later Production convergence must not dismantle `dev` or `devilndove-site-dev.pages.dev`; they remain the ongoing Development path.
+D1/source/Markdown/browser output may contain only reference names such as `X_CLIENT_ID` or `YOUTUBE_REDIRECT_URI`, never their values.
+
+The detailed user-facing setup authority is `/admin/it-integrations/`, backed by `/api/admin/it-provider-setup-guide`.
+
+## Runtime acceptance boundary
+Core acceptance:
+- target only `https://devilndove-site-dev.pages.dev`;
+- authentication only from `DND_DEV_SESSION_COOKIE` for the command-line harness;
+- GET-only;
+- no D1/R2/provider mutation;
+- `/api/admin/app-modules` is the current Release 459 anchor.
+
+CAIP private-media proof is separate and explicit. It creates a short-lived same-origin administrator-bound secure review grant and tests bounded range streaming/metadata/seek. It never copies or overwrites the source object.
+
+## Production/provider lock
+Until deliberate transition:
+- Production promotion: **CLOSED**
+- provider execution: **CLOSED**
+- provider publication: **CLOSED**
+- live Production D1/R2 mutation from Development workflows: **UNAVAILABLE**
+
+Do not weaken these locks to make an acceptance test easier.

@@ -1,27 +1,41 @@
-# Markdown Authority Index — Release 458
+# Devil n Dove — Markdown Index
 
-Updated: 2026-08-29
+## Current authority — Release 459
+To reduce stale/conflicting handoffs, use this order:
 
-Current authority order:
+1. **`development-release.json`** — machine-readable current release, exact Development infrastructure, release history and queue.
+2. **`AI_HANDOFF.md`** — concise human/AI startup handoff and safety boundary.
+3. **`PROJECT_STATUS_AND_ROADMAP.md`** — active automated roadmap and later manual boundary.
+4. **`docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`** — exact Cloudflare/D1/R2 connection and mutation rules.
+5. **`docs/operations/RELEASE_459_RUNTIME_PROVIDER_AUTHORITY.md`** — Release 459 implementation, D1/provider setup and acceptance details.
+6. **`SANITY_HEALTH_CHECK.md`** — current sanity checklist.
 
-1. `development-release.json` — machine-readable Release 458 authority and D1-through-453 state.
-2. `AI_HANDOFF.md` — compact current handoff, exact Release 457 closure evidence and next work.
-3. `PROJECT_STATUS_AND_ROADMAP.md` — completed batches, active Release 458 scope, acceptance queue and later Production convergence.
-4. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` — exact Development D1/R2/account/deployment boundary.
-5. `docs/operations/RELEASE_458_CAIP_REVIEW_HANDOFF.md` — current CAIP private-media/evidence/readiness/handoff authority and safety rules.
-6. `docs/operations/RELEASE_457_FINANCIALS_OPERATIONS.md` — completed Financial Operations source release and exact closure evidence.
-7. `docs/operations/RELEASE_456_INVENTORY_TOOL_WORKFLOW.md` — carried-forward Inventory + Tool operational depth.
-8. `docs/operations/RELEASE_455_STOREFRONT_DISCOVERY.md` — carried-forward Storefront discovery/media/SEO protections.
-9. `docs/operations/RELEASE_454_ADMIN_CONVERGENCE.md` — carried-forward Admin convergence.
-10. `docs/operations/RELEASE_453_IT_PROVIDER_READINESS.md` — carried-forward provider/D1 authority; mutation `33258377328`, verifier `33258415391`.
-11. `SANITY_HEALTH_CHECK.md` — current validation and acceptance summary.
+These are the canonical current documents for **Release 459 — Authenticated Development Acceptance & Provider Setup Authority**.
 
-## Exact carried-forward closure evidence
+## Historical/supporting Markdown
+Older Release/Build documents remain useful for provenance, migrations and subsystem design, but they do not override the current files above.
 
-Release 457 closed on exact Development head `33f939c8b6daa733e8a54fa8ded15cde626978a0` with focused Source Gate `33264872362`, canonical System Gate `33264872366`, and Cloudflare Pages check `99133095306`, all successful on that same SHA.
+Rules:
+- do not infer current release state from an old Build/Release file;
+- do not replay a historical migration because its document still exists;
+- do not treat an old provider blocker as current if the Release 459 I.T. readiness authority has superseded it;
+- preserve old exact evidence when a carried-forward gate depends on it;
+- prefer updating one of the canonical files instead of creating another general-purpose handoff/roadmap Markdown.
 
-## Synchronization rule
+## Current exact boundaries
+- `dev` → `devilndove-site-dev` is Development.
+- The Pages Production deployment of `devilndove-site-dev` is the Development application.
+- Separate live `main` / `devilndove-site` remains closed.
+- D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
+- `account_id` never belongs in `wrangler.toml`.
+- Provider secret/token values never belong in D1/source/Markdown/browser output.
+- Provider execution/publication remains closed.
 
-A release is not converged if these current-authority documents disagree about the current release, D1 state, deployment boundary, exact prior-release evidence, or next queue. Update them in the release batch before exact-head closure.
+## Last completed exact checkpoint
+Release 458:
+- SHA `66b48f0445c74247972e14fbdaa0e215e3792fb7`
+- Source Gate `33265953249`
+- System Gate `33265953255`
+- Pages check `99135984965`
 
-Release 458 has **no D1 migration**. Development D1 remains independently verified through **Release 453**. Separate live Production and provider execution/publication remain closed.
+Release 459 is the active current release.

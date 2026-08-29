@@ -20,7 +20,9 @@ jobs:
         with: {node-version: '24'}
       - name: Validate current release and repository authority
         run: python scripts/repository_forward_sanity.py
-      - name: Validate Release 458 CAIP private-media/evidence/reviewed-handoff depth
+      - name: Validate Release 459 runtime/provider setup authority
+        run: python scripts/release459_runtime_acceptance_gate.py
+      - name: Validate Release 458 carried-forward CAIP private-media/evidence/reviewed-handoff depth
         run: python scripts/release458_caip_review_handoff_gate.py
       - name: Validate Release 457 carried-forward Financials reconciliation/commerce-cost/reporting depth
         run: python scripts/release457_financials_operations_gate.py
@@ -111,6 +113,7 @@ jobs:
           node --check functions/api/admin/release448-calibration.js
           node --check functions/api/admin/it-integrations.js
           node --check functions/api/admin/it-provider-readiness.js
+          node --check functions/api/admin/it-provider-setup-guide.js
           node --check functions/api/admin/storefront-merchandising.js
           node --check functions/api/admin/marketplace-export-preview.js
           node --check functions/api/admin/marketplace-csv-mapping.js
@@ -151,6 +154,8 @@ jobs:
           node --check public/js/admin-release448-calibration.js
           node --check public/js/admin-it-integrations.js
           node --check public/js/admin-it-provider-readiness.js
+          node --check public/js/admin-it-provider-setup-guide.js
+          node --check public/js/admin-runtime-acceptance.js
           node --check public/js/admin-caip-operations.js
           node --check public/js/admin-caip-content-handoff.js
           node --check public/js/admin-home-carousel.js
@@ -163,20 +168,17 @@ jobs:
           node --check functions/api/payment-providers.js
           node --check sw.js
       - name: Compile canonical Python gates
-        run: python -m py_compile scripts/repository_forward_sanity.py scripts/repository_hygiene_gate.py scripts/release458_caip_review_handoff_gate.py scripts/release457_financials_operations_gate.py scripts/release456_inventory_tool_workflow_gate.py scripts/release455_storefront_discovery_gate.py scripts/release454_admin_convergence_gate.py scripts/release453_it_provider_readiness_gate.py scripts/release452_application_streamlining_gate.py scripts/release451_marketplace_calibration_gate.py scripts/release450_marketplace_seo_gate.py scripts/verify_release450_remote_snapshot.py scripts/release448_expansion_authority_gate.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/release448_fresh_install_gate.py scripts/product_lineage_gate.py scripts/release448_media_it_source_gate.py scripts/release448_storefront_merchandising_gate.py scripts/release448_caip_content_handoff_gate.py scripts/release448_inventory_intelligence_gate.py scripts/release448_tool_lifecycle_gate.py scripts/release448_supply_sourcing_gate.py scripts/release448_calibration_gate.py scripts/release448_financials_depth_gate.py scripts/release448_promotion_rehearsal.py scripts/public_seo_gate.py scripts/public_seo_depth_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/apply_development_product_lineage.py scripts/apply_development_release448_media_it.py scripts/apply_development_release448_storefront_merchandising.py scripts/apply_development_release448_caip_content_handoff.py scripts/apply_development_release448_tool_lifecycle.py scripts/apply_development_release448_supply_sourcing.py scripts/development_runtime_acceptance.py
+        run: python -m py_compile scripts/repository_forward_sanity.py scripts/repository_hygiene_gate.py scripts/release459_runtime_acceptance_gate.py scripts/release458_caip_review_handoff_gate.py scripts/release457_financials_operations_gate.py scripts/release456_inventory_tool_workflow_gate.py scripts/release455_storefront_discovery_gate.py scripts/release454_admin_convergence_gate.py scripts/release453_it_provider_readiness_gate.py scripts/release452_application_streamlining_gate.py scripts/release451_marketplace_calibration_gate.py scripts/release450_marketplace_seo_gate.py scripts/verify_release450_remote_snapshot.py scripts/verify_release459_remote_snapshot.py scripts/release448_expansion_authority_gate.py scripts/module_architecture_gate.py scripts/database_platform_gate.py scripts/release448_fresh_install_gate.py scripts/product_lineage_gate.py scripts/release448_media_it_source_gate.py scripts/release448_storefront_merchandising_gate.py scripts/release448_caip_content_handoff_gate.py scripts/release448_inventory_intelligence_gate.py scripts/release448_tool_lifecycle_gate.py scripts/release448_supply_sourcing_gate.py scripts/release448_calibration_gate.py scripts/release448_financials_depth_gate.py scripts/release448_promotion_rehearsal.py scripts/public_seo_gate.py scripts/public_seo_depth_gate.py scripts/pwa_platform_gate.py scripts/product_inventory_tools_source_gate.py scripts/cloudflare_development_access.py scripts/apply_development_platform_convergence.py scripts/apply_development_product_lineage.py scripts/apply_development_release448_media_it.py scripts/apply_development_release448_storefront_merchandising.py scripts/apply_development_release448_caip_content_handoff.py scripts/apply_development_release448_tool_lifecycle.py scripts/apply_development_release448_supply_sourcing.py scripts/development_runtime_acceptance.py
       - name: Whitespace validation
         run: git diff --check
       - name: Safety statement
         run: |
-          echo 'Current release: 458 Creators / CAIP Private Media, Evidence & Reviewed Handoff Depth'
-          echo 'Release 458 D1 migration: NONE'
-          echo 'CAIP readiness projection: READ ONLY'
-          echo 'Stale/empty Content Studio handoff review: BLOCKED'
-          echo 'Private originals copied/overwritten: NO'
-          echo 'Development D1 schema: CURRENT / INDEPENDENTLY VERIFIED THROUGH RELEASE 453'
-          echo 'Release 453 guarded mutation proof: 33258377328'
-          echo 'Release 453 independent read-only proof: 33258415391'
-          echo 'Release 457 exact-head Source/System/Pages proof: 33264872362 / 33264872366 / 99133095306'
+          echo 'Current release: 459 Authenticated Development Acceptance & Provider Setup Authority'
+          echo 'Release 459 D1 migration: SAFE PROVIDER REFERENCE/CHECKLIST METADATA ONLY'
+          echo 'Release 458 exact closure: 33265953249 / 33265953255 / 99135984965'
+          echo 'Core runtime acceptance: GET ONLY'
+          echo 'CAIP secure-review source copy/overwrite: NO'
+          echo 'Development D1 current source checkpoint: independently verified through Release 453 before 459 migration'
           echo 'Development Pages target: devilndove-site-dev'
           echo 'Historical migration replay: FORBIDDEN'
           echo 'Provider execution/publication: DISABLED'

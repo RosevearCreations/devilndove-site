@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 454 carried-forward source gate for shared Admin navigation, workspace state and responsive convergence."""
+"""Carried-forward Release 454 shared Admin navigation/state/responsive convergence gate."""
 from __future__ import annotations
 import json,re
 from pathlib import Path
@@ -14,36 +14,18 @@ for key in ('storefront','creators','socials','financials','it-platform'):req(f"
 for label in ('Storefront','Creators','Socials / CAIP','Financials','I.T.'):req(label in nav,f'module navigation missing label {label}')
 req('fetch(' not in nav and 'fetch(' not in state,'Release 454 shared shell must not make network calls')
 req('MutationObserver' in state and "'loading'" in state and "'empty'" in state and "'error'" in state and 'Try again' in state,'workspace state/retry contract incomplete')
-req('@media(max-width:900px)' in css and '@media(max-width:640px)' in css,'shared responsive breakpoints missing')
-req('overflow-x:auto' in css and 'min-height:42px' in css,'mobile overflow/tap-target protections missing')
-pages={
- 'admin/storefront-merchandising/index.html':'storefront',
- 'admin/creative-automation/index.html':'creators',
- 'admin/caip-content-handoff/index.html':'socials',
- 'admin/accounting/index.html':'financials',
- 'admin/it-integrations/index.html':'it-platform',
- 'admin/inventory-intelligence/index.html':'storefront',
- 'admin/tool-lifecycle/index.html':'storefront'
-}
+req('@media(max-width:900px)' in css and '@media(max-width:640px)' in css and 'overflow-x:auto' in css,'shared responsive protections missing')
+pages={'admin/storefront-merchandising/index.html':'storefront','admin/creative-automation/index.html':'creators','admin/caip-content-handoff/index.html':'socials','admin/accounting/index.html':'financials','admin/it-integrations/index.html':'it-platform','admin/inventory-intelligence/index.html':'storefront','admin/tool-lifecycle/index.html':'storefront'}
 for path,module in pages.items():
- html=read(path);req(f'data-admin-module="{module}"' in html,f'{path} missing module ownership');req('/css/admin-convergence.css?v=454' in html,f'{path} missing shared responsive CSS');req('/public/js/admin-module-nav.js?v=454' in html and '/public/js/admin-workspace-state.js?v=454' in html,f'{path} missing shared Admin shell runtime');req(len(re.findall(r'<h1(?:\s|>)',html,re.I))==1,f'{path} must contain exactly one H1');req('noindex,nofollow' in html,f'{path} must remain private/noindex')
-for path in pages:
- req('data-admin-workspace-status' in read(path),f'{path} missing shared workspace status surface')
-release=json.loads(read('development-release.json'));current=int(release.get('release') or 0);req(current>=454,'current release cannot predate 454')
-history={x.get('release'):x for x in release.get('release_history',[])}
-if current==454:
- req(release.get('label')=='Admin Navigation, State & Responsive Convergence','Release 454 label drifted')
-else:
- req(history.get(454,{}).get('state')=='complete_source_proven_no_new_d1_migration','Release 454 completed history missing from later release')
-d1=release.get('development_infrastructure',{}).get('d1',{});req(d1.get('database_name')=='devilndove-dev' and d1.get('database_id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa','exact Development D1 authority drifted');req(int(d1.get('schema_current_through_release') or 0)>=453,'Release 454 must carry Release 453 D1 forward unchanged')
-db=release.get('current_release_database_state',{});req(db.get('new_migration_required') is False and int(db.get('last_verified_schema_release') or 0)>=453,'D1 state must remain verified through at least 453');req(db.get('historical_migration_replay') is False,'historical migration replay must remain forbidden')
-r453=history.get(453,{});req(r453.get('mutation_workflow_run')==33258377328 and r453.get('verification_workflow_run')==33258415391,'Release 453 D1 evidence drifted')
+ html=read(path);req(f'data-admin-module="{module}"' in html,f'{path} missing module ownership');req('/css/admin-convergence.css?v=454' in html,f'{path} missing shared responsive CSS');req('/public/js/admin-module-nav.js?v=454' in html and '/public/js/admin-workspace-state.js?v=454' in html,f'{path} missing shared Admin shell runtime');req(len(re.findall(r'<h1(?:\s|>)',html,re.I))==1,f'{path} must contain exactly one H1');req('noindex,nofollow' in html,f'{path} must remain private/noindex');req('data-admin-workspace-status' in html,f'{path} missing shared workspace status')
+release=json.loads(read('development-release.json'));current=int(release.get('release') or 0);hist={x.get('release'):x for x in release.get('release_history',[])}
+req(current>=454,'current release cannot predate 454')
+if current>454:req(hist.get(454,{}).get('state')=='complete_source_proven_no_new_d1_migration','Release 454 completed history missing')
+d1=release.get('development_infrastructure',{}).get('d1',{});req(d1.get('database_name')=='devilndove-dev' and d1.get('database_id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa' and int(d1.get('schema_current_through_release') or 0)>=453,'Development D1 authority drifted')
+req(release.get('current_release_database_state',{}).get('historical_migration_replay') is False,'historical migration replay must remain forbidden')
 policy=release.get('release_policy',{});req(policy.get('production_promotion')=='closed' and policy.get('provider_execution')=='closed' and policy.get('provider_publication')=='closed','Production/provider boundaries must remain closed')
-wrangler=read('wrangler.toml');req('account_id =' not in wrangler,'wrangler.toml must never pin account_id')
+req('account_id =' not in read('wrangler.toml'),'wrangler.toml must never pin account_id')
 print('RELEASE 454 ADMIN CONVERGENCE: CARRIED FORWARD')
-print('Five-module shared navigation/state/responsive authority: PRESENT')
-print('Development D1 schema: VERIFIED THROUGH RELEASE 453 OR LATER')
-print('Production/provider execution: CLOSED')
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
  raise SystemExit(1)

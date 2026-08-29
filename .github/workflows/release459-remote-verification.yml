@@ -1,0 +1,90 @@
+name: Release 459 Remote Verification
+
+on:
+  workflow_run:
+    workflows: ['Development D1 Release 459']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-development-d1:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Require exact successful mutation head
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_run" ]; then
+            expected='${{ github.event.workflow_run.head_sha }}'
+            actual="$(git rev-parse HEAD)"
+            test "${actual}" = "${expected}" || { echo "dev advanced from mutation head ${expected} to ${actual}; refusing stale verification."; exit 1; }
+          fi
+      - name: Protect exact Development connection authority
+        run: |
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          test -n "${CLOUDFLARE_API_TOKEN}"
+      - name: Verification-only workflow safety
+        run: |
+          ! grep -Eq -- '--file[[:space:]]|d1 migrations apply|INSERT[[:space:]]+INTO|UPDATE[[:space:]]+[a-zA-Z_]|DELETE[[:space:]]+FROM|CREATE[[:space:]]+TABLE|ALTER[[:space:]]+TABLE|DROP[[:space:]]+TABLE' .github/workflows/release459-remote-verification.yml
+          echo 'Release 459 verifier contains no mutation command.'
+      - name: Install pinned Wrangler
+        run: npm install --global wrangler@4.126.0
+      - name: Verify exact Development D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/release459-d1-info.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/release459-d1-info.json',encoding='utf-8'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values():yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v:yield from walk(x)
+          ids={str(x.get('uuid') or x.get('id') or '') for x in walk(data)}
+          names={str(x.get('name') or '') for x in walk(data)}
+          if os.environ['EXPECTED_DEV_D1_DATABASE_ID'] not in ids or os.environ['DEV_D1_DATABASE_NAME'] not in names:raise SystemExit('Refusing verification: exact Development D1 identity did not match.')
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Capture Release 459 read-only remote snapshot
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM provider_setup_authorities) AS release459_provider_count,
+            (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='x' AND environment='development') AS release459_x_check_count,
+            (SELECT COUNT(*) FROM it_provider_readiness_checks c LEFT JOIN provider_setup_authorities p ON p.provider_key=c.provider_key WHERE p.provider_key IS NULL) AS release459_unknown_provider_count,
+            (SELECT COUNT(*) FROM pragma_foreign_key_check) AS release459_foreign_key_violation_count,
+            (SELECT COUNT(*) FROM pragma_table_info('provider_setup_authorities') WHERE lower(name) IN ('secret','secret_value','api_key','access_token','refresh_token','client_secret','password','private_key')) AS release459_secret_column_count,
+            (SELECT COUNT(*) FROM provider_setup_authorities WHERE provider_key='youtube' AND instr(required_config_keys_json,'YOUTUBE_CLIENT_ID')>0 AND instr(required_config_keys_json,'YOUTUBE_CLIENT_SECRET')>0 AND instr(required_config_keys_json,'YOUTUBE_REDIRECT_URI')>0 AND instr(required_config_keys_json,'GOOGLE_CLIENT_ID')=0) AS release459_youtube_ref_ok,
+            (SELECT COUNT(*) FROM provider_setup_authorities WHERE provider_key='x' AND instr(required_config_keys_json,'X_CLIENT_ID')>0 AND instr(required_config_keys_json,'X_CLIENT_SECRET')>0 AND instr(required_config_keys_json,'X_REDIRECT_URI')>0) AS release459_x_ref_ok,
+            (SELECT COUNT(*) FROM provider_setup_authorities WHERE provider_key='etsy' AND instr(required_config_keys_json,'ETSY_API_KEYSTRING')>0 AND instr(required_config_keys_json,'ETSY_SHARED_SECRET')>0 AND instr(required_config_keys_json,'ETSY_REDIRECT_URI')>0) AS release459_etsy_ref_ok;" > /tmp/release459-remote-snapshot.json
+      - name: Verify Release 459 remote snapshot
+        run: python scripts/verify_release459_remote_snapshot.py /tmp/release459-remote-snapshot.json
+      - name: Read-only boundary
+        run: |
+          echo 'Verification mode: READ ONLY'
+          echo 'Target: devilndove-dev only'
+          echo 'Historical migration replay: NONE'
+          echo 'R2/provider/Production mutation command: NONE'

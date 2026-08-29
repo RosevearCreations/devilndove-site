@@ -1,0 +1,95 @@
+name: Release 459 Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/releaseAuthority.js'
+      - 'functions/api/admin/it-provider-setup-guide.js'
+      - 'public/js/admin-it-provider-setup-guide.js'
+      - 'css/it-provider-setup-guide.css'
+      - 'admin/it-integrations/**'
+      - 'admin/it-platform/**'
+      - 'admin/runtime-acceptance/**'
+      - 'public/js/admin-runtime-acceptance.js'
+      - 'css/runtime-acceptance.css'
+      - 'scripts/development_runtime_acceptance.py'
+      - 'scripts/release459_runtime_acceptance_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/release458_caip_review_handoff_gate.py'
+      - 'scripts/release456_inventory_tool_workflow_gate.py'
+      - 'scripts/release455_storefront_discovery_gate.py'
+      - 'scripts/release454_admin_convergence_gate.py'
+      - 'migrations/dev/20260829_release459_it_provider_setup_authority.sql'
+      - 'development-release.json'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'SANITY_HEALTH_CHECK.md'
+      - 'docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md'
+      - 'docs/operations/RELEASE_459_RUNTIME_PROVIDER_AUTHORITY.md'
+      - '.github/workflows/release459-source-gate.yml'
+      - '.github/workflows/development-d1-release459.yml'
+      - '.github/workflows/release459-remote-verification.yml'
+      - '.github/workflows/system-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Refuse non-Development branch
+        run: test "${GITHUB_REF_NAME}" = "dev"
+      - name: Validate Release 459 runtime/provider authority
+        run: python scripts/release459_runtime_acceptance_gate.py
+      - name: Validate current repository authority
+        run: python scripts/repository_forward_sanity.py
+      - name: Validate repository hygiene and SEO/privacy boundaries
+        run: python scripts/repository_hygiene_gate.py
+      - name: Carry Release 458 CAIP authority forward
+        run: python scripts/release458_caip_review_handoff_gate.py
+      - name: Carry Release 457 Financials authority forward
+        run: python scripts/release457_financials_operations_gate.py
+      - name: Carry Release 456 Inventory and Tool authority forward
+        run: python scripts/release456_inventory_tool_workflow_gate.py
+      - name: Carry Release 455 Storefront authority forward
+        run: python scripts/release455_storefront_discovery_gate.py
+      - name: Carry Release 454 Admin authority forward
+        run: python scripts/release454_admin_convergence_gate.py
+      - name: Carry Release 453 provider/D1 authority forward
+        run: python scripts/release453_it_provider_readiness_gate.py
+      - name: Validate runtime acceptance safety
+        run: python scripts/development_runtime_acceptance.py --self-check
+      - name: Validate public SEO structure/depth
+        run: |
+          python scripts/public_seo_gate.py
+          python scripts/public_seo_depth_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/_lib/releaseAuthority.js
+          node --check functions/api/admin/it-provider-setup-guide.js
+          node --check public/js/admin-it-provider-setup-guide.js
+          node --check public/js/admin-runtime-acceptance.js
+          node --check public/js/admin-it-platform.js
+      - name: Compile Release 459 Python authority
+        run: python -m py_compile scripts/release459_runtime_acceptance_gate.py scripts/repository_forward_sanity.py scripts/development_runtime_acceptance.py scripts/release458_caip_review_handoff_gate.py scripts/release456_inventory_tool_workflow_gate.py scripts/release455_storefront_discovery_gate.py scripts/release454_admin_convergence_gate.py scripts/verify_release459_remote_snapshot.py
+      - name: Whitespace validation
+        run: git diff --check
+      - name: Safety statement
+        run: |
+          echo 'Current release: 459 Authenticated Development Acceptance & Provider Setup Authority'
+          echo 'Release 458 exact closure: 33265953249 / 33265953255 / 66b48f0445c74247972e14fbdaa0e215e3792fb7 / Pages 99135984965'
+          echo 'Release 459 D1 change: SAFE PROVIDER REFERENCE/CHECKLIST METADATA ONLY'
+          echo 'Core runtime acceptance: GET ONLY'
+          echo 'CAIP source copy/overwrite: NO'
+          echo 'Provider execution/publication: DISABLED'
+          echo 'Separate live Production mutation capability: NONE'
