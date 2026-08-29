@@ -1,3 +1,4 @@
+# Final Release 453 exact-head checkpoint trigger; no application/D1 mutation.
 name: Release 453 Source Gate
 
 on:
