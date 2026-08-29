@@ -1,3 +1,5 @@
+import { requireGiftCardSchema } from './_lib/giftCardSchemaReadiness.js';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -7,30 +9,6 @@ function json(data, status = 200) {
 
 function normalizeText(value) {
   return String(value || '').trim();
-}
-
-async function ensureTables(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
-    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL UNIQUE,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
-    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
-    issued_to_email TEXT,
-    issued_to_name TEXT,
-    note TEXT,
-    status TEXT NOT NULL DEFAULT 'active',
-    expires_at TEXT,
-    last_redeemed_at TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_email TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_name TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_email TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_name TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_note TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_user_id INTEGER`).run().catch(() => null);
 }
 
 export async function onRequestPost(context) {
@@ -46,7 +24,17 @@ export async function onRequestPost(context) {
   const currency = normalizeText(body.currency || 'CAD').toUpperCase() || 'CAD';
   if (!code) return json({ ok: false, error: 'Gift card code is required.' }, 400);
 
-  await ensureTables(db);
+  const schema = await requireGiftCardSchema(db, { requiredTables: ['gift_cards'] });
+  if (!schema.ok) {
+    return json({
+      ok: false,
+      error: 'Gift-card service is temporarily unavailable while its schema is being prepared.',
+      error_code: schema.error_code || 'gift_card_schema_not_ready',
+      request_time_schema_mutation: false,
+      migration_authority: schema.readiness?.migration_authority || 'database_gift_card_runtime_parity.sql'
+    }, 503);
+  }
+
   const row = await db.prepare(`
     SELECT gift_card_id, code, currency, initial_amount_cents, remaining_amount_cents, status, expires_at
     FROM gift_cards
@@ -75,6 +63,8 @@ export async function onRequestPost(context) {
       initial_amount_cents: Number(row.initial_amount_cents || 0),
       remaining_amount_cents: remaining,
       applicable_discount_cents: applicable
-    }
+    },
+    request_time_schema_mutation: false,
+    migration_authority: schema.readiness?.migration_authority || 'database_gift_card_runtime_parity.sql'
   });
 }
