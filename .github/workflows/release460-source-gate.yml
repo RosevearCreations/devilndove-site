@@ -1,0 +1,68 @@
+name: Release 460 Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/oauthSecurity.js'
+      - 'functions/api/_lib/oauthProviders.js'
+      - 'functions/api/admin/oauth-start.js'
+      - 'functions/api/admin/oauth-connections.js'
+      - 'functions/api/social/oauth/**'
+      - 'migrations/dev/20260829_release460_secure_oauth_lifecycle.sql'
+      - 'scripts/release460_*'
+      - 'scripts/repository_forward_sanity.py'
+      - 'functions/api/_lib/releaseAuthority.js'
+      - 'development-release.json'
+      - 'docs/operations/RELEASE_460_SECURE_OAUTH_LIFECYCLE_AUTHORITY.md'
+      - '.github/workflows/release460-source-gate.yml'
+      - '.github/workflows/development-d1-release460.yml'
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secure-oauth-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Release 460 secure OAuth source and local D1 proof
+        run: python scripts/release460_secure_oauth_gate.py
+      - name: Release 460 executable cryptographic proof
+        run: node scripts/release460_oauth_crypto_proof.mjs
+      - name: Carry Release 459 provider/runtime authority
+        run: python scripts/release459_runtime_acceptance_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/_lib/oauthSecurity.js
+          node --check functions/api/_lib/oauthProviders.js
+          node --check functions/api/admin/oauth-start.js
+          node --check functions/api/admin/oauth-connections.js
+          node --check functions/api/social/oauth/_callback.js
+          node --check functions/api/social/oauth/etsy/callback.js
+      - name: Production and provider boundary proof
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('development-release.json',encoding='utf-8'))
+          p=x['release_policy'];e=x['current_release_evidence']
+          assert p['production_promotion']=='closed'
+          assert p['provider_execution']=='closed'
+          assert p['provider_publication']=='closed'
+          assert p['provider_live_authorization']=='closed'
+          assert p['oauth_remote_operator_switch']=='unset'
+          assert e['production_mutation'] is False
+          assert e['provider_live_authorization_enabled'] is False
+          assert e['oauth_remote_operator_switch_set'] is False
+          print('RELEASE 460 CLOSED BOUNDARY: PASS')
+          PY
+      - name: Whitespace validation
+        run: git diff --check
