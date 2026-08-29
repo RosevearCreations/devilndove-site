@@ -1,0 +1,179 @@
+name: Development D1 Release 450
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/dev/20260829_release450_marketplace_seo_readiness.sql'
+      - 'scripts/release450_marketplace_seo_gate.py'
+      - '.github/workflows/development-d1-release450.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migrate-development-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      REQUIRED_SOURCE_CHECKPOINT: 7b19941d5ab7befd6a50da3af57109c83bd968e0
+    steps:
+      - name: Development-only branch guard
+        run: |
+          test "${GITHUB_REF_NAME}" = "dev" || {
+            echo 'Refusing to run outside dev.'
+            exit 1
+          }
+
+      - name: Checkout Development source
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Require proven Release 450 source checkpoint
+        run: |
+          git merge-base --is-ancestor "${REQUIRED_SOURCE_CHECKPOINT}" HEAD || {
+            echo 'Proven Release 450 System Gate checkpoint is not an ancestor of this migration authority.'
+            exit 1
+          }
+          python scripts/release450_marketplace_seo_gate.py
+          python scripts/repository_forward_sanity.py
+
+      - name: Protect exact Development connection authority
+        run: |
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          if grep -q '^account_id[[:space:]]*=' wrangler.toml; then
+            echo 'account_id must not be restored to wrangler.toml.'
+            exit 1
+          fi
+          test -f migrations/dev/20260829_release450_marketplace_seo_readiness.sql
+          if grep -Eiq 'devilndove-site([^ -]|$)|production database' migrations/dev/20260829_release450_marketplace_seo_readiness.sql; then
+            echo 'Production identifier found in Release 450 Development migration authority.'
+            exit 1
+          fi
+
+      - name: Install pinned Wrangler
+        run: npm install --global wrangler@4.126.0
+
+      - name: Require Development Cloudflare credential
+        run: |
+          test -n "${CLOUDFLARE_API_TOKEN}" || {
+            echo 'CLOUDFLARE_API_TOKEN is missing. No D1 write was attempted.'
+            exit 1
+          }
+
+      - name: Verify exact Development D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/release450-d1-info.json
+          python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/release450-d1-info.json', encoding='utf-8'))
+          def walk(v):
+              if isinstance(v, dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v, list):
+                  for x in v: yield from walk(x)
+          ids={str(r.get('uuid') or r.get('id') or '') for r in walk(data)}
+          names={str(r.get('name') or '') for r in walk(data)}
+          expected_id=os.environ['EXPECTED_DEV_D1_DATABASE_ID']
+          expected_name=os.environ['DEV_D1_DATABASE_NAME']
+          if expected_id not in ids or expected_name not in names:
+              raise SystemExit(f'Refusing D1 mutation: expected {expected_name} ({expected_id}); received another resource.')
+          print(f'VERIFIED DEVELOPMENT D1: {expected_name} ({expected_id})')
+          PY
+
+      - name: Refuse blind Release 450 replay
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT COUNT(*) AS release450_core_table_count FROM sqlite_master WHERE type='table' AND name IN ('marketplace_channel_policies','marketplace_listing_profiles','marketplace_listing_validation_snapshots');" \
+            > /tmp/release450-preexist.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/release450-preexist.json', encoding='utf-8'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          row=next((x for x in walk(data) if 'release450_core_table_count' in x),None)
+          count=int((row or {}).get('release450_core_table_count') or 0)
+          if count:
+              raise SystemExit(f'Release 450 core schema already exists ({count}/3). Refusing replay; run read-only verification instead.')
+          print('RELEASE 450 REPLAY GUARD: PASS — core schema not active')
+          PY
+
+      - name: Capture pre-migration preservation baseline
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT
+              (SELECT COUNT(*) FROM products) AS product_count,
+              (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND (name='general_ledger_accounts' OR name LIKE 'accounting_%')) AS accounting_authority_table_count,
+              COALESCE((SELECT GROUP_CONCAT(name,'|') FROM (SELECT name FROM sqlite_master WHERE type='table' AND (name='general_ledger_accounts' OR name LIKE 'accounting_%') ORDER BY name)),'') AS accounting_authority_tables;" \
+            > /tmp/release450-before.json
+
+      - name: Apply only Release 450 additive Development migration
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml \
+            --file migrations/dev/20260829_release450_marketplace_seo_readiness.sql
+
+      - name: Capture post-migration preservation evidence
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT
+              (SELECT COUNT(*) FROM products) AS product_count,
+              (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND (name='general_ledger_accounts' OR name LIKE 'accounting_%')) AS accounting_authority_table_count,
+              COALESCE((SELECT GROUP_CONCAT(name,'|') FROM (SELECT name FROM sqlite_master WHERE type='table' AND (name='general_ledger_accounts' OR name LIKE 'accounting_%') ORDER BY name)),'') AS accounting_authority_tables,
+              (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('marketplace_channel_policies','marketplace_listing_profiles','marketplace_listing_validation_snapshots')) AS release450_core_table_count;" \
+            > /tmp/release450-after.json
+
+      - name: Verify additive preservation boundary
+        run: |
+          python - <<'PY'
+          import json
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          def row(path,key):
+              data=json.load(open(path,encoding='utf-8'))
+              return next((x for x in walk(data) if key in x),{})
+          before=row('/tmp/release450-before.json','product_count')
+          after=row('/tmp/release450-after.json','product_count')
+          for key in ('product_count','accounting_authority_table_count','accounting_authority_tables'):
+              if str(before.get(key,'')) != str(after.get(key,'')):
+                  raise SystemExit(f'Additive preservation failed for {key}: {before.get(key)!r} -> {after.get(key)!r}')
+          if int(after.get('release450_core_table_count') or 0) != 3:
+              raise SystemExit('Release 450 core schema was not created completely.')
+          print(f"Products preserved: {after.get('product_count')}")
+          print(f"Accounting authority tables preserved: {after.get('accounting_authority_table_count')}")
+          print('Release 450 core tables: 3/3')
+          PY
+
+      - name: Production and historical migration mutation unavailable
+        run: |
+          echo "Release 450 target: ${DEV_D1_DATABASE_NAME} (${EXPECTED_DEV_D1_DATABASE_ID})"
+          echo 'Release 447/448/449 migration replay: NO'
+          echo 'R2/provider writes: NONE'
+          echo 'Production app/database identifiers and mutation commands: UNAVAILABLE'
