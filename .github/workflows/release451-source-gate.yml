@@ -1,0 +1,47 @@
+name: Release 451 Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/marketplaceCalibration.js'
+      - 'functions/api/admin/marketplace-calibration.js'
+      - 'admin/marketplace-calibration/**'
+      - 'public/js/admin-marketplace-calibration.js'
+      - 'css/admin-marketplace-calibration.css'
+      - 'scripts/release451_marketplace_calibration_gate.py'
+      - 'scripts/public_seo_gate.py'
+      - 'scripts/public_seo_depth_gate.py'
+      - 'docs/operations/RELEASE_451_MARKETPLACE_CALIBRATION.md'
+      - '.github/workflows/release451-source-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Refuse non-Development branch
+        run: test "${GITHUB_REF_NAME}" = "dev"
+      - name: Validate Release 451 marketplace calibration
+        run: python scripts/release451_marketplace_calibration_gate.py
+      - name: Validate canonical repository authority
+        run: python scripts/repository_forward_sanity.py
+      - name: Validate whitespace
+        run: git diff --check
+      - name: Safety statement
+        run: |
+          echo 'Release 451 mode: read-only marketplace calibration'
+          echo 'New D1 migration: NONE'
+          echo 'Provider execution/publication: DISABLED'
+          echo 'Production mutation capability: NONE'
