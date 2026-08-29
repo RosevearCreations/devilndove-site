@@ -1,0 +1,59 @@
+name: Release 452 Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'development-release.json'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'shop/product/index.html'
+      - 'shop/index.html'
+      - 'collections/index.html'
+      - 'collages/index.html'
+      - 'sitemap.xml'
+      - 'public/js/product-breadcrumb-seo.js'
+      - 'admin/inventory-intelligence/index.html'
+      - 'admin/tool-lifecycle/index.html'
+      - 'admin/accounting/index.html'
+      - 'admin/caip-content-handoff/index.html'
+      - 'scripts/repository_hygiene_gate.py'
+      - 'scripts/release452_application_streamlining_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'docs/operations/RELEASE_452_APPLICATION_STREAMLINING.md'
+      - '.github/workflows/release452-source-gate.yml'
+      - '.github/workflows/system-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Refuse non-Development branch
+        run: test "${GITHUB_REF_NAME}" = "dev"
+      - name: Validate repository hygiene
+        run: python scripts/repository_hygiene_gate.py
+      - name: Validate Release 452 application streamlining
+        run: python scripts/release452_application_streamlining_gate.py
+      - name: Validate canonical repository authority
+        run: python scripts/repository_forward_sanity.py
+      - name: Validate whitespace
+        run: git diff --check
+      - name: Safety statement
+        run: |
+          echo 'Release 452 mode: application streamlining + UX/SEO depth'
+          echo 'D1 schema current through: Release 450'
+          echo 'New D1 migration: NONE'
+          echo 'Provider execution/publication: DISABLED'
+          echo 'Production mutation capability: NONE'
