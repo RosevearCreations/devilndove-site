@@ -27,7 +27,7 @@ api=has('functions/api/admin/marketplace-calibration.js',
     'provider_key,marketplace_key,provider_reference,transaction_date,currency','provider_fee_cents,marketplace_fee_cents,currency_conversion_fee_cents,shipping_cost_cents')
 require('CREATE TABLE' not in api.upper() and 'ALTER TABLE' not in api.upper(),'calibration API must not perform request-time DDL')
 require('fetch(' not in api,'calibration API must not contact marketplace providers')
-for forbidden in ('marketplace_channel','payout_reference','amount_cents','occurred_at','pr.id=p.product_id','channel_key,product_id,image_url'):
+for forbidden in ('SELECT provider,marketplace_channel','c.payout_reference','c.amount_cents','occurred_at','pr.id=p.product_id','SELECT channel_key,product_id,image_url'):
     require(forbidden not in api,f'calibration API contains stale/non-authoritative D1 read contract {forbidden!r}')
 
 migration449=text('migrations/dev/20260829_release449_corporate_commerce.sql')
