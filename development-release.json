@@ -1,17 +1,17 @@
 {
   "environment": "development",
-  "release": 454,
-  "label": "Admin Navigation, State & Responsive Convergence",
+  "release": 455,
+  "label": "Storefront Discovery, Media Fallback & SEO Depth",
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "admin_navigation_state_responsive_source_proven_no_new_d1_migration",
+  "convergence_state": "storefront_discovery_media_fallback_seo_depth_source_only",
   "previous_release": {
-    "release": 453,
-    "label": "I.T. Provider Readiness & Acceptance Authority",
-    "state": "complete_applied_independently_verified_and_source_proven_development",
+    "release": 454,
+    "label": "Admin Navigation, State & Responsive Convergence",
+    "state": "complete_source_proven_no_new_d1_migration",
     "completed_on": "2026-08-29",
-    "completion_note": "Release 453 added durable provider readiness authority and is independently verified on Development D1."
+    "completion_note": "Release 454 converged shared Admin navigation, state and responsive behavior without a D1 migration."
   },
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
@@ -29,6 +29,9 @@
     "cloudflare_account_id": "c0d5bc25df16ae5b7d47c985c4b7b787",
     "account_selection": "Local tooling/GitHub Actions pin CLOUDFLARE_ACCOUNT_ID. Cloudflare Pages Git deployment owns account context. Never add account_id to wrangler.toml.",
     "pages_project": "devilndove-site-dev",
+    "pages_url": "https://devilndove-site-dev.pages.dev",
+    "deployment_boundary": "The devilndove-site-dev Pages Production deployment is the Development application. The separate live Production site remains untouched until the controlled transition checklist is complete.",
+    "data_alignment": "Development was synchronized from the locked live site and is treated as current with live unless verification proves drift.",
     "d1": {"binding":"DB","database_name":"devilndove-dev","database_id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa","schema_current_through_release":453},
     "r2": [
       {"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},
@@ -40,8 +43,9 @@
     "startup_sequence": [
       "Read development-release.json and the Development Cloudflare connection authority first",
       "Confirm dev branch and exact Development D1/R2 identities read-only",
-      "A new chat is not a migration event; never replay Releases 447/448/449/450/453 merely because chat or workstation changed",
-      "Release 454 has no D1 migration; Release 453 remains the last verified schema release",
+      "A new chat is not a migration event; never replay historical migrations merely because chat or workstation changed",
+      "Release 455 has no D1 migration; Release 453 remains the last independently verified schema release",
+      "Treat devilndove-site-dev Pages Production deployment as Development; do not touch separate live Production until deliberate transition",
       "Run source/local gates before any genuinely new future D1 migration",
       "Verify exact devilndove-dev name and UUID immediately before any future write",
       "Run a separate read-only remote verifier after any future mutation",
@@ -76,7 +80,8 @@
     {"release":451,"state":"complete_source_proven_no_new_d1_migration","focused_source_gate_run":33252042376,"system_gate_run":33252156030},
     {"release":452,"state":"complete_source_proven_no_new_d1_migration","note":"Exact-head CI evidence retained externally in GitHub Actions."},
     {"release":453,"state":"complete_applied_independently_verified_and_source_proven_development","migration":"migrations/dev/20260829_release453_it_provider_readiness.sql","mutation_workflow_run":33258377328,"verification_workflow_run":33258415391,"source_gate_run":33259039855,"system_gate_run":33259039825},
-    {"release":454,"state":"complete_source_proven_no_new_d1_migration","migration":null,"note":"Shared Admin navigation/state/responsive convergence; exact-head focused Source Gate and canonical System Gate evidence remains external GitHub Actions evidence to avoid self-referential metadata commits."}
+    {"release":454,"state":"complete_source_proven_no_new_d1_migration","migration":null,"note":"Shared Admin navigation/state/responsive convergence; exact-head evidence remains external GitHub Actions evidence."},
+    {"release":455,"state":"complete_source_proven_no_new_d1_migration","migration":null,"note":"Storefront discovery/media fallback/accessibility/responsive/SEO source release. Exact-head focused Source Gate and System Gate evidence remains external GitHub Actions evidence."}
   ],
   "current_release_migrations": [],
   "current_release_database_state": {
@@ -84,14 +89,15 @@
     "last_verified_schema_release": 453,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "historical_migration_replay": false,
+    "release455_d1_change": "none",
     "release454_d1_change": "none",
     "release453_mutation_state": "applied_guarded_development_run_33258377328",
     "release453_verification_state": "independently_verified_read_only_run_33258415391"
   },
   "current_release_evidence": {
-    "source_state": "complete_source_proven",
-    "exact_head_evidence": "GitHub Actions Release 454 Source Gate and System Gate must both be green on the exact current dev SHA; run IDs remain external evidence to avoid self-referential metadata commits.",
-    "d1_mutation": "none_release454",
+    "source_state": "implemented_pending_exact_head_ci",
+    "exact_head_evidence": "GitHub Actions Release 455 Source Gate and System Gate must both be green on the exact current dev SHA; run IDs remain external evidence to avoid self-referential metadata commits.",
+    "d1_mutation": "none_release455",
     "d1_last_independent_verification_run": 33258415391,
     "provider_publication_enabled": false,
     "provider_execution_enabled": false,
@@ -101,14 +107,15 @@
     "repository_hygiene_gate": "required"
   },
   "workstreams": [
-    {"key":"admin-module-navigation","status":"release454_implemented","authority":"public/js/admin-module-nav.js"},
-    {"key":"admin-workspace-state","status":"release454_implemented","authority":"public/js/admin-workspace-state.js"},
-    {"key":"admin-responsive-convergence","status":"release454_implemented","authority":"css/admin-convergence.css"},
-    {"key":"storefront-merchandising","status":"release454_shell_converged","workspace":"/admin/storefront-merchandising/"},
+    {"key":"storefront-discovery","status":"release455_implemented","authority":"public/js/storefront-discovery-runtime.js"},
+    {"key":"storefront-merchandising","status":"release455_discovery_media_protected","workspace":"/admin/storefront-merchandising/"},
+    {"key":"admin-module-navigation","status":"release454_carried_forward","authority":"public/js/admin-module-nav.js"},
+    {"key":"admin-workspace-state","status":"release454_carried_forward","authority":"public/js/admin-workspace-state.js"},
+    {"key":"admin-responsive-convergence","status":"release454_carried_forward","authority":"css/admin-convergence.css"},
     {"key":"creators","status":"release454_shell_converged","workspace":"/admin/creative-automation/"},
     {"key":"socials-caip","status":"release454_shell_converged","workspace":"/admin/caip-content-handoff/"},
     {"key":"financials-accounting","status":"release454_shell_converged","workspace":"/admin/accounting/"},
-    {"key":"it-integration-registry","status":"release454_shell_converged_release453_authority","workspace":"/admin/it-integrations/"},
+    {"key":"it-integration-registry","status":"release453_authority_release454_shell_converged","workspace":"/admin/it-integrations/"},
     {"key":"inventory-operations-intelligence","status":"release454_shell_converged","workspace":"/admin/inventory-intelligence/"},
     {"key":"tool-lifecycle","status":"release454_shell_converged","workspace":"/admin/tool-lifecycle/"},
     {"key":"product-material-lineage","status":"carried_forward","workspace":"/admin/product-lineage/"},
@@ -118,8 +125,8 @@
     {"key":"supply-sourcing-replenishment","status":"carried_forward","workspace":"/admin/supply-sourcing/"},
     {"key":"release448-calibration","status":"carried_forward","workspace":"/admin/release448-calibration/"},
     {"key":"marketplace-calibration","status":"release451_source_proven_carried_forward","workspace":"/admin/marketplace-calibration/"},
-    {"key":"seo-compliance","status":"active_required_gate","authority":"scripts/public_seo_gate.py"},
-    {"key":"seo-depth","status":"active_required_gate","authority":"scripts/public_seo_depth_gate.py"},
+    {"key":"seo-compliance","status":"release455_active_required_gate","authority":"scripts/public_seo_gate.py"},
+    {"key":"seo-depth","status":"release455_active_required_gate","authority":"scripts/public_seo_depth_gate.py"},
     {"key":"repository-hygiene","status":"active_required_gate","authority":"scripts/repository_hygiene_gate.py"}
   ],
   "release454_batch": [
@@ -136,6 +143,20 @@
     {"id":11,"change":"Inventory and Tool operational shell convergence","status":"implemented"},
     {"id":12,"change":"Release 454 source gates with Release 453 D1 carried forward","status":"implemented"}
   ],
+  "release455_batch": [
+    {"id":1,"change":"Shared Shop/Product/Collections/Collages discovery runtime","status":"implemented"},
+    {"id":2,"change":"Broken/missing public image fallback to a local neutral Storefront placeholder","status":"implemented"},
+    {"id":3,"change":"Missing image alt-text derivation without overriding decorative media","status":"implemented"},
+    {"id":4,"change":"Lazy/eager decode handling for below-fold and priority media","status":"implemented"},
+    {"id":5,"change":"Responsive media containment and mobile thumbnail overflow","status":"implemented"},
+    {"id":6,"change":"44px Storefront media controls and reduced-motion protection","status":"implemented"},
+    {"id":7,"change":"Accessible live status/error semantics for Shop/Product discovery","status":"implemented"},
+    {"id":8,"change":"Thumbnail pressed-state accessibility","status":"implemented"},
+    {"id":9,"change":"Runtime duplicate-H1 fail-safe while source one-H1 gates remain authoritative","status":"implemented"},
+    {"id":10,"change":"Product canonical normalization away from pages.dev fallback URLs","status":"implemented"},
+    {"id":11,"change":"Product Open Graph/Twitter image-alt and metadata synchronization","status":"implemented"},
+    {"id":12,"change":"Release 455 focused gate plus carried-forward 454/453/system SEO protection","status":"implemented"}
+  ],
   "deferred_it_test_environment": {
     "state": "tracked_in_release453_readiness_authority",
     "tasks": [
@@ -148,12 +169,12 @@
     ]
   },
   "forward_queue": [
-    "Extend shared Release 454 Admin shell to remaining workspaces as they are touched",
-    "Storefront discovery/media/placeholder depth",
-    "Inventory and Tool workflow depth",
-    "Financials reconciliation and commerce-cost UX",
-    "Creators/CAIP private-media workflow depth",
-    "Authenticated Development runtime acceptance",
-    "Later deliberate Development-to-Production convergence while retaining dev as ongoing development environment"
+    "Inventory and Tool workflow depth using existing durable authorities",
+    "Financials reconciliation, commerce-cost and reporting workflow depth without duplicating the accounting ledger",
+    "Creators/CAIP private-media evidence workflow and reviewed Content Studio handoff",
+    "Authenticated Development runtime acceptance on devilndove-site-dev.pages.dev",
+    "Provider acceptance where credentials/environment permit",
+    "Full Development-to-Production transition checklist",
+    "Deliberate Development-to-Production convergence while retaining dev as the continuing Development environment"
   ]
 }

@@ -19,6 +19,14 @@ function isApiPath(pathname) {
 function isReadMethod(method) {
   return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase());
 }
+function normalizedPagePath(pathname) {
+  let path = String(pathname || '/');
+  if (!path.endsWith('/')) path += '/';
+  return path;
+}
+function isStorefrontDiscoveryPath(pathname) {
+  return ['/shop/', '/shop/product/', '/collections/', '/collages/'].includes(normalizedPagePath(pathname));
+}
 function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) {
   const headers = new Headers(response.headers);
   headers.set(RELEASE_HEADER, String(CURRENT_RELEASE));
@@ -31,11 +39,15 @@ function withPlatformClient(response, request) {
   if (String(request?.method || 'GET').toUpperCase() !== 'GET') return response;
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
   if (!contentType.includes('text/html')) return response;
+  const pathname = new URL(request.url).pathname;
   try {
     return new HTMLRewriter()
       .on('head', {
         element(element) {
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+          if (isStorefrontDiscoveryPath(pathname)) {
+            element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${CURRENT_RELEASE}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+          }
         },
       })
       .transform(response);

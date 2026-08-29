@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 454 source gate for shared Admin navigation, workspace state and responsive convergence."""
+"""Release 454 carried-forward source gate for shared Admin navigation, workspace state and responsive convergence."""
 from __future__ import annotations
 import json,re
 from pathlib import Path
@@ -27,10 +27,23 @@ pages={
 }
 for path,module in pages.items():
  html=read(path);req(f'data-admin-module="{module}"' in html,f'{path} missing module ownership');req('/css/admin-convergence.css?v=454' in html,f'{path} missing shared responsive CSS');req('/public/js/admin-module-nav.js?v=454' in html and '/public/js/admin-workspace-state.js?v=454' in html,f'{path} missing shared Admin shell runtime');req(len(re.findall(r'<h1(?:\s|>)',html,re.I))==1,f'{path} must contain exactly one H1');req('noindex,nofollow' in html,f'{path} must remain private/noindex')
-for path in ('admin/storefront-merchandising/index.html','admin/creative-automation/index.html','admin/caip-content-handoff/index.html','admin/accounting/index.html','admin/it-integrations/index.html','admin/inventory-intelligence/index.html','admin/tool-lifecycle/index.html'):
+for path in pages:
  req('data-admin-workspace-status' in read(path),f'{path} missing shared workspace status surface')
-release=json.loads(read('development-release.json'));req(release.get('release')==454,'current release must be 454');req(release.get('label')=='Admin Navigation, State & Responsive Convergence','Release 454 label drifted');req(release.get('current_release_migrations')==[],'Release 454 must not introduce a D1 migration');d1=release.get('development_infrastructure',{}).get('d1',{});req(d1.get('database_name')=='devilndove-dev' and d1.get('database_id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa','exact Development D1 authority drifted');req(d1.get('schema_current_through_release')==453,'Release 454 must carry Release 453 D1 forward unchanged');db=release.get('current_release_database_state',{});req(db.get('new_migration_required') is False and db.get('last_verified_schema_release')==453,'Release 454 D1 state must remain verified through 453');req(db.get('historical_migration_replay') is False,'historical migration replay must remain forbidden');history={x.get('release'):x for x in release.get('release_history',[])};r453=history.get(453,{});req(r453.get('mutation_workflow_run')==33258377328 and r453.get('verification_workflow_run')==33258415391,'Release 453 D1 evidence drifted');req(len(release.get('release454_batch',[]))==12 and all(x.get('status')=='implemented' for x in release.get('release454_batch',[])),'Release 454 batch is incomplete');policy=release.get('release_policy',{});req(policy.get('production_promotion')=='closed' and policy.get('provider_execution')=='closed' and policy.get('provider_publication')=='closed','Production/provider boundaries must remain closed');wrangler=read('wrangler.toml');req('account_id =' not in wrangler,'wrangler.toml must never pin account_id')
-print('RELEASE 454 ADMIN CONVERGENCE GATE');print('Five-module shared navigation: PRESENT');print('Workspace loading/empty/error/retry state: PRESENT');print('Tablet/mobile shared responsive shell: PRESENT');print('Development D1 migration: NONE');print('Development D1 schema: CARRIED FORWARD / VERIFIED THROUGH RELEASE 453');print('Production/provider execution: CLOSED')
+release=json.loads(read('development-release.json'));current=int(release.get('release') or 0);req(current>=454,'current release cannot predate 454')
+history={x.get('release'):x for x in release.get('release_history',[])}
+if current==454:
+ req(release.get('label')=='Admin Navigation, State & Responsive Convergence','Release 454 label drifted')
+else:
+ req(history.get(454,{}).get('state')=='complete_source_proven_no_new_d1_migration','Release 454 completed history missing from later release')
+d1=release.get('development_infrastructure',{}).get('d1',{});req(d1.get('database_name')=='devilndove-dev' and d1.get('database_id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa','exact Development D1 authority drifted');req(int(d1.get('schema_current_through_release') or 0)>=453,'Release 454 must carry Release 453 D1 forward unchanged')
+db=release.get('current_release_database_state',{});req(db.get('new_migration_required') is False and int(db.get('last_verified_schema_release') or 0)>=453,'D1 state must remain verified through at least 453');req(db.get('historical_migration_replay') is False,'historical migration replay must remain forbidden')
+r453=history.get(453,{});req(r453.get('mutation_workflow_run')==33258377328 and r453.get('verification_workflow_run')==33258415391,'Release 453 D1 evidence drifted')
+policy=release.get('release_policy',{});req(policy.get('production_promotion')=='closed' and policy.get('provider_execution')=='closed' and policy.get('provider_publication')=='closed','Production/provider boundaries must remain closed')
+wrangler=read('wrangler.toml');req('account_id =' not in wrangler,'wrangler.toml must never pin account_id')
+print('RELEASE 454 ADMIN CONVERGENCE: CARRIED FORWARD')
+print('Five-module shared navigation/state/responsive authority: PRESENT')
+print('Development D1 schema: VERIFIED THROUGH RELEASE 453 OR LATER')
+print('Production/provider execution: CLOSED')
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
  raise SystemExit(1)

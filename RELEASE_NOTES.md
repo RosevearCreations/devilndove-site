@@ -1,17 +1,27 @@
-# Development Release Notes — Build 446
+# Development Release Notes — Release 455
 
-## Repository deep retirement
+## Storefront Discovery, Media Fallback & SEO Depth
 
-Build 446 reduces the active Development repository to current runtime, current authority, current recovery and active operational tooling.
+Release 455 is the current Development release on `dev` / `devilndove-site-dev.pages.dev`.
 
-- Git history is now the historical archive; `docs/archive` and `docs/releases` are retired.
-- Historical root Build Markdown, obsolete verification SQL, superseded incremental `database_build*.sql`, temp placeholders and stale troubleshooting snapshots are retired.
-- `scripts/` is reduced from the long Build 190–445 evidence/test chain to current CI/D1 recovery plus three SEO bake utilities.
-- `database_full_schema.sql` remains the fresh-install aggregate authority.
-- Standalone Build 440/442/443 migrations/verifiers remain only because the current guarded Development recovery path still consumes them.
-- `scripts/repository_forward_sanity.py` and the single Build 446 system gate prevent historical bulk from returning.
-- Build 446 introduces no D1 migration and no provider/Production mutation.
+- Shop, Product, Collections and Collages now share a Storefront discovery runtime injected by the Pages middleware.
+- Broken or missing public Product media falls back to a local neutral SVG instead of leaving a broken image surface.
+- Missing non-decorative alt text is derived from nearby Product/Collection context.
+- Below-fold media receives lazy/asynchronous loading behavior while hero/main Product imagery retains priority treatment.
+- Responsive media containment, mobile thumbnail overflow, 44px interaction targets and reduced-motion behavior are protected.
+- Shop/Product status and error surfaces gain live-region semantics; thumbnails expose pressed state.
+- Source one-H1 gates remain authoritative, with a runtime duplicate-H1 defense for unexpected dynamic injection.
+- Product canonical fallback URLs are normalized away from `pages.dev` and Product Open Graph/Twitter metadata is synchronized as dynamic data loads.
+- The shared runtime release authority was corrected from stale Release 448 to the current Release 455.
 
-## Forward status
+## Data and deployment boundary
 
-Carousel/I.T. schema proof where still missing, Stripe, PayPal and CAIP private-media evidence remain current Build 446 HOLDs. Separate live Production promotion remains closed.
+Release 455 introduces **no D1 migration**. Development D1 remains independently verified through Release 453; guarded mutation `33258377328`, independent verifier `33258415391`.
+
+The writable application is the `devilndove-site-dev` Cloudflare Pages project at `https://devilndove-site-dev.pages.dev`. Its Pages Production deployment is our Development application. The separate live Production site remains untouched until the full transition checklist is green and promotion is deliberate.
+
+The Development environment was synchronized from the locked live site and is treated as current with live unless later verification proves drift.
+
+## Next
+
+Inventory + Tools workflow depth is next, followed by Financials depth, Creators/CAIP depth, authenticated Development acceptance, provider acceptance, and finally controlled Development-to-Production convergence while keeping `dev` as ongoing Development.
