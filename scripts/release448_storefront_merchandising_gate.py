@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 448 Storefront Shop / Collections / Collages convergence gate."""
 from pathlib import Path
-import sqlite3,tempfile,re
+import sqlite3,tempfile,re,subprocess
 ROOT=Path(__file__).resolve().parents[1]
 def need(path,needle):
  text=(ROOT/path).read_text(encoding='utf-8')
@@ -37,9 +37,30 @@ with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
  handmade=db.execute("SELECT storefront_collection_id FROM storefront_collections WHERE slug='handmade'").fetchone()[0]
  db.execute("INSERT INTO storefront_collection_products(storefront_collection_id,product_id,membership_status) VALUES(?,?,?)",(handmade,1,'included'))
  if db.execute('PRAGMA foreign_key_check').fetchall():raise SystemExit('FAIL — Storefront migration foreign keys are not clean')
+
+# Forward admin usability regression: one shared contextual-help implementation serves
+# Storefront, CAIP, Tools, Supplies, Accounting and I.T. without acquiring write authority.
+context=need('public/js/admin-context-help.js',"trigger.textContent = 'ⓘ'")
+bootstrap=need('public/js/site-auth-ui.js','/public/js/admin-context-help.js?v=448-context-help')
+context_css=need('css/admin-context-help.css','.dd-context-help-trigger:focus-visible')
+for needle in ["trigger.type = 'button'",'aria-controls','aria-expanded',"event.key === 'Escape'","document.addEventListener('click'",'MutationObserver','[data-context-help]','data-context-help-text']:
+ if needle not in context:raise SystemExit(f'FAIL — shared admin contextual help missing {needle!r}')
+for key in ['carousel:','collection:','explicit_membership:','collage:','caip_handoff:','tool_lifecycle:','supply_sourcing:','accounting:','it_platform:','d1_r2_readiness:','provider_configuration:']:
+ if key not in context:raise SystemExit(f'FAIL — contextual-help library missing {key!r}')
+for path in ['/admin/home-carousel/','/admin/storefront-merchandising/','/admin/caip-content-handoff/','/admin/tool-lifecycle/','/admin/supply-sourcing/','/admin/accounting/','/admin/it-platform/']:
+ if path not in context:raise SystemExit(f'FAIL — contextual-help rules missing {path}')
+if 'fetch(' in context or 'apiFetch' in context:raise SystemExit('FAIL — contextual help must remain client-only and must not call APIs')
+if '<h1' in context.lower():raise SystemExit('FAIL — contextual help must not create public/admin H1 elements')
+if "window.location.pathname.startsWith('/admin')" not in bootstrap:raise SystemExit('FAIL — contextual-help bootstrap must remain admin-only')
+for needle in ['.dd-context-help-panel[hidden]','@media(max-width:700px)','@media(prefers-reduced-motion:reduce)']:
+ if needle not in context_css:raise SystemExit(f'FAIL — contextual-help CSS missing {needle!r}')
+subprocess.run(['node','--check',str(ROOT/'public/js/admin-context-help.js')],check=True)
+subprocess.run(['node','--check',str(ROOT/'public/js/site-auth-ui.js')],check=True)
+
 print('RELEASE 448 STOREFRONT MERCHANDISING GATE: PASS')
 print('Shop / Collections / Collages: ONE PRODUCT AUTHORITY')
 print('Public images: inherited from consent-gated /api/products projection')
 print('Collection metadata/membership: D1 ADDITIVE')
 print('Collage image binaries: NOT DUPLICATED')
 print('Public H1 count: 1 per Storefront page')
+print('Shared admin contextual help: ACCESSIBLE / CLIENT-ONLY / NO MUTATION')

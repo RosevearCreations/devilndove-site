@@ -1,0 +1,46 @@
+/* Devil n Dove shared admin contextual help. */
+.dd-context-help-trigger{
+  width:1.65rem;
+  height:1.65rem;
+  min-width:1.65rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:.35rem;
+  padding:0;
+  border:1px solid rgba(191,232,255,.55);
+  border-radius:999px;
+  background:rgba(46,168,255,.12);
+  color:var(--ice,#bfe8ff);
+  font:inherit;
+  font-size:.9rem;
+  line-height:1;
+  vertical-align:middle;
+  cursor:pointer;
+}
+.dd-context-help-trigger:hover{background:rgba(46,168,255,.22)}
+.dd-context-help-trigger[aria-expanded="true"]{background:rgba(255,122,24,.18);border-color:rgba(255,122,24,.55);color:var(--text,#f6f7fb)}
+.dd-context-help-trigger:focus-visible,.dd-context-help-close:focus-visible{outline:3px solid var(--ice,#bfe8ff);outline-offset:3px}
+.dd-context-help-panel{
+  margin:.55rem 0 1rem;
+  max-width:72ch;
+  padding:.85rem 1rem;
+  border:1px solid rgba(191,232,255,.35);
+  border-radius:12px;
+  background:#0f131a;
+  color:var(--text,#f6f7fb);
+  box-shadow:0 12px 30px rgba(0,0,0,.28);
+  font-size:.9rem;
+  line-height:1.55;
+}
+.dd-context-help-panel[hidden]{display:none!important}
+.dd-context-help-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.35rem}
+.dd-context-help-panel p{margin:.45rem 0;color:var(--muted,#aab3c2)}
+.dd-context-help-panel p:last-child{margin-bottom:0}
+.dd-context-help-close{width:auto;padding:.25rem .55rem;border:1px solid var(--border,#232a36);border-radius:8px;background:rgba(255,255,255,.04);color:var(--text,#f6f7fb);cursor:pointer;font:inherit;font-size:.78rem}
+label + .dd-context-help-trigger{margin:.4rem 0 .7rem .35rem}
+@media(max-width:700px){
+  .dd-context-help-trigger{width:1.9rem;height:1.9rem;min-width:1.9rem}
+  .dd-context-help-panel{max-width:100%;padding:.8rem .85rem}
+}
+@media(prefers-reduced-motion:reduce){.dd-context-help-trigger,.dd-context-help-panel{scroll-behavior:auto;transition:none}}

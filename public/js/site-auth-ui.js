@@ -3,6 +3,7 @@
 // Only an explicit 401/403 clears stored credentials. Cached identity is provisional until /api/auth/me verifies it.
 // Build 438: public/member navigation receives one bounded module-availability read; Admin has its own richer bootstrap.
 // The Application Modules recovery link remains visible to a verified/cached Admin even if Business Administration is disabled.
+// Forward enhancement: admin routes bootstrap the shared accessible contextual-help layer.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
@@ -167,7 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshAuthState();
 });
 
-if (!window.location.pathname.startsWith('/admin')) {
+if (window.location.pathname.startsWith('/admin')) {
+  void import('/public/js/admin-context-help.js?v=448-context-help')
+    .catch((error) => console.warn('[DD admin help] contextual help unavailable', error));
+} else {
   void import('/public/js/core/dd-public-module-visibility.mjs?v=440')
     .catch((error) => console.warn('[DD modules] public navigation module visibility unavailable', error));
 }
