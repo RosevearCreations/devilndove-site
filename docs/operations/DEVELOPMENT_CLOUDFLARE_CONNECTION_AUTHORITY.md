@@ -34,9 +34,9 @@ The repository gate treats adding `account_id` back to `wrangler.toml` as an err
 
 ## Authentication precedence
 
-For local Wrangler work, an environment `CLOUDFLARE_API_TOKEN` can take precedence over an OAuth login. That is why an apparently successful `wrangler login` can still produce authorization errors when a stale or wrong environment token exists.
+For local Wrangler work, an environment `CLOUDFLARE_API_TOKEN` can take precedence over an OAuth login. An apparently successful `wrangler login` can therefore still produce authorization errors when a stale or wrong environment token exists.
 
-The canonical helper is:
+Canonical read-only helper:
 
 ```text
 python scripts/cloudflare_development_access.py --auth-only
@@ -50,7 +50,7 @@ The helper:
 4. never prints credentials;
 5. has no Production mutation target.
 
-When OAuth needs to be tested deliberately instead of an inherited environment token:
+To deliberately test OAuth instead of inherited API credentials:
 
 ```text
 python scripts/cloudflare_development_access.py --auth-only --auth-mode oauth
@@ -67,32 +67,34 @@ A new chat must follow this order:
 5. Confirm `main`/live Production is not the target.
 6. Use **read-only** Development Cloudflare/D1/R2 identity checks first.
 7. Read the current-release migration/verification state before deciding whether D1 needs any write.
-8. Run source/local gates before authorizing a new migration.
-9. If a current release truly needs D1 mutation, verify the exact `devilndove-dev` identity immediately before the write.
-10. Apply **only the current additive migration**.
+8. Run source/local gates before authorizing a genuinely new migration.
+9. If a future current release truly needs D1 mutation, verify the exact `devilndove-dev` identity immediately before the write.
+10. Apply **only that new current additive migration**.
 11. Run a separate **read-only remote verifier** afterward.
-12. Record the successful migration/verification state in `development-release.json` and the active handoff docs.
+12. Record successful migration/verification state in `development-release.json` and active handoff docs.
 
 ## Do not replay historical migrations on startup
 
 The following rule is mandatory:
 
-> A new chat is not a migration event.
+> **A new chat is not a migration event.**
 
-Do **not** reapply Release 447, 448 or 449 merely because the conversation changed or because D1 connectivity had to be re-established.
+Do **not** reapply Release 447, 448, 449 or 450 merely because the conversation/workstation changed or D1 connectivity had to be re-established.
 
-Historical migration state is authority/provenance. A historical migration may be revisited only when read-only inspection proves actual schema drift that requires deliberate repair.
+Historical migration state is authority/provenance. Revisit a historical migration only if read-only inspection proves actual schema drift requiring deliberate repair.
 
-At the Release 450 starting point:
+Current proven Development history:
 
 - Release 447 Development platform baseline: applied and verified.
 - Release 448 platform expansion authorities: retained as regression authority.
 - Release 449 corporate/commerce migration: applied to exact Development D1 and independently verified by read-only workflow run `33235075008`.
-- Release 450 marketplace/SEO migration: current migration; its status must come from `development-release.json`, not assumptions.
+- Release 450 marketplace/SEO migration: applied to exact Development D1 by guarded workflow run `33235769850` and independently verified read-only by workflow run `33235803838`.
+
+Therefore, after Release 450, the default startup action is **verification/read of current state**, not SQL execution.
 
 ## Safe Development migration pattern
 
-Every new D1-changing release should use two separate authorities:
+Every future D1-changing release should use two separate authorities.
 
 ### 1. Guarded mutation workflow
 
@@ -103,14 +105,16 @@ It must:
 - require `CLOUDFLARE_API_TOKEN` without printing it;
 - use `wrangler d1 info` to prove both the exact D1 name and ID;
 - run source/local migration gates first;
+- include a blind-replay guard for the new release;
+- capture preservation evidence for existing authoritative areas where relevant;
 - apply one explicitly named current migration;
 - expose no Production database/project identifier or command.
 
 ### 2. Verification-only workflow
 
-It should be unable to apply a migration. It should read the exact Development D1 and prove the expected tables/configuration/integrity/state after mutation.
+It must be unable to apply a migration. It should read the exact Development D1 and prove the expected tables/configuration/state after mutation.
 
-Release 449 demonstrated why this split matters: a verification-collector issue should never imply that the migration should be blindly replayed.
+Release 449 demonstrated why this split matters: a verification-collector issue must never imply that a migration should be blindly replayed. Release 450 additionally demonstrated the preferred replay guard + preservation baseline + independent verifier pattern.
 
 ## Troubleshooting authorization
 
@@ -119,14 +123,14 @@ If D1/R2 access fails:
 - Do **not** change the database ID to make Wrangler accept a different resource.
 - Do **not** add `account_id` to `wrangler.toml`.
 - Check whether `CLOUDFLARE_API_TOKEN` is present and belongs to the Development account.
-- Remember that environment API credentials may override OAuth.
+- Remember environment API credentials may override OAuth.
 - Run the canonical read-only access preflight.
-- If deliberately testing OAuth, use the helper's `--auth-mode oauth` option so inherited API credentials are suppressed for that process.
-- A connection failure is not evidence that D1 needs migration.
+- If deliberately testing OAuth, use `--auth-mode oauth` so inherited API credentials are suppressed for that process.
+- A connection failure is **not** evidence that D1 needs migration.
 
 ## Safety boundary
 
-Development work may mutate the exact Development D1 only through a deliberate guarded current-release workflow.
+Development work may mutate the exact Development D1 only through a deliberate guarded **new current-release** workflow.
 
 It must not mutate:
 
@@ -137,8 +141,10 @@ It must not mutate:
 
 ## Related authorities
 
-- `development-release.json` — current machine-readable release state.
+- `development-release.json` — current machine-readable release/migration state.
+- `AI_HANDOFF.md` — compact current handoff.
+- `PROJECT_STATUS_AND_ROADMAP.md` — current work/next sequence.
 - `wrangler.toml` — Development Pages/D1/R2 bindings; no `account_id`.
 - `scripts/cloudflare_development_access.py` — canonical read-only identity/access preflight.
-- `.github/workflows/system-gate.yml` — canonical source/regression safety gate.
-- Release-specific D1 workflow — only when the current release actually has an additive migration ready to apply.
+- `.github/workflows/system-gate.yml` — canonical source/regression/SEO safety gate.
+- Release-specific D1 workflow — only when a genuinely new current additive migration is ready.
