@@ -8,8 +8,11 @@ on:
       - 'RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql'
       - 'database_release448_media_it.sql'
       - 'RELEASE448_MEDIA_IT_VERIFICATION.sql'
+      - 'database_release448_storefront_merchandising.sql'
+      - 'RELEASE448_STOREFRONT_MERCHANDISING_VERIFICATION.sql'
       - 'scripts/apply_development_product_lineage.py'
       - 'scripts/apply_development_release448_media_it.py'
+      - 'scripts/apply_development_release448_storefront_merchandising.py'
       - '.github/workflows/development-d1-release448.yml'
   workflow_dispatch:
 
@@ -49,10 +52,14 @@ jobs:
         run: python scripts/apply_development_product_lineage.py
       - name: Apply and verify media quality Movie review and I.T. registry
         run: python scripts/apply_development_release448_media_it.py
+      - name: Apply and verify Storefront Collections and Collages
+        run: python scripts/apply_development_release448_storefront_merchandising.py
       - name: Final read-only Product lineage verification
         run: python scripts/apply_development_product_lineage.py --verify-only
       - name: Final read-only media and I.T. verification
         run: python scripts/apply_development_release448_media_it.py --verify-only
+      - name: Final read-only Storefront merchandising verification
+        run: python scripts/apply_development_release448_storefront_merchandising.py --verify-only
       - name: Safety statement
         run: |
           echo 'Target: devilndove-dev only'
