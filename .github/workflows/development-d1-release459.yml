@@ -1,15 +1,8 @@
 name: Development D1 Release 459
 
+# Historical/converged D1 authority. Never auto-run from source or authority edits.
+# Use manual dispatch only after read-only verification proves actual Release 459 drift.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/dev/20260829_release459_it_provider_setup_authority.sql'
-      - 'functions/api/_lib/releaseAuthority.js'
-      - 'scripts/release459_runtime_acceptance_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'development-release.json'
-      - '.github/workflows/development-d1-release459.yml'
   workflow_dispatch:
 
 permissions:
@@ -34,18 +27,11 @@ jobs:
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
-      - name: Refuse non-Development or stale source
+      - name: Refuse non-Development source
         shell: bash
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "dev"
-          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
-            actual="$(git rev-parse HEAD)"
-            test "${actual}" = "${GITHUB_SHA}" || {
-              echo "Checkout ${actual} does not match pushed Development SHA ${GITHUB_SHA}; refusing D1 mutation."
-              exit 1
-            }
-          fi
       - name: Re-run Release 459 source safety before any D1 write
         run: |
           python scripts/release459_runtime_acceptance_gate.py
@@ -148,6 +134,6 @@ jobs:
       - name: Mutation boundary
         run: |
           echo 'Target: devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa only'
-          echo 'Historical migration replay: NONE'
+          echo 'Historical migration replay: NONE unless read-only drift proof exists and this workflow is manually dispatched'
           echo 'Release 459 mutation: provider reference/checklist metadata only'
           echo 'R2/provider execution/Production mutation: NONE'
