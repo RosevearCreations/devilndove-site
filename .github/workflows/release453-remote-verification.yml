@@ -1,0 +1,85 @@
+name: Release 453 Remote Verification
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/verify_release453_remote_snapshot.py'
+      - '.github/workflows/release453-remote-verification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-development-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - name: Development-only branch guard
+        run: test "${GITHUB_REF_NAME}" = "dev"
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Protect exact Development connection authority
+        run: |
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          test -n "${CLOUDFLARE_API_TOKEN}"
+      - name: Verification-only workflow safety
+        run: |
+          ! grep -Eq -- '--file[[:space:]]|d1 migrations apply|INSERT[[:space:]]+INTO|UPDATE[[:space:]]+[a-zA-Z_]|DELETE[[:space:]]+FROM|CREATE[[:space:]]+TABLE|ALTER[[:space:]]+TABLE|DROP[[:space:]]+TABLE' .github/workflows/release453-remote-verification.yml
+          echo 'Verification workflow contains no migration or mutation SQL command.'
+      - name: Install pinned Wrangler
+        run: npm install --global wrangler@4.126.0
+      - name: Verify exact Development D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/release453-d1-info.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/release453-d1-info.json',encoding='utf-8'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values():yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v:yield from walk(x)
+          ids={str(x.get('uuid') or x.get('id') or '') for x in walk(data)}
+          names={str(x.get('name') or '') for x in walk(data)}
+          if os.environ['EXPECTED_DEV_D1_DATABASE_ID'] not in ids or os.environ['DEV_D1_DATABASE_NAME'] not in names:raise SystemExit('Refusing verification: exact Development D1 identity did not match.')
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Capture Release 453 read-only remote snapshot
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('it_provider_readiness_checks','it_provider_readiness_events')) AS release453_table_count,
+            (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE environment='development') AS readiness_check_count,
+            (SELECT COUNT(DISTINCT provider_key) FROM it_provider_readiness_checks WHERE environment='development') AS readiness_provider_count,
+            (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE environment='development' AND check_state='deferred') AS deferred_check_count,
+            (SELECT COUNT(*) FROM it_provider_readiness_events) AS readiness_event_count,
+            (SELECT COUNT(*) FROM pragma_foreign_key_check) AS foreign_key_violation_count,
+            (SELECT COUNT(*) FROM it_provider_readiness_checks c LEFT JOIN provider_setup_authorities p ON p.provider_key=c.provider_key WHERE p.provider_key IS NULL) AS unknown_provider_count,
+            (SELECT COUNT(*) FROM pragma_table_info('it_provider_readiness_checks') WHERE lower(name) IN ('secret','secret_value','api_key','access_token','refresh_token','client_secret','password','private_key')) AS secret_column_count;" > /tmp/release453-remote-snapshot.json
+      - name: Verify Release 453 remote snapshot
+        run: python scripts/verify_release453_remote_snapshot.py /tmp/release453-remote-snapshot.json
+      - name: Read-only boundary
+        run: |
+          echo 'Verification mode: READ ONLY'
+          echo 'Target: devilndove-dev only'
+          echo 'Historical migration replay: NONE'
+          echo 'R2/provider/Production mutation command: NONE'
