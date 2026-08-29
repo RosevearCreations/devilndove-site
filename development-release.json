@@ -5,7 +5,7 @@
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "release460_secure_oauth_source_and_development_d1_proven_live_provider_authorization_closed",
+  "convergence_state": "release460_secure_oauth_source_d1_and_mock_contract_proof_provider_authorization_closed_system_gate_repair_pending",
   "previous_release": {"release":459,"label":"Authenticated Development Acceptance & Provider Setup Authority","state":"closed_checkpoint_carried_forward","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql"},
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
@@ -67,7 +67,7 @@
     {"release":457,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33264872362,"system_gate_run":33264872366,"exact_head_sha":"33f939c8b6daa733e8a54fa8ded15cde626978a0","pages_check_run":99133095306},
     {"release":458,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33265953249,"system_gate_run":33265953255,"exact_head_sha":"66b48f0445c74247972e14fbdaa0e215e3792fb7","pages_check_run":99135984965,"preview_url":"https://a605691a.devilndove-site-dev.pages.dev"},
     {"release":459,"state":"closed_checkpoint_carried_forward","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql"},
-    {"release":460,"state":"secure_oauth_source_and_development_d1_proven_live_authorization_closed","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql","focused_source_gate_run":33273087878,"development_d1_run":33273087894}
+    {"release":460,"state":"secure_oauth_source_d1_and_mock_contract_proof_live_authorization_closed","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql","focused_source_gate_run":33273588148,"development_d1_run":33273087894}
   ],
   "current_release_migrations": ["migrations/dev/20260829_release460_secure_oauth_lifecycle.sql"],
   "current_release_database_state": {
@@ -80,8 +80,12 @@
     "release460_post_write_proof": "three OAuth authority tables; zero forbidden plaintext OAuth columns; zero foreign-key violations"
   },
   "current_release_evidence": {
-    "source_state": "focused_source_gate_green_33273087878",
+    "source_state": "focused_source_gate_green_33273588148_system_gate_authority_repair_pending",
     "d1_state": "applied_and_post_write_verified_33273087894",
+    "provider_contract_mock_proof": "green_33273588148",
+    "provider_subject_values_emitted": false,
+    "refresh_health_authority": "local_expiry_metadata_only_no_provider_contact",
+    "intended_account_verification": "required_before_live_provider_acceptance",
     "provider_publication_enabled": false,
     "provider_execution_enabled": false,
     "provider_live_authorization_enabled": false,
@@ -98,8 +102,10 @@
     {"key":"caip-reviewed-content-handoff","status":"release458_carried_forward","workspace":"/admin/caip-content-handoff/"},
     {"key":"inventory-operations-intelligence","status":"release456_carried_forward","workspace":"/admin/inventory-intelligence/"},
     {"key":"tool-lifecycle","status":"release456_carried_forward","workspace":"/admin/tool-lifecycle/"},
+    {"key":"supply-sourcing-replenishment","status":"release448_carried_forward","workspace":"/admin/supply-sourcing/"},
+    {"key":"release448-calibration","status":"release448_carried_forward","workspace":"/admin/release448-calibration/"},
     {"key":"it-integration-registry","status":"release459_provider_setup_authority_carried","workspace":"/admin/it-integrations/"},
-    {"key":"social-oauth-lifecycle","status":"release460_source_and_d1_proven_live_authorization_closed","workspace":"/admin/it-integrations/"},
+    {"key":"social-oauth-lifecycle","status":"release460_source_d1_mock_contract_and_redacted_health_proven_live_authorization_closed","workspace":"/admin/it-integrations/"},
     {"key":"financials-accounting","status":"release457_carried_forward","workspace":"/admin/accounting/"},
     {"key":"seo-compliance","status":"required_gate","authority":"scripts/public_seo_gate.py"},
     {"key":"seo-depth","status":"required_gate","authority":"scripts/public_seo_depth_gate.py"},
@@ -120,8 +126,8 @@
     {"id":7,"change":"Encrypted token exchange persistence","status":"implemented"},
     {"id":8,"change":"Guarded refresh lifecycle","status":"implemented"},
     {"id":9,"change":"Idempotent local disconnect and provider revocation contract","status":"implemented"},
-    {"id":10,"change":"Redacted diagnostics/security events","status":"implemented"},
-    {"id":11,"change":"Executable cryptographic and source proof","status":"implemented"},
+    {"id":10,"change":"Redacted diagnostics/security events plus local refresh-expiry health","status":"implemented"},
+    {"id":11,"change":"Executable cryptographic/source/provider-contract mock proof","status":"implemented"},
     {"id":12,"change":"Guarded exact Development D1 convergence","status":"implemented"}
   ],
   "deferred_it_test_environment": {
@@ -138,8 +144,8 @@
   "forward_queue": [
     "Keep Release 460 D1 closed; do not reapply unless read-only verification proves drift.",
     "Keep OAUTH_PROVIDER_AUTHORIZATION_MODE unset and live provider authorization closed.",
-    "Add provider-specific mock exchange/refresh/revoke fixtures and safe failure-contract proof.",
-    "Add intended-account identity verification and refresh-expiry health authority.",
+    "Complete exact-head System Gate after restoring Release 448 carried-forward workstream authority.",
+    "Add provider-specific intended-account identity retrieval/verification contracts using mocks first.",
     "Add non-executing provider publish payload validation/idempotency as a separate layer.",
     "Continue Stripe/PayPal automated contract/replay/reconciliation preparation.",
     "Continue Development-to-Production parity/rollback tooling.",
