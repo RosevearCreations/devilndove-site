@@ -17,6 +17,7 @@ required_work={
  'caip-reviewed-content-handoff':'/admin/caip-content-handoff/',
  'inventory-operations-intelligence':'/admin/inventory-intelligence/',
  'tool-lifecycle':'/admin/tool-lifecycle/',
+ 'supply-sourcing-replenishment':'/admin/supply-sourcing/',
  'it-integration-registry':'/admin/it-integrations/',
 }
 for key,workspace in required_work.items():
@@ -31,8 +32,9 @@ required_migrations={
  'storefront-merchandising':('database_release448_storefront_merchandising.sql','RELEASE448_STOREFRONT_MERCHANDISING_VERIFICATION.sql','scripts/apply_development_release448_storefront_merchandising.py'),
  'caip-content-handoff':('database_release448_caip_content_handoff.sql','RELEASE448_CAIP_CONTENT_HANDOFF_VERIFICATION.sql','scripts/apply_development_release448_caip_content_handoff.py'),
  'tool-lifecycle':('database_release448_tool_lifecycle.sql','RELEASE448_TOOL_LIFECYCLE_VERIFICATION.sql','scripts/apply_development_release448_tool_lifecycle.py'),
+ 'supply-sourcing':('database_release448_supply_sourcing.sql','RELEASE448_SUPPLY_SOURCING_VERIFICATION.sql','scripts/apply_development_release448_supply_sourcing.py'),
 }
-req(len(migrations)==5,f'expected exactly 5 current Release 448 migrations, found {len(migrations)}')
+req(len(migrations)==6,f'expected exactly 6 current Release 448 migrations, found {len(migrations)}')
 for key,(file,verification,runner_path) in required_migrations.items():
  row=migrations.get(key,{})
  req(row.get('file')==file,f'{key} migration file authority drifted')
@@ -48,15 +50,17 @@ for key,(file,verification,runner_path) in required_migrations.items():
 
 inventory=(ROOT/'functions/api/admin/inventory-intelligence.js').read_text(encoding='utf-8')
 tool=(ROOT/'functions/api/admin/tool-lifecycle.js').read_text(encoding='utf-8')
+supply=(ROOT/'functions/api/admin/supply-sourcing.js').read_text(encoding='utf-8')
 caip=(ROOT/'functions/api/admin/caip-content-handoff.js').read_text(encoding='utf-8')
 req('write_authority_duplicated:false' in inventory,'Inventory Intelligence must declare single write authority')
 req('tool_quantity_mutated:false' in tool,'Tool lifecycle must prove quantity is not lifecycle state')
+req("stock_mutation_capability:'none'" in supply and 'automatic_ordering:false' in supply,'Supply sourcing must remain planning-only and non-ordering')
 req('source_media_copied:false' in caip and 'publication_active:false' in caip,'CAIP handoff must remain reference-only and non-publishing')
 for marker in ('CAIP','Inventory','Supplies','Tools'):req(marker in release.get('forward_queue',[]),f'forward queue missing canonical anchor {marker}')
 if fail:
  for i,msg in enumerate(fail,1):print(f'{i:03d}. FAIL — {msg}')
  raise SystemExit(1)
 print('RELEASE 448 EXPANSION AUTHORITY: PASS')
-print('Current migrations: 5')
-print('Product / Storefront / CAIP / Inventory / Tool / I.T. workstreams: RECORDED')
+print('Current migrations: 6')
+print('Product / Storefront / CAIP / Inventory / Tool / Supply / I.T. workstreams: RECORDED')
 print('Production mutation authority: NONE')

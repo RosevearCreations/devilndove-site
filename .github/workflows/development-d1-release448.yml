@@ -14,11 +14,14 @@ on:
       - 'RELEASE448_CAIP_CONTENT_HANDOFF_VERIFICATION.sql'
       - 'database_release448_tool_lifecycle.sql'
       - 'RELEASE448_TOOL_LIFECYCLE_VERIFICATION.sql'
+      - 'database_release448_supply_sourcing.sql'
+      - 'RELEASE448_SUPPLY_SOURCING_VERIFICATION.sql'
       - 'scripts/apply_development_product_lineage.py'
       - 'scripts/apply_development_release448_media_it.py'
       - 'scripts/apply_development_release448_storefront_merchandising.py'
       - 'scripts/apply_development_release448_caip_content_handoff.py'
       - 'scripts/apply_development_release448_tool_lifecycle.py'
+      - 'scripts/apply_development_release448_supply_sourcing.py'
       - '.github/workflows/development-d1-release448.yml'
   workflow_dispatch:
 
@@ -64,6 +67,8 @@ jobs:
         run: python scripts/apply_development_release448_caip_content_handoff.py
       - name: Apply and verify durable Tool lifecycle
         run: python scripts/apply_development_release448_tool_lifecycle.py
+      - name: Apply and verify Supply sourcing and replenishment
+        run: python scripts/apply_development_release448_supply_sourcing.py
       - name: Final read-only Product lineage verification
         run: python scripts/apply_development_product_lineage.py --verify-only
       - name: Final read-only media and I.T. verification
@@ -74,10 +79,13 @@ jobs:
         run: python scripts/apply_development_release448_caip_content_handoff.py --verify-only
       - name: Final read-only Tool lifecycle verification
         run: python scripts/apply_development_release448_tool_lifecycle.py --verify-only
+      - name: Final read-only Supply sourcing verification
+        run: python scripts/apply_development_release448_supply_sourcing.py --verify-only
       - name: Safety statement
         run: |
           echo 'Target: devilndove-dev only'
           echo 'Production mutation capability: NONE'
           echo 'R2 mutation: NONE'
           echo 'Provider mutation: NONE'
+          echo 'Automatic provider ordering: NONE'
           echo 'Automatic write retries: NONE'

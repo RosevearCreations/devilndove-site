@@ -11,6 +11,7 @@ FILES=[
  'database_release448_storefront_merchandising.sql',
  'database_release448_caip_content_handoff.sql',
  'database_release448_tool_lifecycle.sql',
+ 'database_release448_supply_sourcing.sql',
 ]
 REQUIRED={
  'app_modules','app_module_role_access','app_module_user_access','home_carousel_slides','home_carousel_events',
@@ -19,6 +20,7 @@ REQUIRED={
  'storefront_collections','storefront_collection_products','storefront_collage_presets',
  'creative_media_evidence_ranges','creative_story_evidence','creative_story_segments','creative_story_segment_evidence_links',
  'caip_content_handoffs','caip_content_handoff_evidence','inventory_tool_lifecycle_profiles','inventory_tool_lifecycle_events',
+ 'inventory_supply_source_options','inventory_supply_replenishment_profiles','inventory_supply_substitution_reviews',
 }
 for name in FILES:
  if not (ROOT/name).exists():raise SystemExit(f'FAIL — fresh-install input missing: {name}')
@@ -45,5 +47,5 @@ print('RELEASE 448 COMPOSED FRESH INSTALL: PASS')
 print('Base aggregate + Release 447 platform convergence + all Release 448 migrations: COMPATIBLE')
 print('Canonical modules / role rows / explicit-user-only I.T. authority: VERIFIED')
 print(f'Fresh-install active admins: {active_admins}; explicit I.T. managers: {it_managers}')
-print('Product lineage / media-I.T. / Storefront / CAIP handoff / Tool lifecycle tables: PRESENT')
+print('Product lineage / media-I.T. / Storefront / CAIP handoff / Tool lifecycle / Supply sourcing tables: PRESENT')
 print('Foreign keys: CLEAN')
