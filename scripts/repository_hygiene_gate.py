@@ -97,8 +97,8 @@ require('aria-label="Breadcrumb"' in product, "Product page requires a visible a
 require('id="productBreadcrumbLabel"' in product and 'aria-current="page"' in product, "Product breadcrumb current-page label missing")
 require('/public/js/product-breadcrumb-seo.js?v=452' in product, "Product breadcrumb JSON-LD authority is not loaded")
 product_js = read("public/js/product-detail.js")
-require(bool(re.search(r"['\"]@type['\"]\s*:\s*['\"]Product['\"]", product_js)), "existing dynamic Product JSON-LD authority missing")
-require("offers" in product_js and "Offer" in product_js, "Product Offer structured-data authority missing")
+require("'@type': data.product.schema_type || 'Product'" in product_js, "existing dynamic Product JSON-LD schema/fallback authority missing")
+require("offers" in product_js and "'@type': 'Offer'" in product_js, "Product Offer structured-data authority missing")
 breadcrumb_js = read("public/js/product-breadcrumb-seo.js")
 for marker in ("BreadcrumbList", "ListItem", "productBreadcrumbLabel", "link[rel=\"canonical\"]", "MutationObserver"):
     require(marker in breadcrumb_js, f"Product breadcrumb authority missing {marker!r}")
