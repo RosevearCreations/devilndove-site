@@ -1,0 +1,102 @@
+name: Development D1 Release 460
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/dev/20260829_release460_secure_oauth_lifecycle.sql'
+      - 'scripts/release460_secure_oauth_gate.py'
+      - 'scripts/release460_oauth_crypto_proof.mjs'
+      - 'development-release.json'
+      - '.github/workflows/development-d1-release460.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  migrate-development-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: dev, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Refuse stale/non-Development source
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = dev
+          if [ "${GITHUB_EVENT_NAME}" = push ]; then test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"; fi
+      - name: Re-run Release 460 safety before write
+        run: |
+          python scripts/release460_secure_oauth_gate.py
+          node scripts/release460_oauth_crypto_proof.mjs
+          python scripts/release459_runtime_acceptance_gate.py
+      - name: Protect exact Development authority
+        run: |
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          ! grep -Eiq 'DROP[[:space:]]+TABLE|ALTER[[:space:]]+TABLE' migrations/dev/20260829_release460_secure_oauth_lifecycle.sql
+      - run: npm install --global wrangler@4.126.0
+      - name: Require credential
+        run: test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'Credential missing; no D1 write attempted.'; exit 1; }
+      - name: Verify exact D1 identity
+        run: |
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/d1.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          rows=list(walk(d)); ids={str(x.get('uuid') or x.get('id') or '') for x in rows}; names={str(x.get('name') or '') for x in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids and os.environ['DEV_D1_DATABASE_NAME'] in names
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Probe convergence
+        run: |
+          set +e
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS n FROM sqlite_master WHERE type='table' AND name IN ('oauth_authorization_transactions','oauth_provider_connections','oauth_security_events');" > /tmp/pre.json
+          rc=$?; set -e
+          python - <<'PY'
+          import json,os
+          try:
+            d=json.load(open('/tmp/pre.json')); text=json.dumps(d); converged='"n":3' in text or '"n": 3' in text
+          except Exception: converged=False
+          open(os.environ['GITHUB_ENV'],'a').write(f"R460_CONVERGED={'1' if converged else '0'}\n")
+          print('Already converged:',converged)
+          PY
+      - name: Apply only Release 460 migration
+        if: env.R460_CONVERGED != '1'
+        run: wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --file migrations/dev/20260829_release460_secure_oauth_lifecycle.sql
+      - name: Read-only post-write proof
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('oauth_authorization_transactions','oauth_provider_connections','oauth_security_events')) AS oauth_tables,(SELECT COUNT(*) FROM (SELECT name FROM pragma_table_info('oauth_authorization_transactions') UNION ALL SELECT name FROM pragma_table_info('oauth_provider_connections')) WHERE lower(name) IN ('state','code','code_verifier','access_token','refresh_token','id_token','client_secret','shared_secret','password')) AS plaintext_columns,(SELECT COUNT(*) FROM pragma_foreign_key_check) AS fk_violations;" > /tmp/post.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/post.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'oauth_tables' in x)
+          assert int(r['oauth_tables'])==3 and int(r['plaintext_columns'])==0 and int(r['fk_violations'])==0
+          print('RELEASE 460 DEVELOPMENT D1 SECURE OAUTH AUTHORITY: PASS')
+          PY
+      - name: Boundary
+        run: |
+          echo 'Target: exact Development D1 only'
+          echo 'Provider authorization/execution/publication: CLOSED'
+          echo 'Separate live Production mutation: NONE'
