@@ -1,5 +1,5 @@
-// Build 355 — Content Studio GET uses an owned non-mutating read authority.
-// Build 273 mutation behavior remains the compatibility authority for POST actions.
+// Release 448 — Content Studio uses the owned non-mutating read authority and retained mutation services.
+// Historical implementation/build constants are provenance only; outward runtime identity is Release 448.
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
   CONTENT_STUDIO_BUILD,
@@ -17,7 +17,8 @@ import {
 import { readContentStudio } from '../_lib/contentStudioReadService.js';
 import { syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 
-function json(data, status = 200, headers = {}) { return jsonResponse(data, status, { 'Cache-Control': 'no-store', ...headers }); }
+const RELEASE = 448;
+function json(data, status = 200, headers = {}) { return jsonResponse({ release: RELEASE, ...data }, status, { 'Cache-Control': 'no-store', ...headers }); }
 function number(value) { const parsed = Number(value || 0); return Number.isInteger(parsed) && parsed > 0 ? parsed : 0; }
 
 async function requireAdmin(context) {
@@ -38,14 +39,14 @@ export async function onRequestGet(context) {
   try {
     const data = await readContentStudio(db, { projectId, creativeProjectId: requestedCreativeProjectId });
     if (data.not_found) return json({ ...data, ok: false, error: 'Content project not found.' }, 404);
-    return json(data);
+    return json({ provenance_build: CONTENT_STUDIO_BUILD, ...data });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'content_automation_studio', incident_code: 'content_studio_get_failed', severity: 'error',
       message: error?.message || 'Content Automation Studio failed to load.', related_user_id: adminUser.user_id,
-      details: { error: String(error?.stack || error?.message || error), request_time_schema_mutation: false }
+      details: { release: RELEASE, provenance_build: 355, error: String(error?.stack || error?.message || error), request_time_schema_mutation: false }
     });
-    return json({ ok: false, build: 355, owner: 'content', contract: 'content-studio-read', request_time_schema_mutation: false, error: 'Content Automation Studio could not load right now. Check schema readiness and Cloudflare logs.' }, 500);
+    return json({ ok: false, provenance_build: 355, owner: 'content', contract: 'content-studio-read', request_time_schema_mutation: false, error: 'Content Automation Studio could not load right now. Check schema readiness and Cloudflare logs.' }, 500);
   }
 }
 
@@ -71,7 +72,7 @@ export async function onRequestPost(context) {
       const evidenceRows = Array.isArray(evidenceResult?.results) ? evidenceResult.results : [];
       const created = await createOrRefreshContentProjectForCreativeProject(db, creativeProject, evidenceRows, adminUser.user_id, { refresh_copy: Number(body.refresh_copy) === 1 });
       const handoffStatus = evidenceRows.length ? 'ready_for_review' : 'draft';
-      const packageJson = JSON.stringify({ build: CONTENT_STUDIO_BUILD, creative_work_project_id: creativeWorkProjectId, project_key: creativeProject.project_key, project_title: creativeProject.project_title, summary: creativeProject.summary || '', objective: creativeProject.objective || '', story_angle: creativeProject.story_angle || '', evidence_count: evidenceRows.length, caip_media_count: Number(created.caip_media_count || 0), content_only: !Number(creativeProject.product_id || 0) });
+      const packageJson = JSON.stringify({ release: RELEASE, provenance_build: CONTENT_STUDIO_BUILD, creative_work_project_id: creativeWorkProjectId, project_key: creativeProject.project_key, project_title: creativeProject.project_title, summary: creativeProject.summary || '', objective: creativeProject.objective || '', story_angle: creativeProject.story_angle || '', evidence_count: evidenceRows.length, caip_media_count: Number(created.caip_media_count || 0), content_only: !Number(creativeProject.product_id || 0) });
       const existingHandoff = await db.prepare(`SELECT creative_project_content_handoff_id FROM creative_project_content_handoffs WHERE creative_work_project_id=? AND content_project_id=? ORDER BY creative_project_content_handoff_id DESC LIMIT 1`).bind(creativeWorkProjectId, created.project.content_project_id).first().catch(()=>null);
       if (existingHandoff?.creative_project_content_handoff_id) {
         await db.prepare(`UPDATE creative_project_content_handoffs SET handoff_status=?,evidence_count=?,package_json=? WHERE creative_project_content_handoff_id=?`).bind(handoffStatus,evidenceRows.length,packageJson,existingHandoff.creative_project_content_handoff_id).run();
@@ -89,7 +90,7 @@ export async function onRequestPost(context) {
         await captureRuntimeIncident(context.env, context.request, {
           incident_scope: 'creative_asset_intelligence', incident_code: 'caip_sync_after_content_studio_failed', severity: 'warning',
           message: caipError?.message || 'CAIP source sync did not complete.', related_user_id: adminUser.user_id,
-          details: { content_project_id: created.project.content_project_id, error: String(caipError?.stack || caipError?.message || caipError) }
+          details: { release: RELEASE, content_project_id: created.project.content_project_id, error: String(caipError?.stack || caipError?.message || caipError) }
         });
       }
       result = { content_project_id: created.project.content_project_id, archived_count: created.archived_count, deliverables_created: created.deliverables_created, creative_project_id: caip?.project?.creative_project_id || null };
@@ -118,7 +119,7 @@ export async function onRequestPost(context) {
           await captureRuntimeIncident(context.env, context.request, {
             incident_scope: 'creative_asset_intelligence', incident_code: 'caip_sync_after_media_review_failed', severity: 'warning',
             message: caipError?.message || 'CAIP media sync did not complete.', related_user_id: adminUser.user_id,
-            details: { content_project_id: projectId, error: String(caipError?.stack || caipError?.message || caipError) }
+            details: { release: RELEASE, content_project_id: projectId, error: String(caipError?.stack || caipError?.message || caipError) }
           });
         }
       }
@@ -135,17 +136,18 @@ export async function onRequestPost(context) {
       if (!projectId) throw new Error('Content project is required.');
       detail = await getContentProjectDetail(db, projectId);
       if (!detail) throw new Error('Content project not found.');
-      return new Response(JSON.stringify(makeContentManifest(detail), null, 2), {
+      return new Response(JSON.stringify({ release: RELEASE, provenance_build: CONTENT_STUDIO_BUILD, ...makeContentManifest(detail) }, null, 2), {
         status: 200,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'Content-Disposition': `attachment; filename="${detail.project.content_project_key}-manifest.json"`,
           'Cache-Control': 'no-store',
-          'X-Content-Type-Options': 'nosniff'
+          'X-Content-Type-Options': 'nosniff',
+          'X-DND-Release': String(RELEASE)
         }
       });
     } else {
-      throw new Error('Unsupported Content Automation Studio action.');
+      throw new Error('Unsupported Release 448 Content Automation Studio action.');
     }
 
     await auditAdminAction(context.env, context.request, adminUser, {
@@ -153,16 +155,16 @@ export async function onRequestPost(context) {
       target_type: 'content_project',
       target_id: result.content_project_id || projectId || null,
       target_key: detail?.project?.content_project_key || null,
-      details: { action, ...result }
+      details: { release: RELEASE, provenance_build: CONTENT_STUDIO_BUILD, action, ...result }
     });
     const listing = await listContentStudioProjects(db);
-    return json({ ok: true, message: 'Content Automation Studio saved.', build: CONTENT_STUDIO_BUILD, result, detail, ...listing, mode: 'review_first_no_auto_publish' });
+    return json({ ok: true, message: 'Release 448 Content Automation Studio saved.', provenance_build: CONTENT_STUDIO_BUILD, result, detail, ...listing, mode: 'review_first_no_auto_publish' });
   } catch (error) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'content_automation_studio', incident_code: 'content_studio_post_failed', severity: 'warning',
       message: error?.message || 'Content Automation Studio could not save.', related_user_id: adminUser.user_id,
-      details: { action, project_id: projectId || null, error: String(error?.stack || error?.message || error) }
+      details: { release: RELEASE, provenance_build: CONTENT_STUDIO_BUILD, action, project_id: projectId || null, error: String(error?.stack || error?.message || error) }
     });
-    return json({ ok: false, error: error?.message || 'Content Automation Studio could not save right now.' }, 400);
+    return json({ ok: false, provenance_build: CONTENT_STUDIO_BUILD, error: error?.message || 'Content Automation Studio could not save right now.' }, 400);
   }
 }
