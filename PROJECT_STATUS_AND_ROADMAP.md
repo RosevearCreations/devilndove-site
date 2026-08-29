@@ -1,7 +1,7 @@
 # Devil n Dove — Project Status & Roadmap
 
 ## Current Development state
-**Release 459 — Authenticated Development Acceptance & Provider Setup Authority**
+**Release 460 — Secure OAuth Lifecycle & Encrypted Token Authority**
 
 Development boundary:
 - branch `dev`
@@ -11,91 +11,51 @@ Development boundary:
 - R2 `PRODUCT_MEDIA_BUCKET` → `devilndove-toolshed-images-dev`
 - R2 `CAIP_PRIVATE_MEDIA_BUCKET` → `devilndove-caip-media-dev`
 
-Separate live Production remains closed.
+Separate live Production `main` / `devilndove-site` remains closed. Provider publication, provider execution, and live provider authorization remain closed.
 
-## Proven checkpoint before Release 459
-Release 458 is complete at `66b48f0445c74247972e14fbdaa0e215e3792fb7`:
-- focused Source Gate `33265953249`
-- System Gate `33265953255`
-- Cloudflare Pages check `99135984965`
+## Release 459 checkpoint
+Release 459 is the carried provider-setup/runtime-acceptance authority. Its D1 provider metadata is treated as the schema checkpoint beneath Release 460. Historical migrations are never replayed because a chat/workstation changes.
 
-## Release 459 implementation queue
-### Implemented in source
-- current Release 459 runtime authority;
-- detailed I.T. setup guide for eight provider families;
-- safe Cloudflare reference presence reporting without values;
-- X provider authority and readiness definition;
-- YouTube durable reference correction to `YOUTUBE_*`;
-- callback-specific readiness checks;
-- authenticated Development GET-only acceptance harness;
-- Admin Runtime Acceptance workspace;
-- separate CAIP private-media bounded range/metadata/seek proof tooling;
-- carried-forward gate semantics repair for Releases 454–458;
-- guarded Release 459 D1 workflow and read-only verifier;
-- canonical Markdown reduction/synchronization.
+## Release 460 implemented
+- versioned AES-GCM server-side OAuth encryption authority using `OAUTH_TOKEN_ENCRYPTION_KEY_V1`;
+- random state stored only as SHA-256 hash;
+- single-use, expiring authorization transactions with atomic replay protection;
+- PKCE S256 generation and encrypted verifier storage where the provider contract requires/supports it;
+- declarative contracts for Etsy, Pinterest, Meta, X, TikTok and YouTube/Google;
+- administrator-only OAuth start route;
+- callback code exchange path that cannot execute while the live-authorization gate is closed;
+- encrypted access/refresh/ID token persistence with no plaintext token columns;
+- guarded refresh lifecycle;
+- idempotent disconnect with local ciphertext destruction and provider revocation where a generic safe revoke contract exists;
+- redacted connection diagnostics and security events;
+- Etsy callback route added to the existing provider callback set;
+- local D1 schema/replay proof plus executable Web Crypto proof;
+- focused Release 460 Source Gate and guarded Development D1 workflow;
+- Release 459 gate converted to carried historical authority rather than falsely claiming to remain current.
 
-### Release 459 proof sequence
-1. Release 459 focused Source Gate green on exact `dev` SHA.
-2. System Gate green on same exact SHA.
-3. Cloudflare Pages `devilndove-site-dev` successful on same SHA.
-4. Guarded Release 459 migration applies only to exact Development D1, or safely detects it is already converged.
-5. Independent read-only Release 459 D1 verifier passes.
-6. Record exact evidence in current release authority.
+## Proven Release 460 evidence so far
+- Focused Source Gate run `33273087878`: GREEN. This proves Release 460 source/schema invariants, executable cryptography, Release 459 carry-forward, JavaScript syntax, and the closed Production/provider boundary.
+- Guarded Development D1 run `33273087894`: GREEN. Exact `devilndove-dev` identity was verified, only the Release 460 migration was applied, and the post-write proof confirmed the three OAuth authority tables, zero forbidden plaintext OAuth columns, and clean foreign keys.
 
-## Next automated release work — before manual tests
-### Secure OAuth connection lifecycle
-Current social callbacks are readiness-only. Build the missing secure lifecycle before asking for provider authorization:
-- provider-specific OAuth start routes;
-- one-time state records and expiry;
-- PKCE challenge/verifier where required;
-- encrypted access/refresh token storage;
-- token refresh/expiry handling;
-- disconnect/revoke controls;
-- intended-account identity capture;
-- safe callback failures and audit events;
-- provider adapter interfaces and mock/contract tests;
-- no publication during connection setup.
+`OAUTH_PROVIDER_AUTHORIZATION_MODE` remains unset. No live OAuth authorization or provider token exchange was performed by these proofs.
 
-### Provider preparation
-- Etsy OAuth/draft payload validation and idempotency;
-- Pinterest board/Pin payload validation;
-- Meta catalog/content preparation and review requirements;
-- X post/media preparation;
-- TikTok consent/content-posting preparation;
-- YouTube upload metadata/scope preparation;
-- provider retry/error classification without live execution.
-
-### Payment preparation
-- Stripe checkout/webhook contract and replay/idempotency validation;
-- PayPal sandbox approval/capture/webhook contract validation;
-- commerce-cost/accounting reconciliation evidence mechanics;
-- no live-money path in Development acceptance.
-
-### Production-transition preparation
-- read-only schema/data parity checks;
-- bindings/reference inventory;
-- promotion checklist tied to exact release SHA;
-- rollback/recovery mechanics;
-- Development vs separate live Production lock verification.
-
-### Application-wide automated backlog
-Continue auditing the five canonical modules:
-1. Storefront
-2. Creators
-3. Socials / CAIP
-4. Financials
-5. I.T.
-
-For each, continue source-only improvements, error/fallback handling, responsive/accessibility checks, SEO/public-page one-H1 enforcement, dead/stale authority cleanup and regression gates while manual/provider execution remains closed.
+## Next automated work — before manual provider authorization
+1. Converge current metadata/docs after exact-head System/Pages evidence.
+2. Add provider-specific mock exchange/refresh/revoke payload fixtures and error-classification tests beyond the generic contract layer.
+3. Add intended-account identity verification/connection labeling before any provider can be considered accepted.
+4. Add refresh-expiry scheduling/health-state mechanics without contacting providers while the gate is closed.
+5. Add provider publishing payload validation/idempotency as a separate layer; connection setup must never imply publication permission.
+6. Continue Stripe/PayPal automated contract/replay/reconciliation preparation.
+7. Continue Development-to-Production parity/rollback tooling.
 
 ## Manual acceptance — later, not now
-Manual actions are not the current blocker. They become the final acceptance layer after automated preparation:
+Only after automated preparation is exhausted:
 - authenticated Development runtime acceptance;
 - CAIP private-media browser evidence;
 - Stripe test transaction/webhook/reconciliation;
 - PayPal sandbox transaction/webhook/reconciliation;
-- Etsy provider authorization/draft acceptance;
-- Pinterest/Meta/X/TikTok/YouTube authorization and controlled provider acceptance.
+- Etsy authorization/draft acceptance;
+- Pinterest/Meta/X/TikTok/YouTube authorization and controlled acceptance.
 
 ## Promotion rule
 A feature is not complete because code exists. It must have aligned authority, safe failure behavior, tests/gates, exact Development deployment evidence and—when applicable—authenticated/provider acceptance.
