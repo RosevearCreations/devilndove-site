@@ -1,8 +1,8 @@
-import { ensureProductOffersSchema, getBundleDetails, resolveUnitPrice } from './_lib/productOffers.js';
+import { getBundleDetails, resolveUnitPrice } from './_lib/productOffers.js';
+import { requireGiftCardSchema } from './_lib/giftCardSchemaReadiness.js';
 // File: /functions/api/checkout-create-order.js
 // Brief description: Creates a checkout order from the browser cart and customer form data.
-// It now also supports storefront gift-card purchases where the purchaser and recipient
-// can be different people, while keeping new gift cards in pending_activation until payment is confirmed.
+// Storefront request handling is schema-read-only: schema ownership belongs to migrations.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -127,38 +127,31 @@ function validateShippingFields(fulfillmentType, shipping) {
   return "";
 }
 
-async function ensureGiftCardTables(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
-    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL UNIQUE,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
-    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
-    issued_to_email TEXT,
-    issued_to_name TEXT,
-    note TEXT,
-    status TEXT NOT NULL DEFAULT 'active',
-    expires_at TEXT,
-    last_redeemed_at TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_email TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_name TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_email TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_name TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN recipient_note TEXT`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchaser_user_id INTEGER`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN order_id INTEGER`).run().catch(() => null);
-  await db.prepare(`ALTER TABLE gift_cards ADD COLUMN purchase_source TEXT`).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_card_redemptions (
-    gift_card_redemption_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    gift_card_id INTEGER NOT NULL,
-    order_id INTEGER,
-    redeemed_amount_cents INTEGER NOT NULL DEFAULT 0,
-    redeemed_by_email TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
+function isCanadaCountry(value) {
+  const country = String(value || '').trim().toLowerCase().replace(/[^a-z]/g, '');
+  return !country || ['ca', 'can', 'canada'].includes(country);
+}
+
+function shippingCountryClosed(country) {
+  return json({
+    ok: false,
+    code: 'shipping_country_not_supported',
+    error: 'Devil n Dove storefront shipping is currently limited to Canada.',
+    requested_country: String(country || '').trim() || null,
+    allowed_countries: ['CA'],
+    local_order_mutation_performed: false,
+    provider_network_call_performed: false
+  }, 422);
+}
+
+function giftCardSchemaClosed(schema) {
+  return json({
+    ok: false,
+    code: schema?.error_code || 'gift_card_schema_not_ready',
+    error: 'Gift-card service is temporarily unavailable while its schema is being prepared.',
+    request_time_schema_mutation: false,
+    migration_authority: schema?.readiness?.migration_authority || 'database_gift_card_runtime_parity.sql'
+  }, 503);
 }
 
 function normalizeGiftCardPurchase(raw, sessionUser, customerName, customerEmail) {
@@ -216,6 +209,8 @@ export async function onRequestPost(context) {
   const shipping_postal_code = normalizeText(body.shipping_postal_code);
   const shipping_country = normalizeText(body.shipping_country || "Canada");
 
+  if (!isCanadaCountry(shipping_country)) return shippingCountryClosed(shipping_country);
+
   const billing_name = normalizeText(body.billing_name || shipping_name || customer_name);
   const billing_company = normalizeText(body.billing_company);
   const billing_address1 = normalizeText(body.billing_address1 || shipping_address1);
@@ -232,6 +227,12 @@ export async function onRequestPost(context) {
   if (!customer_name) return json({ ok: false, error: "Customer name is required." }, 400);
   if (!customer_email || !isValidEmail(customer_email)) return json({ ok: false, error: "A valid customer email is required." }, 400);
   if (!cartItems.length && !giftCardPurchase) return json({ ok: false, error: "At least one cart item or a gift-card purchase is required." }, 400);
+
+  if (gift_card_code || giftCardPurchase) {
+    const requiredTables = gift_card_code ? ['gift_cards', 'gift_card_redemptions'] : ['gift_cards'];
+    const giftCardSchema = await requireGiftCardSchema(db, { requiredTables });
+    if (!giftCardSchema.ok) return giftCardSchemaClosed(giftCardSchema);
+  }
 
   const productIds = cartItems.map((item) => Number(item.product_id)).filter((id) => Number.isInteger(id) && id > 0);
   let productMap = new Map();
@@ -259,8 +260,7 @@ export async function onRequestPost(context) {
     if (!product) return json({ ok: false, error: `Product ${product_id} was not found.` }, 404);
     if (String(product.status || "").toLowerCase() !== "active") return json({ ok: false, error: `Product ${product.name || product_id} is not available.` }, 400);
 
-    await ensureProductOffersSchema(db);
-    const bundle = await getBundleDetails(db, product_id);
+    const bundle = await getBundleDetails(db, product_id, { ensureSchema: false });
     const componentReservation = Number(bundle?.is_bundle || 0) === 1 ? 0 : Number((await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`).bind(product_id).first().catch(()=>({reserved_quantity:0})))?.reserved_quantity || 0);
     const availableQuantity = Number(bundle?.is_bundle || 0) === 1
       ? Math.max(0, Number(bundle.available_quantity || 0))
@@ -268,7 +268,7 @@ export async function onRequestPost(context) {
     if (Number(product.inventory_tracking || 0) === 1 && quantity > availableQuantity) {
       return json({ ok: false, error: `Only ${availableQuantity} of ${product.name || `product ${product_id}`} are currently available.` }, 409);
     }
-    const pricing = await resolveUnitPrice(db, product_id, quantity, Number(product.price_cents || 0));
+    const pricing = await resolveUnitPrice(db, product_id, quantity, Number(product.price_cents || 0), { ensureSchema: false });
     const unit_price_cents = Number(pricing.unit_price_cents || 0);
     const line_subtotal_cents = unit_price_cents * quantity;
     subtotal_cents += line_subtotal_cents;
@@ -316,7 +316,6 @@ export async function onRequestPost(context) {
   let giftCard = null;
   let discount_cents = 0;
   if (gift_card_code) {
-    await ensureGiftCardTables(db);
     giftCard = await db.prepare(`
       SELECT gift_card_id, code, currency, remaining_amount_cents, status, expires_at
       FROM gift_cards
@@ -378,20 +377,19 @@ export async function onRequestPost(context) {
   if (giftCard && discount_cents > 0) {
     const remaining = Math.max(0, Number(giftCard.remaining_amount_cents || 0) - discount_cents);
     await db.prepare(`UPDATE gift_cards SET remaining_amount_cents = ?, status = CASE WHEN ? <= 0 THEN 'redeemed' ELSE 'active' END, last_redeemed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(remaining, remaining, Number(giftCard.gift_card_id || 0)).run();
-    await db.prepare(`INSERT INTO gift_card_redemptions (gift_card_id, order_id, redeemed_amount_cents, redeemed_by_email, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(Number(giftCard.gift_card_id || 0), order_id, discount_cents, customer_email || null).run().catch(() => null);
+    await db.prepare(`INSERT INTO gift_card_redemptions (gift_card_id, order_id, redeemed_amount_cents, redeemed_by_email, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(Number(giftCard.gift_card_id || 0), order_id, discount_cents, customer_email || null).run();
   }
 
   let createdGiftCard = null;
   if (giftCardPurchase) {
-    await ensureGiftCardTables(db);
     const code = generateGiftCardCode();
     await db.prepare(`
       INSERT INTO gift_cards (
         code, currency, initial_amount_cents, remaining_amount_cents,
         issued_to_email, issued_to_name, recipient_email, recipient_name,
-        purchaser_email, purchaser_name, purchaser_user_id,
+        purchaser_email, purchaser_name,
         note, recipient_note, status, expires_at, order_id, purchase_source, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_activation', ?, ?, 'storefront_checkout', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_activation', ?, ?, 'storefront_checkout', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).bind(
       code,
       giftCardPurchase.currency || currency,
@@ -403,7 +401,6 @@ export async function onRequestPost(context) {
       giftCardPurchase.recipient_name || null,
       giftCardPurchase.purchaser_email || customer_email || null,
       giftCardPurchase.purchaser_name || customer_name || null,
-      user_id,
       `${notes ? `${notes} • ` : ''}Storefront gift card purchase pending payment confirmation.`.trim(),
       giftCardPurchase.recipient_note || null,
       giftCardPurchase.expires_at || null,
@@ -459,6 +456,8 @@ export async function onRequestPost(context) {
       purchaser_name: createdGiftCard.purchaser_name || '',
       status: createdGiftCard.status || 'pending_activation',
       expires_at: createdGiftCard.expires_at || null
-    } : null
+    } : null,
+    request_time_schema_mutation: false,
+    shipping_country_policy: 'CA'
   });
 }
