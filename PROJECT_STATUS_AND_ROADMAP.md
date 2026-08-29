@@ -17,107 +17,101 @@ Updated: 2026-08-28
 
 Always resolve exact `dev` SHA, canonical System Gate and Cloudflare Pages status before calling a checkpoint green.
 
-## Release 448 source convergence completed
+## Source convergence now completed in Release 448
 
 ### Storefront
 
-Shop remains the Product discovery/buying authority. Collections are merchandising/group navigation over the same Products. Collages are visual presentation over the same consent-gated public Product images. Home and Movie cover presentation share one accessible carousel implementation.
+Shop remains the Product discovery/buying authority. Collections group the same Products; Collages visually arrange the same consent-gated public Product images; Home and Movie covers share one accessible carousel renderer.
 
-Current surfaces:
-- `/shop/`
-- `/collections/`
-- `/collages/`
-- `/admin/storefront-merchandising/`
+Current surfaces: `/shop/`, `/collections/`, `/collages/`, `/admin/storefront-merchandising/`.
 
-Storefront D1 stores only metadata/references:
-- `storefront_collections`
-- `storefront_collection_products`
-- `storefront_collage_presets`
-
-No Product row, Inventory quantity or image binary is duplicated. Public merchandising consumes `/api/products` before grouping safe public images. Current public Storefront pages preserve exactly one H1.
+D1 stores only `storefront_collections`, `storefront_collection_products`, and `storefront_collage_presets`. No Product row, Inventory quantity or image binary is duplicated. Public pages preserve exactly one H1.
 
 ### Product Photography Manager
 
 Workspace: `/admin/product-image-quality/`.
 
-The Photography Manager overlays existing Product/media authority and persists score/review evidence in `product_image_quality_assessments`.
+The manager overlays existing Product/media authority and stores score/review evidence in `product_image_quality_assessments`.
 
-Deterministic 100-point rubric:
-- Lighting 20
-- Clarity 20
-- Background 15
-- Framing 15
-- Resolution 10
-- Colour balance 10
-- Artifacts 5
-- Product-set consistency 5
+100-point deterministic rubric: Lighting 20, Clarity 20, Background 15, Framing 15, Resolution 10, Colour 10, Artifacts 5, Product-set consistency 5.
 
-It also provides catalog work queues, Product-set readiness, perceptual duplicate/near-duplicate evidence, hero/gallery recommendations and reshoot reasons. It never auto-deletes images, changes featured media, hides Products or becomes publication authority. Vision-assisted subjective review is a future advisory layer.
+Operational features include catalog queue, Product-set readiness, perceptual duplicate/near-duplicate evidence, hero/gallery recommendations and reshoot reasons. It never auto-deletes images, changes featured media, hides Products or becomes publication authority. Vision-assisted subjective review remains an advisory future layer.
 
 ### Product / Inventory / manufacturer provenance
 
-Current source adds review/policy/provenance without creating another stock ledger:
-- `/admin/product-lineage/`
-- `/admin/vendor-reviews/`
-- new handmade Products can require verified raw-material lineage
-- historical handmade Products stay `legacy_pending / legacy_nonblocking`
-- outside finished goods may be explicitly exempt
-- durable Tools/molds are provenance/use links, not consumption
-- manufacturer and supplier remain separate authorities
-- locally authored equipment/material reviews can retain safe marketplace/source references without marketplace runtime dependency
+Existing `site_item_inventory`, `site_inventory_movements`, `product_resource_links`, production usage and purchase-lot authorities remain canonical. Release 448 adds review/policy/provenance without creating another stock ledger.
 
-Existing operational stock/movement remains canonical.
+Workspaces: `/admin/product-lineage/`, `/admin/vendor-reviews/`.
+
+New handmade Products may require verified material lineage; historical handmade Products stay `legacy_pending / legacy_nonblocking`; outside finished goods may be exempt; durable Tools/molds are provenance/use links; manufacturer and supplier remain separate authorities.
+
+### Inventory Intelligence
+
+Workspace: `/admin/inventory-intelligence/`; API: `/api/admin/inventory-intelligence`.
+
+This is a **read-only prioritized operations queue over existing Inventory**. It highlights linked stockouts, low stock, reorder flags, do-not-reuse items, missing stable identity, missing supplier/manufacturer provenance, missing consumption profile, unlinked Tools and stocked Supplies with no Product linkage. Product impact is derived from existing `product_resource_links`.
+
+It creates no schema and no ledger and explicitly reports `write_authority_duplicated: false`.
+
+### Durable Tool Lifecycle
+
+Workspace: `/admin/tool-lifecycle/`; API: `/api/admin/tool-lifecycle`.
+
+New D1 authority:
+- `inventory_tool_lifecycle_profiles`
+- `inventory_tool_lifecycle_events`
+
+Profiles cover lifecycle/condition, service dates/interval, warranty, replacement priority/cost/reference and evidence. Events cover inspection, maintenance, repair, calibration, damage, out-of-service, return-to-service, retirement and replacement.
+
+Hard invariant: lifecycle changes **never consume Tool quantity and never write Inventory movement rows**. Product contribution is shown through existing Tool resource links.
 
 ### Movies / shared carousel
 
-Home and Movie cover pairs use shared `public/js/media-carousel.js`. Movie data authority is enriched JSON + `movie_catalog` D1 overlay, with stable UPC/slug review keys and explicit pending/incomplete/unverified/verified metadata states. Unknown Movie data is never guessed.
+Home and Movie cover pairs use `public/js/media-carousel.js`. Movie authority remains enriched JSON + `movie_catalog` D1 overlay, with stable UPC/slug review keys and explicit pending/incomplete/unverified/verified metadata states. Unknown Movie metadata is never guessed.
 
 ### I.T. integration registry
 
-Workspace: `/admin/it-integrations/`. The registry records provider purpose, consuming module, environment, scopes, callbacks/webhooks, reference names, configured/tested state and correction mechanics. Actual secret values are forbidden.
+Workspace: `/admin/it-integrations/`. Stores provider purpose, consuming module, environment, scopes, callback/webhook, reference names, configured/tested state and correction mechanics. Actual secret values are forbidden.
 
 ### CAIP / Creators reviewed evidence handoff
 
-CAIP and Content Studio now present **Release 448** outwardly. Historical Builds 439 and 355 remain provenance only.
+CAIP and Content Studio now present Release 448 outwardly. Historical Builds 439 and 355 remain provenance only.
 
-Current surfaces:
-- `/admin/creative-assets/`
-- `/admin/caip-content-handoff/`
-- `/admin/content-studio/`
+Surfaces: `/admin/creative-assets/`, `/admin/caip-content-handoff/`, `/admin/content-studio/`.
 
-New D1 reference authority:
+D1 reference authority:
 - `caip_content_handoffs`
 - `caip_content_handoff_evidence`
 
-The handoff packages only active approved temporal markers whose linked story evidence is approved and not rejected. It requires an existing Content Studio linkage. It stores references/counts only—no private media copy, provider execution or automatic publication. Preparation and review are explicit/audited states.
-
-Secure CAIP review remains authenticated/private, supports ranged streaming, preserves source originals, and now emits Release 448 runtime identity while retaining historical provenance in audit evidence.
+Only active approved temporal markers linked to approved, non-rejected story evidence are eligible. Existing Content Studio linkage is required. Handoffs contain references/counts only—no private media copy, provider execution or publication. Secure CAIP review remains authenticated/private with range streaming and immutable originals.
 
 ## Release 448 database position
 
-Release 448 now has **four additive Development migrations**:
+Release 448 now has **five additive Development migrations**:
 
 1. `database_release448_product_lineage.sql`
 2. `database_release448_media_it.sql`
 3. `database_release448_storefront_merchandising.sql`
 4. `database_release448_caip_content_handoff.sql`
+5. `database_release448_tool_lifecycle.sql`
 
-Each has source/local verification and exact-Development transport protection. `.github/workflows/development-d1-release448.yml` applies/validates the four in order and then performs final read-only verification.
+Each has source/local verification and exact-Development transport protection. `.github/workflows/development-d1-release448.yml` applies/verifies all five in order and performs final read-only verification.
 
-Remote truth remains unchanged: GitHub Actions has no secure `CLOUDFLARE_API_TOKEN`, so the guarded workflow stops before D1 access. Therefore no Release 448 migration may be described as remotely applied yet. Add the credential only to GitHub Actions secret storage; never source/chat.
+Remote truth remains unchanged: GitHub Actions currently has no secure `CLOUDFLARE_API_TOKEN`, so the guarded workflow stops before D1 access. No Release 448 migration may be described as remotely applied yet. The credential belongs only in GitHub Actions secret storage.
 
 ### Fresh-install protection
 
-`python scripts/release448_fresh_install_gate.py` proves this composition:
+`python scripts/release448_fresh_install_gate.py` proves:
 
 1. `database_full_schema.sql`
 2. Release 447 `database_platform_convergence.sql`
-3. Release 448 Product lineage
-4. Release 448 Media/Movie/I.T.
-5. Release 448 Storefront merchandising
-6. Release 448 CAIP reviewed Content Studio handoff
+3. Product lineage
+4. Media/Movie/I.T.
+5. Storefront merchandising
+6. CAIP reviewed Content Studio handoff
+7. Tool lifecycle
 
-The composed test verifies all current tables plus clean foreign keys. A truly empty database has no users and therefore zero explicit I.T. managers; if an active admin exists, Release 447 bootstrap must create explicit manage authority. This distinction is intentional and tested.
+It verifies current tables and clean foreign keys. A truly empty database has zero users and therefore zero explicit I.T. managers; once an active admin exists, Release 447 bootstrap must create explicit manage authority.
 
 ## Canonical current-release gates
 
@@ -134,6 +128,9 @@ python scripts/release448_storefront_merchandising_gate.py
 python scripts/apply_development_release448_storefront_merchandising.py --transport-preflight
 python scripts/release448_caip_content_handoff_gate.py
 python scripts/apply_development_release448_caip_content_handoff.py --transport-preflight
+python scripts/release448_inventory_intelligence_gate.py
+python scripts/release448_tool_lifecycle_gate.py
+python scripts/apply_development_release448_tool_lifecycle.py --transport-preflight
 python scripts/product_inventory_tools_source_gate.py
 python scripts/public_seo_gate.py
 python scripts/pwa_platform_gate.py
@@ -141,34 +138,30 @@ python scripts/cloudflare_development_access.py --transport-preflight
 python scripts/development_runtime_acceptance.py --self-check
 ```
 
-Canonical System Gate performs no remote D1/R2/provider/Production writes. The separate Release 448 D1 workflow owns exact-Development database mutation and remains credential-guarded.
+Canonical System Gate performs no remote D1/R2/provider/Production writes. The separate Release 448 D1 workflow owns exact-Development mutation and remains credential-guarded.
 
 ## Remaining Release 448 roadmap
 
 ### Immediate forward development
 
-1. **Inventory operations intelligence** — turn existing Inventory/movement/usage/provenance data into actionable stock/reorder/lineage work queues without creating another ledger.
-2. **Supplies sourcing/provenance depth** — source/manufacturer/purchase-lot/reorder intelligence and quality/reuse decisions.
-3. **Tools lifecycle/provenance depth** — durable Tool condition, use, maintenance/retirement/replacement and Product/project contribution.
-4. **Storefront + Photography calibration** using real Product data once Release 448 D1 is active.
+1. **Supplies sourcing/provenance depth** — improve source/manufacturer/purchase-lot/reorder intelligence and substitution/quality decisions.
+2. **Inventory operations calibration** — tune priorities against real Development Inventory once the Release 448 D1 migrations are active.
+3. **Tool lifecycle calibration** — establish service/replacement patterns and use existing Product/manufacturer provenance.
+4. **Storefront + Photography calibration** using real Product images and merchandising results.
 5. **CAIP runtime/presentation calibration** and later private-media acceptance.
-6. **Financials depth** — reconciliation, fees, profitability, shared-project allocation and close/export.
+6. **Financials depth** — reconciliation, marketplace fees, shared-project costs, profitability and close/export.
 
 ### Activation when secure D1 credential is available
 
-- apply/verify all four Release 448 migrations against exact `devilndove-dev`;
-- run authenticated Development acceptance across Product lineage, Photography, Storefront, I.T. registry, Movie review and CAIP handoff;
+- apply/verify all **five** Release 448 migrations against exact `devilndove-dev`;
+- run authenticated Development acceptance across Product lineage, Photography, Storefront, I.T. registry, Movie review, CAIP handoff and Tool lifecycle;
+- calibrate Inventory Intelligence from the real Development dataset;
 - preserve Production closure until deliberate promotion review.
 
 ### Deferred I.T. acceptance
 
-- authenticated Development runtime
-- Stripe test
-- PayPal sandbox
-- CAIP private-media delivery/range/timecode/artifact evidence
-
-These remain visible and non-blocking for unrelated Development work.
+Authenticated Development runtime, Stripe test, PayPal sandbox and CAIP private-media delivery/range/timecode/artifact evidence remain visible and non-blocking for unrelated Development work.
 
 ## Directional benefit
 
-Release 448 is converging Devil n Dove into a traceable operating system: Product creation can connect to actual materials/Tools/manufacturers; photography can be ranked into useful merchandising queues; Shop/Collections/Collages reuse one Product/media truth; Movie data carries explicit verification; CAIP approved evidence can move into Content Studio without copying private media or bypassing review; and I.T. can track external readiness without distributing secrets.
+Release 448 is now a much more connected operating system: Product creation can trace to materials, Tools and manufacturers; photography can drive concrete reshoot/merchandising queues; Storefront discovery reuses one Product/media truth; CAIP reviewed evidence can flow into Content Studio without copying private media; Inventory can expose production risk before a build starts; durable Tools can carry maintenance/safety/replacement history without being treated as consumables; and I.T. can track external readiness without distributing secrets.
