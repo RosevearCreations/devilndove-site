@@ -26,17 +26,36 @@ def evaluate(release):
  baseline=release.get('database_baseline') or {}
  if baseline.get('apply_status')!='applied_and_verified_development':errors.append('Release 447 Development database baseline is not verified')
  previous=release.get('previous_release') or {}
- if previous.get('state')!='complete':holds.append(f'previous release {previous.get("release","unknown")} is not marked complete')
- for row in release.get('current_release_migrations') or []:
-  key=row.get('key') or 'unknown'
-  if row.get('production_allowed') is not False:errors.append(f'{key}: Production mutation is not explicitly forbidden')
-  if row.get('source_status') not in {'implemented_and_gated','implemented','source_green'}:holds.append(f'{key}: source state {row.get("source_status","unknown")}')
-  d1=row.get('development_d1_status')
-  if d1 in {'applied_and_verified_development','not_required'}:passes.append(f'{key}: Development D1 state {d1}')
-  else:holds.append(f'{key}: Development D1 not yet proven ({d1 or "unknown"})')
+ previous_state=str(previous.get('state') or '')
+ if not previous_state.startswith('complete'):holds.append(f'previous release {previous.get("release","unknown")} is not marked complete')
+ migrations=release.get('current_release_migrations') or []
+ db_state=release.get('current_release_database_state') or {}
+ for row in migrations:
+  # Older manifests used structured migration objects; current manifests use canonical path strings
+  # and keep proof in current_release_database_state. Support both without weakening safety.
+  if isinstance(row,dict):
+   key=row.get('key') or row.get('file') or 'unknown'
+   if row.get('production_allowed') is not False:errors.append(f'{key}: Production mutation is not explicitly forbidden')
+   if row.get('source_status') not in {'implemented_and_gated','implemented','source_green'}:holds.append(f'{key}: source state {row.get("source_status","unknown")}')
+   d1=row.get('development_d1_status')
+   if d1 in {'applied_and_verified_development','not_required'}:passes.append(f'{key}: Development D1 state {d1}')
+   else:holds.append(f'{key}: Development D1 not yet proven ({d1 or "unknown"})')
+  elif isinstance(row,str):
+   key=row
+   # Production safety is owned by the current release policy/workflow boundary for canonical path manifests.
+   if policy.get('production_promotion')!='closed':errors.append(f'{key}: Production promotion is not closed')
+   new_required=db_state.get('new_migration_required')
+   verified=int(db_state.get('last_verified_schema_release') or 0)
+   if new_required is False and verified>=current:
+    passes.append(f'{key}: Development D1 verified through Release {verified}')
+   else:
+    holds.append(f'{key}: Development D1 not yet proven (new_migration_required={new_required}, last_verified={verified or "unknown"})')
+  else:
+   errors.append(f'unsupported current migration manifest entry type: {type(row).__name__}')
  for task in (release.get('deferred_it_test_environment') or {}).get('tasks') or []:
   if task.get('release_gating') is True and task.get('status') not in {'passed','accepted','complete'}:holds.append(f'I.T. acceptance {task.get("key","unknown")}: {task.get("status","unknown")}')
  if policy.get('production_promotion')=='closed':passes.append('Production promotion remains closed')
+ if policy.get('provider_publication')=='closed':passes.append('Provider publication remains closed')
  return errors,holds,passes
 
 def main():
