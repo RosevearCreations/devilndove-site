@@ -31,10 +31,23 @@ assert "ready: stripeExecution.execution_authorized" in providers
 assert 'payment_provider_execution_not_implemented' in providers
 assert 'mode: "stub"' in providers
 
-# The owner still contains the future provider clients. The routable API boundary must remain before them.
+# Defense in depth: the owner route must enforce the same gate before payment-record mutation/provider calls.
+assert "import { paymentExecutionStatus }" in checkout
+assert "if ([\"paypal\", \"stripe\"].includes(provider))" in checkout
+assert "const execution = paymentExecutionStatus(request.url, env, provider);" in checkout
+assert "local_payment_mutation_performed: false" in checkout
+assert "provider_network_call_performed: false" in checkout
+assert checkout.index('const execution = paymentExecutionStatus(request.url, env, provider);') < checkout.index('const paymentRecord = await getOrCreatePendingPayment')
+assert checkout.index('const execution = paymentExecutionStatus(request.url, env, provider);') < checkout.index('await createPaypalOrder')
+assert checkout.index('const execution = paymentExecutionStatus(request.url, env, provider);') < checkout.index('await createStripeCheckoutSession')
 assert 'https://api.stripe.com/v1/checkout/sessions' in checkout
 assert '/v2/checkout/orders' in checkout
 assert 'fetch(' in checkout
+
+# Current commerce policy: Stripe hosted shipping is Canada-only; U.S. is not an allowed hosted checkout country.
+assert 'shipping_address_collection[allowed_countries][0]' in checkout
+assert 'shipping_address_collection[allowed_countries][1]' not in checkout
+assert 'params.set("shipping_address_collection[allowed_countries][0]", "CA")' in checkout
 
 assert 'payment_provider_execution_closed' in proof
 assert 'payment_live_credentials_forbidden' in proof
