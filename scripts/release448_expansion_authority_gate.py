@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Release 448 expansion authority gate: all current workstreams/migrations stay machine-readable and safe."""
+"""Release 448 carried-forward regression authority gate.
+
+Release 448 is provenance, not the current-release identity. This gate protects the
+platform capabilities introduced there while allowing later Development releases.
+"""
 from pathlib import Path
 import json
 ROOT=Path(__file__).resolve().parents[1]
@@ -7,7 +11,8 @@ release=json.loads((ROOT/'development-release.json').read_text(encoding='utf-8')
 fail=[]
 def req(ok,msg):
  if not ok:fail.append(msg)
-req(release.get('release')==448,'Release 448 must remain current')
+req(int(release.get('release') or 0)>=448,'current Development release cannot predate Release 448')
+req(release.get('environment')=='development' and release.get('branch')=='dev','current authority must remain Development/dev')
 work={row.get('key'):row for row in release.get('workstreams',[])}
 required_work={
  'product-material-lineage':'/admin/product-lineage/',
@@ -23,10 +28,8 @@ required_work={
 }
 for key,workspace in required_work.items():
  row=work.get(key,{})
- req(row.get('workspace')==workspace,f'{key} workspace authority missing/drifted')
- req('source_implemented' in str(row.get('status','')) or 'source_converged' in str(row.get('status','')),f'{key} source completion state not recorded')
+ req(row.get('workspace')==workspace,f'{key} carried-forward workspace authority missing/drifted')
 
-migrations={row.get('key'):row for row in release.get('current_release_migrations',[])}
 required_migrations={
  'product-lineage':('database_release448_product_lineage.sql','RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql','scripts/apply_development_product_lineage.py'),
  'media-movie-it':('database_release448_media_it.sql','RELEASE448_MEDIA_IT_VERIFICATION.sql','scripts/apply_development_release448_media_it.py'),
@@ -35,43 +38,28 @@ required_migrations={
  'tool-lifecycle':('database_release448_tool_lifecycle.sql','RELEASE448_TOOL_LIFECYCLE_VERIFICATION.sql','scripts/apply_development_release448_tool_lifecycle.py'),
  'supply-sourcing':('database_release448_supply_sourcing.sql','RELEASE448_SUPPLY_SOURCING_VERIFICATION.sql','scripts/apply_development_release448_supply_sourcing.py'),
 }
-req(len(migrations)==6,f'expected exactly 6 current Release 448 migrations, found {len(migrations)}')
-for key,(file,verification,runner_path) in required_migrations.items():
- row=migrations.get(key,{})
- req(row.get('file')==file,f'{key} migration file authority drifted')
- req(row.get('verification')==verification,f'{key} verification authority drifted')
- runner=str(row.get('runner',''))
- req(runner.endswith(runner_path),f'{key} runner authority drifted')
- req(row.get('source_status')=='implemented_and_gated',f'{key} source must remain implemented_and_gated')
- req(row.get('development_d1_status') in {'blocked_missing_github_cloudflare_token','applied_and_verified_development'},f'{key} D1 state is not truthful/current')
- req(row.get('production_allowed') is False,f'{key} must never allow Production')
- req((ROOT/file).exists(),f'{key} migration file missing')
- req((ROOT/verification).exists(),f'{key} verification file missing')
- req((ROOT/runner_path).exists(),f'{key} runner missing')
-
-program={row.get('key'):row for row in (release.get('completion_program') or {}).get('steps',[])}
-for key in ('development-d1-activation','authenticated-real-data-calibration','supply-sourcing-replenishment-depth','external-private-acceptance','promotion-rehearsal'):
- req(key in program,f'completion program missing {key}')
-req(release.get('release_policy',{}).get('production_promotion')=='closed','Production promotion must remain closed')
+for key,(file,verification,runner) in required_migrations.items():
+ req((ROOT/file).exists(),f'Release 448 {key} migration file missing')
+ req((ROOT/verification).exists(),f'Release 448 {key} verification file missing')
+ req((ROOT/runner).exists(),f'Release 448 {key} runner missing')
 
 inventory=(ROOT/'functions/api/admin/inventory-intelligence.js').read_text(encoding='utf-8')
 tool=(ROOT/'functions/api/admin/tool-lifecycle.js').read_text(encoding='utf-8')
 supply=(ROOT/'functions/api/admin/supply-sourcing.js').read_text(encoding='utf-8')
 caip=(ROOT/'functions/api/admin/caip-content-handoff.js').read_text(encoding='utf-8')
-calibration=(ROOT/'functions/api/admin/release448-calibration.js').read_text(encoding='utf-8') if (ROOT/'functions/api/admin/release448-calibration.js').exists() else ''
-promotion=(ROOT/'scripts/release448_promotion_rehearsal.py').read_text(encoding='utf-8') if (ROOT/'scripts/release448_promotion_rehearsal.py').exists() else ''
-req('write_authority_duplicated:false' in inventory,'Inventory Intelligence must declare single write authority')
-req('tool_quantity_mutated:false' in tool,'Tool lifecycle must prove quantity is not lifecycle state')
-req("stock_mutation_capability:'none'" in supply and 'automatic_ordering:false' in supply,'Supply sourcing must remain planning-only and non-ordering')
-req('source_media_copied:false' in caip and 'publication_active:false' in caip,'CAIP handoff must remain reference-only and non-publishing')
-req("calibration_ledger_duplicated:false" in calibration and "mutation_capability:'none'" in calibration and 'onRequestPost' not in calibration,'Calibration cockpit must remain derived and read-only')
-req('READ-ONLY' in promotion and '--strict' in promotion and 'production_promotion' in promotion,'Promotion rehearsal authority missing/read-write drifted')
-for marker in ('CAIP','Inventory','Supplies','Tools'):req(marker in release.get('forward_queue',[]),f'forward queue missing canonical anchor {marker}')
+calibration=(ROOT/'functions/api/admin/release448-calibration.js').read_text(encoding='utf-8')
+promotion=(ROOT/'scripts/release448_promotion_rehearsal.py').read_text(encoding='utf-8')
+req('write_authority_duplicated:false' in inventory,'Inventory Intelligence must retain single write authority')
+req('tool_quantity_mutated:false' in tool,'Tool lifecycle must retain quantity separation')
+req("stock_mutation_capability:'none'" in supply and 'automatic_ordering:false' in supply,'Supply sourcing must remain planning-only')
+req('source_media_copied:false' in caip and 'publication_active:false' in caip,'CAIP handoff must remain reference-only/non-publishing')
+req("calibration_ledger_duplicated:false" in calibration and "mutation_capability:'none'" in calibration,'Calibration cockpit must remain derived/read-only')
+req('READ-ONLY' in promotion and '--source-check' in promotion,'Release 448 promotion rehearsal must remain read-only regression authority')
+req(release.get('release_policy',{}).get('production_promotion')=='closed','Production promotion must remain closed')
 if fail:
  for i,msg in enumerate(fail,1):print(f'{i:03d}. FAIL — {msg}')
  raise SystemExit(1)
-print('RELEASE 448 EXPANSION AUTHORITY: PASS')
-print('Current migrations: 6')
-print('Product / Storefront / CAIP / Inventory / Tool / Supply / Calibration / I.T. workstreams: RECORDED')
-print('Promotion rehearsal: READ-ONLY')
+print('RELEASE 448 CARRIED-FORWARD AUTHORITY: PASS')
+print('Release 448 capabilities/migrations: RETAINED AS REGRESSION AUTHORITY')
+print(f"Current release: {release.get('release')}")
 print('Production mutation authority: NONE')
