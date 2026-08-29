@@ -1,8 +1,13 @@
 import { processNotificationOutbox, queueNotification } from './_lib/notificationOutbox.js';
+import {
+  registerWebhookEventAtomic,
+  requireGiftCardWebhookSchema,
+  verifyStripeWebhook,
+} from './_lib/paymentWebhookSecurity.js';
 
 // File: /functions/api/stripe-webhook.js
-// Brief description: Receives Stripe webhook events, verifies the signature, records idempotent
-// webhook history, and reconciles local payment/order state for Checkout Session and refund events.
+// Brief description: Receives Stripe webhook events, requires verified signatures, records atomic
+// webhook replay authority, and reconciles local payment/order state without request-time schema DDL.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -17,55 +22,6 @@ function normalizeText(value) {
 
 function getDb(env) {
   return env.DB || env.DD_DB;
-}
-
-function secureCompare(a, b) {
-  const left = String(a || "");
-  const right = String(b || "");
-  if (left.length !== right.length) return false;
-  let mismatch = 0;
-  for (let i = 0; i < left.length; i += 1) {
-    mismatch |= left.charCodeAt(i) ^ right.charCodeAt(i);
-  }
-  return mismatch === 0;
-}
-
-async function hmacSha256Hex(secret, payload) {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
-  return Array.from(new Uint8Array(signature)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-async function verifyStripeSignature(request, env, bodyText) {
-  const secret = normalizeText(env.STRIPE_WEBHOOK_SECRET);
-  const signatureHeader = normalizeText(request.headers.get("stripe-signature"));
-
-  if (!secret || !signatureHeader) {
-    return { verified: false, verification_mode: secret ? "missing_header" : "skipped" };
-  }
-
-  const parts = signatureHeader.split(",").map((part) => part.trim()).filter(Boolean);
-  const timestamp = normalizeText(parts.find((part) => part.startsWith("t="))?.slice(2));
-  const signatures = parts.filter((part) => part.startsWith("v1=")).map((part) => normalizeText(part.slice(3)));
-
-  if (!timestamp || !signatures.length) {
-    return { verified: false, verification_mode: "invalid_header" };
-  }
-
-  const expected = await hmacSha256Hex(secret, `${timestamp}.${bodyText}`);
-  const verified = signatures.some((value) => secureCompare(value, expected));
-  return {
-    verified,
-    verification_mode: "stripe",
-    raw_status: verified ? "SUCCESS" : "FAILED"
-  };
 }
 
 async function addHistory(env, orderId, oldStatus, newStatus, note) {
@@ -84,43 +40,9 @@ function deriveOrderStatus(existingOrderStatus, localPaymentStatus) {
   return current;
 }
 
-
-async function ensureGiftCardWebhookColumns(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS gift_cards (
-    gift_card_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL UNIQUE,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    initial_amount_cents INTEGER NOT NULL DEFAULT 0,
-    remaining_amount_cents INTEGER NOT NULL DEFAULT 0,
-    issued_to_email TEXT,
-    issued_to_name TEXT,
-    note TEXT,
-    status TEXT NOT NULL DEFAULT 'active',
-    expires_at TEXT,
-    last_redeemed_at TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  const additions = [
-    ['recipient_email', 'recipient_email TEXT'],
-    ['recipient_name', 'recipient_name TEXT'],
-    ['recipient_note', 'recipient_note TEXT'],
-    ['purchaser_email', 'purchaser_email TEXT'],
-    ['purchaser_name', 'purchaser_name TEXT'],
-    ['purchaser_user_id', 'purchaser_user_id INTEGER'],
-    ['order_id', 'order_id INTEGER'],
-    ['purchase_source', 'purchase_source TEXT']
-  ];
-  const info = await db.prepare(`PRAGMA table_info(gift_cards)`).all().catch(() => ({ results: [] }));
-  const cols = new Set((Array.isArray(info?.results) ? info.results : []).map((row) => String(row?.name || '').trim()));
-  for (const [name, ddl] of additions) {
-    if (!cols.has(name)) await db.prepare(`ALTER TABLE gift_cards ADD COLUMN ${ddl}`).run().catch(() => null);
-  }
-}
-
 async function activatePendingGiftCardsForOrder(env, order, payment, providerLabel) {
   const db = getDb(env);
-  await ensureGiftCardWebhookColumns(db);
+  await requireGiftCardWebhookSchema(db);
   const pending = (await db.prepare(`
     SELECT gift_card_id, code, currency, initial_amount_cents, remaining_amount_cents,
            COALESCE(recipient_email, issued_to_email) AS recipient_email,
@@ -130,10 +52,10 @@ async function activatePendingGiftCardsForOrder(env, order, payment, providerLab
     WHERE order_id = ?
       AND LOWER(COALESCE(status,'')) = 'pending_activation'
     ORDER BY gift_card_id ASC
-  `).bind(Number(order?.order_id || 0)).all().catch(() => ({ results: [] }))).results || [];
+  `).bind(Number(order?.order_id || 0)).all()).results || [];
   let activated_count = 0;
   for (const row of pending) {
-    await db.prepare(`UPDATE gift_cards SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(Number(row.gift_card_id || 0)).run().catch(() => null);
+    await db.prepare(`UPDATE gift_cards SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE gift_card_id = ?`).bind(Number(row.gift_card_id || 0)).run();
     activated_count += 1;
     const destination = normalizeText(row.recipient_email || row.issued_to_email).toLowerCase();
     if (destination) {
@@ -179,7 +101,6 @@ async function activatePendingGiftCardsForOrder(env, order, payment, providerLab
   return activated_count;
 }
 
-
 function mapStripeDisputeStatus(eventType, object) {
   const type = normalizeText(eventType).toLowerCase();
   const providerStatus = normalizeText(object?.status).toLowerCase();
@@ -196,7 +117,6 @@ function mapStripeDisputeStatus(eventType, object) {
   if (providerStatus === 'closed') return 'closed';
   return 'open';
 }
-
 
 async function queueProviderNotification(env, payload) {
   const db = getDb(env);
@@ -280,46 +200,13 @@ function mapStripePaymentStatus(eventType, object) {
 }
 
 async function registerWebhookEvent(env, provider, eventId, eventType, verification, payloadJson) {
-  const db = getDb(env);
-  const existing = await db.prepare(`
-    SELECT webhook_event_id, process_status
-    FROM webhook_events
-    WHERE provider = ? AND provider_event_id = ?
-    LIMIT 1
-  `).bind(provider, eventId).first().catch(() => null);
-
-  if (existing) {
-    return {
-      duplicate: true,
-      webhook_event_id: Number(existing.webhook_event_id || 0),
-      process_status: existing.process_status || "processed"
-    };
-  }
-
-  const inserted = await db.prepare(`
-    INSERT INTO webhook_events (
-      provider,
-      provider_event_id,
-      event_type,
-      verification_status,
-      process_status,
-      payload_json,
-      received_at,
-      updated_at
-    ) VALUES (?, ?, ?, ?, 'received', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).bind(
+  return registerWebhookEventAtomic(getDb(env), {
     provider,
     eventId,
-    eventType || null,
-    verification?.verified ? "verified" : (verification?.verification_mode || "skipped"),
-    payloadJson
-  ).run().catch(() => null);
-
-  return {
-    duplicate: false,
-    webhook_event_id: Number(inserted?.meta?.last_row_id || 0),
-    process_status: "received"
-  };
+    eventType,
+    verification,
+    payloadJson,
+  });
 }
 
 async function markWebhookEvent(env, webhookEventId, processStatus, details = {}) {
@@ -352,7 +239,7 @@ async function markWebhookEvent(env, webhookEventId, processStatus, details = {}
     nextRetryAt,
     processStatus,
     Number(webhookEventId)
-  ).run().catch(() => null);
+  ).run();
 }
 
 async function findPaymentForStripeEvent(env, object) {
@@ -403,11 +290,17 @@ async function findPaymentForStripeEvent(env, object) {
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = getDb(env);
-  const bodyText = await request.text();
+  if (!db) return json({ ok: false, error: "Database is not configured." }, 503);
 
-  const verification = await verifyStripeSignature(request, env, bodyText);
-  if (verification.verification_mode === "stripe" && !verification.verified) {
-    return json({ ok: false, error: "Stripe webhook verification failed.", verification }, 401);
+  const bodyText = await request.text();
+  const verification = await verifyStripeWebhook({
+    rawBody: bodyText,
+    signatureHeader: request.headers.get('stripe-signature') || '',
+    env,
+  });
+  if (!verification.verified) {
+    const status = verification.code === 'stripe_webhook_not_configured' ? 503 : 401;
+    return json({ ok: false, error: "Stripe webhook verification failed.", code: verification.code }, status);
   }
 
   let body;
@@ -418,8 +311,18 @@ export async function onRequestPost(context) {
   }
 
   const eventType = normalizeText(body.type).toLowerCase();
-  const eventId = normalizeText(body.id || crypto.randomUUID());
-  const webhookEvent = await registerWebhookEvent(env, "stripe", eventId, eventType, verification, bodyText);
+  const eventId = normalizeText(body.id);
+  if (!eventType || !eventId) {
+    return json({ ok: false, error: "Stripe webhook event is missing id or type." }, 400);
+  }
+
+  let webhookEvent;
+  try {
+    webhookEvent = await registerWebhookEvent(env, "stripe", eventId, eventType, verification, bodyText);
+  } catch (error) {
+    console.error('Stripe webhook replay authority unavailable', error);
+    return json({ ok: false, error: "Stripe webhook replay authority is unavailable." }, 503);
+  }
 
   if (webhookEvent.duplicate) {
     await markWebhookEvent(env, webhookEvent.webhook_event_id, "duplicate");
@@ -541,9 +444,20 @@ export async function onRequestPost(context) {
     `Stripe webhook reconciled event ${eventType || "UNKNOWN"} for payment ${paymentIntentId || sessionId || "unknown"}.`
   );
 
-  const giftCardActivationCount = localPaymentStatus === 'paid'
-    ? await activatePendingGiftCardsForOrder(env, order, payment, 'stripe')
-    : 0;
+  let giftCardActivationCount = 0;
+  if (localPaymentStatus === 'paid') {
+    try {
+      giftCardActivationCount = await activatePendingGiftCardsForOrder(env, order, payment, 'stripe');
+    } catch (error) {
+      await markWebhookEvent(env, webhookEvent.webhook_event_id, 'failed', {
+        related_order_id: Number(order.order_id || 0),
+        related_payment_id: Number(payment.payment_id || 0),
+        error_text: 'gift_card_webhook_schema_not_ready',
+      });
+      console.error('Stripe gift-card webhook schema is not ready', error);
+      return json({ ok: false, error: 'Webhook reconciliation schema is not ready.' }, 503);
+    }
+  }
 
   if (['refunded', 'partially_refunded'].includes(localPaymentStatus) && normalizeText(order.customer_email)) {
     await queueProviderNotification(env, {
