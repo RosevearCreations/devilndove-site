@@ -1,17 +1,17 @@
 {
   "environment": "development",
-  "release": 455,
-  "label": "Storefront Discovery, Media Fallback & SEO Depth",
+  "release": 456,
+  "label": "Inventory & Tool Operational Workflow Depth",
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "storefront_discovery_media_fallback_seo_depth_source_only",
+  "convergence_state": "inventory_tool_operational_workflow_depth_source_only",
   "previous_release": {
-    "release": 454,
-    "label": "Admin Navigation, State & Responsive Convergence",
+    "release": 455,
+    "label": "Storefront Discovery, Media Fallback & SEO Depth",
     "state": "complete_source_proven_no_new_d1_migration",
     "completed_on": "2026-08-29",
-    "completion_note": "Release 454 converged shared Admin navigation, state and responsive behavior without a D1 migration."
+    "completion_note": "Release 455 protected Shop/Product/Collections/Collages discovery, media fallback, accessibility, responsive media and SEO depth without a D1 migration."
   },
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
@@ -44,8 +44,9 @@
       "Read development-release.json and the Development Cloudflare connection authority first",
       "Confirm dev branch and exact Development D1/R2 identities read-only",
       "A new chat is not a migration event; never replay historical migrations merely because chat or workstation changed",
-      "Release 455 has no D1 migration; Release 453 remains the last independently verified schema release",
+      "Release 456 has no D1 migration; Release 453 remains the last independently verified schema release",
       "Treat devilndove-site-dev Pages Production deployment as Development; do not touch separate live Production until deliberate transition",
+      "Use site_item_inventory as Tool identity/quantity/reuse authority and inventory_tool_lifecycle_profiles/events as the single durable Tool lifecycle authority",
       "Run source/local gates before any genuinely new future D1 migration",
       "Verify exact devilndove-dev name and UUID immediately before any future write",
       "Run a separate read-only remote verifier after any future mutation",
@@ -81,7 +82,8 @@
     {"release":452,"state":"complete_source_proven_no_new_d1_migration","note":"Exact-head CI evidence retained externally in GitHub Actions."},
     {"release":453,"state":"complete_applied_independently_verified_and_source_proven_development","migration":"migrations/dev/20260829_release453_it_provider_readiness.sql","mutation_workflow_run":33258377328,"verification_workflow_run":33258415391,"source_gate_run":33259039855,"system_gate_run":33259039825},
     {"release":454,"state":"complete_source_proven_no_new_d1_migration","migration":null,"note":"Shared Admin navigation/state/responsive convergence; exact-head evidence remains external GitHub Actions evidence."},
-    {"release":455,"state":"complete_source_proven_no_new_d1_migration","migration":null,"note":"Storefront discovery/media fallback/accessibility/responsive/SEO source release. Exact-head focused Source Gate and System Gate evidence remains external GitHub Actions evidence."}
+    {"release":455,"state":"complete_source_proven_no_new_d1_migration","migration":null,"note":"Storefront discovery/media fallback/accessibility/responsive/SEO source release; exact-head Source Gate, System Gate and Development Pages deployment were green on 0c8dc0e5e969fe87025fa831531555b00b0182fb."},
+    {"release":456,"state":"implemented_pending_exact_head_ci","migration":null,"note":"Inventory and Tool workflow depth over existing site_item_inventory and inventory_tool_lifecycle_* authorities; no new D1 schema."}
   ],
   "current_release_migrations": [],
   "current_release_database_state": {
@@ -89,6 +91,7 @@
     "last_verified_schema_release": 453,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "historical_migration_replay": false,
+    "release456_d1_change": "none",
     "release455_d1_change": "none",
     "release454_d1_change": "none",
     "release453_mutation_state": "applied_guarded_development_run_33258377328",
@@ -96,8 +99,8 @@
   },
   "current_release_evidence": {
     "source_state": "implemented_pending_exact_head_ci",
-    "exact_head_evidence": "GitHub Actions Release 455 Source Gate and System Gate must both be green on the exact current dev SHA; run IDs remain external evidence to avoid self-referential metadata commits.",
-    "d1_mutation": "none_release455",
+    "exact_head_evidence": "GitHub Actions Release 456 Source Gate and System Gate must both be green on the exact current dev SHA; run IDs remain external evidence to avoid self-referential metadata commits.",
+    "d1_mutation": "none_release456",
     "d1_last_independent_verification_run": 33258415391,
     "provider_publication_enabled": false,
     "provider_execution_enabled": false,
@@ -107,17 +110,17 @@
     "repository_hygiene_gate": "required"
   },
   "workstreams": [
-    {"key":"storefront-discovery","status":"release455_implemented","authority":"public/js/storefront-discovery-runtime.js"},
+    {"key":"inventory-operations-intelligence","status":"release456_operational_depth_implemented","workspace":"/admin/inventory-intelligence/","authority":"site_item_inventory"},
+    {"key":"tool-lifecycle","status":"release456_operational_depth_implemented","workspace":"/admin/tool-lifecycle/","authority":"inventory_tool_lifecycle_profiles + inventory_tool_lifecycle_events"},
+    {"key":"storefront-discovery","status":"release455_carried_forward","authority":"public/js/storefront-discovery-runtime.js"},
     {"key":"storefront-merchandising","status":"release455_discovery_media_protected","workspace":"/admin/storefront-merchandising/"},
     {"key":"admin-module-navigation","status":"release454_carried_forward","authority":"public/js/admin-module-nav.js"},
     {"key":"admin-workspace-state","status":"release454_carried_forward","authority":"public/js/admin-workspace-state.js"},
     {"key":"admin-responsive-convergence","status":"release454_carried_forward","authority":"css/admin-convergence.css"},
     {"key":"creators","status":"release454_shell_converged","workspace":"/admin/creative-automation/"},
     {"key":"socials-caip","status":"release454_shell_converged","workspace":"/admin/caip-content-handoff/"},
-    {"key":"financials-accounting","status":"release454_shell_converged","workspace":"/admin/accounting/"},
+    {"key":"financials-accounting","status":"next_active_after_release456","workspace":"/admin/accounting/"},
     {"key":"it-integration-registry","status":"release453_authority_release454_shell_converged","workspace":"/admin/it-integrations/"},
-    {"key":"inventory-operations-intelligence","status":"release454_shell_converged","workspace":"/admin/inventory-intelligence/"},
-    {"key":"tool-lifecycle","status":"release454_shell_converged","workspace":"/admin/tool-lifecycle/"},
     {"key":"product-material-lineage","status":"carried_forward","workspace":"/admin/product-lineage/"},
     {"key":"manufacturer-provenance-reviews","status":"carried_forward","workspace":"/admin/vendor-reviews/"},
     {"key":"product-image-quality","status":"carried_forward","workspace":"/admin/product-image-quality/"},
@@ -125,8 +128,8 @@
     {"key":"supply-sourcing-replenishment","status":"carried_forward","workspace":"/admin/supply-sourcing/"},
     {"key":"release448-calibration","status":"carried_forward","workspace":"/admin/release448-calibration/"},
     {"key":"marketplace-calibration","status":"release451_source_proven_carried_forward","workspace":"/admin/marketplace-calibration/"},
-    {"key":"seo-compliance","status":"release455_active_required_gate","authority":"scripts/public_seo_gate.py"},
-    {"key":"seo-depth","status":"release455_active_required_gate","authority":"scripts/public_seo_depth_gate.py"},
+    {"key":"seo-compliance","status":"release455_carried_forward_required_gate","authority":"scripts/public_seo_gate.py"},
+    {"key":"seo-depth","status":"release455_carried_forward_required_gate","authority":"scripts/public_seo_depth_gate.py"},
     {"key":"repository-hygiene","status":"active_required_gate","authority":"scripts/repository_hygiene_gate.py"}
   ],
   "release454_batch": [
@@ -157,6 +160,20 @@
     {"id":11,"change":"Product Open Graph/Twitter image-alt and metadata synchronization","status":"implemented"},
     {"id":12,"change":"Release 455 focused gate plus carried-forward 454/453/system SEO protection","status":"implemented"}
   ],
+  "release456_batch": [
+    {"id":1,"change":"Confirm single durable Tool lifecycle authority; no parallel site_tool_lifecycle family","status":"implemented"},
+    {"id":2,"change":"Inventory Intelligence includes Tool lifecycle/service/replacement context without duplicating writes","status":"implemented"},
+    {"id":3,"change":"Tool blocked/unsafe/out-of-service operational states","status":"implemented"},
+    {"id":4,"change":"Service overdue/due-today/due-soon derived queue","status":"implemented"},
+    {"id":5,"change":"Replacement watch/plan/urgent operational queue","status":"implemented"},
+    {"id":6,"change":"Inventory → Tool Lifecycle cross-linking","status":"implemented"},
+    {"id":7,"change":"Tool Lifecycle summary and responsive filtering","status":"implemented"},
+    {"id":8,"change":"Expose acquired date and warranty expiry already supported by durable schema/API","status":"implemented"},
+    {"id":9,"change":"Maintenance/repair/calibration events advance service history even without condition-after","status":"implemented"},
+    {"id":10,"change":"Service interval advances next-service date after service events","status":"implemented"},
+    {"id":11,"change":"Do-not-reuse/unsafe return-to-service and active-state safety guards","status":"implemented"},
+    {"id":12,"change":"Release 456 focused source gate with Release 455/454/453 carried forward","status":"implemented"}
+  ],
   "deferred_it_test_environment": {
     "state": "tracked_in_release453_readiness_authority",
     "tasks": [
@@ -169,7 +186,6 @@
     ]
   },
   "forward_queue": [
-    "Inventory and Tool workflow depth using existing durable authorities",
     "Financials reconciliation, commerce-cost and reporting workflow depth without duplicating the accounting ledger",
     "Creators/CAIP private-media evidence workflow and reviewed Content Studio handoff",
     "Authenticated Development runtime acceptance on devilndove-site-dev.pages.dev",
