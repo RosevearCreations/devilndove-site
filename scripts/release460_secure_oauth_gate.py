@@ -17,6 +17,7 @@ publish_endpoint=read('functions/api/admin/provider-publication-plan.js')
 admin_middleware=read('functions/api/admin/_middleware.js')
 social_queue=read('functions/api/admin/social-post-queue.js')
 social_product_automation=read('functions/api/admin/social-product-automation.js')
+meta_data_deletion=read('functions/api/social/meta/data-deletion.js')
 mock_proof=read('scripts/release460_provider_contract_mock_proof.mjs')
 publish_mock_proof=read('scripts/release460_publish_contract_mock_proof.mjs')
 migration=read('migrations/dev/20260829_release460_secure_oauth_lifecycle.sql')
@@ -54,15 +55,24 @@ need(publish_mock_proof,
      'PROVIDER PUBLICATION VALIDATION + IDEMPOTENCY MOCK PROOF','fetchCalls','duplicate_blocked',
      'provider-secret-must-never-appear','provider-subject-must-never-appear','public_https_image_required','public_https_video_required')
 
-# Retained Build 227-era network publishing/probing code remains source-compatible but is unreachable through admin HTTP while Release 460 closes provider execution.
+# Release 460 closes legacy provider execution at the HTTP middleware before owner handlers.
+# The smaller product-automation owner is additionally hard-closed so direct invocation cannot probe Meta.
 need(social_queue,'publish_platforms','publishToFacebook','publishToInstagram','publishToX','publishToPinterest')
-need(social_product_automation,'test_meta_connections','metaGet')
+need(social_product_automation,
+     'test_meta_connections','provider_execution_closed','provider_contacted: false','social_meta_connection_probe_blocked','/api/admin/provider-publication-plan')
+assert 'fetch(' not in social_product_automation, 'legacy social product automation owner must not contact providers in Release 460'
+assert 'graph.facebook.com' not in social_product_automation, 'legacy Meta Graph client must be removed from social product automation owner'
 need(admin_middleware,
-     'guardClosedProviderExecution','/api/admin/social-post-queue','publish_platforms','/api/admin/social-product-automation','test_meta_connections',
-     'provider_execution_closed','legacy_handler_executed: false','/api/admin/provider-publication-plan')
+     'guardClosedProviderExecution','CLOSED_PROVIDER_DIAGNOSTIC_PATHS','/api/admin/social-post-queue','publish_platforms','/api/admin/social-product-automation','test_meta_connections',
+     'provider_execution_closed','legacy_handler_executed: false','currentizeClosedProviderDiagnostics','closedProviderReadiness','/api/admin/provider-publication-plan',
+     'provider_execution: false','provider_publication: false','provider_contacted: false')
 provider_guard=admin_middleware.index('const providerBlocked = await guardClosedProviderExecution(context)')
 next_handler=admin_middleware.index('const response = await context.next()')
 assert provider_guard < next_handler, 'provider execution guard must run before retained admin route handler'
+provider_currentize=admin_middleware.index('const providerCurrent = await currentizeClosedProviderDiagnostics(response, pathname)')
+assert next_handler < provider_currentize, 'legacy social diagnostics must be currentized after retained owner reads'
+need(meta_data_deletion,'automated_signed_request_processing: false','No unverified deletion was performed.')
+assert 'fetch(' not in meta_data_deletion, 'Meta data-deletion readiness endpoint must remain local/fail-closed'
 
 need(migration,'state_hash TEXT NOT NULL UNIQUE','remote_subject_id','access_token_ciphertext','refresh_token_ciphertext','release460_forbidden_plaintext_columns','PRAGMA foreign_key_check')
 for forbidden in (' state TEXT',' code TEXT',' code_verifier TEXT',' access_token TEXT',' refresh_token TEXT'):
