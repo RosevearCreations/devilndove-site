@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical Release 448 source/local-schema gate for carousel, photography quality, Movie review and I.T. registry."""
+"""Canonical Release 448 carried-forward source/local-schema gate for carousel, photography quality, Movie review and I.T. registry."""
 from pathlib import Path
 import sqlite3,tempfile
 ROOT=Path(__file__).resolve().parents[1]
@@ -27,7 +27,13 @@ for required in ['Catalog photography queue','Product photography set','perceptu
  if required not in photo_page:raise SystemExit(f'FAIL — Photography Manager page missing {required!r}')
 need('functions/api/admin/it-integrations.js','secret_value_refused')
 need('public/js/admin-it-integrations.js','/api/admin/it-integrations')
-need('admin/it-integrations/index.html','External API &amp; Social Integration Registry')
+it_page=(ROOT/'admin/it-integrations/index.html').read_text(encoding='utf-8')
+for required in ['I.T. / Integration Registry','Add or update integration metadata','Registered integrations','itIntegrationSave','itCredential']:
+ if required not in it_page:raise SystemExit(f'FAIL — carried-forward I.T. registry workspace missing {required!r}')
+# Release 453 may extend this same I.T. page with provider readiness, but must not remove the Release 448 registry authority.
+if 'Provider acceptance checklist' in it_page:
+ need('functions/api/admin/it-provider-readiness.js','secret_value_refused')
+ need('public/js/admin-it-provider-readiness.js','/api/admin/it-provider-readiness')
 with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
  db=sqlite3.connect(tmp.name);db.executescript('PRAGMA foreign_keys=ON;CREATE TABLE users(user_id INTEGER PRIMARY KEY);CREATE TABLE products(product_id INTEGER PRIMARY KEY,name TEXT);INSERT INTO products VALUES(1,\'Photography Test Product\');')
  db.executescript(migration)
@@ -45,4 +51,5 @@ print('Image score rubric: 100 points')
 print('Photography Manager: catalog queue + set score + hero/gallery recommendations + duplicate fingerprinting')
 print('Movie authority: movie_catalog + stable review key')
 print('Shared carousel authority: one implementation')
-print('Secret values stored in I.T. registry: FORBIDDEN')
+print('I.T. integration registry: PRESERVED / MAY BE EXTENDED BY CURRENT RELEASE')
+print('Secret values stored in I.T. registry/readiness: FORBIDDEN')
