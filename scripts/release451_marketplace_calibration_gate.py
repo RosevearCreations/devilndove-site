@@ -25,14 +25,14 @@ api=has('functions/api/admin/marketplace-calibration.js','mode:\'read-only-marke
 require('CREATE TABLE' not in api.upper() and 'ALTER TABLE' not in api.upper(),'calibration API must not perform request-time DDL')
 require('fetch(' not in api,'calibration API must not contact marketplace providers')
 
-page=has('admin/marketplace-calibration/index.html','noindex,nofollow','/css/admin-marketplace-calibration.css?v=451','/public/js/admin-marketplace-calibration.js?v=451','Provider execution remains locked.')
+page=has('admin/marketplace-calibration/index.html','noindex,nofollow','/css/admin-marketplace-calibration.css?v=450.451','/public/js/admin-marketplace-calibration.js?v=450.451','Provider execution remains locked.')
 require(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'calibration admin page must have exactly one H1')
-styles=has('css/admin-marketplace-calibration.css','@media(max-width:950px)','@media(max-width:650px)','@media(max-width:420px)','grid-template-columns:1fr')
+has('css/admin-marketplace-calibration.css','@media(max-width:950px)','@media(max-width:650px)','@media(max-width:420px)','grid-template-columns:1fr')
 ui=has('public/js/admin-marketplace-calibration.js','Release 451 marketplace calibration','Checks needing work','Quarter costs','/api/admin/marketplace-calibration?quarter=')
 require('method:' not in ui and 'method :' not in ui,'calibration UI must remain read-only')
 
-readiness=has('functions/api/_lib/marketplaceReadiness.js','max_personalization_questions','Third Etsy variation','provider_execution_allowed','publication_allowed')
-release450=has('scripts/release450_marketplace_seo_gate.py','20 images / 13 tags / 3 variations / 5 personalization questions','Provider execution/publication: DISABLED')
+has('functions/api/_lib/marketplaceReadiness.js','max_personalization_questions','Third Etsy variation','provider_execution_allowed','publication_allowed')
+has('scripts/release450_marketplace_seo_gate.py','20 images / 13 tags / 3 variations / 5 personalization questions','Provider execution/publication: DISABLED')
 
 for js in ('functions/api/_lib/marketplaceCalibration.js','functions/api/admin/marketplace-calibration.js','public/js/admin-marketplace-calibration.js'):
     r=subprocess.run(['node','--check',str(ROOT/js)],capture_output=True,text=True)
