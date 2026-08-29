@@ -9,12 +9,15 @@ FILES=[
  'database_release448_product_lineage.sql',
  'database_release448_media_it.sql',
  'database_release448_storefront_merchandising.sql',
+ 'database_release448_caip_content_handoff.sql',
 ]
 REQUIRED={
  'app_modules','app_module_role_access','app_module_user_access','home_carousel_slides','home_carousel_events',
  'product_lineage_profiles','product_resource_lineage_reviews','inventory_manufacturers','inventory_manufacturer_links','inventory_vendor_reviews',
  'product_image_quality_assessments','movie_catalog','movie_metadata_reviews','it_integration_registry',
  'storefront_collections','storefront_collection_products','storefront_collage_presets',
+ 'creative_media_evidence_ranges','creative_story_evidence','creative_story_segments','creative_story_segment_evidence_links',
+ 'caip_content_handoffs','caip_content_handoff_evidence',
 }
 for name in FILES:
  if not (ROOT/name).exists():raise SystemExit(f'FAIL — fresh-install input missing: {name}')
@@ -41,5 +44,5 @@ print('RELEASE 448 COMPOSED FRESH INSTALL: PASS')
 print('Base aggregate + Release 447 platform convergence + all Release 448 migrations: COMPATIBLE')
 print('Canonical modules / role rows / explicit-user-only I.T. authority: VERIFIED')
 print(f'Fresh-install active admins: {active_admins}; explicit I.T. managers: {it_managers}')
-print('Required Release 448 tables: PRESENT')
+print('Product lineage / media-I.T. / Storefront / CAIP handoff tables: PRESENT')
 print('Foreign keys: CLEAN')
