@@ -1,60 +1,46 @@
 {
   "environment": "development",
-  "release": 459,
-  "label": "Authenticated Development Acceptance & Provider Setup Authority",
+  "release": 460,
+  "label": "Secure OAuth Lifecycle & Encrypted Token Authority",
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "release459_source_implemented_pending_exact_head_ci_and_guarded_d1",
+  "convergence_state": "release460_source_implemented_live_provider_authorization_closed_pending_exact_head_ci_and_guarded_d1",
   "previous_release": {
-    "release": 458,
-    "label": "Creators / CAIP Private Media, Evidence & Reviewed Handoff Depth",
-    "state": "complete_source_proven_no_new_d1_migration",
-    "completed_on": "2026-08-29",
-    "focused_source_gate_run": 33265953249,
-    "system_gate_run": 33265953255,
-    "exact_head_sha": "66b48f0445c74247972e14fbdaa0e215e3792fb7",
-    "pages_check_run": 99135984965,
-    "preview_url": "https://a605691a.devilndove-site-dev.pages.dev"
+    "release": 459,
+    "label": "Authenticated Development Acceptance & Provider Setup Authority",
+    "state": "closed_checkpoint_carried_forward",
+    "migration": "migrations/dev/20260829_release459_it_provider_setup_authority.sql"
   },
   "canonical_modules": [
-    {"key": "storefront", "name": "Storefront", "status": "active"},
-    {"key": "creators", "name": "Creators", "status": "active"},
-    {"key": "socials", "name": "Socials", "status": "active"},
-    {"key": "financials", "name": "Financials", "status": "active"},
-    {"key": "it-platform", "name": "I.T.", "status": "active"}
+    {"key":"storefront","name":"Storefront","status":"active"},
+    {"key":"creators","name":"Creators","status":"active"},
+    {"key":"socials","name":"Socials","status":"active"},
+    {"key":"financials","name":"Financials","status":"active"},
+    {"key":"it-platform","name":"I.T.","status":"active"}
   ],
-  "clients": [
-    {"key": "web", "status": "active"},
-    {"key": "phone", "status": "active"},
-    {"key": "desktop", "status": "active"}
-  ],
+  "clients": [{"key":"web","status":"active"},{"key":"phone","status":"active"},{"key":"desktop","status":"active"}],
   "development_infrastructure": {
     "cloudflare_account_id": "c0d5bc25df16ae5b7d47c985c4b7b787",
     "pages_project": "devilndove-site-dev",
     "pages_url": "https://devilndove-site-dev.pages.dev",
-    "deployment_boundary": "The devilndove-site-dev Pages Production deployment is the Development application. Separate live Production remains untouched until deliberate promotion.",
-    "data_alignment": "Development was synchronized from the locked live site and is treated as current unless verification proves drift.",
-    "d1": {
-      "binding": "DB",
-      "database_name": "devilndove-dev",
-      "database_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
-      "schema_current_through_release": 453
-    },
+    "deployment_boundary": "The devilndove-site-dev Pages Production deployment is the Development application. Separate live Production main/devilndove-site remains untouched until deliberate promotion.",
+    "data_alignment": "Development is treated as current unless read-only verification proves drift.",
+    "d1": {"binding":"DB","database_name":"devilndove-dev","database_id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa","schema_current_through_release":459},
     "r2": [
-      {"binding": "PRODUCT_MEDIA_BUCKET", "bucket_name": "devilndove-toolshed-images-dev"},
-      {"binding": "CAIP_PRIVATE_MEDIA_BUCKET", "bucket_name": "devilndove-caip-media-dev"}
+      {"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},
+      {"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media-dev"}
     ],
-    "github_d1_credential": {"secret_name": "CLOUDFLARE_API_TOKEN", "status": "configured_and_proven_release453"},
+    "github_d1_credential": {"secret_name":"CLOUDFLARE_API_TOKEN","status":"configured_and_proven"},
     "account_selection": "Local tooling/GitHub Actions pin CLOUDFLARE_ACCOUNT_ID. Never add account_id to wrangler.toml.",
     "connection_authority": "docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md",
     "startup_sequence": [
       "Read development-release.json and the Development Cloudflare connection authority first.",
       "Verify dev branch plus exact Development D1/R2 identities read-only.",
       "A new chat is not a migration event; never replay historical migrations.",
-      "Release 459 may apply only its own provider-authority migration to exact devilndove-dev.",
-      "Run a read-only verifier after Release 459 mutation.",
-      "Provider execution/publication and separate live Production remain closed."
+      "Release 460 may apply only its own additive secure OAuth authority migration to exact devilndove-dev.",
+      "Leave OAUTH_PROVIDER_AUTHORIZATION_MODE unset until deliberate Development live-provider acceptance.",
+      "Provider publication/execution and separate live Production remain closed."
     ]
   },
   "release_policy": {
@@ -66,6 +52,8 @@
     "current_release_d1_migration_required": true,
     "provider_publication": "closed",
     "provider_execution": "closed",
+    "provider_live_authorization": "closed",
+    "oauth_remote_operator_switch": "unset",
     "request_time_schema_mutation": "forbidden",
     "seo_gate_required": true,
     "seo_depth_gate_required": true,
@@ -73,112 +61,93 @@
     "documentation_sync_required": true,
     "external_credentials_for_feature_development": "assume_available_or_mocked"
   },
-  "database_baseline": {
-    "release": 447,
-    "file": "database_platform_convergence.sql",
-    "apply_status": "applied_and_verified_development",
-    "startup_rule": "Read-only D1/R2 verification first. Historical baselines/migrations are never startup actions."
-  },
+  "database_baseline": {"release":447,"file":"database_platform_convergence.sql","apply_status":"applied_and_verified_development","startup_rule":"Read-only D1/R2 verification first. Historical baselines/migrations are never startup actions."},
   "release_history": [
-    {"release": 448, "state": "complete_source_and_regression_authority"},
-    {"release": 449, "state": "complete_applied_and_verified_development", "migration": "migrations/dev/20260829_release449_corporate_commerce.sql", "verification_workflow_run": 33235075008},
-    {"release": 450, "state": "complete_applied_and_verified_development", "migration": "migrations/dev/20260829_release450_marketplace_seo_readiness.sql", "mutation_workflow_run": 33235769850, "verification_workflow_run": 33235803838},
-    {"release": 451, "state": "complete_source_proven_no_new_d1_migration", "focused_source_gate_run": 33252042376, "system_gate_run": 33252156030},
-    {"release": 452, "state": "complete_source_proven_no_new_d1_migration", "note": "Exact-head CI evidence retained in GitHub Actions."},
-    {"release": 453, "state": "complete_applied_independently_verified_and_source_proven_development", "migration": "migrations/dev/20260829_release453_it_provider_readiness.sql", "mutation_workflow_run": 33258377328, "verification_workflow_run": 33258415391, "source_gate_run": 33259039855, "system_gate_run": 33259039825},
-    {"release": 454, "state": "complete_source_proven_no_new_d1_migration", "migration": null},
-    {"release": 455, "state": "complete_source_proven_no_new_d1_migration", "migration": null},
-    {"release": 456, "state": "complete_source_proven_no_new_d1_migration", "migration": null, "focused_source_gate_run": 33263530207, "system_gate_run": 33263530221, "exact_head_sha": "66416972f0a76641666d2e08c2634225763e7a17"},
-    {"release": 457, "state": "complete_source_proven_no_new_d1_migration", "migration": null, "focused_source_gate_run": 33264872362, "system_gate_run": 33264872366, "exact_head_sha": "33f939c8b6daa733e8a54fa8ded15cde626978a0", "pages_check_run": 99133095306},
-    {"release": 458, "state": "complete_source_proven_no_new_d1_migration", "migration": null, "focused_source_gate_run": 33265953249, "system_gate_run": 33265953255, "exact_head_sha": "66b48f0445c74247972e14fbdaa0e215e3792fb7", "pages_check_run": 99135984965, "preview_url": "https://a605691a.devilndove-site-dev.pages.dev"},
-    {"release": 459, "state": "implemented_pending_exact_head_ci_and_guarded_d1", "migration": "migrations/dev/20260829_release459_it_provider_setup_authority.sql"}
+    {"release":448,"state":"complete_source_and_regression_authority"},
+    {"release":449,"state":"complete_applied_and_verified_development","migration":"migrations/dev/20260829_release449_corporate_commerce.sql","verification_workflow_run":33235075008},
+    {"release":450,"state":"complete_applied_and_verified_development","migration":"migrations/dev/20260829_release450_marketplace_seo_readiness.sql","mutation_workflow_run":33235769850,"verification_workflow_run":33235803838},
+    {"release":451,"state":"complete_source_proven_no_new_d1_migration","focused_source_gate_run":33252042376,"system_gate_run":33252156030},
+    {"release":452,"state":"complete_source_proven_no_new_d1_migration"},
+    {"release":453,"state":"complete_applied_independently_verified_and_source_proven_development","migration":"migrations/dev/20260829_release453_it_provider_readiness.sql","mutation_workflow_run":33258377328,"verification_workflow_run":33258415391,"source_gate_run":33259039855,"system_gate_run":33259039825},
+    {"release":454,"state":"complete_source_proven_no_new_d1_migration","migration":null},
+    {"release":455,"state":"complete_source_proven_no_new_d1_migration","migration":null},
+    {"release":456,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33263530207,"system_gate_run":33263530221,"exact_head_sha":"66416972f0a76641666d2e08c2634225763e7a17"},
+    {"release":457,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33264872362,"system_gate_run":33264872366,"exact_head_sha":"33f939c8b6daa733e8a54fa8ded15cde626978a0","pages_check_run":99133095306},
+    {"release":458,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33265953249,"system_gate_run":33265953255,"exact_head_sha":"66b48f0445c74247972e14fbdaa0e215e3792fb7","pages_check_run":99135984965,"preview_url":"https://a605691a.devilndove-site-dev.pages.dev"},
+    {"release":459,"state":"closed_checkpoint_carried_forward","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql"},
+    {"release":460,"state":"implemented_pending_exact_head_ci_and_guarded_d1","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql"}
   ],
-  "current_release_migrations": ["migrations/dev/20260829_release459_it_provider_setup_authority.sql"],
+  "current_release_migrations": ["migrations/dev/20260829_release460_secure_oauth_lifecycle.sql"],
   "current_release_database_state": {
     "new_migration_required": true,
-    "last_verified_schema_release": 453,
+    "last_verified_schema_release": 459,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "historical_migration_replay": false,
-    "release459_d1_change": "safe provider reference-name and readiness checklist metadata only",
-    "release453_mutation_state": "applied_guarded_development_run_33258377328",
-    "release453_verification_state": "independently_verified_read_only_run_33258415391"
+    "release460_d1_change": "additive OAuth authorization transaction, encrypted connection metadata, and redacted security-event authority only"
   },
   "current_release_evidence": {
     "source_state": "implemented_pending_exact_head_ci",
-    "d1_state": "pending_guarded_release459_migration_after_source_gate",
+    "d1_state": "pending_guarded_release460_migration_after_source_gate",
     "provider_publication_enabled": false,
     "provider_execution_enabled": false,
+    "provider_live_authorization_enabled": false,
+    "oauth_remote_operator_switch_set": false,
     "production_mutation": false,
-    "authenticated_runtime_acceptance": "prepared_not_yet_executed",
-    "caip_private_media_acceptance": "prepared_not_yet_executed"
+    "secret_values_stored_in_plaintext": false,
+    "runtime_callback_exchange_effective": false
   },
   "workstreams": [
-    {"key": "product-material-lineage", "status": "carried_forward", "workspace": "/admin/product-lineage/"},
-    {"key": "manufacturer-provenance-reviews", "status": "carried_forward", "workspace": "/admin/vendor-reviews/"},
-    {"key": "product-image-quality", "status": "carried_forward", "workspace": "/admin/product-image-quality/"},
-    {"key": "storefront-merchandising", "status": "carried_forward", "workspace": "/admin/storefront-merchandising/"},
-    {"key": "caip-reviewed-content-handoff", "status": "release458_carried_forward", "workspace": "/admin/caip-content-handoff/"},
-    {"key": "inventory-operations-intelligence", "status": "release456_carried_forward", "workspace": "/admin/inventory-intelligence/"},
-    {"key": "tool-lifecycle", "status": "release456_carried_forward", "workspace": "/admin/tool-lifecycle/"},
-    {"key": "supply-sourcing-replenishment", "status": "carried_forward", "workspace": "/admin/supply-sourcing/"},
-    {"key": "release448-calibration", "status": "carried_forward", "workspace": "/admin/release448-calibration/"},
-    {"key": "it-integration-registry", "status": "release459_provider_setup_authority", "workspace": "/admin/it-integrations/"},
-    {"key": "authenticated-runtime-acceptance", "status": "release459_prepared_pending_execution", "workspace": "/admin/runtime-acceptance/"},
-    {"key": "caip-private-media", "status": "release459_range_seek_proof_prepared", "workspace": "/admin/runtime-acceptance/"},
-    {"key": "social-oauth-lifecycle", "status": "next_source_only_release", "workspace": "/admin/it-integrations/"},
-    {"key": "financials-accounting", "status": "release457_carried_forward", "workspace": "/admin/accounting/"},
-    {"key": "storefront-discovery", "status": "release455_carried_forward"},
-    {"key": "admin-module-navigation", "status": "release454_carried_forward"},
-    {"key": "seo-compliance", "status": "required_gate", "authority": "scripts/public_seo_gate.py"},
-    {"key": "seo-depth", "status": "required_gate", "authority": "scripts/public_seo_depth_gate.py"},
-    {"key": "repository-hygiene", "status": "required_gate", "authority": "scripts/repository_hygiene_gate.py"}
+    {"key":"product-material-lineage","status":"carried_forward","workspace":"/admin/product-lineage/"},
+    {"key":"manufacturer-provenance-reviews","status":"carried_forward","workspace":"/admin/vendor-reviews/"},
+    {"key":"product-image-quality","status":"carried_forward","workspace":"/admin/product-image-quality/"},
+    {"key":"storefront-merchandising","status":"carried_forward","workspace":"/admin/storefront-merchandising/"},
+    {"key":"caip-reviewed-content-handoff","status":"release458_carried_forward","workspace":"/admin/caip-content-handoff/"},
+    {"key":"inventory-operations-intelligence","status":"release456_carried_forward","workspace":"/admin/inventory-intelligence/"},
+    {"key":"tool-lifecycle","status":"release456_carried_forward","workspace":"/admin/tool-lifecycle/"},
+    {"key":"it-integration-registry","status":"release459_provider_setup_authority_carried","workspace":"/admin/it-integrations/"},
+    {"key":"social-oauth-lifecycle","status":"release460_source_implemented_live_authorization_closed","workspace":"/admin/it-integrations/"},
+    {"key":"financials-accounting","status":"release457_carried_forward","workspace":"/admin/accounting/"},
+    {"key":"seo-compliance","status":"required_gate","authority":"scripts/public_seo_gate.py"},
+    {"key":"seo-depth","status":"required_gate","authority":"scripts/public_seo_depth_gate.py"},
+    {"key":"repository-hygiene","status":"required_gate","authority":"scripts/repository_hygiene_gate.py"}
   ],
-  "release454_batch": [
-    {"id":1,"change":"Shared five-module Admin navigation","status":"implemented"},{"id":2,"change":"Active-module indication","status":"implemented"},{"id":3,"change":"Shared workspace state classifier","status":"implemented"},{"id":4,"change":"Safe retry controls","status":"implemented"},{"id":5,"change":"Responsive Admin CSS","status":"implemented"},{"id":6,"change":"Storefront shell convergence","status":"implemented"},{"id":7,"change":"Creators shell convergence","status":"implemented"},{"id":8,"change":"Socials shell convergence","status":"implemented"},{"id":9,"change":"Financials shell convergence","status":"implemented"},{"id":10,"change":"I.T. shell convergence","status":"implemented"},{"id":11,"change":"Inventory/Tool shell convergence","status":"implemented"},{"id":12,"change":"Release 454 gates","status":"implemented"}
-  ],
-  "release456_batch": [
-    {"id":1,"change":"Single Tool lifecycle authority","status":"implemented"},{"id":2,"change":"Inventory Tool context","status":"implemented"},{"id":3,"change":"Blocked/unsafe states","status":"implemented"},{"id":4,"change":"Service due queue","status":"implemented"},{"id":5,"change":"Replacement queue","status":"implemented"},{"id":6,"change":"Inventory Tool linking","status":"implemented"},{"id":7,"change":"Tool summary/filtering","status":"implemented"},{"id":8,"change":"Acquired/warranty fields","status":"implemented"},{"id":9,"change":"Service history advancement","status":"implemented"},{"id":10,"change":"Next-service scheduling","status":"implemented"},{"id":11,"change":"Reuse safety guards","status":"implemented"},{"id":12,"change":"Release 456 gate","status":"implemented"}
-  ],
-  "release457_batch": [
-    {"id":1,"change":"Financial Operations queue","status":"implemented"},{"id":2,"change":"Tax reconciliation","status":"implemented"},{"id":3,"change":"Processor fee reconciliation","status":"implemented"},{"id":4,"change":"Shipping reconciliation","status":"implemented"},{"id":5,"change":"Exception queue","status":"implemented"},{"id":6,"change":"Statement fee snapshot","status":"implemented"},{"id":7,"change":"Cost/margin exceptions","status":"implemented"},{"id":8,"change":"GIFI exceptions","status":"implemented"},{"id":9,"change":"Month-close blockers","status":"implemented"},{"id":10,"change":"Monthly performance snapshot","status":"implemented"},{"id":11,"change":"Partial-read isolation","status":"implemented"},{"id":12,"change":"Release 457 gate","status":"implemented"}
-  ],
-  "release458_batch": [
-    {"id":1,"change":"CAIP readiness cockpit","status":"implemented"},{"id":2,"change":"Project deep links","status":"implemented"},{"id":3,"change":"Private R2 visibility","status":"implemented"},{"id":4,"change":"Temporal review backlog","status":"implemented"},{"id":5,"change":"Evidence linkage backlog","status":"implemented"},{"id":6,"change":"Evidence approval backlog","status":"implemented"},{"id":7,"change":"Processing verification backlog","status":"implemented"},{"id":8,"change":"Content Studio eligibility blockers","status":"implemented"},{"id":9,"change":"Stale-package detection","status":"implemented"},{"id":10,"change":"Server stale/empty refusal","status":"implemented"},{"id":11,"change":"Frozen evidence visibility","status":"implemented"},{"id":12,"change":"Release 458 gates/docs","status":"implemented"}
-  ],
-  "release459_batch": [
-    {"id":1,"change":"Close Release 458 exact-head authority","status":"implemented"},
-    {"id":2,"change":"Current Release 459 runtime authority","status":"implemented"},
-    {"id":3,"change":"Detailed eight-provider I.T. setup guide","status":"implemented"},
-    {"id":4,"change":"X durable provider authority","status":"implemented"},
-    {"id":5,"change":"YouTube YOUTUBE_* reference convergence","status":"implemented"},
-    {"id":6,"change":"Social callback readiness checks","status":"implemented"},
-    {"id":7,"change":"Authenticated GET-only runtime acceptance harness","status":"implemented"},
-    {"id":8,"change":"Admin Runtime Acceptance workspace","status":"implemented"},
-    {"id":9,"change":"CAIP bounded range/metadata/seek proof tooling","status":"implemented"},
-    {"id":10,"change":"Historical carried-gate migration semantics repair","status":"implemented"},
-    {"id":11,"change":"Guarded Development D1 + read-only verifier workflows","status":"implemented"},
-    {"id":12,"change":"Canonical Markdown authority consolidation","status":"implemented"}
+  "release454_batch": [{"id":1,"status":"implemented"},{"id":2,"status":"implemented"},{"id":3,"status":"implemented"},{"id":4,"status":"implemented"},{"id":5,"status":"implemented"},{"id":6,"status":"implemented"},{"id":7,"status":"implemented"},{"id":8,"status":"implemented"},{"id":9,"status":"implemented"},{"id":10,"status":"implemented"},{"id":11,"status":"implemented"},{"id":12,"status":"implemented"}],
+  "release456_batch": [{"id":1,"status":"implemented"},{"id":2,"status":"implemented"},{"id":3,"status":"implemented"},{"id":4,"status":"implemented"},{"id":5,"status":"implemented"},{"id":6,"status":"implemented"},{"id":7,"status":"implemented"},{"id":8,"status":"implemented"},{"id":9,"status":"implemented"},{"id":10,"status":"implemented"},{"id":11,"status":"implemented"},{"id":12,"status":"implemented"}],
+  "release457_batch": [{"id":1,"status":"implemented"},{"id":2,"status":"implemented"},{"id":3,"status":"implemented"},{"id":4,"status":"implemented"},{"id":5,"status":"implemented"},{"id":6,"status":"implemented"},{"id":7,"status":"implemented"},{"id":8,"status":"implemented"},{"id":9,"status":"implemented"},{"id":10,"status":"implemented"},{"id":11,"status":"implemented"},{"id":12,"status":"implemented"}],
+  "release458_batch": [{"id":1,"status":"implemented"},{"id":2,"status":"implemented"},{"id":3,"status":"implemented"},{"id":4,"status":"implemented"},{"id":5,"status":"implemented"},{"id":6,"status":"implemented"},{"id":7,"status":"implemented"},{"id":8,"status":"implemented"},{"id":9,"status":"implemented"},{"id":10,"status":"implemented"},{"id":11,"status":"implemented"},{"id":12,"status":"implemented"}],
+  "release459_batch": [{"id":1,"status":"implemented"},{"id":2,"status":"implemented"},{"id":3,"status":"implemented"},{"id":4,"status":"implemented"},{"id":5,"status":"implemented"},{"id":6,"status":"implemented"},{"id":7,"status":"implemented"},{"id":8,"status":"implemented"},{"id":9,"status":"implemented"},{"id":10,"status":"implemented"},{"id":11,"status":"implemented"},{"id":12,"status":"implemented"}],
+  "release460_batch": [
+    {"id":1,"change":"Versioned AES-GCM OAuth secret authority","status":"implemented"},
+    {"id":2,"change":"Hashed one-time OAuth state authority","status":"implemented"},
+    {"id":3,"change":"PKCE S256 verifier/challenge lifecycle","status":"implemented"},
+    {"id":4,"change":"Six-provider OAuth contracts","status":"implemented"},
+    {"id":5,"change":"Fail-closed Development-only OAuth start","status":"implemented"},
+    {"id":6,"change":"Atomic callback replay/expiry protection","status":"implemented"},
+    {"id":7,"change":"Encrypted token exchange persistence","status":"implemented"},
+    {"id":8,"change":"Guarded refresh lifecycle","status":"implemented"},
+    {"id":9,"change":"Idempotent local disconnect and provider revocation contract","status":"implemented"},
+    {"id":10,"change":"Redacted diagnostics/security events","status":"implemented"},
+    {"id":11,"change":"Executable cryptographic and source proof","status":"implemented"},
+    {"id":12,"change":"Guarded Development D1/current authority convergence","status":"in_progress"}
   ],
   "deferred_it_test_environment": {
     "state": "manual_boundary_not_reached",
     "tasks": [
-      {"key":"authenticated-development-runtime","status":"prepared_pending_execution"},
-      {"key":"caip-private-media","status":"prepared_pending_execution"},
-      {"key":"stripe-test","status":"deferred_until_automated_preparation_complete"},
-      {"key":"paypal-sandbox","status":"deferred_until_automated_preparation_complete"},
-      {"key":"etsy-provider","status":"deferred_until_secure_oauth_lifecycle"},
-      {"key":"social-provider-acceptance","status":"deferred_until_secure_oauth_lifecycle"}
+      {"key":"authenticated-development-runtime","status":"deferred"},
+      {"key":"caip-private-media","status":"deferred"},
+      {"key":"stripe-test","status":"deferred"},
+      {"key":"paypal-sandbox","status":"deferred"},
+      {"key":"etsy-provider","status":"deferred_until_release460_automated_proof_closed"},
+      {"key":"social-provider-acceptance","status":"deferred_until_release460_automated_proof_closed"}
     ]
   },
   "forward_queue": [
-    "Prove Release 459 focused Source Gate and System Gate on exact dev SHA.",
-    "Apply only Release 459 safe provider-authority migration to exact Development D1.",
-    "Run independent read-only Release 459 D1 verification.",
-    "Confirm exact Cloudflare Pages Development deployment.",
-    "Implement secure social OAuth start/state/PKCE/encrypted token/refresh/disconnect lifecycle before provider authorization.",
-    "Continue automated provider payload/contract/idempotency preparation.",
-    "Run authenticated runtime and CAIP private-media acceptance only when automated preparation is exhausted.",
-    "Run Stripe/PayPal/Etsy/social provider manual acceptance last.",
-    "Use controlled Development-to-Production transition checklist; separate live Production stays closed until then."
+    "Prove Release 460 Source Gate and System Gate on exact dev SHA.",
+    "Apply only Release 460 additive secure OAuth migration to exact Development D1.",
+    "Run read-only Release 460 D1 verification.",
+    "Keep OAUTH_PROVIDER_AUTHORIZATION_MODE unset and live provider authorization closed.",
+    "Complete mock provider payload/idempotency proof before any real provider authorization.",
+    "Run manual provider acceptance last.",
+    "Use controlled Development-to-Production transition checklist; separate live Production stays closed."
   ]
 }
