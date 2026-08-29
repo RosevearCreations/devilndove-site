@@ -5,13 +5,8 @@
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "release460_source_implemented_live_provider_authorization_closed_pending_exact_head_ci_and_guarded_d1",
-  "previous_release": {
-    "release": 459,
-    "label": "Authenticated Development Acceptance & Provider Setup Authority",
-    "state": "closed_checkpoint_carried_forward",
-    "migration": "migrations/dev/20260829_release459_it_provider_setup_authority.sql"
-  },
+  "convergence_state": "release460_secure_oauth_source_and_development_d1_proven_live_provider_authorization_closed",
+  "previous_release": {"release":459,"label":"Authenticated Development Acceptance & Provider Setup Authority","state":"closed_checkpoint_carried_forward","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql"},
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
     {"key":"creators","name":"Creators","status":"active"},
@@ -26,11 +21,8 @@
     "pages_url": "https://devilndove-site-dev.pages.dev",
     "deployment_boundary": "The devilndove-site-dev Pages Production deployment is the Development application. Separate live Production main/devilndove-site remains untouched until deliberate promotion.",
     "data_alignment": "Development is treated as current unless read-only verification proves drift.",
-    "d1": {"binding":"DB","database_name":"devilndove-dev","database_id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa","schema_current_through_release":459},
-    "r2": [
-      {"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},
-      {"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media-dev"}
-    ],
+    "d1": {"binding":"DB","database_name":"devilndove-dev","database_id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa","schema_current_through_release":460},
+    "r2": [{"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},{"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media-dev"}],
     "github_d1_credential": {"secret_name":"CLOUDFLARE_API_TOKEN","status":"configured_and_proven"},
     "account_selection": "Local tooling/GitHub Actions pin CLOUDFLARE_ACCOUNT_ID. Never add account_id to wrangler.toml.",
     "connection_authority": "docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md",
@@ -38,7 +30,7 @@
       "Read development-release.json and the Development Cloudflare connection authority first.",
       "Verify dev branch plus exact Development D1/R2 identities read-only.",
       "A new chat is not a migration event; never replay historical migrations.",
-      "Release 460 may apply only its own additive secure OAuth authority migration to exact devilndove-dev.",
+      "Release 460 D1 is already applied and proven; do not reapply unless read-only verification proves drift.",
       "Leave OAUTH_PROVIDER_AUTHORIZATION_MODE unset until deliberate Development live-provider acceptance.",
       "Provider publication/execution and separate live Production remain closed."
     ]
@@ -49,7 +41,7 @@
     "historical_build_gates_allowed": false,
     "production_promotion": "closed",
     "current_release_d1_changes_allowed": true,
-    "current_release_d1_migration_required": true,
+    "current_release_d1_migration_required": false,
     "provider_publication": "closed",
     "provider_execution": "closed",
     "provider_live_authorization": "closed",
@@ -75,19 +67,21 @@
     {"release":457,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33264872362,"system_gate_run":33264872366,"exact_head_sha":"33f939c8b6daa733e8a54fa8ded15cde626978a0","pages_check_run":99133095306},
     {"release":458,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33265953249,"system_gate_run":33265953255,"exact_head_sha":"66b48f0445c74247972e14fbdaa0e215e3792fb7","pages_check_run":99135984965,"preview_url":"https://a605691a.devilndove-site-dev.pages.dev"},
     {"release":459,"state":"closed_checkpoint_carried_forward","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql"},
-    {"release":460,"state":"implemented_pending_exact_head_ci_and_guarded_d1","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql"}
+    {"release":460,"state":"secure_oauth_source_and_development_d1_proven_live_authorization_closed","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql","focused_source_gate_run":33273087878,"development_d1_run":33273087894}
   ],
   "current_release_migrations": ["migrations/dev/20260829_release460_secure_oauth_lifecycle.sql"],
   "current_release_database_state": {
-    "new_migration_required": true,
-    "last_verified_schema_release": 459,
+    "new_migration_required": false,
+    "last_verified_schema_release": 460,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "historical_migration_replay": false,
-    "release460_d1_change": "additive OAuth authorization transaction, encrypted connection metadata, and redacted security-event authority only"
+    "release460_d1_change": "additive OAuth authorization transaction, encrypted connection metadata, and redacted security-event authority only",
+    "release460_mutation_run": 33273087894,
+    "release460_post_write_proof": "three OAuth authority tables; zero forbidden plaintext OAuth columns; zero foreign-key violations"
   },
   "current_release_evidence": {
-    "source_state": "implemented_pending_exact_head_ci",
-    "d1_state": "pending_guarded_release460_migration_after_source_gate",
+    "source_state": "focused_source_gate_green_33273087878",
+    "d1_state": "applied_and_post_write_verified_33273087894",
     "provider_publication_enabled": false,
     "provider_execution_enabled": false,
     "provider_live_authorization_enabled": false,
@@ -105,7 +99,7 @@
     {"key":"inventory-operations-intelligence","status":"release456_carried_forward","workspace":"/admin/inventory-intelligence/"},
     {"key":"tool-lifecycle","status":"release456_carried_forward","workspace":"/admin/tool-lifecycle/"},
     {"key":"it-integration-registry","status":"release459_provider_setup_authority_carried","workspace":"/admin/it-integrations/"},
-    {"key":"social-oauth-lifecycle","status":"release460_source_implemented_live_authorization_closed","workspace":"/admin/it-integrations/"},
+    {"key":"social-oauth-lifecycle","status":"release460_source_and_d1_proven_live_authorization_closed","workspace":"/admin/it-integrations/"},
     {"key":"financials-accounting","status":"release457_carried_forward","workspace":"/admin/accounting/"},
     {"key":"seo-compliance","status":"required_gate","authority":"scripts/public_seo_gate.py"},
     {"key":"seo-depth","status":"required_gate","authority":"scripts/public_seo_depth_gate.py"},
@@ -128,7 +122,7 @@
     {"id":9,"change":"Idempotent local disconnect and provider revocation contract","status":"implemented"},
     {"id":10,"change":"Redacted diagnostics/security events","status":"implemented"},
     {"id":11,"change":"Executable cryptographic and source proof","status":"implemented"},
-    {"id":12,"change":"Guarded Development D1/current authority convergence","status":"in_progress"}
+    {"id":12,"change":"Guarded exact Development D1 convergence","status":"implemented"}
   ],
   "deferred_it_test_environment": {
     "state": "manual_boundary_not_reached",
@@ -137,17 +131,18 @@
       {"key":"caip-private-media","status":"deferred"},
       {"key":"stripe-test","status":"deferred"},
       {"key":"paypal-sandbox","status":"deferred"},
-      {"key":"etsy-provider","status":"deferred_until_release460_automated_proof_closed"},
-      {"key":"social-provider-acceptance","status":"deferred_until_release460_automated_proof_closed"}
+      {"key":"etsy-provider","status":"deferred_live_authorization_closed"},
+      {"key":"social-provider-acceptance","status":"deferred_live_authorization_closed"}
     ]
   },
   "forward_queue": [
-    "Prove Release 460 Source Gate and System Gate on exact dev SHA.",
-    "Apply only Release 460 additive secure OAuth migration to exact Development D1.",
-    "Run read-only Release 460 D1 verification.",
+    "Keep Release 460 D1 closed; do not reapply unless read-only verification proves drift.",
     "Keep OAUTH_PROVIDER_AUTHORIZATION_MODE unset and live provider authorization closed.",
-    "Complete mock provider payload/idempotency proof before any real provider authorization.",
-    "Run manual provider acceptance last.",
-    "Use controlled Development-to-Production transition checklist; separate live Production stays closed."
+    "Add provider-specific mock exchange/refresh/revoke fixtures and safe failure-contract proof.",
+    "Add intended-account identity verification and refresh-expiry health authority.",
+    "Add non-executing provider publish payload validation/idempotency as a separate layer.",
+    "Continue Stripe/PayPal automated contract/replay/reconciliation preparation.",
+    "Continue Development-to-Production parity/rollback tooling.",
+    "Run manual provider acceptance last; separate live Production stays closed."
   ]
 }
