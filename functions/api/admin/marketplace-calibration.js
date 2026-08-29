@@ -4,6 +4,7 @@ import { evaluateMarketplaceCalibration, MARKETPLACE_CALIBRATION_RELEASE, MARKET
 
 function text(v){ return String(v ?? '').trim(); }
 function rows(r){ return Array.isArray(r?.results) ? r.results : []; }
+function cleanUrls(value){ return jsonArray(value || '[]',40).map((v)=>text(v)).filter(Boolean); }
 
 export async function onRequestGet(context){
   const adminUser=await getAdminUserFromRequest(context.request, context.env);
@@ -27,15 +28,31 @@ export async function onRequestGet(context){
 
   const providerRows=rows(await db.prepare('SELECT provider_key,setup_status,enabled,setup_authority FROM provider_setup_authorities ORDER BY provider_key').all().catch(()=>({results:[]})));
   const providers=new Map(providerRows.map((r)=>[text(r.provider_key),r]));
-  const profileResult=await db.prepare(`SELECT p.*, pr.name, pr.sku, pr.slug, pr.price_cents, pr.quantity, pr.description, pr.short_description
-    FROM marketplace_listing_profiles p LEFT JOIN products pr ON pr.id=p.product_id
+
+  const profileResult=await db.prepare(`SELECT p.*, pr.name, pr.sku, pr.slug, pr.price_cents, pr.currency, pr.description, pr.short_description
+    FROM marketplace_listing_profiles p LEFT JOIN products pr ON pr.product_id=p.product_id
     WHERE p.channel_key IN (${channelKeys.map(()=>'?').join(',')}) ORDER BY p.channel_key,p.product_id LIMIT 300`).bind(...channelKeys).all().catch(()=>({results:[]}));
   const profiles=rows(profileResult);
-  const imageResult=await db.prepare(`SELECT channel_key,product_id,image_url,alt_text,sort_order FROM marketplace_export_image_selections
-    WHERE channel_key IN (${channelKeys.map(()=>'?').join(',')}) ORDER BY channel_key,product_id,sort_order`).bind(...channelKeys).all().catch(()=>({results:[]}));
-  const images=rows(imageResult);
-  const costs=rows(await db.prepare(`SELECT provider,marketplace_channel,cost_type,payout_reference,amount_cents,currency FROM commerce_transaction_costs
-    WHERE COALESCE(occurred_at,created_at)>=? AND COALESCE(occurred_at,created_at)<?`).bind(start,end).all().catch(()=>({results:[]})));
+
+  const selectionRows=rows(await db.prepare(`SELECT channel,product_id,selected_image_urls_json FROM marketplace_export_image_selections
+    WHERE channel IN (${channelKeys.map(()=>'?').join(',')}) ORDER BY channel,product_id`).bind(...channelKeys).all().catch(()=>({results:[]})));
+  const imageCatalog=rows(await db.prepare(`SELECT product_id,image_url,alt_text,image_role,public_use_status,sort_order FROM product_images
+    ORDER BY product_id,sort_order,product_image_id`).all().catch(()=>({results:[]})));
+  const imageByProduct=new Map();
+  for(const image of imageCatalog){
+    const id=Number(image.product_id||0); if(!imageByProduct.has(id)) imageByProduct.set(id,[]); imageByProduct.get(id).push(image);
+  }
+  const selectedByChannelProduct=new Map();
+  for(const selection of selectionRows){
+    const productId=Number(selection.product_id||0); const urls=cleanUrls(selection.selected_image_urls_json);
+    const available=imageByProduct.get(productId)||[];
+    const selected=urls.map((imageUrl)=>available.find((img)=>text(img.image_url)===imageUrl) || {image_url:imageUrl,alt_text:''});
+    selectedByChannelProduct.set(`${text(selection.channel)}:${productId}`,selected);
+  }
+
+  const costs=rows(await db.prepare(`SELECT provider_key,marketplace_key,provider_reference,transaction_date,currency,
+      provider_fee_cents,marketplace_fee_cents,currency_conversion_fee_cents,shipping_cost_cents
+    FROM commerce_transaction_costs WHERE transaction_date>=? AND transaction_date<?`).bind(start,end).all().catch(()=>({results:[]})));
 
   const out=[];
   for(const channel of channelKeys){
@@ -43,15 +60,19 @@ export async function onRequestGet(context){
     if(!policy){ out.push({channel,schema_ready:true,missing_policy:true,provider_execution_allowed:false,publication_allowed:false}); continue; }
     const provider=providers.get(text(policy.provider_key)) || {};
     const channelProfiles=profiles.filter((p)=>text(p.channel_key)===channel);
-    const channelCosts=costs.filter((c)=>text(c.marketplace_channel)===channel || text(c.provider)===text(policy.provider_key));
-    const commerce={cost_row_count:channelCosts.length,payout_reference_count:channelCosts.filter((c)=>text(c.payout_reference)).length,total_cost_cents:channelCosts.reduce((n,c)=>n+Number(c.amount_cents||0),0)};
+    const channelCosts=costs.filter((c)=>text(c.marketplace_key)===channel || text(c.provider_key)===text(policy.provider_key));
+    const commerce={
+      cost_row_count:channelCosts.length,
+      payout_reference_count:channelCosts.filter((c)=>text(c.provider_reference)).length,
+      total_cost_cents:channelCosts.reduce((n,c)=>n+Number(c.provider_fee_cents||0)+Number(c.marketplace_fee_cents||0)+Number(c.currency_conversion_fee_cents||0)+Number(c.shipping_cost_cents||0),0),
+    };
     const examples=channelProfiles.slice(0,25).map((profile)=>{
-      const selected=images.filter((img)=>text(img.channel_key)===channel && Number(img.product_id)===Number(profile.product_id));
+      const selected=selectedByChannelProduct.get(`${channel}:${Number(profile.product_id||0)}`) || [];
       return evaluateMarketplaceCalibration({
         channel,policy,provider,profile,product:profile,selected_images:selected,
         tags:jsonArray(profile.tags_json,50),materials:jsonArray(profile.materials_json,50),commerce,
         tax_handling_reviewed:Boolean(profile.review_notes && /tax/i.test(profile.review_notes)),
-        currency_reviewed:true,
+        currency_reviewed:Boolean(text(profile.currency || 'CAD')),
         creator_info_reviewed:Boolean(profile.review_notes && /creator info/i.test(profile.review_notes)),
         verified_media_domain:Boolean(profile.review_notes && /verified (media )?domain/i.test(profile.review_notes)),
         consent_reviewed:Boolean(profile.review_notes && /consent/i.test(profile.review_notes)),
