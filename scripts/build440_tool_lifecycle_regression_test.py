@@ -35,7 +35,7 @@ c('do not reuse' in ui.lower() and 'only explicit Reactivate Tool' in ui,'UI exp
 c('setInterval' not in ui and 'setTimeout' not in ui,'Tool workspace contains no polling/timer loop')
 c('provider' not in re.sub(r'//.*','',ui,flags=re.M).lower() and 'bucket.' not in api.lower(),'Tool lifecycle performs no provider/R2 execution')
 c('@media(max-width:900px)' in css and '@media(max-width:620px)' in css,'Tool workspace is responsive on tablet and phone')
-c((ROOT/'BUILD440_D1_STRICT_VERIFICATION.sql').exists() and (ROOT/'scripts/build440_development_tool_lifecycle.py').exists(),'Development strict verifier/helper exist')
+c((ROOT/'scripts/release448_tool_lifecycle_gate.py').exists() and (ROOT/'scripts/apply_development_release448_tool_lifecycle.py').exists(),'Current Tool lifecycle verifier/transport authority exists')
 c("'build_440_tool_lifecycle_history'" in mig,'focused migration is ledgered')
 print('BUILD 440 TOOL LIFECYCLE REGRESSION'); print('Cloudflare/D1/R2/provider access: NONE'); print('Production mutation capability: NONE'); print()
 failed=0
