@@ -28,12 +28,29 @@ Release 459 D1 convergence was re-probed during Release 460 run `33273639605`; t
 6. Contracts exist for Etsy, Pinterest, Meta, X, TikTok and YouTube/Google.
 7. `GET /api/admin/oauth-start` requires an administrator and is fail-closed unless the exact Development host and `OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit` both agree.
 8. **Do not set that operator switch yet.** Current canonical policy is unset/closed.
-9. Real callback responses are rejected with no exchange while the gate is closed. Normal callback browsing remains a safe readiness page.
-10. `/api/admin/oauth-connections` exposes redacted diagnostics and guarded refresh/disconnect. Raw provider subject/account IDs and token material are not emitted by routine diagnostics.
-11. Connection diagnostics calculate local access/refresh health from stored expiry metadata only; this does not contact providers.
-12. Provider-subject presence is not intended-account proof. Intended-account verification remains required before any live provider can be accepted.
-13. Disconnect destroys local encrypted token material even if remote revocation cannot/should not execute. Generic revoke contracts are mock-proven for X, TikTok and YouTube; unsupported generic revoke paths for Etsy, Pinterest and Meta make no network call.
-14. Provider publication is never granted by connection setup and remains closed.
+9. Even after that switch is deliberately opened later, OAuth start now refuses to redirect unless the provider-specific intended account reference is configured.
+10. Real callback responses are rejected with no exchange while the gate is closed. Normal callback browsing remains a safe readiness page.
+11. Once deliberately opened later, a callback exchanges server-side and then retrieves/verifies the provider identity **before any newly returned token is encrypted or persisted**. A mismatch fails closed and consumes the one-time authorization transaction.
+12. Refresh repeats intended-account identity verification before a refreshed access token can replace stored token material.
+13. `/api/admin/oauth-connections` exposes redacted diagnostics and guarded refresh/disconnect. Raw provider subject/account IDs and token material are never emitted by routine diagnostics.
+14. Connection diagnostics expose only `verified`, `mismatch`, `unconfigured`, `not_verified`, or `not_connected`, plus an operator-configured safe account label and readiness booleans.
+15. Connection diagnostics calculate local access/refresh health from stored expiry metadata only; this does not contact providers.
+16. Disconnect destroys local encrypted token material even if remote revocation cannot/should not execute. Generic revoke contracts are mock-proven for X, TikTok and YouTube; unsupported generic revoke paths for Etsy, Pinterest and Meta make no network call.
+17. Provider publication is never granted by connection setup and remains closed.
+
+## Intended-account authority
+Before future live authorization, configure the correct Development secret/variable references for the intended destination. Values must never be written into source or Markdown.
+
+- Etsy: `ETSY_EXPECTED_USER_ID`; safe label `ETSY_EXPECTED_ACCOUNT_LABEL`
+- Pinterest: `PINTEREST_EXPECTED_USERNAME`; safe label `PINTEREST_EXPECTED_ACCOUNT_LABEL`
+- Meta: `META_EXPECTED_PAGE_ID`; optional linked Instagram verification `META_EXPECTED_INSTAGRAM_BUSINESS_ID`; safe label `META_EXPECTED_ACCOUNT_LABEL`
+- X: `X_EXPECTED_USER_ID`; safe label `X_EXPECTED_ACCOUNT_LABEL`
+- TikTok: `TIKTOK_EXPECTED_OPEN_ID`; safe label `TIKTOK_EXPECTED_ACCOUNT_LABEL`
+- YouTube: `YOUTUBE_EXPECTED_CHANNEL_ID`; safe label `YOUTUBE_EXPECTED_ACCOUNT_LABEL`
+
+Meta intentionally verifies the managed Facebook Page and, when configured, its linked Instagram business account. This is stronger than merely proving which Facebook login user approved OAuth.
+
+Pinterest now requests `user_accounts:read` for its identity check. YouTube now requests `youtube.readonly` in addition to upload authority so the authenticated channel can be verified before publication is ever considered.
 
 ## Release 460 D1 checkpoint
 Current migration:
@@ -46,28 +63,37 @@ It adds only:
 
 Guarded Development D1 run `33273087894` applied and proved Release 460. Later convergence run `33273639602` verified the exact Development database, detected all three OAuth authorities already present, **skipped the migration apply step**, and passed read-only plaintext/FK proof.
 
-Both `.github/workflows/development-d1-release459.yml` and `.github/workflows/development-d1-release460.yml` are now **manual-dispatch only**. Authority/source edits no longer wake historical or converged D1 migration workflows. Manual dispatch is reserved for a future case where read-only verification proves actual drift.
+The intended-account layer required **no new migration**. It uses the existing internal `remote_subject_id` field and never emits that value through routine diagnostics.
 
-## Release 460 automated proof checkpoint
-Exact Development source checkpoint before this documentation sync:
-- SHA `03a243176469c42a39bbd99221f7638945975d2a`
-- Release 460 Source Gate `33273733112`: GREEN
-- System Gate `33273733111`: GREEN
-- Cloudflare Pages check `99156783003`: GREEN
-- Development preview: `https://95a45cc7.devilndove-site-dev.pages.dev`
+Both `.github/workflows/development-d1-release459.yml` and `.github/workflows/development-d1-release460.yml` are **manual-dispatch only**. Authority/source edits do not wake historical or converged D1 migration workflows.
 
-The Release 460 Source Gate proves:
+## Release 460 intended-account implementation checkpoint
+Exact Development source checkpoint before this authority sync:
+- SHA `0a224a8313bda8fc36002149a000742f45c41a41`
+- Release 460 Source Gate `33277302902`: GREEN
+- System Gate `33277302903`: GREEN
+- Cloudflare Pages check `99166205949`: GREEN
+- Development preview: `https://ac063323.devilndove-site-dev.pages.dev`
+
+The focused proof now covers:
 - actual Release 460 source/schema invariants;
 - executable Web Crypto AES-GCM/PKCE behavior;
-- six-provider mock authorization/exchange/refresh contracts;
-- safe provider error behavior;
+- six-provider authorization/exchange/refresh contracts;
+- six-provider intended-account identity retrieval using mock network responses only;
+- missing intended-account configuration fail-closed behavior;
+- wrong-account mismatch failure without subject-value leakage;
+- Meta Facebook Page + optional linked Instagram business-account matching;
+- Etsy Bearer + `x-api-key` identity-request contract;
+- Pinterest `user_accounts:read` and YouTube `youtube.readonly` identity scopes;
+- refresh identity re-verification before token replacement;
+- safe provider lookup/exchange failures;
 - supported revoke contracts for X/TikTok/YouTube;
 - no-network unsupported generic revoke behavior for Etsy/Pinterest/Meta;
 - carried Release 459 provider/runtime authority;
 - JavaScript syntax;
 - explicit Production/provider closed-boundary assertions.
 
-The System Gate also restored/proved the carried Release 448 Supply Sourcing and Calibration workstream authority instead of weakening historical regression coverage.
+No real provider identity endpoint was contacted by these proofs.
 
 Key authorities:
 - `functions/api/_lib/oauthSecurity.js`
@@ -85,10 +111,9 @@ Key authorities:
 
 ## What remains before live provider authorization
 Continue automated work first:
-- provider-specific intended-account identity retrieval/verification and safe connection labeling using mocks first;
-- provider publish-payload validation and idempotency as a separate non-executing layer;
-- Stripe/PayPal automated contract/replay/reconciliation preparation;
-- Development-to-Production parity, transition and rollback tooling.
+- add provider publish-payload validation and idempotency as a separate **non-executing** layer;
+- continue Stripe/PayPal automated contract/replay/reconciliation preparation;
+- continue Development-to-Production parity, transition and rollback tooling.
 
 Do not request provider authorization merely because Release 460 source/D1/mock proof is green.
 

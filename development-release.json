@@ -5,7 +5,7 @@
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "release460_secure_oauth_source_d1_mock_contract_redacted_health_and_replay_automation_proven_live_authorization_closed",
+  "convergence_state": "release460_secure_oauth_intended_account_identity_mock_proven_d1_closed_live_authorization_closed",
   "previous_release": {"release":459,"label":"Authenticated Development Acceptance & Provider Setup Authority","state":"closed_checkpoint_carried_forward","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql"},
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
@@ -33,6 +33,7 @@
       "Release 459 and Release 460 D1 workflows are manual-dispatch-only recovery tools; never invoke them without read-only proof of actual drift.",
       "Release 460 D1 is already applied and proven; do not reapply unless read-only verification proves drift.",
       "Leave OAUTH_PROVIDER_AUTHORIZATION_MODE unset until deliberate Development live-provider acceptance.",
+      "Before any future live provider authorization, configure the provider-specific intended-account reference and safe account label documented by Release 460.",
       "Provider publication/execution and separate live Production remain closed."
     ]
   },
@@ -69,7 +70,7 @@
     {"release":457,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33264872362,"system_gate_run":33264872366,"exact_head_sha":"33f939c8b6daa733e8a54fa8ded15cde626978a0","pages_check_run":99133095306},
     {"release":458,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33265953249,"system_gate_run":33265953255,"exact_head_sha":"66b48f0445c74247972e14fbdaa0e215e3792fb7","pages_check_run":99135984965,"preview_url":"https://a605691a.devilndove-site-dev.pages.dev"},
     {"release":459,"state":"closed_checkpoint_carried_forward_manual_d1_recovery_only","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql","convergence_reverify_run":33273639605,"convergence_reverify_apply":"skipped"},
-    {"release":460,"state":"secure_oauth_source_d1_mock_contract_redacted_health_and_replay_automation_proven_live_authorization_closed","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql","initial_focused_source_gate_run":33273087878,"development_d1_run":33273087894,"convergence_reverify_run":33273639602,"convergence_reverify_apply":"skipped","checkpoint_exact_head_sha":"03a243176469c42a39bbd99221f7638945975d2a","checkpoint_source_gate_run":33273733112,"checkpoint_system_gate_run":33273733111,"checkpoint_pages_check_run":99156783003,"checkpoint_preview_url":"https://95a45cc7.devilndove-site-dev.pages.dev"}
+    {"release":460,"state":"secure_oauth_intended_account_identity_mock_proven_live_authorization_closed","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql","initial_focused_source_gate_run":33273087878,"development_d1_run":33273087894,"convergence_reverify_run":33273639602,"convergence_reverify_apply":"skipped","checkpoint_exact_head_sha":"03a243176469c42a39bbd99221f7638945975d2a","checkpoint_source_gate_run":33273733112,"checkpoint_system_gate_run":33273733111,"checkpoint_pages_check_run":99156783003,"checkpoint_preview_url":"https://95a45cc7.devilndove-site-dev.pages.dev","identity_checkpoint_exact_head_sha":"0a224a8313bda8fc36002149a000742f45c41a41","identity_source_gate_run":33277302902,"identity_system_gate_run":33277302903,"identity_pages_check_run":99166205949,"identity_preview_url":"https://ac063323.devilndove-site-dev.pages.dev"}
   ],
   "current_release_migrations": ["migrations/dev/20260829_release460_secure_oauth_lifecycle.sql"],
   "current_release_database_state": {
@@ -81,18 +82,22 @@
     "release459_recovery_workflow": "manual_dispatch_only",
     "release460_recovery_workflow": "manual_dispatch_only",
     "release460_d1_change": "additive OAuth authorization transaction, encrypted connection metadata, and redacted security-event authority only",
+    "release460_identity_change": "source_and_contract_only_uses_existing_remote_subject_id_no_new_migration",
     "release460_mutation_run": 33273087894,
     "release460_convergence_reverify_run": 33273639602,
     "release460_convergence_reverify_apply": "skipped",
     "release460_post_write_proof": "three OAuth authority tables; zero forbidden plaintext OAuth columns; zero foreign-key violations"
   },
   "current_release_evidence": {
-    "source_state": "checkpoint_03a243176469c42a39bbd99221f7638945975d2a_source_33273733112_system_33273733111_pages_99156783003_green",
-    "d1_state": "applied_33273087894_then_convergence_reverified_33273639602_apply_skipped",
-    "provider_contract_mock_proof": "green_33273733112",
+    "source_state": "identity_checkpoint_0a224a8313bda8fc36002149a000742f45c41a41_source_33277302902_system_33277302903_pages_99166205949_green",
+    "d1_state": "applied_33273087894_then_convergence_reverified_33273639602_apply_skipped_no_identity_migration",
+    "provider_contract_mock_proof": "identity_green_33277302902",
     "provider_subject_values_emitted": false,
     "refresh_health_authority": "local_expiry_metadata_only_no_provider_contact",
-    "intended_account_verification": "required_before_live_provider_acceptance",
+    "intended_account_verification": "enforced_before_new_token_persistence_and_refresh_persistence_mock_proven_33277302902_live_acceptance_pending",
+    "intended_account_labels": "safe_operator_configured_labels_only",
+    "intended_account_subject_values_emitted": false,
+    "provider_identity_network_execution": "mock_only_while_remote_gate_closed",
     "automatic_release459_d1_push_trigger": false,
     "automatic_release460_d1_push_trigger": false,
     "provider_publication_enabled": false,
@@ -114,7 +119,7 @@
     {"key":"supply-sourcing-replenishment","status":"release448_carried_forward","workspace":"/admin/supply-sourcing/"},
     {"key":"release448-calibration","status":"release448_carried_forward","workspace":"/admin/release448-calibration/"},
     {"key":"it-integration-registry","status":"release459_provider_setup_authority_carried","workspace":"/admin/it-integrations/"},
-    {"key":"social-oauth-lifecycle","status":"release460_source_d1_mock_contract_redacted_health_and_replay_automation_proven_live_authorization_closed","workspace":"/admin/it-integrations/"},
+    {"key":"social-oauth-lifecycle","status":"release460_intended_account_identity_enforced_and_mock_proven_live_authorization_closed","workspace":"/admin/it-integrations/"},
     {"key":"financials-accounting","status":"release457_carried_forward","workspace":"/admin/accounting/"},
     {"key":"seo-compliance","status":"required_gate","authority":"scripts/public_seo_gate.py"},
     {"key":"seo-depth","status":"required_gate","authority":"scripts/public_seo_depth_gate.py"},
@@ -129,14 +134,14 @@
     {"id":1,"change":"Versioned AES-GCM OAuth secret authority","status":"implemented"},
     {"id":2,"change":"Hashed one-time OAuth state authority","status":"implemented"},
     {"id":3,"change":"PKCE S256 verifier/challenge lifecycle","status":"implemented"},
-    {"id":4,"change":"Six-provider OAuth contracts","status":"implemented"},
-    {"id":5,"change":"Fail-closed Development-only OAuth start","status":"implemented"},
+    {"id":4,"change":"Six-provider OAuth contracts including identity contracts","status":"implemented"},
+    {"id":5,"change":"Fail-closed Development-only OAuth start including intended-account precondition","status":"implemented"},
     {"id":6,"change":"Atomic callback replay/expiry protection","status":"implemented"},
-    {"id":7,"change":"Encrypted token exchange persistence","status":"implemented"},
-    {"id":8,"change":"Guarded refresh lifecycle and local expiry health","status":"implemented"},
+    {"id":7,"change":"Intended-account verification before encrypted token persistence","status":"implemented"},
+    {"id":8,"change":"Guarded refresh lifecycle with identity re-verification and local expiry health","status":"implemented"},
     {"id":9,"change":"Idempotent local disconnect and provider revocation contract","status":"implemented"},
-    {"id":10,"change":"Redacted diagnostics/security events with provider-subject suppression","status":"implemented"},
-    {"id":11,"change":"Executable cryptographic/source/six-provider contract mock proof","status":"implemented"},
+    {"id":10,"change":"Redacted diagnostics/security events with provider-subject suppression and safe account labels","status":"implemented"},
+    {"id":11,"change":"Executable cryptographic/source/six-provider identity/exchange/refresh/revoke mock proof","status":"implemented"},
     {"id":12,"change":"Guarded exact Development D1 convergence plus automatic replay closure","status":"implemented"}
   ],
   "deferred_it_test_environment": {
@@ -153,8 +158,7 @@
   "forward_queue": [
     "Keep Release 460 D1 closed; do not manually dispatch Release 459/460 D1 recovery workflows unless read-only verification proves drift.",
     "Keep OAUTH_PROVIDER_AUTHORIZATION_MODE unset and live provider authorization closed.",
-    "Add provider-specific intended-account identity retrieval/verification and safe connection labeling using mocks first.",
-    "Add non-executing provider publish payload validation/idempotency as a separate layer.",
+    "Add non-executing provider publish payload validation/idempotency as the next Socials/OAuth layer.",
     "Continue Stripe/PayPal automated contract/replay/reconciliation preparation.",
     "Continue Development-to-Production parity/rollback tooling.",
     "Run manual provider acceptance last; separate live Production stays closed."
