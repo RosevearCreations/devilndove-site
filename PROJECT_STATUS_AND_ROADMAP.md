@@ -1,238 +1,158 @@
-# Project Status and Roadmap — Release 448 Platform Expansion
+# Project Status and Roadmap — Release 450 Marketplace & SEO Readiness
 
-Updated: 2026-08-28/29
+Updated: 2026-08-29
 
-`development-release.json` is the machine-readable authority. `AI_HANDOFF.md` and this file are the current human-readable authorities. Historical Build numbers are provenance only.
+`development-release.json` is the machine authority. `AI_HANDOFF.md` is the compact human handoff. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` is the permanent D1/R2 startup authority.
 
 ## Current Development position
 
-- Release: **448 — Platform Expansion**
+- Release: **450 — Marketplace & SEO Readiness**
 - Source: `dev`
-- Development deployment: `devilndove-site-dev`
+- Development Pages: `devilndove-site-dev`
 - Development D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
-- Canonical modules: Storefront / Creators / Socials / Financials / I.T.
-- Clients: Web / Phone / Desktop from one responsive/installable PWA
-- Release 447 D1 baseline: **applied and verified**
-- Release 448 source/fresh-install/transport authority: **six migrations implemented and gated**
-- Release 448 remote D1 activation: **blocked by missing GitHub Actions `CLOUDFLARE_API_TOKEN`**
-- Production `main` / `devilndove-site`: **untouched / promotion closed**
+- Development account ID is pinned by tooling/GitHub Actions, never by `wrangler.toml account_id`.
+- Release 447 baseline: applied/verified Development.
+- Release 448: carried-forward regression authority.
+- Release 449: **complete, applied and independently verified in Development**.
+- Release 450 focused source gate: **GREEN** before D1 activation.
+- Marketplace provider publication: **closed**.
+- Production `main` / live `devilndove-site`: **untouched / promotion closed**.
 
-Always resolve exact `dev` SHA, canonical System Gate and Cloudflare Pages status before calling a checkpoint green.
+## Release 450 batch — 26 changes
 
-## Source convergence completed in Release 448
+The agreed 20–30 change batch is recorded machine-readably in `development-release.json`. Current implementation scope:
 
-### Storefront
+1. Move marketplace export schema ownership out of request handlers.
+2. Move marketplace mapping schema ownership out of request handlers.
+3. Add channel policy authority.
+4. Add local listing profile authority.
+5. Add listing validation snapshots.
+6. Default all marketplace provider execution to disabled.
+7. Keep Etsy publication disabled.
+8. Prepare up to 20 Etsy listing images.
+9. Prepare up to 13 Etsy search tags.
+10. Prepare Etsy taxonomy / who-made / when-made.
+11. Prepare Etsy shipping profile reference.
+12. Prepare Etsy processing/readiness reference.
+13. Prepare Etsy return-policy reference.
+14. Prepare current typed Etsy personalization questions.
+15. Support up to five prepared personalization questions.
+16. Prepare up to three Etsy variation properties, with third-variation provider-go-live warning.
+17. Correct Etsy configuration reference names without storing secret values.
+18. Add Facebook/Meta local preparation policy.
+19. Add Pinterest local preparation policy.
+20. Add TikTok local photo/content preparation policy.
+21. Add responsive `/admin/marketplace-readiness/` workspace.
+22. Align marketplace export preview with the shared validator.
+23. Preserve margin completeness as a local CSV blocker.
+24. Require the public SEO structural gate in Release 450 acceptance.
+25. Permanently document Development Cloudflare/D1/R2 connection mechanics for future chats.
+26. Guardedly apply and independently verify Release 450 against exact Development D1.
 
-Shop remains the Product discovery/buying authority. Collections group the same Products; Collages visually arrange the same consent-gated public Product images; Home and Movie covers share one accessible carousel renderer.
+Items 1–25 are source/documentation work; item 26 is the current database activation step after canonical gates are green.
 
-Current surfaces: `/shop/`, `/collections/`, `/collages/`, `/admin/storefront-merchandising/`.
+## Marketplace architecture
 
-D1 stores only `storefront_collections`, `storefront_collection_products`, and `storefront_collage_presets`. No Product row, Inventory quantity or image binary is duplicated. Public pages preserve exactly one H1.
+Marketplace preparation is an overlay over existing authorities. It does not create another Product, Inventory, Accounting or media catalog.
 
-### Product Photography Manager
+Canonical inputs remain:
 
-Workspace: `/admin/product-image-quality/`.
+- Products/Product SEO;
+- Product images/public-use consent;
+- Inventory/costing/margin authorities;
+- I.T. provider configuration references;
+- Release 449 marketplace/provider setup rows.
 
-The manager overlays existing Product/media authority and stores score/review evidence in `product_image_quality_assessments`.
+Release 450 adds:
 
-100-point deterministic rubric: Lighting 20, Clarity 20, Background 15, Framing 15, Resolution 10, Colour 10, Artifacts 5, Product-set consistency 5.
+- `marketplace_channel_policies`;
+- `marketplace_listing_profiles`;
+- `marketplace_listing_validation_snapshots`;
+- migration-owned legacy export/mapping tables previously created at request time.
 
-Operational features include catalog queue, Product-set readiness, perceptual duplicate/near-duplicate evidence, hero/gallery recommendations and reshoot reasons. It never auto-deletes images, changes featured media, hides Products or becomes publication authority. Vision-assisted subjective review remains an advisory future layer.
+Current migration:
 
-### Product / Inventory / manufacturer provenance
+`migrations/dev/20260829_release450_marketplace_seo_readiness.sql`
 
-Existing `site_item_inventory`, `site_inventory_movements`, `product_resource_links`, production usage and purchase-lot authorities remain canonical. Release 448 adds review/policy/provenance without creating another stock ledger.
+## Etsy readiness
 
-Workspaces: `/admin/product-lineage/`, `/admin/vendor-reviews/`.
+Local draft preparation currently covers title, description, price, quantity, taxonomy, who/when made, tags, materials, physical/download type, shipping/processing/return references, images, personalization and variation metadata.
 
-New handmade Products may require verified material lineage; historical handmade Products stay `legacy_pending / legacy_nonblocking`; outside finished goods may be exempt; durable Tools/molds are provenance/use links; manufacturer and supplier remain separate authorities.
+Release 450 deliberately does **not** perform Etsy OAuth or publication. `marketplace_syndication_drafts.publication_requested` remains zero and marketplace channel publication remains locked.
 
-The Product lineage source gate now explicitly rejects migration-time manufacturer seeding/inference; the earlier always-true placeholder assertion has been removed.
+Real Etsy provider acceptance will later calibrate actual taxonomy/profile IDs and confirm current API behavior against the real Development/test provider context before any publication authority can be considered.
 
-### Inventory Intelligence
+## Facebook / Pinterest / TikTok
 
-Workspace: `/admin/inventory-intelligence/`; API: `/api/admin/inventory-intelligence`.
+Current release creates preparation/review policy only:
 
-This is a **read-only prioritized operations queue over existing Inventory**. It highlights linked stockouts, low stock, reorder flags, do-not-reuse items, missing stable identity, missing supplier/manufacturer provenance, missing consumption profile, unlinked Tools and stocked Supplies with no Product linkage. Product impact is derived from existing `product_resource_links`.
+- Meta/Facebook — local catalog/listing preparation;
+- Pinterest — local pin/catalog preparation;
+- TikTok — local photo/content metadata preparation;
+- no direct provider posting from Release 450 APIs.
 
-It creates no schema and no ledger and explicitly reports `write_authority_duplicated: false`. Supply rows now deep-link to their sourcing record.
+Provider scopes, consent, privacy, creator/shop context and transaction acceptance remain I.T. acceptance work, not inferred from local readiness.
 
-### Supply Sourcing & Replenishment
+## SEO / responsive invariants
 
-Workspace: `/admin/supply-sourcing/`; API: `/api/admin/supply-sourcing`.
+The public SEO structural gate remains mandatory and currently protects:
 
-New D1 authority:
-- `inventory_supply_source_options`
-- `inventory_supply_replenishment_profiles`
-- `inventory_supply_substitution_reviews`
+- exactly one source H1 per public HTML document;
+- non-empty page title;
+- no Home carousel H1 injection.
 
-The workspace records primary/alternate/backup/trial sources, source platform/SKU/URL, pack quantity and CAD cost, shipping, minimum packs, lead time, availability, verification, reorder/target/safety stock, usage/day, preferred source, planning cadence and reviewed Supply substitutions.
+Release 450 admin marketplace pages remain `noindex,nofollow` and use responsive breakpoints. Marketplace preparation consumes canonical Product SEO/media truth rather than becoming a separate public SEO source.
 
-Database triggers enforce Supply-only source/profile/substitution records and same-Supply preferred-source ownership.
+Forward SEO depth after the Release 450 migration closes:
 
-Hard invariants: **no Inventory quantity change, no stock movement, no automatic provider order, no manufacturer inference from supplier identity**.
+- broaden meta-description quality enforcement;
+- review canonical URLs and structured data on public commerce surfaces;
+- continue mobile/responsive CSS cleanup;
+- keep one-H1 invariant on every new public page/component;
+- ensure marketplace titles/tags never overwrite canonical public Product SEO automatically.
 
-### Durable Tool Lifecycle
+## D1 startup / transition rule
 
-Workspace: `/admin/tool-lifecycle/`; API: `/api/admin/tool-lifecycle`.
+Read `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` before any database work.
 
-D1 authority:
-- `inventory_tool_lifecycle_profiles`
-- `inventory_tool_lifecycle_events`
+Key rule: **a new chat is not a migration event**.
 
-Profiles cover lifecycle/condition, service dates/interval, warranty, replacement priority/cost/reference and evidence. Events cover inspection, maintenance, repair, calibration, damage, out-of-service, return-to-service, retirement and replacement.
+Read-only identity checks come first. Historical Release 447/448/449 migrations are not replayed. A current migration may be applied only after source gates and exact Development D1 identity pass, then must be followed by a separate read-only remote verifier.
 
-Hard invariant: lifecycle changes **never consume Tool quantity and never write Inventory movement rows**. Product contribution is shown through existing Tool resource links.
+## Canonical gate stack
 
-### CAIP / Creators reviewed evidence handoff
+The System Gate continues to run carried-forward Release 448 platform regressions plus current authority, Development transport, runtime-safety, SEO and PWA gates. Release 450 also has a focused gate:
 
-CAIP and Content Studio present Release 448 outwardly. Historical Builds 439 and 355 remain provenance only.
-
-Surfaces: `/admin/creative-assets/`, `/admin/caip-content-handoff/`, `/admin/content-studio/`.
-
-D1 reference authority:
-- `caip_content_handoffs`
-- `caip_content_handoff_evidence`
-
-Only active approved temporal markers linked to approved, non-rejected story evidence are eligible. Existing Content Studio linkage is required. Handoffs contain references/counts only—no private media copy, provider execution or publication.
-
-### Movies / shared carousel
-
-Home and Movie cover pairs use `public/js/media-carousel.js`. Movie authority remains enriched JSON + `movie_catalog` D1 overlay, with stable UPC/slug review keys and explicit pending/incomplete/unverified/verified metadata states. Unknown Movie metadata is never guessed.
-
-### I.T. integration registry
-
-Workspace: `/admin/it-integrations/`. Stores provider purpose, consuming module, environment, scopes, callback/webhook, reference names, configured/tested state and correction mechanics. Actual secret values are forbidden.
-
-### Release 448 real-data calibration cockpit
-
-Workspace: `/admin/release448-calibration/`; API: `/api/admin/release448-calibration`.
-
-This is a read-only derived operational view over Photography, Product lineage, Storefront, CAIP, Inventory, Tools, Supplies and I.T. It creates no duplicate calibration/status ledger.
-
-States deliberately distinguish:
-- `schema_not_active`
-- `needs_data`
-- `needs_review`
-- `ready`
-
-The main Admin Dashboard exposes the current Inventory, Supply, Tool, Storefront, CAIP handoff and Calibration workspaces through Release 448 dashboard convergence logic.
-
-### Read-only promotion rehearsal
-
-`scripts/release448_promotion_rehearsal.py` evaluates machine authority without any Git/D1/R2/provider/Pages/Production mutation capability.
-
-`--source-check` proves that the current machine authority can explain readiness while an expected HOLD does not block ordinary source CI. `--strict` refuses promotion readiness until all required activation/calibration/acceptance states are complete.
-
-Current expected strict result: **HOLD**.
-
-## Release 448 database position
-
-Release 448 now has **six additive Development migrations**:
-
-1. `database_release448_product_lineage.sql`
-2. `database_release448_media_it.sql`
-3. `database_release448_storefront_merchandising.sql`
-4. `database_release448_caip_content_handoff.sql`
-5. `database_release448_tool_lifecycle.sql`
-6. `database_release448_supply_sourcing.sql`
-
-Each has source/local verification and exact-Development transport protection. `.github/workflows/development-d1-release448.yml` applies/verifies all six in order and performs final read-only verification.
-
-### Remote D1 evidence
-
-Latest guarded six-migration workflow: **GitHub Actions run 33227149444**.
-
-Result:
-- checkout/setup: passed
-- `Guard Development credential and target`: failed because `CLOUDFLARE_API_TOKEN` was empty
-- read-only D1 auth probe: skipped
-- all migration statements: skipped
-- all final D1 verifications: skipped
-
-Therefore no Release 448 migration is yet proven remotely applied. The credential belongs only in GitHub Actions secret storage; do not place it in source or chat.
-
-### Fresh-install protection
-
-`python scripts/release448_fresh_install_gate.py` composes:
-
-1. `database_full_schema.sql`
-2. Release 447 `database_platform_convergence.sql`
-3. Product lineage
-4. Media/Movie/I.T.
-5. Storefront merchandising
-6. CAIP reviewed Content Studio handoff
-7. Tool lifecycle
-8. Supply sourcing/replenishment
-
-It verifies current authorities and clean foreign keys. A truly empty database has zero users and therefore zero explicit I.T. managers; once an active admin exists, Release 447 bootstrap must create explicit manage authority.
-
-## Canonical current-release gates
-
-```bash
-python scripts/repository_forward_sanity.py
-python scripts/release448_expansion_authority_gate.py
-python scripts/module_architecture_gate.py
-python scripts/database_platform_gate.py
-python scripts/release448_fresh_install_gate.py
-python scripts/product_lineage_gate.py
-python scripts/apply_development_product_lineage.py --transport-preflight
-python scripts/release448_media_it_source_gate.py
-python scripts/apply_development_release448_media_it.py --transport-preflight
-python scripts/release448_storefront_merchandising_gate.py
-python scripts/apply_development_release448_storefront_merchandising.py --transport-preflight
-python scripts/release448_caip_content_handoff_gate.py
-python scripts/apply_development_release448_caip_content_handoff.py --transport-preflight
-python scripts/release448_inventory_intelligence_gate.py
-python scripts/release448_tool_lifecycle_gate.py
-python scripts/apply_development_release448_tool_lifecycle.py --transport-preflight
-python scripts/release448_supply_sourcing_gate.py
-python scripts/apply_development_release448_supply_sourcing.py --transport-preflight
-python scripts/release448_calibration_gate.py
-python scripts/release448_promotion_rehearsal.py --source-check
-python scripts/product_inventory_tools_source_gate.py
-python scripts/public_seo_gate.py
-python scripts/pwa_platform_gate.py
-python scripts/cloudflare_development_access.py --transport-preflight
-python scripts/development_runtime_acceptance.py --self-check
+```text
+python scripts/release450_marketplace_seo_gate.py
 ```
 
-Canonical System Gate performs no remote D1/R2/provider/Production writes. The separate Release 448 D1 workflow owns exact-Development mutation and remains credential-guarded.
+It composes the real Release 449 migration plus Release 450 locally, checks foreign keys and channel locks, rejects request-time marketplace DDL, checks JavaScript syntax/responsive admin structure and runs the public SEO structural gate.
 
-## Release 448 completion program
+## After Release 450 D1 activation
 
-### 1. Development D1 activation — BLOCKED EXTERNALLY
+Next operating work:
 
-Securely add `CLOUDFLARE_API_TOKEN` as a GitHub Actions repository secret, then rerun the guarded six-migration workflow. The token must never be pasted into source/chat. Do not change migration status until final read-only verification passes against exact `devilndove-dev`.
+1. Read-only remote Release 450 verification.
+2. Calibrate actual Development Products into Etsy-ready local drafts.
+3. Resolve missing taxonomy/shipping/processing references and image/tag/material blockers.
+4. Add marketplace/provider fee evidence into Accounting completeness where real transaction evidence exists.
+5. Deepen public SEO metadata/canonical/structured-data checks.
+6. Continue responsive storefront/admin CSS cleanup.
+7. Complete Stripe test and PayPal sandbox acceptance.
+8. Complete Etsy provider acceptance, then Meta/Pinterest/TikTok provider acceptance separately.
+9. Complete CAIP private-media acceptance.
+10. Keep Production closed until deliberate promotion review.
 
-### 2. Authenticated real-data calibration — SOURCE INFRASTRUCTURE READY
+## Non-negotiable invariants
 
-Once D1 is active, open `/admin/release448-calibration/` and work through the derived queues for Product Photography, lineage, Storefront, CAIP, Inventory, Tools, Supplies and I.T.
-
-### 3. Supply sourcing/replenishment depth — SOURCE IMPLEMENTED AND GATED
-
-Calibrate real reorder points, target/safety stock, preferred source, pack cost, lead time and reviewed substitutions. Ordering remains manual and Inventory remains the only stock authority.
-
-### 4. External/private acceptance — DEFERRED / NON-BLOCKING FOR SOURCE, REQUIRED FOR PROMOTION
-
-Still requires real evidence for:
-- authenticated Development runtime
-- Stripe test checkout/webhook/reconciliation/idempotent replay
-- PayPal sandbox approval/capture/webhook/reconciliation/idempotent replay
-- CAIP authenticated private delivery/range/timecode/verified-derived-artifact behavior
-
-Do not infer acceptance from configuration/source readiness.
-
-### 5. Promotion rehearsal — SOURCE IMPLEMENTED / STRICT HOLD
-
-Run:
-
-```bash
-python scripts/release448_promotion_rehearsal.py --strict
-```
-
-A HOLD is correct while D1 activation, calibration or external/private acceptance remains incomplete. A later PASS is evidence for a deliberate promotion decision only; the script itself cannot promote Production.
-
-## Directional benefit
-
-Release 448 is now a connected operating platform rather than a collection of isolated admin tools: Product creation can trace to materials, Tools and manufacturers; photography can drive reshoot/hero/gallery work; Storefront discovery reuses one Product/media truth; CAIP reviewed evidence can flow into Content Studio without copying private media; Inventory can expose production risk; Supplies can compare sourcing/reorder/substitution options without becoming an ordering or stock system; durable Tools carry maintenance/safety/replacement history; and the Calibration/Rehearsal layer provides a single truthful path from source-ready to Development-active to promotion-ready.
+- One current release: 450.
+- Production untouched unless explicitly authorized.
+- No `account_id` in `wrangler.toml`.
+- No historical migration replay because a chat/workstation changed.
+- D1 is schema/write authority; request handlers do not invent marketplace tables.
+- Existing Product, Inventory, Accounting, media, Tool and Supply authorities remain canonical.
+- Provider configuration readiness is not provider acceptance.
+- Provider publication stays closed until explicitly accepted.
+- One meaningful H1 per public page.
+- Secrets stay in proper secret stores and their values never enter D1/source/handoff docs.
