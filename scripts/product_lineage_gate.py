@@ -105,8 +105,8 @@ def execute_gate() -> None:
         manufacturer_id = conn.execute("SELECT manufacturer_id FROM inventory_manufacturers WHERE canonical_key='vevor'").fetchone()[0]
         conn.execute("INSERT INTO inventory_manufacturer_links(site_item_inventory_id,manufacturer_id,relationship_type,verification_status,reviewed_by_user_id) VALUES(12,?,'manufacturer','verified',1)", (manufacturer_id,))
         conn.execute("INSERT INTO inventory_vendor_reviews(site_item_inventory_id,manufacturer_id,vendor_name,platform_code,external_item_id,review_body,rating_value,verification_status,publication_status,created_by_user_id) VALUES(12,?,'Amazon','amazon','B000TEST','Devil n Dove test review',5,'verified','internal',1)", (manufacturer_id,))
-        require(conn.execute('SELECT COUNT(*) FROM inventory_manufacturer_links WHERE verification_status=\'verified\'').fetchone()[0] == 1, 'verified manufacturer link could not be recorded')
-        require(conn.execute('SELECT COUNT(*) FROM inventory_vendor_reviews WHERE platform_code=\'amazon\'').fetchone()[0] == 1, 'company-authored marketplace review could not be recorded')
+        require(conn.execute("SELECT COUNT(*) FROM inventory_manufacturer_links WHERE verification_status='verified'").fetchone()[0] == 1, 'verified manufacturer link could not be recorded')
+        require(conn.execute("SELECT COUNT(*) FROM inventory_vendor_reviews WHERE platform_code='amazon'").fetchone()[0] == 1, 'company-authored marketplace review could not be recorded')
 
         after = conn.execute('SELECT on_hand_quantity FROM site_item_inventory WHERE site_item_inventory_id=11').fetchone()[0]
         require(before == after == 5, 'lineage/manufacturer migration changed Inventory quantity')
@@ -135,7 +135,7 @@ if MIGRATION.exists():
     require('DROP TABLE' not in sql.upper(), 'Release 448 migration may not drop tables')
     require('DROP COLUMN' not in sql.upper(), 'Release 448 migration may not drop columns')
     require('UPDATE SITE_ITEM_INVENTORY' not in sql.upper(), 'Release 448 migration may not mutate Inventory quantities')
-    require('supplier_name' not in sql.split('CREATE TABLE IF NOT EXISTS inventory_manufacturers', 1)[1].split('-- Existing products', 1)[1] if False else True, 'manufacturer identity must not be inferred from supplier_name')
+    require('INSERT INTO inventory_manufacturers' not in sql, 'migration may not auto-infer manufacturer identity')
 
 helper = (ROOT / 'functions/api/_lib/productLineage.js').read_text(encoding='utf-8')
 api = (ROOT / 'functions/api/admin/product-lineage.js').read_text(encoding='utf-8')
