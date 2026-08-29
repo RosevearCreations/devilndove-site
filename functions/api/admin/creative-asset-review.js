@@ -1,12 +1,14 @@
-// Build 439 — authenticated same-origin CAIP review proxy with bounded R2 range streaming.
-// Token is opaque, short lived, bound to the issuing administrator, and never stored raw in D1.
-// Large media is streamed directly from the bound bucket; the Worker never buffers the object.
+// Release 448 — authenticated same-origin CAIP review proxy with bounded R2 range streaming.
+// The secure review design originated in historical Build 439. The token is opaque, short lived,
+// bound to the issuing administrator, and never stored raw in D1. Large media is streamed directly
+// from the bound bucket; the Worker never buffers the object.
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { authorizeSecureReviewGrant, recordSecureReviewServed } from '../_lib/creativeAssetOperations.js';
 import { resolveCaipBucket } from '../_lib/caipMediaIntake.js';
 
+const RELEASE = 448;
 function json(data, status = 200) {
-  return jsonResponse(data, status, { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+  return jsonResponse({ release: RELEASE, ...data }, status, { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
 }
 function numeric(value) {
   const parsed = Number(value);
@@ -51,9 +53,6 @@ export async function onRequestGet(context) {
     const bucket = resolveCaipBucket(env, authorized.storage_provider, authorized.bucket_name);
     if (!bucket || typeof bucket.get !== 'function') throw new Error('R2 review proxy is unavailable because the matching public/private media bucket binding is not configured.');
 
-    // Cloudflare R2 accepts conditional/range Headers and returns a ReadableStream.
-    // Header inputs are sanitized above so unsupported browser conditionals cannot abort
-    // the binding call. Large video/audio is never buffered in Worker memory.
     const object = await bucket.get(authorized.object_key, r2GetOptions(request));
     if (!object) throw new Error('The R2 review object was not found. Source media has not been changed.');
 
@@ -70,10 +69,10 @@ export async function onRequestGet(context) {
     headers.set('Content-Disposition', `inline; filename="${authorized.filename}"`);
     headers.set('Vary', 'Cookie, Range');
     headers.set('Accept-Ranges', 'bytes');
-    headers.set('X-DND-CAIP-Review', '439');
+    headers.set('X-DND-Release', String(RELEASE));
+    headers.set('X-DND-CAIP-Review', 'release448');
     if (object.httpEtag || object.etag) headers.set('ETag', object.httpEtag || `"${object.etag}"`);
 
-    // R2 returns metadata-only when an HTTP precondition fails.
     if (!('body' in object) || !object.body) {
       return new Response(null, { status: 412, headers });
     }
@@ -93,18 +92,18 @@ export async function onRequestGet(context) {
     }
 
     // A video player may issue many range requests. Count/audit the first served request
-    // for a grant, but do not turn every seek/chunk into D1 writes. The token remains
-    // short-lived and bound to the issuing administrator.
+    // for a grant, but do not turn every seek/chunk into D1 writes.
     const shouldRecordGrantUse = !requestedRange || numeric(authorized.grant?.access_count) === 0;
     if (shouldRecordGrantUse) {
       await recordSecureReviewServed(db, authorized.grant, adminUser.user_id, {
+        release: RELEASE,
+        provenance_build: 439,
         source_storage_provider: authorized.storage_provider || 'r2',
         object_key_present: true,
         content_type: mime,
         ranged_streaming: Boolean(requestedRange),
         no_copy: true,
         no_cache: true,
-        build: 439,
       });
     }
 
@@ -114,6 +113,8 @@ export async function onRequestGet(context) {
       incident_scope: 'creative_asset_secure_review', incident_code: 'caip_secure_review_failed', severity: 'warning',
       message: error?.message || 'Secure asset review failed.', related_user_id: adminUser.user_id,
       details: {
+        release: RELEASE,
+        provenance_build: 439,
         raw_token_not_logged: true,
         range_requested: Boolean(request.headers.get('Range')),
         if_range_present: Boolean(request.headers.get('If-Range')),
