@@ -1,0 +1,21 @@
+name: Release 461 Public Auth Source Gate
+on:
+  push:
+    branches: [dev]
+    paths: ['functions/api/auth/account-help-request.js','functions/api/_lib/publicNotificationQueue.js','scripts/release461_public_auth_schema_gate.py','.github/workflows/release461-public-auth-source-gate.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python scripts/release461_public_auth_schema_gate.py
+      - run: |
+          node --check functions/api/_lib/publicNotificationQueue.js
+          node --check functions/api/auth/account-help-request.js
+      - run: git diff --check
