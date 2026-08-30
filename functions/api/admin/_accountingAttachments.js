@@ -46,62 +46,47 @@ export function buildAccountingAttachmentPublicUrl(env, objectKey) {
   return `${base.replace(/\/$/, '')}/${String(objectKey || '').replace(/^\/+/, '')}`;
 }
 
+async function tableColumns(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexes(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 export async function ensureAccountingAttachmentsTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_attachments (
-      accounting_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      attachment_kind TEXT NOT NULL DEFAULT 'other',
-      attachment_status TEXT NOT NULL DEFAULT 'uploaded',
-      attachment_scope TEXT NOT NULL DEFAULT 'other',
-      document_date TEXT,
-      scope_key TEXT,
-      provider_scope TEXT,
-      storage_provider TEXT NOT NULL DEFAULT 'r2',
-      bucket_name TEXT,
-      object_key TEXT NOT NULL UNIQUE,
-      public_url TEXT,
-      original_filename TEXT,
-      mime_type TEXT,
-      file_size_bytes INTEGER NOT NULL DEFAULT 0,
-      expense_id INTEGER,
-      vendor_id INTEGER,
-      reconciliation_type TEXT,
-      period_month TEXT,
-      tax_year TEXT,
-      statement_reference TEXT,
-      statement_gross_cents INTEGER NOT NULL DEFAULT 0,
-      statement_fee_cents INTEGER NOT NULL DEFAULT 0,
-      statement_net_cents INTEGER NOT NULL DEFAULT 0,
-      statement_tax_cents INTEGER NOT NULL DEFAULT 0,
-      statement_shipping_cents INTEGER NOT NULL DEFAULT 0,
-      statement_txn_count INTEGER NOT NULL DEFAULT 0,
-      statement_period_start TEXT,
-      statement_period_end TEXT,
-      statement_detail_json TEXT,
-      notes TEXT,
-      created_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN attachment_status TEXT NOT NULL DEFAULT 'uploaded'`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN document_date TEXT`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN scope_key TEXT`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN attachment_scope TEXT NOT NULL DEFAULT 'other'`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN provider_scope TEXT`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_gross_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_fee_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_net_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_tax_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_shipping_cents INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_txn_count INTEGER NOT NULL DEFAULT 0`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_period_start TEXT`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_period_end TEXT`).run(); } catch {}
-  try { await db.prepare(`ALTER TABLE accounting_attachments ADD COLUMN statement_detail_json TEXT`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_expense ON accounting_attachments(expense_id, created_at DESC)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_vendor ON accounting_attachments(vendor_id, created_at DESC)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period ON accounting_attachments(period_month, tax_year, reconciliation_type, attachment_kind)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind)`).run(); } catch {}
+  const columns = await tableColumns(db, 'accounting_attachments');
+  const requiredColumns = [
+    'accounting_attachment_id', 'attachment_kind', 'attachment_status', 'attachment_scope', 'document_date', 'scope_key', 'provider_scope',
+    'storage_provider', 'bucket_name', 'object_key', 'public_url', 'original_filename', 'mime_type', 'file_size_bytes', 'expense_id', 'vendor_id',
+    'reconciliation_type', 'period_month', 'tax_year', 'statement_reference', 'statement_gross_cents', 'statement_fee_cents', 'statement_net_cents',
+    'statement_tax_cents', 'statement_shipping_cents', 'statement_txn_count', 'statement_period_start', 'statement_period_end', 'statement_detail_json',
+    'notes', 'created_by_user_id', 'created_at', 'updated_at'
+  ];
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting attachment schema is not ready: accounting_attachments is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await tableIndexes(db, 'accounting_attachments');
+  const requiredIndexes = [
+    'idx_accounting_attachments_expense', 'idx_accounting_attachments_vendor',
+    'idx_accounting_attachments_period', 'idx_accounting_attachments_scope'
+  ];
+  const missingIndexes = requiredIndexes.filter((name) => !indexes.has(name));
+  if (missingIndexes.length) {
+    throw new Error(`Accounting attachment schema is not ready: accounting_attachments is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+  }
+  return true;
 }
 
 export async function listAccountingAttachments(db, { expenseId = 0, vendorId = 0, reconciliationType = '', periodMonth = '', taxYear = '', scopeKey = '', attachmentKind = '', attachmentScope = '', providerScope = '', limit = 50 } = {}) {
