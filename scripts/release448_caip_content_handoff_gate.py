@@ -19,7 +19,11 @@ with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
  cols={r[1] for r in db.execute('PRAGMA table_info(caip_content_handoffs)')}
  for col in ['creative_project_id','content_project_id','handoff_status','approved_marker_count','package_json']:
   if col not in cols:raise SystemExit(f'FAIL — caip_content_handoffs missing {col}')
-api=(ROOT/'functions/api/admin/caip-content-handoff.js').read_text(encoding='utf-8')
+api_path=ROOT/'functions/api/admin/_caipContentHandoffLegacy.js'
+if not api_path.exists():api_path=ROOT/'functions/api/admin/caip-content-handoff.js'
+api=api_path.read_text(encoding='utf-8')
+wrapper=(ROOT/'functions/api/admin/caip-content-handoff.js').read_text(encoding='utf-8')
+if api_path.name=='_caipContentHandoffLegacy.js' and "from './_caipContentHandoffLegacy.js'" not in wrapper:raise SystemExit('FAIL — Release 461 wrapper no longer retains the reviewed CAIP handoff implementation')
 page=(ROOT/'admin/caip-content-handoff/index.html').read_text(encoding='utf-8')
 review=(ROOT/'functions/api/admin/caip-evidence-review.js').read_text(encoding='utf-8')
 secure=(ROOT/'functions/api/admin/creative-asset-review.js').read_text(encoding='utf-8')
