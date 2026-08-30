@@ -1,5 +1,5 @@
 from pathlib import Path
-import json, sqlite3, tempfile
+import json, sqlite3, tempfile, re
 
 ROOT=Path(__file__).resolve().parents[1]
 def read(path): return (ROOT/path).read_text(encoding='utf-8')
@@ -118,8 +118,13 @@ with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
     except sqlite3.IntegrityError:
         pass
 
-assert 'CURRENT_RELEASE = 460' in authority
-assert release.get('release')==460
+# This is a historical carried-forward gate. The current release may advance, but
+# Release 460's runtime/security authority and release-history checkpoint must remain.
+m=re.search(r'CURRENT_RELEASE\s*=\s*(\d+)', authority)
+assert m and int(m.group(1)) >= 460, 'current runtime authority cannot regress below Release 460'
+assert int(release.get('release') or 0) >= 460, 'current Development release cannot regress below Release 460'
+history={int(x.get('release') or 0):x for x in release.get('release_history',[]) if isinstance(x,dict)}
+assert history.get(460,{}).get('migration')=='migrations/dev/20260829_release460_secure_oauth_lifecycle.sql', 'Release 460 migration/history checkpoint must be retained'
 policy=release.get('release_policy',{})
 evidence=release.get('current_release_evidence',{})
 assert policy.get('production_promotion')=='closed'
@@ -132,6 +137,6 @@ assert evidence.get('provider_execution_enabled') is False
 assert evidence.get('provider_live_authorization_enabled') is False
 assert evidence.get('oauth_remote_operator_switch_set') is False
 assert evidence.get('secret_values_stored_in_plaintext') is False
-assert release.get('current_release_migrations')==['migrations/dev/20260829_release460_secure_oauth_lifecycle.sql']
+assert (ROOT/'migrations/dev/20260829_release460_secure_oauth_lifecycle.sql').exists()
 assert (ROOT/'functions/api/social/oauth/etsy/callback.js').exists()
-print('RELEASE 460 SECURE OAUTH + IDENTITY + NON-EXECUTING PUBLICATION SOURCE + LOCAL D1 GATE: PASS')
+print('RELEASE 460 SECURE OAUTH + IDENTITY + NON-EXECUTING PUBLICATION SOURCE + LOCAL D1 GATE: CARRIED FORWARD PASS')
