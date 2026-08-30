@@ -34,7 +34,7 @@ for path, tokens in (
     (provider_route, (
         'PRAGMA table_info(', 'PRAGMA index_list(', 'ensureProviderProfilesTable',
         'accounting_statement_provider_profiles', 'idx_accounting_statement_provider_profiles_active',
-        "action === 'seed_defaults'", 'seedDefaults(db)', 'accounting_statement_provider_profiles_seed_defaults',
+        "action === 'seed_defaults'", 'await seedDefaults(db);', 'accounting_statement_provider_profiles_seed_defaults',
         'Apply the current Development migration authority.',
     )),
 ):
@@ -43,8 +43,9 @@ for path, tokens in (
         assert token in text, f'missing read-only accounting overhead/provider token {token} in {path}'
 
 provider_text = provider_route.read_text(encoding='utf-8')
-assert provider_text.count('seedDefaults(db)') == 1, 'provider defaults must materialize only through the explicit seed_defaults action'
-assert provider_text.find("action === 'seed_defaults'") < provider_text.find('seedDefaults(db)'), 'seedDefaults must remain behind explicit seed_defaults action'
+seed_call = 'await seedDefaults(db);'
+assert provider_text.count(seed_call) == 1, 'provider defaults must materialize only through the explicit seed_defaults action'
+assert provider_text.find("action === 'seed_defaults'") < provider_text.find(seed_call), 'seedDefaults must remain behind explicit seed_defaults action'
 
 for path, tokens in (
     (overhead_read, ('request_time_schema_mutation: false', 'PRAGMA table_info(', "AUTHORITY_TABLE = 'accounting_overhead_allocations'")),
