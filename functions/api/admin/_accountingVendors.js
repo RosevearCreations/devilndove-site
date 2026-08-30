@@ -4,25 +4,40 @@ function rows(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+async function tableColumns(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexes(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 export async function ensureAccountingVendorsTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_vendors (
-      accounting_vendor_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      vendor_name TEXT NOT NULL UNIQUE,
-      default_ledger_code TEXT,
-      default_tax_percent REAL NOT NULL DEFAULT 0,
-      payment_terms TEXT,
-      contact_name TEXT,
-      contact_email TEXT,
-      contact_phone TEXT,
-      website_url TEXT,
-      notes TEXT,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_vendors_active_name ON accounting_vendors(is_active, vendor_name)`).run(); } catch {}
+  const requiredColumns = [
+    'accounting_vendor_id', 'vendor_name', 'default_ledger_code', 'default_tax_percent',
+    'payment_terms', 'contact_name', 'contact_email', 'contact_phone', 'website_url',
+    'notes', 'is_active', 'created_at', 'updated_at'
+  ];
+  const columns = await tableColumns(db, 'accounting_vendors');
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting vendor schema is not ready: accounting_vendors is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await tableIndexes(db, 'accounting_vendors');
+  if (!indexes.has('idx_accounting_vendors_active_name')) {
+    throw new Error('Accounting vendor schema is not ready: accounting_vendors is missing index idx_accounting_vendors_active_name. Apply the current Development migration authority.');
+  }
+  return true;
 }
 
 export async function listAccountingVendors(db, { includeInactive = false } = {}) {

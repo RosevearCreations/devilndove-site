@@ -12,8 +12,13 @@ period_helper = ROOT / 'functions/api/admin/_accountingPeriods.js'
 period_route = ROOT / 'functions/api/admin/accounting-period-locks.js'
 reconciliation_helper = ROOT / 'functions/api/admin/_accountingReconciliation.js'
 statement_import_helper = ROOT / 'functions/api/admin/_accountingStatementImports.js'
+vendor_helper = ROOT / 'functions/api/admin/_accountingVendors.js'
+expenses_route = ROOT / 'functions/api/admin/accounting-expenses.js'
+writeoffs_route = ROOT / 'functions/api/admin/accounting-writeoffs.js'
+recurring_expense_route = ROOT / 'functions/api/admin/accounting-recurring-expense-rules.js'
 support_migration = ROOT / 'migrations/dev/20260829_release461_accounting_support_schema_authority.sql'
 statement_import_migration = ROOT / 'migrations/dev/20260830_release461_accounting_statement_import_schema_authority.sql'
+expense_migration = ROOT / 'migrations/dev/20260830_release461_accounting_expense_runtime_schema_authority.sql'
 release_marker = ROOT / 'development-release.json'
 
 DDL = re.compile(r'\b(?:CREATE\s+TABLE|ALTER\s+TABLE|CREATE\s+(?:UNIQUE\s+)?INDEX|DROP\s+TABLE|DROP\s+INDEX)\b', re.I)
@@ -21,7 +26,8 @@ DDL = re.compile(r'\b(?:CREATE\s+TABLE|ALTER\s+TABLE|CREATE\s+(?:UNIQUE\s+)?INDE
 runtime_paths = (
     gifi_helper, gifi_route, attachment_helper, attachment_route,
     fixed_assets_route, period_helper, period_route, reconciliation_helper,
-    statement_import_helper,
+    statement_import_helper, vendor_helper, expenses_route, writeoffs_route,
+    recurring_expense_route,
 )
 for path in runtime_paths:
     text = path.read_text(encoding='utf-8')
@@ -39,6 +45,23 @@ for path, tokens in (
         'idx_accounting_statement_imports_period', 'idx_accounting_statement_import_rows_import',
         'idx_accounting_statement_import_rows_provider_ref', 'idx_accounting_reconciliation_exceptions_period',
         'idx_accounting_reconciliation_exceptions_queue', 'Apply the current Development migration authority.',
+    )),
+    (vendor_helper, (
+        'PRAGMA table_info(', 'PRAGMA index_list(', 'ensureAccountingVendorsTable',
+        'accounting_vendors', 'idx_accounting_vendors_active_name', 'Apply the current Development migration authority.',
+    )),
+    (expenses_route, (
+        'PRAGMA table_info(', 'PRAGMA index_list(', 'accounting_expenses',
+        'idx_accounting_expenses_date', 'idx_accounting_expenses_vendor', 'idx_accounting_expenses_recurring',
+        'Apply the current Development migration authority.',
+    )),
+    (writeoffs_route, (
+        'PRAGMA table_info(', 'accounting_writeoffs', 'Apply the current Development migration authority.',
+    )),
+    (recurring_expense_route, (
+        'PRAGMA table_info(', 'PRAGMA index_list(', 'ensureExpenseTableExtensions', 'ensureRecurringRulesTable',
+        'accounting_expenses', 'accounting_recurring_expense_rules', 'idx_accounting_expenses_recurring',
+        'idx_accounting_recurring_expense_rules_due', 'Apply the current Development migration authority.',
     )),
 ):
     text = path.read_text(encoding='utf-8')
@@ -82,6 +105,23 @@ for token in (
     'idx_accounting_reconciliation_exceptions_queue', 'PRAGMA foreign_key_check',
 ):
     assert token in statement_migration_text, f'accounting statement import migration is missing authority token: {token}'
+
+expense_migration_text = expense_migration.read_text(encoding='utf-8')
+assert not re.search(r'\bALTER\s+TABLE\b|\bDROP\s+TABLE\b|\bDROP\s+INDEX\b', expense_migration_text, re.I)
+for token in (
+    'CREATE TABLE IF NOT EXISTS accounting_vendors',
+    'accounting_vendor_id', 'vendor_name', 'default_ledger_code', 'default_tax_percent', 'payment_terms',
+    'contact_name', 'contact_email', 'contact_phone', 'website_url', 'is_active', 'idx_accounting_vendors_active_name',
+    'CREATE TABLE IF NOT EXISTS accounting_expenses',
+    'expense_id', 'expense_date', 'vendor_id', 'amount', 'tax_amount', 'ledger_code', 'ledger_name',
+    'recurring_expense_rule_id', 'source_mode', 'reference_number', 'idx_accounting_expenses_date',
+    'idx_accounting_expenses_vendor', 'idx_accounting_expenses_recurring',
+    'CREATE TABLE IF NOT EXISTS accounting_writeoffs', 'writeoff_id', 'writeoff_date', 'item_name', 'reason_code',
+    'CREATE TABLE IF NOT EXISTS accounting_recurring_expense_rules', 'rule_name', 'frequency', 'due_day', 'next_due_date',
+    'auto_create_mode', 'last_generated_at', 'last_generated_expense_id', 'created_by_user_id', 'updated_by_user_id',
+    'idx_accounting_recurring_expense_rules_due', 'PRAGMA foreign_key_check',
+):
+    assert token in expense_migration_text, f'accounting expense migration is missing authority token: {token}'
 
 release_text = release_marker.read_text(encoding='utf-8')
 assert re.search(r'"release"\s*:\s*460\b', release_text), 'development-release.json must remain at accepted Release 460 until manual D1 acceptance'

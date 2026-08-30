@@ -18,37 +18,16 @@ async function getTableColumnSet(db, tableName) {
 }
 
 async function ensureTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_writeoffs (
-      writeoff_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      writeoff_date TEXT,
-      item_name TEXT NOT NULL,
-      amount REAL NOT NULL DEFAULT 0,
-      reason_code TEXT NOT NULL DEFAULT 'other',
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-
-  const cols = await getTableColumnSet(db, 'accounting_writeoffs');
-  const additions = [
-    ['writeoff_date', `ALTER TABLE accounting_writeoffs ADD COLUMN writeoff_date TEXT`],
-    ['item_name', `ALTER TABLE accounting_writeoffs ADD COLUMN item_name TEXT`],
-    ['amount', `ALTER TABLE accounting_writeoffs ADD COLUMN amount REAL NOT NULL DEFAULT 0`],
-    ['reason_code', `ALTER TABLE accounting_writeoffs ADD COLUMN reason_code TEXT NOT NULL DEFAULT 'other'`],
-    ['notes', `ALTER TABLE accounting_writeoffs ADD COLUMN notes TEXT`],
-    ['created_at', `ALTER TABLE accounting_writeoffs ADD COLUMN created_at TEXT`],
-    ['updated_at', `ALTER TABLE accounting_writeoffs ADD COLUMN updated_at TEXT`]
+  const requiredColumns = [
+    'writeoff_id', 'writeoff_date', 'item_name', 'amount', 'reason_code',
+    'notes', 'created_at', 'updated_at'
   ];
-
-  for (const [name, sql] of additions) {
-    if (!cols.has(name)) {
-      await db.prepare(sql).run().catch(() => null);
-    }
+  const cols = await getTableColumnSet(db, 'accounting_writeoffs');
+  const missingColumns = requiredColumns.filter((name) => !cols.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting write-off schema is not ready: accounting_writeoffs is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
   }
-
-  return getTableColumnSet(db, 'accounting_writeoffs');
+  return cols;
 }
 
 export async function onRequestGet(context) {

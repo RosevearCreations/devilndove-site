@@ -51,65 +51,52 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
-async function ensureExpenseTableExtensions(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_expenses (
-      expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      expense_date TEXT,
-      vendor_id INTEGER,
-      vendor_name TEXT,
-      amount REAL NOT NULL DEFAULT 0,
-      tax_amount REAL NOT NULL DEFAULT 0,
-      ledger_code TEXT,
-      ledger_name TEXT,
-      recurring_expense_rule_id INTEGER,
-      source_mode TEXT,
-      reference_number TEXT,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  const cols = await getTableColumnSet(db, 'accounting_expenses');
-  const additions = [
-    ['vendor_id', `ALTER TABLE accounting_expenses ADD COLUMN vendor_id INTEGER`],
-    ['recurring_expense_rule_id', `ALTER TABLE accounting_expenses ADD COLUMN recurring_expense_rule_id INTEGER`],
-    ['source_mode', `ALTER TABLE accounting_expenses ADD COLUMN source_mode TEXT`],
-    ['reference_number', `ALTER TABLE accounting_expenses ADD COLUMN reference_number TEXT`],
-  ];
-  for (const [name, sql] of additions) {
-    if (!cols.has(name)) {
-      try { await db.prepare(sql).run(); } catch {}
-    }
+async function getTableIndexSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
   }
 }
 
+async function ensureExpenseTableExtensions(db) {
+  const requiredColumns = [
+    'expense_id', 'expense_date', 'vendor_id', 'vendor_name', 'amount', 'tax_amount',
+    'ledger_code', 'ledger_name', 'recurring_expense_rule_id', 'source_mode',
+    'reference_number', 'notes', 'created_at', 'updated_at'
+  ];
+  const columns = await getTableColumnSet(db, 'accounting_expenses');
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting expense schema is not ready: accounting_expenses is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const requiredIndexes = ['idx_accounting_expenses_date', 'idx_accounting_expenses_vendor', 'idx_accounting_expenses_recurring'];
+  const indexes = await getTableIndexSet(db, 'accounting_expenses');
+  const missingIndexes = requiredIndexes.filter((name) => !indexes.has(name));
+  if (missingIndexes.length) {
+    throw new Error(`Accounting expense schema is not ready: accounting_expenses is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+  }
+  return true;
+}
+
 async function ensureRecurringRulesTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_recurring_expense_rules (
-      recurring_expense_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      vendor_id INTEGER,
-      vendor_name TEXT,
-      rule_name TEXT NOT NULL,
-      ledger_code TEXT,
-      ledger_name TEXT,
-      amount REAL NOT NULL DEFAULT 0,
-      tax_amount REAL NOT NULL DEFAULT 0,
-      frequency TEXT NOT NULL DEFAULT 'monthly',
-      due_day INTEGER,
-      next_due_date TEXT,
-      auto_create_mode TEXT NOT NULL DEFAULT 'manual',
-      notes TEXT,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      last_generated_at TEXT,
-      last_generated_expense_id INTEGER,
-      created_by_user_id INTEGER,
-      updated_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_recurring_expense_rules_due ON accounting_recurring_expense_rules(is_active, next_due_date, frequency)`).run(); } catch {}
+  const requiredColumns = [
+    'recurring_expense_rule_id', 'vendor_id', 'vendor_name', 'rule_name', 'ledger_code', 'ledger_name',
+    'amount', 'tax_amount', 'frequency', 'due_day', 'next_due_date', 'auto_create_mode', 'notes',
+    'is_active', 'last_generated_at', 'last_generated_expense_id', 'created_by_user_id',
+    'updated_by_user_id', 'created_at', 'updated_at'
+  ];
+  const columns = await getTableColumnSet(db, 'accounting_recurring_expense_rules');
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Recurring expense schema is not ready: accounting_recurring_expense_rules is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await getTableIndexSet(db, 'accounting_recurring_expense_rules');
+  if (!indexes.has('idx_accounting_recurring_expense_rules_due')) {
+    throw new Error('Recurring expense schema is not ready: accounting_recurring_expense_rules is missing index idx_accounting_recurring_expense_rules_due. Apply the current Development migration authority.');
+  }
+  return true;
 }
 
 async function lookupLedgerName(db, code) {

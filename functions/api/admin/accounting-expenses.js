@@ -15,54 +15,38 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
-async function ensureTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_expenses (
-      expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      expense_date TEXT,
-      vendor_id INTEGER,
-      vendor_name TEXT,
-      amount REAL NOT NULL DEFAULT 0,
-      tax_amount REAL NOT NULL DEFAULT 0,
-      ledger_code TEXT,
-      ledger_name TEXT,
-      recurring_expense_rule_id INTEGER,
-      source_mode TEXT,
-      reference_number TEXT,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-
-  const cols = await getTableColumnSet(db, 'accounting_expenses');
-  const additions = [
-    ['expense_date', `ALTER TABLE accounting_expenses ADD COLUMN expense_date TEXT`],
-    ['vendor_id', `ALTER TABLE accounting_expenses ADD COLUMN vendor_id INTEGER`],
-    ['vendor_name', `ALTER TABLE accounting_expenses ADD COLUMN vendor_name TEXT`],
-    ['amount', `ALTER TABLE accounting_expenses ADD COLUMN amount REAL NOT NULL DEFAULT 0`],
-    ['tax_amount', `ALTER TABLE accounting_expenses ADD COLUMN tax_amount REAL NOT NULL DEFAULT 0`],
-    ['ledger_code', `ALTER TABLE accounting_expenses ADD COLUMN ledger_code TEXT`],
-    ['ledger_name', `ALTER TABLE accounting_expenses ADD COLUMN ledger_name TEXT`],
-    ['recurring_expense_rule_id', `ALTER TABLE accounting_expenses ADD COLUMN recurring_expense_rule_id INTEGER`],
-    ['source_mode', `ALTER TABLE accounting_expenses ADD COLUMN source_mode TEXT`],
-    ['reference_number', `ALTER TABLE accounting_expenses ADD COLUMN reference_number TEXT`],
-    ['notes', `ALTER TABLE accounting_expenses ADD COLUMN notes TEXT`],
-    ['created_at', `ALTER TABLE accounting_expenses ADD COLUMN created_at TEXT`],
-    ['updated_at', `ALTER TABLE accounting_expenses ADD COLUMN updated_at TEXT`]
-  ];
-
-  for (const [name, sql] of additions) {
-    if (!cols.has(name)) {
-      await db.prepare(sql).run().catch(() => null);
-    }
+async function getTableIndexSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
   }
+}
 
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_expenses_date ON accounting_expenses(expense_date, created_at DESC)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_expenses_vendor ON accounting_expenses(vendor_id, vendor_name, expense_date DESC)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_expenses_recurring ON accounting_expenses(recurring_expense_rule_id, expense_date DESC)`).run(); } catch {}
-
-  return getTableColumnSet(db, 'accounting_expenses');
+async function ensureTable(db) {
+  const requiredColumns = [
+    'expense_id', 'expense_date', 'vendor_id', 'vendor_name', 'amount', 'tax_amount',
+    'ledger_code', 'ledger_name', 'recurring_expense_rule_id', 'source_mode',
+    'reference_number', 'notes', 'created_at', 'updated_at'
+  ];
+  const cols = await getTableColumnSet(db, 'accounting_expenses');
+  const missingColumns = requiredColumns.filter((name) => !cols.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting expense schema is not ready: accounting_expenses is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const requiredIndexes = [
+    'idx_accounting_expenses_date',
+    'idx_accounting_expenses_vendor',
+    'idx_accounting_expenses_recurring'
+  ];
+  const indexes = await getTableIndexSet(db, 'accounting_expenses');
+  const missingIndexes = requiredIndexes.filter((name) => !indexes.has(name));
+  if (missingIndexes.length) {
+    throw new Error(`Accounting expense schema is not ready: accounting_expenses is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+  }
+  return cols;
 }
 
 async function lookupLedgerName(db, code) {
