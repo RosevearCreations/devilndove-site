@@ -99,6 +99,31 @@ Focused source authority is enforced by `scripts/release461_content_automation_s
 
 The Content Automation/Publication migration is source authority only at this checkpoint. It has not been applied to Development D1 and no provider publishing execution has been opened.
 
+## Accounting support authority
+
+The next exact-current shared/admin offenders were the GIFI review-note helper and accounting-attachment helper. Before Release 461, those runtime paths could create their support tables and indexes; the attachment helper also repaired a partially old `accounting_attachments` table with request-time `ALTER TABLE` statements.
+
+Release 461 now owns those structures explicitly in:
+
+`migrations/dev/20260829_release461_accounting_support_schema_authority.sql`
+
+The additive Development authority covers:
+
+- `accounting_gifi_review_notes`
+- `idx_accounting_gifi_review_notes_year`
+- `accounting_attachments`
+- attachment classification, scope, provider, statement-total, statement-period, and statement-detail columns
+- `idx_accounting_attachments_expense`
+- `idx_accounting_attachments_vendor`
+- `idx_accounting_attachments_period`
+- `idx_accounting_attachments_scope`
+
+`functions/api/admin/_accountingGifi.js` and `functions/api/admin/_accountingAttachments.js` now verify required columns and indexes read-only through `PRAGMA table_info` and `PRAGMA index_list`. Their compatibility `ensure*` names remain for callers, but they no longer execute DDL.
+
+Business behavior remains intact when schema is ready: GIFI review-note reads/writes continue, and accounting attachment upload still writes the R2 object plus the accounting row. If Development schema is structurally stale, the request fails with an explicit schema-not-ready error instead of silently repairing D1 during traffic.
+
+Focused source authority is enforced by `scripts/release461_accounting_support_schema_gate.py`, now included in `scripts/release461_aggregate_source_gate.py`. The accounting support migration remains source authority only and has not been applied to Development D1.
+
 ## Drift and migration rule
 
 Release 461 Development D1 workflows are manual-dispatch-only. Before any write they verify the exact Development project/database identity and probe existing table shapes read-only.
@@ -113,6 +138,7 @@ If a table is absent, or if structurally compatible tables only need explicitly 
 - Shared/admin notification runtime-schema source slice: migration-owned and runtime-read-only at source level.
 - Shared community runtime-schema source slice: migration-owned and runtime-read-only at source level.
 - Content Automation Studio/publication runtime-schema source slice: migration-owned and runtime-read-only at source level.
+- Accounting GIFI/attachment support runtime-schema source slice: migration-owned and runtime-read-only at source level.
 - Development D1 Release 461 acceptance: pending manual execution; not claimed complete.
 - Provider-specific Stripe/PayPal acceptance: still closed/pending credentials and does not block unrelated source cleanup.
 - Remaining shared/admin audit: continue through the broader admin request tree for hidden runtime schema mutation, request-time seeding, or backfill behavior.
@@ -131,7 +157,7 @@ If a table is absent, or if structurally compatible tables only need explicitly 
 
 Continue through `functions/api/**` and shared helpers searching for `CREATE TABLE`, `ALTER TABLE`, `CREATE INDEX`, mutation-bearing `ensure*Schema`, request-time policy seeds, and equivalent hidden backfills. Move discovered schema authority into explicit forward migrations plus read-only readiness services before calling a slice closed.
 
-The community and content-publication/content-automation targets are now source-clean. The next target should be selected from the exact-current-`dev` broad admin/shared scan rather than from historical helper names alone.
+The community, content-publication/content-automation, and accounting GIFI/attachment targets are now source-clean. Select the next target from the exact-current-`dev` broad admin/shared scan rather than from historical helper names alone.
 
 ## Current-release metadata
 
