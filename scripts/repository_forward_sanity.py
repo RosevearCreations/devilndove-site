@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Canonical Release 460 current-release and forward-sanity authority."""
 from __future__ import annotations
-import json,re
+import json,re,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
 def req(ok,msg):
@@ -41,6 +41,8 @@ system_workflow=read('.github/workflows/system-gate.yml');focused_workflow=read(
 req('python scripts/release460_secure_oauth_gate.py' in focused_workflow and 'node scripts/release460_oauth_crypto_proof.mjs' in focused_workflow,'Release 460 focused gate must validate secure OAuth source and crypto')
 for gate in ('release459_runtime_acceptance_gate.py','release458_caip_review_handoff_gate.py','release457_financials_operations_gate.py','release456_inventory_tool_workflow_gate.py','release455_storefront_discovery_gate.py','release454_admin_convergence_gate.py','release453_it_provider_readiness_gate.py'):
  req(f'python scripts/{gate}' in system_workflow,f'System Gate missing carried authority {gate}')
+aggregate461=ROOT/'scripts/release461_aggregate_source_gate.py'
+req(aggregate461.exists(),'Release 461 aggregate source gate missing')
 version_pattern=re.compile(r'([?&]v=)(\d+)(?:[.-][\w-]+)?(?=["\'&#\s)]|$)');future=[]
 for p in list(ROOT.glob('*.html'))+list((ROOT/'admin').rglob('*.html'))+list((ROOT/'js').rglob('*.js'))+list((ROOT/'public/js').rglob('*.js'))+list((ROOT/'css').rglob('*.css')):
  for m in version_pattern.finditer(p.read_text(encoding='utf-8',errors='replace')):
@@ -54,4 +56,6 @@ print('Live provider authorization/execution/publication and separate live Produ
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
  raise SystemExit(1)
+subprocess.run([sys.executable,str(aggregate461)],cwd=ROOT,check=True)
+print('Release 461 aggregate source authority: PASS')
 print('PLATFORM FORWARD SANITY: PASS')
