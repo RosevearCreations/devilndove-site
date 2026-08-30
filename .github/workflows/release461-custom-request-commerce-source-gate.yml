@@ -1,0 +1,23 @@
+name: Release 461 Custom Request Commerce Source Gate
+on:
+  push:
+    branches: [dev]
+    paths: ['functions/api/custom-request-order.js','functions/api/custom-request-quote.js','functions/api/custom-request-payment.js','functions/api/_lib/customRequestCommerceSchemaReadiness.js','migrations/dev/20260829_release461_custom_request_commerce_authority.sql','scripts/release461_custom_request_commerce_schema_gate.py','.github/workflows/release461-custom-request-commerce-source-gate.yml','.github/workflows/development-d1-release461-custom-request-commerce.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python scripts/release461_custom_request_commerce_schema_gate.py
+      - run: |
+          node --check functions/api/_lib/customRequestCommerceSchemaReadiness.js
+          node --check functions/api/custom-request-order.js
+          node --check functions/api/custom-request-quote.js
+          node --check functions/api/custom-request-payment.js
+      - run: git diff --check

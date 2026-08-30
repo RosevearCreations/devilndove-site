@@ -1,231 +1,38 @@
 // File: /functions/api/custom-request-quote.js
-// Brief description: Token-protected public preview for custom request quote drafts, including accept/decline response tracking, visible quote line items, and accepted-quote payment/order draft handoff.
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+// Public quote preview/response endpoint. Schema is Release 461 migration-owned.
+import { hasCustomRequestQuoteSchema } from './_lib/customRequestCommerceSchemaReadiness.js';
+function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}
+function clean(value,limit=1200){const text=String(value??'').replace(/\s+/g,' ').trim();return text.length>limit?text.slice(0,limit).trim():text;}
+function money(cents){return(Number(cents||0)/100).toLocaleString('en-CA',{style:'currency',currency:'CAD'});}
+function key(prefix){return`${prefix}_${Date.now().toString(36)}_${crypto.randomUUID().slice(0,8)}`;}
+function rows(result){return Array.isArray(result?.results)?result.results:[];}
+async function event(db,requestId,type,note){await db.prepare(`INSERT INTO custom_request_conversion_events (custom_request_id, conversion_type, target_table, event_notes, created_at) VALUES (?, ?, 'custom_request_quote_share_links', ?, CURRENT_TIMESTAMP)`).bind(Number(requestId||0),type,note||null).run().catch(()=>null);}
+async function loadQuote(db,token){
+  const link=await db.prepare(`SELECT * FROM custom_request_quote_share_links WHERE share_token=? LIMIT 1`).bind(token).first().catch(()=>null);
+  if(!link||['void','expired'].includes(String(link.share_status||'').toLowerCase())||link.voided_at||link.expired_at)return null;
+  const request=await db.prepare(`SELECT request_key, request_type, product_interest, deadline_date, status FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id||0)).first().catch(()=>null);
+  const quoteDraft=await db.prepare(`SELECT * FROM custom_request_quote_drafts WHERE custom_request_quote_draft_id=? OR custom_request_id=? ORDER BY custom_request_quote_draft_id DESC LIMIT 1`).bind(Number(link.quote_draft_id||0),Number(link.custom_request_id||0)).first().catch(()=>null);
+  const lineItems=quoteDraft?rows(await db.prepare(`SELECT * FROM custom_request_quote_line_items WHERE quote_draft_id=? AND COALESCE(line_status,'active') <> 'void' ORDER BY sort_order, custom_request_quote_line_item_id`).bind(Number(quoteDraft.custom_request_quote_draft_id||0)).all().catch(()=>({results:[]}))):[];
+  const candidates=await db.prepare(`SELECT candidate_type, amount_cents, currency, due_date, description, candidate_status FROM custom_request_payment_candidates WHERE custom_request_id=? ORDER BY CASE candidate_type WHEN 'deposit' THEN 1 ELSE 2 END, custom_request_payment_candidate_id`).bind(Number(link.custom_request_id||0)).all().catch(()=>({results:[]}));
+  return{link,request,quote_draft:quoteDraft,quote_line_items:lineItems,payment_candidates:Array.isArray(candidates?.results)?candidates.results:[]};
 }
-function clean(value, limit = 1200) { const text = String(value ?? '').replace(/\s+/g, ' ').trim(); return text.length > limit ? text.slice(0, limit).trim() : text; }
-function money(cents) { return (Number(cents || 0) / 100).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' }); }
-function key(prefix) { return `${prefix}_${Date.now().toString(36)}_${crypto.randomUUID().slice(0, 8)}`; }
-function rows(result) { return Array.isArray(result?.results) ? result.results : []; }
-async function tableColumnSet(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); return new Set(rows(result).map((row) => String(row.name || '').toLowerCase()).filter(Boolean)); } catch { return new Set(); } }
-async function ensureColumn(db, tableName, columnName, sql) { const columns = await tableColumnSet(db, tableName); if (!columns.has(String(columnName || '').toLowerCase())) await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${sql}`).run().catch(() => null); }
-function cents(value) { const n = Number(value); return Number.isFinite(n) ? Math.round(n) : 0; }
-async function ensureSchema(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_quote_share_links (
-    custom_request_quote_share_link_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    custom_request_id INTEGER NOT NULL,
-    quote_draft_id INTEGER,
-    share_token TEXT NOT NULL UNIQUE,
-    share_status TEXT NOT NULL DEFAULT 'active',
-    customer_name TEXT,
-    customer_email TEXT,
-    title TEXT,
-    quote_total_cents INTEGER NOT NULL DEFAULT 0,
-    scope_summary TEXT,
-    payment_summary_json TEXT DEFAULT '{}',
-    expires_at TEXT,
-    accepted_at TEXT,
-    declined_at TEXT,
-    customer_response_note TEXT,
-    created_by_user_id INTEGER,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_share_links_token ON custom_request_quote_share_links(share_token, share_status)`).run().catch(() => null);
-  await ensureColumn(db, 'custom_request_quote_share_links', 'voided_at', 'voided_at TEXT');
-  await ensureColumn(db, 'custom_request_quote_share_links', 'expired_at', 'expired_at TEXT');
-  await ensureColumn(db, 'custom_request_quote_share_links', 'lifecycle_note', 'lifecycle_note TEXT');
-
-  await ensureColumn(db, 'custom_request_quote_drafts', 'material_cost_cents', 'material_cost_cents INTEGER NOT NULL DEFAULT 0');
-  await ensureColumn(db, 'custom_request_quote_drafts', 'labor_cost_cents', 'labor_cost_cents INTEGER NOT NULL DEFAULT 0');
-  await ensureColumn(db, 'custom_request_quote_drafts', 'pickup_shipping_cents', 'pickup_shipping_cents INTEGER NOT NULL DEFAULT 0');
-  await ensureColumn(db, 'custom_request_quote_drafts', 'tax_estimate_cents', 'tax_estimate_cents INTEGER NOT NULL DEFAULT 0');
-  await ensureColumn(db, 'custom_request_quote_drafts', 'quote_total_cents', 'quote_total_cents INTEGER NOT NULL DEFAULT 0');
-  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_quote_line_items (
-    custom_request_quote_line_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    custom_request_id INTEGER NOT NULL,
-    quote_draft_id INTEGER NOT NULL,
-    line_type TEXT NOT NULL DEFAULT 'custom',
-    line_label TEXT NOT NULL,
-    quantity REAL NOT NULL DEFAULT 1,
-    unit_amount_cents INTEGER NOT NULL DEFAULT 0,
-    line_amount_cents INTEGER NOT NULL DEFAULT 0,
-    is_taxable INTEGER NOT NULL DEFAULT 1,
-    line_status TEXT NOT NULL DEFAULT 'active',
-    sort_order INTEGER NOT NULL DEFAULT 100,
-    created_by_user_id INTEGER,
-    updated_by_user_id INTEGER,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_quote_revisions (
-    custom_request_quote_revision_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    custom_request_id INTEGER NOT NULL,
-    quote_draft_id INTEGER,
-    revision_type TEXT NOT NULL DEFAULT 'changed',
-    revision_status TEXT NOT NULL DEFAULT 'open',
-    revision_notes TEXT,
-    snapshot_json TEXT DEFAULT '{}',
-    created_by_user_id INTEGER,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_payment_request_drafts (
-    custom_request_payment_request_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    custom_request_id INTEGER NOT NULL,
-    quote_draft_id INTEGER,
-    share_link_id INTEGER,
-    payment_request_key TEXT NOT NULL UNIQUE,
-    payment_request_status TEXT NOT NULL DEFAULT 'review_needed',
-    request_type TEXT NOT NULL DEFAULT 'deposit',
-    amount_cents INTEGER NOT NULL DEFAULT 0,
-    tax_cents INTEGER NOT NULL DEFAULT 0,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    customer_name TEXT,
-    customer_email TEXT,
-    due_date TEXT,
-    review_notes TEXT,
-    source_payload_json TEXT DEFAULT '{}',
-    created_by_user_id INTEGER,
-    reviewed_by_user_id INTEGER,
-    reviewed_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_request_order_drafts (
-    custom_request_order_draft_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    custom_request_id INTEGER NOT NULL,
-    quote_draft_id INTEGER,
-    share_link_id INTEGER,
-    order_draft_key TEXT NOT NULL UNIQUE,
-    order_draft_status TEXT NOT NULL DEFAULT 'review_needed',
-    customer_name TEXT,
-    customer_email TEXT,
-    subtotal_cents INTEGER NOT NULL DEFAULT 0,
-    shipping_cents INTEGER NOT NULL DEFAULT 0,
-    tax_cents INTEGER NOT NULL DEFAULT 0,
-    total_cents INTEGER NOT NULL DEFAULT 0,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    fulfillment_notes TEXT,
-    source_payload_json TEXT DEFAULT '{}',
-    created_by_user_id INTEGER,
-    reviewed_by_user_id INTEGER,
-    reviewed_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_line_items_quote ON custom_request_quote_line_items(quote_draft_id, line_status, sort_order)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_quote_revisions_request ON custom_request_quote_revisions(custom_request_id, created_at)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_payment_request_drafts_request ON custom_request_payment_request_drafts(custom_request_id, payment_request_status, updated_at)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_custom_order_drafts_request ON custom_request_order_drafts(custom_request_id, order_draft_status, updated_at)`).run().catch(() => null);
-
+function publicPayload(loaded){
+  const{link,request,quote_draft,quote_line_items,payment_candidates}=loaded;const expired=(link.expires_at&&new Date(link.expires_at).getTime()<Date.now())||Boolean(link.expired_at);const status=expired&&link.share_status==='active'?'expired':link.share_status;
+  return{ok:true,quote:{share_status:status,title:link.title||request?.product_interest||'Custom Devil n Dove request',customer_name:link.customer_name||'',customer_email:link.customer_email||'',request_type:request?.request_type||'',requested_deadline:request?.deadline_date||'',quote_total_cents:Number(link.quote_total_cents||quote_draft?.quote_total_cents||quote_draft?.estimated_budget_cents||0),quote_total_label:money(link.quote_total_cents||quote_draft?.quote_total_cents||quote_draft?.estimated_budget_cents||0),material_cost_cents:Number(quote_draft?.material_cost_cents||0),material_cost_label:money(quote_draft?.material_cost_cents||0),labor_cost_cents:Number(quote_draft?.labor_cost_cents||0),labor_cost_label:money(quote_draft?.labor_cost_cents||0),pickup_shipping_cents:Number(quote_draft?.pickup_shipping_cents||0),pickup_shipping_label:money(quote_draft?.pickup_shipping_cents||0),tax_estimate_cents:Number(quote_draft?.tax_estimate_cents||0),tax_estimate_label:money(quote_draft?.tax_estimate_cents||0),scope_summary:link.scope_summary||'',payment_summary:(()=>{try{return JSON.parse(link.payment_summary_json||'{}');}catch{return{};}})(),line_items:(quote_line_items||[]).map(row=>({line_type:row.line_type||'custom',line_label:row.line_label||'',quantity:Number(row.quantity||1),unit_amount_cents:Number(row.unit_amount_cents||0),unit_amount_label:money(row.unit_amount_cents||0),line_amount_cents:Number(row.line_amount_cents||0),line_amount_label:money(row.line_amount_cents||0),is_taxable:Number(row.is_taxable||0)===1})),payment_candidates:payment_candidates.map(row=>({candidate_type:row.candidate_type,amount_cents:Number(row.amount_cents||0),amount_label:money(row.amount_cents||0),due_date:row.due_date||'',description:row.description||'',candidate_status:row.candidate_status||'draft'})),expires_at:link.expires_at||'',accepted_at:link.accepted_at||'',declined_at:link.declined_at||'',customer_response_note:link.customer_response_note||''}};
 }
-async function event(db, requestId, type, note) {
-  await db.prepare(`INSERT INTO custom_request_conversion_events (custom_request_id, conversion_type, target_table, event_notes, created_at) VALUES (?, ?, 'custom_request_quote_share_links', ?, CURRENT_TIMESTAMP)`).bind(Number(requestId || 0), type, note || null).run().catch(() => null);
+async function createAcceptedDrafts(db,link,quoteDraft,lineItems){
+  const request=await db.prepare(`SELECT * FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id||0)).first().catch(()=>null);const quoteTotal=Number(link.quote_total_cents||quoteDraft?.quote_total_cents||quoteDraft?.estimated_budget_cents||0);const tax=Number(quoteDraft?.tax_estimate_cents||0);const shipping=Number(quoteDraft?.pickup_shipping_cents||0);const subtotal=Math.max(0,quoteTotal-tax);const sourcePayload=JSON.stringify({request_key:request?.request_key||null,quote_key:quoteDraft?.quote_key||null,share_link_id:link.custom_request_quote_share_link_id,line_items:lineItems||[]});
+  let paymentDraft=await db.prepare(`SELECT * FROM custom_request_payment_request_drafts WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id||0)).first().catch(()=>null);let orderDraft=await db.prepare(`SELECT * FROM custom_request_order_drafts WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id||0)).first().catch(()=>null);
+  if(!paymentDraft){const depositCandidate=await db.prepare(`SELECT * FROM custom_request_payment_candidates WHERE custom_request_id=? AND candidate_type='deposit' LIMIT 1`).bind(Number(link.custom_request_id||0)).first().catch(()=>null);const amount=Number(depositCandidate?.amount_cents||0)||Math.max(500,Math.round(quoteTotal*0.5));const paymentKey=key('payreq');await db.prepare(`INSERT INTO custom_request_payment_request_drafts (custom_request_id, quote_draft_id, share_link_id, payment_request_key, payment_request_status, request_type, amount_cents, tax_cents, currency, customer_name, customer_email, due_date, review_notes, source_payload_json, created_at, updated_at) VALUES (?, ?, ?, ?, 'review_needed', 'deposit', ?, ?, 'CAD', ?, ?, date('now'), ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(Number(link.custom_request_id||0),Number(link.quote_draft_id||quoteDraft?.custom_request_quote_draft_id||0)||null,Number(link.custom_request_quote_share_link_id||0),paymentKey,amount,Math.round(tax*(amount/Math.max(quoteTotal,1))),link.customer_name||request?.name||null,link.customer_email||request?.email||null,'Customer accepted the quote preview. Review this draft before sending a real payment request.',sourcePayload).run();}
+  if(!orderDraft){const orderKey=key('orderdraft');await db.prepare(`INSERT INTO custom_request_order_drafts (custom_request_id, quote_draft_id, share_link_id, order_draft_key, order_draft_status, customer_name, customer_email, subtotal_cents, shipping_cents, tax_cents, total_cents, currency, fulfillment_notes, source_payload_json, created_at, updated_at) VALUES (?, ?, ?, ?, 'review_needed', ?, ?, ?, ?, ?, ?, 'CAD', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(Number(link.custom_request_id||0),Number(link.quote_draft_id||quoteDraft?.custom_request_quote_draft_id||0)||null,Number(link.custom_request_quote_share_link_id||0),orderKey,link.customer_name||request?.name||null,link.customer_email||request?.email||null,subtotal,shipping,tax,quoteTotal,'Customer accepted quote preview. Confirm payment, shipping/pickup, media consent, and order details before creating a real order.',sourcePayload).run();}
+  await db.prepare(`INSERT INTO custom_request_quote_revisions (custom_request_id, quote_draft_id, revision_type, revision_status, revision_notes, snapshot_json, created_at) VALUES (?, ?, 'quote_accepted', 'open', ?, ?, CURRENT_TIMESTAMP)`).bind(Number(link.custom_request_id||0),Number(link.quote_draft_id||quoteDraft?.custom_request_quote_draft_id||0)||null,'Customer accepted quote; payment-request and order drafts were prepared for review.',sourcePayload).run().catch(()=>null);
 }
-async function loadQuote(db, token) {
-  await ensureSchema(db);
-  const link = await db.prepare(`SELECT * FROM custom_request_quote_share_links WHERE share_token=? LIMIT 1`).bind(token).first().catch(() => null);
-  if (!link || ['void','expired'].includes(String(link.share_status || '').toLowerCase()) || link.voided_at || link.expired_at) return null;
-  const request = await db.prepare(`SELECT request_key, request_type, product_interest, deadline_date, status FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id || 0)).first().catch(() => null);
-  const quoteDraft = await db.prepare(`SELECT * FROM custom_request_quote_drafts WHERE custom_request_quote_draft_id=? OR custom_request_id=? ORDER BY custom_request_quote_draft_id DESC LIMIT 1`).bind(Number(link.quote_draft_id || 0), Number(link.custom_request_id || 0)).first().catch(() => null);
-  const lineItems = quoteDraft ? rows(await db.prepare(`SELECT * FROM custom_request_quote_line_items WHERE quote_draft_id=? AND COALESCE(line_status,'active') <> 'void' ORDER BY sort_order, custom_request_quote_line_item_id`).bind(Number(quoteDraft.custom_request_quote_draft_id || 0)).all().catch(() => ({ results: [] }))) : [];
-  const candidates = await db.prepare(`SELECT candidate_type, amount_cents, currency, due_date, description, candidate_status FROM custom_request_payment_candidates WHERE custom_request_id=? ORDER BY CASE candidate_type WHEN 'deposit' THEN 1 ELSE 2 END, custom_request_payment_candidate_id`).bind(Number(link.custom_request_id || 0)).all().catch(() => ({ results: [] }));
-  return { link, request, quote_draft: quoteDraft, quote_line_items: lineItems, payment_candidates: Array.isArray(candidates?.results) ? candidates.results : [] };
-}
-function publicPayload(loaded) {
-  const { link, request, quote_draft, quote_line_items, payment_candidates } = loaded;
-  const expired = (link.expires_at && new Date(link.expires_at).getTime() < Date.now()) || Boolean(link.expired_at);
-  const status = expired && link.share_status === 'active' ? 'expired' : link.share_status;
-  return {
-    ok: true,
-    quote: {
-      share_status: status,
-      title: link.title || request?.product_interest || 'Custom Devil n Dove request',
-      customer_name: link.customer_name || '',
-      customer_email: link.customer_email || '',
-      request_type: request?.request_type || '',
-      requested_deadline: request?.deadline_date || '',
-      quote_total_cents: Number(link.quote_total_cents || quote_draft?.quote_total_cents || quote_draft?.estimated_budget_cents || 0),
-      quote_total_label: money(link.quote_total_cents || quote_draft?.quote_total_cents || quote_draft?.estimated_budget_cents || 0),
-      material_cost_cents: Number(quote_draft?.material_cost_cents || 0),
-      material_cost_label: money(quote_draft?.material_cost_cents || 0),
-      labor_cost_cents: Number(quote_draft?.labor_cost_cents || 0),
-      labor_cost_label: money(quote_draft?.labor_cost_cents || 0),
-      pickup_shipping_cents: Number(quote_draft?.pickup_shipping_cents || 0),
-      pickup_shipping_label: money(quote_draft?.pickup_shipping_cents || 0),
-      tax_estimate_cents: Number(quote_draft?.tax_estimate_cents || 0),
-      tax_estimate_label: money(quote_draft?.tax_estimate_cents || 0),
-      scope_summary: link.scope_summary || '',
-      payment_summary: (() => { try { return JSON.parse(link.payment_summary_json || '{}'); } catch { return {}; } })(),
-      line_items: (quote_line_items || []).map((row) => ({ line_type: row.line_type || 'custom', line_label: row.line_label || '', quantity: Number(row.quantity || 1), unit_amount_cents: Number(row.unit_amount_cents || 0), unit_amount_label: money(row.unit_amount_cents || 0), line_amount_cents: Number(row.line_amount_cents || 0), line_amount_label: money(row.line_amount_cents || 0), is_taxable: Number(row.is_taxable || 0) === 1 })),
-      payment_candidates: payment_candidates.map((row) => ({ candidate_type: row.candidate_type, amount_cents: Number(row.amount_cents || 0), amount_label: money(row.amount_cents || 0), due_date: row.due_date || '', description: row.description || '', candidate_status: row.candidate_status || 'draft' })),
-      expires_at: link.expires_at || '',
-      accepted_at: link.accepted_at || '',
-      declined_at: link.declined_at || '',
-      customer_response_note: link.customer_response_note || ''
-    }
-  };
-}
-
-async function createAcceptedDrafts(db, link, quoteDraft, lineItems) {
-  const request = await db.prepare(`SELECT * FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id || 0)).first().catch(() => null);
-  const quoteTotal = Number(link.quote_total_cents || quoteDraft?.quote_total_cents || quoteDraft?.estimated_budget_cents || 0);
-  const tax = Number(quoteDraft?.tax_estimate_cents || 0);
-  const shipping = Number(quoteDraft?.pickup_shipping_cents || 0);
-  const subtotal = Math.max(0, quoteTotal - tax);
-  const sourcePayload = JSON.stringify({ request_key: request?.request_key || null, quote_key: quoteDraft?.quote_key || null, share_link_id: link.custom_request_quote_share_link_id, line_items: lineItems || [] });
-  let paymentDraft = await db.prepare(`SELECT * FROM custom_request_payment_request_drafts WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id || 0)).first().catch(() => null);
-  let orderDraft = await db.prepare(`SELECT * FROM custom_request_order_drafts WHERE custom_request_id=? LIMIT 1`).bind(Number(link.custom_request_id || 0)).first().catch(() => null);
-  if (!paymentDraft) {
-    const depositCandidate = await db.prepare(`SELECT * FROM custom_request_payment_candidates WHERE custom_request_id=? AND candidate_type='deposit' LIMIT 1`).bind(Number(link.custom_request_id || 0)).first().catch(() => null);
-    const amount = Number(depositCandidate?.amount_cents || 0) || Math.max(500, Math.round(quoteTotal * 0.5));
-    const paymentKey = key('payreq');
-    await db.prepare(`INSERT INTO custom_request_payment_request_drafts (custom_request_id, quote_draft_id, share_link_id, payment_request_key, payment_request_status, request_type, amount_cents, tax_cents, currency, customer_name, customer_email, due_date, review_notes, source_payload_json, created_at, updated_at) VALUES (?, ?, ?, ?, 'review_needed', 'deposit', ?, ?, 'CAD', ?, ?, date('now'), ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
-      Number(link.custom_request_id || 0), Number(link.quote_draft_id || quoteDraft?.custom_request_quote_draft_id || 0) || null, Number(link.custom_request_quote_share_link_id || 0), paymentKey, amount, Math.round(tax * (amount / Math.max(quoteTotal, 1))), link.customer_name || request?.name || null, link.customer_email || request?.email || null, 'Customer accepted the quote preview. Review this draft before sending a real payment request.', sourcePayload
-    ).run();
-  }
-  if (!orderDraft) {
-    const orderKey = key('orderdraft');
-    await db.prepare(`INSERT INTO custom_request_order_drafts (custom_request_id, quote_draft_id, share_link_id, order_draft_key, order_draft_status, customer_name, customer_email, subtotal_cents, shipping_cents, tax_cents, total_cents, currency, fulfillment_notes, source_payload_json, created_at, updated_at) VALUES (?, ?, ?, ?, 'review_needed', ?, ?, ?, ?, ?, ?, 'CAD', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
-      Number(link.custom_request_id || 0), Number(link.quote_draft_id || quoteDraft?.custom_request_quote_draft_id || 0) || null, Number(link.custom_request_quote_share_link_id || 0), orderKey, link.customer_name || request?.name || null, link.customer_email || request?.email || null, subtotal, shipping, tax, quoteTotal, 'Customer accepted quote preview. Confirm payment, shipping/pickup, media consent, and order details before creating a real order.', sourcePayload
-    ).run();
-  }
-  await db.prepare(`INSERT INTO custom_request_quote_revisions (custom_request_id, quote_draft_id, revision_type, revision_status, revision_notes, snapshot_json, created_at) VALUES (?, ?, 'quote_accepted', 'open', ?, ?, CURRENT_TIMESTAMP)`).bind(Number(link.custom_request_id || 0), Number(link.quote_draft_id || quoteDraft?.custom_request_quote_draft_id || 0) || null, 'Customer accepted quote; payment-request and order drafts were prepared for review.', sourcePayload).run().catch(() => null);
-}
-
-export async function onRequestGet(context) {
-  const db = context.env.DB || context.env.DD_DB;
-  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
-  const token = clean(new URL(context.request.url).searchParams.get('token'), 160);
-  if (!token) return json({ ok: false, error: 'Missing quote token.' }, 400);
-  const loaded = await loadQuote(db, token);
-  if (!loaded) return json({ ok: false, error: 'Quote preview was not found.' }, 404);
-  return json(publicPayload(loaded));
-}
-export async function onRequestPost(context) {
-  const db = context.env.DB || context.env.DD_DB;
-  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
-  let body = {};
-  try { body = await context.request.json(); } catch { body = {}; }
-  const token = clean(body.token, 160);
-  const action = clean(body.action, 40).toLowerCase();
-  const note = clean(body.customer_response_note || body.note || '', 1200);
-  if (!token || !['accept', 'decline'].includes(action)) return json({ ok: false, error: 'Choose accept or decline for this quote.' }, 400);
-  const loaded = await loadQuote(db, token);
-  if (!loaded) return json({ ok: false, error: 'Quote preview was not found.' }, 404);
-  const { link } = loaded;
-  if ((link.expires_at && new Date(link.expires_at).getTime() < Date.now()) || link.expired_at || link.voided_at) return json({ ok: false, error: 'This quote preview link has expired or was closed.' }, 400);
-  if (!['active', 'viewed'].includes(String(link.share_status || ''))) return json({ ok: false, error: 'This quote has already been responded to or closed.' }, 400);
-  const accepted = action === 'accept';
-  await db.prepare(`UPDATE custom_request_quote_share_links SET share_status=?, accepted_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE accepted_at END, declined_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE declined_at END, customer_response_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_quote_share_link_id=?`).bind(
-    accepted ? 'accepted' : 'declined', accepted ? 1 : 0, accepted ? 0 : 1, note || null, Number(link.custom_request_quote_share_link_id || 0)
-  ).run();
-  await db.prepare(`UPDATE custom_requests SET status=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(accepted ? 'accepted' : 'declined', Number(link.custom_request_id || 0)).run().catch(() => null);
-  await db.prepare(`UPDATE custom_request_quote_drafts SET quote_status=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_quote_draft_id=?`).bind(accepted ? 'accepted' : 'declined', Number(link.quote_draft_id || 0)).run().catch(() => null);
-  if (accepted) { await createAcceptedDrafts(db, link, loaded.quote_draft, loaded.quote_line_items).catch(() => null); }
-  else { await db.prepare(`INSERT INTO custom_request_quote_revisions (custom_request_id, quote_draft_id, revision_type, revision_status, revision_notes, snapshot_json, created_at) VALUES (?, ?, 'customer_declined', 'open', ?, ?, CURRENT_TIMESTAMP)`).bind(Number(link.custom_request_id || 0), Number(link.quote_draft_id || 0) || null, note || 'Customer declined or asked not to move forward.', JSON.stringify({ share_link_id: link.custom_request_quote_share_link_id, customer_response_note: note })).run().catch(() => null); }
-  await event(db, link.custom_request_id, accepted ? 'quote_preview_accepted' : 'quote_preview_declined', note || null);
-  const reloaded = await loadQuote(db, token);
-  return json({ message: accepted ? 'Quote accepted. We will review the next step before requesting payment.' : 'Quote declined. Thank you for letting us know.', ...publicPayload(reloaded) });
+export async function onRequestGet(context){const db=context.env.DB||context.env.DD_DB;if(!db)return json({ok:false,error:'Database binding is not configured.'},500);const token=clean(new URL(context.request.url).searchParams.get('token'),160);if(!token)return json({ok:false,error:'Missing quote token.'},400);if(!(await hasCustomRequestQuoteSchema(db)))return json({ok:false,error:'custom_request_quote_schema_unavailable',message:'Quote preview is temporarily unavailable.'},503);const loaded=await loadQuote(db,token);if(!loaded)return json({ok:false,error:'Quote preview was not found.'},404);return json(publicPayload(loaded));}
+export async function onRequestPost(context){
+  const db=context.env.DB||context.env.DD_DB;if(!db)return json({ok:false,error:'Database binding is not configured.'},500);let body={};try{body=await context.request.json();}catch{body={};}const token=clean(body.token,160),action=clean(body.action,40).toLowerCase(),note=clean(body.customer_response_note||body.note||'',1200);if(!token||!['accept','decline'].includes(action))return json({ok:false,error:'Choose accept or decline for this quote.'},400);if(!(await hasCustomRequestQuoteSchema(db)))return json({ok:false,error:'custom_request_quote_schema_unavailable',message:'Quote preview is temporarily unavailable.'},503);
+  const loaded=await loadQuote(db,token);if(!loaded)return json({ok:false,error:'Quote preview was not found.'},404);const{link}=loaded;if((link.expires_at&&new Date(link.expires_at).getTime()<Date.now())||link.expired_at||link.voided_at)return json({ok:false,error:'This quote preview link has expired or was closed.'},400);if(!['active','viewed'].includes(String(link.share_status||'')))return json({ok:false,error:'This quote has already been responded to or closed.'},400);const accepted=action==='accept';
+  await db.prepare(`UPDATE custom_request_quote_share_links SET share_status=?, accepted_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE accepted_at END, declined_at=CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE declined_at END, customer_response_note=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_quote_share_link_id=?`).bind(accepted?'accepted':'declined',accepted?1:0,accepted?0:1,note||null,Number(link.custom_request_quote_share_link_id||0)).run();
+  await db.prepare(`UPDATE custom_requests SET status=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(accepted?'accepted':'declined',Number(link.custom_request_id||0)).run().catch(()=>null);await db.prepare(`UPDATE custom_request_quote_drafts SET quote_status=?, updated_at=CURRENT_TIMESTAMP WHERE custom_request_quote_draft_id=?`).bind(accepted?'accepted':'declined',Number(link.quote_draft_id||0)).run().catch(()=>null);
+  if(accepted){await createAcceptedDrafts(db,link,loaded.quote_draft,loaded.quote_line_items).catch(()=>null);}else{await db.prepare(`INSERT INTO custom_request_quote_revisions (custom_request_id, quote_draft_id, revision_type, revision_status, revision_notes, snapshot_json, created_at) VALUES (?, ?, 'customer_declined', 'open', ?, ?, CURRENT_TIMESTAMP)`).bind(Number(link.custom_request_id||0),Number(link.quote_draft_id||0)||null,note||'Customer declined or asked not to move forward.',JSON.stringify({share_link_id:link.custom_request_quote_share_link_id,customer_response_note:note})).run().catch(()=>null);}
+  await event(db,link.custom_request_id,accepted?'quote_preview_accepted':'quote_preview_declined',note||null);const reloaded=await loadQuote(db,token);return json({message:accepted?'Quote accepted. We will review the next step before requesting payment.':'Quote declined. Thank you for letting us know.',...publicPayload(reloaded)});
 }
