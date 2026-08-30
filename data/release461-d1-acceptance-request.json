@@ -1,7 +1,7 @@
 {
   "release": 461,
   "mode": "preflight",
-  "expected_parent_sha": "b275c64cc1d406fa5dd657ff9f47532bf128c204",
+  "expected_parent_sha": "bf982e6bc098e55dd36eb9867ef29b0a59642bb0",
   "apply_confirmation": "",
   "target": "Development D1 only",
   "database_name": "devilndove-dev",
