@@ -1,4 +1,4 @@
-// Release 460 Financials webhook security authority.
+// Release 461 Financials webhook security authority.
 // Pure verification helpers plus fail-closed replay/schema helpers used by Stripe and PayPal webhooks.
 
 function text(value) {
@@ -243,6 +243,8 @@ export async function registerWebhookEventAtomic(
   };
 }
 
+// Keep this contract aligned to the explicit Build 384 gift-card migration.
+// Request/runtime paths must never require columns that only existed via legacy self-heal ALTERs.
 const GIFT_CARD_WEBHOOK_COLUMNS = Object.freeze([
   'gift_card_id',
   'code',
@@ -259,7 +261,6 @@ const GIFT_CARD_WEBHOOK_COLUMNS = Object.freeze([
   'recipient_note',
   'purchaser_email',
   'purchaser_name',
-  'purchaser_user_id',
   'order_id',
   'purchase_source',
 ]);

@@ -1,0 +1,31 @@
+name: Release 461 Payment Webhook Schema Contract Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/paymentWebhookSecurity.js'
+      - 'database_gift_card_runtime_parity.sql'
+      - 'scripts/release461_payment_webhook_schema_contract_gate.py'
+      - '.github/workflows/release461-payment-webhook-schema-contract-source-gate.yml'
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  schema-contract-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python scripts/release461_payment_webhook_schema_contract_gate.py
+      - run: node --check functions/api/_lib/paymentWebhookSecurity.js
+      - run: git diff --check
+      - run: |
+          echo 'Provider execution/authorization: NOT RUN'
+          echo 'Schema contract verification only'
