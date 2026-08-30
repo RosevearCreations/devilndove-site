@@ -32,7 +32,7 @@ When required schema is unavailable, the handler fails closed with HTTP 503. Cus
 
 ## Shared/admin notification authority
 
-The notification outbox helper was the next confirmed shared-runtime offender. It previously created notification support tables, repaired missing `notification_outbox` columns, and inserted default cooldown policy rows while normal queue/dispatch traffic was running.
+The notification outbox helper was a confirmed shared-runtime offender. It previously created notification support tables, repaired missing `notification_outbox` columns, and inserted default cooldown policy rows while normal queue/dispatch traffic was running.
 
 Release 461 now moves that ownership to:
 
@@ -54,6 +54,51 @@ Focused source authority is enforced by `scripts/release461_notification_runtime
 
 A dedicated manual-only workflow, `.github/workflows/development-d1-release461-notification.yml`, exists for eventual Development acceptance. It verifies the exact Development D1 identity, runs read-only structural drift checks, refuses partial existing table shapes, and only then may apply the additive notification authority migration. It is not an automatic migration trigger and must not be dispatched merely because source changed or a new chat started.
 
+## Shared community authority
+
+`functions/api/_communityContent.js` previously retained schema self-healing even though the public community route had already been made read-only. Release 461 now makes the shared/admin helper read-only as well.
+
+The existing additive authority remains:
+
+`migrations/dev/20260829_release461_public_community_authority.sql`
+
+It owns:
+
+- `community_events`
+- `pickup_profiles`
+- `event_vendor_applications`
+- recurrence/application support columns
+- the active/sort/application indexes used by public and admin callers
+
+The helper preserves its compatibility `ensure*` exports, but those functions now perform structural `PRAGMA table_info` / `PRAGMA index_list` checks only. They do not create or alter schema. `scripts/release461_public_community_schema_gate.py` now protects both the public and shared/admin paths.
+
+## Content Automation Studio and publication authority
+
+The Content Automation Studio shared helper and content-publication helper were another confirmed hidden runtime schema owner. Runtime calls previously created the five Content Automation Studio workflow tables, the two publication tables, and their indexes.
+
+Release 461 now owns that schema explicitly in:
+
+`migrations/dev/20260829_release461_content_automation_publication_authority.sql`
+
+The additive Development authority covers:
+
+- `content_projects`
+- `content_project_media`
+- `content_project_deliverables`
+- `content_render_jobs`
+- `content_project_events`
+- `content_publications`
+- `content_publication_events`
+- all corresponding project/media/deliverable/render/event/publication indexes
+
+`functions/api/_lib/contentAutomationSchemaReadiness.js` is now the shared read-only structural authority. It verifies required columns and indexes through `PRAGMA table_info` and `PRAGMA index_list`.
+
+`functions/api/_lib/contentAutomationStudio.js` and `functions/api/_lib/contentPublications.js` retain their existing compatibility `ensure*Schema` function names for callers, but those functions now delegate to read-only readiness. Legitimate business writes—project creation, media archiving, deliverable updates, render-job creation, publication preparation, approval, publishing state, metrics, and event records—remain intact. Request traffic no longer creates or repairs the supporting tables.
+
+Focused source authority is enforced by `scripts/release461_content_automation_schema_gate.py`, now included in `scripts/release461_aggregate_source_gate.py`.
+
+The Content Automation/Publication migration is source authority only at this checkpoint. It has not been applied to Development D1 and no provider publishing execution has been opened.
+
 ## Drift and migration rule
 
 Release 461 Development D1 workflows are manual-dispatch-only. Before any write they verify the exact Development project/database identity and probe existing table shapes read-only.
@@ -66,9 +111,11 @@ If a table is absent, or if structurally compatible tables only need explicitly 
 
 - Public/customer runtime-schema source audit: closed for the currently identified Release 461 public slices and protected by focused gates.
 - Shared/admin notification runtime-schema source slice: migration-owned and runtime-read-only at source level.
-- Development D1 notification acceptance: pending manual execution; not claimed complete.
+- Shared community runtime-schema source slice: migration-owned and runtime-read-only at source level.
+- Content Automation Studio/publication runtime-schema source slice: migration-owned and runtime-read-only at source level.
+- Development D1 Release 461 acceptance: pending manual execution; not claimed complete.
 - Provider-specific Stripe/PayPal acceptance: still closed/pending credentials and does not block unrelated source cleanup.
-- Remaining shared/admin audit: continue through community/content-publication/content-automation helpers and then the broader admin request tree for hidden runtime schema mutation, seeding, or backfill behavior.
+- Remaining shared/admin audit: continue through the broader admin request tree for hidden runtime schema mutation, request-time seeding, or backfill behavior.
 
 ## Boundaries
 
@@ -84,7 +131,7 @@ If a table is absent, or if structurally compatible tables only need explicitly 
 
 Continue through `functions/api/**` and shared helpers searching for `CREATE TABLE`, `ALTER TABLE`, `CREATE INDEX`, mutation-bearing `ensure*Schema`, request-time policy seeds, and equivalent hidden backfills. Move discovered schema authority into explicit forward migrations plus read-only readiness services before calling a slice closed.
 
-The next shared/admin targets are `_communityContent.js`, `contentPublications.js`, and `contentAutomationStudio.js`, subject to exact-current-`dev` inspection before classification.
+The community and content-publication/content-automation targets are now source-clean. The next target should be selected from the exact-current-`dev` broad admin/shared scan rather than from historical helper names alone.
 
 ## Current-release metadata
 
