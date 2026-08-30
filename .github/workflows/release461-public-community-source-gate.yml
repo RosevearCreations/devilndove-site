@@ -1,0 +1,21 @@
+name: Release 461 Public Community Source Gate
+on:
+  push:
+    branches: [dev]
+    paths: ['functions/api/community-content.js','functions/api/_lib/publicCommunityReadService.js','migrations/dev/20260829_release461_public_community_authority.sql','scripts/release461_public_community_schema_gate.py','.github/workflows/release461-public-community-source-gate.yml','.github/workflows/development-d1-release461-public-community.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python scripts/release461_public_community_schema_gate.py
+      - run: |
+          node --check functions/api/_lib/publicCommunityReadService.js
+          node --check functions/api/community-content.js
+      - run: git diff --check
