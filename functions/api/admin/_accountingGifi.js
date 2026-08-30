@@ -4,26 +4,39 @@ function rows(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+async function tableColumns(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexes(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 export async function ensureAccountingGifiNotesTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_gifi_review_notes (
-      accounting_gifi_review_note_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tax_year TEXT NOT NULL,
-      gifi_code TEXT NOT NULL,
-      gifi_label TEXT,
-      gifi_section TEXT,
-      accountant_note TEXT,
-      schedule_141_note TEXT,
-      supporting_details TEXT,
-      review_status TEXT NOT NULL DEFAULT 'draft',
-      created_by_user_id INTEGER,
-      updated_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(tax_year, gifi_code)
-    )
-  `).run();
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_gifi_review_notes_year ON accounting_gifi_review_notes(tax_year, review_status, gifi_code)`).run(); } catch {}
+  const columns = await tableColumns(db, 'accounting_gifi_review_notes');
+  const requiredColumns = [
+    'accounting_gifi_review_note_id', 'tax_year', 'gifi_code', 'gifi_label', 'gifi_section', 'accountant_note',
+    'schedule_141_note', 'supporting_details', 'review_status', 'created_by_user_id', 'updated_by_user_id', 'created_at', 'updated_at'
+  ];
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting GIFI schema is not ready: accounting_gifi_review_notes is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await tableIndexes(db, 'accounting_gifi_review_notes');
+  if (!indexes.has('idx_accounting_gifi_review_notes_year')) {
+    throw new Error('Accounting GIFI schema is not ready: accounting_gifi_review_notes is missing index idx_accounting_gifi_review_notes_year. Apply the current Development migration authority.');
+  }
+  return true;
 }
 
 function normalizeReviewStatus(value) {
