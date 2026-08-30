@@ -24,6 +24,7 @@ FOCUSED_GATES = (
     "release461_payment_webhook_schema_contract_gate.py",
     "release461_notification_runtime_schema_gate.py",
     "release461_content_automation_schema_gate.py",
+    "release461_accounting_support_schema_gate.py",
 )
 
 missing = [name for name in FOCUSED_GATES if not (ROOT / "scripts" / name).is_file()]
