@@ -6,12 +6,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const apiPath=path.join(root,'functions/api/admin/product-resources.js');
 const persistencePath=path.join(root,'functions/api/admin/_productResourcePersistence.js');
-const dataPath=path.join(root,'functions/api/admin/_productResourcesData.js');
+const wrapperPath=path.join(root,'functions/api/admin/_productResourcesData.js');
+const legacyPath=path.join(root,'functions/api/admin/_productResourcesDataLegacy.js');
+const dataPath=fs.existsSync(legacyPath)?legacyPath:wrapperPath;
 const apiSource=fs.readFileSync(apiPath,'utf8');
 const persistenceSource=fs.readFileSync(persistencePath,'utf8');
+const wrapperSource=fs.readFileSync(wrapperPath,'utf8');
 const dataSource=fs.readFileSync(dataPath,'utf8');
 const { normalizeSubmittedLinks }=await import(pathToFileURL(persistencePath).href);
-const { resourcePreview }=await import(pathToFileURL(dataPath).href);
+const { resourcePreview }=await import(pathToFileURL(wrapperPath).href);
 
 const checks=[];
 function check(condition,label){
@@ -48,6 +51,10 @@ check(!/DELETE FROM product_resource_links[^;]+\.run\(\)/s.test(persistenceSourc
 check(persistenceSource.includes('INSERT INTO product_resource_ingredient_profiles') && persistenceSource.includes('SELECT product_resource_link_id') && persistenceSource.includes('FROM product_resource_links'),'Supply ingredient profile is linked inside the same atomic batch without a second write phase');
 check(apiSource.includes('const persistedLinks = await loadProductLinks(db, productId)'),'saved use/batch values are read back from D1 before desktop response');
 
+if(dataPath===legacyPath){
+  check(wrapperSource.includes("from './_productResourcesDataLegacy.js'"),'Release 461 wrapper retains the proven Product resource data implementation');
+  check(wrapperSource.includes('loadInventoryBaseBalances') && wrapperSource.includes("quantity_authority: 'base'"),'Release 461 wrapper layers canonical base-unit availability over retained resource resolution');
+}
 check(dataSource.includes("LOWER(TRIM(COALESCE(sii2.external_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))"),'linked Inventory lookup normalizes case and whitespace');
 check(dataSource.includes("LOWER(TRIM(COALESCE(ci2.source_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))"),'linked catalog fallback lookup normalizes case and whitespace');
 check(dataSource.includes("LOWER(TRIM(COALESCE(sii.external_key, ''))) = LOWER(TRIM(COALESCE(ci.source_key, '')))"),'catalog fallback suppresses Inventory duplicates using normalized identity');
