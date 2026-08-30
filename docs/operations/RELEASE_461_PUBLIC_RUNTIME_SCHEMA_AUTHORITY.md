@@ -6,8 +6,10 @@ Release 461 candidate work begins the post-checkout runtime-schema audit with pu
 
 - `/api/checkout-recovery-lead`
 - `/api/custom-request-consent`
+- `/api/custom-request`
+- `/api/custom-request-reference-upload`
 
-Both handlers previously created or altered D1 schema during customer traffic. That behavior is forbidden by the current Development release policy.
+These handlers previously created or altered D1 schema during customer traffic. That behavior is forbidden by the current Development release policy.
 
 ## Authority change
 
@@ -15,6 +17,10 @@ Both handlers previously created or altered D1 schema during customer traffic. T
 
 - `checkout_recovery_leads`
 - `custom_request_fulfillment_prompts`
+- `custom_requests`
+- `custom_candle_soap_product_specs`
+- `custom_request_reference_uploads`
+- `media_consent_records`
 
 The public handlers only perform read/write business operations after a read-only schema-readiness check. They never create a table, add a column, or create an index.
 

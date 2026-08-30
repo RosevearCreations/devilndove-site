@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parents[1] if Path(__file__).resolve().parent.na
 ROUTES = [
     ROOT / 'functions/api/checkout-recovery-lead.js',
     ROOT / 'functions/api/custom-request-consent.js',
+    ROOT / 'functions/api/custom-request.js',
+    ROOT / 'functions/api/custom-request-reference-upload.js',
 ]
 HELPER = ROOT / 'functions/api/_lib/publicRuntimeSchemaReadiness.js'
 MIGRATION = ROOT / 'migrations/dev/20260829_release461_public_runtime_schema_authority.sql'
@@ -37,9 +39,14 @@ for route in ROUTES:
 helper = text(HELPER)
 assert not DDL.search(helper), 'readiness helper must be read-only'
 for token in (
-    'PRAGMA table_info(checkout_recovery_leads)',
-    'PRAGMA table_info(custom_request_fulfillment_prompts)',
-    'PRAGMA index_list(checkout_recovery_leads)',
+    'PRAGMA table_info(${tableName})',
+    'PRAGMA index_list(${tableName})',
+    'checkout_recovery_leads',
+    'custom_request_fulfillment_prompts',
+    'custom_requests',
+    'custom_candle_soap_product_specs',
+    'custom_request_reference_uploads',
+    'media_consent_records',
     'browser_session_token',
     'customer_email',
 ):
@@ -55,17 +62,33 @@ assert 'custom_request_consent_schema_unavailable' in consent
 assert 'hasCustomRequestConsentSchema' in consent
 assert "prompt_status='responded'" in consent
 
+intake = text(ROUTES[2])
+assert 'custom_request_schema_unavailable' in intake
+assert 'hasCustomRequestIntakeSchema' in intake
+
+upload = text(ROUTES[3])
+assert 'custom_request_reference_schema_unavailable' in upload
+assert 'hasCustomRequestReferenceUploadSchema' in upload
+
 migration = text(MIGRATION)
 assert not re.search(r'\bALTER\s+TABLE\b|\bDROP\s+TABLE\b', migration, re.I), 'Release 461 migration must remain additive/non-destructive'
 for token in (
     'CREATE TABLE IF NOT EXISTS checkout_recovery_leads',
     'CREATE TABLE IF NOT EXISTS custom_request_fulfillment_prompts',
+    'CREATE TABLE IF NOT EXISTS custom_requests',
+    'CREATE TABLE IF NOT EXISTS custom_candle_soap_product_specs',
+    'CREATE TABLE IF NOT EXISTS custom_request_reference_uploads',
+    'CREATE TABLE IF NOT EXISTS media_consent_records',
     'idx_checkout_recovery_session_email',
     'idx_checkout_recovery_status_updated',
     'idx_custom_fulfillment_prompts_request',
     'idx_custom_fulfillment_prompts_token',
     'release461_checkout_recovery_required_columns',
     'release461_custom_consent_required_columns',
+    'release461_custom_requests_required_columns',
+    'release461_custom_specs_required_columns',
+    'release461_reference_upload_required_columns',
+    'release461_media_consent_required_columns',
     'PRAGMA foreign_key_check',
 ):
     assert token in migration, f'missing Release 461 migration token: {token}'
