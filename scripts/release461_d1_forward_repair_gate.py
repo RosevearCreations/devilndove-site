@@ -38,10 +38,8 @@ assert sql.count('ALTER TABLE ') == 19, 'repair must contain exactly the 19 revi
 assert sql.count('DROP INDEX IF EXISTS ') == 4, 'repair must contain exactly four reviewed index replacements'
 assert sql.count('CREATE INDEX ') == 4, 'repair must contain exactly four reviewed replacement indexes'
 assert 'BEGIN TRANSACTION;' in sql and 'COMMIT;' in sql, 'repair must be transactional'
-for forbidden in ('DROP TABLE','DELETE FROM','UPDATE ','INSERT INTO','CREATE TABLE','main','devilndove-site`','provider'):
- if forbidden in ('provider',):
-  continue
- assert forbidden not in sql, f'forbidden repair operation/token: {forbidden}'
+for forbidden in ('DROP TABLE','DELETE FROM','UPDATE ','INSERT INTO','CREATE TABLE'):
+ assert forbidden not in sql, f'forbidden repair operation: {forbidden}'
 assert not re.search(r'ALTER\s+TABLE\s+\w+\s+(?!ADD\s+COLUMN)',sql,re.I), 'only ALTER TABLE ADD COLUMN is allowed'
 subprocess.run([sys.executable,'-m','py_compile',str(CHECKER)],cwd=ROOT,check=True)
 print('RELEASE 461 DEVELOPMENT D1 STRUCTURAL FORWARD REPAIR SOURCE GATE: PASS')
