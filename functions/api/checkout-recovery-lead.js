@@ -1,3 +1,5 @@
+import { hasCheckoutRecoverySchema } from "./_lib/publicRuntimeSchemaReadiness.js";
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -11,26 +13,6 @@ function normalizeText(value) {
 
 function safeEmail(value) {
   return normalizeText(value).toLowerCase();
-}
-
-async function ensureTable(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS checkout_recovery_leads (
-    checkout_recovery_lead_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    browser_session_token TEXT,
-    visitor_token TEXT,
-    customer_email TEXT,
-    customer_name TEXT,
-    cart_count INTEGER NOT NULL DEFAULT 0,
-    cart_value_cents INTEGER NOT NULL DEFAULT 0,
-    currency TEXT NOT NULL DEFAULT 'CAD',
-    checkout_path TEXT,
-    checkout_state_json TEXT,
-    status TEXT NOT NULL DEFAULT 'open',
-    last_recovery_email_at TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(browser_session_token, customer_email)
-  )`).run();
 }
 
 export async function onRequestPost(context) {
@@ -57,7 +39,18 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: 'browser_session_token is required.' }, 400);
   }
 
-  await ensureTable(db);
+  const schemaReady = await hasCheckoutRecoverySchema(db);
+  if (!schemaReady) {
+    return json(
+      {
+        ok: false,
+        error: 'checkout_recovery_schema_unavailable',
+        message: 'Checkout recovery is temporarily unavailable.',
+      },
+      503
+    );
+  }
+
   const payloadJson = JSON.stringify({
     customer_name: customerName,
     checkout_path: checkoutPath,

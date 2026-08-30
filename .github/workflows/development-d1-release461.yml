@@ -1,0 +1,121 @@
+name: Development D1 Release 461
+
+# Release 461 D1 authority is manual-dispatch-only.
+# Never run because a new chat started or because source changed.
+# Dispatch only after read-only preflight confirms exact Development identity and
+# either missing tables or structurally compatible existing tables.
+on:
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  migrate-development-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: dev, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Refuse non-Development source
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = dev
+      - name: Re-run Release 461 source safety before any write
+        run: |
+          python scripts/release461_public_runtime_schema_gate.py
+          node --check functions/api/_lib/publicRuntimeSchemaReadiness.js
+          node --check functions/api/checkout-recovery-lead.js
+          node --check functions/api/custom-request-consent.js
+      - name: Protect exact Development authority
+        run: |
+          set -euo pipefail
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          ! grep -Eiq 'DROP[[:space:]]+TABLE|ALTER[[:space:]]+TABLE' migrations/dev/20260829_release461_public_runtime_schema_authority.sql
+      - run: npm install --global wrangler@4.126.0
+      - name: Require credential
+        run: test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'Credential missing; no D1 write attempted.'; exit 1; }
+      - name: Verify exact D1 identity
+        run: |
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/d1.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          rows=list(walk(d))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in rows}
+          names={str(x.get('name') or '') for x in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids
+          assert os.environ['DEV_D1_DATABASE_NAME'] in names
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Read-only structural drift preflight
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='checkout_recovery_leads') AS recovery_table,(SELECT COUNT(*) FROM pragma_table_info('checkout_recovery_leads') WHERE name IN ('checkout_recovery_lead_id','browser_session_token','visitor_token','customer_email','customer_name','cart_count','cart_value_cents','currency','checkout_path','checkout_state_json','status','last_recovery_email_at','created_at','updated_at')) AS recovery_columns,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='custom_request_fulfillment_prompts') AS consent_table,(SELECT COUNT(*) FROM pragma_table_info('custom_request_fulfillment_prompts') WHERE name IN ('custom_request_fulfillment_prompt_id','custom_request_id','order_id','prompt_key','prompt_status','prompt_type','customer_name','customer_email','subject','body_text','consent_question_text','created_by_user_id','prompt_token','public_response_status','public_use_scope','review_text','customer_response_note','responded_at','expired_at','voided_at','public_proof_candidate_id','created_at','updated_at')) AS consent_columns,(SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token')) AS named_indexes;" > /tmp/pre.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/pre.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'recovery_table' in x)
+          rt,rc,ct,cc,ix=map(int,(r['recovery_table'],r['recovery_columns'],r['consent_table'],r['consent_columns'],r['named_indexes']))
+          if rt and rc != 14:
+            raise SystemExit('STOP: checkout_recovery_leads structural drift requires a dedicated forward repair. Historical replay is forbidden.')
+          if ct and cc != 23:
+            raise SystemExit('STOP: custom_request_fulfillment_prompts structural drift requires a dedicated forward repair. Historical replay is forbidden.')
+          converged=(rt==1 and rc==14 and ct==1 and cc==23 and ix==4)
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+            f.write(f"R461_CONVERGED={'1' if converged else '0'}\n")
+          print('Release 461 already converged:', converged)
+          print('Read-only structural preflight: PASS')
+          PY
+      - name: Apply only Release 461 migration after explicit safe preflight
+        if: env.R461_CONVERGED != '1'
+        run: wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --file migrations/dev/20260829_release461_public_runtime_schema_authority.sql
+      - name: Read-only post-write proof
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM pragma_table_info('checkout_recovery_leads') WHERE name IN ('checkout_recovery_lead_id','browser_session_token','visitor_token','customer_email','customer_name','cart_count','cart_value_cents','currency','checkout_path','checkout_state_json','status','last_recovery_email_at','created_at','updated_at')) AS recovery_columns,(SELECT COUNT(*) FROM pragma_table_info('custom_request_fulfillment_prompts') WHERE name IN ('custom_request_fulfillment_prompt_id','custom_request_id','order_id','prompt_key','prompt_status','prompt_type','customer_name','customer_email','subject','body_text','consent_question_text','created_by_user_id','prompt_token','public_response_status','public_use_scope','review_text','customer_response_note','responded_at','expired_at','voided_at','public_proof_candidate_id','created_at','updated_at')) AS consent_columns,(SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token')) AS named_indexes,(SELECT COUNT(*) FROM pragma_foreign_key_check) AS fk_violations;" > /tmp/post.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/post.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'recovery_columns' in x)
+          assert int(r['recovery_columns'])==14
+          assert int(r['consent_columns'])==23
+          assert int(r['named_indexes'])==4
+          assert int(r['fk_violations'])==0
+          print('RELEASE 461 DEVELOPMENT D1 PUBLIC RUNTIME SCHEMA AUTHORITY: PASS')
+          PY
+      - name: Boundary
+        run: |
+          echo 'Target: exact Development D1 only'
+          echo 'Historical migration replay: FORBIDDEN'
+          echo 'Automatic D1 mutation path: CLOSED'
+          echo 'Provider authorization/execution/publication: CLOSED'
+          echo 'Separate live Production mutation: NONE'
