@@ -2,21 +2,20 @@ import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normali
 import { BUILD, CONTRACT_ID, OWNER, readAccountingFixedAssets } from '../_lib/accountingFixedAssetsReadService.js';
 
 async function ensureFixedAssetsTable(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_fixed_assets (
-    accounting_fixed_asset_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    asset_label TEXT NOT NULL,
-    asset_category TEXT NOT NULL DEFAULT 'equipment',
-    cca_class TEXT,
-    acquisition_date TEXT,
-    cost_cents INTEGER NOT NULL DEFAULT 0,
-    salvage_cents INTEGER NOT NULL DEFAULT 0,
-    business_use_percent INTEGER NOT NULL DEFAULT 100,
-    location_note TEXT,
-    vendor_name TEXT,
-    notes TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run();
+  let columns = new Set();
+  try {
+    const result = await db.prepare('PRAGMA table_info(accounting_fixed_assets)').all();
+    columns = new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {}
+  const requiredColumns = [
+    'accounting_fixed_asset_id', 'asset_label', 'asset_category', 'cca_class', 'acquisition_date', 'cost_cents',
+    'salvage_cents', 'business_use_percent', 'location_note', 'vendor_name', 'notes', 'created_at', 'updated_at'
+  ];
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting fixed-asset schema is not ready: accounting_fixed_assets is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  return true;
 }
 
 export async function onRequestGet(context) {
