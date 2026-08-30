@@ -32,6 +32,7 @@ admin = ADMIN.read_text(encoding='utf-8')
 mobile = MOBILE.read_text(encoding='utf-8')
 
 forward_re = re.compile(r'\b(?:ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW))\b', re.I)
+network_call_re = re.compile(r'\b(?:fetch|apiFetch)\s*\(|\bXMLHttpRequest\b|\.open\s*\(', re.I)
 checks = {
     'migration owns base balance table': 'CREATE TABLE IF NOT EXISTS site_inventory_base_balances' in migration,
     'migration backfills existing inventory once': 'INSERT OR IGNORE INTO site_inventory_base_balances' in migration and 'FROM site_item_inventory sii' in migration,
@@ -52,7 +53,7 @@ checks = {
     'usability labels receive and use units': 'Receive ${purchaseLabel}' in usability and 'Record ${baseLabel} use' in usability,
     'desktop admin loads usability overlay': "import('/public/js/admin-inventory-base-unit-usability.js?v=461')" in admin,
     'mobile inventory loads usability overlay': '/public/js/admin-inventory-base-unit-usability.js?v=461' in mobile,
-    'usability performs no database or provider mutation': '/api/' not in usability and 'fetch(' not in usability,
+    'usability performs no network/database/provider mutation': not network_call_re.search(usability),
 }
 
 failed = [name for name, ok in checks.items() if not ok]
