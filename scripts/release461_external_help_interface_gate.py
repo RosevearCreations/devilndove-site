@@ -35,7 +35,7 @@ if HELP.is_file():
 
 if ADMIN.is_file():
     admin=ADMIN.read_text(encoding='utf-8')
-    req("import('/public/js/admin-external-help.js?v=461')" in admin,'admin.js does not load the global external help interface')
+    req("import('/public/js/admin-external-help.js?v=460')" in admin,'admin.js does not load the global external help interface using the current outward cache authority')
 
 if AGG.is_file():
     agg=AGG.read_text(encoding='utf-8')
@@ -50,4 +50,5 @@ print('RELEASE 461 BACKEND EXTERNAL HELP INTERFACE: PASS')
 print('Circled field help: GLOBAL / DYNAMIC')
 print('Etsy API acquisition: DETAILED')
 print('External credentials, IDs, URLs, callbacks, webhooks and scopes: COVERED')
+print('Outward cache authority: CURRENT RELEASE 460')
 print('D1 / provider / Production mutation: NONE')
