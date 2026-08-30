@@ -1,9 +1,15 @@
 # Devil n Dove — Project Status & Roadmap
 
 ## Current Development state
-**Release 460 — Secure OAuth Lifecycle & Encrypted Token Authority**
+
+**Accepted release:** Release 460 — Secure OAuth Lifecycle & Encrypted Token Authority.
+
+**Active candidate:** Release 461 — Runtime Schema Authority and Development D1 Acceptance.
+
+Release 461 source work is now the active Development priority. `development-release.json` remains Release 460 until Release 461 D1 preflight, deliberate apply, post-apply proof, and source promotion are complete.
 
 Development boundary:
+
 - branch `dev`
 - Pages project `devilndove-site-dev`
 - URL `https://devilndove-site-dev.pages.dev`
@@ -13,68 +19,173 @@ Development boundary:
 
 Separate live Production `main` / `devilndove-site` remains closed. Provider publication, provider execution, and live provider authorization remain closed. `OAUTH_PROVIDER_AUTHORIZATION_MODE` remains unset.
 
-## Release 459 checkpoint
-Release 459 is the carried provider-setup/runtime-acceptance authority beneath Release 460. Its D1 provider metadata is historical/current-as-carried and is never replayed because a chat/workstation changes. Release 459 convergence run `33273639605` re-verified the current Development D1 and skipped its migration apply step because the authority was already present.
+## Release 461 objective
 
-## Release 460 implemented and proven
-- versioned AES-GCM server-side OAuth encryption using `OAUTH_TOKEN_ENCRYPTION_KEY_V1`;
-- random OAuth state stored only as SHA-256 hash;
-- single-use, expiring authorization transactions with atomic replay protection;
-- PKCE S256 and encrypted verifier storage where required/supported;
-- declarative OAuth/identity contracts for Etsy, Pinterest, Meta, X, TikTok and YouTube/Google;
-- administrator-only, Development-gated OAuth start;
-- callback/token exchange path that cannot execute while live authorization is closed;
-- intended-account verification before newly exchanged token persistence and before refreshed token replacement;
-- encrypted access/refresh/ID token persistence with no plaintext token columns;
-- redacted diagnostics with raw provider subject/account IDs suppressed;
-- guarded refresh/disconnect and local expiry health;
-- six-provider OAuth/identity mock proof and executable crypto proof;
-- local six-provider publication validation contracts in `socialPublishContracts.js`;
-- Development-only `/api/admin/provider-publication-plan` returning validation/idempotency plans only;
-- deterministic SHA-256 idempotency keys: same normalized source/version/payload gives the same key; revisions produce a new key;
-- sensitive publication-input rejection and zero-network executable publication mock proof;
-- Meta/Instagram publication planning intentionally remains permission-contract-not-ready;
-- retained legacy `publish_platforms` and `test_meta_connections` HTTP actions blocked before owner execution;
-- legacy social readiness diagnostics currentized to `provider_execution_closed`, so credential presence cannot imply API readiness;
-- old Meta Graph probe removed from `social-product-automation.js`, making its owner route itself non-networking;
-- Meta data-deletion readiness remains local/fail-closed;
-- historical Release 459 and Release 460 D1 workflows remain manual-dispatch-only recovery tools;
-- no new D1 migration for intended-account identity or publication planning.
+Release 461 makes D1 schema ownership explicit. Runtime/customer/admin traffic must never create, alter, repair, index, or implicitly seed its own schema.
 
-## Proven Release 460 evidence
-Initial guarded D1 run `33273087894`: GREEN. Exact `devilndove-dev` identity was verified, only Release 460 was applied, and post-write proof confirmed the three OAuth authority tables, zero forbidden plaintext OAuth columns and clean foreign keys.
+Current source authority is enforced by focused Release 461 gates plus `scripts/release461_aggregate_source_gate.py`.
 
-Later D1 convergence run `33273639602`: GREEN. It detected Release 460 already converged, **skipped the migration apply step**, and passed read-only post-write proof.
+The combined Release 461 acceptance manifest currently validates:
 
-Latest hardened implementation checkpoint:
-- SHA `9eb50239efca5f1c5c34dcd504d49fde718f3033`
-- Release 460 Source Gate `33279263075`: GREEN
-- System Gate `33279263080`: GREEN
-- Cloudflare Pages check `99171549842`: GREEN
-- preview `https://95326a5a.devilndove-site-dev.pages.dev`
+- **15 Development migrations**
+- **62 required tables**
+- **76 required named indexes**
 
-The identity and publication-planning layers are source/contract-only. They use existing Release 460 authority and require no D1 mutation. The hardened implementation checkpoint launched source/regression workflows only; no Release 459/460 Development D1 migration workflow was triggered.
+The manifest rejects destructive/non-forward migration behavior and Release 461 migration definitions that cannot converge deterministically.
 
-No live OAuth authorization, real provider token exchange/identity lookup, provider probe/publication, or separate Production mutation was performed by these proofs.
+## Release 461 source work completed
 
-## Important retained technical debt
-`functions/api/admin/social-post-queue.js` still contains historical Facebook/Instagram/X/Pinterest emitter functions. They are unreachable through the authorized Release 460 HTTP path because `_middleware.js` rejects `publish_platforms` before `context.next()`. They must remain treated as dead historical source, not an execution capability. Physical removal is a cleanup item and must not relax the closed provider boundary.
+### Public/shared runtime
 
-## Next automated work — before manual provider authorization
-1. Continue Stripe/PayPal automated contract, replay, webhook and reconciliation preparation.
-2. Continue Development-to-Production parity, transition and rollback tooling.
-3. Remove retained unreachable legacy social provider emitters as technical-debt cleanup while preserving local draft/manual-record behavior and the Release 460 execution guard.
+Current source cleanup covers the identified Release 461 public/customer and shared contracts for:
 
-## Manual acceptance — later, not now
-Only after automated preparation is exhausted:
-- authenticated Development runtime acceptance;
-- CAIP private-media browser evidence;
-- Stripe test transaction/webhook/reconciliation;
-- PayPal sandbox transaction/webhook/reconciliation;
-- Etsy authorization/draft acceptance;
-- Pinterest/Meta/X/TikTok/YouTube authorization and controlled acceptance.
+- checkout recovery
+- custom requests and commerce support
+- product interest/product offers
+- member runtime
+- telemetry
+- community content
+- public auth
+- payment-webhook schema contracts
+- notifications
+- Content Automation Studio/publication
+
+These paths now use migration-owned schema plus read-only readiness rather than request-time DDL.
+
+### Accounting
+
+The exact-current accounting scan was expanded through the currently identified runtime-schema owners. Explicit Release 461 migrations now cover:
+
+- GIFI review notes
+- accounting attachments
+- fixed assets
+- period closures
+- reconciliation reviews
+- statement imports/rows
+- reconciliation exceptions
+- vendors
+- expenses
+- write-offs
+- recurring expense rules
+- General Ledger
+- journal entries/lines
+- payment applications
+- HST/GST reviews
+- accountant export packages
+- accounting evidence attachments
+- overhead allocations
+- overhead-to-product allocations
+- statement-provider profiles
+
+Additional correctness/authority fixes made during this pass:
+
+- journal write-offs use `6900 / Write-Off Expense` instead of nonexistent write-off ledger columns
+- General Ledger starter GIFI mappings remain explicit audited admin behavior, not implicit schema seeding
+- statement-provider defaults remain in-memory unless the explicit `seed_defaults` action is used
+- CSV statement import no longer creates/seeds provider-profile authority
+- overhead-to-product changes respect accounting period locks
+- accounting close no longer duplicates notification schema ownership
+
+### Broad exact-current scan
+
+After the accounting pass, candidate discovery was widened across runtime `CREATE TABLE`, `ALTER TABLE`, index creation, destructive DDL, seed/default, backfill, and mutation-bearing ensure helpers.
+
+Historical search results were treated only as candidates and then verified against exact `dev`. No additional confirmed current runtime DDL owner remained after the statement-import/provider cleanup.
+
+Future source changes must continue to pass the aggregate gate, so this scan can be repeated if new runtime code appears.
+
+## Release 461 combined D1 acceptance package
+
+New canonical package:
+
+- `scripts/release461_d1_acceptance_manifest.py`
+- `scripts/release461_d1_acceptance_package_gate.py`
+- `.github/workflows/development-d1-release461-acceptance.yml`
+- `docs/operations/RELEASE_461_PUBLIC_RUNTIME_SCHEMA_AUTHORITY.md`
+
+The package is source-gated and manual-only.
+
+### Preflight mode — next database step
+
+The workflow defaults to **`preflight`**, which is read-only. It requires an exact reviewed `dev` SHA and:
+
+1. reruns the aggregate Release 461 source authority
+2. regenerates the migration manifest
+3. verifies exact Development D1 identity
+4. reads `sqlite_master`
+5. compares current D1 schema to the Release 461 contract
+6. reports structural safety/convergence/missing objects
+7. performs no D1 mutation
+
+A missing Release 461-owned object is safe to create later. An existing structurally incompatible object is a hard stop requiring a new forward repair migration.
+
+### Apply mode — later and deliberate
+
+Apply requires a clean preflight plus the exact typed confirmation:
+
+`APPLY-RELEASE-461-TO-DEVELOPMENT`
+
+It applies only Release 461 migrations in deterministic order, then requires full manifest convergence and zero foreign-key violations.
+
+The workflow does not update `development-release.json` and does not touch separate live Production.
+
+## Release 461 completion checklist
+
+Release 461 is **not complete yet**. Remaining sequence:
+
+1. keep exact-current Release 461 Source Gate green
+2. keep exact-current System Gate green
+3. run the combined Development D1 workflow in `preflight` mode against the exact reviewed SHA
+4. if preflight reports structural drift, create a dedicated forward repair migration and repeat source gates/preflight
+5. after a clean preflight, deliberately authorize `apply`
+6. prove post-apply structural convergence and clean foreign keys
+7. deliberately promote `development-release.json` to Release 461
+8. deploy/verify the exact promoted Development SHA
+9. complete applicable authenticated Development runtime evidence
+
+Historical migrations must not be replayed at any point in this sequence.
+
+## Release 460 authority carried forward
+
+Release 460 remains the accepted security/provider baseline while Release 461 is pending. Its proven model includes:
+
+- AES-GCM encrypted OAuth token/verifier authority
+- hashed/single-use OAuth state
+- PKCE S256 where applicable
+- intended-account verification before token persistence/replacement
+- no plaintext OAuth token columns
+- redacted diagnostics
+- Development-gated OAuth start/callback execution
+- provider execution/publication closed
+- retained legacy provider publish/probe actions blocked
+
+Release 461 schema progress does not authorize live provider work.
+
+## Other automated work after Release 461 D1 convergence
+
+Once Release 461 Development D1 is accepted and the promoted Development build is green, resume the broader automated roadmap without reopening closed migration work:
+
+1. Development authenticated runtime acceptance for Release 461-sensitive admin/public paths.
+2. Stripe/PayPal automated contract, replay, webhook, and reconciliation preparation at the current release number.
+3. Development-to-Production parity, transition, rollback, and promotion tooling.
+4. Technical-debt removal of retained unreachable legacy social provider emitters while preserving the closed provider boundary.
+5. Continue Storefront / Creators / Socials (CAIP) / Finance-Accounting / I.T. module evolution under current authority and SEO rules.
+
+## Manual/provider acceptance — later
+
+Separate manual evidence remains:
+
+- authenticated Development browser acceptance
+- CAIP private-media browser evidence
+- Stripe test transaction/webhook/reconciliation
+- PayPal sandbox transaction/webhook/reconciliation
+- Etsy authorization/draft acceptance
+- Pinterest/Meta/X/TikTok/YouTube authorization and controlled acceptance
+
+Provider live authorization, execution/publication, and separate live Production remain closed until deliberately opened by a later reviewed release.
 
 ## Promotion rule
-A feature is not complete because code exists. It must have aligned authority, safe failure behavior, tests/gates, exact Development deployment evidence and—when applicable—authenticated/provider acceptance.
+
+A feature or release is not complete because code exists. It must have aligned authority, safe failure behavior, source/regression gates, exact Development deployment evidence, database convergence where applicable, and authenticated/provider evidence where applicable.
 
 Promotion to separate live Production remains a deliberate final operation, never an automatic consequence of Development success.
