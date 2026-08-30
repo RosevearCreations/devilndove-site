@@ -61,67 +61,59 @@ async function tableExists(db, tableName) {
   }
 }
 
-// Write-side compatibility only. GET/read paths must never call this helper.
-async function ensureJournalSchema(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_journal_entries (
-      journal_entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      period_month TEXT NOT NULL,
-      entry_date TEXT NOT NULL,
-      source_type TEXT NOT NULL,
-      source_key TEXT NOT NULL,
-      reference_code TEXT,
-      description TEXT,
-      status TEXT NOT NULL DEFAULT 'draft',
-      total_debit_cents INTEGER NOT NULL DEFAULT 0,
-      total_credit_cents INTEGER NOT NULL DEFAULT 0,
-      imbalance_cents INTEGER NOT NULL DEFAULT 0,
-      notes TEXT,
-      posted_by_user_id INTEGER,
-      posted_at TEXT,
-      validation_message TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE (period_month, source_type, source_key)
-    )
-  `).run();
-
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_journal_lines (
-      journal_line_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      journal_entry_id INTEGER NOT NULL,
-      line_number INTEGER NOT NULL,
-      ledger_code TEXT,
-      ledger_name TEXT,
-      line_description TEXT,
-      debit_cents INTEGER NOT NULL DEFAULT 0,
-      credit_cents INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE (journal_entry_id, line_number),
-      FOREIGN KEY (journal_entry_id) REFERENCES accounting_journal_entries(journal_entry_id) ON DELETE CASCADE
-    )
-  `).run();
-
-  await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_period ON accounting_journal_entries(period_month, entry_date DESC, journal_entry_id DESC)"
-  ).run();
-  await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_entries_source ON accounting_journal_entries(source_type, source_key)"
-  ).run();
-  const colsResult = await db.prepare(`PRAGMA table_info(accounting_journal_entries)`).all().catch(() => ({ results: [] }));
-  const cols = new Set(normalizeResults(colsResult).map((row) => String(row?.name || '').trim()).filter(Boolean));
-  const migrations = [
-    ['posted_by_user_id', `ALTER TABLE accounting_journal_entries ADD COLUMN posted_by_user_id INTEGER`],
-    ['posted_at', `ALTER TABLE accounting_journal_entries ADD COLUMN posted_at TEXT`],
-    ['validation_message', `ALTER TABLE accounting_journal_entries ADD COLUMN validation_message TEXT`]
-  ];
-  for (const [name, sql] of migrations) {
-    if (!cols.has(name)) await db.prepare(sql).run().catch(() => null);
+async function tableColumns(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(normalizeResults(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
   }
-  await db.prepare(
-    "CREATE INDEX IF NOT EXISTS idx_accounting_journal_lines_entry ON accounting_journal_lines(journal_entry_id, line_number ASC)"
-  ).run();
+}
+
+async function tableIndexes(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(normalizeResults(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+// Write operations may verify schema readiness, but they never create or repair schema.
+async function ensureJournalSchema(db) {
+  const requirements = [
+    {
+      table: 'accounting_journal_entries',
+      columns: [
+        'journal_entry_id', 'period_month', 'entry_date', 'source_type', 'source_key',
+        'reference_code', 'description', 'status', 'total_debit_cents', 'total_credit_cents',
+        'imbalance_cents', 'notes', 'posted_by_user_id', 'posted_at', 'validation_message',
+        'created_at', 'updated_at'
+      ],
+      indexes: ['idx_accounting_journal_entries_period', 'idx_accounting_journal_entries_source'],
+    },
+    {
+      table: 'accounting_journal_lines',
+      columns: [
+        'journal_line_id', 'journal_entry_id', 'line_number', 'ledger_code', 'ledger_name',
+        'line_description', 'debit_cents', 'credit_cents', 'created_at', 'updated_at'
+      ],
+      indexes: ['idx_accounting_journal_lines_entry'],
+    },
+  ];
+  for (const requirement of requirements) {
+    const columns = await tableColumns(db, requirement.table);
+    const missingColumns = requirement.columns.filter((name) => !columns.has(name));
+    if (missingColumns.length) {
+      throw new Error(`Accounting journal schema is not ready: ${requirement.table} is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+    }
+    const indexes = await tableIndexes(db, requirement.table);
+    const missingIndexes = requirement.indexes.filter((name) => !indexes.has(name));
+    if (missingIndexes.length) {
+      throw new Error(`Accounting journal schema is not ready: ${requirement.table} is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+    }
+  }
+  return true;
 }
 
 function asInt(value) {
@@ -286,16 +278,14 @@ async function loadSourceSummaries(db, range) {
   const writeoffGroups = hasWriteoffs
     ? await safeAll(db, `
         SELECT ? AS period_month,
-               COALESCE(NULLIF(ledger_code, ''), '6900') AS ledger_code,
-               COALESCE(NULLIF(ledger_name, ''), 'Write-Off Expense') AS ledger_name,
+               '6900' AS ledger_code,
+               'Write-Off Expense' AS ledger_name,
                COALESCE(SUM(CAST(ROUND(COALESCE(amount, 0) * 100.0) AS INTEGER)), 0) AS total_cents,
                COUNT(*) AS entry_count
         FROM accounting_writeoffs
         WHERE substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 10) >= ?
           AND substr(COALESCE(writeoff_date, created_at, datetime('now')), 1, 10) < ?
-        GROUP BY COALESCE(NULLIF(ledger_code, ''), '6900'), COALESCE(NULLIF(ledger_name, ''), 'Write-Off Expense')
         HAVING COALESCE(SUM(CAST(ROUND(COALESCE(amount, 0) * 100.0) AS INTEGER)), 0) > 0
-        ORDER BY total_cents DESC, ledger_name ASC
       `, [range.raw, range.start, range.end])
     : [];
 
