@@ -39,52 +39,39 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
-async function ensureTable(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS general_ledger_accounts (
-    gl_account_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL UNIQUE,
-    name TEXT NOT NULL,
-    category TEXT NOT NULL DEFAULT 'expense',
-    parent_group TEXT,
-    normal_balance TEXT NOT NULL DEFAULT 'debit',
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    gifi_code TEXT,
-    gifi_label TEXT,
-    gifi_section TEXT,
-    gifi_review_state TEXT NOT NULL DEFAULT 'draft',
-    gifi_review_note TEXT,
-    gifi_reviewed_by_user_id INTEGER,
-    gifi_reviewed_at TEXT,
-    tax_deductibility_percent INTEGER NOT NULL DEFAULT 100,
-    is_active INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  const cols = await getTableColumnSet(db, 'general_ledger_accounts');
-  const missing = [
-    ['parent_group', `ALTER TABLE general_ledger_accounts ADD COLUMN parent_group TEXT`],
-    ['normal_balance', `ALTER TABLE general_ledger_accounts ADD COLUMN normal_balance TEXT NOT NULL DEFAULT 'debit'`],
-    ['sort_order', `ALTER TABLE general_ledger_accounts ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0`],
-    ['gifi_code', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_code TEXT`],
-    ['gifi_label', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_label TEXT`],
-    ['gifi_section', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_section TEXT`],
-    ['gifi_review_state', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_state TEXT NOT NULL DEFAULT 'draft'`],
-    ['gifi_review_note', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_review_note TEXT`],
-    ['gifi_reviewed_by_user_id', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_by_user_id INTEGER`],
-    ['gifi_reviewed_at', `ALTER TABLE general_ledger_accounts ADD COLUMN gifi_reviewed_at TEXT`],
-    ['tax_deductibility_percent', `ALTER TABLE general_ledger_accounts ADD COLUMN tax_deductibility_percent INTEGER NOT NULL DEFAULT 100`],
-    ['is_active', `ALTER TABLE general_ledger_accounts ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1`],
-    ['created_at', `ALTER TABLE general_ledger_accounts ADD COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
-    ['updated_at', `ALTER TABLE general_ledger_accounts ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP`],
-  ];
-  for (const [col, sql] of missing) {
-    if (!cols.has(col)) {
-      try { await db.prepare(sql).run(); } catch {}
-    }
+async function getTableIndexSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    const rows = Array.isArray(result?.results) ? result.results : [];
+    return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
   }
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_category_sort ON general_ledger_accounts(category, sort_order, code)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_gifi ON general_ledger_accounts(gifi_section, gifi_code, code)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_general_ledger_accounts_review_state ON general_ledger_accounts(gifi_review_state, is_active, code)`).run(); } catch {}
+}
+
+async function ensureTable(db) {
+  const requiredColumns = [
+    'gl_account_id', 'code', 'name', 'category', 'parent_group', 'normal_balance',
+    'sort_order', 'gifi_code', 'gifi_label', 'gifi_section', 'gifi_review_state',
+    'gifi_review_note', 'gifi_reviewed_by_user_id', 'gifi_reviewed_at',
+    'tax_deductibility_percent', 'is_active', 'created_at', 'updated_at'
+  ];
+  const columns = await getTableColumnSet(db, 'general_ledger_accounts');
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`General Ledger schema is not ready: general_ledger_accounts is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const requiredIndexes = [
+    'idx_general_ledger_accounts_category_sort',
+    'idx_general_ledger_accounts_gifi',
+    'idx_general_ledger_accounts_review_state'
+  ];
+  const indexes = await getTableIndexSet(db, 'general_ledger_accounts');
+  const missingIndexes = requiredIndexes.filter((name) => !indexes.has(name));
+  if (missingIndexes.length) {
+    throw new Error(`General Ledger schema is not ready: general_ledger_accounts is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+  }
+  return true;
 }
 
 async function loadSummary(db) {

@@ -16,9 +16,11 @@ vendor_helper = ROOT / 'functions/api/admin/_accountingVendors.js'
 expenses_route = ROOT / 'functions/api/admin/accounting-expenses.js'
 writeoffs_route = ROOT / 'functions/api/admin/accounting-writeoffs.js'
 recurring_expense_route = ROOT / 'functions/api/admin/accounting-recurring-expense-rules.js'
+general_ledger_route = ROOT / 'functions/api/admin/general-ledger-accounts.js'
 support_migration = ROOT / 'migrations/dev/20260829_release461_accounting_support_schema_authority.sql'
 statement_import_migration = ROOT / 'migrations/dev/20260830_release461_accounting_statement_import_schema_authority.sql'
 expense_migration = ROOT / 'migrations/dev/20260830_release461_accounting_expense_runtime_schema_authority.sql'
+general_ledger_migration = ROOT / 'migrations/dev/20260830_release461_accounting_general_ledger_schema_authority.sql'
 release_marker = ROOT / 'development-release.json'
 
 DDL = re.compile(r'\b(?:CREATE\s+TABLE|ALTER\s+TABLE|CREATE\s+(?:UNIQUE\s+)?INDEX|DROP\s+TABLE|DROP\s+INDEX)\b', re.I)
@@ -27,7 +29,7 @@ runtime_paths = (
     gifi_helper, gifi_route, attachment_helper, attachment_route,
     fixed_assets_route, period_helper, period_route, reconciliation_helper,
     statement_import_helper, vendor_helper, expenses_route, writeoffs_route,
-    recurring_expense_route,
+    recurring_expense_route, general_ledger_route,
 )
 for path in runtime_paths:
     text = path.read_text(encoding='utf-8')
@@ -62,6 +64,12 @@ for path, tokens in (
         'PRAGMA table_info(', 'PRAGMA index_list(', 'ensureExpenseTableExtensions', 'ensureRecurringRulesTable',
         'accounting_expenses', 'accounting_recurring_expense_rules', 'idx_accounting_expenses_recurring',
         'idx_accounting_recurring_expense_rules_due', 'Apply the current Development migration authority.',
+    )),
+    (general_ledger_route, (
+        'PRAGMA table_info(', 'PRAGMA index_list(', 'ensureTable', 'general_ledger_accounts',
+        'idx_general_ledger_accounts_category_sort', 'idx_general_ledger_accounts_gifi',
+        'idx_general_ledger_accounts_review_state', 'apply_starter_gifi_mappings',
+        'Apply the current Development migration authority.',
     )),
 ):
     text = path.read_text(encoding='utf-8')
@@ -122,6 +130,19 @@ for token in (
     'idx_accounting_recurring_expense_rules_due', 'PRAGMA foreign_key_check',
 ):
     assert token in expense_migration_text, f'accounting expense migration is missing authority token: {token}'
+
+general_ledger_migration_text = general_ledger_migration.read_text(encoding='utf-8')
+assert not re.search(r'\bALTER\s+TABLE\b|\bDROP\s+TABLE\b|\bDROP\s+INDEX\b', general_ledger_migration_text, re.I)
+assert not re.search(r'\bINSERT\s+INTO\s+general_ledger_accounts\b', general_ledger_migration_text, re.I), 'General Ledger migration must not implicitly seed starter mappings'
+for token in (
+    'CREATE TABLE IF NOT EXISTS general_ledger_accounts',
+    'gl_account_id', 'code', 'name', 'category', 'parent_group', 'normal_balance', 'sort_order',
+    'gifi_code', 'gifi_label', 'gifi_section', 'gifi_review_state', 'gifi_review_note',
+    'gifi_reviewed_by_user_id', 'gifi_reviewed_at', 'tax_deductibility_percent', 'is_active',
+    'idx_general_ledger_accounts_category_sort', 'idx_general_ledger_accounts_gifi',
+    'idx_general_ledger_accounts_review_state', 'PRAGMA foreign_key_check',
+):
+    assert token in general_ledger_migration_text, f'General Ledger migration is missing authority token: {token}'
 
 release_text = release_marker.read_text(encoding='utf-8')
 assert re.search(r'"release"\s*:\s*460\b', release_text), 'development-release.json must remain at accepted Release 460 until manual D1 acceptance'
