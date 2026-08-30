@@ -1,0 +1,29 @@
+name: Release 461 Product Offer Source Gate
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/productOffers.js'
+      - 'migrations/dev/20260829_release461_public_product_offer_authority.sql'
+      - 'scripts/release461_product_offer_schema_gate.py'
+      - '.github/workflows/release461-product-offer-source-gate.yml'
+      - '.github/workflows/development-d1-release461-product-offers.yml'
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  product-offer-schema-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python scripts/release461_product_offer_schema_gate.py
+      - run: node --check functions/api/_lib/productOffers.js
+      - run: git diff --check
