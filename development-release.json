@@ -5,7 +5,7 @@
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site-dev",
-  "convergence_state": "release461_d1_converged_source_green_provider_execution_closed_runtime_acceptance_pending",
+  "convergence_state": "release461_complete_development_green_provider_execution_closed",
   "previous_release": {"release":460,"label":"Secure OAuth Lifecycle & Encrypted Token Authority","state":"closed_checkpoint_carried_forward","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql"},
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
@@ -30,11 +30,11 @@
       "Read development-release.json and the Development Cloudflare connection authority first.",
       "Verify dev branch plus exact Development D1/R2 identities read-only.",
       "A new chat is not a migration event; never replay historical migrations.",
-      "Release 459 and Release 460 D1 workflows remain manual-dispatch recovery tools only.",
       "Release 461 D1 is applied and proven through acceptance run 33340698069; do not reapply unless read-only verification proves actual drift.",
-      "Release 461 runtime/Pages acceptance must be proven independently on the final exact dev SHA before closing the release checkpoint.",
+      "Release 461 authenticated GET-only Development runtime acceptance is proven through run 33342752757 on request SHA 7200f421e0fc58842aed4003dc774ed30f910809.",
+      "Release 459/460/461 mutation workflows are recovery/acceptance authorities only, not startup actions.",
       "Leave OAUTH_PROVIDER_AUTHORIZATION_MODE unset until deliberate Development live-provider acceptance.",
-      "Provider publication/execution and separate live Production remain closed."
+      "Provider publication/execution, raw CAIP R2 deletion, and separate live Production remain closed."
     ]
   },
   "release_policy": {
@@ -42,9 +42,9 @@
     "legacy_build_numbers_are_provenance_only": true,
     "historical_build_gates_allowed": false,
     "production_promotion": "closed",
-    "current_release_d1_changes_allowed": true,
+    "current_release_d1_changes_allowed": false,
     "current_release_d1_migration_required": false,
-    "automatic_d1_migration_triggers": "closed_release461_acceptance_recovery_only",
+    "automatic_d1_migration_triggers": "closed_release461_recovery_only",
     "provider_publication": "closed",
     "provider_execution": "closed",
     "provider_live_authorization": "closed",
@@ -71,7 +71,7 @@
     {"release":458,"state":"complete_source_proven_no_new_d1_migration","migration":null,"focused_source_gate_run":33265953249,"system_gate_run":33265953255,"exact_head_sha":"66b48f0445c74247972e14fbdaa0e215e3792fb7","pages_check_run":99135984965,"preview_url":"https://a605691a.devilndove-site-dev.pages.dev"},
     {"release":459,"state":"closed_checkpoint_carried_forward_manual_d1_recovery_only","migration":"migrations/dev/20260829_release459_it_provider_setup_authority.sql","convergence_reverify_run":33273639605,"convergence_reverify_apply":"skipped"},
     {"release":460,"state":"secure_oauth_identity_and_nonexecuting_publication_planning_proven_execution_closed","migration":"migrations/dev/20260829_release460_secure_oauth_lifecycle.sql","initial_focused_source_gate_run":33273087878,"development_d1_run":33273087894,"convergence_reverify_run":33273639602,"convergence_reverify_apply":"skipped","checkpoint_exact_head_sha":"03a243176469c42a39bbd99221f7638945975d2a","checkpoint_source_gate_run":33273733112,"checkpoint_system_gate_run":33273733111,"checkpoint_pages_check_run":99156783003,"checkpoint_preview_url":"https://95a45cc7.devilndove-site-dev.pages.dev","identity_checkpoint_exact_head_sha":"0a224a8313bda8fc36002149a000742f45c41a41","identity_source_gate_run":33277302902,"identity_system_gate_run":33277302903,"identity_pages_check_run":99166205949,"identity_preview_url":"https://ac063323.devilndove-site-dev.pages.dev","publication_checkpoint_exact_head_sha":"9eb50239efca5f1c5c34dcd504d49fde718f3033","publication_source_gate_run":33279263075,"publication_system_gate_run":33279263080,"publication_pages_check_run":99171549842,"publication_preview_url":"https://95326a5a.devilndove-site-dev.pages.dev"},
-    {"release":461,"state":"development_d1_applied_and_verified_runtime_acceptance_pending","initial_source_gate_run":33339239505,"source_checkpoint_sha":"1e45acab64403159a892a3ed5fb837d10896149f","development_d1_acceptance_run":33340698069,"development_d1_acceptance_sha":"7cbd5035d8755580053e8e4ec934643413954bb2","required_tables":77,"required_indexes":93,"missing_objects_after_acceptance":0,"foreign_key_violations":0}
+    {"release":461,"state":"complete_development_green","initial_source_gate_run":33339239505,"development_d1_acceptance_run":33340698069,"development_d1_acceptance_sha":"7cbd5035d8755580053e8e4ec934643413954bb2","required_tables":77,"required_indexes":93,"missing_objects_after_acceptance":0,"foreign_key_violations":0,"preclosure_source_gate_run":33342697658,"preclosure_pages_check_run":99341136321,"preclosure_pages_sha":"d576a92b1e1a1e3dd4d5605efa06681f6e2d9a8a","authenticated_runtime_acceptance_run":33342752757,"authenticated_runtime_acceptance_sha":"7200f421e0fc58842aed4003dc774ed30f910809"}
   ],
   "current_release_migrations": [
     "migrations/dev/20260829_release461_accounting_support_schema_authority.sql",
@@ -102,7 +102,7 @@
     "automatic_replay_path": false,
     "release459_recovery_workflow": "manual_dispatch_only",
     "release460_recovery_workflow": "manual_dispatch_only",
-    "release461_acceptance_workflow": ".github/workflows/development-d1-release461-acceptance.yml",
+    "release461_acceptance_workflow": "closed_recovery_only_after_verified_apply",
     "release461_change": "forward/additive runtime-schema convergence plus inventory base-unit, product-image quality, and CAIP production-pipeline authorities",
     "release461_apply_status": "applied_and_verified_development",
     "release461_acceptance_run": 33340698069,
@@ -110,8 +110,13 @@
     "release461_post_write_proof": "77 required tables; 93 required indexes; zero missing objects; zero structural drift; zero foreign-key violations"
   },
   "current_release_evidence": {
-    "source_state": "aggregate_source_green_and_system_green_before_metadata_promotion_final_exact_head_recheck_pending",
+    "source_state": "release461_source_system_pages_and_authenticated_runtime_proven_development",
     "d1_state": "release461_applied_and_verified_33340698069_missing_zero_foreign_keys_clean",
+    "authenticated_runtime_state": "release461_get_only_pass_33342752757",
+    "runtime_acceptance_sha": "7200f421e0fc58842aed4003dc774ed30f910809",
+    "inventory_runtime": "80_rows_base_authority_verified",
+    "product_media_runtime": "primary_thresholds_1200x1200_alt12_score70_verified",
+    "caip_runtime": "23_projects_pipeline_and_project36_reviewed_handoff_verified",
     "provider_contract_mock_proof": "Release 460 carried forward; Release 461 provider execution remains closed",
     "provider_subject_values_emitted": false,
     "provider_identity_network_execution": "closed",
@@ -129,17 +134,17 @@
   "workstreams": [
     {"key":"product-material-lineage","status":"carried_forward","workspace":"/admin/product-lineage/"},
     {"key":"manufacturer-provenance-reviews","status":"carried_forward","workspace":"/admin/vendor-reviews/"},
-    {"key":"product-image-quality","status":"release461_primary_image_acceptance_d1_converged","workspace":"/admin/catalog-media/"},
+    {"key":"product-image-quality","status":"release461_runtime_verified","workspace":"/admin/catalog-media/"},
     {"key":"storefront-merchandising","status":"carried_forward","workspace":"/admin/storefront-merchandising/"},
-    {"key":"caip-reviewed-content-handoff","status":"release461_story_timeline_quality_semantic_handoff_d1_converged","workspace":"/admin/caip-content-handoff/"},
-    {"key":"caip-production-pipeline","status":"release461_d1_converged","workspace":"/admin/creative-assets/"},
-    {"key":"inventory-operations-intelligence","status":"release461_base_unit_authority_and_usability_d1_converged","workspace":"/admin/inventory-operations/"},
+    {"key":"caip-reviewed-content-handoff","status":"release461_runtime_verified","workspace":"/admin/caip-content-handoff/"},
+    {"key":"caip-production-pipeline","status":"release461_runtime_verified","workspace":"/admin/creative-assets/"},
+    {"key":"inventory-operations-intelligence","status":"release461_runtime_verified","workspace":"/admin/inventory-operations/"},
     {"key":"tool-lifecycle","status":"release456_carried_forward","workspace":"/admin/tool-lifecycle/"},
     {"key":"supply-sourcing-replenishment","status":"release448_carried_forward","workspace":"/admin/supply-sourcing/"},
     {"key":"release448-calibration","status":"release448_carried_forward","workspace":"/admin/release448-calibration/"},
     {"key":"it-integration-registry","status":"release459_provider_setup_authority_carried","workspace":"/admin/it-integrations/"},
     {"key":"social-oauth-lifecycle","status":"release460_carried_forward_execution_closed","workspace":"/admin/it-integrations/"},
-    {"key":"financials-accounting","status":"release461_runtime_schema_converged_development","workspace":"/admin/accounting/"},
+    {"key":"financials-accounting","status":"release461_d1_converged_development","workspace":"/admin/accounting/"},
     {"key":"seo-compliance","status":"required_gate","authority":"scripts/public_seo_gate.py"},
     {"key":"seo-depth","status":"required_gate","authority":"scripts/public_seo_depth_gate.py"},
     {"key":"repository-hygiene","status":"required_gate","authority":"scripts/repository_hygiene_gate.py"}
@@ -150,41 +155,16 @@
   "release458_batch": [{"id":1,"status":"implemented"},{"id":2,"status":"implemented"},{"id":3,"status":"implemented"},{"id":4,"status":"implemented"},{"id":5,"status":"implemented"},{"id":6,"status":"implemented"},{"id":7,"status":"implemented"},{"id":8,"status":"implemented"},{"id":9,"status":"implemented"},{"id":10,"status":"implemented"},{"id":11,"status":"implemented"},{"id":12,"status":"implemented"}],
   "release459_batch": [{"id":1,"status":"implemented"},{"id":2,"status":"implemented"},{"id":3,"status":"implemented"},{"id":4,"status":"implemented"},{"id":5,"status":"implemented"},{"id":6,"status":"implemented"},{"id":7,"status":"implemented"},{"id":8,"status":"implemented"},{"id":9,"status":"implemented"},{"id":10,"status":"implemented"},{"id":11,"status":"implemented"},{"id":12,"status":"implemented"}],
   "release460_batch": [
-    {"id":1,"change":"Versioned AES-GCM OAuth secret authority","status":"implemented"},
-    {"id":2,"change":"Hashed one-time OAuth state authority","status":"implemented"},
-    {"id":3,"change":"PKCE S256 verifier/challenge lifecycle","status":"implemented"},
-    {"id":4,"change":"Six-provider OAuth contracts including identity contracts","status":"implemented"},
-    {"id":5,"change":"Fail-closed Development-only OAuth start including intended-account precondition","status":"implemented"},
-    {"id":6,"change":"Atomic callback replay/expiry protection","status":"implemented"},
-    {"id":7,"change":"Intended-account verification before encrypted token persistence","status":"implemented"},
-    {"id":8,"change":"Guarded refresh lifecycle with identity re-verification and local expiry health","status":"implemented"},
-    {"id":9,"change":"Idempotent local disconnect and provider revocation contract","status":"implemented"},
-    {"id":10,"change":"Redacted diagnostics/security events with provider-subject suppression and safe account labels","status":"implemented"},
-    {"id":11,"change":"Executable cryptographic/source/six-provider identity/exchange/refresh/revoke mock proof","status":"implemented"},
-    {"id":12,"change":"Guarded exact Development D1 convergence plus automatic replay closure","status":"implemented"},
-    {"id":13,"change":"Six-provider local publication payload validation contracts","status":"implemented"},
-    {"id":14,"change":"Deterministic publication idempotency and zero-network executable proof","status":"implemented"},
-    {"id":15,"change":"Legacy provider publish/probe HTTP closure and closed readiness currentization","status":"implemented"}
+    {"id":1,"change":"Versioned AES-GCM OAuth secret authority","status":"implemented"},{"id":2,"change":"Hashed one-time OAuth state authority","status":"implemented"},{"id":3,"change":"PKCE S256 verifier/challenge lifecycle","status":"implemented"},{"id":4,"change":"Six-provider OAuth contracts including identity contracts","status":"implemented"},{"id":5,"change":"Fail-closed Development-only OAuth start including intended-account precondition","status":"implemented"},{"id":6,"change":"Atomic callback replay/expiry protection","status":"implemented"},{"id":7,"change":"Intended-account verification before encrypted token persistence","status":"implemented"},{"id":8,"change":"Guarded refresh lifecycle with identity re-verification and local expiry health","status":"implemented"},{"id":9,"change":"Idempotent local disconnect and provider revocation contract","status":"implemented"},{"id":10,"change":"Redacted diagnostics/security events with provider-subject suppression and safe account labels","status":"implemented"},{"id":11,"change":"Executable cryptographic/source/six-provider identity/exchange/refresh/revoke mock proof","status":"implemented"},{"id":12,"change":"Guarded exact Development D1 convergence plus automatic replay closure","status":"implemented"},{"id":13,"change":"Six-provider local publication payload validation contracts","status":"implemented"},{"id":14,"change":"Deterministic publication idempotency and zero-network executable proof","status":"implemented"},{"id":15,"change":"Legacy provider publish/probe HTTP closure and closed readiness currentization","status":"implemented"}
   ],
   "release461_batch": [
-    {"id":1,"change":"Inventory package/base-unit correctness","status":"implemented"},
-    {"id":2,"change":"Inventory desktop/mobile usability acceptance","status":"implemented"},
-    {"id":3,"change":"Primary product-image quality acceptance","status":"implemented"},
-    {"id":4,"change":"CAIP private ingest context extension","status":"implemented"},
-    {"id":5,"change":"Multicamera recognition and synchronization planning","status":"implemented"},
-    {"id":6,"change":"Footage-quality review","status":"implemented"},
-    {"id":7,"change":"Reversible reject and deferred-purge workflow","status":"implemented"},
-    {"id":8,"change":"Semantic evidence on source-backed temporal ranges","status":"implemented"},
-    {"id":9,"change":"Reviewed-evidence Story Builder with private storyboard notes","status":"implemented"},
-    {"id":10,"change":"Reviewed edit/timeline generation with provider execution closed","status":"implemented"},
-    {"id":11,"change":"CAIP to Content Studio reviewed publishing handoff","status":"implemented"},
-    {"id":12,"change":"Release 461 runtime-schema and source-gate convergence","status":"implemented"}
+    {"id":1,"change":"Inventory package/base-unit correctness","status":"implemented"},{"id":2,"change":"Inventory desktop/mobile usability acceptance","status":"implemented"},{"id":3,"change":"Primary product-image quality acceptance","status":"implemented"},{"id":4,"change":"CAIP private ingest context extension","status":"implemented"},{"id":5,"change":"Multicamera recognition and synchronization planning","status":"implemented"},{"id":6,"change":"Footage-quality review","status":"implemented"},{"id":7,"change":"Reversible reject and deferred-purge workflow","status":"implemented"},{"id":8,"change":"Semantic evidence on source-backed temporal ranges","status":"implemented"},{"id":9,"change":"Reviewed-evidence Story Builder with private storyboard notes","status":"implemented"},{"id":10,"change":"Reviewed edit/timeline generation with provider execution closed","status":"implemented"},{"id":11,"change":"CAIP to Content Studio reviewed publishing handoff","status":"implemented"},{"id":12,"change":"Release 461 runtime-schema and source-gate convergence","status":"implemented"}
   ],
   "deferred_it_test_environment": {
-    "state": "development_runtime_acceptance_pending",
+    "state": "release461_development_green_separate_provider_and_private_media_evidence_deferred",
     "tasks": [
-      {"key":"authenticated-development-runtime","status":"pending_after_release461_d1_convergence"},
-      {"key":"caip-private-media","status":"pending_after_release461_d1_convergence"},
+      {"key":"authenticated-development-runtime","status":"complete_run_33342752757"},
+      {"key":"caip-private-media","status":"deferred_separate_browser_evidence"},
       {"key":"stripe-test","status":"deferred"},
       {"key":"paypal-sandbox","status":"deferred"},
       {"key":"etsy-provider","status":"deferred_live_authorization_closed"},
@@ -192,11 +172,10 @@
     ]
   },
   "forward_queue": [
-    "Require the final canonical Release 461 Source Gate and System Gate to be green on the exact metadata-promoted dev SHA.",
-    "Require the Development Pages deployment for devilndove-site-dev to be green on that same exact dev SHA.",
-    "Run authenticated Development inventory, product-media, and CAIP runtime acceptance on the deployed Release 461 head.",
-    "Keep Stripe/PayPal and live provider acceptance deferred to their deliberate test boundaries.",
-    "Keep raw CAIP R2 deletion closed unless deliberately authorized.",
+    "Treat Release 461 D1 convergence and authenticated Development runtime acceptance as closed; do not replay or reapply without read-only drift evidence.",
+    "Begin the next source release as Release 462 rather than extending the closed Release 461 checkpoint.",
+    "Keep CAIP private-media browser evidence, Stripe test, PayPal sandbox, and live provider acceptance as deliberate separate evidence boundaries.",
+    "Keep provider execution/publication and raw CAIP R2 deletion closed unless deliberately authorized.",
     "Keep separate live Production untouched until deliberate promotion."
   ]
 }

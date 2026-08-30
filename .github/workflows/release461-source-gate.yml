@@ -9,7 +9,9 @@ on:
       - 'migrations/dev/20260830_release461_*.sql'
       - 'migrations/dev/20260830_runtime_schema_structural_forward_repair.sql'
       - 'scripts/release461_*'
+      - 'scripts/development_runtime_acceptance.py'
       - 'development-release.json'
+      - 'data/release461-runtime-acceptance-request.json'
       - 'docs/operations/RELEASE_461_*.md'
       - '.github/workflows/release461-*.yml'
       - '.github/workflows/development-d1-release461*.yml'
@@ -41,13 +43,14 @@ jobs:
           x=json.load(open('development-release.json', encoding='utf-8'))
           p=x['release_policy']; e=x['current_release_evidence']
           assert x['environment']=='development' and x['branch']=='dev' and int(x['release'])==461
-          assert int(x['development_infrastructure']['d1']['schema_current_through_release']) in (460,461)
+          assert int(x['development_infrastructure']['d1']['schema_current_through_release'])==461
           assert p['production_promotion']=='closed'
           assert p['provider_execution']=='closed'
           assert p['provider_publication']=='closed'
           assert p['provider_live_authorization']=='closed'
           assert p['request_time_schema_mutation']=='forbidden'
           assert x['current_release_database_state']['historical_migration_replay'] is False
+          assert x['current_release_database_state']['new_migration_required'] is False
           assert e['production_mutation'] is False
           assert e['provider_live_authorization_enabled'] is False
           print('RELEASE 461 CLOSED BOUNDARY: PASS')

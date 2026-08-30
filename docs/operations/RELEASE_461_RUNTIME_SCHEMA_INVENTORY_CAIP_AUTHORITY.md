@@ -1,69 +1,54 @@
 # Release 461 — Runtime Schema Convergence, Inventory & CAIP Production Pipeline
 
-Release 461 is the current Development release for `devilndove-site-dev`.
+Release 461 is the accepted Development release for `devilndove-site-dev`.
 
 ## Boundary
 
-- Source branch: `dev`
-- Development Pages project: `devilndove-site-dev`
+- Source: `dev`
+- Development Pages: `devilndove-site-dev`
 - Development D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
-- Development R2 remains the only data/storage target for acceptance.
-- Separate live Production `main` / `devilndove-site` remains untouched.
-- Provider live authorization, execution, and publication remain closed.
-- Request-time DDL is forbidden.
-- Historical migration replay is forbidden.
+- Development R2 only for product/private-media storage.
+- Separate live Production `main` / `devilndove-site`: untouched.
+- Provider live authorization/execution/publication: closed.
+- Raw CAIP R2 deletion: closed.
+- Request-time DDL and historical migration replay: forbidden.
 
-## Release 461 scope
+## Completed scope
 
-Release 461 converges request-time schema ownership into explicit forward/additive migrations and completes the current operational queue:
+Release 461 converged request-time schema ownership into explicit forward migrations and completed Inventory package/base-unit authority, responsive Inventory usability, primary product-image quality, CAIP ingest/synchronization/quality/lifecycle/semantic evidence, Story Builder, edit/timeline planning and reviewed Content Studio handoff.
 
-1. Inventory purchase-package/base-unit correctness.
-2. Inventory desktop/mobile usability acceptance.
-3. Product primary-image quality acceptance.
-4. CAIP private ingest context.
-5. Multicamera recognition and synchronization planning.
-6. Footage-quality review.
-7. Reversible reject/deferred-purge lifecycle.
-8. Semantic evidence attached to source-backed temporal ranges.
-9. Story Builder from reviewed CAIP evidence and story segments.
-10. Reviewed edit/timeline generation with provider execution closed.
-11. Reviewed CAIP → Content Studio publishing handoff.
-12. Release authority/source-gate/D1 acceptance convergence.
+Purchase packaging/cost remains on `site_item_inventory`; `site_inventory_base_balances` is canonical usable/base-unit read authority. Primary product images require a loadable public image, at least 1200×1200, at least 12 alt-text characters and quality score at least 70. CAIP planning remains source-preserving and cannot render/publish through providers or delete raw R2 media.
 
-## Inventory authority
+## D1 closure
 
-Purchase packaging remains the receiving and purchase-cost authority. `site_inventory_base_balances` is the canonical usable/base-unit stock read authority. Compatibility triggers keep mature legacy writers synchronized while migration away from package-count writers continues. UI labels explicitly distinguish purchase units from usable/base units.
+Development D1 acceptance run `33340698069` succeeded:
 
-## Product image acceptance
+- 19 Release 461 migrations;
+- 77 required tables;
+- 93 required named indexes;
+- zero missing required objects;
+- zero remaining structural drift;
+- zero foreign-key violations.
 
-The primary image acceptance contract is explicit and reviewable:
+The bounded structural repair was applied only after exact read-only classification. Release 461 D1 is closed and must not be replayed on startup.
 
-- loadable public image;
-- at least 1200×1200 pixels;
-- at least 12 meaningful alt-text characters;
-- server-computed quality score of at least 70.
+## Authenticated runtime closure
 
-The media-role and quality-review schema is migration-owned; the request route contains no runtime DDL.
+Run `33342752757` on request/source SHA `7200f421e0fc58842aed4003dc774ed30f910809` passed the GET-only Development acceptance:
 
-## CAIP pipeline
+- module authority healthy at Release 461;
+- Inventory base-unit authority live for 80 returned rows;
+- Product Media primary thresholds exactly 1200×1200 / alt 12 / score 70;
+- CAIP pipeline schema ready with 23 projects and execution/publication/R2-delete false;
+- reviewed CAIP handoff live for project 36 with source media unchanged;
+- anonymous protected access refused;
+- existing Development session resolved read-only, masked and never emitted;
+- zero D1/R2/provider/Production mutation.
 
-Existing private CAIP R2 intake and immutable raw-media registration remain canonical. Release 461 adds orchestration/review metadata only: capture context, synchronization groups/tracks, footage quality, reversible lifecycle states, semantic annotations, story drafts, and edit-plan drafts. No Release 461 pipeline action deletes a raw R2 object or invokes a publishing/render provider.
+## Green state
 
-The established reviewed-evidence handoff remains authoritative. Release 461 adds story/timeline/quality/semantic/lifecycle state to the prepared handoff package while preserving reference-only transfer.
+Release 461 satisfies the Development-green definition: D1 converged, aggregate source authority green, System Gate carried-forward authority green on the current source lineage, Development Pages deployment green, authenticated Development runtime green, and all provider/Production deletion boundaries remain closed.
 
-## D1 acceptance state
+Future request-file-only acceptance commits are required to trigger the Release 461 Source Gate as well as System Gate/Pages/runtime acceptance so the latest GitHub head can display the complete green evidence set.
 
-Release 461 contains forward/additive Development migrations. Until read-only acceptance proves convergence and the explicit Development apply is completed, `development-release.json` must continue to report D1 as verified through Release 460 with Release 461 migration required.
-
-Never mark Release 461 D1 green merely because source gates pass. D1 becomes green only after the Release 461 acceptance workflow verifies the exact Development database and all Release 461-owned tables/indexes/constraints with clean foreign keys.
-
-## Green definition
-
-Release 461 is green only when all of the following agree on one exact `dev` SHA:
-
-- Release 461 aggregate source gate: green;
-- canonical System Gate: green;
-- Development D1 Release 461 acceptance: converged and green, or explicitly proven already converged with no apply needed;
-- Development Pages deployment/check: green;
-- provider/publication/live-Production boundaries remain closed;
-- canonical release documentation reflects the same state.
+New source feature work begins as **Release 462**. Separate CAIP private-media browser evidence, Stripe/PayPal testing and live provider acceptance remain deliberate later boundaries.
