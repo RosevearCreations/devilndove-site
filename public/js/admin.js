@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-void import('/public/js/admin-external-help.js?v=460')
+void import('/public/js/admin-external-help.js?v=461')
   .catch((error) => console.warn('[DD Release 461] external field help unavailable', error));
 
 void import('/public/js/admin-inventory-base-unit-usability.js?v=461')
