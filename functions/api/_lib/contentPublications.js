@@ -2,7 +2,7 @@
 // This module prepares and publishes only explicitly approved, public-safe content.
 // It never copies, deletes, moves, or overwrites original product/R2 media.
 
-import { ensureContentAutomationSchema } from './contentAutomationStudio.js';
+import { requireContentPublicationSchema } from './contentAutomationSchemaReadiness.js';
 
 export const CONTENT_PUBLICATION_BUILD = 'Build 200';
 
@@ -138,55 +138,7 @@ function toPublicationSeed(context, destination) {
 }
 
 export async function ensureContentPublicationSchema(db) {
-  await ensureContentAutomationSchema(db);
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS content_publications (
-      content_publication_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      publication_key TEXT NOT NULL UNIQUE,
-      content_project_id INTEGER NOT NULL,
-      content_project_deliverable_id INTEGER,
-      destination TEXT NOT NULL DEFAULT 'workshop_journal',
-      publication_slug TEXT NOT NULL,
-      title TEXT NOT NULL,
-      summary TEXT,
-      body_content TEXT,
-      hero_media_url TEXT,
-      hero_alt_text TEXT,
-      media_urls_json TEXT NOT NULL DEFAULT '[]',
-      product_path TEXT,
-      canonical_path TEXT,
-      meta_title TEXT,
-      meta_description TEXT,
-      schema_json TEXT NOT NULL DEFAULT '{}',
-      content_status TEXT NOT NULL DEFAULT 'draft',
-      review_notes TEXT,
-      copy_locked INTEGER NOT NULL DEFAULT 0,
-      metrics_json TEXT NOT NULL DEFAULT '{}',
-      approved_by_user_id INTEGER,
-      approved_at TEXT,
-      published_by_user_id INTEGER,
-      published_at TEXT,
-      unpublished_at TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(destination, publication_slug),
-      FOREIGN KEY (content_project_id) REFERENCES content_projects(content_project_id) ON DELETE CASCADE,
-      FOREIGN KEY (content_project_deliverable_id) REFERENCES content_project_deliverables(content_project_deliverable_id) ON DELETE SET NULL
-    )`,
-    `CREATE TABLE IF NOT EXISTS content_publication_events (
-      content_publication_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content_publication_id INTEGER NOT NULL,
-      event_type TEXT NOT NULL,
-      actor_user_id INTEGER,
-      details_json TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (content_publication_id) REFERENCES content_publications(content_publication_id) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_content_publications_project ON content_publications(content_project_id, destination, content_status, updated_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_content_publications_public ON content_publications(destination, content_status, published_at DESC, content_publication_id DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_content_publication_events_publication ON content_publication_events(content_publication_id, created_at DESC)`
-  ];
-  for (const statement of statements) await db.prepare(statement).run();
+  return requireContentPublicationSchema(db);
 }
 
 async function writePublicationEvent(db, publicationId, eventType, actorUserId, details = {}) {
