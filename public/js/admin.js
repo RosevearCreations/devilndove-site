@@ -6,6 +6,7 @@
 // Build 397: Commerce & Operations gives /admin/customer-documents/ its Operations-owned read boundary.
 // Build 438: authoritative server module availability is loaded before any top-level runtime activation.
 // Build 440: Products loads the audited finished-production reversal workspace on demand.
+// Release 461: backend external-information fields receive reusable circled help with provider acquisition steps.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -47,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
       .catch((error) => console.warn('[DD Build 440] production reversal workspace unavailable', error));
   }
 });
+
+void import('/public/js/admin-external-help.js?v=461')
+  .catch((error) => console.warn('[DD Release 461] external field help unavailable', error));
 
 void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
   .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
