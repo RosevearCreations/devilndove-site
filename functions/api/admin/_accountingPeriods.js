@@ -4,6 +4,24 @@ function rows(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+async function tableColumns(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexes(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 export function monthValue(value, fallback = '') {
   const raw = String(value || '').trim();
   if (/^\d{4}-\d{2}$/.test(raw)) return raw;
@@ -23,22 +41,20 @@ export function monthFromDateish(value, fallback = '') {
 }
 
 export async function ensureAccountingPeriodClosuresTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_period_closures (
-      accounting_period_closure_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      period_month TEXT NOT NULL UNIQUE,
-      lock_state TEXT NOT NULL DEFAULT 'open',
-      close_checklist_json TEXT,
-      close_notes TEXT,
-      locked_by_user_id INTEGER,
-      locked_at TEXT,
-      reopened_by_user_id INTEGER,
-      reopened_at TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_period_closures_period ON accounting_period_closures(period_month DESC, lock_state)`).run(); } catch {}
+  const columns = await tableColumns(db, 'accounting_period_closures');
+  const requiredColumns = [
+    'accounting_period_closure_id', 'period_month', 'lock_state', 'close_checklist_json', 'close_notes',
+    'locked_by_user_id', 'locked_at', 'reopened_by_user_id', 'reopened_at', 'created_at', 'updated_at'
+  ];
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting period schema is not ready: accounting_period_closures is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await tableIndexes(db, 'accounting_period_closures');
+  if (!indexes.has('idx_accounting_period_closures_period')) {
+    throw new Error('Accounting period schema is not ready: accounting_period_closures is missing index idx_accounting_period_closures_period. Apply the current Development migration authority.');
+  }
+  return true;
 }
 
 export function normalizeChecklistPayload(payload = {}) {
