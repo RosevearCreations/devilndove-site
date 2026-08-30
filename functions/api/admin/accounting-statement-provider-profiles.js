@@ -6,34 +6,47 @@ function providerScope(value) {
   return raw || 'manual';
 }
 
+async function tableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 async function ensureProviderProfilesTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_statement_provider_profiles (
-      accounting_statement_provider_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      provider_scope TEXT NOT NULL UNIQUE,
-      display_name TEXT NOT NULL,
-      date_column TEXT,
-      description_column TEXT,
-      gross_column TEXT,
-      fee_column TEXT,
-      net_column TEXT,
-      currency_column TEXT,
-      reference_column TEXT,
-      default_currency TEXT NOT NULL DEFAULT 'CAD',
-      mapping_json TEXT,
-      notes TEXT,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_provider_profiles_active ON accounting_statement_provider_profiles(is_active, provider_scope)`).run().catch(() => null);
+  const requiredColumns = [
+    'accounting_statement_provider_profile_id','provider_scope','display_name','date_column','description_column',
+    'gross_column','fee_column','net_column','currency_column','reference_column','default_currency','mapping_json',
+    'notes','is_active','created_at','updated_at'
+  ];
+  const columns = await tableColumnSet(db, 'accounting_statement_provider_profiles');
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting statement provider schema is not ready: accounting_statement_provider_profiles is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await tableIndexSet(db, 'accounting_statement_provider_profiles');
+  if (!indexes.has('idx_accounting_statement_provider_profiles_active')) {
+    throw new Error('Accounting statement provider schema is not ready: accounting_statement_provider_profiles is missing index idx_accounting_statement_provider_profiles_active. Apply the current Development migration authority.');
+  }
+  return true;
 }
 
 async function seedDefaults(db) {
   await ensureProviderProfilesTable(db);
+  let changedRows = 0;
   for (const profile of DEFAULT_PROFILES) {
-    await db.prepare(`
+    const result = await db.prepare(`
       INSERT OR IGNORE INTO accounting_statement_provider_profiles (
         provider_scope, display_name, date_column, description_column, gross_column, fee_column, net_column,
         currency_column, reference_column, default_currency, mapping_json, notes, is_active, created_at, updated_at
@@ -52,7 +65,9 @@ async function seedDefaults(db) {
       JSON.stringify(profile),
       profile.notes || null
     ).run();
+    changedRows += Number(result?.meta?.changes || 0);
   }
+  return changedRows;
 }
 
 async function listProfiles(db) {
@@ -77,15 +92,22 @@ export async function onRequestPost(context) {
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await seedDefaults(db);
+  await ensureProviderProfilesTable(db);
 
   let body = {};
   try { body = await context.request.json(); }
   catch { return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400); }
 
-  if (normalizeText(body.action).toLowerCase() === 'seed_defaults') {
+  const action = normalizeText(body.action).toLowerCase();
+  if (action === 'seed_defaults') {
+    const changedRows = await seedDefaults(db);
+    await auditAdminAction(context.env, context.request, adminUser, {
+      action_type: 'accounting_statement_provider_profiles_seed_defaults',
+      target_type: 'accounting_statement_provider_profile',
+      details: { default_profile_count: DEFAULT_PROFILES.length, changed_rows: changedRows },
+    });
     const profiles = await listProfiles(db);
-    return jsonResponse({ ok: true, profiles, seeded: DEFAULT_PROFILES.length });
+    return jsonResponse({ ok: true, profiles, seeded: DEFAULT_PROFILES.length, changed_rows: changedRows });
   }
 
   const provider = providerScope(body.provider_scope);
