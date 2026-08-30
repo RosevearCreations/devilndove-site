@@ -1,0 +1,67 @@
+name: Release 461 Development Runtime Acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: "Exact reviewed dev SHA"
+        required: true
+        type: string
+  push:
+    branches: [dev]
+    paths:
+      - 'data/release461-runtime-acceptance-request.json'
+
+permissions: {contents: read}
+
+jobs:
+  runtime-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DND_DEV_BASE_URL: https://devilndove-site-dev.pages.dev
+      DND_DEV_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: dev, fetch-depth: 2}
+      - name: Resolve exact runtime request
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = workflow_dispatch ]; then
+            EXPECTED='${{ inputs.expected_sha }}'
+          else
+            test "$(git diff --name-only HEAD^ HEAD)" = 'data/release461-runtime-acceptance-request.json' || { echo 'STOP: runtime request push changed more than the dedicated request file.'; exit 1; }
+            EXPECTED="$(python - <<'PY'
+          import json,subprocess
+          r=json.load(open('data/release461-runtime-acceptance-request.json',encoding='utf-8'))
+          assert int(r.get('release') or 0)==461
+          parent=subprocess.check_output(['git','rev-parse','HEAD^'],text=True).strip()
+          assert str(r.get('expected_parent_sha') or '')==parent,(r.get('expected_parent_sha'),parent)
+          assert r.get('production_mutation') is False and r.get('provider_execution') is False and r.get('d1_mutation') is False and r.get('r2_mutation') is False
+          print(subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+          PY
+          )"
+          fi
+          test "$(git rev-parse HEAD)" = "${EXPECTED}" || { echo 'STOP: dev moved from the exact runtime acceptance source.'; exit 1; }
+          echo "EXPECTED_SOURCE_SHA=${EXPECTED}" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Re-run Release 461 source authority
+        run: python scripts/release461_aggregate_source_gate.py
+      - name: Require authenticated Development session
+        run: |
+          test -n "${DND_DEV_SESSION_COOKIE}" || { echo 'STOP: DND_DEV_SESSION_COOKIE secret is not configured. No runtime mutation was attempted.'; exit 1; }
+      - name: Anonymous protected-route proof
+        run: python scripts/development_runtime_acceptance.py --base-url "${DND_DEV_BASE_URL}" --anonymous-check
+      - name: Authenticated Release 461 GET-only runtime proof
+        run: python scripts/development_runtime_acceptance.py --base-url "${DND_DEV_BASE_URL}" --evidence-json /tmp/release461-runtime-evidence.json
+      - name: Acceptance boundary
+        run: |
+          echo "Exact source SHA: ${EXPECTED_SOURCE_SHA}"
+          echo 'Target: devilndove-site-dev Development Pages only'
+          echo 'HTTP acceptance: GET ONLY'
+          echo 'D1 mutation: NONE'
+          echo 'R2 mutation: NONE'
+          echo 'Provider execution/publication: CLOSED'
+          echo 'Raw CAIP R2 delete: CLOSED'
+          echo 'Separate live Production mutation: NONE'
