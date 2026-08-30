@@ -13,96 +13,53 @@ async function getTableColumnSet(db, tableName) {
   }
 }
 
-export async function ensureCommunityEventsTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS community_events (
-      community_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      event_type TEXT NOT NULL DEFAULT 'market',
-      event_status TEXT NOT NULL DEFAULT 'planned',
-      starts_at TEXT,
-      ends_at TEXT,
-      venue_name TEXT,
-      city TEXT,
-      region_label TEXT,
-      event_url TEXT,
-      public_note TEXT,
-      sale_channel_note TEXT,
-      pickup_supported INTEGER NOT NULL DEFAULT 0,
-      is_featured INTEGER NOT NULL DEFAULT 0,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  const cols = await getTableColumnSet(db, 'community_events');
-  const statements = [
-    ['recurrence_rule', `ALTER TABLE community_events ADD COLUMN recurrence_rule TEXT NOT NULL DEFAULT 'none'`],
-    ['recurrence_interval', `ALTER TABLE community_events ADD COLUMN recurrence_interval INTEGER NOT NULL DEFAULT 1`],
-    ['recurrence_count', `ALTER TABLE community_events ADD COLUMN recurrence_count INTEGER`],
-    ['recurrence_until', `ALTER TABLE community_events ADD COLUMN recurrence_until TEXT`],
-    ['recurrence_label', `ALTER TABLE community_events ADD COLUMN recurrence_label TEXT`],
-    ['image_url', `ALTER TABLE community_events ADD COLUMN image_url TEXT`],
-    ['image_alt', `ALTER TABLE community_events ADD COLUMN image_alt TEXT`],
-    ['application_mode', `ALTER TABLE community_events ADD COLUMN application_mode TEXT NOT NULL DEFAULT 'closed'`],
-    ['application_url', `ALTER TABLE community_events ADD COLUMN application_url TEXT`],
-    ['vendor_capacity', `ALTER TABLE community_events ADD COLUMN vendor_capacity INTEGER NOT NULL DEFAULT 0`],
-    ['vendor_note', `ALTER TABLE community_events ADD COLUMN vendor_note TEXT`]
-  ];
-  for (const [name, sql] of statements) {
-    if (!cols.has(name)) await db.prepare(sql).run().catch(() => null);
+async function getTableIndexSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(nr(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
   }
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_community_events_active_start ON community_events(is_active, starts_at, sort_order)`).run().catch(() => null);
+}
+
+async function requireCommunityTableSchema(db, tableName, requiredColumns, requiredIndexes = []) {
+  const columns = await getTableColumnSet(db, tableName);
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Community schema is not ready: ${tableName} is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  if (requiredIndexes.length) {
+    const indexes = await getTableIndexSet(db, tableName);
+    const missingIndexes = requiredIndexes.filter((name) => !indexes.has(name));
+    if (missingIndexes.length) {
+      throw new Error(`Community schema is not ready: ${tableName} is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+    }
+  }
+  return true;
+}
+
+export async function ensureCommunityEventsTable(db) {
+  return requireCommunityTableSchema(db, 'community_events', [
+    'community_event_id', 'title', 'event_type', 'event_status', 'starts_at', 'ends_at', 'venue_name', 'city', 'region_label',
+    'event_url', 'public_note', 'sale_channel_note', 'pickup_supported', 'is_featured', 'is_active', 'sort_order', 'created_at', 'updated_at',
+    'recurrence_rule', 'recurrence_interval', 'recurrence_count', 'recurrence_until', 'recurrence_label', 'image_url', 'image_alt',
+    'application_mode', 'application_url', 'vendor_capacity', 'vendor_note'
+  ], ['idx_community_events_active_start']);
 }
 
 export async function ensurePickupProfilesTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS pickup_profiles (
-      pickup_profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      label TEXT NOT NULL,
-      pickup_mode TEXT NOT NULL DEFAULT 'appointment',
-      city TEXT,
-      region_label TEXT,
-      appointment_only INTEGER NOT NULL DEFAULT 1,
-      lead_time_hours INTEGER NOT NULL DEFAULT 24,
-      public_note TEXT,
-      availability_note TEXT,
-      map_url TEXT,
-      contact_hint TEXT,
-      is_active INTEGER NOT NULL DEFAULT 1,
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_pickup_profiles_active_sort ON pickup_profiles(is_active, sort_order, label)`).run().catch(() => null);
+  return requireCommunityTableSchema(db, 'pickup_profiles', [
+    'pickup_profile_id', 'label', 'pickup_mode', 'city', 'region_label', 'appointment_only', 'lead_time_hours', 'public_note',
+    'availability_note', 'map_url', 'contact_hint', 'is_active', 'sort_order', 'created_at', 'updated_at'
+  ], ['idx_pickup_profiles_active_sort']);
 }
 
 export async function ensureEventVendorApplicationsTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS event_vendor_applications (
-      event_vendor_application_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      community_event_id INTEGER,
-      event_title_snapshot TEXT,
-      vendor_name TEXT NOT NULL,
-      contact_name TEXT,
-      contact_email TEXT NOT NULL,
-      contact_phone TEXT,
-      city TEXT,
-      offered_items TEXT,
-      website_url TEXT,
-      marketplace_url TEXT,
-      instagram_url TEXT,
-      setup_notes TEXT,
-      application_status TEXT NOT NULL DEFAULT 'submitted',
-      internal_note TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (community_event_id) REFERENCES community_events(community_event_id) ON DELETE SET NULL
-    )
-  `).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_event_vendor_applications_event_status ON event_vendor_applications(community_event_id, application_status, created_at DESC)`).run().catch(() => null);
+  return requireCommunityTableSchema(db, 'event_vendor_applications', [
+    'event_vendor_application_id', 'community_event_id', 'event_title_snapshot', 'vendor_name', 'contact_name', 'contact_email',
+    'contact_phone', 'city', 'offered_items', 'website_url', 'marketplace_url', 'instagram_url', 'setup_notes', 'application_status',
+    'internal_note', 'created_at', 'updated_at'
+  ], ['idx_event_vendor_applications_event_status']);
 }
 
 export function cleanEventType(value) {
