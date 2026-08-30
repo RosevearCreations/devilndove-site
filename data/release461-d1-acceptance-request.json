@@ -1,8 +1,8 @@
 {
   "release": 461,
-  "mode": "preflight",
-  "expected_parent_sha": "bf982e6bc098e55dd36eb9867ef29b0a59642bb0",
-  "apply_confirmation": "",
+  "mode": "apply",
+  "expected_parent_sha": "5060a208245f960c0406bda20101301da701b7fb",
+  "apply_confirmation": "APPLY-RELEASE-461-TO-DEVELOPMENT",
   "target": "Development D1 only",
   "database_name": "devilndove-dev",
   "database_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
