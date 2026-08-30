@@ -6,6 +6,7 @@ on:
     paths:
       - 'functions/api/**'
       - 'migrations/dev/20260829_release461_*.sql'
+      - 'migrations/dev/20260830_release461_*.sql'
       - 'scripts/release461_*'
       - 'development-release.json'
       - 'docs/operations/RELEASE_461_*.md'
@@ -38,7 +39,8 @@ jobs:
           import json
           x=json.load(open('development-release.json', encoding='utf-8'))
           p=x['release_policy']; e=x['current_release_evidence']
-          assert x['environment']=='development' and x['branch']=='dev' and int(x['release'])==460
+          assert x['environment']=='development' and x['branch']=='dev' and int(x['release'])==461
+          assert int(x['development_infrastructure']['d1']['schema_current_through_release']) in (460,461)
           assert p['production_promotion']=='closed'
           assert p['provider_execution']=='closed'
           assert p['provider_publication']=='closed'
