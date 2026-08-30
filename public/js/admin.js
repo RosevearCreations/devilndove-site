@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-void import('/public/js/admin-external-help.js?v=461')
+void import('/public/js/admin-external-help.js?v=460')
   .catch((error) => console.warn('[DD Release 461] external field help unavailable', error));
 
 void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
