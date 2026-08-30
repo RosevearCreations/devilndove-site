@@ -11,6 +11,7 @@ ROUTES = [
     ROOT / 'functions/api/custom-request-consent.js',
     ROOT / 'functions/api/custom-request.js',
     ROOT / 'functions/api/custom-request-reference-upload.js',
+    ROOT / 'functions/api/product-interest.js',
 ]
 HELPER = ROOT / 'functions/api/_lib/publicRuntimeSchemaReadiness.js'
 MIGRATION = ROOT / 'migrations/dev/20260829_release461_public_runtime_schema_authority.sql'
@@ -47,6 +48,7 @@ for token in (
     'custom_candle_soap_product_specs',
     'custom_request_reference_uploads',
     'media_consent_records',
+    'product_interest_requests',
     'browser_session_token',
     'customer_email',
 ):
@@ -70,6 +72,10 @@ upload = text(ROUTES[3])
 assert 'custom_request_reference_schema_unavailable' in upload
 assert 'hasCustomRequestReferenceUploadSchema' in upload
 
+interest = text(ROUTES[4])
+assert 'product_interest_schema_unavailable' in interest
+assert 'hasProductInterestSchema' in interest
+
 migration = text(MIGRATION)
 assert not re.search(r'\bALTER\s+TABLE\b|\bDROP\s+TABLE\b', migration, re.I), 'Release 461 migration must remain additive/non-destructive'
 for token in (
@@ -79,6 +85,7 @@ for token in (
     'CREATE TABLE IF NOT EXISTS custom_candle_soap_product_specs',
     'CREATE TABLE IF NOT EXISTS custom_request_reference_uploads',
     'CREATE TABLE IF NOT EXISTS media_consent_records',
+    'CREATE TABLE IF NOT EXISTS product_interest_requests',
     'idx_checkout_recovery_session_email',
     'idx_checkout_recovery_status_updated',
     'idx_custom_fulfillment_prompts_request',
@@ -89,6 +96,7 @@ for token in (
     'release461_custom_specs_required_columns',
     'release461_reference_upload_required_columns',
     'release461_media_consent_required_columns',
+    'release461_product_interest_required_columns',
     'PRAGMA foreign_key_check',
 ):
     assert token in migration, f'missing Release 461 migration token: {token}'

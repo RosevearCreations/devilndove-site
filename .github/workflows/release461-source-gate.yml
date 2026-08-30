@@ -9,6 +9,7 @@ on:
       - 'functions/api/custom-request-consent.js'
       - 'functions/api/custom-request.js'
       - 'functions/api/custom-request-reference-upload.js'
+      - 'functions/api/product-interest.js'
       - 'migrations/dev/20260829_release461_public_runtime_schema_authority.sql'
       - 'scripts/release461_*'
       - 'development-release.json'
@@ -41,6 +42,7 @@ jobs:
           node --check functions/api/custom-request-consent.js
           node --check functions/api/custom-request.js
           node --check functions/api/custom-request-reference-upload.js
+          node --check functions/api/product-interest.js
       - name: Closed execution boundaries
         run: |
           python - <<'PY'

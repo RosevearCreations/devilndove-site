@@ -32,6 +32,7 @@ jobs:
           node --check functions/api/custom-request-consent.js
           node --check functions/api/custom-request.js
           node --check functions/api/custom-request-reference-upload.js
+          node --check functions/api/product-interest.js
       - name: Protect exact Development authority
         run: |
           set -euo pipefail
@@ -76,9 +77,11 @@ jobs:
             (SELECT COUNT(*) FROM pragma_table_info('custom_request_reference_uploads') WHERE name IN ('custom_request_reference_upload_id','custom_request_id','request_key','public_url','object_key','original_filename','mime_type','file_size_bytes','reference_use_status','created_at')) uploads_columns,
             (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='media_consent_records') media_table,
             (SELECT COUNT(*) FROM pragma_table_info('media_consent_records') WHERE name IN ('consent_record_id','consent_key','subject_label','source_type','source_id','media_url','consent_status','consent_scope','public_use_allowed','social_use_allowed','privacy_notes','reviewed_by_user_id','expires_at','created_at','updated_at')) media_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='product_interest_requests') interest_table,
+            (SELECT COUNT(*) FROM pragma_table_info('product_interest_requests') WHERE name IN ('product_interest_request_id','product_id','request_type','user_id','email','notes','status','created_at','updated_at')) interest_columns,
             (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='custom_request_fulfillment_prompts') consent_table,
             (SELECT COUNT(*) FROM pragma_table_info('custom_request_fulfillment_prompts') WHERE name IN ('custom_request_fulfillment_prompt_id','custom_request_id','order_id','prompt_key','prompt_status','prompt_type','customer_name','customer_email','subject','body_text','consent_question_text','created_by_user_id','prompt_token','public_response_status','public_use_scope','review_text','customer_response_note','responded_at','expired_at','voided_at','public_proof_candidate_id','created_at','updated_at')) consent_columns,
-            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_requests_status','idx_custom_requests_email','idx_custom_requests_utm','idx_custom_candle_soap_specs_request','idx_custom_request_reference_uploads_request','idx_media_consent_records_source','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token')) named_indexes;" > /tmp/pre.json
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_requests_status','idx_custom_requests_email','idx_custom_requests_utm','idx_custom_candle_soap_specs_request','idx_custom_request_reference_uploads_request','idx_media_consent_records_source','idx_product_interest_requests_lookup','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token')) named_indexes;" > /tmp/pre.json
           python - <<'PY'
           import json, os
           d=json.load(open('/tmp/pre.json'))
@@ -91,14 +94,14 @@ jobs:
           r=next(x for x in walk(d) if 'recovery_table' in x)
           checks=[
             ('checkout_recovery_leads',14),('custom_requests',31),('custom_candle_soap_product_specs',14),
-            ('custom_request_reference_uploads',10),('media_consent_records',15),('custom_request_fulfillment_prompts',23)
+            ('custom_request_reference_uploads',10),('media_consent_records',15),('product_interest_requests',9),('custom_request_fulfillment_prompts',23)
           ]
-          prefixes=['recovery','requests','specs','uploads','media','consent']
+          prefixes=['recovery','requests','specs','uploads','media','interest','consent']
           for (name,required),prefix in zip(checks,prefixes):
             present=int(r[f'{prefix}_table']); cols=int(r[f'{prefix}_columns'])
             if present and cols != required:
               raise SystemExit(f'STOP: {name} structural drift ({cols}/{required} required columns) needs a dedicated forward repair. Historical replay is forbidden.')
-          converged=all(int(r[f'{p}_table'])==1 and int(r[f'{p}_columns'])==n for p,(_,n) in zip(prefixes,checks)) and int(r['named_indexes'])==10
+          converged=all(int(r[f'{p}_table'])==1 and int(r[f'{p}_columns'])==n for p,(_,n) in zip(prefixes,checks)) and int(r['named_indexes'])==11
           with open(os.environ['GITHUB_ENV'],'a') as f: f.write(f"R461_CONVERGED={'1' if converged else '0'}\n")
           print('Release 461 already converged:',converged)
           print('Read-only structural preflight: PASS')
@@ -114,8 +117,9 @@ jobs:
             (SELECT COUNT(*) FROM pragma_table_info('custom_candle_soap_product_specs') WHERE name IN ('custom_candle_soap_product_spec_id','custom_request_id','product_id','product_draft_id','product_family','scent_profile','wax_or_base','colour_notes','batch_number','ingredient_notes','allergen_safety_notes','cure_ready_date','created_at','updated_at')) specs_columns,
             (SELECT COUNT(*) FROM pragma_table_info('custom_request_reference_uploads') WHERE name IN ('custom_request_reference_upload_id','custom_request_id','request_key','public_url','object_key','original_filename','mime_type','file_size_bytes','reference_use_status','created_at')) uploads_columns,
             (SELECT COUNT(*) FROM pragma_table_info('media_consent_records') WHERE name IN ('consent_record_id','consent_key','subject_label','source_type','source_id','media_url','consent_status','consent_scope','public_use_allowed','social_use_allowed','privacy_notes','reviewed_by_user_id','expires_at','created_at','updated_at')) media_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('product_interest_requests') WHERE name IN ('product_interest_request_id','product_id','request_type','user_id','email','notes','status','created_at','updated_at')) interest_columns,
             (SELECT COUNT(*) FROM pragma_table_info('custom_request_fulfillment_prompts') WHERE name IN ('custom_request_fulfillment_prompt_id','custom_request_id','order_id','prompt_key','prompt_status','prompt_type','customer_name','customer_email','subject','body_text','consent_question_text','created_by_user_id','prompt_token','public_response_status','public_use_scope','review_text','customer_response_note','responded_at','expired_at','voided_at','public_proof_candidate_id','created_at','updated_at')) consent_columns,
-            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_requests_status','idx_custom_requests_email','idx_custom_requests_utm','idx_custom_candle_soap_specs_request','idx_custom_request_reference_uploads_request','idx_media_consent_records_source','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token')) named_indexes,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_requests_status','idx_custom_requests_email','idx_custom_requests_utm','idx_custom_candle_soap_specs_request','idx_custom_request_reference_uploads_request','idx_media_consent_records_source','idx_product_interest_requests_lookup','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token')) named_indexes,
             (SELECT COUNT(*) FROM pragma_foreign_key_check) fk_violations;" > /tmp/post.json
           python - <<'PY'
           import json
@@ -127,7 +131,7 @@ jobs:
             elif isinstance(v,list):
               for x in v: yield from walk(x)
           r=next(x for x in walk(d) if 'recovery_columns' in x)
-          expected={'recovery_columns':14,'requests_columns':31,'specs_columns':14,'uploads_columns':10,'media_columns':15,'consent_columns':23,'named_indexes':10,'fk_violations':0}
+          expected={'recovery_columns':14,'requests_columns':31,'specs_columns':14,'uploads_columns':10,'media_columns':15,'interest_columns':9,'consent_columns':23,'named_indexes':11,'fk_violations':0}
           for key,value in expected.items(): assert int(r[key])==value,(key,r[key],value)
           print('RELEASE 461 DEVELOPMENT D1 PUBLIC RUNTIME SCHEMA AUTHORITY: PASS')
           PY

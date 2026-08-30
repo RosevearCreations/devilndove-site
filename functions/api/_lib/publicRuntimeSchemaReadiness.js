@@ -33,6 +33,11 @@ const CUSTOM_REFERENCE_UPLOAD_COLUMNS = [
   "created_at",
 ];
 
+const PRODUCT_INTEREST_COLUMNS = [
+  "product_interest_request_id", "product_id", "request_type", "user_id", "email",
+  "notes", "status", "created_at", "updated_at",
+];
+
 const MEDIA_CONSENT_COLUMNS = [
   "consent_record_id", "consent_key", "subject_label", "source_type", "source_id", "media_url",
   "consent_status", "consent_scope", "public_use_allowed", "social_use_allowed", "privacy_notes",
@@ -91,4 +96,8 @@ export async function hasCustomRequestReferenceUploadSchema(db) {
   return (await hasTableShape(db, "custom_requests", CUSTOM_REQUEST_COLUMNS)) &&
     (await hasTableShape(db, "custom_request_reference_uploads", CUSTOM_REFERENCE_UPLOAD_COLUMNS)) &&
     (await hasTableShape(db, "media_consent_records", MEDIA_CONSENT_COLUMNS));
+}
+
+export async function hasProductInterestSchema(db) {
+  return hasTableShape(db, "product_interest_requests", PRODUCT_INTEREST_COLUMNS);
 }

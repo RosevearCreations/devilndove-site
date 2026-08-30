@@ -97,6 +97,19 @@ CREATE TABLE IF NOT EXISTS media_consent_records (
 );
 CREATE INDEX IF NOT EXISTS idx_media_consent_records_source ON media_consent_records(source_type, source_id, updated_at);
 
+CREATE TABLE IF NOT EXISTS product_interest_requests (
+  product_interest_request_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  request_type TEXT NOT NULL,
+  user_id INTEGER,
+  email TEXT,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'open',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_product_interest_requests_lookup ON product_interest_requests(product_id, request_type, status, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS custom_request_fulfillment_prompts (
   custom_request_fulfillment_prompt_id INTEGER PRIMARY KEY AUTOINCREMENT,
   custom_request_id INTEGER NOT NULL,
@@ -128,6 +141,7 @@ SELECT COUNT(*) AS release461_custom_requests_required_columns FROM pragma_table
 SELECT COUNT(*) AS release461_custom_specs_required_columns FROM pragma_table_info('custom_candle_soap_product_specs') WHERE name IN ('custom_candle_soap_product_spec_id','custom_request_id','product_id','product_draft_id','product_family','scent_profile','wax_or_base','colour_notes','batch_number','ingredient_notes','allergen_safety_notes','cure_ready_date','created_at','updated_at');
 SELECT COUNT(*) AS release461_reference_upload_required_columns FROM pragma_table_info('custom_request_reference_uploads') WHERE name IN ('custom_request_reference_upload_id','custom_request_id','request_key','public_url','object_key','original_filename','mime_type','file_size_bytes','reference_use_status','created_at');
 SELECT COUNT(*) AS release461_media_consent_required_columns FROM pragma_table_info('media_consent_records') WHERE name IN ('consent_record_id','consent_key','subject_label','source_type','source_id','media_url','consent_status','consent_scope','public_use_allowed','social_use_allowed','privacy_notes','reviewed_by_user_id','expires_at','created_at','updated_at');
+SELECT COUNT(*) AS release461_product_interest_required_columns FROM pragma_table_info('product_interest_requests') WHERE name IN ('product_interest_request_id','product_id','request_type','user_id','email','notes','status','created_at','updated_at');
 SELECT COUNT(*) AS release461_custom_consent_required_columns FROM pragma_table_info('custom_request_fulfillment_prompts') WHERE name IN ('custom_request_fulfillment_prompt_id','custom_request_id','order_id','prompt_key','prompt_status','prompt_type','customer_name','customer_email','subject','body_text','consent_question_text','created_by_user_id','prompt_token','public_response_status','public_use_scope','review_text','customer_response_note','responded_at','expired_at','voided_at','public_proof_candidate_id','created_at','updated_at');
-SELECT COUNT(*) AS release461_named_indexes FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_requests_status','idx_custom_requests_email','idx_custom_requests_utm','idx_custom_candle_soap_specs_request','idx_custom_request_reference_uploads_request','idx_media_consent_records_source','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token');
+SELECT COUNT(*) AS release461_named_indexes FROM sqlite_master WHERE type='index' AND name IN ('idx_checkout_recovery_session_email','idx_checkout_recovery_status_updated','idx_custom_requests_status','idx_custom_requests_email','idx_custom_requests_utm','idx_custom_candle_soap_specs_request','idx_custom_request_reference_uploads_request','idx_media_consent_records_source','idx_product_interest_requests_lookup','idx_custom_fulfillment_prompts_request','idx_custom_fulfillment_prompts_token');
 PRAGMA foreign_key_check;
