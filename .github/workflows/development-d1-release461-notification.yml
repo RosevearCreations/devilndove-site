@@ -1,0 +1,132 @@
+name: Development D1 Release 461 Notification Authority
+
+# Manual only. Source changes and new chats never trigger D1 mutation.
+on:
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  migrate-development-notification-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: dev, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Refuse non-Development source
+        run: test "${GITHUB_REF_NAME}" = dev
+      - name: Re-run Release 461 source safety before any write
+        run: |
+          python scripts/release461_aggregate_source_gate.py
+          node --check functions/api/_lib/notificationOutbox.js
+      - name: Protect exact Development authority
+        run: |
+          set -euo pipefail
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          ! grep -Eiq 'DROP[[:space:]]+TABLE|ALTER[[:space:]]+TABLE' migrations/dev/20260829_release461_notification_runtime_schema_authority.sql
+      - run: npm install --global wrangler@4.126.0
+      - name: Require credential
+        run: test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'Credential missing; no D1 write attempted.'; exit 1; }
+      - name: Verify exact D1 identity
+        run: |
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/d1.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          rows=list(walk(d))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in rows}
+          names={str(x.get('name') or '') for x in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids
+          assert os.environ['DEV_D1_DATABASE_NAME'] in names
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Read-only notification structural drift preflight
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='notification_outbox') outbox_table,
+            (SELECT COUNT(*) FROM pragma_table_info('notification_outbox') WHERE name IN ('notification_outbox_id','notification_kind','channel','destination','related_order_id','related_payment_id','related_product_id','payload_json','metadata_json','status','attempt_count','last_attempt_at','next_attempt_at','provider_message_id','error_text','created_at','updated_at')) outbox_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='notification_dispatch_log') dispatch_table,
+            (SELECT COUNT(*) FROM pragma_table_info('notification_dispatch_log') WHERE name IN ('notification_dispatch_log_id','notification_outbox_id','notification_kind','destination','status','provider_message_id','error_text','created_at')) dispatch_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='notification_exclusions') exclusions_table,
+            (SELECT COUNT(*) FROM pragma_table_info('notification_exclusions') WHERE name IN ('notification_exclusion_id','notification_kind','destination','product_id','order_id','reason','is_active','created_at','updated_at')) exclusions_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='notification_cooldown_rules') cooldown_table,
+            (SELECT COUNT(*) FROM pragma_table_info('notification_cooldown_rules') WHERE name IN ('notification_cooldown_rule_id','notification_kind','cooldown_hours','is_enabled','created_at','updated_at')) cooldown_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='customer_engagement_runs') engagement_table,
+            (SELECT COUNT(*) FROM pragma_table_info('customer_engagement_runs') WHERE name IN ('customer_engagement_run_id','run_type','actor_user_id','summary_json','created_at')) engagement_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_notification_outbox_status','idx_notification_outbox_kind','idx_notification_outbox_order_payment','idx_notification_dispatch_log_outbox','idx_notification_dispatch_log_status','idx_notification_exclusions_lookup','idx_customer_engagement_runs_created')) named_indexes,
+            (SELECT COUNT(*) FROM notification_cooldown_rules WHERE (notification_kind='checkout_recovery' AND cooldown_hours=24) OR (notification_kind='review_request' AND cooldown_hours=72) OR (notification_kind='back_in_stock' AND cooldown_hours=24) OR (notification_kind='gift_card_issued' AND cooldown_hours=1) OR (notification_kind='gift_card_purchase_confirmation' AND cooldown_hours=1)) default_cooldowns;" > /tmp/notification-pre.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/notification-pre.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'outbox_table' in x)
+          checks=[('notification_outbox','outbox',17),('notification_dispatch_log','dispatch',8),('notification_exclusions','exclusions',9),('notification_cooldown_rules','cooldown',6),('customer_engagement_runs','engagement',5)]
+          for name,prefix,required in checks:
+            present=int(r[f'{prefix}_table']); cols=int(r[f'{prefix}_columns'])
+            if present and cols != required:
+              raise SystemExit(f'STOP: {name} structural drift ({cols}/{required} required columns) needs a dedicated forward repair. Historical replay and runtime self-repair are forbidden.')
+          converged=all(int(r[f'{prefix}_table'])==1 and int(r[f'{prefix}_columns'])==required for _,prefix,required in checks) and int(r['named_indexes'])==7 and int(r['default_cooldowns'])==5
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+            f.write(f"R461_NOTIFICATION_CONVERGED={'1' if converged else '0'}\n")
+          print('Release 461 notification authority already converged:', converged)
+          print('Read-only notification structural preflight: PASS')
+          PY
+      - name: Apply only Release 461 notification authority after explicit safe preflight
+        if: env.R461_NOTIFICATION_CONVERGED != '1'
+        run: wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --file migrations/dev/20260829_release461_notification_runtime_schema_authority.sql
+      - name: Read-only post-write proof
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM pragma_table_info('notification_outbox') WHERE name IN ('notification_outbox_id','notification_kind','channel','destination','related_order_id','related_payment_id','related_product_id','payload_json','metadata_json','status','attempt_count','last_attempt_at','next_attempt_at','provider_message_id','error_text','created_at','updated_at')) outbox_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('notification_dispatch_log') WHERE name IN ('notification_dispatch_log_id','notification_outbox_id','notification_kind','destination','status','provider_message_id','error_text','created_at')) dispatch_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('notification_exclusions') WHERE name IN ('notification_exclusion_id','notification_kind','destination','product_id','order_id','reason','is_active','created_at','updated_at')) exclusions_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('notification_cooldown_rules') WHERE name IN ('notification_cooldown_rule_id','notification_kind','cooldown_hours','is_enabled','created_at','updated_at')) cooldown_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('customer_engagement_runs') WHERE name IN ('customer_engagement_run_id','run_type','actor_user_id','summary_json','created_at')) engagement_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_notification_outbox_status','idx_notification_outbox_kind','idx_notification_outbox_order_payment','idx_notification_dispatch_log_outbox','idx_notification_dispatch_log_status','idx_notification_exclusions_lookup','idx_customer_engagement_runs_created')) named_indexes,
+            (SELECT COUNT(*) FROM notification_cooldown_rules WHERE (notification_kind='checkout_recovery' AND cooldown_hours=24) OR (notification_kind='review_request' AND cooldown_hours=72) OR (notification_kind='back_in_stock' AND cooldown_hours=24) OR (notification_kind='gift_card_issued' AND cooldown_hours=1) OR (notification_kind='gift_card_purchase_confirmation' AND cooldown_hours=1)) default_cooldowns,
+            (SELECT COUNT(*) FROM pragma_foreign_key_check) fk_violations;" > /tmp/notification-post.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/notification-post.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'outbox_columns' in x)
+          expected={'outbox_columns':17,'dispatch_columns':8,'exclusions_columns':9,'cooldown_columns':6,'engagement_columns':5,'named_indexes':7,'default_cooldowns':5,'fk_violations':0}
+          for key,value in expected.items(): assert int(r[key])==value,(key,r[key],value)
+          print('RELEASE 461 DEVELOPMENT D1 NOTIFICATION AUTHORITY: PASS')
+          PY
+      - name: Boundary
+        run: |
+          echo 'Target: exact Development D1 only'
+          echo 'Historical migration replay: FORBIDDEN'
+          echo 'Automatic D1 mutation path: CLOSED'
+          echo 'Provider authorization/execution/publication: CLOSED'
+          echo 'Separate live Production mutation: NONE'
