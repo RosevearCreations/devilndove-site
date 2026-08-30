@@ -5,36 +5,45 @@ import {
   jsonResponse,
   normalizeText,
 } from "../_lib/adminAudit.js";
+import { assertAccountingPeriodOpen } from './_accountingPeriods.js';
 import { readAccountingOverheadProductAllocations } from '../_lib/accountingOverheadProductAllocationsReadService.js';
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { "Cache-Control": "no-store" });
 }
 
+async function tableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 async function ensureTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_overhead_product_allocations (
-      overhead_product_allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      period_month TEXT NOT NULL,
-      ledger_code TEXT NOT NULL DEFAULT '',
-      product_id INTEGER NOT NULL,
-      amount_cents INTEGER NOT NULL DEFAULT 0,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(period_month, ledger_code, product_id)
-    )
-  `).run();
-
-  await db.prepare(`
-    CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_month
-    ON accounting_overhead_product_allocations(period_month, ledger_code, product_id)
-  `).run();
-
-  await db.prepare(`
-    CREATE INDEX IF NOT EXISTS idx_accounting_overhead_product_allocations_product
-    ON accounting_overhead_product_allocations(product_id, period_month DESC)
-  `).run();
+  const columns = await tableColumnSet(db, 'accounting_overhead_product_allocations');
+  const requiredColumns = ['overhead_product_allocation_id','period_month','ledger_code','product_id','amount_cents','notes','created_at','updated_at'];
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting overhead product schema is not ready: accounting_overhead_product_allocations is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await tableIndexSet(db, 'accounting_overhead_product_allocations');
+  const requiredIndexes = ['idx_accounting_overhead_product_allocations_month','idx_accounting_overhead_product_allocations_product'];
+  const missingIndexes = requiredIndexes.filter((name) => !indexes.has(name));
+  if (missingIndexes.length) {
+    throw new Error(`Accounting overhead product schema is not ready: accounting_overhead_product_allocations is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+  }
+  return true;
 }
 
 function mapRow(row) {
@@ -115,25 +124,85 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "amount_cents must be a whole number of cents." }, 400);
   }
 
-  const product = await db.prepare(`
-    SELECT product_id, product_number, name, status, review_status
-    FROM products
-    WHERE product_id = ?
-    LIMIT 1
-  `).bind(productId).first();
+  try {
+    await assertAccountingPeriodOpen(db, periodMonth, 'Accounting overhead product allocations');
 
-  if (!product) {
-    return json({ ok: false, error: "Product not found." }, 404);
-  }
+    const product = await db.prepare(`
+      SELECT product_id, product_number, name, status, review_status
+      FROM products
+      WHERE product_id = ?
+      LIMIT 1
+    `).bind(productId).first();
 
-  if (mode === "delete" || amountCents === 0) {
+    if (!product) {
+      return json({ ok: false, error: "Product not found." }, 404);
+    }
+
+    if (mode === "delete" || amountCents === 0) {
+      await db.prepare(`
+        DELETE FROM accounting_overhead_product_allocations
+        WHERE period_month = ? AND ledger_code = ? AND product_id = ?
+      `).bind(periodMonth, ledgerCode, productId).run();
+
+      await auditAdminAction(context.env, context.request, adminUser, {
+        action_type: "delete_overhead_product_allocation",
+        target_type: "accounting_overhead_product_allocation",
+        target_id: productId,
+        target_key: `${periodMonth}:${ledgerCode}:${productId}`,
+        details: {
+          period_month: periodMonth,
+          ledger_code: ledgerCode,
+          product_id: productId,
+        },
+      });
+
+      return json({ ok: true, deleted: true });
+    }
+
     await db.prepare(`
-      DELETE FROM accounting_overhead_product_allocations
-      WHERE period_month = ? AND ledger_code = ? AND product_id = ?
-    `).bind(periodMonth, ledgerCode, productId).run();
+      INSERT INTO accounting_overhead_product_allocations (
+        period_month,
+        ledger_code,
+        product_id,
+        amount_cents,
+        notes,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(period_month, ledger_code, product_id) DO UPDATE SET
+        amount_cents = excluded.amount_cents,
+        notes = excluded.notes,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      periodMonth,
+      ledgerCode,
+      productId,
+      amountCents,
+      notes || null
+    ).run();
+
+    const saved = await db.prepare(`
+      SELECT
+        opa.overhead_product_allocation_id,
+        opa.period_month,
+        opa.ledger_code,
+        opa.product_id,
+        opa.amount_cents,
+        opa.notes,
+        opa.created_at,
+        opa.updated_at,
+        p.product_number,
+        p.name AS product_name,
+        p.status AS product_status,
+        p.review_status
+      FROM accounting_overhead_product_allocations opa
+      LEFT JOIN products p ON p.product_id = opa.product_id
+      WHERE opa.period_month = ? AND opa.ledger_code = ? AND opa.product_id = ?
+      LIMIT 1
+    `).bind(periodMonth, ledgerCode, productId).first();
 
     await auditAdminAction(context.env, context.request, adminUser, {
-      action_type: "delete_overhead_product_allocation",
+      action_type: "save_overhead_product_allocation",
       target_type: "accounting_overhead_product_allocation",
       target_id: productId,
       target_key: `${periodMonth}:${ledgerCode}:${productId}`,
@@ -141,66 +210,12 @@ export async function onRequestPost(context) {
         period_month: periodMonth,
         ledger_code: ledgerCode,
         product_id: productId,
+        amount_cents: amountCents,
       },
     });
 
-    return json({ ok: true, deleted: true });
+    return json({ ok: true, allocation: mapRow(saved) });
+  } catch (error) {
+    return json({ ok: false, error: error?.message || 'Failed to save overhead product allocation.' }, 500);
   }
-
-  await db.prepare(`
-    INSERT INTO accounting_overhead_product_allocations (
-      period_month,
-      ledger_code,
-      product_id,
-      amount_cents,
-      notes,
-      created_at,
-      updated_at
-    ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    ON CONFLICT(period_month, ledger_code, product_id) DO UPDATE SET
-      amount_cents = excluded.amount_cents,
-      notes = excluded.notes,
-      updated_at = CURRENT_TIMESTAMP
-  `).bind(
-    periodMonth,
-    ledgerCode,
-    productId,
-    amountCents,
-    notes || null
-  ).run();
-
-  const saved = await db.prepare(`
-    SELECT
-      opa.overhead_product_allocation_id,
-      opa.period_month,
-      opa.ledger_code,
-      opa.product_id,
-      opa.amount_cents,
-      opa.notes,
-      opa.created_at,
-      opa.updated_at,
-      p.product_number,
-      p.name AS product_name,
-      p.status AS product_status,
-      p.review_status
-    FROM accounting_overhead_product_allocations opa
-    LEFT JOIN products p ON p.product_id = opa.product_id
-    WHERE opa.period_month = ? AND opa.ledger_code = ? AND opa.product_id = ?
-    LIMIT 1
-  `).bind(periodMonth, ledgerCode, productId).first();
-
-  await auditAdminAction(context.env, context.request, adminUser, {
-    action_type: "save_overhead_product_allocation",
-    target_type: "accounting_overhead_product_allocation",
-    target_id: productId,
-    target_key: `${periodMonth}:${ledgerCode}:${productId}`,
-    details: {
-      period_month: periodMonth,
-      ledger_code: ledgerCode,
-      product_id: productId,
-      amount_cents: amountCents,
-    },
-  });
-
-  return json({ ok: true, allocation: mapRow(saved) });
 }
