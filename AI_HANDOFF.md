@@ -1,158 +1,242 @@
 # Devil n Dove — AI Handoff
 
 ## Current authority
-**Release 460 — Secure OAuth Lifecycle & Encrypted Token Authority** is the single current Development release.
 
-- Source branch: `dev`
+**Accepted Development release:** Release 460 — Secure OAuth Lifecycle & Encrypted Token Authority.
+
+**Active candidate:** Release 461 — Runtime Schema Authority and Development D1 Acceptance.
+
+Release 461 is source-implemented and source-gated, but it is **not yet the accepted D1 release**. `development-release.json` must remain Release 460 until the combined Release 461 Development D1 acceptance is deliberately completed and reviewed.
+
+Development boundary:
+
+- source branch: `dev`
 - Development Pages project: `devilndove-site-dev`
 - Development URL: `https://devilndove-site-dev.pages.dev`
-- Separate live Production: `main` / `devilndove-site` — **do not mutate**
 - D1 binding/database: `DB` → `devilndove-dev`
 - D1 UUID: `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
 - Product R2: `PRODUCT_MEDIA_BUCKET` → `devilndove-toolshed-images-dev`
 - CAIP private R2: `CAIP_PRIVATE_MEDIA_BUCKET` → `devilndove-caip-media-dev`
-- Never add `account_id` to `wrangler.toml`.
-- A new chat/workstation is not a migration event. Never replay historical migrations because the session changed.
+- separate live Production: `main` / `devilndove-site` — **do not mutate**
+- never add `account_id` to `wrangler.toml`
 
-## Release 459 checkpoint carried forward
-Release 459 remains the provider setup/authenticated-runtime preparation authority beneath Release 460. Its migration `migrations/dev/20260829_release459_it_provider_setup_authority.sql` is historical and must not be replayed unless read-only verification proves actual drift.
+A new chat, workstation, deploy, or source commit is **not** a migration event. Never replay historical migrations because the session changed.
 
-Release 459 D1 convergence was re-probed during Release 460 run `33273639605`; the migration apply step was **skipped** because the authority was already converged.
+## Release 461 governing rule
 
-## Release 460 security model
-1. OAuth state is random and stored only as a SHA-256 hash.
-2. Authorization state expires after ten minutes and is claimed atomically once before exchange; replay/expired/unknown/provider-mismatch state is rejected.
-3. PKCE uses S256 where the provider contract requires/supports it. Verifiers are encrypted at rest and cleared at terminal completion/failure.
-4. `OAUTH_TOKEN_ENCRYPTION_KEY_V1` is a 32-byte base64url Cloudflare secret reference. AES-GCM v1 envelopes with AAD protect PKCE verifiers and provider token material.
-5. D1 has ciphertext fields only for access/refresh/ID tokens. Plaintext OAuth secret/token columns are forbidden by automated schema proof.
-6. Contracts exist for Etsy, Pinterest, Meta, X, TikTok and YouTube/Google.
-7. `GET /api/admin/oauth-start` requires an administrator and is fail-closed unless the exact Development host and `OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit` both agree.
-8. **Do not set that operator switch yet.** Current canonical policy is unset/closed.
-9. Even after that switch is deliberately opened later, OAuth start refuses to redirect unless the provider-specific intended account reference is configured.
-10. Real callback responses are rejected with no exchange while the gate is closed. Normal callback browsing remains a safe readiness page.
-11. Once deliberately opened later, a callback exchanges server-side and retrieves/verifies provider identity **before any newly returned token is encrypted or persisted**. A mismatch fails closed and consumes the one-time transaction.
-12. Refresh repeats intended-account identity verification before refreshed token material can replace an existing connection.
-13. `/api/admin/oauth-connections` exposes redacted diagnostics and guarded refresh/disconnect. Raw provider subject/account IDs and token material are never emitted.
-14. Connection diagnostics use safe account labels and local expiry metadata only; this does not contact providers.
-15. Disconnect destroys local encrypted token material even if remote revocation cannot/should not execute.
-16. Provider publication is never granted by connection setup and remains closed.
+A request is a business operation, never a migration trigger.
 
-## Intended-account authority
-Before future live authorization, configure the correct Development secret/variable references. Values never belong in source or Markdown.
+Release 461 removes request-time:
 
-- Etsy: `ETSY_EXPECTED_USER_ID`; safe label `ETSY_EXPECTED_ACCOUNT_LABEL`
-- Pinterest: `PINTEREST_EXPECTED_USERNAME`; safe label `PINTEREST_EXPECTED_ACCOUNT_LABEL`
-- Meta: `META_EXPECTED_PAGE_ID`; optional `META_EXPECTED_INSTAGRAM_BUSINESS_ID`; safe label `META_EXPECTED_ACCOUNT_LABEL`
-- X: `X_EXPECTED_USER_ID`; safe label `X_EXPECTED_ACCOUNT_LABEL`
-- TikTok: `TIKTOK_EXPECTED_OPEN_ID`; safe label `TIKTOK_EXPECTED_ACCOUNT_LABEL`
-- YouTube: `YOUTUBE_EXPECTED_CHANNEL_ID`; safe label `YOUTUBE_EXPECTED_ACCOUNT_LABEL`
+- `CREATE TABLE`
+- `ALTER TABLE`
+- `CREATE INDEX`
+- implicit schema repair
+- implicit default/policy seeding
+- equivalent hidden migration/backfill behavior
 
-Meta verifies the intended managed Facebook Page and optionally its linked Instagram business account. Pinterest includes `user_accounts:read`; YouTube includes `youtube.readonly` so account/channel identity can be proven before publication is considered.
+Runtime may inspect schema read-only. If required schema is unavailable or structurally stale, runtime fails closed instead of repairing D1.
 
-## Non-executing publication planning
-Release 460 now has a separate six-provider local validation/idempotency layer.
+## Release 461 source status
 
-- `functions/api/_lib/socialPublishContracts.js` owns local publication validation for Etsy, Pinterest, Meta, X, TikTok and YouTube.
-- `/api/admin/provider-publication-plan` is admin-only and Development-host-only.
-- It validates/normalizes a publication intent and creates a deterministic SHA-256 idempotency key from provider + local source key/version + canonical normalized payload.
-- Identical normalized intents yield the same key and can be duplicate-blocked; revisions yield a new key.
-- It never reads/decrypts OAuth token material and never calls a provider.
-- The executable proof monkeypatches `fetch` and requires exactly zero network calls.
-- Instagram planning is deliberately marked permission-contract-not-ready rather than claiming current Meta OAuth setup grants Instagram publication.
-- Planner output is validation-only; it does not claim a provider will accept the payload.
+The current Release 461 aggregate source authority covers the identified public/customer, shared, notification, community, Content Automation/publication, payment/auth, and accounting runtime-schema slices.
 
-## Legacy provider execution closure
-The Release 460 HTTP authority now hard-closes the retained Build-era provider routes:
+The combined acceptance manifest currently validates:
 
-- `POST /api/admin/social-post-queue` action `publish_platforms` is intercepted in admin middleware and returns `provider_execution_closed` before the retained owner handler runs.
-- `POST /api/admin/social-product-automation` action `test_meta_connections` is also intercepted before owner execution.
-- `social-product-automation.js` is additionally owner-hard-closed: the old Meta Graph client and `fetch()` path were removed; direct invocation returns `provider_execution_closed` with `provider_contacted:false`.
-- Legacy social GET diagnostics are currentized so old credential presence cannot appear as `api_ready`; exposed readiness is `provider_execution_closed`.
-- `social-post-queue.js` still contains historical provider emitter functions behind the mandatory middleware guard. They are **not** an authorized Release 460 execution path; later physical removal is technical-debt cleanup.
-- Meta data-deletion readiness remains local/fail-closed and makes no provider request.
+- **15 Release 461 Development migrations**
+- **62 required tables**
+- **76 required named indexes**
 
-## Release 460 D1 checkpoint
-Current migration:
-`migrations/dev/20260829_release460_secure_oauth_lifecycle.sql`
+The manifest is generated from `migrations/dev/*release461*.sql` and rejects:
 
-It adds only:
-- `oauth_authorization_transactions`
-- `oauth_provider_connections`
-- `oauth_security_events`
+- Release 461 `ALTER TABLE`
+- destructive `DROP` authority
+- conflicting duplicate table/index definitions
+- migration-order definitions that cannot converge a missing table
 
-Guarded Development D1 run `33273087894` applied and proved Release 460. Later convergence run `33273639602` verified the exact Development database, found the OAuth authorities already present, **skipped migration apply**, and passed read-only plaintext/FK proof.
+Key package files:
 
-The intended-account and publication-planning layers required **no new migration**.
+- `scripts/release461_aggregate_source_gate.py`
+- `scripts/release461_d1_acceptance_manifest.py`
+- `scripts/release461_d1_acceptance_package_gate.py`
+- `.github/workflows/development-d1-release461-acceptance.yml`
+- `docs/operations/RELEASE_461_PUBLIC_RUNTIME_SCHEMA_AUTHORITY.md`
 
-Both `.github/workflows/development-d1-release459.yml` and `.github/workflows/development-d1-release460.yml` are **manual-dispatch only**. Ordinary source/authority edits do not wake them.
+## Release 461 accounting closure
 
-## Latest implementation checkpoint
-Exact Development source checkpoint before this authority synchronization:
-- SHA `9eb50239efca5f1c5c34dcd504d49fde718f3033`
-- Release 460 Source Gate `33279263075`: GREEN
-- System Gate `33279263080`: GREEN
-- Cloudflare Pages check `99171549842`: GREEN
-- Development preview: `https://95326a5a.devilndove-site-dev.pages.dev`
+The accounting scan expanded beyond the original statement-import helper and now has explicit migration ownership for the currently identified runtime schema authorities covering:
 
-The focused proof now covers:
-- actual Release 460 source/schema invariants;
-- executable Web Crypto AES-GCM/PKCE behavior;
-- six-provider OAuth exchange/refresh/identity contracts with mocks;
-- intended-account configuration and mismatch failure;
-- refresh identity re-verification before token replacement;
-- local six-provider publication validation and deterministic idempotency;
-- sensitive publication-input rejection;
-- zero-network publication mock proof;
-- Development-only publication-plan endpoint;
-- middleware closure of retained publish/probe HTTP actions;
-- removal of the legacy Meta probe client from its owner module;
-- currentized legacy readiness so credentials cannot imply execution readiness;
-- carried Release 459 authority, JavaScript syntax, and explicit closed Production/provider boundaries.
+- GIFI review notes
+- accounting attachments
+- fixed assets
+- period closures
+- reconciliation reviews
+- statement imports and rows
+- reconciliation exceptions
+- vendors
+- expenses
+- write-offs
+- recurring expense rules
+- General Ledger
+- journal entries/lines
+- payment applications
+- HST/GST reviews
+- accountant export packages
+- accounting evidence attachments
+- overhead allocations
+- overhead-to-product allocations
+- statement-provider profiles
 
-No real provider authorization, identity, token, probe, or publication endpoint was contacted by these proofs. No Release 459/460 D1 migration workflow launched from the source-only checkpoint.
+Current accounting migration files include:
 
-Key authorities:
-- `functions/api/_lib/oauthSecurity.js`
-- `functions/api/_lib/oauthProviders.js`
-- `functions/api/_lib/socialPublishContracts.js`
-- `functions/api/admin/oauth-start.js`
-- `functions/api/admin/oauth-connections.js`
-- `functions/api/admin/provider-publication-plan.js`
-- `functions/api/admin/_middleware.js`
-- `functions/api/social/oauth/_callback.js`
-- `scripts/release460_secure_oauth_gate.py`
-- `scripts/release460_oauth_crypto_proof.mjs`
-- `scripts/release460_provider_contract_mock_proof.mjs`
-- `scripts/release460_publish_contract_mock_proof.mjs`
-- `.github/workflows/release460-source-gate.yml`
-- `.github/workflows/development-d1-release459.yml`
-- `.github/workflows/development-d1-release460.yml`
-- `docs/operations/RELEASE_460_SECURE_OAUTH_LIFECYCLE_AUTHORITY.md`
+- `migrations/dev/20260829_release461_accounting_support_schema_authority.sql`
+- `migrations/dev/20260830_release461_accounting_statement_import_schema_authority.sql`
+- `migrations/dev/20260830_release461_accounting_expense_runtime_schema_authority.sql`
+- `migrations/dev/20260830_release461_accounting_general_ledger_schema_authority.sql`
+- `migrations/dev/20260830_release461_accounting_journal_schema_authority.sql`
+- `migrations/dev/20260830_release461_accounting_close_workflow_schema_authority.sql`
+- `migrations/dev/20260830_release461_accounting_overhead_provider_schema_authority.sql`
 
-## What remains before live provider authorization
-Continue automated work first:
-- Stripe/PayPal automated contract/replay/webhook/reconciliation preparation;
-- Development-to-Production parity, transition and rollback tooling;
-- remove retained unreachable legacy social provider emitters as cleanup without opening provider execution.
+Important preserved business behavior:
 
-Do not request provider authorization merely because Release 460 source/D1/mock proof is green.
+- `apply_starter_gifi_mappings` remains a deliberate audited General Ledger action; it is not an automatic migration/runtime seed.
+- statement-provider defaults remain available in memory and are materialized only by the explicit audited `seed_defaults` action.
+- CSV statement import no longer creates provider-profile schema or seeds provider defaults before every import.
+- overhead-to-product writes/deletes now respect the accounting period lock.
+- the journal write-off aggregation no longer queries nonexistent write-off ledger columns; it uses ledger `6900` / `Write-Off Expense`.
+- HST/GST reminder queueing delegates to notification authority; the close workflow does not recreate notification schema.
 
-## Manual boundary later
-Only after automated preparation is exhausted:
-- authenticated Development runtime evidence;
-- CAIP private-media browser proof;
-- Stripe test transaction/webhook/reconciliation;
-- PayPal sandbox transaction/webhook/reconciliation;
-- Etsy authorization/draft acceptance;
-- Pinterest/Meta/X/TikTok/YouTube authorization and controlled acceptance.
+## Broad source scan status
 
-Live provider authorization, provider execution/publication, and separate live Production remain closed throughout this work.
+After the accounting cleanup, candidate discovery was widened across current runtime schema signatures including `CREATE TABLE`, `ALTER TABLE`, index creation, `DROP TABLE`, seed/default patterns, backfills, and mutation-bearing `ensure*` helpers.
+
+Historical/default-branch search results are **candidate discovery only**. A file is an offender only after its exact `dev` version is fetched and verified.
+
+Exact-current candidates verified already migration-owned/read-only include:
+
+- `accounting-year-end-close.js`
+- `accounting-gifi-summary.js`
+- `product-costs.js`
+- `tier-policies.js`
+- `update-order-status.js`
+- `delete-product.js`
+- `mobile-create-product.js`
+- `gift-card-actions.js`
+- `gift-card-balance.js`
+- `product-production-release.js`
+
+The widened scan produced no additional confirmed current runtime DDL owner after the statement-import/provider cleanup. Do not reopen these files merely because an old code-search result mentions schema DDL.
+
+## Combined Release 461 Development D1 workflow
+
+`.github/workflows/development-d1-release461-acceptance.yml` is **manual-dispatch only**.
+
+It has two modes:
+
+### `preflight` — default, read-only
+
+The operator supplies the exact reviewed `dev` SHA. The workflow:
+
+1. refuses a moved/different source SHA
+2. re-runs the complete Release 461 source gate
+3. regenerates the Release 461 manifest
+4. verifies exact Development Pages/D1 configuration
+5. verifies D1 name and UUID through Cloudflare
+6. reads `sqlite_master` only
+7. compares existing tables/indexes against the Release 461 structural contract
+8. reports whether D1 is safe, already converged, or how many objects an apply would create
+9. performs **no D1 mutation**
+
+Interpretation:
+
+- missing Release 461 object → safe candidate for explicit forward creation
+- existing compatible object → safe
+- existing object missing required structure → **STOP**
+- conflicting named index → **STOP**
+- required pre-existing target table absent → **STOP**
+
+Any STOP requires a new forward repair migration. Historical replay and runtime repair remain forbidden.
+
+### `apply` — deliberate only
+
+Apply requires the same clean preflight plus the exact confirmation phrase:
+
+`APPLY-RELEASE-461-TO-DEVELOPMENT`
+
+The workflow then applies only the Release 461 migration set in deterministic order and requires:
+
+- full manifest convergence
+- zero `pragma_foreign_key_check` violations
+
+The workflow does **not** update `development-release.json` or touch separate live Production.
+
+## Release 461 D1 status
+
+**Pending.**
+
+No combined Release 461 D1 apply has been performed as part of the current source cleanup. The package is assembled and source-validated; Cloudflare preflight/apply remains manual-only.
+
+Do not call Release 461 complete until all of the following are true:
+
+1. exact-current Release 461 Source Gate is green
+2. exact-current System Gate is green
+3. combined workflow passes `preflight` against that exact SHA
+4. any discovered D1 structural drift is repaired through a new forward migration
+5. a deliberate `apply` run is authorized and succeeds
+6. post-apply structural/FK proof is green
+7. `development-release.json` is deliberately promoted to Release 461
+8. Development deploy/runtime acceptance agrees with the promoted SHA
+
+## Release 460 security authority carried forward
+
+Release 460 remains the accepted security/provider authority beneath Release 461:
+
+- OAuth state is random, SHA-256 stored, expiring, and single-use.
+- PKCE S256 and encrypted verifier storage are used where required/supported.
+- `OAUTH_TOKEN_ENCRYPTION_KEY_V1` protects OAuth token material using versioned AES-GCM envelopes.
+- plaintext OAuth token columns are forbidden.
+- intended-account identity is verified before newly exchanged/refreshed token persistence.
+- administrator OAuth start is Development-gated.
+- provider execution/publication remains closed.
+- retained legacy publish/probe HTTP actions remain blocked.
+- `OAUTH_PROVIDER_AUTHORIZATION_MODE` remains unset/closed unless deliberately changed later.
+
+Do **not** reopen provider authorization because Release 461 schema source is green.
+
+## Provider/manual acceptance later
+
+The following remain separate manual/provider evidence work and do not block Release 461 source cleanup:
+
+- authenticated Development runtime evidence
+- CAIP private-media browser proof
+- Stripe test transaction/webhook/reconciliation
+- PayPal sandbox transaction/webhook/reconciliation
+- Etsy authorization/draft acceptance
+- Pinterest/Meta/X/TikTok/YouTube authorization and controlled acceptance
+
+Provider live authorization, execution/publication, and separate live Production remain closed.
+
+## Restart point
+
+At a new chat/session:
+
+1. read `development-release.json` and remember that Release 460 remains accepted until Release 461 D1 acceptance is complete
+2. verify exact `dev` head
+3. verify Release 461 Source Gate and System Gate on that exact SHA
+4. verify Development D1/R2 identities read-only
+5. do not replay historical migrations
+6. do not redo closed Release 461 accounting/runtime slices without exact-current regression evidence
+7. if source remains green, the next database step is the combined Release 461 workflow in **`preflight`** mode using that exact reviewed SHA
+8. if preflight reports drift, stop and create a dedicated forward repair migration
+9. only after clean preflight should a separate deliberate `apply` be considered
 
 ## Canonical reading order
+
 1. `development-release.json`
 2. `AI_HANDOFF.md`
 3. `PROJECT_STATUS_AND_ROADMAP.md`
 4. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`
-5. `docs/operations/RELEASE_460_SECURE_OAUTH_LIFECYCLE_AUTHORITY.md`
+5. `docs/operations/RELEASE_461_PUBLIC_RUNTIME_SCHEMA_AUTHORITY.md`
+6. `docs/operations/RELEASE_460_SECURE_OAUTH_LIFECYCLE_AUTHORITY.md`
 
 Older Markdown is historical/supporting material, not current release authority.
