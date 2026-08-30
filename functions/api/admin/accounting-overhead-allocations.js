@@ -20,19 +20,36 @@ function validBasis(value) {
   return ['manual', 'revenue', 'orders', 'units'].includes(v) ? v : 'manual';
 }
 
+async function tableColumnSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexSet(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 async function ensureTable(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_overhead_allocations (
-    allocation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    period_month TEXT NOT NULL,
-    ledger_code TEXT NOT NULL DEFAULT '',
-    ledger_name TEXT NOT NULL DEFAULT '',
-    allocation_basis TEXT NOT NULL DEFAULT 'manual',
-    amount_cents INTEGER NOT NULL DEFAULT 0,
-    notes TEXT NOT NULL DEFAULT '',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(period_month, ledger_code)
-  )`).run();
+  const columns = await tableColumnSet(db, 'accounting_overhead_allocations');
+  const requiredColumns = ['allocation_id','period_month','ledger_code','ledger_name','allocation_basis','amount_cents','notes','created_at','updated_at'];
+  const missingColumns = requiredColumns.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    throw new Error(`Accounting overhead schema is not ready: accounting_overhead_allocations is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+  }
+  const indexes = await tableIndexSet(db, 'accounting_overhead_allocations');
+  if (!indexes.has('idx_accounting_overhead_allocations_period')) {
+    throw new Error('Accounting overhead schema is not ready: accounting_overhead_allocations is missing index idx_accounting_overhead_allocations_period. Apply the current Development migration authority.');
+  }
+  return true;
 }
 
 function mapRow(row, period) {
