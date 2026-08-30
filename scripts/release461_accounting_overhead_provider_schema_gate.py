@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 overhead_route = ROOT / 'functions/api/admin/accounting-overhead-allocations.js'
 overhead_product_route = ROOT / 'functions/api/admin/accounting-overhead-product-allocations.js'
 provider_route = ROOT / 'functions/api/admin/accounting-statement-provider-profiles.js'
+statement_import_route = ROOT / 'functions/api/admin/accounting-statement-imports.js'
 overhead_read = ROOT / 'functions/api/_lib/accountingOverheadAllocationsReadService.js'
 overhead_product_read = ROOT / 'functions/api/_lib/accountingOverheadProductAllocationsReadService.js'
 provider_read = ROOT / 'functions/api/_lib/accountingStatementProviderProfilesReadService.js'
@@ -15,7 +16,7 @@ release_marker = ROOT / 'development-release.json'
 
 DDL = re.compile(r'\b(?:CREATE\s+TABLE|ALTER\s+TABLE|CREATE\s+(?:UNIQUE\s+)?INDEX|DROP\s+TABLE|DROP\s+INDEX)\b', re.I)
 
-runtime_paths = (overhead_route, overhead_product_route, provider_route, overhead_read, overhead_product_read, provider_read)
+runtime_paths = (overhead_route, overhead_product_route, provider_route, statement_import_route, overhead_read, overhead_product_read, provider_read)
 for path in runtime_paths:
     text = path.read_text(encoding='utf-8')
     assert not DDL.search(text), f'accounting overhead/provider runtime DDL remains in {path}'
@@ -37,6 +38,10 @@ for path, tokens in (
         "action === 'seed_defaults'", 'await seedDefaults(db);', 'accounting_statement_provider_profiles_seed_defaults',
         'Apply the current Development migration authority.',
     )),
+    (statement_import_route, (
+        'ensureAccountingStatementImportsTables(db)', 'createStatementImportFromCsv',
+        'import_accounting_statement_csv',
+    )),
 ):
     text = path.read_text(encoding='utf-8')
     for token in tokens:
@@ -46,6 +51,10 @@ provider_text = provider_route.read_text(encoding='utf-8')
 seed_call = 'await seedDefaults(db);'
 assert provider_text.count(seed_call) == 1, 'provider defaults must materialize only through the explicit seed_defaults action'
 assert provider_text.find("action === 'seed_defaults'") < provider_text.find(seed_call), 'seedDefaults must remain behind explicit seed_defaults action'
+
+statement_import_text = statement_import_route.read_text(encoding='utf-8')
+for forbidden in ('DEFAULT_PROVIDER_PROFILES', 'ensureStatementProviderProfilesTable', 'seedProviderProfileDefaults', 'INSERT OR IGNORE INTO accounting_statement_provider_profiles'):
+    assert forbidden not in statement_import_text, f'statement import route must not recreate or seed provider profile authority: {forbidden}'
 
 for path, tokens in (
     (overhead_read, ('request_time_schema_mutation: false', 'PRAGMA table_info(', "AUTHORITY_TABLE = 'accounting_overhead_allocations'")),
