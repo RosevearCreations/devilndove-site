@@ -8,6 +8,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 MIG = ROOT / 'migrations/dev/20260830_release461_inventory_base_unit_authority.sql'
+COMPAT = ROOT / 'migrations/dev/20260830_release461_inventory_base_unit_compatibility_triggers.sql'
 API = ROOT / 'functions/api/admin/site-item-inventory.js'
 BASE = ROOT / 'functions/api/admin/_inventoryBaseAuthority.js'
 RES = ROOT / 'functions/api/admin/_productResourcesData.js'
@@ -17,11 +18,12 @@ USABILITY = ROOT / 'public/js/admin-inventory-base-unit-usability.js'
 ADMIN = ROOT / 'public/js/admin.js'
 MOBILE = ROOT / 'admin/mobile-inventory/index.html'
 
-for path in (MIG, API, BASE, RES, LEGACY_API, LEGACY_RES, USABILITY, ADMIN, MOBILE):
+for path in (MIG, COMPAT, API, BASE, RES, LEGACY_API, LEGACY_RES, USABILITY, ADMIN, MOBILE):
     if not path.is_file():
         raise SystemExit(f'Missing Release 461 inventory authority file: {path.relative_to(ROOT)}')
 
 migration = MIG.read_text(encoding='utf-8')
+compat = COMPAT.read_text(encoding='utf-8')
 api = API.read_text(encoding='utf-8')
 base = BASE.read_text(encoding='utf-8')
 resources = RES.read_text(encoding='utf-8')
@@ -29,10 +31,15 @@ usability = USABILITY.read_text(encoding='utf-8')
 admin = ADMIN.read_text(encoding='utf-8')
 mobile = MOBILE.read_text(encoding='utf-8')
 
+forward_re = re.compile(r'\b(?:ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW))\b', re.I)
 checks = {
     'migration owns base balance table': 'CREATE TABLE IF NOT EXISTS site_inventory_base_balances' in migration,
     'migration backfills existing inventory once': 'INSERT OR IGNORE INTO site_inventory_base_balances' in migration and 'FROM site_item_inventory sii' in migration,
-    'migration remains forward/additive': not re.search(r'\b(?:ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW))\b', migration, re.I),
+    'base migration remains forward/additive': not forward_re.search(migration),
+    'compatibility migration remains forward/additive': not forward_re.search(compat),
+    'legacy insert writers mirror to base authority': 'CREATE TRIGGER IF NOT EXISTS trg_site_item_inventory_base_insert' in compat,
+    'legacy update writers mirror to base authority': 'CREATE TRIGGER IF NOT EXISTS trg_site_item_inventory_base_update' in compat,
+    'compatibility sync covers quantity conversion': 'usage_units_per_stock_unit' in compat and 'base_on_hand_quantity' in compat and 'base_incoming_quantity' in compat,
     'runtime wrapper preserves legacy implementation': "from './_siteItemInventoryLegacy.js'" in api,
     'runtime requires migration before inventory writes': 'assertInventoryBaseAuthorityReady' in api,
     'runtime synchronizes base authority after writes': 'syncInventoryBaseBalance' in api and 'syncInventoryBaseBalances' in api,
@@ -54,7 +61,8 @@ if failed:
 
 print('RELEASE 461 INVENTORY PACKAGE / BASE-UNIT AUTHORITY: PASS')
 print('Purchase packaging/cost authority: PRESERVED')
-print('Usable/base stock authority: CANONICAL')
+print('Usable/base stock authority: CANONICAL READ AUTHORITY')
+print('Legacy direct writers: MIGRATION-SYNCHRONIZED')
 print('Desktop/mobile usability: ALIGNED')
 print('Runtime DDL: NONE')
 print('D1 / provider / R2 / Production mutation: NONE')
