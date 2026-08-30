@@ -1,190 +1,325 @@
-# Release 461 Candidate — Runtime Schema Authority
+# Release 461 Candidate — Runtime Schema and D1 Acceptance Authority
 
-## Scope
+## Purpose
 
-Release 461 candidate work is removing request-time D1 schema creation, repair, index creation, and policy seeding from public/customer and shared/admin runtime paths. A request is a business operation, never a migration trigger.
+Release 461 removes request-time D1 schema creation, repair, index creation, implicit policy/default seeding, and equivalent hidden migration behavior from public/customer, shared, and admin runtime paths.
 
-The first public/customer migration-owned slice covers:
+The governing rule is simple:
 
-- `/api/checkout-recovery-lead`
-- `/api/custom-request-consent`
-- `/api/custom-request`
-- `/api/custom-request-reference-upload`
-- `/api/product-interest`
+> A request is a business operation, never a migration trigger.
 
-The broader public/customer audit also covers the focused Release 461 product-offer, member, telemetry, community, auth, custom-request-commerce, and payment-webhook contracts now collected by `scripts/release461_aggregate_source_gate.py`.
+Runtime code may inspect schema read-only and may perform legitimate business reads/writes when the required contract is ready. If the contract is missing or structurally stale, runtime must fail closed instead of repairing D1.
 
-## Public/customer authority change
+## Environment boundary
 
-`migrations/dev/20260829_release461_public_runtime_schema_authority.sql` owns the current schema used by:
+Release 461 work is Development-only:
 
-- `checkout_recovery_leads`
-- `custom_request_fulfillment_prompts`
-- `custom_requests`
-- `custom_candle_soap_product_specs`
-- `custom_request_reference_uploads`
-- `media_consent_records`
-- `product_interest_requests`
+- source branch: `dev`
+- Cloudflare Pages project: `devilndove-site-dev`
+- Development D1 database: `devilndove-dev`
+- exact Development D1 UUID: `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
+- separate live Production: untouched
+- provider live authorization/execution/publication: closed
+- historical migration replay: forbidden
+- automatic D1 migration trigger: forbidden
 
-The public handlers perform business reads/writes only after read-only schema-readiness checks. They do not create tables, add columns, or create indexes.
+`development-release.json` intentionally remains at accepted **Release 460** until Release 461 Development D1 authority is explicitly accepted. Source cleanup alone is not a database release.
 
-When required schema is unavailable, the handler fails closed with HTTP 503. Customer traffic is never allowed to repair D1.
+## Release 461 migration inventory
 
-## Shared/admin notification authority
+The combined acceptance manifest currently validates **15** Development Release 461 migrations. Together they describe **62 required tables** and **76 named indexes**.
 
-The notification outbox helper was a confirmed shared-runtime offender. It previously created notification support tables, repaired missing `notification_outbox` columns, and inserted default cooldown policy rows while normal queue/dispatch traffic was running.
+Current migration authority:
 
-Release 461 now moves that ownership to:
+1. `migrations/dev/20260829_release461_accounting_support_schema_authority.sql`
+2. `migrations/dev/20260829_release461_content_automation_publication_authority.sql`
+3. `migrations/dev/20260829_release461_custom_request_commerce_authority.sql`
+4. `migrations/dev/20260829_release461_member_runtime_schema_authority.sql`
+5. `migrations/dev/20260829_release461_notification_runtime_schema_authority.sql`
+6. `migrations/dev/20260829_release461_public_community_authority.sql`
+7. `migrations/dev/20260829_release461_public_product_offer_authority.sql`
+8. `migrations/dev/20260829_release461_public_runtime_schema_authority.sql`
+9. `migrations/dev/20260829_release461_public_telemetry_authority.sql`
+10. `migrations/dev/20260830_release461_accounting_close_workflow_schema_authority.sql`
+11. `migrations/dev/20260830_release461_accounting_expense_runtime_schema_authority.sql`
+12. `migrations/dev/20260830_release461_accounting_general_ledger_schema_authority.sql`
+13. `migrations/dev/20260830_release461_accounting_journal_schema_authority.sql`
+14. `migrations/dev/20260830_release461_accounting_overhead_provider_schema_authority.sql`
+15. `migrations/dev/20260830_release461_accounting_statement_import_schema_authority.sql`
 
-`migrations/dev/20260829_release461_notification_runtime_schema_authority.sql`
+The acceptance manifest rejects Release 461 migrations containing `ALTER TABLE` or destructive `DROP` operations. It also rejects conflicting duplicate table/index definitions and migration-order shapes that could not converge through forward/additive `CREATE ... IF NOT EXISTS` authority.
 
-That additive Development migration owns the required shape for:
+## Public/customer source authority
+
+The Release 461 public/customer audit has closed the currently identified runtime-schema owners covering:
+
+- checkout recovery leads
+- custom-request consent, request records, fulfillment prompts, product specifications, reference uploads, and commerce support
+- product-interest/product-offer contracts
+- member runtime contracts
+- public telemetry contracts
+- community events, pickup profiles, and vendor applications
+- public auth schema contracts
+- payment-webhook schema contracts
+
+Focused gates remain authoritative for each public slice and are all collected by `scripts/release461_aggregate_source_gate.py`.
+
+When a required public schema contract is unavailable, the corresponding handler fails closed rather than creating or altering D1.
+
+## Notification authority
+
+`functions/api/_lib/notificationOutbox.js` no longer creates notification tables, repairs columns, creates indexes, or silently seeds policy rows during normal queue/dispatch traffic.
+
+`migrations/dev/20260829_release461_notification_runtime_schema_authority.sql` owns:
 
 - `notification_outbox`
 - `notification_dispatch_log`
 - `notification_exclusions`
 - `notification_cooldown_rules`
 - `customer_engagement_runs`
-- notification outbox/dispatch/exclusion/engagement indexes
-- default cooldown rows for checkout recovery, review requests, back-in-stock notices, and gift-card delivery notices
+- notification indexes
+- explicitly migration-owned default cooldown policy rows
 
-`functions/api/_lib/notificationOutbox.js` now verifies those tables and required columns read-only through `sqlite_master` and `PRAGMA table_info`. Queueing, suppression, retries, dispatch logging, and notification delivery remain business operations. If the schema is unavailable, the helper raises `notification_schema_unavailable` instead of mutating schema.
+The notification helper now performs read-only readiness checks. Queueing, suppression, retries, dispatch logging, and delivery remain normal business operations.
 
-Focused source authority is enforced by `scripts/release461_notification_runtime_schema_gate.py`, which is part of the aggregate Release 461 source gate.
-
-A dedicated manual-only workflow, `.github/workflows/development-d1-release461-notification.yml`, exists for eventual Development acceptance. It verifies the exact Development D1 identity, runs read-only structural drift checks, refuses partial existing table shapes, and only then may apply the additive notification authority migration. It is not an automatic migration trigger and must not be dispatched merely because source changed or a new chat started.
+The accounting close workflow does **not** duplicate notification schema authority. HST/GST reminder queueing delegates to the notification service and therefore inherits the notification readiness contract.
 
 ## Shared community authority
 
-`functions/api/_communityContent.js` previously retained schema self-healing even though the public community route had already been made read-only. Release 461 now makes the shared/admin helper read-only as well.
+`functions/api/_communityContent.js` and its public/admin callers now treat community schema as migration-owned.
 
-The existing additive authority remains:
+`migrations/dev/20260829_release461_public_community_authority.sql` owns the community event, pickup profile, vendor-application, recurrence/application columns, and associated indexes required by current runtime callers.
 
-`migrations/dev/20260829_release461_public_community_authority.sql`
+Compatibility `ensure*` functions may retain their historical names, but they now inspect schema read-only.
 
-It owns:
+## Content Automation Studio/publication authority
 
-- `community_events`
-- `pickup_profiles`
-- `event_vendor_applications`
-- recurrence/application support columns
-- the active/sort/application indexes used by public and admin callers
-
-The helper preserves its compatibility `ensure*` exports, but those functions now perform structural `PRAGMA table_info` / `PRAGMA index_list` checks only. They do not create or alter schema. `scripts/release461_public_community_schema_gate.py` now protects both the public and shared/admin paths.
-
-## Content Automation Studio and publication authority
-
-The Content Automation Studio shared helper and content-publication helper were another confirmed hidden runtime schema owner. Runtime calls previously created the five Content Automation Studio workflow tables, the two publication tables, and their indexes.
-
-Release 461 now owns that schema explicitly in:
+Release 461 moved Content Automation Studio and publication table/index ownership out of shared runtime helpers into:
 
 `migrations/dev/20260829_release461_content_automation_publication_authority.sql`
 
-The additive Development authority covers:
+This includes current project, media, deliverable, render-job, event, publication, and publication-event authorities.
 
-- `content_projects`
-- `content_project_media`
-- `content_project_deliverables`
-- `content_render_jobs`
-- `content_project_events`
-- `content_publications`
-- `content_publication_events`
-- all corresponding project/media/deliverable/render/event/publication indexes
+`functions/api/_lib/contentAutomationSchemaReadiness.js` is the shared structural readiness authority. Project/media/publication business writes remain available only after the schema is ready.
 
-`functions/api/_lib/contentAutomationSchemaReadiness.js` is now the shared read-only structural authority. It verifies required columns and indexes through `PRAGMA table_info` and `PRAGMA index_list`.
+## Accounting source authority
 
-`functions/api/_lib/contentAutomationStudio.js` and `functions/api/_lib/contentPublications.js` retain their existing compatibility `ensure*Schema` function names for callers, but those functions now delegate to read-only readiness. Legitimate business writes—project creation, media archiving, deliverable updates, render-job creation, publication preparation, approval, publishing state, metrics, and event records—remain intact. Request traffic no longer creates or repairs the supporting tables.
+The accounting scan was expanded until the exact-current admin/shared candidate set stopped producing new runtime DDL owners.
 
-Focused source authority is enforced by `scripts/release461_content_automation_schema_gate.py`, now included in `scripts/release461_aggregate_source_gate.py`.
+### Accounting support and reconciliation
 
-The Content Automation/Publication migration is source authority only at this checkpoint. It has not been applied to Development D1 and no provider publishing execution has been opened.
+`migrations/dev/20260829_release461_accounting_support_schema_authority.sql` and `migrations/dev/20260830_release461_accounting_statement_import_schema_authority.sql` now own the structures used by:
 
-## Accounting support authority
+- GIFI review notes
+- accounting attachments and statement metadata
+- fixed assets
+- period closures
+- reconciliation reviews
+- statement imports
+- statement import rows
+- reconciliation exceptions
+- their required indexes
 
-The exact-current shared/admin accounting audit first found the GIFI review-note helper and accounting-attachment helper, then expanded to fixed assets, period closures, reconciliation reviews, statement imports, statement rows, and reconciliation exceptions. Before Release 461, those runtime paths could create support tables and indexes; the attachment, reconciliation, and statement-import helpers also repaired older tables with request-time `ALTER TABLE` statements.
+The corresponding helpers use `PRAGMA table_info` / `PRAGMA index_list` read-only readiness and never perform request-time repair.
 
-Release 461 now owns those structures explicitly in:
+### Vendors, expenses, write-offs, and recurring expenses
 
-- `migrations/dev/20260829_release461_accounting_support_schema_authority.sql`
-- `migrations/dev/20260830_release461_accounting_statement_import_schema_authority.sql`
+`migrations/dev/20260830_release461_accounting_expense_runtime_schema_authority.sql` owns:
 
-The additive Development authority covers:
+- `accounting_vendors`
+- `accounting_expenses`
+- `accounting_writeoffs`
+- `accounting_recurring_expense_rules`
+- their required indexes
 
-- `accounting_gifi_review_notes`
-- `idx_accounting_gifi_review_notes_year`
-- `accounting_attachments`
-- attachment classification, scope, provider, statement-total, statement-period, and statement-detail columns
-- `idx_accounting_attachments_expense`
-- `idx_accounting_attachments_vendor`
-- `idx_accounting_attachments_period`
-- `idx_accounting_attachments_scope`
-- `accounting_fixed_assets`
-- `accounting_period_closures`
-- `idx_accounting_period_closures_period`
-- `accounting_reconciliation_reviews`
-- reconciliation statement/detail/rate/unresolved-item columns
-- `idx_accounting_reconciliation_reviews_type_period`
-- `accounting_statement_imports`
-- `accounting_statement_import_rows`
-- `accounting_reconciliation_exceptions`
-- reconciliation-exception assignment, accountant-review, resolution, and reopen columns
-- `idx_accounting_statement_imports_period`
-- `idx_accounting_statement_import_rows_import`
-- `idx_accounting_statement_import_rows_provider_ref`
-- `idx_accounting_reconciliation_exceptions_period`
-- `idx_accounting_reconciliation_exceptions_queue`
+The vendor, expense, write-off, and recurring-expense write routes now fail when the required schema is stale rather than creating or altering it.
 
-`functions/api/admin/_accountingGifi.js`, `functions/api/admin/_accountingAttachments.js`, `functions/api/admin/accounting-fixed-assets.js`, `functions/api/admin/_accountingPeriods.js`, `functions/api/admin/_accountingReconciliation.js`, and `functions/api/admin/_accountingStatementImports.js` now verify required columns and indexes read-only through `PRAGMA table_info` and, where applicable, `PRAGMA index_list`. Compatibility `ensure*` names remain for callers, but they no longer execute DDL.
+### General Ledger
 
-Business behavior remains intact when schema is ready: GIFI review-note reads/writes continue; accounting attachment upload still writes the R2 object plus the accounting row; fixed-asset creation still inserts the asset record; period locking/reopening still writes the closure state; reconciliation review reads/writes remain available; and CSV statement imports still create statement/import rows, run reconciliation auto-match, update review state, and create or update reconciliation exceptions. If Development schema is structurally stale, these paths surface schema-not-ready errors instead of silently repairing D1 during traffic.
+`migrations/dev/20260830_release461_accounting_general_ledger_schema_authority.sql` owns `general_ledger_accounts` and its indexes.
 
-Focused source authority is enforced by `scripts/release461_accounting_support_schema_gate.py`, already included in `scripts/release461_aggregate_source_gate.py`. It protects both accounting migrations and the statement-import runtime helper against reintroduction of request-time DDL. Both accounting migrations remain source authority only and have not been applied to Development D1 as part of this source cleanup.
+The deliberate audited admin action `apply_starter_gifi_mappings` remains a legitimate business action. Those mappings are **not** silently seeded by the migration or normal runtime traffic.
 
-The statement-import source checkpoint is `8d2a584424f6d7221651c7f9bdec5461c7974377`. Release 461 Source Gate `33312655653` and System Gate `33312655628` both passed on that exact SHA.
+### Journal
 
-## Drift and migration rule
+`migrations/dev/20260830_release461_accounting_journal_schema_authority.sql` owns journal entries, journal lines, and their indexes.
 
-Release 461 Development D1 workflows are manual-dispatch-only. Before any write they verify the exact Development project/database identity and probe existing table shapes read-only.
+During this cleanup an independent correctness issue was also closed: the journal had attempted to group write-offs by nonexistent `accounting_writeoffs.ledger_code` / `ledger_name` fields. Current journal aggregation explicitly uses the existing write-off fallback authority:
 
-If an existing table is structurally older than the Release 461 contract, the workflow stops. That condition requires a deliberate new forward repair migration. Historical migrations must not be replayed and runtime code must not self-repair the table.
+- ledger code `6900`
+- ledger name `Write-Off Expense`
 
-If a table is absent, or if structurally compatible tables only need explicitly owned additive indexes/default rows, the current Release 461 migration may be applied after the read-only preflight.
+The focused journal source gate protects both the schema boundary and that corrected aggregation contract.
 
-## Current phase status
+### Month-end close workflow
 
-- Public/customer runtime-schema source audit: closed for the currently identified Release 461 public slices and protected by focused gates.
-- Shared/admin notification runtime-schema source slice: migration-owned and runtime-read-only at source level.
-- Shared community runtime-schema source slice: migration-owned and runtime-read-only at source level.
-- Content Automation Studio/publication runtime-schema source slice: migration-owned and runtime-read-only at source level.
-- Accounting GIFI/attachment/fixed-asset/period/reconciliation/statement-import/exception support runtime-schema source slice: migration-owned and runtime-read-only at source level.
-- Development D1 Release 461 acceptance: pending manual execution; not claimed complete.
-- Provider-specific Stripe/PayPal acceptance: still closed/pending credentials and does not block unrelated source cleanup.
-- Remaining shared/admin audit: perform a fresh exact-current `functions/api/**` and shared-helper scan for the next hidden runtime schema mutation, request-time seed, or backfill owner.
+`migrations/dev/20260830_release461_accounting_close_workflow_schema_authority.sql` owns:
 
-## Boundaries
+- `accounting_payment_applications`
+- `accounting_hst_gst_reviews`
+- `accountant_export_packages`
+- `accounting_evidence_attachments`
+- close-workflow indexes and HST/GST evidence/reminder columns
 
-- Development branch/project only.
+`accounting_period_closures` remains owned by the accounting support authority. Notification schema remains owned by notification authority.
+
+The close route performs read-only structural checks before payment application, HST/GST review, close-checklist, reminder, or export-manifest business actions.
+
+### Overhead and statement-provider profiles
+
+`migrations/dev/20260830_release461_accounting_overhead_provider_schema_authority.sql` owns:
+
+- `accounting_overhead_allocations`
+- `accounting_overhead_product_allocations`
+- `accounting_statement_provider_profiles`
+- their required indexes
+
+Both overhead write routes now perform read-only readiness checks, and overhead-to-product writes/deletes respect the accounting period lock.
+
+Statement-provider defaults remain available in memory through the read service. Database materialization occurs only through the explicit audited `seed_defaults` admin action. Normal profile saves do not seed unrelated defaults.
+
+`functions/api/admin/accounting-statement-imports.js` was also corrected: CSV import no longer recreates `accounting_statement_provider_profiles` or materializes provider defaults before every import. Statement import now depends only on statement-import schema readiness and its actual business import logic.
+
+## Broad exact-current source scan
+
+After closing the accounting slices, the candidate scan was widened across runtime signatures including:
+
+- `CREATE TABLE`
+- `ALTER TABLE`
+- `CREATE INDEX` / `CREATE UNIQUE INDEX`
+- `DROP TABLE`
+- `INSERT OR IGNORE` default-seed patterns
+- `seed*`
+- `backfill*`
+- mutation-bearing `ensureTable` / `ensureSchema` patterns
+
+Historical/default-branch search results were treated only as candidate discovery. A file was considered an offender only after its exact `dev` version was fetched and verified.
+
+Exact-current candidates verified clean include, among others:
+
+- `accounting-year-end-close.js`
+- `accounting-gifi-summary.js`
+- `product-costs.js`
+- `tier-policies.js`
+- `update-order-status.js`
+- `delete-product.js`
+- `mobile-create-product.js`
+- `gift-card-actions.js`
+- `gift-card-balance.js`
+- `product-production-release.js`
+
+The widened search produced no additional confirmed current runtime DDL owner after the statement-import/provider cleanup. Source scanning should still be repeated after future code changes, but the current Release 461 candidate set is ready for combined D1 preflight.
+
+## Combined Development D1 acceptance package
+
+Release 461 now has one combined acceptance package:
+
+- manifest/drift engine: `scripts/release461_d1_acceptance_manifest.py`
+- package source gate: `scripts/release461_d1_acceptance_package_gate.py`
+- manual workflow: `.github/workflows/development-d1-release461-acceptance.yml`
+
+The package source gate is part of `scripts/release461_aggregate_source_gate.py`.
+
+### Manifest safety
+
+The manifest is generated directly from every `migrations/dev/*release461*.sql` file. It:
+
+- inventories the exact migration set in deterministic order
+- forbids Release 461 `ALTER TABLE` and destructive `DROP` authority
+- derives required table columns, primary keys, UNIQUE constraints, foreign-key relationships, and named-index signatures
+- detects conflicting duplicate table/index definitions
+- detects migration-order definitions that could not converge a missing table
+- compares a read-only `sqlite_master` snapshot against the Release 461 contract
+
+Preflight interpretation:
+
+- missing Release 461-owned object: safe candidate for explicit forward creation
+- existing compatible object: safe/no repair required
+- existing table missing a Release 461-required structure: **hard stop**
+- existing named index with a conflicting signature: **hard stop**
+- target table missing when Release 461 does not create it: **hard stop**
+
+A hard stop requires a new deliberate forward repair migration. Historical replay and runtime self-repair remain forbidden.
+
+### Manual workflow modes
+
+The combined workflow is `workflow_dispatch` only and defaults to **`preflight`**.
+
+`preflight` mode:
+
+1. pins an exact reviewed `dev` SHA supplied by the operator
+2. re-runs the full Release 461 aggregate source gate
+3. regenerates the 15-migration manifest
+4. verifies the exact Development project/database configuration
+5. verifies D1 name and UUID through Cloudflare
+6. retrieves a read-only `sqlite_master` schema snapshot
+7. reports structural safety, convergence, and the number of objects an apply would create
+8. performs **no D1 mutation**
+
+`apply` mode additionally requires the exact phrase:
+
+`APPLY-RELEASE-461-TO-DEVELOPMENT`
+
+Only after the same read-only preflight passes does it apply the Release 461 migration files in deterministic forward order. It then requires full structural convergence plus zero `pragma_foreign_key_check` violations.
+
+The workflow does **not** promote `development-release.json`. A successful D1 apply must be reviewed first; source metadata promotion to Release 461 is a separate deliberate commit.
+
+## Current source evidence
+
+The combined D1 package source checkpoint validated:
+
+- Release 461 aggregate source authority: PASS
+- Release 461 migration manifest: PASS
+- migration count: **15**
+- required table count: **62**
+- required named-index count: **76**
+- automatic Development D1 mutation: CLOSED
+- provider execution/authorization/publication: CLOSED
+- separate live Production mutation: NONE
+
+The previously completed statement-import/provider checkpoint `29977505699e1ace18fac4f8db3924307a7a994f` passed Release 461 Source Gate `33317962579` and System Gate `33317962559` on that exact SHA.
+
+The combined acceptance package was then added and gated in source. Always use the current exact `dev` SHA when running the manual preflight rather than copying an older checkpoint SHA from this document.
+
+## D1 acceptance status
+
+Release 461 Development D1 acceptance is **pending**.
+
+No Release 461 migration was applied to Development D1 during the source cleanup described here. The combined workflow has been assembled and source-validated, but its Cloudflare preflight/apply path is manual-only.
+
+Do not call Release 461 complete until:
+
+1. exact-current Source Gate is green
+2. exact-current System Gate is green
+3. combined Development D1 workflow completes in `preflight` mode against the exact reviewed SHA
+4. any structural drift is resolved by new forward migrations
+5. a deliberate `apply` run is authorized and completes successfully
+6. post-apply structural and foreign-key evidence is green
+7. `development-release.json` is deliberately promoted to Release 461 in source
+8. the Development deployment and required authenticated runtime acceptance agree with that exact promoted SHA
+
+## Restart protocol
+
+A new chat or new day is never a migration trigger.
+
+At restart:
+
+1. verify the exact `dev` head and confirm it descends from the current Release 461 source chain
+2. verify Release 461 Source Gate and System Gate on that exact SHA
+3. re-confirm Development D1/R2 identities read-only
+4. do **not** replay historical migrations
+5. do **not** re-open already closed accounting/runtime slices unless exact-current evidence shows regression
+6. if source remains green, the next database step is the combined Release 461 workflow in **`preflight`** mode using that exact reviewed SHA
+7. if preflight reports structural drift, stop and create a dedicated forward repair migration
+8. only after a clean preflight should a separate deliberate `apply` run be considered
+
+## Closed boundaries
+
+- Development source only unless the manual D1 workflow is explicitly run.
 - Separate live Production remains untouched.
-- Provider authorization remains closed.
-- Provider execution/publication remains closed.
+- Stripe/PayPal/provider credentials are not required for Release 461 source cleanup.
+- Provider live authorization/execution/publication remains closed.
 - No historical D1 replay.
-- No automatic D1 migration trigger.
-- Release 461 D1 migrations remain unapplied until explicit Development acceptance.
-
-## Current checkpoint
-
-The public/customer, notification, shared community, Content Automation/publication, and accounting slices listed above are now source-owned by explicit migrations and protected against request-time schema mutation.
-
-A restart is never a reason to replay migrations. Re-verify the exact `dev` head and Development D1/R2 identities read-only first, then continue from a fresh broad runtime-DDL scan. `_accountingStatementImports.js` is no longer a restart target; its bounded source slice is closed.
-
-Provider credentials are not required to continue this audit. Stripe/PayPal live or sandbox execution remains a separate acceptance boundary and should stay parked until the intended credentials are available.
-
-## Continuing audit
-
-Continue through `functions/api/**` and shared helpers searching for `CREATE TABLE`, `ALTER TABLE`, `CREATE INDEX`, mutation-bearing `ensure*Schema`, request-time policy seeds, and equivalent hidden backfills. Move discovered schema authority into explicit forward migrations plus read-only readiness services before calling a slice closed.
-
-The community, content-publication/content-automation, notification, and current accounting targets are source-clean. Select the next target from the exact-current broad admin/shared scan rather than from historical helper names or earlier restart notes.
-
-## Current-release metadata
-
-`development-release.json` remains on Release 460 until Release 461 Development D1 authority is explicitly accepted. This prevents source-only progress from being misreported as an applied schema release.
+- No request-time schema mutation.
+- No automatic Release 461 D1 apply.
+- Release 460 remains the accepted source/database marker until explicit Release 461 D1 acceptance and promotion.
