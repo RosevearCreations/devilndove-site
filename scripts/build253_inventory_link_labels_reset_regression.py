@@ -24,13 +24,20 @@ def has_accepted_asset(html, asset_name):
 
 resources_js = (ROOT/'public/js/admin-product-resources.js').read_text()
 inventory_js = (ROOT/'public/js/admin-site-item-inventory.js').read_text()
-data_js = (ROOT/'functions/api/admin/_productResourcesData.js').read_text()
+wrapper_path = ROOT/'functions/api/admin/_productResourcesData.js'
+legacy_path = ROOT/'functions/api/admin/_productResourcesDataLegacy.js'
+data_path = legacy_path if legacy_path.exists() else wrapper_path
+data_js = data_path.read_text()
+wrapper_js = wrapper_path.read_text()
 inv_html = (ROOT/'admin/inventory-operations/index.html').read_text()
 products_html = (ROOT/'admin/products/index.html').read_text()
 mobile_html = (ROOT/'admin/mobile-inventory/index.html').read_text()
 css = (ROOT/'css/styles.css').read_text()
 
 check('canonical Development release is available', release >= FEATURE_BUILD)
+if data_path == legacy_path:
+    check('Release 461 wrapper retains historical Product-resource implementation', "from './_productResourcesDataLegacy.js'" in wrapper_js)
+    check('Release 461 wrapper layers canonical base-unit authority', 'loadInventoryBaseBalances' in wrapper_js and "quantity_authority: 'base'" in wrapper_js)
 check('saved product-resource links resolve a server-side resource name', 'AS resource_name' in data_js and 'sii.item_name' in data_js and 'ci.name' in data_js)
 check('linked inventory lookup is bounded to one authoritative row', 'sii.site_item_inventory_id = (' in data_js and 'LIMIT 1' in data_js)
 check('linked resource response exposes resolved name', 'name: row.resource_name || row.source_key ||' in data_js)
@@ -48,7 +55,7 @@ check('clear action has its own handler', "siteInventoryClearFieldsButton')?.add
 check('full clear also removes helper search/import fields', "setInputValue('siteInventorySeedSearch', '')" in inventory_js and "setInputValue('siteInventoryAmazonImportUrl', '')" in inventory_js)
 check('form actions remain mobile-safe with stacked buttons', '.site-inventory-form-actions .btn' in css and 'width:100%' in css)
 
-# Execute the exact SELECT used by loadProductLinks against the aggregate schema.
+# Execute the exact retained SELECT used by the Product-resource compatibility implementation.
 con = sqlite3.connect(':memory:')
 con.executescript((ROOT/'database_full_schema.sql').read_text())
 con.execute("INSERT INTO products(slug,name,product_type,status) VALUES ('fixture-product','Fixture Product','physical','draft')")
@@ -74,7 +81,7 @@ if m:
         and float(shaped[0]['resource_usage_units_per_stock_unit']) == 100
         and shaped[1]['resource_name'] == 'Soy Candle Wax'
     )
-check('exact loadProductLinks SQL returns human names and tool usage metadata', query_ok)
+check('exact retained loadProductLinks SQL returns human names and tool usage metadata', query_ok)
 check('aggregate schema foreign keys remain clean', con.execute('PRAGMA foreign_key_check').fetchall() == [])
 
 passed = sum(checks)
