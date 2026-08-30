@@ -3,6 +3,8 @@
 // rendering/copy plans from factual product data, but never auto-publishes or
 // deletes original media.
 
+import { requireContentAutomationSchema } from './contentAutomationSchemaReadiness.js';
+
 export const CONTENT_STUDIO_BUILD = 'Build 273';
 
 function text(value, max = 0) {
@@ -244,7 +246,7 @@ function standaloneShortVideoScript(facts, variation, channel) {
     `0:03–0:14 — Factual overlay: “${clip(facts.shortDescription, 110)}”`,
     `0:14–0:24 — Use two to four reviewed source moments; do not treat an immutable derivative plan as proof of what the media shows.`,
     `0:24–0:30 — Close with a soft ${channel} call to action and keep the project private until human approval.`
-  ].join('\n');
+  ].join('\n\n');
 }
 
 function makeAssetPlan(projectKey, preferredMedia, format, limit = 6) {
@@ -354,112 +356,7 @@ function deliverableSpecs(project, facts, assets) {
 }
 
 export async function ensureContentAutomationSchema(db) {
-  const statements = [
-    `CREATE TABLE IF NOT EXISTS content_projects (
-      content_project_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content_project_key TEXT NOT NULL UNIQUE,
-      source_type TEXT NOT NULL DEFAULT 'product',
-      source_id TEXT NOT NULL,
-      product_id INTEGER,
-      project_title TEXT NOT NULL,
-      project_status TEXT NOT NULL DEFAULT 'draft',
-      review_status TEXT NOT NULL DEFAULT 'needs_review',
-      public_release_status TEXT NOT NULL DEFAULT 'private',
-      story_angle TEXT,
-      factual_summary TEXT,
-      internal_notes TEXT,
-      source_snapshot_json TEXT NOT NULL DEFAULT '{}',
-      content_policy_json TEXT NOT NULL DEFAULT '{}',
-      created_by_user_id INTEGER,
-      approved_by_user_id INTEGER,
-      approved_at TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(source_type, source_id)
-    )`,
-    `CREATE TABLE IF NOT EXISTS content_project_media (
-      content_project_media_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content_project_id INTEGER NOT NULL,
-      media_asset_id INTEGER,
-      product_image_id INTEGER,
-      archive_key TEXT NOT NULL,
-      archive_path TEXT NOT NULL,
-      source_url TEXT,
-      media_type TEXT NOT NULL DEFAULT 'image',
-      original_filename TEXT,
-      mime_type TEXT,
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      selection_score INTEGER NOT NULL DEFAULT 0,
-      selection_reason TEXT,
-      safety_status TEXT NOT NULL DEFAULT 'needs_review',
-      consent_record_id INTEGER,
-      is_selected INTEGER NOT NULL DEFAULT 0,
-      is_featured INTEGER NOT NULL DEFAULT 0,
-      source_metadata_json TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(content_project_id, archive_key),
-      FOREIGN KEY (content_project_id) REFERENCES content_projects(content_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS content_project_deliverables (
-      content_project_deliverable_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content_project_id INTEGER NOT NULL,
-      deliverable_key TEXT NOT NULL,
-      channel_key TEXT NOT NULL,
-      deliverable_type TEXT NOT NULL,
-      title TEXT NOT NULL,
-      caption TEXT,
-      script_text TEXT,
-      body_content TEXT,
-      asset_plan_json TEXT NOT NULL DEFAULT '{}',
-      aspect_ratio TEXT,
-      target_duration_seconds INTEGER NOT NULL DEFAULT 0,
-      output_url TEXT,
-      thumbnail_url TEXT,
-      deliverable_status TEXT NOT NULL DEFAULT 'planned',
-      approval_status TEXT NOT NULL DEFAULT 'needs_review',
-      review_notes TEXT,
-      approved_by_user_id INTEGER,
-      approved_at TEXT,
-      published_at TEXT,
-      social_post_queue_id INTEGER,
-      copy_locked INTEGER NOT NULL DEFAULT 0,
-      generated_by TEXT NOT NULL DEFAULT 'factual_template',
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(content_project_id, deliverable_key),
-      FOREIGN KEY (content_project_id) REFERENCES content_projects(content_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS content_render_jobs (
-      content_render_job_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content_project_deliverable_id INTEGER NOT NULL,
-      render_provider TEXT NOT NULL DEFAULT 'manual_export',
-      render_status TEXT NOT NULL DEFAULT 'planned',
-      render_payload_json TEXT NOT NULL DEFAULT '{}',
-      output_url TEXT,
-      error_text TEXT,
-      requested_by_user_id INTEGER,
-      completed_at TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (content_project_deliverable_id) REFERENCES content_project_deliverables(content_project_deliverable_id) ON DELETE CASCADE
-    )`,
-    `CREATE TABLE IF NOT EXISTS content_project_events (
-      content_project_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content_project_id INTEGER NOT NULL,
-      event_type TEXT NOT NULL,
-      actor_user_id INTEGER,
-      details_json TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (content_project_id) REFERENCES content_projects(content_project_id) ON DELETE CASCADE
-    )`,
-    `CREATE INDEX IF NOT EXISTS idx_content_projects_source ON content_projects(source_type, source_id, project_status, updated_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_content_project_media_project ON content_project_media(content_project_id, is_selected, selection_score DESC, sort_order)`,
-    `CREATE INDEX IF NOT EXISTS idx_content_deliverables_project ON content_project_deliverables(content_project_id, channel_key, deliverable_status, approval_status)`,
-    `CREATE INDEX IF NOT EXISTS idx_content_render_jobs_deliverable ON content_render_jobs(content_project_deliverable_id, render_status, created_at)`,
-    `CREATE INDEX IF NOT EXISTS idx_content_project_events_project ON content_project_events(content_project_id, created_at DESC)`
-  ];
-  for (const statement of statements) await db.prepare(statement).run();
+  return requireContentAutomationSchema(db);
 }
 
 async function getProductWithSources(db, productId) {
@@ -683,8 +580,6 @@ export async function createOrRefreshContentProjectForProduct(db, productId, act
   await db.prepare(`UPDATE content_projects SET updated_at=CURRENT_TIMESTAMP WHERE content_project_id=?`).bind(project.content_project_id).run();
   return { project, facts, archived_count: archivedCount, deliverables_created: deliverablesCreated };
 }
-
-
 
 async function caipMediaForCreativeWorkProject(db, creativeWorkProjectId) {
   try {
