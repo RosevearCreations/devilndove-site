@@ -101,7 +101,7 @@ The Content Automation/Publication migration is source authority only at this ch
 
 ## Accounting support authority
 
-The next exact-current shared/admin offenders were the GIFI review-note helper and accounting-attachment helper. Before Release 461, those runtime paths could create their support tables and indexes; the attachment helper also repaired a partially old `accounting_attachments` table with request-time `ALTER TABLE` statements.
+The exact-current shared/admin accounting audit first found the GIFI review-note helper and accounting-attachment helper, then expanded to fixed assets, period closures, and reconciliation reviews. Before Release 461, those runtime paths could create their support tables and indexes; the attachment and reconciliation helpers also repaired older tables with request-time `ALTER TABLE` statements.
 
 Release 461 now owns those structures explicitly in:
 
@@ -117,12 +117,18 @@ The additive Development authority covers:
 - `idx_accounting_attachments_vendor`
 - `idx_accounting_attachments_period`
 - `idx_accounting_attachments_scope`
+- `accounting_fixed_assets`
+- `accounting_period_closures`
+- `idx_accounting_period_closures_period`
+- `accounting_reconciliation_reviews`
+- reconciliation statement/detail/rate/unresolved-item columns
+- `idx_accounting_reconciliation_reviews_type_period`
 
-`functions/api/admin/_accountingGifi.js` and `functions/api/admin/_accountingAttachments.js` now verify required columns and indexes read-only through `PRAGMA table_info` and `PRAGMA index_list`. Their compatibility `ensure*` names remain for callers, but they no longer execute DDL.
+`functions/api/admin/_accountingGifi.js`, `functions/api/admin/_accountingAttachments.js`, `functions/api/admin/accounting-fixed-assets.js`, `functions/api/admin/_accountingPeriods.js`, and `functions/api/admin/_accountingReconciliation.js` now verify required columns and indexes read-only through `PRAGMA table_info` and, where applicable, `PRAGMA index_list`. Compatibility `ensure*` names remain for callers, but they no longer execute DDL.
 
-Business behavior remains intact when schema is ready: GIFI review-note reads/writes continue, and accounting attachment upload still writes the R2 object plus the accounting row. If Development schema is structurally stale, the request fails with an explicit schema-not-ready error instead of silently repairing D1 during traffic.
+Business behavior remains intact when schema is ready: GIFI review-note reads/writes continue, accounting attachment upload still writes the R2 object plus the accounting row, fixed-asset creation still inserts the asset record, period locking/reopening still writes the closure state, and reconciliation review reads/writes remain available. If Development schema is structurally stale, these paths surface schema-not-ready errors instead of silently repairing D1 during traffic.
 
-Focused source authority is enforced by `scripts/release461_accounting_support_schema_gate.py`, now included in `scripts/release461_aggregate_source_gate.py`. The accounting support migration remains source authority only and has not been applied to Development D1.
+Focused source authority is enforced by `scripts/release461_accounting_support_schema_gate.py`, already included in `scripts/release461_aggregate_source_gate.py`. The accounting support migration remains source authority only and has not been applied to Development D1.
 
 ## Drift and migration rule
 
@@ -138,10 +144,10 @@ If a table is absent, or if structurally compatible tables only need explicitly 
 - Shared/admin notification runtime-schema source slice: migration-owned and runtime-read-only at source level.
 - Shared community runtime-schema source slice: migration-owned and runtime-read-only at source level.
 - Content Automation Studio/publication runtime-schema source slice: migration-owned and runtime-read-only at source level.
-- Accounting GIFI/attachment support runtime-schema source slice: migration-owned and runtime-read-only at source level.
+- Accounting GIFI/attachment/fixed-asset/period/reconciliation support runtime-schema source slice: migration-owned and runtime-read-only at source level.
 - Development D1 Release 461 acceptance: pending manual execution; not claimed complete.
 - Provider-specific Stripe/PayPal acceptance: still closed/pending credentials and does not block unrelated source cleanup.
-- Remaining shared/admin audit: continue through the broader admin request tree for hidden runtime schema mutation, request-time seeding, or backfill behavior.
+- Remaining shared/admin audit: continue from the exact-current admin accounting tree, with `_accountingStatementImports.js` and its statement-import/reconciliation-exception authority the next confirmed mutation-bearing cluster.
 
 ## Boundaries
 
@@ -153,11 +159,19 @@ If a table is absent, or if structurally compatible tables only need explicitly 
 - No automatic D1 migration trigger.
 - Release 461 D1 migrations remain unapplied until explicit Development acceptance.
 
+## End-of-day checkpoint
+
+This is a deliberate source checkpoint, not a claim that Release 461 D1 is accepted. The public/customer, notification, shared community, Content Automation/publication, and current accounting support slices listed above are source-owned by explicit migrations and protected against request-time schema mutation.
+
+Do not start the next session by replaying migrations. Re-verify the exact `dev` head and Development D1/R2 identity read-only first. Resume the runtime-DDL audit at `_accountingStatementImports.js`; it is intentionally left as the next bounded slice rather than partially edited at this checkpoint.
+
+Provider credentials are not required to continue this audit. Stripe/PayPal live or sandbox execution remains a separate acceptance boundary and should stay parked until the intended credentials are available.
+
 ## Continuing audit
 
 Continue through `functions/api/**` and shared helpers searching for `CREATE TABLE`, `ALTER TABLE`, `CREATE INDEX`, mutation-bearing `ensure*Schema`, request-time policy seeds, and equivalent hidden backfills. Move discovered schema authority into explicit forward migrations plus read-only readiness services before calling a slice closed.
 
-The community, content-publication/content-automation, and accounting GIFI/attachment targets are now source-clean. Select the next target from the exact-current-`dev` broad admin/shared scan rather than from historical helper names alone.
+The community, content-publication/content-automation, notification, and accounting GIFI/attachment/fixed-asset/period/reconciliation targets are now source-clean. The next exact-current target is `_accountingStatementImports.js`, followed by a fresh broad scan rather than historical helper names alone.
 
 ## Current-release metadata
 
