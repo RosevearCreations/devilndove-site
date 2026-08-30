@@ -26,8 +26,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
       - name: Run every Release 461 focused source authority
         run: python scripts/release461_aggregate_source_gate.py
+      - name: Check notification helper syntax
+        run: node --check functions/api/_lib/notificationOutbox.js
       - name: Closed execution boundaries
         run: |
           python - <<'PY'
