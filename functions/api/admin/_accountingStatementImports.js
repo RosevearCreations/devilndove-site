@@ -6,6 +6,24 @@ function rows(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+async function tableColumns(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA table_info(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+async function tableIndexes(db, tableName) {
+  try {
+    const result = await db.prepare(`PRAGMA index_list(${tableName})`).all();
+    return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
 export function cleanStatementProvider(value) {
   const raw = normalizeText(value).toLowerCase();
   return ['bank', 'paypal', 'stripe', 'etsy', 'square', 'manual', 'other'].includes(raw) ? raw : 'other';
@@ -17,97 +35,51 @@ export function cleanStatementImportStatus(value) {
 }
 
 export async function ensureAccountingStatementImportsTables(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_statement_imports (
-      accounting_statement_import_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      provider_scope TEXT NOT NULL DEFAULT 'other',
-      import_status TEXT NOT NULL DEFAULT 'imported',
-      source_filename TEXT,
-      source_format TEXT NOT NULL DEFAULT 'csv',
-      period_month TEXT,
-      period_start TEXT,
-      period_end TEXT,
-      currency TEXT NOT NULL DEFAULT 'CAD',
-      row_count INTEGER NOT NULL DEFAULT 0,
-      gross_cents INTEGER NOT NULL DEFAULT 0,
-      fee_cents INTEGER NOT NULL DEFAULT 0,
-      net_cents INTEGER NOT NULL DEFAULT 0,
-      tax_cents INTEGER NOT NULL DEFAULT 0,
-      shipping_cents INTEGER NOT NULL DEFAULT 0,
-      deposit_cents INTEGER NOT NULL DEFAULT 0,
-      withdrawal_cents INTEGER NOT NULL DEFAULT 0,
-      txn_count INTEGER NOT NULL DEFAULT 0,
-      statement_reference TEXT,
-      detail_json TEXT,
-      created_by_user_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_statement_import_rows (
-      accounting_statement_import_row_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      accounting_statement_import_id INTEGER NOT NULL,
-      provider_scope TEXT NOT NULL DEFAULT 'other',
-      txn_date TEXT,
-      txn_type TEXT,
-      description TEXT,
-      reference_number TEXT,
-      gross_cents INTEGER NOT NULL DEFAULT 0,
-      fee_cents INTEGER NOT NULL DEFAULT 0,
-      net_cents INTEGER NOT NULL DEFAULT 0,
-      tax_cents INTEGER NOT NULL DEFAULT 0,
-      shipping_cents INTEGER NOT NULL DEFAULT 0,
-      debit_cents INTEGER NOT NULL DEFAULT 0,
-      credit_cents INTEGER NOT NULL DEFAULT 0,
-      running_balance_cents INTEGER NOT NULL DEFAULT 0,
-      raw_json TEXT,
-      matched_scope_key TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_reconciliation_exceptions (
-      accounting_reconciliation_exception_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      reconciliation_type TEXT NOT NULL,
-      period_month TEXT NOT NULL,
-      scope_key TEXT NOT NULL DEFAULT 'all',
-      provider_scope TEXT,
-      exception_status TEXT NOT NULL DEFAULT 'open',
-      severity TEXT NOT NULL DEFAULT 'warning',
-      reference_label TEXT,
-      statement_amount_cents INTEGER NOT NULL DEFAULT 0,
-      book_amount_cents INTEGER NOT NULL DEFAULT 0,
-      difference_cents INTEGER NOT NULL DEFAULT 0,
-      tolerance_cents INTEGER NOT NULL DEFAULT 0,
-      notes TEXT,
-      assigned_to_user_id INTEGER,
-      accountant_review_flag INTEGER NOT NULL DEFAULT 0,
-      resolved_by_user_id INTEGER,
-      resolved_at TEXT,
-      reopened_by_user_id INTEGER,
-      reopened_at TEXT,
-      detail_json TEXT,
-      source_import_id INTEGER,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_imports_period ON accounting_statement_imports(provider_scope, period_month DESC, import_status)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_import ON accounting_statement_import_rows(accounting_statement_import_id, txn_date)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_statement_import_rows_provider_ref ON accounting_statement_import_rows(provider_scope, txn_date, reference_number)`).run(); } catch {}
-  const exceptionCols = await (async () => { try { const result = await db.prepare(`PRAGMA table_info(accounting_reconciliation_exceptions)`).all(); return new Set(rows(result).map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } })();
-  const exceptionMigrations = [
-    ['assigned_to_user_id', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN assigned_to_user_id INTEGER`],
-    ['accountant_review_flag', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN accountant_review_flag INTEGER NOT NULL DEFAULT 0`],
-    ['resolved_by_user_id', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN resolved_by_user_id INTEGER`],
-    ['resolved_at', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN resolved_at TEXT`],
-    ['reopened_by_user_id', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN reopened_by_user_id INTEGER`],
-    ['reopened_at', `ALTER TABLE accounting_reconciliation_exceptions ADD COLUMN reopened_at TEXT`]
+  const tableRequirements = [
+    {
+      table: 'accounting_statement_imports',
+      columns: [
+        'accounting_statement_import_id', 'provider_scope', 'import_status', 'source_filename', 'source_format',
+        'period_month', 'period_start', 'period_end', 'currency', 'row_count', 'gross_cents', 'fee_cents', 'net_cents',
+        'tax_cents', 'shipping_cents', 'deposit_cents', 'withdrawal_cents', 'txn_count', 'statement_reference',
+        'detail_json', 'created_by_user_id', 'created_at', 'updated_at'
+      ],
+      indexes: ['idx_accounting_statement_imports_period'],
+    },
+    {
+      table: 'accounting_statement_import_rows',
+      columns: [
+        'accounting_statement_import_row_id', 'accounting_statement_import_id', 'provider_scope', 'txn_date', 'txn_type',
+        'description', 'reference_number', 'gross_cents', 'fee_cents', 'net_cents', 'tax_cents', 'shipping_cents',
+        'debit_cents', 'credit_cents', 'running_balance_cents', 'raw_json', 'matched_scope_key', 'created_at'
+      ],
+      indexes: ['idx_accounting_statement_import_rows_import', 'idx_accounting_statement_import_rows_provider_ref'],
+    },
+    {
+      table: 'accounting_reconciliation_exceptions',
+      columns: [
+        'accounting_reconciliation_exception_id', 'reconciliation_type', 'period_month', 'scope_key', 'provider_scope',
+        'exception_status', 'severity', 'reference_label', 'statement_amount_cents', 'book_amount_cents', 'difference_cents',
+        'tolerance_cents', 'notes', 'assigned_to_user_id', 'accountant_review_flag', 'resolved_by_user_id', 'resolved_at',
+        'reopened_by_user_id', 'reopened_at', 'detail_json', 'source_import_id', 'created_at', 'updated_at'
+      ],
+      indexes: ['idx_accounting_reconciliation_exceptions_period', 'idx_accounting_reconciliation_exceptions_queue'],
+    },
   ];
-  for (const [name, sql] of exceptionMigrations) { if (!exceptionCols.has(name)) await db.prepare(sql).run().catch(() => null); }
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_exceptions_period ON accounting_reconciliation_exceptions(reconciliation_type, period_month DESC, exception_status)`).run(); } catch {}
-  try { await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_exceptions_queue ON accounting_reconciliation_exceptions(exception_status, accountant_review_flag, updated_at DESC)`).run(); } catch {}
+
+  for (const requirement of tableRequirements) {
+    const columns = await tableColumns(db, requirement.table);
+    const missingColumns = requirement.columns.filter((name) => !columns.has(name));
+    if (missingColumns.length) {
+      throw new Error(`Accounting statement import schema is not ready: ${requirement.table} is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+    }
+    const indexes = await tableIndexes(db, requirement.table);
+    const missingIndexes = requirement.indexes.filter((name) => !indexes.has(name));
+    if (missingIndexes.length) {
+      throw new Error(`Accounting statement import schema is not ready: ${requirement.table} is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+    }
+  }
+  return true;
 }
 
 const HEADER_ALIASES = new Map([
