@@ -10,9 +10,12 @@ def read(path):return (ROOT/path).read_text(encoding='utf-8',errors='replace')
 def run(path):
  p=subprocess.run([sys.executable,str(ROOT/path)],capture_output=True,text=True)
  req(p.returncode==0,f'carried-forward gate failed: {path}\n{p.stdout}\n{p.stderr}')
-OPS='public/js/admin-caip-operations.js';CSS='css/caip-operations.css';ASSETS='admin/creative-assets/index.html';HANDOFF='admin/caip-content-handoff/index.html';HANDOFF_JS='public/js/admin-caip-content-handoff.js';HANDOFF_API='functions/api/admin/caip-content-handoff.js';DOC='docs/operations/RELEASE_458_CAIP_REVIEW_HANDOFF.md'
+OPS='public/js/admin-caip-operations.js';CSS='css/caip-operations.css';ASSETS='admin/creative-assets/index.html';HANDOFF='admin/caip-content-handoff/index.html';HANDOFF_JS='public/js/admin-caip-content-handoff.js';HANDOFF_API='functions/api/admin/caip-content-handoff.js';HANDOFF_IMPL='functions/api/admin/_caipContentHandoffLegacy.js';DOC='docs/operations/RELEASE_458_CAIP_REVIEW_HANDOFF.md'
 for p in (OPS,CSS,ASSETS,HANDOFF,HANDOFF_JS,HANDOFF_API,DOC):req((ROOT/p).exists(),f'Release 458 asset missing: {p}')
-ops,css,assets,handoff,handoff_js,handoff_api=map(read,(OPS,CSS,ASSETS,HANDOFF,HANDOFF_JS,HANDOFF_API))
+impl_path=HANDOFF_IMPL if (ROOT/HANDOFF_IMPL).exists() else HANDOFF_API
+ops,css,assets,handoff,handoff_js,handoff_api=map(read,(OPS,CSS,ASSETS,HANDOFF,HANDOFF_JS,impl_path))
+wrapper=read(HANDOFF_API)
+if impl_path!=HANDOFF_API:req("from './_caipContentHandoffLegacy.js'" in wrapper,'Release 461 wrapper must retain the Release 458 handoff implementation')
 for marker in ('Private media, evidence & handoff readiness','Promise.allSettled','/api/admin/caip-evidence-review','/api/admin/caip-content-handoff','approvedUnlinked','linkedNeedsReview','package_stale','CAIP_PRIVATE_MEDIA_BUCKET'):
  req(marker in ops or marker in handoff_api or marker in read(DOC),f'Release 458 CAIP depth missing {marker}')
 req('method:' not in ops and 'method :' not in ops,'CAIP readiness cockpit must remain read-only')
@@ -23,7 +26,7 @@ req('/public/js/admin-caip-operations.js?v=458' in assets and '/css/caip-operati
 for html,path in ((assets,ASSETS),(handoff,HANDOFF)):
  req(len(re.findall(r'<h1(?:\s|>)',html,re.I))==1,f'{path} must contain exactly one H1');req('noindex,nofollow' in html,f'{path} must remain private/noindex')
 req('package_stale' in handoff_js and 'eligible_for_review' in handoff_js,'Handoff UI must retain stale/review state')
-for marker in ('const RELEASE = 458','package_stale','eligible_for_review','Prepared package is stale','source_media_copied:false','publication_active:false'):req(marker in handoff_api,f'Handoff API missing Release 458 guard: {marker}')
+for marker in ('const RELEASE = 458','package_stale','eligible_for_review','Prepared package is stale','source_media_copied:false','publication_active:false'):req(marker in handoff_api,f'Handoff implementation missing Release 458 guard: {marker}')
 req("action==='review'" in handoff_api and 'if (!data.eligible_for_review)' in handoff_api,'Server must refuse stale/empty handoff review')
 release=json.loads(read('development-release.json'));current=int(release.get('release') or 0);history={x.get('release'):x for x in release.get('release_history',[])}
 req(release.get('environment')=='development' and release.get('branch')=='dev' and release.get('pages_project')=='devilndove-site-dev','Release authority must remain Development/dev')
