@@ -1,0 +1,233 @@
+name: Development D1 Release 461 Acceptance
+
+# Manual only. The default mode is read-only preflight. Nothing in source, a new
+# chat, a push, or a deployment may trigger Release 461 D1 mutation automatically.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Read-only preflight or deliberate apply"
+        required: true
+        default: preflight
+        type: choice
+        options:
+          - preflight
+          - apply
+      expected_sha:
+        description: "Exact reviewed dev SHA to pin this acceptance run"
+        required: true
+        type: string
+      apply_confirmation:
+        description: "For apply only: APPLY-RELEASE-461-TO-DEVELOPMENT"
+        required: false
+        default: ""
+        type: string
+
+permissions: {contents: read}
+
+jobs:
+  release461-development-d1-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      ACCEPTANCE_MODE: ${{ inputs.mode }}
+      EXPECTED_SOURCE_SHA: ${{ inputs.expected_sha }}
+      APPLY_CONFIRMATION: ${{ inputs.apply_confirmation }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Pin exact reviewed Development source
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = dev
+          test -n "${EXPECTED_SOURCE_SHA}"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "${ACTUAL_SHA}" = "${EXPECTED_SOURCE_SHA}" || {
+            echo "STOP: dev moved. Expected ${EXPECTED_SOURCE_SHA}, found ${ACTUAL_SHA}. Review the new head before D1 acceptance."
+            exit 1
+          }
+          echo "EXACT RELEASE 461 SOURCE PIN: ${ACTUAL_SHA}"
+
+      - name: Re-run complete Release 461 source authority
+        run: |
+          set -euo pipefail
+          python scripts/release461_aggregate_source_gate.py
+
+      - name: Build Release 461 D1 acceptance manifest
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_acceptance_manifest.py manifest --output /tmp/release461-manifest.json
+          python - <<'PY'
+          import json
+          m=json.load(open('/tmp/release461-manifest.json'))
+          print('Release 461 migrations:', m['migration_count'])
+          print('Release 461 required tables:', m['table_count'])
+          print('Release 461 required indexes:', m['index_count'])
+          for row in m['migrations']:
+              print(' -', row['path'])
+          PY
+
+      - name: Protect exact Development authority
+        run: |
+          set -euo pipefail
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          test "${DEV_D1_DATABASE_NAME}" = "devilndove-dev"
+          test "${EXPECTED_DEV_D1_DATABASE_ID}" = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+
+      - run: npm install --global wrangler@4.126.0
+
+      - name: Require Cloudflare credential
+        run: |
+          test -n "${CLOUDFLARE_API_TOKEN}" || {
+            echo 'Credential missing; no Development D1 write attempted.'
+            exit 1
+          }
+
+      - name: Verify exact Development D1 identity
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1-info.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(d))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in rows}
+          names={str(x.get('name') or '') for x in rows}
+          expected_id=os.environ['EXPECTED_DEV_D1_DATABASE_ID']
+          expected_name=os.environ['DEV_D1_DATABASE_NAME']
+          assert expected_id in ids, (expected_id, sorted(ids))
+          assert expected_name in names, (expected_name, sorted(names))
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+
+      - name: Read-only Release 461 D1 schema snapshot
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" \
+            --remote --config wrangler.toml --json \
+            --command "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY type,name;" \
+            > /tmp/release461-schema-pre.json
+
+      - name: Read-only Release 461 structural drift preflight
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_acceptance_manifest.py check \
+            --manifest /tmp/release461-manifest.json \
+            --schema-json /tmp/release461-schema-pre.json \
+            --output /tmp/release461-preflight-report.json
+          python - <<'PY'
+          import json, os
+          r=json.load(open('/tmp/release461-preflight-report.json'))
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write(f"R461_D1_SAFE={'1' if r['safe'] else '0'}\n")
+              f.write(f"R461_D1_CONVERGED={'1' if r['converged'] else '0'}\n")
+              f.write(f"R461_D1_MISSING_OBJECTS={int(r['missing_object_count'])}\n")
+          print(json.dumps(r, indent=2))
+          print('RELEASE 461 DEVELOPMENT D1 READ-ONLY PREFLIGHT: PASS')
+          PY
+
+      - name: Read-only preflight boundary
+        if: env.ACCEPTANCE_MODE == 'preflight'
+        run: |
+          echo 'Release 461 mode: READ-ONLY PREFLIGHT'
+          echo "Structurally safe: ${R461_D1_SAFE}"
+          echo "Already converged: ${R461_D1_CONVERGED}"
+          echo "Objects migration would create: ${R461_D1_MISSING_OBJECTS}"
+          echo 'Development D1 mutation: NONE'
+          echo 'Release 460 accepted source marker: UNCHANGED'
+          echo 'Separate live Production mutation: NONE'
+
+      - name: Require deliberate Release 461 apply confirmation
+        if: env.ACCEPTANCE_MODE == 'apply'
+        run: |
+          set -euo pipefail
+          test "${R461_D1_SAFE}" = '1'
+          test "${APPLY_CONFIRMATION}" = 'APPLY-RELEASE-461-TO-DEVELOPMENT' || {
+            echo 'STOP: apply confirmation did not match. No D1 write attempted.'
+            exit 1
+          }
+          echo 'EXPLICIT RELEASE 461 DEVELOPMENT APPLY CONFIRMATION: PASS'
+
+      - name: Apply Release 461 migrations in deterministic forward order
+        if: env.ACCEPTANCE_MODE == 'apply'
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_acceptance_manifest.py list > /tmp/release461-migrations.txt
+          while IFS= read -r migration; do
+            test -n "${migration}" || continue
+            echo "Applying ${migration} to exact Development D1..."
+            wrangler d1 execute "${DEV_D1_DATABASE_NAME}" \
+              --remote --config wrangler.toml --file "${migration}"
+          done < /tmp/release461-migrations.txt
+
+      - name: Read-only post-apply Release 461 schema proof
+        if: env.ACCEPTANCE_MODE == 'apply'
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" \
+            --remote --config wrangler.toml --json \
+            --command "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY type,name;" \
+            > /tmp/release461-schema-post.json
+          python scripts/release461_d1_acceptance_manifest.py check \
+            --manifest /tmp/release461-manifest.json \
+            --schema-json /tmp/release461-schema-post.json \
+            --require-converged \
+            --output /tmp/release461-post-report.json
+          cat /tmp/release461-post-report.json
+
+      - name: Read-only post-apply foreign-key proof
+        if: env.ACCEPTANCE_MODE == 'apply'
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" \
+            --remote --config wrangler.toml --json \
+            --command "SELECT COUNT(*) AS fk_violations FROM pragma_foreign_key_check;" \
+            > /tmp/release461-fk.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/release461-fk.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          row=next(x for x in walk(d) if 'fk_violations' in x)
+          assert int(row['fk_violations']) == 0, row
+          print('RELEASE 461 DEVELOPMENT D1 FOREIGN KEYS: PASS')
+          PY
+
+      - name: Acceptance boundary
+        run: |
+          echo "Release 461 acceptance mode: ${ACCEPTANCE_MODE}"
+          echo "Exact source SHA: ${EXPECTED_SOURCE_SHA}"
+          echo 'Target: exact Development D1 only'
+          echo 'Historical migration replay: FORBIDDEN'
+          echo 'Automatic D1 mutation path: CLOSED'
+          echo 'development-release.json promotion: NOT performed by this workflow'
+          echo 'Provider authorization/execution/publication: CLOSED'
+          echo 'Separate live Production mutation: NONE'
