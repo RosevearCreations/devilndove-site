@@ -37,7 +37,10 @@ for name,target in indexes.items():
 assert sql.count('ALTER TABLE ') == 19, 'repair must contain exactly the 19 reviewed ADD COLUMN operations'
 assert sql.count('DROP INDEX IF EXISTS ') == 4, 'repair must contain exactly four reviewed index replacements'
 assert sql.count('CREATE INDEX ') == 4, 'repair must contain exactly four reviewed replacement indexes'
-assert 'BEGIN TRANSACTION;' in sql and 'COMMIT;' in sql, 'repair must be transactional'
+# Wrangler remote D1 --file rejects SQL transaction-control statements and provides
+# its own rollback boundary for failed file execution. Keep the file transport-safe.
+assert not re.search(r'\b(?:BEGIN(?:\s+TRANSACTION)?|COMMIT|SAVEPOINT|ROLLBACK)\b\s*;', sql, re.I), 'explicit SQL transaction control is forbidden by Wrangler remote D1 file transport'
+assert 'Wrangler remote D1 file execution supplies the rollback boundary' in sql
 for forbidden in ('DROP TABLE','DELETE FROM','UPDATE ','INSERT INTO','CREATE TABLE'):
  assert forbidden not in sql, f'forbidden repair operation: {forbidden}'
 assert not re.search(r'ALTER\s+TABLE\s+\w+\s+(?!ADD\s+COLUMN)',sql,re.I), 'only ALTER TABLE ADD COLUMN is allowed'
@@ -45,6 +48,7 @@ subprocess.run([sys.executable,'-m','py_compile',str(CHECKER)],cwd=ROOT,check=Tr
 print('RELEASE 461 DEVELOPMENT D1 STRUCTURAL FORWARD REPAIR SOURCE GATE: PASS')
 print('Reviewed ADD COLUMN operations: 19')
 print('Reviewed named-index replacements: 4')
+print('Remote D1 transaction control: WRANGLER-MANAGED / EXPLICIT SQL BEGIN-COMMIT FORBIDDEN')
 print('Table/data deletion: NONE')
 print('Historical migration replay: NONE')
 print('Production/provider/R2 mutation: NONE')

@@ -4,9 +4,10 @@
 -- Release 461 objects. Apply only after the exact read-only drift checker passes.
 -- Development only. No data deletion, table rebuild, historical replay, provider,
 -- R2, Pages, or separate live Production mutation.
+-- Wrangler remote D1 file execution supplies the rollback boundary; explicit SQL
+-- BEGIN/COMMIT statements are unsupported by the remote D1 transport.
 
 PRAGMA foreign_keys = ON;
-BEGIN TRANSACTION;
 
 ALTER TABLE accounting_fixed_assets ADD COLUMN location_note TEXT;
 
@@ -47,5 +48,4 @@ DROP INDEX IF EXISTS idx_custom_candle_soap_specs_request;
 CREATE INDEX idx_custom_candle_soap_specs_request
   ON custom_candle_soap_product_specs(custom_request_id, updated_at DESC);
 
-COMMIT;
 PRAGMA foreign_key_check;
