@@ -47,7 +47,8 @@ for token in (
     assert token in migration, f'missing notification migration authority: {token}'
 
 release = json.loads(RELEASE.read_text(encoding='utf-8'))
-assert int(release.get('release', 0)) == 460, 'Release metadata must remain 460 until Release 461 D1 acceptance'
+assert int(release.get('release', 0)) == 461, 'Release 461 must be the current Development release authority'
+assert int((release.get('development_infrastructure') or {}).get('d1', {}).get('schema_current_through_release') or 0) in (460, 461), 'Release 461 source gate must preserve honest D1 pending-or-converged state'
 policy = release.get('release_policy') or {}
 assert policy.get('production_promotion') == 'closed'
 assert policy.get('provider_publication') == 'closed'
