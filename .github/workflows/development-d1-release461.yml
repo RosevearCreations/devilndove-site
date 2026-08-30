@@ -24,9 +24,9 @@ jobs:
         with: {node-version: '24'}
       - name: Refuse non-Development source
         run: test "${GITHUB_REF_NAME}" = dev
-      - name: Re-run Release 461 source safety before any write
+      - name: Re-run all Release 461 source safety before any write
         run: |
-          python scripts/release461_public_runtime_schema_gate.py
+          python scripts/release461_aggregate_source_gate.py
           node --check functions/api/_lib/publicRuntimeSchemaReadiness.js
           node --check functions/api/checkout-recovery-lead.js
           node --check functions/api/custom-request-consent.js
