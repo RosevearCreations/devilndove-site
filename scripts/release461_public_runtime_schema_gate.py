@@ -104,7 +104,8 @@ for token in (
 release = json.loads(text(RELEASE))
 assert release['environment'] == 'development'
 assert release['branch'] == 'dev'
-assert int(release['release']) == 460, 'Release 461 remains a source/D1 candidate until Development migration acceptance'
+assert int(release['release']) == 461, 'Release 461 must be the current Development release authority'
+assert int(release['development_infrastructure']['d1']['schema_current_through_release']) in (460, 461), 'Release 461 source gate must preserve honest D1 pending-or-converged state'
 policy = release['release_policy']
 assert policy['production_promotion'] == 'closed'
 assert policy['provider_publication'] == 'closed'
