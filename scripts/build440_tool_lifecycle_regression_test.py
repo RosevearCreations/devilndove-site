@@ -3,9 +3,9 @@
 from pathlib import Path
 import re
 ROOT=Path(__file__).resolve().parents[1]
-MIG=ROOT/'database_build440_tool_lifecycle_history.sql'; API=ROOT/'functions/api/admin/tool-lifecycle-review.js'; UI=ROOT/'public/js/admin-tool-lifecycle-review.js'; PAGE=ROOT/'admin/inventory-operations/index.html'; CSS=ROOT/'css/tool-lifecycle-review.css'; INV=ROOT/'functions/api/admin/site-item-inventory.js'
+MIG=ROOT/'database_build440_tool_lifecycle_history.sql'; API=ROOT/'functions/api/admin/tool-lifecycle-review.js'; UI=ROOT/'public/js/admin-tool-lifecycle-review.js'; PAGE=ROOT/'admin/inventory-operations/index.html'; CSS=ROOT/'css/tool-lifecycle-review.css'; INV=ROOT/'functions/api/admin/site-item-inventory.js'; INV_LEGACY=ROOT/'functions/api/admin/_siteItemInventoryLegacy.js'
 read=lambda p:p.read_text(encoding='utf-8') if p.exists() else ''
-mig,api,ui,page,css,inv=map(read,(MIG,API,UI,PAGE,CSS,INV)); checks=[]
+mig,api,ui,page,css=map(read,(MIG,API,UI,PAGE,CSS)); inv=read(INV)+'\n'+read(INV_LEGACY); checks=[]
 def c(ok,label): checks.append((bool(ok),label))
 c(MIG.exists() and 'site_tool_lifecycle_profiles' in mig and 'site_tool_lifecycle_events' in mig,'focused migration defines profile + immutable event authorities')
 c("'good','needs_attention','out_of_service','retired'" in mig,'condition states are constrained')
