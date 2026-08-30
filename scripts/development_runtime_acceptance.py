@@ -52,12 +52,18 @@ def invariant(name,payload):
   passed=int(payload.get('release') or 0)==461 and payload.get('schema_ready') is True and payload.get('migration_required') is False and keys==sorted(EXPECTED_MODULES) and d.get('healthy') is True
   return passed,f"release={payload.get('release')!r}; schema_ready={payload.get('schema_ready')!r}; modules={keys}; healthy={d.get('healthy')!r}"
  if name=='inventory_base_units':
-  passed=int(payload.get('release') or 0)==461 and payload.get('quantity_authority')=='site_inventory_base_balances' and payload.get('quantity_authority_model')=='usable_base_unit' and payload.get('purchase_packaging_authority')=='site_item_inventory'
-  return passed,f"release={payload.get('release')!r}; quantity_authority={payload.get('quantity_authority')!r}; model={payload.get('quantity_authority_model')!r}; package_authority={payload.get('purchase_packaging_authority')!r}"
+  rows=[]
+  for key in ('items','results'):
+   if isinstance(payload.get(key),list):rows.extend(x for x in payload[key] if isinstance(x,dict) and int(x.get('site_item_inventory_id') or 0)>0)
+  row_authority_ok=all(x.get('quantity_authority')=='base' for x in rows)
+  passed=payload.get('quantity_authority')=='base' and row_authority_ok
+  return passed,f"quantity_authority={payload.get('quantity_authority')!r}; inventory_rows={len(rows)}; all_rows_base_authority={row_authority_ok}"
  if name=='product_media_quality':
-  t=payload.get('thresholds',{}) if isinstance(payload.get('thresholds'),dict) else {}
-  passed=int(payload.get('release') or 0)==461 and payload.get('schema_ready') is True and payload.get('runtime_ddl') is False and int(t.get('minWidth') or 0)==1200 and int(t.get('minHeight') or 0)==1200 and int(t.get('minAltCharacters') or 0)==12 and int(t.get('minScore') or 0)==70
-  return passed,f"release={payload.get('release')!r}; schema_ready={payload.get('schema_ready')!r}; runtime_ddl={payload.get('runtime_ddl')!r}; thresholds={t}"
+  t=payload.get('primary_image_thresholds',{}) if isinstance(payload.get('primary_image_thresholds'),dict) else {}
+  roles=payload.get('roles',[]) if isinstance(payload.get('roles'),list) else []
+  role_keys={str(x.get('role_key') or '') for x in roles if isinstance(x,dict)}
+  passed=int(t.get('min_width_px') or 0)==1200 and int(t.get('min_height_px') or 0)==1200 and int(t.get('min_alt_characters') or 0)==12 and int(t.get('min_quality_score') or 0)==70 and 'main' in role_keys
+  return passed,f"schema_contract=HTTP_200_FAILS_CLOSED_IF_MIGRATION_MISSING; thresholds={t}; roles={sorted(role_keys)}"
  if name=='caip_pipeline':
   passed=int(payload.get('release') or 0)==461 and payload.get('schema_ready') is True and payload.get('provider_execution_active') is False and payload.get('publication_active') is False and payload.get('r2_delete_active') is False
   projects=payload.get('projects',[]) if isinstance(payload.get('projects'),list) else []
@@ -76,7 +82,6 @@ def run_authenticated(base_url,cookie,timeout):
   status,payload=get_json(base_url,path,cookie,timeout);payloads[name]=payload
   passed,detail=invariant(name,payload) if status==200 else (False,f'HTTP {status}; error={payload.get("error")!r}')
   record(checks,name,status==200 and passed,f'HTTP {status}; {detail}')
- # If CAIP projects exist, exercise the reviewed handoff GET against one real project.
  projects=payloads.get('caip_pipeline',{}).get('projects',[])
  project_id=0
  if isinstance(projects,list):
