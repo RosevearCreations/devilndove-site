@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS accounting_gifi_review_notes (
   updated_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(tax_year, gifi_code)
+  UNIQUE (tax_year, gifi_code)
 );
 
 CREATE INDEX IF NOT EXISTS idx_accounting_gifi_review_notes_year
