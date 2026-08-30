@@ -12,9 +12,8 @@ function boolInt(value) { return value === true || value === 1 || value === '1' 
 async function tableColumnSet(db, tableName) {
   try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row.name || '').toLowerCase()).filter(Boolean)); } catch { return new Set(); }
 }
-async function ensureColumn(db, tableName, columnName, sql) {
-  const columns = await tableColumnSet(db, tableName);
-  if (!columns.has(String(columnName || '').toLowerCase())) await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${sql}`).run().catch(() => null);
+async function tableIndexSet(db, tableName) {
+  try { const result = await db.prepare(`PRAGMA index_list(${tableName})`).all(); return new Set((Array.isArray(result?.results) ? result.results : []).map((row) => String(row.name || '').trim()).filter(Boolean)); } catch { return new Set(); }
 }
 function csvCell(value) { return `"${String(value ?? '').replace(/"/g, '""')}"`; }
 function csvLine(values) { return values.map(csvCell).join(','); }
@@ -170,81 +169,41 @@ function buildCloseCsv(data) {
 
 async function ensureSchema(db) {
   await ensureAccountingPeriodClosuresTable(db);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_payment_applications (
-    accounting_payment_application_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    payment_id INTEGER,
-    order_id INTEGER,
-    period_month TEXT NOT NULL,
-    application_status TEXT NOT NULL DEFAULT 'draft',
-    applied_amount_cents INTEGER NOT NULL DEFAULT 0,
-    fee_amount_cents INTEGER NOT NULL DEFAULT 0,
-    tax_component_cents INTEGER NOT NULL DEFAULT 0,
-    provider TEXT,
-    transaction_reference TEXT,
-    application_notes TEXT,
-    created_by_user_id INTEGER,
-    reviewed_by_user_id INTEGER,
-    reviewed_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_hst_gst_reviews (
-    accounting_hst_gst_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    period_month TEXT NOT NULL UNIQUE,
-    review_status TEXT NOT NULL DEFAULT 'draft',
-    sales_tax_collected_cents INTEGER NOT NULL DEFAULT 0,
-    input_tax_credit_cents INTEGER NOT NULL DEFAULT 0,
-    net_tax_payable_cents INTEGER NOT NULL DEFAULT 0,
-    filing_reference TEXT,
-    filing_due_date TEXT,
-    remittance_status TEXT NOT NULL DEFAULT 'not_ready',
-    reviewed_by_user_id INTEGER,
-    reviewed_at TEXT,
-    notes TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_outbox (
-    notification_outbox_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    notification_kind TEXT NOT NULL,
-    channel TEXT NOT NULL DEFAULT 'email',
-    destination TEXT,
-    related_order_id INTEGER,
-    related_payment_id INTEGER,
-    related_product_id INTEGER,
-    payload_json TEXT,
-    metadata_json TEXT,
-    status TEXT NOT NULL DEFAULT 'queued',
-    attempt_count INTEGER NOT NULL DEFAULT 0,
-    last_attempt_at TEXT,
-    next_attempt_at TEXT,
-    provider_message_id TEXT,
-    error_text TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_notification_outbox_status ON notification_outbox(status, next_attempt_at, created_at)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_notification_outbox_kind ON notification_outbox(notification_kind, destination, created_at)`).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accountant_export_packages (
-    accountant_export_package_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    package_key TEXT NOT NULL UNIQUE,
-    period_month TEXT,
-    tax_year TEXT,
-    package_status TEXT NOT NULL DEFAULT 'draft',
-    manifest_json TEXT,
-    created_by_user_id INTEGER,
-    finalized_by_user_id INTEGER,
-    finalized_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
-  )`).run();
-  await ensureColumn(db, 'accounting_hst_gst_reviews', 'remittance_evidence_url', 'remittance_evidence_url TEXT');
-  await ensureColumn(db, 'accounting_hst_gst_reviews', 'reminder_date', 'reminder_date TEXT');
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_payment_applications_period ON accounting_payment_applications(period_month, application_status)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_hst_gst_reviews_period ON accounting_hst_gst_reviews(period_month, review_status)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accountant_export_packages_period ON accountant_export_packages(period_month, tax_year, package_status)`).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS accounting_evidence_attachments (accounting_evidence_attachment_id INTEGER PRIMARY KEY AUTOINCREMENT, period_month TEXT, evidence_kind TEXT, title TEXT, evidence_url TEXT, object_key TEXT, original_filename TEXT, mime_type TEXT, file_size_bytes INTEGER NOT NULL DEFAULT 0, attachment_status TEXT NOT NULL DEFAULT 'active', created_by_user_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)`).run().catch(() => null);
+  const requirements = [
+    {
+      table: 'accounting_payment_applications',
+      columns: ['accounting_payment_application_id','payment_id','order_id','period_month','application_status','applied_amount_cents','fee_amount_cents','tax_component_cents','provider','transaction_reference','application_notes','created_by_user_id','reviewed_by_user_id','reviewed_at','created_at','updated_at'],
+      indexes: ['idx_accounting_payment_applications_period'],
+    },
+    {
+      table: 'accounting_hst_gst_reviews',
+      columns: ['accounting_hst_gst_review_id','period_month','review_status','sales_tax_collected_cents','input_tax_credit_cents','net_tax_payable_cents','filing_reference','filing_due_date','remittance_status','remittance_evidence_url','reminder_date','reviewed_by_user_id','reviewed_at','notes','created_at','updated_at'],
+      indexes: ['idx_accounting_hst_gst_reviews_period'],
+    },
+    {
+      table: 'accountant_export_packages',
+      columns: ['accountant_export_package_id','package_key','period_month','tax_year','package_status','manifest_json','created_by_user_id','finalized_by_user_id','finalized_at','created_at','updated_at','notes'],
+      indexes: ['idx_accountant_export_packages_period'],
+    },
+    {
+      table: 'accounting_evidence_attachments',
+      columns: ['accounting_evidence_attachment_id','period_month','evidence_kind','title','evidence_url','object_key','original_filename','mime_type','file_size_bytes','attachment_status','created_by_user_id','created_at','updated_at'],
+      indexes: [],
+    },
+  ];
+  for (const requirement of requirements) {
+    const columns = await tableColumnSet(db, requirement.table);
+    const missingColumns = requirement.columns.filter((name) => !columns.has(name));
+    if (missingColumns.length) {
+      throw new Error(`Accounting close schema is not ready: ${requirement.table} is missing ${missingColumns.join(', ')}. Apply the current Development migration authority.`);
+    }
+    const indexes = await tableIndexSet(db, requirement.table);
+    const missingIndexes = requirement.indexes.filter((name) => !indexes.has(name));
+    if (missingIndexes.length) {
+      throw new Error(`Accounting close schema is not ready: ${requirement.table} is missing index ${missingIndexes.join(', ')}. Apply the current Development migration authority.`);
+    }
+  }
+  return true;
 }
 
 async function hstReview(db, periodMonth, fallbackTaxCents = 0) {
