@@ -71,4 +71,67 @@ CREATE INDEX IF NOT EXISTS idx_accounting_attachments_period
 CREATE INDEX IF NOT EXISTS idx_accounting_attachments_scope
   ON accounting_attachments(reconciliation_type, period_month, scope_key, attachment_kind);
 
+CREATE TABLE IF NOT EXISTS accounting_fixed_assets (
+  accounting_fixed_asset_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  asset_label TEXT NOT NULL,
+  asset_category TEXT NOT NULL DEFAULT 'equipment',
+  cca_class TEXT,
+  acquisition_date TEXT,
+  cost_cents INTEGER NOT NULL DEFAULT 0,
+  salvage_cents INTEGER NOT NULL DEFAULT 0,
+  business_use_percent INTEGER NOT NULL DEFAULT 100,
+  location_note TEXT,
+  vendor_name TEXT,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS accounting_period_closures (
+  accounting_period_closure_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  period_month TEXT NOT NULL UNIQUE,
+  lock_state TEXT NOT NULL DEFAULT 'open',
+  close_checklist_json TEXT,
+  close_notes TEXT,
+  locked_by_user_id INTEGER,
+  locked_at TEXT,
+  reopened_by_user_id INTEGER,
+  reopened_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_accounting_period_closures_period
+  ON accounting_period_closures(period_month DESC, lock_state);
+
+CREATE TABLE IF NOT EXISTS accounting_reconciliation_reviews (
+  accounting_reconciliation_review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reconciliation_type TEXT NOT NULL,
+  period_month TEXT NOT NULL,
+  scope_key TEXT NOT NULL DEFAULT 'all',
+  review_status TEXT NOT NULL DEFAULT 'draft',
+  note TEXT,
+  statement_reference TEXT,
+  difference_reason TEXT,
+  detail_json TEXT,
+  attachment_count INTEGER NOT NULL DEFAULT 0,
+  statement_amount_cents INTEGER NOT NULL DEFAULT 0,
+  book_amount_cents INTEGER NOT NULL DEFAULT 0,
+  tolerance_cents INTEGER NOT NULL DEFAULT 0,
+  expected_rate_basis_points INTEGER NOT NULL DEFAULT 0,
+  observed_rate_basis_points INTEGER NOT NULL DEFAULT 0,
+  unresolved_item_count INTEGER NOT NULL DEFAULT 0,
+  reference_amount_cents INTEGER NOT NULL DEFAULT 0,
+  compared_amount_cents INTEGER NOT NULL DEFAULT 0,
+  difference_cents INTEGER NOT NULL DEFAULT 0,
+  created_by_user_id INTEGER,
+  updated_by_user_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(reconciliation_type, period_month, scope_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_accounting_reconciliation_reviews_type_period
+  ON accounting_reconciliation_reviews(reconciliation_type, period_month DESC, review_status);
+
 PRAGMA foreign_key_check;
