@@ -8,6 +8,18 @@ const json = (data, status = 200) => jsonResponse({ release: RELEASE, provenance
 const integer = (value) => { const n=Number(value||0); return Number.isInteger(n)&&n>0?n:0; };
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 
+const REQUIRED_COLUMNS = Object.freeze({
+  creative_projects: ['creative_project_id','creative_project_key','project_title','project_status','governance_status','content_project_id','product_id'],
+  products: ['product_id','name'],
+  creative_assets: ['creative_asset_id','asset_key','original_filename','media_type'],
+  creative_media_evidence_ranges: ['creative_media_evidence_range_id','creative_project_id','creative_asset_id','marker_key','evidence_category','title','note_text','transcript_excerpt','start_seconds','end_seconds','visibility','confidence_score','linked_story_evidence_id','marker_status','review_status'],
+  creative_story_evidence: ['creative_story_evidence_id','evidence_key','evidence_type','review_status','verification_status'],
+  creative_story_segments: ['creative_story_segment_id','creative_project_id','segment_key','title','narrative_text','segment_status','sort_order'],
+  creative_story_segment_evidence_links: ['creative_story_segment_evidence_link_id','creative_story_segment_id'],
+  caip_content_handoffs: ['caip_content_handoff_id','creative_project_id','content_project_id','handoff_status','approved_marker_count','approved_story_evidence_count','approved_segment_count','package_json','prepared_by_user_id','reviewed_by_user_id','prepared_at','reviewed_at','created_at','updated_at'],
+  caip_content_handoff_evidence: ['caip_content_handoff_evidence_id','caip_content_handoff_id','creative_media_evidence_range_id','creative_story_evidence_id','evidence_role','sort_order','created_at'],
+});
+
 async function access(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return { error: json({ ok:false, error:'Admin access required.' },401) };
@@ -17,13 +29,24 @@ async function access(context) {
 }
 
 async function schemaReady(db) {
-  const required=['creative_media_evidence_ranges','creative_story_evidence','creative_story_segments','creative_story_segment_evidence_links','caip_content_handoffs','caip_content_handoff_evidence'];
-  const missing=[];
-  for (const name of required) {
-    const row=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(name).first().catch(()=>null);
-    if (!row?.name) missing.push(name);
+  const missingTables=[];
+  const missingColumns={};
+  for (const [name, requiredColumns] of Object.entries(REQUIRED_COLUMNS)) {
+    const table=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1").bind(name).first().catch(()=>null);
+    if (!table?.name) {
+      missingTables.push(name);
+      continue;
+    }
+    const info=await db.prepare(`PRAGMA table_info("${name}")`).all().catch(()=>({ results:[] }));
+    const available=new Set(rows(info).map((row)=>String(row?.name||'')));
+    const missing=requiredColumns.filter((column)=>!available.has(column));
+    if (missing.length) missingColumns[name]=missing;
   }
-  return { schema_ready:!missing.length, missing_tables:missing };
+  return {
+    schema_ready:!missingTables.length&&!Object.keys(missingColumns).length,
+    missing_tables:missingTables,
+    missing_columns:missingColumns,
+  };
 }
 
 async function project(db, projectId) {
@@ -32,7 +55,7 @@ async function project(db, projectId) {
 }
 
 async function approvedEvidence(db, projectId) {
-  return rows(await db.prepare(`SELECT r.creative_media_evidence_range_id,r.creative_asset_id,r.marker_key,r.evidence_category,r.title,r.note_text,r.transcript_excerpt,r.start_seconds,r.end_seconds,r.visibility,r.confidence_percent,
+  return rows(await db.prepare(`SELECT r.creative_media_evidence_range_id,r.creative_asset_id,r.marker_key,r.evidence_category,r.title,r.note_text,r.transcript_excerpt,r.start_seconds,r.end_seconds,r.visibility,r.confidence_score AS confidence_percent,
       r.linked_story_evidence_id AS creative_story_evidence_id,e.evidence_key,e.evidence_type,e.review_status AS story_review_status,e.verification_status AS story_verification_status,
       ca.asset_key,ca.original_filename,ca.media_type
     FROM creative_media_evidence_ranges r
@@ -80,14 +103,20 @@ function derivePackageState(data) {
   return { current_counts:current, package_stale:packageStale, review_blockers:blockers, eligible_for_review:eligibleForReview };
 }
 
+function unavailable(readiness) {
+  const base={ readiness, project:null, evidence:[], segments:[], handoff:null, handoff_evidence:[] };
+  return { ...base, ...derivePackageState(base) };
+}
+
 async function load(db, projectId) {
   const readiness=await schemaReady(db);
+  if (!readiness.schema_ready) return unavailable(readiness);
   const projectRow=await project(db,projectId);
   if (!projectRow) return { readiness, project:null, evidence:[], segments:[], handoff:null, handoff_evidence:[], current_counts:{approved_marker_count:0,approved_story_evidence_count:0,approved_segment_count:0}, package_stale:false, review_blockers:['CAIP project was not found.'], eligible_for_review:false };
   const [evidence,segments,handoff]=await Promise.all([
-    readiness.schema_ready ? approvedEvidence(db,projectId) : [],
-    readiness.schema_ready ? approvedSegments(db,projectId) : [],
-    readiness.schema_ready && integer(projectRow.content_project_id) ? db.prepare(`SELECT * FROM caip_content_handoffs WHERE creative_project_id=? AND content_project_id=? LIMIT 1`).bind(projectId,integer(projectRow.content_project_id)).first().catch(()=>null) : null,
+    approvedEvidence(db,projectId),
+    approvedSegments(db,projectId),
+    integer(projectRow.content_project_id) ? db.prepare(`SELECT * FROM caip_content_handoffs WHERE creative_project_id=? AND content_project_id=? LIMIT 1`).bind(projectId,integer(projectRow.content_project_id)).first().catch(()=>null) : null,
   ]);
   const handoffEvidence=handoff ? rows(await db.prepare(`SELECT h.*,r.title,r.evidence_category,r.start_seconds,r.end_seconds,e.evidence_key,e.review_status,e.verification_status
       FROM caip_content_handoff_evidence h
@@ -105,8 +134,9 @@ export async function onRequestGet(context) {
   if(!projectId)return json({ok:false,error:'Choose a CAIP project first.'},400);
   try {
     const data=await load(state.db,projectId);
+    if(!data.readiness.schema_ready)return json({ok:false,schema_ready:false,missing_tables:data.readiness.missing_tables,missing_columns:data.readiness.missing_columns,error:'CAIP handoff schema does not match the current reviewed source contract.'},503);
     if(!data.project)return json({ok:false,error:'CAIP project not found.'},404);
-    return json({ok:true,schema_ready:data.readiness.schema_ready,missing_tables:data.readiness.missing_tables,source_media_unchanged:true,provider_execution_active:false,publication_active:false,...data});
+    return json({ok:true,schema_ready:true,missing_tables:[],missing_columns:{},source_media_unchanged:true,provider_execution_active:false,publication_active:false,...data});
   } catch(error) {
     await captureRuntimeIncident(context.env,context.request,{incident_scope:'caip_content_handoff',incident_code:'caip_content_handoff_get_failed',severity:'warning',message:error?.message||'CAIP content handoff could not load.',related_user_id:state.adminUser.user_id,details:{release:RELEASE,provenance_release:PROVENANCE_RELEASE,creative_project_id:projectId,error:String(error?.stack||error)}});
     return json({ok:false,error:error?.message||'CAIP content handoff could not load.'},503);
@@ -120,8 +150,8 @@ export async function onRequestPost(context) {
   if(!projectId)return json({ok:false,error:'Choose a CAIP project first.'},400);
   try {
     const data=await load(state.db,projectId);
+    if(!data.readiness.schema_ready)return json({ok:false,schema_ready:false,missing_tables:data.readiness.missing_tables,missing_columns:data.readiness.missing_columns,error:'Release 461 CAIP handoff source contract does not match Development D1.'},409);
     if(!data.project)return json({ok:false,error:'CAIP project not found.'},404);
-    if(!data.readiness.schema_ready)return json({ok:false,schema_ready:false,missing_tables:data.readiness.missing_tables,error:'Release 458 CAIP handoff authority is not fully installed.'},409);
     const contentProjectId=integer(data.project.content_project_id);
     if(!contentProjectId)return json({ok:false,error:'This CAIP project is not linked to a Content Studio project yet. Create or sync the Content Studio project first.'},409);
     if(action!=='prepare'&&action!=='review')return json({ok:false,error:'Unsupported Release 458 CAIP content-handoff action.'},400);

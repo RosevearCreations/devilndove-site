@@ -28,6 +28,7 @@ FOCUSED_GATES = (
     "release461_accounting_journal_schema_gate.py",
     "release461_accounting_close_workflow_schema_gate.py",
     "release461_accounting_overhead_provider_schema_gate.py",
+    "release461_caip_content_handoff_schema_gate.py",
     "release461_d1_acceptance_package_gate.py",
 )
 
