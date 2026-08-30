@@ -1,0 +1,31 @@
+name: Release 461 Member Runtime Source Gate
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/member/wishlist.js'
+      - 'functions/api/member/reviews.js'
+      - 'functions/api/_lib/memberRuntimeSchemaReadiness.js'
+      - 'migrations/dev/20260829_release461_member_runtime_schema_authority.sql'
+      - 'scripts/release461_member_runtime_schema_gate.py'
+      - '.github/workflows/release461-member-runtime-source-gate.yml'
+      - '.github/workflows/development-d1-release461-member-runtime.yml'
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  member-runtime-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python scripts/release461_member_runtime_schema_gate.py
+      - run: |
+          node --check functions/api/_lib/memberRuntimeSchemaReadiness.js
+          node --check functions/api/member/wishlist.js
+          node --check functions/api/member/reviews.js
+      - run: git diff --check

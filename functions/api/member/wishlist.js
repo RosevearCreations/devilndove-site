@@ -1,3 +1,5 @@
+import { hasMemberWishlistSchema } from '../_lib/memberRuntimeSchemaReadiness.js';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 }
@@ -22,21 +24,15 @@ async function getMemberUserFromRequest(request, env) {
   if (!['member','admin'].includes(role)) return null;
   return { user_id: Number(session.resolved_user_id || session.user_id || 0), email: session.email || '', display_name: session.display_name || '', role };
 }
-async function ensureTable(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS member_wishlists (
-    member_wishlist_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    product_id INTEGER NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, product_id)
-  )`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_member_wishlists_user_created ON member_wishlists(user_id, created_at DESC)`).run();
+async function requireWishlistSchema(db) {
+  if (await hasMemberWishlistSchema(db)) return null;
+  return json({ ok: false, error: 'member_wishlist_schema_unavailable', message: 'Wishlists are temporarily unavailable.' }, 503);
 }
 export async function onRequestGet(context) {
   const { request, env } = context; const db = env.DB || env.DD_DB;
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const memberUser = await getMemberUserFromRequest(request, env); if (!memberUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await ensureTable(db);
+  const schemaError = await requireWishlistSchema(db); if (schemaError) return schemaError;
   const rows = normalizeResults(await db.prepare(`
     SELECT mw.member_wishlist_id, mw.product_id, mw.created_at,
            p.slug, p.name, p.status, p.price_cents, p.currency, p.featured_image_url, p.short_description
@@ -46,23 +42,17 @@ export async function onRequestGet(context) {
     ORDER BY mw.created_at DESC, mw.member_wishlist_id DESC
   `).bind(memberUser.user_id).all());
   return json({ ok: true, items: rows.map((row) => ({
-    member_wishlist_id: Number(row.member_wishlist_id || 0),
-    product_id: Number(row.product_id || 0),
-    created_at: row.created_at || null,
-    slug: row.slug || '',
-    name: row.name || '',
-    status: row.status || '',
-    price_cents: Number(row.price_cents || 0),
-    currency: row.currency || 'CAD',
-    featured_image_url: row.featured_image_url || '',
-    short_description: row.short_description || ''
+    member_wishlist_id: Number(row.member_wishlist_id || 0), product_id: Number(row.product_id || 0),
+    created_at: row.created_at || null, slug: row.slug || '', name: row.name || '', status: row.status || '',
+    price_cents: Number(row.price_cents || 0), currency: row.currency || 'CAD',
+    featured_image_url: row.featured_image_url || '', short_description: row.short_description || ''
   })) });
 }
 export async function onRequestPost(context) {
   const { request, env } = context; const db = env.DB || env.DD_DB;
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const memberUser = await getMemberUserFromRequest(request, env); if (!memberUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await ensureTable(db);
+  const schemaError = await requireWishlistSchema(db); if (schemaError) return schemaError;
   let body={}; try { body = await request.json(); } catch { return json({ ok: false, error: 'Invalid JSON body.' }, 400); }
   const productId = Number(body.product_id || 0);
   if (!productId) return json({ ok: false, error: 'product_id is required.' }, 400);
@@ -75,9 +65,8 @@ export async function onRequestDelete(context) {
   const { request, env } = context; const db = env.DB || env.DD_DB;
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const memberUser = await getMemberUserFromRequest(request, env); if (!memberUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await ensureTable(db);
-  const url = new URL(request.url);
-  const productId = Number(url.searchParams.get('product_id') || 0);
+  const schemaError = await requireWishlistSchema(db); if (schemaError) return schemaError;
+  const url = new URL(request.url); const productId = Number(url.searchParams.get('product_id') || 0);
   if (!productId) return json({ ok: false, error: 'product_id is required.' }, 400);
   await db.prepare(`DELETE FROM member_wishlists WHERE user_id = ? AND product_id = ?`).bind(memberUser.user_id, productId).run();
   return json({ ok: true, message: 'Removed from wishlist.' });
