@@ -1,0 +1,23 @@
+name: Release 461 Public Telemetry Source Gate
+on:
+  push:
+    branches: [dev]
+    paths: ['functions/api/track/**','migrations/dev/20260829_release461_public_telemetry_authority.sql','scripts/release461_public_telemetry_schema_gate.py','.github/workflows/release461-public-telemetry-source-gate.yml','.github/workflows/development-d1-release461-public-telemetry.yml']
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: python scripts/release461_public_telemetry_schema_gate.py
+      - run: |
+          node --check functions/api/track/cart.js
+          node --check functions/api/track/visit.js
+      - run: git diff --check

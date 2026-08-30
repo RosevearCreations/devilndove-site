@@ -1,0 +1,107 @@
+name: Development D1 Release 461 Public Telemetry
+on:
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: dev, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: test "${GITHUB_REF_NAME}" = dev
+      - run: |
+          python scripts/release461_public_telemetry_schema_gate.py
+          node --check functions/api/track/cart.js
+          node --check functions/api/track/visit.js
+      - name: Protect exact Development authority
+        run: |
+          set -euo pipefail
+          grep -q 'name = "devilndove-site-dev"' wrangler.toml
+          grep -q 'database_name = "devilndove-dev"' wrangler.toml
+          grep -q 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          ! grep -Eiq 'DROP[[:space:]]+TABLE|ALTER[[:space:]]+TABLE' migrations/dev/20260829_release461_public_telemetry_authority.sql
+      - run: npm install --global wrangler@4.126.0
+      - run: test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'Credential missing; no D1 write attempted.'; exit 1; }
+      - name: Verify exact D1 identity
+        run: |
+          wrangler d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/d1.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          rows=list(walk(d)); ids={str(x.get('uuid') or x.get('id') or '') for x in rows}; names={str(x.get('name') or '') for x in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids and os.environ['DEV_D1_DATABASE_NAME'] in names
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Read-only structural drift preflight
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='site_visitors') visitors_table,(SELECT COUNT(*) FROM pragma_table_info('site_visitors') WHERE name IN ('site_visitor_id','visitor_token','country','user_agent','referrer_host','first_seen_at','last_seen_at','visit_count','is_bot')) visitors_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='site_visitor_sessions') sessions_table,(SELECT COUNT(*) FROM pragma_table_info('site_visitor_sessions') WHERE name IN ('site_visitor_session_id','site_visitor_id','session_token','user_id','entry_path','last_path','country','utm_source','utm_medium','utm_campaign','utm_content','utm_term','started_at','last_seen_at','page_view_count','event_count','is_checkout_started','is_abandoned_cart')) sessions_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='site_page_views') views_table,(SELECT COUNT(*) FROM pragma_table_info('site_page_views') WHERE name IN ('site_page_view_id','site_visitor_id','site_visitor_session_id','user_id','path','query_string','referrer','page_title','page_h1','event_type','duration_ms','meta_json','utm_source','utm_medium','utm_campaign','utm_content','utm_term','created_at')) views_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='site_search_events') search_table,(SELECT COUNT(*) FROM pragma_table_info('site_search_events') WHERE name IN ('site_search_event_id','site_visitor_id','site_visitor_session_id','user_id','search_term','result_count','path','created_at')) search_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='cart_activity') cart_table,(SELECT COUNT(*) FROM pragma_table_info('cart_activity') WHERE name IN ('cart_activity_id','visitor_token','session_token','user_id','order_id','event_type','path','cart_count','cart_value_cents','meta_json','created_at')) cart_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_site_visitor_sessions_token','idx_site_page_views_created','idx_site_search_events_created','idx_cart_activity_visitor_created')) named_indexes;" > /tmp/pre.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/pre.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'visitors_table' in x); checks=[('visitors',9),('sessions',18),('views',18),('search',8),('cart',11)]
+          for p,n in checks:
+            if int(r[f'{p}_table']) and int(r[f'{p}_columns']) != n: raise SystemExit(f'STOP: telemetry {p} structural drift requires deliberate forward repair. Historical replay is forbidden.')
+          converged=all(int(r[f'{p}_table'])==1 and int(r[f'{p}_columns'])==n for p,n in checks) and int(r['named_indexes'])==4
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write(f"R461_TELEMETRY_CONVERGED={'1' if converged else '0'}\n")
+          print('Telemetry authority already converged:',converged)
+          PY
+      - name: Apply only Release 461 telemetry authority
+        if: env.R461_TELEMETRY_CONVERGED != '1'
+        run: wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --file migrations/dev/20260829_release461_public_telemetry_authority.sql
+      - name: Read-only post-write proof
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM pragma_table_info('site_visitors') WHERE name IN ('site_visitor_id','visitor_token','country','user_agent','referrer_host','first_seen_at','last_seen_at','visit_count','is_bot')) visitors_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('site_visitor_sessions') WHERE name IN ('site_visitor_session_id','site_visitor_id','session_token','user_id','entry_path','last_path','country','utm_source','utm_medium','utm_campaign','utm_content','utm_term','started_at','last_seen_at','page_view_count','event_count','is_checkout_started','is_abandoned_cart')) sessions_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('site_page_views') WHERE name IN ('site_page_view_id','site_visitor_id','site_visitor_session_id','user_id','path','query_string','referrer','page_title','page_h1','event_type','duration_ms','meta_json','utm_source','utm_medium','utm_campaign','utm_content','utm_term','created_at')) views_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('site_search_events') WHERE name IN ('site_search_event_id','site_visitor_id','site_visitor_session_id','user_id','search_term','result_count','path','created_at')) search_columns,
+            (SELECT COUNT(*) FROM pragma_table_info('cart_activity') WHERE name IN ('cart_activity_id','visitor_token','session_token','user_id','order_id','event_type','path','cart_count','cart_value_cents','meta_json','created_at')) cart_columns,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_site_visitor_sessions_token','idx_site_page_views_created','idx_site_search_events_created','idx_cart_activity_visitor_created')) named_indexes,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk_violations;" > /tmp/post.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/post.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'visitors_columns' in x); expected={'visitors_columns':9,'sessions_columns':18,'views_columns':18,'search_columns':8,'cart_columns':11,'named_indexes':4,'fk_violations':0}
+          for k,v in expected.items(): assert int(r[k])==v,(k,r[k],v)
+          print('RELEASE 461 DEVELOPMENT D1 PUBLIC TELEMETRY AUTHORITY: PASS')
+          PY
+      - run: |
+          echo 'Target: exact Development D1 only'
+          echo 'Historical migration replay: FORBIDDEN'
+          echo 'Public analytics schema mutation: CLOSED'
+          echo 'Provider authorization/execution/publication: CLOSED'
+          echo 'Separate live Production mutation: NONE'
