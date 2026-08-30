@@ -72,8 +72,7 @@ jobs:
             (SELECT COUNT(*) FROM pragma_table_info('notification_cooldown_rules') WHERE name IN ('notification_cooldown_rule_id','notification_kind','cooldown_hours','is_enabled','created_at','updated_at')) cooldown_columns,
             (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='customer_engagement_runs') engagement_table,
             (SELECT COUNT(*) FROM pragma_table_info('customer_engagement_runs') WHERE name IN ('customer_engagement_run_id','run_type','actor_user_id','summary_json','created_at')) engagement_columns,
-            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_notification_outbox_status','idx_notification_outbox_kind','idx_notification_outbox_order_payment','idx_notification_dispatch_log_outbox','idx_notification_dispatch_log_status','idx_notification_exclusions_lookup','idx_customer_engagement_runs_created')) named_indexes,
-            (SELECT COUNT(*) FROM notification_cooldown_rules WHERE (notification_kind='checkout_recovery' AND cooldown_hours=24) OR (notification_kind='review_request' AND cooldown_hours=72) OR (notification_kind='back_in_stock' AND cooldown_hours=24) OR (notification_kind='gift_card_issued' AND cooldown_hours=1) OR (notification_kind='gift_card_purchase_confirmation' AND cooldown_hours=1)) default_cooldowns;" > /tmp/notification-pre.json
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_notification_outbox_status','idx_notification_outbox_kind','idx_notification_outbox_order_payment','idx_notification_dispatch_log_outbox','idx_notification_dispatch_log_status','idx_notification_exclusions_lookup','idx_customer_engagement_runs_created')) named_indexes;" > /tmp/notification-pre.json
           python - <<'PY'
           import json, os
           d=json.load(open('/tmp/notification-pre.json'))
@@ -89,11 +88,31 @@ jobs:
             present=int(r[f'{prefix}_table']); cols=int(r[f'{prefix}_columns'])
             if present and cols != required:
               raise SystemExit(f'STOP: {name} structural drift ({cols}/{required} required columns) needs a dedicated forward repair. Historical replay and runtime self-repair are forbidden.')
-          converged=all(int(r[f'{prefix}_table'])==1 and int(r[f'{prefix}_columns'])==required for _,prefix,required in checks) and int(r['named_indexes'])==7 and int(r['default_cooldowns'])==5
+          all_tables=all(int(r[f'{prefix}_table'])==1 and int(r[f'{prefix}_columns'])==required for _,prefix,required in checks)
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+            f.write(f"R461_NOTIFICATION_ALL_TABLES={'1' if all_tables else '0'}\n")
+            f.write(f"R461_NOTIFICATION_INDEX_COUNT={int(r['named_indexes'])}\n")
+          print('Release 461 notification tables structurally compatible:', all_tables)
+          print('Read-only notification structural preflight: PASS')
+          PY
+      - name: Read-only notification policy convergence
+        if: env.R461_NOTIFICATION_ALL_TABLES == '1'
+        run: |
+          wrangler d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COUNT(*) default_cooldowns FROM notification_cooldown_rules WHERE (notification_kind='checkout_recovery' AND cooldown_hours=24) OR (notification_kind='review_request' AND cooldown_hours=72) OR (notification_kind='back_in_stock' AND cooldown_hours=24) OR (notification_kind='gift_card_issued' AND cooldown_hours=1) OR (notification_kind='gift_card_purchase_confirmation' AND cooldown_hours=1);" > /tmp/notification-policy.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/notification-policy.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          r=next(x for x in walk(d) if 'default_cooldowns' in x)
+          converged=int(os.environ.get('R461_NOTIFICATION_INDEX_COUNT','0'))==7 and int(r['default_cooldowns'])==5
           with open(os.environ['GITHUB_ENV'],'a') as f:
             f.write(f"R461_NOTIFICATION_CONVERGED={'1' if converged else '0'}\n")
           print('Release 461 notification authority already converged:', converged)
-          print('Read-only notification structural preflight: PASS')
           PY
       - name: Apply only Release 461 notification authority after explicit safe preflight
         if: env.R461_NOTIFICATION_CONVERGED != '1'
