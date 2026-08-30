@@ -4,18 +4,13 @@ on:
   push:
     branches: [dev]
     paths:
-      - 'functions/api/_lib/publicRuntimeSchemaReadiness.js'
-      - 'functions/api/checkout-recovery-lead.js'
-      - 'functions/api/custom-request-consent.js'
-      - 'functions/api/custom-request.js'
-      - 'functions/api/custom-request-reference-upload.js'
-      - 'functions/api/product-interest.js'
-      - 'migrations/dev/20260829_release461_public_runtime_schema_authority.sql'
+      - 'functions/api/**'
+      - 'migrations/dev/20260829_release461_*.sql'
       - 'scripts/release461_*'
       - 'development-release.json'
-      - 'docs/operations/RELEASE_461_PUBLIC_RUNTIME_SCHEMA_AUTHORITY.md'
-      - '.github/workflows/release461-source-gate.yml'
-      - '.github/workflows/development-d1-release461.yml'
+      - 'docs/operations/RELEASE_461_*.md'
+      - '.github/workflows/release461-*.yml'
+      - '.github/workflows/development-d1-release461*.yml'
   pull_request:
     branches: [dev]
   workflow_dispatch:
@@ -24,25 +19,15 @@ permissions:
   contents: read
 
 jobs:
-  public-runtime-schema-source:
+  release461-aggregate-source:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - uses: actions/setup-node@v4
-        with: {node-version: '24'}
-      - name: Release 461 public runtime schema authority
-        run: python scripts/release461_public_runtime_schema_gate.py
-      - name: JavaScript syntax
-        run: |
-          node --check functions/api/_lib/publicRuntimeSchemaReadiness.js
-          node --check functions/api/checkout-recovery-lead.js
-          node --check functions/api/custom-request-consent.js
-          node --check functions/api/custom-request.js
-          node --check functions/api/custom-request-reference-upload.js
-          node --check functions/api/product-interest.js
+      - name: Run every Release 461 focused source authority
+        run: python scripts/release461_aggregate_source_gate.py
       - name: Closed execution boundaries
         run: |
           python - <<'PY'
@@ -55,6 +40,7 @@ jobs:
           assert p['provider_publication']=='closed'
           assert p['provider_live_authorization']=='closed'
           assert p['request_time_schema_mutation']=='forbidden'
+          assert x['current_release_database_state']['historical_migration_replay'] is False
           assert e['production_mutation'] is False
           assert e['provider_live_authorization_enabled'] is False
           print('RELEASE 461 CLOSED BOUNDARY: PASS')
