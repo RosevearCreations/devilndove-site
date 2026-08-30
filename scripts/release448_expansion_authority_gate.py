@@ -2,7 +2,8 @@
 """Release 448 carried-forward regression authority gate.
 
 Release 448 is provenance, not the current-release identity. This gate protects the
-platform capabilities introduced there while allowing later Development releases.
+platform capabilities introduced there while allowing later Development releases
+and deliberate workspace consolidation.
 """
 from pathlib import Path
 import json
@@ -15,20 +16,20 @@ req(int(release.get('release') or 0)>=448,'current Development release cannot pr
 req(release.get('environment')=='development' and release.get('branch')=='dev','current authority must remain Development/dev')
 work={row.get('key'):row for row in release.get('workstreams',[])}
 required_work={
- 'product-material-lineage':'/admin/product-lineage/',
- 'manufacturer-provenance-reviews':'/admin/vendor-reviews/',
- 'product-image-quality':'/admin/product-image-quality/',
- 'storefront-merchandising':'/admin/storefront-merchandising/',
- 'caip-reviewed-content-handoff':'/admin/caip-content-handoff/',
- 'inventory-operations-intelligence':'/admin/inventory-intelligence/',
- 'tool-lifecycle':'/admin/tool-lifecycle/',
- 'supply-sourcing-replenishment':'/admin/supply-sourcing/',
- 'release448-calibration':'/admin/release448-calibration/',
- 'it-integration-registry':'/admin/it-integrations/',
+ 'product-material-lineage':{'/admin/product-lineage/'},
+ 'manufacturer-provenance-reviews':{'/admin/vendor-reviews/'},
+ 'product-image-quality':{'/admin/product-image-quality/','/admin/catalog-media/'},
+ 'storefront-merchandising':{'/admin/storefront-merchandising/'},
+ 'caip-reviewed-content-handoff':{'/admin/caip-content-handoff/'},
+ 'inventory-operations-intelligence':{'/admin/inventory-intelligence/','/admin/inventory-operations/'},
+ 'tool-lifecycle':{'/admin/tool-lifecycle/'},
+ 'supply-sourcing-replenishment':{'/admin/supply-sourcing/'},
+ 'release448-calibration':{'/admin/release448-calibration/'},
+ 'it-integration-registry':{'/admin/it-integrations/'},
 }
-for key,workspace in required_work.items():
+for key,workspaces in required_work.items():
  row=work.get(key,{})
- req(row.get('workspace')==workspace,f'{key} carried-forward workspace authority missing/drifted')
+ req(row.get('workspace') in workspaces,f'{key} carried-forward workspace authority missing/drifted')
 
 required_migrations={
  'product-lineage':('database_release448_product_lineage.sql','RELEASE448_PRODUCT_LINEAGE_VERIFICATION.sql','scripts/apply_development_product_lineage.py'),
@@ -46,7 +47,11 @@ for key,(file,verification,runner) in required_migrations.items():
 inventory=(ROOT/'functions/api/admin/inventory-intelligence.js').read_text(encoding='utf-8')
 tool=(ROOT/'functions/api/admin/tool-lifecycle.js').read_text(encoding='utf-8')
 supply=(ROOT/'functions/api/admin/supply-sourcing.js').read_text(encoding='utf-8')
-caip=(ROOT/'functions/api/admin/caip-content-handoff.js').read_text(encoding='utf-8')
+caip_path=ROOT/'functions/api/admin/_caipContentHandoffLegacy.js'
+if not caip_path.exists():caip_path=ROOT/'functions/api/admin/caip-content-handoff.js'
+caip=caip_path.read_text(encoding='utf-8')
+caip_wrapper=(ROOT/'functions/api/admin/caip-content-handoff.js').read_text(encoding='utf-8')
+if caip_path.name=='_caipContentHandoffLegacy.js':req("from './_caipContentHandoffLegacy.js'" in caip_wrapper,'Release 461 CAIP wrapper must retain Release 448 handoff implementation')
 calibration=(ROOT/'functions/api/admin/release448-calibration.js').read_text(encoding='utf-8')
 promotion=(ROOT/'scripts/release448_promotion_rehearsal.py').read_text(encoding='utf-8')
 req('write_authority_duplicated:false' in inventory,'Inventory Intelligence must retain single write authority')
@@ -61,5 +66,6 @@ if fail:
  raise SystemExit(1)
 print('RELEASE 448 CARRIED-FORWARD AUTHORITY: PASS')
 print('Release 448 capabilities/migrations: RETAINED AS REGRESSION AUTHORITY')
+print('Release 461 workspace consolidation: ACCEPTED WITHOUT AUTHORITY DUPLICATION')
 print(f"Current release: {release.get('release')}")
 print('Production mutation authority: NONE')
