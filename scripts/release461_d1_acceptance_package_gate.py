@@ -17,11 +17,7 @@ assert WORKFLOW.is_file(), WORKFLOW
 subprocess.run([sys.executable, '-m', 'py_compile', str(MANIFEST_SCRIPT)], cwd=ROOT, check=True)
 with tempfile.TemporaryDirectory() as tmp:
     manifest_path = Path(tmp) / 'manifest.json'
-    subprocess.run(
-        [sys.executable, str(MANIFEST_SCRIPT), 'manifest', '--output', str(manifest_path)],
-        cwd=ROOT,
-        check=True,
-    )
+    subprocess.run([sys.executable, str(MANIFEST_SCRIPT), 'manifest', '--output', str(manifest_path)], cwd=ROOT, check=True)
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
 
 assert manifest['release'] == 461
@@ -52,6 +48,9 @@ for token in (
     '- apply',
     'expected_sha:',
     'apply_confirmation:',
+    'data/release461-d1-acceptance-request.json',
+    'git diff --name-only HEAD^ HEAD',
+    'expected_parent_sha',
     'APPLY-RELEASE-461-TO-DEVELOPMENT',
     'DEV_D1_DATABASE_NAME: devilndove-dev',
     'EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa',
@@ -67,24 +66,28 @@ for token in (
 ):
     assert token in workflow, f'missing acceptance workflow safety token: {token}'
 
-# This workflow must remain manual-only. Ignore comments before testing triggers.
 workflow_no_comments = '\n'.join(line.split('#', 1)[0] for line in workflow.splitlines())
-for forbidden_trigger in ('\n  push:', '\n  pull_request:', '\n  schedule:', '\n  repository_dispatch:'):
-    assert forbidden_trigger not in workflow_no_comments, f'automatic Release 461 D1 trigger is forbidden: {forbidden_trigger.strip()}'
+for forbidden_trigger in ('\n  pull_request:', '\n  schedule:', '\n  repository_dispatch:'):
+    assert forbidden_trigger not in workflow_no_comments, f'unsafe Release 461 D1 trigger is forbidden: {forbidden_trigger.strip()}'
+assert "branches: [dev]" in workflow and "paths:\n      - 'data/release461-d1-acceptance-request.json'" in workflow, 'push acceptance must be scoped only to the dedicated one-shot request file'
+assert "test \"$(git diff --name-only HEAD^ HEAD)\" = 'data/release461-d1-acceptance-request.json'" in workflow, 'push acceptance must prove the request file was the only change'
+assert "assert str(r.get('expected_parent_sha') or '').strip()==parent" in workflow, 'push acceptance must pin the reviewed parent SHA'
 
-# The apply step must remain behind the explicit apply mode and confirmation phrase.
 assert "if: env.ACCEPTANCE_MODE == 'apply'" in workflow
 apply_position = workflow.find('Apply Release 461 migrations in deterministic forward order')
 confirmation_position = workflow.find('Require deliberate Release 461 apply confirmation')
 assert confirmation_position >= 0 and apply_position > confirmation_position
 assert workflow.find("test \"${APPLY_CONFIRMATION}\" = 'APPLY-RELEASE-461-TO-DEVELOPMENT'", confirmation_position, apply_position) >= 0
 
-release_text = RELEASE_MARKER.read_text(encoding='utf-8')
-assert re.search(r'"release"\s*:\s*460\b', release_text), 'accepted source marker must remain Release 460 before explicit D1 acceptance'
+release = json.loads(RELEASE_MARKER.read_text(encoding='utf-8'))
+assert int(release.get('release') or 0) == 461, 'Release 461 must be current Development authority'
+assert int(release.get('development_infrastructure',{}).get('d1',{}).get('schema_current_through_release') or 0) in (460,461), 'D1 authority must honestly report pending or converged Release 461 state'
+assert release.get('current_release_database_state',{}).get('historical_migration_replay') is False
 
 print('RELEASE 461 D1 ACCEPTANCE PACKAGE SOURCE GATE: PASS')
 print(f"Migrations: {manifest['migration_count']}")
 print(f"Required tables: {manifest['table_count']}")
 print(f"Required indexes: {manifest['index_count']}")
 print('Default workflow mode: READ-ONLY PREFLIGHT')
-print('Automatic Development D1 mutation: CLOSED')
+print('Ordinary-push Development D1 mutation: CLOSED')
+print('Explicit request-file acceptance: PINNED / ONE-SHOT')
