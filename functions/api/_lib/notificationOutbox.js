@@ -1,5 +1,29 @@
 import { getDb, normalizeText } from './adminAudit.js';
 
+const NOTIFICATION_SCHEMA = Object.freeze({
+  notification_outbox: [
+    'notification_outbox_id', 'notification_kind', 'channel', 'destination',
+    'related_order_id', 'related_payment_id', 'related_product_id', 'payload_json',
+    'metadata_json', 'status', 'attempt_count', 'last_attempt_at', 'next_attempt_at',
+    'provider_message_id', 'error_text', 'created_at', 'updated_at'
+  ],
+  notification_dispatch_log: [
+    'notification_dispatch_log_id', 'notification_outbox_id', 'notification_kind',
+    'destination', 'status', 'provider_message_id', 'error_text', 'created_at'
+  ],
+  notification_exclusions: [
+    'notification_exclusion_id', 'notification_kind', 'destination', 'product_id',
+    'order_id', 'reason', 'is_active', 'created_at', 'updated_at'
+  ],
+  notification_cooldown_rules: [
+    'notification_cooldown_rule_id', 'notification_kind', 'cooldown_hours',
+    'is_enabled', 'created_at', 'updated_at'
+  ],
+  customer_engagement_runs: [
+    'customer_engagement_run_id', 'run_type', 'actor_user_id', 'summary_json', 'created_at'
+  ]
+});
+
 function jsonHtmlEscape(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -22,79 +46,45 @@ async function tableExists(db, tableName) {
   }
 }
 
-async function ensureColumn(db, tableName, columnName, ddl) {
+async function tableColumns(db, tableName) {
   try {
     const info = await db.prepare(`PRAGMA table_info(${tableName})`).all();
-    const cols = (Array.isArray(info?.results) ? info.results : []).map((row) => String(row?.name || '').trim());
-    if (!cols.includes(columnName)) {
-      await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${ddl}`).run().catch(() => null);
-    }
-  } catch {}
+    return new Set((Array.isArray(info?.results) ? info.results : []).map((row) => String(row?.name || '').trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
 }
 
-async function ensureNotificationSupportTables(db) {
-  if (!db) return;
-  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_dispatch_log (
-    notification_dispatch_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    notification_outbox_id INTEGER,
-    notification_kind TEXT,
-    destination TEXT,
-    status TEXT NOT NULL DEFAULT 'queued',
-    provider_message_id TEXT,
-    error_text TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_exclusions (
-    notification_exclusion_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    notification_kind TEXT NOT NULL,
-    destination TEXT,
-    product_id INTEGER,
-    order_id INTEGER,
-    reason TEXT,
-    is_active INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS notification_cooldown_rules (
-    notification_cooldown_rule_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    notification_kind TEXT NOT NULL UNIQUE,
-    cooldown_hours INTEGER NOT NULL DEFAULT 24,
-    is_enabled INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-  await db.prepare(`CREATE TABLE IF NOT EXISTS customer_engagement_runs (
-    customer_engagement_run_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    run_type TEXT NOT NULL DEFAULT 'automation',
-    actor_user_id INTEGER,
-    summary_json TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  )`).run().catch(() => null);
-
-  await ensureColumn(db, 'notification_outbox', 'attempt_count', `attempt_count INTEGER NOT NULL DEFAULT 0`);
-  await ensureColumn(db, 'notification_outbox', 'last_attempt_at', `last_attempt_at TEXT`);
-  await ensureColumn(db, 'notification_outbox', 'provider_message_id', `provider_message_id TEXT`);
-  await ensureColumn(db, 'notification_outbox', 'error_text', `error_text TEXT`);
-  await ensureColumn(db, 'notification_outbox', 'related_product_id', `related_product_id INTEGER`);
-  await ensureColumn(db, 'notification_outbox', 'metadata_json', `metadata_json TEXT`);
-
-  const defaults = [
-    ['checkout_recovery', 24],
-    ['review_request', 72],
-    ['back_in_stock', 24],
-    ['gift_card_issued', 1],
-    ['gift_card_purchase_confirmation', 1],
-  ];
-  for (const [kind, hours] of defaults) {
-    await db.prepare(`INSERT INTO notification_cooldown_rules (notification_kind, cooldown_hours, is_enabled, created_at, updated_at)
-      VALUES (?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      ON CONFLICT(notification_kind) DO NOTHING`).bind(kind, hours).run().catch(() => null);
+export async function getNotificationRuntimeSchemaReadiness(db) {
+  if (!db) {
+    return { ready: false, missing_tables: Object.keys(NOTIFICATION_SCHEMA), missing_columns: [] };
   }
+  const missingTables = [];
+  const missingColumns = [];
+  for (const [tableName, requiredColumns] of Object.entries(NOTIFICATION_SCHEMA)) {
+    if (!(await tableExists(db, tableName))) {
+      missingTables.push(tableName);
+      continue;
+    }
+    const columns = await tableColumns(db, tableName);
+    for (const columnName of requiredColumns) {
+      if (!columns.has(columnName)) missingColumns.push(`${tableName}.${columnName}`);
+    }
+  }
+  return { ready: missingTables.length === 0 && missingColumns.length === 0, missing_tables: missingTables, missing_columns: missingColumns };
+}
+
+async function requireNotificationRuntimeSchema(db) {
+  const readiness = await getNotificationRuntimeSchemaReadiness(db);
+  if (readiness.ready) return readiness;
+  const error = new Error('Notification schema is unavailable. Apply the explicit Release 461 Development notification migration or a later forward repair after read-only drift review.');
+  error.code = 'notification_schema_unavailable';
+  error.readiness = readiness;
+  throw error;
 }
 
 async function recordDispatchLog(db, row, status, providerMessageId = null, errorText = null) {
   if (!db) return;
-  await ensureNotificationSupportTables(db);
   await db.prepare(`INSERT INTO notification_dispatch_log (
     notification_outbox_id, notification_kind, destination, status, provider_message_id, error_text, created_at
   ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
@@ -177,7 +167,7 @@ async function evaluateSuppression(db, payload = {}) {
 }
 
 export async function queueNotification(db, payload = {}) {
-  await ensureNotificationSupportTables(db);
+  await requireNotificationRuntimeSchema(db);
   const suppression = await evaluateSuppression(db, payload);
   const insert = await db.prepare(`
     INSERT INTO notification_outbox (
@@ -337,7 +327,7 @@ export async function dispatchNotificationRow(env, row) {
 
 export async function processNotificationOutbox(env, options = {}) {
   const db = getDb(env);
-  await ensureNotificationSupportTables(db);
+  await requireNotificationRuntimeSchema(db);
   const limit = Math.max(1, Math.min(Number(options.limit || 10), 50));
   const rows = (await db.prepare(`
     SELECT notification_outbox_id, notification_kind, channel, destination, related_order_id, related_payment_id,
