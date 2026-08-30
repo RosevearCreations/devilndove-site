@@ -7,6 +7,7 @@ on:
       - 'functions/api/**'
       - 'migrations/dev/20260829_release461_*.sql'
       - 'migrations/dev/20260830_release461_*.sql'
+      - 'migrations/dev/20260830_runtime_schema_structural_forward_repair.sql'
       - 'scripts/release461_*'
       - 'development-release.json'
       - 'docs/operations/RELEASE_461_*.md'

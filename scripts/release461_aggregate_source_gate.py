@@ -11,7 +11,7 @@ FOCUSED_GATES=(
  "release461_content_automation_schema_gate.py","release461_accounting_support_schema_gate.py","release461_accounting_journal_schema_gate.py",
  "release461_accounting_close_workflow_schema_gate.py","release461_accounting_overhead_provider_schema_gate.py","release461_inventory_base_unit_gate.py",
  "release461_product_image_quality_gate.py","release461_caip_production_pipeline_gate.py","release461_caip_content_handoff_schema_gate.py",
- "release461_external_help_interface_gate.py","release461_d1_acceptance_package_gate.py",
+ "release461_external_help_interface_gate.py","release461_d1_forward_repair_gate.py","release461_d1_acceptance_package_gate.py",
 )
 missing=[name for name in FOCUSED_GATES if not (ROOT/'scripts'/name).is_file()]
 if missing: raise SystemExit(f"Missing Release 461 focused source gate(s): {', '.join(missing)}")
