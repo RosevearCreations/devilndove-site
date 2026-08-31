@@ -41,6 +41,23 @@ function hasBucket(bucket) {
     && typeof bucket.get === 'function' && typeof bucket.put === 'function' && typeof bucket.delete === 'function';
 }
 
+function normalizeObject(value) {
+  if (!value || typeof value !== 'object') return {};
+  return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+function metadataSnapshot(object) {
+  return {
+    httpMetadata: normalizeObject(object?.httpMetadata),
+    customMetadata: normalizeObject(object?.customMetadata),
+    storageClass: normalizeText(object?.storageClass) || 'Standard',
+  };
+}
+
+function sameMetadata(left, right) {
+  return JSON.stringify(metadataSnapshot(left)) === JSON.stringify(metadataSnapshot(right));
+}
+
 async function copyBatch(source, destination, cursor, limit) {
   const listing = await source.list({ limit, ...(cursor ? { cursor } : {}), include: ['httpMetadata', 'customMetadata'] });
   const results = [];
@@ -50,11 +67,13 @@ async function copyBatch(source, destination, cursor, limit) {
     await destination.put(object.key, body.body, {
       httpMetadata: body.httpMetadata || object.httpMetadata,
       customMetadata: body.customMetadata || object.customMetadata,
+      storageClass: body.storageClass || object.storageClass,
     });
     const check = await destination.head(object.key);
     if (!check || Number(check.size || 0) !== Number(object.size || body.size || 0)) {
       throw new Error(`Destination size verification failed for ${object.key}`);
     }
+    if (!sameMetadata(body, check)) throw new Error(`Destination metadata verification failed for ${object.key}`);
     results.push({ key: object.key, bytes: Number(check.size || 0), status: 'copied_verified' });
   }
   return {
@@ -85,8 +104,8 @@ async function pruneBatch(source, destination, cursor, limit) {
   };
 }
 
-async function verifyBatch(source, destination, cursor, limit) {
-  const listing = await source.list({ limit, ...(cursor ? { cursor } : {}) });
+async function verifySourceBatch(source, destination, cursor, limit) {
+  const listing = await source.list({ limit, ...(cursor ? { cursor } : {}), include: ['httpMetadata', 'customMetadata'] });
   const results = [];
   for (const object of listing.objects || []) {
     const destinationObject = await destination.head(object.key);
@@ -94,7 +113,27 @@ async function verifyBatch(source, destination, cursor, limit) {
     if (Number(destinationObject.size || 0) !== Number(object.size || 0)) {
       throw new Error(`Destination object size mismatch: ${object.key}`);
     }
-    results.push({ key: object.key, bytes: Number(object.size || 0), status: 'verified' });
+    if (!sameMetadata(object, destinationObject)) throw new Error(`Destination object metadata mismatch: ${object.key}`);
+    results.push({ key: object.key, bytes: Number(object.size || 0), status: 'source_to_destination_verified' });
+  }
+  return {
+    results,
+    cursor: listing.truncated ? normalizeText(listing.cursor) : '',
+    done: !listing.truncated,
+  };
+}
+
+async function verifyDestinationBatch(source, destination, cursor, limit) {
+  const listing = await destination.list({ limit, ...(cursor ? { cursor } : {}), include: ['httpMetadata', 'customMetadata'] });
+  const results = [];
+  for (const object of listing.objects || []) {
+    const sourceObject = await source.head(object.key);
+    if (!sourceObject) throw new Error(`Destination-only object remains after prune: ${object.key}`);
+    if (Number(sourceObject.size || 0) !== Number(object.size || 0)) {
+      throw new Error(`Source/destination size mismatch: ${object.key}`);
+    }
+    if (!sameMetadata(sourceObject, object)) throw new Error(`Source/destination metadata mismatch: ${object.key}`);
+    results.push({ key: object.key, bytes: Number(object.size || 0), status: 'destination_to_source_verified' });
   }
   return {
     results,
@@ -127,8 +166,9 @@ export async function onRequestPost({ request, env }) {
     let outcome;
     if (action === 'copy') outcome = await copyBatch(pair.source, pair.destination, cursor, limit);
     else if (action === 'prune') outcome = await pruneBatch(pair.source, pair.destination, cursor, limit);
-    else if (action === 'verify') outcome = await verifyBatch(pair.source, pair.destination, cursor, limit);
-    else return json({ ok: false, release: RELEASE, code: 'unsupported_action', error: 'Supported actions are copy, prune and verify.' }, 400);
+    else if (action === 'verify_source') outcome = await verifySourceBatch(pair.source, pair.destination, cursor, limit);
+    else if (action === 'verify_destination') outcome = await verifyDestinationBatch(pair.source, pair.destination, cursor, limit);
+    else return json({ ok: false, release: RELEASE, code: 'unsupported_action', error: 'Supported actions are copy, prune, verify_source and verify_destination.' }, 400);
 
     return json({
       ok: true,
