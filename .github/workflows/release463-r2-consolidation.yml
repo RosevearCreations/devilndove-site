@@ -12,7 +12,7 @@ permissions:
 jobs:
   consolidate-r2:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
@@ -30,13 +30,16 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate isolated legacy Development bridge
+      - name: Validate inventory-delta R2 bridge
         shell: bash
         run: |
           set -euo pipefail
           node --check functions/api/admin/release463-r2-sync.js
           grep -q "devilndove-site-dev.pages.dev" functions/api/admin/release463-r2-sync.js
-          grep -q "verify_destination" functions/api/admin/release463-r2-sync.js
+          grep -q "inventory_source" functions/api/admin/release463-r2-sync.js
+          grep -q "inventory_destination" functions/api/admin/release463-r2-sync.js
+          grep -q "copy_keys" functions/api/admin/release463-r2-sync.js
+          grep -q "delete_keys" functions/api/admin/release463-r2-sync.js
 
       - name: Deploy exact Development SHA to disposable legacy bridge project
         shell: bash
@@ -79,7 +82,7 @@ jobs:
             --project-name=devilndove-site-dev \
             --branch=dev \
             --commit-hash="${GITHUB_SHA}" \
-            --commit-message="Release 463 disposable R2 migration bridge" \
+            --commit-message="Release 463 inventory-delta R2 migration bridge" \
             | tee /tmp/release463-r2-deploy.log
           cp /tmp/wrangler.release463-original.toml wrangler.toml
           python - <<'PY'
@@ -118,7 +121,7 @@ jobs:
           echo "RELEASE463_ADMIN_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
           rm -f /tmp/release463-session.json
 
-      - name: Prove disposable bridge is reachable without changing Access
+      - name: Prove disposable bridge is reachable
         shell: bash
         run: |
           set -euo pipefail
@@ -145,13 +148,12 @@ jobs:
                   last=(status,ctype,raw[:200]); time.sleep(3); continue
               if status in (401,403) and int(data.get('release') or 0)==463:
                   ready=True; break
-              last=(status,data)
-              time.sleep(3)
+              last=(status,data); time.sleep(3)
           assert ready,(url,last)
           print('RELEASE 463 DISPOSABLE R2 BRIDGE: READY',url)
           PY
 
-      - name: Copy prune and prove both Production R2 buckets
+      - name: Converge only R2 deltas and prove exact parity
         shell: bash
         run: |
           set -euo pipefail
@@ -163,9 +165,10 @@ jobs:
           endpoint=base+'/api/admin/release463-r2-sync'
           auth='RELEASE463_R2_ENVIRONMENT_SYNC'
 
-          def call(bucket,action,cursor=''):
-              payload=json.dumps({'authorization':auth,'bucket':bucket,'action':action,'cursor':cursor,'limit':10}).encode()
-              req=urllib.request.Request(endpoint,method='POST',data=payload,headers={
+          def call(bucket,action,cursor='',keys=None,limit=500):
+              payload={'authorization':auth,'bucket':bucket,'action':action,'cursor':cursor,'limit':limit}
+              if keys is not None: payload['keys']=keys
+              req=urllib.request.Request(endpoint,method='POST',data=json.dumps(payload).encode(),headers={
                   'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store',
                   'Cookie':'dd_auth_token='+token,'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
               })
@@ -179,35 +182,68 @@ jobs:
               assert status==200 and data.get('ok') is True,(bucket,action,status,data)
               return data
 
-          def exhaust(bucket,action):
-              cursor=''; processed=0; total_bytes=0; calls=0
-              for _ in range(10000):
-                  data=call(bucket,action,cursor)
+          def inventory(bucket,side):
+              action='inventory_'+side
+              cursor=''; items=[]; calls=0
+              for _ in range(1000):
+                  data=call(bucket,action,cursor,limit=500)
                   calls += 1
-                  processed += int(data.get('processed') or 0)
-                  total_bytes += int(data.get('bytes') or 0)
-                  if data.get('done') is True:
-                      break
+                  items.extend(data.get('results') or [])
+                  if data.get('done') is True: break
                   nxt=str(data.get('next_cursor') or '').strip()
                   assert nxt and nxt != cursor,(bucket,action,cursor,data)
                   cursor=nxt
-              else:
-                  raise AssertionError((bucket,action,'pagination_limit_exceeded'))
-              print('PASS',bucket,action,'objects=',processed,'bytes=',total_bytes,'calls=',calls)
-              return {'objects':processed,'bytes':total_bytes,'calls':calls}
+              else: raise AssertionError((bucket,action,'pagination_limit_exceeded'))
+              mapping={str(item['key']):item for item in items}
+              assert len(mapping)==len(items),(bucket,side,'duplicate_keys')
+              return mapping,calls
 
-          summary={'release':463,'status':'PASS','transport':'isolated legacy Pages R2 binding bridge','buckets':{}}
+          def sig(item):
+              return json.dumps({
+                  'key':str(item.get('key') or ''),
+                  'size':int(item.get('size') or 0),
+                  'etag':str(item.get('etag') or ''),
+                  'httpMetadata':item.get('httpMetadata') or {},
+                  'customMetadata':item.get('customMetadata') or {},
+                  'storageClass':str(item.get('storageClass') or 'Standard'),
+              },sort_keys=True,separators=(',',':'))
+
+          def chunks(values,size):
+              for i in range(0,len(values),size): yield values[i:i+size]
+
+          proof={'release':463,'status':'PASS','transport':'inventory-delta R2 binding bridge','buckets':{}}
           for bucket in ('product','caip'):
-              actions={}
-              actions['copy']=exhaust(bucket,'copy')
-              actions['prune']=exhaust(bucket,'prune')
-              actions['verify_source']=exhaust(bucket,'verify_source')
-              actions['verify_destination']=exhaust(bucket,'verify_destination')
-              assert actions['copy']['objects'] == actions['verify_source']['objects'],actions
-              assert actions['verify_source']['objects'] == actions['verify_destination']['objects'],actions
-              summary['buckets'][bucket]=actions
-          open('/tmp/release463-r2-proof.json','w').write(json.dumps(summary,indent=2,sort_keys=True))
-          print(json.dumps(summary,indent=2,sort_keys=True))
+              source,source_calls=inventory(bucket,'source')
+              destination,destination_calls=inventory(bucket,'destination')
+              copy_keys=sorted(k for k,v in source.items() if k not in destination or sig(v)!=sig(destination[k]))
+              delete_keys=sorted(set(destination)-set(source))
+              print('DELTA',bucket,'source=',len(source),'destination=',len(destination),'copy=',len(copy_keys),'delete=',len(delete_keys))
+
+              copied=0
+              for group in chunks(copy_keys,5):
+                  data=call(bucket,'copy_keys',keys=group,limit=5)
+                  copied += int(data.get('processed') or 0)
+              deleted=0
+              for group in chunks(delete_keys,500):
+                  data=call(bucket,'delete_keys',keys=group,limit=500)
+                  deleted += int(data.get('processed') or 0)
+
+              final_source,final_source_calls=inventory(bucket,'source')
+              final_destination,final_destination_calls=inventory(bucket,'destination')
+              assert set(final_source)==set(final_destination),(bucket,'key_parity',len(final_source),len(final_destination))
+              mismatches=[k for k in final_source if sig(final_source[k])!=sig(final_destination[k])]
+              assert not mismatches,(bucket,'object_identity_mismatch',mismatches[:20])
+              proof['buckets'][bucket]={
+                  'objects':len(final_source),
+                  'bytes':sum(int(v.get('size') or 0) for v in final_source.values()),
+                  'copied_delta':copied,
+                  'deleted_destination_only':deleted,
+                  'inventory_calls':source_calls+destination_calls+final_source_calls+final_destination_calls,
+              }
+              print('PASS',bucket,proof['buckets'][bucket])
+
+          open('/tmp/release463-r2-proof.json','w').write(json.dumps(proof,indent=2,sort_keys=True))
+          print(json.dumps(proof,indent=2,sort_keys=True))
           PY
 
       - name: Preserve R2 consolidation proof
@@ -221,7 +257,7 @@ jobs:
       - name: Boundary statement
         run: |
           echo 'Development R2 buckets: unchanged'
-          echo 'Production R2 buckets: key/size/metadata parity proven in both directions'
+          echo 'Production R2 buckets: exact key/size/etag/metadata/storage-class parity proven'
           echo 'Canonical devilndove-site Cloudflare Access: unchanged'
           echo 'Disposable bridge project: devilndove-site-dev; retire after final cutover proof'
           echo 'Live Production Pages deployment: not changed by this workflow'
