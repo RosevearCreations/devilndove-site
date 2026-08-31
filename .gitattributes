@@ -1,0 +1,2 @@
+# Cloudflare D1 remote migration parser is sensitive to CRLF in trigger migrations.
+migrations/canonical/*.sql text eol=lf
