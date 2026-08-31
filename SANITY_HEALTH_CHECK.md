@@ -2,7 +2,16 @@
 
 ## Current release
 
-**Release 462 — Autonomous Quality, Workflow & Gate Consolidation.**
+**Release 462 — Autonomous Quality, Workflow & Gate Consolidation — Development green.**
+
+## Exact green evidence
+
+- [x] Preclosure source SHA: `71b58c548e953edbdede1be85e12acd7e30e3422`.
+- [x] System Gate run `33348770688` (#526), job `99357890735`: PASS.
+- [x] Cloudflare Pages check `99358032459`: PASS.
+- [x] Development deployment `3e03d1ee-a427-4d14-b561-59b2980fdf1c`: deployed successfully.
+- [x] Preview: `https://3e03d1ee.devilndove-site-dev.pages.dev`.
+- [x] Ordinary Actions fanout reduced from 11 workflows on the first landing to exactly 1 current System Gate on the corrected green head.
 
 ## Hard boundaries
 
@@ -24,7 +33,7 @@
 - [x] Historical migration replay remains forbidden.
 - [x] Request-time schema DDL remains forbidden.
 
-## Twelve-workstream Release 462 source sanity
+## Release 462 full-dozen sanity
 
 - [x] Application-wide authority audit.
 - [x] Finance/Accounting fail-closed schema ownership.
@@ -37,15 +46,16 @@
 - [x] Stripe/PayPal source preparation without transactions.
 - [x] Responsive/admin UX convergence.
 - [x] Regression/GitHub gate consolidation.
-- [x] Canonical Markdown convergence.
+- [x] Canonical documentation convergence.
 
 ## GitHub sanity
 
-- [x] System Gate is the ordinary push-time source authority.
-- [x] Closed Release 461 source workflow is manual-only.
-- [x] Current official GitHub setup actions use the Node-24-era `v7` major.
-- [x] Historical red runs are not current-release status.
+- [x] System Gate is the only ordinary push-time GitHub Actions source authority.
+- [x] Historical `release4*-source-gate` workflows are manual snapshots only.
+- [x] Historical remote-verification workflows are archived/manual and do not replay remote procedures.
+- [x] Canonical System Gate uses `actions/checkout@v7`, `actions/setup-python@v7`, and `actions/setup-node@v7`.
+- [x] The prior System Gate #525 red entry was an intermediate brittle static assertion and is superseded by #526 PASS.
 
 ## Still deliberately open
 
-CAIP private-media browser proof, Stripe test acceptance, PayPal sandbox acceptance, live provider authorization and Production promotion remain separate external evidence boundaries.
+CAIP private-media browser proof, Stripe test acceptance, PayPal sandbox acceptance, live provider authorization and Production promotion remain separate external evidence boundaries. They are not prerequisites for calling the autonomous Release 462 source release Development green.

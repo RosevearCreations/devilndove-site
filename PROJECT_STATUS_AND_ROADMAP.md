@@ -2,34 +2,47 @@
 
 ## Current Development state
 
-**Release 462 — Autonomous Quality, Workflow & Gate Consolidation.**
+**Release 462 — Autonomous Quality, Workflow & Gate Consolidation — complete and Development green.**
 
-Release 462 processes the full autonomous twelve-item queue without adding a D1 migration or opening external execution. Development remains `dev` → `devilndove-site-dev`; separate live `main` / `devilndove-site` is untouched.
+Preclosure technical evidence is exact and green:
 
-## What Release 462 changes
+- source SHA `71b58c548e953edbdede1be85e12acd7e30e3422`
+- System Gate run `33348770688` (#526), job `99357890735` — PASS
+- Cloudflare Pages check `99358032459` — PASS
+- deployment `3e03d1ee-a427-4d14-b561-59b2980fdf1c`
+- preview `https://3e03d1ee.devilndove-site-dev.pages.dev`
+- one ordinary GitHub Actions workflow on the green head instead of the 11-workflow historical fanout exposed by the first landing.
 
-| # | Workstream | Release 462 result |
+Release 462 is source-only. No D1 migration was added or executed, and no R2/provider/live Production mutation was performed.
+
+## Completed dozen
+
+| # | Workstream | Result |
 |---|---|---|
-| 1 | Application-wide audit | Current-release/runtime ownership reviewed; no new schema migration justified. |
+| 1 | Application-wide audit | Runtime/schema ownership reviewed; no Release 462 schema migration justified. |
 | 2 | Finance / Accounting | Statement imports remain migration-owned, read-only schema checked and fail closed. |
-| 3 | Inventory / Tools / Supplies | Base-unit authority reinforced in workspace guidance and shared responsive handling. |
-| 4 | Product / Storefront | Merchandising authority retained; Product image-quality and SEO requirements surfaced. |
-| 5 | SEO | Canonical public SEO structure and depth gates remain mandatory in the current gate. |
-| 6 | CAIP | Source-preserving review/edit/handoff boundaries reinforced; raw deletion/execution closed. |
+| 3 | Inventory / Tools / Supplies | Base-unit authority and mobile/responsive clarity reinforced. |
+| 4 | Product / Storefront | Merchandising, primary-media quality and SEO guidance reinforced. |
+| 5 | SEO | Public SEO structure and depth remain mandatory current gates. |
+| 6 | CAIP | Source-preserving review/edit/handoff boundaries reinforced; raw deletion and execution closed. |
 | 7 | Creators / Content Studio | Reference-only reviewed handoff and no-auto-publish rule reinforced. |
-| 8 | I.T. | Provider setup now exposes the next external acceptance step and exact runtime references. |
-| 9 | Stripe / PayPal prep | Payment execution remains Development-only/operator-gated; PayPal setup name aligned to runtime `PAYPAL_SECRET`. |
-| 10 | Responsive/admin UX | Shared Release 462 narrow-screen/table/form/action layer applied to major workspaces. |
-| 11 | Regression / gates | Ordinary pushes use the System Gate; closed Release 461 source gate is manual snapshot proof. |
-| 12 | Markdown | Canonical handoff/status/sanity/index and Release 462 authority synchronized. |
+| 8 | I.T. | Provider next steps/correction mechanics exposed safely; PayPal setup aligned to `PAYPAL_SECRET`. |
+| 9 | Stripe / PayPal prep | Development test/sandbox execution remains explicit-operator gated. |
+| 10 | Responsive/admin UX | Shared Release 462 responsive layer applied to major workspaces. |
+| 11 | Regression / GitHub | Historical source/remote workflows archived; one ordinary System Gate remains. |
+| 12 | Documentation | Machine and human current authorities synchronized. |
+
+## GitHub workflow correction
+
+The first Release 462 landing generated 11 Actions workflows and System Gate #525 failed on one incorrect static Accounting helper-name assertion. The runtime Accounting helper already used read-only `PRAGMA` checks and contained no request-time DDL. Release 462 corrected the assertion and converted the entire historical release-specific source/remote workflow family to deliberate manual archives. The corrected head generated exactly one Actions workflow, System Gate #526, and it passed every substantive step.
 
 ## Database state
 
-No Release 462 migration exists or is required. Release 461 D1 proof remains authoritative: 77 required tables, 93 required indexes, zero missing objects, zero structural drift and zero foreign-key violations.
+Release 461 remains the D1 authority: 77 required tables, 93 required indexes, zero missing objects, zero structural drift and zero foreign-key violations. Historical migration replay remains forbidden.
 
 ## External evidence still open
 
-The following remain deliberately outside autonomous source work:
+These remain deliberate later acceptance work:
 
 - CAIP private-media browser/range-streaming evidence;
 - Stripe test transaction/webhook/reconciliation;
@@ -37,8 +50,8 @@ The following remain deliberately outside autonomous source work:
 - Etsy/social/video provider authorization/controlled acceptance;
 - Development-to-Production promotion.
 
-Credentials/configuration presence never authorizes provider execution.
+Credentials/configuration presence never authorizes execution.
 
-## Promotion rule
+## Forward direction
 
-Development-green never promotes the separate live Production application automatically. Production remains a deliberate reviewed operation.
+Release 462 autonomous source work is closed. New autonomous feature/source work should begin as **Release 463**. Production remains a separate deliberate promotion boundary.
