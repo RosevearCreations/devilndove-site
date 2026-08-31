@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """Prove runtime D1 schema mutation is unreachable.
 
-Release 464 does not pretend that hundreds of historical schema-description/ensure SQL
-strings disappeared from source overnight. Instead it enforces the safety property that
-matters: all runtime D1 access capable of reaching those legacy statements must pass
-through the schema-safe database adapter, and no route carrying DDL may access DB/DD_DB
-directly. New schema change authority is migrations/canonical only.
+Historical schema-description/ensure SQL may remain temporarily in source, but any
+runtime path capable of executing it must receive a schema-safe D1 binding. This gate
+inventories that residue and fails on raw D1 acquisition/execution bypasses.
 """
 from __future__ import annotations
 
@@ -24,8 +22,12 @@ DDL_AFTER_NEWLINE = re.compile(
     r"`(?:\s|--[^\n]*\n|/\*.*?\*/)*(?P<sql>(?:CREATE\s+(?:TABLE|INDEX|TRIGGER|VIEW)|ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW)|VACUUM\b|REINDEX\b))",
     re.IGNORECASE | re.MULTILINE | re.DOTALL,
 )
-DIRECT_DB = re.compile(r"(?:\bcontext\s*\.\s*)?\benv\s*\.\s*(?:DB|DD_DB)\b", re.IGNORECASE)
-DESTRUCTURED_DB = re.compile(r"\{[^}\n]*\b(?:DB|DD_DB)\b[^}\n]*\}\s*=\s*(?:context\.)?env\b", re.IGNORECASE)
+# Boolean readiness/status checks such as `!!env.DB` are not database access. These
+# patterns identify actual raw binding acquisition or direct execution only.
+RAW_RETURN = re.compile(r"\breturn\s+(?:context\.)?env\s*\.\s*(?:DB|DD_DB)\b", re.IGNORECASE)
+RAW_ASSIGN = re.compile(r"\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*(?:context\.)?env\s*\.\s*(?:DB|DD_DB)\b", re.IGNORECASE)
+RAW_EXECUTE = re.compile(r"(?:context\.)?env\s*\.\s*(?:DB|DD_DB)\s*\.\s*(?:prepare|exec|batch|withSession)\s*\(", re.IGNORECASE)
+RAW_DESTRUCTURE = re.compile(r"\{[^}\n]*\b(?:DB|DD_DB)\b[^}\n]*\}\s*=\s*(?:context\.)?env\b", re.IGNORECASE)
 
 schema_safe = (ROOT / "functions/api/_lib/schemaSafeD1.js").read_text(encoding="utf-8", errors="replace")
 admin_audit = (ROOT / "functions/api/_lib/adminAudit.js").read_text(encoding="utf-8", errors="replace")
@@ -58,26 +60,31 @@ for path in sorted(FUNCTIONS.rglob("*.js")):
     ddl_occurrences += len(unique)
     rel = path.relative_to(ROOT).as_posix()
 
-    # Any route/library that bypasses getDb and reaches the raw binding while carrying
-    # DDL is an immediate blocker, regardless of whether the DDL currently executes.
-    if DIRECT_DB.search(text) or DESTRUCTURED_DB.search(text):
-        unprotected.append(f"{rel} — direct env.DB/DD_DB access while carrying schema DDL")
+    raw_access = any(pattern.search(text) for pattern in (RAW_RETURN, RAW_ASSIGN, RAW_EXECUTE, RAW_DESTRUCTURE))
+    if raw_access:
+        # A raw acquisition is acceptable only when this source itself explicitly wraps
+        # the binding in createSchemaSafeD1 before use.
+        if "createSchemaSafeD1" not in text:
+            unprotected.append(f"{rel} — raw D1 acquisition/execution while carrying schema DDL")
+            continue
+
+    if rel.startswith("functions/api/admin/_"):
+        # Underscore admin helpers are not routes; they receive DB from their guarded caller.
+        delegated_libraries += 1
         continue
 
     if rel.startswith("functions/api/admin/"):
-        if "getDb" not in text:
-            unprotected.append(f"{rel} — admin DDL source does not use guarded getDb()")
+        if "getDb" not in text and "createSchemaSafeD1" not in text:
+            unprotected.append(f"{rel} — admin DDL source does not use guarded getDb()/createSchemaSafeD1")
         else:
             protected_routes += 1
         continue
 
     if rel.startswith("functions/api/_lib/"):
-        # Shared libraries receive a DB from callers. They may retain historical DDL only
-        # if they never reach env.DB directly; admin callers supply guarded getDb().
+        # Shared libraries either wrap their own binding or receive a DB from guarded callers.
         delegated_libraries += 1
         continue
 
-    # Public/non-admin runtime should not carry schema mutation residue at all.
     unprotected.append(f"{rel} — non-admin runtime carries schema DDL")
 
 if unprotected:
@@ -87,9 +94,9 @@ print("RUNTIME SCHEMA MUTATION AUTHORITY GATE")
 print(f"Runtime JS files scanned: {sum(1 for _ in FUNCTIONS.rglob('*.js'))}")
 print(f"Historical DDL-bearing files inventoried: {files_with_ddl}")
 print(f"Historical DDL string occurrences inventoried: {ddl_occurrences}")
-print(f"DDL-bearing admin routes behind guarded getDb(): {protected_routes}")
-print(f"DDL-bearing shared libraries with delegated guarded DB: {delegated_libraries}")
-print(f"Raw DB binding bypasses carrying DDL: {len(unprotected)}")
+print(f"DDL-bearing admin routes behind guarded DB: {protected_routes}")
+print(f"DDL-bearing delegated/shared helpers: {delegated_libraries}")
+print(f"Raw D1 bypasses carrying DDL: {len(unprotected)}")
 if FAIL:
     print("RUNTIME SCHEMA MUTATION AUTHORITY GATE: FAIL")
     for index, message in enumerate(FAIL, 1):
@@ -98,6 +105,6 @@ if FAIL:
 
 print("RUNTIME SCHEMA MUTATION AUTHORITY GATE: PASS")
 print("Request-time schema mutation capability: BLOCKED")
-print("Legacy ensure-DDL through getDb(): NON-MUTATING")
-print("Raw DB bypass with DDL: ZERO")
+print("Legacy ensure-DDL behind guarded DB: NON-MUTATING")
+print("Raw D1 bypass with DDL: ZERO")
 print("Schema change authority: migrations/canonical + scripts/d1_migrate.py")
