@@ -66,14 +66,14 @@ jobs:
           sha256sum /tmp/devilndove-dev-release463.sql | tee /tmp/devilndove-dev-release463.sha256
           ls -lh /tmp/devilndove-dev-release463.sql
 
-      - name: Reorder exported SQL and prove it locally before remote import
+      - name: Order schema and data by dependencies and prove with foreign keys ON
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import pathlib, sqlite3
+          import pathlib, re, sqlite3, collections
           src=pathlib.Path('/tmp/devilndove-dev-release463.sql')
-          out=pathlib.Path('/tmp/devilndove-dev-release463-reordered.sql')
+          out=pathlib.Path('/tmp/devilndove-dev-release463-ordered.sql')
           text=src.read_text(encoding='utf-8')
           statements=[]; buf=''
           for line in text.splitlines(True):
@@ -84,17 +84,14 @@ jobs:
                   buf=''
           if buf.strip(): statements.append(buf.strip())
 
-          pre=[]; tables=[]; data=[]; views=[]; indexes=[]; triggers=[]; post=[]
+          tables=[]; data=[]; views=[]; indexes=[]; triggers=[]; other=[]
           for s in statements:
               u=s.lstrip().upper()
-              if u.startswith('BEGIN TRANSACTION') or u == 'BEGIN;' or u.startswith('COMMIT'):
+              if u.startswith('BEGIN TRANSACTION') or u == 'BEGIN;' or u.startswith('COMMIT') or u.startswith('PRAGMA '):
                   continue
-              if u.startswith('PRAGMA '):
-                  # D1 export pragmas are safe to retain before schema creation.
-                  pre.append(s)
-              elif u.startswith('CREATE TABLE') or u.startswith('CREATE VIRTUAL TABLE'):
+              if u.startswith('CREATE TABLE') or u.startswith('CREATE VIRTUAL TABLE'):
                   tables.append(s)
-              elif u.startswith('INSERT INTO') or u.startswith('REPLACE INTO') or u.startswith('UPDATE ') or u.startswith('DELETE FROM'):
+              elif u.startswith('INSERT INTO') or u.startswith('REPLACE INTO'):
                   data.append(s)
               elif u.startswith('CREATE VIEW'):
                   views.append(s)
@@ -103,21 +100,78 @@ jobs:
               elif u.startswith('CREATE TRIGGER'):
                   triggers.append(s)
               else:
-                  post.append(s)
+                  other.append(s)
 
-          ordered=pre + tables + data + views + indexes + triggers + post
+          assert len(tables) >= 574, len(tables)
+          assert not other, other[:5]
+
+          schema=sqlite3.connect(':memory:')
+          schema.execute('PRAGMA foreign_keys=ON')
+          for s in tables:
+              schema.execute(s)
+          table_names=[r[0] for r in schema.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")]
+          table_set=set(table_names)
+          creation_pos={name:i for i,name in enumerate(table_names)}
+
+          deps={name:set() for name in table_names}
+          reverse={name:set() for name in table_names}
+          for child in table_names:
+              q='PRAGMA foreign_key_list("'+child.replace('"','""')+'")'
+              for row in schema.execute(q):
+                  parent=str(row[2])
+                  if parent in table_set and parent != child:
+                      deps[child].add(parent)
+                      reverse[parent].add(child)
+
+          indegree={name:len(deps[name]) for name in table_names}
+          ready=sorted((n for n,d in indegree.items() if d==0), key=lambda n:creation_pos[n])
+          order=[]
+          while ready:
+              node=ready.pop(0); order.append(node)
+              for child in sorted(reverse[node], key=lambda n:creation_pos[n]):
+                  indegree[child]-=1
+                  if indegree[child]==0:
+                      ready.append(child)
+                      ready.sort(key=lambda n:creation_pos[n])
+          unresolved=[n for n in table_names if n not in set(order)]
+          order.extend(sorted(unresolved,key=lambda n:creation_pos[n]))
+          schema.close()
+          print('FK TOPOLOGY tables=',len(table_names),'cyclic_or_unresolved=',len(unresolved))
+          if unresolved: print('UNRESOLVED',unresolved[:30])
+
+          insert_re=re.compile(r'^\s*(?:INSERT|REPLACE)\s+INTO\s+(?:"((?:[^"]|"")+)"|`([^`]+)`|\[([^\]]+)\]|([^\s(]+))',re.I|re.S)
+          grouped=collections.defaultdict(list); unknown=[]
+          for s in data:
+              m=insert_re.match(s)
+              if not m:
+                  unknown.append(s); continue
+              name=next((g for g in m.groups() if g is not None),'').replace('""','"')
+              grouped[name].append(s)
+          assert not unknown, unknown[:3]
+
+          ordered_data=[]
+          for name in order:
+              ordered_data.extend(grouped.pop(name,[]))
+          # sqlite_sequence and any engine-created helper targets follow all user tables.
+          for name in sorted(grouped):
+              ordered_data.extend(grouped[name])
+              print('ENGINE/UNLISTED INSERT TARGET',name,'statements=',len(grouped[name]))
+
+          ordered=tables + ordered_data + views + indexes + triggers
           out.write_text('\n'.join(s.rstrip(';')+';' for s in ordered)+'\n',encoding='utf-8')
-          print('STATEMENTS',len(statements),'TABLES',len(tables),'DATA',len(data),'VIEWS',len(views),'INDEXES',len(indexes),'TRIGGERS',len(triggers),'OTHER',len(post))
-          assert len(tables) >= 500, len(tables)
+          print('STATEMENTS',len(statements),'TABLES',len(tables),'DATA',len(ordered_data),'VIEWS',len(views),'INDEXES',len(indexes),'TRIGGERS',len(triggers))
 
           db='/tmp/release463-local-proof.sqlite'
           con=sqlite3.connect(db)
           try:
+              con.execute('PRAGMA foreign_keys=ON')
               con.executescript(out.read_text(encoding='utf-8'))
+              enabled=con.execute('PRAGMA foreign_keys').fetchone()[0]
               tables_n=con.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> '_cf_KV'").fetchone()[0]
               indexes_n=con.execute("SELECT count(*) FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'").fetchone()[0]
               fk=list(con.execute('PRAGMA foreign_key_check'))
-              print('LOCAL PROOF tables=',tables_n,'indexes=',indexes_n,'fk_violations=',len(fk))
+              print('LOCAL STRICT PROOF fk_enabled=',enabled,'tables=',tables_n,'indexes=',indexes_n,'fk_violations=',len(fk))
+              assert enabled==1
               assert tables_n >= 574, tables_n
               assert indexes_n >= 607, indexes_n
               assert fk == [], fk[:10]
@@ -127,15 +181,15 @@ jobs:
                   assert n==expected,(table,n,expected)
           finally:
               con.close()
-          print('REORDERED EXPORT LOCAL SQLITE PROOF: PASS')
+          print('FK-ORDERED EXPORT LOCAL STRICT SQLITE PROOF: PASS')
           PY
-          sha256sum /tmp/devilndove-dev-release463-reordered.sql | tee /tmp/devilndove-dev-release463-reordered.sha256
+          sha256sum /tmp/devilndove-dev-release463-ordered.sql | tee /tmp/devilndove-dev-release463-ordered.sha256
 
-      - name: Import locally-proven reordered Development state into Production candidate
+      - name: Import locally-proven ordered Development state into Production candidate
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute "${TARGET_DB}" --remote --yes --file=/tmp/devilndove-dev-release463-reordered.sql
+          npx --yes wrangler@4 d1 execute "${TARGET_DB}" --remote --yes --file=/tmp/devilndove-dev-release463-ordered.sql
 
       - name: Verify Production candidate parity read-only
         shell: bash
@@ -193,7 +247,7 @@ jobs:
           name: release463-dev-to-production-d1-proof
           path: |
             /tmp/devilndove-dev-release463.sha256
-            /tmp/devilndove-dev-release463-reordered.sha256
+            /tmp/devilndove-dev-release463-ordered.sha256
             /tmp/target-fk.json
           retention-days: 90
           if-no-files-found: error
