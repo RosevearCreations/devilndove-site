@@ -30,6 +30,7 @@ manifest = json.loads(read("migrations/canonical/manifest.json") or "{}")
 req(release.get("environment") == "development" and release.get("branch") == "dev", "application authority must remain Development/dev")
 req(int(release.get("release") or 0) == 464, "current application release must be 464")
 req(release.get("label") == LABEL, "Release 464 label drifted")
+req(release.get("convergence_state") == "release464_update2_complete_development_green", "Release 464 convergence state must identify Update 2 Development green")
 req([x.get("key") for x in release.get("canonical_modules", [])] == ["storefront","creators","socials","financials","it-platform"], "canonical five-module authority drifted")
 
 infra = release.get("development_infrastructure", {})
@@ -56,18 +57,20 @@ req(policy.get("production_migration_before_dependent_code") is True, "Productio
 req(policy.get("production_transactional_data_owned_by_production") is True and policy.get("blind_dev_to_production_data_overwrite") is False, "Production data-ownership boundary drifted")
 req(policy.get("provider_execution") == "closed" and policy.get("provider_publication") == "closed" and policy.get("provider_live_authorization") == "closed", "provider boundaries must remain closed")
 req(policy.get("request_time_schema_mutation") == "blocked_by_runtime_firewall_and_source_gate", "runtime schema mutation blockade missing")
+req(policy.get("preview_access_must_not_be_weakened_for_smoke") is True, "Preview smoke must preserve Cloudflare Access")
 
 migrations = release.get("current_release_migrations", [])
-req(len(migrations) >= 1, "Release 464 must declare the canonical bootstrap migration")
-if migrations:
-    req(migrations[0].get("file") == "migrations/canonical/0001_release464_migration_authority.sql", "Release 464 canonical bootstrap migration identity drifted")
+req([x.get("file") for x in migrations] == [
+    "migrations/canonical/0001_release464_migration_authority.sql",
+    "migrations/canonical/0002_release464_operational_acceptance.sql",
+], "Release 464 canonical migration authority must contain exact 0001/0002 sequence")
 
 req(manifest.get("stream") == "devilndove-canonical-forward", "canonical migration stream drifted")
 rules = manifest.get("rules", {})
 req(rules.get("development_first") is True and rules.get("production_before_dependent_code") is True, "canonical manifest safety order drifted")
 req(rules.get("native_ledger") == "d1_migrations" and rules.get("proof_table") == "app_schema_migration_proofs", "canonical ledger/proof authority drifted")
 manifest_migrations = [m.get("file") for m in manifest.get("migrations", [])]
-req(bool(manifest_migrations) and manifest_migrations[0] == "0001_release464_migration_authority.sql", "canonical migration bootstrap drifted")
+req(manifest_migrations == ["0001_release464_migration_authority.sql", "0002_release464_operational_acceptance.sql"], "canonical migration manifest must contain exact Release 464 0001/0002 sequence")
 req(len(manifest_migrations) == len(set(manifest_migrations)), "canonical migration manifest contains duplicate filenames")
 
 runtime = read("functions/api/_lib/releaseAuthority.js")
@@ -98,18 +101,26 @@ req("f34a741b-0000-45b0-9a96-6be08754d563" not in wrangler and "account_id =" no
 update1 = release.get("release464_update1", [])
 req([x.get("id") for x in update1] == list(range(1, 8)), "Release 464 Update 1 must contain items 1-7")
 update2 = release.get("release464_update2", [])
-update2_complete = [x.get("id") for x in update2] == [8,9,10,11,12,13]
-if update2_complete:
-    req(all(x.get("status") == "complete_development_green" for x in update2), "Update 2 completion status drifted")
+req([x.get("id") for x in update2] == [8,9,10,11,12,13], "Release 464 Update 2 must contain completed items 8-13")
+req(all(str(x.get("status") or "").startswith("complete") for x in update2), "Release 464 Update 2 items must remain complete")
 planned = {int(x.get("update") or 0): x for x in release.get("planned_updates", [])}
-update2_planned = planned.get(2, {}).get("items") == [8,9,10,11,12,13]
-req(update2_complete != update2_planned, "Update 2 roadmap must be exactly one of planned or completed")
+req(2 not in planned, "Completed Update 2 must not remain in planned_updates")
 req(planned.get(3, {}).get("items") == [14,15,16,17,18,19,20], "Update 3 roadmap drifted")
+
+current_evidence = release.get("current_release_evidence", {})
+req(current_evidence.get("update2_development_green") is True, "Update 2 Development-green evidence missing")
+req(int(current_evidence.get("development_native_migration_rows") or 0) == 2, "Update 2 must retain two Development native migration rows")
+req(int(current_evidence.get("development_migration_proof_rows") or 0) == 2, "Update 2 must retain two Development migration proof rows")
+fk_value = current_evidence.get("development_foreign_key_violations")
+req(fk_value is not None and int(fk_value) == 0, "Update 2 Development FK authority drifted")
+req(current_evidence.get("preview_smoke_pass") is True and current_evidence.get("preview_access_weakened") is False, "Update 2 Access-safe Preview smoke evidence drifted")
+req(int(current_evidence.get("preview_smoke_auth_headers_used") or 0) == 0, "Update 2 Preview smoke must use zero auth headers")
 
 for path in (
     "AI_HANDOFF.md",
     "PROJECT_STATUS_AND_ROADMAP.md",
     "SANITY_HEALTH_CHECK.md",
+    "release464-update2-operational-acceptance.json",
     "docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md",
     "docs/operations/RELEASE_464_THREE_UPDATE_ROADMAP.md",
     "migrations/canonical/README.md",
@@ -124,7 +135,9 @@ print("PLATFORM FORWARD SANITY")
 print(f"Application release: 464 — {LABEL}")
 print("Environment release: 463 — one Pages project with isolated Dev/Production D1 + R2")
 print("Historical D1 baseline: Release 461 — provenance only, never replayed")
-print("Forward D1 migration stream: migrations/canonical")
+print("Forward D1 migration stream: migrations/canonical (0001 + 0002 Development proven)")
+print("Release 464 Update 2: DEVELOPMENT GREEN")
+print("Next bounded work: Update 3 items 14-20")
 print("Request-time schema mutation capability: BLOCKED")
 print("Production data ownership: PRODUCTION")
 if FAIL:
