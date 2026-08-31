@@ -1,0 +1,169 @@
+name: Release 463 D1 Consolidation
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'data/release463-d1-consolidation-trigger.json'
+
+permissions:
+  contents: read
+
+jobs:
+  consolidate-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      SOURCE_DB: devilndove-dev
+      SOURCE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      TARGET_DB: devilndove-prod-r462
+      TARGET_ID: f34a741b-0000-45b0-9a96-6be08754d563
+      LEGACY_DB: devilndove-prod
+      LEGACY_REPL_DB: devilndove-prod-repl-20260823
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Verify exact source and empty target before mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 list --json > /tmp/d1-list.json
+          python - <<'PY'
+          import json, os
+          rows=json.load(open('/tmp/d1-list.json',encoding='utf-8'))
+          by_name={x.get('name'):str(x.get('uuid') or x.get('id') or '') for x in rows}
+          assert by_name.get(os.environ['SOURCE_DB']) == os.environ['SOURCE_ID'], by_name
+          assert by_name.get(os.environ['TARGET_DB']) == os.environ['TARGET_ID'], by_name
+          print('EXACT D1 IDENTITIES: PASS')
+          PY
+          npx --yes wrangler@4 d1 execute "${TARGET_DB}" --remote --json --command "SELECT count(*) AS user_table_count FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> '_cf_KV';" > /tmp/target-pre.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/target-pre.json'))
+          vals=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'user_table_count' in v: vals.append(int(v['user_table_count']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d)
+          assert vals and vals[0] == 0, vals
+          print('EMPTY PRODUCTION CANDIDATE: PASS')
+          PY
+
+      - name: Export legacy Production rollback databases
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/release463-backups
+          npx --yes wrangler@4 d1 export "${LEGACY_DB}" --remote --skip-confirmation --output=/tmp/release463-backups/devilndove-prod-before-release463.sql
+          npx --yes wrangler@4 d1 export "${LEGACY_REPL_DB}" --remote --skip-confirmation --output=/tmp/release463-backups/devilndove-prod-repl-20260823-before-release463.sql
+          sha256sum /tmp/release463-backups/*.sql | tee /tmp/release463-backups/SHA256SUMS.txt
+          ls -lh /tmp/release463-backups
+
+      - name: Preserve rollback exports as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release463-preconsolidation-production-d1-backups
+          path: /tmp/release463-backups/
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Export proven Development D1 exactly once
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 export "${SOURCE_DB}" --remote --skip-confirmation --output=/tmp/devilndove-dev-release463.sql
+          test -s /tmp/devilndove-dev-release463.sql
+          sha256sum /tmp/devilndove-dev-release463.sql | tee /tmp/devilndove-dev-release463.sha256
+          ls -lh /tmp/devilndove-dev-release463.sql
+
+      - name: Import proven Development state into empty Production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${TARGET_DB}" --remote --yes --file=/tmp/devilndove-dev-release463.sql
+
+      - name: Verify Production candidate parity read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, subprocess
+          source=os.environ['SOURCE_DB']; target=os.environ['TARGET_DB']
+          queries={
+            'tables': "SELECT count(*) AS n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';",
+            'indexes': "SELECT count(*) AS n FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%';",
+            'views': "SELECT count(*) AS n FROM sqlite_master WHERE type='view' AND name NOT LIKE 'sqlite_%';",
+            'triggers': "SELECT count(*) AS n FROM sqlite_master WHERE type='trigger' AND name NOT LIKE 'sqlite_%';",
+            'users': "SELECT count(*) AS n FROM users;",
+            'products': "SELECT count(*) AS n FROM products;",
+            'sessions': "SELECT count(*) AS n FROM sessions;",
+            'orders': "SELECT count(*) AS n FROM orders;",
+            'site_item_inventory': "SELECT count(*) AS n FROM site_item_inventory;",
+            'app_modules': "SELECT count(*) AS n FROM app_modules;",
+          }
+          def value(db,sql):
+              p=subprocess.run(['npx','--yes','wrangler@4','d1','execute',db,'--remote','--json','--command',sql],check=True,capture_output=True,text=True)
+              d=json.loads(p.stdout); vals=[]
+              def walk(v):
+                  if isinstance(v,dict):
+                      if 'n' in v: vals.append(int(v['n']))
+                      for x in v.values(): walk(x)
+                  elif isinstance(v,list):
+                      for x in v: walk(x)
+              walk(d)
+              if not vals: raise AssertionError((db,sql,d))
+              return vals[0]
+          for label,sql in queries.items():
+              a=value(source,sql); b=value(target,sql)
+              print(label,'source=',a,'target=',b)
+              assert a==b,(label,a,b)
+          assert value(target,queries['tables']) >= 575
+          assert value(target,queries['indexes']) >= 607
+          print('SOURCE/TARGET STRUCTURAL + KEY ROW PARITY: PASS')
+          PY
+          npx --yes wrangler@4 d1 execute "${TARGET_DB}" --remote --json --command "PRAGMA foreign_key_check;" > /tmp/target-fk.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/target-fk.json'))
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  r=v.get('results')
+                  if isinstance(r,list): rows.extend(r)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          # Count only actual result rows from top-level query result payloads.
+          for item in d if isinstance(d,list) else [d]:
+              if isinstance(item,dict) and isinstance(item.get('results'),list): rows.extend(item['results'])
+          assert rows == [], rows[:10]
+          print('TARGET FOREIGN KEY CHECK: PASS')
+          PY
+
+      - name: Preserve source snapshot checksum and target proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: release463-dev-to-production-d1-proof
+          path: |
+            /tmp/devilndove-dev-release463.sha256
+            /tmp/target-fk.json
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Boundary statement
+        run: |
+          echo 'Release 463 D1 clone: COMPLETE'
+          echo 'Source devilndove-dev: NOT MUTATED'
+          echo 'Target devilndove-prod-r462: POPULATED AND VERIFIED'
+          echo 'Legacy Production databases: NOT DELETED BY THIS WORKFLOW'
+          echo 'Pages bindings: NOT CHANGED BY THIS WORKFLOW'
