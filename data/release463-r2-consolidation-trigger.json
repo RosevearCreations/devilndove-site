@@ -1,7 +1,7 @@
 {
   "release": 463,
-  "operation": "synchronize proven Development R2 buckets into retained Production R2 buckets through the isolated legacy Pages project using native R2 bindings",
+  "operation": "converge proven Development R2 buckets into retained Production R2 buckets by inventory delta and prove exact parity",
   "requested_at": "2026-08-31",
-  "attempt": 7,
-  "transport": "isolated-legacy-pages-r2-bridge"
+  "attempt": 8,
+  "transport": "isolated-legacy-pages-r2-inventory-delta"
 }
