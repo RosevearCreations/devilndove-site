@@ -51,11 +51,11 @@
       "name": "Non-secret Preview smoke",
       "requirements": [
         "exact Preview URL",
-        "no authentication header",
-        "home",
-        "manifest",
-        "service worker",
-        "public API"
+        "no authentication header or service token",
+        "never weaken Cloudflare Access",
+        "when Access is enforced prove home, manifest, service worker and public API are all intercepted anonymously",
+        "when Access is not enforced validate those application surfaces directly",
+        "validate matching source artifacts in the exact checked-out SHA"
       ]
     },
     {
@@ -97,6 +97,7 @@
     "raw_r2_delete": false,
     "provider_execution": false,
     "production_mutation": false,
-    "retention_delete_requires_archived_approved_review": true
+    "retention_delete_requires_archived_approved_review": true,
+    "preview_access_weakened_for_smoke": false
   }
 }
