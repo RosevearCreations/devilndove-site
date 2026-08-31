@@ -1,31 +1,26 @@
-name: Release 461 Payment Webhook Schema Contract Source Gate
+name: Release 461 Payment Webhook Schema Source Gate — Closed Snapshot
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/paymentWebhookSecurity.js'
-      - 'database_gift_card_runtime_parity.sql'
-      - 'scripts/release461_payment_webhook_schema_contract_gate.py'
-      - '.github/workflows/release461-payment-webhook-schema-contract-source-gate.yml'
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Historical Release 461 ref to re-prove
+        required: true
+        default: e5637bdcc9807e626f0ed5e2828c86898804aed1
 
-permissions: {contents: read}
+permissions:
+  contents: read
 
 jobs:
-  schema-contract-source:
+  historical-source-snapshot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - uses: actions/setup-node@v4
-        with: {node-version: '24'}
-      - run: python scripts/release461_payment_webhook_schema_contract_gate.py
-      - run: node --check functions/api/_lib/paymentWebhookSecurity.js
-      - run: git diff --check
-      - run: |
-          echo 'Provider execution/authorization: NOT RUN'
-          echo 'Schema contract verification only'
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Re-prove historical payment/webhook schema source
+        run: python scripts/release461_payment_webhook_schema_contract_gate.py
+      - run: echo 'Historical Release 461 snapshot only; D1/provider/Production mutation NONE.'

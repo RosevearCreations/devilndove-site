@@ -1,59 +1,32 @@
-name: Release 452 Source Gate
+name: Release 452 Source Gate — Closed Snapshot
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'development-release.json'
-      - 'AI_HANDOFF.md'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'shop/product/index.html'
-      - 'shop/index.html'
-      - 'collections/index.html'
-      - 'collages/index.html'
-      - 'sitemap.xml'
-      - 'public/js/product-breadcrumb-seo.js'
-      - 'admin/inventory-intelligence/index.html'
-      - 'admin/tool-lifecycle/index.html'
-      - 'admin/accounting/index.html'
-      - 'admin/caip-content-handoff/index.html'
-      - 'scripts/repository_hygiene_gate.py'
-      - 'scripts/release452_application_streamlining_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'docs/operations/RELEASE_452_APPLICATION_STREAMLINING.md'
-      - '.github/workflows/release452-source-gate.yml'
-      - '.github/workflows/system-gate.yml'
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Historical Release 452 ref to re-prove
+        required: true
 
 permissions:
   contents: read
 
 jobs:
-  source-gate:
+  historical-source-snapshot:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Refuse non-Development branch
-        run: test "${GITHUB_REF_NAME}" = "dev"
-      - name: Validate repository hygiene
-        run: python scripts/repository_hygiene_gate.py
-      - name: Validate Release 452 application streamlining
+      - name: Re-prove historical Release 452 source
         run: python scripts/release452_application_streamlining_gate.py
-      - name: Validate canonical repository authority
-        run: python scripts/repository_forward_sanity.py
-      - name: Validate whitespace
-        run: git diff --check
-      - name: Safety statement
+      - name: Closed snapshot boundary
         run: |
-          echo 'Release 452 mode: application streamlining + UX/SEO depth'
-          echo 'D1 schema current through: Release 450'
-          echo 'New D1 migration: NONE'
-          echo 'Provider execution/publication: DISABLED'
-          echo 'Production mutation capability: NONE'
+          echo 'Historical Release 452 snapshot only; ordinary dev pushes do not run this workflow.'
+          echo 'D1/R2/provider/Production mutation: NONE'

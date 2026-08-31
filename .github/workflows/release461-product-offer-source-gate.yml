@@ -1,29 +1,26 @@
-name: Release 461 Product Offer Source Gate
+name: Release 461 Product Offer Source Gate — Closed Snapshot
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/productOffers.js'
-      - 'migrations/dev/20260829_release461_public_product_offer_authority.sql'
-      - 'scripts/release461_product_offer_schema_gate.py'
-      - '.github/workflows/release461-product-offer-source-gate.yml'
-      - '.github/workflows/development-d1-release461-product-offers.yml'
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Historical Release 461 ref to re-prove
+        required: true
+        default: e5637bdcc9807e626f0ed5e2828c86898804aed1
 
-permissions: {contents: read}
+permissions:
+  contents: read
 
 jobs:
-  product-offer-schema-source:
+  historical-source-snapshot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - uses: actions/setup-node@v4
-        with: {node-version: '24'}
-      - run: python scripts/release461_product_offer_schema_gate.py
-      - run: node --check functions/api/_lib/productOffers.js
-      - run: git diff --check
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Re-prove historical product-offer schema source
+        run: python scripts/release461_product_offer_schema_gate.py
+      - run: echo 'Historical Release 461 snapshot only; D1/provider/Production mutation NONE.'

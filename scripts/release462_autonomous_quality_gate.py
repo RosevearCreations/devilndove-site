@@ -37,7 +37,7 @@ req(db.get("historical_migration_replay") is False and db.get("automatic_replay_
 
 # 2. Finance / Accounting: statement-import schema ownership stays migration-owned.
 statement=read("functions/api/admin/_accountingStatementImports.js")
-req("assertStatementImportSchema" in statement and "PRAGMA table_info" in statement,"Accounting statement-import read-only schema assertion missing")
+req("ensureAccountingStatementImportsTables" in statement and "PRAGMA table_info" in statement and "PRAGMA index_list" in statement,"Accounting statement-import read-only schema assertion missing")
 for ddl in ("CREATE TABLE","ALTER TABLE","DROP TABLE","CREATE INDEX","DROP INDEX"):
     req(ddl not in statement.upper(),f"Accounting statement-import helper contains request-time DDL: {ddl}")
 req("release462-admin-quality.css" in read("admin/accounting/index.html"),"Accounting responsive Release 462 layer missing")
@@ -91,10 +91,19 @@ for selector in (".release462-status-strip",".dd-admin-responsive-actions","@med
 for page in ("admin/accounting/index.html","admin/inventory-operations/index.html","admin/storefront-merchandising/index.html","admin/creative-assets/index.html","admin/content-studio/index.html","admin/it-integrations/index.html"):
     req("release462-admin-quality.css" in read(page),f"{page} missing shared Release 462 responsive layer")
 
-# 11. Regression/gate consolidation.
-historical=read(".github/workflows/release461-source-gate.yml")
+# 11. Regression/gate consolidation. Historical release-specific source and remote
+# verification workflows are retained only as manual snapshots. Ordinary dev pushes
+# must produce one canonical source signal: System Gate.
 system=read(".github/workflows/system-gate.yml")
-req("push:" not in historical and "pull_request:" not in historical and "workflow_dispatch:" in historical,"Closed Release 461 source workflow must be manual-only")
+historical_paths=sorted(
+    list((ROOT/".github/workflows").glob("release4*-source-gate.yml"))+
+    list((ROOT/".github/workflows").glob("release4*-remote-verification.yml"))
+)
+req(bool(historical_paths),"Historical workflow inventory unexpectedly empty")
+for path in historical_paths:
+    workflow=path.read_text(encoding="utf-8",errors="replace")
+    req("workflow_dispatch:" in workflow and "\n  push:" not in workflow and "\n  pull_request:" not in workflow,
+        f"Historical workflow must be manual-only: {path.name}")
 req("release462_autonomous_quality_gate.py" in system,"System Gate must run Release 462 autonomous quality authority")
 req("actions/checkout@v7" in system and "actions/setup-python@v7" in system and "actions/setup-node@v7" in system,"System Gate actions must use current Node-24-era major versions")
 req("Release 459 runtime/provider" not in system and "release459_runtime_acceptance_gate.py" not in system,"System Gate still exposes stale Release 459 current-authority noise")
@@ -124,6 +133,7 @@ for script in ("public_seo_gate.py","public_seo_depth_gate.py"):
 
 print("\nRELEASE 462 AUTONOMOUS QUALITY GATE: PASS")
 print("Twelve autonomous workstreams: SOURCE-CLOSED")
+print("Historical release-specific source/remote workflows: MANUAL SNAPSHOTS ONLY")
 print("D1 migration: NONE")
 print("Provider/payment execution: CLOSED")
 print("Raw CAIP R2 deletion: CLOSED")
