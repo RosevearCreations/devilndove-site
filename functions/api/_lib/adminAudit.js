@@ -1,3 +1,5 @@
+import { createSchemaSafeD1 } from './schemaSafeD1.js';
+
 export function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -15,7 +17,7 @@ export function normalizeText(value) {
 }
 
 export function getDb(env) {
-  return env.DB || env.DD_DB;
+  return createSchemaSafeD1(env.DB || env.DD_DB);
 }
 
 export function getClientIp(request) {
@@ -115,11 +117,9 @@ export async function auditAdminAction(env, request, adminUser, payload = {}) {
   } catch {}
 }
 
-
 export async function captureRuntimeIncident(env, request, payload = {}) {
   const db = getDb(env);
   if (!db) return false;
-
 
   try {
     await db.prepare(`
