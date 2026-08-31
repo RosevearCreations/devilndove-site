@@ -1,5 +1,10 @@
 {
+  "format": 1,
   "stream": "devilndove-canonical-forward",
+  "baseline": {
+    "application_release": 461,
+    "note": "Release 461 is the already-proven schema baseline. Historical files in migrations/dev are provenance only and are never replayed by this canonical stream."
+  },
   "rules": {
     "immutable_after_development_apply": true,
     "development_first": true,
@@ -12,18 +17,21 @@
     {
       "version": 1,
       "file": "0001_release464_migration_authority.sql",
-      "description": "Bootstrap canonical migration proof authority alongside Cloudflare native D1 migration tracking.",
-      "recovery": "Forward-only bootstrap. Restore from the pre-migration D1 backup only if verification cannot be repaired forward."
+      "release": 464,
+      "description": "Bootstrap the forward-only canonical migration proof authority used alongside Cloudflare D1's native d1_migrations ledger.",
+      "recovery": "Forward-only. Restore the pre-migration D1 backup if required, or repair with a new numbered migration. Never edit or replay this migration after Development application."
     },
     {
       "version": 2,
       "file": "0002_release464_operational_acceptance.sql",
-      "description": "Add migration-owned operational retention archive/review and audited recovery evidence authorities.",
-      "recovery": "Forward-only additive tables. Preserve archived evidence and repair forward; restore the pre-migration D1 backup only for unrecoverable integrity failure."
+      "release": 464,
+      "description": "Add migration-owned operational retention archive review and audited safe-recovery evidence for Update 2.",
+      "recovery": "Forward-only. Restore the pre-migration D1 backup if required, or repair retention/recovery authorities with a new numbered migration. Never edit this migration after Development application."
     },
     {
       "version": 3,
       "file": "0003_release464_business_growth.sql",
+      "release": 464,
       "description": "Add scheduled Storefront merchandising rules and the cross-module Creative-to-Storefront business pipeline spine.",
       "recovery": "Forward-only additive tables. Disable rules or archive pipeline rows for logical rollback; restore the pre-migration D1 backup only for unrecoverable schema integrity failure."
     }
