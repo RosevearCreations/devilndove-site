@@ -1,7 +1,9 @@
 {
   "release": 463,
-  "operation": "clone proven Development D1 into empty Production candidate with rollback exports",
+  "operation": "clone proven Development D1 into empty Production candidate using locally-proven reordered export",
   "source": "devilndove-dev",
   "target": "devilndove-prod-r462",
-  "requested_at": "2026-08-30"
+  "requested_at": "2026-08-30",
+  "attempt": 2,
+  "rollback_artifact_id": 9744317222
 }
