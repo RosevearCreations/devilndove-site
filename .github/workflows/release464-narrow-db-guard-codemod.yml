@@ -1,0 +1,40 @@
+name: Release 464 Narrow D1 Guard Codemod
+
+on:
+  push:
+    branches: [release464-update1-platform-integrity]
+    paths:
+      - data/release464-narrow-db-guard-trigger.json
+
+permissions:
+  contents: write
+
+jobs:
+  apply-narrow-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Apply exact narrow DB guard edits
+        run: python scripts/release464_narrow_db_guard_codemod.py --apply
+      - name: Prove only intended files changed
+        run: |
+          git diff --check
+          git diff -- functions/api/_lib/accounting.js functions/api/admin/product-images.js
+      - name: Commit guarded product-images acquisition
+        shell: bash
+        run: |
+          if git diff --quiet -- functions/api/_lib/accounting.js functions/api/admin/product-images.js; then
+            echo "No codemod changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add functions/api/_lib/accounting.js functions/api/admin/product-images.js
+          git commit -m "Release 464 guard remaining raw D1 acquisitions"
+          git push origin HEAD:release464-update1-platform-integrity
