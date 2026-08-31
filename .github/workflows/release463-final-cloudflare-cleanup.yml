@@ -1,0 +1,196 @@
+name: Release 463 Final Cloudflare Cleanup
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [dev]
+    paths:
+      - 'data/release463-final-cleanup-trigger.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release463-final-cloudflare-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CANONICAL_PROJECT: devilndove-site
+      LEGACY_PROJECT: devilndove-site-dev
+      DEV_D1_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      PROD_D1_ID: f34a741b-0000-45b0-9a96-6be08754d563
+      LEGACY_D1_ID: 0dc8fa3e-319c-45f7-a515-34c8acd89fcf
+      LEGACY_REPL_D1_ID: 0e45fdfb-0223-4eb0-a2ed-3d013cab7e5d
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Prove Release 463 live cutover prerequisites
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          e=json.load(open('release463-environment.json'))
+          assert e['environment_release']==463
+          assert e['proof']['d1_exact_parity'] is True
+          assert e['proof']['r2_exact_parity'] is True
+          assert e['production']['d1']['id']=='f34a741b-0000-45b0-9a96-6be08754d563'
+          PY
+          npx --yes wrangler@4 d1 execute devilndove-prod-r462 --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables; PRAGMA foreign_key_check;" > /tmp/release463-cleanup-prod-d1.json
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${CANONICAL_PROJECT}" \
+            > /tmp/release463-cleanup-canonical-project.json
+          curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database" \
+            > /tmp/release463-cleanup-d1-before.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/release463-cleanup-prod-d1.json'))
+          rows=[]; sets=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'app_modules' in v and 'tables' in v: rows.append(v)
+                  if 'results' in v and isinstance(v['results'],list): sets.append(v['results'])
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d)
+          assert rows and int(rows[0]['app_modules'])==5 and int(rows[0]['tables'])>=574,rows
+          assert any(len(x)==0 for x in sets),sets[-3:]
+          p=json.load(open('/tmp/release463-cleanup-canonical-project.json'))
+          assert p.get('success') is True,p
+          r=p['result']; prod=(r.get('deployment_configs') or {}).get('production') or {}
+          assert ((prod.get('d1_databases') or {}).get('DB') or {}).get('id')=='f34a741b-0000-45b0-9a96-6be08754d563',prod
+          r2=prod.get('r2_buckets') or {}
+          assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images',r2
+          assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('name')=='devilndove-caip-media',r2
+          inv=json.load(open('/tmp/release463-cleanup-d1-before.json'))
+          assert inv.get('success') is True,inv
+          ids={str(x.get('uuid') or x.get('id') or '') for x in inv.get('result') or []}
+          assert 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' in ids,ids
+          assert 'f34a741b-0000-45b0-9a96-6be08754d563' in ids,ids
+          print('RELEASE 463 CLEANUP PREFLIGHT: PASS')
+          PY
+
+      - name: Retire disposable legacy Pages project
+        shell: bash
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          STATUS="$(curl -sS -o /tmp/release463-legacy-project-before.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${LEGACY_PROJECT}")"
+          if [ "${STATUS}" = "200" ]; then
+            curl -fsS -X DELETE -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${LEGACY_PROJECT}" \
+              > /tmp/release463-legacy-project-delete.json
+            python - <<'PY'
+          import json
+          d=json.load(open('/tmp/release463-legacy-project-delete.json'))
+          assert d.get('success') is True,d
+          print('LEGACY PAGES PROJECT DELETE: PASS')
+          PY
+          elif [ "${STATUS}" = "404" ]; then
+            echo 'Legacy Pages project already absent: PASS'
+          else
+            echo "Unexpected legacy Pages lookup status ${STATUS}" >&2
+            cat /tmp/release463-legacy-project-before.json >&2 || true
+            exit 1
+          fi
+
+      - name: Retire stale Production D1 databases
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          inv=json.load(open('/tmp/release463-cleanup-d1-before.json'))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in inv.get('result') or []}
+          targets=['0dc8fa3e-319c-45f7-a515-34c8acd89fcf','0e45fdfb-0223-4eb0-a2ed-3d013cab7e5d']
+          open('/tmp/release463-d1-delete-list','w').write('\n'.join(x for x in targets if x in ids))
+          PY
+          while IFS= read -r DBID; do
+            [ -n "${DBID}" ] || continue
+            curl -fsS -X DELETE -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${DBID}" \
+              > "/tmp/release463-d1-delete-${DBID}.json"
+            python - "${DBID}" <<'PY'
+          import json,sys
+          dbid=sys.argv[1]
+          d=json.load(open(f'/tmp/release463-d1-delete-{dbid}.json'))
+          assert d.get('success') is True,d
+          print('LEGACY D1 DELETE: PASS',dbid)
+          PY
+          done < /tmp/release463-d1-delete-list
+
+      - name: Prove final Cloudflare inventory
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database" \
+            > /tmp/release463-cleanup-d1-after.json
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects" \
+            > /tmp/release463-cleanup-pages-after.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/release463-cleanup-d1-after.json'))
+          assert d.get('success') is True,d
+          ids={str(x.get('uuid') or x.get('id') or '') for x in d.get('result') or []}
+          assert 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' in ids,ids
+          assert 'f34a741b-0000-45b0-9a96-6be08754d563' in ids,ids
+          assert '0dc8fa3e-319c-45f7-a515-34c8acd89fcf' not in ids,ids
+          assert '0e45fdfb-0223-4eb0-a2ed-3d013cab7e5d' not in ids,ids
+          p=json.load(open('/tmp/release463-cleanup-pages-after.json'))
+          assert p.get('success') is True,p
+          names={str(x.get('name') or '') for x in p.get('result') or []}
+          assert 'devilndove-site' in names,names
+          assert 'devilndove-site-dev' not in names,names
+          proof={
+            'release':463,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),
+            'canonical_pages_project':'devilndove-site','legacy_pages_project_retired':True,
+            'development_d1':'dbc1615b-dcbe-4951-973b-b47c99c73bfa',
+            'production_d1':'f34a741b-0000-45b0-9a96-6be08754d563',
+            'legacy_d1_retired':['0dc8fa3e-319c-45f7-a515-34c8acd89fcf','0e45fdfb-0223-4eb0-a2ed-3d013cab7e5d']
+          }
+          json.dump(proof,open('/tmp/release463-final-cloudflare-cleanup-proof.json','w'),indent=2,sort_keys=True)
+          print('RELEASE 463 FINAL CLOUDFLARE CLEANUP: PASS')
+          print(json.dumps(proof,indent=2,sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release463-final-cloudflare-cleanup-proof
+          path: /tmp/release463-final-cloudflare-cleanup-proof.json
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Boundary statement
+        run: |
+          echo 'Canonical Pages project retained: devilndove-site'
+          echo 'Legacy Pages project retired: devilndove-site-dev'
+          echo 'Development D1 retained: dbc1615b-dcbe-4951-973b-b47c99c73bfa'
+          echo 'Production D1 retained: f34a741b-0000-45b0-9a96-6be08754d563'
+          echo 'Two stale Production D1 databases retired after rollback + live proof'
+          echo 'Development and Production R2 buckets retained and isolated'
