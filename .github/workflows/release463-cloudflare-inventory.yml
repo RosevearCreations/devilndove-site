@@ -1,0 +1,83 @@
+name: Release 463 Cloudflare Inventory
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'data/release463-cloudflare-inventory-trigger.json'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify token and list Cloudflare resources read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          npx --yes wrangler@4 pages project list --json > /tmp/pages.json
+          npx --yes wrangler@4 d1 list --json > /tmp/d1.json
+          npx --yes wrangler@4 r2 bucket list --json > /tmp/r2.json
+          python - <<'PY'
+          import json
+          for title,path in [('PAGES','/tmp/pages.json'),('D1','/tmp/d1.json'),('R2','/tmp/r2.json')]:
+              print('\n====',title,'====')
+              data=json.load(open(path,encoding='utf-8'))
+              if title=='PAGES':
+                  for x in data:
+                      print(x.get('name'), 'production_branch=',x.get('production_branch'), 'subdomain=',x.get('subdomain'))
+              elif title=='D1':
+                  for x in data:
+                      print(x.get('name'), x.get('uuid') or x.get('id'))
+              else:
+                  for x in data:
+                      print(x.get('name') or x.get('bucket_name') or x)
+          PY
+      - name: Inspect Pages project configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in devilndove-site devilndove-site-dev; do
+            echo "==== PROJECT ${project} ===="
+            curl -fsS \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${project}" \
+              | python -c "import json,sys; d=json.load(sys.stdin); r=d.get('result') or {}; print(json.dumps({'name':r.get('name'),'production_branch':r.get('production_branch'),'source':r.get('source'),'production_config':r.get('deployment_configs',{}).get('production'),'preview_config':r.get('deployment_configs',{}).get('preview')},indent=2))"
+          done
+      - name: Inspect R2 object counts read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          account=os.environ['CLOUDFLARE_ACCOUNT_ID']; token=os.environ['CLOUDFLARE_API_TOKEN']
+          for bucket in ['devilndove-toolshed-images-dev','devilndove-caip-media-dev']:
+              cursor=None; count=0; size=0
+              while True:
+                  q='?per_page=1000' + (('&cursor='+urllib.parse.quote(cursor,safe='')) if cursor else '')
+                  req=urllib.request.Request(f'https://api.cloudflare.com/client/v4/accounts/{account}/r2/buckets/{bucket}/objects{q}',headers={'Authorization':'Bearer '+token})
+                  with urllib.request.urlopen(req,timeout=60) as r: data=json.load(r)
+                  result=data.get('result') or []
+                  if isinstance(result,dict):
+                      objs=result.get('objects') or result.get('items') or []
+                      cursor=(result.get('cursor') or result.get('continuation_token') or '')
+                      truncated=bool(result.get('truncated') or result.get('is_truncated'))
+                  else:
+                      objs=result; cursor=''; truncated=False
+                  count += len(objs); size += sum(int(x.get('size') or 0) for x in objs if isinstance(x,dict))
+                  if not truncated or not cursor: break
+              print(bucket,'objects=',count,'bytes=',size)
+          PY
