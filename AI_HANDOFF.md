@@ -4,6 +4,8 @@
 
 **Release 463 — single-project Development/Production operation is now the canonical model.**
 
+**Release 462 application provenance remains closed and green; Release 463 supersedes its old two-project environment assumptions.**
+
 The application is now operated from one Cloudflare Pages project:
 
 - Cloudflare Pages project: `devilndove-site`
