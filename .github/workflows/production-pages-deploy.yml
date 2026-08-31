@@ -22,6 +22,7 @@ jobs:
       PROD_D1_ID: f34a741b-0000-45b0-9a96-6be08754d563
       PROD_PRODUCT_R2: devilndove-toolshed-images
       PROD_CAIP_R2: devilndove-caip-media
+      PROD_LIVE_BASE: https://devilndove.com
       RELEASE463_BROWSER_UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
     steps:
       - uses: actions/checkout@v7
@@ -154,7 +155,66 @@ jobs:
           print('EXACT_PRODUCTION_URL',url)
           PY
 
-      - name: Prove live Production D1 and R2 bindings with temporary Production-only session
+      - name: Prove exact Production deployment and bindings through Cloudflare control plane
+        shell: bash
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site/deployments" \
+            > /tmp/release463-production-deployments.json
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site" \
+            > /tmp/release463-production-project.json
+          python - <<'PY'
+          import json,os
+          exact=open('/tmp/release463-production-url').read().strip().rstrip('/')
+          expected_sha=os.environ['GITHUB_SHA']
+          deployments=json.load(open('/tmp/release463-production-deployments.json'))
+          assert deployments.get('success') is True,deployments
+          matches=[]
+          for item in deployments.get('result') or []:
+              if str(item.get('url') or '').rstrip('/')==exact:
+                  matches.append(item)
+          assert matches,(exact,(deployments.get('result') or [])[:3])
+          dep=matches[0]
+          assert dep.get('project_name')=='devilndove-site',dep
+          assert dep.get('environment')=='production',dep
+          meta=(dep.get('deployment_trigger') or {}).get('metadata') or {}
+          branch=str(meta.get('branch') or '')
+          commit=str(meta.get('commit_hash') or '')
+          assert branch=='main',(branch,meta)
+          assert commit==expected_sha or expected_sha.startswith(commit) or commit.startswith(expected_sha),(commit,expected_sha)
+
+          project=json.load(open('/tmp/release463-production-project.json'))
+          assert project.get('success') is True,project
+          p=project['result']
+          assert p.get('name')=='devilndove-site',p
+          src=(p.get('source') or {}).get('config') or {}
+          assert src.get('production_branch')=='main',src
+          assert src.get('production_deployments_enabled') is False,src
+          assert src.get('preview_deployment_setting')=='none',src
+          prod=(p.get('deployment_configs') or {}).get('production') or {}
+          d1=prod.get('d1_databases') or {}
+          r2=prod.get('r2_buckets') or {}
+          assert (d1.get('DB') or {}).get('id')=='f34a741b-0000-45b0-9a96-6be08754d563',d1
+          assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images',r2
+          assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('name')=='devilndove-caip-media',r2
+          proof={
+            'release':463,'status':'PASS','source_sha':expected_sha,
+            'deployment_id':dep.get('id'),'deployment_url':exact,
+            'environment':dep.get('environment'),'branch':branch,'commit_hash':commit,
+            'project':'devilndove-site','production_d1':'devilndove-prod-r462',
+            'product_r2':'devilndove-toolshed-images','caip_r2':'devilndove-caip-media',
+            'native_git_deployments':False
+          }
+          json.dump(proof,open('/tmp/release463-production-control-plane-proof.json','w'),indent=2,sort_keys=True)
+          print('RELEASE 463 EXACT PRODUCTION CONTROL-PLANE PROOF: PASS')
+          print(json.dumps(proof,indent=2,sort_keys=True))
+          PY
+
+      - name: Prove live Production D1 and R2 on customer-facing domain
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -191,8 +251,7 @@ jobs:
           import json,os,time,urllib.request,urllib.error
           token=os.environ['RELEASE463_PROBE_TOKEN']
           ua=os.environ['RELEASE463_BROWSER_UA']
-          candidates=[open('/tmp/release463-production-url').read().strip(),'https://devilndove-site.pages.dev']
-          outcomes=[]
+          base=os.environ['PROD_LIVE_BASE'].rstrip('/')
           def get_json(url):
               last=None
               for _ in range(25):
@@ -213,45 +272,42 @@ jobs:
                   if status==200: return data
                   last=(status,data); time.sleep(3)
               raise AssertionError((url,last))
-          for base in candidates:
-              me=get_json(base+'/api/auth/me')
-              assert me.get('ok') is True and str((me.get('user') or {}).get('role') or '').lower()=='admin',(base,me)
-              ready=get_json(base+'/api/admin/infrastructure-readiness')
-              assert ready.get('ok') is True and ready.get('release')==463,(base,ready)
-              assert ready.get('target')=='production' and ready.get('project')=='devilndove-site',(base,ready)
-              assert ready.get('configured') is True and ready.get('reachable') is True and ready.get('ready') is True,(base,ready)
-              auth=ready.get('authority') or {}
-              assert (auth.get('d1') or {}).get('database_id')=='f34a741b-0000-45b0-9a96-6be08754d563',(base,auth)
-              r2={x.get('binding'):x for x in auth.get('r2') or []}
-              assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('bucket_name')=='devilndove-toolshed-images',(base,r2)
-              assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('bucket_name')=='devilndove-caip-media',(base,r2)
-              probes={x.get('binding'):x for x in ready.get('r2') or []}
-              assert (probes.get('PRODUCT_MEDIA_BUCKET') or {}).get('storage_ready') is True,(base,probes)
-              assert (probes.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('storage_ready') is True,(base,probes)
-              assert (ready.get('d1') or {}).get('schema_ready') is True,(base,ready.get('d1'))
-              assert (ready.get('d1') or {}).get('foreign_key_violations')==0,(base,ready.get('d1'))
-              outcomes.append({
-                  'base':base,
-                  'auth':'PASS',
-                  'target':ready.get('target'),
-                  'd1':(ready.get('d1') or {}).get('resource'),
-                  'product_r2':(probes.get('PRODUCT_MEDIA_BUCKET') or {}).get('resource'),
-                  'caip_r2':(probes.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('resource'),
-                  'ready':ready.get('ready'),
-              })
-          proof={'release':463,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),'runtime':outcomes}
+          me=get_json(base+'/api/auth/me')
+          assert me.get('ok') is True and str((me.get('user') or {}).get('role') or '').lower()=='admin',(base,me)
+          ready=get_json(base+'/api/admin/infrastructure-readiness')
+          assert ready.get('ok') is True and ready.get('release')==463,(base,ready)
+          assert ready.get('target')=='production' and ready.get('project')=='devilndove-site',(base,ready)
+          assert ready.get('configured') is True and ready.get('reachable') is True and ready.get('ready') is True,(base,ready)
+          auth=ready.get('authority') or {}
+          assert (auth.get('d1') or {}).get('database_id')=='f34a741b-0000-45b0-9a96-6be08754d563',(base,auth)
+          r2={x.get('binding'):x for x in auth.get('r2') or []}
+          assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('bucket_name')=='devilndove-toolshed-images',(base,r2)
+          assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('bucket_name')=='devilndove-caip-media',(base,r2)
+          probes={x.get('binding'):x for x in ready.get('r2') or []}
+          assert (probes.get('PRODUCT_MEDIA_BUCKET') or {}).get('storage_ready') is True,(base,probes)
+          assert (probes.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('storage_ready') is True,(base,probes)
+          assert (ready.get('d1') or {}).get('schema_ready') is True,(base,ready.get('d1'))
+          assert (ready.get('d1') or {}).get('foreign_key_violations')==0,(base,ready.get('d1'))
+          proof={
+              'release':463,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),'base':base,
+              'auth':'PASS','target':ready.get('target'),'d1':(ready.get('d1') or {}).get('resource'),
+              'product_r2':(probes.get('PRODUCT_MEDIA_BUCKET') or {}).get('resource'),
+              'caip_r2':(probes.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('resource'),'ready':ready.get('ready')
+          }
           json.dump(proof,open('/tmp/release463-production-runtime-proof.json','w'),indent=2,sort_keys=True)
-          print('RELEASE 463 LIVE ISOLATED D1/R2 RUNTIME PROBE: PASS')
+          print('RELEASE 463 CUSTOMER-FACING LIVE D1/R2 RUNTIME PROBE: PASS')
           print(json.dumps(proof,indent=2,sort_keys=True))
           PY
           cleanup
           trap - EXIT
 
-      - name: Preserve Production runtime proof
+      - name: Preserve Production cutover proofs
         uses: actions/upload-artifact@v4
         with:
-          name: release463-production-runtime-proof
-          path: /tmp/release463-production-runtime-proof.json
+          name: release463-production-cutover-proof
+          path: |
+            /tmp/release463-production-control-plane-proof.json
+            /tmp/release463-production-runtime-proof.json
           retention-days: 90
           if-no-files-found: error
 
@@ -264,6 +320,8 @@ jobs:
           echo "Production D1: ${PROD_D1_NAME} / ${PROD_D1_ID}"
           echo "Production R2 Product: ${PROD_PRODUCT_R2}"
           echo "Production R2 CAIP: ${PROD_CAIP_R2}"
-          echo 'Exact deployment and canonical pages.dev both proved Production D1 + both Production R2 bindings read-only'
+          echo "Customer-facing runtime: ${PROD_LIVE_BASE}"
+          echo 'Exact hashed deployment proved by Cloudflare control plane; Access protection remains intact'
+          echo 'Customer-facing Live domain proved Production D1 + both Production R2 bindings read-only'
           echo 'Temporary Production-only D1 session removed'
           echo 'Development D1/R2: not mutated by Production deployment'
