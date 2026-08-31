@@ -1,0 +1,4 @@
+{
+  "mode": "read-only",
+  "trigger": "r2-edit-token-preflight-1"
+}
