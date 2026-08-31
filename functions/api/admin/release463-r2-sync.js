@@ -10,7 +10,8 @@ const json = (data, status = 200) => jsonResponse(data, status, { 'Cache-Control
 
 function isRelease463DevelopmentHost(request) {
   const host = new URL(request.url).hostname.toLowerCase();
-  return host === 'dev.devilndove-site.pages.dev' || host === 'localhost' || host === '127.0.0.1';
+  return host === 'localhost' || host === '127.0.0.1'
+    || (host.endsWith('.devilndove-site.pages.dev') && host !== 'devilndove-site.pages.dev');
 }
 
 function bucketPair(env, key) {
