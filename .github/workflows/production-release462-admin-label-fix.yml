@@ -1,0 +1,54 @@
+name: Production Release 462 Admin Label Fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/production-release462-admin-label-fix.json'
+
+permissions:
+  contents: write
+
+jobs:
+  fix-admin-release-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 2
+      - name: Update top-level Admin release authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('admin/index.html')
+          text=p.read_text(encoding='utf-8')
+          before=text
+          assert 'Release 448' in text, 'Expected stale Release 448 marker not found'
+          text=text.replace('Release 448', 'Release 462')
+          text=text.replace('?v=448', '?v=462')
+          text=text.replace('Release 462 — Platform Expansion.', 'Release 462 — Autonomous Quality, Workflow & Gate Consolidation.')
+          text=text.replace('Release 462 infrastructure cockpit for Development D1/R2 readiness, deferred non-blocking acceptance work, deployment evidence, access/security, recovery and the separate Production boundary.', 'Release 462 infrastructure cockpit for current D1/R2 readiness, deployment evidence, access/security, recovery, provider diagnostics and environment boundaries.')
+          text=text.replace('Home and Movie cover presentation now share the Release 462 carousel renderer.', 'Home and Movie cover presentation share the current Storefront carousel renderer.')
+          text=text.replace('<h2 style="margin-top:0">Release 462 forward focus</h2>', '<h2 style="margin-top:0">Release 462 current focus</h2>')
+          text=text.replace('<li>Keep Production promotion closed until a deliberate Development release review.</li>', '<li>Production is running the deliberately promoted Release 462 application; provider/payment execution remains separately gated.</li>')
+          assert text != before
+          assert 'Release 448' not in text
+          assert '?v=448' not in text
+          p.write_text(text,encoding='utf-8')
+          print('ADMIN RELEASE AUTHORITY: UPDATED TO 462')
+          PY
+          git diff --check
+          git diff -- admin/index.html
+      - name: Commit corrected Admin authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Devil n Dove Release Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add admin/index.html
+          git commit -m 'Correct live Admin dashboard to Release 462'
+          git push origin HEAD:main
