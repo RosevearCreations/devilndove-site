@@ -51,7 +51,7 @@ jobs:
           print(f"CONVERGENCE_MODE={mode}")
           print(f"APPLY_CONFIRMATION={str(r.get('apply_confirmation') or '')}")
           PY
-          echo "Production Release 462 convergence mode: ${CONVERGENCE_MODE}"
+          echo 'Production Release 462 convergence request resolved.'
 
       - name: Pin Production source and bindings
         shell: bash
