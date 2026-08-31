@@ -1,77 +1,125 @@
 # Development Cloudflare Connection Authority
 
-## Current authority — Release 462 Development green
+## Current authority — Release 463 live operating model
 
-This file defines the only Cloudflare boundary for ongoing Devil n Dove Development work.
+This file defines the only Cloudflare boundary for ongoing Devil n Dove work.
+
+## One Pages project
+
+There is one canonical Cloudflare Pages project:
+
+- project: `devilndove-site`
+- `dev` → **Preview / Development**
+- `main` → **Production / Live**
+- live customer domain: `https://devilndove.com`
+
+The retired `devilndove-site-dev` project is legacy cleanup only. It is not an application target and must not receive new Development work.
+
+Native Git-triggered Pages deployments remain frozen. Environment-aware GitHub Actions deploy the exact approved SHA so branch, resource bindings and deployment evidence remain explicit.
+
+## Cloudflare account
+
+- approved tooling/CI account ID: `c0d5bc25df16ae5b7d47c985c4b7b787`
+- account selection belongs in local tooling/GitHub Actions environment
+- `wrangler.toml` must never contain `account_id`
+
+The tracked `wrangler.toml` is Development-safe and points only to Development resources. The Production deployment workflow generates Production bindings ephemerally in the runner and restores the tracked Development configuration before exit.
+
+## Development authority
 
 ### Source / Pages
 
-- GitHub branch: `dev`
-- Cloudflare Pages project: `devilndove-site-dev`
-- Development URL: `https://devilndove-site-dev.pages.dev`
-- The Pages **Production deployment of `devilndove-site-dev` is the Development application**.
-- Separate live `main` / `devilndove-site` is a different Production boundary and remains untouched until deliberate promotion.
-
-Release 462 preclosure Pages proof:
-
-- source SHA: `71b58c548e953edbdede1be85e12acd7e30e3422`
-- System Gate: run `33348770688` (#526), job `99357890735` — PASS
-- Pages check: `99358032459` — PASS
-- deployment ID: `3e03d1ee-a427-4d14-b561-59b2980fdf1c`
-- preview: `https://3e03d1ee.devilndove-site-dev.pages.dev`
-
-### Cloudflare account
-
-- Approved tooling/CI account ID: `c0d5bc25df16ae5b7d47c985c4b7b787`
-- Account selection belongs in local tooling/GitHub Actions environment.
-- `wrangler.toml` must never contain `account_id`.
+- branch: `dev`
+- project: `devilndove-site`
+- Pages environment: Preview
+- exact Preview URL changes per deployment
 
 ### D1
 
 - binding: `DB`
 - database: `devilndove-dev`
 - UUID: `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
-- schema accepted through **Release 461**
-- Release 462 has **no D1 migration**
-- Release 461 D1 acceptance run: `33340698069`
-- proven contract: 77 required tables / 93 required indexes / zero missing objects / zero structural drift / zero FK violations
-
-Before any future D1 write, tooling must verify the exact name and UUID. A friendly-name match alone is insufficient. A new chat/session/workstation/source commit is not a migration event.
 
 ### R2
 
 - `PRODUCT_MEDIA_BUCKET` → `devilndove-toolshed-images-dev`
 - `CAIP_PRIVATE_MEDIA_BUCKET` → `devilndove-caip-media-dev`
 
-Release 462 autonomous work performed no R2 mutation. Raw CAIP R2 deletion remains closed.
+Development is where new code and schema changes are proven before promotion.
+
+## Production authority
+
+### Source / Pages
+
+- branch: `main`
+- project: `devilndove-site`
+- Pages environment: Production
+- live domain: `https://devilndove.com`
+
+### D1
+
+- binding: `DB`
+- database: `devilndove-prod-r462`
+- UUID: `f34a741b-0000-45b0-9a96-6be08754d563`
+
+### R2
+
+- `PRODUCT_MEDIA_BUCKET` → `devilndove-toolshed-images`
+- `CAIP_PRIVATE_MEDIA_BUCKET` → `devilndove-caip-media`
+
+Release 463 live cutover runtime proof passed on workflow run `33396235808`. Proof artifact `9759432735` is retained for 90 days. D1 baseline clone/parity proof is run `33354477153`, artifact `9744697793`.
+
+## Live D1 operating rule
+
+Production is now an independent, live data authority.
+
+- Business and transactional rows created in Production stay Production-owned.
+- Never clone/synchronize Development over Production as an ordinary release action.
+- Never use a fresh-install schema or historical migration replay as a startup action.
+- Request-time schema DDL is forbidden.
+- Runtime handlers must fail closed if required schema is missing; they must not create/repair it.
+
+For every **future schema change**:
+
+1. add a versioned SQL migration to the repository;
+2. apply and verify it against `devilndove-dev` first;
+3. run System Gate and Development Preview acceptance;
+4. promote the exact approved tree to `main`;
+5. apply the **same migration** to `devilndove-prod-r462` before code depending on it is allowed to deploy;
+6. verify required objects, foreign keys and any migration-specific invariants;
+7. deploy exact `main` SHA with Production bindings;
+8. verify authenticated runtime through `devilndove.com`.
+
+Migration files are forward history. Once Production has accepted a migration, do not edit that migration in place; add a new migration for later changes. Every Production migration must have either a rollback plan or a documented forward-only recovery path.
+
+## Upgrade rule
+
+Normal application upgrades should be additive/backwards-compatible where practical:
+
+- add columns/tables first;
+- deploy code that can tolerate old/new state during transition when feasible;
+- backfill explicitly when required;
+- only remove old schema after dependent code/data has already moved;
+- keep Production data intact during branch promotion.
+
+This prevents a code promotion from becoming a destructive database replacement.
 
 ## Startup rule
 
-1. Read `development-release.json` and `AI_HANDOFF.md`.
-2. Verify `dev` plus exact Development D1/R2 identities read-only.
-3. Do not replay historical migrations.
-4. Treat Release 461 D1 as already applied unless read-only evidence proves actual drift.
-5. Treat Release 462 autonomous source/System/Pages work as closed and Development green.
-6. Historical release-specific source/remote workflows are manual archives, not startup actions.
-7. New autonomous source feature work begins as Release 463.
-
-## Runtime / external acceptance boundary
-
-The last authenticated Development application runtime proof remains Release 461 GET-only acceptance on `e5637bdcc9807e626f0ed5e2828c86898804aed1`. Release 462 does not claim that separate browser/provider/payment evidence was rerun merely because source/System/Pages acceptance passed.
-
-Release 462 does not authorize D1/R2 writes, OAuth authorization or provider/payment execution. Those require their own deliberate evidence boundaries.
+1. Read `development-release.json`, `AI_HANDOFF.md`, and `release463-environment.json`.
+2. Verify the `dev` branch and exact Development D1/R2 identities before Development mutation.
+3. Use only `devilndove-site` Preview for Development.
+4. Use only `devilndove-site` Production / `main` for Live.
+5. Do not replay old Release 448–463 migration/recovery workflows as startup actions.
+6. A new chat, workstation, deployment or source commit is not a migration event.
+7. Resume feature/runtime work from the current roadmap rather than reopening environment consolidation.
 
 ## Secret/configuration boundary
 
-Actual provider values belong in Cloudflare Workers & Pages → `devilndove-site-dev` → Settings → Variables and Secrets. D1/source/Markdown/browser output may contain safe reference names only, never secret/token values.
+Actual provider values belong in Cloudflare project environment settings/secrets and GitHub Actions secrets where required. Source, Markdown, D1 and browser output may contain safe reference names only, never secret/token values.
 
-## Production/provider lock
+## Provider boundary
 
-- Production promotion: **CLOSED**
-- provider live authorization: **CLOSED**
-- provider execution/publication: **CLOSED**
-- payment remote execution: **CLOSED unless deliberately operator-enabled for Development test/sandbox acceptance**
-- raw CAIP R2 deletion: **CLOSED**
-- live Production D1/R2 mutation from Development workflows: **UNAVAILABLE**
+Stripe, PayPal, OAuth/social publication and other provider execution remain deliberate acceptance boundaries. A live Pages/D1 environment does not automatically authorize financial/provider execution.
 
-Do not weaken these locks to make an acceptance test easier.
+Do not weaken Cloudflare Access, D1/R2 isolation or provider locks just to make an acceptance test easier.
