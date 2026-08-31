@@ -1,0 +1,6 @@
+{
+  "release": 463,
+  "operation": "freeze native Git-triggered Pages deployments before explicit environment cutover",
+  "requested_at": "2026-08-31",
+  "attempt": 1
+}
