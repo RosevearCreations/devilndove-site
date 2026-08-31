@@ -1,19 +1,19 @@
 {
   "environment": "development",
-  "release": 462,
-  "label": "Autonomous Quality, Workflow & Gate Consolidation",
+  "release": 464,
+  "label": "Platform Integrity and Migration Authority",
   "environment_release": 463,
   "environment_label": "Environment Consolidation and Production Cutover",
   "release_track": "single-current-release",
   "branch": "dev",
   "pages_project": "devilndove-site",
   "pages_environment": "preview",
-  "convergence_state": "release463_single_project_live_production_operational",
+  "convergence_state": "release464_update1_platform_integrity",
   "previous_release": {
-    "release": 461,
-    "label": "Runtime Schema Convergence, Inventory & CAIP Production Pipeline",
-    "state": "complete_development_green",
-    "exact_head_sha": "e5637bdcc9807e626f0ed5e2828c86898804aed1"
+    "release": 462,
+    "label": "Autonomous Quality, Workflow & Gate Consolidation",
+    "state": "complete_source_system_pages_green",
+    "environment_release": 463
   },
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
@@ -28,39 +28,25 @@
     {"key":"desktop","status":"active"}
   ],
   "development_infrastructure": {
-    "cloudflare_account_id": "c0d5bc25df16ae5b7d47c985c4b7b787",
     "pages_project": "devilndove-site",
     "pages_environment": "preview",
     "pages_branch": "dev",
-    "pages_url_pattern": "https://<deployment>.devilndove-site.pages.dev",
-    "deployment_boundary": "dev deploys to the Preview environment of the canonical devilndove-site Pages project. main deploys to Production of the same project.",
-    "data_alignment": "Development D1/R2 are isolated test authorities. Production business and transactional data are Production-owned and are never refreshed wholesale from Development.",
+    "deployment_boundary": "dev deploys to the Preview environment of devilndove-site; main deploys to Production of the same project.",
+    "data_alignment": "Development D1/R2 are isolated test authorities. Production business/transactional data are Production-owned and are never refreshed wholesale from Development.",
     "d1": {
       "binding": "DB",
       "database_name": "devilndove-dev",
       "database_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
-      "schema_current_through_release": 461,
-      "schema_current_through_migration": "migrations/dev/20260830_release461_product_image_quality_authority.sql",
-      "release_461_acceptance_run_id": 33340698069,
-      "release_461_required_tables": 77,
-      "release_461_required_indexes": 93,
-      "release_461_missing_objects_after_acceptance": 0,
-      "release_461_fk_violations_after_acceptance": 0
+      "historical_schema_baseline_release": 461,
+      "canonical_migrations_dir": "migrations/canonical",
+      "native_migration_ledger": "d1_migrations",
+      "proof_table": "app_schema_migration_proofs"
     },
     "r2": [
       {"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},
       {"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media-dev"}
     ],
-    "account_selection": "Local tooling/GitHub Actions pin CLOUDFLARE_ACCOUNT_ID. Never add account_id to wrangler.toml.",
-    "connection_authority": "docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md",
-    "startup_sequence": [
-      "Read development-release.json, AI_HANDOFF.md and release463-environment.json first.",
-      "Verify dev plus exact Development D1/R2 identities read-only before Development mutation.",
-      "A new chat, workstation, deployment or source commit is not a migration event; never replay historical migrations.",
-      "Use only devilndove-site Preview for Development and devilndove-site Production for main.",
-      "Do not use the legacy devilndove-site-dev Pages project for new work.",
-      "Production business/transactional data is live authority and must never be overwritten from Development."
-    ]
+    "account_selection": "Local tooling/GitHub Actions pin CLOUDFLARE_ACCOUNT_ID. Never add account_id to wrangler.toml."
   },
   "production_infrastructure": {
     "branch": "main",
@@ -75,97 +61,96 @@
     "r2": [
       {"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images"},
       {"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media"}
-    ],
-    "cutover_runtime_proof_run": 33396235808,
-    "cutover_runtime_proof_artifact": 9759432735
+    ]
   },
   "release_policy": {
     "one_current_release": true,
     "legacy_build_numbers_are_provenance_only": true,
-    "historical_build_gates_allowed": false,
-    "production_promotion": "controlled_main_promotion",
-    "promotion_cadence": "deliberate_daily_when_development_green",
+    "historical_migration_replay": false,
+    "production_promotion": "exact_green_development_tree_only",
     "main_only_application_patches": false,
-    "current_release_d1_changes_allowed": false,
-    "current_release_d1_migration_required": false,
-    "future_d1_schema_changes": "versioned_repository_migration_required",
+    "future_d1_schema_changes": "migrations/canonical_only",
     "development_first_schema_verification": true,
     "production_migration_before_dependent_code": true,
+    "migration_checksum_algorithm": "sha256",
+    "migration_recovery_note_required": true,
     "production_transactional_data_owned_by_production": true,
     "blind_dev_to_production_data_overwrite": false,
     "provider_publication": "closed",
     "provider_execution": "closed",
     "provider_live_authorization": "closed",
-    "request_time_schema_mutation": "forbidden",
+    "request_time_schema_mutation": "blocked_by_runtime_firewall_and_source_gate",
     "seo_gate_required": true,
-    "seo_depth_gate_required": true,
     "repository_hygiene_gate_required": true,
     "documentation_sync_required": true
   },
   "database_baseline": {
-    "release": 463,
-    "source_release": 461,
-    "production_clone_proof_run": 33354477153,
-    "production_clone_proof_artifact": 9744697793,
+    "historical_release": 461,
+    "state": "proven_and_not_replayed",
+    "development_d1": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "production_d1": "devilndove-prod-r462 / f34a741b-0000-45b0-9a96-6be08754d563",
-    "startup_rule": "Historical baselines are never startup actions. Future schema changes move forward through explicit versioned migrations only."
+    "forward_migration_stream": "migrations/canonical",
+    "startup_rule": "A chat, workstation, deployment or source commit is not a migration event. Historical migrations are never replayed."
   },
-  "release_history": [
+  "current_release_migrations": [
     {
-      "release": 461,
-      "state": "complete_development_green",
-      "development_d1_acceptance_run": 33340698069,
-      "foreign_key_violations": 0
-    },
-    {
-      "release": 462,
-      "state": "complete_source_system_pages_green",
-      "migration": null,
-      "scope": "application quality, workflow and gate consolidation"
+      "version": 1,
+      "file": "migrations/canonical/0001_release464_migration_authority.sql",
+      "purpose": "Bootstrap canonical migration proof authority alongside Cloudflare native d1_migrations.",
+      "development_apply": "system_gate_managed",
+      "production_apply": "production_promotion_gate_managed"
     }
   ],
-  "current_release_migrations": [],
   "current_release_database_state": {
-    "new_migration_required": false,
-    "last_verified_schema_release": 461,
+    "new_migration_required": true,
+    "historical_schema_baseline_release": 461,
+    "canonical_stream_started_in_release": 464,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "production_d1_target": "devilndove-prod-r462 / f34a741b-0000-45b0-9a96-6be08754d563",
     "historical_migration_replay": false,
-    "automatic_replay_path": false,
-    "future_change_rule": "Every new schema change must be a versioned migration, proven on Development, then applied to Production before dependent main code is deployed."
+    "automatic_historical_replay_path": false,
+    "future_change_rule": "Every schema change is an immutable numbered canonical migration, proven on Development, then the exact same migration is applied/proven on Production before dependent Production code."
   },
   "current_release_evidence": {
-    "d1_exact_parity": true,
-    "d1_foreign_key_violations": 0,
-    "r2_exact_parity": true,
-    "production_runtime_cutover": "pass_33396235808",
+    "release463_environment_cutover_preserved": true,
+    "d1_environment_isolation": true,
+    "r2_environment_isolation": true,
     "production_data_live_authority": true,
     "provider_execution_enabled": false,
     "provider_publication_enabled": false,
-    "provider_live_authorization_enabled": false,
-    "request_time_schema_mutation": false,
-    "raw_caip_r2_delete_enabled": false
+    "raw_caip_r2_delete_enabled": false,
+    "runtime_schema_mutation_firewall_present": true,
+    "manual_runtime_migration_endpoint_retired": true,
+    "manual_migration_ledger_write_retired": true,
+    "storefront_runtime_schema_repair_retired": true,
+    "accounting_statement_import_runtime_ddl": false
   },
-  "release462_batch": [
-    {"id":1,"change":"Application-wide Release 462 source/runtime ownership audit","status":"implemented"},
-    {"id":2,"change":"Finance/Accounting migration-owned fail-closed workflow review","status":"implemented"},
-    {"id":3,"change":"Inventory/Tools/Supplies base-unit and responsive clarity","status":"implemented"},
-    {"id":4,"change":"Product/Storefront merchandising, media-quality and SEO reinforcement","status":"implemented"},
-    {"id":5,"change":"Public SEO structure/depth gate retention under current authority","status":"implemented"},
-    {"id":6,"change":"CAIP source-preserving pipeline/review boundary reinforcement","status":"implemented"},
-    {"id":7,"change":"Creators/Content Studio reviewed-reference handoff reinforcement","status":"implemented"},
-    {"id":8,"change":"I.T. provider next-action/correction readiness and PayPal reference alignment","status":"implemented"},
-    {"id":9,"change":"Stripe/PayPal source preparation with operator-gated execution retained","status":"implemented"},
-    {"id":10,"change":"Shared responsive/admin UX convergence layer","status":"implemented"},
-    {"id":11,"change":"GitHub regression gate consolidation and current action-runtime upgrade","status":"implemented"},
-    {"id":12,"change":"Canonical Markdown/status convergence","status":"implemented"}
+  "release464_update1": [
+    {"id":1,"change":"Canonical D1 migration ledger/applicator","status":"implemented_source_acceptance_required"},
+    {"id":2,"change":"dev/main branch protection and equivalent fail-closed source/deploy controls","status":"source_controls_implemented_native_github_setting_external"},
+    {"id":3,"change":"Exact green Development tree to main promotion proof","status":"implemented_source_acceptance_required"},
+    {"id":4,"change":"Legacy Build/Release branch and infrastructure cleanup","status":"cleanup_inventory_active"},
+    {"id":5,"change":"Canonical documentation convergence","status":"implemented_source_acceptance_required"},
+    {"id":6,"change":"Accounting statement-import migration-owned fail-closed closure","status":"implemented"},
+    {"id":7,"change":"Application-wide request-time D1 schema mutation blockade","status":"implemented_source_acceptance_required"}
+  ],
+  "planned_updates": [
+    {
+      "update": 2,
+      "items": [8,9,10,11,12,13],
+      "theme": "Operational Acceptance and Recovery"
+    },
+    {
+      "update": 3,
+      "items": [14,15,16,17,18,19,20],
+      "theme": "Business Application Growth"
+    }
   ],
   "forward_queue": [
-    "Continue ordinary application work on dev and deploy only to devilndove-site Preview.",
-    "Promote an exact approved Development tree to main when green; main deploys only to devilndove-site Production.",
-    "For every future D1 schema change: repository migration, Development apply/proof, Production apply/proof, then dependent Production deployment.",
+    "Close Release 464 Update 1 source, Development migration and Preview acceptance.",
+    "Keep native GitHub dev/main branch protection visibly open until repository settings report it enabled; never claim it is enabled based on source controls alone.",
+    "After Update 1 closes, begin Update 2 items 8-13.",
     "Never overwrite Production transactional data from Development.",
-    "Keep request-time schema DDL forbidden.",
-    "Resume the Accounting runtime-schema cleanup at functions/api/admin/_accountingStatementImports.js."
+    "Never restore request-time schema DDL."
   ]
 }
