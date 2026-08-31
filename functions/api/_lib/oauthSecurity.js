@@ -93,16 +93,21 @@ export function safeDiagnosticCode(value, fallback = 'oauth_error') {
   return normalized || fallback;
 }
 
-export function isDevelopmentOAuthHost(hostname) {
-  const host = String(hostname || '').toLowerCase();
-  return host === 'devilndove-site-dev.pages.dev' || host.endsWith('.devilndove-site-dev.pages.dev');
+export function isDevelopmentOAuthHost(hostname, env = {}) {
+  const environment = String(env?.DND_ENVIRONMENT || '').trim().toLowerCase();
+  if (environment !== 'development') return false;
+  const host = String(hostname || '').trim().toLowerCase();
+  return host === 'dev.devilndove-site.pages.dev'
+    || /^[0-9a-f]{8}\.devilndove-site\.pages\.dev$/i.test(host)
+    || host === 'localhost'
+    || host === '127.0.0.1';
 }
 
 export function oauthRemoteAuthorizationOpen(env, requestUrl) {
   const mode = String(env?.OAUTH_PROVIDER_AUTHORIZATION_MODE || '').trim().toLowerCase();
   let host = '';
   try { host = new URL(String(requestUrl || '')).hostname; } catch { return false; }
-  return mode === 'development-explicit' && isDevelopmentOAuthHost(host);
+  return mode === 'development-explicit' && isDevelopmentOAuthHost(host, env);
 }
 
 export function safeReturnPath(value, fallback = '/admin/it-integrations/') {
