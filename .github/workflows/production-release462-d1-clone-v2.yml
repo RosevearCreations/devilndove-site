@@ -1,0 +1,167 @@
+name: Production Release 462 D1 Clone v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/production-release462-d1-clone-v2.json'
+
+permissions:
+  contents: read
+
+jobs:
+  clone-dev-d1-to-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_NAME: devilndove-dev
+      DEV_D1_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      NEW_PROD_D1_NAME: devilndove-prod-r462
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install Wrangler
+        run: npm install --global wrangler@4.127.1
+      - name: Verify deliberate clone request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          r=json.load(open('data/production-release462-d1-clone-v2.json',encoding='utf-8'))
+          assert r.get('confirmation') == 'CLONE-DEV-D1-TO-FRESH-PRODUCTION-R462', r
+          assert r.get('source_database_id') == 'dbc1615b-dcbe-4951-973b-b47c99c73bfa', r
+          assert r.get('target_database_name') == 'devilndove-prod-r462', r
+          print('DELIBERATE D1 CLONE REQUEST: PASS')
+          PY
+          test -n "${CLOUDFLARE_API_TOKEN}"
+      - name: Create exact Development Wrangler config
+        shell: bash
+        run: |
+          cat > /tmp/wrangler-dev.toml <<'EOF'
+          name = "devilndove-d1-export"
+          compatibility_date = "2026-08-30"
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "devilndove-dev"
+          database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+          EOF
+      - name: Verify exact Development D1 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${DEV_D1_NAME}" --json --config /tmp/wrangler-dev.toml > /tmp/dev-info.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/dev-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(d))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in rows}
+          names={str(x.get('name') or '') for x in rows}
+          assert os.environ['DEV_D1_ID'] in ids, ids
+          assert os.environ['DEV_D1_NAME'] in names, names
+          print('EXACT DEVELOPMENT D1 SOURCE: PASS')
+          PY
+      - name: Export current Development D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/devilndove-dev-r462.sql
+          wrangler d1 export "${DEV_D1_NAME}" --remote --config /tmp/wrangler-dev.toml --output /tmp/devilndove-dev-r462.sql
+          test -s /tmp/devilndove-dev-r462.sql
+          echo "Export bytes: $(wc -c < /tmp/devilndove-dev-r462.sql)"
+      - name: Ensure target name is unused
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 list --json > /tmp/d1-list.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/d1-list.json'))
+          rows=d if isinstance(d,list) else d.get('result',d.get('databases',[])) if isinstance(d,dict) else []
+          target=os.environ['NEW_PROD_D1_NAME']
+          hits=[x for x in rows if str(x.get('name') or '')==target]
+          if hits:
+              raise SystemExit(f'STOP: target D1 already exists: {hits}')
+          print('FRESH TARGET NAME: PASS')
+          PY
+      - name: Create fresh Production Release 462 D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 create "${NEW_PROD_D1_NAME}" | tee /tmp/create.txt
+          id="$(grep -Eo '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' /tmp/create.txt | head -1)"
+          test -n "${id}" || { echo 'Could not resolve new D1 UUID'; exit 2; }
+          echo "NEW_PROD_D1_ID=${id}" >> "$GITHUB_ENV"
+          echo "Created ${NEW_PROD_D1_NAME} as ${id}"
+      - name: Create new Production Wrangler config
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${NEW_PROD_D1_ID}"
+          cat > /tmp/wrangler-prod-r462.toml <<EOF
+          name = "devilndove-d1-import"
+          compatibility_date = "2026-08-30"
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "${NEW_PROD_D1_NAME}"
+          database_id = "${NEW_PROD_D1_ID}"
+          EOF
+      - name: Import Development export into fresh Production D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${NEW_PROD_D1_NAME}" --remote --config /tmp/wrangler-prod-r462.toml --file /tmp/devilndove-dev-r462.sql
+      - name: Verify cloned Release 461 schema contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_acceptance_manifest.py manifest --output /tmp/release461-manifest.json
+          wrangler d1 execute "${NEW_PROD_D1_NAME}" --remote --config /tmp/wrangler-prod-r462.toml --json --command "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY type,name;" > /tmp/schema.json
+          python scripts/release461_d1_acceptance_manifest.py check --manifest /tmp/release461-manifest.json --schema-json /tmp/schema.json --require-converged --output /tmp/report.json
+          cat /tmp/report.json
+      - name: Verify cloned foreign keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${NEW_PROD_D1_NAME}" --remote --config /tmp/wrangler-prod-r462.toml --json --command "SELECT COUNT(*) AS fk_violations FROM pragma_foreign_key_check; SELECT COUNT(*) AS table_count FROM sqlite_master WHERE type='table'; SELECT COUNT(*) AS index_count FROM sqlite_master WHERE type='index';" > /tmp/final.json
+          cat /tmp/final.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/final.json'))
+          vals={}
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          for x in walk(d):
+              for k in ('fk_violations','table_count','index_count'):
+                  if k in x: vals[k]=int(x[k])
+          assert vals.get('fk_violations')==0, vals
+          assert vals.get('table_count',0)>=77, vals
+          assert vals.get('index_count',0)>=93, vals
+          print('CLONED PRODUCTION D1 INTEGRITY: PASS', vals)
+          PY
+      - name: Final binding handoff
+        shell: bash
+        run: |
+          echo "PRODUCTION_R462_D1_NAME=${NEW_PROD_D1_NAME}"
+          echo "PRODUCTION_R462_D1_ID=${NEW_PROD_D1_ID}"
+          echo 'Old devilndove-prod database retained untouched for rollback.'
