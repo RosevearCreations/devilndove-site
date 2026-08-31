@@ -158,10 +158,11 @@ jobs:
                   raise AssertionError(('empty deployment list but project delete failed',status,body))
 
               def remove(dep_id):
-                  s,b=call('DELETE',base+'/deployments/'+urllib.parse.quote(dep_id,safe=''))
+                  url=base+'/deployments/'+urllib.parse.quote(dep_id,safe='')+'?force=true'
+                  s,b=call('DELETE',url)
                   text=json.dumps(b).lower()
                   if s in (200,404): return ('deleted',dep_id,s)
-                  if s in (400,409) and 'active' in text and 'production' in text:
+                  if s in (400,409) and (('active' in text and 'production' in text) or ('latest' in text and 'deployment' in text)):
                       return ('active',dep_id,s)
                   return ('error',dep_id,s,b)
 
