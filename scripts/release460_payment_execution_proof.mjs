@@ -5,15 +5,19 @@ import {
   paymentExecutionStatus,
 } from '../functions/api/_lib/paymentExecution.js';
 
-const canonical = 'https://devilndove-site-dev.pages.dev/api/checkout-prepare-payment';
-const preview = 'https://abc123.devilndove-site-dev.pages.dev/api/checkout-prepare-payment';
+const canonical = 'https://dev.devilndove-site.pages.dev/api/checkout-prepare-payment';
+const preview = 'https://abc12345.devilndove-site.pages.dev/api/checkout-prepare-payment';
 const production = 'https://devilndove-site.pages.dev/api/checkout-prepare-payment';
+const devEnv = { DND_ENVIRONMENT: 'development' };
+const prodEnv = { DND_ENVIRONMENT: 'production' };
 
-assert.equal(isDevelopmentPaymentHost('devilndove-site-dev.pages.dev'), true);
-assert.equal(isDevelopmentPaymentHost('abc123.devilndove-site-dev.pages.dev'), true);
-assert.equal(isDevelopmentPaymentHost('devilndove-site.pages.dev'), false);
+assert.equal(isDevelopmentPaymentHost('dev.devilndove-site.pages.dev', devEnv), true);
+assert.equal(isDevelopmentPaymentHost('abc12345.devilndove-site.pages.dev', devEnv), true);
+assert.equal(isDevelopmentPaymentHost('devilndove-site.pages.dev', devEnv), false);
+assert.equal(isDevelopmentPaymentHost('abc12345.devilndove-site.pages.dev', prodEnv), false);
 
 const closed = paymentExecutionStatus(canonical, {
+  ...devEnv,
   STRIPE_SECRET_KEY: 'sk_test_mock',
   STRIPE_PUBLISHABLE_KEY: 'pk_test_mock',
 }, 'stripe');
@@ -22,6 +26,7 @@ assert.equal(closed.code, 'payment_provider_execution_closed');
 assert.equal(closed.operator_switch_set, false);
 
 const stripeTest = paymentExecutionStatus(canonical, {
+  ...devEnv,
   PAYMENT_PROVIDER_EXECUTION_MODE: 'development-explicit',
   STRIPE_SECRET_KEY: 'sk_test_mock',
   STRIPE_PUBLISHABLE_KEY: 'pk_test_mock',
@@ -31,6 +36,7 @@ assert.equal(stripeTest.test_mode, true);
 assert.equal(stripeTest.live_credential_detected, false);
 
 const stripePreview = paymentExecutionStatus(preview, {
+  ...devEnv,
   PAYMENT_PROVIDER_EXECUTION_MODE: 'development-explicit',
   STRIPE_SECRET_KEY: 'rk_test_mock',
   STRIPE_PUBLISHABLE_KEY: 'pk_test_mock',
@@ -38,6 +44,7 @@ const stripePreview = paymentExecutionStatus(preview, {
 assert.equal(stripePreview.execution_authorized, true);
 
 const stripeLive = paymentExecutionStatus(canonical, {
+  ...devEnv,
   PAYMENT_PROVIDER_EXECUTION_MODE: 'development-explicit',
   STRIPE_SECRET_KEY: 'sk_live_never_execute',
   STRIPE_PUBLISHABLE_KEY: 'pk_live_never_execute',
@@ -47,6 +54,7 @@ assert.equal(stripeLive.code, 'payment_live_credentials_forbidden');
 assert.equal(stripeLive.live_credential_detected, true);
 
 const stripeProduction = paymentExecutionStatus(production, {
+  ...prodEnv,
   PAYMENT_PROVIDER_EXECUTION_MODE: 'development-explicit',
   STRIPE_SECRET_KEY: 'sk_test_mock',
   STRIPE_PUBLISHABLE_KEY: 'pk_test_mock',
@@ -55,6 +63,7 @@ assert.equal(stripeProduction.execution_authorized, false);
 assert.equal(stripeProduction.code, 'payment_execution_development_only');
 
 const paypalTest = paymentExecutionStatus(canonical, {
+  ...devEnv,
   PAYMENT_PROVIDER_EXECUTION_MODE: 'development-explicit',
   PAYPAL_CLIENT_ID: 'sandbox-client',
   PAYPAL_SECRET: 'sandbox-secret',
@@ -64,6 +73,7 @@ assert.equal(paypalTest.execution_authorized, true);
 assert.equal(paypalTest.environment, 'sandbox');
 
 const paypalLive = paymentExecutionStatus(canonical, {
+  ...devEnv,
   PAYMENT_PROVIDER_EXECUTION_MODE: 'development-explicit',
   PAYPAL_CLIENT_ID: 'live-client',
   PAYPAL_SECRET: 'live-secret',
@@ -73,6 +83,7 @@ assert.equal(paypalLive.execution_authorized, false);
 assert.equal(paypalLive.code, 'payment_live_credentials_forbidden');
 
 const paypalMissing = paymentExecutionStatus(canonical, {
+  ...devEnv,
   PAYMENT_PROVIDER_EXECUTION_MODE: 'development-explicit',
   PAYPAL_ENV: 'sandbox',
 }, 'paypal');
