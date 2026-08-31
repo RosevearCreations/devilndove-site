@@ -1,0 +1,9 @@
+{
+  "release": 464,
+  "update": 1,
+  "action": "apply-narrow-runtime-d1-guard",
+  "scope": [
+    "functions/api/_lib/accounting.js",
+    "functions/api/admin/product-images.js"
+  ]
+}
