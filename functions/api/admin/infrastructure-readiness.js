@@ -1,23 +1,33 @@
-// Release 447 — authenticated, read-only Development infrastructure readiness.
-// Harmless SELECT/list probes only. No D1, R2, provider or Production write is performed here.
+// Release 463 — authenticated, read-only environment infrastructure readiness.
+// Harmless SELECT/list probes only. No D1, R2, provider or external write is performed here.
 import { getAdminUserFromRequest, jsonResponse } from '../_lib/adminAudit.js';
 
-const RELEASE = 447;
-const CONTRACT = 'platform_convergence_infrastructure_v1';
-const EXPECTED = Object.freeze({
-  project: 'devilndove-site-dev',
-  d1: { binding: 'DB', database_name: 'devilndove-dev', database_id: 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' },
-  r2: [
-    { binding: 'PRODUCT_MEDIA_BUCKET', bucket_name: 'devilndove-toolshed-images-dev' },
-    { binding: 'CAIP_PRIVATE_MEDIA_BUCKET', bucket_name: 'devilndove-caip-media-dev' },
-  ],
+const RELEASE = 463;
+const CONTRACT = 'release463_environment_infrastructure_v1';
+const PROJECT = 'devilndove-site';
+const AUTHORITIES = Object.freeze({
+  development: Object.freeze({
+    project: PROJECT,
+    d1: { binding: 'DB', database_name: 'devilndove-dev', database_id: 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' },
+    r2: [
+      { binding: 'PRODUCT_MEDIA_BUCKET', bucket_name: 'devilndove-toolshed-images-dev' },
+      { binding: 'CAIP_PRIVATE_MEDIA_BUCKET', bucket_name: 'devilndove-caip-media-dev' },
+    ],
+  }),
+  production: Object.freeze({
+    project: PROJECT,
+    d1: { binding: 'DB', database_name: 'devilndove-prod-r462', database_id: 'f34a741b-0000-45b0-9a96-6be08754d563' },
+    r2: [
+      { binding: 'PRODUCT_MEDIA_BUCKET', bucket_name: 'devilndove-toolshed-images' },
+      { binding: 'CAIP_PRIVATE_MEDIA_BUCKET', bucket_name: 'devilndove-caip-media' },
+    ],
+  }),
 });
 const REQUIRED_D1_TABLES = Object.freeze([
   'users', 'sessions', 'products',
   'app_modules', 'app_module_role_access', 'app_module_user_access',
   'home_carousel_slides', 'home_carousel_events',
 ]);
-const MIGRATION_FILE = 'database_platform_convergence.sql';
 
 function json(data, status = 200) {
   return jsonResponse(data, status, { 'Cache-Control': 'no-store' });
@@ -25,17 +35,22 @@ function json(data, status = 200) {
 function cleanError(error) {
   return String(error?.message || error || 'unknown error').replace(/\s+/g, ' ').slice(0, 240);
 }
+function targetFor(env) {
+  const target = String(env?.DND_ENVIRONMENT || '').trim().toLowerCase();
+  return target === 'production' ? 'production' : 'development';
+}
 
-async function probeD1(env) {
+async function probeD1(env, expected) {
   const db = env?.DB;
   const result = {
-    kind: 'd1', binding: EXPECTED.d1.binding, resource: EXPECTED.d1.database_name,
-    database_id: EXPECTED.d1.database_id,
+    kind: 'd1', binding: expected.binding, resource: expected.database_name,
+    database_id: expected.database_id,
     configured: Boolean(db && typeof db.prepare === 'function'), reachable: false,
-    schema_ready: false, required_tables: REQUIRED_D1_TABLES, tables: [], missing_tables: [], error: '',
+    schema_ready: false, required_tables: REQUIRED_D1_TABLES, tables: [], missing_tables: [],
+    foreign_key_violations: null, error: '',
   };
   if (!result.configured) {
-    result.error = 'DB binding is not available to this Development runtime.';
+    result.error = 'DB binding is not available to this runtime.';
     return result;
   }
   try {
@@ -47,7 +62,9 @@ async function probeD1(env) {
     result.tables = (rows?.results || []).map((row) => String(row?.name || '')).filter(Boolean).sort();
     const found = new Set(result.tables);
     result.missing_tables = REQUIRED_D1_TABLES.filter((name) => !found.has(name));
-    result.schema_ready = result.reachable && result.missing_tables.length === 0;
+    const fk = await db.prepare('PRAGMA foreign_key_check').all();
+    result.foreign_key_violations = Array.isArray(fk?.results) ? fk.results.length : null;
+    result.schema_ready = result.reachable && result.missing_tables.length === 0 && result.foreign_key_violations === 0;
   } catch (error) {
     result.error = cleanError(error);
   }
@@ -59,16 +76,17 @@ async function probeR2(env, authority) {
   const result = {
     kind: 'r2', binding: authority.binding, resource: authority.bucket_name,
     configured: Boolean(bucket && typeof bucket.list === 'function'), reachable: false,
-    storage_ready: false, error: '',
+    storage_ready: false, sampled_objects: null, error: '',
   };
   if (!result.configured) {
-    result.error = `${authority.binding} binding is not available to this Development runtime.`;
+    result.error = `${authority.binding} binding is not available to this runtime.`;
     return result;
   }
   try {
-    await bucket.list({ limit: 1 });
+    const listing = await bucket.list({ limit: 1 });
     result.reachable = true;
     result.storage_ready = true;
+    result.sampled_objects = Array.isArray(listing?.objects) ? listing.objects.length : 0;
   } catch (error) {
     result.error = cleanError(error);
   }
@@ -80,34 +98,30 @@ export async function onRequestGet(context) {
   try { adminUser = await getAdminUserFromRequest(context.request, context.env); } catch { adminUser = null; }
   if (!adminUser) return json({ ok: false, release: RELEASE, contract: CONTRACT, error: 'Admin access required.' }, 401);
 
-  const d1 = await probeD1(context.env);
+  const target = targetFor(context.env);
+  const expected = AUTHORITIES[target];
+  const declaredProject = String(context.env?.DND_PAGES_PROJECT || '').trim() || PROJECT;
+  const d1 = await probeD1(context.env, expected.d1);
   const r2 = [];
-  for (const authority of EXPECTED.r2) r2.push(await probeR2(context.env, authority));
-  const configured = d1.configured && r2.every((item) => item.configured);
+  for (const authority of expected.r2) r2.push(await probeR2(context.env, authority));
+  const configured = declaredProject === PROJECT && d1.configured && r2.every((item) => item.configured);
   const reachable = d1.reachable && r2.every((item) => item.reachable);
-  const ready = d1.schema_ready && r2.every((item) => item.storage_ready);
-  const migrationRequired = d1.configured && d1.reachable && !d1.schema_ready;
+  const ready = configured && d1.schema_ready && r2.every((item) => item.storage_ready);
 
   return json({
     ok: true,
     release: RELEASE,
     contract: CONTRACT,
-    target: 'development',
-    project: EXPECTED.project,
+    target,
+    project: PROJECT,
+    declared_project: declaredProject,
     configured,
     reachable,
     ready,
-    authority: EXPECTED,
-    migration: {
-      required: migrationRequired,
-      file: MIGRATION_FILE,
-      missing_tables: d1.missing_tables,
-      target_database: EXPECTED.d1.database_name,
-      production_allowed: false,
-    },
-    current_release_sql_required: migrationRequired,
+    authority: expected,
+    current_release_sql_required: false,
     mutation_policy: {
-      d1_probe: 'SELECT only',
+      d1_probe: 'SELECT/PRAGMA read only',
       r2_probe: 'list limit 1 only',
       d1_write: false,
       r2_write: false,
@@ -116,6 +130,6 @@ export async function onRequestGet(context) {
     },
     d1,
     r2,
-    note: 'Release 447 uses database_platform_convergence.sql as the only current Development D1 convergence path. Historical build migrations are provenance only.',
+    note: 'Release 463 proves the active runtime environment without mutating D1 or R2. Production and Development use isolated resources on the single canonical Pages project.',
   });
 }
