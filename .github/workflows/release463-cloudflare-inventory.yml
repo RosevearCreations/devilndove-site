@@ -15,7 +15,8 @@ jobs:
     timeout-minutes: 12
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+      CF_DATA_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -23,16 +24,25 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Verify token and list Cloudflare resources read-only
+      - name: List Cloudflare resources read-only with scoped tokens
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${CLOUDFLARE_API_TOKEN}"
-          npx --yes wrangler@4 pages project list --json > /tmp/pages.json
-          npx --yes wrangler@4 d1 list --json > /tmp/d1.json
-          npx --yes wrangler@4 r2 bucket list --json > /tmp/r2.json
+          test -n "${CF_PAGES_TOKEN}"
+          test -n "${CF_DATA_TOKEN}"
+          CLOUDFLARE_API_TOKEN="${CF_PAGES_TOKEN}" npx --yes wrangler@4 pages project list --json > /tmp/pages.json
+          CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 d1 list --json > /tmp/d1.json
+          if CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 r2 bucket list --json > /tmp/r2.json 2>/tmp/r2.err; then
+            echo DATA > /tmp/r2-token-source
+          elif CLOUDFLARE_API_TOKEN="${CF_PAGES_TOKEN}" npx --yes wrangler@4 r2 bucket list --json > /tmp/r2.json 2>/tmp/r2.err; then
+            echo PAGES > /tmp/r2-token-source
+          else
+            cat /tmp/r2.err
+            exit 1
+          fi
           python - <<'PY'
           import json
+          print('R2_TOKEN_SOURCE',open('/tmp/r2-token-source').read().strip())
           for title,path in [('PAGES','/tmp/pages.json'),('D1','/tmp/d1.json'),('R2','/tmp/r2.json')]:
               print('\n====',title,'====')
               data=json.load(open(path,encoding='utf-8'))
@@ -53,7 +63,7 @@ jobs:
           for project in devilndove-site devilndove-site-dev; do
             echo "==== PROJECT ${project} ===="
             curl -fsS \
-              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
               "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${project}" \
               | python -c "import json,sys; d=json.load(sys.stdin); r=d.get('result') or {}; print(json.dumps({'name':r.get('name'),'production_branch':r.get('production_branch'),'source':r.get('source'),'production_config':r.get('deployment_configs',{}).get('production'),'preview_config':r.get('deployment_configs',{}).get('preview')},indent=2))"
           done
@@ -62,14 +72,22 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, os, urllib.parse, urllib.request
-          account=os.environ['CLOUDFLARE_ACCOUNT_ID']; token=os.environ['CLOUDFLARE_API_TOKEN']
+          import json, os, urllib.parse, urllib.request, urllib.error
+          account=os.environ['CLOUDFLARE_ACCOUNT_ID']
+          tokens=[('DATA',os.environ['CF_DATA_TOKEN']),('PAGES',os.environ['CF_PAGES_TOKEN'])]
+          def fetch(url):
+              last=None
+              for label,token in tokens:
+                  req=urllib.request.Request(url,headers={'Authorization':'Bearer '+token})
+                  try:
+                      with urllib.request.urlopen(req,timeout=60) as r: return label,json.load(r)
+                  except urllib.error.HTTPError as e: last=e
+              raise last
           for bucket in ['devilndove-toolshed-images-dev','devilndove-caip-media-dev']:
-              cursor=None; count=0; size=0
+              cursor=None; count=0; size=0; source=None
               while True:
                   q='?per_page=1000' + (('&cursor='+urllib.parse.quote(cursor,safe='')) if cursor else '')
-                  req=urllib.request.Request(f'https://api.cloudflare.com/client/v4/accounts/{account}/r2/buckets/{bucket}/objects{q}',headers={'Authorization':'Bearer '+token})
-                  with urllib.request.urlopen(req,timeout=60) as r: data=json.load(r)
+                  source,data=fetch(f'https://api.cloudflare.com/client/v4/accounts/{account}/r2/buckets/{bucket}/objects{q}')
                   result=data.get('result') or []
                   if isinstance(result,dict):
                       objs=result.get('objects') or result.get('items') or []
@@ -79,5 +97,5 @@ jobs:
                       objs=result; cursor=''; truncated=False
                   count += len(objs); size += sum(int(x.get('size') or 0) for x in objs if isinstance(x,dict))
                   if not truncated or not cursor: break
-              print(bucket,'objects=',count,'bytes=',size)
+              print(bucket,'objects=',count,'bytes=',size,'token=',source)
           PY
