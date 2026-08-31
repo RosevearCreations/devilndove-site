@@ -12,20 +12,20 @@ Release 465 follows the green Release 464 Development checkpoint and is intentio
 6. Product image-quality visibility using existing image annotations, merchandising scores, alt coverage and contextual-shot evidence.
 7. Storefront search-quality recovery that suggests likely Products after a zero-result/typo search without changing Product data.
 
-**Build 1 technical-green evidence:** source `4359862e1d7a9d8dfc53841d0d25c6a219f134c3`, System Gate `33428268265`, Preview `https://57cfbd12.devilndove-site.pages.dev`, D1 `4` native migration rows + `4` proof rows + `4` Release 465 triggers + `0` FK violations, proof artifact `9771613193`, Access-safe smoke PASS with zero auth headers and no Access weakening.
+**Build 1 final restart checkpoint:** `c2728be72b9c416536252e7cdbdaf39d1226a095`, System Gate `33429507939`, Preview `https://99705dfc.devilndove-site.pages.dev`, D1 `4` native migration rows + `4` proof rows + `4` Release 465 triggers + `0` FK violations, proof artifact `9772063788`, Access-safe smoke PASS with zero auth headers and no Access weakening.
 
 **Exit achieved:** one Storefront quality control centre can explain what is ready, blocked, weak or discoverable; publication hard requirements fail closed; simulation/search/link intelligence remains non-mutating.
 
 ## Build 2 — Inventory & Creator Intelligence
 
-**State: next bounded work after the Build 1 documentation closure SHA passes its final idempotent System Gate.**
+**State: source candidate in progress. Build 2 reuses existing authorities and requires no new D1 migration.**
 
 8. Related-product intelligence with explainable relationship reasons.
-9. Inventory availability intelligence: can-make / limited / unavailable reasoning without consuming stock.
-10. Material shortage forecasting from recipes, lots, on-hand quantities and planned work.
-11. Genealogy exception cockpit over the existing purchase-lot → production → finished-lot → sale authority.
-12. Creative project readiness score across materials, cost, evidence, Product linkage and content readiness.
-13. Pipeline Next Action engine that explains the next safe step and blockers without executing providers, inventory mutations or accounting posting.
+9. Inventory availability intelligence: available-now / can-make / limited / unavailable reasoning without consuming stock.
+10. Scenario-based material shortage forecasting from Product resource recipes, purchase lots, on-hand quantities and operator-entered planned units. Scenario quantity is never claimed to be an actual production order.
+11. Genealogy exception cockpit over the existing purchase-lot → production → finished-lot → sale authority, with pre-cutover opening-stock boundaries kept separate from forward exceptions.
+12. Creative project readiness score across materials, cost coverage, reviewed CAIP evidence, Product linkage, Content Studio readiness and governance.
+13. Pipeline Next Safe Action engine that explains the next safe step and blockers without executing providers, Inventory mutations, production posting or Accounting posting.
 
 **Exit:** Product and Creative workflows can explain readiness, material risk, genealogy gaps and next actions without introducing a second Inventory or CAIP authority.
 
@@ -43,7 +43,7 @@ Release 465 follows the green Release 464 Development checkpoint and is intentio
 
 **Exit:** the business and platform expose explainable readiness/risk signals and every Release 465 build is independently Development-proven before any deliberate Production promotion.
 
-## Canonical migration state after Build 1
+## Canonical migration state
 
 Development has proven:
 
@@ -52,7 +52,7 @@ Development has proven:
 3. `0003_release464_business_growth.sql`
 4. `0004_release465_storefront_quality.sql`
 
-The first 0004 attempt failed before application with a Cloudflare D1 `incomplete input` parser error. Because 0004 had not entered the native ledger, its trigger bodies were simplified and then applied successfully. After successful Development application, 0004 is immutable and any future repair must be a new numbered migration.
+Build 2 is intentionally schema-neutral. The canonical stream therefore remains exactly 0001–0004. Migration 0004 is already Development-applied and immutable; any future schema repair must be a new numbered migration.
 
 ## Permanent boundaries
 
@@ -62,6 +62,7 @@ The first 0004 attempt failed before application with a Cloudflare D1 `incomplet
 - Production receives the exact same canonical migrations before dependent code and only during deliberate promotion.
 - Provider credentials never imply payment or publication authorization.
 - Stripe/PayPal/Social/OAuth execution remains outside autonomous Release 465 work unless explicitly authorized.
+- Build 2 never consumes Inventory, posts production, posts Accounting, writes Product relationships, executes a Next Action, or reconstructs historical genealogy.
 - Raw CAIP R2 deletion remains closed.
 - Cloudflare Access is never weakened to make Preview smoke pass.
 - Public SEO keeps one-H1, canonical, metadata and structured-data gates.

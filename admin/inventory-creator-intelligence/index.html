@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>Inventory & Creator Intelligence | Devil n Dove Admin</title>
+<link rel="stylesheet" href="/css/styles.css"/>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"/><div><strong>Devil n Dove</strong><div class="small">Release 465 • Build 2</div></div></div>
+    <div class="links">
+      <a href="/admin/">Admin</a>
+      <a href="/admin/inventory-operations/">Inventory</a>
+      <a href="/admin/business-pipeline/">Business Pipeline</a>
+      <a href="/admin/content-studio/">Content Studio</a>
+      <a href="/admin/caip-production-pipeline/">CAIP</a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div>
+      <h1>Inventory &amp; Creator Intelligence</h1>
+      <p>Explain related Products, makeability, material shortages, genealogy exceptions, Creative readiness, and the next safe action without consuming stock, posting accounting, or publishing content.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid cols-3">
+      <label>Product
+        <select id="b2ProductSelect"><option value="">Choose a Product</option></select>
+      </label>
+      <label>Creative Project
+        <select id="b2CreativeSelect"><option value="">Choose a Creative Project</option></select>
+      </label>
+      <label>Forecast scenario units
+        <input id="b2ForecastUnits" type="number" min="1" max="100" value="1"/>
+      </label>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn" id="b2RefreshButton" type="button">Refresh intelligence</button>
+      <span class="small" id="b2Status">Read-only intelligence. No stock or provider action is executed.</span>
+    </div>
+  </div>
+
+  <div class="grid cols-3" style="margin-top:14px">
+    <div class="card"><h2>Next safe action</h2><div id="b2NextAction" class="small">Choose a Creative Project.</div></div>
+    <div class="card"><h2>Product availability</h2><div id="b2Availability" class="small">Choose a Product.</div></div>
+    <div class="card"><h2>Creative readiness</h2><div id="b2CreativeScore" class="small">Choose a Creative Project.</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Material shortage forecast</h2>
+    <p class="small">Scenario-based only. The quantity above is operator input and is not treated as an actual production order.</p>
+    <div id="b2Shortages" class="small">Choose a Product.</div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Related-product intelligence</h2>
+    <p class="small">Explainable suggestions based on shared category, Product type, Product resources, Storefront collections, merchandise origin, and price proximity. Suggestions never rewrite Product relationships.</p>
+    <div id="b2Related" class="small">Choose a Product.</div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Genealogy exceptions</h2>
+    <p class="small">Forward-provenance exceptions are separated from legitimate pre-cutover opening-stock boundaries. Historical production is never fabricated.</p>
+    <div id="b2Genealogy" class="small">Loading…</div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Creative readiness dimensions</h2>
+    <div id="b2CreativeDimensions" class="small">Choose a Creative Project.</div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Build 2 boundaries</h2>
+    <ul class="small">
+      <li>Product, Inventory, lot provenance, CAIP, Content Studio and business-pipeline tables remain the domain authorities.</li>
+      <li>No new D1 schema is required for Build 2.</li>
+      <li>No Inventory consumption, production posting, accounting posting, provider execution, provider publication, automatic relationship write, or historical reconstruction occurs here.</li>
+      <li>Build 3 remains closed until Build 2 is Development GREEN.</li>
+    </ul>
+  </div>
+</div>
+<script src="/public/js/auth.js?v=279"></script>
+<script src="/public/js/site-auth-ui.js"></script>
+<script src="/public/js/admin-inventory-creator-intelligence.js"></script>
+</body>
+</html>

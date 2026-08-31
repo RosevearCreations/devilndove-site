@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """Canonical Release 465 application + Release 463 environment forward-sanity authority."""
 from __future__ import annotations
-
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FAIL: list[str] = []
+FAIL = []
 LABEL = "Business Intelligence and Release Hardening"
-STATE = "release465_build1_complete_development_green"
 MIGRATIONS = [
     "migrations/canonical/0001_release464_migration_authority.sql",
     "migrations/canonical/0002_release464_operational_acceptance.sql",
@@ -16,32 +14,32 @@ MIGRATIONS = [
     "migrations/canonical/0004_release465_storefront_quality.sql",
 ]
 MANIFEST_FILES = [Path(x).name for x in MIGRATIONS]
+BUILD2_STATES = {"release465_build2_source_candidate", "release465_build2_complete_development_green"}
 
-
-def read(path: str) -> str:
-    file = ROOT / path
-    if not file.is_file():
+def read(path):
+    p = ROOT / path
+    if not p.is_file():
         FAIL.append(f"missing file: {path}")
         return ""
-    return file.read_text(encoding="utf-8", errors="replace")
+    return p.read_text(encoding="utf-8", errors="replace")
 
-
-def req(ok: bool, message: str) -> None:
+def req(ok, message):
     if not ok:
         FAIL.append(message)
-
 
 release = json.loads(read("development-release.json") or "{}")
 env463 = json.loads(read("release463-environment.json") or "{}")
 manifest = json.loads(read("migrations/canonical/manifest.json") or "{}")
 build1_authority = json.loads(read("release465-build1-storefront-quality.json") or "{}")
+build2_authority = json.loads(read("release465-build2-inventory-creator-intelligence.json") or "{}")
 
 req(release.get("environment") == "development" and release.get("branch") == "dev", "application authority must remain Development/dev")
 req(int(release.get("release") or 0) == 465, "current application release must be 465")
 req(release.get("label") == LABEL, "Release 465 label drifted")
-req(release.get("convergence_state") == STATE, "Release 465 Build 1 must be documented Development green")
+state = release.get("convergence_state")
+req(state in BUILD2_STATES, "Release 465 Build 2 state is unsupported")
 req(int(release.get("environment_release") or 0) == 463, "environment overlay must remain Release 463")
-req([x.get("key") for x in release.get("canonical_modules", [])] == ["storefront", "creators", "socials", "financials", "it-platform"], "canonical five-module authority drifted")
+req([x.get("key") for x in release.get("canonical_modules", [])] == ["storefront","creators","socials","financials","it-platform"], "canonical five-module authority drifted")
 
 previous = release.get("previous_release", {})
 req(int(previous.get("release") or 0) == 464 and previous.get("state") == "complete_development_green", "Release 464 must remain the completed prior application release")
@@ -71,16 +69,21 @@ req(policy.get("request_time_schema_mutation") == "blocked_by_runtime_firewall_a
 req(policy.get("preview_access_must_not_be_weakened_for_smoke") is True, "Preview smoke must preserve Cloudflare Access")
 
 migrations = release.get("current_release_migrations", [])
-req([x.get("file") for x in migrations] == MIGRATIONS, "current canonical migration authority must be exact 0001-0004 sequence")
-req(all(x.get("development_apply") == "applied_and_verified" for x in migrations), "all four canonical migrations must be Development applied and verified")
+req([x.get("file") for x in migrations] == MIGRATIONS, "current canonical migration authority must remain exact 0001-0004 sequence")
+req(all(x.get("development_apply") == "applied_and_verified" for x in migrations), "all four canonical migrations must remain Development applied and verified")
 req(all(x.get("production_apply") == "production_promotion_gate_managed_not_yet_promoted" for x in migrations), "Production migrations must remain unpromoted")
+
+db_state = release.get("current_release_database_state", {})
+req(db_state.get("new_development_migration_required") is False, "Build 2 must not request a Development migration")
+req(db_state.get("build2_schema_change_required") is False and db_state.get("build2_migration") == "none", "Build 2 schema boundary drifted")
+req(int(db_state.get("development_native_migration_rows") or 0) == 4 and int(db_state.get("development_migration_proof_rows") or 0) == 4, "Build 2 must preserve 4 native migrations + 4 proof rows")
 
 req(manifest.get("stream") == "devilndove-canonical-forward", "canonical migration stream drifted")
 rules = manifest.get("rules", {})
 req(rules.get("development_first") is True and rules.get("production_before_dependent_code") is True, "canonical manifest safety order drifted")
 req(rules.get("native_ledger") == "d1_migrations" and rules.get("proof_table") == "app_schema_migration_proofs", "canonical manifest ledger/proof authority drifted")
 manifest_files = [m.get("file") for m in manifest.get("migrations", [])]
-req(manifest_files == MANIFEST_FILES and len(manifest_files) == len(set(manifest_files)), "canonical manifest must contain one exact immutable 0001-0004 sequence")
+req(manifest_files == MANIFEST_FILES and len(manifest_files) == len(set(manifest_files)), "canonical manifest must retain one exact immutable 0001-0004 sequence")
 
 runtime = read("functions/api/_lib/releaseAuthority.js")
 req("CURRENT_RELEASE = 465" in runtime and LABEL in runtime, "shared runtime Release 465 authority drifted")
@@ -104,72 +107,65 @@ req(prod.get("r2", {}).get("product") == "devilndove-toolshed-images" and prod.g
 wrangler = read("wrangler.toml")
 req('name = "devilndove-site"' in wrangler and 'migrations_dir = "migrations/canonical"' in wrangler, "tracked Wrangler migration/project authority drifted")
 req('database_name = "devilndove-dev"' in wrangler and 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' in wrangler, "tracked Wrangler Development D1 authority drifted")
-req("f34a741b-0000-45b0-9a96-6be08754d563" not in wrangler and "account_id =" not in wrangler, "tracked Wrangler configuration contains forbidden Production/account identity")
+req("f34a741b-0000-45b0-9a96-6be08754d563" not in wrangler and "account_id =" not in wrangler, "tracked Wrangler contains forbidden Production/account identity")
 
 for key, ids in (
-    ("release464_update1", list(range(1, 8))),
-    ("release464_update2", [8, 9, 10, 11, 12, 13]),
-    ("release464_update3", [14, 15, 16, 17, 18, 19, 20]),
+    ("release464_update1", list(range(1,8))),
+    ("release464_update2", [8,9,10,11,12,13]),
+    ("release464_update3", [14,15,16,17,18,19,20]),
 ):
-    rows = release.get(key, [])
-    req([x.get("id") for x in rows] == ids, f"{key} identity drifted")
-    req(all(str(x.get("status") or "").startswith("complete") for x in rows), f"{key} must remain complete")
+    entries = release.get(key, [])
+    req([x.get("id") for x in entries] == ids, f"{key} identity drifted")
+    req(all(str(x.get("status") or "").startswith("complete") for x in entries), f"{key} must remain complete")
 
 build1 = release.get("release465_build1", [])
-req([x.get("id") for x in build1] == list(range(1, 8)), "Release 465 Build 1 must contain items 1-7")
-req(all(x.get("status") == "complete_development_green" for x in build1), "Release 465 Build 1 items must be Development green")
+req([x.get("id") for x in build1] == list(range(1,8)), "Release 465 Build 1 must contain items 1-7")
+req(all(x.get("status") == "complete_development_green" for x in build1), "Release 465 Build 1 items must remain Development green")
+req(build1_authority.get("state") == "complete_development_green", "Build 1 authority must remain complete Development green")
+
+build2 = release.get("release465_build2", [])
+req([x.get("id") for x in build2] == [8,9,10,11,12,13], "Release 465 Build 2 must contain items 8-13")
+req(build2_authority.get("state") in ("in_progress_source_candidate", "complete_development_green"), "Build 2 authority state drifted")
+req(build2_authority.get("schema_change_required") is False and build2_authority.get("migration") is None, "Build 2 must remain schema-neutral")
+
 planned = {int(x.get("build") or 0): x for x in release.get("planned_builds", [])}
-req(1 not in planned, "Completed Build 1 must not remain planned")
-req(planned.get(2, {}).get("items") == [8, 9, 10, 11, 12, 13], "Build 2 must remain the next planned block")
-req(planned.get(3, {}).get("items") == [14, 15, 16, 17, 18, 19, 20], "Build 3 must remain planned behind Build 2")
+if state == "release465_build2_source_candidate":
+    req(all(x.get("status") == "implemented_source_candidate" for x in build2), "Build 2 source candidate statuses drifted")
+    req(build2_authority.get("state") == "in_progress_source_candidate", "Build 2 authority must be source candidate before technical green")
+    req(planned.get(2, {}).get("items") == [8,9,10,11,12,13], "Build 2 must remain planned/in-progress during source candidate")
+else:
+    req(all(x.get("status") == "complete_development_green" for x in build2), "Build 2 complete statuses drifted")
+    req(build2_authority.get("state") == "complete_development_green", "Build 2 authority must be complete after closure")
+    req(2 not in planned, "Completed Build 2 must not remain planned")
+    evidence = release.get("current_release_evidence", {})
+    req(evidence.get("build2_development_green") is True, "Build 2 green evidence missing")
+    req(bool(evidence.get("build2_final_restart_sha")), "Build 2 final restart SHA missing")
+    req(int(evidence.get("build2_final_system_gate_run") or 0) > 0, "Build 2 final System Gate run missing")
+    req(str(evidence.get("build2_final_exact_preview") or "").startswith("https://"), "Build 2 final exact Preview missing")
+    req(int(evidence.get("development_native_migration_rows") or 0) == 4 and int(evidence.get("development_migration_proof_rows") or 0) == 4, "Build 2 closure must preserve 4/4 D1 migration proof")
+    req(int(evidence.get("development_foreign_key_violations", -1)) == 0, "Build 2 closure FK authority drifted")
 
-evidence = release.get("current_release_evidence", {})
-req(evidence.get("release464_updates_1_3_development_green") is True, "Release 464 inherited green evidence missing")
-req(evidence.get("build1_development_green") is True, "Build 1 green evidence missing")
-req(evidence.get("build1_technical_green_source_sha") == "4359862e1d7a9d8dfc53841d0d25c6a219f134c3", "Build 1 technical-green SHA drifted")
-req(int(evidence.get("build1_system_gate_run") or 0) == 33428268265, "Build 1 System Gate run drifted")
-req(int(evidence.get("development_d1_tables") or 0) >= 583, "Development D1 table count regressed")
-req(int(evidence.get("development_native_migration_rows") or 0) == 4 and int(evidence.get("development_migration_proof_rows") or 0) == 4, "Build 1 must retain 4 native migration + 4 proof rows")
-req(int(evidence.get("development_foreign_key_violations", -1)) == 0, "Development FK authority drifted")
-req(int(evidence.get("release465_publication_triggers") or 0) == 4, "Release 465 publication trigger proof missing")
-req(evidence.get("preview_smoke_pass") is True and evidence.get("preview_smoke_mode") == "CLOUDFLARE_ACCESS_PROTECTED", "Build 1 Preview smoke evidence missing")
-req(int(evidence.get("preview_smoke_auth_headers_used") or 0) == 0 and evidence.get("preview_access_weakened") is False, "Build 1 Preview smoke must use zero auth headers and preserve Access")
-req(evidence.get("production_mutation_executed_for_build1") is False, "Build 1 must not mutate Production")
-req(evidence.get("provider_execution_enabled") is False and evidence.get("provider_publication_enabled") is False and evidence.get("raw_caip_r2_delete_enabled") is False, "provider/R2 safety boundaries drifted")
-
-req(build1_authority.get("state") == "complete_development_green", "Release 465 Build 1 authority must be complete Development green")
-req(all(x.get("status") == "complete_development_green" for x in build1_authority.get("items", [])), "Release 465 Build 1 authority item status drifted")
-dev_evidence = build1_authority.get("development_evidence") or {}
-req(dev_evidence.get("source_sha") == "4359862e1d7a9d8dfc53841d0d25c6a219f134c3", "Build 1 authority technical-green SHA drifted")
-req(int(dev_evidence.get("native_migration_rows") or 0) == 4 and int(dev_evidence.get("proof_rows") or 0) == 4 and int(dev_evidence.get("foreign_key_violations", -1)) == 0, "Build 1 authority D1 proof drifted")
+req(planned.get(3, {}).get("items") == [14,15,16,17,18,19,20], "Build 3 must remain planned behind Build 2")
 
 for path in (
-    "AI_HANDOFF.md",
-    "PROJECT_STATUS_AND_ROADMAP.md",
-    "SANITY_HEALTH_CHECK.md",
-    "docs/operations/RELEASE_465_THREE_BUILD_ROADMAP.md",
-    "release465-build1-storefront-quality.json",
-    "docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md",
-    "migrations/canonical/README.md",
-    "scripts/d1_migrate.py",
-    "scripts/main_promotion_gate.py",
-    "scripts/migration_policy_gate.py",
-    "scripts/runtime_schema_mutation_gate.py",
-    "scripts/release465_build1_gate.py",
+    "AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","docs/operations/RELEASE_465_THREE_BUILD_ROADMAP.md",
+    "release465-build1-storefront-quality.json","release465-build2-inventory-creator-intelligence.json","docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md",
+    "migrations/canonical/README.md","scripts/d1_migrate.py","scripts/main_promotion_gate.py","scripts/migration_policy_gate.py","scripts/runtime_schema_mutation_gate.py",
+    "scripts/release465_build1_gate.py","scripts/release465_build2_gate.py",
 ):
     req((ROOT / path).is_file(), f"canonical authority missing: {path}")
 
 print("PLATFORM FORWARD SANITY")
 print(f"Application release: 465 — {LABEL}")
 print("Release 465 Build 1: DEVELOPMENT GREEN")
-print("Next bounded work: Build 2 items 8-13 only")
+print("Release 465 Build 2:", "DEVELOPMENT GREEN" if state.endswith("complete_development_green") else "SOURCE CANDIDATE")
+print("Build 2 D1 migration: NONE; canonical stream remains 0001-0004")
+print("Build 3: CLOSED until Build 2 Development green")
 print("Environment release: 463 — one Pages project with isolated Dev/Production D1 + R2")
 print("Historical D1 baseline: Release 461 — provenance only, never replayed")
-print("Forward D1 migration stream: migrations/canonical (0001 + 0002 + 0003 + 0004)")
 print("Request-time schema mutation capability: BLOCKED")
 print("Production data ownership: PRODUCTION")
 if FAIL:
-    for index, item in enumerate(FAIL, 1):
-        print(f"{index:03d}. FAIL — {item}")
+    for index, item in enumerate(FAIL, 1): print(f"{index:03d}. FAIL — {item}")
     raise SystemExit(1)
 print("PLATFORM FORWARD SANITY: PASS")

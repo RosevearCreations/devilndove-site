@@ -24,6 +24,7 @@ on:
       - 'release464-update2-operational-acceptance.json'
       - 'release464-update3-business-growth.json'
       - 'release465-build1-storefront-quality.json'
+      - 'release465-build2-inventory-creator-intelligence.json'
       - 'migrations/**'
       - 'scripts/**'
       - '.github/workflows/**'
@@ -67,6 +68,8 @@ jobs:
         run: python scripts/release464_update3_gate.py
       - name: Validate Release 465 Build 1 Storefront and SEO quality
         run: python scripts/release465_build1_gate.py
+      - name: Validate Release 465 Build 2 Inventory and Creator intelligence
+        run: python scripts/release465_build2_gate.py
       - name: Validate public SEO depth
         run: |
           python scripts/public_seo_gate.py
@@ -85,6 +88,8 @@ jobs:
           node --check functions/api/_lib/appModuleRoutes.js
           node --check functions/api/_lib/appModuleSessionGuard.js
           node --check functions/api/_lib/storefrontMerchandising.js
+          node --check functions/api/_lib/productLotProvenance.js
+          node --check functions/api/_lib/inventoryCreatorIntelligence.js
           node --check functions/api/admin/_middleware.js
           node --check functions/api/admin/_accountingStatementImports.js
           node --check functions/api/admin/migrate.js
@@ -97,6 +102,7 @@ jobs:
           node --check functions/api/admin/storefront-merchandising-simulator.js
           node --check functions/api/admin/product-genealogy-trace.js
           node --check functions/api/admin/business-growth-pipeline.js
+          node --check functions/api/admin/inventory-creator-intelligence.js
           node --check functions/api/admin/it-operations-dashboard.js
           node --check functions/api/admin/caip-production-pipeline.js
           node --check functions/api/admin/caip-content-handoff.js
@@ -115,6 +121,7 @@ jobs:
           node --check public/js/admin-storefront-merchandising.js
           node --check public/js/admin-storefront-quality.js
           node --check public/js/admin-business-pipeline.js
+          node --check public/js/admin-inventory-creator-intelligence.js
           node --check public/js/admin-month-end-cockpit.js
           node --check public/js/admin-it-platform.js
           node --check public/js/admin-caip-production-pipeline.js
@@ -145,26 +152,30 @@ jobs:
             scripts/release464_update2_gate.py \
             scripts/release464_update3_gate.py \
             scripts/release465_build1_gate.py \
+            scripts/release465_build2_gate.py \
             scripts/accessibility_acceptance_gate.py \
             scripts/preview_smoke.py
       - name: Whitespace validation
         run: git diff --check origin/dev...HEAD
-      - name: Release 465 Build 1 safety statement
+      - name: Release 465 Build 2 safety statement
         run: |
-          echo 'Release 464 baseline: DEVELOPMENT GREEN / IMMUTABLE'
-          echo 'Release 465 Build 1: Storefront and SEO Quality'
+          echo 'Release 465 Build 1: DEVELOPMENT GREEN / IMMUTABLE'
+          echo 'Release 465 Build 2: Inventory & Creator Intelligence'
           echo 'Environment release: 463 Environment Consolidation and Production Cutover'
           echo 'Historical D1 baseline: Release 461 provenance only'
           echo 'Forward D1 migration authority: migrations/canonical / 0001 + 0002 + 0003 + 0004'
-          echo 'Development-first migration proof: REQUIRED'
-          echo 'Product hard publication readiness: FAIL CLOSED'
-          echo 'Merchandising simulation: READ ONLY'
-          echo 'Internal-link/search intelligence: SUGGESTION ONLY'
+          echo 'Build 2 D1 schema migration: NONE'
+          echo 'Related-product intelligence: EXPLAINABLE / NON-MUTATING'
+          echo 'Availability + shortage forecast: READ ONLY / OPERATOR SCENARIO'
+          echo 'Genealogy historical reconstruction: NONE'
+          echo 'Creative readiness + Next Action: EXPLAIN ONLY'
           echo 'Request-time schema mutation capability: BLOCKED'
           echo 'Production promotion: exact green Development tree only'
           echo 'Payment/provider execution: CLOSED'
           echo 'Provider publication: CLOSED'
+          echo 'Inventory/production/accounting execution from Build 2: CLOSED'
           echo 'Raw CAIP R2 deletion: CLOSED'
+          echo 'Build 3: CLOSED until Build 2 Development green'
           echo 'Canonical Pages project: devilndove-site'
           echo 'Development target: dev Preview / Development D1 + Development R2'
           echo 'Native Git-triggered Pages deployments: FROZEN'
@@ -203,11 +214,12 @@ jobs:
           grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
           grep -q '^bucket_name = "devilndove-caip-media-dev"$' wrangler.toml
           ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables, (SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) AS canonical_migrations, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') AND environment='development') AS migration_proofs, (SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name LIKE 'release465_%') AS release465_triggers, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='storefront_merchandising_rules') AS merchandising_rules_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='product_review_actions') AS product_review_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='product_publish_overrides') AS publish_override_authority; PRAGMA foreign_key_check;" > /tmp/release465-build1-d1.json
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables, (SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) AS canonical_migrations, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') AND environment='development') AS migration_proofs, (SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name LIKE 'release465_%') AS release465_triggers, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('products','product_resource_links','site_item_inventory','site_inventory_usage_profiles','inventory_purchase_lots','inventory_lot_policies','product_production_runs','product_production_run_material_lots','product_finished_inventory_lots','order_items','creative_projects','creative_media_evidence_ranges','creative_story_evidence','content_projects','content_project_media','content_project_deliverables','creative_business_pipelines','storefront_collection_products')) AS build2_required_tables;" > /tmp/release465-build2-d1.json
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "PRAGMA foreign_key_check;" > /tmp/release465-build2-fk.json
           python - <<'PY'
           import json
-          d=json.load(open('/tmp/release465-build1-d1.json'));rows=[]
-          keys=('app_modules','tables','canonical_migrations','migration_proofs','release465_triggers','merchandising_rules_authority','product_review_authority','publish_override_authority')
+          d=json.load(open('/tmp/release465-build2-d1.json'));rows=[]
+          keys=('app_modules','tables','canonical_migrations','migration_proofs','release465_triggers','build2_required_tables')
           def walk(v):
               if isinstance(v,dict):
                   if all(k in v for k in keys): rows.append(v)
@@ -220,12 +232,21 @@ jobs:
           assert int(row['canonical_migrations'])==4,row
           assert int(row['migration_proofs'])==4,row
           assert int(row['release465_triggers'])==4,row
-          assert int(row['merchandising_rules_authority'])==1,row
-          assert int(row['product_review_authority'])==1,row
-          assert int(row['publish_override_authority'])==1,row
+          assert int(row['build2_required_tables'])==18,row
           compact={k:int(row[k]) for k in keys}
-          json.dump(compact,open('/tmp/release465-build1-d1-authority.json','w'),indent=2,sort_keys=True)
-          print('RELEASE 465 BUILD 1 DEVELOPMENT D1 AUTHORITY: PASS',compact)
+          fk=json.load(open('/tmp/release465-build2-fk.json'));fk_rows=[]
+          def collect(v):
+              if isinstance(v,dict):
+                  if isinstance(v.get('results'),list): fk_rows.extend(x for x in v['results'] if isinstance(x,dict))
+                  for x in v.values(): collect(x)
+              elif isinstance(v,list):
+                  for x in v: collect(x)
+          collect(fk)
+          violations=[x for x in fk_rows if any(k in x for k in ('table','parent','fkid','foreign_key'))]
+          assert not violations,violations
+          compact['foreign_key_violations']=len(violations)
+          json.dump(compact,open('/tmp/release465-build2-d1-authority.json','w'),indent=2,sort_keys=True)
+          print('RELEASE 465 BUILD 2 DEVELOPMENT D1 AUTHORITY: PASS',compact)
           PY
       - name: Deploy exact Development SHA to canonical Preview
         shell: bash
@@ -237,7 +258,7 @@ jobs:
             --project-name=devilndove-site \
             --branch=dev \
             --commit-hash="${GITHUB_SHA}" \
-            --commit-message="Release 465 Build 1 canonical Development Preview ${GITHUB_SHA}" \
+            --commit-message="Release 465 Build 2 canonical Development Preview ${GITHUB_SHA}" \
             | tee /tmp/release465-dev-deploy.log
           python - <<'PY'
           import re
@@ -268,8 +289,8 @@ jobs:
           assert (d1.get('DB') or {}).get('id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa',d1
           assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images-dev',r2
           assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('name')=='devilndove-caip-media-dev',r2
-          proof={'release':465,'build':1,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),'project':'devilndove-site','environment':'preview','branch':'dev','url':open('/tmp/release465-dev-url').read().strip(),'d1':'devilndove-dev','product_r2':'devilndove-toolshed-images-dev','caip_r2':'devilndove-caip-media-dev','d1_authority':json.load(open('/tmp/release465-build1-d1-authority.json')),'canonical_migration_stream':'migrations/canonical','native_git_deployments':False,'provider_execution':False,'provider_publication':False,'production_mutation':False,'raw_caip_r2_delete':False}
-          json.dump(proof,open('/tmp/release465-build1-development-deploy-proof.json','w'),indent=2,sort_keys=True);print(json.dumps(proof,indent=2,sort_keys=True))
+          proof={'release':465,'build':2,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),'project':'devilndove-site','environment':'preview','branch':'dev','url':open('/tmp/release465-dev-url').read().strip(),'d1':'devilndove-dev','product_r2':'devilndove-toolshed-images-dev','caip_r2':'devilndove-caip-media-dev','d1_authority':json.load(open('/tmp/release465-build2-d1-authority.json')),'canonical_migration_stream':'migrations/canonical','build2_schema_change':False,'native_git_deployments':False,'provider_execution':False,'provider_publication':False,'inventory_mutation':False,'accounting_posting':False,'production_mutation':False,'raw_caip_r2_delete':False}
+          json.dump(proof,open('/tmp/release465-build2-development-deploy-proof.json','w'),indent=2,sort_keys=True);print(json.dumps(proof,indent=2,sort_keys=True))
           PY
       - name: Run non-secret exact Preview smoke acceptance
         shell: bash
@@ -278,7 +299,7 @@ jobs:
           python scripts/preview_smoke.py --base-url "$(cat /tmp/release465-dev-url)"
       - uses: actions/upload-artifact@v4
         with:
-          name: release465-build1-development-deploy-proof
-          path: /tmp/release465-build1-development-deploy-proof.json
+          name: release465-build2-development-deploy-proof
+          path: /tmp/release465-build2-development-deploy-proof.json
           retention-days: 90
           if-no-files-found: error

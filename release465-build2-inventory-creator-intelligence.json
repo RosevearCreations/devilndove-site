@@ -1,0 +1,73 @@
+{
+  "release": 465,
+  "build": 2,
+  "title": "Inventory & Creator Intelligence",
+  "state": "in_progress_source_candidate",
+  "base_development_sha": "c2728be72b9c416536252e7cdbdaf39d1226a095",
+  "items": [
+    {
+      "id": 8,
+      "name": "Related-product intelligence with explainable relationship reasons",
+      "status": "implemented_source_candidate"
+    },
+    {
+      "id": 9,
+      "name": "Inventory availability intelligence: available / can-make / limited / unavailable",
+      "status": "implemented_source_candidate"
+    },
+    {
+      "id": 10,
+      "name": "Scenario-based material shortage forecasting from Product resources, lots, on-hand stock and operator planned units",
+      "status": "implemented_source_candidate"
+    },
+    {
+      "id": 11,
+      "name": "Genealogy exception cockpit over existing purchase-lot to production to finished-lot to sale authority",
+      "status": "implemented_source_candidate"
+    },
+    {
+      "id": 12,
+      "name": "Creative project readiness score across materials, cost, evidence, Product linkage and Content Studio readiness",
+      "status": "implemented_source_candidate"
+    },
+    {
+      "id": 13,
+      "name": "Explainable next-safe-action engine without provider, inventory or accounting execution",
+      "status": "implemented_source_candidate"
+    }
+  ],
+  "schema_change_required": false,
+  "migration": null,
+  "safety": {
+    "production_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "inventory_consumption": false,
+    "production_posting": false,
+    "accounting_posting": false,
+    "automatic_relationship_write": false,
+    "automatic_next_action_execution": false,
+    "historical_genealogy_reconstruction": false,
+    "raw_r2_delete": false,
+    "request_time_schema_ddl": false,
+    "preview_access_must_remain_enforced": true
+  },
+  "authority_reuse": {
+    "product": "existing products + product_resource_links authorities",
+    "inventory": "existing site_item_inventory + site_inventory_usage_profiles authority",
+    "lot_provenance": "existing inventory_purchase_lots + inventory_lot_policies + Build 440 production/finished-lot authority",
+    "orders": "existing orders + order_items authority",
+    "creators": "existing creative_projects + CAIP evidence-review authority",
+    "content": "existing content_projects/media/deliverables authority",
+    "pipeline": "existing creative_business_pipelines reference/status spine",
+    "storefront": "existing storefront_collection_products + storefront_collections authority"
+  },
+  "forecast_policy": {
+    "operator_scenario_units": true,
+    "actual_planned_quantity_claimed": false,
+    "default_units": 1,
+    "max_units": 100
+  },
+  "development_evidence": null,
+  "production_promotion": "closed"
+}
