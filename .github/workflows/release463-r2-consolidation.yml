@@ -58,11 +58,12 @@ jobs:
           python - <<'PY'
           import re
           text=open('/tmp/release463-r2-deploy.log',encoding='utf-8',errors='replace').read()
-          urls=re.findall(r'https://[a-z0-9-]+\.devilndove-site\.pages\.dev',text,re.I)
-          assert urls,text[-2000:]
-          url=urls[-1].rstrip('/')
+          urls=re.findall(r'https://([a-z0-9-]+)\.devilndove-site\.pages\.dev',text,re.I)
+          hashes=[label for label in urls if re.fullmatch(r'[0-9a-f]{8}',label,re.I)]
+          assert hashes,text[-2000:]
+          url=f'https://{hashes[-1]}.devilndove-site.pages.dev'
           open('/tmp/release463-preview-url','w').write(url)
-          print('PREVIEW_URL',url)
+          print('EXACT_PREVIEW_URL',url)
           PY
 
       - name: Resolve existing Development admin session read-only
@@ -95,24 +96,28 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import time,urllib.request,urllib.error
+          import json,time,urllib.request,urllib.error
           base=open('/tmp/release463-preview-url').read().strip()
           url=base+'/api/admin/release463-r2-sync'
-          ready=False
+          ready=False; last=None
           for _ in range(30):
-              req=urllib.request.Request(url,method='POST',data=b'{}',headers={'Content-Type':'application/json'})
+              req=urllib.request.Request(url,method='POST',data=b'{}',headers={'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store'})
               try:
-                  urllib.request.urlopen(req,timeout=20)
-                  status=200
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      status=r.status; raw=r.read().decode('utf-8','replace'); ctype=r.headers.get('Content-Type','')
               except urllib.error.HTTPError as e:
-                  status=e.code
+                  status=e.code; raw=e.read().decode('utf-8','replace'); ctype=e.headers.get('Content-Type','')
+              except Exception as e:
+                  last=repr(e); time.sleep(3); continue
+              try: data=json.loads(raw)
               except Exception:
-                  status=0
-              if status in (401,403):
+                  last=(status,ctype,raw[:160]); time.sleep(3); continue
+              if status in (401,403) and int(data.get('release') or 0)==463:
                   ready=True; break
+              last=(status,data)
               time.sleep(3)
-          assert ready,(url,status)
-          print('RELEASE 463 R2 PREVIEW BRIDGE: READY')
+          assert ready,(url,last)
+          print('RELEASE 463 R2 EXACT PREVIEW BRIDGE: READY',url)
           PY
 
       - name: Copy prune and verify both R2 environments through authenticated preview
