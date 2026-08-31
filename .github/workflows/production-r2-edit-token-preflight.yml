@@ -1,0 +1,36 @@
+name: Production R2 Edit Token Preflight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/production-r2-edit-token-preflight.json'
+
+permissions:
+  contents: read
+
+jobs:
+  r2-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Read Production/Development R2 inventories
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          python scripts/production_release462_r2_sync.py inventory --output /tmp/r2.json
+          cat /tmp/r2.json
+      - name: Boundary
+        run: |
+          echo 'R2 mutation: NONE'
+          echo 'D1 mutation: NONE'
