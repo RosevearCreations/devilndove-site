@@ -43,7 +43,7 @@ req(int(e.get("source_gate_job") or 0) == 99607087240, "Build 1 source-gate job 
 req(int(e.get("deploy_development_job") or 0) == 99607189007, "Build 1 deploy job drifted")
 req(e.get("exact_preview") == "https://57cfbd12.devilndove-site.pages.dev", "Build 1 exact Preview drifted")
 req(int(e.get("native_migration_rows") or 0) == 4 and int(e.get("proof_rows") or 0) == 4, "Build 1 must retain 4 migration rows + 4 proof rows")
-req(int(e.get("foreign_key_violations") or -1) == 0, "Build 1 Development FK proof drifted")
+req(int(e.get("foreign_key_violations", -1)) == 0, "Build 1 Development FK proof drifted")
 req(int(e.get("release465_publication_triggers") or 0) == 4, "Build 1 publication trigger proof drifted")
 req(e.get("preview_smoke_mode") == "CLOUDFLARE_ACCESS_PROTECTED" and int(e.get("preview_smoke_auth_headers_used") or 0) == 0 and e.get("preview_access_weakened") is False, "Build 1 Access-safe Preview evidence drifted")
 req(e.get("production_mutation") is False and e.get("provider_execution") is False and e.get("provider_publication") is False and e.get("raw_caip_r2_delete") is False, "Build 1 provider/Production/R2 safety evidence drifted")
