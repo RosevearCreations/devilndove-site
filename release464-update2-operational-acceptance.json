@@ -2,95 +2,79 @@
   "release": 464,
   "update": 2,
   "theme": "Operational Acceptance and Recovery",
-  "status": "implementation",
+  "status": "complete_development_green",
   "items": [
     {
       "id": 8,
       "name": "Operational thresholds and alerts",
-      "requirements": [
-        "failed notifications",
-        "failed uploads",
-        "payment/provider failures",
-        "stale open incidents"
-      ],
+      "status": "complete_development_green",
+      "requirements": ["failed notifications","failed uploads","payment/provider failures","stale open incidents"],
       "surface": "/admin/operations/#runtimeIncidentsAdminMount"
     },
     {
       "id": 9,
       "name": "Retention review before deletion",
-      "requirements": [
-        "archive candidate rows before deletion",
-        "explicit admin approval",
-        "delete only archived approved source IDs",
-        "audit every step"
-      ]
+      "status": "complete_development_green",
+      "requirements": ["archive candidate rows before deletion","explicit admin approval","delete only archived approved source IDs","audit every step"]
     },
     {
       "id": 10,
       "name": "Orphaned storage diagnostics",
-      "requirements": [
-        "read-only D1 reference scan",
-        "read-only R2 list scan",
-        "no object body reads",
-        "no R2 deletion"
-      ]
+      "status": "complete_development_green",
+      "requirements": ["read-only D1 reference scan","read-only R2 list scan","no object body reads","no R2 deletion"]
     },
     {
       "id": 11,
       "name": "Audited safe recovery",
-      "requirements": [
-        "one-click only when a safe probe exists",
-        "R2 HEAD or HTTPS HEAD only",
-        "resolve only after healthy verification",
-        "audit recovery result",
-        "provider execution remains closed"
-      ]
+      "status": "complete_development_green",
+      "requirements": ["one-click only when a safe probe exists","R2 HEAD or HTTPS HEAD only","resolve only after healthy verification","audit recovery result","provider execution remains closed"]
     },
     {
       "id": 12,
       "name": "Non-secret Preview smoke",
-      "requirements": [
-        "exact Preview URL",
-        "no authentication header or service token",
-        "never weaken Cloudflare Access",
-        "when Access is enforced prove home, manifest, service worker and public API are all intercepted anonymously",
-        "when Access is not enforced validate those application surfaces directly",
-        "validate matching source artifacts in the exact checked-out SHA"
-      ]
+      "status": "complete_development_green",
+      "requirements": ["exact Preview URL","no authentication header or service token","never weaken Cloudflare Access","when Access is enforced prove home, manifest, service worker and public API are all intercepted anonymously","when Access is not enforced validate those application surfaces directly","validate matching source artifacts in the exact checked-out SHA"]
     },
     {
       "id": 13,
       "name": "Accessibility acceptance",
-      "requirements": [
-        "keyboard-native controls",
-        "visible focus",
-        "status announcements",
-        "image alt text",
-        "caption requirement for HTML video",
-        "iframe titles"
-      ]
+      "status": "complete_development_green",
+      "requirements": ["keyboard-native controls","visible focus","status announcements","image alt text","caption requirement for HTML video","iframe titles"]
     }
   ],
   "thresholds": {
-    "notification_failures_24h": {
-      "warning": 1,
-      "error": 3
-    },
-    "upload_failures_24h": {
-      "warning": 1,
-      "error": 3
-    },
-    "payment_provider_failures_24h": {
-      "error": 1,
-      "critical": 3
-    },
-    "open_critical": {
-      "critical": 1
-    },
-    "stale_open_hours": {
-      "warning": 24,
-      "critical": 72
-    }
+    "notification_failures_24h": {"warning":1,"error":3},
+    "upload_failures_24h": {"warning":1,"error":3},
+    "payment_provider_failures_24h": {"error":1,"critical":3},
+    "open_critical": {"critical":1},
+    "stale_open_hours": {"warning":24,"critical":72}
+  },
+  "canonical_migration": {
+    "file": "migrations/canonical/0002_release464_operational_acceptance.sql",
+    "development_state": "applied_and_verified",
+    "production_state": "not_applied_until_deliberate_production_promotion"
+  },
+  "development_evidence": {
+    "technical_green_source_sha": "40fd75bc833407f96dfa249fa5935aa55ac79b16",
+    "system_gate_run": 33415361384,
+    "source_gate_job": 99564590843,
+    "deploy_development_job": 99564723020,
+    "exact_preview_url": "https://b10e991f.devilndove-site.pages.dev",
+    "development_d1_tables": 580,
+    "canonical_native_migration_rows": 2,
+    "canonical_migration_proof_rows": 2,
+    "foreign_key_violations": 0,
+    "migration_manifest_sha256": "f5e559a44dd098182bc2cd5f182422a15e49b9166089c2fda812901350f5f667",
+    "proof_artifact_id": 9766829652,
+    "proof_artifact_sha256": "b9e4cb02358c9d0970f6d1bdfb6343d13e3fbb20df213ca448f3909c7fb69ac2",
+    "preview_smoke_mode": "cloudflare_access_protected",
+    "preview_smoke_pass": true,
+    "preview_smoke_auth_headers_used": 0,
+    "preview_access_weakened": false,
+    "provider_execution_invoked": false,
+    "production_mutation_executed": false,
+    "migration_idempotence_proven": true,
+    "final_verification_newly_applied_migrations": []
   },
   "safety": {
     "runtime_schema_ddl": false,
@@ -99,5 +83,10 @@
     "production_mutation": false,
     "retention_delete_requires_archived_approved_review": true,
     "preview_access_weakened_for_smoke": false
+  },
+  "next_update": {
+    "update": 3,
+    "items": [14,15,16,17,18,19,20],
+    "theme": "Business Application Growth"
   }
 }

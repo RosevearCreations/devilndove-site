@@ -8,7 +8,7 @@
   "branch": "dev",
   "pages_project": "devilndove-site",
   "pages_environment": "preview",
-  "convergence_state": "release464_update1_complete_development_green",
+  "convergence_state": "release464_update2_complete_development_green",
   "previous_release": {
     "release": 462,
     "label": "Autonomous Quality, Workflow & Gate Consolidation",
@@ -82,7 +82,8 @@
     "request_time_schema_mutation": "blocked_by_runtime_firewall_and_source_gate",
     "seo_gate_required": true,
     "repository_hygiene_gate_required": true,
-    "documentation_sync_required": true
+    "documentation_sync_required": true,
+    "preview_access_must_not_be_weakened_for_smoke": true
   },
   "database_baseline": {
     "historical_release": 461,
@@ -99,12 +100,21 @@
       "purpose": "Bootstrap canonical migration proof authority alongside Cloudflare native d1_migrations.",
       "development_apply": "applied_and_verified",
       "production_apply": "production_promotion_gate_managed_not_yet_promoted"
+    },
+    {
+      "version": 2,
+      "file": "migrations/canonical/0002_release464_operational_acceptance.sql",
+      "purpose": "Add migration-owned operational retention archive/review and audited recovery evidence authorities for Update 2.",
+      "development_apply": "applied_and_verified",
+      "production_apply": "production_promotion_gate_managed_not_yet_promoted"
     }
   ],
   "current_release_database_state": {
     "new_development_migration_required": false,
-    "development_migration_state": "applied_and_verified",
-    "production_migration_state": "not_applied_until_deliberate_production_promotion",
+    "development_migration_state": "two_canonical_migrations_applied_and_verified",
+    "development_native_migration_rows": 2,
+    "development_migration_proof_rows": 2,
+    "production_migration_state": "0001_and_0002_not_applied_until_deliberate_production_promotion",
     "historical_schema_baseline_release": 461,
     "canonical_stream_started_in_release": 464,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
@@ -115,31 +125,40 @@
   },
   "current_release_evidence": {
     "update1_development_green": true,
-    "technical_green_source_sha": "27573f9877e781270544aa3b43886c1271c068ad",
-    "technical_green_system_gate_run": 33410041936,
-    "technical_green_source_gate_job": 99547032508,
-    "technical_green_deploy_job": 99547120515,
-    "technical_green_preview_url": "https://77ac1b5e.devilndove-site.pages.dev",
-    "migration_first_apply_source_sha": "e96414301d28ca0885b8fabc687a1ff78192416d",
-    "migration_first_apply_system_gate_run": 33409846602,
-    "development_d1_tables": 577,
+    "update2_development_green": true,
+    "technical_green_source_sha": "40fd75bc833407f96dfa249fa5935aa55ac79b16",
+    "technical_green_system_gate_run": 33415361384,
+    "technical_green_source_gate_job": 99564590843,
+    "technical_green_deploy_job": 99564723020,
+    "technical_green_preview_url": "https://b10e991f.devilndove-site.pages.dev",
+    "technical_green_proof_artifact_id": 9766829652,
+    "technical_green_proof_artifact_sha256": "b9e4cb02358c9d0970f6d1bdfb6343d13e3fbb20df213ca448f3909c7fb69ac2",
+    "migration_0002_first_apply_source_sha": "8d2d431fe65ba164fcad6c387c3f82fa6702635d",
+    "migration_0002_first_apply_system_gate_run": 33414742367,
+    "development_d1_tables": 580,
     "development_d1_app_modules": 5,
-    "development_native_migration_rows": 1,
-    "development_migration_proof_rows": 1,
+    "development_native_migration_rows": 2,
+    "development_migration_proof_rows": 2,
     "development_foreign_key_violations": 0,
-    "migration_manifest_sha256": "ae59eda03fd2f58b26963f73a74bfe8126f276d7472123b5f63dbae8163f67a6",
+    "migration_manifest_sha256": "f5e559a44dd098182bc2cd5f182422a15e49b9166089c2fda812901350f5f667",
+    "preview_smoke_mode": "cloudflare_access_protected",
+    "preview_smoke_pass": true,
+    "preview_smoke_auth_headers_used": 0,
+    "preview_access_weakened": false,
     "release463_environment_cutover_preserved": true,
     "d1_environment_isolation": true,
     "r2_environment_isolation": true,
     "production_data_live_authority": true,
+    "production_mutation_executed_for_update2": false,
     "provider_execution_enabled": false,
     "provider_publication_enabled": false,
     "raw_caip_r2_delete_enabled": false,
     "runtime_schema_mutation_firewall_present": true,
-    "manual_runtime_migration_endpoint_retired": true,
-    "manual_migration_ledger_write_retired": true,
-    "storefront_runtime_schema_repair_retired": true,
-    "accounting_statement_import_runtime_ddl": false,
+    "runtime_incident_request_time_schema_ddl": false,
+    "operational_retention_review_authority_present": true,
+    "operational_recovery_event_authority_present": true,
+    "orphan_storage_diagnostic_mutation_capability": false,
+    "accessibility_acceptance_gate_pass": true,
     "native_github_branch_protection_enabled": false,
     "native_github_rulesets_present": false,
     "native_github_setting_note": "Repository-admin setting remains externally observable and is not falsely inferred from fail-closed source/deployment controls."
@@ -153,12 +172,15 @@
     {"id":6,"change":"Accounting statement-import migration-owned fail-closed closure","status":"complete"},
     {"id":7,"change":"Application-wide request-time D1 schema mutation blockade","status":"complete_development_green"}
   ],
+  "release464_update2": [
+    {"id":8,"change":"Operational thresholds and Today Needs Attention alerts","status":"complete_development_green"},
+    {"id":9,"change":"Retention archive plus explicit approval before deletion","status":"complete_development_green"},
+    {"id":10,"change":"Read-only orphaned-storage diagnostics","status":"complete_development_green"},
+    {"id":11,"change":"Allowlisted audited safe recovery probes","status":"complete_development_green"},
+    {"id":12,"change":"Access-safe non-secret exact Preview smoke acceptance","status":"complete_development_green"},
+    {"id":13,"change":"Keyboard focus caption and screen-reader acceptance gate","status":"complete_development_green"}
+  ],
   "planned_updates": [
-    {
-      "update": 2,
-      "items": [8,9,10,11,12,13],
-      "theme": "Operational Acceptance and Recovery"
-    },
     {
       "update": 3,
       "items": [14,15,16,17,18,19,20],
@@ -166,11 +188,11 @@
     }
   ],
   "forward_queue": [
-    "Release 464 Update 1 items 1-7 are complete Development green; begin Update 2 items 8-13.",
+    "Release 464 Update 2 items 8-13 are complete Development green; next bounded work is Update 3 items 14-20, Business Application Growth.",
+    "Keep Production promotion closed until deliberately requested; Production canonical migrations 0001 and 0002 apply only immediately before dependent Production code.",
     "Native GitHub dev/main branch protection remains a repository-admin hardening setting; never claim it is enabled until repository settings report it enabled.",
-    "Legacy remote branch deletion remains repository-admin housekeeping and does not override the canonical current source/deployment authorities.",
-    "Keep Production promotion closed until deliberately requested; Production migration 0001 is applied only immediately before dependent Production code.",
+    "Legacy remote branch deletion remains repository-admin housekeeping and does not override canonical current source/deployment authorities.",
     "Never overwrite Production transactional data from Development.",
-    "Never restore request-time schema DDL."
+    "Never restore request-time schema DDL, raw R2 deletion, provider execution, or Preview smoke that weakens Cloudflare Access."
   ]
 }
