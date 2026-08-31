@@ -38,12 +38,15 @@ files = [x.get("file") for x in manifest.get("migrations", [])]
 req(files == ["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql","0003_release464_business_growth.sql","0004_release465_storefront_quality.sql"], "Build 2 must preserve exact canonical migration sequence 0001-0004 with no Build 2 migration")
 
 helper = read("functions/api/_lib/inventoryCreatorIntelligence.js")
+lot_provenance = read("functions/api/_lib/productLotProvenance.js")
+authority_sources = helper + "\n" + lot_provenance
 endpoint = read("functions/api/admin/inventory-creator-intelligence.js")
 page = read("admin/inventory-creator-intelligence/index.html")
 client = read("public/js/admin-inventory-creator-intelligence.js")
 
 has(helper,"loadMaterialLotPlan","loadProductAvailabilityIntelligence","loadRelatedProductIntelligence","loadGenealogyExceptions","loadCreativeReadinessIntelligence","chooseNextSafeAction","actual_planned_quantity_claimed:false","historical_reconstruction_claimed:false","automatic_relationship_write:false","inventory_mutation_active:false","accounting_posting_active:false",label="Build 2 intelligence helper")
-has(helper,"product_resource_links","site_item_inventory","inventory_purchase_lots","inventory_lot_policies","product_production_runs","product_production_run_material_lots","product_finished_inventory_lots","order_items","creative_projects","creative_media_evidence_ranges","content_projects","creative_business_pipelines",label="Build 2 reused authorities")
+has(authority_sources,"product_resource_links","site_item_inventory","inventory_purchase_lots","inventory_lot_policies","product_production_runs","product_production_run_material_lots","product_finished_inventory_lots","order_items","creative_projects","creative_media_evidence_ranges","content_projects","creative_business_pipelines",label="Build 2 reused authorities")
+has(lot_provenance,"loadMaterialLotPlan","productLotSchemaReadiness","inventory_purchase_lots","inventory_lot_policies",label="existing lot provenance authority")
 for forbidden in ("INSERT INTO", "UPDATE ", "DELETE FROM", "CREATE TABLE", "ALTER TABLE", "DROP TABLE", ".delete(", ".put("):
     req(forbidden not in helper, f"Build 2 helper must remain read-only: {forbidden}")
 
