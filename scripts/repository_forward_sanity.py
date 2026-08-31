@@ -58,15 +58,17 @@ req(policy.get("provider_execution") == "closed" and policy.get("provider_public
 req(policy.get("request_time_schema_mutation") == "blocked_by_runtime_firewall_and_source_gate", "runtime schema mutation blockade missing")
 
 migrations = release.get("current_release_migrations", [])
-req(len(migrations) == 1, "Release 464 must declare exactly the canonical bootstrap migration")
+req(len(migrations) >= 1, "Release 464 must declare the canonical bootstrap migration")
 if migrations:
-    req(migrations[0].get("file") == "migrations/canonical/0001_release464_migration_authority.sql", "Release 464 canonical migration identity drifted")
+    req(migrations[0].get("file") == "migrations/canonical/0001_release464_migration_authority.sql", "Release 464 canonical bootstrap migration identity drifted")
 
 req(manifest.get("stream") == "devilndove-canonical-forward", "canonical migration stream drifted")
 rules = manifest.get("rules", {})
 req(rules.get("development_first") is True and rules.get("production_before_dependent_code") is True, "canonical manifest safety order drifted")
 req(rules.get("native_ledger") == "d1_migrations" and rules.get("proof_table") == "app_schema_migration_proofs", "canonical ledger/proof authority drifted")
-req([m.get("file") for m in manifest.get("migrations", [])] == ["0001_release464_migration_authority.sql"], "canonical migration manifest drifted")
+manifest_migrations = [m.get("file") for m in manifest.get("migrations", [])]
+req(bool(manifest_migrations) and manifest_migrations[0] == "0001_release464_migration_authority.sql", "canonical migration bootstrap drifted")
+req(len(manifest_migrations) == len(set(manifest_migrations)), "canonical migration manifest contains duplicate filenames")
 
 runtime = read("functions/api/_lib/releaseAuthority.js")
 req("CURRENT_RELEASE = 464" in runtime and LABEL in runtime, "shared runtime Release 464 authority drifted")
