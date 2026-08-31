@@ -9,7 +9,13 @@
     "max_html_bytes": 500000,
     "max_runtime_source_bytes": 18000000,
     "max_runtime_source_files": 1800,
-    "max_inline_data_uri_bytes": 120000
+    "max_inline_data_uri_bytes": 650000
+  },
+  "baseline_observed": {
+    "runtime_source_files": 874,
+    "runtime_source_bytes": 9863687,
+    "inline_data_uri_bytes": 567271,
+    "measured_by_system_gate_run": 33447028070
   },
   "policy": {
     "binary_media_excluded": true,
