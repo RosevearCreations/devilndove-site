@@ -1,7 +1,6 @@
 name = "devilndove-site"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
-migrations_dir = "migrations/canonical"
 
 # TRACKED DEVELOPMENT-SAFE CONFIGURATION.
 # One Cloudflare Pages project is canonical: devilndove-site.
@@ -20,6 +19,7 @@ DND_PAGES_PROJECT = "devilndove-site"
 binding = "DB"
 database_name = "devilndove-dev"
 database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+migrations_dir = "migrations/canonical"
 
 [[r2_buckets]]
 binding = "PRODUCT_MEDIA_BUCKET"
