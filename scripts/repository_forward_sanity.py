@@ -16,6 +16,7 @@ MIGRATIONS = [
 MANIFEST_FILES = [Path(x).name for x in MIGRATIONS]
 BUILD2_STATES = {"release465_build2_source_candidate", "release465_build2_complete_development_green"}
 
+
 def read(path):
     p = ROOT / path
     if not p.is_file():
@@ -23,9 +24,11 @@ def read(path):
         return ""
     return p.read_text(encoding="utf-8", errors="replace")
 
+
 def req(ok, message):
     if not ok:
         FAIL.append(message)
+
 
 release = json.loads(read("development-release.json") or "{}")
 env463 = json.loads(read("release463-environment.json") or "{}")
@@ -139,11 +142,16 @@ else:
     req(2 not in planned, "Completed Build 2 must not remain planned")
     evidence = release.get("current_release_evidence", {})
     req(evidence.get("build2_development_green") is True, "Build 2 green evidence missing")
-    req(bool(evidence.get("build2_final_restart_sha")), "Build 2 final restart SHA missing")
-    req(int(evidence.get("build2_final_system_gate_run") or 0) > 0, "Build 2 final System Gate run missing")
-    req(str(evidence.get("build2_final_exact_preview") or "").startswith("https://"), "Build 2 final exact Preview missing")
+    req(evidence.get("build2_technical_green_source_sha") == "658613a9775c248e959c04113ea138e85d32bac1", "Build 2 technical-green source SHA drifted")
+    req(int(evidence.get("build2_technical_system_gate_run") or 0) == 33431890551, "Build 2 technical-green System Gate run drifted")
+    req(evidence.get("build2_technical_exact_preview") == "https://def3bd0b.devilndove-site.pages.dev", "Build 2 technical-green exact Preview drifted")
+    req(int(evidence.get("build2_technical_proof_artifact_id") or 0) == 9772962684, "Build 2 proof artifact drifted")
+    req(evidence.get("build2_schema_change") is False and int(evidence.get("build2_required_tables") or 0) == 18, "Build 2 technical D1 authority evidence drifted")
     req(int(evidence.get("development_native_migration_rows") or 0) == 4 and int(evidence.get("development_migration_proof_rows") or 0) == 4, "Build 2 closure must preserve 4/4 D1 migration proof")
     req(int(evidence.get("development_foreign_key_violations", -1)) == 0, "Build 2 closure FK authority drifted")
+    req(evidence.get("preview_smoke_pass") is True and evidence.get("preview_smoke_mode") == "CLOUDFLARE_ACCESS_PROTECTED", "Build 2 Preview smoke evidence missing")
+    req(int(evidence.get("preview_smoke_auth_headers_used") or 0) == 0 and evidence.get("preview_access_weakened") is False, "Build 2 Preview smoke must use zero auth headers and preserve Access")
+    req(evidence.get("production_mutation_executed_for_build2") is False and evidence.get("inventory_mutation_executed_for_build2") is False and evidence.get("accounting_posting_executed_for_build2") is False, "Build 2 mutation boundaries drifted")
 
 req(planned.get(3, {}).get("items") == [14,15,16,17,18,19,20], "Build 3 must remain planned behind Build 2")
 
@@ -160,12 +168,13 @@ print(f"Application release: 465 — {LABEL}")
 print("Release 465 Build 1: DEVELOPMENT GREEN")
 print("Release 465 Build 2:", "DEVELOPMENT GREEN" if state.endswith("complete_development_green") else "SOURCE CANDIDATE")
 print("Build 2 D1 migration: NONE; canonical stream remains 0001-0004")
-print("Build 3: CLOSED until Build 2 Development green")
+print("Build 3:", "NEXT BOUNDED WORK" if state.endswith("complete_development_green") else "CLOSED until Build 2 Development green")
 print("Environment release: 463 — one Pages project with isolated Dev/Production D1 + R2")
 print("Historical D1 baseline: Release 461 — provenance only, never replayed")
 print("Request-time schema mutation capability: BLOCKED")
 print("Production data ownership: PRODUCTION")
 if FAIL:
-    for index, item in enumerate(FAIL, 1): print(f"{index:03d}. FAIL — {item}")
+    for index, item in enumerate(FAIL, 1):
+        print(f"{index:03d}. FAIL — {item}")
     raise SystemExit(1)
 print("PLATFORM FORWARD SANITY: PASS")

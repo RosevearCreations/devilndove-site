@@ -1,24 +1,20 @@
 # Release 465 — Three-Build Roadmap
 
-Release 465 follows the green Release 464 Development checkpoint and is intentionally divided into three bounded builds. Each build uses the same closure discipline: isolated feature branch, source/regression gate, managed Development migration when required, exact Development Preview deployment, D1/R2 binding proof, Access-safe smoke, canonical documentation convergence, then a final idempotent System Gate on the documented closure SHA.
+Release 465 follows the green Release 464 Development checkpoint and is intentionally divided into three bounded builds. Each build uses the same closure discipline: isolated feature branch, source/regression gate, managed Development migration when required, exact Development Preview deployment, D1/R2 binding proof, Access-safe smoke, canonical documentation convergence, then a final idempotent System Gate on the documented closure head.
 
 ## Build 1 — Storefront & SEO Quality — Development green
 
 1. Storefront merchandising simulator for date/time preview without rewriting Product rows.
-2. Product readiness/completeness visibility using the existing Product, SEO and media authorities.
-3. Fail-closed Product publication rules: hard commerce/SEO readiness cannot be bypassed; permitted soft quality override remains explicit, step-up protected and audited.
-4. SEO quality cockpit combining structured-data, Product SEO and public-page diagnostics.
-5. Explainable internal-link intelligence between Products, Collections and related Storefront content; suggestions do not rewrite content automatically.
-6. Product image-quality visibility using existing image annotations, merchandising scores, alt coverage and contextual-shot evidence.
-7. Storefront search-quality recovery that suggests likely Products after a zero-result/typo search without changing Product data.
+2. Product readiness/completeness visibility using existing Product, SEO and media authorities.
+3. Fail-closed Product publication rules.
+4. SEO quality cockpit.
+5. Explainable internal-link intelligence.
+6. Product image-quality visibility.
+7. Storefront search-quality recovery.
 
-**Build 1 final restart checkpoint:** `c2728be72b9c416536252e7cdbdaf39d1226a095`, System Gate `33429507939`, Preview `https://99705dfc.devilndove-site.pages.dev`, D1 `4` native migration rows + `4` proof rows + `4` Release 465 triggers + `0` FK violations, proof artifact `9772063788`, Access-safe smoke PASS with zero auth headers and no Access weakening.
+**Build 1 final restart checkpoint:** `c2728be72b9c416536252e7cdbdaf39d1226a095`, System Gate `33429507939`, Preview `https://99705dfc.devilndove-site.pages.dev`, D1 `4` native migration rows + `4` proof rows + `4` Release 465 triggers + `0` FK violations.
 
-**Exit achieved:** one Storefront quality control centre can explain what is ready, blocked, weak or discoverable; publication hard requirements fail closed; simulation/search/link intelligence remains non-mutating.
-
-## Build 2 — Inventory & Creator Intelligence
-
-**State: source candidate in progress. Build 2 reuses existing authorities and requires no new D1 migration.**
+## Build 2 — Inventory & Creator Intelligence — Development green
 
 8. Related-product intelligence with explainable relationship reasons.
 9. Inventory availability intelligence: available-now / can-make / limited / unavailable reasoning without consuming stock.
@@ -27,11 +23,13 @@ Release 465 follows the green Release 464 Development checkpoint and is intentio
 12. Creative project readiness score across materials, cost coverage, reviewed CAIP evidence, Product linkage, Content Studio readiness and governance.
 13. Pipeline Next Safe Action engine that explains the next safe step and blockers without executing providers, Inventory mutations, production posting or Accounting posting.
 
-**Exit:** Product and Creative workflows can explain readiness, material risk, genealogy gaps and next actions without introducing a second Inventory or CAIP authority.
+**Build 2 technical-green evidence:** source `658613a9775c248e959c04113ea138e85d32bac1`, System Gate `33431890551`, source job `99618968755`, deploy job `99619087413`, Preview `https://def3bd0b.devilndove-site.pages.dev`, proof artifact `9772962684`, D1 `583` tables + `4` native migrations + `4` proofs + `4` Release 465 triggers + `18` required authority tables + `0` FK violations. Build 2 required no schema change and the migrator reported no pending migrations. Access-safe smoke passed with zero auth headers and no Access weakening.
+
+**Exit achieved technically:** Product and Creative workflows can explain readiness, material risk, genealogy gaps and next actions without introducing a second Inventory or CAIP authority. The final restart checkpoint is the current `dev` head only after the closure head passes its final idempotent System Gate; it is not self-embedded in the closure commit.
 
 ## Build 3 — Financial, I.T. & Release Hardening
 
-**State: planned only; must not begin before Build 2 is Development green.**
+**State: next bounded work after the final Build 2 closure System Gate.**
 
 14. Cost/profitability intelligence using existing material cost, packaging/labour assumptions and fee models.
 15. Read-only Financial anomaly detection for duplicate/unmatched/unusual accounting evidence.
@@ -45,7 +43,7 @@ Release 465 follows the green Release 464 Development checkpoint and is intentio
 
 ## Canonical migration state
 
-Development has proven:
+Development has proven exactly:
 
 1. `0001_release464_migration_authority.sql`
 2. `0002_release464_operational_acceptance.sql`

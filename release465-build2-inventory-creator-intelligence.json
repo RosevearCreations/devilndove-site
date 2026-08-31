@@ -2,39 +2,15 @@
   "release": 465,
   "build": 2,
   "title": "Inventory & Creator Intelligence",
-  "state": "in_progress_source_candidate",
+  "state": "complete_development_green",
   "base_development_sha": "c2728be72b9c416536252e7cdbdaf39d1226a095",
   "items": [
-    {
-      "id": 8,
-      "name": "Related-product intelligence with explainable relationship reasons",
-      "status": "implemented_source_candidate"
-    },
-    {
-      "id": 9,
-      "name": "Inventory availability intelligence: available / can-make / limited / unavailable",
-      "status": "implemented_source_candidate"
-    },
-    {
-      "id": 10,
-      "name": "Scenario-based material shortage forecasting from Product resources, lots, on-hand stock and operator planned units",
-      "status": "implemented_source_candidate"
-    },
-    {
-      "id": 11,
-      "name": "Genealogy exception cockpit over existing purchase-lot to production to finished-lot to sale authority",
-      "status": "implemented_source_candidate"
-    },
-    {
-      "id": 12,
-      "name": "Creative project readiness score across materials, cost, evidence, Product linkage and Content Studio readiness",
-      "status": "implemented_source_candidate"
-    },
-    {
-      "id": 13,
-      "name": "Explainable next-safe-action engine without provider, inventory or accounting execution",
-      "status": "implemented_source_candidate"
-    }
+    {"id":8,"name":"Related-product intelligence with explainable relationship reasons","status":"complete_development_green"},
+    {"id":9,"name":"Inventory availability intelligence: available / can-make / limited / unavailable","status":"complete_development_green"},
+    {"id":10,"name":"Scenario-based material shortage forecasting from Product resources, lots, on-hand stock and operator planned units","status":"complete_development_green"},
+    {"id":11,"name":"Genealogy exception cockpit over existing purchase-lot to production to finished-lot to sale authority","status":"complete_development_green"},
+    {"id":12,"name":"Creative project readiness score across materials, cost, evidence, Product linkage and Content Studio readiness","status":"complete_development_green"},
+    {"id":13,"name":"Explainable next-safe-action engine without provider, inventory or accounting execution","status":"complete_development_green"}
   ],
   "schema_change_required": false,
   "migration": null,
@@ -68,6 +44,30 @@
     "default_units": 1,
     "max_units": 100
   },
-  "development_evidence": null,
+  "development_evidence": {
+    "technical_green_source_sha": "658613a9775c248e959c04113ea138e85d32bac1",
+    "system_gate_run": 33431890551,
+    "source_gate_job": 99618968755,
+    "deploy_development_job": 99619087413,
+    "exact_preview": "https://def3bd0b.devilndove-site.pages.dev",
+    "proof_artifact_id": 9772962684,
+    "d1_tables": 583,
+    "native_migration_rows": 4,
+    "proof_rows": 4,
+    "release465_triggers": 4,
+    "required_authority_tables": 18,
+    "foreign_key_violations": 0,
+    "new_migration_applied": false,
+    "preview_smoke_mode": "CLOUDFLARE_ACCESS_PROTECTED",
+    "preview_smoke_auth_headers_used": 0,
+    "preview_access_weakened": false,
+    "production_mutation": false,
+    "inventory_mutation": false,
+    "accounting_posting": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "raw_caip_r2_delete": false
+  },
+  "closure_rule": "The final restart checkpoint is the current dev head only after its final idempotent System Gate succeeds; the closure commit does not self-embed its own future SHA/run ID.",
   "production_promotion": "closed"
 }
