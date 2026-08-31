@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 461 authenticated GET-only Development runtime acceptance."""
 from __future__ import annotations
-import argparse,json,os,sys
+import argparse,json,os,re,sys
 from datetime import datetime,timezone
 from pathlib import Path
 from urllib.error import HTTPError,URLError
@@ -9,8 +9,7 @@ from urllib.parse import urljoin,urlparse
 from urllib.request import Request,urlopen
 
 CURRENT_RELEASE=461
-DEFAULT_BASE_URL='https://devilndove-site-dev.pages.dev'
-ALLOWED_HOSTS={'devilndove-site-dev.pages.dev'}
+DEFAULT_BASE_URL='https://dev.devilndove-site.pages.dev'
 SESSION_ENV='DND_DEV_SESSION_COOKIE'
 EXPECTED_MODULES=['storefront','creators','socials','financials','it-platform']
 PROTECTED_ENDPOINTS={
@@ -22,10 +21,14 @@ PROTECTED_ENDPOINTS={
 
 class AcceptanceError(RuntimeError):pass
 
+def is_allowed_development_host(host:str)->bool:
+ host=str(host or '').strip().lower()
+ return host=='dev.devilndove-site.pages.dev' or re.fullmatch(r'[0-9a-f]{8}\.devilndove-site\.pages\.dev',host) is not None
+
 def validate_base_url(value:str)->str:
  value=str(value or '').strip().rstrip('/');p=urlparse(value);host=(p.hostname or '').lower()
- if p.scheme!='https' or host not in ALLOWED_HOSTS or p.path not in ('','/'):
-  raise AcceptanceError('Only the exact HTTPS Development Pages host is permitted. Separate live Production/custom/arbitrary targets are forbidden.')
+ if p.scheme!='https' or not is_allowed_development_host(host) or p.path not in ('','/'):
+  raise AcceptanceError('Only the canonical HTTPS Development Preview host or exact hashed Preview deployment is permitted. Production/custom/arbitrary targets are forbidden.')
  return value
 
 def get_json(base_url:str,path:str,cookie:str|None,timeout:float=20.0)->tuple[int,dict]:
@@ -100,7 +103,9 @@ def self_check():
  checks=[]
  try:validate_base_url(DEFAULT_BASE_URL);record(checks,'development_default_allowed',True,DEFAULT_BASE_URL)
  except AcceptanceError as e:record(checks,'development_default_allowed',False,str(e))
- for forbidden in ('https://devilndove.com','https://devilndove-site.pages.dev','https://example.com','http://devilndove-site-dev.pages.dev'):
+ try:validate_base_url('https://abc12345.devilndove-site.pages.dev');record(checks,'hashed_preview_allowed',True,'abc12345 preview')
+ except AcceptanceError as e:record(checks,'hashed_preview_allowed',False,str(e))
+ for forbidden in ('https://devilndove.com','https://devilndove-site.pages.dev','https://devilndove-site-dev.pages.dev','https://example.com','http://dev.devilndove-site.pages.dev'):
   refused=False
   try:validate_base_url(forbidden)
   except AcceptanceError:refused=True
