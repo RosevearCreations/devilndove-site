@@ -11,7 +11,9 @@ const json = (data, status = 200) => jsonResponse(data, status, { 'Cache-Control
 function isRelease463DevelopmentHost(request) {
   const host = new URL(request.url).hostname.toLowerCase();
   return host === 'localhost' || host === '127.0.0.1'
-    || (host.endsWith('.devilndove-site.pages.dev') && host !== 'devilndove-site.pages.dev');
+    || (host.endsWith('.devilndove-site.pages.dev') && host !== 'devilndove-site.pages.dev')
+    || host === 'devilndove-site-dev.pages.dev'
+    || host.endsWith('.devilndove-site-dev.pages.dev');
 }
 
 function bucketPair(env, key) {
@@ -103,7 +105,7 @@ async function verifyBatch(source, destination, cursor, limit) {
 
 export async function onRequestPost({ request, env }) {
   if (!isRelease463DevelopmentHost(request)) {
-    return json({ ok: false, release: RELEASE, code: 'development_only', error: 'Release 463 R2 sync is available only on the canonical Development preview.' }, 403);
+    return json({ ok: false, release: RELEASE, code: 'development_only', error: 'Release 463 R2 sync is available only on the Release 463 Development bridge.' }, 403);
   }
   const admin = await getAdminUserFromRequest(request, env);
   if (!admin) return json({ ok: false, release: RELEASE, code: 'unauthorized', error: 'Unauthorized.' }, 401);
