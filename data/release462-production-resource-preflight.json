@@ -1,0 +1,5 @@
+{
+  "target_release": 462,
+  "scope": "production-d1-r2-read-only",
+  "trigger": "resource-preflight-1"
+}
