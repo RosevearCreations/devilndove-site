@@ -16,9 +16,13 @@ const MAX_OBJECT_BYTES = 25 * 1024 * 1024;
 const json = (data, status = 200) => jsonResponse(data, status, { 'Cache-Control': 'no-store' });
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 
-function isDevelopmentHost(request) {
+function isDevelopmentHost(request, env = {}) {
+  if (String(env?.DND_ENVIRONMENT || '').trim().toLowerCase() !== 'development') return false;
   const hostname = new URL(request.url).hostname.toLowerCase();
-  return hostname === 'devilndove-site-dev.pages.dev' || hostname === 'localhost' || hostname === '127.0.0.1';
+  return hostname === 'dev.devilndove-site.pages.dev'
+    || /^[0-9a-f]{8}\.devilndove-site\.pages\.dev$/i.test(hostname)
+    || hostname === 'localhost'
+    || hostname === '127.0.0.1';
 }
 
 function canonicalR2Key(value) {
@@ -246,7 +250,7 @@ async function restoreOne(bucket, row) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!isDevelopmentHost(request)) {
+  if (!isDevelopmentHost(request, env)) {
     return json({ ok: false, build: BUILD, code: 'development_only', error: 'Inventory asset restore is available only in Development.' }, 403);
   }
 
