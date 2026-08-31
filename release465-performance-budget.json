@@ -1,0 +1,20 @@
+{
+  "release": 465,
+  "build": 3,
+  "title": "Runtime source performance budget",
+  "scope_roots": ["functions", "public/js", "js", "css", "admin", "shop", "collections", "collages"],
+  "limits": {
+    "max_js_bytes": 600000,
+    "max_css_bytes": 500000,
+    "max_html_bytes": 500000,
+    "max_runtime_source_bytes": 18000000,
+    "max_runtime_source_files": 1800,
+    "max_inline_data_uri_bytes": 120000
+  },
+  "policy": {
+    "binary_media_excluded": true,
+    "budget_increase_requires_explicit_review": true,
+    "source_gate_failure_is_fail_closed": true,
+    "production_mutation": false
+  }
+}
