@@ -1,0 +1,34 @@
+{
+  "release": 464,
+  "update": 3,
+  "title": "Business Application Growth",
+  "state": "in_progress_source_candidate",
+  "items": [
+    {"id": 14, "name": "Storefront product-detail customer experience", "status": "implemented_source_candidate"},
+    {"id": 15, "name": "Public SEO depth and structured data", "status": "implemented_source_candidate"},
+    {"id": 16, "name": "Reusable Storefront merchandising and scheduling", "status": "implemented_source_candidate"},
+    {"id": 17, "name": "Inventory material genealogy trace", "status": "implemented_source_candidate"},
+    {"id": 18, "name": "Financials month-end cockpit", "status": "implemented_source_candidate"},
+    {"id": 19, "name": "Creators CAIP Storefront production pipeline", "status": "implemented_source_candidate"},
+    {"id": 20, "name": "I.T. Operations Dashboard", "status": "implemented_source_candidate"}
+  ],
+  "migration": "migrations/canonical/0003_release464_business_growth.sql",
+  "safety": {
+    "production_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "inventory_stock_mutation_from_update3_pipeline": false,
+    "accounting_posting_from_update3_pipeline": false,
+    "request_time_schema_ddl": false,
+    "preview_access_must_remain_enforced": true
+  },
+  "domain_authorities": {
+    "product": "products and existing Storefront product APIs",
+    "inventory": "site_item_inventory, inventory_purchase_lots, production-run lot provenance and order commitments",
+    "accounting": "existing accounting close/ledger authorities",
+    "caip": "existing creative_projects, creative_assets and CAIP production pipeline",
+    "update3": "merchandising schedules plus cross-module references/status only"
+  },
+  "development_evidence": null,
+  "production_promotion": "closed"
+}

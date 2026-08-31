@@ -1,0 +1,56 @@
+// Release 464 Update 3 — read-only I.T. Operations Dashboard snapshot.
+// Never returns secrets and never invokes payment/social providers.
+import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
+import { CURRENT_RELEASE, RELEASE_LABEL } from '../_lib/releaseAuthority.js';
+import { paymentExecutionBoundary, paymentExecutionStatus } from '../_lib/paymentExecution.js';
+
+const json=(d,s=200)=>jsonResponse({release:CURRENT_RELEASE,...d},s,{'Cache-Control':'no-store'});
+const num=(v)=>Number(v||0)||0;
+const configured=(v)=>String(v||'').trim().length>0;
+async function first(db,sql,bind=[]){try{return await db.prepare(sql).bind(...bind).first();}catch{return null}}
+
+export async function onRequestGet({request,env}){
+  const user=await getAdminUserFromRequest(request,env);if(!user)return json({ok:false,error:'Admin access required.'},401);
+  const db=getDb(env);if(!db)return json({ok:false,error:'Database binding is not configured.'},500);
+  try{
+    const [migration,incidents,pipelines,rules,retention]=await Promise.all([
+      first(db,`SELECT
+        (SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql')) AS native_rows,
+        (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql')) AS proof_rows`),
+      first(db,`SELECT COUNT(*) total,SUM(CASE WHEN LOWER(COALESCE(review_status,'open'))='open' THEN 1 ELSE 0 END) open_count,SUM(CASE WHEN LOWER(COALESCE(severity,''))='critical' AND LOWER(COALESCE(review_status,'open'))='open' THEN 1 ELSE 0 END) open_critical,SUM(CASE WHEN LOWER(COALESCE(severity,''))='error' AND LOWER(COALESCE(review_status,'open'))='open' THEN 1 ELSE 0 END) open_error FROM runtime_incidents`),
+      first(db,`SELECT COUNT(*) total,SUM(CASE WHEN pipeline_status NOT IN ('complete','archived') THEN 1 ELSE 0 END) open_count,SUM(CASE WHEN pipeline_status='complete' THEN 1 ELSE 0 END) complete_count,SUM(CASE WHEN social_handoff_status='review_ready' THEN 1 ELSE 0 END) social_review_ready FROM creative_business_pipelines`),
+      first(db,`SELECT COUNT(*) total,SUM(CASE WHEN rule_status='active' AND (active_from IS NULL OR datetime(active_from)<=datetime('now')) AND (active_until IS NULL OR datetime(active_until)>=datetime('now')) THEN 1 ELSE 0 END) active_now FROM storefront_merchandising_rules`),
+      first(db,`SELECT COUNT(*) total,SUM(CASE WHEN review_status='archived_pending_approval' THEN 1 ELSE 0 END) pending_approval FROM operational_retention_reviews`)
+    ]);
+    const stripe=paymentExecutionStatus(request.url,env,'stripe'),paypal=paymentExecutionStatus(request.url,env,'paypal');
+    const environment=String(env.DND_ENVIRONMENT||'development').toLowerCase()==='production'?'production':'development';
+    const resources=environment==='production'?{
+      pages_project:'devilndove-site',pages_environment:'production',branch:'main',
+      d1:'devilndove-prod-r462',product_r2:'devilndove-toolshed-images',caip_r2:'devilndove-caip-media'
+    }:{
+      pages_project:'devilndove-site',pages_environment:'preview',branch:'dev',
+      d1:'devilndove-dev',product_r2:'devilndove-toolshed-images-dev',caip_r2:'devilndove-caip-media-dev'
+    };
+    return json({
+      ok:true,label:RELEASE_LABEL,environment_release:463,environment,
+      resources,
+      migrations:{expected:3,native_rows:num(migration?.native_rows),proof_rows:num(migration?.proof_rows),ready:num(migration?.native_rows)===3&&num(migration?.proof_rows)>=3},
+      runtime_incidents:{total:num(incidents?.total),open_count:num(incidents?.open_count),open_critical:num(incidents?.open_critical),open_error:num(incidents?.open_error)},
+      retention:{total_reviews:num(retention?.total),pending_approval:num(retention?.pending_approval)},
+      business_growth:{pipelines:num(pipelines?.total),open_pipelines:num(pipelines?.open_count),complete_pipelines:num(pipelines?.complete_count),social_review_ready:num(pipelines?.social_review_ready),merchandising_rules:num(rules?.total),active_rules_now:num(rules?.active_now)},
+      providers:{
+        boundary:paymentExecutionBoundary(env),
+        stripe:{configured:configured(env.STRIPE_PUBLISHABLE_KEY)&&configured(env.STRIPE_SECRET_KEY),webhook_configured:configured(env.STRIPE_WEBHOOK_SECRET)||configured(env.STRIPE_WEBHOOK_SIGNING_SECRET),execution_authorized:Boolean(stripe.execution_authorized),execution_code:stripe.code},
+        paypal:{configured:configured(env.PAYPAL_CLIENT_ID)&&configured(env.PAYPAL_SECRET),webhook_configured:configured(env.PAYPAL_WEBHOOK_ID),execution_authorized:Boolean(paypal.execution_authorized),execution_code:paypal.code}
+      },
+      safety:{secrets_exposed:false,provider_execution_invoked:false,production_mutation_invoked:false,raw_r2_delete_invoked:false},
+      links:{
+        runtime_incidents:'/admin/operations/#runtime-incidents',
+        business_pipeline:'/admin/business-pipeline/',
+        storefront_merchandising:'/admin/storefront-merchandising/',
+        accounting:'/admin/accounting/',
+        integrations:'/admin/it-integrations/'
+      }
+    });
+  }catch(e){return json({ok:false,error:e?.message||'I.T. Operations Dashboard could not load.'},500);}
+}
