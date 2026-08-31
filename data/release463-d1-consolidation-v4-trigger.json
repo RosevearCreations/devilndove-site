@@ -1,0 +1,8 @@
+{
+  "release": 463,
+  "attempt": 4,
+  "source": "devilndove-dev",
+  "target": "devilndove-prod-r462",
+  "method": "all tables first plus D1 defer_foreign_keys",
+  "rollback_artifact_id": 9744317222
+}
