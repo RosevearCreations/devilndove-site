@@ -54,12 +54,12 @@ jobs:
               print('RELEASE 463 LEGACY PAGES ALREADY ABSENT: PASS'); raise SystemExit(0)
           assert status==200 and body.get('success') is True,(status,body)
           total=0
-          for round_no in range(1,31):
+          for round_no in range(1,61):
               status,body=delete_project()
               if status in (200,404):
                   print(f'RELEASE 463 LEGACY PAGES RETIRED: PASS deleted_deployments={total}'); raise SystemExit(0)
               assert status==400,(status,body)
-              q=urllib.parse.urlencode({'page':1,'per_page':100})
+              q=urllib.parse.urlencode({'page':1,'per_page':25})
               status,listing=call('GET',base+'/deployments?'+q)
               if status==404:
                   print(f'RELEASE 463 LEGACY PAGES RETIRED DURING PRUNE: PASS deleted_deployments={total}'); raise SystemExit(0)
