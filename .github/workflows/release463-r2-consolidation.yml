@@ -17,6 +17,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
       CF_DATA_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      RELEASE463_BROWSER_UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
     steps:
       - uses: actions/checkout@v7
         with:
@@ -96,12 +97,16 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json,time,urllib.request,urllib.error
+          import json,os,time,urllib.request,urllib.error
           base=open('/tmp/release463-preview-url').read().strip()
           url=base+'/api/admin/release463-r2-sync'
+          ua=os.environ['RELEASE463_BROWSER_UA']
           ready=False; last=None
           for _ in range(30):
-              req=urllib.request.Request(url,method='POST',data=b'{}',headers={'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store'})
+              req=urllib.request.Request(url,method='POST',data=b'{}',headers={
+                  'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store',
+                  'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
+              })
               try:
                   with urllib.request.urlopen(req,timeout=20) as r:
                       status=r.status; raw=r.read().decode('utf-8','replace'); ctype=r.headers.get('Content-Type','')
@@ -115,6 +120,8 @@ jobs:
               if status in (401,403) and int(data.get('release') or 0)==463:
                   ready=True; break
               last=(status,data)
+              if int(data.get('error_code') or 0)==1010:
+                  raise AssertionError(('Cloudflare browser-signature block persisted',url,data))
               time.sleep(3)
           assert ready,(url,last)
           print('RELEASE 463 R2 EXACT PREVIEW BRIDGE: READY',url)
@@ -128,6 +135,7 @@ jobs:
           import json, os, urllib.request, urllib.error
           base=open('/tmp/release463-preview-url').read().strip()
           token=os.environ['RELEASE463_ADMIN_TOKEN']
+          ua=os.environ['RELEASE463_BROWSER_UA']
           endpoint=base+'/api/admin/release463-r2-sync'
           auth='RELEASE463_R2_ENVIRONMENT_SYNC'
 
@@ -135,7 +143,7 @@ jobs:
               payload=json.dumps({'authorization':auth,'bucket':bucket,'action':action,'cursor':cursor,'limit':10}).encode()
               req=urllib.request.Request(endpoint,method='POST',data=payload,headers={
                   'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store',
-                  'Cookie':'dd_auth_token='+token,'User-Agent':'dnd-release463-r2-consolidation'
+                  'Cookie':'dd_auth_token='+token,'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
               })
               try:
                   with urllib.request.urlopen(req,timeout=120) as r:
