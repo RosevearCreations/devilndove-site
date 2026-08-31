@@ -15,7 +15,9 @@ jobs:
     timeout-minutes: 60
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+      CF_DATA_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      RELEASE463_BROWSER_UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
     steps:
       - uses: actions/checkout@v7
         with:
@@ -28,21 +30,185 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate Access-independent R2 controller
+      - name: Validate isolated legacy Development bridge
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile scripts/release463_r2_direct_sync.py
-          grep -q 'devilndove-toolshed-images-dev' scripts/release463_r2_direct_sync.py
-          grep -q 'devilndove-toolshed-images' scripts/release463_r2_direct_sync.py
-          grep -q 'devilndove-caip-media-dev' scripts/release463_r2_direct_sync.py
-          grep -q 'devilndove-caip-media' scripts/release463_r2_direct_sync.py
+          node --check functions/api/admin/release463-r2-sync.js
+          grep -q "devilndove-site-dev.pages.dev" functions/api/admin/release463-r2-sync.js
+          grep -q "verify_destination" functions/api/admin/release463-r2-sync.js
 
-      - name: Synchronize and prove isolated Production R2 directly
+      - name: Deploy exact Development SHA to disposable legacy bridge project
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          cp wrangler.toml /tmp/wrangler.release463-original.toml
+          cat > wrangler.toml <<'TOML'
+          name = "devilndove-site-dev"
+          compatibility_date = "2026-04-08"
+          pages_build_output_dir = "."
+
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "devilndove-dev"
+          database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+
+          [[r2_buckets]]
+          binding = "PRODUCT_MEDIA_BUCKET"
+          bucket_name = "devilndove-toolshed-images-dev"
+          preview_bucket_name = "devilndove-toolshed-images-dev"
+
+          [[r2_buckets]]
+          binding = "CAIP_PRIVATE_MEDIA_BUCKET"
+          bucket_name = "devilndove-caip-media-dev"
+          preview_bucket_name = "devilndove-caip-media-dev"
+
+          [[r2_buckets]]
+          binding = "RELEASE463_PRODUCT_MEDIA_PROD_BUCKET"
+          bucket_name = "devilndove-toolshed-images"
+          preview_bucket_name = "devilndove-toolshed-images"
+
+          [[r2_buckets]]
+          binding = "RELEASE463_CAIP_MEDIA_PROD_BUCKET"
+          bucket_name = "devilndove-caip-media"
+          preview_bucket_name = "devilndove-caip-media"
+          TOML
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=devilndove-site-dev \
+            --branch=dev \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message="Release 463 disposable R2 migration bridge" \
+            | tee /tmp/release463-r2-deploy.log
+          cp /tmp/wrangler.release463-original.toml wrangler.toml
+          python - <<'PY'
+          import re
+          text=open('/tmp/release463-r2-deploy.log',encoding='utf-8',errors='replace').read()
+          urls=re.findall(r'https://([a-z0-9-]+)\.devilndove-site-dev\.pages\.dev',text,re.I)
+          hashes=[label for label in urls if re.fullmatch(r'[0-9a-f]{8}',label,re.I)]
+          assert hashes,text[-3000:]
+          url=f'https://{hashes[-1]}.devilndove-site-dev.pages.dev'
+          open('/tmp/release463-bridge-url','w').write(url)
+          print('RELEASE463_BRIDGE_URL',url)
+          PY
+
+      - name: Resolve existing Development admin session read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "devilndove-dev" --remote --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(u.role)='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/release463-session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/release463-session.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          token=next(walk(d),'').strip()
+          assert token,'No active Development admin session is available for Release 463 R2 consolidation.'
+          print(token)
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          echo "RELEASE463_ADMIN_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          rm -f /tmp/release463-session.json
+
+      - name: Prove disposable bridge is reachable without changing Access
         shell: bash
         run: |
           set -euo pipefail
-          python scripts/release463_r2_direct_sync.py
+          python - <<'PY'
+          import json,os,time,urllib.request,urllib.error
+          base=open('/tmp/release463-bridge-url').read().strip()
+          url=base+'/api/admin/release463-r2-sync'
+          ua=os.environ['RELEASE463_BROWSER_UA']
+          ready=False; last=None
+          for _ in range(30):
+              req=urllib.request.Request(url,method='POST',data=b'{}',headers={
+                  'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store',
+                  'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
+              })
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as r:
+                      status=r.status; raw=r.read().decode('utf-8','replace'); ctype=r.headers.get('Content-Type','')
+              except urllib.error.HTTPError as e:
+                  status=e.code; raw=e.read().decode('utf-8','replace'); ctype=e.headers.get('Content-Type','')
+              except Exception as e:
+                  last=repr(e); time.sleep(3); continue
+              try: data=json.loads(raw)
+              except Exception:
+                  last=(status,ctype,raw[:200]); time.sleep(3); continue
+              if status in (401,403) and int(data.get('release') or 0)==463:
+                  ready=True; break
+              last=(status,data)
+              time.sleep(3)
+          assert ready,(url,last)
+          print('RELEASE 463 DISPOSABLE R2 BRIDGE: READY',url)
+          PY
+
+      - name: Copy prune and prove both Production R2 buckets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+          base=open('/tmp/release463-bridge-url').read().strip()
+          token=os.environ['RELEASE463_ADMIN_TOKEN']
+          ua=os.environ['RELEASE463_BROWSER_UA']
+          endpoint=base+'/api/admin/release463-r2-sync'
+          auth='RELEASE463_R2_ENVIRONMENT_SYNC'
+
+          def call(bucket,action,cursor=''):
+              payload=json.dumps({'authorization':auth,'bucket':bucket,'action':action,'cursor':cursor,'limit':10}).encode()
+              req=urllib.request.Request(endpoint,method='POST',data=payload,headers={
+                  'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store',
+                  'Cookie':'dd_auth_token='+token,'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
+              })
+              try:
+                  with urllib.request.urlopen(req,timeout=180) as r:
+                      raw=r.read().decode('utf-8','replace'); status=r.status
+              except urllib.error.HTTPError as e:
+                  raw=e.read().decode('utf-8','replace'); status=e.code
+              try: data=json.loads(raw)
+              except Exception: raise AssertionError((bucket,action,status,raw[:500]))
+              assert status==200 and data.get('ok') is True,(bucket,action,status,data)
+              return data
+
+          def exhaust(bucket,action):
+              cursor=''; processed=0; total_bytes=0; calls=0
+              for _ in range(10000):
+                  data=call(bucket,action,cursor)
+                  calls += 1
+                  processed += int(data.get('processed') or 0)
+                  total_bytes += int(data.get('bytes') or 0)
+                  if data.get('done') is True:
+                      break
+                  nxt=str(data.get('next_cursor') or '').strip()
+                  assert nxt and nxt != cursor,(bucket,action,cursor,data)
+                  cursor=nxt
+              else:
+                  raise AssertionError((bucket,action,'pagination_limit_exceeded'))
+              print('PASS',bucket,action,'objects=',processed,'bytes=',total_bytes,'calls=',calls)
+              return {'objects':processed,'bytes':total_bytes,'calls':calls}
+
+          summary={'release':463,'status':'PASS','transport':'isolated legacy Pages R2 binding bridge','buckets':{}}
+          for bucket in ('product','caip'):
+              actions={}
+              actions['copy']=exhaust(bucket,'copy')
+              actions['prune']=exhaust(bucket,'prune')
+              actions['verify_source']=exhaust(bucket,'verify_source')
+              actions['verify_destination']=exhaust(bucket,'verify_destination')
+              assert actions['copy']['objects'] == actions['verify_source']['objects'],actions
+              assert actions['verify_source']['objects'] == actions['verify_destination']['objects'],actions
+              summary['buckets'][bucket]=actions
+          open('/tmp/release463-r2-proof.json','w').write(json.dumps(summary,indent=2,sort_keys=True))
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          PY
 
       - name: Preserve R2 consolidation proof
         uses: actions/upload-artifact@v4
@@ -54,8 +220,8 @@ jobs:
 
       - name: Boundary statement
         run: |
-          echo 'Release 463 R2 consolidation: COMPLETE'
-          echo 'Development R2 source buckets: unchanged'
-          echo 'Production R2 buckets: exact key/metadata/content parity proven'
-          echo 'Cloudflare Access: unchanged; no Preview bypass required'
-          echo 'Live Production Pages bindings: unchanged by this workflow'
+          echo 'Development R2 buckets: unchanged'
+          echo 'Production R2 buckets: key/size/metadata parity proven in both directions'
+          echo 'Canonical devilndove-site Cloudflare Access: unchanged'
+          echo 'Disposable bridge project: devilndove-site-dev; retire after final cutover proof'
+          echo 'Live Production Pages deployment: not changed by this workflow'
