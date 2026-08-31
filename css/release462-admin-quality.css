@@ -1,0 +1,56 @@
+/* Release 462 — shared admin quality/responsive convergence.
+   Source-only styling: no runtime/provider/database behavior. */
+.release462-status-strip{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
+  margin:18px 0;
+}
+.release462-status-strip > div{
+  min-width:0;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+}
+.release462-status-strip strong{display:block;margin-bottom:4px}
+.release462-safety-note{
+  border-left:4px solid var(--ice);
+  background:rgba(46,168,255,.07);
+}
+.admin-shell :is(input,select,textarea,button,a){max-width:100%}
+.admin-shell :is(input,select,textarea){min-width:0}
+.admin-shell .grid > *{min-width:0}
+.admin-shell .table-wrap,
+.admin-shell [class*="table-wrap"]{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.admin-shell table{max-width:100%}
+.admin-shell td,.admin-shell th{overflow-wrap:anywhere}
+.admin-shell code{white-space:normal;overflow-wrap:anywhere}
+.admin-shell .dd-admin-responsive-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+.admin-shell .dd-admin-responsive-actions > *{min-width:0}
+@media(max-width:760px){
+  .admin-shell{overflow-x:hidden}
+  .admin-shell .grid.cols-2,
+  .admin-shell .grid.cols-3,
+  .admin-shell .grid.cols-4{grid-template-columns:1fr!important}
+  .admin-shell .dd-admin-responsive-actions > :is(.btn,button,a){
+    flex:1 1 100%;
+    justify-content:center;
+    min-height:44px;
+  }
+  .admin-shell .dd-admin-responsive-actions > label{flex:1 1 100%}
+  .admin-shell .card{min-width:0}
+  .release462-status-strip{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .admin-shell *{scroll-behavior:auto!important}
+}

@@ -1,65 +1,77 @@
 #!/usr/bin/env python3
-"""Canonical Release 461 current-release and forward-sanity authority."""
+"""Canonical Release 462 current-release / forward-sanity authority."""
 from __future__ import annotations
-import json,re,subprocess,sys
+import json, sys
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];FAIL=[]
+
+ROOT=Path(__file__).resolve().parents[1]
+FAIL=[]
+
+def read(path):
+    p=ROOT/path
+    if not p.is_file():
+        FAIL.append(f"missing file: {path}")
+        return ""
+    return p.read_text(encoding="utf-8",errors="replace")
+
 def req(ok,msg):
- if not ok:FAIL.append(msg)
-def read(path):return (ROOT/path).read_text(encoding='utf-8',errors='replace')
-def complete_batch(items,minimum=12):
- if not isinstance(items,list) or len(items)<minimum:return False
- ids=[x.get('id') for x in items if isinstance(x,dict)]
- return len(ids)==len(items) and ids==list(range(1,len(items)+1)) and all(x.get('status')=='implemented' for x in items)
-release=json.loads(read('development-release.json'));current=int(release.get('release') or 0)
-req(release.get('environment')=='development' and release.get('branch')=='dev','current release must remain Development/dev')
-req(current==461,'current Development release must be 461')
-label='Runtime Schema Convergence, Inventory & CAIP Production Pipeline'
-req(release.get('label')==label,'Release 461 label drifted')
-req(release.get('pages_project')=='devilndove-site-dev' and release.get('release_track')=='single-current-release','Development Pages/release track drifted')
-previous=release.get('previous_release',{});req(previous.get('release')==460,'Release 460 must be previous release')
-req([x.get('key') for x in release.get('canonical_modules',[])]==['storefront','creators','socials','financials','it-platform'],'canonical module list drifted')
-infra=release.get('development_infrastructure',{});d1=infra.get('d1',{})
-req(infra.get('pages_url')=='https://devilndove-site-dev.pages.dev','Development Pages URL drifted')
-req(d1.get('binding')=='DB' and d1.get('database_name')=='devilndove-dev' and d1.get('database_id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa','exact Development D1 authority drifted')
-schema_release=int(d1.get('schema_current_through_release') or 0);req(schema_release>=460,'Release 461 metadata must retain at least the proven Release 460 D1 checkpoint')
-release461_migrations=sorted(str(p.relative_to(ROOT)).replace('\\','/') for p in (ROOT/'migrations/dev').glob('*release461*.sql'))
-req(bool(release461_migrations),'Release 461 migrations are missing')
-req(release.get('current_release_migrations')==release461_migrations,'Release 461 current migration inventory drifted')
-db=release.get('current_release_database_state',{});req(db.get('historical_migration_replay') is False,'historical migration replay must remain false')
-if schema_release<461:req(db.get('new_migration_required') is True and int(db.get('last_verified_schema_release') or 0)>=460,'pending Release 461 D1 state must carry the proven Release 460 checkpoint')
-else:req(db.get('new_migration_required') is False and int(db.get('last_verified_schema_release') or 0)>=461,'verified Release 461 D1 state must be closed at 461+')
-history={x.get('release'):x for x in release.get('release_history',[])}
-r458=history.get(458,{});req(r458.get('state')=='complete_source_proven_no_new_d1_migration' and r458.get('focused_source_gate_run')==33265953249 and r458.get('system_gate_run')==33265953255 and r458.get('exact_head_sha')=='66b48f0445c74247972e14fbdaa0e215e3792fb7' and r458.get('pages_check_run')==99135984965,'Release 458 history proof missing')
-req(history.get(459,{}).get('migration')=='migrations/dev/20260829_release459_it_provider_setup_authority.sql','Release 459 history/migration missing')
-req(history.get(460,{}).get('migration')=='migrations/dev/20260829_release460_secure_oauth_lifecycle.sql','Release 460 history/migration missing')
-req(history.get(461,{}).get('state') in ('source_converged_d1_acceptance_pending','development_d1_applied_and_verified_runtime_acceptance_pending','complete_development_green'),'Release 461 history state missing')
-policy=release.get('release_policy',{});req(policy.get('production_promotion')=='closed','Production promotion must remain closed');req(policy.get('provider_execution')=='closed' and policy.get('provider_publication')=='closed' and policy.get('provider_live_authorization')=='closed','provider execution/publication/live authorization must remain closed');req(policy.get('oauth_remote_operator_switch')=='unset','OAuth remote operator switch must remain unset');req(policy.get('documentation_sync_required') is True,'documentation sync must remain mandatory')
-for p in ('functions/api/_lib/oauthSecurity.js','functions/api/_lib/oauthProviders.js','functions/api/admin/oauth-start.js','functions/api/admin/oauth-connections.js','functions/api/social/oauth/_callback.js','functions/api/social/oauth/etsy/callback.js','scripts/release460_secure_oauth_gate.py','scripts/release460_oauth_crypto_proof.mjs','migrations/dev/20260829_release460_secure_oauth_lifecycle.sql','docs/operations/RELEASE_460_SECURE_OAUTH_LIFECYCLE_AUTHORITY.md','.github/workflows/release460-source-gate.yml','.github/workflows/development-d1-release460.yml'):
- req((ROOT/p).exists(),f'Release 460 carried authority missing: {p}')
-for p in ('scripts/release461_aggregate_source_gate.py','scripts/release461_d1_acceptance_manifest.py','docs/operations/RELEASE_461_RUNTIME_SCHEMA_INVENTORY_CAIP_AUTHORITY.md','.github/workflows/release461-source-gate.yml','.github/workflows/development-d1-release461-acceptance.yml'):
- req((ROOT/p).exists(),f'Release 461 authority missing: {p}')
-for p in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','MARKDOWN_INDEX.md','SANITY_HEALTH_CHECK.md','docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md'):
- req((ROOT/p).exists(),f'canonical Markdown missing: {p}')
-wrangler=read('wrangler.toml');req('name = "devilndove-site-dev"' in wrangler and 'database_name = "devilndove-dev"' in wrangler and 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' in wrangler,'wrangler Development authority drifted');req('account_id =' not in wrangler,'wrangler.toml must never contain account_id')
-authority=read('functions/api/_lib/releaseAuthority.js');req('CURRENT_RELEASE = 461' in authority and label in authority,'shared runtime Release 461 authority drifted')
-system_workflow=read('.github/workflows/system-gate.yml');focused_workflow=read('.github/workflows/release461-source-gate.yml')
-req('python scripts/release461_aggregate_source_gate.py' in focused_workflow,'Release 461 focused workflow must run the aggregate source authority')
-for gate in ('release459_runtime_acceptance_gate.py','release458_caip_review_handoff_gate.py','release457_financials_operations_gate.py','release456_inventory_tool_workflow_gate.py','release455_storefront_discovery_gate.py','release454_admin_convergence_gate.py','release453_it_provider_readiness_gate.py'):
- req(f'python scripts/{gate}' in system_workflow,f'System Gate missing carried authority {gate}')
-version_pattern=re.compile(r'([?&]v=)(\d+)(?:[.-][\w-]+)?(?=["\'&#\s)]|$)');future=[]
-for p in list(ROOT.glob('*.html'))+list((ROOT/'admin').rglob('*.html'))+list((ROOT/'js').rglob('*.js'))+list((ROOT/'public/js').rglob('*.js'))+list((ROOT/'css').rglob('*.css')):
- for m in version_pattern.finditer(p.read_text(encoding='utf-8',errors='replace')):
-  if int(m.group(2))>461:future.append(f'{p.relative_to(ROOT)}:{m.group(2)}')
-req(not future,f'future cache majors found: {future[:12]}')
-req(complete_batch(release.get('release458_batch',[])) and complete_batch(release.get('release459_batch',[])) and complete_batch(release.get('release460_batch',[])) and complete_batch(release.get('release461_batch',[])),'carried/current release batch authority incomplete')
-print('PLATFORM FORWARD SANITY')
-print(f'Current release: 461 — {label}')
-print(f'Development D1 schema authority: {schema_release} ({"Release 461 migration pending" if schema_release<461 else "Release 461+ verified"})')
-print('Live provider authorization/execution/publication and separate live Production: CLOSED')
+    if not ok: FAIL.append(msg)
+
+release=json.loads(read("development-release.json"))
+label="Autonomous Quality, Workflow & Gate Consolidation"
+req(release.get("environment")=="development" and release.get("branch")=="dev","current release must remain Development/dev")
+req(int(release.get("release") or 0)==462,"current Development release must be 462")
+req(release.get("label")==label,"Release 462 label drifted")
+req(release.get("release_track")=="single-current-release" and release.get("pages_project")=="devilndove-site-dev","Development release/Page authority drifted")
+previous=release.get("previous_release",{})
+req(previous.get("release")==461 and previous.get("state")=="complete_development_green","Release 461 must be the closed previous release")
+req([x.get("key") for x in release.get("canonical_modules",[])]==["storefront","creators","socials","financials","it-platform"],"canonical five-module authority drifted")
+
+infra=release.get("development_infrastructure",{})
+d1=infra.get("d1",{})
+req(infra.get("pages_url")=="https://devilndove-site-dev.pages.dev","Development URL drifted")
+req(d1.get("binding")=="DB" and d1.get("database_name")=="devilndove-dev" and d1.get("database_id")=="dbc1615b-dcbe-4951-973b-b47c99c73bfa","exact Development D1 authority drifted")
+req(int(d1.get("schema_current_through_release") or 0)==461,"Release 462 must carry the proven Release 461 D1 schema")
+req(release.get("current_release_migrations")==[],"Release 462 must not claim a D1 migration")
+
+db=release.get("current_release_database_state",{})
+req(db.get("new_migration_required") is False and int(db.get("last_verified_schema_release") or 0)==461,"Release 462 D1 state must remain closed at the verified Release 461 schema")
+req(db.get("historical_migration_replay") is False and db.get("automatic_replay_path") is False,"migration replay must remain closed")
+
+history={x.get("release"):x for x in release.get("release_history",[])}
+req(history.get(461,{}).get("state")=="complete_development_green","Release 461 closure proof missing")
+req(history.get(462,{}).get("state") in ("source_implemented_acceptance_pending","complete_source_system_pages_green"),"Release 462 history state missing")
+
+policy=release.get("release_policy",{})
+req(policy.get("production_promotion")=="closed","Production promotion must remain closed")
+req(policy.get("provider_execution")=="closed" and policy.get("provider_publication")=="closed" and policy.get("provider_live_authorization")=="closed","provider boundaries must remain closed")
+req(policy.get("request_time_schema_mutation")=="forbidden","request-time schema mutation must remain forbidden")
+req(policy.get("current_release_d1_changes_allowed") is False and policy.get("current_release_d1_migration_required") is False,"Release 462 must remain source-only")
+
+authority=read("functions/api/_lib/releaseAuthority.js")
+req("CURRENT_RELEASE = 462" in authority and label in authority,"shared runtime Release 462 authority drifted")
+wrangler=read("wrangler.toml")
+req('name = "devilndove-site-dev"' in wrangler and 'database_name = "devilndove-dev"' in wrangler and 'database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' in wrangler,"wrangler Development authority drifted")
+req("account_id =" not in wrangler,"wrangler.toml must never contain account_id")
+
+batch=release.get("release462_batch",[])
+req(isinstance(batch,list) and len(batch)==12 and [x.get("id") for x in batch]==list(range(1,13)) and all(x.get("status")=="implemented" for x in batch),"Release 462 twelve-workstream batch is incomplete")
+
+historic=read(".github/workflows/release461-source-gate.yml")
+system=read(".github/workflows/system-gate.yml")
+req("push:" not in historic and "pull_request:" not in historic and "workflow_dispatch:" in historic,"closed Release 461 source workflow must be manual-only")
+req("python scripts/release462_autonomous_quality_gate.py" in system,"System Gate missing Release 462 authority")
+
+for path in ("AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","MARKDOWN_INDEX.md","SANITY_HEALTH_CHECK.md","docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md","docs/operations/RELEASE_462_AUTONOMOUS_QUALITY_AUTHORITY.md"):
+    req((ROOT/path).is_file(),f"canonical authority missing: {path}")
+
+print("PLATFORM FORWARD SANITY")
+print(f"Current release: 462 — {label}")
+print("Development D1 schema authority: Release 461 proven/unchanged")
+print("Release 462 D1 migration: NONE")
+print("Provider execution/publication, raw CAIP delete and separate live Production: CLOSED")
 if FAIL:
- for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
- raise SystemExit(1)
-subprocess.run([sys.executable,str(ROOT/'scripts/release461_aggregate_source_gate.py')],cwd=ROOT,check=True)
-print('Release 461 aggregate source authority: PASS')
-print('PLATFORM FORWARD SANITY: PASS')
+    for i,item in enumerate(FAIL,1): print(f"{i:03d}. FAIL — {item}")
+    raise SystemExit(1)
+
+print("PLATFORM FORWARD SANITY: PASS")

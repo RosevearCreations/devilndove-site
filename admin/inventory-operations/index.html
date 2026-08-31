@@ -5,15 +5,16 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Tools & Supplies Inventory Operations — Devil n Dove</title>
-  <link rel="stylesheet" href="/css/styles.css?v=440"/>
+  <link rel="stylesheet" href="/css/styles.css?v=462"/>
   <link rel="stylesheet" href="/css/inventory-receiving.css?v=440.1"/>
   <link rel="stylesheet" href="/css/inventory-integrity-review.css?v=440"/>
   <link rel="stylesheet" href="/css/product-integrity-review.css?v=440"/>
   <link rel="stylesheet" href="/css/tool-lifecycle-review.css?v=440"/>
   <link rel="stylesheet" href="/css/inventory-kit-component-usage.css?v=440"/>
+  <link rel="stylesheet" href="/css/release462-admin-quality.css?v=462"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, product resource reservations, receiving, and catalog sync."/>
+  <meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, base-unit stock, product resource reservations, receiving, and catalog sync."/>
 </head>
 <body data-admin-page="products" class="inventory-operations-page">
   <div class="container admin-shell">
@@ -23,17 +24,22 @@
     </div>
     <div class="hero compact-hero inventory-operations-hero">
       <div>
-        <p class="inventory-operations-eyebrow">Admin workspace</p>
+        <p class="inventory-operations-eyebrow">Release 462 • Inventory quality pass</p>
         <h1>Tools & Supplies Inventory Operations</h1>
-        <p>Manage tools, supplies, stock, receiving, product resource reservations, and catalog sync without the long product editor page.</p>
-        <p class="small inventory-operations-hero-note">Use this workspace for internal stock control only. Product facts, public images, consent, Content Studio, CAIP, and Release Board approvals stay in their own deliberate workflows.</p>
+        <p>Manage tools, supplies, purchase packaging, canonical base-unit stock, receiving, product resource reservations, and catalog sync without the long product editor page.</p>
+        <p class="small inventory-operations-hero-note">Use this workspace for internal stock control only. Purchase packaging/cost remains on the inventory record while usable quantity is read from the base-unit authority. Product facts, public images, consent, Content Studio, CAIP, and Release Board approvals stay in their own deliberate workflows.</p>
       </div>
       <div class="inventory-operations-hero-art" aria-hidden="true">
         <img src="/assets/inventory-operations-placeholder.svg" alt=""/>
       </div>
     </div>
+    <div class="release462-status-strip" aria-label="Inventory operating status">
+      <div><strong>Quantity authority</strong><span class="small">Base units drive usable stock.</span></div>
+      <div><strong>Purchase packaging</strong><span class="small">Package size and cost stay distinct from usable quantity.</span></div>
+      <div><strong>Mobile safety</strong><span class="small">Actions and wide data remain reachable on narrow screens.</span></div>
+    </div>
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
-    <div class="admin-department-links card inventory-operations-links" style="margin-bottom:18px"><a class="btn" href="/admin/catalog/">Products & publishing</a><a class="btn" href="/admin/catalog-media/">Media & product images</a><a class="btn active" href="/admin/inventory-operations/" aria-current="page">Tools & supplies inventory operations</a><a class="btn" href="/admin/release-preflight/">Release preflight</a></div>
+    <div class="admin-department-links card inventory-operations-links dd-admin-responsive-actions" style="margin-bottom:18px"><a class="btn" href="/admin/catalog/">Products & publishing</a><a class="btn" href="/admin/catalog-media/">Media & product images</a><a class="btn active" href="/admin/inventory-operations/" aria-current="page">Tools & supplies inventory operations</a><a class="btn" href="/admin/release-preflight/">Release preflight</a></div>
     <div class="card catalog-workspace-panel inventory-operations-workspace">
       <div class="inventory-operations-workspace-heading">
         <div>
@@ -76,14 +82,14 @@
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
-  <script src="/js/main.js?v=440"></script>
-  <script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script>
+  <script src="/js/main.js?v=462"></script>
+  <script src="/public/js/auth.js?v=462"></script><script src="/public/js/admin-route-usage.js"></script>
   <script src="/public/js/admin-asset-url-safety.js?v=440.2"></script>
   <script src="/public/js/admin-inventory-asset-transport-guard.js?v=440.4"></script>
-  <script src="/public/js/site-auth-ui.js?v=440"></script>
-  <script src="/public/js/site-analytics.js?v=440"></script>
-  <script src="/public/js/admin-self-protect.js?v=440"></script>
-  <script src="/public/js/admin.js?v=440"></script>
+  <script src="/public/js/site-auth-ui.js?v=462"></script>
+  <script src="/public/js/site-analytics.js?v=462"></script>
+  <script src="/public/js/admin-self-protect.js?v=462"></script>
+  <script src="/public/js/admin.js?v=462"></script>
   <script src="/public/js/admin-inventory-receiving.js?v=440.1"></script>
   <script src="/public/js/admin-inventory-receiving-reversal.js?v=440.1"></script>
   <script src="/public/js/admin-inventory-source-provenance-review.js?v=440.1"></script>
@@ -102,6 +108,5 @@
   <script src="/public/js/admin-catalog-option-manager.js"></script>
   <script src="/public/js/admin-notifications.js"></script>
   <script src="/public/js/admin-app-settings.js"></script>
-
 </body>
 </html>

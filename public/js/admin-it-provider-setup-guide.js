@@ -1,4 +1,4 @@
-// Release 459 — read-only I.T. provider setup guide renderer.
+// Release 462 — read-only I.T. provider setup guide renderer.
 (function(){
   'use strict';
   const byId=(id)=>document.getElementById(id);
@@ -14,7 +14,9 @@
     const scopes=(provider.scopes||[]).length?`<div class="it-setup-sub"><h4>Scopes / permissions</h4><ul class="small compact-list">${provider.scopes.map((scope)=>`<li><code>${esc(scope)}</code></li>`).join('')}</ul></div>`:'';
     const steps=(provider.setup_steps||[]).length?`<div class="it-setup-sub"><h4>Setup sequence</h4><ol class="small compact-list">${provider.setup_steps.map((step)=>`<li>${esc(step)}</li>`).join('')}</ol></div>`:'';
     const verification=(provider.verification||[]).length?`<div class="it-setup-sub"><h4>Acceptance notes</h4><ul class="small compact-list">${provider.verification.map((step)=>`<li>${esc(step)}</li>`).join('')}</ul></div>`:'';
-    return `<article class="card it-setup-card"><div class="it-setup-title"><div><h3>${esc(provider.name)}</h3><div class="small">${esc(provider.type)} · ${esc(provider.environment)} · ${esc(provider.implementation_state)}</div></div><div class="it-setup-count">${Number(provider.configured_required_count||0)}/${Number(provider.required_field_count||0)} refs present</div></div><div class="small"><strong>Provider console:</strong> ${esc(provider.dashboard)}</div><div class="it-setup-fields">${(provider.fields||[]).map(fieldRow).join('')}</div>${callbacks}${scopes}${steps}${verification}</article>`;
+    const next=provider.next_action?`<div class="it-setup-sub"><h4>Next external acceptance step</h4><p class="small">${esc(provider.next_action)}</p></div>`:'';
+    const input=provider.operator_input_required?'<span class="status-pill status-not-configured">operator input later</span>':'<span class="status-pill status-configured">autonomous</span>';
+    return `<article class="card it-setup-card"><div class="it-setup-title"><div><h3>${esc(provider.name)}</h3><div class="small">${esc(provider.type)} · ${esc(provider.environment)} · ${esc(provider.implementation_state)}</div></div><div><div class="it-setup-count">${Number(provider.configured_required_count||0)}/${Number(provider.required_field_count||0)} refs present</div>${input}</div></div><div class="small"><strong>Provider console:</strong> ${esc(provider.dashboard)}</div><div class="it-setup-fields">${(provider.fields||[]).map(fieldRow).join('')}</div>${callbacks}${scopes}${steps}${verification}${next}</article>`;
   }
   function render(payload){
     const mount=byId('itSetupGuide');if(!mount)return;
@@ -25,7 +27,8 @@
       try{await navigator.clipboard.writeText(value);button.textContent='Copied';setTimeout(()=>button.textContent='Copy name',1200)}catch{message(`Could not copy ${value}; select the reference name manually.`,true)}
     }));
     const configured=providers.filter((row)=>row.configuration_complete).length;
-    message(`Release ${payload.release}: ${providers.length} provider guides loaded; ${configured} have all required Cloudflare references present. Secret values were not returned.`);
+    const switchState=payload.payment_operator_switch_set?'set':'closed';
+    message(`Release ${payload.release}: ${providers.length} provider guides loaded; ${configured} have all required Cloudflare references present. Payment execution switch: ${switchState}. Secret values were not returned.`);
   }
   async function load(){const button=byId('itSetupGuideRefresh');if(button)button.disabled=true;message('Loading safe provider setup authority…');try{render(await readJson(await apiFetch('/api/admin/it-provider-setup-guide',{method:'GET',cache:'no-store'})))}catch(error){message(error.message||String(error),true)}finally{if(button)button.disabled=false}}
   function init(){byId('itSetupGuideRefresh')?.addEventListener('click',load);load()}

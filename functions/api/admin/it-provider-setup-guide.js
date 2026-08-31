@@ -1,5 +1,5 @@
-// Release 459 — authenticated, read-only provider setup guide.
-// Returns names/instructions and presence booleans only. Secret values are never emitted.
+// Release 462 — authenticated, read-only provider setup/readiness authority.
+// Returns reference names/instructions and presence booleans only. Secret values are never emitted.
 import { getAdminUserFromRequest, jsonResponse } from '../_lib/adminAudit.js';
 import { CURRENT_RELEASE } from '../_lib/releaseAuthority.js';
 
@@ -9,80 +9,14 @@ const field=(name,storage,purpose,source,required=true)=>({name,storage,purpose,
 
 function providerGuide(origin){
   return [
-    {
-      key:'stripe',name:'Stripe',type:'payment',dashboard:'Stripe Dashboard → Developers',environment:'test',implementation_state:'checkout_and_webhook_runtime_present_manual_acceptance_pending',
-      fields:[
-        field('STRIPE_PUBLISHABLE_KEY','variable','Client-side Stripe test-mode identifier.','Stripe test-mode API keys.'),
-        field('STRIPE_SECRET_KEY','secret','Server-side Stripe test-mode credential.','Stripe test-mode API keys.'),
-        field('STRIPE_WEBHOOK_SECRET','secret','Verifies signed Development webhook events.','Stripe Development/test webhook endpoint signing secret.')
-      ],
-      callbacks:[],scopes:[],
-      setup_steps:['Create/use test-mode credentials only.','Store server credentials under Cloudflare Variables and Secrets for devilndove-site-dev.','Configure the Development webhook and signing secret.','Run test checkout, signed webhook, reconciliation and idempotent replay before acceptance.'],
-      verification:['Configuration presence is safe to check automatically.','No live charge is part of Release 459 automated acceptance.']
-    },
-    {
-      key:'paypal',name:'PayPal',type:'payment',dashboard:'PayPal Developer Dashboard',environment:'sandbox',implementation_state:'sandbox_runtime_present_manual_acceptance_pending',
-      fields:[
-        field('PAYPAL_CLIENT_ID','variable','Identifies the PayPal sandbox application.','PayPal Developer Dashboard sandbox app.'),
-        field('PAYPAL_CLIENT_SECRET','secret','Authenticates server-side sandbox requests.','PayPal Developer Dashboard sandbox app.'),
-        field('PAYPAL_WEBHOOK_ID','variable','Identifies the configured sandbox webhook.','PayPal Developer Dashboard webhook configuration.')
-      ],callbacks:[],scopes:[],
-      setup_steps:['Use sandbox application credentials only.','Store the client secret in Cloudflare, never D1/source.','Create the sandbox webhook and record PAYPAL_WEBHOOK_ID.','Complete approval/capture, authenticity verification, reconciliation and replay acceptance later.'],
-      verification:['Automated readiness never moves money.','Production credentials remain unavailable during Development.']
-    },
-    {
-      key:'etsy',name:'Etsy',type:'marketplace',dashboard:'Etsy Developer / Open API application',environment:'development',implementation_state:'local_listing_preparation_ready_provider_specific_oauth_exchange_pending',
-      fields:[
-        field('ETSY_API_KEYSTRING','secret','Open API application keystring used with Etsy API requests.','Approved Etsy Open API application.'),
-        field('ETSY_SHARED_SECRET','secret','Open API shared secret paired with the application keystring.','Approved Etsy Open API application.'),
-        field('ETSY_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Choose the final Devil n Dove Development Etsy callback once the provider-specific OAuth route is enabled.'),
-        field('ETSY_SHOP_ID','variable','Safe identifier for the intended Devil n Dove Etsy shop.','Etsy shop/account after authorization.')
-      ],
-      callbacks:[{label:'Etsy callback',url:null,status:'provider_specific_callback_not_enabled_yet'}],
-      scopes:['shops_r','listings_r','listings_w','transactions_r'],
-      setup_steps:['Obtain/approve the Etsy Open API application.','OAuth Authorization Code must use PKCE and an exact HTTPS redirect.','Begin with least-privilege shop/listing/order-read scopes; add write scopes only for implemented workflows.','Never paste rotating access/refresh tokens into D1, source, Markdown or this UI.'],
-      verification:['Local Etsy listing preparation remains draft-only.','Provider-side OAuth/draft acceptance stays blocked until the secure OAuth lifecycle is enabled.']
-    },
-    {
-      key:'pinterest',name:'Pinterest',type:'social',dashboard:'Pinterest Developers application',environment:'development',implementation_state:'callback_readiness_present_token_exchange_pending',
-      fields:[field('PINTEREST_APP_ID','variable','Identifies the Pinterest application.','Pinterest developer application.'),field('PINTEREST_APP_SECRET','secret','Authenticates server-side OAuth exchange.','Pinterest developer application.'),field('PINTEREST_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],
-      callbacks:[{label:'Pinterest OAuth callback',url:`${origin}/api/social/oauth/pinterest/callback`,status:'deployed_readiness_callback'}],
-      scopes:['boards:read','boards:write','pins:read','pins:write'],
-      setup_steps:['Create/confirm the Pinterest business developer application.','Register the callback exactly.','Request only board/Pin permissions required by the approved workflow.','Complete domain/business review where required.'],
-      verification:['Current callback proves route/config readiness but does not exchange tokens yet.','Publishing remains disabled until secure token lifecycle and controlled acceptance are complete.']
-    },
-    {
-      key:'meta',name:'Meta / Facebook / Instagram',type:'social',dashboard:'Meta for Developers application',environment:'development',implementation_state:'callback_readiness_present_token_exchange_pending',
-      fields:[field('META_APP_ID','variable','Identifies the Meta application shared by configured Facebook/Instagram flows.','Meta App Dashboard.'),field('META_APP_SECRET','secret','Authenticates server-side Meta OAuth exchange.','Meta App Dashboard.'),field('META_REDIRECT_URI','variable','Canonical redirect reference selected for the Meta connection flow.','Meta App Dashboard OAuth settings.')],
-      callbacks:[{label:'Meta callback',url:`${origin}/api/social/oauth/meta/callback`,status:'deployed_readiness_callback'},{label:'Facebook callback',url:`${origin}/api/social/oauth/facebook/callback`,status:'deployed_readiness_callback'},{label:'Instagram callback',url:`${origin}/api/social/oauth/instagram/callback`,status:'deployed_readiness_callback'}],
-      scopes:['Verify current Meta Page/Instagram permissions at activation; permissions and app-review requirements change by product/use case.'],
-      setup_steps:['Use one documented Meta application authority for the Facebook/Instagram channels unless provider review requires separation.','Register every callback actually used by the selected Meta product.','Verify current Meta permissions, business/domain verification and app-review requirements immediately before activation.','Do not mark connected because an App ID/secret merely exists.'],
-      verification:['Current routes are readiness callbacks only.','Provider acceptance must confirm the intended business/page/Instagram account and approved permissions.']
-    },
-    {
-      key:'x',name:'X',type:'social',dashboard:'X Developer Portal application',environment:'development',implementation_state:'callback_readiness_present_durable_authority_added_release459_token_exchange_pending',
-      fields:[field('X_CLIENT_ID','variable','Identifies the X OAuth 2 application.','X Developer Portal OAuth 2 settings.'),field('X_CLIENT_SECRET','secret','Confidential-client secret when issued/required.','X Developer Portal OAuth 2 settings.'),field('X_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],
-      callbacks:[{label:'X OAuth callback',url:`${origin}/api/social/oauth/x/callback`,status:'deployed_readiness_callback'}],
-      scopes:['tweet.read','tweet.write','users.read','offline.access','media.write (only when media upload is implemented)'],
-      setup_steps:['Configure OAuth 2 Authorization Code with PKCE.','Register the exact Development callback.','Request offline.access only when refresh tokens are required.','Add media.write only for an implemented approved media-upload path.'],
-      verification:['Release 459 adds the missing durable X setup/readiness authority.','Connection/publication stays closed until encrypted token lifecycle and controlled acceptance pass.']
-    },
-    {
-      key:'tiktok',name:'TikTok',type:'social',dashboard:'TikTok for Developers application',environment:'development',implementation_state:'callback_readiness_present_content_posting_preparation_token_exchange_pending',
-      fields:[field('TIKTOK_CLIENT_KEY','variable','Identifies the TikTok developer application.','TikTok developer application.'),field('TIKTOK_CLIENT_SECRET','secret','Authenticates server-side TikTok OAuth exchange.','TikTok developer application.'),field('TIKTOK_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],
-      callbacks:[{label:'TikTok OAuth callback',url:`${origin}/api/social/oauth/tiktok/callback`,status:'deployed_readiness_callback'}],
-      scopes:['user.info.basic','video.publish','video.upload','video.list (only if readback/listing is implemented)'],
-      setup_steps:['Enable the Content Posting product required by the chosen workflow.','Register the exact Development callback.','Use video.publish for Direct Post and video.upload for upload-to-draft workflows as applicable.','Preserve explicit user review/consent before provider execution.'],
-      verification:['Unaudited/testing restrictions must be reviewed in the provider console before public use.','General posting remains disabled.']
-    },
-    {
-      key:'youtube',name:'YouTube',type:'video',dashboard:'Google Cloud Console → OAuth consent / Credentials',environment:'development',implementation_state:'callback_readiness_present_reference_names_corrected_release459_token_exchange_pending',
-      fields:[field('YOUTUBE_CLIENT_ID','variable','Identifies the Google OAuth Web client used for YouTube.','Google Cloud OAuth client.'),field('YOUTUBE_CLIENT_SECRET','secret','Authenticates server-side Google OAuth exchange.','Google Cloud OAuth client.'),field('YOUTUBE_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],
-      callbacks:[{label:'YouTube OAuth callback',url:`${origin}/api/social/oauth/youtube/callback`,status:'deployed_readiness_callback'}],
-      scopes:['https://www.googleapis.com/auth/youtube.upload'],
-      setup_steps:['Create a Web OAuth client for Devil n Dove Development.','Register the exact Development callback.','Start with youtube.upload; add broader scopes only when an implemented feature requires them.','Request offline access only when encrypted refresh-token storage/refresh is enabled.'],
-      verification:['Release 459 aligns durable reference names with the actual YOUTUBE_* runtime contract.','Service accounts are not treated as the user-channel authorization path.']
-    }
+    {key:'stripe',name:'Stripe',type:'payment',dashboard:'Stripe Dashboard → Developers',environment:'test',implementation_state:'runtime_ready_operator_acceptance_pending',operator_input_required:true,next_action:'When deliberately authorized, run a test checkout, signed webhook, reconciliation and idempotent replay.',fields:[field('STRIPE_PUBLISHABLE_KEY','variable','Client-side Stripe test-mode identifier.','Stripe test-mode API keys.'),field('STRIPE_SECRET_KEY','secret','Server-side Stripe test-mode credential.','Stripe test-mode API keys.'),field('STRIPE_WEBHOOK_SECRET','secret','Verifies signed Development webhook events.','Stripe Development/test webhook endpoint signing secret.')],callbacks:[],scopes:[],setup_steps:['Use test-mode credentials only.','Store server credentials under Cloudflare Variables and Secrets for devilndove-site-dev.','Configure the Development webhook and signing secret.','Keep PAYMENT_PROVIDER_EXECUTION_MODE unset until deliberate acceptance.'],verification:['Configuration presence is safe to check automatically.','No live charge is part of Release 462 automated acceptance.']},
+    {key:'paypal',name:'PayPal',type:'payment',dashboard:'PayPal Developer Dashboard',environment:'sandbox',implementation_state:'runtime_ready_operator_acceptance_pending',operator_input_required:true,next_action:'When deliberately authorized, run sandbox approval/capture, webhook authenticity, reconciliation and replay acceptance.',fields:[field('PAYPAL_CLIENT_ID','variable','Identifies the PayPal sandbox application.','PayPal Developer Dashboard sandbox app.'),field('PAYPAL_SECRET','secret','Authenticates server-side sandbox requests. This is the canonical runtime reference name.','PayPal Developer Dashboard sandbox app.'),field('PAYPAL_WEBHOOK_ID','variable','Identifies the configured sandbox webhook.','PayPal Developer Dashboard webhook configuration.')],callbacks:[],scopes:[],setup_steps:['Use sandbox application credentials only.','Store PAYPAL_SECRET in Cloudflare secret storage, never D1/source.','Create the sandbox webhook and record PAYPAL_WEBHOOK_ID.','Keep PAYMENT_PROVIDER_EXECUTION_MODE unset until deliberate acceptance.'],verification:['Release 462 aligns the setup guide with the actual PAYPAL_SECRET runtime contract.','Automated readiness never moves money and Production credentials remain closed.']},
+    {key:'etsy',name:'Etsy',type:'marketplace',dashboard:'Etsy Developer / Open API application',environment:'development',implementation_state:'local_preparation_ready_live_authorization_closed',operator_input_required:true,next_action:'Provider app approval and a deliberately authorized Development OAuth acceptance remain external.',fields:[field('ETSY_API_KEYSTRING','secret','Open API application keystring used with Etsy API requests.','Approved Etsy Open API application.'),field('ETSY_SHARED_SECRET','secret','Open API shared secret paired with the application keystring.','Approved Etsy Open API application.'),field('ETSY_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Final Devil n Dove Development Etsy callback.'),field('ETSY_SHOP_ID','variable','Safe identifier for the intended Devil n Dove Etsy shop.','Etsy shop/account after authorization.')],callbacks:[{label:'Etsy callback',url:null,status:'provider_specific_callback_not_enabled_yet'}],scopes:['shops_r','listings_r','listings_w','transactions_r'],setup_steps:['Obtain/approve the Etsy Open API application.','Use OAuth Authorization Code with PKCE and an exact HTTPS redirect.','Begin with least privilege.','Never place rotating access/refresh tokens in D1, source or Markdown.'],verification:['Local listing preparation remains draft-only.','Provider execution/publication stays closed.']},
+    {key:'pinterest',name:'Pinterest',type:'social',dashboard:'Pinterest Developers application',environment:'development',implementation_state:'callback_ready_live_authorization_closed',operator_input_required:true,next_action:'Deliberate Development OAuth/account acceptance is still required before any publication.',fields:[field('PINTEREST_APP_ID','variable','Identifies the Pinterest application.','Pinterest developer application.'),field('PINTEREST_APP_SECRET','secret','Authenticates server-side OAuth exchange.','Pinterest developer application.'),field('PINTEREST_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],callbacks:[{label:'Pinterest OAuth callback',url:`${origin}/api/social/oauth/pinterest/callback`,status:'deployed_readiness_callback'}],scopes:['boards:read','boards:write','pins:read','pins:write'],setup_steps:['Confirm the business developer application.','Register the callback exactly.','Request only required permissions.','Complete domain/business review where required.'],verification:['Callback readiness is not token acceptance.','Publishing remains disabled.']},
+    {key:'meta',name:'Meta / Facebook / Instagram',type:'social',dashboard:'Meta for Developers application',environment:'development',implementation_state:'callback_ready_live_authorization_closed',operator_input_required:true,next_action:'Verify current app-review permissions and intended Page/Instagram identity during deliberate acceptance.',fields:[field('META_APP_ID','variable','Identifies the Meta application.','Meta App Dashboard.'),field('META_APP_SECRET','secret','Authenticates server-side Meta OAuth exchange.','Meta App Dashboard.'),field('META_REDIRECT_URI','variable','Canonical redirect reference.','Meta App Dashboard OAuth settings.')],callbacks:[{label:'Meta callback',url:`${origin}/api/social/oauth/meta/callback`,status:'deployed_readiness_callback'},{label:'Facebook callback',url:`${origin}/api/social/oauth/facebook/callback`,status:'deployed_readiness_callback'},{label:'Instagram callback',url:`${origin}/api/social/oauth/instagram/callback`,status:'deployed_readiness_callback'}],scopes:['Verify current Meta Page/Instagram permissions at activation.'],setup_steps:['Use one documented Meta application authority unless review requires separation.','Register every callback actually used.','Verify current permissions/business verification immediately before activation.'],verification:['Configuration presence never means connected.','Provider publication remains closed.']},
+    {key:'x',name:'X',type:'social',dashboard:'X Developer Portal application',environment:'development',implementation_state:'oauth_contract_ready_live_authorization_closed',operator_input_required:true,next_action:'Deliberate OAuth identity acceptance remains external; no posting is enabled by configuration.',fields:[field('X_CLIENT_ID','variable','Identifies the X OAuth 2 application.','X Developer Portal OAuth 2 settings.'),field('X_CLIENT_SECRET','secret','Confidential-client secret when issued/required.','X Developer Portal OAuth 2 settings.'),field('X_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],callbacks:[{label:'X OAuth callback',url:`${origin}/api/social/oauth/x/callback`,status:'deployed_readiness_callback'}],scopes:['tweet.read','tweet.write','users.read','offline.access','media.write (only when implemented)'],setup_steps:['Use OAuth 2 Authorization Code with PKCE.','Register the exact Development callback.','Request offline.access only when refresh is required.'],verification:['Encrypted token authority is carried forward.','Connection/publication stays closed.']},
+    {key:'tiktok',name:'TikTok',type:'social',dashboard:'TikTok for Developers application',environment:'development',implementation_state:'content_posting_preparation_ready_live_authorization_closed',operator_input_required:true,next_action:'Provider Content Posting approval and deliberate account acceptance remain external.',fields:[field('TIKTOK_CLIENT_KEY','variable','Identifies the TikTok developer application.','TikTok developer application.'),field('TIKTOK_CLIENT_SECRET','secret','Authenticates server-side TikTok OAuth exchange.','TikTok developer application.'),field('TIKTOK_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],callbacks:[{label:'TikTok OAuth callback',url:`${origin}/api/social/oauth/tiktok/callback`,status:'deployed_readiness_callback'}],scopes:['user.info.basic','video.publish','video.upload','video.list (only if implemented)'],setup_steps:['Enable the required Content Posting product.','Register the exact Development callback.','Preserve explicit review/consent before provider execution.'],verification:['Testing/review restrictions must be checked in provider console.','General posting remains disabled.']},
+    {key:'youtube',name:'YouTube',type:'video',dashboard:'Google Cloud Console → OAuth consent / Credentials',environment:'development',implementation_state:'upload_contract_ready_live_authorization_closed',operator_input_required:true,next_action:'Deliberate Google OAuth/channel identity acceptance remains external.',fields:[field('YOUTUBE_CLIENT_ID','variable','Identifies the Google OAuth Web client used for YouTube.','Google Cloud OAuth client.'),field('YOUTUBE_CLIENT_SECRET','secret','Authenticates server-side Google OAuth exchange.','Google Cloud OAuth client.'),field('YOUTUBE_REDIRECT_URI','variable','Exact HTTPS OAuth redirect URI.','Register the Development callback below.')],callbacks:[{label:'YouTube OAuth callback',url:`${origin}/api/social/oauth/youtube/callback`,status:'deployed_readiness_callback'}],scopes:['https://www.googleapis.com/auth/youtube.upload'],setup_steps:['Create a Web OAuth client for Development.','Register the exact callback.','Start with youtube.upload.','Request offline access only when encrypted refresh is enabled.'],verification:['Service accounts are not the user-channel authorization path.','Publication remains closed.']}
   ];
 }
 
@@ -94,16 +28,5 @@ export async function onRequestGet({request,env}){
     const required=fields.filter((item)=>item.required!==false);
     return {...provider,fields,configured_required_count:required.filter((item)=>item.present).length,required_field_count:required.length,configuration_complete:required.length>0&&required.every((item)=>item.present)};
   });
-  return json({
-    ok:true,
-    authority:'it-provider-setup-guide',
-    environment:'development',
-    pages_project:'devilndove-site-dev',
-    cloudflare_location:'Workers & Pages → devilndove-site-dev → Settings → Variables and Secrets',
-    secret_values_emitted:false,
-    provider_execution_allowed:false,
-    provider_publication_allowed:false,
-    oauth_token_exchange_global_state:'not_enabled_until_secure_state_pkce_encrypted_token_refresh_disconnect_lifecycle_is_complete',
-    providers
-  });
+  return json({ok:true,authority:'it-provider-setup-guide',environment:'development',pages_project:'devilndove-site-dev',cloudflare_location:'Workers & Pages → devilndove-site-dev → Settings → Variables and Secrets',secret_values_emitted:false,provider_execution_allowed:false,provider_publication_allowed:false,payment_operator_switch:'PAYMENT_PROVIDER_EXECUTION_MODE',payment_operator_switch_required_value:'development-explicit',payment_operator_switch_set:text(env?.PAYMENT_PROVIDER_EXECUTION_MODE).toLowerCase()==='development-explicit',oauth_token_exchange_global_state:'closed_until_deliberate_development_provider_acceptance',providers});
 }

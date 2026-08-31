@@ -2,74 +2,43 @@
 
 ## Current Development state
 
-**Release 461 — Runtime Schema Convergence, Inventory & CAIP Production Pipeline — Development green.**
+**Release 462 — Autonomous Quality, Workflow & Gate Consolidation.**
 
-Development remains `dev` → `devilndove-site-dev` with D1 `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`). Separate live `main` / `devilndove-site` is untouched. Provider live authorization, provider execution/publication, and raw CAIP R2 deletion remain closed.
+Release 462 processes the full autonomous twelve-item queue without adding a D1 migration or opening external execution. Development remains `dev` → `devilndove-site-dev`; separate live `main` / `devilndove-site` is untouched.
 
-## Release 461 completed scope
+## What Release 462 changes
 
-Release 461 closed the runtime-schema convergence and the current Inventory/Product Media/CAIP production-pipeline queue:
+| # | Workstream | Release 462 result |
+|---|---|---|
+| 1 | Application-wide audit | Current-release/runtime ownership reviewed; no new schema migration justified. |
+| 2 | Finance / Accounting | Statement imports remain migration-owned, read-only schema checked and fail closed. |
+| 3 | Inventory / Tools / Supplies | Base-unit authority reinforced in workspace guidance and shared responsive handling. |
+| 4 | Product / Storefront | Merchandising authority retained; Product image-quality and SEO requirements surfaced. |
+| 5 | SEO | Canonical public SEO structure and depth gates remain mandatory in the current gate. |
+| 6 | CAIP | Source-preserving review/edit/handoff boundaries reinforced; raw deletion/execution closed. |
+| 7 | Creators / Content Studio | Reference-only reviewed handoff and no-auto-publish rule reinforced. |
+| 8 | I.T. | Provider setup now exposes the next external acceptance step and exact runtime references. |
+| 9 | Stripe / PayPal prep | Payment execution remains Development-only/operator-gated; PayPal setup name aligned to runtime `PAYPAL_SECRET`. |
+| 10 | Responsive/admin UX | Shared Release 462 narrow-screen/table/form/action layer applied to major workspaces. |
+| 11 | Regression / gates | Ordinary pushes use the System Gate; closed Release 461 source gate is manual snapshot proof. |
+| 12 | Markdown | Canonical handoff/status/sanity/index and Release 462 authority synchronized. |
 
-1. Inventory purchase-package/base-unit correctness.
-2. Inventory desktop/mobile usable-unit clarity.
-3. Primary product-image quality acceptance.
-4. CAIP private ingest context.
-5. Multicamera recognition/synchronization planning.
-6. Footage-quality review.
-7. Reversible reject/deferred-purge lifecycle.
-8. Semantic evidence on source-backed temporal ranges.
-9. Reviewed-evidence Story Builder.
-10. Reviewed edit/timeline generation with provider execution closed.
-11. CAIP → Content Studio reviewed publishing handoff.
-12. Broad public/shared/admin/accounting runtime-schema migration ownership.
+## Database state
 
-Request-time schema DDL/repair is forbidden and historical migration replay remains forbidden.
+No Release 462 migration exists or is required. Release 461 D1 proof remains authoritative: 77 required tables, 93 required indexes, zero missing objects, zero structural drift and zero foreign-key violations.
 
-## Database closure
+## External evidence still open
 
-The combined Release 461 D1 acceptance succeeded in run `33340698069`:
-
-- 19 Release 461 migrations applied;
-- 77 required tables present;
-- 93 required named indexes present;
-- zero missing required objects;
-- zero remaining structural drift;
-- zero foreign-key violations.
-
-The bounded pre-existing structural repair was applied only after exact read-only classification. Release 461 D1 must not be reapplied on future startup unless read-only verification proves actual drift.
-
-## Runtime/deployment closure
-
-Authenticated GET-only Development runtime acceptance succeeded in run `33342752757` on request SHA `7200f421e0fc58842aed4003dc774ed30f910809`.
-
-Live Development proof included:
-
-- Release 461 module authority healthy;
-- Inventory base-unit authority live across 80 returned rows;
-- Product Media primary thresholds live at 1200×1200, alt ≥12, score ≥70;
-- CAIP pipeline schema live with 23 projects and all execution/delete boundaries closed;
-- reviewed CAIP handoff live for project 36 with source media unchanged;
-- anonymous admin access correctly rejected;
-- session token resolved read-only from an existing Development session and masked;
-- no D1, R2, provider, publication, raw-media-delete, or Production mutation.
-
-## Carried security/provider boundary
-
-Release 460 security remains carried forward: encrypted OAuth material, hashed single-use state, PKCE where supported, intended-account verification, redacted diagnostics, and fail-closed Development authorization. None of that authorizes live provider execution.
-
-## Deferred evidence / next roadmap
-
-Release 461 itself is closed. The next source release must begin as **Release 462**.
-
-Separate evidence/work that can be resumed deliberately:
+The following remain deliberately outside autonomous source work:
 
 - CAIP private-media browser/range-streaming evidence;
 - Stripe test transaction/webhook/reconciliation;
 - PayPal sandbox transaction/webhook/reconciliation;
-- Etsy and social/video provider authorization/controlled acceptance;
-- Development-to-Production parity/promotion rehearsal;
-- continued Storefront / Creators / Socials (CAIP) / Finance-Accounting / I.T. evolution under SEO and current release authority.
+- Etsy/social/video provider authorization/controlled acceptance;
+- Development-to-Production promotion.
+
+Credentials/configuration presence never authorizes provider execution.
 
 ## Promotion rule
 
-Development-green does not promote separate live Production. Promotion remains a deliberate reviewed operation after the chosen later acceptance boundary is satisfied.
+Development-green never promotes the separate live Production application automatically. Production remains a deliberate reviewed operation.

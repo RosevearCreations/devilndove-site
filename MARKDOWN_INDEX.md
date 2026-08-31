@@ -1,35 +1,24 @@
 # Devil n Dove — Markdown Index
 
-## Current authority — Release 461
+## Canonical current authority
 
-Use this order and do not infer current state from older Build/Release documents:
+Read these files in order:
 
-1. **`development-release.json`** — machine-readable current release, exact Development infrastructure, evidence and forward queue.
-2. **`AI_HANDOFF.md`** — concise startup handoff and safety boundary.
-3. **`PROJECT_STATUS_AND_ROADMAP.md`** — current Development status and next-release direction.
-4. **`docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`** — exact Cloudflare/D1/R2 boundary.
-5. **`docs/operations/RELEASE_461_RUNTIME_SCHEMA_INVENTORY_CAIP_AUTHORITY.md`** — Release 461 scope and closure evidence.
-6. **`SANITY_HEALTH_CHECK.md`** — current Release 461 health checklist.
+1. `development-release.json` — machine-readable current release/boundaries.
+2. `AI_HANDOFF.md` — exact restart rules.
+3. `PROJECT_STATUS_AND_ROADMAP.md` — current workstream state and forward queue.
+4. `SANITY_HEALTH_CHECK.md` — compact release/boundary checklist.
+5. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` — exact Development Cloudflare identities.
+6. `docs/operations/RELEASE_462_AUTONOMOUS_QUALITY_AUTHORITY.md` — Release 462 implementation/acceptance authority.
 
-These are the canonical current documents for **Release 461 — Runtime Schema Convergence, Inventory & CAIP Production Pipeline**.
+## Supporting domain references
 
-## Current exact boundaries
+Domain-specific Markdown such as Content Automation, Creative Automation, image registers, SEO playbooks, marketplace/provider guides and schema references may be used for detail, but they do not override the canonical current authority above.
 
-- `dev` → `devilndove-site-dev` is Development.
-- The Pages Production deployment of `devilndove-site-dev` is the Development application.
-- Separate live `main` / `devilndove-site` remains closed.
-- D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
-- `account_id` never belongs in `wrangler.toml`.
-- Provider secret/token values never belong in D1/source/Markdown/browser output.
-- Provider live authorization/execution/publication remains closed.
-- Raw CAIP R2 deletion remains closed.
+## Historical material
 
-## Release 461 evidence anchors
+Older Build/Release Markdown is provenance only. A historical file cannot reopen a closed migration, authorize Production/provider execution, or override `development-release.json`.
 
-- D1 convergence: run `33340698069` — 19 migrations, 77 tables, 93 indexes, zero missing objects, zero FK violations.
-- Authenticated Development runtime: run `33342752757`, SHA `7200f421e0fc58842aed4003dc774ed30f910809` — PASS.
-- Release 461 is the accepted Development checkpoint; new source feature work begins as Release 462.
+## Release 462 rule
 
-## Historical/supporting Markdown
-
-Older files remain useful for provenance, migrations and subsystem design, but they do not override the canonical files above and they never authorize historical migration replay.
+Release 462 has no D1 migration. Release 461 remains the verified schema baseline. Ordinary source changes are judged by the current System Gate rather than by a fan-out of closed historical release gates.
