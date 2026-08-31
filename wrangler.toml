@@ -1,6 +1,7 @@
 name = "devilndove-site"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
+migrations_dir = "migrations/canonical"
 
 # TRACKED DEVELOPMENT-SAFE CONFIGURATION.
 # One Cloudflare Pages project is canonical: devilndove-site.
@@ -8,6 +9,8 @@ pages_build_output_dir = "."
 # `main` deploys as Production through .github/workflows/production-pages-deploy.yml,
 # which generates Production bindings ephemerally in the runner. Do not commit
 # Production resource IDs/bucket names here and do not add account_id here.
+# Future schema changes use only migrations/canonical through scripts/d1_migrate.py.
+# Historical migrations are provenance and must never be replayed automatically.
 
 [vars]
 DND_ENVIRONMENT = "development"
