@@ -12,12 +12,12 @@ permissions:
 
 concurrency:
   group: release463-final-cloudflare-cleanup
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CANONICAL_PROJECT: devilndove-site
@@ -86,91 +86,108 @@ jobs:
           print('RELEASE 463 CLEANUP PREFLIGHT: PASS')
           PY
 
-      - name: Retire disposable legacy Pages project
+      - name: Retire disposable legacy Pages project with direct Cloudflare API
         shell: bash
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
           CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
         run: |
           set -euo pipefail
-          STATUS="$(curl -sS -o /tmp/release463-legacy-project-before.json -w '%{http_code}' \
-            -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${LEGACY_PROJECT}")"
-          if [ "${STATUS}" = "404" ]; then
-            echo 'Legacy Pages project already absent: PASS'
-            exit 0
-          fi
-          if [ "${STATUS}" != "200" ]; then
-            echo "Unexpected legacy Pages lookup status ${STATUS}" >&2
-            cat /tmp/release463-legacy-project-before.json >&2 || true
-            exit 1
-          fi
-
-          DELETE_STATUS="$(curl -sS -X DELETE -o /tmp/release463-legacy-project-delete-first.json -w '%{http_code}' \
-            -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${LEGACY_PROJECT}")"
-          if [ "${DELETE_STATUS}" = "200" ]; then
-            echo 'LEGACY PAGES PROJECT DELETE: PASS'
-            exit 0
-          fi
-          if [ "${DELETE_STATUS}" != "400" ]; then
-            echo "Unexpected legacy Pages delete status ${DELETE_STATUS}" >&2
-            cat /tmp/release463-legacy-project-delete-first.json >&2 || true
-            exit 1
-          fi
-
-          echo 'Cloudflare Pages project has deployment-history delete barrier; pruning non-active deployments using documented Wrangler workaround.'
-          PROD_ID=""
-          for ROUND in $(seq 1 30); do
-            npx --yes wrangler@4 pages deployment list --project-name "${LEGACY_PROJECT}" --json > /tmp/release463-legacy-deployments.json
-            python - "${PROD_ID}" <<'PY' > /tmp/release463-legacy-delete-ids
-          import json,sys
-          keep=sys.argv[1]
-          data=json.load(open('/tmp/release463-legacy-deployments.json'))
-          assert isinstance(data,list),type(data)
-          for item in data:
-              ident=str(item.get('id') or item.get('Id') or '')
-              if ident and ident!=keep:
-                  print(ident)
-          PY
-            if [ ! -s /tmp/release463-legacy-delete-ids ]; then
-              echo "Deployment pruning complete; retained active production deployment ${PROD_ID:-none}."
-              break
-            fi
-            echo "Legacy Pages prune round ${ROUND}: $(wc -l < /tmp/release463-legacy-delete-ids | tr -d ' ') candidates"
-            while IFS= read -r DEPLOYMENT_ID; do
-              [ -n "${DEPLOYMENT_ID}" ] || continue
-              set +e
-              OUTPUT="$(npx --yes wrangler@4 pages deployment delete "${DEPLOYMENT_ID}" --project-name "${LEGACY_PROJECT}" --force 2>&1)"
-              RC=$?
-              set -e
-              if [ "${RC}" = "0" ] && printf '%s' "${OUTPUT}" | grep -qi 'Successfully deleted'; then
-                continue
-              fi
-              if printf '%s' "${OUTPUT}" | grep -qi 'active production deployment'; then
-                PROD_ID="${DEPLOYMENT_ID}"
-                echo "Retaining active legacy production deployment ${PROD_ID} until project deletion."
-                continue
-              fi
-              echo "Unexpected deployment-delete failure for ${DEPLOYMENT_ID}" >&2
-              printf '%s\n' "${OUTPUT}" >&2
-              exit 1
-            done < /tmp/release463-legacy-delete-ids
-          done
-
-          FINAL_DELETE_STATUS="$(curl -sS -X DELETE -o /tmp/release463-legacy-project-delete-final.json -w '%{http_code}' \
-            -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${LEGACY_PROJECT}")"
-          if [ "${FINAL_DELETE_STATUS}" != "200" ]; then
-            echo "Legacy Pages project still could not be deleted; status ${FINAL_DELETE_STATUS}" >&2
-            cat /tmp/release463-legacy-project-delete-final.json >&2 || true
-            exit 1
-          fi
           python - <<'PY'
-          import json
-          d=json.load(open('/tmp/release463-legacy-project-delete-final.json'))
-          assert d.get('success') is True,d
-          print('LEGACY PAGES PROJECT DELETE AFTER DEPLOYMENT PRUNE: PASS')
+          import concurrent.futures, json, os, time, urllib.error, urllib.parse, urllib.request
+
+          account=os.environ['CLOUDFLARE_ACCOUNT_ID']
+          project=os.environ['LEGACY_PROJECT']
+          token=os.environ['CF_PAGES_TOKEN']
+          base=f'https://api.cloudflare.com/client/v4/accounts/{account}/pages/projects/{project}'
+          headers={'Authorization':f'Bearer {token}','Content-Type':'application/json'}
+
+          def call(method,url,retries=5):
+              last=None
+              for attempt in range(retries):
+                  req=urllib.request.Request(url,method=method,headers=headers)
+                  try:
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          raw=r.read().decode('utf-8','replace')
+                          return r.status, json.loads(raw) if raw else {}
+                  except urllib.error.HTTPError as e:
+                      raw=e.read().decode('utf-8','replace')
+                      try: body=json.loads(raw) if raw else {}
+                      except Exception: body={'raw':raw[:500]}
+                      if e.code==429 or 500 <= e.code < 600:
+                          last=(e.code,body); time.sleep(min(8,1.5*(attempt+1))); continue
+                      return e.code,body
+                  except Exception as e:
+                      last=repr(e); time.sleep(min(8,1.5*(attempt+1)))
+              raise RuntimeError((method,url,last))
+
+          def project_delete():
+              return call('DELETE',base)
+
+          status,body=call('GET',base)
+          if status==404:
+              print('Legacy Pages project already absent: PASS')
+              raise SystemExit(0)
+          if status!=200 or not body.get('success'):
+              raise AssertionError(('legacy project lookup',status,body))
+
+          status,body=project_delete()
+          if status==200 and body.get('success'):
+              print('LEGACY PAGES PROJECT DELETE: PASS')
+              raise SystemExit(0)
+          if status!=400:
+              raise AssertionError(('initial project delete',status,body))
+
+          print('Deployment-history barrier confirmed; pruning retired-project deployments with direct API.')
+          total_deleted=0
+          active_kept=set()
+          for round_no in range(1,31):
+              query=urllib.parse.urlencode({'page':1,'per_page':100})
+              status,listing=call('GET',base+'/deployments?'+query)
+              if status==404:
+                  print('Legacy Pages project disappeared during pruning: PASS')
+                  raise SystemExit(0)
+              if status!=200 or not listing.get('success'):
+                  raise AssertionError(('deployment list',status,listing))
+              items=listing.get('result') or []
+              ids=[str(x.get('id') or '') for x in items if x.get('id')]
+              if not ids:
+                  status,body=project_delete()
+                  if status in (200,404):
+                      print('LEGACY PAGES PROJECT DELETE AFTER EMPTY LIST: PASS')
+                      raise SystemExit(0)
+                  raise AssertionError(('empty deployment list but project delete failed',status,body))
+
+              def remove(dep_id):
+                  s,b=call('DELETE',base+'/deployments/'+urllib.parse.quote(dep_id,safe=''))
+                  text=json.dumps(b).lower()
+                  if s in (200,404): return ('deleted',dep_id,s)
+                  if s in (400,409) and 'active' in text and 'production' in text:
+                      return ('active',dep_id,s)
+                  return ('error',dep_id,s,b)
+
+              deleted=0; active=0; errors=[]
+              with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+                  for result in pool.map(remove,ids):
+                      if result[0]=='deleted': deleted+=1
+                      elif result[0]=='active': active+=1; active_kept.add(result[1])
+                      else: errors.append(result)
+              if errors:
+                  raise AssertionError(('deployment delete errors',errors[:5],len(errors)))
+              total_deleted += deleted
+              print(f'Legacy Pages prune round {round_no}: deleted={deleted} active_kept={active} total_deleted={total_deleted}')
+
+              status,body=project_delete()
+              if status in (200,404):
+                  if status==200 and body and body.get('success') is not True:
+                      raise AssertionError(('project delete non-success',body))
+                  print(f'LEGACY PAGES PROJECT DELETE AFTER DIRECT PRUNE: PASS total_deleted={total_deleted} active_kept={len(active_kept)}')
+                  raise SystemExit(0)
+              if status!=400:
+                  raise AssertionError(('project delete after prune',status,body))
+              if deleted==0 and active:
+                  raise AssertionError(('only active deployment remains but project still cannot delete',body))
+
+          raise AssertionError(('deployment pruning exceeded round limit',total_deleted,len(active_kept)))
           PY
 
       - name: Retire stale Production D1 databases
