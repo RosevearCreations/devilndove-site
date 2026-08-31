@@ -63,7 +63,7 @@ req(dev.get("d1",{}).get("id")!=prod.get("d1",{}).get("id"),"Development and Pro
 req(dev.get("r2",{}).get("product")=="devilndove-toolshed-images-dev" and dev.get("r2",{}).get("caip")=="devilndove-caip-media-dev","Release 463 Development R2 drifted")
 req(prod.get("r2",{}).get("product")=="devilndove-toolshed-images" and prod.get("r2",{}).get("caip")=="devilndove-caip-media","Release 463 Production R2 drifted")
 proof=env463.get("proof",{})
-req(proof.get("d1_exact_parity") is True and int(proof.get("d1_foreign_key_violations") or -1)==0,"Release 463 D1 parity proof missing")
+req(proof.get("d1_exact_parity") is True and int(proof.get("d1_foreign_key_violations",-1))==0,"Release 463 D1 parity proof missing")
 req(proof.get("r2_exact_parity") is True and int(proof.get("product_r2_objects") or 0)==897 and int(proof.get("caip_r2_objects") or 0)==1,"Release 463 R2 parity proof missing")
 req(env463.get("operating_model",{}).get("blind_dev_to_production_data_overwrite_after_cutover") is False,"blind Dev-to-Production transactional overwrite must remain forbidden")
 
