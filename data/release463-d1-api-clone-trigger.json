@@ -1,0 +1,8 @@
+{
+  "release": 463,
+  "operation": "clone proven Development D1 into isolated Production candidate through D1 Query API with Time Travel rollback",
+  "source": "devilndove-dev",
+  "target": "devilndove-prod-r462",
+  "rollback_artifact_id": 9744317222,
+  "requested_at": "2026-08-30"
+}
