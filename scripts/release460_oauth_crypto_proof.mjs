@@ -7,7 +7,11 @@ async function importSource(path){
 }
 const security=await importSource('functions/api/_lib/oauthSecurity.js');
 const raw=crypto.getRandomValues(new Uint8Array(32));
-const env={OAUTH_TOKEN_ENCRYPTION_KEY_V1:Buffer.from(raw).toString('base64url'),OAUTH_PROVIDER_AUTHORIZATION_MODE:'development-explicit'};
+const env={
+  OAUTH_TOKEN_ENCRYPTION_KEY_V1:Buffer.from(raw).toString('base64url'),
+  OAUTH_PROVIDER_AUTHORIZATION_MODE:'development-explicit',
+  DND_ENVIRONMENT:'development',
+};
 
 const proof=await security.createStateAndPkce();
 assert.ok(proof.state.length>=43);
@@ -28,9 +32,11 @@ assert.equal(redacted.access_token,'[REDACTED]');
 assert.equal(redacted.nested.client_secret,'[REDACTED]');
 assert.equal(redacted.nested.safe,'visible');
 assert.equal(redacted.state,'[REDACTED]');
-assert.equal(security.oauthRemoteAuthorizationOpen(env,'https://devilndove-site-dev.pages.dev/api/admin/oauth-start'),true);
+assert.equal(security.oauthRemoteAuthorizationOpen(env,'https://dev.devilndove-site.pages.dev/api/admin/oauth-start'),true);
+assert.equal(security.oauthRemoteAuthorizationOpen(env,'https://abc12345.devilndove-site.pages.dev/api/admin/oauth-start'),true);
 assert.equal(security.oauthRemoteAuthorizationOpen(env,'https://devilndove-site.pages.dev/api/admin/oauth-start'),false);
-assert.equal(security.oauthRemoteAuthorizationOpen({...env,OAUTH_PROVIDER_AUTHORIZATION_MODE:''},'https://devilndove-site-dev.pages.dev/'),false);
+assert.equal(security.oauthRemoteAuthorizationOpen({...env,DND_ENVIRONMENT:'production'},'https://abc12345.devilndove-site.pages.dev/api/admin/oauth-start'),false);
+assert.equal(security.oauthRemoteAuthorizationOpen({...env,OAUTH_PROVIDER_AUTHORIZATION_MODE:''},'https://dev.devilndove-site.pages.dev/'),false);
 assert.equal(security.safeReturnPath('https://evil.example/'),'/admin/it-integrations/');
 
 console.log('RELEASE 460 OAUTH CRYPTO PROOF: PASS');
