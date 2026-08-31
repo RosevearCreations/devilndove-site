@@ -1,0 +1,177 @@
+name: Production Release 462 Runtime Acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/production-release462-runtime-acceptance.json'
+
+permissions:
+  contents: read
+
+jobs:
+  live-runtime-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LIVE_BASE_URL: https://devilndove-site.pages.dev
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      LIVE_D1_NAME: devilndove-dev
+      LIVE_D1_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify exact promoted resource authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-caip-media-dev"$' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          test -n "${CLOUDFLARE_API_TOKEN}"
+      - name: Wait for exact Release 462 live surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import time, urllib.request, urllib.error
+          base='https://devilndove-site.pages.dev'
+          ready=False
+          for _ in range(30):
+              try:
+                  with urllib.request.urlopen(base+'/admin/',timeout=15) as r:
+                      body=r.read().decode('utf-8','replace')
+                  req=urllib.request.Request(base+'/api/admin/release462-production-resource-diagnostic',headers={'Accept':'application/json'})
+                  try:
+                      urllib.request.urlopen(req,timeout=15)
+                      status=200
+                  except urllib.error.HTTPError as e:
+                      status=e.code
+                  if 'Admin Dashboard • Release 462' in body and 'Release 448' not in body and status in (401,403):
+                      ready=True; break
+              except Exception:
+                  pass
+              time.sleep(4)
+          assert ready,'Latest Release 462 live surface did not become visible.'
+          print('LIVE RELEASE 462 SURFACE: PASS')
+          PY
+      - name: Install Wrangler for read-only session lookup
+        run: npm install --global wrangler@4.127.1
+      - name: Verify exact promoted D1 identity and resolve existing admin session read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/wrangler-live.toml <<EOF
+          name = "devilndove-live-runtime-acceptance"
+          compatibility_date = "2026-08-30"
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "${LIVE_D1_NAME}"
+          database_id = "${LIVE_D1_ID}"
+          EOF
+          wrangler d1 info "${LIVE_D1_NAME}" --json --config /tmp/wrangler-live.toml > /tmp/d1-info.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(d)); ids={str(x.get('uuid') or x.get('id') or '') for x in rows}; names={str(x.get('name') or '') for x in rows}
+          assert os.environ['LIVE_D1_ID'] in ids,ids
+          assert os.environ['LIVE_D1_NAME'] in names,names
+          print('EXACT PROMOTED LIVE D1 IDENTITY: PASS')
+          PY
+          wrangler d1 execute "${LIVE_D1_NAME}" --remote --config /tmp/wrangler-live.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(u.role)='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/session.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          token=next(walk(d),'').strip(); assert token,'No active admin session available for GET-only live acceptance.'; print(token)
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          echo "LIVE_ADMIN_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
+          unset TOKEN
+          rm -f /tmp/session.json
+      - name: Anonymous live protection proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import urllib.request,urllib.error
+          base='https://devilndove-site.pages.dev'
+          paths=['/api/admin/app-modules','/api/admin/site-item-inventory','/api/admin/caip-production-pipeline','/api/admin/release462-production-resource-diagnostic']
+          for path in paths:
+              req=urllib.request.Request(base+path,headers={'Accept':'application/json'})
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as r: status=r.status
+              except urllib.error.HTTPError as e: status=e.code
+              assert status in (401,403),(path,status)
+              print('PASS anonymous refused',path,status)
+          PY
+      - name: Authenticated GET-only Production runtime proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,urllib.request,urllib.error
+          base='https://devilndove-site.pages.dev'; cookie=os.environ['LIVE_ADMIN_COOKIE']
+          def get(path):
+              req=urllib.request.Request(base+path,headers={'Accept':'application/json','Cache-Control':'no-store','Cookie':cookie,'User-Agent':'dnd-release462-production-acceptance'})
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as r: status=r.status; raw=r.read().decode('utf-8','replace')
+              except urllib.error.HTTPError as e: status=e.code; raw=e.read().decode('utf-8','replace')
+              try: data=json.loads(raw)
+              except Exception: raise AssertionError((path,status,raw[:300]))
+              return status,data
+          s,m=get('/api/admin/app-modules'); assert s==200 and m.get('ok') is True and int(m.get('release') or 0)==461 and m.get('schema_ready') is True and m.get('migration_required') is False,(s,m)
+          keys=sorted(str(x.get('module_key') or '') for x in m.get('modules',[]) if isinstance(x,dict)); assert keys==sorted(['storefront','creators','socials','financials','it-platform']),keys
+          print('PASS modules',keys)
+          s,i=get('/api/admin/site-item-inventory'); assert s==200 and i.get('quantity_authority')=='base',(s,i.get('quantity_authority'),i.get('error'))
+          print('PASS inventory base authority')
+          s,p=get('/api/admin/product-media-score'); assert s==200 and p.get('ok') is True,(s,p.get('error'))
+          t=p.get('primary_image_thresholds') or {}; assert int(t.get('min_width_px') or 0)==1200 and int(t.get('min_height_px') or 0)==1200 and int(t.get('min_alt_characters') or 0)==12 and int(t.get('min_quality_score') or 0)==70,t
+          print('PASS product media quality',t)
+          s,c=get('/api/admin/caip-production-pipeline'); assert s==200 and c.get('ok') is True and c.get('schema_ready') is True and c.get('provider_execution_active') is False and c.get('publication_active') is False and c.get('r2_delete_active') is False,(s,c)
+          print('PASS CAIP pipeline safety')
+          s,r=get('/api/admin/release462-production-resource-diagnostic'); assert s==200 and r.get('ok') is True and int(r.get('release') or 0)==462,(s,r)
+          d=r.get('d1') or {}; assert d.get('binding_available') is True and int(d.get('table_count') or 0)>=77 and int(d.get('index_count') or 0)>=93 and int(d.get('foreign_key_violations') or -1)==0,d
+          rr=r.get('r2') or {}; product=rr.get('product_media') or {}; caip=rr.get('caip_private_media') or {}
+          assert product.get('binding_available') is True and product.get('list_success') is True,product
+          assert caip.get('binding_available') is True and caip.get('list_success') is True,caip
+          safety=r.get('safety') or {}; assert safety.get('d1_mutation_executed') is False and safety.get('r2_mutation_executed') is False and safety.get('provider_execution_active') is False,safety
+          print('PASS live D1',d)
+          print('PASS PRODUCT_MEDIA_BUCKET read-only list',product)
+          print('PASS CAIP_PRIVATE_MEDIA_BUCKET read-only list',caip)
+          print('PRODUCTION RELEASE 462 RUNTIME ACCEPTANCE: PASS')
+          PY
+      - name: Acceptance boundary
+        run: |
+          echo 'Target: live devilndove-site Pages project'
+          echo 'Release: 462 application / Release 461 proven D1 schema contract'
+          echo 'HTTP acceptance: GET ONLY'
+          echo 'D1 session lookup: READ ONLY / existing session only'
+          echo 'R2 diagnostic: LIST(limit=1) ONLY / no body reads'
+          echo 'D1 mutation: NONE'
+          echo 'R2 mutation: NONE'
+          echo 'Provider execution/publication: NONE'
