@@ -1,0 +1,8 @@
+{
+  "release": 462,
+  "mode": "live-get-only-runtime-acceptance",
+  "d1_mutation": false,
+  "r2_mutation": false,
+  "provider_execution": false,
+  "trigger": "production-release462-live-acceptance-1"
+}
