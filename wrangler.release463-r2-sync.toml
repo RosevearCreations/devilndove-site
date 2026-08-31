@@ -1,0 +1,46 @@
+name = "devilndove-site"
+compatibility_date = "2026-04-08"
+pages_build_output_dir = "."
+
+# Temporary Release 463 migration configuration.
+# Production remains untouched by this file; it is deployed only with --branch=dev.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "devilndove-dev"
+database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+
+[[r2_buckets]]
+binding = "PRODUCT_MEDIA_BUCKET"
+bucket_name = "devilndove-toolshed-images-dev"
+preview_bucket_name = "devilndove-toolshed-images-dev"
+
+[[r2_buckets]]
+binding = "CAIP_PRIVATE_MEDIA_BUCKET"
+bucket_name = "devilndove-caip-media-dev"
+preview_bucket_name = "devilndove-caip-media-dev"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "devilndove-dev"
+database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+
+[[env.preview.r2_buckets]]
+binding = "PRODUCT_MEDIA_BUCKET"
+bucket_name = "devilndove-toolshed-images-dev"
+preview_bucket_name = "devilndove-toolshed-images-dev"
+
+[[env.preview.r2_buckets]]
+binding = "CAIP_PRIVATE_MEDIA_BUCKET"
+bucket_name = "devilndove-caip-media-dev"
+preview_bucket_name = "devilndove-caip-media-dev"
+
+[[env.preview.r2_buckets]]
+binding = "RELEASE463_PRODUCT_MEDIA_PROD_BUCKET"
+bucket_name = "devilndove-toolshed-images"
+preview_bucket_name = "devilndove-toolshed-images"
+
+[[env.preview.r2_buckets]]
+binding = "RELEASE463_CAIP_MEDIA_PROD_BUCKET"
+bucket_name = "devilndove-caip-media"
+preview_bucket_name = "devilndove-caip-media"
