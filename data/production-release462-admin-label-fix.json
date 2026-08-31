@@ -1,0 +1,5 @@
+{
+  "target_release": 462,
+  "scope": "admin-index-release-authority",
+  "trigger": "admin-label-fix-1"
+}
