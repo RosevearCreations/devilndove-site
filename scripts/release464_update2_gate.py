@@ -33,10 +33,14 @@ for token in ("no authentication header or service token", "never weaken Cloudfl
     if token not in item12_requirements:
         FAIL.append(f"Preview smoke authority missing Access-safe contract: {token}")
 
+# Update 2 owns canonical migrations 0001/0002, but later forward migrations are allowed to append.
 manifest = json.loads((ROOT / "migrations/canonical/manifest.json").read_text(encoding="utf-8"))
 migration_names = [str(x.get("file") or "") for x in manifest.get("migrations", [])]
-if migration_names != ["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql"]:
-    FAIL.append(f"canonical migration sequence drifted: {migration_names}")
+update2_prefix = ["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql"]
+if migration_names[:2] != update2_prefix or len(migration_names) < 2:
+    FAIL.append(f"canonical Update 2 migration prefix drifted: {migration_names}")
+if len(migration_names) != len(set(migration_names)):
+    FAIL.append("canonical migration sequence contains duplicate filenames")
 migration = (ROOT / "migrations/canonical/0002_release464_operational_acceptance.sql").read_text(encoding="utf-8", errors="replace")
 for token in ("operational_retention_reviews","operational_retention_archive_items","operational_recovery_events","ON DELETE RESTRICT"):
     if token not in migration:
@@ -83,6 +87,7 @@ if FAIL:
     raise SystemExit(1)
 print("PASS")
 print("Items 8-13: SOURCE COMPLETE")
+print("Canonical 0001/0002 prefix: PRESERVED; later forward migrations allowed")
 print("Runtime schema DDL in Update 2 incident route: ZERO")
 print("Raw orphan-storage deletion capability: ZERO")
 print("Provider execution capability added: ZERO")
