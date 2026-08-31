@@ -2,15 +2,15 @@
   "release": 464,
   "update": 3,
   "title": "Business Application Growth",
-  "state": "in_progress_source_candidate",
+  "state": "complete_development_green",
   "items": [
-    {"id": 14, "name": "Storefront product-detail customer experience", "status": "implemented_source_candidate"},
-    {"id": 15, "name": "Public SEO depth and structured data", "status": "implemented_source_candidate"},
-    {"id": 16, "name": "Reusable Storefront merchandising and scheduling", "status": "implemented_source_candidate"},
-    {"id": 17, "name": "Inventory material genealogy trace", "status": "implemented_source_candidate"},
-    {"id": 18, "name": "Financials month-end cockpit", "status": "implemented_source_candidate"},
-    {"id": 19, "name": "Creators CAIP Storefront production pipeline", "status": "implemented_source_candidate"},
-    {"id": 20, "name": "I.T. Operations Dashboard", "status": "implemented_source_candidate"}
+    {"id":14,"name":"Storefront product-detail customer experience","status":"complete_development_green"},
+    {"id":15,"name":"Public SEO depth and structured data","status":"complete_development_green"},
+    {"id":16,"name":"Reusable Storefront merchandising and scheduling","status":"complete_development_green"},
+    {"id":17,"name":"Inventory material genealogy trace","status":"complete_development_green"},
+    {"id":18,"name":"Financials month-end cockpit","status":"complete_development_green"},
+    {"id":19,"name":"Creators CAIP Storefront production pipeline","status":"complete_development_green"},
+    {"id":20,"name":"I.T. Operations Dashboard","status":"complete_development_green"}
   ],
   "migration": "migrations/canonical/0003_release464_business_growth.sql",
   "safety": {
@@ -23,12 +23,29 @@
     "preview_access_must_remain_enforced": true
   },
   "domain_authorities": {
-    "product": "products and existing Storefront product APIs",
-    "inventory": "site_item_inventory, inventory_purchase_lots, production-run lot provenance and order commitments",
-    "accounting": "existing accounting close/ledger authorities",
-    "caip": "existing creative_projects, creative_assets and CAIP production pipeline",
-    "update3": "merchandising schedules plus cross-module references/status only"
+    "product":"products and existing Storefront product APIs",
+    "inventory":"site_item_inventory, inventory_purchase_lots, production-run lot provenance and order commitments",
+    "accounting":"existing accounting close/ledger authorities",
+    "caip":"existing creative_projects, creative_assets and CAIP production pipeline",
+    "update3":"merchandising schedules plus cross-module references/status only"
   },
-  "development_evidence": null,
+  "development_evidence": {
+    "source_sha":"0edab02e5506dc74a37ad7e2ef03fbeb52b02398",
+    "system_gate_run":33422881509,
+    "source_job":99589311686,
+    "deploy_job":99589416714,
+    "d1_tables":583,
+    "native_migration_rows":3,
+    "migration_proof_rows":3,
+    "foreign_key_violations":0,
+    "manifest_sha256":"9a230eda68494c197e41b2f268c4539638921e4bbaf77004c81ab972eb2a8f76",
+    "exact_preview":"https://b6ac8e5a.devilndove-site.pages.dev",
+    "artifact_id":9769640976,
+    "preview_mode":"CLOUDFLARE_ACCESS_PROTECTED",
+    "smoke_auth_headers_used":0,
+    "access_weakened":false,
+    "provider_execution_invoked":false,
+    "production_mutation_invoked":false
+  },
   "production_promotion": "closed"
 }

@@ -8,8 +8,8 @@
   "branch": "dev",
   "pages_project": "devilndove-site",
   "pages_environment": "preview",
-  "convergence_state": "release464_update3_source_candidate",
-  "previous_release": {"release": 462, "label": "Autonomous Quality, Workflow & Gate Consolidation", "state": "complete_source_system_pages_green", "environment_release": 463},
+  "convergence_state": "release464_update3_complete_development_green",
+  "previous_release": {"release":462,"label":"Autonomous Quality, Workflow & Gate Consolidation","state":"complete_source_system_pages_green","environment_release":463},
   "canonical_modules": [
     {"key":"storefront","name":"Storefront","status":"active"},
     {"key":"creators","name":"Creators","status":"active"},
@@ -19,14 +19,12 @@
   ],
   "clients": [{"key":"web","status":"active"},{"key":"phone","status":"active"},{"key":"desktop","status":"active"}],
   "development_infrastructure": {
-    "pages_project": "devilndove-site",
-    "pages_environment": "preview",
-    "pages_branch": "dev",
-    "deployment_boundary": "dev deploys to the Preview environment of devilndove-site; main deploys to Production of the same project.",
-    "data_alignment": "Development D1/R2 are isolated test authorities. Production business/transactional data are Production-owned and are never refreshed wholesale from Development.",
-    "d1": {"binding":"DB","database_name":"devilndove-dev","database_id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa","historical_schema_baseline_release":461,"canonical_migrations_dir":"migrations/canonical","native_migration_ledger":"d1_migrations","proof_table":"app_schema_migration_proofs"},
-    "r2": [{"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},{"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media-dev"}],
-    "account_selection": "Local tooling/GitHub Actions pin CLOUDFLARE_ACCOUNT_ID. Never add account_id to wrangler.toml."
+    "pages_project":"devilndove-site","pages_environment":"preview","pages_branch":"dev",
+    "deployment_boundary":"dev deploys to the Preview environment of devilndove-site; main deploys to Production of the same project.",
+    "data_alignment":"Development D1/R2 are isolated test authorities. Production business/transactional data are Production-owned and are never refreshed wholesale from Development.",
+    "d1":{"binding":"DB","database_name":"devilndove-dev","database_id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa","historical_schema_baseline_release":461,"canonical_migrations_dir":"migrations/canonical","native_migration_ledger":"d1_migrations","proof_table":"app_schema_migration_proofs"},
+    "r2":[{"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images-dev"},{"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media-dev"}],
+    "account_selection":"Local tooling/GitHub Actions pin CLOUDFLARE_ACCOUNT_ID. Never add account_id to wrangler.toml."
   },
   "production_infrastructure": {
     "branch":"main","pages_project":"devilndove-site","pages_environment":"production","live_domain":"https://devilndove.com",
@@ -34,30 +32,17 @@
     "r2":[{"binding":"PRODUCT_MEDIA_BUCKET","bucket_name":"devilndove-toolshed-images"},{"binding":"CAIP_PRIVATE_MEDIA_BUCKET","bucket_name":"devilndove-caip-media"}]
   },
   "release_policy": {
-    "one_current_release": true,
-    "legacy_build_numbers_are_provenance_only": true,
-    "historical_migration_replay": false,
-    "production_promotion": "exact_green_development_tree_only",
-    "main_only_application_patches": false,
-    "future_d1_schema_changes": "migrations/canonical_only",
-    "development_first_schema_verification": true,
-    "production_migration_before_dependent_code": true,
-    "migration_checksum_algorithm": "sha256",
-    "migration_recovery_note_required": true,
-    "production_transactional_data_owned_by_production": true,
-    "blind_dev_to_production_data_overwrite": false,
-    "provider_publication": "closed",
-    "provider_execution": "closed",
-    "provider_live_authorization": "closed",
-    "request_time_schema_mutation": "blocked_by_runtime_firewall_and_source_gate",
-    "seo_gate_required": true,
-    "repository_hygiene_gate_required": true,
-    "documentation_sync_required": true,
-    "preview_access_must_not_be_weakened_for_smoke": true
+    "one_current_release":true,"legacy_build_numbers_are_provenance_only":true,"historical_migration_replay":false,
+    "production_promotion":"exact_green_development_tree_only","main_only_application_patches":false,
+    "future_d1_schema_changes":"migrations/canonical_only","development_first_schema_verification":true,"production_migration_before_dependent_code":true,
+    "migration_checksum_algorithm":"sha256","migration_recovery_note_required":true,
+    "production_transactional_data_owned_by_production":true,"blind_dev_to_production_data_overwrite":false,
+    "provider_publication":"closed","provider_execution":"closed","provider_live_authorization":"closed",
+    "request_time_schema_mutation":"blocked_by_runtime_firewall_and_source_gate","seo_gate_required":true,"repository_hygiene_gate_required":true,
+    "documentation_sync_required":true,"preview_access_must_not_be_weakened_for_smoke":true
   },
   "database_baseline": {
-    "historical_release":461,
-    "state":"proven_and_not_replayed",
+    "historical_release":461,"state":"proven_and_not_replayed",
     "development_d1":"devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "production_d1":"devilndove-prod-r462 / f34a741b-0000-45b0-9a96-6be08754d563",
     "forward_migration_stream":"migrations/canonical",
@@ -66,36 +51,27 @@
   "current_release_migrations": [
     {"version":1,"file":"migrations/canonical/0001_release464_migration_authority.sql","purpose":"Bootstrap canonical migration proof authority alongside Cloudflare native d1_migrations.","development_apply":"applied_and_verified","production_apply":"production_promotion_gate_managed_not_yet_promoted"},
     {"version":2,"file":"migrations/canonical/0002_release464_operational_acceptance.sql","purpose":"Add migration-owned operational retention archive/review and audited recovery evidence authorities for Update 2.","development_apply":"applied_and_verified","production_apply":"production_promotion_gate_managed_not_yet_promoted"},
-    {"version":3,"file":"migrations/canonical/0003_release464_business_growth.sql","purpose":"Add scheduled Storefront merchandising rules and the Creative-to-Storefront business pipeline spine.","development_apply":"pending_managed_development_apply","production_apply":"production_promotion_gate_managed_not_yet_promoted"}
+    {"version":3,"file":"migrations/canonical/0003_release464_business_growth.sql","purpose":"Add scheduled Storefront merchandising rules and the Creative-to-Storefront business pipeline spine.","development_apply":"applied_and_verified","production_apply":"production_promotion_gate_managed_not_yet_promoted"}
   ],
   "current_release_database_state": {
-    "new_development_migration_required": true,
-    "development_migration_state":"update3_0003_pending_managed_apply",
-    "development_native_migration_rows":2,
-    "development_migration_proof_rows":2,
+    "new_development_migration_required":false,"development_migration_state":"0001_0002_0003_applied_and_verified",
+    "development_native_migration_rows":3,"development_migration_proof_rows":3,
     "production_migration_state":"0001_0002_0003_not_applied_until_deliberate_production_promotion",
-    "historical_schema_baseline_release":461,
-    "canonical_stream_started_in_release":464,
+    "historical_schema_baseline_release":461,"canonical_stream_started_in_release":464,
     "development_d1_target":"devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "production_d1_target":"devilndove-prod-r462 / f34a741b-0000-45b0-9a96-6be08754d563",
-    "historical_migration_replay":false,
-    "automatic_historical_replay_path":false
+    "historical_migration_replay":false,"automatic_historical_replay_path":false
   },
   "current_release_evidence": {
-    "update1_development_green":true,
-    "update2_development_green":true,
-    "update3_source_candidate":true,
-    "update2_final_green_source_sha":"e33f37e7bd6d2bae5bcd8772b930104573b672ce",
-    "update2_final_system_gate_run":33416312954,
-    "development_d1_tables_before_update3":580,
-    "development_native_migration_rows_before_update3":2,
-    "development_migration_proof_rows_before_update3":2,
-    "development_foreign_key_violations":0,
-    "preview_access_weakened":false,
-    "production_mutation_executed_for_update3":false,
-    "provider_execution_enabled":false,
-    "provider_publication_enabled":false,
-    "raw_caip_r2_delete_enabled":false
+    "update1_development_green":true,"update2_development_green":true,"update3_development_green":true,
+    "update2_final_green_source_sha":"e33f37e7bd6d2bae5bcd8772b930104573b672ce","update2_final_system_gate_run":33416312954,
+    "update3_technical_green_source_sha":"0edab02e5506dc74a37ad7e2ef03fbeb52b02398","update3_technical_green_system_gate_run":33422881509,
+    "update3_technical_green_source_job":99589311686,"update3_technical_green_deploy_job":99589416714,
+    "update3_exact_preview":"https://b6ac8e5a.devilndove-site.pages.dev","update3_proof_artifact_id":9769640976,
+    "development_d1_tables":583,"development_native_migration_rows":3,"development_migration_proof_rows":3,"development_foreign_key_violations":0,
+    "migration_manifest_sha256":"9a230eda68494c197e41b2f268c4539638921e4bbaf77004c81ab972eb2a8f76",
+    "preview_smoke_pass":true,"preview_smoke_mode":"CLOUDFLARE_ACCESS_PROTECTED","preview_smoke_auth_headers_used":0,"preview_access_weakened":false,
+    "production_mutation_executed_for_update3":false,"provider_execution_enabled":false,"provider_publication_enabled":false,"raw_caip_r2_delete_enabled":false
   },
   "release464_update1": [
     {"id":1,"change":"Canonical D1 migration ledger/applicator","status":"complete_development_green"},
@@ -115,19 +91,19 @@
     {"id":13,"change":"Keyboard focus caption and screen-reader acceptance gate","status":"complete_development_green"}
   ],
   "release464_update3": [
-    {"id":14,"change":"Storefront product-detail customer experience and canonical product path","status":"in_progress_source_candidate"},
-    {"id":15,"change":"Public SEO depth, Product/Offer/Breadcrumb structured data and internal linking","status":"in_progress_source_candidate"},
-    {"id":16,"change":"Reusable Storefront merchandising rules and scheduling","status":"in_progress_source_candidate"},
-    {"id":17,"change":"Read-only purchase-lot to production to finished-product to sale genealogy trace","status":"in_progress_source_candidate"},
-    {"id":18,"change":"Financials month-end cockpit over existing close workflow","status":"in_progress_source_candidate"},
-    {"id":19,"change":"Creators CAIP Storefront cross-module business pipeline","status":"in_progress_source_candidate"},
-    {"id":20,"change":"I.T. Operations Dashboard control centre","status":"in_progress_source_candidate"}
+    {"id":14,"change":"Storefront product-detail customer experience and canonical product path","status":"complete_development_green"},
+    {"id":15,"change":"Public SEO depth, Product/Offer/Breadcrumb structured data and internal linking","status":"complete_development_green"},
+    {"id":16,"change":"Reusable Storefront merchandising rules and scheduling","status":"complete_development_green"},
+    {"id":17,"change":"Read-only purchase-lot to production to finished-product to sale genealogy trace","status":"complete_development_green"},
+    {"id":18,"change":"Financials month-end cockpit over existing close workflow","status":"complete_development_green"},
+    {"id":19,"change":"Creators CAIP Storefront cross-module business pipeline","status":"complete_development_green"},
+    {"id":20,"change":"I.T. Operations Dashboard control centre","status":"complete_development_green"}
   ],
-  "planned_updates": [{"update":3,"items":[14,15,16,17,18,19,20],"theme":"Business Application Growth"}],
+  "planned_updates": [],
   "forward_queue": [
-    "Release 464 Update 3 source candidate is staged; canonical migration 0003 must apply and verify on Development before Update 3 is called green.",
-    "Keep Production promotion closed; Production canonical migrations apply only during deliberate promotion before dependent Production code.",
-    "Never overwrite Production transactional data from Development.",
-    "Never restore request-time schema DDL, raw R2 deletion, provider execution, or Preview smoke that weakens Cloudflare Access."
+    "Release 464 Updates 1-3 are Development green; do not reopen them unless a current gate proves drift.",
+    "Keep Production promotion closed until deliberately requested; Production canonical migrations 0001-0003 apply only during that promotion before dependent code.",
+    "External Stripe, PayPal, CAIP private-media browser and Social/OAuth provider acceptance remain separate deliberate work where credentials/operator interaction are required.",
+    "Never overwrite Production transactional data from Development or restore request-time schema DDL, raw R2 deletion, provider execution, or Preview smoke that weakens Cloudflare Access."
   ]
 }
