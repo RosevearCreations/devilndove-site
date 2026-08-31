@@ -1,6 +1,8 @@
 {
   "release": 463,
   "action": "parallel_retire_legacy_pages_only",
+  "attempt": 2,
   "authorized_after_live_cutover_run": 33396235808,
-  "legacy_project": "devilndove-site-dev"
+  "legacy_project": "devilndove-site-dev",
+  "deployment_page_size": 25
 }
