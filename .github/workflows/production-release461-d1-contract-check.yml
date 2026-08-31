@@ -1,0 +1,80 @@
+name: Production Release 461 D1 Contract Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/production-release461-d1-contract-check.json'
+
+permissions:
+  contents: read
+
+jobs:
+  check-production-d1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PROD_D1_DATABASE_NAME: devilndove-prod
+      EXPECTED_PROD_D1_DATABASE_ID: 0dc8fa3e-319c-45f7-a515-34c8acd89fcf
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install Wrangler
+        run: npm install --global wrangler@4.127.1
+      - name: Verify Production D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^database_name = "devilndove-prod"$' wrangler.toml
+          grep -q '^database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"$' wrangler.toml
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          wrangler d1 info "${PROD_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1-info.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(d))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in rows}
+          names={str(x.get('name') or '') for x in rows}
+          assert os.environ['EXPECTED_PROD_D1_DATABASE_ID'] in ids, ids
+          assert os.environ['PROD_D1_DATABASE_NAME'] in names, names
+          print('PRODUCTION D1 IDENTITY: PASS')
+          PY
+      - name: Build Release 461 manifest
+        run: python scripts/release461_d1_acceptance_manifest.py manifest --output /tmp/release461-manifest.json
+      - name: Read Production schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY type,name;" > /tmp/schema.json
+      - name: Check Release 461 contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_acceptance_manifest.py check --manifest /tmp/release461-manifest.json --schema-json /tmp/schema.json --output /tmp/report.json
+          cat /tmp/report.json
+      - name: Check forward-repair safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_forward_repair_check.py --manifest /tmp/release461-manifest.json --schema-json /tmp/schema.json --output /tmp/repair.json
+          cat /tmp/repair.json
+      - name: Boundary
+        run: |
+          echo 'Production D1 mutation: NONE'
+          echo 'Production R2 mutation: NONE'
