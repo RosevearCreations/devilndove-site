@@ -1,57 +1,64 @@
 # Devil n Dove — Project Status & Roadmap
 
-## Current Development state
+## Current Development release
 
-**Release 462 — Autonomous Quality, Workflow & Gate Consolidation — complete and Development green.**
+**Release 464 — Platform Integrity and Migration Authority.**
 
-Preclosure technical evidence is exact and green:
+Release 463 remains the environment/cutover authority. The canonical operating model is one Cloudflare Pages project (`devilndove-site`): `dev` → Preview/Development and `main` → Production/Live, with isolated D1/R2 resources.
 
-- source SHA `71b58c548e953edbdede1be85e12acd7e30e3422`
-- System Gate run `33348770688` (#526), job `99357890735` — PASS
-- Cloudflare Pages check `99358032459` — PASS
-- deployment `3e03d1ee-a427-4d14-b561-59b2980fdf1c`
-- preview `https://3e03d1ee.devilndove-site-dev.pages.dev`
-- one ordinary GitHub Actions workflow on the green head instead of the 11-workflow historical fanout exposed by the first landing.
+## Update plan
 
-Release 462 is source-only. No D1 migration was added or executed, and no R2/provider/live Production mutation was performed.
+| Update | Items | Theme |
+|---|---:|---|
+| Update 1 | 1–7 | Platform Integrity and Migration Authority |
+| Update 2 | 8–13 | Operational Acceptance and Recovery |
+| Update 3 | 14–20 | Business Application Growth |
 
-## Completed dozen
+The detailed 20-item grouping is maintained in `docs/operations/RELEASE_464_THREE_UPDATE_ROADMAP.md`.
 
-| # | Workstream | Result |
-|---|---|---|
-| 1 | Application-wide audit | Runtime/schema ownership reviewed; no Release 462 schema migration justified. |
-| 2 | Finance / Accounting | Statement imports remain migration-owned, read-only schema checked and fail closed. |
-| 3 | Inventory / Tools / Supplies | Base-unit authority and mobile/responsive clarity reinforced. |
-| 4 | Product / Storefront | Merchandising, primary-media quality and SEO guidance reinforced. |
-| 5 | SEO | Public SEO structure and depth remain mandatory current gates. |
-| 6 | CAIP | Source-preserving review/edit/handoff boundaries reinforced; raw deletion and execution closed. |
-| 7 | Creators / Content Studio | Reference-only reviewed handoff and no-auto-publish rule reinforced. |
-| 8 | I.T. | Provider next steps/correction mechanics exposed safely; PayPal setup aligned to `PAYPAL_SECRET`. |
-| 9 | Stripe / PayPal prep | Development test/sandbox execution remains explicit-operator gated. |
-| 10 | Responsive/admin UX | Shared Release 462 responsive layer applied to major workspaces. |
-| 11 | Regression / GitHub | Historical source/remote workflows archived; one ordinary System Gate remains. |
-| 12 | Documentation | Machine and human current authorities synchronized. |
+## Update 1 — items 1–7
 
-## GitHub workflow correction
+1. **Canonical D1 migrations** — forward schema changes are immutable files under `migrations/canonical/`, applied by `scripts/d1_migrate.py`, with Cloudflare native `d1_migrations` plus SHA-256/source/recovery proof.
+2. **Branch/release safety** — source/deploy controls fail closed. Native GitHub branch-protection state remains a separately observable repository setting and is never inferred from source controls.
+3. **Exact Development → Production promotion** — `main` deployment requires an exact tree already reachable on `dev` with a successful canonical System Gate.
+4. **Legacy cleanup** — temporary Release 464 codemod/source workflows are removed after use; historical Build/Release material remains provenance only.
+5. **Documentation convergence** — `development-release.json`, AI handoff, project roadmap, sanity authority and Release 464 roadmap all identify the current operating model.
+6. **Accounting statement imports** — migration-owned, read-only schema inspection, fail-closed; no request-time schema repair.
+7. **Runtime D1 schema mutation blockade** — shared D1 firewall blocks schema mutation authority at request time while preserving business reads/writes; source gate requires zero raw D1 bypasses carrying DDL.
 
-The first Release 462 landing generated 11 Actions workflows and System Gate #525 failed on one incorrect static Accounting helper-name assertion. The runtime Accounting helper already used read-only `PRAGMA` checks and contained no request-time DDL. Release 462 corrected the assertion and converted the entire historical release-specific source/remote workflow family to deliberate manual archives. The corrected head generated exactly one Actions workflow, System Gate #526, and it passed every substantive step.
+## Database authority
 
-## Database state
+Release 461 is the historical verified baseline only. It is not replayed. Release 464 starts the forward canonical stream with `0001_release464_migration_authority.sql`.
 
-Release 461 remains the D1 authority: 77 required tables, 93 required indexes, zero missing objects, zero structural drift and zero foreign-key violations. Historical migration replay remains forbidden.
+Future rule:
 
-## External evidence still open
+**Dev migration + Dev proof → exact green Dev tree → Production migration + Production proof → Production code deployment.**
 
-These remain deliberate later acceptance work:
+Production transactional/business data remains Production-owned and is never overwritten wholesale from Development.
+
+## Release gates
+
+A Development release is green only when the same `dev` SHA has:
+
+- canonical System Gate PASS;
+- canonical migration policy PASS;
+- runtime D1 schema authority/firewall PASS;
+- Development D1 migration apply/proof PASS;
+- Development D1/R2 boundary verification PASS;
+- exact SHA Cloudflare Preview deployment/control-plane proof PASS.
+
+Production remains a separate deliberate promotion boundary and is not required to call a Development release green.
+
+## External acceptance still deliberately separate
 
 - CAIP private-media browser/range-streaming evidence;
 - Stripe test transaction/webhook/reconciliation;
 - PayPal sandbox transaction/webhook/reconciliation;
-- Etsy/social/video provider authorization/controlled acceptance;
-- Development-to-Production promotion.
+- live provider authorization;
+- deliberate Production promotion.
 
-Credentials/configuration presence never authorizes execution.
+Configuration or credential presence never authorizes execution.
 
 ## Forward direction
 
-Release 462 autonomous source work is closed. New autonomous feature/source work should begin as **Release 463**. Production remains a separate deliberate promotion boundary.
+Close Update 1 on exact Development evidence, then begin **Update 2 — items 8–13**. Do not reopen Release 461 migration replay, the retired `devilndove-site-dev` authority, request-time schema DDL, or blind Development-to-Production data copying.
