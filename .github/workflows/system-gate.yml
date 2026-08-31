@@ -21,6 +21,7 @@ on:
       - 'wrangler.toml'
       - 'development-release.json'
       - 'release463-environment.json'
+      - 'migrations/**'
       - 'scripts/**'
       - '.github/workflows/**'
   pull_request:
@@ -33,6 +34,8 @@ jobs:
     timeout-minutes: 14
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
@@ -40,11 +43,17 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Validate Release 462 application and Release 463 environment authority
+      - name: Validate Release 464 application and Release 463 environment authority
         run: python scripts/repository_forward_sanity.py
 
-      - name: Validate Release 462 twelve-workstream autonomous quality
-        run: python scripts/release462_autonomous_quality_gate.py
+      - name: Validate canonical D1 migration policy
+        run: python scripts/migration_policy_gate.py
+
+      - name: Validate runtime D1 schema mutation authority
+        run: python scripts/runtime_schema_mutation_gate.py
+
+      - name: Prove runtime D1 schema firewall
+        run: node scripts/release464_schema_firewall_proof.mjs
 
       - name: Validate repository hygiene
         run: python scripts/repository_hygiene_gate.py
@@ -62,12 +71,19 @@ jobs:
         run: |
           node --check functions/_middleware.js
           node --check functions/api/_lib/releaseAuthority.js
+          node --check functions/api/_lib/schemaSafeD1.js
+          node --check functions/api/_lib/adminAudit.js
+          node --check functions/api/_lib/accounting.js
           node --check functions/api/_lib/paymentExecution.js
           node --check functions/api/_lib/appModules.js
           node --check functions/api/_lib/appModuleRoutes.js
           node --check functions/api/_lib/appModuleSessionGuard.js
           node --check functions/api/admin/_middleware.js
           node --check functions/api/admin/_accountingStatementImports.js
+          node --check functions/api/admin/migrate.js
+          node --check functions/api/admin/migration-ledger.js
+          node --check functions/api/admin/storefront-schema-repair.js
+          node --check functions/api/admin/product-images.js
           node --check functions/api/admin/site-item-inventory.js
           node --check functions/api/admin/product-image-quality.js
           node --check functions/api/admin/storefront-merchandising.js
@@ -93,7 +109,10 @@ jobs:
         run: |
           python -m py_compile \
             scripts/repository_forward_sanity.py \
-            scripts/release462_autonomous_quality_gate.py \
+            scripts/migration_policy_gate.py \
+            scripts/runtime_schema_mutation_gate.py \
+            scripts/d1_migrate.py \
+            scripts/main_promotion_gate.py \
             scripts/repository_hygiene_gate.py \
             scripts/module_architecture_gate.py \
             scripts/public_seo_gate.py \
@@ -102,15 +121,17 @@ jobs:
             scripts/product_inventory_tools_source_gate.py
 
       - name: Whitespace validation
-        run: git diff --check
+        run: git diff --check origin/dev...HEAD
 
-      - name: Release 462 application / Release 463 environment safety statement
+      - name: Release 464 safety statement
         run: |
-          echo 'Application release: 462 Autonomous Quality, Workflow & Gate Consolidation'
+          echo 'Application release: 464 Platform Integrity and Migration Authority'
           echo 'Environment release: 463 Environment Consolidation and Production Cutover'
-          echo 'Release 462 D1 migration: NONE'
-          echo 'Development D1 schema: Release 461 applied and verified'
-          echo 'Request-time schema DDL: FORBIDDEN'
+          echo 'Historical D1 baseline: Release 461 provenance only'
+          echo 'Forward D1 migration authority: migrations/canonical'
+          echo 'Development-first migration proof: REQUIRED'
+          echo 'Request-time schema mutation capability: BLOCKED'
+          echo 'Production promotion: exact green Development tree only'
           echo 'Payment/provider execution: CLOSED'
           echo 'Raw CAIP R2 deletion: CLOSED'
           echo 'Canonical Pages project: devilndove-site'
@@ -121,17 +142,25 @@ jobs:
     needs: source-gate
     if: github.event_name == 'push' && github.ref_name == 'dev'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 1
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Apply and prove canonical Development D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
 
       - name: Prove Development data authority read-only
         shell: bash
@@ -145,14 +174,14 @@ jobs:
           grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
           grep -q '^bucket_name = "devilndove-caip-media-dev"$' wrangler.toml
           ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables; PRAGMA foreign_key_check;" > /tmp/release463-dev-d1.json
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables, (SELECT COUNT(*) FROM d1_migrations WHERE name='0001_release464_migration_authority.sql') AS canonical_migration, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name='0001_release464_migration_authority.sql' AND environment='development') AS migration_proof; PRAGMA foreign_key_check;" > /tmp/release464-dev-d1.json
           python - <<'PY'
           import json
-          d=json.load(open('/tmp/release463-dev-d1.json'))
+          d=json.load(open('/tmp/release464-dev-d1.json'))
           rows=[]
           def walk(v):
               if isinstance(v,dict):
-                  if 'app_modules' in v and 'tables' in v: rows.append(v)
+                  if all(k in v for k in ('app_modules','tables','canonical_migration','migration_proof')): rows.append(v)
                   for x in v.values(): walk(x)
               elif isinstance(v,list):
                   for x in v: walk(x)
@@ -161,7 +190,9 @@ jobs:
           row=rows[0]
           assert int(row['app_modules'])==5,row
           assert int(row['tables'])>=574,row
-          print('RELEASE 463 DEVELOPMENT D1 READ-ONLY AUTHORITY: PASS',row)
+          assert int(row['canonical_migration'])==1,row
+          assert int(row['migration_proof'])==1,row
+          print('RELEASE 464 DEVELOPMENT D1 AUTHORITY: PASS',row)
           PY
 
       - name: Deploy exact Development SHA to canonical Preview
@@ -174,16 +205,16 @@ jobs:
             --project-name=devilndove-site \
             --branch=dev \
             --commit-hash="${GITHUB_SHA}" \
-            --commit-message="Release 463 canonical Development Preview ${GITHUB_SHA}" \
-            | tee /tmp/release463-dev-deploy.log
+            --commit-message="Release 464 canonical Development Preview ${GITHUB_SHA}" \
+            | tee /tmp/release464-dev-deploy.log
           python - <<'PY'
           import re
-          text=open('/tmp/release463-dev-deploy.log',encoding='utf-8',errors='replace').read()
+          text=open('/tmp/release464-dev-deploy.log',encoding='utf-8',errors='replace').read()
           labels=re.findall(r'https://([a-z0-9-]+)\.devilndove-site\.pages\.dev',text,re.I)
           hashes=[x for x in labels if re.fullmatch(r'[0-9a-f]{8}',x,re.I)]
           assert hashes,text[-3000:]
           url=f'https://{hashes[-1]}.devilndove-site.pages.dev'
-          open('/tmp/release463-dev-url','w').write(url)
+          open('/tmp/release464-dev-url','w').write(url)
           print('EXACT_DEVELOPMENT_URL',url)
           PY
 
@@ -195,10 +226,10 @@ jobs:
           set -euo pipefail
           curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site" \
-            > /tmp/release463-project.json
+            > /tmp/release464-project.json
           python - <<'PY'
-          import json
-          d=json.load(open('/tmp/release463-project.json'))
+          import json,os
+          d=json.load(open('/tmp/release464-project.json'))
           assert d.get('success') is True,d
           r=d['result']; src=(r.get('source') or {}).get('config') or {}
           assert src.get('production_deployments_enabled') is False,src
@@ -210,19 +241,19 @@ jobs:
           assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images-dev',r2
           assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('name')=='devilndove-caip-media-dev',r2
           proof={
-            'release':463,'status':'PASS','source_sha':__import__('os').environ.get('GITHUB_SHA'),
+            'release':464,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),
             'project':'devilndove-site','environment':'preview','branch':'dev',
-            'url':open('/tmp/release463-dev-url').read().strip(),
+            'url':open('/tmp/release464-dev-url').read().strip(),
             'd1':'devilndove-dev','product_r2':'devilndove-toolshed-images-dev','caip_r2':'devilndove-caip-media-dev',
-            'native_git_deployments':False
+            'canonical_migration_stream':'migrations/canonical','native_git_deployments':False
           }
-          json.dump(proof,open('/tmp/release463-development-deploy-proof.json','w'),indent=2,sort_keys=True)
+          json.dump(proof,open('/tmp/release464-development-deploy-proof.json','w'),indent=2,sort_keys=True)
           print(json.dumps(proof,indent=2,sort_keys=True))
           PY
 
       - uses: actions/upload-artifact@v4
         with:
-          name: release463-development-deploy-proof
-          path: /tmp/release463-development-deploy-proof.json
+          name: release464-development-deploy-proof
+          path: /tmp/release464-development-deploy-proof.json
           retention-days: 90
           if-no-files-found: error
