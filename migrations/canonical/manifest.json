@@ -20,6 +20,13 @@
       "release": 464,
       "description": "Bootstrap the forward-only canonical migration proof authority used alongside Cloudflare D1's native d1_migrations ledger.",
       "recovery": "Forward-only. Restore the pre-migration D1 backup if required, or repair with a new numbered migration. Never edit or replay this migration after Development application."
+    },
+    {
+      "version": 2,
+      "file": "0002_release464_operational_acceptance.sql",
+      "release": 464,
+      "description": "Add migration-owned operational retention archive review and audited safe-recovery evidence for Update 2.",
+      "recovery": "Forward-only. Restore the pre-migration D1 backup if required, or repair retention/recovery authorities with a new numbered migration. Never edit this migration after Development application."
     }
   ]
 }

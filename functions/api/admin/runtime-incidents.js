@@ -1,298 +1,36 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
-
-function normalizeText(value) {
-  return String(value || '').trim();
+import { classifyIncidentAttention, operationalThresholdSnapshot } from './_operationalThresholds.js';
+import { boundedRetentionDays, consumeRetentionReview, decideRetentionReview, requestRetentionReview, retentionReviews } from './_operationalRetention.js';
+import { recoveryDescriptor, safeRecheckIncident } from './_operationalRecovery.js';
+function text(value){return String(value||'').trim();}
+function rows(result){return Array.isArray(result?.results)?result.results:[];}
+function parseIds(value){if(Array.isArray(value))return value.map(Number).filter((id)=>Number.isInteger(id)&&id>0);return String(value||'').split(',').map((id)=>Number(String(id).trim())).filter((id)=>Number.isInteger(id)&&id>0);}
+function filters(url){
+  const scope=text(url.searchParams.get('scope')).toLowerCase(),code=text(url.searchParams.get('code')).toLowerCase(),path=text(url.searchParams.get('path')).toLowerCase(),severity=text(url.searchParams.get('severity')).toLowerCase(),review=text(url.searchParams.get('review_status')||'open').toLowerCase();
+  const days=Math.max(1,Math.min(Number(url.searchParams.get('days')||7),90)),limit=Math.max(1,Math.min(Number(url.searchParams.get('limit')||40),100));
+  const clauses=[`datetime(COALESCE(created_at,datetime('now'))) >= datetime('now',?)`],binds=[`-${days} days`];
+  if(scope){clauses.push('LOWER(COALESCE(incident_scope,""))=?');binds.push(scope);} if(code){clauses.push('LOWER(COALESCE(incident_code,""))=?');binds.push(code);} if(path){clauses.push('LOWER(COALESCE(endpoint_path,""))=?');binds.push(path);} if(['critical','error','warning','info'].includes(severity)){clauses.push('LOWER(COALESCE(severity,"warning"))=?');binds.push(severity);} if(review&&review!=='all'){clauses.push('LOWER(COALESCE(review_status,"open"))=?');binds.push(review);}
+  return {scope,code,path,severity,review_status:review,days,limit,clauses,binds};
 }
-
-function normalizeResults(result) {
-  return Array.isArray(result?.results) ? result.results : [];
+export async function onRequestGet(context){
+  const {request,env}=context,adminUser=await getAdminUserFromRequest(request,env),db=getDb(env); if(!adminUser)return jsonResponse({ok:false,error:'Unauthorized.'},401); if(!db)return jsonResponse({ok:false,error:'Database binding is not configured.'},500);
+  const url=new URL(request.url),f=filters(url),where=f.clauses.join(' AND '),group=['1','true','yes'].includes(text(url.searchParams.get('group')).toLowerCase());
+  try{
+    const summary=await db.prepare(`SELECT COUNT(*) AS total_count,SUM(CASE WHEN LOWER(COALESCE(severity,''))='critical' THEN 1 ELSE 0 END) AS critical_count,SUM(CASE WHEN LOWER(COALESCE(severity,''))='error' THEN 1 ELSE 0 END) AS error_count,SUM(CASE WHEN LOWER(COALESCE(severity,''))='warning' THEN 1 ELSE 0 END) AS warning_count,SUM(CASE WHEN LOWER(COALESCE(review_status,'open'))='open' THEN 1 ELSE 0 END) AS open_count,SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) IN ('resolved','ignored') THEN 1 ELSE 0 END) AS closed_count FROM runtime_incidents WHERE ${where}`).bind(...f.binds).first();
+    const grouped=group?rows(await db.prepare(`SELECT LOWER(COALESCE(severity,'warning')) AS severity,COALESCE(incident_scope,'') AS incident_scope,COALESCE(incident_code,'') AS incident_code,COALESCE(endpoint_path,'') AS endpoint_path,COUNT(*) AS incident_count,MAX(created_at) AS last_seen_at,MIN(created_at) AS first_seen_at FROM runtime_incidents WHERE ${where} GROUP BY LOWER(COALESCE(severity,'warning')),COALESCE(incident_scope,''),COALESCE(incident_code,''),COALESCE(endpoint_path,'') ORDER BY incident_count DESC,datetime(MAX(created_at)) DESC LIMIT ?`).bind(...f.binds,f.limit).all()):[];
+    const incidents=rows(await db.prepare(`SELECT runtime_incident_id,incident_scope,incident_code,severity,endpoint_path,request_method,message,details_json,related_user_id,ip_address,user_agent,COALESCE(review_status,'open') AS review_status,admin_note,reviewed_by_user_id,reviewed_at,created_at FROM runtime_incidents WHERE ${where} ORDER BY datetime(created_at) DESC,runtime_incident_id DESC LIMIT ?`).bind(...f.binds,f.limit).all());
+    return jsonResponse({ok:true,requested_by:{user_id:adminUser.user_id,email:adminUser.email,display_name:adminUser.display_name},operational_attention:await operationalThresholdSnapshot(db),retention_reviews:await retentionReviews(db),filters:{scope:f.scope,code:f.code,path:f.path,severity:f.severity,review_status:f.review_status,days:f.days,limit:f.limit,group},summary:{total_count:Number(summary?.total_count||0),critical_count:Number(summary?.critical_count||0),error_count:Number(summary?.error_count||0),warning_count:Number(summary?.warning_count||0),open_count:Number(summary?.open_count||0),closed_count:Number(summary?.closed_count||0)},groups:grouped.map((r)=>({...r,incident_count:Number(r.incident_count||0)})),incidents:incidents.map((r)=>({...r,runtime_incident_id:Number(r.runtime_incident_id||0),attention:classifyIncidentAttention(r),recovery:recoveryDescriptor(r)}))},200,{'Cache-Control':'no-store'});
+  }catch(error){return jsonResponse({ok:false,error:error?.message||'Failed to load runtime incidents.',schema_ready:false},500);}
 }
-
-function normalizeSeverity(value) {
-  const clean = normalizeText(value).toLowerCase();
-  if (['critical', 'error', 'warning', 'info'].includes(clean)) return clean;
-  return '';
-}
-
-function parseIds(value) {
-  if (Array.isArray(value)) return value.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0);
-  return String(value || '')
-    .split(',')
-    .map((id) => Number(String(id).trim()))
-    .filter((id) => Number.isFinite(id) && id > 0);
-}
-
-async function ensureRuntimeIncidentSchema(db) {
-  const warnings = [];
-  try {
-    await db.prepare(`
-      CREATE TABLE IF NOT EXISTS runtime_incidents (
-        runtime_incident_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        incident_scope TEXT,
-        incident_code TEXT,
-        severity TEXT DEFAULT 'warning',
-        endpoint_path TEXT,
-        request_method TEXT,
-        message TEXT,
-        details_json TEXT,
-        related_user_id INTEGER,
-        ip_address TEXT,
-        user_agent TEXT,
-        review_status TEXT DEFAULT 'open',
-        admin_note TEXT,
-        reviewed_by_user_id INTEGER,
-        reviewed_at TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `).run();
-
-    const columns = normalizeResults(await db.prepare(`PRAGMA table_info(runtime_incidents)`).all())
-      .map((row) => String(row.name || '').toLowerCase());
-    const required = [
-      ['review_status', "ALTER TABLE runtime_incidents ADD COLUMN review_status TEXT DEFAULT 'open'"],
-      ['admin_note', 'ALTER TABLE runtime_incidents ADD COLUMN admin_note TEXT'],
-      ['reviewed_by_user_id', 'ALTER TABLE runtime_incidents ADD COLUMN reviewed_by_user_id INTEGER'],
-      ['reviewed_at', 'ALTER TABLE runtime_incidents ADD COLUMN reviewed_at TEXT']
-    ];
-    for (const [column, sql] of required) {
-      if (!columns.includes(column)) {
-        await db.prepare(sql).run();
-      }
-    }
-    await db.prepare(`CREATE INDEX IF NOT EXISTS idx_runtime_incidents_review_status_created ON runtime_incidents(review_status, severity, created_at DESC)`).run();
-    await db.prepare(`CREATE INDEX IF NOT EXISTS idx_runtime_incidents_grouping ON runtime_incidents(severity, incident_scope, incident_code, endpoint_path, created_at DESC)`).run();
-  } catch (error) {
-    warnings.push(`runtime_incident_schema_guard_failed: ${error?.message || error}`);
-  }
-  return warnings;
-}
-
-function buildFilters(url) {
-  const scope = normalizeText(url.searchParams.get('scope')).toLowerCase();
-  const code = normalizeText(url.searchParams.get('code')).toLowerCase();
-  const path = normalizeText(url.searchParams.get('path')).toLowerCase();
-  const severity = normalizeSeverity(url.searchParams.get('severity'));
-  const reviewStatus = normalizeText(url.searchParams.get('review_status') || 'open').toLowerCase();
-  const days = Math.max(1, Math.min(Number(url.searchParams.get('days') || 7), 90));
-  const limit = Math.max(1, Math.min(Number(url.searchParams.get('limit') || 40), 100));
-
-  const clauses = [`datetime(COALESCE(created_at, datetime('now'))) >= datetime('now', ?)`];
-  const bindings = [`-${days} days`];
-
-  if (scope) {
-    clauses.push('LOWER(COALESCE(incident_scope, "")) = ?');
-    bindings.push(scope);
-  }
-  if (code) {
-    clauses.push('LOWER(COALESCE(incident_code, "")) = ?');
-    bindings.push(code);
-  }
-  if (path) {
-    clauses.push('LOWER(COALESCE(endpoint_path, "")) = ?');
-    bindings.push(path);
-  }
-  if (severity) {
-    clauses.push('LOWER(COALESCE(severity, "warning")) = ?');
-    bindings.push(severity);
-  }
-  if (reviewStatus && reviewStatus !== 'all') {
-    clauses.push('LOWER(COALESCE(review_status, "open")) = ?');
-    bindings.push(reviewStatus);
-  }
-
-  return { scope, code, path, severity, review_status: reviewStatus, days, limit, clauses, bindings };
-}
-
-export async function onRequestGet(context) {
-  const { request, env } = context;
-  const db = getDb(env);
-  const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) return jsonResponse({ ok: false, error: 'Unauthorized.' }, 401);
-  if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-
-  const url = new URL(request.url);
-  const wantsGrouped = ['1', 'true', 'yes'].includes(normalizeText(url.searchParams.get('group')).toLowerCase());
-  const filters = buildFilters(url);
-  const warnings = await ensureRuntimeIncidentSchema(db);
-
-  try {
-    const whereSql = filters.clauses.join(' AND ');
-    const summaryRow = await db.prepare(`
-      SELECT
-        COUNT(*) AS total_count,
-        SUM(CASE WHEN LOWER(COALESCE(severity,'')) = 'critical' THEN 1 ELSE 0 END) AS critical_count,
-        SUM(CASE WHEN LOWER(COALESCE(severity,'')) = 'error' THEN 1 ELSE 0 END) AS error_count,
-        SUM(CASE WHEN LOWER(COALESCE(severity,'')) = 'warning' THEN 1 ELSE 0 END) AS warning_count,
-        SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) = 'open' THEN 1 ELSE 0 END) AS open_count,
-        SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) IN ('resolved','ignored') THEN 1 ELSE 0 END) AS closed_count
-      FROM runtime_incidents
-      WHERE ${whereSql}
-    `).bind(...filters.bindings).first().catch(() => null);
-
-    const groups = wantsGrouped ? normalizeResults(await db.prepare(`
-      SELECT
-        LOWER(COALESCE(severity,'warning')) AS severity,
-        COALESCE(incident_scope,'') AS incident_scope,
-        COALESCE(incident_code,'') AS incident_code,
-        COALESCE(endpoint_path,'') AS endpoint_path,
-        COUNT(*) AS incident_count,
-        MAX(created_at) AS last_seen_at,
-        MIN(created_at) AS first_seen_at
-      FROM runtime_incidents
-      WHERE ${whereSql}
-      GROUP BY LOWER(COALESCE(severity,'warning')), COALESCE(incident_scope,''), COALESCE(incident_code,''), COALESCE(endpoint_path,'')
-      ORDER BY incident_count DESC, datetime(MAX(created_at)) DESC
-      LIMIT ?
-    `).bind(...filters.bindings, filters.limit).all()) : [];
-
-    const rows = normalizeResults(await db.prepare(`
-      SELECT
-        runtime_incident_id,
-        incident_scope,
-        incident_code,
-        severity,
-        endpoint_path,
-        request_method,
-        message,
-        details_json,
-        related_user_id,
-        ip_address,
-        user_agent,
-        COALESCE(review_status,'open') AS review_status,
-        admin_note,
-        reviewed_by_user_id,
-        reviewed_at,
-        created_at
-      FROM runtime_incidents
-      WHERE ${whereSql}
-      ORDER BY datetime(created_at) DESC, runtime_incident_id DESC
-      LIMIT ?
-    `).bind(...filters.bindings, filters.limit).all());
-
-    return jsonResponse({
-      ok: true,
-      requested_by: { user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
-      warnings,
-      filters: {
-        scope: filters.scope,
-        code: filters.code,
-        path: filters.path,
-        severity: filters.severity,
-        review_status: filters.review_status,
-        days: filters.days,
-        limit: filters.limit,
-        group: wantsGrouped
-      },
-      summary: {
-        total_count: Number(summaryRow?.total_count || 0),
-        critical_count: Number(summaryRow?.critical_count || 0),
-        error_count: Number(summaryRow?.error_count || 0),
-        warning_count: Number(summaryRow?.warning_count || 0),
-        open_count: Number(summaryRow?.open_count || 0),
-        closed_count: Number(summaryRow?.closed_count || 0)
-      },
-      groups: groups.map((row) => ({
-        severity: row.severity || 'warning',
-        incident_scope: row.incident_scope || '',
-        incident_code: row.incident_code || '',
-        endpoint_path: row.endpoint_path || '',
-        incident_count: Number(row.incident_count || 0),
-        first_seen_at: row.first_seen_at || null,
-        last_seen_at: row.last_seen_at || null
-      })),
-      incidents: rows.map((row) => ({
-        runtime_incident_id: Number(row.runtime_incident_id || 0),
-        incident_scope: row.incident_scope || '',
-        incident_code: row.incident_code || '',
-        severity: row.severity || 'warning',
-        endpoint_path: row.endpoint_path || '',
-        request_method: row.request_method || '',
-        message: row.message || '',
-        details_json: row.details_json || '',
-        related_user_id: row.related_user_id == null ? null : Number(row.related_user_id),
-        ip_address: row.ip_address || '',
-        user_agent: row.user_agent || '',
-        review_status: row.review_status || 'open',
-        admin_note: row.admin_note || '',
-        reviewed_by_user_id: row.reviewed_by_user_id == null ? null : Number(row.reviewed_by_user_id),
-        reviewed_at: row.reviewed_at || null,
-        created_at: row.created_at || null
-      }))
-    }, 200, { 'Cache-Control': 'no-store' });
-  } catch (error) {
-    return jsonResponse({ ok: false, error: error?.message || 'Failed to load runtime incidents.' }, 500);
-  }
-}
-
-export async function onRequestPost(context) {
-  const { request, env } = context;
-  const db = getDb(env);
-  const adminUser = await getAdminUserFromRequest(request, env);
-  if (!adminUser) return jsonResponse({ ok: false, error: 'Unauthorized.' }, 401);
-  if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-
-  const warnings = await ensureRuntimeIncidentSchema(db);
-  let body = {};
-  try { body = await request.json(); } catch { body = {}; }
-
-  const action = normalizeText(body.action).toLowerCase();
-  const ids = parseIds(body.runtime_incident_ids || body.ids || body.runtime_incident_id);
-  const adminNote = normalizeText(body.admin_note || body.note);
-  const allowedStatuses = new Set(['open', 'reviewing', 'resolved', 'ignored']);
-
-  if (action === 'cleanup_resolved' || action === 'purge_resolved') {
-    const olderThanDays = Math.max(7, Math.min(Number(body.older_than_days || 30), 365));
-    try {
-      const result = await db.prepare(`
-        DELETE FROM runtime_incidents
-        WHERE LOWER(COALESCE(review_status,'open')) IN ('resolved','ignored')
-          AND datetime(COALESCE(created_at, datetime('now'))) < datetime('now', ?)
-      `).bind(`-${olderThanDays} days`).run();
-      await auditAdminAction(env, request, adminUser, {
-        action_type: 'runtime_incident_cleanup_resolved',
-        target_type: 'runtime_incidents',
-        target_key: `${olderThanDays}_days`,
-        details: { older_than_days: olderThanDays, deleted_count: result?.meta?.changes || 0, admin_note: adminNote }
-      });
-      return jsonResponse({ ok: true, warnings, deleted_count: result?.meta?.changes || 0, older_than_days: olderThanDays });
-    } catch (error) {
-      return jsonResponse({ ok: false, error: error?.message || 'Failed to clean up resolved runtime incidents.' }, 500);
-    }
-  }
-  const statusByAction = {
-    reopen: 'open',
-    reviewing: 'reviewing',
-    mark_reviewing: 'reviewing',
-    resolve: 'resolved',
-    resolved: 'resolved',
-    ignore: 'ignored',
-    ignored: 'ignored'
-  };
-  const nextStatus = statusByAction[action] || normalizeText(body.review_status).toLowerCase();
-
-  if (!ids.length) return jsonResponse({ ok: false, error: 'Select at least one incident.' }, 400);
-  if (!allowedStatuses.has(nextStatus)) return jsonResponse({ ok: false, error: 'Unsupported runtime incident status.' }, 400);
-
-  const placeholders = ids.map(() => '?').join(',');
-  try {
-    await db.prepare(`
-      UPDATE runtime_incidents
-      SET review_status = ?,
-          admin_note = CASE WHEN ? = '' THEN admin_note ELSE ? END,
-          reviewed_by_user_id = ?,
-          reviewed_at = CURRENT_TIMESTAMP
-      WHERE runtime_incident_id IN (${placeholders})
-    `).bind(nextStatus, adminNote, adminNote, Number(adminUser.user_id || 0), ...ids).run();
-
-    await auditAdminAction(env, request, adminUser, {
-      action_type: `runtime_incident_${nextStatus}`,
-      target_type: 'runtime_incidents',
-      target_key: ids.join(','),
-      details: { runtime_incident_ids: ids, review_status: nextStatus, admin_note: adminNote }
-    });
-
-    return jsonResponse({ ok: true, warnings, updated_count: ids.length, review_status: nextStatus });
-  } catch (error) {
-    return jsonResponse({ ok: false, error: error?.message || 'Failed to update runtime incidents.' }, 500);
-  }
+export async function onRequestPost(context){
+  const {request,env}=context,adminUser=await getAdminUserFromRequest(request,env),db=getDb(env); if(!adminUser)return jsonResponse({ok:false,error:'Unauthorized.'},401); if(!db)return jsonResponse({ok:false,error:'Database binding is not configured.'},500);
+  let body={};try{body=await request.json();}catch{} const action=text(body.action).toLowerCase(),ids=parseIds(body.runtime_incident_ids||body.ids||body.runtime_incident_id),note=text(body.admin_note||body.note);
+  try{
+    if(action==='request_retention_review')return jsonResponse(await requestRetentionReview(context,adminUser,db,{...body,older_than_days:boundedRetentionDays(body.older_than_days)}));
+    if(action==='approve_retention_review'||action==='reject_retention_review'){const out=await decideRetentionReview(context,adminUser,db,body,action==='approve_retention_review');return jsonResponse(out.data,out.status);}
+    if(action==='cleanup_resolved'||action==='purge_resolved'){const out=await consumeRetentionReview(context,adminUser,db,body);return jsonResponse(out.data,out.status);}
+    if(action==='safe_recheck'){if(ids.length!==1)return jsonResponse({ok:false,error:'Safe recovery requires exactly one incident.'},400);const out=await safeRecheckIncident(context,adminUser,db,ids[0]);return jsonResponse(out.data,out.status);}
+    const map={reopen:'open',reviewing:'reviewing',mark_reviewing:'reviewing',resolve:'resolved',resolved:'resolved',ignore:'ignored',ignored:'ignored'},next=map[action]||text(body.review_status).toLowerCase(); if(!ids.length)return jsonResponse({ok:false,error:'Select at least one incident.'},400);if(!['open','reviewing','resolved','ignored'].includes(next))return jsonResponse({ok:false,error:'Unsupported runtime incident status.'},400);
+    const placeholders=ids.map(()=>'?').join(',');await db.prepare(`UPDATE runtime_incidents SET review_status=?,admin_note=CASE WHEN ?='' THEN admin_note ELSE ? END,reviewed_by_user_id=?,reviewed_at=CURRENT_TIMESTAMP WHERE runtime_incident_id IN (${placeholders})`).bind(next,note,note,Number(adminUser.user_id||0),...ids).run();await auditAdminAction(env,request,adminUser,{action_type:`runtime_incident_${next}`,target_type:'runtime_incidents',target_key:ids.join(','),details:{runtime_incident_ids:ids,review_status:next,admin_note:note}});return jsonResponse({ok:true,updated_count:ids.length,review_status:next});
+  }catch(error){return jsonResponse({ok:false,error:error?.message||'Runtime incident operation failed.',schema_ready:false},500);}
 }

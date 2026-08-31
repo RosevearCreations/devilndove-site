@@ -1,0 +1,102 @@
+{
+  "release": 464,
+  "update": 2,
+  "theme": "Operational Acceptance and Recovery",
+  "status": "implementation",
+  "items": [
+    {
+      "id": 8,
+      "name": "Operational thresholds and alerts",
+      "requirements": [
+        "failed notifications",
+        "failed uploads",
+        "payment/provider failures",
+        "stale open incidents"
+      ],
+      "surface": "/admin/operations/#runtimeIncidentsAdminMount"
+    },
+    {
+      "id": 9,
+      "name": "Retention review before deletion",
+      "requirements": [
+        "archive candidate rows before deletion",
+        "explicit admin approval",
+        "delete only archived approved source IDs",
+        "audit every step"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Orphaned storage diagnostics",
+      "requirements": [
+        "read-only D1 reference scan",
+        "read-only R2 list scan",
+        "no object body reads",
+        "no R2 deletion"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Audited safe recovery",
+      "requirements": [
+        "one-click only when a safe probe exists",
+        "R2 HEAD or HTTPS HEAD only",
+        "resolve only after healthy verification",
+        "audit recovery result",
+        "provider execution remains closed"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Non-secret Preview smoke",
+      "requirements": [
+        "exact Preview URL",
+        "no authentication header",
+        "home",
+        "manifest",
+        "service worker",
+        "public API"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Accessibility acceptance",
+      "requirements": [
+        "keyboard-native controls",
+        "visible focus",
+        "status announcements",
+        "image alt text",
+        "caption requirement for HTML video",
+        "iframe titles"
+      ]
+    }
+  ],
+  "thresholds": {
+    "notification_failures_24h": {
+      "warning": 1,
+      "error": 3
+    },
+    "upload_failures_24h": {
+      "warning": 1,
+      "error": 3
+    },
+    "payment_provider_failures_24h": {
+      "error": 1,
+      "critical": 3
+    },
+    "open_critical": {
+      "critical": 1
+    },
+    "stale_open_hours": {
+      "warning": 24,
+      "critical": 72
+    }
+  },
+  "safety": {
+    "runtime_schema_ddl": false,
+    "raw_r2_delete": false,
+    "provider_execution": false,
+    "production_mutation": false,
+    "retention_delete_requires_archived_approved_review": true
+  }
+}
