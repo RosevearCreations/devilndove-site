@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Release 462 source-only autonomous quality gate.
+"""Release 462 source-only autonomous quality gate under Release 463 environment authority.
 
 This gate deliberately avoids Cloudflare, provider and Production network calls.
 It verifies the twelve autonomous workstreams and then runs the existing public
-SEO authorities locally.
+SEO authorities locally. Release 463 owns the current single-project environment.
 """
 from __future__ import annotations
 import json, subprocess, sys
@@ -28,9 +28,10 @@ policy=release.get("release_policy",{})
 db=release.get("current_release_database_state",{})
 
 # 1. Application-wide current authority / no accidental migration event.
-req(release.get("environment")=="development" and release.get("branch")=="dev","Release 462 must remain Development/dev")
-req(int(release.get("release") or 0)==462,"current release must be 462")
-req(release.get("pages_project")=="devilndove-site-dev","Development Pages project drifted")
+req(release.get("environment")=="development" and release.get("branch")=="dev","Release 462 application source must remain Development/dev")
+req(int(release.get("release") or 0)==462,"current application release must remain 462")
+req(release.get("pages_project")=="devilndove-site","Development must use Preview of the canonical devilndove-site Pages project")
+req(release.get("pages_environment")=="preview","Development Pages environment must be Preview")
 req(int(release.get("development_infrastructure",{}).get("d1",{}).get("schema_current_through_release") or 0)==461,"Release 462 must carry the proven Release 461 D1 schema without pretending to migrate")
 req(db.get("new_migration_required") is False and release.get("current_release_migrations")==[],"Release 462 must remain source-only/no-new-migration")
 req(db.get("historical_migration_replay") is False and db.get("automatic_replay_path") is False,"historical/automatic migration replay must remain closed")
@@ -111,10 +112,12 @@ req("Release 459 runtime/provider" not in system and "release459_runtime_accepta
 # 12. Canonical Markdown/documentation.
 for path in ("AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md","docs/operations/RELEASE_462_AUTONOMOUS_QUALITY_AUTHORITY.md"):
     text=read(path)
-    req("Release 462" in text,f"{path} is not synchronized to Release 462")
+    req("Release 462" in text,f"{path} is not synchronized to Release 462 application provenance")
 
-# Hard boundaries shared by all twelve.
-req(policy.get("production_promotion")=="closed","Production promotion must remain closed")
+# Hard boundaries shared by all twelve under the live Release 463 environment.
+req(policy.get("production_promotion")=="controlled_main_promotion","Production promotion must use the controlled main promotion gate")
+req(policy.get("blind_dev_to_production_data_overwrite") is False,"Production transactional data must never be overwritten from Development")
+req(policy.get("production_transactional_data_owned_by_production") is True,"Production data ownership must remain explicit")
 req(policy.get("provider_execution")=="closed" and policy.get("provider_publication")=="closed" and policy.get("provider_live_authorization")=="closed","Provider execution/publication/live authorization must remain closed")
 req(policy.get("request_time_schema_mutation")=="forbidden","Request-time schema mutation must remain forbidden")
 req(release.get("current_release_evidence",{}).get("raw_caip_r2_delete_enabled") is False,"Raw CAIP R2 deletion must remain disabled")
@@ -134,7 +137,9 @@ for script in ("public_seo_gate.py","public_seo_depth_gate.py"):
 print("\nRELEASE 462 AUTONOMOUS QUALITY GATE: PASS")
 print("Twelve autonomous workstreams: SOURCE-CLOSED")
 print("Historical release-specific source/remote workflows: MANUAL SNAPSHOTS ONLY")
-print("D1 migration: NONE")
+print("Release 462 D1 migration: NONE")
+print("Release 463 Pages model: devilndove-site Preview(dev) / Production(main)")
+print("Future D1 schema changes: VERSIONED MIGRATION, DEV FIRST, PRODUCTION BEFORE DEPENDENT CODE")
+print("Production transactional overwrite from Development: FORBIDDEN")
 print("Provider/payment execution: CLOSED")
 print("Raw CAIP R2 deletion: CLOSED")
-print("Separate live Production mutation: NONE")
