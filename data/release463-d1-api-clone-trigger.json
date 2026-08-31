@@ -4,6 +4,6 @@
   "source": "devilndove-dev",
   "target": "devilndove-prod-r462",
   "rollback_artifact_id": 9744317222,
-  "attempt": 2,
-  "requested_at": "2026-08-30"
+  "attempt": 3,
+  "requested_at": "2026-08-31"
 }
