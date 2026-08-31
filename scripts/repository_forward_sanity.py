@@ -130,7 +130,7 @@ req(evidence.get("build1_technical_green_source_sha") == "4359862e1d7a9d8dfc5384
 req(int(evidence.get("build1_system_gate_run") or 0) == 33428268265, "Build 1 System Gate run drifted")
 req(int(evidence.get("development_d1_tables") or 0) >= 583, "Development D1 table count regressed")
 req(int(evidence.get("development_native_migration_rows") or 0) == 4 and int(evidence.get("development_migration_proof_rows") or 0) == 4, "Build 1 must retain 4 native migration + 4 proof rows")
-req(int(evidence.get("development_foreign_key_violations") or -1) == 0, "Development FK authority drifted")
+req(int(evidence.get("development_foreign_key_violations", -1)) == 0, "Development FK authority drifted")
 req(int(evidence.get("release465_publication_triggers") or 0) == 4, "Release 465 publication trigger proof missing")
 req(evidence.get("preview_smoke_pass") is True and evidence.get("preview_smoke_mode") == "CLOUDFLARE_ACCESS_PROTECTED", "Build 1 Preview smoke evidence missing")
 req(int(evidence.get("preview_smoke_auth_headers_used") or 0) == 0 and evidence.get("preview_access_weakened") is False, "Build 1 Preview smoke must use zero auth headers and preserve Access")
@@ -141,7 +141,7 @@ req(build1_authority.get("state") == "complete_development_green", "Release 465 
 req(all(x.get("status") == "complete_development_green" for x in build1_authority.get("items", [])), "Release 465 Build 1 authority item status drifted")
 dev_evidence = build1_authority.get("development_evidence") or {}
 req(dev_evidence.get("source_sha") == "4359862e1d7a9d8dfc53841d0d25c6a219f134c3", "Build 1 authority technical-green SHA drifted")
-req(int(dev_evidence.get("native_migration_rows") or 0) == 4 and int(dev_evidence.get("proof_rows") or 0) == 4 and int(dev_evidence.get("foreign_key_violations") or -1) == 0, "Build 1 authority D1 proof drifted")
+req(int(dev_evidence.get("native_migration_rows") or 0) == 4 and int(dev_evidence.get("proof_rows") or 0) == 4 and int(dev_evidence.get("foreign_key_violations", -1)) == 0, "Build 1 authority D1 proof drifted")
 
 for path in (
     "AI_HANDOFF.md",
