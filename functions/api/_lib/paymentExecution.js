@@ -5,9 +5,14 @@ function text(value) {
   return String(value ?? '').trim();
 }
 
-export function isDevelopmentPaymentHost(hostname) {
+export function isDevelopmentPaymentHost(hostname, env = {}) {
+  const environment = text(env.DND_ENVIRONMENT).toLowerCase();
+  if (environment !== 'development') return false;
   const host = text(hostname).toLowerCase();
-  return host === 'devilndove-site-dev.pages.dev' || host.endsWith('.devilndove-site-dev.pages.dev');
+  return host === 'dev.devilndove-site.pages.dev'
+    || /^[0-9a-f]{8}\.devilndove-site\.pages\.dev$/i.test(host)
+    || host === 'localhost'
+    || host === '127.0.0.1';
 }
 
 function requestHost(requestUrl) {
@@ -48,7 +53,7 @@ function paypalCredentialState(env = {}) {
 export function paymentExecutionStatus(requestUrl, env = {}, providerValue = '') {
   const provider = text(providerValue).toLowerCase();
   const host = requestHost(requestUrl);
-  const development_host = isDevelopmentPaymentHost(host);
+  const development_host = isDevelopmentPaymentHost(host, env);
   const operator_switch_set = text(env.PAYMENT_PROVIDER_EXECUTION_MODE).toLowerCase() === 'development-explicit';
 
   let providerState;
