@@ -300,7 +300,9 @@ def verify_development_before_production(items: list[dict[str, Any]], manifest_h
 
 def apply_native(config: Path, target: str) -> None:
     print(f"Applying pending canonical migrations to {target} via Cloudflare D1 native migrations...")
-    run(wrangler_args(config, "d1", "migrations", "apply", "DB", "--remote", "--yes"))
+    # Wrangler 4 automatically skips the confirmation prompt in CI. `--yes` is an
+    # npx package-install flag only and is intentionally not forwarded to this command.
+    run(wrangler_args(config, "d1", "migrations", "apply", "DB", "--remote"))
 
 
 def main() -> int:
