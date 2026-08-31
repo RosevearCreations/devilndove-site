@@ -1,0 +1,8 @@
+{
+  "target_release": 462,
+  "mode": "preflight",
+  "apply_confirmation": "",
+  "requested_scope": "full-production-d1-r2-convergence",
+  "production_data_state": "site_closed_since_extraction; business data expected unchanged",
+  "r2_policy": "copy-forward-no-delete"
+}

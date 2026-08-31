@@ -1,0 +1,329 @@
+name: Production Release 462 Convergence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/release462-production-convergence-request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-release462-convergence
+  cancel-in-progress: false
+
+jobs:
+  converge-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+      PROD_D1_DATABASE_NAME: devilndove-prod
+      EXPECTED_PROD_D1_DATABASE_ID: 0dc8fa3e-319c-45f7-a515-34c8acd89fcf
+      STRUCTURAL_REPAIR: migrations/dev/20260830_runtime_schema_structural_forward_repair.sql
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Resolve deliberate Production request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_ENV"
+          import json
+          r=json.load(open('data/release462-production-convergence-request.json', encoding='utf-8'))
+          mode=str(r.get('mode') or '').strip().lower()
+          assert mode in ('preflight','apply'), mode
+          assert int(r.get('target_release') or 0) == 462, r
+          print(f"CONVERGENCE_MODE={mode}")
+          print(f"APPLY_CONFIRMATION={str(r.get('apply_confirmation') or '')}")
+          PY
+          echo "Production Release 462 convergence mode: ${CONVERGENCE_MODE}"
+
+      - name: Pin Production source and bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = main
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^database_name = "devilndove-prod"$' wrangler.toml
+          grep -q '^database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-caip-media"$' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          echo "Exact main SHA: $(git rev-parse HEAD)"
+
+      - name: Require Cloudflare credential
+        shell: bash
+        run: test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'CLOUDFLARE_API_TOKEN_EDIT is missing.'; exit 1; }
+
+      - name: Install Wrangler
+        shell: bash
+        run: npm install --global wrangler@4.127.1
+
+      - name: Verify exact Production D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${PROD_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1-info.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(d))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in rows}
+          names={str(x.get('name') or '') for x in rows}
+          assert os.environ['EXPECTED_PROD_D1_DATABASE_ID'] in ids, ids
+          assert os.environ['PROD_D1_DATABASE_NAME'] in names, names
+          print('EXACT PRODUCTION D1 IDENTITY: PASS')
+          PY
+
+      - name: Build post-448 migration manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          root=Path('migrations/dev')
+          selected=[]
+          tables=set(); indexes=set()
+          forbidden=re.compile(r'\b(?:ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW))\b',re.I)
+          for p in sorted(root.glob('*.sql')):
+              m=re.search(r'release(\d+)',p.name,re.I)
+              if not m: continue
+              rel=int(m.group(1))
+              if not 449 <= rel <= 461: continue
+              text=p.read_text(encoding='utf-8')
+              bad=forbidden.search(text)
+              if bad:
+                  raise SystemExit(f'STOP: non-additive post-448 migration {p}: {bad.group(0)}')
+              selected.append(str(p).replace('\\','/'))
+              tables.update(x.lower() for x in re.findall(r'CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?["`\[]?([A-Za-z_][A-Za-z0-9_]*)',text,re.I))
+              indexes.update(x.lower() for x in re.findall(r'CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:IF\s+NOT\s+EXISTS\s+)?["`\[]?([A-Za-z_][A-Za-z0-9_]*)',text,re.I))
+          assert selected, 'No post-448 migrations found'
+          json.dump({'migrations':selected,'tables':sorted(tables),'indexes':sorted(indexes)},open('/tmp/post448-manifest.json','w'),indent=2)
+          print(f'Post-448 migrations: {len(selected)}')
+          print(f'Required tables: {len(tables)}')
+          print(f'Required indexes: {len(indexes)}')
+          for p in selected: print(p)
+          PY
+
+      - name: Read-only Production D1 snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY type,name;" \
+            > /tmp/production-schema-pre.json
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT COUNT(*) AS fk_violations FROM pragma_foreign_key_check;" \
+            > /tmp/production-fk-pre.json
+
+      - name: Read-only Production R2 inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/production_release462_r2_sync.py inventory --output /tmp/production-r2-preflight.json
+          cat /tmp/production-r2-preflight.json
+
+      - name: Preflight boundary
+        if: env.CONVERGENCE_MODE == 'preflight'
+        shell: bash
+        run: |
+          echo 'PRODUCTION RELEASE 462 PREFLIGHT COMPLETE'
+          echo 'D1 mutation: NONE'
+          echo 'R2 mutation: NONE'
+          echo 'Pages mutation: NONE from this workflow'
+
+      - name: Require explicit Production apply confirmation
+        if: env.CONVERGENCE_MODE == 'apply'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${APPLY_CONFIRMATION}" = 'APPLY-RELEASE-462-FULL-PRODUCTION-CONVERGENCE'
+          echo 'EXPLICIT PRODUCTION APPLY CONFIRMATION: PASS'
+
+      - name: Apply Releases 449 through 460 in Production-safe form
+        if: env.CONVERGENCE_MODE == 'apply'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/release449-460.txt
+          import json,re
+          for p in json.load(open('/tmp/post448-manifest.json'))['migrations']:
+              m=re.search(r'release(\d+)',p,re.I)
+              if m and 449 <= int(m.group(1)) <= 460:
+                  print(p)
+          PY
+          while IFS= read -r migration; do
+            test -n "${migration}" || continue
+            target="/tmp/$(basename "${migration}")"
+            python - "${migration}" "${target}" <<'PY'
+          import sys
+          src,dst=sys.argv[1:3]
+          text=open(src,encoding='utf-8').read()
+          text=text.replace("'development'","'production'")
+          text=text.replace('Development','Production').replace('development','production')
+          text=text.replace('devilndove-site-prod.pages.dev','devilndove.com')
+          text=text.replace('devilndove-site-dev.pages.dev','devilndove.com')
+          text=text.replace('devilndove-dev','devilndove-prod')
+          text=text.replace('devilndove-toolshed-images-dev','devilndove-toolshed-images')
+          text=text.replace('devilndove-caip-media-dev','devilndove-caip-media')
+          open(dst,'w',encoding='utf-8').write(text)
+          PY
+            echo "Applying Production-safe ${migration}"
+            wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --file "${target}"
+          done < /tmp/release449-460.txt
+
+      - name: Release 461 structural preflight after 460 convergence
+        if: env.CONVERGENCE_MODE == 'apply'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_acceptance_manifest.py manifest --output /tmp/release461-manifest.json
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY type,name;" \
+            > /tmp/production-schema-after460.json
+          python scripts/release461_d1_forward_repair_check.py \
+            --manifest /tmp/release461-manifest.json \
+            --schema-json /tmp/production-schema-after460.json \
+            --output /tmp/release461-production-repair.json
+          python - <<'PY' >> "$GITHUB_ENV"
+          import json
+          r=json.load(open('/tmp/release461-production-repair.json'))
+          assert r['safe'], r
+          print(f"R461_REPAIR_REQUIRED={'1' if r['repair_required'] else '0'}")
+          PY
+          cat /tmp/release461-production-repair.json
+
+      - name: Apply Release 461 structural forward repair when required
+        if: env.CONVERGENCE_MODE == 'apply' && env.R461_REPAIR_REQUIRED == '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=/tmp/runtime_schema_structural_forward_repair.sql
+          python - "${STRUCTURAL_REPAIR}" "${target}" <<'PY'
+          import sys
+          src,dst=sys.argv[1:3]
+          text=open(src,encoding='utf-8').read()
+          text=text.replace("'development'","'production'")
+          text=text.replace('Development','Production').replace('development','production')
+          text=text.replace('devilndove-site-dev.pages.dev','devilndove.com')
+          text=text.replace('devilndove-dev','devilndove-prod')
+          text=text.replace('devilndove-toolshed-images-dev','devilndove-toolshed-images')
+          text=text.replace('devilndove-caip-media-dev','devilndove-caip-media')
+          open(dst,'w',encoding='utf-8').write(text)
+          PY
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --file "${target}"
+
+      - name: Apply Release 461 migrations in Production-safe form
+        if: env.CONVERGENCE_MODE == 'apply'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/release461_d1_acceptance_manifest.py list > /tmp/release461-migrations.txt
+          while IFS= read -r migration; do
+            test -n "${migration}" || continue
+            target="/tmp/$(basename "${migration}")"
+            python - "${migration}" "${target}" <<'PY'
+          import sys
+          src,dst=sys.argv[1:3]
+          text=open(src,encoding='utf-8').read()
+          text=text.replace("'development'","'production'")
+          text=text.replace('Development','Production').replace('development','production')
+          text=text.replace('devilndove-site-dev.pages.dev','devilndove.com')
+          text=text.replace('devilndove-dev','devilndove-prod')
+          text=text.replace('devilndove-toolshed-images-dev','devilndove-toolshed-images')
+          text=text.replace('devilndove-caip-media-dev','devilndove-caip-media')
+          open(dst,'w',encoding='utf-8').write(text)
+          PY
+            echo "Applying Production-safe ${migration}"
+            wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --file "${target}"
+          done < /tmp/release461-migrations.txt
+
+      - name: Post-apply Production D1 convergence proof
+        if: env.CONVERGENCE_MODE == 'apply'
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY type,name;" \
+            > /tmp/production-schema-post.json
+          python scripts/release461_d1_acceptance_manifest.py check \
+            --manifest /tmp/release461-manifest.json \
+            --schema-json /tmp/production-schema-post.json \
+            --require-converged --output /tmp/release461-production-post.json
+          python - <<'PY'
+          import json
+          schema=json.load(open('/tmp/production-schema-post.json'))
+          req=json.load(open('/tmp/post448-manifest.json'))
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(schema))
+          tables={str(x.get('name') or '').lower() for x in rows if str(x.get('type') or '').lower()=='table'}
+          indexes={str(x.get('name') or '').lower() for x in rows if str(x.get('type') or '').lower()=='index'}
+          missing_tables=sorted(set(req['tables'])-tables)
+          missing_indexes=sorted(set(req['indexes'])-indexes)
+          assert not missing_tables, missing_tables
+          assert not missing_indexes, missing_indexes
+          print(f'POST-448 TABLES: PASS ({len(req["tables"])})')
+          print(f'POST-448 INDEXES: PASS ({len(req["indexes"])})')
+          PY
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --json \
+            --command "SELECT COUNT(*) AS fk_violations FROM pragma_foreign_key_check;" > /tmp/production-fk-post.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/production-fk-post.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          row=next(x for x in walk(d) if 'fk_violations' in x)
+          assert int(row['fk_violations'])==0,row
+          print('PRODUCTION D1 FOREIGN KEYS: PASS')
+          PY
+
+      - name: Converge Development R2 assets forward into Production R2
+        if: env.CONVERGENCE_MODE == 'apply'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/production_release462_r2_sync.py apply --output /tmp/production-r2-post.json
+          cat /tmp/production-r2-post.json
+
+      - name: Production convergence boundary
+        if: always()
+        shell: bash
+        run: |
+          echo "Mode: ${CONVERGENCE_MODE:-unknown}"
+          echo "Target release: 462"
+          echo "Target D1: devilndove-prod / 0dc8fa3e-319c-45f7-a515-34c8acd89fcf"
+          echo "Target R2: devilndove-toolshed-images + devilndove-caip-media"
+          echo "R2 policy: copy-forward only; Production-only objects are never deleted"
+          echo "Provider execution/publication: NONE"
