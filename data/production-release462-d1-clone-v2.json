@@ -1,0 +1,9 @@
+{
+  "target_release": 462,
+  "confirmation": "CLONE-DEV-D1-TO-FRESH-PRODUCTION-R462",
+  "source_database_name": "devilndove-dev",
+  "source_database_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+  "target_database_name": "devilndove-prod-r462",
+  "preserve_old_production_database": true,
+  "trigger": "clone-v2-1"
+}
