@@ -1,7 +1,7 @@
 {
   "release": 463,
-  "operation": "synchronize proven Development R2 buckets into retained Production R2 buckets using authenticated Cloudflare object inventory and Wrangler remote object transport",
+  "operation": "synchronize proven Development R2 buckets into retained Production R2 buckets through the isolated legacy Pages project using native R2 bindings",
   "requested_at": "2026-08-31",
-  "attempt": 6,
-  "transport": "cloudflare-r2-direct"
+  "attempt": 7,
+  "transport": "isolated-legacy-pages-r2-bridge"
 }
