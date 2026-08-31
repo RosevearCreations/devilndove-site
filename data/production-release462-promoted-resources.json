@@ -1,0 +1,14 @@
+{
+  "release": 462,
+  "promotion_mode": "promote-proven-development-resources",
+  "live_pages_project": "devilndove-site",
+  "d1": {
+    "name": "devilndove-dev",
+    "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+  },
+  "r2": {
+    "product_media": "devilndove-toolshed-images-dev",
+    "caip_private_media": "devilndove-caip-media-dev"
+  },
+  "rollback_resources_retained": true
+}
