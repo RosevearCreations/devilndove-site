@@ -8,6 +8,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FAIL: list[str] = []
 LABEL = "Platform Integrity and Migration Authority"
+CANDIDATE = "release464_update3_source_candidate"
+GREEN = "release464_update3_complete_development_green"
+MIGRATIONS = [
+    "migrations/canonical/0001_release464_migration_authority.sql",
+    "migrations/canonical/0002_release464_operational_acceptance.sql",
+    "migrations/canonical/0003_release464_business_growth.sql",
+]
+MANIFEST_MIGRATIONS = [Path(x).name for x in MIGRATIONS]
 
 
 def read(path: str) -> str:
@@ -26,11 +34,12 @@ def req(ok: bool, message: str) -> None:
 release = json.loads(read("development-release.json") or "{}")
 env463 = json.loads(read("release463-environment.json") or "{}")
 manifest = json.loads(read("migrations/canonical/manifest.json") or "{}")
+state = release.get("convergence_state")
 
 req(release.get("environment") == "development" and release.get("branch") == "dev", "application authority must remain Development/dev")
 req(int(release.get("release") or 0) == 464, "current application release must be 464")
 req(release.get("label") == LABEL, "Release 464 label drifted")
-req(release.get("convergence_state") == "release464_update2_complete_development_green", "Release 464 convergence state must identify Update 2 Development green")
+req(state in {CANDIDATE, GREEN}, "Release 464 convergence state must identify Update 3 source candidate or Development green")
 req([x.get("key") for x in release.get("canonical_modules", [])] == ["storefront","creators","socials","financials","it-platform"], "canonical five-module authority drifted")
 
 infra = release.get("development_infrastructure", {})
@@ -60,17 +69,13 @@ req(policy.get("request_time_schema_mutation") == "blocked_by_runtime_firewall_a
 req(policy.get("preview_access_must_not_be_weakened_for_smoke") is True, "Preview smoke must preserve Cloudflare Access")
 
 migrations = release.get("current_release_migrations", [])
-req([x.get("file") for x in migrations] == [
-    "migrations/canonical/0001_release464_migration_authority.sql",
-    "migrations/canonical/0002_release464_operational_acceptance.sql",
-], "Release 464 canonical migration authority must contain exact 0001/0002 sequence")
-
+req([x.get("file") for x in migrations] == MIGRATIONS, "Release 464 canonical migration authority must contain exact 0001/0002/0003 sequence")
 req(manifest.get("stream") == "devilndove-canonical-forward", "canonical migration stream drifted")
 rules = manifest.get("rules", {})
 req(rules.get("development_first") is True and rules.get("production_before_dependent_code") is True, "canonical manifest safety order drifted")
 req(rules.get("native_ledger") == "d1_migrations" and rules.get("proof_table") == "app_schema_migration_proofs", "canonical ledger/proof authority drifted")
 manifest_migrations = [m.get("file") for m in manifest.get("migrations", [])]
-req(manifest_migrations == ["0001_release464_migration_authority.sql", "0002_release464_operational_acceptance.sql"], "canonical migration manifest must contain exact Release 464 0001/0002 sequence")
+req(manifest_migrations == MANIFEST_MIGRATIONS, "canonical migration manifest must contain exact Release 464 0001/0002/0003 sequence")
 req(len(manifest_migrations) == len(set(manifest_migrations)), "canonical migration manifest contains duplicate filenames")
 
 runtime = read("functions/api/_lib/releaseAuthority.js")
@@ -100,27 +105,46 @@ req("f34a741b-0000-45b0-9a96-6be08754d563" not in wrangler and "account_id =" no
 
 update1 = release.get("release464_update1", [])
 req([x.get("id") for x in update1] == list(range(1, 8)), "Release 464 Update 1 must contain items 1-7")
+req(all(str(x.get("status") or "").startswith("complete") for x in update1), "Release 464 Update 1 items must remain complete")
 update2 = release.get("release464_update2", [])
 req([x.get("id") for x in update2] == [8,9,10,11,12,13], "Release 464 Update 2 must contain completed items 8-13")
 req(all(str(x.get("status") or "").startswith("complete") for x in update2), "Release 464 Update 2 items must remain complete")
+update3 = release.get("release464_update3", [])
+req([x.get("id") for x in update3] == [14,15,16,17,18,19,20], "Release 464 Update 3 must contain items 14-20")
 planned = {int(x.get("update") or 0): x for x in release.get("planned_updates", [])}
 req(2 not in planned, "Completed Update 2 must not remain in planned_updates")
-req(planned.get(3, {}).get("items") == [14,15,16,17,18,19,20], "Update 3 roadmap drifted")
 
 current_evidence = release.get("current_release_evidence", {})
-req(current_evidence.get("update2_development_green") is True, "Update 2 Development-green evidence missing")
-req(int(current_evidence.get("development_native_migration_rows") or 0) == 2, "Update 2 must retain two Development native migration rows")
-req(int(current_evidence.get("development_migration_proof_rows") or 0) == 2, "Update 2 must retain two Development migration proof rows")
-fk_value = current_evidence.get("development_foreign_key_violations")
-req(fk_value is not None and int(fk_value) == 0, "Update 2 Development FK authority drifted")
-req(current_evidence.get("preview_smoke_pass") is True and current_evidence.get("preview_access_weakened") is False, "Update 2 Access-safe Preview smoke evidence drifted")
-req(int(current_evidence.get("preview_smoke_auth_headers_used") or 0) == 0, "Update 2 Preview smoke must use zero auth headers")
+req(current_evidence.get("update1_development_green") is True and current_evidence.get("update2_development_green") is True, "Update 1/2 Development-green evidence must remain present")
+req(int(current_evidence.get("development_foreign_key_violations") or 0) == 0, "Development FK authority drifted")
+req(current_evidence.get("preview_access_weakened") is False, "Preview Access boundary drifted")
+req(current_evidence.get("production_mutation_executed_for_update3") is False, "Update 3 must not mutate Production")
+req(current_evidence.get("provider_execution_enabled") is False and current_evidence.get("provider_publication_enabled") is False, "Update 3 provider boundaries drifted")
+req(current_evidence.get("raw_caip_r2_delete_enabled") is False, "Update 3 raw CAIP R2 deletion must remain closed")
+
+if state == CANDIDATE:
+    req(all(str(x.get("status") or "").startswith("in_progress") for x in update3), "Update 3 candidate items must remain explicitly in progress")
+    req(planned.get(3, {}).get("items") == [14,15,16,17,18,19,20], "Update 3 candidate must remain in planned_updates")
+    req(current_evidence.get("update3_source_candidate") is True, "Update 3 source-candidate evidence missing")
+    req(int(current_evidence.get("development_native_migration_rows_before_update3") or 0) == 2, "Update 3 candidate must preserve pre-0003 native migration evidence")
+    req(int(current_evidence.get("development_migration_proof_rows_before_update3") or 0) == 2, "Update 3 candidate must preserve pre-0003 migration proof evidence")
+    db_state = release.get("current_release_database_state", {})
+    req(db_state.get("development_migration_state") == "update3_0003_pending_managed_apply", "Update 3 candidate must declare migration 0003 pending managed apply")
+else:
+    req(all(str(x.get("status") or "").startswith("complete") for x in update3), "Update 3 green items must all be complete")
+    req(3 not in planned, "Completed Update 3 must not remain in planned_updates")
+    req(current_evidence.get("update3_development_green") is True, "Update 3 Development-green evidence missing")
+    req(int(current_evidence.get("development_native_migration_rows") or 0) == 3, "Update 3 green must retain three native migration rows")
+    req(int(current_evidence.get("development_migration_proof_rows") or 0) == 3, "Update 3 green must retain three migration proof rows")
+    req(current_evidence.get("preview_smoke_pass") is True and current_evidence.get("preview_access_weakened") is False, "Update 3 Access-safe Preview smoke evidence drifted")
+    req(int(current_evidence.get("preview_smoke_auth_headers_used") or 0) == 0, "Update 3 Preview smoke must use zero auth headers")
 
 for path in (
     "AI_HANDOFF.md",
     "PROJECT_STATUS_AND_ROADMAP.md",
     "SANITY_HEALTH_CHECK.md",
     "release464-update2-operational-acceptance.json",
+    "release464-update3-business-growth.json",
     "docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md",
     "docs/operations/RELEASE_464_THREE_UPDATE_ROADMAP.md",
     "migrations/canonical/README.md",
@@ -128,6 +152,7 @@ for path in (
     "scripts/main_promotion_gate.py",
     "scripts/migration_policy_gate.py",
     "scripts/runtime_schema_mutation_gate.py",
+    "scripts/release464_update3_gate.py",
 ):
     req((ROOT / path).is_file(), f"canonical authority missing: {path}")
 
@@ -135,9 +160,10 @@ print("PLATFORM FORWARD SANITY")
 print(f"Application release: 464 — {LABEL}")
 print("Environment release: 463 — one Pages project with isolated Dev/Production D1 + R2")
 print("Historical D1 baseline: Release 461 — provenance only, never replayed")
-print("Forward D1 migration stream: migrations/canonical (0001 + 0002 Development proven)")
+print("Forward D1 migration stream: migrations/canonical (0001 + 0002 + 0003)")
+print("Release 464 Update 1: DEVELOPMENT GREEN")
 print("Release 464 Update 2: DEVELOPMENT GREEN")
-print("Next bounded work: Update 3 items 14-20")
+print(f"Release 464 Update 3: {'DEVELOPMENT GREEN' if state == GREEN else 'SOURCE CANDIDATE / 0003 PENDING'}")
 print("Request-time schema mutation capability: BLOCKED")
 print("Production data ownership: PRODUCTION")
 if FAIL:
