@@ -20,6 +20,7 @@ on:
       - 'manifest.webmanifest'
       - 'wrangler.toml'
       - 'development-release.json'
+      - 'release463-environment.json'
       - 'scripts/**'
       - '.github/workflows/**'
   pull_request:
@@ -39,7 +40,7 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Validate current Release 462 and repository authority
+      - name: Validate Release 462 application and Release 463 environment authority
         run: python scripts/repository_forward_sanity.py
 
       - name: Validate Release 462 twelve-workstream autonomous quality
@@ -74,6 +75,7 @@ jobs:
           node --check functions/api/admin/caip-content-handoff.js
           node --check functions/api/admin/content-studio.js
           node --check functions/api/admin/it-provider-setup-guide.js
+          node --check functions/api/admin/infrastructure-readiness.js
           node --check functions/api/payment-providers.js
           node --check public/js/admin-site-item-inventory.js
           node --check public/js/admin-storefront-merchandising.js
@@ -102,13 +104,125 @@ jobs:
       - name: Whitespace validation
         run: git diff --check
 
-      - name: Release 462 safety statement
+      - name: Release 462 application / Release 463 environment safety statement
         run: |
-          echo 'Current release: 462 Autonomous Quality, Workflow & Gate Consolidation'
+          echo 'Application release: 462 Autonomous Quality, Workflow & Gate Consolidation'
+          echo 'Environment release: 463 Environment Consolidation and Production Cutover'
           echo 'Release 462 D1 migration: NONE'
           echo 'Development D1 schema: Release 461 applied and verified'
           echo 'Request-time schema DDL: FORBIDDEN'
           echo 'Payment/provider execution: CLOSED'
           echo 'Raw CAIP R2 deletion: CLOSED'
-          echo 'Development Pages target: devilndove-site-dev'
-          echo 'Separate live Production mutation capability: NONE'
+          echo 'Canonical Pages project: devilndove-site'
+          echo 'Development target: dev Preview / Development D1 + Development R2'
+          echo 'Native Git-triggered Pages deployments: FROZEN'
+
+  deploy-development:
+    needs: source-gate
+    if: github.event_name == 'push' && github.ref_name == 'dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prove Development data authority read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-caip-media-dev"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables; PRAGMA foreign_key_check;" > /tmp/release463-dev-d1.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/release463-dev-d1.json'))
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'app_modules' in v and 'tables' in v: rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d)
+          assert rows,d
+          row=rows[0]
+          assert int(row['app_modules'])==5,row
+          assert int(row['tables'])>=574,row
+          print('RELEASE 463 DEVELOPMENT D1 READ-ONLY AUTHORITY: PASS',row)
+          PY
+
+      - name: Deploy exact Development SHA to canonical Preview
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=devilndove-site \
+            --branch=dev \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message="Release 463 canonical Development Preview ${GITHUB_SHA}" \
+            | tee /tmp/release463-dev-deploy.log
+          python - <<'PY'
+          import re
+          text=open('/tmp/release463-dev-deploy.log',encoding='utf-8',errors='replace').read()
+          labels=re.findall(r'https://([a-z0-9-]+)\.devilndove-site\.pages\.dev',text,re.I)
+          hashes=[x for x in labels if re.fullmatch(r'[0-9a-f]{8}',x,re.I)]
+          assert hashes,text[-3000:]
+          url=f'https://{hashes[-1]}.devilndove-site.pages.dev'
+          open('/tmp/release463-dev-url','w').write(url)
+          print('EXACT_DEVELOPMENT_URL',url)
+          PY
+
+      - name: Prove canonical Preview control-plane bindings
+        shell: bash
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site" \
+            > /tmp/release463-project.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/release463-project.json'))
+          assert d.get('success') is True,d
+          r=d['result']; src=(r.get('source') or {}).get('config') or {}
+          assert src.get('production_deployments_enabled') is False,src
+          assert src.get('preview_deployment_setting')=='none',src
+          preview=(r.get('deployment_configs') or {}).get('preview') or {}
+          d1=preview.get('d1_databases') or {}
+          r2=preview.get('r2_buckets') or {}
+          assert (d1.get('DB') or {}).get('id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa',d1
+          assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images-dev',r2
+          assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('name')=='devilndove-caip-media-dev',r2
+          proof={
+            'release':463,'status':'PASS','source_sha':__import__('os').environ.get('GITHUB_SHA'),
+            'project':'devilndove-site','environment':'preview','branch':'dev',
+            'url':open('/tmp/release463-dev-url').read().strip(),
+            'd1':'devilndove-dev','product_r2':'devilndove-toolshed-images-dev','caip_r2':'devilndove-caip-media-dev',
+            'native_git_deployments':False
+          }
+          json.dump(proof,open('/tmp/release463-development-deploy-proof.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(proof,indent=2,sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release463-development-deploy-proof
+          path: /tmp/release463-development-deploy-proof.json
+          retention-days: 90
+          if-no-files-found: error
