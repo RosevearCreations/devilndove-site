@@ -1,0 +1,55 @@
+name: Production Pages Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-live-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify Production source configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "main"
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^database_name = "devilndove-prod"$' wrangler.toml
+          grep -q '^database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-caip-media"$' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+      - name: Deploy exact main SHA to live Pages project
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=devilndove-site \
+            --branch=main \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message="${{ github.event.head_commit.message || 'Manual Production deployment' }}"
+      - name: Boundary statement
+        run: |
+          echo 'Target: Cloudflare Pages devilndove-site'
+          echo 'Source branch: main'
+          echo 'D1 migration/conversion: NONE'
+          echo 'R2 mutation: NONE beyond normal application runtime'
+          echo 'Provider execution/publication: NONE'
