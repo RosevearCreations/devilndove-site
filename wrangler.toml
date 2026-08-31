@@ -1,12 +1,13 @@
-name = "devilndove-site-dev"
+name = "devilndove-site"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
 
-# DEV ENVIRONMENT ONLY.
-# The Pages Git deployment owns account selection. Do not add account_id here;
-# local Development tooling pins CLOUDFLARE_ACCOUNT_ID explicitly instead.
-# Cloudflare Pages projects do not accept the Workers-only [observability] block.
-# Use Cloudflare Pages/Functions Logs or `wrangler pages deployment tail`.
+# TRACKED DEVELOPMENT-SAFE CONFIGURATION.
+# One Cloudflare Pages project is canonical: devilndove-site.
+# `dev` deploys as Preview/Development with the Development D1/R2 resources below.
+# `main` deploys as Production through .github/workflows/production-pages-deploy.yml,
+# which generates Production bindings ephemerally in the runner. Do not commit
+# Production resource IDs/bucket names here and do not add account_id here.
 
 [[d1_databases]]
 binding = "DB"
