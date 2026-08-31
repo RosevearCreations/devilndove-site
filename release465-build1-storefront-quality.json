@@ -1,0 +1,39 @@
+{
+  "release": 465,
+  "build": 1,
+  "title": "Storefront and SEO Quality",
+  "state": "in_progress_source_candidate",
+  "base_release": 464,
+  "base_development_sha": "e90158c0282111a81fa74c24d2140ae3fa7f2c2b",
+  "items": [
+    {"id":1,"name":"Storefront merchandising simulator","status":"implemented_source_candidate"},
+    {"id":2,"name":"Product readiness and completeness intelligence","status":"implemented_source_candidate"},
+    {"id":3,"name":"Fail-closed Product publication readiness","status":"implemented_source_candidate"},
+    {"id":4,"name":"SEO quality cockpit","status":"implemented_source_candidate"},
+    {"id":5,"name":"Internal-link intelligence","status":"implemented_source_candidate"},
+    {"id":6,"name":"Product image-quality automation visibility","status":"implemented_source_candidate"},
+    {"id":7,"name":"Storefront search quality and typo recovery","status":"implemented_source_candidate"}
+  ],
+  "migration": "migrations/canonical/0004_release465_storefront_quality.sql",
+  "safety": {
+    "production_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_product_publication": false,
+    "automatic_internal_link_rewrite": false,
+    "raw_r2_delete": false,
+    "request_time_schema_ddl": false,
+    "preview_access_must_remain_enforced": true,
+    "hard_publication_readiness_non_overrideable": true,
+    "soft_quality_override_requires_step_up_and_note": true
+  },
+  "authority_reuse": {
+    "products": "existing products/product_seo/product_images/product_image_annotations authorities",
+    "readiness": "existing admin Product readiness and image scoring",
+    "structured_data": "existing structured-data health plus Release 464 Product/Offer/Breadcrumb runtime",
+    "merchandising": "existing Release 464 Storefront collections, memberships, collages and scheduled rules",
+    "search": "existing public Product endpoint; Build 1 adds non-mutating suggestion recovery only"
+  },
+  "development_evidence": null,
+  "production_promotion": "closed"
+}

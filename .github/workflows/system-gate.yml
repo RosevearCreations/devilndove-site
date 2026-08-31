@@ -23,6 +23,7 @@ on:
       - 'release463-environment.json'
       - 'release464-update2-operational-acceptance.json'
       - 'release464-update3-business-growth.json'
+      - 'release465-build1-storefront-quality.json'
       - 'migrations/**'
       - 'scripts/**'
       - '.github/workflows/**'
@@ -44,45 +45,34 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-
-      - name: Validate Release 464 application and Release 463 environment authority
+      - name: Validate current application and Release 463 environment authority
         run: python scripts/repository_forward_sanity.py
-
       - name: Validate canonical D1 migration policy
         run: python scripts/migration_policy_gate.py
-
       - name: Validate runtime D1 schema mutation authority
         run: python scripts/runtime_schema_mutation_gate.py
-
       - name: Prove runtime D1 schema firewall
         run: node scripts/release464_schema_firewall_proof.mjs
-
       - name: Validate repository hygiene
         run: python scripts/repository_hygiene_gate.py
-
       - name: Validate five-module platform architecture
         run: python scripts/module_architecture_gate.py
-
       - name: Validate installable client platform
         run: python scripts/pwa_platform_gate.py
-
       - name: Validate Product Inventory Tools source authority
         run: python scripts/product_inventory_tools_source_gate.py
-
       - name: Validate Release 464 Update 2 operational acceptance authority
         run: python scripts/release464_update2_gate.py
-
       - name: Validate Release 464 Update 3 business application growth
         run: python scripts/release464_update3_gate.py
-
+      - name: Validate Release 465 Build 1 Storefront and SEO quality
+        run: python scripts/release465_build1_gate.py
       - name: Validate public SEO depth
         run: |
           python scripts/public_seo_gate.py
           python scripts/public_seo_depth_gate.py
-
       - name: Validate keyboard focus caption and screen-reader acceptance
         run: python scripts/accessibility_acceptance_gate.py
-
       - name: JavaScript syntax for current application core
         run: |
           node --check functions/_middleware.js
@@ -94,6 +84,7 @@ jobs:
           node --check functions/api/_lib/appModules.js
           node --check functions/api/_lib/appModuleRoutes.js
           node --check functions/api/_lib/appModuleSessionGuard.js
+          node --check functions/api/_lib/storefrontMerchandising.js
           node --check functions/api/admin/_middleware.js
           node --check functions/api/admin/_accountingStatementImports.js
           node --check functions/api/admin/migrate.js
@@ -103,6 +94,7 @@ jobs:
           node --check functions/api/admin/site-item-inventory.js
           node --check functions/api/admin/product-image-quality.js
           node --check functions/api/admin/storefront-merchandising.js
+          node --check functions/api/admin/storefront-merchandising-simulator.js
           node --check functions/api/admin/product-genealogy-trace.js
           node --check functions/api/admin/business-growth-pipeline.js
           node --check functions/api/admin/it-operations-dashboard.js
@@ -121,6 +113,7 @@ jobs:
           node --check public/js/admin-runtime-incidents.js
           node --check public/js/admin-site-item-inventory.js
           node --check public/js/admin-storefront-merchandising.js
+          node --check public/js/admin-storefront-quality.js
           node --check public/js/admin-business-pipeline.js
           node --check public/js/admin-month-end-cockpit.js
           node --check public/js/admin-it-platform.js
@@ -131,10 +124,10 @@ jobs:
           node --check public/js/admin-workspace-state.js
           node --check public/js/admin-module-nav.js
           node --check public/js/storefront-discovery-runtime.js
+          node --check public/js/storefront-search-quality.js
           node --check public/js/product-detail.js
           node --check public/js/seo-page-overrides.js
           node --check sw.js
-
       - name: Compile current Python gates
         run: |
           python -m py_compile \
@@ -151,26 +144,23 @@ jobs:
             scripts/product_inventory_tools_source_gate.py \
             scripts/release464_update2_gate.py \
             scripts/release464_update3_gate.py \
+            scripts/release465_build1_gate.py \
             scripts/accessibility_acceptance_gate.py \
             scripts/preview_smoke.py
-
       - name: Whitespace validation
         run: git diff --check origin/dev...HEAD
-
-      - name: Release 464 safety statement
+      - name: Release 465 Build 1 safety statement
         run: |
-          echo 'Application release: 464 Platform Integrity and Migration Authority'
-          echo 'Update 1: Platform Integrity and Migration Authority — GREEN'
-          echo 'Update 2: Operational Acceptance and Recovery — GREEN'
-          echo 'Update 3: Business Application Growth'
+          echo 'Release 464 baseline: DEVELOPMENT GREEN / IMMUTABLE'
+          echo 'Release 465 Build 1: Storefront and SEO Quality'
           echo 'Environment release: 463 Environment Consolidation and Production Cutover'
           echo 'Historical D1 baseline: Release 461 provenance only'
-          echo 'Forward D1 migration authority: migrations/canonical / 0001 + 0002 + 0003'
+          echo 'Forward D1 migration authority: migrations/canonical / 0001 + 0002 + 0003 + 0004'
           echo 'Development-first migration proof: REQUIRED'
+          echo 'Product hard publication readiness: FAIL CLOSED'
+          echo 'Merchandising simulation: READ ONLY'
+          echo 'Internal-link/search intelligence: SUGGESTION ONLY'
           echo 'Request-time schema mutation capability: BLOCKED'
-          echo 'Material genealogy: EXISTING BUILD 440 AUTHORITY / READ ONLY IN UPDATE 3'
-          echo 'Month-End Cockpit: EXISTING ACCOUNTING AUTHORITY / READ ONLY'
-          echo 'Cross-module pipeline: REFERENCES + STATUS ONLY'
           echo 'Production promotion: exact green Development tree only'
           echo 'Payment/provider execution: CLOSED'
           echo 'Provider publication: CLOSED'
@@ -197,12 +187,10 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-
       - name: Apply and prove canonical Development D1 migrations
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
-
       - name: Prove Development data authority read-only
         shell: bash
         env:
@@ -215,35 +203,30 @@ jobs:
           grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
           grep -q '^bucket_name = "devilndove-caip-media-dev"$' wrangler.toml
           ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables, (SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql')) AS canonical_migrations, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql') AND environment='development') AS migration_proofs, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='operational_retention_reviews') AS retention_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='operational_recovery_events') AS recovery_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='storefront_merchandising_rules') AS merchandising_rules_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='creative_business_pipelines') AS business_pipeline_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='creative_business_pipeline_events') AS business_pipeline_events_authority; PRAGMA foreign_key_check;" > /tmp/release464-dev-d1.json
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables, (SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) AS canonical_migrations, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') AND environment='development') AS migration_proofs, (SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name LIKE 'release465_%') AS release465_triggers, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='storefront_merchandising_rules') AS merchandising_rules_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='product_review_actions') AS product_review_authority, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='product_publish_overrides') AS publish_override_authority; PRAGMA foreign_key_check;" > /tmp/release465-build1-d1.json
           python - <<'PY'
           import json
-          d=json.load(open('/tmp/release464-dev-d1.json'))
-          rows=[]
-          keys=('app_modules','tables','canonical_migrations','migration_proofs','retention_authority','recovery_authority','merchandising_rules_authority','business_pipeline_authority','business_pipeline_events_authority')
+          d=json.load(open('/tmp/release465-build1-d1.json'));rows=[]
+          keys=('app_modules','tables','canonical_migrations','migration_proofs','release465_triggers','merchandising_rules_authority','product_review_authority','publish_override_authority')
           def walk(v):
               if isinstance(v,dict):
                   if all(k in v for k in keys): rows.append(v)
                   for x in v.values(): walk(x)
               elif isinstance(v,list):
                   for x in v: walk(x)
-          walk(d)
-          assert rows,d
-          row=rows[0]
+          walk(d);assert rows,d;row=rows[0]
           assert int(row['app_modules'])==5,row
           assert int(row['tables'])>=583,row
-          assert int(row['canonical_migrations'])==3,row
-          assert int(row['migration_proofs'])==3,row
-          assert int(row['retention_authority'])==1,row
-          assert int(row['recovery_authority'])==1,row
+          assert int(row['canonical_migrations'])==4,row
+          assert int(row['migration_proofs'])==4,row
+          assert int(row['release465_triggers'])==4,row
           assert int(row['merchandising_rules_authority'])==1,row
-          assert int(row['business_pipeline_authority'])==1,row
-          assert int(row['business_pipeline_events_authority'])==1,row
+          assert int(row['product_review_authority'])==1,row
+          assert int(row['publish_override_authority'])==1,row
           compact={k:int(row[k]) for k in keys}
-          json.dump(compact,open('/tmp/release464-update3-d1-authority.json','w'),indent=2,sort_keys=True)
-          print('RELEASE 464 UPDATE 3 DEVELOPMENT D1 AUTHORITY: PASS',compact)
+          json.dump(compact,open('/tmp/release465-build1-d1-authority.json','w'),indent=2,sort_keys=True)
+          print('RELEASE 465 BUILD 1 DEVELOPMENT D1 AUTHORITY: PASS',compact)
           PY
-
       - name: Deploy exact Development SHA to canonical Preview
         shell: bash
         env:
@@ -254,19 +237,18 @@ jobs:
             --project-name=devilndove-site \
             --branch=dev \
             --commit-hash="${GITHUB_SHA}" \
-            --commit-message="Release 464 Update 3 canonical Development Preview ${GITHUB_SHA}" \
-            | tee /tmp/release464-dev-deploy.log
+            --commit-message="Release 465 Build 1 canonical Development Preview ${GITHUB_SHA}" \
+            | tee /tmp/release465-dev-deploy.log
           python - <<'PY'
           import re
-          text=open('/tmp/release464-dev-deploy.log',encoding='utf-8',errors='replace').read()
+          text=open('/tmp/release465-dev-deploy.log',encoding='utf-8',errors='replace').read()
           labels=re.findall(r'https://([a-z0-9-]+)\.devilndove-site\.pages\.dev',text,re.I)
           hashes=[x for x in labels if re.fullmatch(r'[0-9a-f]{8}',x,re.I)]
           assert hashes,text[-3000:]
           url=f'https://{hashes[-1]}.devilndove-site.pages.dev'
-          open('/tmp/release464-dev-url','w').write(url)
+          open('/tmp/release465-dev-url','w').write(url)
           print('EXACT_DEVELOPMENT_URL',url)
           PY
-
       - name: Prove canonical Preview control-plane bindings
         shell: bash
         env:
@@ -275,42 +257,28 @@ jobs:
           set -euo pipefail
           curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site" \
-            > /tmp/release464-project.json
+            > /tmp/release465-project.json
           python - <<'PY'
           import json,os
-          d=json.load(open('/tmp/release464-project.json'))
-          assert d.get('success') is True,d
-          r=d['result']; src=(r.get('source') or {}).get('config') or {}
+          d=json.load(open('/tmp/release465-project.json'));assert d.get('success') is True,d
+          r=d['result'];src=(r.get('source') or {}).get('config') or {}
           assert src.get('production_deployments_enabled') is False,src
           assert src.get('preview_deployment_setting')=='none',src
-          preview=(r.get('deployment_configs') or {}).get('preview') or {}
-          d1=preview.get('d1_databases') or {}
-          r2=preview.get('r2_buckets') or {}
+          preview=(r.get('deployment_configs') or {}).get('preview') or {};d1=preview.get('d1_databases') or {};r2=preview.get('r2_buckets') or {}
           assert (d1.get('DB') or {}).get('id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa',d1
           assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images-dev',r2
           assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('name')=='devilndove-caip-media-dev',r2
-          proof={
-            'release':464,'update':3,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),
-            'project':'devilndove-site','environment':'preview','branch':'dev',
-            'url':open('/tmp/release464-dev-url').read().strip(),
-            'd1':'devilndove-dev','product_r2':'devilndove-toolshed-images-dev','caip_r2':'devilndove-caip-media-dev',
-            'd1_authority':json.load(open('/tmp/release464-update3-d1-authority.json')),
-            'canonical_migration_stream':'migrations/canonical','native_git_deployments':False,
-            'provider_execution':False,'provider_publication':False,'production_mutation':False,'raw_caip_r2_delete':False
-          }
-          json.dump(proof,open('/tmp/release464-development-deploy-proof.json','w'),indent=2,sort_keys=True)
-          print(json.dumps(proof,indent=2,sort_keys=True))
+          proof={'release':465,'build':1,'status':'PASS','source_sha':os.environ.get('GITHUB_SHA'),'project':'devilndove-site','environment':'preview','branch':'dev','url':open('/tmp/release465-dev-url').read().strip(),'d1':'devilndove-dev','product_r2':'devilndove-toolshed-images-dev','caip_r2':'devilndove-caip-media-dev','d1_authority':json.load(open('/tmp/release465-build1-d1-authority.json')),'canonical_migration_stream':'migrations/canonical','native_git_deployments':False,'provider_execution':False,'provider_publication':False,'production_mutation':False,'raw_caip_r2_delete':False}
+          json.dump(proof,open('/tmp/release465-build1-development-deploy-proof.json','w'),indent=2,sort_keys=True);print(json.dumps(proof,indent=2,sort_keys=True))
           PY
-
       - name: Run non-secret exact Preview smoke acceptance
         shell: bash
         run: |
           set -euo pipefail
-          python scripts/preview_smoke.py --base-url "$(cat /tmp/release464-dev-url)"
-
+          python scripts/preview_smoke.py --base-url "$(cat /tmp/release465-dev-url)"
       - uses: actions/upload-artifact@v4
         with:
-          name: release464-update3-development-deploy-proof
-          path: /tmp/release464-development-deploy-proof.json
+          name: release465-build1-development-deploy-proof
+          path: /tmp/release465-build1-development-deploy-proof.json
           retention-days: 90
           if-no-files-found: error

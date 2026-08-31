@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Storefront Quality &amp; Readiness — Devil n Dove</title>
+<link rel="stylesheet" href="/css/styles.css?v=465"><link rel="stylesheet" href="/css/admin-convergence.css?v=454"><link rel="icon" href="/assets/mark.png" type="image/png">
+<style>.quality-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.quality-metric{padding:12px;border:1px solid var(--border);border-radius:12px}.quality-list{display:grid;gap:8px;max-height:430px;overflow:auto}.quality-row{padding:10px;border:1px solid var(--border);border-radius:10px}.quality-row strong{display:block}.quality-actions{display:flex;gap:8px;flex-wrap:wrap}.quality-good{border-left:4px solid currentColor}.quality-warn{border-left:4px dashed currentColor}@media(max-width:900px){.quality-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.quality-grid{grid-template-columns:1fr}}</style>
+</head><body data-admin-page="storefront-quality" data-admin-module="storefront">
+<div class="container admin-shell">
+<div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"><div><div style="font-weight:800">Devil n Dove</div><div class="small">Storefront / Quality</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/storefront-merchandising/">Merchandising</a><a href="/admin/products/">Products</a><a href="/shop/">Shop</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
+<div class="hero compact-hero"><div><p class="eyebrow">Release 465 • Build 1</p><h1>Storefront Quality &amp; Readiness</h1><p>One read-only control centre for Product readiness, SEO/structured data, image quality, internal-link suggestions, merchandising simulation and search recovery. Existing Product, media and Storefront authorities remain authoritative.</p></div></div>
+<div class="card" style="margin-top:18px"><p class="small" id="qualityMessage" role="status" aria-live="polite" data-admin-workspace-status data-admin-retry-action="reload">Loading Storefront quality evidence…</p></div>
+<div id="qualitySummary" class="quality-grid" style="margin-top:18px"></div>
+<div class="grid cols-2" style="gap:18px;margin-top:18px">
+<section class="card"><h2 style="margin-top:0">Product readiness</h2><p class="small">Hard readiness is publication safety. Soft quality scores explain improvement opportunities.</p><div id="qualityProducts" class="quality-list"></div></section>
+<section class="card"><h2 style="margin-top:0">SEO &amp; structured data</h2><div id="qualitySeo" class="quality-list"></div></section>
+<section class="card"><h2 style="margin-top:0">Image quality</h2><div id="qualityImages" class="quality-list"></div></section>
+<section class="card"><h2 style="margin-top:0">Internal-link intelligence</h2><p class="small">Suggestions are explainable and non-mutating. Nothing rewrites Product or page content automatically.</p><div id="qualityLinks" class="quality-list"></div></section>
+<section class="card"><h2 style="margin-top:0">Merchandising simulator</h2><p class="small">Evaluate published Collections at another date/time using the same rule semantics. Simulation never rewrites Product rows.</p><div class="quality-actions"><label><span class="small">Simulate at</span><input id="qualitySimulateAt" type="datetime-local"></label><button class="btn" id="qualitySimulate" type="button">Run simulation</button><button class="btn" id="qualitySimulateNow" type="button">Now</button></div><div id="qualitySimulation" class="quality-list" style="margin-top:12px"></div></section>
+<section class="card"><h2 style="margin-top:0">Search quality</h2><p class="small">Runs a small read-only sample against the public Product search and reports zero-result terms. The Shop also gains typo-recovery suggestions after a zero-result search.</p><div id="qualitySearch" class="quality-list"></div></section>
+</div>
+<div class="footer card" style="margin-top:18px"></div></div>
+<script src="/js/main.js?v=465"></script><script src="/public/js/auth.js?v=465"></script><script src="/public/js/site-auth-ui.js?v=465"></script><script src="/public/js/admin-self-protect.js?v=465"></script><script src="/public/js/admin.js?v=465"></script><script src="/public/js/admin-module-nav.js?v=454"></script><script src="/public/js/admin-workspace-state.js?v=465"></script><script src="/public/js/admin-storefront-quality.js?v=465"></script>
+</body></html>

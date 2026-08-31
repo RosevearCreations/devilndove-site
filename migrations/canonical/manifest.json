@@ -34,6 +34,13 @@
       "release": 464,
       "description": "Add scheduled Storefront merchandising rules and the cross-module Creative-to-Storefront business pipeline spine.",
       "recovery": "Forward-only additive tables. Disable rules or archive pipeline rows for logical rollback; restore the pre-migration D1 backup only for unrecoverable schema integrity failure."
+    },
+    {
+      "version": 4,
+      "file": "0004_release465_storefront_quality.sql",
+      "release": 465,
+      "description": "Make Product publication hard-readiness migration-owned and add fail-closed SEO/readiness guards for Release 465 Build 1.",
+      "recovery": "Forward-only. Unpublish affected Products before any corrective migration; repair or replace Release 465 publication triggers only with a new numbered migration. Never edit this migration after Development application."
     }
   ]
 }
