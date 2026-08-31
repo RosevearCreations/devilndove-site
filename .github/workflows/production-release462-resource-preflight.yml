@@ -1,0 +1,82 @@
+name: Production Release 462 Resource Preflight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/release462-production-resource-preflight.json'
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PROD_D1_DATABASE_NAME: devilndove-prod
+      EXPECTED_PROD_D1_DATABASE_ID: 0dc8fa3e-319c-45f7-a515-34c8acd89fcf
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Protect Production authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^database_name = "devilndove-prod"$' wrangler.toml
+          grep -q '^database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-caip-media"$' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          test -n "${CLOUDFLARE_API_TOKEN}"
+      - name: Install Wrangler
+        run: npm install --global wrangler@4.127.1
+      - name: Verify Production D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 info "${PROD_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/d1-info.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(d))
+          ids={str(x.get('uuid') or x.get('id') or '') for x in rows}
+          names={str(x.get('name') or '') for x in rows}
+          assert os.environ['EXPECTED_PROD_D1_DATABASE_ID'] in ids, ids
+          assert os.environ['PROD_D1_DATABASE_NAME'] in names, names
+          print('PRODUCTION D1 IDENTITY: PASS')
+          PY
+      - name: Read Production D1 schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrangler d1 execute "${PROD_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS table_count FROM sqlite_master WHERE type='table'; SELECT COUNT(*) AS index_count FROM sqlite_master WHERE type='index'; SELECT COUNT(*) AS fk_violations FROM pragma_foreign_key_check;" > /tmp/prod-d1.json
+          cat /tmp/prod-d1.json
+      - name: Read Production R2 inventories
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/production_release462_r2_sync.py inventory --output /tmp/prod-r2.json
+          cat /tmp/prod-r2.json
+      - name: Boundary
+        run: |
+          echo 'Production D1 mutation: NONE'
+          echo 'Production R2 mutation: NONE'
+          echo 'Provider execution: NONE'
