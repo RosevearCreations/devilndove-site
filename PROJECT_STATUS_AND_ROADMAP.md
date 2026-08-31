@@ -2,81 +2,76 @@
 
 ## Current Development release
 
-**Release 464 — Platform Integrity and Migration Authority — is complete through Update 3 in Development.** Release 463 remains the environment/cutover authority: one Cloudflare Pages project (`devilndove-site`), `dev` → Preview/Development and `main` → Production/Live, with isolated D1/R2 resources.
+**Release 465 — Business Intelligence and Release Hardening — is current. Build 1 is Development green.** Release 464 is the completed prior application release. Release 463 remains the environment/cutover authority: one Cloudflare Pages project (`devilndove-site`), `dev` → Preview/Development and `main` → Production/Live, with isolated D1/R2 resources.
 
-## Three-update plan
+## Three-build plan
 
-| Update | Items | Theme | State |
+| Build | Items | Theme | State |
 |---|---:|---|---|
-| Update 1 | 1–7 | Platform Integrity and Migration Authority | Complete / Development green |
-| Update 2 | 8–13 | Operational Acceptance and Recovery | Complete / Development green |
-| Update 3 | 14–20 | Business Application Growth | Complete / Development green |
+| Build 1 | 1–7 | Storefront & SEO Quality | Complete / Development green |
+| Build 2 | 8–13 | Inventory & Creator Intelligence | Next / not started |
+| Build 3 | 14–20 | Financial, I.T. & Release Hardening | Planned after Build 2 green |
 
-## Update 1 — items 1–7
+## Build 1 — items 1–7
 
-Canonical forward D1 migration authority, fail-closed source/deploy controls, exact Development-tree Production promotion, legacy-authority cleanup, documentation convergence, Accounting statement-import fail-closed ownership, and zero request-time schema mutation capability are established and carried forward.
-
-## Update 2 — items 8–13
-
-Operational thresholds/Today Needs Attention, archive-and-approve retention deletion, read-only orphan-storage diagnostics, allowlisted audited HEAD recovery, Access-safe Preview smoke, and accessibility acceptance are complete. Provider execution, raw R2 deletion and Access weakening remain closed.
-
-## Update 3 — items 14–20
-
-14. **Storefront product experience:** correct `/shop/product/?slug=` customer path and richer Product context.
-15. **Public SEO depth:** Product/Offer/Breadcrumb structured data, canonical/social metadata, Collection internal links, one-H1 enforcement.
-16. **Storefront merchandising:** reusable scheduled rules, include/exclude effects, priority, start/end windows and explicit Product overrides.
-17. **Inventory genealogy:** read-only existing Build 440 purchase-lot → production-run → finished-lot → order/sale trace; no duplicate stock ledger.
-18. **Financials:** read-only Month-End Cockpit over existing close, HST/GST, evidence and accountant-export authority.
-19. **Creators + CAIP + Storefront:** cross-module business pipeline stores references/status/events only; Inventory mutation, accounting posting, publication and provider execution are not granted.
-20. **I.T. Operations Dashboard:** current release/environment/migration/provider/business-growth control centre without secrets/provider calls.
+1. Storefront merchandising simulator — read-only date/time projection over existing Storefront authority.
+2. Product readiness/completeness intelligence — uses existing Product, SEO and media signals.
+3. Fail-closed Product publication readiness — hard requirements are database-protected and non-overrideable.
+4. SEO quality cockpit — read-only structured-data/Product/public-page diagnostics.
+5. Internal-link intelligence — explainable suggestions only; no automatic rewriting.
+6. Product image-quality visibility — existing image scoring/annotation/alt/context evidence.
+7. Storefront typo recovery — suggestions over existing Products; no Product mutation.
 
 ## Database authority
 
-Release 461 is the historical verified baseline only and is not replayed. Release 464's canonical forward stream is:
+Release 461 remains the historical verified baseline only and is not replayed. The canonical forward stream proven on Development is:
 
 1. `0001_release464_migration_authority.sql`
 2. `0002_release464_operational_acceptance.sql`
 3. `0003_release464_business_growth.sql`
+4. `0004_release465_storefront_quality.sql`
 
-Update 3 Development proof: **583 tables, 3 native migration ledger rows, 3 migration proof rows, 0 foreign-key violations.** Migration 0003 was the only newly applied file in the first Update 3 green run.
+Build 1 Development proof: **583 tables, 4 native migration ledger rows, 4 migration proof rows, 4 Release 465 publication triggers, 0 foreign-key violations.**
 
 Permanent order: **Dev migration + Dev proof → exact green Dev tree → Production migration + Production proof → dependent Production code.** Production business/transactional data remains Production-owned and is never overwritten wholesale from Development.
 
-## Exact first Update 3 Development-green evidence
+## Exact first Build 1 Development-green evidence
 
-- source SHA: `0edab02e5506dc74a37ad7e2ef03fbeb52b02398`
-- System Gate: `33422881509`
-- source-gate job: `99589311686` — PASS
-- deploy-development job: `99589416714` — PASS
-- exact Preview: `https://b6ac8e5a.devilndove-site.pages.dev`
-- D1: `583` tables / `3` native migration rows / `3` proof rows / `0` FK violations
-- migration manifest SHA-256: `9a230eda68494c197e41b2f268c4539638921e4bbaf77004c81ab972eb2a8f76`
-- proof artifact: `9769640976`
+- technical-green source SHA: `4359862e1d7a9d8dfc53841d0d25c6a219f134c3`
+- System Gate: `33428268265`
+- source-gate job: `99607087240` — PASS
+- deploy-development job: `99607189007` — PASS
+- exact Preview: `https://57cfbd12.devilndove-site.pages.dev`
+- D1: `583` tables / `4` native migration rows / `4` proof rows / `4` Release 465 triggers / `0` FK violations
+- migration manifest SHA-256: `d9a0f294765543e6f09696f54dfc58453d201fd4a6a84c1f11cd62e56ffa1642`
+- proof artifact: `9771613193`
 - Preview smoke: `CLOUDFLARE_ACCESS_PROTECTED` — PASS
 - authentication headers used by smoke: `ZERO`
 - Cloudflare Access weakened: `NO`
-- provider execution invoked: `ZERO`
+- provider execution/publication: `ZERO`
 - Production mutation: `ZERO`
+
+## Build 2 — next bounded work, items 8–13
+
+8. Related-product intelligence with explainable reasons.
+9. Inventory availability intelligence: can-make / limited / unavailable without consuming stock.
+10. Material-shortage forecasting from existing recipes, lots, on-hand quantities and planned work.
+11. Genealogy exception cockpit over the existing lot/production/finished-lot/sale authority.
+12. Creative project readiness score across materials, cost, evidence, Product linkage and content readiness.
+13. Pipeline Next Action engine that explains blockers and the next safe step without executing providers, Inventory mutations or Accounting posting.
+
+Build 2 must start from the final Build 1 documentation-closure SHA after its idempotent System Gate succeeds.
+
+## Build 3 — planned only, items 14–20
+
+Build 3 remains closed until Build 2 is Development green. It covers cost/profitability intelligence, Financial anomaly detection, month-end readiness, I.T. health, regression evidence, performance budgets, and Release 465 final acceptance.
 
 ## Release gates
 
-Development is green only when the same `dev` tree has canonical source gates, migration policy/firewall, update-specific gates, SEO/accessibility where applicable, Development D1 apply/proof, exact Preview deployment/control-plane binding proof and Access-safe non-secret smoke all passing.
+A build is Development green only when the same `dev` tree has canonical source gates, migration policy/firewall, build-specific gates, SEO/accessibility where applicable, Development D1 apply/proof, exact Preview deployment/control-plane binding proof and Access-safe non-secret smoke all passing.
 
-Production is a separate deliberate promotion boundary and is not required to call a Development update green.
+Production is a separate deliberate promotion boundary and is not required to call a Development build green.
 
 ## Deliberately separate future acceptance
 
-These were not silently folded into Update 3 and still require deliberate provider/browser/operator acceptance when chosen:
-
-- Stripe Development test payment/webhook/refund/reconciliation;
-- PayPal sandbox payment/webhook/refund/reconciliation;
-- CAIP private-media browser/range-streaming/source-preservation evidence;
-- Social/OAuth connect/revoke/error acceptance;
-- live provider authorization;
-- deliberate Production promotion.
-
-Configuration or credential presence never authorizes execution.
-
-## Forward direction
-
-Release 464 Updates 1–3 are complete in Development. Do not reopen them without current evidence of drift. The next bounded roadmap can now focus on external acceptance, deliberate Production promotion, or the next business-growth release rather than redoing Release 464 infrastructure.
+Stripe Development test acceptance, PayPal sandbox acceptance, CAIP private-media browser/range-streaming evidence, Social/OAuth controlled acceptance, live provider authorization, and deliberate Production promotion remain separate operator/provider boundaries. Credentials never imply execution authorization.

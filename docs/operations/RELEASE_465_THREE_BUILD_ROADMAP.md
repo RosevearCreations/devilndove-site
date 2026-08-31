@@ -2,19 +2,23 @@
 
 Release 465 follows the green Release 464 Development checkpoint and is intentionally divided into three bounded builds. Each build uses the same closure discipline: isolated feature branch, source/regression gate, managed Development migration when required, exact Development Preview deployment, D1/R2 binding proof, Access-safe smoke, canonical documentation convergence, then a final idempotent System Gate on the documented closure SHA.
 
-## Build 1 — Storefront & SEO Quality (items 1–7)
+## Build 1 — Storefront & SEO Quality — Development green
 
 1. Storefront merchandising simulator for date/time preview without rewriting Product rows.
 2. Product readiness/completeness visibility using the existing Product, SEO and media authorities.
-3. Fail-closed Product publication rules: hard commerce/SEO readiness cannot be bypassed; any permitted soft quality override remains explicit, step-up protected and audited.
+3. Fail-closed Product publication rules: hard commerce/SEO readiness cannot be bypassed; permitted soft quality override remains explicit, step-up protected and audited.
 4. SEO quality cockpit combining structured-data, Product SEO and public-page diagnostics.
 5. Explainable internal-link intelligence between Products, Collections and related Storefront content; suggestions do not rewrite content automatically.
 6. Product image-quality visibility using existing image annotations, merchandising scores, alt coverage and contextual-shot evidence.
 7. Storefront search-quality recovery that suggests likely Products after a zero-result/typo search without changing Product data.
 
-**Exit:** one Storefront quality control centre can explain what is ready, blocked, weak or discoverable; publication hard requirements fail closed; simulation/search suggestions remain non-mutating.
+**Build 1 technical-green evidence:** source `4359862e1d7a9d8dfc53841d0d25c6a219f134c3`, System Gate `33428268265`, Preview `https://57cfbd12.devilndove-site.pages.dev`, D1 `4` native migration rows + `4` proof rows + `4` Release 465 triggers + `0` FK violations, proof artifact `9771613193`, Access-safe smoke PASS with zero auth headers and no Access weakening.
 
-## Build 2 — Inventory & Creator Intelligence (items 8–13)
+**Exit achieved:** one Storefront quality control centre can explain what is ready, blocked, weak or discoverable; publication hard requirements fail closed; simulation/search/link intelligence remains non-mutating.
+
+## Build 2 — Inventory & Creator Intelligence
+
+**State: next bounded work after the Build 1 documentation closure SHA passes its final idempotent System Gate.**
 
 8. Related-product intelligence with explainable relationship reasons.
 9. Inventory availability intelligence: can-make / limited / unavailable reasoning without consuming stock.
@@ -25,7 +29,9 @@ Release 465 follows the green Release 464 Development checkpoint and is intentio
 
 **Exit:** Product and Creative workflows can explain readiness, material risk, genealogy gaps and next actions without introducing a second Inventory or CAIP authority.
 
-## Build 3 — Financial, I.T. & Release Hardening (items 14–20)
+## Build 3 — Financial, I.T. & Release Hardening
+
+**State: planned only; must not begin before Build 2 is Development green.**
 
 14. Cost/profitability intelligence using existing material cost, packaging/labour assumptions and fee models.
 15. Read-only Financial anomaly detection for duplicate/unmatched/unusual accounting evidence.
@@ -36,6 +42,17 @@ Release 465 follows the green Release 464 Development checkpoint and is intentio
 20. Release 465 autonomous acceptance framework and final canonical convergence.
 
 **Exit:** the business and platform expose explainable readiness/risk signals and every Release 465 build is independently Development-proven before any deliberate Production promotion.
+
+## Canonical migration state after Build 1
+
+Development has proven:
+
+1. `0001_release464_migration_authority.sql`
+2. `0002_release464_operational_acceptance.sql`
+3. `0003_release464_business_growth.sql`
+4. `0004_release465_storefront_quality.sql`
+
+The first 0004 attempt failed before application with a Cloudflare D1 `incomplete input` parser error. Because 0004 had not entered the native ledger, its trigger bodies were simplified and then applied successfully. After successful Development application, 0004 is immutable and any future repair must be a new numbered migration.
 
 ## Permanent boundaries
 

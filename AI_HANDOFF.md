@@ -2,9 +2,9 @@
 
 ## Current authority
 
-**Release 464 — Platform Integrity and Migration Authority — is the current application release, and Updates 1–3 are Development green.**
+**Release 465 — Business Intelligence and Release Hardening — is the current application release. Build 1 (items 1–7, Storefront & SEO Quality) is Development green.**
 
-Release 463 remains the environment authority: one Cloudflare Pages project, `devilndove-site`; `dev` deploys to Preview/Development and `main` deploys to Production/Live. Release 461 is historical D1 baseline provenance only and is never replayed because a chat, workstation, branch or deployment changes.
+Release 464 is the completed prior application release. Release 463 remains the environment authority: one Cloudflare Pages project, `devilndove-site`; `dev` deploys to Preview/Development and `main` deploys to Production/Live. Release 461 is historical D1 baseline provenance only and is never replayed because a chat, workstation, branch or deployment changes.
 
 ## Environment boundary
 
@@ -25,62 +25,69 @@ Release 463 remains the environment authority: one Cloudflare Pages project, `de
 
 Production business/transactional data is Production-owned. Never refresh or overwrite it wholesale from Development.
 
-## Release 464 Update 1 — Development green
+## Release 464 inherited green baseline
 
-Items 1–7 established the canonical forward D1 migration stream, fail-closed source/deploy controls, exact green-Development-tree Production promotion rule, legacy authority cleanup, canonical documentation, Accounting statement-import fail-closed migration ownership, and the application-wide request-time schema-mutation blockade.
+Release 464 Updates 1–3 remain closed and Development green. They established the forward-only canonical migration stream, request-time D1 schema firewall, operational recovery/retention acceptance, Access-safe Preview smoke, accessibility gate, Storefront merchandising, Product SEO/structured data, read-only genealogy, Month-End Cockpit, Creative business pipeline, and I.T. Operations Dashboard.
 
-Forward migrations live only in `migrations/canonical/`. Cloudflare native `d1_migrations` is paired with `app_schema_migration_proofs`. Historical migrations are provenance only. Missing schema is repaired by a new repository migration, never request-time DDL.
+Do not reopen Release 464 work unless a current gate proves drift.
 
-## Release 464 Update 2 — Development green
+## Release 465 Build 1 — Storefront & SEO Quality — Development green
 
-Items 8–13 added operational thresholds/Today Needs Attention, archive + explicit approval before retention deletion, read-only orphan-storage diagnostics, audited allowlisted HEAD recovery probes, Access-safe non-secret Preview smoke, and keyboard/focus/caption/screen-reader acceptance.
+Items 1–7 are complete:
 
-Cloudflare Access is not weakened for smoke testing. The smoke sends zero authentication/service-token headers. Provider execution and raw R2 deletion remain closed.
+1. **Storefront merchandising simulator** — evaluates existing Collection/rule/membership authority at a selected date/time without rewriting Product rows.
+2. **Product readiness/completeness intelligence** — consolidates the existing Product, SEO, media and readiness signals rather than creating a parallel Product record.
+3. **Fail-closed Product publication readiness** — canonical migration `0004_release465_storefront_quality.sql` adds four database triggers so hard commerce/SEO readiness cannot be bypassed. Soft quality override remains explicit, step-up protected and audited.
+4. **SEO quality cockpit** — one read-only Storefront Quality control centre combines Product readiness, structured-data health and public SEO diagnostics.
+5. **Internal-link intelligence** — explainable Product/Collection relationship suggestions only; content is not rewritten automatically.
+6. **Product image-quality visibility** — exposes existing image annotation, merchandising score, alt coverage and contextual-shot signals.
+7. **Storefront search quality / typo recovery** — suggests likely existing Products after zero-result searches without mutating Product data.
 
-## Release 464 Update 3 — Development green
+### Exact first Build 1 Development-green evidence
 
-Items 14–20 are complete:
-
-14. **Storefront product experience** — customer product links use the real `/shop/product/?slug=<slug>` authority and retain one source H1.
-15. **Public SEO depth** — Product + Offer + BreadcrumbList structured data, dynamic canonical/social metadata, related Collection links, and existing public SEO gates are carried together.
-16. **Storefront merchandising** — reusable scheduled include/exclude rules with priorities and start/end windows are evaluated at read time; campaigns do not rewrite Product rows.
-17. **Inventory material genealogy** — a GET-only trace exposes existing Build 440 purchase-lot → production-run material allocation → finished lot → order/sale provenance. No parallel stock ledger or historical reconstruction was introduced.
-18. **Financials Month-End Cockpit** — a read-only executive view summarizes the existing accounting close/HST/evidence/export authority. Accounting mutation remains in the existing Accounting workspace.
-19. **Creators + CAIP + Storefront pipeline** — `creative_business_pipelines` and event history connect existing Product/creative/content/Collection/accounting references and state without posting accounting, decrementing Inventory, publishing content, executing providers, or deleting R2.
-20. **I.T. Operations Dashboard** — current release/environment/migration/provider/business-growth state is exposed as the Release 464 control centre without secrets or provider execution.
-
-Canonical migration `0003_release464_business_growth.sql` owns only the new scheduled-merchandising and cross-module pipeline tables. Existing Product, Inventory, Accounting and CAIP tables remain their domain authorities.
-
-### Exact first Update 3 Development-green evidence
-
-- source SHA: `0edab02e5506dc74a37ad7e2ef03fbeb52b02398`
-- System Gate: `33422881509`
-- source-gate job: `99589311686` — PASS
-- deploy-development job: `99589416714` — PASS
-- exact Preview: `https://b6ac8e5a.devilndove-site.pages.dev`
-- Development D1: `583` tables
-- native canonical migration rows: `3`
-- migration proof rows: `3`
+- technical-green source SHA: `4359862e1d7a9d8dfc53841d0d25c6a219f134c3`
+- System Gate run: `33428268265`
+- source-gate job: `99607087240` — PASS
+- deploy-development job: `99607189007` — PASS
+- exact Preview: `https://57cfbd12.devilndove-site.pages.dev`
+- Development D1: `583` non-SQLite tables
+- native canonical migration rows: `4`
+- migration proof rows: `4`
+- Release 465 publication triggers: `4`
 - foreign-key violations: `0`
-- manifest SHA-256: `9a230eda68494c197e41b2f268c4539638921e4bbaf77004c81ab972eb2a8f76`
-- proof artifact ID: `9769640976`
+- migration manifest SHA-256: `d9a0f294765543e6f09696f54dfc58453d201fd4a6a84c1f11cd62e56ffa1642`
+- proof artifact ID: `9771613193`
 - Preview mode: `CLOUDFLARE_ACCESS_PROTECTED`
 - smoke authentication headers: `0`
 - Cloudflare Access weakened: **NO**
-- provider execution invoked: **ZERO**
+- provider execution/publication: **ZERO**
 - Production mutation: **ZERO**
+- raw CAIP R2 delete: **ZERO**
 
-The managed migrator applied only `0003_release464_business_growth.sql`; immutable 0001/0002 identities were preserved. The documentation closure SHA must pass the same managed gate idempotently before becoming the final restart checkpoint.
+The first 0004 attempt stopped before ledger application with Cloudflare D1 `incomplete input`. The migration was still unapplied, so its trigger bodies were simplified before the successful Development apply. Once 0004 applied, its identity became immutable.
+
+## Canonical D1 stream now proven on Development
+
+1. `0001_release464_migration_authority.sql`
+2. `0002_release464_operational_acceptance.sql`
+3. `0003_release464_business_growth.sql`
+4. `0004_release465_storefront_quality.sql`
+
+Cloudflare native `d1_migrations` and `app_schema_migration_proofs` both report four rows. Missing future schema must be repaired with a new numbered migration; request-time DDL remains forbidden.
 
 ## Permanent promotion/provider rules
 
 Production promotion remains exact green Development tree only: Development migration/proof → exact Dev Preview proof → same tree on `main` → Production migration/proof → dependent Production deployment. Main-only application patches are forbidden. Native Git-triggered Pages deployments remain frozen.
 
-Stripe/PayPal/provider execution and publication remain closed unless a later deliberate test/live authorization explicitly opens them. Configuration presence alone never authorizes transactions or publication.
+Stripe/PayPal/provider execution and publication remain closed unless a later deliberate test/live authorization explicitly opens them. Configuration presence alone never authorizes transactions or publication. Raw CAIP R2 deletion remains closed. Cloudflare Access must never be weakened to make Preview smoke pass.
 
 ## Next work
 
-Do **not** reopen Release 464 Updates 1–3 unless a current gate proves drift. The next work should be chosen from deliberately separate external acceptance or a new bounded business roadmap: Stripe test acceptance, PayPal sandbox acceptance, CAIP private-media browser/range-streaming evidence, Social/OAuth controlled acceptance, or deliberate Production promotion.
+**Do not begin Build 3.** After this documentation closure SHA passes the final idempotent System Gate, the next bounded work is:
+
+**Release 465 Build 2 — Inventory & Creator Intelligence — items 8–13 only.**
+
+Build 2 must itself become Development green before Build 3 starts.
 
 ## Canonical reading order
 
@@ -88,8 +95,9 @@ Do **not** reopen Release 464 Updates 1–3 unless a current gate proves drift. 
 2. `AI_HANDOFF.md`
 3. `PROJECT_STATUS_AND_ROADMAP.md`
 4. `SANITY_HEALTH_CHECK.md`
-5. `docs/operations/RELEASE_464_THREE_UPDATE_ROADMAP.md`
-6. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`
-7. `release463-environment.json`
+5. `docs/operations/RELEASE_465_THREE_BUILD_ROADMAP.md`
+6. `release465-build1-storefront-quality.json`
+7. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`
+8. `release463-environment.json`
 
 Older Build/Release material is provenance only and must not override these authorities.

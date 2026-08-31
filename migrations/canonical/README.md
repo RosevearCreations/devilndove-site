@@ -4,13 +4,14 @@ This directory is the **only forward migration stream for schema changes after t
 
 ## Current Development proof
 
-Release 464 Development has applied and verified:
+Release 465 Build 1 Development has applied and verified:
 
 1. `0001_release464_migration_authority.sql`
 2. `0002_release464_operational_acceptance.sql`
 3. `0003_release464_business_growth.sql`
+4. `0004_release465_storefront_quality.sql`
 
-The first Update 3 green run (`33422881509`, source `0edab02e5506dc74a37ad7e2ef03fbeb52b02398`) proved 3 native `d1_migrations` rows, 3 `app_schema_migration_proofs` rows, 583 non-SQLite tables and 0 foreign-key violations. Migration 0003 was the only newly applied file in that run.
+The first Build 1 green run (`33428268265`, source `4359862e1d7a9d8dfc53841d0d25c6a219f134c3`) proved 4 native `d1_migrations` rows, 4 `app_schema_migration_proofs` rows, 583 non-SQLite tables, 4 Release 465 publication triggers and 0 foreign-key violations. Migration 0004 was the only newly applied file in that run.
 
 ## Authority
 
@@ -32,10 +33,12 @@ The first Update 3 green run (`33422881509`, source `0edab02e5506dc74a37ad7e2ef0
 
 ## Immutability
 
-Once a canonical migration has been applied to Development, **do not edit, rename, reorder, delete, or rewrite its manifest recovery identity**. Any correction is a new numbered migration. The Release 464 Update 3 acceptance explicitly proved this fail-closed behavior when a draft manifest drift was rejected before migration 0003 could apply.
+Once a canonical migration has been applied to Development, **do not edit, rename, reorder, delete, or rewrite its manifest recovery identity**. Any correction is a new numbered migration.
+
+Release 465 Build 1 demonstrated the pre-application exception correctly: the first 0004 attempt failed with D1 `incomplete input` before ledger application, so its trigger syntax could still be corrected. After the successful Development apply, 0004 became immutable.
 
 ## Recovery
 
 Every migration manifest entry must contain concrete recovery guidance. Destructive or data-rewriting migrations require an explicit operator-reviewed recovery plan and must not be treated as routine automatic migrations.
 
-Production canonical migrations remain unapplied until deliberate Production promotion.
+Production canonical migrations 0001–0004 remain unapplied until deliberate Production promotion.

@@ -2,17 +2,17 @@
   "release": 465,
   "build": 1,
   "title": "Storefront and SEO Quality",
-  "state": "in_progress_source_candidate",
+  "state": "complete_development_green",
   "base_release": 464,
   "base_development_sha": "e90158c0282111a81fa74c24d2140ae3fa7f2c2b",
   "items": [
-    {"id":1,"name":"Storefront merchandising simulator","status":"implemented_source_candidate"},
-    {"id":2,"name":"Product readiness and completeness intelligence","status":"implemented_source_candidate"},
-    {"id":3,"name":"Fail-closed Product publication readiness","status":"implemented_source_candidate"},
-    {"id":4,"name":"SEO quality cockpit","status":"implemented_source_candidate"},
-    {"id":5,"name":"Internal-link intelligence","status":"implemented_source_candidate"},
-    {"id":6,"name":"Product image-quality automation visibility","status":"implemented_source_candidate"},
-    {"id":7,"name":"Storefront search quality and typo recovery","status":"implemented_source_candidate"}
+    {"id": 1, "name": "Storefront merchandising simulator", "status": "complete_development_green"},
+    {"id": 2, "name": "Product readiness and completeness intelligence", "status": "complete_development_green"},
+    {"id": 3, "name": "Fail-closed Product publication readiness", "status": "complete_development_green"},
+    {"id": 4, "name": "SEO quality cockpit", "status": "complete_development_green"},
+    {"id": 5, "name": "Internal-link intelligence", "status": "complete_development_green"},
+    {"id": 6, "name": "Product image-quality automation visibility", "status": "complete_development_green"},
+    {"id": 7, "name": "Storefront search quality and typo recovery", "status": "complete_development_green"}
   ],
   "migration": "migrations/canonical/0004_release465_storefront_quality.sql",
   "safety": {
@@ -34,6 +34,33 @@
     "merchandising": "existing Release 464 Storefront collections, memberships, collages and scheduled rules",
     "search": "existing public Product endpoint; Build 1 adds non-mutating suggestion recovery only"
   },
-  "development_evidence": null,
+  "development_evidence": {
+    "source_sha": "4359862e1d7a9d8dfc53841d0d25c6a219f134c3",
+    "system_gate_run": 33428268265,
+    "source_gate_job": 99607087240,
+    "deploy_development_job": 99607189007,
+    "exact_preview": "https://57cfbd12.devilndove-site.pages.dev",
+    "d1_database": "devilndove-dev",
+    "native_migration_rows": 4,
+    "proof_rows": 4,
+    "non_sqlite_tables": 583,
+    "release465_publication_triggers": 4,
+    "foreign_key_violations": 0,
+    "migration_manifest_sha256": "d9a0f294765543e6f09696f54dfc58453d201fd4a6a84c1f11cd62e56ffa1642",
+    "proof_artifact_id": 9771613193,
+    "preview_smoke_mode": "CLOUDFLARE_ACCESS_PROTECTED",
+    "preview_smoke_auth_headers_used": 0,
+    "preview_access_weakened": false,
+    "production_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "raw_caip_r2_delete": false
+  },
+  "next_build": {
+    "build": 2,
+    "items": [8, 9, 10, 11, 12, 13],
+    "theme": "Inventory & Creator Intelligence",
+    "start_rule": "only after the Release 465 Build 1 documentation closure SHA passes the final idempotent System Gate"
+  },
   "production_promotion": "closed"
 }
