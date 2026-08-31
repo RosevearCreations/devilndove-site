@@ -85,7 +85,6 @@ jobs:
           assert actual['site_item_inventory']>=1041,actual
           assert actual['app_modules']==5,actual
           assert actual['tables']>=574,actual
-          # The second statement is PRAGMA foreign_key_check and must have no rows.
           result_sets=[]
           def collect(v):
               if isinstance(v,dict):
@@ -172,8 +171,21 @@ jobs:
           }
           trap cleanup EXIT
           npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --command "INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) SELECT user_id, '${PROBE}', '${PROBE}', datetime('now','+15 minutes'), datetime('now') FROM users WHERE is_active=1 AND lower(role)='admin' ORDER BY user_id LIMIT 1;"
-          COUNT="$(npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT COUNT(*) AS probe_count FROM sessions WHERE session_token='${PROBE}';" | python -c "import sys,json; d=json.load(sys.stdin); vals=[]; exec('def w(v):\n    if isinstance(v,dict):\n        if \\"probe_count\\" in v: vals.append(int(v[\\"probe_count\\"]))\n        for x in v.values(): w(x)\n    elif isinstance(v,list):\n        for x in v: w(x)',globals()); w(d); print(vals[0] if vals else 0)")"
-          test "${COUNT}" = "1"
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT COUNT(*) AS probe_count FROM sessions WHERE session_token='${PROBE}';" > /tmp/release463-probe-count.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/release463-probe-count.json'))
+          values=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'probe_count' in v: values.append(int(v['probe_count']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert values and values[0]==1,(values,data)
+          print('RELEASE 463 PRODUCTION-ONLY PROBE SESSION: PASS')
+          PY
           export RELEASE463_PROBE_TOKEN="${PROBE}"
           python - <<'PY'
           import json,os,time,urllib.request,urllib.error
