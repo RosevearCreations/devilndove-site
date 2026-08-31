@@ -12,7 +12,7 @@ permissions:
 jobs:
   inventory:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
@@ -24,50 +24,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Inventory Pages and D1 read-only
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "${CF_PAGES_TOKEN}"
-          test -n "${CF_DATA_TOKEN}"
-          CLOUDFLARE_API_TOKEN="${CF_PAGES_TOKEN}" npx --yes wrangler@4 pages project list --json > /tmp/pages.json
-          CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 d1 list --json > /tmp/d1.json
-          python - <<'PY'
-          import json
-          print('\n==== PAGES ====')
-          for x in json.load(open('/tmp/pages.json',encoding='utf-8')):
-              print(x.get('name'), 'production_branch=',x.get('production_branch'), 'subdomain=',x.get('subdomain'))
-          print('\n==== D1 ====')
-          for x in json.load(open('/tmp/d1.json',encoding='utf-8')):
-              print(x.get('name'), x.get('uuid') or x.get('id'))
-          PY
-      - name: Inventory R2 buckets read-only
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import json, os, urllib.request, urllib.error
-          account=os.environ['CLOUDFLARE_ACCOUNT_ID']
-          tokens=[('DATA',os.environ['CF_DATA_TOKEN']),('PAGES',os.environ['CF_PAGES_TOKEN'])]
-          url=f'https://api.cloudflare.com/client/v4/accounts/{account}/r2/buckets'
-          last=None
-          for label,token in tokens:
-              req=urllib.request.Request(url,headers={'Authorization':'Bearer '+token})
-              try:
-                  with urllib.request.urlopen(req,timeout=60) as r: data=json.load(r)
-                  print('R2_TOKEN_SOURCE',label)
-                  print('\n==== R2 ====')
-                  result=data.get('result') or []
-                  buckets=result.get('buckets') if isinstance(result,dict) else result
-                  for x in buckets or []:
-                      print(x.get('name') or x.get('bucket_name') or x)
-                  break
-              except urllib.error.HTTPError as e:
-                  last=e
-          else:
-              raise last
-          PY
-      - name: Inspect Pages project configuration
+      - name: Inventory exact Pages projects read-only
         shell: bash
         run: |
           set -euo pipefail
@@ -76,49 +33,42 @@ jobs:
             curl -fsS \
               -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
               "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${project}" \
-              | python -c "import json,sys; d=json.load(sys.stdin); r=d.get('result') or {}; print(json.dumps({'name':r.get('name'),'production_branch':r.get('production_branch'),'source':r.get('source'),'production_config':r.get('deployment_configs',{}).get('production'),'preview_config':r.get('deployment_configs',{}).get('preview')},indent=2))"
+              | python -c "import json,sys; d=json.load(sys.stdin); r=d.get('result') or {}; print(json.dumps({'name':r.get('name'),'production_branch':r.get('production_branch'),'subdomain':r.get('subdomain'),'source':r.get('source'),'production_config':r.get('deployment_configs',{}).get('production'),'preview_config':r.get('deployment_configs',{}).get('preview')},indent=2))"
           done
-      - name: Inspect D1 structural and key-row counts read-only
+      - name: Inventory all D1 identities read-only
         shell: bash
         run: |
           set -euo pipefail
-          cat >/tmp/wrangler-d1.toml <<'EOF'
-          name = "release463-d1-inventory"
-          compatibility_date = "2026-08-30"
-          EOF
-          for db in devilndove-dev devilndove-prod; do
-            echo "==== D1 ${db} ===="
-            CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 d1 execute "${db}" --remote --config /tmp/wrangler-d1.toml --json --command "SELECT (SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS table_count, (SELECT count(*) FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%') AS index_count, (SELECT count(*) FROM users) AS users, (SELECT count(*) FROM products) AS products, (SELECT count(*) FROM sessions) AS sessions; PRAGMA foreign_key_check;" || true
-          done
-      - name: Inspect R2 object counts read-only
-        shell: bash
-        run: |
-          set -euo pipefail
+          CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 d1 list --json > /tmp/d1.json
           python - <<'PY'
-          import json, os, urllib.parse, urllib.request, urllib.error
-          account=os.environ['CLOUDFLARE_ACCOUNT_ID']
-          tokens=[('DATA',os.environ['CF_DATA_TOKEN']),('PAGES',os.environ['CF_PAGES_TOKEN'])]
-          def fetch(url):
-              last=None
-              for label,token in tokens:
-                  req=urllib.request.Request(url,headers={'Authorization':'Bearer '+token})
-                  try:
-                      with urllib.request.urlopen(req,timeout=60) as r: return label,json.load(r)
-                  except urllib.error.HTTPError as e: last=e
-              raise last
-          for bucket in ['devilndove-toolshed-images-dev','devilndove-caip-media-dev']:
-              cursor=None; count=0; size=0; source=None
-              while True:
-                  q='?per_page=1000' + (('&cursor='+urllib.parse.quote(cursor,safe='')) if cursor else '')
-                  source,data=fetch(f'https://api.cloudflare.com/client/v4/accounts/{account}/r2/buckets/{bucket}/objects{q}')
-                  result=data.get('result') or []
-                  if isinstance(result,dict):
-                      objs=result.get('objects') or result.get('items') or []
-                      cursor=(result.get('cursor') or result.get('continuation_token') or '')
-                      truncated=bool(result.get('truncated') or result.get('is_truncated'))
-                  else:
-                      objs=result; cursor=''; truncated=False
-                  count += len(objs); size += sum(int(x.get('size') or 0) for x in objs if isinstance(x,dict))
-                  if not truncated or not cursor: break
-              print(bucket,'objects=',count,'bytes=',size,'token=',source)
+          import json
+          print('==== D1 IDENTITIES ====')
+          for x in json.load(open('/tmp/d1.json',encoding='utf-8')):
+              print(x.get('name'), x.get('uuid') or x.get('id'))
           PY
+      - name: Inspect all known D1 candidates read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          for db in devilndove-dev devilndove-prod devilndove-prod-r462 devilndove-prod-repl-20260823; do
+            echo "==== D1 ${db} STRUCTURE ===="
+            CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 d1 execute "${db}" --remote --json --command "SELECT count(*) AS table_count FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'; SELECT count(*) AS index_count FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'; PRAGMA foreign_key_check;" || true
+            echo "==== D1 ${db} KEY ROWS ===="
+            for table in users products sessions orders site_item_inventory app_modules; do
+              CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 d1 execute "${db}" --remote --json --command "SELECT '${table}' AS table_name, CASE WHEN EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='${table}') THEN (SELECT count(*) FROM ${table}) ELSE -1 END AS row_count;" || true
+            done
+          done
+      - name: Inspect exact known R2 buckets read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          for bucket in devilndove-toolshed-images-dev devilndove-caip-media-dev devilndove-toolshed-images devilndove-caip-media; do
+            echo "==== R2 ${bucket} ===="
+            if CLOUDFLARE_API_TOKEN="${CF_DATA_TOKEN}" npx --yes wrangler@4 r2 bucket info "${bucket}" --json; then
+              echo "R2_ACCESS=${bucket}:DATA"
+            elif CLOUDFLARE_API_TOKEN="${CF_PAGES_TOKEN}" npx --yes wrangler@4 r2 bucket info "${bucket}" --json; then
+              echo "R2_ACCESS=${bucket}:PAGES"
+            else
+              echo "R2_ACCESS=${bucket}:UNAVAILABLE"
+            fi
+          done
