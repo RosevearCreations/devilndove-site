@@ -38,8 +38,12 @@ req('/admin/' not in sitemap and '/api/' not in sitemap,'sitemap must never expo
 for page in ('admin/storefront-merchandising/index.html','admin/creative-automation/index.html','admin/caip-content-handoff/index.html','admin/accounting/index.html','admin/it-integrations/index.html','admin/inventory-intelligence/index.html','admin/tool-lifecycle/index.html'):
  html=read(page);req(len(re.findall(r'<h1(?:\s|>)',html,re.I))==1,f'{page} must contain exactly one H1');req('noindex,nofollow' in html,f'{page} must remain noindex,nofollow');req('/css/admin-convergence.css?v=454' in html,f'{page} missing Release 454 shared responsive shell');req('/public/js/admin-module-nav.js?v=454' in html,f'{page} missing Release 454 module nav')
 req('fetch(' not in read('public/js/admin-module-nav.js') and 'fetch(' not in read('public/js/admin-workspace-state.js'),'Release 454 shell must remain client-only')
-wrangler=read('wrangler.toml');req('account_id =' not in wrangler,'wrangler.toml must never pin account_id');policy=release.get('release_policy',{});req(policy.get('production_promotion')=='closed' and policy.get('provider_publication')=='closed','Production/provider publication must remain closed')
-print('REPOSITORY HYGIENE / UX / SEO GATE');print(f'Current Development release: {current}');print('Obsolete root Build verification artifacts: NONE');print('Storefront SEO/one-H1/structured data: GUARDED');print('Release 454 Admin module/state/responsive shell: CARRIED FORWARD');print('Private admin noindex: GUARDED');print('Production/provider publication: CLOSED')
+wrangler=read('wrangler.toml');req('account_id =' not in wrangler,'wrangler.toml must never pin account_id')
+policy=release.get('release_policy',{})
+req(policy.get('production_promotion')=='controlled_main_promotion','Production must remain behind the controlled main promotion gate')
+req(policy.get('provider_publication')=='closed','Provider publication must remain closed unless deliberately authorized')
+req(policy.get('blind_dev_to_production_data_overwrite') is False,'Production transactional data must never be overwritten from Development')
+print('REPOSITORY HYGIENE / UX / SEO GATE');print(f'Current Development release: {current}');print('Obsolete root Build verification artifacts: NONE');print('Storefront SEO/one-H1/structured data: GUARDED');print('Release 454 Admin module/state/responsive shell: CARRIED FORWARD');print('Private admin noindex: GUARDED');print('Production promotion: CONTROLLED MAIN GATE');print('Provider publication: CLOSED');print('Production data overwrite from Development: FORBIDDEN')
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
  raise SystemExit(1)
