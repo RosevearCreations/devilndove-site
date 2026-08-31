@@ -20,8 +20,6 @@ jobs:
       SOURCE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
       TARGET_DB: devilndove-prod-r462
       TARGET_ID: f34a741b-0000-45b0-9a96-6be08754d563
-      LEGACY_DB: devilndove-prod
-      LEGACY_REPL_DB: devilndove-prod-repl-20260823
     steps:
       - uses: actions/checkout@v7
         with:
@@ -59,24 +57,6 @@ jobs:
           print('EMPTY PRODUCTION CANDIDATE: PASS')
           PY
 
-      - name: Export legacy Production rollback databases
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/release463-backups
-          npx --yes wrangler@4 d1 export "${LEGACY_DB}" --remote --skip-confirmation --output=/tmp/release463-backups/devilndove-prod-before-release463.sql
-          npx --yes wrangler@4 d1 export "${LEGACY_REPL_DB}" --remote --skip-confirmation --output=/tmp/release463-backups/devilndove-prod-repl-20260823-before-release463.sql
-          sha256sum /tmp/release463-backups/*.sql | tee /tmp/release463-backups/SHA256SUMS.txt
-          ls -lh /tmp/release463-backups
-
-      - name: Preserve rollback exports as workflow artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release463-preconsolidation-production-d1-backups
-          path: /tmp/release463-backups/
-          retention-days: 90
-          if-no-files-found: error
-
       - name: Export proven Development D1 exactly once
         shell: bash
         run: |
@@ -86,11 +66,76 @@ jobs:
           sha256sum /tmp/devilndove-dev-release463.sql | tee /tmp/devilndove-dev-release463.sha256
           ls -lh /tmp/devilndove-dev-release463.sql
 
-      - name: Import proven Development state into empty Production candidate
+      - name: Reorder exported SQL and prove it locally before remote import
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute "${TARGET_DB}" --remote --yes --file=/tmp/devilndove-dev-release463.sql
+          python - <<'PY'
+          import pathlib, sqlite3
+          src=pathlib.Path('/tmp/devilndove-dev-release463.sql')
+          out=pathlib.Path('/tmp/devilndove-dev-release463-reordered.sql')
+          text=src.read_text(encoding='utf-8')
+          statements=[]; buf=''
+          for line in text.splitlines(True):
+              buf += line
+              if sqlite3.complete_statement(buf):
+                  s=buf.strip()
+                  if s: statements.append(s)
+                  buf=''
+          if buf.strip(): statements.append(buf.strip())
+
+          pre=[]; tables=[]; data=[]; views=[]; indexes=[]; triggers=[]; post=[]
+          for s in statements:
+              u=s.lstrip().upper()
+              if u.startswith('BEGIN TRANSACTION') or u == 'BEGIN;' or u.startswith('COMMIT'):
+                  continue
+              if u.startswith('PRAGMA '):
+                  # D1 export pragmas are safe to retain before schema creation.
+                  pre.append(s)
+              elif u.startswith('CREATE TABLE') or u.startswith('CREATE VIRTUAL TABLE'):
+                  tables.append(s)
+              elif u.startswith('INSERT INTO') or u.startswith('REPLACE INTO') or u.startswith('UPDATE ') or u.startswith('DELETE FROM'):
+                  data.append(s)
+              elif u.startswith('CREATE VIEW'):
+                  views.append(s)
+              elif u.startswith('CREATE INDEX') or u.startswith('CREATE UNIQUE INDEX'):
+                  indexes.append(s)
+              elif u.startswith('CREATE TRIGGER'):
+                  triggers.append(s)
+              else:
+                  post.append(s)
+
+          ordered=pre + tables + data + views + indexes + triggers + post
+          out.write_text('\n'.join(s.rstrip(';')+';' for s in ordered)+'\n',encoding='utf-8')
+          print('STATEMENTS',len(statements),'TABLES',len(tables),'DATA',len(data),'VIEWS',len(views),'INDEXES',len(indexes),'TRIGGERS',len(triggers),'OTHER',len(post))
+          assert len(tables) >= 500, len(tables)
+
+          db='/tmp/release463-local-proof.sqlite'
+          con=sqlite3.connect(db)
+          try:
+              con.executescript(out.read_text(encoding='utf-8'))
+              tables_n=con.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> '_cf_KV'").fetchone()[0]
+              indexes_n=con.execute("SELECT count(*) FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'").fetchone()[0]
+              fk=list(con.execute('PRAGMA foreign_key_check'))
+              print('LOCAL PROOF tables=',tables_n,'indexes=',indexes_n,'fk_violations=',len(fk))
+              assert tables_n >= 574, tables_n
+              assert indexes_n >= 607, indexes_n
+              assert fk == [], fk[:10]
+              for table,expected in [('users',1),('products',45),('site_item_inventory',1041),('app_modules',5)]:
+                  n=con.execute(f'SELECT count(*) FROM "{table}"').fetchone()[0]
+                  print('LOCAL',table,n)
+                  assert n==expected,(table,n,expected)
+          finally:
+              con.close()
+          print('REORDERED EXPORT LOCAL SQLITE PROOF: PASS')
+          PY
+          sha256sum /tmp/devilndove-dev-release463-reordered.sql | tee /tmp/devilndove-dev-release463-reordered.sha256
+
+      - name: Import locally-proven reordered Development state into Production candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${TARGET_DB}" --remote --yes --file=/tmp/devilndove-dev-release463-reordered.sql
 
       - name: Verify Production candidate parity read-only
         shell: bash
@@ -136,26 +181,19 @@ jobs:
           import json
           d=json.load(open('/tmp/target-fk.json'))
           rows=[]
-          def walk(v):
-              if isinstance(v,dict):
-                  r=v.get('results')
-                  if isinstance(r,list): rows.extend(r)
-                  for x in v.values(): walk(x)
-              elif isinstance(v,list):
-                  for x in v: walk(x)
-          # Count only actual result rows from top-level query result payloads.
           for item in d if isinstance(d,list) else [d]:
               if isinstance(item,dict) and isinstance(item.get('results'),list): rows.extend(item['results'])
           assert rows == [], rows[:10]
           print('TARGET FOREIGN KEY CHECK: PASS')
           PY
 
-      - name: Preserve source snapshot checksum and target proof
+      - name: Preserve source checksum and target proof
         uses: actions/upload-artifact@v4
         with:
           name: release463-dev-to-production-d1-proof
           path: |
             /tmp/devilndove-dev-release463.sha256
+            /tmp/devilndove-dev-release463-reordered.sha256
             /tmp/target-fk.json
           retention-days: 90
           if-no-files-found: error
@@ -165,5 +203,5 @@ jobs:
           echo 'Release 463 D1 clone: COMPLETE'
           echo 'Source devilndove-dev: NOT MUTATED'
           echo 'Target devilndove-prod-r462: POPULATED AND VERIFIED'
-          echo 'Legacy Production databases: NOT DELETED BY THIS WORKFLOW'
+          echo 'Legacy rollback artifact preserved by run 33353307056 / artifact 9744317222'
           echo 'Pages bindings: NOT CHANGED BY THIS WORKFLOW'
