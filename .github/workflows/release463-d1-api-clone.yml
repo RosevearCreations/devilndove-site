@@ -36,15 +36,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile scripts/release463_d1_api_clone.py
+          python -m py_compile scripts/release463_d1_api_clone.py scripts/release463_d1_api_clone_v2.py
           grep -q 'Time Travel bookmark' scripts/release463_d1_api_clone.py
           grep -q 'foreign-key dependency' scripts/release463_d1_api_clone.py
+          grep -q 'd1 execute' scripts/release463_d1_api_clone_v2.py
 
       - name: Clone proven Development D1 into isolated Production candidate
         shell: bash
         run: |
           set -euo pipefail
-          python scripts/release463_d1_api_clone.py
+          python scripts/release463_d1_api_clone_v2.py
 
       - name: Preserve D1 clone proof
         uses: actions/upload-artifact@v4
@@ -58,8 +59,9 @@ jobs:
 
       - name: Boundary statement
         run: |
-          echo 'Release 463 D1 Query API clone: COMPLETE'
+          echo 'Release 463 D1 clone: COMPLETE'
           echo 'Development source: unchanged'
           echo 'Production candidate: exact row-count/object/FK parity proven'
+          echo 'Trigger DDL transport: Wrangler file execution only'
           echo 'Live Pages bindings: unchanged by this workflow'
           echo 'Legacy Production D1 rollback exports: preserved in artifact 9744317222'
