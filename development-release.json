@@ -8,7 +8,7 @@
   "branch": "dev",
   "pages_project": "devilndove-site",
   "pages_environment": "preview",
-  "convergence_state": "release464_update1_platform_integrity",
+  "convergence_state": "release464_update1_complete_development_green",
   "previous_release": {
     "release": 462,
     "label": "Autonomous Quality, Workflow & Gate Consolidation",
@@ -97,12 +97,14 @@
       "version": 1,
       "file": "migrations/canonical/0001_release464_migration_authority.sql",
       "purpose": "Bootstrap canonical migration proof authority alongside Cloudflare native d1_migrations.",
-      "development_apply": "system_gate_managed",
-      "production_apply": "production_promotion_gate_managed"
+      "development_apply": "applied_and_verified",
+      "production_apply": "production_promotion_gate_managed_not_yet_promoted"
     }
   ],
   "current_release_database_state": {
-    "new_migration_required": true,
+    "new_development_migration_required": false,
+    "development_migration_state": "applied_and_verified",
+    "production_migration_state": "not_applied_until_deliberate_production_promotion",
     "historical_schema_baseline_release": 461,
     "canonical_stream_started_in_release": 464,
     "development_d1_target": "devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa",
@@ -112,6 +114,20 @@
     "future_change_rule": "Every schema change is an immutable numbered canonical migration, proven on Development, then the exact same migration is applied/proven on Production before dependent Production code."
   },
   "current_release_evidence": {
+    "update1_development_green": true,
+    "technical_green_source_sha": "27573f9877e781270544aa3b43886c1271c068ad",
+    "technical_green_system_gate_run": 33410041936,
+    "technical_green_source_gate_job": 99547032508,
+    "technical_green_deploy_job": 99547120515,
+    "technical_green_preview_url": "https://77ac1b5e.devilndove-site.pages.dev",
+    "migration_first_apply_source_sha": "e96414301d28ca0885b8fabc687a1ff78192416d",
+    "migration_first_apply_system_gate_run": 33409846602,
+    "development_d1_tables": 577,
+    "development_d1_app_modules": 5,
+    "development_native_migration_rows": 1,
+    "development_migration_proof_rows": 1,
+    "development_foreign_key_violations": 0,
+    "migration_manifest_sha256": "ae59eda03fd2f58b26963f73a74bfe8126f276d7472123b5f63dbae8163f67a6",
     "release463_environment_cutover_preserved": true,
     "d1_environment_isolation": true,
     "r2_environment_isolation": true,
@@ -123,16 +139,19 @@
     "manual_runtime_migration_endpoint_retired": true,
     "manual_migration_ledger_write_retired": true,
     "storefront_runtime_schema_repair_retired": true,
-    "accounting_statement_import_runtime_ddl": false
+    "accounting_statement_import_runtime_ddl": false,
+    "native_github_branch_protection_enabled": false,
+    "native_github_rulesets_present": false,
+    "native_github_setting_note": "Repository-admin setting remains externally observable and is not falsely inferred from fail-closed source/deployment controls."
   },
   "release464_update1": [
-    {"id":1,"change":"Canonical D1 migration ledger/applicator","status":"implemented_source_acceptance_required"},
-    {"id":2,"change":"dev/main branch protection and equivalent fail-closed source/deploy controls","status":"source_controls_implemented_native_github_setting_external"},
-    {"id":3,"change":"Exact green Development tree to main promotion proof","status":"implemented_source_acceptance_required"},
-    {"id":4,"change":"Legacy Build/Release branch and infrastructure cleanup","status":"cleanup_inventory_active"},
-    {"id":5,"change":"Canonical documentation convergence","status":"implemented_source_acceptance_required"},
-    {"id":6,"change":"Accounting statement-import migration-owned fail-closed closure","status":"implemented"},
-    {"id":7,"change":"Application-wide request-time D1 schema mutation blockade","status":"implemented_source_acceptance_required"}
+    {"id":1,"change":"Canonical D1 migration ledger/applicator","status":"complete_development_green"},
+    {"id":2,"change":"dev/main branch protection and equivalent fail-closed source/deploy controls","status":"complete_fail_closed_controls_native_github_setting_external"},
+    {"id":3,"change":"Exact green Development tree to main promotion proof","status":"complete_source_and_development_green_production_not_promoted"},
+    {"id":4,"change":"Legacy Build/Release branch and infrastructure cleanup","status":"complete_source_cleanup_remote_branch_deletion_repository_admin_housekeeping"},
+    {"id":5,"change":"Canonical documentation convergence","status":"complete_current_authority_converged"},
+    {"id":6,"change":"Accounting statement-import migration-owned fail-closed closure","status":"complete"},
+    {"id":7,"change":"Application-wide request-time D1 schema mutation blockade","status":"complete_development_green"}
   ],
   "planned_updates": [
     {
@@ -147,9 +166,10 @@
     }
   ],
   "forward_queue": [
-    "Close Release 464 Update 1 source, Development migration and Preview acceptance.",
-    "Keep native GitHub dev/main branch protection visibly open until repository settings report it enabled; never claim it is enabled based on source controls alone.",
-    "After Update 1 closes, begin Update 2 items 8-13.",
+    "Release 464 Update 1 items 1-7 are complete Development green; begin Update 2 items 8-13.",
+    "Native GitHub dev/main branch protection remains a repository-admin hardening setting; never claim it is enabled until repository settings report it enabled.",
+    "Legacy remote branch deletion remains repository-admin housekeeping and does not override the canonical current source/deployment authorities.",
+    "Keep Production promotion closed until deliberately requested; Production migration 0001 is applied only immediately before dependent Production code.",
     "Never overwrite Production transactional data from Development.",
     "Never restore request-time schema DDL."
   ]
