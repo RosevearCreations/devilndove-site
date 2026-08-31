@@ -1,7 +1,7 @@
 {
   "release": 463,
-  "operation": "synchronize proven Development R2 buckets into retained Production R2 buckets through authenticated exact preview bindings",
+  "operation": "synchronize proven Development R2 buckets into retained Production R2 buckets using authenticated Cloudflare object inventory and Wrangler remote object transport",
   "requested_at": "2026-08-31",
-  "attempt": 5,
-  "transport": "browser-compatible preview requests"
+  "attempt": 6,
+  "transport": "cloudflare-r2-direct"
 }
