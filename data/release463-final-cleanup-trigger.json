@@ -1,9 +1,9 @@
 {
   "release": 463,
   "action": "final_cloudflare_cleanup",
-  "attempt": 4,
+  "attempt": 5,
   "authorized_after_live_cutover_run": 33396235808,
   "live_cutover_artifact": 9759432735,
   "rollback_artifact": 9744317222,
-  "pages_cleanup_strategy": "cloudflare_direct_api_parallel_prune_per_page_20"
+  "pages_cleanup_strategy": "cloudflare_direct_api_force_aliased_prune_per_page_20"
 }
