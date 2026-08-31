@@ -97,8 +97,13 @@ req("f34a741b-0000-45b0-9a96-6be08754d563" not in wrangler and "account_id =" no
 
 update1 = release.get("release464_update1", [])
 req([x.get("id") for x in update1] == list(range(1, 8)), "Release 464 Update 1 must contain items 1-7")
+update2 = release.get("release464_update2", [])
+update2_complete = [x.get("id") for x in update2] == [8,9,10,11,12,13]
+if update2_complete:
+    req(all(x.get("status") == "complete_development_green" for x in update2), "Update 2 completion status drifted")
 planned = {int(x.get("update") or 0): x for x in release.get("planned_updates", [])}
-req(planned.get(2, {}).get("items") == [8,9,10,11,12,13], "Update 2 roadmap drifted")
+update2_planned = planned.get(2, {}).get("items") == [8,9,10,11,12,13]
+req(update2_complete != update2_planned, "Update 2 roadmap must be exactly one of planned or completed")
 req(planned.get(3, {}).get("items") == [14,15,16,17,18,19,20], "Update 3 roadmap drifted")
 
 for path in (
