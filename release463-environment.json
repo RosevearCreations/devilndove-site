@@ -1,7 +1,7 @@
 {
   "environment_release": 463,
   "label": "Environment Consolidation and Production Cutover",
-  "status": "cutover_in_progress",
+  "status": "production_live_cleanup_hygiene_remaining",
   "canonical_pages_project": "devilndove-site",
   "branches": {
     "development": "dev",
@@ -25,6 +25,7 @@
   },
   "production": {
     "pages_environment": "production",
+    "live_domain": "https://devilndove.com",
     "d1": {
       "name": "devilndove-prod-r462",
       "id": "f34a741b-0000-45b0-9a96-6be08754d563"
@@ -46,15 +47,51 @@
     "caip_r2_objects": 1,
     "caip_r2_bytes": 74442873,
     "r2_exact_parity": true,
+    "production_cutover_runtime_run": 33396235808,
+    "production_cutover_runtime_artifact": 9759432735,
+    "production_customer_domain_runtime": true,
+    "production_control_plane_bindings": true,
     "legacy_production_d1_backup_artifact": 9744317222
   },
   "operating_model": {
     "dev_is_work_branch": true,
     "main_is_promoted_release_branch": true,
+    "development_pages_environment": "preview",
+    "production_pages_environment": "production",
     "application_tree_should_match_after_promotion": true,
+    "main_only_application_or_binding_patches": false,
+    "production_bindings_generated_ephemerally": true,
     "production_transactional_data_is_production_owned_after_cutover": true,
     "blind_dev_to_production_data_overwrite_after_cutover": false,
     "request_time_schema_mutation": false,
+    "future_schema_changes_require_versioned_migration": true,
+    "future_schema_changes_apply_to_development_first": true,
+    "production_migration_must_precede_dependent_main_code": true,
+    "applied_migrations_are_immutable_history": true,
+    "production_migration_requires_recovery_plan": true,
     "provider_execution_default": "closed"
+  },
+  "promotion_model": {
+    "cadence": "deliberate_daily_when_development_green",
+    "source": "dev",
+    "target": "main",
+    "blind_scheduled_overwrite": false,
+    "required_order": [
+      "development source/system gates",
+      "development D1 migration and verification when required",
+      "canonical Preview deployment and acceptance",
+      "exact approved tree promotion to main",
+      "production D1 migration and verification when required",
+      "exact main Production deployment",
+      "control-plane binding proof",
+      "authenticated live runtime proof"
+    ]
+  },
+  "legacy_cleanup": {
+    "legacy_pages_project": "devilndove-site-dev",
+    "legacy_pages_project_is_authority": false,
+    "legacy_pages_project_cleanup_only": true,
+    "legacy_d1_cleanup_only": true,
+    "cleanup_must_not_mutate_canonical_dev_or_production_data": true
   }
 }
