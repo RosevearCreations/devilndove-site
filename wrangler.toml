@@ -9,6 +9,10 @@ pages_build_output_dir = "."
 # which generates Production bindings ephemerally in the runner. Do not commit
 # Production resource IDs/bucket names here and do not add account_id here.
 
+[vars]
+DND_ENVIRONMENT = "development"
+DND_PAGES_PROJECT = "devilndove-site"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "devilndove-dev"
