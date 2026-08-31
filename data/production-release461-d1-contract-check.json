@@ -1,0 +1,6 @@
+{
+  "target_release": 461,
+  "database": "devilndove-prod",
+  "mode": "read-only-contract-check",
+  "trigger": "prod-d1-contract-1"
+}
