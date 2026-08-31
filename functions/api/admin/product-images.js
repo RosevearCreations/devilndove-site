@@ -3,6 +3,8 @@
 // image roles, public-use status, consent links, product_image_role_reference, and storefront rendering can be managed
 // together from the admin interface.
 
+import { createSchemaSafeD1 } from '../_lib/schemaSafeD1.js';
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -15,7 +17,7 @@ function normalizeText(value) {
 }
 
 function getDb(env) {
-  return env.DB || env.DD_DB || null;
+  return createSchemaSafeD1(env.DB || env.DD_DB || null);
 }
 
 function getBearerToken(request) {

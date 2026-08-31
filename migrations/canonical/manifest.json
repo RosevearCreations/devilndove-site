@@ -1,0 +1,25 @@
+{
+  "format": 1,
+  "stream": "devilndove-canonical-forward",
+  "baseline": {
+    "application_release": 461,
+    "note": "Release 461 is the already-proven schema baseline. Historical files in migrations/dev are provenance only and are never replayed by this canonical stream."
+  },
+  "rules": {
+    "immutable_after_development_apply": true,
+    "development_first": true,
+    "production_before_dependent_code": true,
+    "checksum_algorithm": "sha256",
+    "native_ledger": "d1_migrations",
+    "proof_table": "app_schema_migration_proofs"
+  },
+  "migrations": [
+    {
+      "version": 1,
+      "file": "0001_release464_migration_authority.sql",
+      "release": 464,
+      "description": "Bootstrap the forward-only canonical migration proof authority used alongside Cloudflare D1's native d1_migrations ledger.",
+      "recovery": "Forward-only. Restore the pre-migration D1 backup if required, or repair with a new numbered migration. Never edit or replay this migration after Development application."
+    }
+  ]
+}

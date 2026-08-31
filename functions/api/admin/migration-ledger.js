@@ -1,278 +1,92 @@
 import {
-  auditAdminAction,
   getAdminUserFromRequest,
   getDb,
   jsonResponse,
-  normalizeText,
 } from '../_lib/adminAudit.js';
 
-const EXPECTED_MIGRATIONS = [
-  {
-    migration_key: 'database_upgrade_current_pass',
-    file_name: 'database_upgrade_current_pass.sql',
-    purpose: 'Current pass D1 schema/data safety migration.',
-    destructive: false,
-    run_order: 10,
-  },
-  {
-    migration_key: 'database_amazon_purchase_import_staging',
-    file_name: 'database_amazon_purchase_import_staging.sql',
-    purpose: 'Private Amazon purchase import staging table and indexes.',
-    destructive: false,
-    run_order: 20,
-  },
-  {
-    migration_key: 'database_inventory_stock_unit_quick_fix',
-    file_name: 'database_inventory_stock_unit_quick_fix.sql',
-    purpose: 'Optional one-time stock/default-unit correction for existing Tools/Supplies inventory rows.',
-    destructive: false,
-    run_order: 25,
-  },
-  {
-    migration_key: 'database_growth_analytics_seo_extension',
-    file_name: 'database_growth_analytics_seo_extension.sql',
-    purpose: 'Growth analytics, SEO, media, and operational reporting extension.',
-    destructive: false,
-    run_order: 30,
-  },
-  {
-    migration_key: 'database_payments_extension',
-    file_name: 'database_payments_extension.sql',
-    purpose: 'Payments, refunds, disputes, and provider tracking extension.',
-    destructive: false,
-    run_order: 40,
-  },
-  {
-    migration_key: 'database_profiles_extension',
-    file_name: 'database_profiles_extension.sql',
-    purpose: 'Profiles, access-tier support, and admin identity extension.',
-    destructive: false,
-    run_order: 50,
-  },
-  {
-    migration_key: 'database_access_tiers',
-    file_name: 'database_access_tiers.sql',
-    purpose: 'Access tiers and admin-permission foundation.',
-    destructive: false,
-    run_order: 60,
-  },
-  {
-    migration_key: 'build_171_admin_safety_release_readiness',
-    file_name: 'database_upgrade_current_pass.sql',
-    purpose: 'Build 171 admin evidence, marketplace rollback, recall approval, local SEO, release readiness, and safety controls.',
-    destructive: false,
-    run_order: 171,
-  },
-  {
-    migration_key: 'build_173_deployment_preflight_release_safety',
-    file_name: 'database_build173_deployment_preflight.sql',
-    purpose: 'Build 173 deployment preflight run history and D1 rerun-safety checks.',
-    destructive: false,
-    run_order: 173,
-  },
-  {
-    migration_key: 'build_174_preflight_detail_manifest',
-    file_name: 'database_build174_deployment_preflight_detail.sql',
-    purpose: 'Build 174 deployment preflight detail drawers, post-deploy confirmations, and release manifest workflow.',
-    destructive: false,
-    run_order: 174,
-  },
-  {
-    migration_key: 'build_175_release_control_center',
-    file_name: 'database_build175_release_control.sql',
-    purpose: 'Build 175 release control, deployment history, manifest comparisons, screenshot jobs, marketplace validation, recall compliance, and LocalBusiness schema.',
-    destructive: false,
-    run_order: 175,
-  },
-  {
-    migration_key: 'build_176_release_safety_controls',
-    file_name: 'database_build176_release_safety_controls.sql',
-    purpose: 'Build 176 safe deploy ZIP tracking, live manifest diffs, QA previews, recall locks, local SEO links/trends, rollback checklist, and notification routes.',
-    destructive: false,
-    run_order: 176,
-  },
-];
-
-function normalizeResults(result) {
+function rows(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
-function normalizeStatus(value) {
-  const raw = normalizeText(value).toLowerCase();
-  if (['applied', 'skipped', 'failed', 'pending_review'].includes(raw)) return raw;
-  return 'applied';
+async function tableExists(db, tableName) {
+  const row = await db.prepare(`
+    SELECT name
+    FROM sqlite_master
+    WHERE type = 'table' AND name = ?
+    LIMIT 1
+  `).bind(tableName).first().catch(() => null);
+  return String(row?.name || '') === tableName;
 }
 
-function slugKey(value) {
-  return normalizeText(value)
-    .toLowerCase()
-    .replace(/\.sql$/i, '')
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-}
-
-async function ensureMigrationLedgerTable(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS schema_migration_ledger (
-      schema_migration_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      migration_key TEXT NOT NULL UNIQUE,
-      file_name TEXT NOT NULL,
-      checksum TEXT,
-      status TEXT NOT NULL DEFAULT 'applied' CHECK (status IN ('applied','skipped','failed','pending_review')),
-      destructive INTEGER NOT NULL DEFAULT 0,
-      applied_by_user_id INTEGER,
-      applied_at TEXT,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_schema_migration_ledger_status ON schema_migration_ledger(status, applied_at DESC)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_schema_migration_ledger_file ON schema_migration_ledger(file_name)`).run().catch(() => null);
-}
-
-async function listLedger(db) {
-  await ensureMigrationLedgerTable(db);
-  return normalizeResults(await db.prepare(`
-    SELECT
-      schema_migration_id,
-      migration_key,
-      file_name,
-      checksum,
-      status,
-      destructive,
-      applied_by_user_id,
-      applied_at,
-      notes,
-      created_at,
-      updated_at
-    FROM schema_migration_ledger
-    ORDER BY COALESCE(applied_at, created_at) DESC, schema_migration_id DESC
+async function listNativeLedger(db) {
+  if (!(await tableExists(db, 'd1_migrations'))) return [];
+  return rows(await db.prepare(`
+    SELECT id, name, applied_at
+    FROM d1_migrations
+    ORDER BY id DESC
   `).all().catch(() => ({ results: [] })));
 }
 
-function buildChecklist(rows = []) {
-  const byKey = new Map(rows.map((row) => [String(row.migration_key || ''), row]));
-  const expected = EXPECTED_MIGRATIONS
-    .slice()
-    .sort((a, b) => Number(a.run_order || 0) - Number(b.run_order || 0))
-    .map((item) => {
-      const recorded = byKey.get(item.migration_key);
-      return {
-        ...item,
-        recorded: !!recorded,
-        status: recorded?.status || 'not_recorded',
-        applied_at: recorded?.applied_at || null,
-        checksum: recorded?.checksum || '',
-        notes: recorded?.notes || '',
-      };
-    });
-
-  const unrecordedExpected = expected.filter((item) => !item.recorded);
-  const failed = rows.filter((row) => row.status === 'failed');
-  const pendingReview = rows.filter((row) => row.status === 'pending_review');
-  return {
-    expected,
-    unrecorded_expected_count: unrecordedExpected.length,
-    failed_count: failed.length,
-    pending_review_count: pendingReview.length,
-    attention_required: unrecordedExpected.length + failed.length + pendingReview.length,
-  };
+async function listProofs(db) {
+  if (!(await tableExists(db, 'app_schema_migration_proofs'))) return [];
+  return rows(await db.prepare(`
+    SELECT
+      schema_migration_proof_id,
+      migration_name,
+      migration_sha256,
+      manifest_sha256,
+      source_sha,
+      environment,
+      recovery_note_sha256,
+      applied_at,
+      verified_at
+    FROM app_schema_migration_proofs
+    ORDER BY schema_migration_proof_id DESC
+  `).all().catch(() => ({ results: [] })));
 }
 
 export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
+
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
 
-  const rows = await listLedger(db);
-  const checklist = buildChecklist(rows);
+  const [nativeLedger, proofs] = await Promise.all([
+    listNativeLedger(db),
+    listProofs(db),
+  ]);
+  const proofByName = new Map(proofs.map((row) => [String(row.migration_name || ''), row]));
+  const canonical = nativeLedger
+    .filter((row) => /^\d{4}_[a-z0-9][a-z0-9_-]*\.sql$/i.test(String(row.name || '')))
+    .map((row) => ({
+      id: Number(row.id || 0),
+      migration_name: String(row.name || ''),
+      applied_at: row.applied_at || null,
+      proof: proofByName.get(String(row.name || '')) || null,
+    }));
+
   return jsonResponse({
     ok: true,
-    summary: {
-      ledger_count: rows.length,
-      expected_migration_count: EXPECTED_MIGRATIONS.length,
-      unrecorded_expected_count: checklist.unrecorded_expected_count,
-      failed_count: checklist.failed_count,
-      pending_review_count: checklist.pending_review_count,
-      status: checklist.attention_required ? 'attention_required' : 'ok',
-    },
-    expected_migrations: checklist.expected,
-    ledger: rows,
+    authority: 'cloudflare_d1_native_migrations',
+    native_ledger_table: 'd1_migrations',
+    proof_table: 'app_schema_migration_proofs',
+    manual_ledger_mutation_allowed: false,
+    historical_replay_allowed: false,
+    canonical_migration_count: canonical.length,
+    canonical,
+    native_ledger: nativeLedger,
+    proofs,
   });
 }
 
 export async function onRequestPost(context) {
   const adminUser = await getAdminUserFromRequest(context.request, context.env);
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
-  const db = getDb(context.env);
-  if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureMigrationLedgerTable(db);
-
-  let body = {};
-  try { body = await context.request.json(); }
-  catch { return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400); }
-
-  const fileName = normalizeText(body.file_name || body.fileName);
-  const migrationKey = normalizeText(body.migration_key || body.migrationKey || slugKey(fileName));
-  const status = normalizeStatus(body.status);
-  const checksum = normalizeText(body.checksum || body.hash || '');
-  const notes = normalizeText(body.notes || body.note || '');
-  const destructive = Number(body.destructive || 0) === 1 ? 1 : 0;
-  const force = Number(body.force || 0) === 1 || body.force === true;
-
-  if (!fileName || !migrationKey) {
-    return jsonResponse({ ok: false, error: 'file_name and migration_key are required.' }, 400);
-  }
-
-  const existing = await db.prepare(`
-    SELECT migration_key, file_name, checksum, status, applied_at
-    FROM schema_migration_ledger
-    WHERE migration_key = ?
-    LIMIT 1
-  `).bind(migrationKey).first().catch(() => null);
-
-  if (existing?.status === 'applied' && status === 'applied' && !force) {
-    return jsonResponse({
-      ok: false,
-      error: 'This migration is already recorded as applied. Use force only after verifying it is safe.',
-      existing,
-    }, 409);
-  }
-
-  await db.prepare(`
-    INSERT INTO schema_migration_ledger (
-      migration_key, file_name, checksum, status, destructive, applied_by_user_id, applied_at, notes, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, CASE WHEN ? = 'applied' THEN CURRENT_TIMESTAMP ELSE NULL END, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    ON CONFLICT(migration_key) DO UPDATE SET
-      file_name = excluded.file_name,
-      checksum = COALESCE(NULLIF(excluded.checksum, ''), schema_migration_ledger.checksum),
-      status = excluded.status,
-      destructive = excluded.destructive,
-      applied_by_user_id = excluded.applied_by_user_id,
-      applied_at = CASE WHEN excluded.status = 'applied' THEN CURRENT_TIMESTAMP ELSE schema_migration_ledger.applied_at END,
-      notes = COALESCE(NULLIF(excluded.notes, ''), schema_migration_ledger.notes),
-      updated_at = CURRENT_TIMESTAMP
-  `).bind(
-    migrationKey,
-    fileName,
-    checksum || null,
-    status,
-    destructive,
-    Number(adminUser.user_id || 0) || null,
-    status,
-    notes || null
-  ).run();
-
-  await auditAdminAction(context.env, context.request, adminUser, {
-    action_type: 'schema_migration_ledger_record',
-    target_type: 'schema_migration',
-    target_key: migrationKey,
-    details: { file_name: fileName, status, destructive, checksum, force },
-  });
-
-  const rows = await listLedger(db);
-  return jsonResponse({ ok: true, summary: buildChecklist(rows), ledger: rows });
+  return jsonResponse({
+    ok: false,
+    error: 'Manual migration-ledger writes are disabled. Schema changes must use migrations/canonical through scripts/d1_migrate.py.',
+    code: 'canonical_migration_authority_required',
+    manual_ledger_mutation_allowed: false,
+  }, 405, { Allow: 'GET' });
 }

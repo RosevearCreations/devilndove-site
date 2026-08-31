@@ -1,3 +1,5 @@
+import { createSchemaSafeD1 } from './schemaSafeD1.js';
+
 // Shared accounting shadow helpers for order-linked bookkeeping records.
 
 function normalizeText(value) {
@@ -9,7 +11,7 @@ function normalizeResults(result) {
 }
 
 export function getDb(env) {
-  return env.DB || env.DD_DB;
+  return createSchemaSafeD1(env.DB || env.DD_DB);
 }
 
 export async function ensureAccountingSchema(db) {
