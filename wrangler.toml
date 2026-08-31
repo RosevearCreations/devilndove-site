@@ -2,22 +2,22 @@ name = "devilndove-site"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
 
-# PRODUCTION ENVIRONMENT.
-# The Pages Git deployment owns account selection. Do not add account_id here.
-# Cloudflare Pages projects do not accept the Workers-only [observability] block.
-# Use Cloudflare Pages/Functions Logs or `wrangler pages deployment tail`.
+# PRODUCTION ENVIRONMENT — Release 462 promoted resources.
+# The proven Development D1/R2 resources are deliberately promoted to live.
+# Account selection remains in tooling/GitHub Actions. Do not add account_id here.
+# The prior devilndove-prod D1 and Production R2 buckets are retained as rollback sources.
 
 [[d1_databases]]
 binding = "DB"
-database_name = "devilndove-prod"
-database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"
+database_name = "devilndove-dev"
+database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
 
 [[r2_buckets]]
 binding = "PRODUCT_MEDIA_BUCKET"
-bucket_name = "devilndove-toolshed-images"
-preview_bucket_name = "devilndove-toolshed-images"
+bucket_name = "devilndove-toolshed-images-dev"
+preview_bucket_name = "devilndove-toolshed-images-dev"
 
 [[r2_buckets]]
 binding = "CAIP_PRIVATE_MEDIA_BUCKET"
-bucket_name = "devilndove-caip-media"
-preview_bucket_name = "devilndove-caip-media"
+bucket_name = "devilndove-caip-media-dev"
+preview_bucket_name = "devilndove-caip-media-dev"

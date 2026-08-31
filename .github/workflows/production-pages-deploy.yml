@@ -26,16 +26,16 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Verify Production source configuration
+      - name: Verify promoted Release 462 Production resources
         shell: bash
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "main"
           grep -q '^name = "devilndove-site"$' wrangler.toml
-          grep -q '^database_name = "devilndove-prod"$' wrangler.toml
-          grep -q '^database_id = "0dc8fa3e-319c-45f7-a515-34c8acd89fcf"$' wrangler.toml
-          grep -q '^bucket_name = "devilndove-toolshed-images"$' wrangler.toml
-          grep -q '^bucket_name = "devilndove-caip-media"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-caip-media-dev"$' wrangler.toml
           ! grep -q '^account_id[[:space:]]*=' wrangler.toml
       - name: Deploy exact main SHA to live Pages project
         shell: bash
@@ -50,6 +50,9 @@ jobs:
         run: |
           echo 'Target: Cloudflare Pages devilndove-site'
           echo 'Source branch: main'
-          echo 'D1 migration/conversion: NONE'
-          echo 'R2 mutation: NONE beyond normal application runtime'
+          echo 'Release: 462'
+          echo 'D1: promoted devilndove-dev / dbc1615b-dcbe-4951-973b-b47c99c73bfa'
+          echo 'R2 Product: promoted devilndove-toolshed-images-dev'
+          echo 'R2 CAIP: promoted devilndove-caip-media-dev'
+          echo 'Prior Production D1/R2 resources retained for rollback'
           echo 'Provider execution/publication: NONE'
