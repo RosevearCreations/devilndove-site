@@ -1,6 +1,6 @@
 {
   "release": 463,
-  "operation": "synchronize proven Development R2 buckets into retained Production R2 buckets through authenticated preview bindings",
+  "operation": "synchronize proven Development R2 buckets into retained Production R2 buckets through authenticated exact preview bindings",
   "requested_at": "2026-08-30",
-  "attempt": 2
+  "attempt": 3
 }
