@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Month-End Cockpit — Devil n Dove</title><link rel="stylesheet" href="/css/styles.css?v=464"><link rel="stylesheet" href="/css/admin-convergence.css?v=464"><link rel="icon" href="/assets/mark.png" type="image/png">
+<style>.month-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.month-actions{display:flex;gap:8px;flex-wrap:wrap}.month-blockers{margin:0;padding-left:20px}.month-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}</style>
+</head><body data-admin-page="month-end" data-admin-module="financials">
+<div class="container admin-shell">
+<div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"><div><div style="font-weight:800">Devil n Dove</div><div class="small">Financials / Month-End</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/accounting/">Accounting</a><a href="/admin/business-pipeline/">Business Pipeline</a><a href="/admin/it-platform/">I.T.</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
+<div class="hero compact-hero"><div><p class="eyebrow">Release 464 • Update 3</p><h1>Month-End Cockpit</h1><p>Read-only executive view of the existing accounting close workflow: payments, HST/GST, evidence, blockers, lock state and accountant export readiness.</p></div></div>
+<section class="card" style="margin-top:18px"><div class="month-actions"><label><span class="small">Period</span><input id="monthEndPeriod" type="month"></label><button class="btn primary" id="monthEndRefresh" type="button">Refresh</button><a class="btn" href="/admin/accounting/#accountingCloseWorkflowMount">Open working accounting controls</a></div><p class="small" id="monthEndMessage" role="status" aria-live="polite" data-admin-workspace-status>Loading month-end authority…</p></section>
+<div id="monthEndCockpit" style="margin-top:18px"></div>
+<div class="footer card" style="margin-top:18px"></div></div>
+<script src="/js/main.js?v=464"></script><script src="/public/js/auth.js?v=464"></script><script src="/public/js/site-auth-ui.js?v=464"></script><script src="/public/js/admin-self-protect.js?v=464"></script><script src="/public/js/admin.js?v=464"></script><script src="/public/js/admin-module-nav.js?v=464"></script><script src="/public/js/admin-month-end-cockpit.js?v=464"></script>
+</body></html>
