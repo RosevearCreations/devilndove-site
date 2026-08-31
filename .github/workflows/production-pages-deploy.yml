@@ -1,0 +1,190 @@
+name: Production Pages Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-live-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_D1_NAME: devilndove-prod-r462
+      PROD_D1_ID: f34a741b-0000-45b0-9a96-6be08754d563
+      PROD_PRODUCT_R2: devilndove-toolshed-images
+      PROD_CAIP_R2: devilndove-caip-media
+      RELEASE463_BROWSER_UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Verify Production cutover boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "main"
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-caip-media-dev"$' wrangler.toml
+          ! grep -q '^account_id[[:space:]]*=' wrangler.toml
+          test "${PROD_D1_ID}" != "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+          test "${PROD_PRODUCT_R2}" != "devilndove-toolshed-images-dev"
+          test "${PROD_CAIP_R2}" != "devilndove-caip-media-dev"
+
+      - name: Prove isolated Production D1 before deployment
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM site_item_inventory) AS site_item_inventory, (SELECT COUNT(*) FROM app_modules) AS app_modules;" > /tmp/release463-prod-d1.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/release463-prod-d1.json'))
+          rows=[]
+          def walk(value):
+              if isinstance(value,dict):
+                  if all(k in value for k in ('users','products','site_item_inventory','app_modules')): rows.append(value)
+                  for child in value.values(): walk(child)
+              elif isinstance(value,list):
+                  for child in value: walk(child)
+          walk(data)
+          assert rows, data
+          row=rows[0]
+          expected={'users':1,'products':45,'site_item_inventory':1041,'app_modules':5}
+          actual={k:int(row[k]) for k in expected}
+          assert actual==expected,(actual,expected)
+          print('RELEASE 463 ISOLATED PRODUCTION D1 PREDEPLOY: PASS',actual)
+          PY
+          rm -f /tmp/release463-prod-d1.json
+
+      - name: Generate ephemeral Production bindings and deploy exact main SHA
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          cp wrangler.toml /tmp/wrangler.release463-development.toml
+          cat > wrangler.toml <<TOML
+          name = "devilndove-site"
+          compatibility_date = "2026-04-08"
+          pages_build_output_dir = "."
+
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "${PROD_D1_NAME}"
+          database_id = "${PROD_D1_ID}"
+
+          [[r2_buckets]]
+          binding = "PRODUCT_MEDIA_BUCKET"
+          bucket_name = "${PROD_PRODUCT_R2}"
+          preview_bucket_name = "${PROD_PRODUCT_R2}"
+
+          [[r2_buckets]]
+          binding = "CAIP_PRIVATE_MEDIA_BUCKET"
+          bucket_name = "${PROD_CAIP_R2}"
+          preview_bucket_name = "${PROD_CAIP_R2}"
+          TOML
+          grep -q "database_id = \"${PROD_D1_ID}\"" wrangler.toml
+          ! grep -q 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' wrangler.toml
+          ! grep -q 'devilndove-toolshed-images-dev' wrangler.toml
+          ! grep -q 'devilndove-caip-media-dev' wrangler.toml
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=devilndove-site \
+            --branch=main \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message="${{ github.event.head_commit.message || 'Release 463 Production deployment' }}" \
+            | tee /tmp/release463-production-deploy.log
+          cp /tmp/wrangler.release463-development.toml wrangler.toml
+          python - <<'PY'
+          import re
+          text=open('/tmp/release463-production-deploy.log',encoding='utf-8',errors='replace').read()
+          labels=re.findall(r'https://([a-z0-9-]+)\.devilndove-site\.pages\.dev',text,re.I)
+          hashes=[label for label in labels if re.fullmatch(r'[0-9a-f]{8}',label,re.I)]
+          assert hashes,text[-3000:]
+          url=f'https://{hashes[-1]}.devilndove-site.pages.dev'
+          open('/tmp/release463-production-url','w').write(url)
+          print('EXACT_PRODUCTION_URL',url)
+          PY
+
+      - name: Prove live runtime is bound to isolated Production D1
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          PROBE="release463-prod-probe-$(python - <<'PY'
+          import secrets
+          print(secrets.token_hex(24))
+          PY
+          )"
+          echo "::add-mask::${PROBE}"
+          cleanup() {
+            npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --command "DELETE FROM sessions WHERE session_token='${PROBE}' OR token='${PROBE}';" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --command "INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) SELECT user_id, '${PROBE}', '${PROBE}', datetime('now','+15 minutes'), datetime('now') FROM users WHERE is_active=1 AND lower(role)='admin' ORDER BY user_id LIMIT 1;"
+          COUNT="$(npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT COUNT(*) AS probe_count FROM sessions WHERE session_token='${PROBE}';" | python -c "import sys,json; d=json.load(sys.stdin); vals=[]; exec('def w(v):\n    if isinstance(v,dict):\n        if \\"probe_count\\" in v: vals.append(int(v[\\"probe_count\\"]))\n        for x in v.values(): w(x)\n    elif isinstance(v,list):\n        for x in v: w(x)',globals()); w(d); print(vals[0] if vals else 0)")"
+          test "${COUNT}" = "1"
+          export RELEASE463_PROBE_TOKEN="${PROBE}"
+          python - <<'PY'
+          import json,os,time,urllib.request,urllib.error
+          token=os.environ['RELEASE463_PROBE_TOKEN']
+          ua=os.environ['RELEASE463_BROWSER_UA']
+          candidates=[open('/tmp/release463-production-url').read().strip(),'https://devilndove-site.pages.dev']
+          outcomes=[]
+          for base in candidates:
+              url=base+'/api/auth/me'
+              success=False; last=None
+              for _ in range(20):
+                  req=urllib.request.Request(url,headers={
+                      'Accept':'application/json','Cache-Control':'no-store','Cookie':'dd_auth_token='+token,
+                      'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
+                  })
+                  try:
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          status=r.status; raw=r.read().decode('utf-8','replace')
+                  except urllib.error.HTTPError as e:
+                      status=e.code; raw=e.read().decode('utf-8','replace')
+                  except Exception as e:
+                      last=repr(e); time.sleep(3); continue
+                  try: data=json.loads(raw)
+                  except Exception:
+                      last=(status,raw[:200]); time.sleep(3); continue
+                  if status==200 and data.get('ok') is True and str((data.get('user') or {}).get('role') or '').lower()=='admin':
+                      success=True; outcomes.append({'url':url,'status':status,'profile':data.get('response_profile')}); break
+                  last=(status,data); time.sleep(3)
+              assert success,(url,last)
+          print('RELEASE 463 LIVE ISOLATED D1 RUNTIME PROBE: PASS',json.dumps(outcomes))
+          PY
+          cleanup
+          trap - EXIT
+
+      - name: Boundary statement
+        run: |
+          echo 'Target: Cloudflare Pages devilndove-site / main Production'
+          echo "Source SHA: ${GITHUB_SHA}"
+          echo 'Tracked wrangler.toml remains Development-safe and identical across branches'
+          echo "Production D1: ${PROD_D1_NAME} / ${PROD_D1_ID}"
+          echo "Production R2 Product: ${PROD_PRODUCT_R2}"
+          echo "Production R2 CAIP: ${PROD_CAIP_R2}"
+          echo 'Live authenticated probe used a temporary Production-only D1 session and removed it'
+          echo 'Development D1/R2: not mutated by Production deployment'
