@@ -2,7 +2,7 @@
 
 ## Current authority
 
-**Release 465 — Business Intelligence and Release Hardening — is current. Builds 1 and 2 are Development green.** Release 464 remains the completed prior application release. Release 463 remains the environment authority: one Cloudflare Pages project (`devilndove-site`), `dev` → Preview/Development and `main` → Production/Live. Release 461 is historical D1 provenance only and is never replayed because a chat, workstation, branch or deployment changes.
+**Release 465 — Business Intelligence and Release Hardening — Builds 1, 2 and 3 are Development green.** Release 464 is the completed prior application release. Release 463 remains the environment authority: one Cloudflare Pages project (`devilndove-site`), `dev` → Preview/Development and `main` → Production/Live. Release 461 is historical D1 provenance only and is never replayed because a chat, workstation, branch or deployment changes.
 
 ## Environment boundary
 
@@ -23,47 +23,46 @@
 
 Production business/transactional data is Production-owned. Never refresh or overwrite it wholesale from Development.
 
-## Release 464 inherited green baseline
+## Release 465 completed Development scope
 
-Release 464 Updates 1–3 remain closed and Development green. They established canonical forward migrations, request-time D1 schema firewall, operational recovery/retention, Access-safe Preview smoke, accessibility, Storefront merchandising, Product SEO/structured data, read-only genealogy, Month-End Cockpit, Creative business pipeline, and I.T. Operations Dashboard. Do not reopen them unless a current gate proves drift.
+### Build 1 — items 1–7 — Development green
+Storefront merchandising simulation, Product readiness/completeness, fail-closed publication readiness, SEO quality cockpit, internal-link intelligence, Product image-quality visibility and Storefront typo recovery.
 
-## Release 465 Build 1 — Development green
+Final Build 1 checkpoint: `c2728be72b9c416536252e7cdbdaf39d1226a095`, System Gate `33429507939`, Preview `https://99705dfc.devilndove-site.pages.dev`.
 
-Items 1–7 are complete: Storefront merchandising simulation; Product readiness/completeness; fail-closed publication readiness; SEO quality cockpit; internal-link intelligence; Product image-quality visibility; and Storefront typo recovery.
+### Build 2 — items 8–13 — Development green
+Related-product intelligence, Inventory availability, scenario material-shortage forecasting, genealogy exceptions, Creative readiness and explainable Next Safe Action. Build 2 is read-only intelligence over existing authorities and introduced no migration.
 
-Final Build 1 restart checkpoint recorded previously: `c2728be72b9c416536252e7cdbdaf39d1226a095`, System Gate `33429507939`, Preview `https://99705dfc.devilndove-site.pages.dev`, D1 `583` tables / `4` migrations / `4` proofs / `4` Release 465 triggers / `0` FK violations.
+Final Build 2 checkpoint: `2fc2a17be77a170852b4e11e3c88d59e16928e7b`, System Gate `33432641781`, Preview `https://6c476c17.devilndove-site.pages.dev`, proof artifact `9773238824`.
 
-## Release 465 Build 2 — Inventory & Creator Intelligence — Development green
+### Build 3 — items 14–20 — Development green
+14. **Cost/profitability intelligence** — existing Creative Project cost, time/labour rate, packaging, overhead, fee, shipping and revenue authority; estimated content value is separate from storefront revenue margin.
+15. **Financial anomaly detection** — read-only duplicate-payment, over-application, evidence-gap, tax-variance, outstanding-balance and locked-period checks.
+16. **Month-end readiness score** — weighted read-only score over the existing Accounting close, HST/GST, evidence and accountant-export authority.
+17. **I.T. health score** — D1 migration/proof count, Release 465 triggers, five-module authority, FK integrity, D1/R2 bindings and runtime incident posture. Expected canonical migrations are correctly `4`.
+18. **Regression-evidence archive** — canonical System Gate emits machine-readable release evidence.
+19. **Performance budget** — fail-closed runtime-source limits. Measured baseline: `874` runtime source files / `9,863,687` bytes / `567,271` inline data-URI estimate; inline budget is `650,000` bytes.
+20. **Release 465 autonomous acceptance framework** — same-tree source, D1, Preview, binding, smoke, evidence and closure proof.
 
-Items 8–13 are complete:
+### First Build 3 technical-green evidence
 
-8. **Related-product intelligence** — explainable relationship reasons only; no relationship rows are written automatically.
-9. **Inventory availability intelligence** — reports available-now / can-make / limited / unavailable from existing Product resources, on-hand stock and lot authority without consuming Inventory.
-10. **Material shortage forecasting** — scenario-based forecast from Product resource recipes, purchase lots, on-hand quantities and operator-entered planned units. Scenario quantity is never claimed to be an actual production order.
-11. **Genealogy exception cockpit** — identifies real forward-provenance gaps while keeping legitimate pre-cutover opening-stock boundaries separate; historical genealogy is never fabricated.
-12. **Creative readiness score** — combines Product linkage, materials/cost coverage, reviewed CAIP evidence, governance and Content Studio readiness using existing authorities.
-13. **Next Safe Action engine** — explains the next safe step and blockers; it never executes providers, publishes, consumes Inventory, posts production, or posts Accounting.
-
-### First Build 2 technical-green evidence
-
-- source SHA: `658613a9775c248e959c04113ea138e85d32bac1`
-- System Gate: `33431890551`
-- source-gate job: `99618968755` — PASS
-- deploy-development job: `99619087413` — PASS
-- exact Preview: `https://def3bd0b.devilndove-site.pages.dev`
-- proof artifact: `9772962684`
-- D1: `583` tables / `4` native migration rows / `4` proof rows / `4` Release 465 triggers / `18` required Build 2 authority tables / `0` FK violations
-- migration result: `No migrations to apply!`
-- Build 2 schema change: **NONE**
+- source SHA: `c0cf58ca79f1c4d3ac2844f49c143f16a1bc5f13`
+- System Gate: `33447135123`
+- source job: `99668632173` — PASS
+- deploy job: `99668701612` — PASS
+- exact Preview: `https://27bb1bcc.devilndove-site.pages.dev`
+- D1: `583` tables / `4` native migrations / `4` proofs / `4` Release 465 triggers / `11` Build 3 required authority tables / `0` FK violations
+- migration result: `No migrations to apply!` / `newly_applied: []`
+- deploy-proof artifact: `9778464644`
+- regression-evidence artifact: `9778465208`
+- artifact retention: repository maximum `90` days
 - Preview mode: `CLOUDFLARE_ACCESS_PROTECTED`
-- smoke auth headers: `0`
+- smoke authentication headers: `ZERO`
 - Cloudflare Access weakened: **NO**
 - provider execution/publication: **ZERO**
 - Inventory mutation / production posting / Accounting posting: **ZERO**
-- Production mutation: **ZERO**
-- raw CAIP R2 delete: **ZERO**
-
-The final Build 2 restart checkpoint is the current `dev` head only after its final idempotent System Gate succeeds. The closure commit intentionally does not self-embed a future SHA or workflow-run ID.
+- automatic financial correction / price changes: **ZERO**
+- Production mutation / raw CAIP R2 delete: **ZERO**
 
 ## Canonical D1 stream
 
@@ -74,7 +73,11 @@ Development remains exactly:
 3. `0003_release464_business_growth.sql`
 4. `0004_release465_storefront_quality.sql`
 
-Build 2 is intentionally schema-neutral. Missing future schema must be repaired with a new numbered migration; request-time DDL remains forbidden.
+Builds 2 and 3 are schema-neutral. Any future schema change requires the next numbered migration. Request-time DDL remains forbidden.
+
+## Final Release 465 closure rule
+
+The documented closure tree must pass the same canonical System Gate idempotently: no migrations to apply, 4 native rows / 4 proofs / 4 triggers / 11 Build 3 authorities / 0 FK violations, exact closure Preview, Development D1/R2 binding proof, Access-safe smoke and both proof/evidence artifacts. Git plus that successful run determines the authoritative final restart checkpoint; the closure commit does not self-embed a future SHA or run ID.
 
 ## Permanent promotion/provider rules
 
@@ -82,9 +85,9 @@ Production promotion remains exact green Development tree only: Development migr
 
 Stripe/PayPal/provider execution and publication remain closed unless a deliberate test/live authorization explicitly opens them. Configuration presence alone never authorizes transactions or publication. Raw CAIP R2 deletion remains closed. Cloudflare Access must never be weakened to make Preview smoke pass.
 
-## Next bounded work
+## Next work after final closure
 
-After the Build 2 closure SHA passes its final idempotent System Gate, proceed to **Release 465 Build 3 — Financial, I.T. & Release Hardening — items 14–20 only**. Do not reopen Builds 1 or 2 unless a current gate proves drift.
+Do not reopen Release 465 Builds 1–3 unless a current gate proves drift. External Stripe Development acceptance, PayPal sandbox acceptance, CAIP private-media browser/range-streaming evidence, Social/OAuth controlled acceptance and deliberate Production promotion remain separately bounded future work.
 
 ## Canonical reading order
 
@@ -95,7 +98,9 @@ After the Build 2 closure SHA passes its final idempotent System Gate, proceed t
 5. `docs/operations/RELEASE_465_THREE_BUILD_ROADMAP.md`
 6. `release465-build1-storefront-quality.json`
 7. `release465-build2-inventory-creator-intelligence.json`
-8. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`
-9. `release463-environment.json`
+8. `release465-build3-financial-it-hardening.json`
+9. `release465-performance-budget.json`
+10. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`
+11. `release463-environment.json`
 
 Older Build/Release material is provenance only and must not override these authorities.
