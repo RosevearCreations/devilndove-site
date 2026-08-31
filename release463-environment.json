@@ -1,0 +1,60 @@
+{
+  "environment_release": 463,
+  "label": "Environment Consolidation and Production Cutover",
+  "status": "cutover_in_progress",
+  "canonical_pages_project": "devilndove-site",
+  "branches": {
+    "development": "dev",
+    "production": "main"
+  },
+  "native_git_deployments": {
+    "enabled": false,
+    "freeze_run": 33394264797,
+    "reason": "Only explicit environment-aware workflows may deploy after Release 463 consolidation."
+  },
+  "development": {
+    "pages_environment": "preview",
+    "d1": {
+      "name": "devilndove-dev",
+      "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+    },
+    "r2": {
+      "product": "devilndove-toolshed-images-dev",
+      "caip": "devilndove-caip-media-dev"
+    }
+  },
+  "production": {
+    "pages_environment": "production",
+    "d1": {
+      "name": "devilndove-prod-r462",
+      "id": "f34a741b-0000-45b0-9a96-6be08754d563"
+    },
+    "r2": {
+      "product": "devilndove-toolshed-images",
+      "caip": "devilndove-caip-media"
+    }
+  },
+  "proof": {
+    "d1_clone_run": 33354477153,
+    "d1_clone_artifact": 9744697793,
+    "d1_exact_parity": true,
+    "d1_foreign_key_violations": 0,
+    "r2_convergence_run": 33359789152,
+    "r2_convergence_artifact": 9746311000,
+    "product_r2_objects": 897,
+    "product_r2_bytes": 40874208,
+    "caip_r2_objects": 1,
+    "caip_r2_bytes": 74442873,
+    "r2_exact_parity": true,
+    "legacy_production_d1_backup_artifact": 9744317222
+  },
+  "operating_model": {
+    "dev_is_work_branch": true,
+    "main_is_promoted_release_branch": true,
+    "application_tree_should_match_after_promotion": true,
+    "production_transactional_data_is_production_owned_after_cutover": true,
+    "blind_dev_to_production_data_overwrite_after_cutover": false,
+    "request_time_schema_mutation": false,
+    "provider_execution_default": "closed"
+  }
+}
