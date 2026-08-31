@@ -90,14 +90,22 @@ export async function syncAccountingForOrder(env, orderId, opts = {}) {
   let grossPaidCents = 0;
   for (const row of payments) {
     const status = normalizeText(row.payment_status).toLowerCase();
-    if (['paid', 'succeeded', 'completed', 'captured'].includes(status)) grossPaidCents += Number(row.amount_cents || 0);
+    if (['paid', 'partially_refunded', 'refunded'].includes(status)) {
+      grossPaidCents += Math.max(0, Number(row.amount_cents || 0));
+    }
   }
-  const refundedCents = Math.max(0, Number(refunds?.total_refunded_cents || 0));
-  const netPaidCents = Math.max(0, grossPaidCents - refundedCents);
+
+  const totalRefundedCents = Math.max(0, Number(refunds?.total_refunded_cents || 0));
+  const netPaidCents = Math.max(0, grossPaidCents - totalRefundedCents);
   const totalCents = Math.max(0, Number(order.total_cents || 0));
   const taxCents = Math.max(0, Number(order.tax_cents || 0));
-  const amountOutstandingCents = Math.max(0, totalCents - netPaidCents);
+  const outstandingCents = Math.max(0, totalCents - netPaidCents);
   const entryStatus = deriveEntryStatus(order.order_status, order.payment_status, totalCents, netPaidCents);
+  const revenueCents = Math.max(0, Math.min(totalCents, netPaidCents));
+  const taxLiabilityCents = totalCents > 0
+    ? Math.round(taxCents * Math.min(netPaidCents, totalCents) / totalCents)
+    : 0;
+  const note = normalizeText(opts.note) || null;
 
   await db.prepare(`
     INSERT INTO accounting_order_records (
@@ -123,34 +131,40 @@ export async function syncAccountingForOrder(env, orderId, opts = {}) {
       tax_liability_cents = excluded.tax_liability_cents,
       source_order_status = excluded.source_order_status,
       source_payment_status = excluded.source_payment_status,
-      notes = excluded.notes,
+      notes = CASE
+        WHEN excluded.notes IS NULL OR excluded.notes = '' THEN accounting_order_records.notes
+        WHEN accounting_order_records.notes IS NULL OR accounting_order_records.notes = '' THEN excluded.notes
+        ELSE excluded.notes
+      END,
       updated_at = CURRENT_TIMESTAMP,
       last_synced_at = CURRENT_TIMESTAMP
   `).bind(
     id,
-    normalizeText(order.order_number),
+    order.order_number || `Order ${id}`,
     entryStatus,
     normalizeText(order.customer_name) || null,
     normalizeText(order.customer_email) || null,
-    normalizeText(order.currency) || 'CAD',
+    normalizeText(order.currency || 'CAD').toUpperCase() || 'CAD',
     Math.max(0, Number(order.subtotal_cents || 0)),
     Math.max(0, Number(order.discount_cents || 0)),
     Math.max(0, Number(order.shipping_cents || 0)),
     taxCents,
     totalCents,
     netPaidCents,
-    amountOutstandingCents,
-    Math.max(0, totalCents - taxCents),
-    taxCents,
-    normalizeText(order.order_status) || null,
-    normalizeText(order.payment_status) || null,
-    normalizeText(opts.note) || null,
+    outstandingCents,
+    revenueCents,
+    taxLiabilityCents,
+    normalizeText(order.order_status).toLowerCase() || null,
+    normalizeText(order.payment_status).toLowerCase() || null,
+    note
   ).run();
 
-  return db.prepare(`
-    SELECT *
-    FROM accounting_order_records
-    WHERE order_id = ?
-    LIMIT 1
-  `).bind(id).first();
+  return {
+    order_id: id,
+    entry_status: entryStatus,
+    amount_paid_cents: netPaidCents,
+    amount_outstanding_cents: outstandingCents,
+    revenue_cents: revenueCents,
+    tax_liability_cents: taxLiabilityCents
+  };
 }
