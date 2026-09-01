@@ -36,19 +36,20 @@ Technical-green source `5ca09eab9e2a3441ffbdf76c46e35b3a6fcd52a6`; System Gate `
 
 ## Build 4 — External Acceptance & Commercial Readiness — TECHNICAL GREEN / EXTERNAL ACCEPTANCE HOLD
 
-The last fully proven Build 4 technical-closure tree is `0ca68e19339da198e25dd7d3d603a2e616bc77ec`.
+The current fully proven Build 4 technical-closure tree is `8f6cb19f69f102b09685dbb4cf410fe123e5775d`.
 
 Final technical closure:
-- canonical System Gate `33469027060` — PASS
-- exact Preview `https://c3b4404c.devilndove-site.pages.dev`
-- Build 1 Proof `33469027078` — PASS
-- Build 2 Proof `33469027029` — PASS
-- Build 3 Proof `33469027067` — PASS
-- Build 4 Proof `33469026988` — PASS
-- Build 4 proof artifact `9785894659`, SHA-256 `de5bc1ea32eeb5ec6584ca7b8f73cd082c5e9939c2ce38db63bf8c98d1907ad2`
+- canonical System Gate `33510294636` — PASS
+- exact Preview `https://83bc32a3.devilndove-site.pages.dev`
+- Build 1 Proof `33510294602` — PASS
+- Build 2 Proof `33510294860` — PASS
+- Build 3 Proof `33510294792` — PASS
+- Build 4 Proof `33510294597` — PASS
+- Build 4 proof artifact `9801397939`, SHA-256 `af257b6a2976b5d51f1667d2c8f045dfbe7f4d6a0e0ff753f7aa42bb7fce8508`
+- Development deploy artifact `9801387368`, SHA-256 `b56ce91f7654664cfa3e8ebd13ac2c931fcbd67fd75c546a2b9b4379b26cdeb7`
 - canonical migrations remain exactly `0001`–`0004`; newly applied migrations `0`; Development FK violations `0`
 - Preview remained Cloudflare Access protected
-- Production mutation/provider publication/payment execution from automated proof `0`
+- Production mutation/provider publication/payment/refund/OAuth execution from automated proof `0`
 
 ### Item 16 — CAIP private-media browser/range-streaming acceptance — DEVELOPMENT GREEN
 
@@ -56,26 +57,27 @@ Development D1 contains **3 qualifying** `review_proxy_served` audits with `rang
 
 ### Item 17 — Stripe Development acceptance — EXTERNAL ACCEPTANCE PENDING
 
-The prior closure measured **0/5** readiness-ledger checks before refund was promoted to its own evidence dimension. The current Release 466 acceptance contract requires **six** dimensions: test credentials, test checkout, signed webhook, a real provider-synchronized Development refund, reconciliation, and idempotent replay.
+Current Development evidence is **0/6**, including **0 successful provider-synchronized refunds**. The current Release 466 acceptance contract requires six dimensions: test credentials, test checkout, signed webhook, a real provider-synchronized Development refund, reconciliation, and idempotent replay.
 
-The refund dimension is derived from actual successful `payment_refunds` provider synchronization with a provider refund ID. A local-only refund does not count. Outbound refunds are fail-closed behind the old provider-mutation gate, explicit request confirmation, and the Release 466 Development/test execution boundary.
+The refund dimension is derived from actual successful `payment_refunds` provider synchronization with a provider refund ID. A local-only refund does not count. Outbound refunds are fail-closed behind the legacy provider-mutation gate, explicit request confirmation, and the Release 466 Development/test execution boundary.
 
 ### Item 18 — PayPal sandbox acceptance — EXTERNAL ACCEPTANCE PENDING
 
-The prior closure measured **0/5** readiness-ledger checks before refund was promoted to its own evidence dimension. The current contract requires **six** dimensions: sandbox credentials, approval/capture, verified webhook, a real provider-synchronized sandbox refund, reconciliation, and idempotent replay.
+Current Development evidence is **0/6**, including **0 successful provider-synchronized refunds**. The current contract requires six dimensions: sandbox credentials, approval/capture, verified webhook, a real provider-synchronized sandbox refund, reconciliation, and idempotent replay.
 
 The refund dimension is derived from actual successful `payment_refunds` provider synchronization with a provider refund ID. A local-only refund does not count. PayPal remote refunds are sandbox-only and carry `PayPal-Request-Id` retry protection.
 
-### Payment refund hardening
+### Payment refund hardening — DEVELOPMENT GREEN
 
-Release 466 payment hardening is schema-neutral and must pass source and exact-SHA Development proof before replacing the last technical closure tree. It enforces:
+Release 466 payment hardening is schema-neutral and is Development green on `8f6cb19f69f102b09685dbb4cf410fe123e5775d`. It enforces:
 
 - direct `/api/admin/payment-actions` provider synchronization defaults OFF;
 - `PAYMENT_PROVIDER_MUTATIONS_ENABLED=1` plus `provider_sync_confirmed=true` remains required;
 - `PAYMENT_PROVIDER_EXECUTION_MODE=development-explicit`, Development host/environment, and test/sandbox credentials are additionally required;
 - Stripe refunds use `Idempotency-Key`; PayPal refunds use `PayPal-Request-Id`;
 - failed provider refunds do not mark local payment/order state refunded;
-- provider refund acceptance comes from real successful provider synchronization, never configuration.
+- provider refund acceptance comes from real successful provider synchronization, never configuration;
+- Build 4 CI makes zero external provider/refund calls.
 
 ### Item 19 — Social/OAuth controlled acceptance — EXTERNAL ACCEPTANCE PENDING
 
@@ -87,6 +89,6 @@ The cockpit and read-only acceptance API are technically green. Current launch s
 
 ## Current Release 466 state
 
-Builds 1–3 are Development green. Build 4 implementation is technical green, CAIP acceptance is green, and external Stripe/PayPal/Social acceptance remains HOLD. Payment acceptance now correctly includes refund proof as a sixth provider evidence dimension. Therefore **Release 466 is not Production-promotion ready and is not complete**.
+Builds 1–3 are Development green. Build 4 implementation and payment-refund hardening are technical green, CAIP acceptance is green, and external Stripe/PayPal/Social acceptance remains HOLD. Payment acceptance correctly includes real refund proof as a sixth provider evidence dimension. Therefore **Release 466 is not Production-promotion ready and is not complete**.
 
 `main` must not move until the remaining real Development/sandbox/OAuth acceptance evidence exists, native repository governance is deliberately resolved/reviewed, and a separate Production promotion is explicitly authorized.
