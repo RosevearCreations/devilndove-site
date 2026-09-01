@@ -2,7 +2,7 @@
 
 ## Current release
 
-**Release 466 — Operational Resilience and Commercial Readiness** is the current Development release. Builds 1, 2 and 3 are Development green. Build 1 native GitHub ruleset application remains the external repository-setting boundary pending. Release 465 remains fully Production green on `main` at `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`.
+**Release 466 — Operational Resilience and Commercial Readiness** is the current Development release. Builds 1, 2 and 3 are Development green. Build 4 is **technical green with external acceptance HOLD**. Item 16 CAIP private-media acceptance is green; Stripe, PayPal and Social/OAuth acceptance remain incomplete. Native GitHub ruleset application remains the external repository-setting boundary pending. Release 465 remains fully Production green on `main` at `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`.
 
 ## Four-build plan
 
@@ -11,56 +11,56 @@
 | Build 1 | 1–5 | Governance, Recovery & Production Reliability | Development green / native GitHub ruleset external pending |
 | Build 2 | 6–10 | Runtime & Storefront Intelligence | Development green |
 | Build 3 | 11–15 | Revenue & Business Intelligence | Development green |
-| Build 4 | 16–20 | External Acceptance & Commercial Readiness | Next |
+| Build 4 | 16–20 | External Acceptance & Commercial Readiness | Technical green / external acceptance HOLD |
 
-## Build 1 — Governance, Recovery & Production Reliability
+## Builds 1–3
 
-Items 2–5 remain Development green. Item 1's in-repository fail-closed policy is green; native GitHub `dev`/`main` ruleset application remains external/pending.
+Builds 1–3 remain green on the current Build 4 source lineage. Final historical closure authorities remain:
 
-Final closure source `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`; System Gate `33464419372` PASS; Build 1 Proof `33464419380` PASS. Production reliability remains current read-only `100/100 GREEN`.
+- Build 1 closure `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`; System Gate `33464419372`; Build 1 Proof `33464419380`.
+- Build 2 closure `855171430c6b14c4f4a6ff24a120bcce722294f9`; System Gate `33466171233`; Build 2 Proof `33466171290`.
+- Build 3 technical source `5ca09eab9e2a3441ffbdf76c46e35b3a6fcd52a6`; System Gate `33466655732`; Build 3 Proof `33466655735`.
 
-## Build 2 — Runtime & Storefront Intelligence
+All Release 466 Builds remain schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
 
-Items 6–10 are Development green. Final closure source `855171430c6b14c4f4a6ff24a120bcce722294f9`; final System Gate `33466171233` PASS; final Build 2 Proof `33466171290` PASS.
+## Build 4 — External Acceptance & Commercial Readiness
 
-The corrected live Production SEO baseline remains `46` public HTML pages / `38` sitemap URLs / `6` errors / `8` warnings. The six retained sitemap/noindex conflicts are `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`. These are actionable intelligence, not hidden failures.
+Technical implementation source: `6421187fb7c1f1eed932c2dd8e223b5f9589484d`.
 
-## Build 3 — Revenue & Business Intelligence
+- System Gate `33468360898` — PASS
+- exact Development Preview `https://7d8d9c89.devilndove-site.pages.dev`
+- Build 4 Proof `33468360774` — PASS
+- proof artifact `9785676849`, SHA-256 `5f789155e831a00a6af4816ac4cacb3613f4a975be2e76799a4b906314328fc1`
+- canonical migrations `4`; newly applied `0`; Development FK violations `0`
+- Production mutation/provider publication/payment execution by automated proof: ZERO
 
-11. Storefront conversion funnel analytics — **Development green**, read-only over existing page-view/cart/order authorities.
-12. Zero-result/abandoned-search intelligence — **Development green**, using existing search/session/cart evidence with explicit abandonment semantics.
-13. Explainable Product opportunity score — **Development green**, recommendation-only with visible component scores/reasons.
-14. Inventory reorder economics — **Development green**, using existing Inventory/replenishment/sourcing evidence; never places orders.
-15. Creative-project priority engine — **Development green**, recommendation-only; never starts/publishes projects or posts Inventory/Accounting.
+### Item status
 
-Technical-green source: `5ca09eab9e2a3441ffbdf76c46e35b3a6fcd52a6`.
+16. **CAIP private-media browser/range-streaming acceptance — Development green.** Development evidence contains `3` qualifying range-stream audits.
+17. **Stripe Development acceptance — external acceptance pending.** Required ledger checks passed: `0/5`.
+18. **PayPal sandbox acceptance — external acceptance pending.** Required ledger checks passed: `0/5`.
+19. **Social/OAuth controlled acceptance — external acceptance pending.** Selected Development providers `0`; selected-provider connections `0`; selected-provider security events `0`.
+20. **Production-launch readiness cockpit — technical green / HOLD.** Current state `HOLD_EXTERNAL_ACCEPTANCE`.
 
-- canonical System Gate `33466655732` — PASS
-- exact Development Preview `https://732f6430.devilndove-site.pages.dev`
-- Release 466 Build 3 Proof `33466655735` — PASS
-- Build 3 proof artifact `9785121048`, SHA-256 `92af7c472900d89cf4d9a01a44d4abc5ba4a10ef698de2cac7df44011b525b56`
-- all `11` required Development authority tables present
-- observed Development rows: page views `33`, Products `45`, Inventory `1041`, Creative projects `5`, cart/order/search/profitability `0/0/0/0`
-- zero observed rows mean no captured Development observations in those authorities, not zero demand or zero Production activity
-- canonical migrations remain `0001`–`0004`; no Build 3 migration applied; FK violations `0`
-- Preview remained Cloudflare Access protected; Production business rows read ZERO; Production mutation ZERO
-
-Builds 1–3 introduce no new D1 migration.
+The six Release 465 live sitemap/noindex findings remain visible for `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`. Release 466 Development source now removes those six noindex utility/health routes from `sitemap.xml`; Production remains unchanged until deliberate promotion.
 
 ## Production boundary
 
 Release 466 has **not** been promoted. Production remains Release 465 at exact SHA `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`. Production business data remain Production-owned.
 
-## Build 4 — External Acceptance & Commercial Readiness — next
+Release 466 is not complete and is not promotion-ready while Stripe, PayPal and Social/OAuth external acceptance remain pending and native GitHub ruleset application remains external/pending. Real provider/browser acceptance must not be inferred from configuration.
 
-16. CAIP private-media authenticated browser/range-streaming acceptance.
-17. Stripe Development payment/webhook/refund/reconciliation/idempotency acceptance.
-18. PayPal sandbox payment/webhook/refund/reconciliation/idempotency acceptance.
-19. Social/OAuth controlled connect/refresh/expiry/revoke/outage/reconnect acceptance, with publication still closed.
-20. Production-launch readiness cockpit combining source, recovery, provider, SEO, performance and incident evidence.
+## Next bounded work
 
-Build 4 must preserve sandbox/Development boundaries. Provider configuration or credentials do not authorize live charges, Production publication, or Release 466 Production promotion.
+The remaining Release 466 work is no longer another feature build. It is deliberate external acceptance:
+
+- complete the five Stripe Development checks using test mode only;
+- complete the five PayPal checks using sandbox only;
+- deliberately select the intended Social/OAuth provider(s) and perform controlled intended-account lifecycle acceptance with publication still closed;
+- retain CAIP range-streaming evidence as already accepted;
+- review/apply native GitHub rulesets externally when repository settings access permits;
+- then rerun strict Build 4 acceptance and the exact Development gates before considering a separate Production-promotion decision.
 
 ## Permanent boundaries
 
-Production data is never replaced wholesale from Development. Request-time DDL, schema reversal, automatic business-data restore, raw R2 deletion, provider execution/publication, automatic financial correction, automatic price/reorder/project actions, and main-only application patches remain closed. Release 466 Production promotion requires a separate deliberate authorization after Development acceptance.
+Production data is never replaced wholesale from Development. Request-time DDL, schema reversal, automatic business-data restore, raw R2 deletion, unbounded provider execution/publication, automatic financial correction, automatic price/reorder/project actions, and main-only application patches remain closed. Production promotion requires a separate deliberate authorization.
