@@ -45,12 +45,21 @@ def main() -> None:
             'runner responses must preserve Production-mutation boundary')
     require("secret_values_emitted: false" in api,
             'runner must explicitly keep secret values out of responses')
-    require("PAYMENT_PROVIDER_MUTATIONS_ENABLED=1" not in api,
-            'runner must not hard-code/open the legacy provider mutation switch')
+    require(not re.search(r'env\.PAYMENT_PROVIDER_MUTATIONS_ENABLED\s*=', api),
+            'runner must not assign/open the provider mutation switch')
+    require("PAYMENT_PROVIDER_MUTATIONS_ENABLED=1" in api,
+            'runner may expose the safe operator switch name but must leave it externally controlled')
     require("https://api.stripe.com" not in api and "https://api-m.paypal.com" not in api,
             'runner must not implement direct provider transports or live PayPal hosts')
     require("https://api-m.sandbox.paypal.com" not in api,
             'runner must reuse existing provider transports instead of duplicating sandbox transport')
+
+    require("STRIPE_PUBLISHABLE_KEY" in api and "STRIPE_SECRET_KEY" in api and "STRIPE_WEBHOOK_SECRET" in api,
+            'Stripe canonical Development references must be enforced')
+    require("PAYPAL_CLIENT_ID" in api and "PAYPAL_SECRET" in api and "PAYPAL_WEBHOOK_ID" in api and "PAYPAL_ENV" in api,
+            'PayPal canonical sandbox references must be enforced')
+    require("PAYPAL_CLIENT_SECRET" not in api and "PAYPAL_CLIENT_SECRET" not in ui and "PAYPAL_CLIENT_SECRET" not in page,
+            'Build 6 current authority must not teach the stale PAYPAL_CLIENT_SECRET name')
 
     ddl = re.findall(r'\b(?:CREATE|ALTER|DROP)\s+TABLE\b', api, flags=re.I)
     require(not ddl, f'runner must remain schema-neutral; found DDL tokens: {ddl}')
