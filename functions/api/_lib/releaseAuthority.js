@@ -1,4 +1,4 @@
 // Devil n Dove single current-release authority.
-export const CURRENT_RELEASE = 465;
-export const RELEASE_LABEL = 'Business Intelligence and Release Hardening';
+export const CURRENT_RELEASE = 466;
+export const RELEASE_LABEL = 'Operational Resilience and Commercial Readiness';
 export const RELEASE_HEADER = 'X-DND-Release';
