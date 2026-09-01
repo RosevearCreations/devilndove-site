@@ -81,7 +81,7 @@
             {"href": "/admin/supply-sourcing/", "label": "Supply Sourcing"},
             {"href": "/admin/tool-lifecycle/", "label": "Tool Lifecycle"},
             {"href": "/admin/vendor-reviews/", "label": "Vendor & Manufacturer Reviews"},
-            {"href": "/admin/packaging/", "label": "Packaging"},
+            {"href": "/admin/packaging/soap-labels/", "label": "Soap Labels"},
             {"href": "/admin/packaging-studio/", "label": "Labeling & Packaging Studio"}
           ]
         },
