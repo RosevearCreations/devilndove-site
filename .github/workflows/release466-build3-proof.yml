@@ -1,0 +1,122 @@
+name: Release 466 Build 3 Proof
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Release 466 Build 3 source contracts
+        run: python scripts/release466_build3_gate.py
+      - name: Validate Build 3 JavaScript syntax
+        run: |
+          node --check functions/api/admin/release466-revenue-business-intelligence.js
+          node --check functions/api/admin/release-revenue-business-intelligence.js
+          node --check public/js/admin-release466-revenue-business-intelligence.js
+      - name: Compile Build 3 Python proof tools
+        run: python -m py_compile scripts/release466_build3_gate.py scripts/release466_build3_runtime_proof.py
+      - name: Preserve inherited schema SEO performance and repository gates
+        run: |
+          python scripts/migration_policy_gate.py
+          python scripts/runtime_schema_mutation_gate.py
+          python scripts/repository_hygiene_gate.py
+          python scripts/release465_performance_budget_gate.py
+          python scripts/public_seo_depth_gate.py
+          git diff --check origin/dev...HEAD
+      - name: Build 3 safety statement
+        run: |
+          echo 'Release 466 Build 3: Revenue & Business Intelligence'
+          echo 'Items: 11-15 only'
+          echo 'Build 3 D1 migration: NONE'
+          echo 'Development intelligence: SELECT ONLY'
+          echo 'Production business-row reads: ZERO'
+          echo 'Automatic price/reorder/project action: ZERO'
+          echo 'Inventory/Accounting mutation: ZERO'
+          echo 'Provider/payment execution: ZERO'
+
+  runtime-proof:
+    needs: source-proof
+    if: github.event_name == 'push' && github.ref_name == 'dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      DEV_D1_NAME: devilndove-dev
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Wait for exact-SHA canonical System Gate
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            curl -fsS -H "Authorization: Bearer ${GH_READ_TOKEN}" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&event=push&per_page=20" > /tmp/release466-build3-system-gate-runs.json
+            state="$(python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/release466-build3-system-gate-runs.json'))
+          runs=[r for r in data.get('workflow_runs',[]) if r.get('name')=='System Gate' and r.get('head_sha')==os.environ['GITHUB_SHA'] and r.get('event')=='push']
+          if not runs: print('pending')
+          else:
+              run=sorted(runs,key=lambda x:x.get('created_at',''),reverse=True)[0]
+              print(str(run.get('conclusion') or run.get('status') or 'pending'))
+          PY
+            )"
+            echo "Canonical System Gate state: ${state}"
+            if [ "${state}" = success ]; then break; fi
+            if [ "${state}" = failure ] || [ "${state}" = cancelled ] || [ "${state}" = timed_out ]; then echo 'Canonical System Gate did not succeed; Build 3 runtime proof will not start.' >&2; exit 1; fi
+            if [ "${attempt}" -eq 90 ]; then echo 'Timed out waiting for canonical System Gate.' >&2; exit 1; fi
+            sleep 5
+          done
+      - name: Read Development Build 3 authority
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SQL="SELECT (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='site_page_views') site_page_views_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='cart_activity') cart_activity_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='orders') orders_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='site_search_events') site_search_events_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='products') products_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='site_item_inventory') site_item_inventory_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='inventory_supply_replenishment_profiles') inventory_supply_replenishment_profiles_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='inventory_supply_source_options') inventory_supply_source_options_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='creative_work_projects') creative_work_projects_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='creative_project_profitability') creative_project_profitability_table,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='creative_work_events') creative_work_events_table,(SELECT COUNT(*) FROM site_page_views) page_view_rows,(SELECT COUNT(*) FROM cart_activity) cart_rows,(SELECT COUNT(*) FROM orders) order_rows,(SELECT COUNT(*) FROM site_search_events) search_rows,(SELECT COUNT(*) FROM products) product_rows,(SELECT COUNT(*) FROM site_item_inventory) inventory_rows,(SELECT COUNT(*) FROM creative_work_projects) creative_project_rows,(SELECT COUNT(*) FROM creative_project_profitability) profitability_rows;"
+          npx --yes wrangler@4 d1 execute "${DEV_D1_NAME}" --remote --json --command "${SQL}" > /tmp/release466-build3-development-authority.json
+      - name: Assemble Build 3 runtime evidence
+        run: python scripts/release466_build3_runtime_proof.py --d1 /tmp/release466-build3-development-authority.json --source-sha "${GITHUB_SHA}" --output /tmp/release466-build3-runtime-proof.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release466-build3-revenue-business-proof
+          path: /tmp/release466-build3-runtime-proof.json
+          retention-days: 90
+          if-no-files-found: error
+      - name: Runtime boundary statement
+        run: |
+          echo 'Development D1 operation: SELECT only'
+          echo 'Production business rows read: ZERO'
+          echo 'Production mutation: ZERO'
+          echo 'Inventory/Accounting mutation: ZERO'
+          echo 'Automatic price/reorder/project action: ZERO'
+          echo 'Provider/payment execution: ZERO'
