@@ -38,10 +38,13 @@ def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--database", required=True)
     p.add_argument("--export-file", required=True)
+    p.add_argument("--expected-application-tables", required=True, type=int)
     p.add_argument("--source-sha", required=True)
     p.add_argument("--output", required=True)
     args = p.parse_args()
 
+    if args.expected_application_tables <= 0:
+        raise SystemExit("expected application-table count must be positive")
     db_path = Path(args.database)
     export_path = Path(args.export_file)
     if not db_path.is_file() or db_path.stat().st_size <= 0:
@@ -54,7 +57,8 @@ def main() -> int:
     try:
         integrity = str(db.execute("PRAGMA integrity_check").fetchone()[0])
         fk_violations = list(db.execute("PRAGMA foreign_key_check"))
-        tables = scalar(db, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+        application_tables = scalar(db, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'")
+        reserved_cf_tables = scalar(db, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name LIKE '_cf_%'")
         app_modules = scalar(db, "SELECT COUNT(*) FROM app_modules")
         placeholders = ",".join("?" for _ in MIGRATIONS)
         migrations = scalar(db, f"SELECT COUNT(*) FROM d1_migrations WHERE name IN ({placeholders})", MIGRATIONS)
@@ -67,7 +71,7 @@ def main() -> int:
 
     assert integrity.lower() == "ok", integrity
     assert not fk_violations, fk_violations[:20]
-    assert tables >= 583, tables
+    assert application_tables == args.expected_application_tables, (application_tables, args.expected_application_tables)
     assert app_modules == 5, app_modules
     assert migrations == 4, migrations
     assert proofs == 4, proofs
@@ -86,7 +90,10 @@ def main() -> int:
         "export_bytes": export_path.stat().st_size,
         "integrity_check": integrity,
         "foreign_key_violations": len(fk_violations),
-        "tables": tables,
+        "expected_application_tables": args.expected_application_tables,
+        "restored_application_tables": application_tables,
+        "restored_reserved_cf_tables": reserved_cf_tables,
+        "reserved_cloudflare_tables_in_application_count": False,
         "app_modules": app_modules,
         "canonical_migrations": migrations,
         "migration_proofs": proofs,
