@@ -1,0 +1,123 @@
+name: Production Rollback Readiness
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: 'Previously deployed Production commit SHA to evaluate'
+        required: true
+        type: string
+      acknowledgement:
+        description: 'Type RELEASE466_ROLLBACK_READINESS (this workflow never executes a rollback)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  rollback-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_D1_NAME: devilndove-prod-r462
+      PROD_D1_ID: f34a741b-0000-45b0-9a96-6be08754d563
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Fail closed unless explicitly acknowledged
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ inputs.acknowledgement }}" = "RELEASE466_ROLLBACK_READINESS"
+          test "${GITHUB_REF_NAME}" = "main"
+          echo 'READINESS ONLY — this workflow does not move main, deploy code, restore data, or reverse schema.'
+      - name: Build forward-schema-compatible rollback plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          CURRENT_SHA="$(git rev-parse HEAD)"
+          TARGET_SHA="$(git rev-parse --verify '${{ inputs.target_sha }}^{commit}')"
+          python scripts/release466_rollback_plan.py \
+            --target-sha "${TARGET_SHA}" \
+            --current-sha "${CURRENT_SHA}" \
+            --output /tmp/release466-rollback-plan.json
+          printf '%s' "${TARGET_SHA}" > /tmp/release466-rollback-target-sha
+      - name: Prove target has a prior successful Production deployment
+        shell: bash
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site/deployments" \
+            > /tmp/release466-production-deployments.json
+          python - <<'PY'
+          import json
+          target=open('/tmp/release466-rollback-target-sha').read().strip()
+          data=json.load(open('/tmp/release466-production-deployments.json'))
+          assert data.get('success') is True,data
+          matches=[]
+          for item in data.get('result') or []:
+              meta=((item.get('deployment_trigger') or {}).get('metadata') or {})
+              commit=str(meta.get('commit_hash') or '')
+              branch=str(meta.get('branch') or '')
+              if branch=='main' and item.get('environment')=='production' and (commit==target or target.startswith(commit) or commit.startswith(target)):
+                  matches.append(item)
+          assert matches,'Target SHA is not present in the returned successful Production deployment history.'
+          chosen=matches[0]
+          proof={'release':466,'build':1,'target_sha':target,'prior_production_deployment_found':True,'deployment_id':chosen.get('id'),'deployment_url':chosen.get('url'),'environment':chosen.get('environment'),'branch':'main'}
+          json.dump(proof,open('/tmp/release466-rollback-deployment-proof.json','w'),indent=2,sort_keys=True)
+          print('RELEASE 466 PRIOR PRODUCTION DEPLOYMENT LOOKUP: PASS')
+          print(json.dumps(proof,indent=2,sort_keys=True))
+          PY
+      - name: Snapshot current Production authority read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT (SELECT COUNT(*) FROM users) users,(SELECT COUNT(*) FROM products) products,(SELECT COUNT(*) FROM site_item_inventory) site_item_inventory,(SELECT COUNT(*) FROM orders) orders,(SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) canonical_migrations,(SELECT COUNT(*) FROM app_schema_migration_proofs WHERE environment='production' AND migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) migration_proofs;" > /tmp/release466-rollback-prod-snapshot-raw.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/release466-rollback-prod-snapshot-raw.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('users','products','site_item_inventory','orders','canonical_migrations','migration_proofs')): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d);assert rows,d
+          r=rows[0];proof={k:int(r[k]) for k in ('users','products','site_item_inventory','orders','canonical_migrations','migration_proofs')}
+          assert proof['canonical_migrations']==4 and proof['migration_proofs']==4,proof
+          proof.update({'release':466,'build':1,'database':'devilndove-prod-r462','database_id':'f34a741b-0000-45b0-9a96-6be08754d563','read_only':True,'schema_rollback_allowed':False,'automatic_business_data_restore':False})
+          json.dump(proof,open('/tmp/release466-rollback-prod-snapshot.json','w'),indent=2,sort_keys=True)
+          print('RELEASE 466 PRODUCTION ROLLBACK SNAPSHOT: PASS',proof)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release466-production-rollback-readiness
+          path: |
+            /tmp/release466-rollback-plan.json
+            /tmp/release466-rollback-deployment-proof.json
+            /tmp/release466-rollback-prod-snapshot.json
+          retention-days: 90
+          if-no-files-found: error
+      - name: Boundary statement
+        run: |
+          echo 'Rollback action executed: NO'
+          echo 'Production schema reversal: NO'
+          echo 'Production business-data restore: NO'
+          echo 'Production mutation: ZERO'
+          echo 'Provider execution/publication: ZERO'
+          echo 'Result: readiness evidence only; execution requires a separate deliberate emergency decision.'
