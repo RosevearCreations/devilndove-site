@@ -5,12 +5,13 @@
   "state": "technical_green_external_acceptance_pending",
   "base_development_sha": "030ec92924762adaa4c3f72001a3dd06bbe8c887",
   "technical_green_source_sha": "6421187fb7c1f1eed932c2dd8e223b5f9589484d",
+  "final_technical_closure_sha": "0ca68e19339da198e25dd7d3d603a2e616bc77ec",
   "schema_change_required": false,
   "migration": null,
   "items": [
     {"id": 16, "name": "CAIP private-media browser/range-streaming acceptance", "status": "development_green", "evidence": "3 qualifying review_proxy_served range audits"},
-    {"id": 17, "name": "Stripe Development acceptance", "status": "technical_green_external_acceptance_pending", "evidence": "0/5 required acceptance checks passed"},
-    {"id": 18, "name": "PayPal sandbox acceptance", "status": "technical_green_external_acceptance_pending", "evidence": "0/5 required acceptance checks passed"},
+    {"id": 17, "name": "Stripe Development payment/webhook/refund/reconciliation/idempotency acceptance", "status": "technical_green_external_acceptance_pending", "evidence": "External acceptance pending; Release 466 hardening adds real provider-synchronized refund as a sixth required evidence dimension."},
+    {"id": 18, "name": "PayPal sandbox payment/webhook/refund/reconciliation/idempotency acceptance", "status": "technical_green_external_acceptance_pending", "evidence": "External acceptance pending; Release 466 hardening adds real provider-synchronized refund as a sixth required evidence dimension."},
     {"id": 19, "name": "Social/OAuth controlled acceptance", "status": "technical_green_external_acceptance_pending", "evidence": "0 selected Development providers; no connection/security-event evidence"},
     {"id": 20, "name": "Production-launch readiness cockpit", "status": "technical_green_external_acceptance_pending", "evidence": "cockpit/source/runtime proof green; launch state HOLD_EXTERNAL_ACCEPTANCE"}
   ],
@@ -37,14 +38,39 @@
     "preview_access_weakened": false,
     "production_mutation": false
   },
+  "final_technical_closure_evidence": {
+    "source_sha": "0ca68e19339da198e25dd7d3d603a2e616bc77ec",
+    "system_gate_run": 33469027060,
+    "build1_proof_run": 33469027078,
+    "build2_proof_run": 33469027029,
+    "build3_proof_run": 33469027067,
+    "build4_proof_run": 33469026988,
+    "build4_proof_artifact_id": 9785894659,
+    "build4_proof_artifact_sha256": "de5bc1ea32eeb5ec6584ca7b8f73cd082c5e9939c2ce38db63bf8c98d1907ad2",
+    "exact_preview": "https://c3b4404c.devilndove-site.pages.dev",
+    "all_exact_sha_workflows_green": true
+  },
   "external_acceptance_evidence": {
     "launch_state": "HOLD_EXTERNAL_ACCEPTANCE",
     "caip_private_media": {"accepted": true, "qualifying_range_audits": 3},
-    "stripe": {"accepted": false, "required_checks": 5, "passed_checks": 0},
-    "paypal": {"accepted": false, "required_checks": 5, "passed_checks": 0},
+    "stripe": {"accepted": false, "historical_required_checks": 5, "historical_passed_checks": 0, "current_required_checks_after_hardening": 6, "refund_dimension_pending_reproof": true},
+    "paypal": {"accepted": false, "historical_required_checks": 5, "historical_passed_checks": 0, "current_required_checks_after_hardening": 6, "refund_dimension_pending_reproof": true},
     "social_oauth": {"accepted": false, "selected_providers": 0, "selected_provider_connections": 0, "selected_provider_security_events": 0},
     "native_github_ruleset": "external_repository_setting_pending",
     "production_promotion_authorized": false
+  },
+  "payment_refund_hardening": {
+    "base_sha": "0ca68e19339da198e25dd7d3d603a2e616bc77ec",
+    "source_gate_state": "pending",
+    "direct_payment_actions_default_provider_sync": false,
+    "legacy_provider_mutation_gate_required": true,
+    "explicit_provider_sync_confirmation_required": true,
+    "release466_development_test_boundary_required": true,
+    "stripe_idempotency_header_required": "Idempotency-Key",
+    "paypal_idempotency_header_required": "PayPal-Request-Id",
+    "failed_provider_refund_changes_payment_or_order_status": false,
+    "refund_acceptance_source": "successful Development payment_refunds provider synchronization",
+    "schema_change_required": false
   },
   "seo_resolution": {
     "release465_current_live_findings": ["/cart/", "/checkout/", "/checkout/confirmation/", "/supplies/health/", "/tools/health/", "/toolshed/duplicates/"],
@@ -53,17 +79,15 @@
     "production_unchanged_until_deliberate_promotion": true
   },
   "inherited_final_proofs": {
-    "build1_run": 33468360674,
-    "build2_run": 33468360701,
-    "build3_run": 33468360735,
-    "build3_runtime_rerun_job": 99733359874,
-    "all_green": true,
-    "build3_initial_d1_read_failure_interpretation": "Transient remote Wrangler/D1 read failure while multiple exact-SHA proofs were concurrent; exact rerun passed without source or schema change."
+    "build1_run": 33469027078,
+    "build2_run": 33469027029,
+    "build3_run": 33469027067,
+    "all_green": true
   },
   "authority_reuse": {
     "caip_private_media": ["creative_asset_access_grants", "creative_asset_access_audit", "creative-asset-review.js"],
-    "stripe": ["it_provider_readiness_checks", "it_provider_readiness_events", "payment-providers.js", "paymentExecution.js"],
-    "paypal": ["it_provider_readiness_checks", "it_provider_readiness_events", "payment-providers.js", "paymentExecution.js"],
+    "stripe": ["it_provider_readiness_checks", "it_provider_readiness_events", "payment_refunds", "payment-actions.js", "payment-providers.js", "paymentExecution.js"],
+    "paypal": ["it_provider_readiness_checks", "it_provider_readiness_events", "payment_refunds", "payment-actions.js", "payment-providers.js", "paymentExecution.js"],
     "social_oauth": ["provider_setup_authorities", "it_provider_readiness_checks", "oauth_provider_connections", "oauth_security_events", "oauth-start.js", "oauth-connections.js"],
     "launch_readiness": ["Build 1 recovery/drift/reliability evidence", "Build 2 runtime/storefront/SEO evidence", "Build 3 business-intelligence evidence", "Build 4 external acceptance evidence"]
   },
@@ -71,8 +95,10 @@
     "configuration_is_not_acceptance": true,
     "provider_credentials_are_never_evidence_by_themselves": true,
     "sandbox_or_test_mode_only_before_production_promotion": true,
-    "stripe_required_checks": ["credentials", "checkout", "webhook-signature", "reconciliation", "idempotent-replay"],
-    "paypal_required_checks": ["credentials", "approval-capture", "webhook-verification", "reconciliation", "idempotent-replay"],
+    "stripe_required_checks": ["credentials", "checkout", "webhook-signature", "refund", "reconciliation", "idempotent-replay"],
+    "paypal_required_checks": ["credentials", "approval-capture", "webhook-verification", "refund", "reconciliation", "idempotent-replay"],
+    "refund_check_requires_real_provider_sync_evidence": true,
+    "local_only_refund_is_not_external_acceptance": true,
     "caip_requires_range_served_evidence": true,
     "social_oauth_requires_intended_account_verification": true,
     "social_oauth_publication_remains_disabled": true,
