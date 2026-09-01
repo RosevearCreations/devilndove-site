@@ -2,7 +2,7 @@
 
 ## Current release
 
-**Release 466 — Operational Resilience and Commercial Readiness** is the current Development release. Builds 1, 2 and 3 are Development green. Build 4 is **technical green with external acceptance HOLD**. Item 16 CAIP private-media acceptance is green; Stripe, PayPal and Social/OAuth acceptance remain incomplete. Native GitHub ruleset application remains the external repository-setting boundary pending. Release 465 remains fully Production green on `main` at `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`.
+**Release 466 — Operational Resilience and Commercial Readiness** is the current Development release. Builds 1, 2 and 3 are Development green. Build 4 is **technical green with external acceptance HOLD**, including Development-green payment-refund hardening. Item 16 CAIP private-media acceptance is green; Stripe, PayPal and Social/OAuth acceptance remain incomplete. Native GitHub ruleset application remains the external repository-setting boundary pending. Release 465 remains fully Production green on `main` at `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`.
 
 ## Four-build plan
 
@@ -25,24 +25,25 @@ All Release 466 Builds remain schema-neutral. Canonical migrations remain exactl
 
 ## Build 4 — External Acceptance & Commercial Readiness
 
-Last fully proven technical-closure source: `0ca68e19339da198e25dd7d3d603a2e616bc77ec`.
+Current fully proven payment-hardening technical closure source: `8f6cb19f69f102b09685dbb4cf410fe123e5775d`.
 
-- System Gate `33469027060` — PASS
-- exact Development Preview `https://c3b4404c.devilndove-site.pages.dev`
-- Build 1/2/3/4 final proofs `33469027078` / `33469027029` / `33469027067` / `33469026988` — PASS
-- Build 4 proof artifact `9785894659`, SHA-256 `de5bc1ea32eeb5ec6584ca7b8f73cd082c5e9939c2ce38db63bf8c98d1907ad2`
+- System Gate `33510294636` — PASS
+- exact Development Preview `https://83bc32a3.devilndove-site.pages.dev`
+- Build 1/2/3/4 proofs `33510294602` / `33510294860` / `33510294792` / `33510294597` — PASS
+- Build 4 proof artifact `9801397939`, SHA-256 `af257b6a2976b5d51f1667d2c8f045dfbe7f4d6a0e0ff753f7aa42bb7fce8508`
+- Development deploy artifact `9801387368`, SHA-256 `b56ce91f7654664cfa3e8ebd13ac2c931fcbd67fd75c546a2b9b4379b26cdeb7`
 - canonical migrations `4`; newly applied `0`; Development FK violations `0`
-- Production mutation/provider publication/payment execution by automated proof: ZERO
+- Production mutation/provider publication/payment/refund/OAuth execution by automated proof: ZERO
 
 ### Item status
 
 16. **CAIP private-media browser/range-streaming acceptance — Development green.** Development evidence contains `3` qualifying range-stream audits.
-17. **Stripe Development acceptance — external acceptance pending.** Historical closure evidence was `0/5`; the corrected current contract is six-part and adds a real provider-synchronized Development refund to credentials, checkout, signed webhook, reconciliation and idempotent replay.
-18. **PayPal sandbox acceptance — external acceptance pending.** Historical closure evidence was `0/5`; the corrected current contract is six-part and adds a real provider-synchronized sandbox refund to credentials, approval/capture, verified webhook, reconciliation and idempotent replay.
+17. **Stripe Development acceptance — external acceptance pending.** Current Development evidence is `0/6`, including `0` successful provider-synchronized refunds. The six dimensions are credentials, checkout, signed webhook, real provider-synchronized Development refund, reconciliation and idempotent replay.
+18. **PayPal sandbox acceptance — external acceptance pending.** Current Development evidence is `0/6`, including `0` successful provider-synchronized refunds. The six dimensions are sandbox credentials, approval/capture, verified webhook, real provider-synchronized sandbox refund, reconciliation and idempotent replay.
 19. **Social/OAuth controlled acceptance — external acceptance pending.** Selected Development providers `0`; selected-provider connections `0`; selected-provider security events `0`.
 20. **Production-launch readiness cockpit — technical green / HOLD.** Current state `HOLD_EXTERNAL_ACCEPTANCE`.
 
-Payment refund acceptance is now derived from successful Development `payment_refunds` provider synchronization with a provider refund ID. Local-only refunds do not count. Remote refunds require the legacy provider gate, explicit request confirmation, the Release 466 Development/test execution boundary and test/sandbox credentials. Failed remote refunds cannot mark the local order/payment refunded.
+Payment refund hardening is Development green. Provider synchronization defaults OFF at `/api/admin/payment-actions`; remote refunds require the legacy provider gate, explicit `provider_sync_confirmed=true`, the Release 466 Development/test execution boundary, and test/sandbox credentials. Stripe retries use `Idempotency-Key`, PayPal sandbox retries use `PayPal-Request-Id`, failed remote refunds cannot mark local order/payment state refunded, and only successful provider-synchronized `payment_refunds` evidence counts toward external acceptance. Local-only refunds do not count.
 
 The six Release 465 live sitemap/noindex findings remain visible for `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`. Release 466 Development source removes those six noindex utility/health routes from `sitemap.xml`; Production remains unchanged until deliberate promotion.
 
@@ -54,7 +55,7 @@ Release 466 is not complete and is not promotion-ready while Stripe, PayPal and 
 
 ## Next bounded work
 
-The remaining Release 466 work is deliberate external acceptance after the payment-hardening source is re-proven on Development:
+The remaining Release 466 work is deliberate external acceptance, not another feature build:
 
 - complete the six Stripe Development evidence dimensions using test mode only;
 - complete the six PayPal evidence dimensions using sandbox only;
