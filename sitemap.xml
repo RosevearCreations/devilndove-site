@@ -2,8 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://devilndove.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://devilndove.com/about/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://devilndove.com/cart/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://devilndove.com/checkout/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://devilndove.com/collections/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://devilndove.com/collages/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://devilndove.com/contact/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -26,18 +24,12 @@
   <url><loc>https://devilndove.com/toolshed/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://devilndove.com/vintage-finds-ontario/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://devilndove.com/workshop-made-gifts-ontario/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://devilndove.com/checkout/confirmation/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://devilndove.com/shop/product/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://devilndove.com/supplies/health/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://devilndove.com/tools/health/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://devilndove.com/toolshed/duplicates/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-
   <url><loc>https://devilndove.com/custom-candle-making-ontario/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://devilndove.com/custom-soap-making-ontario/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-
-<url><loc>https://devilndove.com/gift-cards/</loc><changefreq>monthly</changefreq><priority>0.70</priority></url>
-<url><loc>https://devilndove.com/privacy/</loc></url>
-<url><loc>https://devilndove.com/terms/</loc></url>
-<url><loc>https://devilndove.com/data-deletion/</loc></url>
-<url><loc>https://devilndove.com/social-connections/</loc></url>
+  <url><loc>https://devilndove.com/gift-cards/</loc><changefreq>monthly</changefreq><priority>0.70</priority></url>
+  <url><loc>https://devilndove.com/privacy/</loc></url>
+  <url><loc>https://devilndove.com/terms/</loc></url>
+  <url><loc>https://devilndove.com/data-deletion/</loc></url>
+  <url><loc>https://devilndove.com/social-connections/</loc></url>
 </urlset>
