@@ -1,138 +1,35 @@
 #!/usr/bin/env python3
 """Fail-closed source contract for Release 466 Build 2 — Runtime & Storefront Intelligence."""
 from __future__ import annotations
-
-import json
-import re
+import json,re
 from pathlib import Path
-
-ROOT = Path(__file__).resolve().parents[1]
-AUTHORITY = ROOT / 'release466-build2-runtime-storefront-intelligence.json'
-FAIL: list[str] = []
-
-
-def require(condition: bool, message: str) -> None:
-    if not condition:
-        FAIL.append(message)
-
-
-def text(path: str) -> str:
-    target = ROOT / path
-    require(target.is_file(), f'missing required file: {path}')
-    return target.read_text(encoding='utf-8', errors='replace') if target.is_file() else ''
-
-
-def main() -> int:
-    authority = json.loads(AUTHORITY.read_text(encoding='utf-8')) if AUTHORITY.is_file() else {}
-    require(authority.get('release') == 466 and authority.get('build') == 2, 'authority must identify Release 466 Build 2')
-    require(authority.get('state') in {'implementation_in_progress', 'development_green'}, 'unexpected Build 2 state')
-    require(authority.get('schema_change_required') is False and authority.get('migration') is None, 'Build 2 must remain schema-neutral')
-    items = {int(row.get('id', 0)): row for row in authority.get('items', []) if isinstance(row, dict)}
-    require(set(items) == {6, 7, 8, 9, 10}, 'Build 2 authority must own exactly items 6–10')
-    require(all(items[item].get('status') in {'implementation_in_progress', 'development_green'} for item in items), 'Build 2 item state is outside accepted lifecycle')
-
-    safety = authority.get('safety', {})
-    for key in ('production_business_mutation', 'production_schema_mutation', 'provider_execution', 'provider_publication', 'payment_execution', 'inventory_mutation', 'accounting_posting', 'raw_r2_delete', 'request_time_schema_ddl'):
-        require(safety.get(key) is False, f'safety flag must remain false: {key}')
-    require(safety.get('preview_access_must_remain_enforced') is True, 'Preview Access must remain enforced')
-    require(safety.get('main_must_remain_release465_until_deliberate_promotion') is True, 'main boundary must remain Release 465')
-
-    endpoint = text('functions/api/runtime-telemetry.js')
-    client = text('public/js/runtime-intelligence.js')
-    middleware = text('functions/_middleware.js')
-    intelligence = text('functions/api/admin/release466-runtime-storefront-intelligence.js')
-    alias = text('functions/api/admin/release-runtime-storefront-intelligence.js')
-    cockpit = text('admin/release-control/runtime-storefront-intelligence/index.html')
-    cockpit_js = text('public/js/admin-release466-runtime-storefront-intelligence.js')
-    synthetic = text('scripts/release466_storefront_synthetic_monitor.py')
-    crawler = text('scripts/release466_production_seo_crawler.py')
-    workflow = text('.github/workflows/release466-build2-proof.yml')
-
-    for token in ('MAX_BODY_BYTES = 24576', 'sameOriginRequest', 'captureRuntimeIncident', "incident_scope: 'client_runtime'", "incident_scope: 'real_user_performance'", "'Cache-Control': 'no-store'"):
-        require(token in endpoint, f'runtime telemetry endpoint missing: {token}')
-    require(not re.search(r'\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX|TRIGGER|VIEW)\b', endpoint, re.I), 'public telemetry endpoint carries schema DDL')
-
-    for token in ('PerformanceObserver', "addEventListener('error'", "addEventListener('unhandledrejection'", 'largest-contentful-paint', 'layout-shift', "observe('event'", 'navigator.globalPrivacyControl', 'navigator.doNotTrack', 'navigator.sendBeacon', 'RUM_SAMPLE_RATE = 0.15'):
-        require(token in client, f'client runtime intelligence missing: {token}')
-    require('location.pathname' in client and 'location.search' not in client, 'telemetry must record path without query-string authority')
-    require('/public/js/runtime-intelligence.js' in middleware and 'isPublicRuntimeIntelligencePath' in middleware, 'middleware must inject public runtime intelligence and exclude admin')
-
-    for token in ('percentile(values', "incident_scope='client_runtime'", "incident_scope='real_user_performance'", 'search_console_page_queries', 'striking_distance_queries', 'low_ctr_pages', 'release465_source_budget'):
-        require(token in intelligence, f'admin intelligence API missing: {token}')
-    require(not re.search(r'\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX|TRIGGER|VIEW)\b', intelligence, re.I), 'Build 2 intelligence API carries schema DDL')
-    require("export { onRequestGet }" in alias, 'I.T. release-route alias must export the read-only intelligence GET')
-
-    require(cockpit.lower().count('<h1') == 1, 'Build 2 cockpit must have exactly one H1')
-    require('/api/admin/release-runtime-storefront-intelligence' in cockpit_js, 'cockpit JS must use I.T. release-route API')
-    require('/admin/operations/#searchConsoleImportAdminMount' in cockpit, 'cockpit must link to existing Search Console Operations panel')
-    require('/admin/operations/#runtimeIncidentsAdminMount' in cockpit, 'cockpit must link to existing Runtime Incidents Operations panel')
-
-    for token in ('method="GET"', 'business_mutations', 'provider_calls', 'read_only'):
-        require(token in synthetic, f'synthetic monitor missing read-only contract: {token}')
-    require("method='GET'" in crawler and 'production_mutations' in crawler and '--fail-on-seo-errors' in crawler, 'Production SEO crawler must remain read-only and support later promotion gating')
-    for token in ('SKIP_PREFIXES', '"/admin/"', '"/api/"', '"/cdn-cgi/"', "lower.endswith('/index.html')", "'index_html_aliases_normalized': True"):
-        require(token in crawler, f'Production SEO crawler missing corrected public-scope contract: {token}')
-
-    require('Release 466 Build 2 Proof' in workflow, 'Build 2 proof workflow missing name')
-    require('scripts/release466_build2_gate.py' in workflow, 'Build 2 proof workflow must execute Build 2 source gate')
-    require('scripts/release466_storefront_synthetic_monitor.py' in workflow, 'Build 2 proof workflow must run synthetic monitor')
-    require('scripts/release466_production_seo_crawler.py' in workflow, 'Build 2 proof workflow must run Production SEO crawler')
-
-    release466_migrations = sorted((ROOT / 'migrations/canonical').glob('*466*build2*')) if (ROOT / 'migrations/canonical').is_dir() else []
-    require(not release466_migrations, f'Build 2 declared schema-neutral but migration files exist: {[p.name for p in release466_migrations]}')
-
-    if authority.get('state') == 'development_green':
-        require(all(items[item].get('status') == 'development_green' for item in items), 'Development-green authority requires every Build 2 item green')
-        technical = authority.get('technical_green_evidence', {})
-        require(technical.get('source_sha') == '68f1dae3a0b56de5b631603bf7191388a8f8f219', 'Build 2 technical-green source SHA must be recorded')
-        require(int(technical.get('system_gate_run') or 0) == 33465451865, 'Build 2 technical System Gate must be recorded')
-        require(int(technical.get('build2_proof_run') or 0) == 33465451850, 'Build 2 technical proof run must be recorded')
-        require(technical.get('exact_preview') == 'https://8a41ed9d.devilndove-site.pages.dev', 'Build 2 exact technical Preview must be recorded')
-        measurement = authority.get('production_measurement_evidence', {})
-        seo = measurement.get('seo_crawler', {})
-        require(int(seo.get('pages_crawled') or 0) == 46 and int(seo.get('errors') or 0) == 6 and int(seo.get('warnings') or 0) == 8, 'Corrected Production SEO baseline must remain 46 pages / 6 errors / 8 warnings')
-        require(seo.get('production_mutation') is False, 'SEO measurement must remain non-mutating')
-        conflicts = set(seo.get('live_sitemap_noindex_conflicts') or [])
-        require(conflicts == {'/cart/', '/checkout/', '/checkout/confirmation/', '/supplies/health/', '/tools/health/', '/toolshed/duplicates/'}, 'Six live sitemap/noindex conflicts must remain explicitly recorded')
-
-        development = json.loads(text('development-release.json') or '{}')
-        require(development.get('convergence_state') == 'release466_build2_development_green_external_ruleset_pending', 'Development authority must identify Build 2 green with external ruleset pending')
-        require(development.get('production_infrastructure', {}).get('current_production_release') == 465, 'Production authority must remain Release 465')
-        require(development.get('production_infrastructure', {}).get('current_production_source_sha') == 'd5009d9c622bdf84232b3aa7bd24a1c3d61581b2', 'Production source boundary must remain Release 465 exact SHA')
-        require(development.get('current_release_database_state', {}).get('release466_build2_schema_change_required') is False, 'Development authority must record Build 2 schema-neutral state')
-        build2_rows = {int(row.get('id', 0)): row for row in development.get('release466_build2', []) if isinstance(row, dict)}
-        require(set(build2_rows) == {6, 7, 8, 9, 10} and all(build2_rows[i].get('status') == 'complete_development_green' for i in build2_rows), 'Development authority must close Build 2 items 6–10')
-        planned = {int(row.get('build', 0)): row for row in development.get('planned_builds', []) if isinstance(row, dict)}
-        require(planned.get(3, {}).get('state') == 'next' and planned.get(3, {}).get('items') == [11, 12, 13, 14, 15], 'Build 3 items 11–15 must be next')
-
-        roadmap = text('docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md')
-        handoff = text('AI_HANDOFF.md')
-        project = text('PROJECT_STATUS_AND_ROADMAP.md')
-        sanity = text('SANITY_HEALTH_CHECK.md')
-        require('Build 2 — Runtime & Storefront Intelligence — DEVELOPMENT GREEN' in roadmap, 'Release roadmap must close Build 2 Development green')
-        require('Build 3 — Revenue & Business Intelligence — NEXT' in roadmap, 'Release roadmap must make Build 3 next')
-        require('Build 2 is Development green' in handoff, 'AI handoff must identify Build 2 Development green')
-        require('Build 3 — Revenue & Business Intelligence, items 11–15' in handoff, 'AI handoff must point to Build 3 items 11–15')
-        require('| Build 2 | 6–10 | Runtime & Storefront Intelligence | Development green |' in project, 'Project roadmap must close Build 2 Development green')
-        require('| Build 3 | 11–15 | Revenue & Business Intelligence | Next |' in project, 'Project roadmap must identify Build 3 next')
-        require('Release 466 Build 2 is technically **Development GREEN**' in sanity, 'Sanity authority must close Build 2 green')
-        for doc_name, doc in [('roadmap', roadmap), ('handoff', handoff), ('project', project), ('sanity', sanity)]:
-            for path in ('/cart/', '/checkout/', '/checkout/confirmation/', '/supplies/health/', '/tools/health/', '/toolshed/duplicates/'):
-                require(path in doc, f'{doc_name} must retain live SEO finding {path}')
-
-    print('RELEASE 466 BUILD 2 SOURCE CONTRACT')
-    print('Items: 6 synthetic monitoring; 7 client errors; 8 RUM; 9 Production SEO crawler; 10 Search Console/indexing intelligence')
-    print('Schema change: NONE')
-    print('Production business mutation: ZERO')
-    print('Provider/payment execution: ZERO')
-    if FAIL:
-        print('RELEASE 466 BUILD 2 SOURCE CONTRACT: FAIL')
-        for index, message in enumerate(FAIL, 1):
-            print(f'{index:03d}. {message}')
-        return 1
-    print('RELEASE 466 BUILD 2 SOURCE CONTRACT: PASS')
-    return 0
-
-
-if __name__ == '__main__':
-    raise SystemExit(main())
+ROOT=Path(__file__).resolve().parents[1];AUTHORITY=ROOT/'release466-build2-runtime-storefront-intelligence.json';FAIL=[]
+def require(condition,message):
+ if not condition:FAIL.append(message)
+def text(path):
+ target=ROOT/path;require(target.is_file(),f'missing required file: {path}');return target.read_text(encoding='utf-8',errors='replace') if target.is_file() else''
+def main():
+ authority=json.loads(AUTHORITY.read_text(encoding='utf-8')) if AUTHORITY.is_file() else {};require(authority.get('release')==466 and authority.get('build')==2,'authority must identify Release 466 Build 2');require(authority.get('state') in {'implementation_in_progress','development_green'},'unexpected Build 2 state');require(authority.get('schema_change_required') is False and authority.get('migration') is None,'Build 2 must remain schema-neutral');items={int(row.get('id',0)):row for row in authority.get('items',[]) if isinstance(row,dict)};require(set(items)=={6,7,8,9,10},'Build 2 authority must own exactly items 6–10');require(all(items[item].get('status') in {'implementation_in_progress','development_green'} for item in items),'Build 2 item state is outside accepted lifecycle')
+ safety=authority.get('safety',{});[require(safety.get(key) is False,f'safety flag must remain false: {key}') for key in ('production_business_mutation','production_schema_mutation','provider_execution','provider_publication','payment_execution','inventory_mutation','accounting_posting','raw_r2_delete','request_time_schema_ddl')];require(safety.get('preview_access_must_remain_enforced') is True,'Preview Access must remain enforced');require(safety.get('main_must_remain_release465_until_deliberate_promotion') is True,'main boundary must remain Release 465')
+ endpoint=text('functions/api/runtime-telemetry.js');client=text('public/js/runtime-intelligence.js');middleware=text('functions/_middleware.js');intelligence=text('functions/api/admin/release466-runtime-storefront-intelligence.js');alias=text('functions/api/admin/release-runtime-storefront-intelligence.js');cockpit=text('admin/release-control/runtime-storefront-intelligence/index.html');cockpit_js=text('public/js/admin-release466-runtime-storefront-intelligence.js');synthetic=text('scripts/release466_storefront_synthetic_monitor.py');crawler=text('scripts/release466_production_seo_crawler.py');workflow=text('.github/workflows/release466-build2-proof.yml')
+ for token in ('MAX_BODY_BYTES = 24576','sameOriginRequest','captureRuntimeIncident',"incident_scope: 'client_runtime'", "incident_scope: 'real_user_performance'", "'Cache-Control': 'no-store'"):require(token in endpoint,f'runtime telemetry endpoint missing: {token}')
+ require(not re.search(r'\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX|TRIGGER|VIEW)\b',endpoint,re.I),'public telemetry endpoint carries schema DDL')
+ for token in ('PerformanceObserver',"addEventListener('error'", "addEventListener('unhandledrejection'",'largest-contentful-paint','layout-shift',"observe('event'",'navigator.globalPrivacyControl','navigator.doNotTrack','navigator.sendBeacon','RUM_SAMPLE_RATE = 0.15'):require(token in client,f'client runtime intelligence missing: {token}')
+ require('location.pathname' in client and 'location.search' not in client,'telemetry must record path without query-string authority');require('/public/js/runtime-intelligence.js' in middleware and 'isPublicRuntimeIntelligencePath' in middleware,'middleware must inject public runtime intelligence and exclude admin')
+ for token in ('percentile(values',"incident_scope='client_runtime'", "incident_scope='real_user_performance'",'search_console_page_queries','striking_distance_queries','low_ctr_pages','release465_source_budget'):require(token in intelligence,f'admin intelligence API missing: {token}')
+ require(not re.search(r'\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX|TRIGGER|VIEW)\b',intelligence,re.I),'Build 2 intelligence API carries schema DDL');require("export { onRequestGet }" in alias,'I.T. release-route alias must export the read-only intelligence GET');require(cockpit.lower().count('<h1')==1,'Build 2 cockpit must have exactly one H1');require('/api/admin/release-runtime-storefront-intelligence' in cockpit_js,'cockpit JS must use I.T. release-route API');require('/admin/operations/#searchConsoleImportAdminMount' in cockpit,'cockpit must link to existing Search Console Operations panel');require('/admin/operations/#runtimeIncidentsAdminMount' in cockpit,'cockpit must link to existing Runtime Incidents Operations panel')
+ for token in ('method="GET"','business_mutations','provider_calls','read_only'):require(token in synthetic,f'synthetic monitor missing read-only contract: {token}')
+ require("method='GET'" in crawler and 'production_mutations' in crawler and '--fail-on-seo-errors' in crawler,'Production SEO crawler must remain read-only and support later promotion gating')
+ for token in ('SKIP_PREFIXES','"/admin/"','"/api/"','"/cdn-cgi/"',"lower.endswith('/index.html')", "'index_html_aliases_normalized': True"):require(token in crawler,f'Production SEO crawler missing corrected public-scope contract: {token}')
+ require('Release 466 Build 2 Proof' in workflow,'Build 2 proof workflow missing name');require('scripts/release466_build2_gate.py' in workflow,'Build 2 proof workflow must execute Build 2 source gate');require('scripts/release466_storefront_synthetic_monitor.py' in workflow,'Build 2 proof workflow must run synthetic monitor');require('scripts/release466_production_seo_crawler.py' in workflow,'Build 2 proof workflow must run Production SEO crawler');release466_migrations=sorted((ROOT/'migrations/canonical').glob('*466*build2*')) if (ROOT/'migrations/canonical').is_dir() else[];require(not release466_migrations,f'Build 2 declared schema-neutral but migration files exist: {[p.name for p in release466_migrations]}')
+ if authority.get('state')=='development_green':
+  require(all(items[item].get('status')=='development_green' for item in items),'Development-green authority requires every Build 2 item green');technical=authority.get('technical_green_evidence',{});require(technical.get('source_sha')=='68f1dae3a0b56de5b631603bf7191388a8f8f219','Build 2 technical-green source SHA must be recorded');require(int(technical.get('system_gate_run') or 0)==33465451865,'Build 2 technical System Gate must be recorded');require(int(technical.get('build2_proof_run') or 0)==33465451850,'Build 2 technical proof run must be recorded');require(technical.get('exact_preview')=='https://8a41ed9d.devilndove-site.pages.dev','Build 2 exact technical Preview must be recorded');measurement=authority.get('production_measurement_evidence',{});seo=measurement.get('seo_crawler',{});require(int(seo.get('pages_crawled') or 0)==46 and int(seo.get('errors') or 0)==6 and int(seo.get('warnings') or 0)==8,'Corrected Production SEO baseline must remain 46 pages / 6 errors / 8 warnings');require(seo.get('production_mutation') is False,'SEO measurement must remain non-mutating');conflicts=set(seo.get('live_sitemap_noindex_conflicts') or []);require(conflicts=={'/cart/','/checkout/','/checkout/confirmation/','/supplies/health/','/tools/health/','/toolshed/duplicates/'},'Six live sitemap/noindex conflicts must remain explicitly recorded')
+  development=json.loads(text('development-release.json') or '{}');allowed={f'release466_build{i}_development_green_external_ruleset_pending' for i in (2,3,4)};require(development.get('convergence_state') in allowed,'Development authority must preserve Build 2 while allowing later Release 466 build convergence');require(development.get('production_infrastructure',{}).get('current_production_release')==465,'Production authority must remain Release 465');require(development.get('production_infrastructure',{}).get('current_production_source_sha')=='d5009d9c622bdf84232b3aa7bd24a1c3d61581b2','Production source boundary must remain Release 465 exact SHA');require(development.get('current_release_database_state',{}).get('release466_build2_schema_change_required') is False,'Development authority must record Build 2 schema-neutral state');build2_rows={int(row.get('id',0)):row for row in development.get('release466_build2',[]) if isinstance(row,dict)};require(set(build2_rows)=={6,7,8,9,10} and all(build2_rows[i].get('status')=='complete_development_green' for i in build2_rows),'Development authority must preserve Build 2 items 6–10 as complete Development green')
+  roadmap=text('docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md');handoff=text('AI_HANDOFF.md');project=text('PROJECT_STATUS_AND_ROADMAP.md');sanity=text('SANITY_HEALTH_CHECK.md');require('Build 2 — Runtime & Storefront Intelligence — DEVELOPMENT GREEN' in roadmap,'Release roadmap must preserve Build 2 Development green');require('Build 2 closure' in handoff,'AI handoff must preserve Build 2 closure');require('| Build 2 | 6–10 | Runtime & Storefront Intelligence | Development green |' in project,'Project roadmap must preserve Build 2 Development green');require('Release 466 Build 2 closure' in sanity,'Sanity authority must preserve Build 2 closure')
+  for doc_name,doc in [('roadmap',roadmap),('handoff',handoff),('project',project),('sanity',sanity)]:
+   for path in ('/cart/','/checkout/','/checkout/confirmation/','/supplies/health/','/tools/health/','/toolshed/duplicates/'):require(path in doc,f'{doc_name} must retain live SEO finding {path}')
+ print('RELEASE 466 BUILD 2 SOURCE CONTRACT');print('Items: 6 synthetic monitoring; 7 client errors; 8 RUM; 9 Production SEO crawler; 10 Search Console/indexing intelligence');print('Schema change: NONE');print('Production business mutation: ZERO');print('Provider/payment execution: ZERO')
+ if FAIL:
+  print('RELEASE 466 BUILD 2 SOURCE CONTRACT: FAIL');[print(f'{index:03d}. {message}') for index,message in enumerate(FAIL,1)];return 1
+ print('RELEASE 466 BUILD 2 SOURCE CONTRACT: PASS');return 0
+if __name__=='__main__':raise SystemExit(main())
