@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
+  <meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
   <meta charset="utf-8"/>
-  <meta content="width=device-width,initial-scale=1" name="viewport"/>
-  <title>Admin Dashboard — Devil n Dove</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin — Devil n Dove</title>
   <meta name="robots" content="noindex,nofollow"/>
-  <link href="/css/styles.css?v=448" rel="stylesheet"/>
+  <meta name="description" content="Devil n Dove Release 466 four-workspace admin cockpit for Storefront, Creator, Finance and I.T."/>
+  <link href="/css/styles.css?v=466" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
-  <meta content="Devil n Dove Release 448 admin operations dashboard for Storefront, Creators, Socials, Financials, I.T., catalog, inventory, content, releases, accounting, analytics, and site operations." name="description"/>
 </head>
 <body>
   <div class="container admin-shell">
@@ -17,7 +17,7 @@
         <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
         <div>
           <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Admin Dashboard • Release 448</div>
+          <div class="small">Admin • Release 466</div>
         </div>
       </div>
       <div class="links">
@@ -25,113 +25,57 @@
         <a href="/shop/">Shop</a>
         <a href="/members/?admin_preview=1">Members</a>
         <a href="/admin/">Admin</a>
-        <button class="btn" data-nav-logout="" type="button">Logout</button>
+        <button class="btn" data-nav-logout type="button">Logout</button>
       </div>
     </div>
 
     <div class="hero">
       <div>
-        <h1>Admin Dashboard</h1>
-        <div id="desktopTodayTasksMount" style="margin-top:18px"></div>
-        <p>Release 448 — Platform Expansion. Launch the five current modules and their operational tools from one dashboard. Deferred authenticated/provider/private-media I.T. acceptance remains visible but does not stop unrelated Development feature work.</p>
+        <h1>Admin</h1>
+        <p>Choose the part of the business you want to work in. Detailed screens now live inside four clear workspaces instead of competing for space on this dashboard.</p>
       </div>
     </div>
 
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
 
-    <div class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Dashboard Summary</h2>
-      <div class="small" id="dashboardSummaryMessage" style="display:none;margin-bottom:10px"></div>
-      <div class="admin-summary-grid">
-        <div class="admin-stat"><div class="admin-stat-label">Users</div><div class="admin-stat-value" id="summaryUsersCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Products</div><div class="admin-stat-value" id="summaryProductsCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Orders</div><div class="admin-stat-value" id="summaryOrdersCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Payments</div><div class="admin-stat-value" id="summaryPaymentsCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Low Stock</div><div class="admin-stat-value" id="summaryLowStockCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Failed Webhooks</div><div class="admin-stat-value" id="summaryFailedWebhooksCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Open Disputes</div><div class="admin-stat-value" id="summaryOpenDisputesCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Live Visitors</div><div class="admin-stat-value" id="summaryLiveVisitorsCount">—</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Searches (24h)</div><div class="admin-stat-value" id="summaryRecentSearchesCount">—</div></div>
-        <a class="admin-stat admin-stat-link" href="/admin/readiness/?filter=missing_featured"><div class="admin-stat-label">Missing Featured</div><div class="admin-stat-value" id="summaryMissingFeaturedImagesCount">—</div></a>
-        <a class="admin-stat admin-stat-link" href="/admin/readiness/?filter=missing_image_roles"><div class="admin-stat-label">Missing Image Roles</div><div class="admin-stat-value" id="summaryMissingImageRolesCount">—</div></a>
-        <a class="admin-stat admin-stat-link" href="/admin/readiness/?filter=missing_hero_role"><div class="admin-stat-label">Missing Hero Role</div><div class="admin-stat-value" id="summaryMissingHeroRoleCount">—</div></a>
-        <a class="admin-stat admin-stat-link" href="/admin/readiness/?filter=missing_alt_text"><div class="admin-stat-label">Missing Alt Text</div><div class="admin-stat-value" id="summaryMissingAltTextCount">—</div></a>
-        <a class="admin-stat admin-stat-link" href="/admin/readiness/?filter=blocked_public_images"><div class="admin-stat-label">Public Image Blockers</div><div class="admin-stat-value" id="summaryBlockedPublicImagesCount">—</div></a>
-        <a class="admin-stat admin-stat-link" href="/admin/readiness/?filter=missing_seo"><div class="admin-stat-label">Missing SEO</div><div class="admin-stat-value" id="summaryMissingSeoCount">—</div></a>
-      </div>
-      <div style="margin-top:12px"><button class="btn" id="refreshDashboardSummaryButton" type="button">Refresh Summary</button></div>
-    </div>
+    <main class="department-grid" style="margin-top:18px" aria-label="Admin workspaces">
+      <a class="card department-card startup-highlight-card" data-admin-module-card="storefront" href="/admin/storefront/">
+        <h2>Storefront</h2>
+        <p class="small">Website presentation, merchandising, Carousel, public media, customer programs, SEO, analytics and marketplace channels.</p>
+        <div class="small" data-admin-module-count>Storefront tools</div>
+      </a>
+      <a class="card department-card startup-highlight-card" data-admin-module-card="creator" href="/admin/creator/">
+        <h2>Creator</h2>
+        <p class="small">Product entry, catalog, inventory, tools, packaging, creative projects, CAIP evidence, storytelling, Content Studio and social publishing.</p>
+        <div class="small" data-admin-module-count>Creator tools</div>
+      </a>
+      <a class="card department-card startup-highlight-card" data-admin-module-card="finance" href="/admin/finance/">
+        <h2>Finance</h2>
+        <p class="small">Orders, payments, customer documents, accounting, reconciliation, month-end, business health and financial planning.</p>
+        <div class="small" data-admin-module-count>Finance tools</div>
+      </a>
+      <a class="card department-card startup-highlight-card" data-admin-module-card="it" href="/admin/it/">
+        <h2>I.T.</h2>
+        <p class="small">Settings, users, integrations, Stripe/PayPal configuration, testing, sanity checks, reliability, releases, deployment and recovery.</p>
+        <div class="small" data-admin-module-count>I.T. tools</div>
+      </a>
+    </main>
 
-    <div class="department-grid" style="margin-top:18px">
-      <a class="card department-card startup-highlight-card" data-dd-module-control-card="1" href="/admin/application-modules/"><h2>Application Modules</h2><p class="small">Manage the current Storefront, Creators, Socials, Financials and I.T. module authorities, role access and opt-in background activity from the shared Application Core.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/it-platform/"><h2>I.T. Preflight &amp; Platform</h2><p class="small">Release 448 infrastructure cockpit for Development D1/R2 readiness, deferred non-blocking acceptance work, deployment evidence, access/security, recovery and the separate Production boundary.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/it-integrations/"><h2>External API &amp; Integration Registry</h2><p class="small">Track Stripe, PayPal, social and future provider purpose, consuming module, secret/binding reference names, callbacks/webhooks, scopes and configured/tested state without storing secret values.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/startup-readiness/"><h2>Startup Readiness Guide</h2><p class="small">Track go-live gates with status, owner, evidence, detailed instructions, pass conditions, and change history.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/operational-continuity/"><h2>Operational Continuity &amp; Evidence</h2><p class="small">Manage production-evidence, idempotency, packaging, provider, mobile recovery, support, accounting, SEO, fallback and controlled-approval workstreams.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/packaging-studio/"><h2>Labeling &amp; Packaging System</h2><p class="small">Create reference-faithful bilingual soap ribbons, candle tops, laser rounds, labels, cards and inserts with reusable exact-size templates, inventory-linked components, costs, proofs, versions and export evidence.</p></a>
-      <a class="card department-card" href="/admin/members/"><h2>Members &amp; Tiers</h2><p class="small">Manage users, access tiers, and member-facing tier policy.</p></a>
-      <a class="card department-card" href="/admin/catalog/"><h2>Catalog &amp; Inventory</h2><p class="small">Products, imports, media, resources, SEO, and stock tools.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/product-lineage/"><h2>Product Material &amp; Tool Lineage</h2><p class="small">Review Product origin, raw-material lineage, durable Tool/mold relationships and evidence without creating a second stock ledger or fabricating historical use.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/product-image-quality/"><h2>Product Photography Manager</h2><p class="small">Score Product images for lighting, clarity, background, framing, resolution, colour and artifacts; flag near-duplicates; rank hero/gallery candidates; and build a photography work queue.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/vendor-reviews/"><h2>Manufacturer &amp; Purchased-item Reviews</h2><p class="small">Link Supplies/Tools to normalized manufacturers such as VEVOR and retain Devil n Dove-authored marketplace review provenance, identifiers and safe source links.</p></a>
-      <a class="card department-card" href="/admin/orders/"><h2>Orders &amp; Payments</h2><p class="small">Review orders, payment status, refunds, and operational order detail.</p></a>
-      <a class="card department-card" href="/admin/customer-documents/"><h2>Client Documents</h2><p class="small">Issue immutable formatted invoices, receipts, packing slips, credit notes, and refund confirmations.</p></a>
-      <a class="card department-card" href="/admin/accounting/"><h2>Accounting</h2><p class="small">General ledger, expenses, write-offs, item costs, and exports.</p></a>
-      <a class="card department-card" href="/admin/analytics/"><h2>Analytics</h2><p class="small">Visitor reporting, summary metrics, and merch diagnostics.</p></a>
-      <a class="card department-card" href="/admin/stage-photo-moderation/"><h2>Photo Moderation</h2><p class="small">Review custom order-stage proof photos before public use.</p></a>
-      <a class="card department-card" href="/admin/marketplace-mapping/"><h2>Marketplace Mapping</h2><p class="small">Edit Etsy, Facebook, Pinterest, and manual CSV column presets.</p></a>
-      <a class="card department-card" href="/admin/operations/"><h2>Operations</h2><p class="small">Notifications, settings, webhooks, live activity, and security.</p></a>
-      <a class="card department-card" href="/admin/public-display-order/"><h2>Public Display Order</h2><p class="small">Pin and rank the Home featured creations, Art/Gallery and Creations surfaces.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/home-carousel/"><h2>Home Carousel</h2><p class="small">Create, preview, schedule, order, publish, pause and archive approved Home slides with audit snapshots and a static-hero fallback. Home and Movie cover presentation now share the Release 448 carousel renderer.</p></a>
-      <a class="card department-card" href="/admin/movies/"><h2>Movies</h2><p class="small">Movie catalog overlay, metadata review and shelf editing tools using the current enriched JSON + D1 movie_catalog authority.</p></a>
-      <a class="card department-card" href="/admin/mobile-product/"><h2>Phone Capture</h2><p class="small">Phone-first Product capture and draft intake workflow.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/prelaunch/"><h2>Release &amp; Go-Live Center</h2><p class="small">Primary guided release path: validate the current release, prove deployment safety, review true blockers, promote deliberately, then verify live operations.</p></a>
-      <a class="card department-card" href="/admin/visual-polish/"><h2>Visual Polish &amp; Mobile Parity</h2><p class="small">Desktop website polish, mobile parity, visual enrichment candidates, fallback rows, CSS drift, and structured-data queues.</p></a>
-      <a class="card department-card" href="/admin/application-sanity/"><h2>Application Sanity Check</h2><p class="small">Full application state, value-added roadmap, Web/Phone/Desktop checks, SEO criteria, visual enrichment ideas, and next-step sanity planning.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/media-content-studio/"><h2>Website Media &amp; Content Studio</h2><p class="small">Public-site presentation authority: one page-wide Edit switch, approved image/text placements, metadata, recommended image sizes and the live outstanding-image checklist. It does not manage Creative Project timelines, private CAIP footage or story evidence.</p></a>
-      <a class="card department-card" href="/admin/image-manifest/"><h2>Visual Image Manifest</h2><p class="small">Track every missing image, real-photo requirement, generated editorial asset, rights approval, final URL, alt text, and Phone/Desktop evidence.</p></a>
-      <a class="card department-card" href="/admin/visual-enrichment-studio/"><h2>Visual Enrichment Studio</h2><p class="small">Use the specialist media picker, screenshot pairs, visual diffs, alt-text suggestions, seasonal campaigns, and low-bandwidth controls.</p></a>
-      <a class="card department-card startup-highlight-card" href="/admin/creative-automation/"><h2>Creative Project Workflow</h2><p class="small">Project/process authority: concept, planned vs actual materials, costs, CAIP source media/evidence/story, Content Studio packages, approvals, results and repurposing. Use this for maker and content-only projects.</p></a>
-      <a class="card department-card" href="/admin/release-preflight/"><h2>Product Release Preflight</h2><p class="small">Read-only Product-by-Product checklist across catalog facts, media permissions, Content Studio, CAIP evidence, and Release Board conditions.</p></a>
-    </div>
-
-    <details class="card admin-advanced-tools" style="margin-top:18px">
-      <summary><strong>Advanced release tools</strong> — individual stages behind Release &amp; Go-Live Center</summary>
-      <p class="small">These tools are intentionally separate because they answer different release questions. Most day-to-day use should start in Release &amp; Go-Live Center.</p>
-      <div class="admin-compact-tool-grid">
-        <a href="/admin/deployment-preflight/"><strong>1. Pre-Deploy Validation</strong><small>D1 migration safety, one-H1, CSS/JSON and SEO checks.</small></a>
-        <a href="/admin/release-control/"><strong>2. Release Evidence</strong><small>Manifest, deployment history, screenshots and release proof.</small></a>
-        <a href="/admin/deploy-readiness/"><strong>3. Promote / Hold Decision</strong><small>Final blocker review and promotion decision.</small></a>
-        <a href="/admin/promotion-control/"><strong>4. Promotion Gate</strong><small>Apply the approved live-promotion controls.</small></a>
-        <a href="/admin/go-live-execution/"><strong>5. Go-Live Actions</strong><small>Execute final approved actions and direct endpoint checks.</small></a>
-        <a href="/admin/live-ops-followthrough/"><strong>6. Live Ops Follow-through</strong><small>Post-promotion evidence, blockers, overrides and monitoring.</small></a>
-      </div>
-    </details>
-
-    <div class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Release 448 forward focus</h2>
-      <ul class="small compact-list">
-        <li>Use Product Photography Manager to rank image reshoots and identify the strongest Storefront hero/gallery candidates.</li>
-        <li>Continue Storefront Shop, Collections, Collages and Carousels as one coherent merchandising layer.</li>
-        <li>Continue CAIP, Inventory, Supplies and Tools depth without waiting for deferred provider acceptance.</li>
-        <li>Keep Web, Phone and Desktop behavior aligned as first-class clients of the same application authority.</li>
-        <li>Keep Production promotion closed until a deliberate Development release review.</li>
-      </ul>
-    </div>
+    <section class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Four workspaces, existing capabilities</h2>
+      <p class="small" style="margin-bottom:0">No operational screen has been removed. Existing admin URLs stay stable; this update only gives every existing screen a clear primary home. Creator groups Socials/CAIP navigation with creative storytelling while the underlying Socials runtime authority remains independently permissioned.</p>
+    </section>
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
 
-  <script src="/js/main.js?v=448"></script>
-  <script src="/public/js/auth.js?v=448"></script><script src="/public/js/admin-route-usage.js?v=448"></script>
-  <script src="/public/js/site-auth-ui.js?v=448"></script>
-  <script src="/public/js/site-analytics.js?v=448"></script>
-  <script src="/public/js/admin-self-protect.js?v=448"></script>
-  <script src="/public/js/admin.js?v=448"></script>
-  <script src="/public/js/admin-dashboard-summary.js?v=448"></script>
-  <script src="/public/js/admin-today-tasks.js?v=448"></script>
-  <script src="/public/js/admin-dashboard-smoke-badges.js?v=448"></script>
-  <script src="/public/js/admin-dashboard-preflight-badge.js?v=448"></script>
-  <script src="/public/js/admin-dashboard-notification-actions.js?v=448"></script>
+  <script src="/js/main.js?v=466"></script>
+  <script src="/public/js/auth.js?v=466"></script>
+  <script src="/public/js/admin-route-usage.js?v=466"></script>
+  <script src="/public/js/site-auth-ui.js?v=466"></script>
+  <script src="/public/js/site-analytics.js?v=466"></script>
+  <script src="/public/js/admin-self-protect.js?v=466"></script>
+  <script src="/public/js/admin.js?v=466"></script>
+  <script src="/public/js/admin-module-hub.js?v=466"></script>
 </body>
 </html>
