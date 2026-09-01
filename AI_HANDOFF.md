@@ -2,7 +2,7 @@
 
 ## Current authority
 
-**Release 466 — Operational Resilience and Commercial Readiness — Build 3 is Development green.** Builds 1 and 2 remain Development green. Build 1 has one external repository-governance boundary: native GitHub `dev`/`main` ruleset application remains pending because the connected GitHub integration can read rulesets but cannot write them.
+**Release 466 — Operational Resilience and Commercial Readiness.** Builds 1–3 are Development green. Build 4 implementation is **technical green / external acceptance HOLD**. CAIP private-media acceptance is already green. Stripe, PayPal and Social/OAuth acceptance remain incomplete. Native GitHub `dev`/`main` ruleset application remains external/pending because the connected integration cannot write repository rulesets.
 
 Release 465 remains fully GREEN on Production and must not be reopened unless a current gate proves drift.
 
@@ -24,68 +24,59 @@ Release 465 remains fully GREEN on Production and must not be reopened unless a 
 - Product R2: `devilndove-toolshed-images`
 - CAIP R2: `devilndove-caip-media`
 
-Production business/transactional data remain Production-owned. Release 466 has **not** been promoted to Production.
+Production business/transactional data remain Production-owned. Release 466 has **not** been promoted.
 
-## Release 466 Build 1 closure
+## Builds 1–3
 
-Final closure SHA: `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`.
+Builds 1–3 remain Development green and pass their inherited proofs on the current Build 4 source lineage.
 
-- canonical System Gate `33464419372` — PASS
-- Release 466 Build 1 Proof `33464419380` — PASS
-- items 2–5 Development green
-- item 1 in-repository fail-closed policy Development green; native GitHub ruleset application external/pending
-- Production reliability snapshot remains read-only `100/100 GREEN`
-- recovery export remains serialized after exact-SHA System Gate
+- Build 1 closure SHA `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`; current-tree inherited run `33468360674` PASS.
+- Build 2 closure SHA `855171430c6b14c4f4a6ff24a120bcce722294f9`; current-tree inherited run `33468360701` PASS.
+- Build 3 is Development green; current-tree inherited run `33468360735` PASS after exact runtime rerun job `99733359874`.
 
-## Release 466 Build 2 closure
+The first Build 3 runtime attempt on the Build 4 SHA hit a transient Wrangler/D1 remote SELECT exit while several proofs were concurrent. No source/schema change was made; the exact rerun passed.
 
-Final closure SHA: `855171430c6b14c4f4a6ff24a120bcce722294f9`.
+## Release 466 Build 4 technical-green evidence
 
-- final canonical System Gate `33466171233` — PASS
-- final Release 466 Build 2 Proof `33466171290` — PASS
-- synthetic Production monitor remains GET-only and GREEN
-- corrected Production SEO baseline remains `46` public HTML pages / `38` sitemap URLs / `6` errors / `8` warnings
-
-The six retained live SEO errors are sitemap/noindex conflicts on `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`. Build 2 never mutated Release 465 Production to make Development pass.
-
-## Release 466 Build 3 technical-green evidence
-
-Technical-green source SHA: `5ca09eab9e2a3441ffbdf76c46e35b3a6fcd52a6`.
+Technical source SHA: `6421187fb7c1f1eed932c2dd8e223b5f9589484d`.
 
 Canonical System Gate:
-- run `33466655732`
-- source job `99727807616`
-- deploy-development job `99727877699`
-- exact Preview `https://732f6430.devilndove-site.pages.dev`
-- Development deploy proof artifact `9785113788`
-- regression evidence artifact `9785114215`
-- canonical D1: exactly `4` migrations / `4` proofs / `0` newly applied / `0` FK violations
-- `No migrations to apply!`
-- Preview remained Cloudflare Access protected; authentication headers ZERO; Access weakened NO.
+- run `33468360898` — PASS
+- source job `99732822736`
+- deploy-development job `99732868160`
+- exact Preview `https://7d8d9c89.devilndove-site.pages.dev`
+- Development deploy proof artifact `9785671708`
+- deploy proof SHA-256 `af1353d6c23882870067f01acecc00012d9ac388dc4288e25650c11e7ead123b`
+- regression artifact `9785672087`
+- canonical D1 `4` migrations / `0` newly applied / `0` FK violations / `583` tables
+- Preview remained `CLOUDFLARE_ACCESS_PROTECTED`; authentication headers ZERO; Access weakened NO.
 
-Release 466 Build 3 Proof:
-- run `33466655735`
-- source-proof job `99727807035`
-- runtime-proof job `99727862065`
-- artifact `9785121048`
-- artifact SHA-256 `92af7c472900d89cf4d9a01a44d4abc5ba4a10ef698de2cac7df44011b525b56`
-- all `11` required Development business-intelligence authority tables present
-- observed Development rows: page views `33`, Products `45`, Inventory `1041`, Creative projects `5`, cart/order/search/profitability `0/0/0/0`
-- zero observed rows are coverage evidence only and are not claims of zero demand or zero Production activity
+Release 466 Build 4 Proof:
+- run `33468360774` — PASS
+- source-proof job `99732822552`
+- runtime-proof job `99732864996`
+- artifact `9785676849`
+- artifact SHA-256 `5f789155e831a00a6af4816ac4cacb3613f4a975be2e76799a4b906314328fc1`
 - Development D1 operation SELECT only
-- Production business rows read ZERO; Production mutation ZERO
-- automatic price/reorder/project execution ZERO
-- Inventory/Accounting mutation and provider/payment execution ZERO
+- Production business rows read ZERO
+- Production mutation ZERO
+- automated provider/payment/OAuth execution ZERO
 
-## Build 3 status
+## Build 4 status
 
-11. Storefront conversion-funnel analytics — **Development green**. Existing page-view/cart/order authorities, read-only.
-12. Zero-result and abandoned-search intelligence — **Development green**. Existing search/session/cart evidence with explicit abandonment semantics.
-13. Explainable Product opportunity score — **Development green**. Visible component scores/reasons; recommendation only.
-14. Inventory reorder economics — **Development green**. Existing Inventory/replenishment/source evidence; never places an order.
-15. Creative-project priority engine — **Development green**. Recommendation only; cannot start/publish projects, consume Inventory or post Accounting.
+16. **CAIP private-media browser/range-streaming acceptance — DEVELOPMENT GREEN.** `3` qualifying `review_proxy_served` range audits exist with ranged streaming, no copy and no cache evidence.
+17. **Stripe Development acceptance — EXTERNAL ACCEPTANCE PENDING.** I.T. ledger: `0/5` required checks passed.
+18. **PayPal sandbox acceptance — EXTERNAL ACCEPTANCE PENDING.** I.T. ledger: `0/5` required checks passed.
+19. **Social/OAuth controlled acceptance — EXTERNAL ACCEPTANCE PENDING.** Selected providers/connections/security events: `0/0/0`.
+20. **Production-launch readiness cockpit — TECHNICAL GREEN / HOLD.** Current launch state `HOLD_EXTERNAL_ACCEPTANCE`.
 
-Build 3 is schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
+Configuration, credentials or an enabled Development operator switch are never acceptance. Real Development test/sandbox/OAuth evidence must exist before items 17–19 can pass.
+
+## SEO correction staged in Release 466
+
+Build 2 measured six live Release 465 sitemap/noindex conflicts: `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`.
+
+Release 466 Development source now removes those six noindex utility/health routes from `sitemap.xml`, and the corrected source passed the public SEO gates. Release 465 Production is deliberately unchanged until a later promotion.
 
 ## Permanent safety rules
 
@@ -93,37 +84,41 @@ Build 3 is schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
 - Main-only application patches are forbidden.
 - Production transactional data are never overwritten from Development.
 - Request-time schema DDL remains forbidden.
-- Schema migrations are forward-only; rollback does not automatically reverse schema.
+- Canonical migrations remain exactly `0001`–`0004`; Release 466 Builds 1–4 are schema-neutral.
 - Business-data restore is never automatic.
 - Native Git-triggered Cloudflare Pages deployment remains frozen.
-- Provider execution/publication remain closed unless separately authorized and bounded to the intended Development/sandbox acceptance.
+- Provider/payment execution remains closed except deliberate bounded Development test/sandbox acceptance.
+- Provider publication remains closed.
 - Raw CAIP R2 deletion remains closed.
 - Cloudflare Access is never weakened for Preview smoke.
-- Build 3 scores are recommendation-only; automatic price changes, reorders and project starts remain closed.
+- Build 3 business scores remain recommendation-only.
 
 ## Next bounded work
 
-After the final Build 3 closure tree re-passes the canonical System Gate and Release 466 Build 3 Proof on `dev`, proceed to **Release 466 Build 4 — External Acceptance & Commercial Readiness, items 16–20**:
+Do **not** start another feature build. The remaining Release 466 work is deliberate external acceptance:
 
-16. CAIP private-media authenticated browser/range-streaming acceptance.
-17. Stripe Development payment/webhook/refund/reconciliation/idempotency acceptance.
-18. PayPal sandbox payment/webhook/refund/reconciliation/idempotency acceptance.
-19. Social/OAuth connect/refresh/expiry/revoke/outage/reconnect acceptance with publication still closed.
-20. Production-launch readiness cockpit combining source, recovery, providers, SEO, performance and incident evidence.
+1. Stripe Development — complete the five required test-mode checks: credentials, checkout, signed webhook, reconciliation and idempotent replay.
+2. PayPal sandbox — complete the five required checks: credentials, approval/capture, verified webhook, reconciliation and idempotent replay.
+3. Social/OAuth — deliberately choose the intended provider(s), verify intended account, controlled connection lifecycle, refresh/revoke/disconnect behavior as applicable; publication remains closed.
+4. Native GitHub rulesets — apply/review externally when repository-settings write access is available.
+5. Rerun strict Build 4 acceptance, then exact canonical/inherited proofs.
+6. Only after those are green may a separate Release 466 Production-promotion decision be considered.
 
-Build 4 acceptance does not authorize live Production charging/publication or Release 466 Production promotion. Do not touch `main` until a later deliberate Production promotion is explicitly requested.
+No real Stripe/PayPal/OAuth action should be faked or inferred. If credentials/session/operator authorization are unavailable, keep the item HOLD and surface the exact correction mechanics in the I.T. readiness workspace.
 
 ## Canonical reading order
 
-1. `development-release.json`
-2. `release466-build3-revenue-business-intelligence.json`
-3. `docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md`
-4. `AI_HANDOFF.md`
-5. `PROJECT_STATUS_AND_ROADMAP.md`
-6. `SANITY_HEALTH_CHECK.md`
-7. `release466-build2-runtime-storefront-intelligence.json`
-8. `release466-build1-governance-recovery-reliability.json`
-9. `.github/RELEASE466_BRANCH_PROTECTION_POLICY.md`
-10. `release463-environment.json`
+1. `development-release.json` — last fully accepted convergence remains Build 3 while Build 4 external acceptance is HOLD.
+2. `release466-build4-external-commercial-readiness.json` — Build 4 technical/evidence authority.
+3. `LIVE_TESTING_GUIDE.md` — current Build 4 operator acceptance procedure.
+4. `docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md`
+5. `AI_HANDOFF.md`
+6. `PROJECT_STATUS_AND_ROADMAP.md`
+7. `SANITY_HEALTH_CHECK.md`
+8. `release466-build3-revenue-business-intelligence.json`
+9. `release466-build2-runtime-storefront-intelligence.json`
+10. `release466-build1-governance-recovery-reliability.json`
+11. `.github/RELEASE466_BRANCH_PROTECTION_POLICY.md`
+12. `release463-environment.json`
 
 Release 465 files remain immutable historical acceptance authorities and must continue to pass their append-safe gates.
