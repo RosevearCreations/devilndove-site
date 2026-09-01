@@ -2,7 +2,7 @@
 
 ## Current authority
 
-**Release 466 — Operational Resilience and Commercial Readiness.** Builds 1–3 are Development green. Build 4 implementation is **technical green / external acceptance HOLD**. CAIP private-media acceptance is already green. Stripe, PayPal and Social/OAuth acceptance remain incomplete. Native GitHub `dev`/`main` ruleset application remains external/pending because the connected integration cannot write repository rulesets.
+**Release 466 — Operational Resilience and Commercial Readiness.** Builds 1–3 are Development green. Build 4 implementation is **technical green / external acceptance HOLD**. CAIP private-media acceptance is green. Stripe, PayPal and Social/OAuth acceptance remain incomplete. Native GitHub `dev`/`main` ruleset application remains external/pending because the connected integration cannot write repository rulesets.
 
 Release 465 remains fully GREEN on Production and must not be reopened unless a current gate proves drift.
 
@@ -28,55 +28,59 @@ Production business/transactional data remain Production-owned. Release 466 has 
 
 ## Builds 1–3
 
-Builds 1–3 remain Development green and pass their inherited proofs on the current Build 4 source lineage.
+Builds 1–3 remain Development green and must continue to pass inherited proofs on every Build 4 source tree.
 
-- Build 1 closure SHA `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`; current-tree inherited run `33468360674` PASS.
-- Build 2 closure SHA `855171430c6b14c4f4a6ff24a120bcce722294f9`; current-tree inherited run `33468360701` PASS.
-- Build 3 is Development green; current-tree inherited run `33468360735` PASS after exact runtime rerun job `99733359874`.
+- Build 1 closure SHA `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`.
+- Build 2 closure SHA `855171430c6b14c4f4a6ff24a120bcce722294f9`.
+- Build 3 Development-green closure remains the last fully accepted convergence in `development-release.json` while Build 4 external evidence is HOLD.
 
-The first Build 3 runtime attempt on the Build 4 SHA hit a transient Wrangler/D1 remote SELECT exit while several proofs were concurrent. No source/schema change was made; the exact rerun passed.
+## Release 466 Build 4 final technical closure
 
-## Release 466 Build 4 technical-green evidence
+Last fully proven Build 4 technical closure SHA: `0ca68e19339da198e25dd7d3d603a2e616bc77ec`.
 
-Technical source SHA: `6421187fb7c1f1eed932c2dd8e223b5f9589484d`.
-
-Canonical System Gate:
-- run `33468360898` — PASS
-- source job `99732822736`
-- deploy-development job `99732868160`
-- exact Preview `https://7d8d9c89.devilndove-site.pages.dev`
-- Development deploy proof artifact `9785671708`
-- deploy proof SHA-256 `af1353d6c23882870067f01acecc00012d9ac388dc4288e25650c11e7ead123b`
-- regression artifact `9785672087`
-- canonical D1 `4` migrations / `0` newly applied / `0` FK violations / `583` tables
-- Preview remained `CLOUDFLARE_ACCESS_PROTECTED`; authentication headers ZERO; Access weakened NO.
-
-Release 466 Build 4 Proof:
-- run `33468360774` — PASS
-- source-proof job `99732822552`
-- runtime-proof job `99732864996`
-- artifact `9785676849`
-- artifact SHA-256 `5f789155e831a00a6af4816ac4cacb3613f4a975be2e76799a4b906314328fc1`
-- Development D1 operation SELECT only
-- Production business rows read ZERO
-- Production mutation ZERO
+- System Gate `33469027060` — PASS
+- exact Preview `https://c3b4404c.devilndove-site.pages.dev`
+- Build 1 Proof `33469027078` — PASS
+- Build 2 Proof `33469027029` — PASS
+- Build 3 Proof `33469027067` — PASS
+- Build 4 Proof `33469026988` — PASS
+- Build 4 proof artifact `9785894659`
+- artifact SHA-256 `de5bc1ea32eeb5ec6584ca7b8f73cd082c5e9939c2ce38db63bf8c98d1907ad2`
+- canonical D1 remains exactly `0001`–`0004`, with no Build 4 migration and zero Development FK violations
+- Production business rows read by Build 4 proof ZERO; Production mutation ZERO
 - automated provider/payment/OAuth execution ZERO
 
 ## Build 4 status
 
 16. **CAIP private-media browser/range-streaming acceptance — DEVELOPMENT GREEN.** `3` qualifying `review_proxy_served` range audits exist with ranged streaming, no copy and no cache evidence.
-17. **Stripe Development acceptance — EXTERNAL ACCEPTANCE PENDING.** I.T. ledger: `0/5` required checks passed.
-18. **PayPal sandbox acceptance — EXTERNAL ACCEPTANCE PENDING.** I.T. ledger: `0/5` required checks passed.
-19. **Social/OAuth controlled acceptance — EXTERNAL ACCEPTANCE PENDING.** Selected providers/connections/security events: `0/0/0`.
+17. **Stripe Development acceptance — EXTERNAL ACCEPTANCE PENDING.** Historical closure measured `0/5` readiness checks. Current acceptance is six-part: credentials, checkout, signed webhook, real provider-synchronized Development refund, reconciliation and idempotent replay.
+18. **PayPal sandbox acceptance — EXTERNAL ACCEPTANCE PENDING.** Historical closure measured `0/5` readiness checks. Current acceptance is six-part: sandbox credentials, approval/capture, verified webhook, real provider-synchronized sandbox refund, reconciliation and idempotent replay.
+19. **Social/OAuth controlled acceptance — EXTERNAL ACCEPTANCE PENDING.** Selected providers/connections/security events remain `0/0/0` until a provider is deliberately selected and tested.
 20. **Production-launch readiness cockpit — TECHNICAL GREEN / HOLD.** Current launch state `HOLD_EXTERNAL_ACCEPTANCE`.
 
-Configuration, credentials or an enabled Development operator switch are never acceptance. Real Development test/sandbox/OAuth evidence must exist before items 17–19 can pass.
+## Payment refund hardening now in progress
+
+The Build 4 hardening branch is intended to close a runtime safety gap before any real provider testing. It must be source-gated and exact-SHA Development-proven before replacing the last technical closure SHA.
+
+Required behavior:
+
+- direct `/api/admin/payment-actions` defaults provider synchronization OFF;
+- remote refund requires `PAYMENT_PROVIDER_MUTATIONS_ENABLED=1` and explicit `provider_sync_confirmed=true`;
+- remote refund additionally requires the Release 466 payment boundary: Development host, `DND_ENVIRONMENT=development`, `PAYMENT_PROVIDER_EXECUTION_MODE=development-explicit`, and test/sandbox credentials;
+- Stripe refund retries use `Idempotency-Key`;
+- PayPal refund retries use `PayPal-Request-Id` and the sandbox API only;
+- a failed provider refund cannot mark the local payment/order refunded;
+- refund acceptance is derived from a successful Development `payment_refunds` provider synchronization with a provider refund ID;
+- a local-only refund is not external acceptance;
+- no D1 schema change is required.
+
+Do **not** execute a Stripe/PayPal refund merely because this machinery exists. Real provider acceptance remains a separate deliberate operator action.
 
 ## SEO correction staged in Release 466
 
 Build 2 measured six live Release 465 sitemap/noindex conflicts: `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`.
 
-Release 466 Development source now removes those six noindex utility/health routes from `sitemap.xml`, and the corrected source passed the public SEO gates. Release 465 Production is deliberately unchanged until a later promotion.
+Release 466 Development source removes those six noindex utility/health routes from `sitemap.xml`, and the corrected source passed the public SEO gates. Release 465 Production remains unchanged until a later promotion.
 
 ## Permanent safety rules
 
@@ -87,7 +91,7 @@ Release 466 Development source now removes those six noindex utility/health rout
 - Canonical migrations remain exactly `0001`–`0004`; Release 466 Builds 1–4 are schema-neutral.
 - Business-data restore is never automatic.
 - Native Git-triggered Cloudflare Pages deployment remains frozen.
-- Provider/payment execution remains closed except deliberate bounded Development test/sandbox acceptance.
+- Provider/payment execution remains closed except separately authorized, bounded Development test/sandbox acceptance.
 - Provider publication remains closed.
 - Raw CAIP R2 deletion remains closed.
 - Cloudflare Access is never weakened for Preview smoke.
@@ -95,13 +99,13 @@ Release 466 Development source now removes those six noindex utility/health rout
 
 ## Next bounded work
 
-Do **not** start another feature build. The remaining Release 466 work is deliberate external acceptance:
+Do **not** start another feature build. First finish and prove the payment-refund hardening source. After that, the remaining Release 466 work is deliberate external acceptance:
 
-1. Stripe Development — complete the five required test-mode checks: credentials, checkout, signed webhook, reconciliation and idempotent replay.
-2. PayPal sandbox — complete the five required checks: credentials, approval/capture, verified webhook, reconciliation and idempotent replay.
-3. Social/OAuth — deliberately choose the intended provider(s), verify intended account, controlled connection lifecycle, refresh/revoke/disconnect behavior as applicable; publication remains closed.
+1. Stripe Development — complete all six evidence dimensions in test mode only.
+2. PayPal sandbox — complete all six evidence dimensions in sandbox only.
+3. Social/OAuth — deliberately choose intended provider(s), verify intended account, and exercise controlled connection lifecycle; publication remains closed.
 4. Native GitHub rulesets — apply/review externally when repository-settings write access is available.
-5. Rerun strict Build 4 acceptance, then exact canonical/inherited proofs.
+5. Rerun strict Build 4 acceptance and all exact inherited proofs.
 6. Only after those are green may a separate Release 466 Production-promotion decision be considered.
 
 No real Stripe/PayPal/OAuth action should be faked or inferred. If credentials/session/operator authorization are unavailable, keep the item HOLD and surface the exact correction mechanics in the I.T. readiness workspace.
