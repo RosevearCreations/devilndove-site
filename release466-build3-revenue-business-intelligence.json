@@ -1,0 +1,45 @@
+{
+  "release": 466,
+  "build": 3,
+  "title": "Revenue & Business Intelligence",
+  "state": "implementation_in_progress",
+  "base_development_sha": "855171430c6b14c4f4a6ff24a120bcce722294f9",
+  "schema_change_required": false,
+  "migration": null,
+  "items": [
+    {"id": 11, "name": "Storefront conversion-funnel analytics", "status": "implementation_in_progress"},
+    {"id": 12, "name": "Zero-result and abandoned-search intelligence", "status": "implementation_in_progress"},
+    {"id": 13, "name": "Explainable Product opportunity score", "status": "implementation_in_progress"},
+    {"id": 14, "name": "Inventory reorder economics", "status": "implementation_in_progress"},
+    {"id": 15, "name": "Creative-project priority engine", "status": "implementation_in_progress"}
+  ],
+  "authority_reuse": {
+    "funnel": ["site_page_views", "cart_activity", "orders"],
+    "search": ["site_search_events", "site_visitor_sessions", "cart_activity"],
+    "product_opportunity": ["products", "product_margin_warning_rows", "cart_activity", "order_items"],
+    "reorder_economics": ["site_item_inventory", "inventory_supply_replenishment_profiles", "inventory_supply_source_options"],
+    "creative_priority": ["creative_work_projects", "creative_project_profitability", "creative_project_profitability_extensions", "creative_work_events"]
+  },
+  "policy": {
+    "scores_are_explainable": true,
+    "scores_are_recommendations_only": true,
+    "zero_observations_are_not_interpreted_as_zero_demand": true,
+    "missing_optional_authority_is_reported_not_repaired": true
+  },
+  "safety": {
+    "production_business_mutation": false,
+    "production_schema_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_execution": false,
+    "inventory_mutation": false,
+    "accounting_posting": false,
+    "automatic_price_change": false,
+    "automatic_reorder": false,
+    "automatic_project_start": false,
+    "raw_r2_delete": false,
+    "request_time_schema_ddl": false,
+    "preview_access_must_remain_enforced": true,
+    "main_must_remain_release465_until_deliberate_promotion": true
+  }
+}
