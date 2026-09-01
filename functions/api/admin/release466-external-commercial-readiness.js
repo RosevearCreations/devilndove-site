@@ -3,8 +3,8 @@ import { paymentExecutionBoundary, paymentExecutionStatus } from '../_lib/paymen
 
 const RELEASE = 466;
 const BUILD = 4;
-const STRIPE_CHECKS = ['credentials', 'checkout', 'webhook-signature', 'reconciliation', 'idempotent-replay'];
-const PAYPAL_CHECKS = ['credentials', 'approval-capture', 'webhook-verification', 'reconciliation', 'idempotent-replay'];
+const STRIPE_LEDGER_CHECKS = ['credentials', 'checkout', 'webhook-signature', 'reconciliation', 'idempotent-replay'];
+const PAYPAL_LEDGER_CHECKS = ['credentials', 'approval-capture', 'webhook-verification', 'reconciliation', 'idempotent-replay'];
 const LIVE_SEO_CONFLICTS = ['/cart/', '/checkout/', '/checkout/confirmation/', '/supplies/health/', '/tools/health/', '/toolshed/duplicates/'];
 
 const rows = (value) => Array.isArray(value?.results) ? value.results : [];
@@ -23,20 +23,20 @@ async function tableExists(db, name) {
 }
 
 async function safeAll(db, sql, bindings = []) {
-  try {
-    return rows(await db.prepare(sql).bind(...bindings).all());
-  } catch {
-    return [];
-  }
+  try { return rows(await db.prepare(sql).bind(...bindings).all()); }
+  catch { return []; }
+}
+
+async function safeFirst(db, sql, bindings = []) {
+  try { return await db.prepare(sql).bind(...bindings).first(); }
+  catch { return null; }
 }
 
 function parseJson(value, fallback = {}) {
   try {
     const parsed = JSON.parse(String(value || ''));
     return parsed && typeof parsed === 'object' ? parsed : fallback;
-  } catch {
-    return fallback;
-  }
+  } catch { return fallback; }
 }
 
 function checkState(checks, requiredKeys) {
@@ -51,36 +51,93 @@ function checkState(checks, requiredKeys) {
       last_checked_at: row?.last_checked_at || null,
       last_safe_error: text(row?.last_safe_error) || null,
       correction_mechanics: text(row?.correction_mechanics) || null,
+      evidence_source: 'it_provider_readiness_checks',
     };
   });
   const passed = required.filter((row) => row.check_state === 'passed').length;
-  const failed = required.filter((row) => ['blocked', 'failed', 'missing'].includes(row.check_state));
+  const blockers = required.filter((row) => ['blocked', 'failed'].includes(row.check_state)).length;
   return {
     required_count: required.length,
     passed_count: passed,
     accepted: required.length > 0 && passed === required.length,
-    blocker_count: failed.length,
+    blocker_count: blockers,
+    pending_count: required.length - passed - blockers,
     checks: required,
   };
 }
 
+async function loadProviderRefundAcceptance(db, provider) {
+  const ready = await tableExists(db, 'payment_refunds');
+  if (!ready) {
+    return { schema_ready: false, accepted: false, accepted_count: 0, last_accepted_at: null };
+  }
+  const row = await safeFirst(db, `
+    SELECT COUNT(*) AS accepted_count,
+           MAX(COALESCE(provider_sync_at,created_at)) AS last_accepted_at
+    FROM payment_refunds
+    WHERE LOWER(COALESCE(provider,''))=?
+      AND LOWER(COALESCE(provider_sync_status,''))='succeeded'
+      AND provider_refund_id IS NOT NULL
+      AND TRIM(provider_refund_id)<>''
+      AND LOWER(COALESCE(refund_status,'')) IN ('submitted','succeeded')
+  `, [provider]);
+  const acceptedCount = integer(row?.accepted_count);
+  return {
+    schema_ready: true,
+    accepted: acceptedCount > 0,
+    accepted_count: acceptedCount,
+    last_accepted_at: row?.last_accepted_at || null,
+  };
+}
+
 async function loadPaymentAcceptance(db, request, env, provider) {
-  const requiredKeys = provider === 'stripe' ? STRIPE_CHECKS : PAYPAL_CHECKS;
+  const requiredKeys = provider === 'stripe' ? STRIPE_LEDGER_CHECKS : PAYPAL_LEDGER_CHECKS;
   const readinessReady = await tableExists(db, 'it_provider_readiness_checks');
-  const checks = readinessReady ? await safeAll(db, `SELECT check_key,check_label,check_state,evidence_reference,last_checked_at,last_safe_error,correction_mechanics FROM it_provider_readiness_checks WHERE provider_key=? AND environment='development' AND required_for_activation=1 ORDER BY check_key`, [provider]) : [];
-  const acceptance = checkState(checks, requiredKeys);
+  const checks = readinessReady ? await safeAll(db, `
+    SELECT check_key,check_label,check_state,evidence_reference,last_checked_at,last_safe_error,correction_mechanics
+    FROM it_provider_readiness_checks
+    WHERE provider_key=? AND environment='development' AND required_for_activation=1
+    ORDER BY check_key
+  `, [provider]) : [];
+  const ledger = checkState(checks, requiredKeys);
+  const refund = await loadProviderRefundAcceptance(db, provider);
+  const refundCheck = {
+    check_key: 'refund',
+    check_label: 'Provider-synchronized Development refund',
+    check_state: refund.accepted ? 'passed' : (refund.schema_ready ? 'pending' : 'missing'),
+    evidence_reference_present: refund.accepted,
+    last_checked_at: refund.last_accepted_at,
+    last_safe_error: null,
+    correction_mechanics: 'Run one deliberate Development test/sandbox refund through the guarded admin payment action. Acceptance requires a successful provider_refund_id persisted in payment_refunds; configuration or a local-only refund does not count.',
+    evidence_source: 'payment_refunds',
+    successful_provider_refund_count: refund.accepted_count,
+  };
+  const requiredCount = ledger.required_count + 1;
+  const passedCount = ledger.passed_count + (refund.accepted ? 1 : 0);
+  const blockerCount = ledger.blocker_count + (refund.schema_ready ? 0 : 1);
+  const pendingCount = requiredCount - passedCount - blockerCount;
   const execution = paymentExecutionStatus(request.url, env, provider);
   const boundary = paymentExecutionBoundary(env);
   const configurationSafe = execution.live_credential_detected !== true;
+  const accepted = passedCount === requiredCount && configurationSafe;
   return {
     provider,
-    schema_ready: readinessReady,
-    accepted: acceptance.accepted && configurationSafe,
-    acceptance_state: acceptance.accepted && configurationSafe ? 'accepted' : (acceptance.blocker_count > 0 ? 'blocked_or_failed' : 'pending_external_evidence'),
-    required_count: acceptance.required_count,
-    passed_count: acceptance.passed_count,
-    blocker_count: acceptance.blocker_count,
-    checks: acceptance.checks,
+    schema_ready: readinessReady && refund.schema_ready,
+    accepted,
+    acceptance_state: accepted
+      ? 'accepted'
+      : (!configurationSafe || blockerCount > 0 ? 'blocked_or_failed' : 'pending_external_evidence'),
+    required_count: requiredCount,
+    passed_count: passedCount,
+    blocker_count: blockerCount,
+    pending_count: Math.max(0, pendingCount),
+    checks: [...ledger.checks, refundCheck],
+    refund_evidence: {
+      accepted: refund.accepted,
+      successful_provider_refund_count: refund.accepted_count,
+      last_accepted_at: refund.last_accepted_at,
+      provider_refund_id_emitted: false,
+    },
     execution_boundary: {
       configured: Boolean(execution.configured),
       test_mode: Boolean(execution.test_mode),
@@ -91,15 +148,21 @@ async function loadPaymentAcceptance(db, request, env, provider) {
       execution_code: text(execution.code),
       production_execution: false,
       required_operator_switch: `${boundary.operator_switch}=${boundary.required_value}`,
+      legacy_refund_gate: 'PAYMENT_PROVIDER_MUTATIONS_ENABLED=1 + provider_sync_confirmed=true',
     },
-    policy: 'Configuration or an enabled operator switch is never acceptance. All required provider checks must carry sanitized passed evidence.',
+    policy: 'Configuration or an enabled operator switch is never acceptance. Five sanitized readiness checks plus one real provider-synchronized Development refund are required.',
   };
 }
 
 async function loadCaipAcceptance(db) {
   const grantReady = await tableExists(db, 'creative_asset_access_grants');
   const auditReady = await tableExists(db, 'creative_asset_access_audit');
-  const recent = auditReady ? await safeAll(db, `SELECT creative_asset_access_audit_id,event_type,outcome,details_json,created_at FROM creative_asset_access_audit WHERE event_type='review_proxy_served' ORDER BY creative_asset_access_audit_id DESC LIMIT 50`) : [];
+  const recent = auditReady ? await safeAll(db, `
+    SELECT creative_asset_access_audit_id,event_type,outcome,details_json,created_at
+    FROM creative_asset_access_audit
+    WHERE event_type='review_proxy_served'
+    ORDER BY creative_asset_access_audit_id DESC LIMIT 50
+  `) : [];
   const served = recent.map((row) => ({ ...row, details: parseJson(row.details_json, {}) }));
   const rangeEvidence = served.find((row) => row.outcome === 'served' && row.details?.ranged_streaming === true && row.details?.no_copy === true && row.details?.no_cache === true) || null;
   return {
