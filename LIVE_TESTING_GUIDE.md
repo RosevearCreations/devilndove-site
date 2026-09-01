@@ -17,7 +17,7 @@ This is the current release-independent procedure for **Release 466 Build 4 — 
 - Production exact source: `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`
 - Production business/transactional data remain Production-owned.
 
-Canonical D1 migrations remain exactly `0001`–`0004`. Release 466 Builds 1–4 are schema-neutral unless a future source change deliberately creates a new canonical migration and follows Development-first migration policy.
+Canonical D1 migrations remain exactly `0001`–`0004`. Release 466 Builds 1–4 remain schema-neutral.
 
 ## Build 4 acceptance cockpit
 
@@ -64,37 +64,43 @@ Require:
 
 **Pass condition:** the Build 4 cockpit reports CAIP private-media acceptance as accepted from a qualifying real range-stream audit.
 
-## 17. Stripe Development acceptance
+## Payment provider execution boundary
 
-Remote Stripe execution is allowed only when all of the following are true:
+All outbound Stripe/PayPal actions, including refunds, are fail-closed. A provider refund requires all of these controls simultaneously:
 
 - request host is the Development Preview host;
 - `DND_ENVIRONMENT=development`;
 - `PAYMENT_PROVIDER_EXECUTION_MODE=development-explicit`;
-- Stripe credentials are test-mode credentials;
-- no live credential is detected.
+- `PAYMENT_PROVIDER_MUTATIONS_ENABLED=1`;
+- the admin request explicitly carries `provider_sync_confirmed=true`;
+- Stripe credentials are test-only, or PayPal is sandbox-only;
+- no live credential/environment is detected.
 
-The existing I.T. readiness authority requires these checks to be `passed` with sanitized evidence references:
+The direct `/api/admin/payment-actions` implementation defaults provider synchronization **off**. A failed provider refund records failure evidence only; it must not mark the local order/payment refunded. Stripe refund retries use `Idempotency-Key`; PayPal refund retries use `PayPal-Request-Id`.
+
+## 17. Stripe Development acceptance
+
+The Build 4 Stripe acceptance contract has **six** required evidence dimensions:
 
 1. `credentials` — Development test credentials configured.
 2. `checkout` — one owner-controlled Stripe test checkout completes without a live charge.
 3. `webhook-signature` — signed Development webhook verification passes.
-4. `reconciliation` — provider transaction reconciles to local order/payment/accounting evidence without duplicate posting.
-5. `idempotent-replay` — replaying the same signed test event creates no duplicate order, payment, refund, inventory or accounting effect.
+4. `refund` — one deliberate Development refund succeeds at Stripe. This is derived from a `payment_refunds` row with successful provider synchronization and a provider refund ID; a local-only refund does not count.
+5. `reconciliation` — payment and refund state reconcile to the local order/payment/accounting evidence without duplicate posting.
+6. `idempotent-replay` — retry/replay of the same test operation or signed event creates no duplicate charge, refund, order, Inventory or Accounting effect.
 
 Do not use a real card or live key. Provider configuration alone must remain pending.
 
 ## 18. PayPal sandbox acceptance
 
-Remote PayPal execution is allowed only on the Development Preview with the explicit Development payment switch and `PAYPAL_ENV=sandbox`. Live credentials are forbidden.
-
-Required `passed` checks with sanitized evidence:
+The Build 4 PayPal acceptance contract also has **six** required evidence dimensions:
 
 1. `credentials` — sandbox credentials configured.
 2. `approval-capture` — one owner-controlled sandbox approval/capture completes.
 3. `webhook-verification` — sandbox webhook authenticity is verified.
-4. `reconciliation` — sandbox capture reconciles to local order/payment/accounting evidence.
-5. `idempotent-replay` — duplicate sandbox event replay creates no duplicate financial/order effect.
+4. `refund` — one deliberate PayPal sandbox refund succeeds. This is derived from a `payment_refunds` row with successful provider synchronization and a provider refund ID; a local-only refund does not count.
+5. `reconciliation` — sandbox capture/refund reconciles to local order/payment/accounting evidence.
+6. `idempotent-replay` — duplicate operation/event replay creates no duplicate financial/order effect.
 
 ## 19. Social / OAuth controlled acceptance
 
@@ -131,15 +137,18 @@ Build 4 source-gating is owned by:
 python scripts/release466_build4_gate.py
 ```
 
-The Build 4 GitHub workflow must prove source safety and read Development evidence only. It must not automatically call Stripe, PayPal, OAuth providers, Production APIs or mutate Production. External browser/provider tests remain deliberate operator-controlled acceptance activities.
+The Build 4 GitHub workflow must prove source safety and read Development evidence only. It must not automatically call Stripe, PayPal, refund APIs, OAuth providers, Production APIs or mutate Production. External browser/provider tests remain deliberate operator-controlled acceptance activities.
 
 ## Existing fail-closed execution authorities
 
 Payment execution:
 
 - `functions/api/_lib/paymentExecution.js`
-- Development host + explicit operator switch + test/sandbox credentials required.
+- `functions/api/admin/contracts/operations-payment-action-write.js`
+- `functions/api/admin/payment-actions.js`
+- Development host + explicit operator switch + old provider-mutation gate + explicit request confirmation + test/sandbox credentials are required for remote refunds.
 - live credentials are rejected.
+- successful refund acceptance is derived from `payment_refunds`, not inferred from configuration.
 
 OAuth:
 
