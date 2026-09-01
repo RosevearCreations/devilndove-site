@@ -99,8 +99,10 @@ def main() -> None:
             'refund proof UI must explain the explicit mutation gate')
     require("/api/stripe-webhook" in api and "/api/paypal-webhook" in api,
             'runner must surface exact application webhook paths')
-    require("Cloudflare Access" in page and "Access" in api,
-            'runner must preserve the provider-reachability/Access warning')
+    require("access_policy_note" in api and "Cloudflare Access" in api,
+            'runner API must preserve the provider-reachability/Access warning')
+    require("webhook.access_policy_note" in ui and "Cloudflare Access" in ui,
+            'runner UI must render the provider-reachability/Access warning')
 
     print('RELEASE 466 BUILD 6 PROVIDER ACCEPTANCE RUNNER: PASS')
     print('Provider transports duplicated: NO')
