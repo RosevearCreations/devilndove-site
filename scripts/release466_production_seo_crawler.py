@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Release 466 read-only Production SEO crawler.
 
-The crawler measures live Production without mutating it. By default SEO defects are
-reported as evidence rather than failing the process; --fail-on-seo-errors can be used
-later as a Production promotion gate.
+The crawler measures live public Production without mutating it. Admin/API/Cloudflare
+utility routes are intentionally excluded from SEO scoring. Equivalent ``index.html``
+URLs are normalized to their directory URL so aliases do not create false duplicate
+signals. By default SEO defects are reported as evidence rather than failing the process;
+--fail-on-seo-errors can be used later as a Production promotion gate.
 """
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import time
 import urllib.error
 import urllib.request
@@ -20,11 +21,12 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urljoin, urlparse, urlunparse
 
-USER_AGENT = "DevilDove-Release466-SEO-Crawler/1.0"
+USER_AGENT = "DevilDove-Release466-SEO-Crawler/1.1"
 UTILITY_PATHS = {
     "/cart/", "/checkout/", "/checkout/confirmation/", "/privacy/", "/terms/",
     "/data-deletion/", "/social-connections/",
 }
+SKIP_PREFIXES = ("/admin/", "/api/", "/cdn-cgi/")
 SKIP_SUFFIXES = ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico', '.pdf', '.zip', '.mp4', '.webm', '.css', '.js', '.xml', '.txt')
 
 
@@ -94,8 +96,21 @@ class PageResult:
 def clean_url(url: str) -> str:
     parsed = urlparse(url)
     path = parsed.path or '/'
-    if not path.endswith('/') and not Path(path).suffix: path += '/'
+    lower = path.lower()
+    if lower.endswith('/index.html'):
+        path = path[:-len('index.html')]
+    elif lower == '/index.html':
+        path = '/'
+    if not path.endswith('/') and not Path(path).suffix:
+        path += '/'
     return urlunparse((parsed.scheme.lower(), parsed.netloc.lower(), path, '', '', ''))
+
+
+def skipped_path(path: str) -> bool:
+    normalized = (path or '/').lower()
+    if any(normalized.startswith(prefix) for prefix in SKIP_PREFIXES):
+        return True
+    return normalized.endswith(SKIP_SUFFIXES)
 
 
 def fetch(url: str, attempts: int = 2) -> tuple[int, bytes, str, str, int]:
@@ -127,7 +142,14 @@ def sitemap_urls(base: str, issues: list[dict]) -> list[str]:
             issue(issues, 'error', 'sitemap_http', sitemap, f'status={status} final={final}')
             return [base]
         root = ET.fromstring(body.decode('utf-8', errors='replace'))
-        urls = [node.text.strip() for node in root.findall('.//{*}loc') if node.text and node.text.strip()]
+        urls = []
+        for node in root.findall('.//{*}loc'):
+            if not node.text or not node.text.strip():
+                continue
+            candidate = clean_url(node.text.strip())
+            if skipped_path(urlparse(candidate).path):
+                continue
+            urls.append(candidate)
         return list(dict.fromkeys(urls)) or [base]
     except Exception as exc:
         issue(issues, 'error', 'sitemap_parse', sitemap, str(exc))
@@ -143,11 +165,10 @@ def main() -> int:
     args = parser.parse_args()
 
     base = clean_url(args.base_url)
-    origin = f"{urlparse(base).scheme}://{urlparse(base).netloc}"
     host = (urlparse(base).hostname or '').lower()
     issues: list[dict] = []
     seeds = sitemap_urls(base, issues)
-    queue = deque(clean_url(url) for url in seeds)
+    queue = deque(seeds)
     queued = set(queue)
     sitemap_set = set(queue)
     results: list[PageResult] = []
@@ -157,8 +178,8 @@ def main() -> int:
     while queue and len(results) < max(1, args.max_pages):
         url = queue.popleft()
         parsed = urlparse(url)
-        if (parsed.hostname or '').lower() != host: continue
-        if parsed.path.lower().endswith(SKIP_SUFFIXES): continue
+        if (parsed.hostname or '').lower() != host or skipped_path(parsed.path):
+            continue
         try:
             status, body, content_type, final_url, elapsed_ms = fetch(url)
         except Exception as exc:
@@ -174,53 +195,57 @@ def main() -> int:
             issue(issues, 'warning', 'non_html_page', url, content_type)
             continue
 
+        canonical_url = clean_url(final_url)
+        path = urlparse(canonical_url).path or '/'
+        if skipped_path(path):
+            continue
         html = body.decode('utf-8', errors='replace')
         doc = HtmlSignals(); doc.feed(html)
-        path = urlparse(clean_url(final_url)).path or '/'
         robots = ','.join(doc.metas('name', 'robots')).lower().replace(' ', '')
         description = doc.metas('name', 'description')
         canonical_values = doc.canonicals()
-        canonical = canonical_values[0] if len(canonical_values) == 1 else ''
+        canonical = clean_url(canonical_values[0]) if len(canonical_values) == 1 and canonical_values[0] else ''
         utility = path in UTILITY_PATHS
         indexable = 'noindex' not in robots and not utility
 
-        if doc.h1 != 1: issue(issues, 'error', 'h1_count', url, f'expected=1 actual={doc.h1}')
-        if not doc.title or len(doc.title) < 15: issue(issues, 'error', 'title_missing_or_shallow', url, f'length={len(doc.title)}')
-        if len(description) != 1: issue(issues, 'error', 'meta_description_count', url, f'count={len(description)}')
-        elif indexable and not 70 <= len(description[0]) <= 220: issue(issues, 'warning', 'meta_description_length', url, f'length={len(description[0])}')
-        if len(canonical_values) != 1: issue(issues, 'error', 'canonical_count', url, f'count={len(canonical_values)}')
+        if doc.h1 != 1: issue(issues, 'error', 'h1_count', canonical_url, f'expected=1 actual={doc.h1}')
+        if not doc.title or len(doc.title) < 15: issue(issues, 'error', 'title_missing_or_shallow', canonical_url, f'length={len(doc.title)}')
+        if len(description) != 1: issue(issues, 'error', 'meta_description_count', canonical_url, f'count={len(description)}')
+        elif indexable and not 70 <= len(description[0]) <= 220: issue(issues, 'warning', 'meta_description_length', canonical_url, f'length={len(description[0])}')
+        if len(canonical_values) != 1: issue(issues, 'error', 'canonical_count', canonical_url, f'count={len(canonical_values)}')
         elif canonical:
             cp = urlparse(canonical)
             if cp.scheme != 'https' or (cp.hostname or '').lower() != host or cp.query or cp.fragment:
-                issue(issues, 'error', 'canonical_invalid', url, canonical)
-        if utility and url in sitemap_set:
-            issue(issues, 'warning', 'utility_in_sitemap', url, 'Utility/legal/transaction page is present in sitemap; review indexing intent.')
-        if indexable and 'index' not in robots:
-            issue(issues, 'warning', 'robots_index_implicit', url, robots or 'robots meta absent')
+                issue(issues, 'error', 'canonical_invalid', canonical_url, canonical_values[0])
+        if utility and canonical_url in sitemap_set:
+            issue(issues, 'warning', 'utility_in_sitemap', canonical_url, 'Utility/legal/transaction page is present in sitemap; review indexing intent.')
+        if canonical_url in sitemap_set and 'noindex' in robots:
+            issue(issues, 'error', 'sitemap_noindex', canonical_url, robots)
 
         valid_jsonld = 0
         for raw in doc.jsonld_raw:
             if not raw: continue
             try: json.loads(raw); valid_jsonld += 1
-            except Exception as exc: issue(issues, 'error', 'jsonld_invalid', url, str(exc))
-        if indexable and valid_jsonld == 0: issue(issues, 'warning', 'jsonld_missing', url, 'No valid JSON-LD block found.')
+            except Exception as exc: issue(issues, 'error', 'jsonld_invalid', canonical_url, str(exc))
+        if indexable and valid_jsonld == 0: issue(issues, 'warning', 'jsonld_missing', canonical_url, 'No valid JSON-LD block found.')
 
-        result = PageResult(url, path, status, elapsed_ms, len(body), content_type, final_url, doc.title, doc.h1, canonical, len(description[0]) if len(description) == 1 else 0, robots, valid_jsonld, indexable)
+        result = PageResult(canonical_url, path, status, elapsed_ms, len(body), content_type, final_url, doc.title, doc.h1, canonical, len(description[0]) if len(description) == 1 else 0, robots, valid_jsonld, indexable)
         results.append(result)
-        if doc.title: titles.setdefault(doc.title.lower(), []).append(url)
-        if canonical: canonicals.setdefault(canonical.lower(), []).append(url)
+        if doc.title: titles.setdefault(doc.title.lower(), []).append(canonical_url)
+        if canonical: canonicals.setdefault(canonical.lower(), []).append(canonical_url)
 
         for href in doc.anchors():
             if not href or href.startswith(('#', 'mailto:', 'tel:', 'javascript:', 'data:')): continue
             try: candidate = clean_url(urljoin(final_url, href))
             except Exception: continue
             cp = urlparse(candidate)
-            if (cp.hostname or '').lower() != host or cp.path.lower().endswith(SKIP_SUFFIXES): continue
+            if (cp.hostname or '').lower() != host or skipped_path(cp.path): continue
             if candidate not in queued and len(queued) < args.max_pages * 3:
                 queued.add(candidate); queue.append(candidate)
 
     for title, urls in titles.items():
-        if len(urls) > 1: issue(issues, 'warning', 'duplicate_title', urls[0], f'{len(urls)} pages: {urls[:6]}')
+        unique = sorted(set(urls))
+        if len(unique) > 1: issue(issues, 'warning', 'duplicate_title', unique[0], f'{len(unique)} pages: {unique[:6]}')
     for canonical, urls in canonicals.items():
         unique = sorted(set(urls))
         if len(unique) > 1: issue(issues, 'error', 'duplicate_canonical', unique[0], f'{len(unique)} pages declare {canonical}: {unique[:6]}')
@@ -231,6 +256,9 @@ def main() -> int:
         'build': 2,
         'crawler': 'production_seo',
         'base_url': base,
+        'scope': 'public_html_only',
+        'excluded_prefixes': list(SKIP_PREFIXES),
+        'index_html_aliases_normalized': True,
         'read_only': True,
         'pages_crawled': len(results),
         'sitemap_urls': len(sitemap_set),
