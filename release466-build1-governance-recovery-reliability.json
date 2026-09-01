@@ -1,0 +1,51 @@
+{
+  "release": 466,
+  "build": 1,
+  "label": "Governance, Recovery & Production Reliability",
+  "state": "in_progress_source_candidate",
+  "base_sha": "d5009d9c622bdf84232b3aa7bd24a1c3d61581b2",
+  "schema_change_required": false,
+  "migration": null,
+  "items": [
+    {"id": 1, "name": "Native GitHub dev/main ruleset protection plus fail-closed repository policy", "status": "implemented_source_candidate_external_ruleset_apply_pending"},
+    {"id": 2, "name": "Production rollback readiness framework with forward-only schema compatibility", "status": "implemented_source_candidate"},
+    {"id": 3, "name": "Ephemeral Development D1 disaster-recovery rehearsal", "status": "implemented_source_candidate"},
+    {"id": 4, "name": "Read-only Development/Production structural drift detector", "status": "implemented_source_candidate"},
+    {"id": 5, "name": "Production reliability/SLO snapshot over existing I.T. authority", "status": "implemented_source_candidate"}
+  ],
+  "governance": {
+    "native_ruleset_api_write_available_to_connected_integration": false,
+    "native_ruleset_status": "external_repository_setting_pending",
+    "equivalent_fail_closed_source_controls_required": true,
+    "force_push_policy": "forbidden",
+    "branch_delete_policy": "forbidden",
+    "required_status_context": "source-gate",
+    "exact_green_development_tree_only_for_main": true
+  },
+  "recovery": {
+    "production_schema_rollback": false,
+    "business_data_restore_automatic": false,
+    "rollback_target_must_use_same_canonical_migration_stream": true,
+    "rollback_target_must_have_prior_successful_production_deployment": true,
+    "development_export_restore_rehearsal": true,
+    "raw_database_dump_uploaded_as_artifact": false
+  },
+  "drift": {
+    "production_contact": "read_only_schema_metadata",
+    "business_row_comparison": false,
+    "table_and_trigger_identity_comparison": true,
+    "canonical_migration_comparison": true
+  },
+  "safety": {
+    "production_business_mutation": false,
+    "production_schema_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "inventory_mutation": false,
+    "accounting_posting": false,
+    "automatic_rollback_execution": false,
+    "raw_r2_delete": false,
+    "request_time_schema_ddl": false,
+    "preview_access_must_remain_enforced": true
+  }
+}
