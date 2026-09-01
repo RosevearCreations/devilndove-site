@@ -22,16 +22,32 @@
 
     <main>
       <section class="card">
-        <p class="eyebrow">Release 466 · Build 4 · I.T. / Financials / Socials / Creators</p>
+        <p class="eyebrow">Release 466 · Builds 4–6 · I.T. / Financials / Socials / Creators</p>
         <h1>External Acceptance &amp; Commercial Readiness</h1>
         <p>One fail-closed view of CAIP private-media acceptance, Stripe Development acceptance, PayPal sandbox acceptance, Social/OAuth controlled acceptance, and the remaining Production-launch blockers.</p>
-        <p class="small"><strong>Safety:</strong> this cockpit is GET-only. It does not charge, refund, authorize OAuth, revoke providers, publish content, delete R2 objects, change Production, or weaken Cloudflare Access.</p>
+        <p class="small"><strong>Safety:</strong> readiness display is GET-only. Build 6 adds explicit Development-only test/sandbox actions below; they require an authenticated admin, explicit confirmation, the Development execution switch and test/sandbox credentials. Production provider execution remains forbidden.</p>
         <div id="build4Headline" class="notice">Loading current Development evidence…</div>
       </section>
 
       <section class="card" style="margin-top:18px">
         <h2>Acceptance scorecard</h2>
         <div id="build4Scorecard" class="department-grid"></div>
+      </section>
+
+      <section id="provider-acceptance-runner" class="card" style="margin-top:18px">
+        <p class="eyebrow">Build 6 · I.T. provider acceptance runner</p>
+        <h2>Stripe test / PayPal sandbox acceptance</h2>
+        <p>Prepare deliberately marked $1 CAD Development acceptance orders, complete the provider-hosted payment manually, then derive readiness from verified webhook/reconciliation evidence instead of manually declaring a check passed.</p>
+        <div id="providerAcceptanceRunnerNotice" class="notice">Loading provider acceptance runner…</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button type="button" id="providerAcceptanceRefresh">Refresh verified evidence</button>
+          <a class="button secondary" href="/admin/webhook-events/">Open Webhook Events</a>
+          <a class="button secondary" href="/admin/it-integrations/">Open Provider Configuration</a>
+        </div>
+        <p id="providerAcceptanceActionNotice" class="small" aria-live="polite"></p>
+        <div id="providerAcceptanceRunnerMount"></div>
+        <p class="small"><strong>Replay proof:</strong> after the first verified payment webhook is processed, resend that same provider event from the Stripe test or PayPal sandbox developer tools. The application must classify it as a duplicate without creating a second financial/order effect.</p>
+        <p class="small"><strong>Refund proof:</strong> after a settled acceptance payment exists, the runner uses the existing guarded admin refund path. It still requires <code>PAYMENT_PROVIDER_MUTATIONS_ENABLED=1</code> plus the Development execution switch and test/sandbox credentials.</p>
       </section>
 
       <section class="card" style="margin-top:18px">
@@ -75,5 +91,6 @@
   </div>
   <script src="/public/js/admin-auth.js?v=466"></script>
   <script src="/public/js/admin-release466-external-commercial-readiness.js?v=466"></script>
+  <script src="/public/js/admin-provider-acceptance-runner.js?v=466"></script>
 </body>
 </html>
