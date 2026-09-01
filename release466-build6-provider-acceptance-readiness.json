@@ -1,0 +1,122 @@
+{
+  "release": 466,
+  "build": 6,
+  "title": "Provider Acceptance Runner & Development Readiness",
+  "state": "development_configured_external_acceptance_pending",
+  "base_development_sha": "f6c5e4a96e5b2a1cddfd3731aff9928d175e5b26",
+  "schema_change_required": false,
+  "migration": null,
+  "launch_state": "HOLD_EXTERNAL_ACCEPTANCE",
+  "provider_acceptance_runner": {
+    "implemented": true,
+    "development_green": true,
+    "admin_authentication_required": true,
+    "development_host_required": true,
+    "explicit_confirmation_required": true,
+    "stripe_test_credentials_required": true,
+    "paypal_sandbox_required": true,
+    "checkout_or_approval_is_not_acceptance_by_itself": true,
+    "verified_webhook_required": true,
+    "provider_reconciliation_required": true,
+    "idempotent_replay_required": true,
+    "provider_synchronized_refund_required": true
+  },
+  "development_configuration_evidence": {
+    "workflow_run": 33541430483,
+    "workflow_status": "success",
+    "artifact_id": 9813735520,
+    "artifact_sha256": "135decf3a9ed564b69846abf33d1e62de113890abc769a96fae1e16ef1eeaedb",
+    "project": "devilndove-site",
+    "environment": "preview",
+    "paypal_environment_sandbox_ready": true,
+    "payment_execution_switch_ready": true,
+    "payment_mutation_switch_ready": true,
+    "provider_secret_reference_count": 6,
+    "secret_values_emitted": false,
+    "provider_execution_performed": false,
+    "preview_d1_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+    "product_r2": "devilndove-toolshed-images-dev",
+    "caip_r2": "devilndove-caip-media-dev",
+    "production_configuration_unchanged": true
+  },
+  "exact_development_gate": {
+    "source_sha": "f6c5e4a96e5b2a1cddfd3731aff9928d175e5b26",
+    "system_gate_run": 33541430082,
+    "system_gate_status": "success",
+    "build6_proof_run": 33541430362,
+    "build6_proof_status": "success"
+  },
+  "external_acceptance": {
+    "caip_private_media": {
+      "accepted": true,
+      "qualifying_range_audits": 3
+    },
+    "stripe": {
+      "configured": true,
+      "accepted": false,
+      "required_checks": [
+        "credentials",
+        "checkout",
+        "webhook-signature",
+        "refund",
+        "reconciliation",
+        "idempotent-replay"
+      ],
+      "passed_checks": 0,
+      "successful_provider_refunds": 0
+    },
+    "paypal": {
+      "configured": true,
+      "accepted": false,
+      "required_checks": [
+        "credentials",
+        "approval-capture",
+        "webhook-verification",
+        "refund",
+        "reconciliation",
+        "idempotent-replay"
+      ],
+      "passed_checks": 0,
+      "successful_provider_refunds": 0
+    },
+    "social_oauth": {
+      "accepted": false,
+      "selected_providers": 0,
+      "selected_provider_connections": 0,
+      "selected_provider_security_events": 0,
+      "publication_enabled": false
+    },
+    "native_github_ruleset": "external_repository_setting_pending"
+  },
+  "production_promotion": {
+    "user_authorized_after_full_release466_green": true,
+    "authorized_on": "2026-09-01",
+    "authorization_is_conditional": true,
+    "promotion_allowed_while_hold_external_acceptance": false,
+    "main_must_remain_release465_until_external_acceptance_green": true
+  },
+  "next_acceptance_sequence": [
+    "Create marked CAD 1.00 Development Stripe test checkout and complete it through Stripe test mode.",
+    "Confirm Stripe signature-verified webhook reconciliation in Development D1.",
+    "Replay the same Stripe event and prove idempotent duplicate handling.",
+    "Execute an explicitly confirmed Stripe test refund through the guarded Development provider-sync path and prove provider reconciliation.",
+    "Create marked CAD 1.00 PayPal sandbox approval/capture and complete it through sandbox.",
+    "Confirm verified PayPal webhook reconciliation in Development D1.",
+    "Replay the same PayPal event and prove idempotent duplicate handling.",
+    "Execute an explicitly confirmed PayPal sandbox refund through the guarded Development provider-sync path and prove provider reconciliation.",
+    "Complete controlled Social/OAuth acceptance with at least one intended Development provider/account while publication remains disabled.",
+    "Run strict external acceptance and require EXTERNAL_ACCEPTANCE_COMPLETE before Production promotion."
+  ],
+  "safety": {
+    "production_business_mutation": false,
+    "production_schema_mutation": false,
+    "production_payment_execution": false,
+    "production_provider_execution": false,
+    "production_provider_publication": false,
+    "automatic_payment_execution": false,
+    "automatic_refund_execution": false,
+    "ci_provider_calls": false,
+    "secrets_in_source_or_evidence": false,
+    "configuration_is_not_acceptance": true
+  }
+}
