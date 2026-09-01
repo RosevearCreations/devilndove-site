@@ -1,32 +1,40 @@
 # Release 466 — Operational Resilience & Commercial Readiness
 
-Release 466 starts only after Release 465 reached the same exact Production-green tree on `dev` and `main`.
+Release 466 follows the fully Production-green Release 465 baseline. Development and Production remain intentionally separated: Release 466 is currently Development-only; Production remains Release 465 until a later deliberate promotion.
 
 ## Permanent boundaries
 
 - Production transactional/business data remain Production-owned and are never refreshed wholesale from Development.
 - Canonical D1 migrations remain append-only in `migrations/canonical/`; request-time schema DDL stays forbidden.
 - Development migration/proof precedes Production migration before dependent code.
-- A rollback may move code backward only when the current forward schema remains compatible; schema migrations are never automatically reversed.
+- Rollback may move code backward only when the forward schema remains compatible; schema migrations are never automatically reversed.
+- Business-data restore is never automatic.
 - Provider credentials/configuration never imply payment execution, publication or OAuth authorization.
 - Raw CAIP R2 deletion remains closed.
 - Cloudflare Access is never weakened for Preview acceptance.
 - Public SEO retains one-H1, canonical, metadata and structured-data gates.
 - Production promotion remains exact-green-Development-tree only.
 
-## Build 1 — Governance, Recovery & Production Reliability — IN PROGRESS
+## Build 1 — Governance, Recovery & Production Reliability — DEVELOPMENT GREEN / EXTERNAL RULESET PENDING
 
-1. Native GitHub `dev`/`main` ruleset protection and equivalent fail-closed repository policy.
-2. Production rollback readiness framework with prior-deployment and forward-schema compatibility proof.
-3. Disaster-recovery rehearsal using a Development D1 export restored into ephemeral local SQLite; raw dumps are deleted and never retained as artifacts.
-4. Read-only Development/Production structural drift detector over table/trigger identity and canonical migration authority; no business-row comparison.
-5. Production reliability/SLO snapshot over existing I.T., migration, FK, D1/R2 and runtime-incident authority.
+1. **Native GitHub `dev`/`main` ruleset protection:** in-repository policy and equivalent fail-closed controls are Development green. Native GitHub ruleset application remains an external repository setting because the connected integration can read but cannot write rulesets.
+2. **Production rollback readiness:** Development green. Readiness-only planner; requires forward-schema compatibility and prior Production deployment; performs no rollback, deploy, schema reversal or automatic data restore.
+3. **Disaster recovery rehearsal:** Development green. Development D1 export restored into ephemeral local SQLite; `582/582` application tables excluding Cloudflare-reserved `_cf_%`, integrity `ok`, `0` FK; raw export/restored DB deleted and not retained.
+4. **Development/Production structural drift:** Development green. `603/603` schema/trigger identities, no missing/extra, canonical migration/proof identities match; no Production business-row read or mutation.
+5. **Production reliability/SLO snapshot:** Development green. Current read-only score `100/100 GREEN`, D1/Product R2/CAIP R2 bindings proven, open critical `0`, open error `0`, FK `0`.
 
-**Build 1 schema expectation:** NONE. Reuse existing migration/runtime/I.T. authorities. Do not create migration `0005` unless a real schema requirement is proven.
+Technical-green evidence:
+- source SHA `96c51f4f2f7ebeb8035b2d4db4c8c3aadf2ffe2c`
+- canonical System Gate `33463654502`
+- exact Preview `https://60d84da5.devilndove-site.pages.dev`
+- Release 466 Build 1 Proof `33463654504`
+- proof artifact `9784113538`
 
-**Native GitHub governance note:** the connected GitHub integration can read rulesets but cannot create/update them. Source policy and fail-closed controls are implemented in-repo; the final native repository-setting application remains an external repository-governance action until an authorized write surface exists.
+**Build 1 schema:** NONE. Canonical migrations remain exactly `0001`–`0004`.
 
-## Build 2 — Runtime & Storefront Intelligence — PLANNED
+**Operational lesson:** D1 export is serialized after the exact-SHA canonical System Gate. Do not export Development D1 concurrently with canonical migration/deployment acceptance because export can temporarily make D1 unavailable.
+
+## Build 2 — Runtime & Storefront Intelligence — NEXT
 
 6. Synthetic storefront monitoring.
 7. Production JavaScript/runtime error capture.
@@ -50,18 +58,8 @@ Release 466 starts only after Release 465 reached the same exact Production-gree
 19. Social/OAuth connect/refresh/expiry/revoke/outage/reconnect acceptance with publication still closed.
 20. Production-launch readiness cockpit combining source, recovery, providers, SEO, performance and incident evidence.
 
-## Build closure discipline
+## Closure discipline
 
-Every bounded build must pass:
+Every build requires source gates, explicit migration decision, exact green tree to `dev`, managed Development D1 proof, exact Preview/binding/Access smoke, build-specific evidence, canonical documentation closure, and final idempotent canonical + build-specific proof on the closure SHA.
 
-1. source implementation and regression gates;
-2. canonical migration decision and policy gate;
-3. exact source-gated tree to `dev`;
-4. managed Development migration/proof (or explicit no-migration proof);
-5. D1/R2 authority proof;
-6. exact Preview deployment and Access-safe smoke;
-7. build-specific runtime/recovery/drift evidence;
-8. canonical documentation closure;
-9. final idempotent System Gate on the closure SHA.
-
-Production remains unchanged during Release 466 feature development until a later deliberate promotion is explicitly authorized.
+`main` must not move for Release 466 until a later deliberate Production promotion is explicitly authorized.
