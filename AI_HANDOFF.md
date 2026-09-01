@@ -2,9 +2,11 @@
 
 ## Current authority
 
-**Release 465 — Business Intelligence and Release Hardening — is GREEN on both Development and Production.** Builds 1–3 are closed. Release 463 remains the environment authority: one Cloudflare Pages project (`devilndove-site`), `dev` → Preview/Development and `main` → Production/Live. Release 461 is historical D1 provenance only and is never replayed because a chat, workstation, branch or deployment changes.
+**Release 466 — Operational Resilience and Commercial Readiness — Build 1 is Development green with one external repository-governance boundary pending.** Items 2–5 are fully Development green. Item 1's in-repository fail-closed branch policy is implemented and gated, but native GitHub `dev`/`main` ruleset application remains external because the connected GitHub integration can read rulesets but cannot write them.
 
-## Environment boundary
+Release 465 remains fully GREEN on Production and must not be reopened unless a current gate proves drift.
+
+## Exact environment boundary
 
 ### Development
 - branch: `dev`
@@ -15,79 +17,75 @@
 
 ### Production
 - branch: `main`
-- Pages: `devilndove-site` / Production
-- live domain: `https://devilndove.com`
+- current Production release: **465**
+- current Production source: `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`
+- live: `https://devilndove.com`
 - D1: `devilndove-prod-r462` (`f34a741b-0000-45b0-9a96-6be08754d563`)
 - Product R2: `devilndove-toolshed-images`
 - CAIP R2: `devilndove-caip-media`
 
-Production business/transactional data is Production-owned. Never refresh or overwrite it wholesale from Development.
+Production business/transactional data remain Production-owned. Release 466 has **not** been promoted to Production.
 
-## Release 465 scope
+## Release 466 Build 1 technical-green evidence
 
-### Build 1 — items 1–7 — Development green
-Storefront merchandising simulation, Product readiness/completeness, fail-closed publication readiness, SEO quality cockpit, internal-link intelligence, Product image-quality visibility and Storefront typo recovery.
+Technical source SHA: `96c51f4f2f7ebeb8035b2d4db4c8c3aadf2ffe2c`.
 
-### Build 2 — items 8–13 — Development green
-Related-product intelligence, Inventory availability, scenario material-shortage forecasting, genealogy exceptions, Creative readiness and explainable Next Safe Action. Build 2 introduced no migration and remains read-only.
+Canonical System Gate:
+- run `33463654502`
+- source job `99718937820`
+- deploy-development job `99718991277`
+- exact Preview `https://60d84da5.devilndove-site.pages.dev`
+- Development D1: `583` total non-sqlite tables including Cloudflare reserved storage / `4` canonical migrations / `4` proofs / `4` Release 465 guards / `11` Build 3 required authorities / `0` FK violations
+- `No migrations to apply!`
+- Access-safe Preview smoke passed; auth headers ZERO; Access weakened NO.
 
-### Build 3 — Financial, I.T. & Release Hardening — Development green
-14. Cost/profitability intelligence.
-15. Read-only Financial anomaly detection.
-16. Month-end readiness score.
-17. I.T. health score.
-18. Regression-evidence archive.
-19. Fail-closed performance budget.
-20. Release 465 same-tree acceptance framework.
+Release 466 supplemental proof:
+- run `33463654504`
+- source-proof job `99718937752`
+- runtime-proof job `99718977134`
+- artifact `9784113538`
+- recovery rehearsal: remote application-table count excluding `_cf_%` = `582`; ephemeral restored SQLite application tables = `582`; integrity `ok`; FK violations `0`; raw export retained NO; restored DB retained NO
+- structural drift: Development `603` identities / Production `603`; missing `[]`; extra `[]`; migration/proof identities match
+- Production reliability snapshot: **GREEN 100/100**, D1/Product R2/CAIP R2 bindings proven, open critical incidents `0`, open error incidents `0`, FK violations `0`, business rows read NO, Production mutation ZERO
 
-Builds 2 and 3 are schema-neutral. The canonical migration stream remains exactly 0001–0004.
+The recovery proof is serialized after the exact-SHA canonical System Gate because a D1 export can temporarily make D1 unavailable. Never run the recovery export concurrently with canonical migration/deployment acceptance.
 
-## Production promotion — GREEN
+## Build 1 status
 
-First Release 465 Production promotion source: `6f2bd42e99f8a92cc6f6aa3dad717fa6b9fc6677`.
+1. Native GitHub branch/ruleset protection — **Development green policy / external native ruleset application pending**.
+2. Production rollback readiness — **Development green**. Readiness only; no deploy, schema reverse, branch movement or automatic data restore.
+3. Disaster-recovery rehearsal — **Development green**.
+4. Development/Production structural drift detector — **Development green**, schema metadata only.
+5. Production reliability/SLO current snapshot — **Development green**, read-only and not a historical uptime claim.
 
-- Development System Gate immediately before promotion: `33457936115` — PASS
-- Development Preview: `https://569e651b.devilndove-site.pages.dev`
-- Production workflow: `33458134514` — PASS
-- Production job: `99702372383` — PASS
-- exact Production Pages deployment: `https://4b352cde.devilndove-site.pages.dev`
-- Production proof artifact: `9782207262`
-- Production D1: `583` tables / `4` native migrations / `4` proof rows / `4` Release 465 triggers / `11` Build 3 authority tables / `0` FK violations
-- Production business-count preservation: PASS — users `1`, products `45`, inventory rows `1041`, orders `0` before and after migration
-- live smoke: `https://devilndove.com/`, `/shop/`, `/manifest.webmanifest`, and `/api/creations` all returned `200`
-- Production D1/R2 control-plane binding proof: PASS
-- tracked `wrangler.toml` remains Development-safe; Production bindings were ephemeral
-- provider execution/publication remained closed
-
-Canonical migrations 0001–0004 are now applied and verified on **both Development and Production**. Future schema work starts with the next numbered migration and follows Development proof → Production migration proof → dependent Production code.
+Build 1 is schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
 
 ## Permanent safety rules
 
 - Exact green Development tree only may move to `main`.
 - Main-only application patches are forbidden.
-- Production transactional data is never overwritten from Development.
+- Production transactional data are never overwritten from Development.
 - Request-time schema DDL remains forbidden.
-- Native Git-triggered Cloudflare Pages deployments remain frozen; controlled workflows own deployment.
-- Stripe/PayPal/provider execution and publication remain closed unless separately authorized.
+- Schema migrations are forward-only; rollback does not automatically reverse schema.
+- Business-data restore is never automatic.
+- Native Git-triggered Cloudflare Pages deployment remains frozen.
+- Provider execution/publication remain closed unless separately authorized.
 - Raw CAIP R2 deletion remains closed.
-- Cloudflare Access is never weakened to make Preview smoke pass.
+- Cloudflare Access is never weakened for Preview smoke.
 
 ## Next bounded work
 
-Do not reopen Release 465 unless a current gate proves drift. Remaining deliberate external acceptance is Stripe Development, PayPal sandbox, CAIP private-media browser/range-streaming evidence and Social/OAuth controlled acceptance. Native GitHub branch protection remains a separate repository-governance improvement.
+After the final Build 1 closure SHA re-passes both canonical System Gate and Release 466 Build 1 Proof, proceed to **Release 466 Build 2 — Runtime & Storefront Intelligence, items 6–10**. Do not touch `main` for Release 466 until a later deliberate Production promotion is explicitly requested.
 
 ## Canonical reading order
 
 1. `development-release.json`
-2. `AI_HANDOFF.md`
-3. `PROJECT_STATUS_AND_ROADMAP.md`
-4. `SANITY_HEALTH_CHECK.md`
-5. `docs/operations/RELEASE_465_THREE_BUILD_ROADMAP.md`
-6. `release465-build1-storefront-quality.json`
-7. `release465-build2-inventory-creator-intelligence.json`
-8. `release465-build3-financial-it-hardening.json`
-9. `release465-performance-budget.json`
-10. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`
-11. `release463-environment.json`
+2. `release466-build1-governance-recovery-reliability.json`
+3. `docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md`
+4. `AI_HANDOFF.md`
+5. `PROJECT_STATUS_AND_ROADMAP.md`
+6. `SANITY_HEALTH_CHECK.md`
+7. `.github/RELEASE466_BRANCH_PROTECTION_POLICY.md`
+8. `release463-environment.json`
 
-Older Build/Release material is provenance only and must not override these authorities.
+Release 465 files remain immutable historical acceptance authorities and must continue to pass their append-safe gates.
