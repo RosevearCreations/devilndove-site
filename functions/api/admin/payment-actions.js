@@ -1,4 +1,5 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
+import { paymentExecutionStatus } from "../_lib/paymentExecution.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -13,16 +14,29 @@ function centsToAmountString(cents) {
   return (Number(cents || 0) / 100).toFixed(2);
 }
 
-async function createStripeRefund(env, payment, amountCents, reason) {
+function providerMutationEnabled(env) {
+  return normalizeText(env.PAYMENT_PROVIDER_MUTATIONS_ENABLED) === '1';
+}
+
+function localRefundStatus(providerStatus, providerSyncStatus) {
+  const value = normalizeText(providerStatus).toLowerCase();
+  if (['succeeded', 'completed'].includes(value)) return 'succeeded';
+  if (['failed', 'denied', 'declined'].includes(value)) return 'failed';
+  if (['cancelled', 'canceled'].includes(value)) return 'cancelled';
+  if (['pending', 'processing', 'submitted', 'requested'].includes(value)) return 'submitted';
+  return providerSyncStatus === 'succeeded' ? 'submitted' : 'recorded';
+}
+
+async function createStripeRefund(env, payment, amountCents, reason, requestId) {
   const secretKey = normalizeText(env.STRIPE_SECRET_KEY);
   const providerPaymentId = normalizeText(payment.provider_payment_id || payment.transaction_reference || '');
-  if (!secretKey || !providerPaymentId) {
-    return { attempted: false, provider_sync_status: 'local_only', provider_sync_note: 'Stripe secret or provider payment id missing.' };
+  if (!(secretKey.startsWith('sk_test_') || secretKey.startsWith('rk_test_')) || !providerPaymentId) {
+    return { attempted: false, provider_sync_status: 'failed', provider_sync_note: 'Stripe test secret or provider payment id is missing.' };
   }
 
   const params = new URLSearchParams();
   params.set('payment_intent', providerPaymentId);
-  if (Number(amountCents || 0) > 0) params.set('amount', String(Number(amountCents || 0)));
+  params.set('amount', String(Number(amountCents || 0)));
   if (reason) params.set('reason', 'requested_by_customer');
   params.set('metadata[local_order_id]', String(payment.order_id || ''));
   params.set('metadata[local_payment_id]', String(payment.payment_id || ''));
@@ -31,7 +45,8 @@ async function createStripeRefund(env, payment, amountCents, reason) {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${secretKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Idempotency-Key': requestId
     },
     body: params.toString()
   });
@@ -42,15 +57,14 @@ async function createStripeRefund(env, payment, amountCents, reason) {
       provider_sync_status: 'failed',
       provider_sync_note: data?.error?.message || data?.message || 'Stripe refund request failed.',
       provider_refund_id: null,
-      provider_payload: data || null
+      provider_refund_status: normalizeText(data?.status || 'failed').toLowerCase() || 'failed'
     };
   }
   return {
     attempted: true,
     provider_sync_status: 'succeeded',
-    provider_sync_note: 'Stripe refund created.',
-    provider_refund_id: data.id,
-    provider_payload: data,
+    provider_sync_note: 'Stripe test refund created.',
+    provider_refund_id: normalizeText(data.id),
     provider_refund_status: normalizeText(data.status || 'submitted').toLowerCase() || 'submitted'
   };
 }
@@ -59,8 +73,8 @@ async function getPaypalAccessToken(env) {
   const clientId = normalizeText(env.PAYPAL_CLIENT_ID);
   const secret = normalizeText(env.PAYPAL_SECRET);
   const mode = normalizeText(env.PAYPAL_ENV || 'sandbox').toLowerCase() || 'sandbox';
-  if (!clientId || !secret) return null;
-  const base = mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  if (!clientId || !secret || mode !== 'sandbox') return null;
+  const base = 'https://api-m.sandbox.paypal.com';
   const basic = btoa(`${clientId}:${secret}`);
   const response = await fetch(`${base}/v1/oauth2/token`, {
     method: 'POST',
@@ -69,19 +83,19 @@ async function getPaypalAccessToken(env) {
   });
   const data = await response.json().catch(() => null);
   if (!response.ok || !data?.access_token) {
-    throw new Error(data?.error_description || data?.error || 'Failed to obtain PayPal access token.');
+    throw new Error(data?.error_description || data?.error || 'Failed to obtain PayPal sandbox access token.');
   }
   return { base, access_token: data.access_token, mode };
 }
 
-async function createPaypalRefund(env, payment, amountCents, note) {
+async function createPaypalRefund(env, payment, amountCents, note, requestId) {
   const providerPaymentId = normalizeText(payment.provider_payment_id || '');
   if (!providerPaymentId) {
-    return { attempted: false, provider_sync_status: 'local_only', provider_sync_note: 'PayPal capture id missing.' };
+    return { attempted: false, provider_sync_status: 'failed', provider_sync_note: 'PayPal capture id is missing.' };
   }
   const auth = await getPaypalAccessToken(env).catch(() => null);
   if (!auth) {
-    return { attempted: false, provider_sync_status: 'local_only', provider_sync_note: 'PayPal credentials missing.' };
+    return { attempted: false, provider_sync_status: 'failed', provider_sync_note: 'PayPal sandbox credentials are missing or live mode is configured.' };
   }
 
   const payload = {
@@ -97,7 +111,8 @@ async function createPaypalRefund(env, payment, amountCents, note) {
     headers: {
       Authorization: `Bearer ${auth.access_token}`,
       'Content-Type': 'application/json',
-      Prefer: 'return=representation'
+      Prefer: 'return=representation',
+      'PayPal-Request-Id': requestId
     },
     body: JSON.stringify(payload)
   });
@@ -106,26 +121,97 @@ async function createPaypalRefund(env, payment, amountCents, note) {
     return {
       attempted: true,
       provider_sync_status: 'failed',
-      provider_sync_note: data?.message || data?.details?.[0]?.description || 'PayPal refund request failed.',
+      provider_sync_note: data?.message || data?.details?.[0]?.description || 'PayPal sandbox refund request failed.',
       provider_refund_id: null,
-      provider_payload: data || null
+      provider_refund_status: normalizeText(data?.status || 'failed').toLowerCase() || 'failed'
     };
   }
   return {
     attempted: true,
     provider_sync_status: 'succeeded',
-    provider_sync_note: 'PayPal refund created.',
-    provider_refund_id: data.id,
-    provider_payload: data,
+    provider_sync_note: 'PayPal sandbox refund created.',
+    provider_refund_id: normalizeText(data.id),
     provider_refund_status: normalizeText(data.status || 'submitted').toLowerCase() || 'submitted'
   };
 }
 
-async function attemptProviderRefund(env, payment, amountCents, reason, note) {
+async function attemptProviderRefund(env, payment, amountCents, reason, note, requestId) {
   const provider = normalizeText(payment.provider).toLowerCase();
-  if (provider === 'stripe') return createStripeRefund(env, payment, amountCents, reason);
-  if (provider === 'paypal') return createPaypalRefund(env, payment, amountCents, note || reason);
+  if (provider === 'stripe') return createStripeRefund(env, payment, amountCents, reason, requestId);
+  if (provider === 'paypal') return createPaypalRefund(env, payment, amountCents, note || reason, requestId);
   return { attempted: false, provider_sync_status: 'local_only', provider_sync_note: 'Provider refund sync is not implemented for this provider.' };
+}
+
+async function getOrCreateProviderRefundIntent(db, payment, refundAmount, currency, reason, note, userId) {
+  const provider = normalizeText(payment.provider).toLowerCase();
+  const existing = await db.prepare(`
+    SELECT rowid AS refund_rowid
+    FROM payment_refunds
+    WHERE payment_id = ?
+      AND LOWER(COALESCE(provider,'')) = ?
+      AND amount_cents = ?
+      AND provider_refund_id IS NULL
+      AND LOWER(COALESCE(provider_sync_status,'')) IN ('pending','failed')
+      AND LOWER(COALESCE(refund_status,'')) IN ('requested','failed')
+    ORDER BY rowid DESC
+    LIMIT 1
+  `).bind(Number(payment.payment_id || 0), provider, refundAmount).first();
+
+  if (existing?.refund_rowid) {
+    await db.prepare(`
+      UPDATE payment_refunds
+      SET refund_status='requested', provider_sync_status='pending',
+          provider_sync_note='Provider refund execution pending.', reason=?, note=?, updated_at=CURRENT_TIMESTAMP
+      WHERE rowid=?
+    `).bind(reason || null, note || null, Number(existing.refund_rowid)).run();
+    return Number(existing.refund_rowid);
+  }
+
+  const inserted = await db.prepare(`
+    INSERT INTO payment_refunds (
+      payment_id, order_id, provider, provider_refund_id, amount_cents, currency, refund_status,
+      reason, note, provider_sync_status, provider_sync_note, provider_sync_at,
+      created_by_user_id, created_at, updated_at
+    ) VALUES (?, ?, ?, NULL, ?, ?, 'requested', ?, ?, 'pending', 'Provider refund execution pending.', NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `).bind(
+    Number(payment.payment_id || 0),
+    Number(payment.order_id || 0),
+    provider || 'other',
+    refundAmount,
+    currency,
+    reason || null,
+    note || null,
+    userId || null
+  ).run();
+  return Number(inserted?.meta?.last_row_id || 0);
+}
+
+async function markProviderRefundIntent(db, refundRowId, providerSync) {
+  const syncStatus = providerSync.provider_sync_status === 'succeeded' ? 'succeeded' : 'failed';
+  const refundStatus = localRefundStatus(providerSync.provider_refund_status, syncStatus);
+  await db.prepare(`
+    UPDATE payment_refunds
+    SET provider_refund_id=?, refund_status=?, provider_sync_status=?, provider_sync_note=?,
+        provider_sync_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP
+    WHERE rowid=?
+  `).bind(
+    providerSync.provider_refund_id || null,
+    refundStatus,
+    syncStatus,
+    providerSync.provider_sync_note || null,
+    Number(refundRowId || 0)
+  ).run();
+}
+
+async function totalRecordedRefunds(db, paymentId) {
+  const row = await db.prepare(`
+    SELECT COALESCE(SUM(amount_cents),0) AS total_cents
+    FROM payment_refunds
+    WHERE payment_id=?
+      AND LOWER(COALESCE(refund_status,'')) IN ('recorded','submitted','succeeded')
+      AND LOWER(COALESCE(provider_sync_status,'')) <> 'failed'
+  `).bind(Number(paymentId || 0)).first();
+  return Math.max(0, Number(row?.total_cents || 0));
 }
 
 async function queueReceipt(db, kind, orderId, paymentId, destination, payload) {
@@ -175,61 +261,118 @@ export async function onRequestPost(context) {
     const refundAmount = Math.max(0, Number(body.amount_cents || 0));
     const reason = normalizeText(body.reason);
     const note = normalizeText(body.note);
-    const syncProvider = body.sync_provider == null ? 1 : (Number(body.sync_provider) === 1 ? 1 : 0);
+    const provider = normalizeText(payment.provider).toLowerCase();
+    const remoteProvider = ['stripe', 'paypal'].includes(provider);
+    const syncProvider = Number(body.sync_provider || 0) === 1;
+    const providerConfirmed = body.provider_sync_confirmed === true;
+    const currency = normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase();
+
     if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
       return json({ ok: false, error: 'Refund amount must be greater than zero.' }, 400);
     }
+    if (refundAmount > Number(payment.amount_cents || 0)) {
+      return json({ ok: false, error: 'Refund amount cannot exceed the original payment amount.' }, 409);
+    }
 
     let providerSync = { attempted: false, provider_sync_status: 'local_only', provider_sync_note: 'Refund recorded locally only.' };
-    if (syncProvider) {
-      providerSync = await attemptProviderRefund(env, payment, refundAmount, reason, note).catch((error) => ({
+    let refundRowId = 0;
+    let execution = null;
+
+    if (syncProvider && remoteProvider) {
+      execution = paymentExecutionStatus(request.url, env, provider);
+      const legacyGateOpen = providerMutationEnabled(env) && providerConfirmed;
+      if (!legacyGateOpen || !execution.execution_authorized) {
+        return json({
+          ok: false,
+          code: !legacyGateOpen ? 'provider_mutation_gate_closed' : execution.code,
+          error: !legacyGateOpen
+            ? 'Remote provider refund requires PAYMENT_PROVIDER_MUTATIONS_ENABLED=1 and explicit provider_sync_confirmed=true.'
+            : 'Remote provider refund is closed. Development test/sandbox execution requires the explicit Release 466 payment execution switch and test-only credentials.',
+          action: 'refund',
+          payment_id: paymentId,
+          provider,
+          provider_mutation_enabled: providerMutationEnabled(env),
+          provider_sync_confirmed: providerConfirmed,
+          development_host: Boolean(execution.development_host),
+          operator_switch_set: Boolean(execution.operator_switch_set),
+          test_mode: Boolean(execution.test_mode),
+          live_credential_detected: Boolean(execution.live_credential_detected),
+          execution_authorized: false,
+          local_payment_mutation_performed: false,
+          provider_network_call_performed: false
+        }, !legacyGateOpen ? 409 : 423);
+      }
+
+      refundRowId = await getOrCreateProviderRefundIntent(db, payment, refundAmount, currency, reason, note, adminUser.user_id);
+      if (!refundRowId) return json({ ok: false, error: 'Provider refund intent could not be recorded.' }, 500);
+      const requestId = `dnd-r-${paymentId}-${refundRowId}`.slice(0, 38);
+
+      providerSync = await attemptProviderRefund(env, payment, refundAmount, reason, note, requestId).catch((error) => ({
         attempted: true,
         provider_sync_status: 'failed',
         provider_sync_note: error?.message || 'Provider refund sync failed.'
       }));
+      await markProviderRefundIntent(db, refundRowId, providerSync).catch(() => null);
+
+      if (providerSync.provider_sync_status !== 'succeeded' || !providerSync.provider_refund_id) {
+        await captureRuntimeIncident(env, request, {
+          incident_scope: 'admin_payment_actions',
+          incident_code: 'provider_refund_sync_failed',
+          severity: 'warning',
+          message: providerSync.provider_sync_note || 'Provider refund sync failed.',
+          related_user_id: adminUser.user_id,
+          details: { payment_id: paymentId, order_id: Number(payment.order_id || 0), provider }
+        });
+        return json({
+          ok: false,
+          code: 'provider_refund_sync_failed',
+          error: providerSync.provider_sync_note || 'Provider refund sync failed. Local payment and order status were not changed.',
+          action: 'refund',
+          payment_id: paymentId,
+          order_id: Number(payment.order_id || 0),
+          provider,
+          provider_sync: providerSync,
+          local_payment_status_changed: false,
+          local_order_status_changed: false,
+          provider_network_call_performed: Boolean(providerSync.attempted)
+        }, 502);
+      }
+    } else {
+      const inserted = await db.prepare(`
+        INSERT INTO payment_refunds (
+          payment_id, order_id, provider, provider_refund_id, amount_cents, currency, refund_status,
+          reason, note, provider_sync_status, provider_sync_note, provider_sync_at,
+          created_by_user_id, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, 'recorded', ?, ?, 'local_only', 'Refund explicitly recorded locally only.', NULL, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).bind(
+        paymentId,
+        Number(payment.order_id || 0),
+        payment.provider || 'other',
+        normalizeText(body.provider_refund_id) || null,
+        refundAmount,
+        currency,
+        reason || null,
+        note || null,
+        adminUser.user_id
+      ).run();
+      refundRowId = Number(inserted?.meta?.last_row_id || 0);
     }
 
-    const status = refundAmount >= Number(payment.amount_cents || 0) ? 'refunded' : 'partially_refunded';
-    const refundStatus = providerSync.provider_refund_status || (providerSync.provider_sync_status === 'succeeded' ? 'submitted' : 'recorded');
-
-    const refundInsert = await db.prepare(`
-      INSERT INTO payment_refunds (
-        payment_id, order_id, provider, provider_refund_id, amount_cents, currency, refund_status,
-        reason, note, provider_sync_status, provider_sync_note, provider_sync_at,
-        created_by_user_id, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).bind(
-      paymentId,
-      Number(payment.order_id || 0),
-      payment.provider || 'other',
-      normalizeText(body.provider_refund_id) || providerSync.provider_refund_id || null,
-      refundAmount,
-      normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
-      refundStatus,
-      reason || null,
-      note || null,
-      providerSync.provider_sync_status || 'local_only',
-      providerSync.provider_sync_note || null,
-      providerSync.attempted ? new Date().toISOString() : null,
-      adminUser.user_id
-    ).run();
+    const totalRefunded = await totalRecordedRefunds(db, paymentId);
+    const status = totalRefunded >= Number(payment.amount_cents || 0) ? 'refunded' : 'partially_refunded';
 
     try {
       await db.prepare(`
         UPDATE payments
-        SET payment_status = ?,
-            updated_at = CURRENT_TIMESTAMP,
+        SET payment_status = ?, updated_at = CURRENT_TIMESTAMP,
             notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
         WHERE payment_id = ?
       `).bind(status, `Refund logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
     } catch (error) {
       warnings.push('Refund recorded, but the payment row note/status was not fully refreshed.');
       await captureRuntimeIncident(env, request, {
-        incident_scope: 'admin_payment_actions',
-        incident_code: 'refund_payment_update_failed',
-        severity: 'warning',
-        message: error?.message || 'Refund recorded but payment update failed.',
-        related_user_id: adminUser.user_id,
+        incident_scope: 'admin_payment_actions', incident_code: 'refund_payment_update_failed', severity: 'warning',
+        message: error?.message || 'Refund recorded but payment update failed.', related_user_id: adminUser.user_id,
         details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
       });
     }
@@ -237,90 +380,55 @@ export async function onRequestPost(context) {
     try {
       await db.prepare(`
         UPDATE orders
-        SET payment_status = ?,
-            order_status = CASE WHEN ? = 'refunded' THEN 'refunded' ELSE order_status END,
+        SET payment_status = ?, order_status = CASE WHEN ? = 'refunded' THEN 'refunded' ELSE order_status END,
             updated_at = CURRENT_TIMESTAMP
         WHERE order_id = ?
       `).bind(status, status, Number(payment.order_id || 0)).run();
     } catch (error) {
       warnings.push('Refund recorded, but the parent order status did not refresh cleanly.');
       await captureRuntimeIncident(env, request, {
-        incident_scope: 'admin_payment_actions',
-        incident_code: 'refund_order_update_failed',
-        severity: 'warning',
-        message: error?.message || 'Refund recorded but order update failed.',
-        related_user_id: adminUser.user_id,
+        incident_scope: 'admin_payment_actions', incident_code: 'refund_order_update_failed', severity: 'warning',
+        message: error?.message || 'Refund recorded but order update failed.', related_user_id: adminUser.user_id,
         details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
       });
     }
 
     try {
-      await addHistory(
-        db,
-        Number(payment.order_id || 0),
-        order.order_status || null,
+      await addHistory(db, Number(payment.order_id || 0), order.order_status || null,
         status === 'refunded' ? 'refunded' : order.order_status || null,
-        note || `Refund recorded for payment ${paymentId}.`
-      );
+        note || `Refund recorded for payment ${paymentId}.`);
     } catch (error) {
       warnings.push('Refund recorded, but order history logging failed.');
-      await captureRuntimeIncident(env, request, {
-        incident_scope: 'admin_payment_actions',
-        incident_code: 'refund_history_failed',
-        severity: 'warning',
-        message: error?.message || 'Refund recorded but history logging failed.',
-        related_user_id: adminUser.user_id,
-        details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
-      });
     }
 
     try {
       await queueReceipt(db, 'refund_receipt', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
-        order_number: order.order_number || '',
-        amount_cents: refundAmount,
-        currency: normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
-        customer_name: normalizeText(order.customer_name),
-        reason,
-        note,
-        provider: payment.provider || 'other',
+        order_number: order.order_number || '', amount_cents: refundAmount, currency,
+        customer_name: normalizeText(order.customer_name), reason, note, provider: payment.provider || 'other',
         provider_sync_status: providerSync.provider_sync_status || 'local_only'
       });
     } catch (error) {
       warnings.push('Refund recorded, but receipt queueing failed.');
-      await captureRuntimeIncident(env, request, {
-        incident_scope: 'admin_payment_actions',
-        incident_code: 'refund_receipt_queue_failed',
-        severity: 'warning',
-        message: error?.message || 'Refund recorded but receipt queueing failed.',
-        related_user_id: adminUser.user_id,
-        details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
-      });
     }
 
     await auditAdminAction(env, request, adminUser, {
-      action_type: 'payment_refund',
-      target_type: 'payment',
-      target_id: paymentId,
+      action_type: 'payment_refund', target_type: 'payment', target_id: paymentId,
       target_key: payment.provider_payment_id || payment.provider_order_id || String(paymentId),
       details: {
-        refund_id: Number(refundInsert?.meta?.last_row_id || 0),
-        refund_amount_cents: refundAmount,
-        provider: payment.provider || 'other',
+        refund_rowid: refundRowId, refund_amount_cents: refundAmount, provider: payment.provider || 'other',
         provider_sync_status: providerSync.provider_sync_status || 'local_only',
-        provider_sync_note: providerSync.provider_sync_note || null
+        provider_sync_note: providerSync.provider_sync_note || null,
+        provider_execution_authorized: Boolean(execution?.execution_authorized)
       }
     });
 
     return json({
       ok: true,
       message: warnings.length ? 'Refund recorded with warnings.' : 'Refund recorded.',
-      warning: warnings[0] || '',
-      warnings,
-      action,
-      payment_id: paymentId,
-      order_id: Number(payment.order_id || 0),
-      payment_status: status,
+      warning: warnings[0] || '', warnings, action, payment_id: paymentId,
+      order_id: Number(payment.order_id || 0), payment_status: status,
       provider_sync: providerSync,
+      provider_execution_authorized: Boolean(execution?.execution_authorized),
       fallback_state: warnings.length ? 'refund_recorded_with_partial_followup' : null
     });
   }
@@ -352,104 +460,53 @@ export async function onRequestPost(context) {
 
   try {
     await db.prepare(`
-      UPDATE payments
-      SET updated_at = CURRENT_TIMESTAMP,
-          notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
+      UPDATE payments SET updated_at = CURRENT_TIMESTAMP,
+        notes = TRIM(COALESCE(notes,'') || CASE WHEN COALESCE(notes,'') = '' THEN '' ELSE ' | ' END || ?)
       WHERE payment_id = ?
     `).bind(`Dispute logged by admin${reason ? `: ${reason}` : ''}`, paymentId).run();
   } catch (error) {
     warnings.push('Dispute recorded, but the payment row note was not fully refreshed.');
     await captureRuntimeIncident(env, request, {
-      incident_scope: 'admin_payment_actions',
-      incident_code: 'dispute_payment_update_failed',
-      severity: 'warning',
-      message: error?.message || 'Dispute recorded but payment update failed.',
-      related_user_id: adminUser.user_id,
+      incident_scope: 'admin_payment_actions', incident_code: 'dispute_payment_update_failed', severity: 'warning',
+      message: error?.message || 'Dispute recorded but payment update failed.', related_user_id: adminUser.user_id,
       details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
     });
   }
 
   try {
-    await db.prepare(`
-      UPDATE orders
-      SET updated_at = CURRENT_TIMESTAMP
-      WHERE order_id = ?
-    `).bind(Number(payment.order_id || 0)).run();
+    await db.prepare(`UPDATE orders SET updated_at = CURRENT_TIMESTAMP WHERE order_id = ?`).bind(Number(payment.order_id || 0)).run();
   } catch (error) {
     warnings.push('Dispute recorded, but the parent order update stamp failed.');
-    await captureRuntimeIncident(env, request, {
-      incident_scope: 'admin_payment_actions',
-      incident_code: 'dispute_order_update_failed',
-      severity: 'warning',
-      message: error?.message || 'Dispute recorded but order update failed.',
-      related_user_id: adminUser.user_id,
-      details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
-    });
   }
 
   try {
-    await addHistory(
-      db,
-      Number(payment.order_id || 0),
-      order.order_status || null,
-      order.order_status || null,
-      note || `Dispute logged for payment ${paymentId}.`
-    );
+    await addHistory(db, Number(payment.order_id || 0), order.order_status || null, order.order_status || null,
+      note || `Dispute logged for payment ${paymentId}.`);
   } catch (error) {
     warnings.push('Dispute recorded, but order history logging failed.');
-    await captureRuntimeIncident(env, request, {
-      incident_scope: 'admin_payment_actions',
-      incident_code: 'dispute_history_failed',
-      severity: 'warning',
-      message: error?.message || 'Dispute recorded but history logging failed.',
-      related_user_id: adminUser.user_id,
-      details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
-    });
   }
 
   try {
     await queueReceipt(db, 'dispute_notice', Number(payment.order_id || 0), paymentId, normalizeText(order.customer_email), {
-      order_number: order.order_number || '',
-      amount_cents: disputeAmount,
+      order_number: order.order_number || '', amount_cents: disputeAmount,
       currency: normalizeText(body.currency || payment.currency || order.currency || 'CAD').toUpperCase(),
-      customer_name: normalizeText(order.customer_name),
-      reason,
-      note,
-      provider: payment.provider || 'other'
+      customer_name: normalizeText(order.customer_name), reason, note, provider: payment.provider || 'other'
     });
   } catch (error) {
     warnings.push('Dispute recorded, but receipt queueing failed.');
-    await captureRuntimeIncident(env, request, {
-      incident_scope: 'admin_payment_actions',
-      incident_code: 'dispute_receipt_queue_failed',
-      severity: 'warning',
-      message: error?.message || 'Dispute recorded but receipt queueing failed.',
-      related_user_id: adminUser.user_id,
-      details: { payment_id: paymentId, order_id: Number(payment.order_id || 0) }
-    });
   }
 
   await auditAdminAction(env, request, adminUser, {
-    action_type: 'payment_dispute',
-    target_type: 'payment',
-    target_id: paymentId,
+    action_type: 'payment_dispute', target_type: 'payment', target_id: paymentId,
     target_key: payment.provider_payment_id || payment.provider_order_id || String(paymentId),
-    details: {
-      dispute_id: Number(insert?.meta?.last_row_id || 0),
-      dispute_status,
-      reason
-    }
+    details: { dispute_id: Number(insert?.meta?.last_row_id || 0), dispute_status: disputeStatus, reason }
   });
 
   return json({
     ok: true,
     message: warnings.length ? 'Dispute recorded with warnings.' : 'Dispute recorded locally.',
-    warning: warnings[0] || '',
-    warnings,
-    action,
-    payment_id: paymentId,
-    order_id: Number(payment.order_id || 0),
-    dispute_status: disputeStatus || 'open',
+    warning: warnings[0] || '', warnings, action, payment_id: paymentId,
+    order_id: Number(payment.order_id || 0), dispute_status: disputeStatus || 'open',
     fallback_state: warnings.length ? 'dispute_recorded_with_partial_followup' : null
   });
 }
