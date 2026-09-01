@@ -31,6 +31,8 @@ jobs:
         run: |
           node --check functions/api/admin/release466-external-commercial-readiness.js
           node --check functions/api/admin/release-external-commercial-readiness.js
+          node --check functions/api/admin/payment-actions.js
+          node --check functions/api/admin/contracts/operations-payment-action-write.js
           node --check public/js/admin-release466-external-commercial-readiness.js
       - name: Compile Build 4 Python proof tools
         run: python -m py_compile scripts/release466_build4_gate.py scripts/release466_build4_runtime_proof.py
@@ -53,6 +55,7 @@ jobs:
           echo 'Build 4 D1 migration: NONE'
           echo 'CI Development D1 operation: SELECT ONLY'
           echo 'Automated Stripe/PayPal execution: ZERO'
+          echo 'Automated provider refund execution: ZERO'
           echo 'Automated OAuth connect/revoke: ZERO'
           echo 'Provider publication: ZERO'
           echo 'Production mutation: ZERO'
@@ -111,14 +114,17 @@ jobs:
           (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='it_provider_readiness_checks') it_provider_readiness_checks_table,
           (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='it_provider_readiness_events') it_provider_readiness_events_table,
           (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='provider_setup_authorities') provider_setup_authorities_table,
+          (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='payment_refunds') payment_refunds_table,
           (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='creative_asset_access_grants') creative_asset_access_grants_table,
           (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='creative_asset_access_audit') creative_asset_access_audit_table,
           (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='oauth_provider_connections') oauth_provider_connections_table,
           (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='oauth_security_events') oauth_security_events_table,
-          (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='stripe' AND environment='development' AND required_for_activation=1 AND check_key IN ('credentials','checkout','webhook-signature','reconciliation','idempotent-replay')) stripe_required_checks,
-          (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='stripe' AND environment='development' AND required_for_activation=1 AND check_state='passed' AND check_key IN ('credentials','checkout','webhook-signature','reconciliation','idempotent-replay')) stripe_passed_checks,
-          (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='paypal' AND environment='development' AND required_for_activation=1 AND check_key IN ('credentials','approval-capture','webhook-verification','reconciliation','idempotent-replay')) paypal_required_checks,
-          (SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='paypal' AND environment='development' AND required_for_activation=1 AND check_state='passed' AND check_key IN ('credentials','approval-capture','webhook-verification','reconciliation','idempotent-replay')) paypal_passed_checks,
+          ((SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='stripe' AND environment='development' AND required_for_activation=1 AND check_key IN ('credentials','checkout','webhook-signature','reconciliation','idempotent-replay')) + 1) stripe_required_checks,
+          ((SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='stripe' AND environment='development' AND required_for_activation=1 AND check_state='passed' AND check_key IN ('credentials','checkout','webhook-signature','reconciliation','idempotent-replay')) + CASE WHEN EXISTS(SELECT 1 FROM payment_refunds WHERE LOWER(COALESCE(provider,''))='stripe' AND LOWER(COALESCE(provider_sync_status,''))='succeeded' AND provider_refund_id IS NOT NULL AND TRIM(provider_refund_id)<>'' AND LOWER(COALESCE(refund_status,'')) IN ('submitted','succeeded')) THEN 1 ELSE 0 END) stripe_passed_checks,
+          (SELECT COUNT(*) FROM payment_refunds WHERE LOWER(COALESCE(provider,''))='stripe' AND LOWER(COALESCE(provider_sync_status,''))='succeeded' AND provider_refund_id IS NOT NULL AND TRIM(provider_refund_id)<>'' AND LOWER(COALESCE(refund_status,'')) IN ('submitted','succeeded')) stripe_successful_provider_refunds,
+          ((SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='paypal' AND environment='development' AND required_for_activation=1 AND check_key IN ('credentials','approval-capture','webhook-verification','reconciliation','idempotent-replay')) + 1) paypal_required_checks,
+          ((SELECT COUNT(*) FROM it_provider_readiness_checks WHERE provider_key='paypal' AND environment='development' AND required_for_activation=1 AND check_state='passed' AND check_key IN ('credentials','approval-capture','webhook-verification','reconciliation','idempotent-replay')) + CASE WHEN EXISTS(SELECT 1 FROM payment_refunds WHERE LOWER(COALESCE(provider,''))='paypal' AND LOWER(COALESCE(provider_sync_status,''))='succeeded' AND provider_refund_id IS NOT NULL AND TRIM(provider_refund_id)<>'' AND LOWER(COALESCE(refund_status,'')) IN ('submitted','succeeded')) THEN 1 ELSE 0 END) paypal_passed_checks,
+          (SELECT COUNT(*) FROM payment_refunds WHERE LOWER(COALESCE(provider,''))='paypal' AND LOWER(COALESCE(provider_sync_status,''))='succeeded' AND provider_refund_id IS NOT NULL AND TRIM(provider_refund_id)<>'' AND LOWER(COALESCE(refund_status,'')) IN ('submitted','succeeded')) paypal_successful_provider_refunds,
           (SELECT COUNT(*) FROM creative_asset_access_audit WHERE event_type='review_proxy_served' AND outcome='served' AND json_extract(details_json,'$.ranged_streaming')=1 AND json_extract(details_json,'$.no_copy')=1 AND json_extract(details_json,'$.no_cache')=1) caip_range_acceptance_rows,
           (SELECT COUNT(*) FROM provider_setup_authorities WHERE enabled=1 AND provider_key IN ('etsy','pinterest','meta','tiktok','youtube','x')) selected_social_providers,
           (SELECT COUNT(*) FROM oauth_provider_connections c JOIN provider_setup_authorities p ON p.provider_key=c.provider_key WHERE p.enabled=1 AND p.provider_key IN ('etsy','pinterest','meta','tiktok','youtube','x') AND c.connection_status IN ('connected','refresh_required') AND c.remote_subject_id IS NOT NULL AND trim(c.remote_subject_id)<>'') selected_social_connections,
@@ -139,6 +145,7 @@ jobs:
           echo 'Production business rows read: ZERO'
           echo 'Production mutation: ZERO'
           echo 'Stripe/PayPal execution from CI: ZERO'
+          echo 'Provider refund execution from CI: ZERO'
           echo 'OAuth remote execution from CI: ZERO'
           echo 'Provider publication: ZERO'
           echo 'HOLD is expected until deliberate real external acceptance exists'
