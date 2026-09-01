@@ -5,7 +5,6 @@ const RELEASE = 466;
 const BUILD = 4;
 const STRIPE_CHECKS = ['credentials', 'checkout', 'webhook-signature', 'reconciliation', 'idempotent-replay'];
 const PAYPAL_CHECKS = ['credentials', 'approval-capture', 'webhook-verification', 'reconciliation', 'idempotent-replay'];
-const SOCIAL_PROVIDER_KEYS = ['etsy', 'pinterest', 'meta', 'tiktok', 'youtube', 'x'];
 const LIVE_SEO_CONFLICTS = ['/cart/', '/checkout/', '/checkout/confirmation/', '/supplies/health/', '/tools/health/', '/toolshed/duplicates/'];
 
 const rows = (value) => Array.isArray(value?.results) ? value.results : [];
@@ -177,7 +176,6 @@ function launchBlockers({ caip, stripe, paypal, social }) {
   if (!paypal.accepted) blockers.push({ code: 'paypal_sandbox_acceptance_pending', item: 18, owner: 'Financials / I.T.' });
   if (!social.accepted) blockers.push({ code: 'social_oauth_controlled_acceptance_pending', item: 19, owner: 'Socials / I.T.' });
   blockers.push({ code: 'native_github_ruleset_external_pending', item: 20, owner: 'I.T. / GitHub repository settings' });
-  for (const path of LIVE_SEO_CONFLICTS) blockers.push({ code: 'production_sitemap_noindex_conflict', item: 20, owner: 'Storefront / SEO', path });
   return blockers;
 }
 
@@ -217,7 +215,9 @@ export async function onRequestGet({ request, env }) {
         state: promotionReady ? 'ready_for_separate_promotion_review' : 'hold',
         blocker_count: blockers.length,
         blockers,
-        live_seo_conflicts: LIVE_SEO_CONFLICTS,
+        current_live_production_seo_findings: LIVE_SEO_CONFLICTS,
+        release466_seo_source_fix_staged: true,
+        release466_seo_source_fix: 'The six noindex utility/health routes are removed from sitemap.xml in Release 466 Development source. Release 465 Production remains unchanged until deliberate promotion.',
         native_github_ruleset_state: 'external_repository_setting_pending',
       },
     },
