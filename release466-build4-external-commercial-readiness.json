@@ -1,0 +1,52 @@
+{
+  "release": 466,
+  "build": 4,
+  "title": "External Acceptance & Commercial Readiness",
+  "state": "implementation_in_progress",
+  "base_development_sha": "030ec92924762adaa4c3f72001a3dd06bbe8c887",
+  "schema_change_required": false,
+  "migration": null,
+  "items": [
+    {"id": 16, "name": "CAIP private-media browser/range-streaming acceptance", "status": "implementation_in_progress"},
+    {"id": 17, "name": "Stripe Development acceptance", "status": "implementation_in_progress"},
+    {"id": 18, "name": "PayPal sandbox acceptance", "status": "implementation_in_progress"},
+    {"id": 19, "name": "Social/OAuth controlled acceptance", "status": "implementation_in_progress"},
+    {"id": 20, "name": "Production-launch readiness cockpit", "status": "implementation_in_progress"}
+  ],
+  "authority_reuse": {
+    "caip_private_media": ["creative_asset_access_grants", "creative_asset_access_audit", "creative-asset-review.js"],
+    "stripe": ["it_provider_readiness_checks", "it_provider_readiness_events", "payment-providers.js", "paymentExecution.js"],
+    "paypal": ["it_provider_readiness_checks", "it_provider_readiness_events", "payment-providers.js", "paymentExecution.js"],
+    "social_oauth": ["provider_setup_authorities", "it_provider_readiness_checks", "oauth_provider_connections", "oauth_security_events", "oauth-start.js", "oauth-connections.js"],
+    "launch_readiness": ["Build 1 recovery/drift/reliability evidence", "Build 2 runtime/storefront/SEO evidence", "Build 3 business-intelligence evidence", "Build 4 external acceptance evidence"]
+  },
+  "acceptance_policy": {
+    "configuration_is_not_acceptance": true,
+    "provider_credentials_are_never_evidence_by_themselves": true,
+    "sandbox_or_test_mode_only_before_production_promotion": true,
+    "stripe_required_checks": ["credentials", "checkout", "webhook-signature", "reconciliation", "idempotent-replay"],
+    "paypal_required_checks": ["credentials", "approval-capture", "webhook-verification", "reconciliation", "idempotent-replay"],
+    "caip_requires_range_served_evidence": true,
+    "social_oauth_requires_intended_account_verification": true,
+    "social_oauth_publication_remains_disabled": true,
+    "production_promotion_is_separate_and_deliberate": true,
+    "pending_external_evidence_must_render_as_hold_not_pass": true
+  },
+  "safety": {
+    "production_business_mutation": false,
+    "production_schema_mutation": false,
+    "production_payment_execution": false,
+    "production_provider_execution": false,
+    "production_provider_publication": false,
+    "automatic_provider_authorization": false,
+    "automatic_payment_execution": false,
+    "automatic_refund_execution": false,
+    "automatic_oauth_connect": false,
+    "automatic_oauth_revoke": false,
+    "raw_r2_delete": false,
+    "request_time_schema_ddl": false,
+    "secrets_in_source_or_evidence": false,
+    "preview_access_must_remain_enforced": true,
+    "main_must_remain_release465_until_deliberate_promotion": true
+  }
+}
