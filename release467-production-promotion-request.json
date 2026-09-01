@@ -1,0 +1,21 @@
+{
+  "release": 467,
+  "intent": "deliberate_cloudflare_production_promotion",
+  "promotion_policy": "exact_green_development_tree_only",
+  "previous_development_green_sha": "77f6cd48b7bdf82cebdb0522c7fc1653fadd92c2",
+  "schema_change_required": false,
+  "production_business_data_overwrite": false,
+  "provider_execution": "closed",
+  "provider_publication": "closed",
+  "provider_live_authorization": "closed",
+  "external_acceptance": "pending_and_not_reclassified_by_deployment",
+  "production_target": {
+    "pages_project": "devilndove-site",
+    "branch": "main",
+    "live_domain": "https://devilndove.com",
+    "d1_name": "devilndove-prod-r462",
+    "d1_id": "f34a741b-0000-45b0-9a96-6be08754d563",
+    "product_r2": "devilndove-toolshed-images",
+    "caip_r2": "devilndove-caip-media"
+  }
+}
