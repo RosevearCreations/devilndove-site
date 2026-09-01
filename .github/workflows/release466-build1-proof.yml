@@ -1,0 +1,153 @@
+name: Release 466 Build 1 Proof
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Release 466 Build 1 source contracts
+        run: python scripts/release466_build1_gate.py
+      - name: Validate Release 466 JavaScript syntax
+        run: |
+          node --check functions/api/_lib/release466Reliability.js
+          node --check functions/api/admin/release466-reliability.js
+          node --check public/js/admin-release466-reliability.js
+      - name: Compile Release 466 Python proof tools
+        run: |
+          python -m py_compile \
+            scripts/release466_build1_gate.py \
+            scripts/release466_rollback_plan.py \
+            scripts/release466_recovery_rehearsal.py \
+            scripts/release466_drift_detector.py \
+            scripts/release466_production_health_proof.py
+      - name: Preserve inherited source quality
+        run: |
+          python scripts/migration_policy_gate.py
+          python scripts/runtime_schema_mutation_gate.py
+          python scripts/repository_hygiene_gate.py
+          git diff --check origin/dev...HEAD
+      - name: Build 1 safety statement
+        run: |
+          echo 'Release 466 Build 1: Governance, Recovery & Production Reliability'
+          echo 'Build 1 D1 migration: NONE / canonical 0001-0004 unchanged'
+          echo 'Native GitHub ruleset: external repository setting pending'
+          echo 'Rollback workflow: READINESS ONLY / no deploy / no schema reversal / no data restore'
+          echo 'Recovery rehearsal: Development D1 export -> ephemeral local SQLite'
+          echo 'Drift detector: Development/Production schema metadata only'
+          echo 'Production reliability: READ-ONLY current snapshot, not historical uptime'
+          echo 'Provider execution/publication: CLOSED'
+          echo 'Production business mutation: ZERO'
+
+  runtime-proof:
+    needs: source-proof
+    if: github.event_name == 'push' && github.ref_name == 'dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      DEV_D1_NAME: devilndove-dev
+      PROD_D1_NAME: devilndove-prod-r462
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Ensure local SQLite restore tooling
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y sqlite3
+      - name: Rehearse Development D1 export and ephemeral restore
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/release466-development-export.sql /tmp/release466-recovered.db
+          npx --yes wrangler@4 d1 export "${DEV_D1_NAME}" --remote --output=/tmp/release466-development-export.sql
+          sqlite3 /tmp/release466-recovered.db < /tmp/release466-development-export.sql
+          python scripts/release466_recovery_rehearsal.py \
+            --database /tmp/release466-recovered.db \
+            --export-file /tmp/release466-development-export.sql \
+            --source-sha "${GITHUB_SHA}" \
+            --output /tmp/release466-recovery-rehearsal.json
+          rm -f /tmp/release466-development-export.sql /tmp/release466-recovered.db
+          test ! -e /tmp/release466-development-export.sql
+          test ! -e /tmp/release466-recovered.db
+      - name: Compare Development and Production structural authority read-only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEV_SQL="SELECT 'schema' kind,type,name FROM sqlite_master WHERE type IN ('table','trigger') AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' UNION ALL SELECT 'migration' kind,'migration' type,name FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') UNION ALL SELECT 'proof' kind,'proof' type,migration_name name FROM app_schema_migration_proofs WHERE environment='development' AND migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') ORDER BY kind,type,name;"
+          PROD_SQL="SELECT 'schema' kind,type,name FROM sqlite_master WHERE type IN ('table','trigger') AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' UNION ALL SELECT 'migration' kind,'migration' type,name FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') UNION ALL SELECT 'proof' kind,'proof' type,migration_name name FROM app_schema_migration_proofs WHERE environment='production' AND migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') ORDER BY kind,type,name;"
+          npx --yes wrangler@4 d1 execute "${DEV_D1_NAME}" --remote --json --command "${DEV_SQL}" > /tmp/release466-drift-dev.json
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "${PROD_SQL}" > /tmp/release466-drift-prod.json
+          python scripts/release466_drift_detector.py \
+            --development /tmp/release466-drift-dev.json \
+            --production /tmp/release466-drift-prod.json \
+            --source-sha "${GITHUB_SHA}" \
+            --output /tmp/release466-drift-proof.json \
+            --fail-on-drift
+          rm -f /tmp/release466-drift-dev.json /tmp/release466-drift-prod.json
+      - name: Prove Production reliability/SLO snapshot read-only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT (SELECT COUNT(*) FROM app_modules) app_modules,(SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) canonical_migrations,(SELECT COUNT(*) FROM app_schema_migration_proofs WHERE environment='production' AND migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) migration_proofs,(SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name LIKE 'release465_%') release465_triggers,(SELECT COUNT(*) FROM runtime_incidents WHERE LOWER(COALESCE(review_status,'open'))='open' AND LOWER(COALESCE(severity,''))='critical') open_critical,(SELECT COUNT(*) FROM runtime_incidents WHERE LOWER(COALESCE(review_status,'open'))='open' AND LOWER(COALESCE(severity,''))='error') open_error;" > /tmp/release466-production-health-d1.json
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA foreign_key_check;" > /tmp/release466-production-health-fk.json
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site" \
+            > /tmp/release466-production-project.json
+          python scripts/release466_production_health_proof.py \
+            --d1 /tmp/release466-production-health-d1.json \
+            --fk /tmp/release466-production-health-fk.json \
+            --project /tmp/release466-production-project.json \
+            --source-sha "${GITHUB_SHA}" \
+            --output /tmp/release466-production-health-proof.json
+          rm -f /tmp/release466-production-health-d1.json /tmp/release466-production-health-fk.json /tmp/release466-production-project.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release466-build1-recovery-drift-proof
+          path: |
+            /tmp/release466-recovery-rehearsal.json
+            /tmp/release466-drift-proof.json
+            /tmp/release466-production-health-proof.json
+          retention-days: 90
+          if-no-files-found: error
+      - name: Runtime boundary statement
+        run: |
+          echo 'Raw Development D1 export retained: NO'
+          echo 'Restored SQLite database retained: NO'
+          echo 'Production business rows read by drift/health proof: NO'
+          echo 'Production mutation: ZERO'
+          echo 'Recovery rehearsal target: EPHEMERAL LOCAL SQLITE'
+          echo 'Structural drift: FAIL CLOSED'
