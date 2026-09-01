@@ -1,0 +1,43 @@
+{
+  "release": 466,
+  "build": 2,
+  "title": "Runtime & Storefront Intelligence",
+  "state": "implementation_in_progress",
+  "base_development_sha": "3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e",
+  "schema_change_required": false,
+  "migration": null,
+  "items": [
+    {"id": 6, "name": "Synthetic storefront monitoring", "status": "implementation_in_progress"},
+    {"id": 7, "name": "Production JavaScript/runtime error capture", "status": "implementation_in_progress"},
+    {"id": 8, "name": "Real-user performance telemetry", "status": "implementation_in_progress"},
+    {"id": 9, "name": "Full Production SEO crawler", "status": "implementation_in_progress"},
+    {"id": 10, "name": "Search Console/indexing intelligence layer", "status": "implementation_in_progress"}
+  ],
+  "performance": {
+    "core_web_vitals_percentile": 75,
+    "good_thresholds": {"LCP_ms": 2500, "INP_ms": 200, "CLS": 0.1},
+    "release465_source_budget_file": "release465-performance-budget.json",
+    "policy": "Field metrics and the inherited Release 465 source-size budget are reported together; unlike units are never collapsed into one score."
+  },
+  "telemetry": {
+    "client_error_sample_rate": 1.0,
+    "rum_sample_rate": 0.15,
+    "accepted_scopes": ["client_runtime", "real_user_performance"],
+    "query_strings_recorded": false,
+    "fragment_identifiers_recorded": false,
+    "request_body_limit_bytes": 24576
+  },
+  "safety": {
+    "production_business_mutation": false,
+    "production_schema_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_execution": false,
+    "inventory_mutation": false,
+    "accounting_posting": false,
+    "raw_r2_delete": false,
+    "request_time_schema_ddl": false,
+    "preview_access_must_remain_enforced": true,
+    "main_must_remain_release465_until_deliberate_promotion": true
+  }
+}
