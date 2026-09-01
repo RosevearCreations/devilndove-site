@@ -23,6 +23,11 @@
 - [x] Development remains `583` tables / `4` migrations / `4` proofs / `0` FK violations.
 - [x] Production canonical `0001`–`0004` remains unchanged from Release 465.
 
+## Release 466 Build 2 closure
+
+- [x] Build 2 final closure remains Development green on SHA `855171430c6b14c4f4a6ff24a120bcce722294f9`.
+- [x] Current-tree inherited Build 2 run `33468360701` passed live read-only storefront/SEO evidence.
+
 ## Builds 1–3 carried-forward proof
 
 - [x] Build 1 final closure remains green; current-tree inherited run `33468360674` passed recovery, structural drift and Production reliability proof.
