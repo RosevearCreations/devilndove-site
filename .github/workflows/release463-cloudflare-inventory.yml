@@ -68,11 +68,14 @@ jobs:
                   'env_var_types': types,
                   'payment_execution_switch_ready': value_matches('PAYMENT_PROVIDER_EXECUTION_MODE', 'development-explicit'),
                   'payment_mutation_switch_ready': value_matches('PAYMENT_PROVIDER_MUTATIONS_ENABLED', '1'),
+                  'stripe_publishable_key_present': 'STRIPE_PUBLISHABLE_KEY' in env_vars,
                   'stripe_secret_key_present': 'STRIPE_SECRET_KEY' in env_vars,
                   'stripe_webhook_secret_present': 'STRIPE_WEBHOOK_SECRET' in env_vars,
                   'paypal_client_id_present': 'PAYPAL_CLIENT_ID' in env_vars,
-                  'paypal_client_secret_present': 'PAYPAL_CLIENT_SECRET' in env_vars,
-                  'paypal_environment_present': 'PAYPAL_ENVIRONMENT' in env_vars,
+                  'paypal_secret_present': 'PAYPAL_SECRET' in env_vars,
+                  'paypal_webhook_id_present': 'PAYPAL_WEBHOOK_ID' in env_vars,
+                  'paypal_environment_present': 'PAYPAL_ENV' in env_vars,
+                  'paypal_environment_sandbox_ready': value_matches('PAYPAL_ENV', 'sandbox'),
               }
 
           source_config = ((project.get('source') or {}).get('config') or {})
