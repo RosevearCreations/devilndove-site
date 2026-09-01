@@ -27,6 +27,10 @@ function normalizedPagePath(pathname) {
 function isStorefrontDiscoveryPath(pathname) {
   return ['/shop/', '/shop/product/', '/collections/', '/collages/'].includes(normalizedPagePath(pathname));
 }
+function isPublicRuntimeIntelligencePath(pathname) {
+  const path = normalizedPagePath(pathname);
+  return path !== '/admin/' && !path.startsWith('/admin/');
+}
 function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) {
   const headers = new Headers(response.headers);
   headers.set(RELEASE_HEADER, String(CURRENT_RELEASE));
@@ -45,6 +49,9 @@ function withPlatformClient(response, request) {
       .on('head', {
         element(element) {
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+          if (isPublicRuntimeIntelligencePath(pathname)) {
+            element.append(`<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+          }
           if (isStorefrontDiscoveryPath(pathname)) {
             element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${CURRENT_RELEASE}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
