@@ -1,6 +1,6 @@
 {
-  "release": 463,
-  "purpose": "read-only Cloudflare Pages D1 R2 consolidation inventory",
-  "requested_at": "2026-08-30",
-  "attempt": 5
+  "release": 466,
+  "purpose": "sanitized Cloudflare Pages Preview payment configuration inventory",
+  "requested_at": "2026-09-01",
+  "attempt": 6
 }
