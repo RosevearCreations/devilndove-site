@@ -1,4 +1,4 @@
-// Release 462 — read-only I.T. provider setup guide renderer.
+// Release 466 — read-only I.T. provider setup guide renderer.
 (function(){
   'use strict';
   const byId=(id)=>document.getElementById(id);
@@ -27,8 +27,9 @@
       try{await navigator.clipboard.writeText(value);button.textContent='Copied';setTimeout(()=>button.textContent='Copy name',1200)}catch{message(`Could not copy ${value}; select the reference name manually.`,true)}
     }));
     const configured=providers.filter((row)=>row.configuration_complete).length;
-    const switchState=payload.payment_operator_switch_set?'set':'closed';
-    message(`Release ${payload.release}: ${providers.length} provider guides loaded; ${configured} have all required Cloudflare references present. Payment execution switch: ${switchState}. Secret values were not returned.`);
+    const executionSwitch=payload.payment_operator_switch_set?'set':'closed';
+    const mutationSwitch=payload.payment_mutation_switch_set?'set':'closed';
+    message(`Release ${payload.release}: ${providers.length} provider guides loaded; ${configured} have all required Cloudflare Preview references present. Payment execution switch: ${executionSwitch}; mutation switch: ${mutationSwitch}. Secret values were not returned.`);
   }
   async function load(){const button=byId('itSetupGuideRefresh');if(button)button.disabled=true;message('Loading safe provider setup authority…');try{render(await readJson(await apiFetch('/api/admin/it-provider-setup-guide',{method:'GET',cache:'no-store'})))}catch(error){message(error.message||String(error),true)}finally{if(button)button.disabled=false}}
   function init(){byId('itSetupGuideRefresh')?.addEventListener('click',load);load()}
