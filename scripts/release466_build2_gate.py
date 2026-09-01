@@ -70,6 +70,8 @@ def main() -> int:
     for token in ('method="GET"', 'business_mutations', 'provider_calls', 'read_only'):
         require(token in synthetic, f'synthetic monitor missing read-only contract: {token}')
     require("method='GET'" in crawler and 'production_mutations' in crawler and '--fail-on-seo-errors' in crawler, 'Production SEO crawler must remain read-only and support later promotion gating')
+    for token in ('SKIP_PREFIXES', '"/admin/"', '"/api/"', '"/cdn-cgi/"', "lower.endswith('/index.html')", "'index_html_aliases_normalized': True"):
+        require(token in crawler, f'Production SEO crawler missing corrected public-scope contract: {token}')
 
     require('Release 466 Build 2 Proof' in workflow, 'Build 2 proof workflow missing name')
     require('scripts/release466_build2_gate.py' in workflow, 'Build 2 proof workflow must execute Build 2 source gate')
@@ -78,6 +80,45 @@ def main() -> int:
 
     release466_migrations = sorted((ROOT / 'migrations/canonical').glob('*466*build2*')) if (ROOT / 'migrations/canonical').is_dir() else []
     require(not release466_migrations, f'Build 2 declared schema-neutral but migration files exist: {[p.name for p in release466_migrations]}')
+
+    if authority.get('state') == 'development_green':
+        require(all(items[item].get('status') == 'development_green' for item in items), 'Development-green authority requires every Build 2 item green')
+        technical = authority.get('technical_green_evidence', {})
+        require(technical.get('source_sha') == '68f1dae3a0b56de5b631603bf7191388a8f8f219', 'Build 2 technical-green source SHA must be recorded')
+        require(int(technical.get('system_gate_run') or 0) == 33465451865, 'Build 2 technical System Gate must be recorded')
+        require(int(technical.get('build2_proof_run') or 0) == 33465451850, 'Build 2 technical proof run must be recorded')
+        require(technical.get('exact_preview') == 'https://8a41ed9d.devilndove-site.pages.dev', 'Build 2 exact technical Preview must be recorded')
+        measurement = authority.get('production_measurement_evidence', {})
+        seo = measurement.get('seo_crawler', {})
+        require(int(seo.get('pages_crawled') or 0) == 46 and int(seo.get('errors') or 0) == 6 and int(seo.get('warnings') or 0) == 8, 'Corrected Production SEO baseline must remain 46 pages / 6 errors / 8 warnings')
+        require(seo.get('production_mutation') is False, 'SEO measurement must remain non-mutating')
+        conflicts = set(seo.get('live_sitemap_noindex_conflicts') or [])
+        require(conflicts == {'/cart/', '/checkout/', '/checkout/confirmation/', '/supplies/health/', '/tools/health/', '/toolshed/duplicates/'}, 'Six live sitemap/noindex conflicts must remain explicitly recorded')
+
+        development = json.loads(text('development-release.json') or '{}')
+        require(development.get('convergence_state') == 'release466_build2_development_green_external_ruleset_pending', 'Development authority must identify Build 2 green with external ruleset pending')
+        require(development.get('production_infrastructure', {}).get('current_production_release') == 465, 'Production authority must remain Release 465')
+        require(development.get('production_infrastructure', {}).get('current_production_source_sha') == 'd5009d9c622bdf84232b3aa7bd24a1c3d61581b2', 'Production source boundary must remain Release 465 exact SHA')
+        require(development.get('current_release_database_state', {}).get('release466_build2_schema_change_required') is False, 'Development authority must record Build 2 schema-neutral state')
+        build2_rows = {int(row.get('id', 0)): row for row in development.get('release466_build2', []) if isinstance(row, dict)}
+        require(set(build2_rows) == {6, 7, 8, 9, 10} and all(build2_rows[i].get('status') == 'complete_development_green' for i in build2_rows), 'Development authority must close Build 2 items 6–10')
+        planned = {int(row.get('build', 0)): row for row in development.get('planned_builds', []) if isinstance(row, dict)}
+        require(planned.get(3, {}).get('state') == 'next' and planned.get(3, {}).get('items') == [11, 12, 13, 14, 15], 'Build 3 items 11–15 must be next')
+
+        roadmap = text('docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md')
+        handoff = text('AI_HANDOFF.md')
+        project = text('PROJECT_STATUS_AND_ROADMAP.md')
+        sanity = text('SANITY_HEALTH_CHECK.md')
+        require('Build 2 — Runtime & Storefront Intelligence — DEVELOPMENT GREEN' in roadmap, 'Release roadmap must close Build 2 Development green')
+        require('Build 3 — Revenue & Business Intelligence — NEXT' in roadmap, 'Release roadmap must make Build 3 next')
+        require('Build 2 is Development green' in handoff, 'AI handoff must identify Build 2 Development green')
+        require('Build 3 — Revenue & Business Intelligence, items 11–15' in handoff, 'AI handoff must point to Build 3 items 11–15')
+        require('| Build 2 | 6–10 | Runtime & Storefront Intelligence | Development green |' in project, 'Project roadmap must close Build 2 Development green')
+        require('| Build 3 | 11–15 | Revenue & Business Intelligence | Next |' in project, 'Project roadmap must identify Build 3 next')
+        require('Release 466 Build 2 is technically **Development GREEN**' in sanity, 'Sanity authority must close Build 2 green')
+        for doc_name, doc in [('roadmap', roadmap), ('handoff', handoff), ('project', project), ('sanity', sanity)]:
+            for path in ('/cart/', '/checkout/', '/checkout/confirmation/', '/supplies/health/', '/tools/health/', '/toolshed/duplicates/'):
+                require(path in doc, f'{doc_name} must retain live SEO finding {path}')
 
     print('RELEASE 466 BUILD 2 SOURCE CONTRACT')
     print('Items: 6 synthetic monitoring; 7 client errors; 8 RUM; 9 Production SEO crawler; 10 Search Console/indexing intelligence')
