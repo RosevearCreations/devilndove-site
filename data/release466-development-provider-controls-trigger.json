@@ -1,0 +1,7 @@
+{
+  "release": 466,
+  "purpose": "open bounded Stripe test and PayPal sandbox acceptance controls in Cloudflare Preview",
+  "requested_at": "2026-09-01",
+  "environment": "development",
+  "production_mutation": false
+}
