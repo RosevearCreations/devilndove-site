@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Runtime & Storefront Intelligence — Devil n Dove Admin</title>
+  <meta name="description" content="Release 466 runtime error, Core Web Vitals, storefront monitoring, SEO crawl and Search Console intelligence for Devil n Dove administrators.">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" type="image/png" href="/assets/mark.png">
+</head>
+<body class="theme-dark admin-page">
+  <main class="container admin-shell">
+    <nav class="nav">
+      <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"><div><strong>Devil n Dove</strong><div class="small">Release 466 Build 2</div></div></div>
+      <div class="links"><a href="/admin/">Admin</a><a href="/admin/release-control/">Release Control</a><a href="/admin/it-platform/">I.T.</a><button class="btn" type="button" data-nav-logout>Logout</button></div>
+    </nav>
+    <section class="hero"><div><h1>Runtime & Storefront Intelligence</h1><p>Review public JavaScript errors, real-user Core Web Vitals, synthetic storefront monitoring, Production SEO crawl evidence, and Search Console opportunities without mutating Production.</p></div></section>
+    <section class="card">
+      <div class="admin-actions" style="display:flex;flex-wrap:wrap;gap:10px;align-items:end">
+        <label>Window <select id="intelligenceDays"><option value="7">7 days</option><option value="28" selected>28 days</option><option value="90">90 days</option></select></label>
+        <button class="btn" id="refreshIntelligence" type="button">Refresh</button>
+        <a class="btn secondary" href="/admin/search-console-import/">Search Console Import</a>
+        <a class="btn secondary" href="/admin/runtime-incidents/">Runtime Incidents</a>
+      </div>
+    </section>
+    <section class="card" id="runtimeStorefrontIntelligenceMount"><p class="small">Loading Release 466 Build 2 intelligence…</p></section>
+    <section class="footer card"><p class="small">Read-only intelligence surface. Synthetic and crawler execution is performed by Release 466 proof tooling; this page does not deploy, publish, charge, post accounting, mutate inventory, or weaken Cloudflare Access.</p></section>
+  </main>
+  <script src="/public/js/auth.js?v=440"></script>
+  <script src="/public/js/admin-route-usage.js"></script>
+  <script src="/public/js/site-auth-ui.js?v=440"></script>
+  <script src="/public/js/admin-self-protect.js?v=440"></script>
+  <script src="/public/js/admin-release466-runtime-storefront-intelligence.js"></script>
+</body>
+</html>
