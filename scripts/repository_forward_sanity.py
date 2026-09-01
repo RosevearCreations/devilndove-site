@@ -1,31 +1,154 @@
 #!/usr/bin/env python3
 """Canonical Release 466 + inherited Release 465/463 forward sanity."""
 from __future__ import annotations
+
 import json
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];FAIL=[]
-MIGRATIONS=['migrations/canonical/0001_release464_migration_authority.sql','migrations/canonical/0002_release464_operational_acceptance.sql','migrations/canonical/0003_release464_business_growth.sql','migrations/canonical/0004_release465_storefront_quality.sql']
-def read(p):
- f=ROOT/p
- if not f.is_file():FAIL.append(f'missing file: {p}');return''
- return f.read_text(encoding='utf-8',errors='replace')
-def req(ok,msg):
- if not ok:FAIL.append(msg)
-r=json.loads(read('development-release.json') or '{}');env=json.loads(read('release463-environment.json') or '{}');manifest=json.loads(read('migrations/canonical/manifest.json') or '{}');b1=json.loads(read('release465-build1-storefront-quality.json') or '{}');b2=json.loads(read('release465-build2-inventory-creator-intelligence.json') or '{}');b3=json.loads(read('release465-build3-financial-it-hardening.json') or '{}');r466=json.loads(read('release466-build1-governance-recovery-reliability.json') or '{}')
-req(r.get('environment')=='development' and r.get('branch')=='dev','application authority must remain Development/dev');req(int(r.get('release') or 0)==466 and r.get('label')=='Operational Resilience and Commercial Readiness','current Release 466 authority drifted');req(r.get('convergence_state')=='release466_build1_development_green_external_ruleset_pending','Release 466 Build 1 convergence state drifted');req(r.get('production_convergence_state')=='release465_complete_production_green','Production must remain Release 465 green until deliberate Release 466 promotion');req(int(r.get('environment_release') or 0)==463,'environment overlay must remain Release 463');req([x.get('key') for x in r.get('canonical_modules',[])]==['storefront','creators','socials','financials','it-platform'],'five-module authority drifted')
-dev=r.get('development_infrastructure') or {};d1=dev.get('d1') or {};prod=r.get('production_infrastructure') or {};pd1=prod.get('d1') or {};req(dev.get('pages_project')=='devilndove-site' and dev.get('pages_environment')=='preview' and dev.get('pages_branch')=='dev','Development Pages boundary drifted');req(d1.get('database_name')=='devilndove-dev' and d1.get('database_id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa','Development D1 drifted');req(prod.get('branch')=='main' and prod.get('current_production_release')==465 and prod.get('current_production_source_sha')=='d5009d9c622bdf84232b3aa7bd24a1c3d61581b2','Production Release 465 source boundary drifted');req(pd1.get('database_id')=='f34a741b-0000-45b0-9a96-6be08754d563' and d1.get('database_id')!=pd1.get('database_id'),'Development/Production D1 isolation drifted')
-policy=r.get('release_policy') or {};req(policy.get('historical_migration_replay') is False and policy.get('future_d1_schema_changes')=='migrations/canonical_only','migration policy drifted');req(policy.get('production_promotion')=='exact_green_development_tree_only' and policy.get('main_only_application_patches') is False,'promotion policy drifted');req(policy.get('production_transactional_data_owned_by_production') is True and policy.get('blind_dev_to_production_data_overwrite') is False,'Production data ownership drifted');req(policy.get('provider_execution')=='closed' and policy.get('provider_publication')=='closed','provider boundary drifted');req(policy.get('rollback_schema_reversal') is False and policy.get('automatic_business_data_restore') is False,'rollback/recovery safety drifted');req(policy.get('native_github_ruleset')=='external_repository_setting_pending','native GitHub ruleset external boundary must remain explicit')
-rm=r.get('current_release_migrations') or [];req([x.get('file') for x in rm]==MIGRATIONS,'canonical migration list must remain exact 0001-0004');req(all(x.get('development_apply')=='applied_and_verified' and x.get('production_apply')=='applied_and_verified' for x in rm),'0001-0004 must remain proven on Development and Production');req([x.get('file') for x in manifest.get('migrations',[])]==[Path(x).name for x in MIGRATIONS],'manifest sequence drifted');req(not (ROOT/'migrations/canonical/0005_release466_governance_recovery_reliability.sql').exists(),'Release 466 Build 1 must not create migration 0005')
-db=r.get('current_release_database_state') or {};req(db.get('new_development_migration_required') is False and db.get('release466_build1_schema_change_required') is False and db.get('release466_build1_migration')=='none','Release 466 Build 1 schema-neutral authority drifted');req(int(db.get('development_native_migration_rows') or 0)==4 and int(db.get('development_migration_proof_rows') or 0)==4,'Development migration proof must remain 4/4');req(int(db.get('production_native_migration_rows') or 0)==4 and int(db.get('production_migration_proof_rows') or 0)==4,'Production migration proof must remain 4/4')
-req(b1.get('state')=='complete_development_green' and b2.get('state')=='complete_development_green' and b3.get('state')=='complete_development_green','Release 465 historical build authorities must remain green');req(all(x.get('status')=='complete_development_green' for key in ('release465_build1','release465_build2','release465_build3') for x in r.get(key,[])),'Release 465 historical completion drifted')
-req(r466.get('state')=='development_green_external_ruleset_pending','Release 466 Build 1 authority state drifted');items={int(x.get('id') or 0):x for x in r466.get('items',[])};req(items.get(1,{}).get('status')=='development_green_external_ruleset_pending','Build 1 item 1 must remain external ruleset pending');req(all(items.get(i,{}).get('status')=='complete_development_green' for i in (2,3,4,5)),'Build 1 items 2-5 must remain Development green');ev=r466.get('technical_evidence') or {};req(ev.get('technical_green_source_sha') is None or True,'noop');req(int(ev.get('system_gate_run') or 0)==33463654502 and int(ev.get('build1_proof_run') or 0)==33463654504,'Build 1 technical run evidence drifted');req(ev.get('exact_preview')=='https://60d84da5.devilndove-site.pages.dev' and int(ev.get('proof_artifact_id') or 0)==9784113538,'Build 1 Preview/artifact evidence drifted');req(int(ev.get('restored_application_tables') or 0)==582 and int(ev.get('structural_identity_count_development') or 0)==603 and int(ev.get('structural_identity_count_production') or 0)==603,'Build 1 recovery/drift evidence drifted');req(int(ev.get('production_reliability_score') or 0)==100 and ev.get('production_reliability_status')=='green' and ev.get('production_mutation') is False,'Build 1 Production reliability evidence drifted')
-planned={int(x.get('build') or 0):x for x in r.get('planned_builds',[])};req(sorted(planned)==[2,3,4] and planned[2].get('items')==[6,7,8,9,10],'Release 466 Builds 2-4 planning drifted')
-req(int(env.get('environment_release') or 0)==463 and env.get('canonical_pages_project')=='devilndove-site','Release 463 environment authority drifted');req((env.get('native_git_deployments') or {}).get('enabled') is False,'native Git-triggered Pages deploy must remain frozen')
-wrangler=read('wrangler.toml');req('database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' in wrangler and 'migrations_dir = "migrations/canonical"' in wrangler,'tracked Wrangler Development authority drifted');req('f34a741b-0000-45b0-9a96-6be08754d563' not in wrangler and 'account_id =' not in wrangler,'tracked Wrangler contains forbidden Production/account identity')
-runtime=read('functions/api/_lib/releaseAuthority.js');req('CURRENT_RELEASE = 466' in runtime and 'Operational Resilience and Commercial Readiness' in runtime,'runtime current-release authority drifted')
-for p in ('docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md','.github/RELEASE466_BRANCH_PROTECTION_POLICY.md','.github/workflows/release466-build1-proof.yml','.github/workflows/production-rollback-readiness.yml','scripts/release466_build1_gate.py','scripts/release466_recovery_rehearsal.py','scripts/release466_drift_detector.py','scripts/release466_production_health_proof.py','AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md'):req((ROOT/p).is_file(),f'current authority missing: {p}')
-print('PLATFORM FORWARD SANITY');print('Application release: 466 — Operational Resilience and Commercial Readiness');print('Release 465: DEVELOPMENT + PRODUCTION HISTORICAL GREEN');print('Release 466 Build 1: DEVELOPMENT GREEN / NATIVE GITHUB RULESET EXTERNAL PENDING');print('Canonical D1: 0001-0004 / Build 1 migration NONE');print('Production: remains Release 465 until deliberate Release 466 promotion')
+
+ROOT = Path(__file__).resolve().parents[1]
+FAIL: list[str] = []
+MIGRATIONS = [
+    'migrations/canonical/0001_release464_migration_authority.sql',
+    'migrations/canonical/0002_release464_operational_acceptance.sql',
+    'migrations/canonical/0003_release464_business_growth.sql',
+    'migrations/canonical/0004_release465_storefront_quality.sql',
+]
+
+
+def read(path: str) -> str:
+    target = ROOT / path
+    if not target.is_file():
+        FAIL.append(f'missing file: {path}')
+        return ''
+    return target.read_text(encoding='utf-8', errors='replace')
+
+
+def req(ok: bool, message: str) -> None:
+    if not ok:
+        FAIL.append(message)
+
+
+r = json.loads(read('development-release.json') or '{}')
+env = json.loads(read('release463-environment.json') or '{}')
+manifest = json.loads(read('migrations/canonical/manifest.json') or '{}')
+b1 = json.loads(read('release465-build1-storefront-quality.json') or '{}')
+b2 = json.loads(read('release465-build2-inventory-creator-intelligence.json') or '{}')
+b3 = json.loads(read('release465-build3-financial-it-hardening.json') or '{}')
+r466b1 = json.loads(read('release466-build1-governance-recovery-reliability.json') or '{}')
+r466b2 = json.loads(read('release466-build2-runtime-storefront-intelligence.json') or '{}')
+
+req(r.get('environment') == 'development' and r.get('branch') == 'dev', 'application authority must remain Development/dev')
+req(int(r.get('release') or 0) == 466 and r.get('label') == 'Operational Resilience and Commercial Readiness', 'current Release 466 authority drifted')
+req(r.get('convergence_state') == 'release466_build2_development_green_external_ruleset_pending', 'Release 466 Build 2 convergence state drifted')
+req(r.get('production_convergence_state') == 'release465_complete_production_green', 'Production must remain Release 465 green until deliberate Release 466 promotion')
+req(int(r.get('environment_release') or 0) == 463, 'environment overlay must remain Release 463')
+req([x.get('key') for x in r.get('canonical_modules', [])] == ['storefront', 'creators', 'socials', 'financials', 'it-platform'], 'five-module authority drifted')
+
+dev = r.get('development_infrastructure') or {}
+d1 = dev.get('d1') or {}
+prod = r.get('production_infrastructure') or {}
+pd1 = prod.get('d1') or {}
+req(dev.get('pages_project') == 'devilndove-site' and dev.get('pages_environment') == 'preview' and dev.get('pages_branch') == 'dev', 'Development Pages boundary drifted')
+req(d1.get('database_name') == 'devilndove-dev' and d1.get('database_id') == 'dbc1615b-dcbe-4951-973b-b47c99c73bfa', 'Development D1 drifted')
+req(prod.get('branch') == 'main' and prod.get('current_production_release') == 465 and prod.get('current_production_source_sha') == 'd5009d9c622bdf84232b3aa7bd24a1c3d61581b2', 'Production Release 465 source boundary drifted')
+req(pd1.get('database_id') == 'f34a741b-0000-45b0-9a96-6be08754d563' and d1.get('database_id') != pd1.get('database_id'), 'Development/Production D1 isolation drifted')
+
+policy = r.get('release_policy') or {}
+req(policy.get('historical_migration_replay') is False and policy.get('future_d1_schema_changes') == 'migrations/canonical_only', 'migration policy drifted')
+req(policy.get('production_promotion') == 'exact_green_development_tree_only' and policy.get('main_only_application_patches') is False, 'promotion policy drifted')
+req(policy.get('production_transactional_data_owned_by_production') is True and policy.get('blind_dev_to_production_data_overwrite') is False, 'Production data ownership drifted')
+req(policy.get('provider_execution') == 'closed' and policy.get('provider_publication') == 'closed', 'provider boundary drifted')
+req(policy.get('rollback_schema_reversal') is False and policy.get('automatic_business_data_restore') is False, 'rollback/recovery safety drifted')
+req(policy.get('native_github_ruleset') == 'external_repository_setting_pending', 'native GitHub ruleset external boundary must remain explicit')
+
+rm = r.get('current_release_migrations') or []
+req([x.get('file') for x in rm] == MIGRATIONS, 'canonical migration list must remain exact 0001-0004')
+req(all(x.get('development_apply') == 'applied_and_verified' and x.get('production_apply') == 'applied_and_verified' for x in rm), '0001-0004 must remain proven on Development and Production')
+req([x.get('file') for x in manifest.get('migrations', [])] == [Path(x).name for x in MIGRATIONS], 'manifest sequence drifted')
+req(not list((ROOT / 'migrations/canonical').glob('0005_release466*')), 'Release 466 Builds 1-2 must not create migration 0005')
+
+db = r.get('current_release_database_state') or {}
+req(db.get('new_development_migration_required') is False, 'Development must not claim a pending migration')
+req(db.get('release466_build1_schema_change_required') is False and db.get('release466_build1_migration') == 'none', 'Release 466 Build 1 schema-neutral authority drifted')
+req(db.get('release466_build2_schema_change_required') is False and db.get('release466_build2_migration') == 'none', 'Release 466 Build 2 schema-neutral authority drifted')
+req(int(db.get('development_native_migration_rows') or 0) == 4 and int(db.get('development_migration_proof_rows') or 0) == 4, 'Development migration proof must remain 4/4')
+req(int(db.get('production_native_migration_rows') or 0) == 4 and int(db.get('production_migration_proof_rows') or 0) == 4, 'Production migration proof must remain 4/4')
+
+req(b1.get('state') == 'complete_development_green' and b2.get('state') == 'complete_development_green' and b3.get('state') == 'complete_development_green', 'Release 465 historical build authorities must remain green')
+req(all(x.get('status') == 'complete_development_green' for key in ('release465_build1', 'release465_build2', 'release465_build3') for x in r.get(key, [])), 'Release 465 historical completion drifted')
+
+req(r466b1.get('state') == 'development_green_external_ruleset_pending', 'Release 466 Build 1 authority state drifted')
+items1 = {int(x.get('id') or 0): x for x in r466b1.get('items', [])}
+req(items1.get(1, {}).get('status') == 'development_green_external_ruleset_pending', 'Build 1 item 1 must remain external ruleset pending')
+req(all(items1.get(i, {}).get('status') == 'complete_development_green' for i in (2, 3, 4, 5)), 'Build 1 items 2-5 must remain Development green')
+ev1 = r466b1.get('technical_evidence') or {}
+req(int(ev1.get('system_gate_run') or 0) == 33463654502 and int(ev1.get('build1_proof_run') or 0) == 33463654504, 'Build 1 technical run evidence drifted')
+req(ev1.get('exact_preview') == 'https://60d84da5.devilndove-site.pages.dev' and int(ev1.get('proof_artifact_id') or 0) == 9784113538, 'Build 1 Preview/artifact evidence drifted')
+req(int(ev1.get('restored_application_tables') or 0) == 582 and int(ev1.get('structural_identity_count_development') or 0) == 603 and int(ev1.get('structural_identity_count_production') or 0) == 603, 'Build 1 recovery/drift evidence drifted')
+req(int(ev1.get('production_reliability_score') or 0) == 100 and ev1.get('production_reliability_status') == 'green' and ev1.get('production_mutation') is False, 'Build 1 Production reliability evidence drifted')
+
+ev_current = r.get('current_release_evidence') or {}
+req(ev_current.get('release466_build1_final_closure_sha') == '3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e', 'Build 1 final closure SHA drifted')
+req(int(ev_current.get('release466_build1_final_system_gate_run') or 0) == 33464419372 and int(ev_current.get('release466_build1_final_proof_run') or 0) == 33464419380, 'Build 1 final closure runs drifted')
+
+req(r466b2.get('state') == 'development_green', 'Release 466 Build 2 authority state drifted')
+items2 = {int(x.get('id') or 0): x for x in r466b2.get('items', [])}
+req(set(items2) == {6, 7, 8, 9, 10} and all(items2[i].get('status') == 'development_green' for i in items2), 'Build 2 items 6-10 must remain Development green')
+ev2 = r466b2.get('technical_green_evidence') or {}
+req(ev2.get('source_sha') == '68f1dae3a0b56de5b631603bf7191388a8f8f219', 'Build 2 technical source SHA drifted')
+req(int(ev2.get('system_gate_run') or 0) == 33465451865 and int(ev2.get('build2_proof_run') or 0) == 33465451850, 'Build 2 technical run evidence drifted')
+req(ev2.get('exact_preview') == 'https://8a41ed9d.devilndove-site.pages.dev' and int(ev2.get('build2_proof_artifact_id') or 0) == 9784701212, 'Build 2 Preview/artifact evidence drifted')
+measurement = r466b2.get('production_measurement_evidence') or {}
+synthetic = measurement.get('synthetic_storefront') or {}
+seo = measurement.get('seo_crawler') or {}
+req(synthetic.get('state') == 'GREEN' and int(synthetic.get('routes_checked') or 0) == 8 and int(synthetic.get('failures') or 0) == 0 and synthetic.get('production_mutation') is False, 'Build 2 synthetic evidence drifted')
+req(int(seo.get('pages_crawled') or 0) == 46 and int(seo.get('sitemap_urls') or 0) == 38 and int(seo.get('errors') or 0) == 6 and int(seo.get('warnings') or 0) == 8 and seo.get('production_mutation') is False, 'Build 2 Production SEO evidence drifted')
+req(set(seo.get('live_sitemap_noindex_conflicts') or []) == {'/cart/', '/checkout/', '/checkout/confirmation/', '/supplies/health/', '/tools/health/', '/toolshed/duplicates/'}, 'Build 2 live SEO findings drifted')
+
+release466_rows = {int(x.get('id') or 0): x for x in r.get('release466_build2', [])}
+req(set(release466_rows) == {6, 7, 8, 9, 10} and all(release466_rows[i].get('status') == 'complete_development_green' for i in release466_rows), 'Development authority Build 2 completion drifted')
+planned = {int(x.get('build') or 0): x for x in r.get('planned_builds', [])}
+req(sorted(planned) == [3, 4] and planned[3].get('items') == [11, 12, 13, 14, 15] and planned[3].get('state') == 'next', 'Release 466 Build 3 next-work planning drifted')
+req(planned[4].get('items') == [16, 17, 18, 19, 20] and planned[4].get('state') == 'planned', 'Release 466 Build 4 planning drifted')
+
+req(int(env.get('environment_release') or 0) == 463 and env.get('canonical_pages_project') == 'devilndove-site', 'Release 463 environment authority drifted')
+req((env.get('native_git_deployments') or {}).get('enabled') is False, 'native Git-triggered Pages deploy must remain frozen')
+
+wrangler = read('wrangler.toml')
+req('database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"' in wrangler and 'migrations_dir = "migrations/canonical"' in wrangler, 'tracked Wrangler Development authority drifted')
+req('f34a741b-0000-45b0-9a96-6be08754d563' not in wrangler and 'account_id =' not in wrangler, 'tracked Wrangler contains forbidden Production/account identity')
+runtime = read('functions/api/_lib/releaseAuthority.js')
+req('CURRENT_RELEASE = 466' in runtime and 'Operational Resilience and Commercial Readiness' in runtime, 'runtime current-release authority drifted')
+
+for path in (
+    'docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md',
+    '.github/RELEASE466_BRANCH_PROTECTION_POLICY.md',
+    '.github/workflows/release466-build1-proof.yml',
+    '.github/workflows/release466-build2-proof.yml',
+    '.github/workflows/production-rollback-readiness.yml',
+    'scripts/release466_build1_gate.py',
+    'scripts/release466_build2_gate.py',
+    'scripts/release466_recovery_rehearsal.py',
+    'scripts/release466_drift_detector.py',
+    'scripts/release466_production_health_proof.py',
+    'scripts/release466_storefront_synthetic_monitor.py',
+    'scripts/release466_production_seo_crawler.py',
+    'AI_HANDOFF.md',
+    'PROJECT_STATUS_AND_ROADMAP.md',
+    'SANITY_HEALTH_CHECK.md',
+):
+    req((ROOT / path).is_file(), f'current authority missing: {path}')
+
+print('PLATFORM FORWARD SANITY')
+print('Application release: 466 — Operational Resilience and Commercial Readiness')
+print('Release 465: DEVELOPMENT + PRODUCTION HISTORICAL GREEN')
+print('Release 466 Build 1: DEVELOPMENT GREEN / NATIVE GITHUB RULESET EXTERNAL PENDING')
+print('Release 466 Build 2: DEVELOPMENT GREEN')
+print('Canonical D1: 0001-0004 / Builds 1-2 migration NONE')
+print('Next bounded work: Release 466 Build 3 items 11-15')
+print('Production: remains Release 465 until deliberate Release 466 promotion')
 if FAIL:
- for i,m in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {m}')
- raise SystemExit(1)
+    for index, message in enumerate(FAIL, 1):
+        print(f'{index:03d}. FAIL — {message}')
+    raise SystemExit(1)
 print('PLATFORM FORWARD SANITY: PASS')
