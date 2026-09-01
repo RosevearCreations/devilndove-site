@@ -51,7 +51,7 @@ req("request_time_schema_mutation: false" in api, "request-time schema mutation 
 req("production_mutation: false" in api, "Production mutation boundary missing")
 req("production_provider_execution: false" in api, "Production provider execution boundary missing")
 req("secret_values_emitted: false" in api, "secret-value redaction boundary missing")
-req("runtime_binding_presence_only" in api, "opaque binding identity must not be inferred")
+req("r2_identity_control_plane_proof" in api and "not inferred from opaque binding objects" in api, "opaque binding identity must not be inferred")
 req("HOLD_EXTERNAL_ACCEPTANCE" in api, "external acceptance HOLD boundary missing")
 req("runtime_exact_sha_unavailable" in api and "shaFromEnv" in api, "exact-SHA fail-closed evidence missing")
 req("PRAGMA foreign_key_check" in api, "foreign-key preflight missing")
