@@ -38,6 +38,12 @@ def admin_route_to_path(href: str) -> Path:
     return ADMIN / relative / "index.html"
 
 
+def index_path_to_route(path: Path) -> str:
+    relative = path.parent.relative_to(ADMIN).as_posix().strip("/")
+    require(relative, f"admin root cannot be treated as an operational route: {path}")
+    return f"/admin/{relative}/"
+
+
 def main() -> None:
     manifest = json.loads(read(MANIFEST))
     require(manifest.get("release") == 466, "navigation manifest release must be 466")
@@ -71,14 +77,18 @@ def main() -> None:
     duplicates = sorted({route for route in assigned_routes if assigned_routes.count(route) > 1})
     require(not duplicates, f"routes assigned to more than one primary workspace: {duplicates}")
 
-    operational_dirs = sorted(
-        path.name
-        for path in ADMIN.iterdir()
-        if path.is_dir() and path.name not in HUB_DIRS and (path / "index.html").is_file()
-    )
-    assigned_dirs = sorted(route.removeprefix("/admin/").strip("/") for route in assigned_routes)
-    missing = sorted(set(operational_dirs) - set(assigned_dirs))
-    unknown = sorted(set(assigned_dirs) - set(operational_dirs))
+    operational_routes = []
+    for path in ADMIN.rglob("index.html"):
+        if path == INDEX:
+            continue
+        relative_parts = path.parent.relative_to(ADMIN).parts
+        if relative_parts and relative_parts[0] in HUB_DIRS:
+            continue
+        operational_routes.append(index_path_to_route(path))
+    operational_routes = sorted(operational_routes)
+
+    missing = sorted(set(operational_routes) - set(assigned_routes))
+    unknown = sorted(set(assigned_routes) - set(operational_routes))
     require(not missing, f"admin workspaces missing a primary module assignment: {missing}")
     require(not unknown, f"manifest references unknown admin workspaces: {unknown}")
 
@@ -119,6 +129,7 @@ def main() -> None:
     print("RELEASE 466 BUILD 5 ADMIN FOUR-MODULE COCKPIT: PASS")
     print(f"Navigation modules: {len(modules)}")
     print(f"Assigned existing admin workspaces: {len(assigned_routes)}")
+    print("Nested admin workspaces: COVERED")
     print("Runtime authorities preserved: Storefront, Creators, Socials, Financials, I.T.")
     print("Production mutation: ZERO")
     print("Schema change: NONE")
