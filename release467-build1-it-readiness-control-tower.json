@@ -1,0 +1,57 @@
+{
+  "release": 467,
+  "build": 1,
+  "title": "I.T. Readiness Control Tower",
+  "state": "development_candidate",
+  "scope": [
+    "it_preflight_command_center",
+    "automatic_release_readiness_score",
+    "sanitized_configuration_drift_detection",
+    "exact_sha_deployment_ancestry_evidence"
+  ],
+  "schema_change_required": false,
+  "request_time_schema_mutation": false,
+  "production_mutation": false,
+  "production_provider_execution": false,
+  "admin_root_navigation_cards": 4,
+  "it_control_tower_route": "/admin/it/",
+  "api_route": "/api/admin/it-control-tower",
+  "api_methods": ["GET"],
+  "expected_development_authority": {
+    "pages_project": "devilndove-site",
+    "d1_name": "devilndove-dev",
+    "d1_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+    "product_r2_bucket": "devilndove-toolshed-images-dev",
+    "caip_r2_bucket": "devilndove-caip-media-dev",
+    "application_modules": 5,
+    "canonical_migrations": 4,
+    "minimum_tables": 583
+  },
+  "readiness_policy": {
+    "green": "Direct runtime or canonical control-plane evidence proves the requirement.",
+    "amber": "Evidence is pending, external, opaque at runtime, or requires canonical System Gate confirmation.",
+    "red": "A required binding, authority, safety boundary, migration proof, environment marker, or relational invariant is missing or drifted.",
+    "unknown_is_green": false,
+    "configuration_is_external_acceptance": false,
+    "runtime_binding_presence_is_exact_identity": false
+  },
+  "external_acceptance": {
+    "stripe": "pending_real_development_evidence",
+    "paypal": "pending_real_sandbox_evidence",
+    "social_oauth": "pending_controlled_development_evidence",
+    "github_native_ruleset": "external_repository_setting_pending",
+    "launch_state_until_proven": "HOLD_EXTERNAL_ACCEPTANCE"
+  },
+  "ancestry_policy": {
+    "runtime_sha_must_be_40_hex_if_reported": true,
+    "hostname_or_release_number_sha_inference": false,
+    "canonical_exact_sha_proof": "System Gate deployment artifact"
+  },
+  "secret_policy": {
+    "secret_values_emitted": false,
+    "only_presence_and_sanitized_type_are_reported": true
+  },
+  "base_development_sha": "b70c3fa372e0c99ae9a1bf4195130c0f7cb14439",
+  "production_sha_at_build_start": "d5009d9c622bdf84232b3aa7bd24a1c3d61581b2",
+  "promotion": "closed_until_external_acceptance_and_exact_green_development_proof"
+}
