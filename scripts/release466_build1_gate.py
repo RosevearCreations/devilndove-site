@@ -55,6 +55,8 @@ recovery=read('scripts/release466_recovery_rehearsal.py')
 has(recovery,'ephemeral_local_sqlite','PRAGMA integrity_check','PRAGMA foreign_key_check','raw_export_artifact_retained','restored_database_artifact_retained','production_contacted',label='recovery rehearsal')
 drift=read('scripts/release466_drift_detector.py')
 has(drift,'schema_identity_and_canonical_migration_authority_only','business_rows_read','missing_in_production','extra_in_production','canonical_migrations_match','canonical_proofs_match','--fail-on-drift',label='drift detector')
+production_health=read('scripts/release466_production_health_proof.py')
+has(production_health,'production-reliability-slo-snapshot','current_snapshot_not_historical_uptime','business_rows_read','production_mutation','foreign_key_violations',label='Production reliability proof')
 
 helper=read('functions/api/_lib/release466Reliability.js')
 endpoint=read('functions/api/admin/release466-reliability.js')
@@ -71,8 +73,8 @@ has(client,'/api/admin/release466-reliability','Reliability score','Native GitHu
 roadmap=read('docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md')
 has(roadmap,'Build 1 — Governance, Recovery & Production Reliability','Build 2 — Runtime & Storefront Intelligence','Build 3 — Revenue & Business Intelligence','Build 4 — External Acceptance & Commercial Readiness','Build 1 schema expectation:** NONE',label='Release 466 roadmap')
 
-workflow=read('.github/workflows/system-gate.yml')
-has(workflow,'release466_build1_gate.py','release466_recovery_rehearsal.py','release466_drift_detector.py','release466-reliability.js','admin-release466-reliability.js','release466-build1-recovery-drift-proof',label='System Gate Release 466 coverage')
+workflow=read('.github/workflows/release466-build1-proof.yml')
+has(workflow,'release466_build1_gate.py','release466_recovery_rehearsal.py','release466_drift_detector.py','release466_production_health_proof.py','release466-reliability.js','admin-release466-reliability.js','release466-build1-recovery-drift-proof','d1 export','ephemeral restore','Production structural authority read-only',label='Release 466 supplemental proof workflow')
 
 print('RELEASE 466 BUILD 1 — GOVERNANCE, RECOVERY & PRODUCTION RELIABILITY')
 print('Items: 1-5')
