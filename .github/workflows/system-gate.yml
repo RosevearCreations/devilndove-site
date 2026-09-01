@@ -27,6 +27,7 @@ on:
       - 'release465-build2-inventory-creator-intelligence.json'
       - 'release465-build3-financial-it-hardening.json'
       - 'release465-performance-budget.json'
+      - 'release466-*.json'
       - 'migrations/**'
       - 'scripts/**'
       - '.github/workflows/**'
