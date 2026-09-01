@@ -1,0 +1,194 @@
+{
+  "release": 466,
+  "build": 5,
+  "navigation_model": "four-module-admin-cockpit",
+  "runtime_authorities_preserved": ["storefront", "creators", "socials", "financials", "it"],
+  "navigation_note": "Admin navigation is grouped into four business workspaces. Socials and CAIP are grouped under Creator for navigation only; canonical runtime module authority remains separate.",
+  "modules": [
+    {
+      "key": "storefront",
+      "label": "Storefront",
+      "href": "/admin/storefront/",
+      "summary": "Everything that presents, merchandises, markets, and sells the public Devil n Dove experience.",
+      "sections": [
+        {
+          "label": "Merchandising & presentation",
+          "links": [
+            {"href": "/admin/storefront-merchandising/", "label": "Storefront Merchandising"},
+            {"href": "/admin/home-carousel/", "label": "Home Carousel"},
+            {"href": "/admin/public-display-order/", "label": "Public Display Order"},
+            {"href": "/admin/media-content-studio/", "label": "Website Media & Content Studio"},
+            {"href": "/admin/image-manifest/", "label": "Visual Image Manifest"},
+            {"href": "/admin/visual-enrichment-studio/", "label": "Visual Enrichment Studio"},
+            {"href": "/admin/visual-polish/", "label": "Visual Polish & Mobile Parity"},
+            {"href": "/admin/storefront-quality/", "label": "Storefront Quality"}
+          ]
+        },
+        {
+          "label": "Customers & conversion",
+          "links": [
+            {"href": "/admin/members/", "label": "Members & Tiers"},
+            {"href": "/admin/membership/", "label": "Membership"},
+            {"href": "/admin/gift-cards/", "label": "Gift Cards"},
+            {"href": "/admin/trust-blocks/", "label": "Trust Blocks"},
+            {"href": "/admin/readiness/", "label": "Product & Public Readiness"},
+            {"href": "/admin/analytics/", "label": "Storefront Analytics"}
+          ]
+        },
+        {
+          "label": "Search & sales channels",
+          "links": [
+            {"href": "/admin/local-seo-review/", "label": "SEO Review"},
+            {"href": "/admin/marketplace-readiness/", "label": "Marketplace Readiness"},
+            {"href": "/admin/marketplace-mapping/", "label": "Marketplace Mapping"},
+            {"href": "/admin/marketplace-calibration/", "label": "Marketplace Calibration"},
+            {"href": "/admin/marketplace-exports/", "label": "Marketplace Exports"}
+          ]
+        },
+        {
+          "label": "Special storefronts",
+          "links": [
+            {"href": "/admin/movies/", "label": "Movies"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "creator",
+      "label": "Creator",
+      "href": "/admin/creator/",
+      "summary": "Product entry, materials, tools, creative projects, CAIP evidence, storytelling, content packages and publication.",
+      "sections": [
+        {
+          "label": "Product entry & catalog",
+          "links": [
+            {"href": "/admin/products/", "label": "Products"},
+            {"href": "/admin/catalog/", "label": "Catalog & Inventory"},
+            {"href": "/admin/catalog-media/", "label": "Catalog Media"},
+            {"href": "/admin/mobile-product/", "label": "Phone Product Capture"},
+            {"href": "/admin/mobile/", "label": "Mobile Creator Workspace"},
+            {"href": "/admin/product-image-quality/", "label": "Product Photography Manager"},
+            {"href": "/admin/product-lineage/", "label": "Product Material & Tool Lineage"}
+          ]
+        },
+        {
+          "label": "Materials, tools & packaging",
+          "links": [
+            {"href": "/admin/inventory-creator-intelligence/", "label": "Creator Inventory Intelligence"},
+            {"href": "/admin/inventory-intelligence/", "label": "Inventory Intelligence"},
+            {"href": "/admin/inventory-operations/", "label": "Inventory Operations"},
+            {"href": "/admin/mobile-inventory/", "label": "Mobile Inventory"},
+            {"href": "/admin/supply-sourcing/", "label": "Supply Sourcing"},
+            {"href": "/admin/tool-lifecycle/", "label": "Tool Lifecycle"},
+            {"href": "/admin/vendor-reviews/", "label": "Vendor & Manufacturer Reviews"},
+            {"href": "/admin/packaging/", "label": "Packaging"},
+            {"href": "/admin/packaging-studio/", "label": "Labeling & Packaging Studio"}
+          ]
+        },
+        {
+          "label": "Storytelling, CAIP & publishing",
+          "links": [
+            {"href": "/admin/creative-automation/", "label": "Creative Project Workflow"},
+            {"href": "/admin/creative-process/", "label": "Creative Process"},
+            {"href": "/admin/creative-assets/", "label": "Creative Assets"},
+            {"href": "/admin/content-studio/", "label": "Content Studio"},
+            {"href": "/admin/caip-content-handoff/", "label": "CAIP Content Handoff"},
+            {"href": "/admin/public-proof-candidates/", "label": "Public Proof Candidates"},
+            {"href": "/admin/stage-photo-moderation/", "label": "Photo Moderation"},
+            {"href": "/admin/content-publications/", "label": "Content Publications"},
+            {"href": "/admin/social-publishing/", "label": "Social Publishing"}
+          ]
+        },
+        {
+          "label": "Custom work & release",
+          "links": [
+            {"href": "/admin/custom-request/", "label": "Custom Requests"},
+            {"href": "/admin/release-preflight/", "label": "Product Release Preflight"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "finance",
+      "label": "Finance",
+      "href": "/admin/finance/",
+      "summary": "Orders, payments, customer documents, accounting, month-end and business financial health.",
+      "sections": [
+        {
+          "label": "Sales, payments & documents",
+          "links": [
+            {"href": "/admin/orders/", "label": "Orders & Payments"},
+            {"href": "/admin/customer-documents/", "label": "Customer Documents"}
+          ]
+        },
+        {
+          "label": "Accounting & close",
+          "links": [
+            {"href": "/admin/accounting/", "label": "Accounting"},
+            {"href": "/admin/month-end/", "label": "Month-End"}
+          ]
+        },
+        {
+          "label": "Planning & business health",
+          "links": [
+            {"href": "/admin/business-health/", "label": "Business Health"},
+            {"href": "/admin/business-pipeline/", "label": "Business Pipeline"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "it",
+      "label": "I.T.",
+      "href": "/admin/it/",
+      "summary": "System settings, integrations, testing, diagnostics, releases, deployment controls, security and operational continuity.",
+      "sections": [
+        {
+          "label": "Platform, access & settings",
+          "links": [
+            {"href": "/admin/it-platform/", "label": "I.T. Platform"},
+            {"href": "/admin/it-integrations/", "label": "External API & Integration Registry"},
+            {"href": "/admin/application-modules/", "label": "Application Modules"},
+            {"href": "/admin/operations/", "label": "Operations & Settings"},
+            {"href": "/admin/users/", "label": "Users & Access"},
+            {"href": "/admin/command-center/", "label": "Command Center"}
+          ]
+        },
+        {
+          "label": "Testing, diagnostics & sanity",
+          "links": [
+            {"href": "/admin/application-sanity/", "label": "Application Sanity Check"},
+            {"href": "/admin/markdown-sanity/", "label": "Markdown Sanity"},
+            {"href": "/admin/runtime-acceptance/", "label": "Runtime Acceptance"},
+            {"href": "/admin/post-deploy-smoke-tests/", "label": "Post-Deploy Smoke Tests"},
+            {"href": "/admin/reliability/", "label": "Reliability"},
+            {"href": "/admin/dark-theme-evidence/", "label": "Dark Theme Evidence"},
+            {"href": "/admin/release448-calibration/", "label": "Legacy Calibration Evidence"},
+            {"href": "/admin/startup-readiness/", "label": "Startup Readiness Guide"}
+          ]
+        },
+        {
+          "label": "Release & deployment",
+          "links": [
+            {"href": "/admin/prelaunch/", "label": "Release & Go-Live Center"},
+            {"href": "/admin/deployment-preflight/", "label": "Pre-Deploy Validation"},
+            {"href": "/admin/release-control/", "label": "Release Evidence"},
+            {"href": "/admin/deploy-readiness/", "label": "Promote / Hold Decision"},
+            {"href": "/admin/promotion-control/", "label": "Promotion Gate"},
+            {"href": "/admin/go-live-execution/", "label": "Go-Live Actions"},
+            {"href": "/admin/live-ops-followthrough/", "label": "Live Ops Follow-through"},
+            {"href": "/admin/safe-deploy-package/", "label": "Safe Deploy Package"},
+            {"href": "/admin/release-notes/", "label": "Release Notes"}
+          ]
+        },
+        {
+          "label": "Continuity & daily operations",
+          "links": [
+            {"href": "/admin/operational-continuity/", "label": "Operational Continuity & Evidence"},
+            {"href": "/admin/today-tasks/", "label": "Today Tasks"}
+          ]
+        }
+      ]
+    }
+  ]
+}
