@@ -2,22 +2,24 @@
   "release": 466,
   "build": 2,
   "title": "Runtime & Storefront Intelligence",
-  "state": "implementation_in_progress",
+  "state": "development_green",
   "base_development_sha": "3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e",
+  "technical_green_source_sha": "68f1dae3a0b56de5b631603bf7191388a8f8f219",
   "schema_change_required": false,
   "migration": null,
   "items": [
-    {"id": 6, "name": "Synthetic storefront monitoring", "status": "implementation_in_progress"},
-    {"id": 7, "name": "Production JavaScript/runtime error capture", "status": "implementation_in_progress"},
-    {"id": 8, "name": "Real-user performance telemetry", "status": "implementation_in_progress"},
-    {"id": 9, "name": "Full Production SEO crawler", "status": "implementation_in_progress"},
-    {"id": 10, "name": "Search Console/indexing intelligence layer", "status": "implementation_in_progress"}
+    {"id": 6, "name": "Synthetic storefront monitoring", "status": "development_green"},
+    {"id": 7, "name": "Production JavaScript/runtime error capture", "status": "development_green"},
+    {"id": 8, "name": "Real-user performance telemetry", "status": "development_green"},
+    {"id": 9, "name": "Full Production SEO crawler", "status": "development_green"},
+    {"id": 10, "name": "Search Console/indexing intelligence layer", "status": "development_green"}
   ],
   "performance": {
     "core_web_vitals_percentile": 75,
     "good_thresholds": {"LCP_ms": 2500, "INP_ms": 200, "CLS": 0.1},
     "release465_source_budget_file": "release465-performance-budget.json",
-    "policy": "Field metrics and the inherited Release 465 source-size budget are reported together; unlike units are never collapsed into one score."
+    "policy": "Field metrics and the inherited Release 465 source-size budget are reported together; unlike units are never collapsed into one score.",
+    "live_field_sample_state": "not_expected_until_release466_production_promotion"
   },
   "telemetry": {
     "client_error_sample_rate": 1.0,
@@ -25,7 +27,66 @@
     "accepted_scopes": ["client_runtime", "real_user_performance"],
     "query_strings_recorded": false,
     "fragment_identifiers_recorded": false,
-    "request_body_limit_bytes": 24576
+    "request_body_limit_bytes": 24576,
+    "development_observed_client_runtime_rows": 0,
+    "development_observed_rum_rows": 0,
+    "zero_row_interpretation": "Release 465 remains live Production, so Release 466 browser telemetry is not expected to produce live field rows before deliberate Production promotion."
+  },
+  "search_console": {
+    "staged_import_authority_ready": true,
+    "development_observed_rows": 0,
+    "direct_google_api_authorization_configured": false,
+    "direct_google_api_authorization_required_for_build2_closure": false,
+    "zero_row_interpretation": "The intelligence layer is Development green; no current Search Console dataset is claimed until data is imported or later authorized externally."
+  },
+  "production_measurement_evidence": {
+    "synthetic_storefront": {
+      "state": "GREEN",
+      "routes_checked": 8,
+      "warnings": 0,
+      "failures": 0,
+      "request_method": "GET",
+      "production_mutation": false
+    },
+    "seo_crawler": {
+      "scope": "public_html_only",
+      "pages_crawled": 46,
+      "sitemap_urls": 38,
+      "errors": 6,
+      "warnings": 8,
+      "measurement_only_during_development": true,
+      "production_mutation": false,
+      "excluded_prefixes": ["/admin/", "/api/", "/cdn-cgi/"],
+      "index_html_aliases_normalized": true,
+      "live_sitemap_noindex_conflicts": [
+        "/cart/",
+        "/checkout/",
+        "/checkout/confirmation/",
+        "/supplies/health/",
+        "/tools/health/",
+        "/toolshed/duplicates/"
+      ]
+    }
+  },
+  "technical_green_evidence": {
+    "source_sha": "68f1dae3a0b56de5b631603bf7191388a8f8f219",
+    "system_gate_run": 33465451865,
+    "system_gate_source_job": 99724237977,
+    "system_gate_deploy_job": 99724289502,
+    "exact_preview": "https://8a41ed9d.devilndove-site.pages.dev",
+    "system_gate_deploy_artifact_id": 9784693769,
+    "system_gate_regression_artifact_id": 9784693975,
+    "build2_proof_run": 33465451850,
+    "build2_source_proof_job": 99724237928,
+    "build2_runtime_proof_job": 99724276899,
+    "build2_proof_artifact_id": 9784701212,
+    "build2_proof_artifact_sha256": "3c46694f1675a19d237475b4207224a8c834820b62db27cb1a0e3f873b91b63e",
+    "canonical_migrations": 4,
+    "migration_proofs": 4,
+    "foreign_key_violations": 0,
+    "preview_access_mode": "CLOUDFLARE_ACCESS_PROTECTED",
+    "preview_auth_headers_used": 0,
+    "preview_access_weakened": false
   },
   "safety": {
     "production_business_mutation": false,
@@ -39,5 +100,11 @@
     "request_time_schema_ddl": false,
     "preview_access_must_remain_enforced": true,
     "main_must_remain_release465_until_deliberate_promotion": true
+  },
+  "next_bounded_work": {
+    "release": 466,
+    "build": 3,
+    "title": "Revenue & Business Intelligence",
+    "items": [11, 12, 13, 14, 15]
   }
 }
