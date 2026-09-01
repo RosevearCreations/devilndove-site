@@ -2,7 +2,7 @@
 
 ## Current authority
 
-**Release 466 — Operational Resilience and Commercial Readiness — Build 2 is Development green.** Build 1 remains Development green with one external repository-governance boundary: native GitHub `dev`/`main` ruleset application remains pending because the connected GitHub integration can read rulesets but cannot write them.
+**Release 466 — Operational Resilience and Commercial Readiness — Build 3 is Development green.** Builds 1 and 2 remain Development green. Build 1 has one external repository-governance boundary: native GitHub `dev`/`main` ruleset application remains pending because the connected GitHub integration can read rulesets but cannot write them.
 
 Release 465 remains fully GREEN on Production and must not be reopened unless a current gate proves drift.
 
@@ -37,51 +37,55 @@ Final closure SHA: `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`.
 - Production reliability snapshot remains read-only `100/100 GREEN`
 - recovery export remains serialized after exact-SHA System Gate
 
-## Release 466 Build 2 technical-green evidence
+## Release 466 Build 2 closure
 
-Technical-green source SHA: `68f1dae3a0b56de5b631603bf7191388a8f8f219`.
+Final closure SHA: `855171430c6b14c4f4a6ff24a120bcce722294f9`.
+
+- final canonical System Gate `33466171233` — PASS
+- final Release 466 Build 2 Proof `33466171290` — PASS
+- synthetic Production monitor remains GET-only and GREEN
+- corrected Production SEO baseline remains `46` public HTML pages / `38` sitemap URLs / `6` errors / `8` warnings
+
+The six retained live SEO errors are sitemap/noindex conflicts on `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`. Build 2 never mutated Release 465 Production to make Development pass.
+
+## Release 466 Build 3 technical-green evidence
+
+Technical-green source SHA: `5ca09eab9e2a3441ffbdf76c46e35b3a6fcd52a6`.
 
 Canonical System Gate:
-- run `33465451865`
-- source job `99724237977`
-- deploy-development job `99724289502`
-- exact Preview `https://8a41ed9d.devilndove-site.pages.dev`
-- Development D1: `583` total non-sqlite tables / `4` canonical migrations / `4` proofs / `4` Release 465 guards / `11` inherited Build 3 authorities / `0` FK violations
+- run `33466655732`
+- source job `99727807616`
+- deploy-development job `99727877699`
+- exact Preview `https://732f6430.devilndove-site.pages.dev`
+- Development deploy proof artifact `9785113788`
+- regression evidence artifact `9785114215`
+- canonical D1: exactly `4` migrations / `4` proofs / `0` newly applied / `0` FK violations
 - `No migrations to apply!`
-- Access-safe Preview smoke passed; auth headers ZERO; Access weakened NO.
+- Preview remained Cloudflare Access protected; authentication headers ZERO; Access weakened NO.
 
-Release 466 Build 2 Proof:
-- run `33465451850`
-- source-proof job `99724237928`
-- runtime-proof job `99724276899`
-- artifact `9784701212`
-- artifact SHA-256 `3c46694f1675a19d237475b4207224a8c834820b62db27cb1a0e3f873b91b63e`
-- Development intelligence tables present: `runtime_incidents`, `search_console_import_batches`, `search_console_page_queries`
-- observed rows: client runtime `0`, RUM `0`, Search Console `0`
-- live Production synthetic monitor: `8` routes / GREEN / `0` warnings / `0` failures / GET only
-- corrected Production SEO crawl: `46` public HTML pages / `38` sitemap URLs / `6` errors / `8` warnings / Production mutation ZERO
+Release 466 Build 3 Proof:
+- run `33466655735`
+- source-proof job `99727807035`
+- runtime-proof job `99727862065`
+- artifact `9785121048`
+- artifact SHA-256 `92af7c472900d89cf4d9a01a44d4abc5ba4a10ef698de2cac7df44011b525b56`
+- all `11` required Development business-intelligence authority tables present
+- observed Development rows: page views `33`, Products `45`, Inventory `1041`, Creative projects `5`, cart/order/search/profitability `0/0/0/0`
+- zero observed rows are coverage evidence only and are not claims of zero demand or zero Production activity
+- Development D1 operation SELECT only
+- Production business rows read ZERO; Production mutation ZERO
+- automatic price/reorder/project execution ZERO
+- Inventory/Accounting mutation and provider/payment execution ZERO
 
-The six current live SEO errors are sitemap/noindex conflicts on:
-- `/cart/`
-- `/checkout/`
-- `/checkout/confirmation/`
-- `/supplies/health/`
-- `/tools/health/`
-- `/toolshed/duplicates/`
+## Build 3 status
 
-These findings are retained as intelligence. Build 2 does not modify Release 465 Production to make the Development proof pass.
+11. Storefront conversion-funnel analytics — **Development green**. Existing page-view/cart/order authorities, read-only.
+12. Zero-result and abandoned-search intelligence — **Development green**. Existing search/session/cart evidence with explicit abandonment semantics.
+13. Explainable Product opportunity score — **Development green**. Visible component scores/reasons; recommendation only.
+14. Inventory reorder economics — **Development green**. Existing Inventory/replenishment/source evidence; never places an order.
+15. Creative-project priority engine — **Development green**. Recommendation only; cannot start/publish projects, consume Inventory or post Accounting.
 
-## Build 2 status
-
-6. Synthetic storefront monitoring — **Development green**. Read-only Production GET monitor.
-7. Production JavaScript/runtime error capture — **Development green**. Collector and I.T. aggregation are ready in Release 466 Development.
-8. Real-user performance telemetry — **Development green**. LCP/INP/CLS/FCP/TTFB field collection and p75 aggregation are ready; source-size budget and field metrics remain separate authorities.
-9. Full Production SEO crawler — **Development green**. Public-only crawler produces retained live evidence and can later be made promotion-failing with `--fail-on-seo-errors`.
-10. Search Console/indexing intelligence — **Development green**. Staged-import and analysis layer is ready; no current imported dataset is claimed and direct Google API authorization is not configured or required for this closure.
-
-The `0` client-runtime and RUM rows are **not** evidence that live Production has zero errors or perfect Web Vitals. Release 465 is still the live code, so the Release 466 client collector is not expected to create live field samples until deliberate Production promotion. Likewise, `0` Search Console rows means no current imported dataset is present, not that search traffic is zero.
-
-Build 2 is schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
+Build 3 is schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
 
 ## Permanent safety rules
 
@@ -92,32 +96,34 @@ Build 2 is schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
 - Schema migrations are forward-only; rollback does not automatically reverse schema.
 - Business-data restore is never automatic.
 - Native Git-triggered Cloudflare Pages deployment remains frozen.
-- Provider execution/publication remain closed unless separately authorized.
+- Provider execution/publication remain closed unless separately authorized and bounded to the intended Development/sandbox acceptance.
 - Raw CAIP R2 deletion remains closed.
 - Cloudflare Access is never weakened for Preview smoke.
+- Build 3 scores are recommendation-only; automatic price changes, reorders and project starts remain closed.
 
 ## Next bounded work
 
-After the final Build 2 closure tree re-passes the canonical System Gate and Release 466 Build 2 Proof on `dev`, proceed to **Release 466 Build 3 — Revenue & Business Intelligence, items 11–15**:
+After the final Build 3 closure tree re-passes the canonical System Gate and Release 466 Build 3 Proof on `dev`, proceed to **Release 466 Build 4 — External Acceptance & Commercial Readiness, items 16–20**:
 
-11. Storefront conversion-funnel analytics.
-12. Zero-result and abandoned-search intelligence.
-13. Explainable Product opportunity score.
-14. Inventory reorder economics.
-15. Creative-project priority engine — recommendation only.
+16. CAIP private-media authenticated browser/range-streaming acceptance.
+17. Stripe Development payment/webhook/refund/reconciliation/idempotency acceptance.
+18. PayPal sandbox payment/webhook/refund/reconciliation/idempotency acceptance.
+19. Social/OAuth connect/refresh/expiry/revoke/outage/reconnect acceptance with publication still closed.
+20. Production-launch readiness cockpit combining source, recovery, providers, SEO, performance and incident evidence.
 
-Do not touch `main` for Release 466 until a later deliberate Production promotion is explicitly requested.
+Build 4 acceptance does not authorize live Production charging/publication or Release 466 Production promotion. Do not touch `main` until a later deliberate Production promotion is explicitly requested.
 
 ## Canonical reading order
 
 1. `development-release.json`
-2. `release466-build2-runtime-storefront-intelligence.json`
+2. `release466-build3-revenue-business-intelligence.json`
 3. `docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md`
 4. `AI_HANDOFF.md`
 5. `PROJECT_STATUS_AND_ROADMAP.md`
 6. `SANITY_HEALTH_CHECK.md`
-7. `release466-build1-governance-recovery-reliability.json`
-8. `.github/RELEASE466_BRANCH_PROTECTION_POLICY.md`
-9. `release463-environment.json`
+7. `release466-build2-runtime-storefront-intelligence.json`
+8. `release466-build1-governance-recovery-reliability.json`
+9. `.github/RELEASE466_BRANCH_PROTECTION_POLICY.md`
+10. `release463-environment.json`
 
 Release 465 files remain immutable historical acceptance authorities and must continue to pass their append-safe gates.
