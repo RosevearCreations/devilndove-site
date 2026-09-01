@@ -2,7 +2,7 @@
 
 ## Current release
 
-**Release 466 — Operational Resilience and Commercial Readiness — Builds 1 and 2 are Development green.** Build 1 native GitHub ruleset application remains externally pending. Release 465 remains Production green and unchanged on `main`.
+**Release 466 — Operational Resilience and Commercial Readiness — Builds 1, 2 and 3 are Development green.** Build 1 native GitHub ruleset application remains externally pending. Release 465 remains Production green and unchanged on `main`.
 
 ## Environment boundaries
 
@@ -18,9 +18,9 @@
 ## Canonical D1 authority
 
 - [x] Canonical stream remains exactly `0001`–`0004`.
-- [x] Release 466 Builds 1 and 2 introduced no migration `0005`.
-- [x] Corrected Build 2 exact-SHA System Gate reported `No migrations to apply!`.
-- [x] Development: `583` total non-sqlite tables / `4` migrations / `4` proofs / `4` Release 465 guards / `11` inherited Build 3 authorities / `0` FK violations.
+- [x] Release 466 Builds 1–3 introduced no migration `0005`.
+- [x] Build 3 exact-SHA System Gate reported `No migrations to apply!`.
+- [x] Development: `583` total non-sqlite tables / `4` migrations / `4` proofs / `4` Release 465 guards / `11` inherited business authorities / `0` FK violations.
 - [x] Production: canonical `0001`–`0004` remain applied/proven from Release 465.
 
 ## Release 466 Build 1 closure
@@ -31,49 +31,55 @@
 - [x] Rollback readiness, disaster recovery, structural drift and current Production reliability evidence remain green.
 - [ ] Native GitHub `dev`/`main` ruleset application remains an external repository-setting action; in-repository controls are green.
 
-## Release 466 Build 2 proof
+## Release 466 Build 2 closure
 
-- [x] Technical-green source SHA `68f1dae3a0b56de5b631603bf7191388a8f8f219`.
-- [x] Canonical System Gate `33465451865` passed.
-- [x] Exact Preview `https://8a41ed9d.devilndove-site.pages.dev` passed bindings and Access-safe smoke.
-- [x] Release 466 Build 2 Proof `33465451850` passed.
-- [x] Proof artifact `9784701212` retained with SHA-256 `3c46694f1675a19d237475b4207224a8c834820b62db27cb1a0e3f873b91b63e`.
-- [x] Development intelligence tables `runtime_incidents`, `search_console_import_batches` and `search_console_page_queries` exist.
-- [x] Synthetic storefront monitor checked `8` live Production routes: GREEN, `0` warnings, `0` failures, GET only.
-- [x] Full Production SEO crawl is public-only and read-only: `46` HTML pages, `38` sitemap URLs, `6` errors, `8` warnings.
-- [x] Crawler normalizes `index.html` aliases and excludes `/admin/`, `/api/` and `/cdn-cgi/` from public SEO scoring.
-- [x] Production mutation by Build 2 monitoring/crawler: ZERO.
-- [x] Preview authentication headers used: ZERO; Cloudflare Access weakened: NO.
+- [x] Final closure source SHA `855171430c6b14c4f4a6ff24a120bcce722294f9`.
+- [x] Final canonical System Gate `33466171233` passed.
+- [x] Final Release 466 Build 2 Proof `33466171290` passed.
+- [x] Synthetic storefront monitor remained GREEN.
+- [x] Full Production SEO crawler remains public-only/read-only and retains the six live sitemap/noindex conflicts.
+
+## Release 466 Build 3 technical proof
+
+- [x] Technical-green source SHA `5ca09eab9e2a3441ffbdf76c46e35b3a6fcd52a6`.
+- [x] Canonical System Gate `33466655732` passed.
+- [x] Exact Preview `https://732f6430.devilndove-site.pages.dev` passed bindings and Access-safe smoke.
+- [x] Release 466 Build 3 Proof `33466655735` passed.
+- [x] Proof artifact `9785121048` retained with SHA-256 `92af7c472900d89cf4d9a01a44d4abc5ba4a10ef698de2cac7df44011b525b56`.
+- [x] All `11` required Development authority tables are present.
+- [x] Observed Development rows: page views `33`, Products `45`, Inventory `1041`, Creative projects `5`, cart `0`, orders `0`, searches `0`, profitability `0`.
+- [x] Zero observed rows are explicitly not interpreted as zero demand, zero business activity or zero Production activity.
+- [x] Build 3 Development D1 operation is SELECT-only.
+- [x] Automatic price change, automatic reorder and automatic Creative project start remain ZERO.
+- [x] Inventory/Accounting mutation, provider/payment execution and Production business-row reads remain ZERO.
 
 ## Item status
 
 - [ ] Item 1 native GitHub `dev`/`main` ruleset application — **external repository setting pending**. In-repository policy and equivalent fail-closed controls are green.
-- [x] Item 2 rollback readiness — Development green, execution disabled.
-- [x] Item 3 disaster-recovery rehearsal — Development green.
-- [x] Item 4 structural drift detector — Development green.
-- [x] Item 5 Production reliability/SLO snapshot — Development green.
-- [x] Item 6 synthetic storefront monitoring — Development green.
-- [x] Item 7 JavaScript/runtime error capture — Development green collector/aggregation authority.
-- [x] Item 8 real-user performance telemetry — Development green collector/p75 authority.
-- [x] Item 9 full Production SEO crawler — Development green, live findings retained.
-- [x] Item 10 Search Console/indexing intelligence — Development green staged-import/analysis authority.
+- [x] Items 2–5 governance/recovery/reliability — Development green.
+- [x] Items 6–10 runtime/storefront intelligence — Development green.
+- [x] Item 11 conversion-funnel analytics — Development green.
+- [x] Item 12 zero-result/abandoned-search intelligence — Development green.
+- [x] Item 13 Product opportunity score — Development green and explainable.
+- [x] Item 14 Inventory reorder economics — Development green and recommendation-only.
+- [x] Item 15 Creative-project priority engine — Development green and recommendation-only.
 
 ## Current intelligence findings and interpretation
 
 - [ ] Live Release 465 sitemap/noindex conflicts remain for `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`.
-- [x] Current Development-observed client-runtime rows: `0`. This is **not** a claim of zero live Production errors; Release 466 telemetry is not yet live on Production.
-- [x] Current Development-observed RUM rows: `0`. This is **not** a claim of perfect live Core Web Vitals; field collection begins after deliberate Release 466 Production promotion.
-- [x] Current Search Console rows: `0`. This means no current imported dataset is present; it does not mean search traffic is zero.
-- [x] Direct Google Search Console API authorization was neither required nor used for Build 2 closure.
+- [x] Development-observed Build 3 cart/order/search/profitability row counts of `0` are coverage evidence only, not claims about Production demand or business activity.
+- [x] Build 2 client-runtime/RUM/Search Console zero-row interpretation remains unchanged: no captured Development/imported observations is not proof of zero live errors, perfect Web Vitals or zero search traffic.
 
 ## Remaining amber boundaries
 
 - [ ] Native GitHub ruleset application.
 - [ ] Six current Production sitemap/noindex conflicts retained by Build 2 intelligence.
-- [ ] Release 466 Builds 3–4.
-- [ ] Stripe Development, PayPal sandbox, CAIP private-media and Social/OAuth acceptance remain deliberately deferred to Build 4.
+- [ ] Release 466 Build 4.
+- [ ] CAIP private-media authenticated browser/range acceptance.
+- [ ] Stripe Development and PayPal sandbox acceptance.
+- [ ] Social/OAuth controlled acceptance.
 - [ ] Release 466 Production promotion is not authorized.
 
 ## Current verdict
 
-Release 466 Build 2 is technically **Development GREEN**. Build 1 native GitHub ruleset application remains the external governance action. Production remains safely on Release 465. After the final Build 2 closure tree re-passes the canonical System Gate and Build 2 Proof, the next bounded work is **Release 466 Build 3 — Revenue & Business Intelligence, items 11–15**.
+Release 466 Build 3 is technically **Development GREEN**. Build 1 native GitHub ruleset application remains the external governance action. Production remains safely on Release 465. The next bounded work after final Build 3 closure proof is **Release 466 Build 4 — External Acceptance & Commercial Readiness, items 16–20**.
