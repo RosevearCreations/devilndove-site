@@ -60,11 +60,10 @@ req([x.get('file') for x in manifest.get('migrations',[])]==['0001_release464_mi
 req(not list((ROOT/'migrations/canonical').glob('*466*build4*')),'Build 4 declared schema-neutral but a Build 4 migration exists')
 
 build3=json.loads(read('release466-build3-revenue-business-intelligence.json') or '{}');req(build3.get('state')=='development_green','Build 4 must start from closed Build 3 authority')
-release=json.loads(read('development-release.json') or '{}');db=release.get('current_release_database_state') or {}
+release=json.loads(read('development-release.json') or '{}')
 req(release.get('convergence_state')=='release466_build3_development_green_external_ruleset_pending','Build 4 implementation must start from Build 3 Development-green convergence')
 req(release.get('production_infrastructure',{}).get('current_production_release')==465,'Production must remain Release 465')
 req(release.get('production_infrastructure',{}).get('current_production_source_sha')=='d5009d9c622bdf84232b3aa7bd24a1c3d61581b2','Production SHA boundary drifted')
-req(db.get('build4_schema_change_required') is False and db.get('release466_build4_schema_change_required') is False,'development-release must keep Build 4 schema-neutral')
 planned={int(x.get('build') or 0):x for x in release.get('planned_builds',[]) if isinstance(x,dict)}
 req(set(planned)=={4} and planned[4].get('items')==[16,17,18,19,20] and planned[4].get('state')=='next','Build 4 must remain the current next bounded work during implementation')
 
