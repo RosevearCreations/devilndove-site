@@ -1,215 +1,164 @@
-# Development I.T. Test Environment
+# Development I.T. Test Environment — Release 466
 
-Updated: 2026-08-28/29
+Updated: 2026-09-01
 
-This is the release-independent Development testing procedure for deferred I.T. runtime/provider/media evidence. It is **non-blocking** for normal forward release development, but real accepted evidence is required before a strict promotion-ready result. Historical numbered testing guides remain Git-history provenance only and are not operating instructions.
+This is the current release-independent procedure for **Release 466 Build 4 — External Acceptance & Commercial Readiness**. Historical numbered testing guides are provenance only; they are not current operating instructions.
 
-The application continues through one current release even when an external credential, provider sandbox, authenticated browser session or private-media acceptance task is pending. Those tasks stay visible in I.T. authority and carry forward; they do not become old-release gates.
+## Current boundary
 
-## Allowed target
-
-- Branch: `dev`
-- Cloudflare Pages project: `devilndove-site-dev`
-- Allowed runtime host: `https://devilndove-site-dev.pages.dev`
+- Source branch: `dev`
+- Development Pages project: `devilndove-site`
+- Development environment: Cloudflare Pages Preview
 - Development D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
-- Development R2: `devilndove-toolshed-images-dev` and `devilndove-caip-media-dev`
-- Separate Production: `main` / `devilndove-site`
+- Development Product R2: `devilndove-toolshed-images-dev`
+- Development CAIP R2: `devilndove-caip-media-dev`
+- Production branch: `main`
+- Production release: Release 465
+- Production exact source: `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`
+- Production business/transactional data remain Production-owned.
 
-`scripts/development_runtime_acceptance.py` hard-refuses Production, custom-domain, HTTP and arbitrary hosts. Runtime acceptance performs GET requests only.
+Canonical D1 migrations remain exactly `0001`–`0004`. Release 466 Builds 1–4 are schema-neutral unless a future source change deliberately creates a new canonical migration and follows Development-first migration policy.
 
-## Current Release 448 activation boundary
+## Build 4 acceptance cockpit
 
-Release 447 convergence is already applied and verified. Release 448 currently has six additive migrations:
+Open:
 
-1. `database_release448_product_lineage.sql`
-2. `database_release448_media_it.sql`
-3. `database_release448_storefront_merchandising.sql`
-4. `database_release448_caip_content_handoff.sql`
-5. `database_release448_tool_lifecycle.sql`
-6. `database_release448_supply_sourcing.sql`
+`/admin/release-control/external-commercial-readiness/`
 
-The exact-Development workflow is `.github/workflows/development-d1-release448.yml`. It is deliberately guarded by the GitHub Actions repository secret `CLOUDFLARE_API_TOKEN`, exact database name and exact database ID, and it performs no automatic write retry.
+The cockpit is GET-only. It combines existing I.T., Financials, Socials and CAIP acceptance authority and must render unresolved external work as **HOLD**, never as an inferred PASS.
 
-Latest proven remote result: workflow run **33227149444** stopped at the credential guard because `CLOUDFLARE_API_TOKEN` was empty. The D1 auth probe and all migration/verification steps were skipped. Therefore none of the six migrations is remotely proven applied yet.
+Related workspaces:
 
-Never paste the token into chat, Markdown, source, a shell argument or an evidence file. Once the secret exists, rerun the guarded workflow and require its final read-only verification before updating D1 status.
+- `/admin/it-integrations/` — provider readiness checks, correction mechanics and sanitized evidence references.
+- `/admin/runtime-acceptance/` — Development runtime/private-media acceptance workspace.
+- `/admin/release-control/runtime-storefront-intelligence/` — Build 2 monitoring/SEO evidence.
+- `/admin/release-control/revenue-business-intelligence/` — Build 3 business intelligence.
 
-## Forward-development rule
+## Permanent evidence rules
 
-For ordinary feature implementation, treat required Development provider/key **references** as available or use the existing safe mock/provider abstraction. Do not block Storefront, Creators, Socials, Financials, CAIP, Inventory, Supplies, Tools or client work merely because real provider acceptance has not yet been performed.
+- Configuration is not acceptance.
+- A credential reference is not acceptance.
+- An enabled Development operator switch is not acceptance.
+- Do not store passwords, cookies, tokens, provider secrets, card data or OAuth token material in Markdown, D1 evidence text, Git, screenshots, shell arguments or chat.
+- Provider/payment testing is Development test/sandbox only until a separate Production authorization.
+- Production payment/provider execution remains forbidden.
+- Provider publication remains closed.
+- Raw CAIP R2 deletion remains closed.
+- Preview Cloudflare Access must not be weakened for testing.
+- Any Production promotion remains a separate deliberate decision after Development acceptance.
 
-This does **not** mean a real Stripe, PayPal, social, Amazon or other credential has been verified. External I.T. validation remains a dedicated acceptance activity.
+## 16. CAIP private-media browser/range-streaming acceptance
 
-## Canonical read-only repository/infrastructure checks
+Acceptance requires real authenticated Development evidence through the administrator-bound secure review proxy, not merely an R2 binding or object listing.
 
-```bash
-python scripts/repository_forward_sanity.py
-python scripts/release448_expansion_authority_gate.py
-python scripts/module_architecture_gate.py
-python scripts/database_platform_gate.py
-python scripts/release448_fresh_install_gate.py
-python scripts/product_lineage_gate.py
-python scripts/apply_development_product_lineage.py --transport-preflight
-python scripts/release448_media_it_source_gate.py
-python scripts/apply_development_release448_media_it.py --transport-preflight
-python scripts/release448_storefront_merchandising_gate.py
-python scripts/apply_development_release448_storefront_merchandising.py --transport-preflight
-python scripts/release448_caip_content_handoff_gate.py
-python scripts/apply_development_release448_caip_content_handoff.py --transport-preflight
-python scripts/release448_inventory_intelligence_gate.py
-python scripts/release448_tool_lifecycle_gate.py
-python scripts/apply_development_release448_tool_lifecycle.py --transport-preflight
-python scripts/release448_supply_sourcing_gate.py
-python scripts/apply_development_release448_supply_sourcing.py --transport-preflight
-python scripts/release448_calibration_gate.py
-python scripts/release448_promotion_rehearsal.py --source-check
-python scripts/public_seo_gate.py
-python scripts/pwa_platform_gate.py
-python scripts/product_inventory_tools_source_gate.py
-python scripts/cloudflare_development_access.py --transport-preflight
-python scripts/development_runtime_acceptance.py --self-check
-```
+Require:
 
-Use the read-only Cloudflare resource preflight when infrastructure work requires it:
+1. Use a current authenticated Development administrator session.
+2. Select an existing private CAIP source object; do not fabricate or copy a Production object.
+3. Create/use the normal short-lived administrator-bound secure review grant.
+4. Load the media through `/api/admin/creative-asset-review`.
+5. Seek within the media so the browser issues an HTTP `Range` request.
+6. Confirm the response is HTTP `206` with valid `Content-Range`, `Accept-Ranges: bytes`, private/no-store caching and same-origin protections.
+7. Confirm `creative_asset_access_audit` records `review_proxy_served` evidence with `ranged_streaming=true`, `no_copy=true` and `no_cache=true`.
+8. Confirm the source R2 object remains unchanged and no raw token is logged.
 
-```bash
-python scripts/cloudflare_development_access.py --auth-only
-```
+**Pass condition:** the Build 4 cockpit reports CAIP private-media acceptance as accepted from a qualifying real range-stream audit.
 
-This verifies the exact Development account, D1 and both R2 buckets without applying a migration. Do not reapply `database_platform_convergence.sql` merely because a release or chat changed.
+## 17. Stripe Development acceptance
 
-## Anonymous protection acceptance
+Remote Stripe execution is allowed only when all of the following are true:
 
-Before using an authenticated session, the runtime harness can prove protected GET routes refuse anonymous access:
+- request host is the Development Preview host;
+- `DND_ENVIRONMENT=development`;
+- `PAYMENT_PROVIDER_EXECUTION_MODE=development-explicit`;
+- Stripe credentials are test-mode credentials;
+- no live credential is detected.
 
-```bash
-python scripts/development_runtime_acceptance.py --anonymous-check
-```
+The existing I.T. readiness authority requires these checks to be `passed` with sanitized evidence references:
 
-It checks the canonical infrastructure/module/contracts plus the current Release 448 operational reads and expects HTTP 401/403.
+1. `credentials` — Development test credentials configured.
+2. `checkout` — one owner-controlled Stripe test checkout completes without a live charge.
+3. `webhook-signature` — signed Development webhook verification passes.
+4. `reconciliation` — provider transaction reconciles to local order/payment/accounting evidence without duplicate posting.
+5. `idempotent-replay` — replaying the same signed test event creates no duplicate order, payment, refund, inventory or accounting effect.
 
-## Authenticated Development runtime
+Do not use a real card or live key. Provider configuration alone must remain pending.
 
-Use a fresh authenticated Development browser session. Put only the complete Development session-cookie header value in the environment variable `DND_DEV_SESSION_COOKIE`. Do not put a password, cookie, API key or token in a script, Markdown file, shell argument, Git commit or evidence file.
+## 18. PayPal sandbox acceptance
 
-PowerShell example using a placeholder only:
+Remote PayPal execution is allowed only on the Development Preview with the explicit Development payment switch and `PAYPAL_ENV=sandbox`. Live credentials are forbidden.
 
-```powershell
-$env:DND_DEV_SESSION_COOKIE = 'session=<development-session-value>'
-python scripts/development_runtime_acceptance.py --evidence-json evidence/runtime-authenticated.json
-Remove-Item Env:DND_DEV_SESSION_COOKIE
-```
+Required `passed` checks with sanitized evidence:
 
-The Release 448 harness validates:
+1. `credentials` — sandbox credentials configured.
+2. `approval-capture` — one owner-controlled sandbox approval/capture completes.
+3. `webhook-verification` — sandbox webhook authenticity is verified.
+4. `reconciliation` — sandbox capture reconciles to local order/payment/accounting evidence.
+5. `idempotent-replay` — duplicate sandbox event replay creates no duplicate financial/order effect.
 
-- exact Development target;
-- D1 schema and both Development R2 bindings;
-- no runtime migration requirement;
-- read-only mutation policy;
-- five canonical modules with 10 canonical role rows;
-- Storefront, Creators and Financials read contracts;
-- Product Lineage list/read authority;
-- Product Photography catalog-summary authority;
-- Storefront merchandising authority;
-- Inventory Intelligence authority and no duplicate write ledger;
-- Tool Lifecycle authority;
-- Supply Sourcing authority and `stock_mutation_capability: none`;
-- Release 448 Calibration Cockpit with zero schema-blocked areas after D1 activation;
-- I.T. integration registry;
-- safe Stripe/PayPal configuration readiness.
+## 19. Social / OAuth controlled acceptance
 
-Provider transaction acceptance and CAIP private-media acceptance remain explicitly `NOT_PERFORMED` in this GET-only harness. Generated evidence is sanitized.
+OAuth remote authorization remains fail-closed unless the Development-only operator switch is explicitly enabled. Raw state, PKCE verifiers and provider tokens must remain encrypted/redacted.
 
-## Real-data calibration after D1 activation
+Only deliberately enabled Development providers are acceptance targets. For each selected provider require:
 
-Open `/admin/release448-calibration/` after authenticated runtime is green. It is derived/read-only and creates no second calibration ledger.
+1. provider readiness checks marked `passed` with sanitized evidence;
+2. the intended provider account verified before token persistence/use;
+3. a controlled OAuth connection lifecycle producing safe local security evidence;
+4. refresh/revoke/disconnect behavior exercised where supported;
+5. token and provider-subject values absent from diagnostics/evidence;
+6. provider publication remains disabled.
 
-Work through:
+If no provider is deliberately selected, Build 4 must show `pending_provider_selection`; it must not infer acceptance.
 
-1. Product Photography — score remaining Product sets, review low scores/duplicates, calibrate thresholds.
-2. Product Lineage — verify required new handmade material/tool provenance; reconstruct legacy only where evidence exists.
-3. Storefront — review Collection membership, Collage composition, mobile rendering and public SEO against real Products.
-4. CAIP — prepare/review source-backed Content Studio handoffs; private-media transport remains separate evidence.
-5. Inventory — resolve linked stockouts, reorder, provenance and usage-profile gaps.
-6. Tools — establish condition/service/replacement state without consuming Tool quantity.
-7. Supplies — calibrate reorder/target/safety stock, source cost/lead time and reviewed substitutions; ordering remains manual.
-8. I.T. — record real configuration/test evidence without storing secrets.
+## 20. Production-launch readiness
 
-## Deferred Stripe test
+The Build 4 cockpit must stay **HOLD** until external acceptance is complete and all launch blockers have been deliberately resolved/reviewed.
 
-Stripe provider acceptance later covers:
+Current carried-forward launch blockers include:
 
-1. test-mode checkout creation;
-2. owner-controlled completion/return;
-3. signed webhook receipt;
-4. order/payment reconciliation;
-5. duplicate event replay/idempotency;
-6. sanitized evidence references.
+- native GitHub `dev`/`main` ruleset application remains an external repository-setting action;
+- Release 465 sitemap/noindex conflicts remain visible for `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`;
+- any incomplete Build 4 external acceptance item.
 
-Until performed, record Stripe as `deferred`/unaccepted in the I.T. test environment. Do not infer acceptance from readiness/configuration.
+A zero-blocker cockpit does **not** deploy Production. It only supports a later separate promotion review of the exact green Development tree.
 
-## Deferred PayPal sandbox test
+## Source and CI proof
 
-PayPal provider acceptance later covers:
-
-1. sandbox approval flow;
-2. capture;
-3. owner-controlled return;
-4. verified webhook receipt;
-5. reconciliation;
-6. duplicate replay/idempotency;
-7. sanitized evidence references.
-
-Until performed, record PayPal as `deferred`/unaccepted. Do not infer acceptance from readiness/configuration.
-
-## Deferred CAIP private-media evidence
-
-Later I.T./CAIP acceptance covers authenticated private object delivery, HTTP Range/seek behavior, exact timecode/range evidence, verified derived-artifact metadata and provider-off/error behavior. Public media or simple bucket visibility is not equivalent evidence.
-
-## Promotion rehearsal
-
-Normal source CI runs:
+Build 4 source-gating is owned by:
 
 ```bash
-python scripts/release448_promotion_rehearsal.py --source-check
+python scripts/release466_build4_gate.py
 ```
 
-This validates the readiness authority while allowing an expected HOLD during active Development.
+The Build 4 GitHub workflow must prove source safety and read Development evidence only. It must not automatically call Stripe, PayPal, OAuth providers, Production APIs or mutate Production. External browser/provider tests remain deliberate operator-controlled acceptance activities.
 
-When D1 activation, real-data calibration and all required external/private acceptance have genuine evidence, run:
+## Existing fail-closed execution authorities
 
-```bash
-python scripts/release448_promotion_rehearsal.py --strict
-```
+Payment execution:
 
-`--strict` must remain HOLD/non-zero until those states are complete. The rehearsal has no Production mutation capability; a PASS only supports a later deliberate promotion decision.
+- `functions/api/_lib/paymentExecution.js`
+- Development host + explicit operator switch + test/sandbox credentials required.
+- live credentials are rejected.
 
-## I.T. authority direction
+OAuth:
 
-The I.T. page/registry is the single place to hold safe provider/platform metadata:
+- `functions/api/admin/oauth-start.js`
+- `functions/api/admin/oauth-connections.js`
+- encrypted state/PKCE/token lifecycle with intended-account verification.
+- remote authorization requires the Development-only explicit switch.
 
-- platform/provider and capability;
-- consuming module/workflow;
-- Development/Production environment;
-- secret/binding **reference name only**;
-- callback/redirect/webhook locations;
-- requested/granted scopes;
-- configured state;
-- tested/accepted state;
-- last safe test result/error;
-- correction/recovery mechanics;
-- evidence reference.
+CAIP private review:
 
-Actual secret values never belong in D1, visible HTML, source control, logs or evidence output.
+- `functions/api/admin/creative-asset-review.js`
+- administrator-bound grant, private/no-store response, R2 range streaming, no source copy/delete.
 
-## Permanent rules
+I.T. acceptance ledger:
 
-- Historical Build numbers are provenance only, never current acceptance requirements.
-- There is one current forward release.
-- Deferred I.T. test work is non-blocking for ordinary source development and required for strict promotion readiness.
-- Runtime acceptance is Development-only and GET/read-only.
-- No embedded passwords, tokens, cookies or provider secrets.
-- D1/R2 readiness never authorizes an unrelated migration.
-- Provider readiness never implies provider acceptance.
-- Supply sourcing never implies provider purchasing or stock mutation.
-- Production mutation is forbidden until a deliberate promotion decision.
+- `functions/api/admin/it-provider-readiness.js`
+- stores only safe state, correction mechanics and evidence references.
+- secret-like values are refused.
+
+## Final rule
+
+Release 466 Build 4 is an **acceptance and readiness** build. Never turn missing external evidence into a green result merely to complete the release. A truthful HOLD is the correct state until the real Development test/sandbox/browser evidence exists.
