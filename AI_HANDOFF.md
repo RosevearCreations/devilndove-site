@@ -28,7 +28,7 @@ Production business/transactional data remain Production-owned. Release 466 has 
 
 ## Builds 1–3
 
-Builds 1–3 remain Development green and must continue to pass inherited proofs on every Build 4 source tree.
+Builds 1–3 remain Development green and must continue to pass inherited proofs on every Build 4 source tree. **Build 3 is Development green.**
 
 - Build 1 closure SHA `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`.
 - Build 2 closure SHA `855171430c6b14c4f4a6ff24a120bcce722294f9`.
