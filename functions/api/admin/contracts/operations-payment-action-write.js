@@ -1,6 +1,6 @@
 // Devil n Dove Build 409 Operations-owned payment refund/dispute authority.
-// Provider mutations are fail-closed: local-only is the default even when the
-// mature compatibility implementation historically defaulted provider sync on.
+// Provider mutations are fail-closed: local-only is the default. Release 466 additionally
+// requires the Development-only payment execution boundary before any provider network call.
 
 import { onRequestPost as implementationPost } from '../payment-actions.js';
 
@@ -20,6 +20,7 @@ export const metadata = Object.freeze({
   providerEnableFlag: PROVIDER_ENABLE_FLAG,
   providerConfirmationField: 'provider_sync_confirmed',
   providerSyncRequiresBothGates: true,
+  release466PaymentExecutionBoundaryRequired: true,
   consumerMoved: true,
   createsNetworkTransport: false,
 });
@@ -62,8 +63,8 @@ export async function onRequestPost(context) {
   const safeBody = {
     ...body,
     sync_provider: action === 'refund' && providerEnabled && providerConfirmed ? 1 : 0,
+    provider_sync_confirmed: action === 'refund' && providerEnabled && providerConfirmed,
   };
-  delete safeBody.provider_sync_confirmed;
 
   const request = new Request(context.request.url, {
     method: 'POST',
