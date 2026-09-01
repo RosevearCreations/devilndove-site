@@ -65,6 +65,30 @@
     "production_mutation": false,
     "raw_r2_delete": false
   },
-  "final_restart_rule": "The authoritative final restart checkpoint is the exact current dev head only after this closure tree passes its final idempotent System Gate; the closure commit does not self-embed a future SHA or run ID.",
-  "production_promotion": "closed"
+  "production_evidence": {
+    "state": "complete_production_green",
+    "promoted_source_sha": "6f2bd42e99f8a92cc6f6aa3dad717fa6b9fc6677",
+    "development_system_gate_run": 33457936115,
+    "production_workflow_run": 33458134514,
+    "production_job": 99702372383,
+    "exact_production_url": "https://4b352cde.devilndove-site.pages.dev",
+    "live_domain": "https://devilndove.com",
+    "promotion_proof_artifact_id": 9782207262,
+    "tables": 583,
+    "canonical_migrations": 4,
+    "migration_proofs": 4,
+    "release465_triggers": 4,
+    "build3_required_tables": 11,
+    "foreign_key_violations": 0,
+    "business_counts_preserved": true,
+    "users": 1,
+    "products": 45,
+    "site_item_inventory": 1041,
+    "orders": 0,
+    "public_smoke_pass": true,
+    "provider_execution": false,
+    "provider_publication": false
+  },
+  "final_restart_rule": "The authoritative restart checkpoint is the exact current dev/main convergence head after the post-Production closure tree passes Development System Gate and the Production workflow idempotently.",
+  "production_promotion": "complete_production_green"
 }
