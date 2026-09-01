@@ -1,0 +1,44 @@
+name: Release 466 System Gate Path Patch
+
+on:
+  push:
+    branches:
+      - release466-build6-system-gate-tracking
+    paths:
+      - '.github/workflows/release466-system-gate-path-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-system-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Add Release 466 authority trigger and remove patch workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/system-gate.yml')
+          text = path.read_text(encoding='utf-8')
+          marker = "      - 'release466-*.json'\n"
+          if marker not in text:
+              anchor = "      - 'release465-performance-budget.json'\n"
+              if anchor not in text:
+                  raise SystemExit('Expected System Gate path anchor not found')
+              text = text.replace(anchor, anchor + marker, 1)
+              path.write_text(text, encoding='utf-8')
+          PY
+          git rm .github/workflows/release466-system-gate-path-patch.yml
+          git diff --check
+          git diff -- .github/workflows/system-gate.yml
+          test "$(git diff --numstat -- .github/workflows/system-gate.yml | awk '{print $1":"$2}')" = "1:0"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/system-gate.yml
+          git commit -m 'Release 466 track authority files in System Gate'
+          git push origin HEAD:release466-build6-system-gate-tracking
