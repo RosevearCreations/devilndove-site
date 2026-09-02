@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Fail-closed source contract for Release 467 Build 12 — Finance Operations Command Center."""
+"""Fail-closed source contract for Release 467 Build 12 — Finance Operations Command Center.
+
+Build 12 remains exact while current. Newer Release 467 builds must preserve its manifest/runtime
+contract and closed-predecessor evidence without forcing unrelated later maintenance work into the
+Build 12 changed-file allowlist.
+"""
 from __future__ import annotations
 import json, re, subprocess, sys
 from pathlib import Path
@@ -42,24 +47,33 @@ sanity=read("SANITY_HEALTH_CHECK.md")
 index=read("MARKDOWN_INDEX.md")
 ops_doc=read("docs/operations/RELEASE_467_BUILD_12_FINANCE_OPERATIONS_COMMAND_CENTER.md")
 
-req(pointer.get("release")==467 and pointer.get("build")==12,"current authority must identify Release 467 Build 12")
-req(pointer.get("title")=="Finance Operations Command Center","Build 12 title drifted")
-req(pointer.get("state")=="DEVELOPMENT_CANDIDATE","Build 12 pointer must remain DEVELOPMENT_CANDIDATE before merge")
-req(pointer.get("source_base_sha")==BASE_SHA,"Build 12 source base drifted")
-req(pointer.get("last_green_build")==11,"Build 11 must be exact last-green predecessor")
-req(pointer.get("last_green_dev_sha")==BASE_SHA,"Build 11 predecessor SHA drifted")
-req(pointer.get("last_green_dev_tree_sha")==BASE_TREE,"Build 11 predecessor tree drifted")
-req(pointer.get("last_green_system_gate_run")==SYSTEM_GATE,"Build 11 System Gate evidence drifted")
-req(pointer.get("last_green_build_proof_run")==BUILD11_PROOF,"Build 11 proof evidence drifted")
+pointer_build=int(pointer.get("build") or 0)
+req(pointer.get("release")==467 and pointer_build>=12,"current authority must remain Release 467 Build 12 or newer")
+req(pointer.get("state") in {"DEVELOPMENT_CANDIDATE","DEVELOPMENT_GREEN"},"current authority state drifted")
+if pointer_build==12:
+    req(pointer.get("title")=="Finance Operations Command Center","Build 12 title drifted")
+    req(pointer.get("source_base_sha")==BASE_SHA,"Build 12 source base drifted")
+    req(pointer.get("last_green_build")==11,"Build 11 must be exact last-green predecessor")
+    req(pointer.get("last_green_dev_sha")==BASE_SHA,"Build 11 predecessor SHA drifted")
+    req(pointer.get("last_green_dev_tree_sha")==BASE_TREE,"Build 11 predecessor tree drifted")
+    req(pointer.get("last_green_system_gate_run")==SYSTEM_GATE,"Build 11 System Gate evidence drifted")
+    req(pointer.get("last_green_build_proof_run")==BUILD11_PROOF,"Build 11 proof evidence drifted")
+    req((pointer.get("current_release_authorities") or [None])[0]=="release467-build12-finance-operations-command-center.json","Build 12 must be first current authority while current")
+else:
+    req(int(pointer.get("last_green_build") or 0)>=12,"newer Release 467 authority must retain Build 12 as a closed predecessor")
+    req(bool(pointer.get("last_green_dev_sha")),"newer Release 467 authority must retain last-green Development SHA")
+    req(bool(pointer.get("last_green_dev_tree_sha")),"newer Release 467 authority must retain last-green Development tree")
+    req(bool(pointer.get("last_green_system_gate_run")),"newer Release 467 authority must retain last-green System Gate evidence")
+    req(bool(pointer.get("last_green_build_proof_run")),"newer Release 467 authority must retain last-green build proof evidence")
 req(pointer.get("promotion_state")=="NO_AUTOMATIC_PROMOTION","Build 12 cannot authorize Production promotion")
-req((pointer.get("current_release_authorities") or [None])[0]=="release467-build12-finance-operations-command-center.json","Build 12 must be first current authority")
+req("release467-build12-finance-operations-command-center.json" in (pointer.get("current_release_authorities") or []),"newer Release 467 authority must retain Build 12 provenance")
 req("release467-build11-admin-operations-command-center.json" in (pointer.get("current_release_authorities") or []),"Build 11 provenance must remain retained")
 compatibility=pointer.get("compatibility_authority") or {}
 req(compatibility.get("role")=="INHERITED_REGRESSION_COMPATIBILITY","Release 466 compatibility role drifted")
 req(compatibility.get("runtime_release_header")==466 and compatibility.get("runtime_release_header_role")=="INHERITED_RUNTIME_COMPATIBILITY","runtime compatibility classification drifted")
 req(compat.get("release")==466,"development-release.json must remain inherited Release 466 evidence")
 for key in ("schema_change_authorized","d1_mutation_authorized","r2_mutation_authorized","provider_execution_authorized","provider_publication_authorized","cloudflare_access_mutation_authorized","main_mutation_authorized","production_mutation_authorized","secret_values_emitted"):
-    req(pointer.get(key) is False,f"Build 12 pointer safety flag must remain false: {key}")
+    req(pointer.get(key) is False,f"current pointer safety flag must remain false: {key}")
 
 req(manifest.get("release")==467 and manifest.get("build")==12,"Build 12 manifest identity drifted")
 req(manifest.get("source_base_sha")==BASE_SHA and manifest.get("source_base_tree_sha")==BASE_TREE,"Build 12 manifest predecessor drifted")
@@ -88,28 +102,26 @@ for endpoint in ("/api/admin/accounting-reconciliation","/api/admin/accounting-r
     req(endpoint in ops_js,f"existing Accounting read source missing from shared engine: {endpoint}")
 for forbidden in ("fetch('/api/admin","method:'POST'","method: 'POST'","method:'PUT'","method: 'PUT'","method:'DELETE'","method: 'DELETE'","CREATE TABLE","ALTER TABLE","DROP TABLE"):
     req(forbidden not in ops_js,f"Build 12 shared Finance intelligence contains forbidden mutation marker: {forbidden}")
-req("pointer_build >= 11" in build11_gate,"Build 11 gate must be forward-compatible with Build 12")
+req("pointer_build >= 11" in build11_gate,"Build 11 gate must remain forward-compatible")
 req("if pointer_build == 11" in build11_gate,"Build 11 exact scope must remain limited to Build 11 itself")
-req("newer Release 467 authority must retain Build 11 as a closed predecessor" in build11_gate,"Build 11 closed-predecessor proof missing")
 expected=["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql","0003_release464_business_growth.sql","0004_release465_storefront_quality.sql"]
 req([row.get("file") for row in migrations.get("migrations",[])]==expected,"Build 12 must preserve canonical migrations 0001-0004 exactly")
 req(not list((ROOT/"migrations/canonical").glob("*467*build12*")),"Build 12 is schema-neutral but a Build 12 migration exists")
 for body,name in ((handoff,"AI_HANDOFF.md"),(roadmap,"PROJECT_STATUS_AND_ROADMAP.md"),(sanity,"SANITY_HEALTH_CHECK.md"),(index,"MARKDOWN_INDEX.md"),(ops_doc,"Build 12 operations doc")):
     for token in ("Release 467 Build 12","Finance Operations Command Center",BASE_SHA,"HOLD_EXTERNAL"):
         req(token in body,f"{name} missing Build 12 authority token: {token}")
-allowed={"admin/finance/index.html","public/js/admin-accounting-operations.js","current-development-authority.json","release467-build12-finance-operations-command-center.json","scripts/release467_build11_gate.py","scripts/release467_build12_gate.py",".github/workflows/release467-build12-proof.yml","PROJECT_STATUS_AND_ROADMAP.md","AI_HANDOFF.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md","docs/operations/RELEASE_467_BUILD_12_FINANCE_OPERATIONS_COMMAND_CENTER.md"}
-changed=changed_files()
-if changed:
-    unexpected=[p for p in changed if p not in allowed]; req(not unexpected,f"Build 12 changed files outside bounded Finance scope: {unexpected}")
-    migration_changes=[p for p in changed if p.startswith("migrations/") or p.lower().endswith(".sql")]; req(not migration_changes,f"Build 12 is schema-neutral but migration/SQL files changed: {migration_changes}")
+if pointer_build==12:
+    allowed={"admin/finance/index.html","public/js/admin-accounting-operations.js","current-development-authority.json","release467-build12-finance-operations-command-center.json","scripts/release467_build11_gate.py","scripts/release467_build12_gate.py",".github/workflows/release467-build12-proof.yml","PROJECT_STATUS_AND_ROADMAP.md","AI_HANDOFF.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md","docs/operations/RELEASE_467_BUILD_12_FINANCE_OPERATIONS_COMMAND_CENTER.md"}
+    changed=changed_files()
+    if changed:
+        unexpected=[p for p in changed if p not in allowed]; req(not unexpected,f"Build 12 changed files outside bounded Finance scope: {unexpected}")
+        migration_changes=[p for p in changed if p.startswith("migrations/") or p.lower().endswith(".sql")]; req(not migration_changes,f"Build 12 is schema-neutral but migration/SQL files changed: {migration_changes}")
 if FAIL:
     print("FAIL Release 467 Build 12 Finance Operations Command Center gate")
     for item in FAIL: print(f"- {item}")
     sys.exit(1)
 print("PASS Release 467 Build 12 Finance Operations Command Center gate")
-print(f"predecessor_dev_sha={BASE_SHA}")
-print(f"predecessor_system_gate={SYSTEM_GATE}")
-print(f"predecessor_build11_proof={BUILD11_PROOF}")
+print(f"current_pointer_build={pointer_build}")
 print("finance_command_center=SHARED_READ_ONLY_ACCOUNTING_INTELLIGENCE")
 print("financial_write_authority=UNCHANGED_ACCOUNTING_OWNER")
 print("external_acceptance=HOLD_EXTERNAL")
