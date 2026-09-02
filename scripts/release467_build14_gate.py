@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
 SOURCE_BASE="86907d512c5121bb05306ca9d31d4aecb5fd6c50";SOURCE_TREE="9740eec99afbcd93773ab7e3b875037c183591db"
 GREEN13_SHA="794fd5b36191fff4c9e8376197f968d9c6d6da80";GREEN13_TREE="9c2bcdcb12bcbf2f00aeb19345329cdce39c65d9";SYSTEM_GATE=33643833623;BUILD13_PROOF=33643833608
+BUILD11_PROD_SHA="ce42f3b2ea553b69085705f500a9e2bd2f689818";BUILD11_PROD_DEPLOY=33640133776
 EXPECTED=["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql","0003_release464_business_growth.sql","0004_release465_storefront_quality.sql"]
 def req(ok,msg):
     if not ok:FAIL.append(msg)
@@ -40,15 +41,19 @@ if pointer_build==14:
     req(pointer.get("last_green_system_gate_run")==SYSTEM_GATE and pointer.get("last_green_build_proof_run")==BUILD13_PROOF,"Build 13 green proof drifted")
     req((pointer.get("current_release_authorities") or [None])[0]=="release467-build14-product-release-quality.json","Build 14 must be first current authority while current")
     req(pointer.get("autonomous_backlog_active_build")==14 and pointer.get("autonomous_backlog_active_items")==[1,2,3,4,5],"Build 14 autonomous backlog pointer drifted")
+    req(pointer.get("main_source_head_last_verified")==BUILD11_PROD_SHA and pointer.get("production_pages_deploy_last_verified")==BUILD11_PROD_DEPLOY,"Production Build 11 evidence drifted")
 else:
     req(int(pointer.get("last_green_build") or 0)>=14,"newer authority must retain Build 14 as a closed predecessor")
     for key in ("last_green_dev_sha","last_green_dev_tree_sha","last_green_system_gate_run","last_green_build_proof_run"):req(bool(pointer.get(key)),f"newer authority missing last-green evidence: {key}")
+    current_prod_sha=str(pointer.get("main_source_head_last_verified") or "")
+    current_prod_run=int(pointer.get("production_pages_deploy_last_verified") or 0)
+    req(len(current_prod_sha)==40 and all(c in "0123456789abcdef" for c in current_prod_sha.lower()),"newer pointer must retain a trusted 40-character Production SHA")
+    req(current_prod_run>=BUILD11_PROD_DEPLOY,"newer pointer must retain Production deployment evidence at or after Build 11")
 req("release467-build14-product-release-quality.json" in (pointer.get("current_release_authorities") or []),"Build 14 provenance missing from current authority")
 req("release467-build13-repository-hygiene-cleanup.json" in (pointer.get("current_release_authorities") or []),"Build 13 provenance missing")
 req(pointer.get("promotion_state")=="NO_AUTOMATIC_PROMOTION","automatic Production promotion forbidden")
 for k in ("schema_change_authorized","d1_mutation_authorized","r2_mutation_authorized","provider_execution_authorized","provider_publication_authorized","cloudflare_access_mutation_authorized","main_mutation_authorized","production_mutation_authorized","secret_values_emitted"):req(pointer.get(k) is False,f"pointer safety drift: {k}")
 ca=pointer.get("compatibility_authority") or {};req(ca.get("role")=="INHERITED_REGRESSION_COMPATIBILITY" and ca.get("runtime_release_header")==466 and ca.get("runtime_release_header_role")=="INHERITED_RUNTIME_COMPATIBILITY","compatibility classification drifted");req(compat.get("release")==466,"Release 466 compatibility evidence drifted")
-req(pointer.get("main_source_head_last_verified")=="ce42f3b2ea553b69085705f500a9e2bd2f689818" and pointer.get("production_pages_deploy_last_verified")==33640133776,"Production Build 11 evidence drifted")
 
 req(manifest.get("release")==467 and manifest.get("build")==14 and manifest.get("title")=="Product Release Quality Command Center","Build 14 manifest identity drifted");req(manifest.get("source_base_sha")==SOURCE_BASE and manifest.get("source_base_tree_sha")==SOURCE_TREE,"Build 14 manifest source base drifted")
 pr=manifest.get("predecessor") or {};req(pr.get("build")==13 and pr.get("merged_dev_sha")==GREEN13_SHA and pr.get("merged_dev_tree_sha")==GREEN13_TREE and pr.get("system_gate_run")==SYSTEM_GATE and pr.get("build13_proof_run")==BUILD13_PROOF,"Build 14 predecessor evidence drifted");req(manifest.get("backlog_items")==[1,2,3,4,5],"Build 14 manifest backlog drifted")
@@ -73,4 +78,4 @@ if pointer_build==14:
     ch=changed();req(not [x for x in ch if x not in allowed],f"files outside Build 14 scope changed: {[x for x in ch if x not in allowed]}");req(not [x for x in ch if x.startswith('migrations/') or x.lower().endswith('.sql')],"Build 14 must not change schema/migrations")
 if FAIL:
     print("FAIL Release 467 Build 14 Product Release Quality gate");[print(f"- {x}") for x in FAIL];sys.exit(1)
-print("PASS Release 467 Build 14 Product Release Quality gate");print(f"current_pointer_build={pointer_build}");print("autonomous_backlog_items=1,2,3,4,5");print("quality_command_center=READ_ONLY");print("original_r2_media=PRESERVED");print("marketplace_provider_execution=FALSE");print("canonical_migrations=0001-0004");print("schema_d1_r2_provider_access_main_production_mutation=NONE")
+print("PASS Release 467 Build 14 Product Release Quality gate");print(f"current_pointer_build={pointer_build}");print("autonomous_backlog_items=1,2,3,4,5");print("quality_command_center=READ_ONLY");print("original_r2_media=PRESERVED");print("marketplace_provider_execution=FALSE");print("production_provenance=BUILD14_EXACT_OR_NEWER_VERIFIED");print("canonical_migrations=0001-0004");print("schema_d1_r2_provider_access_main_production_mutation=NONE")

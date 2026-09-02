@@ -9,6 +9,8 @@ BASE_SHA="374983f68fb16172fb357b1755293a29e5d2953f"
 BASE_TREE="339f13b5a6e6ba5cc4a9c64ea3b04b70ad8aef91"
 SYSTEM_GATE=33642231716
 BUILD12_PROOF=33642231794
+BUILD11_PROD_SHA="ce42f3b2ea553b69085705f500a9e2bd2f689818"
+BUILD11_PROD_DEPLOY=33640133776
 RETIRED=[
 ".github/workflows/development-d1-release448.yml",".github/workflows/development-d1-release449.yml",".github/workflows/development-d1-release450.yml",".github/workflows/development-d1-release453.yml",".github/workflows/development-d1-release459.yml",".github/workflows/development-d1-release460.yml",".github/workflows/development-d1-release461-acceptance.yml",".github/workflows/development-d1-release461-custom-request-commerce.yml",".github/workflows/development-d1-release461-member-runtime.yml",".github/workflows/development-d1-release461-notification.yml",".github/workflows/development-d1-release461-product-offers.yml",".github/workflows/development-d1-release461-public-community.yml",".github/workflows/development-d1-release461-public-telemetry.yml",".github/workflows/development-d1-release461.yml",".github/workflows/release449-remote-verification.yml",".github/workflows/release449-source-gate.yml",".github/workflows/release450-remote-verification.yml",".github/workflows/release450-source-gate.yml",".github/workflows/release451-source-gate.yml",".github/workflows/release452-source-gate.yml",".github/workflows/release453-remote-verification.yml",".github/workflows/release453-source-gate.yml",".github/workflows/release454-source-gate.yml",".github/workflows/release455-source-gate.yml",".github/workflows/release456-source-gate.yml",".github/workflows/release457-source-gate.yml",".github/workflows/release458-source-gate.yml",".github/workflows/release459-remote-verification.yml",".github/workflows/release459-source-gate.yml",".github/workflows/release460-source-gate.yml",".github/workflows/release461-custom-request-commerce-source-gate.yml",".github/workflows/release461-d1-one-shot-preflight.yml",".github/workflows/release461-member-runtime-source-gate.yml",".github/workflows/release461-payment-webhook-schema-contract-source-gate.yml",".github/workflows/release461-product-offer-source-gate.yml",".github/workflows/release461-public-auth-source-gate.yml",".github/workflows/release461-public-community-source-gate.yml",".github/workflows/release461-public-telemetry-source-gate.yml",".github/workflows/release461-source-gate.yml"]
 RETAINED=["system-gate.yml","development-runtime-acceptance.yml","production-pages-deploy-current.yml","production-rollback-readiness.yml","release463-cloudflare-inventory.yml","release463-d1-api-clone.yml","release463-d1-consolidation-v4.yml","release463-d1-consolidation.yml","release463-final-cloudflare-cleanup.yml","release463-freeze-native-pages.yml","release463-pages-prune-accelerator.yml","release463-r2-consolidation.yml","release466-build1-proof.yml","release466-build2-proof.yml","release466-build3-proof.yml","release466-build4-proof.yml","release466-build5-proof.yml","release466-build6-proof.yml","release466-development-provider-controls.yml","release466-preview-payment-acceptance-config.yml","release467-build12-proof.yml","release467-it-admin-runtime-proof.yml"]
@@ -39,10 +41,14 @@ if pointer_build==13:
     req(p.get("last_green_dev_sha")==BASE_SHA and p.get("last_green_dev_tree_sha")==BASE_TREE,"Build 12 predecessor SHA/tree drifted")
     req(p.get("last_green_system_gate_run")==SYSTEM_GATE and p.get("last_green_build_proof_run")==BUILD12_PROOF,"Build 12 evidence drifted")
     req((p.get("current_release_authorities") or [None])[0]=="release467-build13-repository-hygiene-cleanup.json","Build 13 must be first authority")
+    req(p.get("main_source_head_last_verified")==BUILD11_PROD_SHA and p.get("production_pages_deploy_last_verified")==BUILD11_PROD_DEPLOY,"Production Build 11 evidence drifted")
 else:
     req("release467-build13-repository-hygiene-cleanup.json" in (p.get("current_release_authorities") or []),"Build 13 provenance missing from newer pointer")
+    current_prod_sha=str(p.get("main_source_head_last_verified") or "")
+    current_prod_run=int(p.get("production_pages_deploy_last_verified") or 0)
+    req(len(current_prod_sha)==40 and all(c in "0123456789abcdef" for c in current_prod_sha.lower()),"newer pointer must retain a trusted 40-character Production SHA")
+    req(current_prod_run>=BUILD11_PROD_DEPLOY,"newer pointer must retain Production deployment evidence at or after Build 11")
 req("release467-build12-finance-operations-command-center.json" in (p.get("current_release_authorities") or []),"Build 12 provenance missing")
-req(p.get("main_source_head_last_verified")=="ce42f3b2ea553b69085705f500a9e2bd2f689818" and p.get("production_pages_deploy_last_verified")==33640133776,"Production Build 11 evidence drifted")
 req(p.get("promotion_state")=="NO_AUTOMATIC_PROMOTION","automatic Production promotion forbidden")
 for k in ("schema_change_authorized","d1_mutation_authorized","r2_mutation_authorized","provider_execution_authorized","provider_publication_authorized","cloudflare_access_mutation_authorized","main_mutation_authorized","production_mutation_authorized","secret_values_emitted"):req(p.get(k) is False,f"pointer safety drift: {k}")
 ca=p.get("compatibility_authority") or {};req(ca.get("role")=="INHERITED_REGRESSION_COMPATIBILITY" and ca.get("runtime_release_header")==466 and ca.get("runtime_release_header_role")=="INHERITED_RUNTIME_COMPATIBILITY","compatibility classification drifted");req(compat.get("release")==466,"Release 466 compatibility evidence drifted")
@@ -73,4 +79,5 @@ print("historical_git_evidence=RETAINED")
 print("release463_infrastructure=RETAINED")
 print("release466_compatibility=RETAINED")
 print("release467_current_proofs=RETAINED")
+print("production_provenance=BUILD13_EXACT_OR_NEWER_VERIFIED")
 print("schema_d1_r2_provider_access_main_production_mutation=NONE")
