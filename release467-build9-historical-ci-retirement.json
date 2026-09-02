@@ -1,0 +1,48 @@
+{
+  "release": 467,
+  "build": 9,
+  "title": "Historical CI Retirement & Gate Fanout Reduction",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_branch": "release467-build9-historical-ci-retirement",
+  "source_base_sha": "94a891d3cb0608a91550c90fb04acea05cff75b3",
+  "source_base_tree_sha": "09d9f822c9987d3422921e819c913427af664184",
+  "source_authority": "dev",
+  "predecessor": {
+    "release": 467,
+    "build": 8,
+    "merged_dev_sha": "94a891d3cb0608a91550c90fb04acea05cff75b3",
+    "system_gate_run": 33631757568,
+    "build8_proof_run": 33631758140
+  },
+  "retirement_mode": "MANUAL_ONLY_PROVENANCE",
+  "retired_automatic_workflows": [
+    ".github/workflows/release466-build1-proof.yml",
+    ".github/workflows/release466-build2-proof.yml",
+    ".github/workflows/release466-build3-proof.yml",
+    ".github/workflows/release466-build4-proof.yml",
+    ".github/workflows/release466-build5-proof.yml",
+    ".github/workflows/release466-build6-proof.yml"
+  ],
+  "historical_proof_scripts_retained": true,
+  "historical_git_history_retained": true,
+  "historical_actions_history_retained": true,
+  "canonical_current_ci": [
+    ".github/workflows/system-gate.yml",
+    ".github/workflows/release467-build8-proof.yml",
+    ".github/workflows/release467-build7-proof.yml",
+    ".github/workflows/release467-build6-proof.yml",
+    ".github/workflows/release467-build5-proof.yml",
+    ".github/workflows/release467-build5-promotion-proof.yml"
+  ],
+  "external_acceptance_state": "HOLD_EXTERNAL",
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false
+}
