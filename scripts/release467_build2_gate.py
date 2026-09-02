@@ -151,7 +151,3 @@ req("node --check public/js/admin-it-readiness-actions.js" in workflow, "Build 2
 print("RELEASE 467 BUILD 2 I.T. READINESS ACTION QUEUE & RUNBOOKS: PASS")
 print("schema_change=NONE runtime_api_change=NONE request_time_mutation=NONE production_mutation=NONE")
 print("queue=RED_THEN_AMBER runbooks=7 repairs=EXISTING_AUDITED_WORKSPACES external_acceptance=HOLD")
-
-
-if __name__ == "__main__":
-    main()
