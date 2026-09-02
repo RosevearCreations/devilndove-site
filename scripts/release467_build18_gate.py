@@ -50,7 +50,7 @@ else:
  req(b19.get('source_base_sha')==MERGED_SHA and b19.get('source_base_tree_sha')==MERGED_TREE,'Build 18 merged SHA/tree must be retained through Build 19 source base')
  b19p=b19.get('predecessor') or {};req(b19p.get('build')==18 and b19p.get('merged_dev_sha')==MERGED_SHA and b19p.get('merged_dev_tree_sha')==MERGED_TREE and b19p.get('system_gate_run')==MERGED_SYSTEM_GATE and b19p.get('build18_proof_run')==MERGED_BUILD18_PROOF,'Build 18 merged proof must be retained through Build 19 predecessor evidence')
 
-b16c=b16.replace(' ','');req('Build16_provenance=TRANSITIVE_VIA_BUILD17' in b16,'Build 16 transitive provenance marker missing');req('pointer_build>=17' in b17c,'Build 17 gate lost forward compatibility')
+b16c=b16.replace(' ','');b17c=b17.replace(' ','');req('Build16_provenance=TRANSITIVE_VIA_BUILD17' in b16,'Build 16 transitive provenance marker missing');req('pointer_build>=17' in b17c,'Build 17 gate lost forward compatibility')
 hasall(api,['read-only','orders','payments','payment_refunds','custom_requests','shipping policy mismatch','automatic_order_mutation:false','automatic_customer_message:false','refund_provider_execution:false','shipping_provider_execution:false','canada_only_shipping_policy_preserved:true','us_sales_shipping_suspension_preserved:true'],'Build 18 API')
 upper=api.upper()
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','INSERT INTO','UPDATE ','DELETE FROM'):req(forbidden not in upper,f'Build 18 API must contain no DDL/DML: {forbidden}')
