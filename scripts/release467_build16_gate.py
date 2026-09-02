@@ -25,8 +25,9 @@ def hasall(body,tokens,label):
  for token in tokens:req(token in body,f'{label} marker missing: {token}')
 def one_h1(body,label):req(len(re.findall(r'<h1(?:\s|>)',body,re.I))==1,f'{label} must contain exactly one H1')
 
-p=load('current-development-authority.json');m=load('release467-build16-custom-request-made-today-journey.json');mig=load('migrations/canonical/manifest.json');compat=load('development-release.json')
+p=load('current-development-authority.json');m=load('release467-build16-custom-request-made-today-journey.json');b17m=load('release467-build17-creator-content-completeness.json');mig=load('migrations/canonical/manifest.json');compat=load('development-release.json')
 pointer_build=int(p.get('build') or 0)
+authorities=p.get('current_release_authorities') or []
 req(p.get('release')==467 and pointer_build>=16,'current authority must identify Release 467 Build 16 or newer')
 if pointer_build==16:
  req(p.get('title')=='Custom Request & Made Today Journey','Build 16 title drifted')
@@ -34,12 +35,25 @@ if pointer_build==16:
  req(p.get('source_base_sha')==BASE_SHA and p.get('source_base_tree_sha')==BASE_TREE,'Build 16 source base drifted')
  req(p.get('last_green_build')==15 and p.get('last_green_dev_sha')==BASE_SHA and p.get('last_green_dev_tree_sha')==BASE_TREE,'Build 15 predecessor drifted')
  req(p.get('last_green_system_gate_run')==PREV_SYSTEM_GATE and p.get('last_green_build_proof_run')==PREV_BUILD15_PROOF,'Build 15 predecessor proof drifted')
- req((p.get('current_release_authorities') or [None])[0]=='release467-build16-custom-request-made-today-journey.json','Build 16 must be first authority while current')
+ req((authorities or [None])[0]=='release467-build16-custom-request-made-today-journey.json','Build 16 must be first authority while current')
+elif pointer_build==17:
+ req(int(p.get('last_green_build') or 0)>=16,'Build 17 authority must retain Build 16 as a green predecessor')
+ req(p.get('last_green_dev_sha')==MERGED_SHA and p.get('last_green_dev_tree_sha')==MERGED_TREE,'Build 17 authority must retain exact merged Build 16 SHA/tree')
+ req(p.get('last_green_system_gate_run')==MERGED_SYSTEM_GATE and p.get('last_green_build_proof_run')==MERGED_BUILD16_PROOF,'Build 17 authority must retain exact Build 16 proof evidence')
+ req('release467-build16-custom-request-made-today-journey.json' in authorities,'Build 16 provenance missing from Build 17 pointer')
 else:
- req(int(p.get('last_green_build') or 0)>=16,'newer authority must retain Build 16 as a green predecessor')
- req(p.get('last_green_dev_sha')==MERGED_SHA and p.get('last_green_dev_tree_sha')==MERGED_TREE,'newer authority must retain exact merged Build 16 SHA/tree')
- req(p.get('last_green_system_gate_run')==MERGED_SYSTEM_GATE and p.get('last_green_build_proof_run')==MERGED_BUILD16_PROOF,'newer authority must retain exact Build 16 proof evidence')
- req('release467-build16-custom-request-made-today-journey.json' in (p.get('current_release_authorities') or []),'Build 16 provenance missing from newer pointer')
+ # From Build 18 onward the current pointer correctly advances to the immediately previous green build.
+ # Preserve Build 16 transitively through the immutable Build 17 predecessor manifest instead of
+ # forcing current last_green_* fields to remain pinned to Build 16 forever.
+ req(int(p.get('last_green_build') or 0)>=17,'newer authority must retain a green Build 17-or-newer predecessor')
+ req(bool(p.get('last_green_dev_sha')) and bool(p.get('last_green_dev_tree_sha')),'newer authority must retain current last-green SHA/tree evidence')
+ req(bool(p.get('last_green_system_gate_run')) and bool(p.get('last_green_build_proof_run')),'newer authority must retain current last-green proof evidence')
+ req('release467-build16-custom-request-made-today-journey.json' in authorities,'Build 16 provenance missing from newer pointer')
+ req('release467-build17-creator-content-completeness.json' in authorities,'Build 17 transitive provenance missing from newer pointer')
+ b17pr=b17m.get('predecessor') or {}
+ req(b17m.get('release')==467 and b17m.get('build')==17,'Build 17 manifest missing for transitive Build 16 proof')
+ req(b17pr.get('build')==16 and b17pr.get('merged_dev_sha')==MERGED_SHA and b17pr.get('merged_dev_tree_sha')==MERGED_TREE,'Build 17 manifest must retain exact merged Build 16 SHA/tree')
+ req(b17pr.get('system_gate_run')==MERGED_SYSTEM_GATE and b17pr.get('build16_proof_run')==MERGED_BUILD16_PROOF,'Build 17 manifest must retain exact Build 16 proof evidence')
 req(p.get('promotion_state')=='NO_AUTOMATIC_PROMOTION','automatic Production promotion forbidden')
 for k in ('schema_change_authorized','d1_mutation_authorized','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_mutation_authorized','main_mutation_authorized','production_mutation_authorized','secret_values_emitted'):req(p.get(k) is False,f'pointer safety drift: {k}')
 req(p.get('main_source_head_last_verified')==PROD_MAIN and p.get('production_pages_deploy_last_verified')==PROD_DEPLOY,'verified Production checkpoint drifted')
@@ -76,6 +90,7 @@ if FAIL:
  print('FAIL Release 467 Build 16 retained gate');[print(f'- {x}') for x in FAIL];sys.exit(1)
 print('PASS Release 467 Build 16 retained gate')
 print(f'pointer_build={pointer_build}')
+print('Build16_provenance=TRANSITIVE_VIA_BUILD17' if pointer_build>17 else 'Build16_provenance=DIRECT')
 print('customer_safe_request_journey=GUARDED')
 print('evidence_only_public_examples=GUARDED')
 print('made_today_review_only=GUARDED')
