@@ -1,0 +1,24 @@
+{
+  "release": 467,
+  "build": 17,
+  "policy": "NO_SILENT_PLACEHOLDERS",
+  "invented_marketing_fallback_allowed": false,
+  "entries": [
+    {
+      "path": "functions/api/custom-request-examples.js",
+      "marker": "fallback_empty",
+      "reason": "Public custom-work evidence fails empty when the approved product/evidence authority cannot be read; inventing a replacement claim would violate evidence-only storefront policy.",
+      "owner": "Storefront + Creator Content",
+      "remediation": "Restore the Development D1/read authority and approved product facts/photos, then let the evidence-backed block populate normally.",
+      "allows_invented_content": false
+    },
+    {
+      "path": "functions/api/custom-request-examples.js",
+      "marker": "temporarily unavailable",
+      "reason": "The customer-safe warning explicitly reports missing approved evidence instead of silently substituting marketing copy.",
+      "owner": "Storefront + Creator Content",
+      "remediation": "Resolve the underlying approved-evidence read failure; do not replace it with guessed candle/soap claims.",
+      "allows_invented_content": false
+    }
+  ]
+}
