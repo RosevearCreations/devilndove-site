@@ -1,0 +1,63 @@
+name: Release 467 Build 18 Order Fulfillment Customer Care Proof
+
+on:
+  push:
+    branches:
+      - release467-build18-order-fulfillment-customer-care
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Preserve Release 467 Build 17 authority
+        run: python scripts/release467_build17_gate.py
+      - name: Prove Release 467 Build 18 Order Fulfillment and Customer Care
+        run: python scripts/release467_build18_gate.py
+      - name: Preserve whole-site public SEO quality
+        run: python scripts/release467_build15_public_seo_gate.py
+      - name: Validate authority JSON
+        run: |
+          python -m json.tool current-development-authority.json >/dev/null
+          python -m json.tool release467-build18-order-fulfillment-customer-care.json >/dev/null
+      - name: Validate Python syntax
+        run: python -m py_compile scripts/release467_build17_gate.py scripts/release467_build18_gate.py scripts/release467_build15_public_seo_gate.py
+      - name: Validate JavaScript syntax
+        run: |
+          node --check functions/api/admin/order-fulfillment-care.js
+          node --check public/js/admin-order-fulfillment-care.js
+      - name: Diff safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="$(git merge-base HEAD origin/dev)"
+          git diff --check "${base}...HEAD"
+          if git diff --name-only "${base}...HEAD" | grep -E '(^migrations/|\.sql$)'; then
+            echo 'Build 18 must not change schema or migration files.' >&2
+            exit 1
+          fi
+      - name: Boundary
+        run: |
+          echo 'Build 18 is a read-only Order Fulfillment and Customer Care command center.'
+          echo 'Orders, Custom Requests, Customers and Accounting retain all write authority.'
+          echo 'No automatic order status, payment, refund, customer message, custom stage, fulfillment, shipping-provider or payment-provider action is authorized.'
+          echo 'Canada-only shipping and the U.S. sales/shipping suspension remain preserved.'
+          echo 'No schema migration, new broad D1/R2 authority, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
