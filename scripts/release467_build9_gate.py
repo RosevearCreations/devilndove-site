@@ -122,6 +122,10 @@ build8_gate = read("scripts/release467_build8_gate.py")
 req("pointer_build >= 8" in build8_gate, "Build 8 gate must be forward-compatible with newer Release 467 pointers")
 req("current_pointer_build" in build8_gate, "Build 8 gate forward-compatibility evidence missing")
 
+build6_gate = read("scripts/release467_build6_gate.py")
+req("current authority must remain Release 467" in build6_gate, "Build 6 gate must use semantic current Release 467 handoff authority")
+req("INHERITED_REGRESSION_COMPATIBILITY" in build6_gate, "Build 6 gate must permit Release 466 wording only as explicit compatibility evidence")
+
 migration_manifest = load("migrations/canonical/manifest.json")
 expected = [
     "0001_release464_migration_authority.sql",
@@ -135,6 +139,7 @@ req(not list((ROOT / "migrations/canonical").glob("*467*build9*")), "Build 9 is 
 allowed = set(HISTORICAL_WORKFLOWS + [
     "current-development-authority.json",
     "release467-build9-historical-ci-retirement.json",
+    "scripts/release467_build6_gate.py",
     "scripts/release467_build8_gate.py",
     "scripts/release467_build9_gate.py",
     ".github/workflows/release467-build9-proof.yml",
