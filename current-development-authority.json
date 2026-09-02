@@ -1,22 +1,22 @@
 {
   "release": 467,
-  "build": 15,
-  "title": "Storefront / SEO Parity",
+  "build": 20,
+  "title": "Workshop Tool & Equipment Readiness Command Center",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build15-storefront-seo-parity",
-  "source_base_sha": "dd92a10799f0f7656fe9508a25a983839117a1d0",
-  "source_base_tree_sha": "dbe3ed8e1be82c02223a346f58a626654f8d5382",
-  "last_green_build": 14,
-  "last_green_dev_sha": "dd92a10799f0f7656fe9508a25a983839117a1d0",
-  "last_green_dev_tree_sha": "dbe3ed8e1be82c02223a346f58a626654f8d5382",
-  "last_green_system_gate_run": 33649971571,
-  "last_green_build_proof_run": 33649971525,
+  "feature_branch": "release-467-build-20-workshop-tool-equipment-readiness",
+  "source_base_sha": "9c814314dea5ddc664e73b9d822c8a41423c3aca",
+  "source_base_tree_sha": "9be57e9c0e090f8edf210ce62fcf8b093e703506",
+  "last_green_build": 19,
+  "last_green_dev_sha": "9c814314dea5ddc664e73b9d822c8a41423c3aca",
+  "last_green_dev_tree_sha": "9be57e9c0e090f8edf210ce62fcf8b093e703506",
+  "last_green_system_gate_run": 33673793408,
+  "last_green_build_proof_run": 33673793538,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {"name": "devilndove-dev", "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
   "development_r2": ["devilndove-toolshed-images-dev", "devilndove-caip-media-dev"],
-  "main_source_head_last_verified": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
-  "production_pages_deploy_last_verified": 33640133776,
+  "main_source_head_last_verified": "296e53b079bba53126c80902be36a9271d82cea4",
+  "production_pages_deploy_last_verified": 33655223149,
   "production_deployment_must_be_verified_independently": true,
   "compatibility_authority": {
     "file": "development-release.json",
@@ -24,9 +24,14 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Build 15 advances current Storefront / SEO parity while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
+    "reason": "Build 20 adds a read-only workshop Tool readiness projection while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
   },
   "current_release_authorities": [
+    "release467-build20-workshop-tool-equipment-readiness.json",
+    "release467-build19-inventory-replenishment-procurement-readiness.json",
+    "release467-build18-order-fulfillment-customer-care.json",
+    "release467-build17-creator-content-completeness.json",
+    "release467-build16-custom-request-made-today-journey.json",
     "release467-build15-storefront-seo-parity.json",
     "release467-build14-product-release-quality.json",
     "release467-build13-repository-hygiene-cleanup.json",
@@ -41,8 +46,10 @@
     "release467-build5-ci-access-readiness.json"
   ],
   "autonomous_backlog": "docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md",
-  "autonomous_backlog_active_build": 15,
-  "autonomous_backlog_active_items": [6, 7, 8, 9, 10],
+  "autonomous_backlog_state": "COMPLETE_THROUGH_BUILD_17",
+  "autonomous_backlog_active_build": null,
+  "autonomous_backlog_active_items": [],
+  "post_autonomous_sequence": "WORKSHOP_TOOL_EQUIPMENT_READINESS",
   "external_lanes": {
     "cloudflare_access_service_token": "HOLD_EXTERNAL",
     "stripe_development": "HOLD_EXTERNAL",
@@ -61,5 +68,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md and docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md. Build 15 owns autonomous items 6-10: visible-fact Product/Offer/Breadcrumb parity, full public SEO quality, normalized buyer facts with admin remediation, stronger Shop/Collection relationships, and Canada-only shipping/pickup/policy consistency. The U.S. sales/shipping suspension remains intact. Development first; provider execution and Production promotion remain closed."
+  "restart_rule": "Read this file first, then docs/operations/RELEASE_467_BUILD_20_WORKSHOP_TOOL_EQUIPMENT_READINESS.md, then AI_HANDOFF.md. Build 20 is a read-only workshop Tool and equipment readiness command center over existing Inventory and durable Tool Lifecycle authorities. All mutations remain in existing owner workspaces. Calibration is event history only because no independent calibration due-date authority exists. External provider lanes remain HOLD_EXTERNAL and Production promotion remains closed."
 }

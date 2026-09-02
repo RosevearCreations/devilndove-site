@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Fail-closed source contract for Release 467 Build 15 — Storefront / SEO Parity."""
+"""Retained fail-closed contract for Release 467 Build 15 — Storefront / SEO Parity.
+
+Build 15 exact-branch scope checks apply only while Build 15 is current. Later Release 467
+builds must continue preserving its substantive Storefront/SEO/shipping authorities.
+"""
 from __future__ import annotations
 import json, subprocess, sys
 from pathlib import Path
@@ -30,6 +34,7 @@ def changed():
         FAIL.append(f"could not calculate changed files: {e}"); return []
 
 pointer=load("current-development-authority.json")
+pointer_build=int(pointer.get("build") or 0)
 manifest=load("release467-build15-storefront-seo-parity.json")
 compat=load("development-release.json")
 migrations=load("migrations/canonical/manifest.json")
@@ -49,22 +54,24 @@ market=read("functions/api/_lib/marketplaceReadiness.js")
 quote=read("custom-request/quote/index.html")
 docs=[read(x) for x in ("AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md","docs/operations/RELEASE_467_BUILD_15_STOREFRONT_SEO_PARITY.md")]
 
-req(pointer.get("release")==467 and pointer.get("build")==15,"pointer must identify Release 467 Build 15")
-req(pointer.get("title")=="Storefront / SEO Parity","Build 15 pointer title drifted")
-req(pointer.get("state")=="DEVELOPMENT_CANDIDATE","Build 15 pointer must remain DEVELOPMENT_CANDIDATE before closure")
-req(pointer.get("feature_branch")=="release467-build15-storefront-seo-parity","Build 15 feature branch drifted")
-req(pointer.get("source_base_sha")==BASE_SHA and pointer.get("source_base_tree_sha")==BASE_TREE,"Build 15 source base drifted")
-req(pointer.get("last_green_build")==14 and pointer.get("last_green_dev_sha")==BASE_SHA and pointer.get("last_green_dev_tree_sha")==BASE_TREE,"Build 14 predecessor pointer drifted")
-req(pointer.get("last_green_system_gate_run")==SYSTEM_GATE and pointer.get("last_green_build_proof_run")==BUILD14_PROOF,"Build 14 green evidence drifted")
-req((pointer.get("current_release_authorities") or [None])[0]=="release467-build15-storefront-seo-parity.json","Build 15 must be first current authority")
-req("release467-build14-product-release-quality.json" in (pointer.get("current_release_authorities") or []),"Build 14 provenance missing")
-req(pointer.get("autonomous_backlog_active_build")==15 and pointer.get("autonomous_backlog_active_items")==[6,7,8,9,10],"Build 15 backlog pointer drifted")
+req(pointer.get("release")==467 and pointer_build>=15,"pointer_build >= 15 is required")
+req("release467-build15-storefront-seo-parity.json" in (pointer.get("current_release_authorities") or []),"Build 15 provenance missing from current authorities")
 req(pointer.get("promotion_state")=="NO_AUTOMATIC_PROMOTION","automatic Production promotion remains forbidden")
 for k in ("schema_change_authorized","d1_mutation_authorized","r2_mutation_authorized","provider_execution_authorized","provider_publication_authorized","cloudflare_access_mutation_authorized","main_mutation_authorized","production_mutation_authorized","secret_values_emitted"):
     req(pointer.get(k) is False,f"pointer safety drift: {k}")
 ca=pointer.get("compatibility_authority") or {}
 req(ca.get("role")=="INHERITED_REGRESSION_COMPATIBILITY" and ca.get("runtime_release_header")==466 and ca.get("runtime_release_header_role")=="INHERITED_RUNTIME_COMPATIBILITY","compatibility classification drifted")
 req(compat.get("release")==466,"Release 466 compatibility evidence drifted")
+
+if pointer_build==15:
+    req(pointer.get("title")=="Storefront / SEO Parity","Build 15 pointer title drifted")
+    req(pointer.get("state")=="DEVELOPMENT_CANDIDATE","Build 15 pointer must remain DEVELOPMENT_CANDIDATE before closure")
+    req(pointer.get("feature_branch")=="release467-build15-storefront-seo-parity","Build 15 feature branch drifted")
+    req(pointer.get("source_base_sha")==BASE_SHA and pointer.get("source_base_tree_sha")==BASE_TREE,"Build 15 source base drifted")
+    req(pointer.get("last_green_build")==14 and pointer.get("last_green_dev_sha")==BASE_SHA and pointer.get("last_green_dev_tree_sha")==BASE_TREE,"Build 14 predecessor pointer drifted")
+    req(pointer.get("last_green_system_gate_run")==SYSTEM_GATE and pointer.get("last_green_build_proof_run")==BUILD14_PROOF,"Build 14 green evidence drifted")
+    req((pointer.get("current_release_authorities") or [None])[0]=="release467-build15-storefront-seo-parity.json","Build 15 must be first current authority while current")
+    req(pointer.get("autonomous_backlog_active_build")==15 and pointer.get("autonomous_backlog_active_items")==[6,7,8,9,10],"Build 15 backlog pointer drifted")
 
 req(manifest.get("release")==467 and manifest.get("build")==15 and manifest.get("title")=="Storefront / SEO Parity","Build 15 manifest identity drifted")
 req(manifest.get("source_base_sha")==BASE_SHA and manifest.get("source_base_tree_sha")==BASE_TREE,"Build 15 manifest base drifted")
@@ -98,36 +105,36 @@ for forbidden in ("CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDAT
 quality_lower=quality.lower()
 for token in ("buyer facts","buyer fact: materials","buyer fact: finish / condition","buyer fact: size / dimensions","buyer fact: care","buyer fact: personalization limits","buyer fact: availability","/api/product-buyer-facts"):
     req(token in quality_lower,f"Product Quality buyer-fact remediation marker missing: {token}")
-
 for body,name in ((middleware,"middleware"),(checkout,"checkout create order")):
     req("shipping_country_not_supported" in body and "limited to Canada" in body,f"{name} Canada-only fail-closed guard missing")
 req("allowed_countries][0]" in payment and '"CA"' in payment,"payment preparation must retain Canada-only shipping collection")
 req("shipping_profile_reference" in market and "provider_execution_allowed" in market and "publication_allowed" in market,"marketplace preparation shipping/provider boundary missing")
-req("storefront-parity.js" in quote and "storefront-shipping-policy.js" in quote and "customQuotePreviewMount" in quote,"private custom quote must load the shared Canada-only policy")
+req("storefront-parity.js" in quote and "storefront-shipping-policy.js" in quote and "customQuotePreviewMount" in quote,"private custom quote must load shared Canada-only policy")
 req("limited to Canada" in shared and "allowed_countries: ['CA']" in shared,"shared client policy must visibly define Canada-only fulfillment")
-
 for token in ("exactly one H1","meta description","canonical","crawlable internal links","meaningful alt text","structured data","Product schema parity","storefront-parity.js"):
     req(token.lower() in public_gate.lower(),f"whole-site public SEO gate marker missing: {token}")
 req([x.get("file") for x in migrations.get("migrations",[])]==EXPECTED_MIGRATIONS,"canonical migrations drifted")
 for body in docs:
-    for token in ("Release 467 Build 15","Storefront / SEO Parity",BASE_SHA,"Release 467 Build 14","Product Release Quality","HOLD_EXTERNAL"):
+    for token in ("Release 467 Build 15","Storefront / SEO Parity","Release 467 Build 14","Product Release Quality","HOLD_EXTERNAL"):
         req(token in body,f"Build 15 documentation token missing: {token}")
 
-allowed={
-"AI_HANDOFF.md","MARKDOWN_INDEX.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","current-development-authority.json","custom-request/quote/index.html","data-deletion.html","privacy.html","social-connections.html","terms.html","docs/operations/RELEASE_467_BUILD_15_STOREFRONT_SEO_PARITY.md",
-"functions/api/product-buyer-facts.js","public/js/admin-product-quality-command-center.js","public/js/product-detail-parity.js","public/js/seo-page-overrides.js","public/js/shop-parity.js","public/js/storefront-parity.js","public/js/storefront-shipping-policy.js",
-"release467-build15-storefront-seo-parity.json","scripts/release467_build14_gate.py","scripts/release467_build15_public_seo_gate.py","scripts/release467_build15_gate.py",".github/workflows/release467-build15-proof.yml"
-}
-ch=changed();extra=[x for x in ch if x not in allowed]
-req(not extra,f"files outside Build 15 scope changed: {extra}")
-req(not [x for x in ch if x.startswith("migrations/") or x.lower().endswith(".sql")],"Build 15 must not change schema/migrations")
+if pointer_build==15:
+    allowed={
+      "AI_HANDOFF.md","MARKDOWN_INDEX.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","current-development-authority.json","custom-request/quote/index.html","data-deletion.html","privacy.html","social-connections.html","terms.html","docs/operations/RELEASE_467_BUILD_15_STOREFRONT_SEO_PARITY.md",
+      "functions/api/product-buyer-facts.js","public/js/admin-product-quality-command-center.js","public/js/product-detail-parity.js","public/js/seo-page-overrides.js","public/js/shop-parity.js","public/js/storefront-parity.js","public/js/storefront-shipping-policy.js",
+      "release467-build15-storefront-seo-parity.json","scripts/release467_build14_gate.py","scripts/release467_build15_public_seo_gate.py","scripts/release467_build15_gate.py",".github/workflows/release467-build15-proof.yml"
+    }
+    ch=changed();extra=[x for x in ch if x not in allowed]
+    req(not extra,f"files outside Build 15 scope changed: {extra}")
+    req(not [x for x in ch if x.startswith("migrations/") or x.lower().endswith(".sql")],"Build 15 must not change schema/migrations")
 
 if FAIL:
     print("FAIL Release 467 Build 15 Storefront / SEO Parity gate")
     [print(f"- {x}") for x in FAIL]
     sys.exit(1)
 print("PASS Release 467 Build 15 Storefront / SEO Parity gate")
-print("autonomous_backlog_items=6,7,8,9,10")
+print(f"pointer_build={pointer_build}")
+print("Build15_closed_predecessor_preservation=GUARDED" if pointer_build>15 else "Build15_current_scope=GUARDED")
 print("visible_product_offer_breadcrumb_parity=GUARDED")
 print("whole_site_public_seo_quality=GUARDED")
 print("buyer_fact_admin_remediation=GUARDED")

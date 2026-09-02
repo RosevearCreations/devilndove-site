@@ -12,60 +12,26 @@
 <body>
   <div class="container admin-shell">
     <div class="nav">
-      <div class="brand">
-        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
-        <div>
-          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Custom Requests</div>
-        </div>
-      </div>
-      <div class="links">
-        <a href="/admin/">Admin</a>
-        <a href="/admin/operations/">Operations</a>
-        <a href="/admin/today-tasks/">Today Tasks</a>
-        <button class="btn" data-nav-logout="" type="button">Logout</button>
-      </div>
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Custom Requests</div></div></div>
+      <div class="links"><a href="/admin/">Admin</a><a href="/admin/operations/">Operations</a><a href="/admin/custom-request/made-today/">Made Today</a><a href="/admin/today-tasks/">Today Tasks</a><button class="btn" data-nav-logout="" type="button">Logout</button></div>
     </div>
 
-    <div class="hero">
-      <div>
-        <h1>Custom Requests</h1>
-        <p>Review custom gift, engraving, candle, soap, personalized-work, quote, payment, order, fulfillment, and marketplace planning from one Operations workspace.</p>
-      </div>
-    </div>
+    <div class="hero"><div><p class="small" style="font-weight:800;text-transform:uppercase;letter-spacing:.08em">Release 467 Build 16</p><h1>Custom Requests</h1><p>Review custom gift, engraving, candle, soap, personalized-work, quote, payment, order, fulfillment, and marketplace planning from one Operations workspace.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><a class="btn primary" href="/admin/custom-request/made-today/">Open Made Today capture</a><a class="btn" href="/admin/stage-photo-moderation/">Review captured photos</a></div></div></div>
 
     <div class="card">
-      <div id="adminAuthState" class="small">Checking administrator session…</div>
-      <div id="adminUserSummary" class="small"></div>
-      <div id="adminAccessMessage" class="small"></div>
+      <div id="adminAuthState" class="small">Checking administrator session…</div><div id="adminUserSummary" class="small"></div><div id="adminAccessMessage" class="small"></div>
       <p class="small">The automatic workspace read is compatibility-backed and non-migrating. Build 370 separately verifies all required startup tables without creating schema. Workflow mutations remain on their existing Custom Requests authority.</p>
+      <p class="small" style="margin-bottom:0">Build 16 adds a phone-first Made Today handoff that reuses the existing stage-photo moderation authority. Captures default to private/review-only and never publish automatically.</p>
     </div>
 
     <section class="card" aria-labelledby="customRequestsReadSafetyHeading">
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div>
-          <h2 id="customRequestsReadSafetyHeading" style="margin-top:0">Read safety & marketplace exports</h2>
-          <p class="small" style="margin:0">Builds 373–380 add non-mutating marketplace CSV downloads, visible schema readiness, and a page guard that rewrites the older self-ensuring CSV links to the safe export authority.</p>
-        </div>
-        <button class="btn small" id="customRequestsReadRefresh" type="button">Refresh read diagnostics</button>
-      </div>
-      <div id="customRequestsOwnedReadStatus" class="small" role="status" aria-live="polite" style="margin-top:10px">Checking Custom Requests read/schema readiness…</div>
-      <div id="customRequestsReadDiagnostics" style="margin-top:8px"></div>
-      <div id="customRequestsSafeExportLinks" style="margin-top:12px"></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h2 id="customRequestsReadSafetyHeading" style="margin-top:0">Read safety & marketplace exports</h2><p class="small" style="margin:0">Builds 373–380 add non-mutating marketplace CSV downloads, visible schema readiness, and a page guard that rewrites the older self-ensuring CSV links to the safe export authority.</p></div><button class="btn small" id="customRequestsReadRefresh" type="button">Refresh read diagnostics</button></div>
+      <div id="customRequestsOwnedReadStatus" class="small" role="status" aria-live="polite" style="margin-top:10px">Checking Custom Requests read/schema readiness…</div><div id="customRequestsReadDiagnostics" style="margin-top:8px"></div><div id="customRequestsSafeExportLinks" style="margin-top:12px"></div>
       <p class="small" style="margin-bottom:0">Safe CSV exports read already-prepared marketplace packs only. They never create tables, seed presets, create packs, publish listings, or move mutation ownership.</p>
     </section>
 
-    <div id="customRequestsAdminMount"></div>
-    <div class="footer card" style="margin-top:18px"></div>
+    <div id="customRequestsAdminMount"></div><div class="footer card" style="margin-top:18px"></div>
   </div>
-
-  <script src="/js/main.js?v=440"></script>
-  <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-route-usage.js"></script>
-  <script src="/public/js/site-auth-ui.js?v=440"></script>
-  <script src="/public/js/admin-self-protect.js?v=440"></script>
-  <script src="/public/js/admin.js?v=440"></script>
-  <script src="/public/js/admin-custom-requests.js?v=440"></script>
-  <script type="module" src="/public/js/modules/commerce-operations/custom-requests-page-tools.mjs?v=440"></script>
+  <script src="/js/main.js?v=440"></script><script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script><script src="/public/js/site-auth-ui.js?v=440"></script><script src="/public/js/admin-self-protect.js?v=440"></script><script src="/public/js/admin.js?v=440"></script><script src="/public/js/admin-custom-requests.js?v=440"></script><script type="module" src="/public/js/modules/commerce-operations/custom-requests-page-tools.mjs?v=440"></script>
 </body>
 </html>

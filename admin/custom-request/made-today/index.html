@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="description" content="Phone-first Devil n Dove Made Today capture workflow for reviewed custom-work photos, process notes, batch/material facts, and story candidates."/>
+  <title>Made Today Capture — Devil n Dove Admin</title>
+  <link href="/css/styles.css" rel="stylesheet"/>
+  <link href="/css/custom-request-journey.css?v=467b16" rel="stylesheet"/>
+  <link href="/assets/mark.png" rel="icon" type="image/png"/>
+</head>
+<body>
+  <div class="container admin-shell">
+    <div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Made Today • Build 16</div></div></div><div class="links"><a href="/admin/custom-request/">Custom Requests</a><a href="/admin/mobile/">Phone Dashboard</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
+
+    <main>
+      <section class="hero"><div><p class="small" style="font-weight:800;text-transform:uppercase;letter-spacing:.08em">Release 467 Build 16</p><h1>Made Today capture</h1><p>Capture finished-work photos and the facts worth remembering while they are fresh. Everything lands in review; nothing is automatically published.</p></div></section>
+
+      <section class="card" style="margin-top:16px">
+        <h2 style="margin-top:0">Capture boundary</h2>
+        <ul class="small"><li>Photos upload as <strong>customer/private review</strong> and <strong>needs review</strong>.</li><li>Process notes, batch/material facts, and story ideas are stored only in the review caption attached to the captured photo.</li><li>Use Photo Moderation before any customer/public proof decision.</li><li>No social, marketplace, or Content Studio publication happens from this page.</li></ul>
+      </section>
+
+      <section class="card" style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div><h2 style="margin-top:0">What did we make today?</h2><p class="small">Choose an existing custom request. If this is a new standalone product, create it first and return here.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn small" href="/admin/mobile-product/">Create product</a><a class="btn small" href="/admin/custom-request/">Open request workspace</a><a class="btn small" href="/admin/stage-photo-moderation/">Photo moderation</a></div></div>
+        <div id="madeTodayMessage" class="status-note" role="status" aria-live="polite" style="display:none;margin-top:10px"></div>
+        <form id="madeTodayForm" class="made-today-grid" style="margin-top:14px">
+          <label class="full">Custom request<select class="input" id="madeTodayRequest" name="custom_request_id" required><option value="">Loading requests…</option></select></label>
+          <label>Work stage<select class="input" name="stage_key"><option value="making">Making</option><option value="curing_finishing">Curing / finishing</option><option value="ready">Ready / final quality</option><option value="complete">Complete</option></select></label>
+          <label>Finished photos<input class="input" id="madeTodayFiles" name="files" type="file" accept="image/*" capture="environment" multiple required/></label>
+          <label class="full">Process notes<textarea class="input" name="process_notes" rows="4" placeholder="What did we do, change, solve, or learn?"></textarea></label>
+          <label>Batch / material facts<textarea class="input" name="batch_material_facts" rows="4" placeholder="Batch, scent, clay/resin/metal, colour recipe, material lot, finish, cure information…"></textarea></label>
+          <label>Story candidate<textarea class="input" name="story_candidate" rows="4" placeholder="A technique, problem/result, lesson, material proof, quality step, or customer-safe story idea for later review."></textarea></label>
+          <label class="full">Photo caption / finished result<textarea class="input" name="caption" rows="3" placeholder="Short factual description of what is visible."></textarea></label>
+          <div class="full" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn primary" type="submit">Capture for review</button><span class="small">Uploads stay private/review-only until explicitly moderated.</span></div>
+        </form>
+        <div id="madeTodayPreview" class="made-today-preview" style="margin-top:12px"></div>
+      </section>
+    </main>
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=440"></script>
+  <script src="/public/js/auth.js?v=440"></script>
+  <script src="/public/js/admin-route-usage.js"></script>
+  <script src="/public/js/site-auth-ui.js?v=440"></script>
+  <script src="/public/js/admin-self-protect.js?v=440"></script>
+  <script src="/public/js/admin-made-today.js?v=467b16"></script>
+</body>
+</html>
