@@ -1,0 +1,60 @@
+{
+  "release": 467,
+  "build": 2,
+  "label": "I.T. Admin Runtime Reliability",
+  "state": "development_candidate",
+  "source_branch": "release467-it-admin-runtime-reliability",
+  "base_development_sha": "fcf92f5342c04f0f0d07387034e852b4cc40f3f9",
+  "schema_change_required": false,
+  "production_mutation": false,
+  "production_provider_execution": false,
+  "development_d1_mutation_required": false,
+  "objectives": [
+    "Authenticated I.T. Control Tower acceptance on the canonical Development Preview",
+    "Root administrator full effective manage authority verification",
+    "Application Modules account-profile population and explicit-user access visibility",
+    "Cloudflare Access service-token-aware authenticated CI without weakening Access",
+    "Canonical current Development runtime acceptance workflow",
+    "Canonical Cloudflare Development helper and startup authority",
+    "Regression protection against retired active Development Pages targets"
+  ],
+  "root_admin_authority": {
+    "verification": "read_only_development_d1",
+    "business_admin_manage_rows": 4,
+    "enabled_modules": 5,
+    "it_role_grants": 0,
+    "root_it_explicit_manage_rows": 1,
+    "root_explicit_business_denials": 0,
+    "full_effective_manage": true,
+    "repair_required": false
+  },
+  "canonical_development": {
+    "pages_project": "devilndove-site",
+    "pages_environment": "preview",
+    "pages_branch": "dev",
+    "preview_alias": "https://dev.devilndove-site.pages.dev",
+    "d1_name": "devilndove-dev",
+    "d1_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+    "product_r2": "devilndove-toolshed-images-dev",
+    "caip_r2": "devilndove-caip-media-dev"
+  },
+  "runtime_acceptance": {
+    "http_method": "GET_ONLY",
+    "application_session": "existing_active_admin_session_only",
+    "d1_session_lookup": "read_only",
+    "cloudflare_access": "service_token_optional_if_configured_never_bypassed",
+    "credentials_emitted": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_mutation": false
+  },
+  "focused_proof": {
+    "workflow": ".github/workflows/release467-it-admin-runtime-proof.yml",
+    "run_id": 33574246549,
+    "candidate_sha": "d1b87cc95cce45034d74be62c71ce6f0de94a55b",
+    "source_proof": "success",
+    "development_root_admin_proof": "success"
+  },
+  "promotion": "closed_until_exact_green_development_system_gate_and_authenticated_runtime_acceptance"
+}
