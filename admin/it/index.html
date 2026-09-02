@@ -17,8 +17,9 @@
     </div>
     <div class="hero"><div><h1>I.T.</h1><p id="adminModuleHubIntro">System readiness, settings, integrations, testing, diagnostics, releases, deployment controls, security and continuity.</p></div></div>
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
-    <div class="card" style="margin-top:18px"><strong>Release 467:</strong> The I.T. control tower is the read-only first stop for preflight, readiness scoring, sanitized drift detection and exact-SHA/deployment evidence. Detailed diagnostic and correction workspaces remain grouped below.</div>
+    <div class="card" style="margin-top:18px"><strong>Release 467:</strong> The I.T. Control Tower remains the read-only first stop for preflight and exact evidence. Build 2 turns every non-GREEN finding into a prioritized action queue with a safe recovery runbook and explicit pass condition; repairs remain in the existing audited workspaces.</div>
     <main id="itControlTowerMount" aria-live="polite"><section class="card" style="margin-top:18px"><p class="small">Loading I.T. preflight…</p></section></main>
+    <section id="itReadinessActionQueueMount" aria-live="polite"><div class="card" style="margin-top:18px"><p class="small">Loading readiness action queue…</p></div></section>
     <main id="adminModuleHubMount" aria-live="polite"><section class="card" style="margin-top:18px"><p class="small">Loading I.T. tools…</p></section></main>
     <div class="footer card" style="margin-top:18px"></div>
   </div>
@@ -29,6 +30,7 @@
   <script src="/public/js/admin-self-protect.js?v=467"></script>
   <script src="/public/js/admin.js?v=467"></script>
   <script src="/public/js/admin-it-control-tower.js?v=467"></script>
+  <script src="/public/js/admin-it-readiness-actions.js?v=467"></script>
   <script src="/public/js/admin-module-hub.js?v=466"></script>
 </body>
 </html>
