@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Fail-closed source contract for Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics."""
+"""Fail-closed source contract for Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics.
+
+Build 10 remains exact when it is current and becomes provenance-preserving when a newer
+Release 467 build is current. Newer builds must retain the Build 10 manifest/runtime contract,
+but Build 10 must not reject unrelated later application files merely because the pointer moved.
+"""
 from __future__ import annotations
 
 import json
@@ -60,17 +65,26 @@ html = read("admin/it/index.html")
 build1_gate = read("scripts/release467_build1_gate.py")
 build9_gate = read("scripts/release467_build9_gate.py")
 
-req(pointer.get("release") == 467 and pointer.get("build") == 10, "current authority pointer must identify Release 467 Build 10")
-req(pointer.get("title") == "I.T. Control Tower Consolidation and Self-Diagnostics", "Build 10 title drifted")
-req(pointer.get("state") == "DEVELOPMENT_CANDIDATE", "Build 10 pointer must remain DEVELOPMENT_CANDIDATE before merge")
-req(pointer.get("source_base_sha") == BASE_SHA, "Build 10 source base drifted")
-req(pointer.get("last_green_build") == 9, "Build 9 must be the exact last-green predecessor")
-req(pointer.get("last_green_dev_sha") == BASE_SHA, "Build 9 predecessor SHA drifted")
-req(pointer.get("last_green_dev_tree_sha") == BASE_TREE, "Build 9 predecessor tree drifted")
-req(pointer.get("last_green_system_gate_run") == SYSTEM_GATE, "Build 9 System Gate evidence drifted")
-req(pointer.get("last_green_build_proof_run") == BUILD9_PROOF, "Build 9 proof evidence drifted")
+pointer_build = int(pointer.get("build") or 0)
+req(pointer.get("release") == 467 and pointer_build >= 10, "current authority pointer must remain Release 467 Build 10 or newer")
+req(pointer.get("state") in {"DEVELOPMENT_CANDIDATE", "DEVELOPMENT_GREEN"}, "current authority pointer state drifted")
+if pointer_build == 10:
+    req(pointer.get("title") == "I.T. Control Tower Consolidation and Self-Diagnostics", "Build 10 title drifted")
+    req(pointer.get("source_base_sha") == BASE_SHA, "Build 10 source base drifted")
+    req(pointer.get("last_green_build") == 9, "Build 9 must be the exact last-green predecessor")
+    req(pointer.get("last_green_dev_sha") == BASE_SHA, "Build 9 predecessor SHA drifted")
+    req(pointer.get("last_green_dev_tree_sha") == BASE_TREE, "Build 9 predecessor tree drifted")
+    req(pointer.get("last_green_system_gate_run") == SYSTEM_GATE, "Build 9 System Gate evidence drifted")
+    req(pointer.get("last_green_build_proof_run") == BUILD9_PROOF, "Build 9 proof evidence drifted")
+else:
+    req(int(pointer.get("last_green_build") or 0) >= 10, "newer Release 467 authority must retain Build 10 as a closed predecessor")
+    req(bool(pointer.get("last_green_dev_sha")), "newer Release 467 authority must retain a last-green Development SHA")
+    req(bool(pointer.get("last_green_dev_tree_sha")), "newer Release 467 authority must retain a last-green Development tree")
+    req(bool(pointer.get("last_green_system_gate_run")), "newer Release 467 authority must retain a last-green System Gate run")
+    req(bool(pointer.get("last_green_build_proof_run")), "newer Release 467 authority must retain a last-green build proof run")
+
 req(pointer.get("promotion_state") == "NO_AUTOMATIC_PROMOTION", "Build 10 cannot authorize automatic Production promotion")
-req("release467-build10-it-control-tower-consolidation.json" in (pointer.get("current_release_authorities") or []), "Build 10 authority must be first-class current authority")
+req("release467-build10-it-control-tower-consolidation.json" in (pointer.get("current_release_authorities") or []), "newer Release 467 authority must retain Build 10 provenance")
 
 compatibility = pointer.get("compatibility_authority") or {}
 req(compatibility.get("role") == "INHERITED_REGRESSION_COMPATIBILITY", "Release 466 regression compatibility role drifted")
@@ -84,7 +98,7 @@ for key in (
     "cloudflare_access_mutation_authorized", "main_mutation_authorized",
     "production_mutation_authorized", "secret_values_emitted",
 ):
-    req(pointer.get(key) is False, f"Build 10 pointer safety flag must remain false: {key}")
+    req(pointer.get(key) is False, f"current Release 467 pointer safety flag must remain false: {key}")
 
 req(manifest.get("release") == 467 and manifest.get("build") == 10, "Build 10 manifest identity drifted")
 req(manifest.get("source_base_sha") == BASE_SHA and manifest.get("source_base_tree_sha") == BASE_TREE, "Build 10 manifest predecessor drifted")
@@ -106,20 +120,11 @@ for key in (
     req(manifest.get(key) is False, f"Build 10 manifest safety flag must remain false: {key}")
 
 required_endpoint = [
-    "getReadinessControlTower",
-    "const BUILD = 10",
-    "recoveryQueue(subsystems",
-    "external_policy: EXTERNAL_POLICY",
-    "recovery_queue: queue",
-    "next_action: queue[0] || null",
-    "compatibility_runtime_release_header: 466",
-    "root_admin_full_manage",
-    "canonical_migrations",
-    "foreign_key_violations",
-    "secret_values_emitted: false",
-    "provider_execution: false",
-    "main_mutation: false",
-    "production_mutation: false",
+    "getReadinessControlTower", "const BUILD = 10", "recoveryQueue(subsystems",
+    "external_policy: EXTERNAL_POLICY", "recovery_queue: queue", "next_action: queue[0] || null",
+    "compatibility_runtime_release_header: 466", "root_admin_full_manage", "canonical_migrations",
+    "foreign_key_violations", "secret_values_emitted: false", "provider_execution: false",
+    "main_mutation: false", "production_mutation: false",
 ]
 for marker in required_endpoint:
     req(marker in endpoint, f"Build 10 endpoint marker missing: {marker}")
@@ -127,28 +132,20 @@ for marker in ("method: 'POST'", 'method: "POST"', "method: 'PUT'", "method: 'PA
     req(marker not in endpoint, f"Build 10 endpoint contains forbidden execution marker: {marker}")
 
 required_ui = [
-    "/api/admin/it-operations-control-tower",
-    "Release ${esc(current.release || data.release)} • Build ${esc(current.build || data.build)}",
-    "I.T. Operations Control Tower",
-    "Prioritized recovery queue",
-    "External acceptance policy",
-    "Runtime deployed SHA",
-    "Root admin",
-    "Migrations / proofs",
-    "runtime compatibility",
+    "/api/admin/it-operations-control-tower", "Release ${esc(current.release || data.release)} • Build ${esc(current.build || data.build)}",
+    "I.T. Operations Control Tower", "Prioritized recovery queue", "External acceptance policy",
+    "Runtime deployed SHA", "Root admin", "Migrations / proofs", "runtime compatibility",
     "The Control Tower never performs these repairs automatically",
 ]
 for marker in required_ui:
     req(marker in ui, f"Build 10 UI marker missing: {marker}")
-req("Release 467 Build 10" in html, "I.T. workspace must name Release 467 Build 10")
+req("Release 467 Build 10" in html, "I.T. workspace must retain Release 467 Build 10 provenance")
 req("consolidates current release/deployment authority" in html, "I.T. workspace Build 10 purpose missing")
 req("/public/js/admin-it-control-tower.js?v=467" in html, "I.T. control tower script mount drifted")
 
 req("direct_ui or wrapped_ui" in build1_gate, "Build 1 gate must allow the newer wrapper while retaining its original readiness engine")
 req("getReadinessControlTower" in build1_gate, "Build 1 gate wrapper proof marker missing")
-req("pointer_build >= 9" in build9_gate, "Build 9 gate must be forward-compatible with Build 10")
-req("if pointer_build == 9" in build9_gate, "Build 9 exact changed-file scope must be limited to Build 9 itself")
-req("newer Release 467 authority must retain Build 9 provenance" in build9_gate, "Build 9 provenance retention check missing")
+req("pointer_build >= 9" in build9_gate, "Build 9 gate must remain forward-compatible")
 
 expected_migrations = [
     "0001_release464_migration_authority.sql",
@@ -177,7 +174,7 @@ allowed = {
     "docs/operations/RELEASE_467_BUILD_10_IT_CONTROL_TOWER.md",
 }
 changed = changed_files()
-if changed:
+if changed and pointer_build == 10:
     unexpected = [path for path in changed if path not in allowed]
     req(not unexpected, f"Build 10 changed files outside bounded I.T./authority scope: {unexpected}")
     migration_changes = [path for path in changed if path.startswith("migrations/") or path.lower().endswith(".sql")]
@@ -190,11 +187,11 @@ if FAIL:
     sys.exit(1)
 
 print("PASS Release 467 Build 10 I.T. control tower gate")
-print(f"predecessor_dev_sha={BASE_SHA}")
-print(f"predecessor_system_gate={SYSTEM_GATE}")
-print(f"predecessor_build9_proof={BUILD9_PROOF}")
+print(f"locked_build10_predecessor_dev_sha={BASE_SHA}")
+print(f"locked_build10_predecessor_system_gate={SYSTEM_GATE}")
+print(f"locked_build10_predecessor_build9_proof={BUILD9_PROOF}")
+print(f"current_pointer_build={pointer_build}")
 print("control_tower=CONSOLIDATED_READ_ONLY")
-print("build1_readiness_engine=RETAINED_THROUGH_WRAPPER_OR_DIRECT_UI")
-print("recovery_queue=PRIORITIZED_NO_AUTOMATIC_REPAIR")
+print("build10_provenance=RETAINED")
 print("external_acceptance=HOLD_EXTERNAL")
 print("schema_d1_r2_provider_access_main_production_mutation=NONE")

@@ -2,11 +2,11 @@
 
 ## Current release
 
-**Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics** is the active Development source candidate.
+**Release 467 Build 11 — Admin Operations Command Center** is the active Development source candidate.
 
-Its exact Development-green predecessor is **Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction**, merged to `dev` at `d8a9ffba03f980b9632643d91d9aa69b25bd94fd`, tree `949f2523d31e0f47ed1e19ff7655de2762fbc1df`, with System Gate `33633043297` and Build 9 proof `33633043229` both successful.
+Its exact Development-green predecessor is **Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics**, merged to `dev` at `cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a`, tree `c2de52782f96fa43d1e5d2eabd80b30a23c62ecd`, with System Gate `33635318725` and Build 10 Proof `33635318747` both successful.
 
-The current restart pointer is `current-development-authority.json`. `development-release.json` remains inherited Release 466 regression compatibility and the middleware Release 466 header remains explicit runtime compatibility; neither is the current Release 467 selector.
+The current restart pointer remains `current-development-authority.json`. `development-release.json` remains inherited regression compatibility and the middleware Release 466 header remains explicit runtime compatibility; neither selects the current Release 467 build.
 
 ## Release 467 progression
 
@@ -20,39 +20,47 @@ The current restart pointer is `current-development-authority.json`. `developmen
 | 6 | Development Cloudflare Access service-token acceptance harness | Harness green; real Access `HOLD_EXTERNAL` |
 | 7 | External Commercial Acceptance Bridge | Source green; real external lanes bounded |
 | 8 | Authority Convergence and Restart Safety | Development green |
-| 9 | Historical CI Retirement & Gate Fanout Reduction | Development green at `d8a9ffba…` |
-| 10 | I.T. Control Tower Consolidation and Self-Diagnostics | Active Development candidate |
+| 9 | Historical CI Retirement & Gate Fanout Reduction | Development green |
+| 10 | I.T. Control Tower Consolidation and Self-Diagnostics | Development green at `cba1fbe1…` |
+| 11 | Admin Operations Command Center | Active Development candidate |
 
 ## Locked Build 8 provenance
 
-**Release 467 Build 8 — Authority Convergence and Restart Safety** remains retained provenance for the current-vs-compatibility authority model. Its locked predecessor was Release 467 Build 7 at `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, with System Gate `33591744817` and Build 7 Proof `33591744787`. Real external acceptance remained `HOLD_EXTERNAL`; these historical facts are retained rather than promoted into current Build 10 state.
+**Release 467 Build 8 — Authority Convergence and Restart Safety** remains retained provenance for the current-vs-compatibility authority model. Its locked predecessor was Release 467 Build 7 at `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, with System Gate `33591744817` and Build 7 Proof `33591744787`. Real external acceptance remained `HOLD_EXTERNAL`; these facts remain historical proof and do not override current Build 11 authority or Production boundaries.
 
-## Build 10 scope
+## Build 11 scope
 
-Build 10 makes `/admin/it/` the operational first stop instead of requiring the operator to interpret multiple older Build 1–7 panels before knowing what matters now.
+Build 11 moves the main `/admin/` landing page from a navigation-only screen into a practical daily operating surface.
 
 It adds:
 
-- `/api/admin/it-operations-control-tower` as a read-only wrapper around the existing subsystem preflight engine;
-- current Release 467 Build 10 and exact last-green Build 9 evidence;
-- Development target, D1/R2 and runtime SHA/host summary;
-- root-admin, profile, module, D1 migration/proof and foreign-key headline metrics;
-- one severity-sorted recovery queue generated from existing subsystem findings;
-- explicit external acceptance policy states that remain separate from runtime evidence;
-- explicit labeling of Release 466 runtime/regression metadata as inherited compatibility rather than current authority.
+- a desktop **Today Operations Command Center** above the four workspace cards;
+- the existing owned Today Tasks read contract rather than a duplicate task engine;
+- category and minimum-count filters for catalog, customers, orders, inventory, accounting and runtime health;
+- direct links to the exact work surface plus the owning Storefront, Creator, Finance or I.T. workspace;
+- explicit Done, Ignore and Snooze controls through the already-audited `/api/admin/today-task-actions` authority;
+- visible success/failure feedback after an administrator action;
+- current Release 467 Build 11 operator labeling on the admin landing page;
+- explicit wording that the four admin workspaces are backed by five permission modules, with Socials/CAIP independently permissioned even though its operator navigation is grouped with Creator.
 
-The endpoint performs no automatic permission repair, schema work, data mutation or provider action. Build 10 is schema-neutral and canonical migrations remain exactly `0001`–`0004`.
+Build 11 does **not** create another task table, change task mutation ownership, run background task actions, or introduce request-time schema work.
 
-## Current I.T. operating model
+## Retained Today Tasks authority
 
-The top I.T. Control Tower answers four questions first:
+The Build 366/369 Today Tasks read service remains the read owner. The Build 393 action endpoint remains the explicit write owner for `completed`, `ignored` and `snoozed` actions. Build 11 only exposes these retained capabilities on the desktop admin landing page.
 
-1. **What exact release/build are we working on, and what was the last proven Development predecessor?**
-2. **Are Development D1/R2, root-admin/module authority and runtime ancestry healthy?**
-3. **What is blocking or needs attention next?**
-4. **Which external lanes remain policy HOLDs even if source/runtime checks are green?**
+This distinction matters: rendering a task and allowing an administrator to click Done/Ignore/Snooze is not an automatic repair or background mutation. No task action fires merely because `/admin/` loads.
 
-Builds 2–7 remain visible below as bounded specialist evidence lanes. Build 10 does not collapse or falsely promote those authorities.
+## Current operator model
+
+- `/admin/` — daily cross-business operating first stop.
+- `/admin/today-tasks/` — full Today Tasks workspace.
+- `/admin/storefront/` — customer-facing merchandising, SEO, public media and customer programs.
+- `/admin/creator/` — catalog, inventory, packaging, projects, CAIP/content and creator operations.
+- `/admin/finance/` — orders, payments, accounting and business-health work.
+- `/admin/it/` — technical readiness, release/deployment, integrations and recovery first stop from Build 10.
+
+The permission model remains five modules: Storefront, Creators, Socials, Financials and I.T. platform.
 
 ## External acceptance remains separate
 
@@ -62,7 +70,7 @@ Builds 2–7 remain visible below as bounded specialist evidence lanes. Build 10
 - Social/OAuth — `HOLD_EXTERNAL` until deliberate intended-account lifecycle evidence succeeds with publication closed.
 - CAIP private media — use fresh Build 7 runtime evidence.
 
-No credential or provider action is executed merely to make the I.T. dashboard green.
+Build 11 does not execute any of these external lanes merely because a daily task points toward related work.
 
 ## Development boundary
 
@@ -71,19 +79,21 @@ No credential or provider action is executed merely to make the I.T. dashboard g
 - D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
 - Product R2: `devilndove-toolshed-images-dev`.
 - CAIP private R2: `devilndove-caip-media-dev`.
-- Canonical migrations: `0001`–`0004`; Build 10 adds none.
+- Canonical migrations: exactly `0001`–`0004`; Build 11 adds none.
+- New D1 mutation authority from Build 11: NONE.
+- Retained explicit Today Task administrator actions: unchanged.
 
 ## Main / Production boundary
 
 The carried-forward source-head observation for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. The exact deployed Production release must still be verified independently before any future promotion decision.
 
-Build 10 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute Production providers, change Cloudflare Access policy, or authorize deployment. Production promotion remains governed separately by `release467-build5-production-promotion-readiness.json` for one exact reviewed Development candidate.
+Build 11 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute Production providers, change Cloudflare Access policy, or authorize deployment. Production promotion remains governed separately by `release467-build5-production-promotion-readiness.json` for one exact reviewed Development candidate.
 
 ## Next bounded work
 
-First make Build 10 proof and current Release 467/System gates green, merge to `dev`, and prove/deploy the exact merged Development SHA.
+First prove Build 11, keep all current Release 467/System gates green, merge to `dev`, then prove and deploy the exact merged Development SHA.
 
-After Build 10 closure, use the consolidated I.T. recovery queue to select the next non-provider application improvement. External `HOLD_EXTERNAL` lanes remain deliberate acceptance work, not a reason to manufacture green status.
+After Build 11 closure, use the new desktop daily queue and the Build 10 I.T. Control Tower together to choose the next real Storefront, Creator or Finance workflow improvement. External `HOLD_EXTERNAL` lanes remain deliberate acceptance work, not a reason to manufacture green status.
 
 ## Permanent boundaries
 

@@ -1,16 +1,16 @@
 {
   "release": 467,
-  "build": 10,
-  "title": "I.T. Control Tower Consolidation and Self-Diagnostics",
+  "build": 11,
+  "title": "Admin Operations Command Center",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build10-it-control-tower-consolidation",
-  "source_base_sha": "d8a9ffba03f980b9632643d91d9aa69b25bd94fd",
-  "last_green_build": 9,
-  "last_green_dev_sha": "d8a9ffba03f980b9632643d91d9aa69b25bd94fd",
-  "last_green_dev_tree_sha": "949f2523d31e0f47ed1e19ff7655de2762fbc1df",
-  "last_green_system_gate_run": 33633043297,
-  "last_green_build_proof_run": 33633043229,
+  "feature_branch": "release467-build11-admin-operations-command-center",
+  "source_base_sha": "cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a",
+  "last_green_build": 10,
+  "last_green_dev_sha": "cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a",
+  "last_green_dev_tree_sha": "c2de52782f96fa43d1e5d2eabd80b30a23c62ecd",
+  "last_green_system_gate_run": 33635318725,
+  "last_green_build_proof_run": 33635318747,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {
     "name": "devilndove-dev",
@@ -28,9 +28,10 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Release 467 current operator/restart authority is separate from inherited Release 466 regression fields and the compatibility runtime release header. Build 10 surfaces that split explicitly instead of silently treating compatibility metadata as current authority."
+    "reason": "Release 467 current operator/restart authority remains separate from inherited Release 466 regression fields and the compatibility runtime release header. Build 11 changes the admin operator surface, not that compatibility contract."
   },
   "current_release_authorities": [
+    "release467-build11-admin-operations-command-center.json",
     "release467-build10-it-control-tower-consolidation.json",
     "release467-build9-historical-ci-retirement.json",
     "release467-build8-authority-convergence.json",
@@ -58,5 +59,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 10 makes /admin/it/ the consolidated read-only operational first stop while preserving separate bounded Build 5-7 external/promotion authorities and Build 9 historical CI retirement."
+  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 11 makes /admin/ the daily operations first stop while Build 10 keeps /admin/it/ as the read-only technical first stop. Today task writes remain explicit administrator actions through the retained audited action authority; no new mutation authority is introduced."
 }

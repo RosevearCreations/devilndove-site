@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Admin — Devil n Dove</title>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="description" content="Devil n Dove Release 466 four-workspace admin cockpit for Storefront, Creator, Finance and I.T."/>
+  <meta name="description" content="Devil n Dove Release 467 Build 11 admin operations command center for today's work and the Storefront, Creator, Finance and I.T. workspaces."/>
   <link href="/css/styles.css?v=466" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
 </head>
@@ -17,7 +17,7 @@
         <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
         <div>
           <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Admin • Release 466</div>
+          <div class="small">Admin • Release 467 Build 11</div>
         </div>
       </div>
       <div class="links">
@@ -32,11 +32,22 @@
     <div class="hero">
       <div>
         <h1>Admin</h1>
-        <p>Choose the part of the business you want to work in. Detailed screens now live inside four clear workspaces instead of competing for space on this dashboard.</p>
+        <p>Start with today's work, then move into four admin workspaces backed by five permission modules. Storefront, Creator, Finance and I.T. remain the operator homes while Socials/CAIP keeps its independent module authority.</p>
       </div>
     </div>
 
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+
+    <section aria-labelledby="adminTodayCommandCenterHeading" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px">
+        <div>
+          <h2 id="adminTodayCommandCenterHeading" style="margin:0">Today Operations Command Center</h2>
+          <p class="small" style="margin:6px 0 0">One daily queue across product readiness, customer requests, orders, inventory, accounting and runtime health. Done, Ignore and Snooze remain explicit administrator actions through the existing audited Today Tasks authority.</p>
+        </div>
+        <a class="btn" href="/admin/today-tasks/">Open full Today Tasks</a>
+      </div>
+      <div id="desktopTodayTasksMount" aria-live="polite" aria-busy="true"></div>
+    </section>
 
     <main class="department-grid" style="margin-top:18px" aria-label="Admin workspaces">
       <a class="card department-card startup-highlight-card" data-admin-module-card="storefront" href="/admin/storefront/">
@@ -62,8 +73,8 @@
     </main>
 
     <section class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Four workspaces, existing capabilities</h2>
-      <p class="small" style="margin-bottom:0">No operational screen has been removed. Existing admin URLs stay stable; this update only gives every existing screen a clear primary home. Creator groups Socials/CAIP navigation with creative storytelling while the underlying Socials runtime authority remains independently permissioned.</p>
+      <h2 style="margin-top:0">Four workspaces, five permission modules</h2>
+      <p class="small" style="margin-bottom:0">No operational screen has been removed. Existing admin URLs stay stable. Creator groups Socials/CAIP navigation with creative storytelling while the underlying Socials runtime authority remains independently permissioned.</p>
     </section>
 
     <div class="footer card" style="margin-top:18px"></div>
@@ -76,6 +87,7 @@
   <script src="/public/js/site-analytics.js?v=466"></script>
   <script src="/public/js/admin-self-protect.js?v=466"></script>
   <script src="/public/js/admin.js?v=466"></script>
+  <script src="/public/js/admin-today-tasks.js?v=467b11"></script>
   <script src="/public/js/admin-module-hub.js?v=466"></script>
 </body>
 </html>
