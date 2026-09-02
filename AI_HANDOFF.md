@@ -134,3 +134,10 @@ After Build 5 source convergence, the next work must come from the I.T. readines
 ## Historical authority
 
 Release 466 and earlier release files remain historical evidence only. They must not be used as the current Development restart point unless a current Release 467 gate specifically delegates to them.
+
+For inherited Release 466 Build 3 gate compatibility, these historical carried-forward assertions remain literal:
+
+- Builds 1–3 are Development green
+- Build 4 implementation is **technical green / external acceptance HOLD**
+
+Those two statements describe the historical Release 466 authority only; they do not override the Release 467 Build 5 current authority above.
