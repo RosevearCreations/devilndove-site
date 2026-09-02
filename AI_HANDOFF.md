@@ -2,9 +2,9 @@
 
 ## Current authority
 
-**Release 467 Build 7 — External Commercial Acceptance Bridge** is the active Development source candidate.
+**Release 467 Build 7 — External Commercial Acceptance Bridge** is the current Development authority.
 
-Release 467 Builds 1–6 are merged on `dev`. Build 7 bridges the existing sanitized external-commercial runtime evidence into current Release 467 I.T. authority so Stripe Development, PayPal sandbox, CAIP private-media and Social/OAuth acceptance no longer depend on stale release labels or historical Production metadata in the operator view.
+Release 467 Builds 1–7 source implementation is merged on `dev`. Build 7 bridges the existing sanitized external-commercial runtime evidence into current Release 467 I.T. authority so Stripe Development, PayPal sandbox, CAIP private-media and Social/OAuth acceptance no longer depend on stale release labels or historical Production metadata in the operator view.
 
 Build 7 does **not** execute a provider, mutate D1/R2, change Cloudflare Access, change `main`, contact Production, or declare external acceptance by configuration alone.
 
@@ -18,26 +18,30 @@ Build 7 technical source authority:
 - canonical I.T. workspace: `/admin/it/`
 - existing deliberate payment acceptance runner: `/admin/release-control/external-commercial-readiness/#provider-acceptance-runner`
 
-The Build 7 source can be GREEN while real external commercial acceptance remains **`HOLD_EXTERNAL`**. Existing runtime evidence is reused read-only; historical Production-release/SHA wording is explicitly not accepted as current authority.
+The Build 7 source is Development-green while real external commercial acceptance remains **`HOLD_EXTERNAL`** unless the inherited runtime evidence independently proves the required provider/runtime lanes. Existing runtime evidence is reused read-only; historical Production-release/SHA wording is explicitly not accepted as current authority.
 
 ## Exact source boundary
 
 ### Development
 
 - source branch: `dev`
-- Build 7 feature branch: `release467-build7-external-commercial-acceptance`
-- Build 7 source base: `493454d50c4a6f3f1ed8eb74e189bc576879a040`
+- Build 7 merged Development SHA: `5eef764a67466dc2989a4681c6a7cc782b9d4df9`
+- Build 7 source base before merge: `493454d50c4a6f3f1ed8eb74e189bc576879a040`
+- Build 7 post-merge proof: run `33591744787` — GREEN
+- Build 7 post-merge System Gate: run `33591744817` — source gate GREEN and exact Development deployment GREEN
 - canonical Development Access target: `https://dev.devilndove-site.pages.dev`
 - D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
 - Product R2: `devilndove-toolshed-images-dev`
 - CAIP R2: `devilndove-caip-media-dev`
+
+The post-merge System Gate proved canonical Development D1 convergence, Development data authority read-only, exact-SHA Preview deployment, canonical Preview control-plane bindings and non-secret exact Preview smoke acceptance on `5eef764a67466dc2989a4681c6a7cc782b9d4df9`.
 
 The Build 7 bridge reports the runtime source SHA when exposed by the Development environment and keeps exact-SHA Production promotion authority separate from commercial/provider acceptance.
 
 ### Main / Production boundary
 
 - current `main` source head at Build 7 start: `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`
-- Build 7 does **not** update `main`.
+- Build 7 did **not** update `main`.
 - Build 7 does **not** authorize a Production deployment.
 - Build 7 does **not** contact Production resources.
 - Build 7 does **not** mutate Production D1/R2, business data, provider state, OAuth state or Cloudflare Access configuration.
@@ -59,6 +63,8 @@ Only the names are repository/UI authority. Secret values must never be displaye
 ### Build 2 — readiness actions and recovery queue
 
 Development source authority is merged. Non-GREEN findings are converted into prioritized read-only recovery/runbook actions.
+
+The Build 2 regression gate is forward-compatible with later Release 467 slices: its no-new-runtime-API/no-migration candidate restriction applies only when Build 2-owned feature files are being changed. Later builds must satisfy their own gates rather than being incorrectly rejected by Build 2.
 
 ### Build 3 — browser runtime acceptance
 
@@ -92,7 +98,7 @@ Current outer Access service-token state remains **`HOLD_EXTERNAL`** until the d
 
 ### Build 7 — External Commercial Acceptance Bridge
 
-Build 7 creates the current Release 467 operator authority for these four external/commercial lanes:
+Build 7 source implementation is merged and Development-proven. It creates the current Release 467 operator authority for these four external/commercial lanes:
 
 1. CAIP private-media authenticated browser/range evidence.
 2. Stripe Development acceptance.
@@ -144,11 +150,13 @@ No real Stripe, PayPal or OAuth execution is authorized merely because Build 7 d
 
 ## Next bounded work
 
-First prove Build 7 on its exact feature branch, merge only after the Build 7 proof and canonical System Gate are GREEN, then re-prove the exact merged `dev` SHA.
+Do not reopen Release 467 Builds 1–7 unless a current gate proves drift.
 
-After Build 7 is Development-green, use the I.T. panel to select the highest-priority external lane that can be deliberately accepted with available operator credentials/session. Do not automatically execute Stripe, PayPal, OAuth or Cloudflare Access merely to make the dashboard green.
+Use the I.T. panel to select the highest-priority external lane that can be deliberately accepted with available operator credentials/session. Do not automatically execute Stripe, PayPal, OAuth or Cloudflare Access merely to make the dashboard green.
 
-If credentials/operator authorization are unavailable, leave the lane at **`HOLD_EXTERNAL`** and move to the next bounded release-mechanics improvement that does not fake external evidence.
+If credentials/operator authorization are unavailable, leave the lane at **`HOLD_EXTERNAL`** and move to the next bounded release-mechanics or product/business improvement that does not fake external evidence.
+
+Before any Production promotion, use the separate Build 5 Production Promotion Readiness authority against the exact intended Development candidate and independently verify the current deployed Production release. Build 7 itself is not a promotion authorization.
 
 ## Canonical reading order
 
