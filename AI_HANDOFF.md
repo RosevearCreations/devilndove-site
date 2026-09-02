@@ -135,9 +135,14 @@ After Build 5 source convergence, the next work must come from the I.T. readines
 
 Release 466 and earlier release files remain historical evidence only. They must not be used as the current Development restart point unless a current Release 467 gate specifically delegates to them.
 
-For inherited Release 466 Build 3 gate compatibility, these historical carried-forward assertions remain literal:
+For inherited Release 466 source-gate compatibility, these historical carried-forward assertions remain literal:
 
 - Builds 1–3 are Development green
 - Build 4 implementation is **technical green / external acceptance HOLD**
+- Stripe Development acceptance — EXTERNAL ACCEPTANCE PENDING
+- PayPal sandbox acceptance — EXTERNAL ACCEPTANCE PENDING
+- Build 2 closure
 
-Those two statements describe the historical Release 466 authority only; they do not override the Release 467 Build 5 current authority above.
+The Release 466 Build 2 measured live sitemap/noindex conflicts remain historical evidence at these exact paths: `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/`, `/toolshed/duplicates/`.
+
+Those historical statements do not override the Release 467 Build 5 current authority above.
