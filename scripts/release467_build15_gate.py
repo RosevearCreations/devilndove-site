@@ -114,7 +114,7 @@ for body in docs:
         req(token in body,f"Build 15 documentation token missing: {token}")
 
 allowed={
-"AI_HANDOFF.md","MARKDOWN_INDEX.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","current-development-authority.json","custom-request/quote/index.html","docs/operations/RELEASE_467_BUILD_15_STOREFRONT_SEO_PARITY.md",
+"AI_HANDOFF.md","MARKDOWN_INDEX.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","current-development-authority.json","custom-request/quote/index.html","data-deletion.html","privacy.html","social-connections.html","terms.html","docs/operations/RELEASE_467_BUILD_15_STOREFRONT_SEO_PARITY.md",
 "functions/api/product-buyer-facts.js","public/js/admin-product-quality-command-center.js","public/js/product-detail-parity.js","public/js/seo-page-overrides.js","public/js/shop-parity.js","public/js/storefront-parity.js","public/js/storefront-shipping-policy.js",
 "release467-build15-storefront-seo-parity.json","scripts/release467_build14_gate.py","scripts/release467_build15_public_seo_gate.py","scripts/release467_build15_gate.py",".github/workflows/release467-build15-proof.yml"
 }
