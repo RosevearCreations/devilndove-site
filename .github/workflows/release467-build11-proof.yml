@@ -1,10 +1,7 @@
 name: Release 467 Build 11 Admin Operations Command Center Proof
 
 on:
-  push:
-    branches: [release467-build11-admin-operations-command-center, dev]
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
 
 permissions: {contents: read}
 
@@ -42,16 +39,11 @@ jobs:
       - name: Boundary
         if: always()
         run: |
+          echo 'Build 11 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Scope: Release 467 Build 11 Admin Operations Command Center'
-          echo 'Desktop Today Tasks read contract: RETAINED'
           echo 'Today Task write authority: RETAINED / EXPLICIT ADMIN ACTION ONLY'
           echo 'Automatic task action: NONE'
-          echo 'Schema change: NONE'
-          echo 'New D1 mutation authority: NONE'
-          echo 'R2 mutation: NONE'
+          echo 'Schema/New D1/R2 mutation authority: NONE'
           echo 'Provider execution/publication: NONE'
-          echo 'Cloudflare Access policy mutation: NONE'
-          echo 'Main mutation: NONE'
-          echo 'Production mutation/contact: NONE'
-          echo 'Secret values inspected/emitted: NONE'
+          echo 'Cloudflare Access/Main/Production mutation: NONE'
           echo 'External acceptance remains HOLD_EXTERNAL unless separately and deliberately proven'

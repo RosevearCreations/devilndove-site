@@ -1,10 +1,7 @@
 name: Release 467 Build 6 Access Acceptance Harness Proof
 
 on:
-  push:
-    branches: [release467-build6-access-acceptance-current-dev, dev]
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
 
 permissions: {contents: read}
 
@@ -37,6 +34,7 @@ jobs:
       - name: Boundary
         if: always()
         run: |
+          echo 'Build 6 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Scope: Release 467 Build 6 Development Cloudflare Access service-token acceptance harness'
           echo 'Source proof only: the external Access workflow is NOT dispatched here.'
           echo 'Cloudflare contact: NONE'

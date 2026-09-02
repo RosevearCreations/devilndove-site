@@ -1,10 +1,7 @@
 name: Release 467 Build 12 Finance Operations Command Center Proof
 
 on:
-  push:
-    branches: [release467-build12-finance-operations-command-center, dev]
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
 
 permissions: {contents: read}
 
@@ -39,14 +36,12 @@ jobs:
       - name: Boundary
         if: always()
         run: |
+          echo 'Build 12 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Scope: Release 467 Build 12 Finance Operations Command Center'
           echo 'Finance intelligence: SHARED EXISTING ACCOUNTING READ ENGINE'
           echo 'Financial write authority duplicated: NO'
           echo 'Automatic finance mutation: NONE'
-          echo 'Schema change: NONE'
-          echo 'New D1/R2 mutation authority: NONE'
+          echo 'Schema/New D1/R2 mutation authority: NONE'
           echo 'Provider execution/publication: NONE'
-          echo 'Cloudflare Access policy mutation: NONE'
-          echo 'Main mutation: NONE'
-          echo 'Production mutation/contact: NONE'
+          echo 'Cloudflare Access/Main/Production mutation: NONE'
           echo 'External acceptance remains HOLD_EXTERNAL unless separately and deliberately proven'

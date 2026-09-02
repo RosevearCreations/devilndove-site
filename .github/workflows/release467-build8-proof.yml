@@ -1,10 +1,7 @@
 name: Release 467 Build 8 Authority Convergence Proof
 
 on:
-  push:
-    branches: [release467-build8-authority-convergence, dev]
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
 
 permissions: {contents: read}
 
@@ -34,13 +31,11 @@ jobs:
       - name: Boundary
         if: always()
         run: |
+          echo 'Build 8 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Scope: Release 467 Build 8 authority convergence and restart safety'
           echo 'development-release.json role: inherited Release 466 regression compatibility'
-          echo 'Schema change: NONE'
-          echo 'D1/R2 mutation: NONE'
+          echo 'Schema/D1/R2 mutation: NONE'
           echo 'Provider execution/publication: NONE'
-          echo 'Cloudflare Access mutation: NONE'
-          echo 'Main mutation: NONE'
-          echo 'Production mutation: NONE'
+          echo 'Cloudflare Access/Main/Production mutation: NONE'
           echo 'Secret values inspected/emitted: NONE'
           echo 'External acceptance remains HOLD_EXTERNAL unless separately and deliberately proven'

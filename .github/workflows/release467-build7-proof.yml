@@ -1,10 +1,7 @@
 name: Release 467 Build 7 External Commercial Acceptance Proof
 
 on:
-  push:
-    branches: [release467-build7-external-commercial-acceptance, dev]
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
 
 permissions: {contents: read}
 
@@ -37,14 +34,13 @@ jobs:
       - name: Boundary
         if: always()
         run: |
+          echo 'Build 7 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Scope: Release 467 Build 7 external commercial acceptance bridge'
           echo 'Historical readiness authority mutation: NONE'
           echo 'Schema change: NONE'
           echo 'D1/R2 mutation: NONE'
-          echo 'Provider execution: NONE'
-          echo 'Provider publication: NONE'
+          echo 'Provider execution/publication: NONE'
           echo 'Cloudflare Access policy mutation: NONE'
-          echo 'Main mutation: NONE'
-          echo 'Production mutation: NONE'
+          echo 'Main/Production mutation: NONE'
           echo 'Secret values inspected/emitted: NONE'
           echo 'External commercial acceptance: HOLD_EXTERNAL unless existing runtime evidence already proves all four lanes'

@@ -3,10 +3,22 @@
   "build": 21,
   "title": "Release State, Branch & CI Hygiene Convergence",
   "role": "REPOSITORY_GOVERNANCE_CONVERGENCE",
+  "state": "DEVELOPMENT_GREEN",
   "source_branch": "dev",
-  "feature_branch": "release467-build21-release-state-branch-ci-hygiene",
   "source_base_sha": "7b38af543400a81593a8dc1b7caa4ad9a43033ea",
   "source_base_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
+  "feature_head_sha": "8aa888af2cece0e3d7adeaa2c3c438346698c077",
+  "merged_dev_sha": "63c6e90b9637e7953020aa856017bfde3579b47e",
+  "merged_dev_tree_sha": "8b8ca34e0909d684de6e473007bd976e7948e52b",
+  "acceptance": {
+    "feature_build21_proof_run": 33696184648,
+    "pr_number": 73,
+    "pr_system_gate_run": 33696299977,
+    "merged_build21_proof_run": 33696534777,
+    "merged_system_gate_run": 33696534720,
+    "branch_hygiene_run": 33696535136,
+    "post_cleanup_persistent_branches": ["main", "dev"]
+  },
   "predecessor": {
     "build": 20,
     "title": "Workshop Tool & Equipment Readiness Command Center",
@@ -32,28 +44,9 @@
     "core_branch_deletion_authorized": false
   },
   "workflow_hygiene": {
-    "retained_proofs_dispatch_only": [
-      ".github/workflows/release467-build16-proof.yml",
-      ".github/workflows/release467-build17-proof.yml",
-      ".github/workflows/release467-build18-proof.yml",
-      ".github/workflows/release467-build19-proof.yml",
-      ".github/workflows/release467-build20-proof.yml"
-    ],
-    "current_automatic_proofs": [
-      ".github/workflows/system-gate.yml",
-      ".github/workflows/release467-build21-proof.yml"
-    ],
-    "branch_cleanup_automatic": [".github/workflows/repository-branch-hygiene.yml"],
+    "retained_proofs_dispatch_only_builds": [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+    "current_automatic_proofs": [".github/workflows/system-gate.yml", ".github/workflows/release467-build21-proof.yml", ".github/workflows/repository-branch-hygiene.yml"],
     "historical_source_and_actions_evidence_preserved": true
-  },
-  "authority_convergence": {
-    "restart_pointer": "current-development-authority.json",
-    "handoff": "AI_HANDOFF.md",
-    "roadmap": "PROJECT_STATUS_AND_ROADMAP.md",
-    "sanity": "SANITY_HEALTH_CHECK.md",
-    "markdown_index": "MARKDOWN_INDEX.md",
-    "build20_runtime_authority_preserved": true,
-    "build20_production_green_recorded": true
   },
   "schema_change_authorized": false,
   "request_time_schema_mutation": false,
