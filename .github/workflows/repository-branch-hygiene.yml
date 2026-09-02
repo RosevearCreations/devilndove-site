@@ -1,0 +1,113 @@
+name: Repository Branch Hygiene
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: repository-branch-hygiene
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Prune merged and explicitly archived non-core branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune --no-tags
+
+          declare -A archive_sha
+          archive_sha["backup-main-before-dev-replacement-20260830"]="985ecfad41207f8bf46ad99e1346e6e69ece5a69"
+          archive_sha["release467-build7-handoff-convergence"]="1486777699808c1252f585b7024e2fcfd6296b26"
+
+          deleted=0
+          archived=0
+          retained=0
+
+          mapfile -t branches < <(
+            git for-each-ref --format='%(refname:strip=3)' refs/remotes/origin |
+            sed '/^HEAD$/d' |
+            sort -u
+          )
+
+          for branch in "${branches[@]}"; do
+            case "$branch" in
+              main|dev)
+                echo "CORE RETAIN: $branch"
+                continue
+                ;;
+            esac
+
+            open_pr_count="$(
+              gh api -X GET "repos/${GITHUB_REPOSITORY}/pulls" \
+                -f state=open \
+                -f "head=${GITHUB_REPOSITORY_OWNER}:${branch}" \
+                --jq 'length'
+            )"
+            if [[ "$open_pr_count" != "0" ]]; then
+              echo "::warning::ACTIVE PR RETAIN: ${branch}"
+              retained=$((retained + 1))
+              continue
+            fi
+
+            if [[ -n "${archive_sha[$branch]:-}" ]]; then
+              expected="${archive_sha[$branch]}"
+              actual="$(git rev-parse "refs/remotes/origin/${branch}")"
+              if [[ "$actual" != "$expected" ]]; then
+                echo "::warning::ARCHIVE SHA DRIFT RETAIN: ${branch} expected=${expected} actual=${actual}"
+                retained=$((retained + 1))
+                continue
+              fi
+
+              safe="${branch//\//-}"
+              tag="archive/branch-hygiene/${safe}-${expected:0:12}"
+              existing="$(git ls-remote --refs origin "refs/tags/${tag}" | awk '{print $1}')"
+              if [[ -n "$existing" && "$existing" != "$expected" ]]; then
+                echo "::error::Archive tag ${tag} exists at unexpected SHA ${existing}"
+                exit 1
+              fi
+              if [[ -z "$existing" ]]; then
+                git tag "$tag" "$expected"
+                git push origin "refs/tags/${tag}:refs/tags/${tag}"
+                archived=$((archived + 1))
+                echo "ARCHIVED: ${branch} -> ${tag}"
+              else
+                echo "ARCHIVE EXISTS: ${branch} -> ${tag}"
+              fi
+
+              git push origin --delete "$branch"
+              deleted=$((deleted + 1))
+              echo "DELETED ARCHIVED BRANCH: ${branch}"
+              continue
+            fi
+
+            if git merge-base --is-ancestor "refs/remotes/origin/${branch}" refs/remotes/origin/dev ||
+               git merge-base --is-ancestor "refs/remotes/origin/${branch}" refs/remotes/origin/main; then
+              git push origin --delete "$branch"
+              deleted=$((deleted + 1))
+              echo "DELETED MERGED BRANCH: ${branch}"
+            else
+              echo "::warning::UNKNOWN UNMERGED RETAIN: ${branch}"
+              retained=$((retained + 1))
+            fi
+          done
+
+          echo "branch_hygiene_deleted=${deleted}"
+          echo "branch_hygiene_archived=${archived}"
+          echo "branch_hygiene_retained_unknown_or_active=${retained}"
+          echo "Persistent branch policy: main + dev only; unknown unmerged branches fail safe by retention."
