@@ -4,6 +4,7 @@
   "title": "I.T. Evidence & Acceptance Ledger",
   "state": "development_candidate",
   "base_development_sha": "af611cc117d445687ffb905123db7bec8c6fc2ba",
+  "proof_policy": "The exact feature-candidate head must complete the Release 467 Build 4 Proof before PR merge; post-merge dev gates remain a separate confirmation.",
   "scope": [
     "consolidated_it_evidence_ledger",
     "same_session_browser_evidence_bridge",
