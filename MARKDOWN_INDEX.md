@@ -1,28 +1,43 @@
-# Devil n Dove — Markdown Index
+# Devil n Dove — Markdown / Authority Index
 
-## Canonical current authority — Release 462 Development green
+## Canonical current authority — Release 467 Build 8
 
-Read these files in order:
+**Release 467 Build 8 — Authority Convergence and Restart Safety** is the active Development source candidate. The exact Development-green predecessor is Release 467 Build 7 at commit `5eef764a67466dc2989a4681c6a7cc782b9d4df9`.
 
-1. `development-release.json` — machine-readable current release, exact Development boundaries and closure evidence.
-2. `AI_HANDOFF.md` — exact restart rules and deferred external boundaries.
-3. `PROJECT_STATUS_AND_ROADMAP.md` — completed Release 462 dozen and forward direction.
-4. `SANITY_HEALTH_CHECK.md` — compact exact green evidence and boundary checklist.
-5. `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md` — exact Development Cloudflare/D1/R2 authority.
-6. `docs/operations/RELEASE_462_AUTONOMOUS_QUALITY_AUTHORITY.md` — Release 462 implementation, workflow correction and acceptance authority.
+Read current authority in this order:
 
-## Release 462 evidence anchor
+1. `current-development-authority.json` — machine-readable current Release 467 restart pointer and exact safety boundary.
+2. `AI_HANDOFF.md` — current restart instructions, current external HOLDs and next bounded work.
+3. `release467-build8-authority-convergence.json` — Build 8 source contract.
+4. `PROJECT_STATUS_AND_ROADMAP.md` — current release/build progression and forward direction.
+5. `SANITY_HEALTH_CHECK.md` — compact current evidence and safety checklist.
+6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — canonical startup/preflight mechanics.
+7. `docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md` — why the authority split exists and how it is proved.
+8. `release467-build7-external-commercial-acceptance.json` — current commercial/provider acceptance authority.
+9. `release467-build6-access-acceptance-harness.json` — separate Development Cloudflare Access service-token authority.
+10. `release467-build5-production-promotion-readiness.json` — separate exact-candidate Production promotion HOLD/READY authority.
+11. `development-release.json` — **inherited Release 466 regression compatibility evidence only; not the current Release 467 restart pointer**.
 
-The preclosure technical checkpoint is `71b58c548e953edbdede1be85e12acd7e30e3422` with System Gate `33348770688` (#526) PASS and Cloudflare Pages check `99358032459` PASS. The Development preview is `https://3e03d1ee.devilndove-site-dev.pages.dev`.
+## Exact green predecessor
 
-Release 462 has no D1 migration. Release 461 remains the verified schema baseline. Ordinary `dev` changes now produce one current System Gate instead of a fanout of historical release-specific source gates.
+Release 467 Build 7 merged to `dev` at `5eef764a67466dc2989a4681c6a7cc782b9d4df9` with tree `f7327733dc423982016829d717521ceab2029f35`.
 
-## Supporting domain references
+- System Gate `33591744817` — SUCCESS.
+- Release 467 Build 7 Proof `33591744787` — SUCCESS.
+- Build 7 provider/payment/Access/main/Production mutation authority — NONE.
 
-Domain-specific Markdown such as Content Automation, Creative Automation, image registers, SEO playbooks, marketplace/provider guides and schema references may be used for detail, but they do not override the canonical current authority above.
+## Compatibility boundary
+
+`development-release.json` intentionally remains top-level Release 466 because inherited Release 466 regression gates still assert its historical convergence fields. Its role is compatibility, not current release selection. Build 8 introduces `current-development-authority.json` so new chats and tooling no longer misread those historical fields as the current Development release.
+
+Do not rewrite historical compatibility evidence merely to make version labels look newer. Migrate a dependent regression gate first, then retire its compatibility assertion deliberately.
+
+## External boundaries
+
+External acceptance remains truthful `HOLD_EXTERNAL` unless separately proven through its bounded workflow/operator path. Cloudflare Access service-token acceptance, Stripe Development, PayPal sandbox, Social/OAuth and native repository rules remain separate from source-green Build 8. CAIP private-media status must come from fresh current runtime evidence rather than stale historical wording.
+
+Production promotion remains separate and manual. Build 8 does not change `main`, Production data, D1/R2, providers, OAuth state, Cloudflare Access policy or secrets.
 
 ## Historical material
 
-Older Build/Release Markdown and archived GitHub workflows are provenance/evidence only. They cannot reopen a closed migration, authorize Production/provider execution, or override `development-release.json`.
-
-New autonomous source feature work begins as **Release 463**.
+Release 466 and earlier release/build documents remain provenance and regression evidence. They cannot override the Release 467 current authority above, reopen historical migrations, authorize provider execution/publication, or authorize Production promotion.
