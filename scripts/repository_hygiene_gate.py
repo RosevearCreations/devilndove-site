@@ -5,6 +5,12 @@ import json,re
 from pathlib import Path
 from urllib.parse import urlparse
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
+RETIRED_WORKFLOWS={
+'development-d1-release448.yml','development-d1-release449.yml','development-d1-release450.yml','development-d1-release453.yml','development-d1-release459.yml','development-d1-release460.yml',
+'development-d1-release461-acceptance.yml','development-d1-release461-custom-request-commerce.yml','development-d1-release461-member-runtime.yml','development-d1-release461-notification.yml','development-d1-release461-product-offers.yml','development-d1-release461-public-community.yml','development-d1-release461-public-telemetry.yml','development-d1-release461.yml',
+'release449-remote-verification.yml','release449-source-gate.yml','release450-remote-verification.yml','release450-source-gate.yml','release451-source-gate.yml','release452-source-gate.yml','release453-remote-verification.yml','release453-source-gate.yml','release454-source-gate.yml','release455-source-gate.yml','release456-source-gate.yml','release457-source-gate.yml','release458-source-gate.yml','release459-remote-verification.yml','release459-source-gate.yml','release460-source-gate.yml',
+'release461-custom-request-commerce-source-gate.yml','release461-d1-one-shot-preflight.yml','release461-member-runtime-source-gate.yml','release461-payment-webhook-schema-contract-source-gate.yml','release461-product-offer-source-gate.yml','release461-public-auth-source-gate.yml','release461-public-community-source-gate.yml','release461-public-telemetry-source-gate.yml','release461-source-gate.yml'
+}
 def req(ok,msg):
  if not ok:FAIL.append(msg)
 def read(path):return (ROOT/path).read_text(encoding='utf-8',errors='replace')
@@ -24,6 +30,9 @@ for p in ROOT.rglob('*'):
  if p.name.lower().endswith(('.bak','.old','.tmp','.orig','.rej')) or p.name.endswith('~'):bad.append(str(rel))
 req(not bad,f'backup/temp artifacts must not ship: {bad[:20]}')
 for p in ('tmp','docs/archive','docs/releases'):req(not (ROOT/p).exists(),f'{p} must not ship')
+workflow_dir=ROOT/'.github/workflows'
+returned=sorted(p.name for p in workflow_dir.iterdir() if p.is_file() and p.name in RETIRED_WORKFLOWS) if workflow_dir.is_dir() else []
+req(not returned,f'Release 467 Build 13 retired workflow definitions must not return: {returned}')
 release=json.loads(read('development-release.json'));current=int(release.get('release') or 0)
 req(current>=454,'repository hygiene gate requires Release 454 or later current authority')
 if current in {454,455}:req(release.get('current_release_migrations')==[],f'Release {current} must remain source-only')
@@ -44,7 +53,7 @@ req(policy.get('production_promotion')=='exact_green_development_tree_only','Pro
 req(policy.get('main_only_application_patches') is False,'main-only application patches must remain forbidden')
 req(policy.get('provider_publication')=='closed','Provider publication must remain closed unless deliberately authorized')
 req(policy.get('blind_dev_to_production_data_overwrite') is False,'Production transactional data must never be overwritten from Development')
-print('REPOSITORY HYGIENE / UX / SEO GATE');print(f'Current Development release: {current}');print('Obsolete root Build verification artifacts: NONE');print('Storefront SEO/one-H1/structured data: GUARDED');print('Release 454 Admin module/state/responsive shell: CARRIED FORWARD');print('Private admin noindex: GUARDED');print('Production promotion: EXACT GREEN DEVELOPMENT TREE ONLY');print('Provider publication: CLOSED');print('Production data overwrite from Development: FORBIDDEN')
+print('REPOSITORY HYGIENE / UX / SEO GATE');print(f'Current Development release: {current}');print('Obsolete root Build verification artifacts: NONE');print(f'Retired historical workflow definitions: {len(RETIRED_WORKFLOWS)} GUARDED');print('Storefront SEO/one-H1/structured data: GUARDED');print('Release 454 Admin module/state/responsive shell: CARRIED FORWARD');print('Private admin noindex: GUARDED');print('Production promotion: EXACT GREEN DEVELOPMENT TREE ONLY');print('Provider publication: CLOSED');print('Production data overwrite from Development: FORBIDDEN')
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
  raise SystemExit(1)

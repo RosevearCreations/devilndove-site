@@ -1,20 +1,21 @@
 {
   "release": 467,
-  "build": 12,
-  "title": "Finance Operations Command Center",
+  "build": 13,
+  "title": "Repository Hygiene and Historical CI Cleanup",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build12-finance-operations-command-center",
-  "source_base_sha": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
-  "last_green_build": 11,
-  "last_green_dev_sha": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
-  "last_green_dev_tree_sha": "191e4a92ebcbc94b29cfbf6a83259acd4981d302",
-  "last_green_system_gate_run": 33637049566,
-  "last_green_build_proof_run": 33637049079,
+  "feature_branch": "release467-build13-repository-hygiene-cleanup",
+  "source_base_sha": "374983f68fb16172fb357b1755293a29e5d2953f",
+  "last_green_build": 12,
+  "last_green_dev_sha": "374983f68fb16172fb357b1755293a29e5d2953f",
+  "last_green_dev_tree_sha": "339f13b5a6e6ba5cc4a9c64ea3b04b70ad8aef91",
+  "last_green_system_gate_run": 33642231716,
+  "last_green_build_proof_run": 33642231794,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {"name": "devilndove-dev", "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
   "development_r2": ["devilndove-toolshed-images-dev", "devilndove-caip-media-dev"],
-  "main_source_head_last_verified": "fcf92f5342c04f0f0d07387034e852b4cc40f3f9",
+  "main_source_head_last_verified": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
+  "production_pages_deploy_last_verified": 33640133776,
   "production_deployment_must_be_verified_independently": true,
   "compatibility_authority": {
     "file": "development-release.json",
@@ -22,9 +23,10 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Release 467 Build 12 advances the Finance operator surface only. Inherited Release 466 regression fields and runtime header remain compatibility evidence, not current release authority."
+    "reason": "Build 13 changes repository hygiene only; inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
   },
   "current_release_authorities": [
+    "release467-build13-repository-hygiene-cleanup.json",
     "release467-build12-finance-operations-command-center.json",
     "release467-build11-admin-operations-command-center.json",
     "release467-build10-it-control-tower-consolidation.json",
@@ -33,8 +35,7 @@
     "release467-build7-external-commercial-acceptance.json",
     "release467-build6-access-acceptance-harness.json",
     "release467-build5-production-promotion-readiness.json",
-    "release467-build5-ci-access-readiness.json",
-    "release467-build4-evidence-acceptance-ledger.json"
+    "release467-build5-ci-access-readiness.json"
   ],
   "external_lanes": {
     "cloudflare_access_service_token": "HOLD_EXTERNAL",
@@ -54,5 +55,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 12 makes /admin/finance/ the read-only financial operating first stop by sharing the existing Accounting operations-intelligence engine; Accounting retains every reconciliation, statement-import, costing, close and ledger write authority."
+  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 13 is repository-only cleanup: 39 obsolete Release 448-461 live workflow definitions are retired while current System/Release 467, Release 463 infrastructure, Release 466 compatibility and Production safety authorities remain retained."
 }
