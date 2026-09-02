@@ -1,0 +1,64 @@
+{
+  "release": 467,
+  "build": 10,
+  "title": "I.T. Control Tower Consolidation and Self-Diagnostics",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_branch": "release467-build10-it-control-tower-consolidation",
+  "source_base_sha": "d8a9ffba03f980b9632643d91d9aa69b25bd94fd",
+  "source_base_tree_sha": "949f2523d31e0f47ed1e19ff7655de2762fbc1df",
+  "predecessor": {
+    "release": 467,
+    "build": 9,
+    "merged_dev_sha": "d8a9ffba03f980b9632643d91d9aa69b25bd94fd",
+    "merged_dev_tree_sha": "949f2523d31e0f47ed1e19ff7655de2762fbc1df",
+    "system_gate_run": 33633043297,
+    "build9_proof_run": 33633043229
+  },
+  "scope": [
+    "consolidated read-only I.T. operations control tower API",
+    "current Release 467 Build 10 and exact last-green Build 9 authority summary",
+    "Development target D1 R2 and runtime ancestry summary",
+    "root-admin profile module and D1 headline metrics",
+    "prioritized recovery queue generated from existing subsystem findings",
+    "explicit external acceptance policy states without provider execution",
+    "clear separation of Release 467 operator authority from inherited Release 466 runtime/regression compatibility metadata",
+    "forward-compatible Build 9 proof gate"
+  ],
+  "runtime": {
+    "endpoint": "/api/admin/it-operations-control-tower",
+    "workspace": "/admin/it/",
+    "source_preflight_engine": "/api/admin/it-control-tower",
+    "read_only": true,
+    "automatic_repair": false,
+    "secret_values_emitted": false
+  },
+  "development": {
+    "target": "https://dev.devilndove-site.pages.dev",
+    "pages_project": "devilndove-site",
+    "d1_name": "devilndove-dev",
+    "d1_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+    "product_r2": "devilndove-toolshed-images-dev",
+    "caip_r2": "devilndove-caip-media-dev",
+    "canonical_migrations": 4
+  },
+  "compatibility": {
+    "development_release_file": "development-release.json",
+    "development_release_role": "INHERITED_REGRESSION_COMPATIBILITY",
+    "runtime_release_header": 466,
+    "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
+    "current_operator_authority_release": 467
+  },
+  "external_acceptance_state": "HOLD_EXTERNAL",
+  "production_promotion_authority": "release467-build5-production-promotion-readiness.json",
+  "production_promotion_state": "NO_AUTOMATIC_PROMOTION",
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false
+}
