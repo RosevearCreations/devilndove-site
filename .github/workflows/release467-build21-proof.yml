@@ -1,0 +1,69 @@
+name: Release 467 Build 21 Release State Branch CI Hygiene Proof
+
+on:
+  push:
+    branches:
+      - release467-build21-release-state-branch-ci-hygiene
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+
+      - name: Preserve Release 467 Build 20 authority
+        run: python scripts/release467_build20_gate.py
+
+      - name: Prove Release 467 Build 21 release state and repository hygiene
+        run: python scripts/release467_build21_gate.py
+
+      - name: Preserve whole-site public SEO quality
+        run: python scripts/release467_build15_public_seo_gate.py
+
+      - name: Validate authority JSON
+        run: |
+          python -m json.tool current-development-authority.json >/dev/null
+          python -m json.tool release467-build21-release-state-branch-ci-hygiene.json >/dev/null
+
+      - name: Validate Python syntax
+        run: python -m py_compile scripts/release467_build20_gate.py scripts/release467_build21_gate.py scripts/release467_build15_public_seo_gate.py
+
+      - name: Diff safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="$(git merge-base HEAD origin/dev)"
+          git diff --check "${base}...HEAD"
+          changed="$(git diff --name-only "${base}...HEAD")"
+          if printf '%s\n' "$changed" | grep -E '(^migrations/|\.sql$)'; then
+            echo 'Build 21 must not change schema or migration files.' >&2
+            exit 1
+          fi
+          if printf '%s\n' "$changed" | grep -E '^(functions/|public/|admin/|css/|assets/)'; then
+            echo 'Build 21 is repository/release governance only and must not change runtime application surfaces.' >&2
+            exit 1
+          fi
+
+      - name: Boundary
+        run: |
+          echo 'Build 21 changes release/restart authority, branch lifecycle, and CI trigger hygiene only.'
+          echo 'main and dev are the only persistent branches.'
+          echo 'Merged non-core branches may be deleted; two explicit unique legacy branches must be archived to tags before deletion.'
+          echo 'Unknown unmerged branches are retained with warnings.'
+          echo 'Release 467 Builds 16-20 proofs remain manual historical workflows; System Gate plus Build 21 proof are current automatic authority.'
+          echo 'No runtime behavior, schema, D1/R2 data, provider, Cloudflare Access, main, or Production mutation is authorized.'
