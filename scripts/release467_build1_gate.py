@@ -58,10 +58,17 @@ req("PRAGMA foreign_key_check" in api, "foreign-key preflight missing")
 req("d1_migrations" in api and "app_schema_migration_proofs" in api, "canonical migration/proof checks missing")
 req("it_provider_readiness_checks" in api and "payment_refunds" in api, "provider evidence authority missing")
 req("oauth_security_events" in api and "creative_asset_access_audit" in api, "external evidence aggregation incomplete")
+req("adminModuleAuthority" in api and "admin_authority: adminAuthority" in api, "root-admin authority is not part of first-stop readiness")
+req("app_module_user_access" in api and "app_module_role_access" in api, "module user/role access authority is not read by the control tower")
+req("root_admin_full_manage" in api and "root_it_explicit_manage" in api, "root-admin full-manage/I.T. explicit-grant evidence missing")
+req("Root administrator full module authority" in api, "root-admin green readiness finding missing")
 
 req("/api/admin/it-control-tower" in ui, "I.T. UI does not call the control tower")
 req("I.T. Preflight Command Center" in ui, "preflight command center UI missing")
 req("Open corrective workspace" in ui, "corrective mechanics are not surfaced")
+req("Administrator & module authority" in ui, "administrator/module authority card missing")
+req("Root admin" in ui and "FULL MANAGE" in ui, "root-admin first-stop summary missing")
+req("/admin/application-modules/" in ui, "Application Modules corrective workspace link missing")
 req("readiness.score" not in ui, "unexpected direct object contract")
 req("itControlTowerMount" in html, "I.T. control tower mount missing")
 req("admin-it-control-tower.js?v=467" in html, "I.T. control tower script missing")
@@ -83,6 +90,8 @@ req(authority.get("secret_policy", {}).get("secret_values_emitted") is False, "s
 req(authority.get("expected_development_authority", {}).get("d1_id") == "dbc1615b-dcbe-4951-973b-b47c99c73bfa", "Development D1 authority drifted")
 req(authority.get("expected_development_authority", {}).get("product_r2_bucket") == "devilndove-toolshed-images-dev", "Development product R2 authority drifted")
 req(authority.get("expected_development_authority", {}).get("caip_r2_bucket") == "devilndove-caip-media-dev", "Development CAIP R2 authority drifted")
+req(authority.get("admin_module_authority", {}).get("root_admin_it_explicit_manage") is True, "authority must retain explicit root-admin I.T. manage")
+req(authority.get("admin_module_authority", {}).get("enabled_modules") == 5, "authority must retain five enabled modules")
 
 changed = changed_files()
 if changed:
@@ -91,4 +100,4 @@ if changed:
 
 print("RELEASE 467 BUILD 1 I.T. READINESS CONTROL TOWER: PASS")
 print("schema_change=NONE request_time_mutation=NONE production_mutation=NONE")
-print("unknown_evidence=AMBER external_acceptance=HOLD secret_values=REDACTED")
+print("root_admin_authority=READ_ONLY_FIRST_STOP unknown_evidence=AMBER external_acceptance=HOLD secret_values=REDACTED")
