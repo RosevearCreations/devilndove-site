@@ -1,0 +1,11 @@
+{
+  "authority_release": 467,
+  "authority_build": 2,
+  "application_release": 466,
+  "expected_parent_sha": "f1eeeecb55d2e0e5a49082580ed03c8b21a3fb43",
+  "purpose": "authenticated_it_admin_runtime_acceptance",
+  "d1_mutation": false,
+  "r2_mutation": false,
+  "provider_execution": false,
+  "production_mutation": false
+}
