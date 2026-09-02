@@ -13,7 +13,7 @@
   <meta property="og:description" content="Request a custom handmade gift, engraving, jewelry piece, candle, soap, or workshop-made Devil n Dove creation in Southern Ontario."/>
   <meta property="og:url" content="https://devilndove.com/custom-request/"/>
   <meta property="og:type" content="website"/>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Custom Work Request | Devil n Dove", "description": "Request custom handmade jewelry, engraving, candle, soap, gift, or mixed-media work from Devil n Dove in Southern Ontario.", "url": "https://devilndove.com/custom-request/", "isPartOf": {"@type": "WebSite", "name": "Devil n Dove", "url": "https://devilndove.com/"}}</script></head>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Custom Work Request | Devil n Dove","description":"Request custom handmade jewelry, engraving, candle, soap, gift, or mixed-media work from Devil n Dove in Southern Ontario.","url":"https://devilndove.com/custom-request/","isPartOf":{"@type":"WebSite","name":"Devil n Dove","url":"https://devilndove.com/"}}</script></head>
 <body>
   <div class="container">
     <div class="nav">
@@ -21,13 +21,7 @@
         <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
         <div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Custom handmade requests</div></div>
       </div>
-      <div class="links">
-        <a href="/">Home</a>
-        <a href="/shop/">Shop</a>
-        <a href="/gallery/">Gallery</a>
-        <a href="/custom-gifts-southern-ontario/">Custom Gifts</a>
-        <a href="/contact/">Contact</a>
-      </div>
+      <div class="links"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/gallery/">Gallery</a><a href="/custom-gifts-southern-ontario/">Custom Gifts</a><a href="/contact/">Contact</a></div>
     </div>
 
     <section class="hero">
@@ -38,6 +32,19 @@
       </div>
     </section>
 
+    <section class="card" style="margin-top:18px" aria-labelledby="customJourneyHeading">
+      <h2 id="customJourneyHeading" style="margin-top:0">How a custom request moves forward</h2>
+      <p class="small">The same customer-safe journey is used from the first request through the private order-status page. Nothing becomes an automatic order or public post.</p>
+      <ol class="custom-request-journey">
+        <li class="custom-request-journey-step"><strong>1. Request</strong><span class="small">You send the idea, timing, budget, and optional private reference images.</span></li>
+        <li class="custom-request-journey-step"><strong>2. Review & proof</strong><span class="small">We review fit, materials, references, and anything that needs clarification.</span></li>
+        <li class="custom-request-journey-step"><strong>3. Quote</strong><span class="small">A reviewed private quote is prepared before payment or making.</span></li>
+        <li class="custom-request-journey-step"><strong>4. Making</strong><span class="small">Accepted work moves through planning, making, curing/finishing, and quality review.</span></li>
+        <li class="custom-request-journey-step"><strong>5. Pickup / shipping</strong><span class="small">We use the reviewed local pickup or Canada-only shipping plan. U.S. sales/shipping remain suspended.</span></li>
+        <li class="custom-request-journey-step"><strong>6. Complete</strong><span class="small">The private status page closes the customer journey; any review/photo permission remains a separate explicit choice.</span></li>
+      </ol>
+    </section>
+
     <section class="card" style="margin-top:18px">
       <h2 style="margin-top:0">Custom request form</h2>
       <p class="small">This does not create an automatic order. It sends the idea to our admin review queue so we can decide whether it should become a quote, product draft, or follow-up conversation.</p>
@@ -46,15 +53,7 @@
         <label>Email<input class="input" name="email" type="email" autocomplete="email" required/></label>
         <label>Phone, optional<input class="input" name="phone" autocomplete="tel"/></label>
         <label>Request type<select class="input" name="request_type">
-          <option value="custom_gift">Custom handmade gift</option>
-          <option value="engraving">Laser engraving</option>
-          <option value="jewelry">Jewelry or polymer clay piece</option>
-          <option value="sublimation">Sublimation item</option>
-          <option value="custom_candle">Custom candle making</option>
-          <option value="custom_soap">Custom soap making</option>
-          <option value="vintage_find">Vintage or collectible idea</option>
-          <option value="repair_or_remake">Repair, remake, or matching piece</option>
-          <option value="other">Other workshop request</option>
+          <option value="custom_gift">Custom handmade gift</option><option value="engraving">Laser engraving</option><option value="jewelry">Jewelry or polymer clay piece</option><option value="sublimation">Sublimation item</option><option value="custom_candle">Custom candle making</option><option value="custom_soap">Custom soap making</option><option value="vintage_find">Vintage or collectible idea</option><option value="repair_or_remake">Repair, remake, or matching piece</option><option value="other">Other workshop request</option>
         </select></label>
         <label>Product or idea name<input class="input" name="product_interest" placeholder="Example: personalized keychain, memorial ornament, matching earrings"/></label>
         <label>Deadline, optional<input class="input" name="deadline_date" type="date"/></label>
@@ -68,20 +67,28 @@
       <div id="customRequestMessage" class="status-note" style="display:none;margin-top:12px"></div>
     </section>
 
+    <section class="card" style="margin-top:18px" aria-labelledby="customExamplesHeading">
+      <h2 id="customExamplesHeading" style="margin-top:0">Real candle & soap examples</h2>
+      <p class="small">These blocks appear only when an existing public product has approved photography and actual candle/soap facts. Missing facts stay missing rather than being turned into marketing claims.</p>
+      <div id="customRequestExamplesMount"><p class="small">Loading reviewed examples…</p></div>
+    </section>
+
+    <section class="card" style="margin-top:18px" aria-labelledby="customProofHeading">
+      <h2 id="customProofHeading" style="margin-top:0">Consent-cleared customer proof</h2>
+      <p class="small">Only reviews or proof notes already approved for public use and privacy-cleared can appear here. Private requests, internal notes, and unapproved photos remain private.</p>
+      <div id="customRequestProofMount"><p class="small">Loading approved proof…</p></div>
+    </section>
+
     <section class="card" style="margin-top:18px">
       <h2 style="margin-top:0">Good details to include</h2>
-      <ul class="small">
-        <li>What the item is for: gift, memorial, event, display, daily use, or experiment.</li>
-        <li>Size, colour, wording, finish, and any material limits.</li>
-        <li>Whether you need local pickup in Southern Ontario or shipping.</li>
-        <li>Photos or links that show the style, not private photos unless you are comfortable sharing them for review.</li>
-      </ul>
+      <ul class="small"><li>What the item is for: gift, memorial, event, display, daily use, or experiment.</li><li>Size, colour, wording, finish, and any material limits.</li><li>Whether you need local pickup in Southern Ontario or Canada shipping.</li><li>Photos or links that show the style, not private photos unless you are comfortable sharing them for review.</li></ul>
     </section>
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
   <script src="/js/main.js?v=279"></script><script src="/public/js/seo-page-overrides.js"></script><script src="/public/js/site-analytics.js?v=279"></script>
   <script src="/public/js/custom-request-intake.js"></script>
+  <script src="/public/js/custom-request-examples.js?v=467b16"></script>
   <script defer src="/public/js/media-content-runtime.js?v=278"></script>
 </body>
 </html>
