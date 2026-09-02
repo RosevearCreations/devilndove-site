@@ -12,6 +12,7 @@ HTML = ROOT / 'admin/it/index.html'
 AUTHORITY = ROOT / 'release467-build5-production-promotion-readiness.json'
 WORKFLOW = ROOT / '.github/workflows/release467-build5-proof.yml'
 PROMOTION_DOC = ROOT / 'docs/operations/RELEASE_467_PRODUCTION_PROMOTION.md'
+BUILD5_DOC = ROOT / 'docs/operations/RELEASE_467_BUILD_5_PROMOTION_READINESS.md'
 
 
 def req(condition: bool, message: str) -> None:
@@ -32,7 +33,7 @@ def changed_files() -> list[str]:
         return []
 
 
-for path in (UI, HTML, AUTHORITY, WORKFLOW, PROMOTION_DOC):
+for path in (UI, HTML, AUTHORITY, WORKFLOW, PROMOTION_DOC, BUILD5_DOC):
     req(path.exists(), f'missing {path.relative_to(ROOT)}')
 
 ui = read(UI)
@@ -40,6 +41,7 @@ html = read(HTML)
 authority = json.loads(read(AUTHORITY))
 workflow = read(WORKFLOW)
 promotion_doc = read(PROMOTION_DOC)
+build5_doc = read(BUILD5_DOC)
 
 req('Release 467 Build 5' in ui, 'Build 5 UI release marker missing')
 req("'/api/admin/it-control-tower'" in ui, 'Build 5 must consume the existing I.T. Control Tower API')
@@ -47,7 +49,11 @@ req("method: 'GET'" in ui, 'Build 5 runtime request must be explicit GET')
 req('sessionStorage' in ui, 'Build 5 must consume same-session browser evidence')
 req('localStorage' not in ui, 'Build 5 must not persist acceptance evidence in localStorage')
 req('READY_FOR_MANUAL_PROMOTION' in ui and 'HOLD' in ui, 'Build 5 HOLD/READY decision semantics missing')
-req('candidate_sha' in ui and 'trustedSha' in ui, 'Build 5 exact candidate SHA handling missing')
+req('candidate_sha' in ui and 'trustedRuntimeSha' in ui, 'Build 5 exact candidate SHA handling missing')
+req('exact_sha_available !== true' in ui and 'deployment_ancestry' in ui and 'runtime_source_sha' in ui, 'Build 5 must inherit Build 4 exact-SHA authority')
+req("database?.state === 'green' && admin?.state === 'green'" in ui, 'Build 5 runtime-core authority must inherit Build 4 database/admin semantics')
+req('external?.accepted === true' in ui, 'Build 5 must inherit Build 4 external acceptance authority')
+req("tower?.readiness?.launch_state" in ui and "READY_FOR_SEPARATE_PROMOTION_REVIEW" in ui, 'Build 5 must inherit Build 4 launch-state authority')
 req('external_acceptance' in ui, 'Build 5 external acceptance evidence missing')
 req('production_contacted: false' in ui, 'Build 5 must state Production was not contacted')
 req('main_advanced: false' in ui, 'Build 5 must state main was not advanced')
@@ -132,6 +138,15 @@ for token in (
     'Canonical D1 migrations remain the only schema-change authority',
 ):
     req(token in promotion_doc, f'Production promotion authority missing: {token}')
+
+for token in (
+    'READY_FOR_MANUAL_PROMOTION',
+    'Build 5 does not contact Production',
+    'Production business data remains Production-owned',
+    'Canonical D1 migrations remain the only schema-change authority',
+    '`main`: UNTOUCHED',
+):
+    req(token in build5_doc, f'Build 5 operator document missing: {token}')
 
 changed = changed_files()
 if changed:
