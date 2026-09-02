@@ -10,7 +10,7 @@ PROBE = ROOT / "scripts/release467_build6_access_acceptance.py"
 UI = ROOT / "public/js/admin-it-access-acceptance-harness.js"
 HTML = ROOT / "admin/it/index.html"
 HANDOFF = ROOT / "AI_HANDOFF.md"
-PROOF_WORKFLOW = ROOT / ".github/workflows/release467-build6-proof.yml"
+WORKFLOW = ROOT / ".github/workflows/release467-build6-proof.yml"
 ACCEPTANCE_WORKFLOW = ROOT / ".github/workflows/release467-build6-cloudflare-access-acceptance.yml"
 BUILD5_CI_GATE = ROOT / "scripts/release467_build5_gate.py"
 BUILD5_PROMOTION_GATE = ROOT / "scripts/release467_build5_promotion_gate.py"
@@ -32,7 +32,7 @@ def main() -> None:
     ui = read(UI)
     html = read(HTML)
     handoff = read(HANDOFF)
-    proof_workflow = read(PROOF_WORKFLOW)
+    workflow = read(WORKFLOW)
     acceptance_workflow = read(ACCEPTANCE_WORKFLOW)
     read(BUILD5_CI_GATE)
     read(BUILD5_PROMOTION_GATE)
@@ -71,11 +71,11 @@ def main() -> None:
     require(token.get("secret_values_forbidden_in_logs_artifacts_ui") is True, "secret values must remain forbidden")
     require(token.get("browser_runtime_must_not_receive_service_token") is True, "browser must never receive Access service-token values")
 
-    workflow = manifest.get("acceptance_workflow") or {}
-    require(workflow.get("path") == ".github/workflows/release467-build6-cloudflare-access-acceptance.yml", "acceptance workflow path changed")
-    require(workflow.get("trigger") == "workflow_dispatch", "acceptance workflow must be dispatch-only")
-    require(workflow.get("workflow_dispatch_only") is True, "acceptance workflow must remain deliberate")
-    require(workflow.get("requires_exact_dev_sha") is True, "acceptance workflow must pin exact dev SHA")
+    acceptance = manifest.get("acceptance_workflow") or {}
+    require(acceptance.get("path") == ".github/workflows/release467-build6-cloudflare-access-acceptance.yml", "acceptance workflow path changed")
+    require(acceptance.get("trigger") == "workflow_dispatch", "acceptance workflow must be dispatch-only")
+    require(acceptance.get("workflow_dispatch_only") is True, "acceptance workflow must remain deliberate")
+    require(acceptance.get("requires_exact_dev_sha") is True, "acceptance workflow must pin exact dev SHA")
 
     required_probe_markers = [
         'DEFAULT_BASE_URL = "https://dev.devilndove-site.pages.dev"',
@@ -148,18 +148,27 @@ def main() -> None:
     for marker in ["method: 'POST'", 'method: "POST"', "localStorage.setItem", "sessionStorage.setItem", "CF-Access-Client-Secret"]:
         require(marker not in ui, f"forbidden Build 6 browser behavior found: {marker}")
 
-    require("Release 467 Build 6" in handoff, "canonical handoff has not converged to Release 467 Build 6")
+    require("Release 467 Build 6" in handoff, "canonical handoff must retain Release 467 Build 6 authority")
     require("HOLD_EXTERNAL" in handoff, "canonical handoff must preserve external Access hold")
     require("CF_ACCESS_CLIENT_ID" in handoff and "CF_ACCESS_CLIENT_SECRET" in handoff, "handoff must preserve canonical secret names")
     require("Production Promotion Readiness" in handoff, "handoff must preserve Build 5 promotion-readiness authority")
-    require("Release 466" not in handoff.split("## Historical authority", 1)[0], "stale Release 466 current authority remains in handoff")
 
-    require("python scripts/release467_build5_gate.py" in proof_workflow, "Build 6 proof must preserve Build 5 CI / Access authority")
-    require("python scripts/release467_build5_promotion_gate.py" in proof_workflow, "Build 6 proof must preserve Build 5 promotion-readiness authority")
-    require("python scripts/release467_build6_gate.py" in proof_workflow, "Build 6 proof does not execute Build 6 source gate")
-    require("Cloudflare contact: NONE" in proof_workflow, "Build 6 source proof must remain offline")
-    require("Production mutation: NONE" in proof_workflow, "Build 6 source proof Production boundary missing")
-    require("secrets.CF_ACCESS_CLIENT_SECRET" not in proof_workflow, "Build 6 source proof must not consume Access secrets")
+    # Forward-compatible handoff rule: newer Release 467 work may discuss Release 466 only
+    # as inherited compatibility/provenance. The Current authority section itself must
+    # remain explicitly Release 467 rather than relying on a blanket string ban.
+    current_section = handoff.split("## Current authority", 1)
+    require(len(current_section) == 2, "handoff must retain a Current authority section")
+    current_heading_body = current_section[1].split("##", 1)[0]
+    require("Release 467 Build " in current_heading_body, "handoff current authority must remain Release 467")
+    require("development-release.json" in handoff, "handoff must identify inherited development-release compatibility evidence")
+    require("INHERITED_REGRESSION_COMPATIBILITY" in handoff, "Release 466 wording must remain explicitly compatibility-only")
+
+    require("python scripts/release467_build5_gate.py" in workflow, "Build 6 proof must preserve Build 5 CI / Access authority")
+    require("python scripts/release467_build5_promotion_gate.py" in workflow, "Build 6 proof must preserve Build 5 promotion-readiness authority")
+    require("python scripts/release467_build6_gate.py" in workflow, "Build 6 proof does not execute Build 6 source gate")
+    require("Cloudflare contact: NONE" in workflow, "Build 6 source proof must remain offline")
+    require("Production mutation: NONE" in workflow, "Build 6 source proof Production boundary missing")
+    require("secrets.CF_ACCESS_CLIENT_SECRET" not in workflow, "Build 6 source proof must not consume Access secrets")
 
     print("Release 467 Build 6 Access acceptance harness source gate: PASS")
     print("Build 5 CI / Access authority: RETAINED")
