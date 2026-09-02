@@ -14,22 +14,29 @@ Read current authority in this order:
 4. `PROJECT_STATUS_AND_ROADMAP.md` — current release/build progression.
 5. `SANITY_HEALTH_CHECK.md` — current evidence and safety checklist.
 6. `docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md` — Build 13 cleanup authority.
-7. `release467-build12-finance-operations-command-center.json` — Build 12 Finance authority.
-8. `docs/operations/RELEASE_467_BUILD_12_FINANCE_OPERATIONS_COMMAND_CENTER.md` — Build 12 operating details.
-9. `release467-build11-admin-operations-command-center.json` — Build 11 daily Admin command authority.
-10. `release467-build10-it-control-tower-consolidation.json` — Build 10 I.T. technical-first-stop authority.
-11. `release467-build9-historical-ci-retirement.json` — Build 9 historical CI authority.
-12. `release467-build8-authority-convergence.json` — current-vs-compatibility authority model.
-13. `release467-build7-external-commercial-acceptance.json` — External Commercial Acceptance Bridge.
-14. `release467-build6-access-acceptance-harness.json` — Development Cloudflare Access acceptance authority.
-15. `release467-build5-production-promotion-readiness.json` — exact-candidate Production promotion HOLD/READY authority.
-16. `development-release.json` — **inherited Release 466 regression compatibility only; not current authority**.
+7. `docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md` — exact autonomous Builds 14–17 execution backlog.
+8. `release467-build12-finance-operations-command-center.json` — Build 12 Finance authority.
+9. `docs/operations/RELEASE_467_BUILD_12_FINANCE_OPERATIONS_COMMAND_CENTER.md` — Build 12 operating details.
+10. `release467-build11-admin-operations-command-center.json` — Build 11 daily Admin command authority.
+11. `release467-build10-it-control-tower-consolidation.json` — Build 10 I.T. technical-first-stop authority.
+12. `release467-build9-historical-ci-retirement.json` — Build 9 historical CI authority.
+13. `release467-build8-authority-convergence.json` — current-vs-compatibility authority model.
+14. `release467-build7-external-commercial-acceptance.json` — External Commercial Acceptance Bridge.
+15. `release467-build6-access-acceptance-harness.json` — Development Cloudflare Access acceptance authority.
+16. `release467-build5-production-promotion-readiness.json` — exact-candidate Production promotion HOLD/READY authority.
+17. `development-release.json` — **inherited Release 466 regression compatibility only; not current authority**.
 
 ## Build 13 cleanup boundary
 
 Build 13 removes 39 obsolete Release 448–461 live GitHub Actions definitions. It preserves Git history, Release 463 infrastructure workflows, Release 466 Build 1–6 manual-only proof provenance, Release 466 bounded provider/payment acceptance tools, current Release 467 workflows, Development runtime acceptance, and Production deploy/rollback safety.
 
 The canonical repository hygiene gate now prevents those 39 retired workflow names from returning.
+
+## Autonomous Builds 14–17 backlog
+
+`docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md` is the canonical exact 20-item autonomous development sequence agreed after Build 13. It groups five improvements per build across Build 14 Product Release Quality, Build 15 Storefront/SEO parity, Build 16 custom-request/customer proof, and Build 17 Creative/CAIP/Content Studio workflow depth.
+
+Those 20 items may proceed in Development without further business input by using existing approved facts and failing closed where evidence is absent. Stripe Development, PayPal sandbox, Social/OAuth, real Cloudflare Access service-token acceptance, Production promotion and `main` mutation remain outside that autonomous sequence and continue to require deliberate acceptance/promotion.
 
 ## Compatibility boundary
 
