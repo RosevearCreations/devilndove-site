@@ -38,7 +38,7 @@ Build 17 owns items 16–20: Creative Project → Content Studio completeness, C
 
 **Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818`. **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** retains exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`. **Release 467 Build 14 — Product Release Quality Command Center** retains exact Build 13 predecessor `794fd5b36191fff4c9e8376197f968d9c6d6da80`.
 
-**Release 467 Build 8 — Authority Convergence and Restart Safety** retains Build 7 predecessor `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, System Gate `33591744817`, Build 7 Proof `33591744787`, external state `HOLD_EXTERNAL`. Build 4 same-session evidence remains retained; Build 10 preserves that ledger rather than replacing it.
+**Release 467 Build 8 — Authority Convergence and Restart Safety** retains Build 7 predecessor `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, System Gate `33591744817`, Build 7 Proof `33591744787`, external state `HOLD_EXTERNAL`. Build 8 compatibility separation remains explicit: current Release 467 authority is distinct from inherited Release 466 regression/runtime compatibility. Build 4 same-session evidence remains retained; Build 10 preserves that ledger rather than replacing it.
 
 ## Compatibility / external boundary
 
