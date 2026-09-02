@@ -58,7 +58,7 @@ b17c=b17.replace(' ','');req('pointer_build>=17' in b17c and 'ifpointer_build==1
 hasall(b17,[BASE_SHA,BASE_TREE,str(SYSTEM_GATE),str(BUILD17_PROOF),'PASS Release 467 Build 17 retained gate'],'Build 17 merged provenance')
 
 # Runtime endpoint must be read-only and derived from canonical authorities.
-hasall(api,['READ-ONLY','orders','payments','payment_refunds','order_status_history','custom_requests','custom_request_order_drafts','custom_request_order_stage_events','custom_request_fulfillment_prompts','custom_request_order_status_links','shipping policy mismatch','automatic_order_mutation:false','automatic_customer_message:false','refund_provider_execution:false','shipping_provider_execution:false','canada_only_shipping_policy_preserved:true','us_sales_shipping_suspension_preserved:true'],'Build 18 API')
+hasall(api,['read-only','orders','payments','payment_refunds','order_status_history','custom_requests','custom_request_order_drafts','custom_request_order_stage_events','custom_request_fulfillment_prompts','custom_request_order_status_links','shipping policy mismatch','automatic_order_mutation:false','automatic_customer_message:false','refund_provider_execution:false','shipping_provider_execution:false','canada_only_shipping_policy_preserved:true','us_sales_shipping_suspension_preserved:true'],'Build 18 API')
 upper=api.upper()
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','INSERT INTO','UPDATE ','DELETE FROM'):req(forbidden not in upper,f'Build 18 API must contain no DDL/DML: {forbidden}')
 req('onRequestPost' not in api,'Build 18 endpoint must expose no POST handler')
