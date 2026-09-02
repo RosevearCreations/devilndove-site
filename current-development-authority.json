@@ -1,16 +1,17 @@
 {
   "release": 467,
-  "build": 13,
-  "title": "Repository Hygiene and Historical CI Cleanup",
+  "build": 14,
+  "title": "Product Release Quality Command Center",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build13-repository-hygiene-cleanup",
-  "source_base_sha": "374983f68fb16172fb357b1755293a29e5d2953f",
-  "last_green_build": 12,
-  "last_green_dev_sha": "374983f68fb16172fb357b1755293a29e5d2953f",
-  "last_green_dev_tree_sha": "339f13b5a6e6ba5cc4a9c64ea3b04b70ad8aef91",
-  "last_green_system_gate_run": 33642231716,
-  "last_green_build_proof_run": 33642231794,
+  "feature_branch": "release467-build14-product-release-quality",
+  "source_base_sha": "86907d512c5121bb05306ca9d31d4aecb5fd6c50",
+  "source_base_tree_sha": "9740eec99afbcd93773ab7e3b875037c183591db",
+  "last_green_build": 13,
+  "last_green_dev_sha": "794fd5b36191fff4c9e8376197f968d9c6d6da80",
+  "last_green_dev_tree_sha": "9c2bcdcb12bcbf2f00aeb19345329cdce39c65d9",
+  "last_green_system_gate_run": 33643833623,
+  "last_green_build_proof_run": 33643833608,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {"name": "devilndove-dev", "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
   "development_r2": ["devilndove-toolshed-images-dev", "devilndove-caip-media-dev"],
@@ -23,9 +24,10 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Build 13 changes repository hygiene only; inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
+    "reason": "Build 14 advances current Product Release Quality authority while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
   },
   "current_release_authorities": [
+    "release467-build14-product-release-quality.json",
     "release467-build13-repository-hygiene-cleanup.json",
     "release467-build12-finance-operations-command-center.json",
     "release467-build11-admin-operations-command-center.json",
@@ -37,6 +39,9 @@
     "release467-build5-production-promotion-readiness.json",
     "release467-build5-ci-access-readiness.json"
   ],
+  "autonomous_backlog": "docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md",
+  "autonomous_backlog_active_build": 14,
+  "autonomous_backlog_active_items": [1, 2, 3, 4, 5],
   "external_lanes": {
     "cloudflare_access_service_token": "HOLD_EXTERNAL",
     "stripe_development": "HOLD_EXTERNAL",
@@ -55,5 +60,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 13 is repository-only cleanup: 39 obsolete Release 448-461 live workflow definitions are retired while current System/Release 467, Release 463 infrastructure, Release 466 compatibility and Production safety authorities remain retained."
+  "restart_rule": "Read this file first, then AI_HANDOFF.md and docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md. Build 14 owns autonomous items 1-5: Product Release Quality Command Center, visual readiness, crop/focal discoverability, marketplace image readiness, and proof-image recommendations. Development first; provider execution and Production promotion remain closed."
 }
