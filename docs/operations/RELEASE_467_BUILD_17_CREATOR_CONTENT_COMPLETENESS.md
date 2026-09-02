@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Build 17 closes autonomous backlog items **16–20** from exact green Build 16 Development SHA `c05c7ff64e01672b04ec1768b696e163adeeca0f`, tree `1635f19b24df5c37358925948b51e5a43c20cf99`. Build 16 System Gate `33658864411` and Build 16 Proof `33658864422` are the predecessor evidence.
+Build 17 closes autonomous backlog items **16–20** from exact green **Release 467 Build 16 — Custom Request & Made Today Journey** Development SHA `c05c7ff64e01672b04ec1768b696e163adeeca0f`, tree `1635f19b24df5c37358925948b51e5a43c20cf99`. Release 467 Build 16 System Gate `33658864411` and Build 16 Proof `33658864422` are the predecessor evidence.
 
 The release consolidates existing Creator, CAIP, Media Studio and marketplace-preparation authorities. It does not create a new creative schema, new R2 bucket, provider execution path, publication authority, Access policy, or Production mutation.
 
