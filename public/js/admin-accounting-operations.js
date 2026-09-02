@@ -1,8 +1,10 @@
-// Release 457 — read-only Financials operations intelligence.
+// Release 457 financial operations intelligence; Release 467 Build 12 shares the same read-only engine with the Finance landing page.
 document.addEventListener('DOMContentLoaded', () => {
-  const mount=document.getElementById('accountingOperationsMount');
+  const mount=document.getElementById('accountingOperationsMount')||document.getElementById('financeOperationsMount');
   if(!mount||!window.DDAuth)return;
   const RELEASE=457;
+  const financeCommandCenter=mount.id==='financeOperationsMount';
+  const resolveHref=(href)=>financeCommandCenter&&String(href||'').startsWith('#')?`/admin/accounting/${href}`:href;
   const urls=(month)=>({
     salesTax:`/api/admin/accounting-reconciliation?type=sales_tax&period_month=${encodeURIComponent(month)}`,
     processorFees:`/api/admin/accounting-reconciliation?type=processor_fees&period_month=${encodeURIComponent(month)}`,
@@ -14,10 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     locks:'/api/admin/accounting-period-locks?limit=18',
     gifi:`/api/admin/accounting-gifi-summary?year=${encodeURIComponent(month.slice(0,4))}`,
   });
+  const eyebrow=financeCommandCenter?'Release 467 Build 12 • shared read-only Accounting intelligence':`Release ${RELEASE} • read-only operations intelligence`;
+  const intro=financeCommandCenter
+    ?'Current-month reconciliation, statement, commerce-cost, close and reporting exceptions are projected here from existing Accounting read authorities. Every work link returns to its owning Accounting workflow.'
+    :'Reconciliation, statement, commerce-cost, close and reporting exceptions are projected here without creating a second ledger or write authority.';
   mount.innerHTML=`<section class="card accounting-ops" id="financial-operations" aria-labelledby="financialOperationsHeading">
-    <div class="accounting-ops-head"><div><p class="eyebrow">Release ${RELEASE} • read-only operations intelligence</p>
-    <h2 id="financialOperationsHeading">Financial operations queue</h2>
-    <p class="small">Reconciliation, statement, commerce-cost, close and reporting exceptions are projected here without creating a second ledger or write authority.</p></div>
+    <div class="accounting-ops-head"><div><p class="eyebrow">${eyebrow}</p>
+    <h2 id="financialOperationsHeading">${financeCommandCenter?'Finance Operations Command Center':'Financial operations queue'}</h2>
+    <p class="small">${intro}</p></div>
     <div class="accounting-ops-period"><label for="accountingOpsMonth">Review month</label><input id="accountingOpsMonth" type="month"><button class="btn" id="accountingOpsRefresh" type="button">Refresh</button></div></div>
     <div id="accountingOpsStatus" class="small" aria-live="polite" role="status" data-admin-workspace-status data-admin-retry-action="reload">Loading financial operations…</div>
     <div class="accounting-ops-summary" id="accountingOpsSummary"></div><div class="accounting-ops-snapshot" id="accountingOpsSnapshot"></div><div class="accounting-ops-queue" id="accountingOpsQueue"></div>
@@ -40,20 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function renderSummary(s){
     summary.innerHTML=[['Open exceptions',s.exceptions,'#reconciliationExceptionsCard'],['Unresolved reconciliation',s.reconciliation,'#accountingReconciliationCard'],['Cost gaps',s.costGaps,'#item-costing'],['Close blockers',s.closeBlockers,'#period-locks'],['Evidence gaps',s.evidenceGaps,'#accountingAttachmentsCard']]
-      .map(([label,value,href])=>`<a class="accounting-ops-stat" href="${href}"><span>${esc(label)}</span><strong>${esc(value)}</strong></a>`).join('');
+      .map(([label,value,href])=>`<a class="accounting-ops-stat" href="${esc(resolveHref(href))}"><span>${esc(label)}</span><strong>${esc(value)}</strong></a>`).join('');
   }
   function renderSnapshot(pl,costing,imports){
     const p=pl?.summary||{},c=costing?.summary||{};
     const recognized=Math.round(Number(p.recognized_amount||0)*100);
     const nonCogs=num(p.operating_expense_cents)+num(p.operating_expense_tax_cents)+num(p.writeoff_cents);
     const fullCogs=num(c.estimated_recognized_full_cogs_cents);
-    const operating=recognized-nonCogs-fullCogs; // full COGS already includes allocated overhead; do not subtract overhead again.
+    const operating=recognized-nonCogs-fullCogs;
     const statementFees=arr(imports?.imports).reduce((sum,row)=>sum+Number(row.fee_cents||0),0);
     snapshot.innerHTML=`<div><span>Recognized revenue</span><strong>${esc(money(recognized))}</strong></div><div><span>Non-COGS operating costs</span><strong>${esc(money(nonCogs))}</strong></div><div><span>Recognized full COGS</span><strong>${esc(money(fullCogs))}</strong></div><div><span>Imported provider fees</span><strong>${esc(money(statementFees))}</strong></div><div class="${operating<0?'negative':''}"><span>Rough operating result</span><strong>${esc(money(operating))}</strong></div>`;
   }
   function renderQueue(issues,failures){
     const order={high:0,medium:1,low:2};issues.sort((a,b)=>(order[a.priority]??9)-(order[b.priority]??9)||a.title.localeCompare(b.title));
-    queue.innerHTML=issues.length?issues.map(x=>`<a class="accounting-ops-item priority-${esc(x.priority)}" href="${esc(x.href)}"><span class="accounting-ops-priority">${esc(x.priority)}</span><span class="accounting-ops-item-body"><strong>${esc(x.title)}</strong><small>${esc(x.detail)}</small></span><span class="accounting-ops-owner">${esc(x.owner)}</span></a>`).join(''):'<div class="accounting-ops-empty"><strong>No financial exceptions are currently derived for this month.</strong><span>Normal accounting work remains in the owner sections below.</span></div>';
+    queue.innerHTML=issues.length?issues.map(x=>`<a class="accounting-ops-item priority-${esc(x.priority)}" href="${esc(resolveHref(x.href))}"><span class="accounting-ops-priority">${esc(x.priority)}</span><span class="accounting-ops-item-body"><strong>${esc(x.title)}</strong><small>${esc(x.detail)}</small></span><span class="accounting-ops-owner">${esc(x.owner)}</span></a>`).join(''):'<div class="accounting-ops-empty"><strong>No financial exceptions are currently derived for this month.</strong><span>Normal accounting work remains in the owner workspaces below.</span></div>';
     status.textContent=`Financial operations refreshed.${failures.length?` ${failures.length} read source${failures.length===1?'':'s'} unavailable; the queue is partial.`:''}`;
     status.dataset.state=failures.length?'warning':(issues.length?'ready':'empty');
   }
