@@ -23,12 +23,11 @@ def changed():
         return [x for x in subprocess.check_output(["git","diff","--name-only",f"{base}...HEAD"],cwd=ROOT,text=True).splitlines() if x]
     except Exception as e: FAIL.append(f"could not calculate changed files: {e}"); return []
 def one_h1(body,name): req(len(re.findall(r"<h1(?:\s|>)",body,re.I))==1,f"{name} must contain exactly one H1")
-
 def hasall(body,tokens,label):
     for token in tokens: req(token in body,f"{label} marker missing: {token}")
 
 p=load("current-development-authority.json"); m=load("release467-build16-custom-request-made-today-journey.json"); mig=load("migrations/canonical/manifest.json")
-b13=read("scripts/release467_build13_gate.py"); b15=read("scripts/release467_build15_gate.py")
+b13=read("scripts/release467_build13_gate.py"); b14=read("scripts/release467_build14_gate.py"); b15=read("scripts/release467_build15_gate.py")
 helper=read("functions/api/_lib/customRequestJourney.js"); order_api=read("functions/api/custom-request-order.js")
 order_client=read("public/js/custom-request-order-status.js"); order_compat=read("custom-request-order-status.js")
 examples_api=read("functions/api/custom-request-examples.js"); examples_client=read("public/js/custom-request-examples.js")
@@ -65,9 +64,10 @@ req(mt.get("default_public_use_status")=="customer_private" and mt.get("default_
 req(f.get("allowed_shipping_countries")==["CA"] and f.get("us_sales_shipping_suspended") is True,"Canada-only/U.S. suspension drifted")
 for k in ("schema_change_authorized","request_time_schema_mutation","new_d1_mutation_authorized","d1_mutation_authorized","new_r2_mutation_authorized","r2_mutation_authorized","provider_execution_authorized","provider_publication_authorized","cloudflare_access_policy_mutation_authorized","main_mutation_authorized","production_mutation_authorized","secret_values_emitted"): req(m.get(k) is False,f"manifest safety drift: {k}")
 
-# Retained predecessor gates stay forward-compatible; Build 13 may accept newer verified Production provenance but never a placeholder.
+# Retained predecessor gates stay forward-compatible. Build 13/14 accept newer verified Production provenance but never placeholders.
 b15c=b15.replace(" ",""); req("pointer_build>=15" in b15c and "ifpointer_build==15" in b15c,"Build 15 gate lost forward compatibility")
 req("newer pointer must retain a trusted 40-character Production SHA" in b13 and "BUILD11_PROD_DEPLOY" in b13,"Build 13 Production-provenance compatibility repair missing")
+req("newer pointer must retain a trusted 40-character Production SHA" in b14 and "BUILD11_PROD_DEPLOY" in b14 and "production_provenance=BUILD14_EXACT_OR_NEWER_VERIFIED" in b14,"Build 14 Production-provenance compatibility repair missing")
 
 # Customer-safe journey/privacy.
 hasall(helper,["review_proof","fulfillment","planning","curing_finishing","shipped_pickup","customerStageMessage","buildCustomerJourney"],"journey helper")
@@ -100,7 +100,7 @@ hasall(css,["custom-request-journey","made-today-grid"],"Build 16 responsive CSS
 req([x.get("file") for x in mig.get("migrations",[])]==MIGRATIONS,"canonical migrations drifted")
 hasall(doc,["Release 467 Build 16","Custom Request & Made Today Journey",BASE_SHA,"Release 467 Build 15","HOLD_EXTERNAL","Canada only","automatic_publication=false"],"Build 16 documentation")
 allowed={
- ".github/workflows/release467-build16-proof.yml","admin/custom-request/index.html","admin/custom-request/made-today/index.html","css/custom-request-journey.css","custom-request-order-status.js","custom-request/index.html","custom-request/order/index.html","current-development-authority.json","docs/operations/RELEASE_467_BUILD_16_CUSTOM_REQUEST_MADE_TODAY_JOURNEY.md","functions/api/_lib/customRequestJourney.js","functions/api/admin/custom-order-stage-photos.js","functions/api/custom-request-examples.js","functions/api/custom-request-order.js","public/js/admin-made-today.js","public/js/custom-request-examples.js","public/js/custom-request-order-status.js","release467-build16-custom-request-made-today-journey.json","scripts/release467_build13_gate.py","scripts/release467_build15_gate.py","scripts/release467_build16_gate.py"
+ ".github/workflows/release467-build16-proof.yml","admin/custom-request/index.html","admin/custom-request/made-today/index.html","css/custom-request-journey.css","custom-request-order-status.js","custom-request/index.html","custom-request/order/index.html","current-development-authority.json","docs/operations/RELEASE_467_BUILD_16_CUSTOM_REQUEST_MADE_TODAY_JOURNEY.md","functions/api/_lib/customRequestJourney.js","functions/api/admin/custom-order-stage-photos.js","functions/api/custom-request-examples.js","functions/api/custom-request-order.js","public/js/admin-made-today.js","public/js/custom-request-examples.js","public/js/custom-request-order-status.js","release467-build16-custom-request-made-today-journey.json","scripts/release467_build13_gate.py","scripts/release467_build14_gate.py","scripts/release467_build15_gate.py","scripts/release467_build16_gate.py"
 }
 ch=changed(); extra=[x for x in ch if x not in allowed]; req(not extra,f"files outside Build 16 scope changed: {extra}")
 req(not [x for x in ch if x.startswith("migrations/") or x.lower().endswith(".sql")],"Build 16 must not change schema/migrations")
