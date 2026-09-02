@@ -36,6 +36,10 @@ Primary Build 17 authorities:
 
 ## Release 467 retained authority separation
 
+**Release 467 Build 6 — Development Cloudflare Access Acceptance Harness** remains the source-only Access acceptance harness; real service-token acceptance remains `HOLD_EXTERNAL` until deliberately dispatched and proven.
+
+**Release 467 Build 7 — External Commercial Acceptance Bridge** remains the predecessor authority for external commercial/CAIP visibility. Its retained predecessor is Build 6, and external lanes remain `HOLD_EXTERNAL` unless separately proven.
+
 **Release 467 Build 8 — Authority Convergence and Restart Safety** remains locked provenance with Build 7 predecessor `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, System Gate `33591744817`, Build 7 Proof `33591744787`, external state `HOLD_EXTERNAL`.
 
 **Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction** remains retained.
