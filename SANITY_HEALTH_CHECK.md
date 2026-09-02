@@ -15,6 +15,7 @@ Exact green predecessor: **Release 467 Build 14 — Product Release Quality Comm
 
 ## Retained historical authority sanity
 
+- [x] **Release 467 Build 8 — Authority Convergence and Restart Safety** remains locked provenance. Its exact Build 7 predecessor is `5eef764a67466dc2989a4681c6a7cc782b9d4df9`; System Gate `33591744817` and Build 7 Proof `33591744787` remain the retained successful evidence, with external acceptance `HOLD_EXTERNAL`.
 - [x] **Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818` and `HOLD_EXTERNAL` provider state.
 - [x] **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** remains retained; 39 obsolete Release 448–461 workflows remain retired and repository hygiene remains guarded.
 - [x] **Release 467 Build 14 — Product Release Quality Command Center** remains the Product quality owner; Build 15 extends rather than duplicates it.
