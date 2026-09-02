@@ -37,6 +37,18 @@ This is the short operator guide for the canonical Devil n Dove Development envi
 
 Credential values must never be printed, committed or pasted into release evidence.
 
+## Current Cloudflare Access CI boundary
+
+The canonical Preview is intentionally protected by Cloudflare Access. Current Release 467 evidence proves anonymous requests to `dev.devilndove-site.pages.dev` redirect to the Pages-managed Access tenant `devilndove-site-pages.cloudflareaccess.com`. The Access audience is known and matched from signed redirect metadata; this is evidence only and is not used to bypass Access.
+
+The existing masked `CLOUDFLARE_API_TOKEN` can read Access service-token/application inventory, but the current account inventory exposes zero service tokens and zero standard Access applications. A bounded ephemeral service-token creation probe was refused with HTTP 403 / Cloudflare code 1010, so **no service token was created**. The same credential is also refused by the Pages project API with HTTP 403 / code 10000. No Access policy was modified.
+
+Therefore authenticated HTTP acceptance through CI is currently **AMBER_EXTERNAL_ACCESS**, not RED application failure and not GREEN runtime acceptance. The application-side prerequisites are independently proven: Development D1 identity is exact, an active admin session can be resolved read-only, Application Modules profiles load from the current source contract, and the root administrator has effective manage authority across all five modules.
+
+To close this boundary, provision the automation path with the least privilege needed to create/use a Cloudflare Access service token (currently `Access: Service Tokens Write` for token creation) and configure the resulting values only as masked GitHub Actions secrets `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If the Pages-managed policy then requires an explicit Service Auth policy, that policy change must be separately reviewed and proven. **Do not disable or weaken Preview Access for testing.**
+
+The canonical runtime workflow treats this known outer-Access condition as `AMBER_EXTERNAL_ACCESS`. Any unrelated runtime error, a partially configured service token, or configured service-token credentials that Access refuses remains a real workflow failure.
+
 ## Canonical Production boundary
 
 - Pages project: `devilndove-site`
@@ -67,7 +79,7 @@ Use `python scripts/release467_root_admin_access.py --verify-only` for read-only
 
 The canonical workflow is `.github/workflows/development-runtime-acceptance.yml`. It is GET-only over HTTP and uses only an existing unexpired Development admin session, resolved read-only from Development D1 when necessary.
 
-Cloudflare Access is never weakened for testing. If Access protects the Preview, CI may pass an already-configured service token through `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If those references are absent, authenticated runtime acceptance must report the Access boundary as unresolved rather than bypass it.
+Cloudflare Access is never weakened for testing. If Access protects the Preview, CI may pass an already-configured service token through `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If those references are absent and the only refusal is the proven outer Access boundary, the workflow records sanitized `AMBER_EXTERNAL_ACCESS` evidence. It does not call the application runtime GREEN. Unexpected runtime failures still fail the job.
 
 Runtime acceptance verifies, among other carried-forward contracts:
 
