@@ -71,7 +71,7 @@ Build 4 explicitly forbids inferring CI/service-token readiness from browser suc
 
 ### Build 5 — CI / Cloudflare Access readiness
 
-Development source authority is merged and GREEN. Build 5 makes the separate automation-authentication lane explicit and defines the exact safe closure condition.
+**Release 467 Build 5** source authority is merged and GREEN. Build 5 makes the separate automation-authentication lane explicit and defines the exact safe closure condition.
 
 The two canonical GitHub Actions secret names remain:
 
