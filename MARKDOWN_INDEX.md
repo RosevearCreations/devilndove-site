@@ -46,7 +46,13 @@ Build 8 retains Build 7 predecessor `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, 
 
 Build 4 consolidates source-proof authorities into its same-session evidence and acceptance ledger; Build 10 preserves that ledger rather than replacing it.
 
-**Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818`. **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** retains exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`. Builds 14–17 remain retained current-release predecessors.
+**Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818`; external acceptance remains `HOLD_EXTERNAL`.
+
+**Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** retains exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`; external acceptance remains `HOLD_EXTERNAL`.
+
+**Release 467 Build 14 — Product Release Quality Command Center** retains exact green **Release 467 Build 13 — Repository Hygiene** SHA `794fd5b36191fff4c9e8376197f968d9c6d6da80` and retained predecessor `374983f68fb16172fb357b1755293a29e5d2953f`; external lanes remain `HOLD_EXTERNAL`.
+
+**Release 467 Build 15 — Storefront / SEO Parity** retains **Release 467 Build 14 — Product Release Quality Command Center** and keeps external lanes `HOLD_EXTERNAL`. **Release 467 Build 16 — Custom Request & Made Today Journey** and **Release 467 Build 17 — Creator & Content Completeness** remain retained.
 
 `development-release.json` remains Release 466 **INHERITED_REGRESSION_COMPATIBILITY** and the middleware Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**.
 
