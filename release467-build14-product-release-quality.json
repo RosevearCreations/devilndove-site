@@ -1,0 +1,83 @@
+{
+  "release": 467,
+  "build": 14,
+  "title": "Product Release Quality Command Center",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_branch": "release467-build14-product-release-quality",
+  "source_base_sha": "86907d512c5121bb05306ca9d31d4aecb5fd6c50",
+  "source_base_tree_sha": "9740eec99afbcd93773ab7e3b875037c183591db",
+  "predecessor": {
+    "build": 13,
+    "merged_dev_sha": "794fd5b36191fff4c9e8376197f968d9c6d6da80",
+    "merged_dev_tree_sha": "9c2bcdcb12bcbf2f00aeb19345329cdce39c65d9",
+    "system_gate_run": 33643833623,
+    "build13_proof_run": 33643833608
+  },
+  "autonomous_backlog": "docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md",
+  "backlog_items": [1, 2, 3, 4, 5],
+  "scope": [
+    "Rank products by unresolved release-quality blockers and attention items using existing product, inventory, media and SEO authorities.",
+    "Expose visual readiness badges and direct owning-workspace remediation links on the Product Release Quality Command Center.",
+    "Expose the existing non-destructive Product Media focal-point, square-crop and derivative workflow directly from product quality cards.",
+    "Extend local marketplace draft/export readiness with image alt, public-use, duplicate, size, orientation and merchandising checks without provider execution.",
+    "Recommend missing proof-image roles by product category/type using existing product and image-role facts only."
+  ],
+  "runtime": {
+    "workspace": "/admin/products/",
+    "quality_mount": "productQualityCommandCenterMount",
+    "quality_script": "public/js/admin-product-quality-command-center.js",
+    "product_authority": "/api/admin/products",
+    "readiness_authority": "/api/admin/product-readiness",
+    "media_authority": "/api/admin/product-images",
+    "marketplace_authority": "/api/admin/marketplace-export-preview",
+    "marketplace_helper": "functions/api/_lib/marketplaceReadiness.js",
+    "existing_crop_focal_authority": "public/js/admin-product-images.js",
+    "command_center_read_only": true,
+    "automatic_repair": false,
+    "original_r2_media_preserved": true,
+    "provider_execution": false,
+    "provider_publication": false
+  },
+  "development": {
+    "preview": "https://dev.devilndove-site.pages.dev",
+    "d1_name": "devilndove-dev",
+    "d1_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+    "product_r2": "devilndove-toolshed-images-dev",
+    "caip_r2": "devilndove-caip-media-dev",
+    "canonical_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ]
+  },
+  "compatibility": {
+    "file": "development-release.json",
+    "role": "INHERITED_REGRESSION_COMPATIBILITY",
+    "runtime_release_header": 466,
+    "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY"
+  },
+  "external_lanes": {
+    "cloudflare_access_service_token": "HOLD_EXTERNAL",
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "USE_FRESH_BUILD7_RUNTIME_EVIDENCE"
+  },
+  "main_production": {
+    "main_source_head_last_verified": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
+    "production_pages_deploy_last_verified": 33640133776,
+    "promotion_state": "NO_AUTOMATIC_PROMOTION"
+  },
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "new_d1_mutation_authorized": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false
+}

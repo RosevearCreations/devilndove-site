@@ -1,9 +1,78 @@
 // File: /functions/api/admin/product-readiness.js
-// Build 245: migration-owned schema, bounded readiness preview, no request-time DDL/PRAGMA introspection.
+// Release 467 Build 14: migration-owned product readiness plus non-mutating image/marketplace quality guidance.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 const json=(data,status=200)=>jsonResponse(data,status,{"Cache-Control":"no-store"});
 const rows=(result)=>Array.isArray(result?.results)?result.results:[];
+
+function roleCount(row, key) { return Number(row?.[key] || 0); }
+
+function buildImageRecommendations(row = {}) {
+  const imageCount = Number(row.image_count || 0);
+  const categoryText = `${normalizeText(row.product_category)} ${normalizeText(row.name)}`.toLowerCase();
+  const recommendations = [];
+  const add = (role, label, reason) => {
+    if (!recommendations.some((item) => item.role === role)) recommendations.push({ role, label, reason });
+  };
+
+  if (roleCount(row, 'hero_image_role_count') === 0) add('hero_front', 'Hero/front', 'Add a clean primary view that can carry the product card and listing lead image.');
+  if (roleCount(row, 'detail_image_role_count') === 0) add('detail_texture', 'Detail/texture', 'Show workmanship, finish, engraving, surface, clasp, texture, or another buyer-relevant detail.');
+  if (roleCount(row, 'scale_image_role_count') === 0) add('scale_context', 'Scale/context', 'Show real-world scale or the product in a useful context so buyers can judge size.');
+
+  if (/soap|candle|wax|bath|body/.test(categoryText) && roleCount(row, 'packaging_pickup_role_count') === 0) {
+    add('packaging_pickup', 'Packaging/label', 'Show the finished label or packaging so ingredients, identity, gifting, and pickup presentation are easier to understand.');
+  }
+  if (/soap|candle|wax|resin|clay|ring|jewel|engrave|laser|wood|metal|cnc|printed|3d/.test(categoryText) && roleCount(row, 'process_story_role_count') === 0) {
+    add('process_story', 'Process/story', 'Add a real making/process image when available; it is stronger proof than generic decorative media.');
+  }
+  if (/ring|jewel|earring|bracelet|necklace|pendant|coin/.test(categoryText) && roleCount(row, 'back_side_role_count') === 0) {
+    add('back_side', 'Back/side', 'Show the back, side, clasp, setting, band, or attachment details a buyer cannot see from the hero angle.');
+  }
+  if (/engrave|laser|wood|metal|cnc|resin|clay|soap|candle|ring|jewel/.test(categoryText) && roleCount(row, 'material_tool_proof_role_count') === 0) {
+    add('material_tool_proof', 'Material/tool proof', 'When useful, show the real material or tool/process evidence supporting the product story.');
+  }
+  if (imageCount < 5) add('gallery_support', 'Supporting gallery view', `The current set has ${imageCount} image${imageCount === 1 ? '' : 's'}; add another distinct buyer-useful angle when real media exists.`);
+
+  return recommendations.slice(0, 6);
+}
+
+function buildMarketplaceImageReadiness(row = {}) {
+  const imageCount = Number(row.image_count || 0);
+  const altCoverage = Number(row.alt_coverage_count || 0);
+  const blockedPublicUseCount = Number(row.blocked_public_use_count || 0);
+  const duplicateImageUrlCount = Number(row.duplicate_image_url_count || 0);
+  const firstWidth = Number(row.first_width_px || 0);
+  const firstHeight = Number(row.first_height_px || 0);
+  const firstOrientation = String(row.first_image_orientation || '').toLowerCase();
+  const firstScore = Number(row.first_merchandising_score || 0);
+  const knowsLeadSize = firstWidth > 0 && firstHeight > 0;
+  const blockers = [];
+  const warnings = [];
+
+  if (imageCount === 0) blockers.push('No product images are available for marketplace preparation.');
+  if (imageCount > 0 && altCoverage < Math.min(3, imageCount)) blockers.push('The first marketplace-ready images need useful alt text.');
+  if (blockedPublicUseCount > 0) blockers.push(`${blockedPublicUseCount} image(s) still require consent/public-use review.`);
+  if (duplicateImageUrlCount > 0) blockers.push(`${duplicateImageUrlCount} duplicate image URL(s) should be removed from the product set.`);
+  if (knowsLeadSize && (firstWidth < 800 || firstHeight < 800)) blockers.push('Lead image is under the 800×800 minimum marketplace safety target.');
+
+  if (imageCount > 0 && imageCount < 3) warnings.push('Only one or two product images are available; three or more distinct buyer-useful views are preferred.');
+  if (knowsLeadSize && (firstWidth < 1200 || firstHeight < 1200)) warnings.push('Lead image is below the preferred 1200×1200 target.');
+  if (firstOrientation === 'portrait') warnings.push('Lead image is portrait; a square or landscape lead is usually easier to reuse across marketplace cards.');
+  if (firstScore > 0 && firstScore < 70) warnings.push('Lead image merchandising score is below 70%.');
+
+  return {
+    ready: blockers.length === 0,
+    blocker_count: blockers.length,
+    warning_count: warnings.length,
+    blockers,
+    warnings,
+    duplicate_image_url_count: duplicateImageUrlCount,
+    lead_width_px: firstWidth,
+    lead_height_px: firstHeight,
+    lead_orientation: firstOrientation || 'unknown',
+    lead_merchandising_score: firstScore,
+  };
+}
 
 function buildReadiness(row = {}) {
   const imageCount = Number(row.image_count || 0);
@@ -45,6 +114,7 @@ function buildReadiness(row = {}) {
 
   const blockers = checks.filter(([, ok]) => !ok).map(([label, , help]) => ({ label, help }));
   const score = Math.round(((checks.length - blockers.length) / checks.length) * 100);
+  const marketplaceImageReadiness = buildMarketplaceImageReadiness(row);
 
   return {
     ready: blockers.length === 0,
@@ -57,13 +127,20 @@ function buildReadiness(row = {}) {
       hero_image_role_count: heroImageRoleCount,
       detail_image_role_count: detailImageRoleCount,
       scale_image_role_count: scaleImageRoleCount,
+      process_story_role_count: Number(row.process_story_role_count || 0),
+      packaging_pickup_role_count: Number(row.packaging_pickup_role_count || 0),
+      material_tool_proof_role_count: Number(row.material_tool_proof_role_count || 0),
+      back_side_role_count: Number(row.back_side_role_count || 0),
       blocked_public_use_count: blockedPublicUseCount,
+      duplicate_image_url_count: Number(row.duplicate_image_url_count || 0),
       first_width_px: firstWidth,
       first_height_px: firstHeight,
       first_image_orientation: firstOrientation || "unknown",
       first_merchandising_score: firstScore,
       average_merchandising_score: averageScore
-    }
+    },
+    marketplace_image_readiness: marketplaceImageReadiness,
+    image_recommendations: buildImageRecommendations(row),
   };
 }
 
@@ -79,6 +156,8 @@ function summarizeProducts(products) {
     missing_seo: 0,
     missing_price: 0,
     needs_three_images: 0,
+    marketplace_image_blocked: 0,
+    duplicate_image_sets: 0,
     average_score: 0
   };
 
@@ -94,6 +173,8 @@ function summarizeProducts(products) {
     if (labels.has("SEO title") || labels.has("SEO meta description")) summary.missing_seo += 1;
     if (labels.has("Price")) summary.missing_price += 1;
     if (labels.has("Image count")) summary.needs_three_images += 1;
+    if (!readiness.marketplace_image_readiness?.ready) summary.marketplace_image_blocked += 1;
+    if (Number(readiness.image?.duplicate_image_url_count || 0) > 0) summary.duplicate_image_sets += 1;
     summary.average_score += Number(readiness.score || 0);
   }
 
@@ -116,10 +197,15 @@ export async function onRequestGet({ request, env }) {
         SELECT pi.product_id,
                COUNT(DISTINCT pi.product_image_id) AS image_count,
                COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,'')))>=5 THEN pi.product_image_id END) AS alt_coverage_count,
+               COUNT(DISTINCT pi.product_image_id)-COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COALESCE(pi.image_url,'')))>0 THEN LOWER(TRIM(pi.image_url)) END) AS duplicate_image_url_count,
                SUM(CASE WHEN COALESCE(NULLIF(TRIM(pia.image_role),''),'')='' THEN 1 ELSE 0 END) AS missing_image_role_count,
                SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='hero_front' THEN 1 ELSE 0 END) AS hero_image_role_count,
                SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='detail_texture' THEN 1 ELSE 0 END) AS detail_image_role_count,
                SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='scale_context' THEN 1 ELSE 0 END) AS scale_image_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='process_story' THEN 1 ELSE 0 END) AS process_story_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='packaging_pickup' THEN 1 ELSE 0 END) AS packaging_pickup_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='material_tool_proof' THEN 1 ELSE 0 END) AS material_tool_proof_role_count,
+               SUM(CASE WHEN LOWER(COALESCE(pia.image_role,''))='back_side' THEN 1 ELSE 0 END) AS back_side_role_count,
                SUM(CASE WHEN LOWER(COALESCE(pia.public_use_status,'')) IN ('consent_needed','blocked') THEN 1 ELSE 0 END) AS blocked_public_use_count,
                MAX(CASE WHEN pi.sort_order=0 THEN COALESCE(pia.image_orientation,'') END) AS first_image_orientation,
                MAX(CASE WHEN pi.sort_order=0 THEN COALESCE(pia.width_px,0) END) AS first_width_px,
@@ -134,8 +220,11 @@ export async function onRequestGet({ request, env }) {
              p.featured_image_url,p.product_category,p.sale_channel,p.updated_at,p.created_at,
              ps.meta_title,ps.meta_description,
              COALESCE(i.image_count,0) AS image_count,COALESCE(i.alt_coverage_count,0) AS alt_coverage_count,
+             COALESCE(i.duplicate_image_url_count,0) AS duplicate_image_url_count,
              COALESCE(i.missing_image_role_count,0) AS missing_image_role_count,COALESCE(i.hero_image_role_count,0) AS hero_image_role_count,
              COALESCE(i.detail_image_role_count,0) AS detail_image_role_count,COALESCE(i.scale_image_role_count,0) AS scale_image_role_count,
+             COALESCE(i.process_story_role_count,0) AS process_story_role_count,COALESCE(i.packaging_pickup_role_count,0) AS packaging_pickup_role_count,
+             COALESCE(i.material_tool_proof_role_count,0) AS material_tool_proof_role_count,COALESCE(i.back_side_role_count,0) AS back_side_role_count,
              COALESCE(i.blocked_public_use_count,0) AS blocked_public_use_count,COALESCE(i.first_image_orientation,'') AS first_image_orientation,
              COALESCE(i.first_width_px,0) AS first_width_px,COALESCE(i.first_height_px,0) AS first_height_px,
              COALESCE(i.first_merchandising_score,0) AS first_merchandising_score,COALESCE(i.average_merchandising_score,0) AS average_merchandising_score
@@ -153,8 +242,8 @@ export async function onRequestGet({ request, env }) {
       short_description:normalizeText(row.short_description),featured_image_url:normalizeText(row.featured_image_url),product_category:normalizeText(row.product_category),
       sale_channel:normalizeText(row.sale_channel),readiness:buildReadiness(row)
     }));
-    return json({ok:true,products:showReady?products:products.filter((p)=>!p.readiness.ready),summary:summarizeProducts(products),generated_at:new Date().toISOString(),requested_by:{user_id:adminUser.user_id,email:adminUser.email}});
+    return json({ok:true,release:467,build:14,contract:'release467-build14-product-release-quality',read_only:true,request_time_schema_mutation:false,products:showReady?products:products.filter((p)=>!p.readiness.ready),summary:summarizeProducts(products),generated_at:new Date().toISOString(),requested_by:{user_id:adminUser.user_id,email:adminUser.email}});
   } catch(error) {
-    return json({ok:false,error:error?.message||'Failed to load product readiness preview.',code:'product_readiness_failed',hint:'Apply the current D1 migration and retry. Readiness no longer creates schema during a live request.'},500);
+    return json({ok:false,error:error?.message||'Failed to load product readiness preview.',code:'product_readiness_failed',hint:'Apply the current canonical D1 migration and retry. Readiness never creates schema during a live request.',request_time_schema_mutation:false},500);
   }
 }

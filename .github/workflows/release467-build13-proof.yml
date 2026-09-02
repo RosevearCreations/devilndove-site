@@ -61,10 +61,21 @@ jobs:
           python -m py_compile scripts/release467_build12_gate.py scripts/release467_build13_gate.py scripts/repository_hygiene_gate.py
       - name: Diff safety
         run: |
+          set -euo pipefail
           git diff --check origin/dev...HEAD
-          if git diff --name-only origin/dev...HEAD | grep -E '^(functions/|public/|admin/|migrations/)|\.sql$'; then
-            echo 'Build 13 must not alter application runtime or schema.' >&2
-            exit 1
+          pointer_build="$(python - <<'PY'
+          import json
+          with open('current-development-authority.json', encoding='utf-8') as handle:
+              print(int(json.load(handle).get('build') or 0))
+          PY
+          )"
+          if [ "${pointer_build}" -eq 13 ]; then
+            if git diff --name-only origin/dev...HEAD | grep -E '^(functions/|public/|admin/|migrations/)|\.sql$'; then
+              echo 'Build 13 must not alter application runtime or schema while Build 13 is current.' >&2
+              exit 1
+            fi
+          else
+            echo "Build 13 preservation mode for current pointer Build ${pointer_build}; runtime scope is governed by the newer build gate."
           fi
       - name: Boundary
         if: always()
@@ -72,8 +83,8 @@ jobs:
           echo 'Scope: Release 467 Build 13 Repository Hygiene and Historical CI Cleanup'
           echo 'Retired live workflow definitions: 39'
           echo 'Historical Git evidence: RETAINED'
-          echo 'Application runtime change: NONE'
-          echo 'Schema/D1/R2 mutation: NONE'
+          echo 'Build 13 runtime-neutral scope: preserved when Build 13 is current; newer builds use their own bounded runtime gate'
+          echo 'Schema/D1/R2 mutation: NONE from Build 13'
           echo 'Provider execution/publication: NONE'
           echo 'Cloudflare Access policy mutation: NONE'
           echo 'Main/Production mutation: NONE'

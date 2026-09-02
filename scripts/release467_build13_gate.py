@@ -31,12 +31,16 @@ def changed():
 p=load("current-development-authority.json");m=load("release467-build13-repository-hygiene-cleanup.json");compat=load("development-release.json");mig=load("migrations/canonical/manifest.json")
 b12=read("scripts/release467_build12_gate.py");hyg=read("scripts/repository_hygiene_gate.py")
 docs=[read(x) for x in ("AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md","docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md")]
-req(p.get("release")==467 and p.get("build")==13,"pointer must identify Release 467 Build 13")
-req(p.get("title")=="Repository Hygiene and Historical CI Cleanup","Build 13 title drifted")
-req(p.get("source_base_sha")==BASE_SHA and p.get("last_green_build")==12,"Build 12 predecessor pointer drifted")
-req(p.get("last_green_dev_sha")==BASE_SHA and p.get("last_green_dev_tree_sha")==BASE_TREE,"Build 12 predecessor SHA/tree drifted")
-req(p.get("last_green_system_gate_run")==SYSTEM_GATE and p.get("last_green_build_proof_run")==BUILD12_PROOF,"Build 12 evidence drifted")
-req((p.get("current_release_authorities") or [None])[0]=="release467-build13-repository-hygiene-cleanup.json","Build 13 must be first authority")
+pointer_build=int(p.get("build") or 0)
+req(p.get("release")==467 and pointer_build>=13,"pointer must identify Release 467 Build 13 or newer")
+if pointer_build==13:
+    req(p.get("title")=="Repository Hygiene and Historical CI Cleanup","Build 13 title drifted")
+    req(p.get("source_base_sha")==BASE_SHA and p.get("last_green_build")==12,"Build 12 predecessor pointer drifted")
+    req(p.get("last_green_dev_sha")==BASE_SHA and p.get("last_green_dev_tree_sha")==BASE_TREE,"Build 12 predecessor SHA/tree drifted")
+    req(p.get("last_green_system_gate_run")==SYSTEM_GATE and p.get("last_green_build_proof_run")==BUILD12_PROOF,"Build 12 evidence drifted")
+    req((p.get("current_release_authorities") or [None])[0]=="release467-build13-repository-hygiene-cleanup.json","Build 13 must be first authority")
+else:
+    req("release467-build13-repository-hygiene-cleanup.json" in (p.get("current_release_authorities") or []),"Build 13 provenance missing from newer pointer")
 req("release467-build12-finance-operations-command-center.json" in (p.get("current_release_authorities") or []),"Build 12 provenance missing")
 req(p.get("main_source_head_last_verified")=="ce42f3b2ea553b69085705f500a9e2bd2f689818" and p.get("production_pages_deploy_last_verified")==33640133776,"Production Build 11 evidence drifted")
 req(p.get("promotion_state")=="NO_AUTOMATIC_PROMOTION","automatic Production promotion forbidden")
@@ -57,15 +61,16 @@ expected=["0001_release464_migration_authority.sql","0002_release464_operational
 req([x.get("file") for x in mig.get("migrations",[])]==expected,"canonical migrations drifted")
 for body in docs:
     for token in ("Release 467 Build 13","Repository Hygiene",BASE_SHA,"HOLD_EXTERNAL"):req(token in body,f"Build 13 documentation token missing: {token}")
-allowed=set(RETIRED)|{"current-development-authority.json","release467-build13-repository-hygiene-cleanup.json","scripts/release467_build12_gate.py","scripts/release467_build13_gate.py","scripts/repository_hygiene_gate.py",".github/workflows/release467-build13-proof.yml","AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md","docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md"}
-ch=changed();req(not [x for x in ch if x not in allowed],f"files outside Build 13 scope changed: {[x for x in ch if x not in allowed]}");req(not [x for x in ch if x.startswith(("functions/","public/","admin/"))],"application runtime changed");req(not [x for x in ch if x.startswith("migrations/") or x.lower().endswith(".sql")],"schema/migration changed")
+if pointer_build==13:
+    allowed=set(RETIRED)|{"current-development-authority.json","release467-build13-repository-hygiene-cleanup.json","scripts/release467_build12_gate.py","scripts/release467_build13_gate.py","scripts/repository_hygiene_gate.py",".github/workflows/release467-build13-proof.yml","AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md","docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md"}
+    ch=changed();req(not [x for x in ch if x not in allowed],f"files outside Build 13 scope changed: {[x for x in ch if x not in allowed]}");req(not [x for x in ch if x.startswith(("functions/","public/","admin/"))],"application runtime changed");req(not [x for x in ch if x.startswith("migrations/") or x.lower().endswith(".sql")],"schema/migration changed")
 if FAIL:
     print("FAIL Release 467 Build 13 Repository Hygiene gate");[print(f"- {x}") for x in FAIL];sys.exit(1)
 print("PASS Release 467 Build 13 Repository Hygiene gate")
+print(f"current_pointer_build={pointer_build}")
 print("retired_live_workflows=39")
 print("historical_git_evidence=RETAINED")
 print("release463_infrastructure=RETAINED")
 print("release466_compatibility=RETAINED")
 print("release467_current_proofs=RETAINED")
-print("application_runtime_changes=NONE")
 print("schema_d1_r2_provider_access_main_production_mutation=NONE")

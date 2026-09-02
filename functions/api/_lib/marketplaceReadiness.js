@@ -1,4 +1,5 @@
-// Release 450 marketplace readiness helpers. No request-time schema mutation and no provider execution.
+// Release 450 marketplace readiness helpers, extended by Release 467 Build 14 image-quality validation.
+// No request-time schema mutation and no provider execution.
 
 export const MARKETPLACE_RELEASE = 450;
 export const MARKETPLACE_CONTRACT = 'release450-marketplace-readiness';
@@ -114,6 +115,67 @@ function validatePersonalization(profile, policy, blockers, warnings) {
   if (questions.length > 1) warnings.push('Multiple personalization questions require Etsy multiple-question support during provider execution.');
 }
 
+function selectedImageRows(selectedImages) {
+  return (Array.isArray(selectedImages) ? selectedImages : []).map((image) => {
+    if (typeof image === 'string') return { image_url: text(image), metadata_available: false };
+    return {
+      ...(image || {}),
+      image_url: text(image?.image_url || image?.url),
+      alt_text: text(image?.alt_text),
+      image_role: text(image?.image_role),
+      public_use_status: text(image?.public_use_status).toLowerCase(),
+      width_px: Number(image?.width_px || 0),
+      height_px: Number(image?.height_px || 0),
+      merchandising_score: Number(image?.merchandising_score || image?.first_image_score || 0),
+      metadata_available: true,
+    };
+  }).filter((image) => image.image_url);
+}
+
+export function validateSelectedImageSet(selectedImages = []) {
+  const images = selectedImageRows(selectedImages);
+  const blockers = [];
+  const warnings = [];
+  const urls = images.map((image) => image.image_url.toLowerCase());
+  const duplicateCount = Math.max(0, urls.length - new Set(urls).size);
+  const metadataImages = images.filter((image) => image.metadata_available);
+  const lead = images[0] || null;
+
+  if (!images.length) blockers.push('At least one marketplace image is required.');
+  if (duplicateCount > 0) blockers.push(`${duplicateCount} duplicate marketplace image URL(s) are selected.`);
+
+  if (metadataImages.length) {
+    const missingAlt = metadataImages.filter((image) => text(image.alt_text).length < 5).length;
+    const blockedUse = metadataImages.filter((image) => ['internal_review', 'consent_needed', 'blocked', ''].includes(image.public_use_status)).length;
+    if (missingAlt > 0) blockers.push(`${missingAlt} selected marketplace image(s) are missing useful alt text.`);
+    if (blockedUse > 0) blockers.push(`${blockedUse} selected marketplace image(s) are not cleared for public use.`);
+
+    if (lead?.metadata_available) {
+      const width = Number(lead.width_px || 0);
+      const height = Number(lead.height_px || 0);
+      const score = Number(lead.merchandising_score || 0);
+      const knowsSize = width > 0 && height > 0;
+      if (knowsSize && (width < 800 || height < 800)) blockers.push('Selected lead image is under the 800×800 marketplace safety minimum.');
+      if (knowsSize && (width < 1200 || height < 1200)) warnings.push('Selected lead image is below the preferred 1200×1200 target.');
+      if (knowsSize && height > width * 1.18) warnings.push('Selected lead image is strongly portrait; square or landscape is easier to reuse across marketplace cards.');
+      if (score > 0 && score < 70) warnings.push('Selected lead image merchandising score is below 70%.');
+    }
+  }
+
+  if (images.length > 0 && images.length < 3) warnings.push('Only one or two marketplace images are selected; three or more distinct buyer-useful views are preferred.');
+
+  return {
+    ready: blockers.length === 0,
+    blockers,
+    warnings,
+    blocker_count: blockers.length,
+    warning_count: warnings.length,
+    selected_count: images.length,
+    metadata_checked_count: metadataImages.length,
+    duplicate_count: duplicateCount,
+  };
+}
+
 export function validateListingDraft({ channel, product = {}, profile = {}, selectedImages = [], policy = {} }) {
   const key = text(channel).toLowerCase();
   const blockers = [];
@@ -126,12 +188,15 @@ export function validateListingDraft({ channel, product = {}, profile = {}, sele
   const priceCents = Number(product.price_cents || 0);
   const quantity = Number(profile.quantity_override || product.quantity || 1);
   const imageLimit = Number(policy.max_images || 10);
+  const imageRows = selectedImageRows(selectedImages);
+  const imageReadiness = validateSelectedImageSet(imageRows);
 
   if (!title) blockers.push('Missing listing title.');
   if (!description) blockers.push('Missing listing description.');
-  if (!selectedImages.length) blockers.push('At least one public-ready image must be selected.');
-  if (imageLimit && selectedImages.length > imageLimit) blockers.push(`Selected images exceed the channel limit of ${imageLimit}.`);
-  if (selectedImages.length > 0 && selectedImages.length < 3) warnings.push('Only one or two images selected; add more useful views when available.');
+  if (!imageRows.length) blockers.push('At least one public-ready image must be selected.');
+  if (imageLimit && imageRows.length > imageLimit) blockers.push(`Selected images exceed the channel limit of ${imageLimit}.`);
+  blockers.push(...imageReadiness.blockers.filter((message) => message !== 'At least one marketplace image is required.'));
+  warnings.push(...imageReadiness.warnings);
 
   if (key === 'etsy') {
     if (title.length > 140) blockers.push('Etsy title exceeds the local 140-character safety limit.');
@@ -171,6 +236,7 @@ export function validateListingDraft({ channel, product = {}, profile = {}, sele
     warnings,
     blocker_count: blockers.length,
     warning_count: warnings.length,
-    payload: { title, description, tags, materials, quantity, price_cents: priceCents, selected_images: selectedImages.length },
+    image_readiness: imageReadiness,
+    payload: { title, description, tags, materials, quantity, price_cents: priceCents, selected_images: imageRows.length },
   };
 }
