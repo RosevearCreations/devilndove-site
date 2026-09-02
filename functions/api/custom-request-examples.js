@@ -12,10 +12,8 @@ function familyFor(row={}){
 }
 function publicStatus(row={}){
   const status=String(row.status||'active').toLowerCase();
-  const review=String(row.review_status||'published').toLowerCase();
-  if(['archived','deleted','draft','private','inactive'].includes(status)) return false;
-  if(['blocked','rejected','draft','private'].includes(review)) return false;
-  return ['active','published','available','ready'].includes(status)||['approved','published','ready_for_release'].includes(review);
+  const review=String(row.review_status??'published').toLowerCase();
+  return status==='active' && ['approved','published',''].includes(review);
 }
 function factsFor(row={},spec={}){
   const facts=[
@@ -32,9 +30,9 @@ function factsFor(row={},spec={}){
 
 export async function onRequestGet(context){
   const db=context.env.DB||context.env.DD_DB;
-  if(!db)return json({ok:true,authority:'fallback_empty',examples:[],summary:{example_count:0}});
+  if(!db)return json({ok:true,authority:'fallback_empty',examples:[],summary:{example_count:0,read_only:true,invented_claims:false}});
   try{
-    const productRows=rows(await db.prepare(`SELECT * FROM products ORDER BY datetime(updated_at) DESC, product_id DESC LIMIT 180`).all());
+    const productRows=rows(await db.prepare(`SELECT * FROM products WHERE COALESCE(status,'active')='active' AND COALESCE(review_status,'published') IN ('approved','published','') ORDER BY datetime(updated_at) DESC, product_id DESC LIMIT 180`).all());
     const specRows=rows(await db.prepare(`SELECT * FROM custom_candle_soap_product_specs ORDER BY datetime(updated_at) DESC LIMIT 240`).all().catch(()=>({results:[]})));
     const specsByProduct=new Map();
     for(const spec of specRows){const id=Number(spec.product_id||0);if(id&&!specsByProduct.has(id))specsByProduct.set(id,spec);}
@@ -61,6 +59,6 @@ export async function onRequestGet(context){
     }
     return json({ok:true,authority:'products_plus_custom_candle_soap_product_specs',examples,summary:{example_count:examples.length,families:[...new Set(examples.map(x=>x.family))],invented_claims:false,read_only:true}});
   }catch(error){
-    return json({ok:true,authority:'fallback_empty',examples:[],summary:{example_count:0,read_only:true},warning:'Approved candle/soap examples are temporarily unavailable.'});
+    return json({ok:true,authority:'fallback_empty',examples:[],summary:{example_count:0,read_only:true,invented_claims:false},warning:'Approved candle/soap examples are temporarily unavailable.'});
   }
 }
