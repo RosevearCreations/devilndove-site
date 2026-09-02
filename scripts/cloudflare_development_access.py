@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 """Read-only Cloudflare Development account/resource preflight and safe runner wrapper.
 
-Purpose
--------
-Make the recurring D1/R2 authentication problem explicit before any database write.
-The wrapper pins the one Development account, reports the active Wrangler credential
-source without printing credentials, verifies access to the exact Development D1 and
-both R2 buckets, then optionally launches the canonical platform-convergence runner.
-
-No Cloudflare mutation is performed by this file. D1 mutation happens only if this
-preflight passes and the child convergence runner is invoked without --auth-only or
---verify-only.
+The helper pins the canonical `devilndove-site` Pages project and its isolated
+Development D1/R2 resources. It never prints credentials and performs no Cloudflare
+mutation itself. D1 mutation is possible only when the canonical child migration/
+convergence runner is deliberately invoked outside --auth-only / --verify-only modes.
 """
 from __future__ import annotations
 
@@ -25,8 +19,9 @@ from typing import Any, NoReturn
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / 'wrangler.toml'
-WRANGLER_VERSION = '4.126.0'
+WRANGLER_VERSION = '4.128.0'
 EXPECTED_ACCOUNT_ID = 'c0d5bc25df16ae5b7d47c985c4b7b787'
+EXPECTED_PAGES_PROJECT = 'devilndove-site'
 EXPECTED_DATABASE_NAME = 'devilndove-dev'
 EXPECTED_DATABASE_ID = 'dbc1615b-dcbe-4951-973b-b47c99c73bfa'
 EXPECTED_R2_BUCKETS = (
@@ -52,7 +47,9 @@ def npx_executable() -> str:
 def assert_source_authority() -> None:
     text = CONFIG.read_text(encoding='utf-8')
     required = (
-        'name = "devilndove-site-dev"',
+        f'name = "{EXPECTED_PAGES_PROJECT}"',
+        'DND_ENVIRONMENT = "development"',
+        f'DND_PAGES_PROJECT = "{EXPECTED_PAGES_PROJECT}"',
         f'database_name = "{EXPECTED_DATABASE_NAME}"',
         f'database_id = "{EXPECTED_DATABASE_ID}"',
         'bucket_name = "devilndove-toolshed-images-dev"',
@@ -79,7 +76,6 @@ def credential_source(auth_mode: str) -> str:
 
 def build_env(auth_mode: str) -> dict[str, str]:
     env = os.environ.copy()
-    # Deterministically select the one Development account for all Wrangler child calls.
     env['CLOUDFLARE_ACCOUNT_ID'] = EXPECTED_ACCOUNT_ID
     if auth_mode == 'oauth':
         for key in AUTH_ENV_KEYS:
@@ -89,24 +85,16 @@ def build_env(auth_mode: str) -> dict[str, str]:
 
 def wrangler_args(*parts: str) -> list[str]:
     return [
-        npx_executable(),
-        '--yes',
-        f'wrangler@{WRANGLER_VERSION}',
-        *parts,
-        '--config',
-        str(CONFIG),
+        npx_executable(), '--yes', f'wrangler@{WRANGLER_VERSION}', *parts,
+        '--config', str(CONFIG),
     ]
 
 
 def run_capture(parts: tuple[str, ...], *, label: str, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
     print(f'\n--- {label} ---', flush=True)
     return subprocess.run(
-        wrangler_args(*parts),
-        cwd=ROOT,
-        env=env,
-        check=False,
-        capture_output=True,
-        text=True,
+        wrangler_args(*parts), cwd=ROOT, env=env, check=False,
+        capture_output=True, text=True,
     )
 
 
@@ -127,8 +115,8 @@ def auth_failure_message(auth_mode: str, result: subprocess.CompletedProcess[str
         if unauthorized:
             return (
                 'Wrangler OAuth is authenticated but is not authorized for the pinned Development account. '
-                'Run `npx wrangler logout`, then `npx wrangler login`, sign into the Cloudflare account that owns '
-                '`devilndove-site-dev`, and rerun this preflight.'
+                f'Run `npx wrangler logout`, then `npx wrangler login`, sign into the Cloudflare account that owns '
+                f'`{EXPECTED_PAGES_PROJECT}`, and rerun this preflight.'
             )
         return (
             'Wrangler OAuth is not usable for the pinned Development account. Run `npx wrangler login` and rerun '
@@ -138,12 +126,12 @@ def auth_failure_message(auth_mode: str, result: subprocess.CompletedProcess[str
         return (
             'The active CLOUDFLARE_API_TOKEN is not authorized for the pinned Development account/D1 resource. '
             'Wrangler gives this environment token precedence over OAuth. Replace it with a Development token that '
-            'has D1 and R2 access, or rerun with `--auth-mode oauth` to deliberately ignore the environment token.'
+            'has D1 and R2 read access, or rerun with `--auth-mode oauth` to deliberately ignore the environment token.'
         )
     if unauthorized:
         return (
             'The active Wrangler credential is not authorized for the pinned Development account. Reauthenticate with '
-            '`npx wrangler login` or supply a Development-scoped CLOUDFLARE_API_TOKEN with D1 and R2 access.'
+            '`npx wrangler login` or supply a Development-scoped CLOUDFLARE_API_TOKEN with D1 and R2 read access.'
         )
     return 'Wrangler authentication/account membership preflight failed.'
 
@@ -151,13 +139,11 @@ def auth_failure_message(auth_mode: str, result: subprocess.CompletedProcess[str
 def whoami_preflight(auth_mode: str, env: dict[str, str]) -> None:
     result = run_capture(
         ('whoami', '--account', EXPECTED_ACCOUNT_ID, '--json'),
-        label='Wrangler account membership preflight',
-        env=env,
+        label='Wrangler account membership preflight', env=env,
     )
     if result.returncode:
         die(auth_failure_message(auth_mode, result), result.returncode)
     payload = parse_json_output(result, 'wrangler whoami')
-    # Do not print the payload. It may contain user/account metadata; only record PASS.
     if not payload:
         die('Wrangler account membership preflight returned an empty result.')
     print('PASS — Wrangler credential is accepted for the pinned Development account')
@@ -166,8 +152,7 @@ def whoami_preflight(auth_mode: str, env: dict[str, str]) -> None:
 def d1_preflight(env: dict[str, str]) -> None:
     result = run_capture(
         ('d1', 'info', EXPECTED_DATABASE_NAME, '--json'),
-        label='Development D1 visibility preflight',
-        env=env,
+        label='Development D1 visibility preflight', env=env,
     )
     if result.returncode:
         die('Wrangler cannot read the exact Development D1 database. No D1 write was attempted.', result.returncode)
@@ -191,14 +176,12 @@ def r2_preflight(env: dict[str, str]) -> None:
     for bucket in EXPECTED_R2_BUCKETS:
         result = run_capture(
             ('r2', 'bucket', 'info', bucket, '--json'),
-            label=f'R2 visibility preflight: {bucket}',
-            env=env,
+            label=f'R2 visibility preflight: {bucket}', env=env,
         )
         if result.returncode:
             die(f'Wrangler cannot read Development R2 bucket `{bucket}`. No R2 mutation was attempted.', result.returncode)
         payload = parse_json_output(result, f'wrangler r2 bucket info {bucket}')
-        raw = json.dumps(payload, ensure_ascii=False)
-        if bucket not in raw:
+        if bucket not in json.dumps(payload, ensure_ascii=False):
             die(f'R2 info did not resolve the expected Development bucket `{bucket}`.')
         print(f'PASS — R2 visible: {bucket}')
 
@@ -214,8 +197,7 @@ def run_child(args: argparse.Namespace, env: dict[str, str]) -> int:
     elif args.transport_preflight:
         command.append('--transport-preflight')
     print('\nLaunching canonical Development platform convergence runner…', flush=True)
-    result = subprocess.run(command, cwd=ROOT, env=env, check=False)
-    return int(result.returncode)
+    return int(subprocess.run(command, cwd=ROOT, env=env, check=False).returncode)
 
 
 def main() -> int:
@@ -223,9 +205,7 @@ def main() -> int:
         description='Development-only Cloudflare D1/R2 access preflight and platform-convergence wrapper'
     )
     parser.add_argument(
-        '--auth-mode',
-        choices=('auto', 'oauth'),
-        default='auto',
+        '--auth-mode', choices=('auto', 'oauth'), default='auto',
         help='auto respects Cloudflare environment credentials; oauth suppresses them and uses `wrangler login`.',
     )
     mode = parser.add_mutually_exclusive_group()
@@ -235,7 +215,9 @@ def main() -> int:
     args = parser.parse_args()
 
     assert_source_authority()
-    print('RELEASE 447 DEVELOPMENT CLOUDFLARE ACCESS AUTHORITY')
+    print('CURRENT DEVELOPMENT CLOUDFLARE ACCESS AUTHORITY')
+    print(f'Pages project: {EXPECTED_PAGES_PROJECT}')
+    print('Pages environment: Preview / dev branch')
     print('Target: Development only')
     print(f'Credential source: {credential_source(args.auth_mode)}')
     print('Credentials printed: NEVER')
