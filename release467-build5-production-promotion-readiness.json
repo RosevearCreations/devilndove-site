@@ -1,0 +1,87 @@
+{
+  "release": 467,
+  "build": 5,
+  "title": "Production Promotion Readiness Review",
+  "state": "development_candidate",
+  "purpose": "Produce a read-only, exact-SHA Development promotion-readiness decision without changing Production, providers, Cloudflare Access, D1, or R2.",
+  "it_route": "/admin/it/",
+  "existing_runtime_api": "/api/admin/it-control-tower",
+  "api_methods": ["GET"],
+  "schema_change_required": false,
+  "runtime_api_change": false,
+  "request_time_schema_mutation": false,
+  "d1_mutation": false,
+  "r2_mutation": false,
+  "production_mutation": false,
+  "production_provider_execution": false,
+  "provider_publication": false,
+  "cloudflare_access_policy_mutation": false,
+  "secret_values_emitted": false,
+  "promotion_execution": false,
+  "scope": [
+    "freeze_current_development_candidate_sha",
+    "retain_release467_build1_through_build4_source_proofs",
+    "verify_authenticated_development_runtime_authority",
+    "verify_exact_sha_visibility",
+    "verify_same_session_browser_acceptance",
+    "surface_external_acceptance_holds",
+    "surface_production_resource_compatibility_requirements_without_contacting_production",
+    "produce_sanitized_hold_or_ready_promotion_package"
+  ],
+  "promotion_contract": {
+    "source_authority": "dev",
+    "production_source": "main",
+    "cloudflare_pages_project": "devilndove-site",
+    "live_domain": "https://devilndove.com",
+    "exact_green_development_tree_only": true,
+    "production_business_data_is_production_owned": true,
+    "canonical_d1_migrations_are_only_schema_change_authority": true,
+    "production_resources_are_not_contacted_by_build5": true,
+    "main_is_not_advanced_by_build5": true
+  },
+  "production_resource_expectations": {
+    "d1_binding_name": "devilndove-prod-r462",
+    "product_r2_bucket": "devilndove-toolshed-images",
+    "caip_private_r2_bucket": "devilndove-caip-media",
+    "verification_mode": "documented_expectation_only_no_runtime_contact"
+  },
+  "required_evidence": {
+    "source_proof_chain": [
+      "Release 467 Build 1 Proof",
+      "Release 467 Build 2 Proof",
+      "Release 467 I.T. Admin Runtime Proof",
+      "Release 467 Build 3 Proof",
+      "Release 467 Build 4 Proof",
+      "Release 467 Build 5 Proof"
+    ],
+    "runtime_core": "GREEN",
+    "runtime_source_sha": "TRUSTED_40_CHARACTER_SHA",
+    "browser_acceptance": "FRESH_SAME_ORIGIN_PASS",
+    "external_acceptance": "GREEN_OR_EXPLICITLY_ACCEPTED_HOLD",
+    "promotion_candidate_sha": "MUST_EQUAL_RUNTIME_SOURCE_SHA_AND_REVIEWED_DEVELOPMENT_SHA"
+  },
+  "decision_semantics": {
+    "HOLD": "Any required Development runtime, exact-SHA, browser, external-acceptance, or candidate-freeze evidence is incomplete, stale, red, or ambiguous.",
+    "READY_FOR_MANUAL_PROMOTION": "All Build 5 evidence is proven for one exact Development SHA. This is permission to conduct a separate deliberate promotion review only; it does not itself promote or mutate Production."
+  },
+  "known_external_acceptance_classes": [
+    "stripe_test_acceptance",
+    "paypal_sandbox_acceptance",
+    "social_oauth_acceptance",
+    "github_native_ruleset_acceptance",
+    "provider_specific_external_evidence"
+  ],
+  "safety_boundary": {
+    "environment": "development",
+    "http": "GET_ONLY",
+    "schema": "UNCHANGED",
+    "d1": "READ_ONLY",
+    "r2": "READ_ONLY",
+    "production": "FORBIDDEN",
+    "main_branch_mutation": "FORBIDDEN",
+    "provider_execution": "CLOSED",
+    "provider_publication": "CLOSED",
+    "cloudflare_access": "NEVER_WEAKENED",
+    "credentials": "NEVER_EMITTED"
+  }
+}
