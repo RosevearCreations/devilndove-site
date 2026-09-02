@@ -1,0 +1,69 @@
+name: Release 467 Build 4 Proof
+
+on:
+  push:
+    branches: [release467-build4-evidence-acceptance-ledger, dev]
+    paths:
+      - 'public/js/admin-it-browser-runtime-acceptance.js'
+      - 'public/js/admin-it-evidence-ledger.js'
+      - 'admin/it/index.html'
+      - 'release467-build4-evidence-acceptance-ledger.json'
+      - 'scripts/release467_build4_gate.py'
+      - 'scripts/release467_build3_gate.py'
+      - 'scripts/release467_build2_gate.py'
+      - 'scripts/release467_build1_gate.py'
+      - 'scripts/release467_it_admin_runtime_gate.py'
+      - '.github/workflows/release467-build4-proof.yml'
+  pull_request:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  build467-evidence-acceptance-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Retain Release 467 Build 1 proof
+        run: python scripts/release467_build1_gate.py
+      - name: Retain Release 467 Build 2 proof
+        run: python scripts/release467_build2_gate.py
+      - name: Retain I.T./Admin runtime source authority
+        run: python scripts/release467_it_admin_runtime_gate.py
+      - name: Retain Release 467 Build 3 proof
+        run: python scripts/release467_build3_gate.py
+      - name: Validate Release 467 Build 4 authority
+        run: python scripts/release467_build4_gate.py
+      - name: Validate Build 3 browser bridge JavaScript syntax
+        run: node --check public/js/admin-it-browser-runtime-acceptance.js
+      - name: Validate Build 4 ledger JavaScript syntax
+        run: node --check public/js/admin-it-evidence-ledger.js
+      - name: Compile Release 467 Build 4 gate
+        run: python -m py_compile scripts/release467_build4_gate.py
+      - name: Whitespace validation
+        run: git diff --check origin/dev...HEAD
+      - name: Release 467 Build 4 safety statement
+        run: |
+          echo 'Release 467 Build 4: I.T. Evidence & Acceptance Ledger'
+          echo 'Ledger runtime: SAME-ORIGIN / GET ONLY'
+          echo 'Browser evidence: SESSION ONLY / SAME ORIGIN / MAX 8 HOURS'
+          echo 'Schema migration: NONE'
+          echo 'Runtime API change: NONE'
+          echo 'Request-time schema mutation: CLOSED'
+          echo 'D1 mutation: CLOSED'
+          echo 'R2 mutation: CLOSED'
+          echo 'Production mutation: CLOSED'
+          echo 'Provider execution/publication: CLOSED'
+          echo 'Cloudflare Access policy mutation: CLOSED'
+          echo 'CI service-token readiness: SEPARATE AUTHORITY / NEVER INFERRED FROM BROWSER PASS'
+          echo 'Secret disclosure: CLOSED'
