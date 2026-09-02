@@ -2,41 +2,43 @@
 
 ## Current authority
 
-**Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction** is the active Development source candidate.
+**Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics** is the active Development source candidate.
 
-Start every new chat/workstation/restart by reading `current-development-authority.json`, then this file. `development-release.json` is compatibility evidence and is not the current Release 467 selector.
+Start every new chat/workstation/restart by reading `current-development-authority.json`, then this file. `development-release.json` remains compatibility evidence and is not the current Release 467 selector.
 
-The exact Development-green predecessor is **Release 467 Build 8 — Authority Convergence and Restart Safety**:
+The exact Development-green predecessor is **Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction**:
 
-- merged `dev` commit: `94a891d3cb0608a91550c90fb04acea05cff75b3`
-- tree: `09d9f822c9987d3422921e819c913427af664184`
-- System Gate `33631757568` — SUCCESS
-- Release 467 Build 8 Authority Convergence Proof `33631758140` — SUCCESS
+- merged `dev` commit: `d8a9ffba03f980b9632643d91d9aa69b25bd94fd`
+- tree: `949f2523d31e0f47ed1e19ff7655de2762fbc1df`
+- System Gate `33633043297` — SUCCESS
+- Release 467 Build 9 Historical CI Retirement Proof `33633043229` — SUCCESS
 
-Build 9 removes obsolete automatic Release 466 workflow fanout from current Release 467 pushes and pull requests. It does not delete the historical proof scripts or Git/Actions history.
+Build 10 moves the I.T. workspace back into application improvement. `/admin/it/` becomes the consolidated read-only first stop for current release/deployment authority, D1/R2 readiness, administrator/module authority, external policy states, and one prioritized corrective queue.
 
-## Build 9 technical authority
+## Build 10 technical authority
 
 - current pointer: `current-development-authority.json`
-- Build 9 manifest: `release467-build9-historical-ci-retirement.json`
-- source gate: `scripts/release467_build9_gate.py`
-- source proof: `.github/workflows/release467-build9-proof.yml`
-- operations authority: `docs/operations/RELEASE_467_BUILD_9_HISTORICAL_CI_RETIREMENT.md`
-- source base: exact merged Build 8 `94a891d3cb0608a91550c90fb04acea05cff75b3`
+- Build 10 manifest: `release467-build10-it-control-tower-consolidation.json`
+- source gate: `scripts/release467_build10_gate.py`
+- source proof: `.github/workflows/release467-build10-proof.yml`
+- runtime endpoint: `/api/admin/it-operations-control-tower`
+- operator workspace: `/admin/it/`
+- operations authority: `docs/operations/RELEASE_467_BUILD_10_IT_CONTROL_TOWER.md`
+- source base: exact merged Build 9 `d8a9ffba03f980b9632643d91d9aa69b25bd94fd`
 
-Release 466 Build 1–6 proof workflows are now **MANUAL_ONLY_PROVENANCE**. Their gate scripts remain in `scripts/`, and historical workflow runs/artifacts remain GitHub evidence. The canonical current `System Gate` and Release 467 gates remain active.
+The new endpoint wraps the existing read-only readiness engine rather than replacing its bounded subsystem checks. It generates a prioritized recovery queue but performs **no automatic repair**.
 
 ## Historical authority compatibility boundary
 
-`development-release.json` deliberately remains **INHERITED_REGRESSION_COMPATIBILITY** for still-valid historical assertions. Release 467 Build 9 retires obsolete automatic workflow triggers; it does not rewrite historical convergence evidence merely to make old version fields look current.
+`development-release.json` deliberately remains **INHERITED_REGRESSION_COMPATIBILITY** for still-valid historical assertions. The application middleware runtime release header remains `466` as explicit **INHERITED_RUNTIME_COMPATIBILITY** until that separate compatibility contract is deliberately migrated. Neither compatibility surface overrides `current-development-authority.json` or the Release 467 Build 10 I.T. operator authority.
 
-Historical compatibility evidence never overrides `current-development-authority.json`.
+Release 467 Build 8 — Authority Convergence and Restart Safety established this current-vs-compatibility separation. Release 467 Build 9 then retired obsolete Release 466 automatic CI fanout while retaining historical proof source and evidence.
 
 ## Release 467 authority separation
 
 ### Builds 1–4
 
-Builds 1–4 established the I.T. readiness control tower, recovery/readiness actions, authenticated browser runtime acceptance, and sanitized evidence/acceptance ledger. Their current Release 467 source authority is carried forward.
+Builds 1–4 established the I.T. readiness control tower, recovery/readiness actions, authenticated browser runtime acceptance, and sanitized evidence/acceptance ledger. Build 10 consolidates their read-only findings without removing those bounded authorities.
 
 ### Build 5 — CI / Cloudflare Access readiness
 
@@ -50,15 +52,19 @@ Release 467 Build 6 remains the dispatch-only Development Cloudflare Access serv
 
 ### Release 467 Build 7 — External Commercial Acceptance Bridge
 
-Release 467 Build 7 — **External Commercial Acceptance Bridge** — remains the current operator visibility bridge for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth acceptance. Build 7 performs no provider action automatically.
+Release 467 Build 7 — **External Commercial Acceptance Bridge** — remains the operator visibility bridge for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth acceptance. Build 7 performs no provider action automatically.
 
 ### Release 467 Build 8 — Authority Convergence and Restart Safety
 
-Release 467 Build 8 established the current restart pointer and separated current Release 467 authority from inherited compatibility evidence. Build 8 is Development green at `94a891d3cb0608a91550c90fb04acea05cff75b3`.
+Release 467 Build 8 established `current-development-authority.json` as the restart pointer and fenced inherited Release 466 compatibility evidence away from current Release 467 authority.
 
 ### Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction
 
-Build 9 makes Release 466 Build 1–6 workflow files manual-only so current Release 467 work no longer produces false-red legacy fanout. Proof scripts/history remain available.
+Build 9 made Release 466 Build 1–6 workflow files manual-only so current Release 467 work no longer produces false-red legacy fanout. Proof scripts/history remain available.
+
+### Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics
+
+Build 10 adds a current I.T. operations wrapper and UI summary. It surfaces exact last-green Build 9 evidence, runtime ancestry when available, root-admin/profile/module metrics, D1 migration/FK metrics, explicit external policy HOLDs and a severity-sorted recovery queue. It does not silently convert runtime binding presence into exact control-plane identity and does not auto-repair access or data.
 
 ## Exact environment boundary
 
@@ -68,7 +74,7 @@ Build 9 makes Release 466 Build 1–6 workflow files manual-only so current Rele
 - Product R2: `devilndove-toolshed-images-dev`
 - CAIP private R2: `devilndove-caip-media-dev`
 - canonical migrations: exactly `0001`–`0004`
-- Build 9 schema/D1/R2 mutation: NONE
+- Build 10 schema/D1/R2 mutation: NONE
 
 A chat, workstation, deployment or source commit is not a migration event. Historical migrations are never replayed merely because work resumed.
 
@@ -83,13 +89,13 @@ External lanes remain truthfully **`HOLD_EXTERNAL`** unless separately and delib
 - native GitHub rulesets — separate repository-setting authority;
 - CAIP private media — use fresh Build 7 runtime evidence.
 
-No real Stripe, PayPal, OAuth or Cloudflare Access execution is authorized merely because source gates are green.
+The Build 10 I.T. page displays those policy states but performs no Stripe, PayPal, OAuth or Cloudflare Access execution.
 
 ## Main / Production boundary
 
 The last source-head verification carried forward for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`; this is a source-head observation only, not proof of the deployed Production release.
 
-Build 9 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute provider/payment/OAuth actions, change Cloudflare Access policy, expose secrets or authorize Production promotion.
+Build 10 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute provider/payment/OAuth actions, change Cloudflare Access policy, expose secrets or authorize Production promotion.
 
 ## Permanent safety rules
 
@@ -103,29 +109,32 @@ Build 9 does not update `main`, contact Production resources, mutate Production 
 - Build 5 remains Production Promotion Readiness authority.
 - Build 6 remains outer Access service-token authority.
 - Build 7 remains external-commercial visibility authority.
+- Build 9 remains historical-CI retirement authority.
+- Build 10 I.T. recovery guidance is read-only; repairs require the specific corrective workspace/authority.
 
 ## Next bounded work
 
-Prove Build 9 with its dedicated source proof and canonical System Gate, merge only when current Release 467 checks are green, then re-prove the exact merged `dev` SHA. Do not reactivate Release 466 automatic workflow fanout.
+Prove Build 10 with its dedicated source proof and current Release 467/System gates, merge only when green, then re-prove and deploy the exact merged `dev` SHA to the canonical Development Preview.
 
-After Build 9 closure, continue with the next non-provider application/release improvement unless we deliberately choose and authorize one of the external `HOLD_EXTERNAL` acceptance lanes.
+After Build 10 closure, use the consolidated I.T. view to choose the next **non-provider** application improvement unless we deliberately authorize an external `HOLD_EXTERNAL` acceptance lane.
 
 ## Canonical reading order
 
 1. `current-development-authority.json`
 2. `AI_HANDOFF.md`
-3. `release467-build9-historical-ci-retirement.json`
+3. `release467-build10-it-control-tower-consolidation.json`
 4. `PROJECT_STATUS_AND_ROADMAP.md`
 5. `SANITY_HEALTH_CHECK.md`
-6. `docs/operations/RELEASE_467_BUILD_9_HISTORICAL_CI_RETIREMENT.md`
-7. `release467-build8-authority-convergence.json`
-8. `docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md`
-9. `release467-build7-external-commercial-acceptance.json`
-10. `release467-build6-access-acceptance-harness.json`
-11. `release467-build5-production-promotion-readiness.json`
-12. `release467-build5-ci-access-readiness.json`
-13. `development-release.json` — compatibility evidence only
+6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
+7. `docs/operations/RELEASE_467_BUILD_10_IT_CONTROL_TOWER.md`
+8. `release467-build9-historical-ci-retirement.json`
+9. `release467-build8-authority-convergence.json`
+10. `release467-build7-external-commercial-acceptance.json`
+11. `release467-build6-access-acceptance-harness.json`
+12. `release467-build5-production-promotion-readiness.json`
+13. `release467-build5-ci-access-readiness.json`
+14. `development-release.json` — compatibility evidence only
 
 ## Historical authority
 
-Release 466 and earlier release/build files remain provenance and compatibility evidence. Their Build 1–6 workflow definitions are manual-only under Build 9 and cannot override current Release 467 authority.
+Release 466 and earlier release/build files remain provenance and compatibility evidence. Their Build 1–6 workflow definitions remain manual-only under Build 9 and cannot override current Release 467 Build 10 authority.

@@ -31,6 +31,7 @@ def changed_files() -> list[str]:
 
 
 api_path = "functions/api/admin/it-control-tower.js"
+wrapper_path = "functions/api/admin/it-operations-control-tower.js"
 ui_path = "public/js/admin-it-control-tower.js"
 html_path = "admin/it/index.html"
 authority_path = "release467-build1-it-readiness-control-tower.json"
@@ -40,6 +41,7 @@ for path in (api_path, ui_path, html_path, authority_path, workflow_path):
     req((ROOT / path).exists(), f"missing {path}")
 
 api = read(api_path)
+wrapper = read(wrapper_path) if (ROOT / wrapper_path).exists() else ""
 ui = read(ui_path)
 html = read(html_path)
 authority = json.loads(read(authority_path))
@@ -63,8 +65,16 @@ req("app_module_user_access" in api and "app_module_role_access" in api, "module
 req("root_admin_full_manage" in api and "root_it_explicit_manage" in api, "root-admin full-manage/I.T. explicit-grant evidence missing")
 req("Root administrator full module authority" in api, "root-admin green readiness finding missing")
 
-req("/api/admin/it-control-tower" in ui, "I.T. UI does not call the control tower")
-req("I.T. Preflight Command Center" in ui, "preflight command center UI missing")
+# Build 1 originally called the readiness engine directly from the browser. Newer Release 467 builds may
+# wrap that exact read-only engine server-side, but the Build 1 engine must remain in the active path.
+direct_ui = "/api/admin/it-control-tower" in ui
+wrapped_ui = (
+    "/api/admin/it-operations-control-tower" in ui
+    and "getReadinessControlTower" in wrapper
+    and "./it-control-tower.js" in wrapper
+)
+req(direct_ui or wrapped_ui, "I.T. UI does not retain the Build 1 control tower engine in its active path")
+req("I.T. Preflight Command Center" in ui or "I.T. Operations Control Tower" in ui, "preflight/control-tower command center UI missing")
 req("Open corrective workspace" in ui, "corrective mechanics are not surfaced")
 req("Administrator & module authority" in ui, "administrator/module authority card missing")
 req("Root admin" in ui and "FULL MANAGE" in ui, "root-admin first-stop summary missing")

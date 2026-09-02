@@ -2,25 +2,27 @@
 
 This guide defines the safe restart sequence for the canonical Devil n Dove Development environment.
 
-`current-development-authority.json` is the current Release 467 machine-readable restart pointer. `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY** for old gates and must not be used as the current release selector.
+`current-development-authority.json` is the current Release 467 machine-readable restart pointer. `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY** and the middleware Release 466 header remains explicit **INHERITED_RUNTIME_COMPATIBILITY**; neither is the current release selector.
 
 ## Startup sequence
 
 1. Read `current-development-authority.json` and confirm the current Release 467 build, exact green predecessor and safety boundaries.
 2. Read `AI_HANDOFF.md` for the current restart point, authority separation and next bounded work.
-3. Read `release467-build8-authority-convergence.json` when Build 8 is active.
+3. Read the current Release 467 build manifest; Release 467 Build 8 — Authority Convergence and Restart Safety remains the authority that established this reading order.
 4. Confirm the intended source branch is `dev` and resolve its exact current commit SHA.
-5. Confirm the canonical Pages project is `devilndove-site`; Development is the `dev` Preview environment and Production is the `main` Production environment.
-6. Confirm tracked `wrangler.toml` remains Development-safe and contains no `account_id`.
-7. Run current source/System gates before making a release claim.
-8. Check Development D1/R2 identity/readiness read-only before deciding whether a migration is required.
-9. Never replay historical migrations merely because a chat, workstation, deployment or source commit changed.
-10. Future schema changes must be added only to `migrations/canonical`, proven on Development first, and applied to Production only before dependent Production code when separately authorized.
-11. Apply only genuinely pending canonical migrations through the guarded migration tooling; run a separate read-only verifier afterward.
-12. Verify Application Modules returns account profiles and the root administrator retains effective `manage` access to all five modules. I.T. remains an explicit-user grant.
-13. Use the I.T. Control Tower for current readiness. External/provider/Access evidence remains amber/HOLD until independently proven.
-14. Keep provider execution/publication closed unless a separate controlled acceptance step explicitly opens a Development/test/sandbox lane.
-15. Promote only a separately reviewed exact System-Gate-green Development candidate through the Release 467 Production Promotion Readiness process; never overwrite Production business data from Development.
+5. Open `/admin/it/` after authenticated access. Build 10 makes its consolidated Control Tower the current read-only operational first stop.
+6. Confirm the canonical Pages project is `devilndove-site`; Development is the `dev` Preview environment and Production is the `main` Production environment.
+7. Confirm tracked `wrangler.toml` remains Development-safe and contains no `account_id`.
+8. Run current source/System gates before making a release claim.
+9. Check Development D1/R2 identity/readiness read-only before deciding whether a migration is required.
+10. Never replay historical migrations merely because a chat, workstation, deployment or source commit changed.
+11. Future schema changes must be added only to `migrations/canonical`, proven on Development first, and applied to Production only before dependent Production code when separately authorized.
+12. Apply only genuinely pending canonical migrations through guarded migration tooling; run a separate read-only verifier afterward.
+13. Verify Application Modules returns account profiles and the root administrator retains effective `manage` access to all five modules. I.T. remains an explicit-user grant.
+14. Use the Build 10 prioritized I.T. recovery queue to identify the next corrective workspace. The queue is guidance only and never performs automatic repair.
+15. Keep external provider/Access policy states separate from runtime/source health. Amber/HOLD remains truthful until independently proven.
+16. Keep provider execution/publication closed unless a separate controlled acceptance step explicitly opens a Development/test/sandbox lane.
+17. Promote only a separately reviewed exact System-Gate-green Development candidate through Release 467 Production Promotion Readiness; never overwrite Production business data from Development.
 
 ## Canonical Development connection
 
@@ -32,7 +34,7 @@ This guide defines the safe restart sequence for the canonical Devil n Dove Deve
 - Product R2: `devilndove-toolshed-images-dev`
 - CAIP private R2: `devilndove-caip-media-dev`
 - Canonical migration directory: `migrations/canonical`
-- Canonical migration stream at Build 8: exactly `0001`–`0004`
+- Canonical migration stream at Build 10: exactly `0001`–`0004`
 - GitHub Actions Cloudflare credential reference: `CLOUDFLARE_API_TOKEN`
 - Optional outer Access service-token references: `CF_ACCESS_CLIENT_ID` + `CF_ACCESS_CLIENT_SECRET`
 
@@ -40,14 +42,31 @@ Credential **values** must never be printed, committed, serialized into evidence
 
 ## Current exact predecessor evidence
 
-Release 467 Build 7 is the Build 8 predecessor:
+Release 467 Build 9 is the exact Build 10 predecessor:
 
-- merged Development commit: `5eef764a67466dc2989a4681c6a7cc782b9d4df9`
-- tree: `f7327733dc423982016829d717521ceab2029f35`
-- System Gate: `33591744817` — SUCCESS
-- Build 7 Proof: `33591744787` — SUCCESS
+- merged Development commit: `d8a9ffba03f980b9632643d91d9aa69b25bd94fd`
+- tree: `949f2523d31e0f47ed1e19ff7655de2762fbc1df`
+- System Gate: `33633043297` — SUCCESS
+- Build 9 Proof: `33633043229` — SUCCESS
 
-Build 8 must not rewrite those predecessor facts until Build 8 itself is merged and re-proven on an exact new `dev` SHA.
+Build 10 must not rewrite those facts until Build 10 itself is merged and re-proven on a new exact `dev` SHA.
+
+## Build 10 I.T. first-stop mechanics
+
+`/api/admin/it-operations-control-tower` wraps the existing read-only `/api/admin/it-control-tower` subsystem engine and adds current operator context.
+
+The top Control Tower must show:
+
+- current Release 467 build and last-green predecessor;
+- runtime source SHA/host when trusted runtime ancestry is available;
+- Development D1/R2 target authority;
+- root-admin/profile/module metrics;
+- canonical migration/proof and foreign-key metrics;
+- blocking vs attention recovery counts;
+- one severity-sorted recovery queue with correction text and workspace links;
+- external policy HOLDs separately from runtime evidence.
+
+The Build 10 endpoint never performs permission repair, schema mutation, D1/R2 writes, provider execution, Access policy mutation, `main` mutation or Production mutation.
 
 ## Current-vs-compatibility authority
 
@@ -58,42 +77,34 @@ The Release 467 restart chain is:
 3. current Release 467 build manifest
 4. current roadmap/sanity/operations authority
 
-`development-release.json` intentionally stays on its inherited Release 466 compatibility contract because still-valid Release 466 gates assert its historical convergence fields. Do not “modernize” that file independently. Migrate the consuming regression gates first, then retire historical compatibility fields deliberately.
+`development-release.json` intentionally stays on its inherited Release 466 regression contract. The middleware `X-DND-Release` compatibility value also remains 466 until that separate runtime contract is deliberately migrated. Build 10 surfaces this split clearly so compatibility metadata cannot silently override current Release 467 authority.
 
-The Build 8 gate fails if stale compatibility evidence is promoted back into current authority or if current restart files disagree.
+Release 467 Build 8 — Authority Convergence and Restart Safety remains the governing rationale for this separation.
 
 ## Cloudflare Access boundary
 
 The canonical Preview remains protected by Cloudflare Access. Release 467 Build 6 owns the separate Development Access service-token acceptance harness. A browser/application-admin success is not CI Access success, and outer Access success is not application-admin authentication.
 
-The service-token acceptance lane remains `HOLD_EXTERNAL` until its deliberate Development-only workflow succeeds with correctly provisioned masked `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` references.
+The service-token acceptance lane remains `HOLD_EXTERNAL` until its deliberate Development-only workflow succeeds with masked `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` references.
 
-Do not disable, bypass or weaken Preview Access to make smoke/runtime tests green. Build 8 performs no Access policy/token mutation.
+Do not disable, bypass or weaken Preview Access to make tests green. Build 10 performs no Access policy/token mutation.
 
 ## Root administrator / module recovery authority
 
-The canonical modules are:
+The canonical modules are Storefront, Creators, Socials/CAIP, Financials and I.T. The `admin` role retains `manage` defaults for the first four; I.T. intentionally remains explicit-user-only. The active root administrator must retain an explicit `it-platform/manage` grant.
 
-- Storefront
-- Creators
-- Socials / CAIP
-- Financials
-- I.T.
-
-The `admin` role retains `manage` defaults for Storefront, Creators, Socials and Financials. I.T. intentionally remains explicit-user-only. The active root administrator must retain an explicit `it-platform/manage` grant.
-
-Use `python scripts/release467_root_admin_access.py --verify-only` for read-only Development verification. A separately deliberate repair may restore only the bounded root-administrator I.T. grant; it is not authority for broad permission rewrites or Production mutation.
+The Control Tower may report a permission problem and link to Application Modules, but it does not repair it automatically. Use bounded existing verification/repair authority only when deliberately required.
 
 ## External commercial/provider boundary
 
-Release 467 Build 7 owns the current external-commercial visibility bridge. Build 8 does not execute providers.
+Release 467 Build 7 owns the external-commercial visibility bridge. Build 10 only displays policy/evidence status.
 
 Keep these separate and truthful:
 
 - Stripe Development — `HOLD_EXTERNAL` until deliberate test-mode acceptance evidence exists;
 - PayPal sandbox — `HOLD_EXTERNAL` until deliberate sandbox acceptance evidence exists;
 - Social/OAuth — `HOLD_EXTERNAL` until controlled intended-provider/account lifecycle evidence exists; publication remains closed;
-- CAIP private media — use fresh current Build 7 runtime evidence rather than stale historical wording;
+- CAIP private media — use fresh current Build 7 runtime evidence;
 - native GitHub rulesets — separate external repository-setting authority.
 
 Do not create provider activity merely to turn an I.T. card green.
@@ -106,9 +117,9 @@ Do not create provider activity merely to turn an I.T. card green.
 - Live domain: `https://devilndove.com`
 - Production D1/R2 remain Production-owned authorities.
 
-The last source-head verification before Build 8 found `main` at `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. This is not sufficient to assert the exact deployed Production release. Verify Production deployment independently before any promotion decision.
+The carried-forward source-head observation for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. This is not sufficient to assert the exact deployed Production release. Verify Production deployment independently before any promotion decision.
 
-Build 8 does not update `main`, contact Production, mutate Production D1/R2/business data or authorize deployment.
+Build 10 does not update `main`, contact Production, mutate Production D1/R2/business data or authorize deployment.
 
 ## Stop conditions
 
@@ -121,7 +132,7 @@ Stop mutation/promotion when:
 - `account_id` has been restored to tracked `wrangler.toml`;
 - current migration state is uncertain;
 - a historical migration is proposed only because work resumed;
-- stale Release 466 documentation is being used to override current Release 467 authority;
+- compatibility Release 466 metadata is being used to override current Release 467 authority;
 - Application Modules cannot load profiles or root-admin authority is broken;
 - request-time code attempts schema DDL;
 - provider execution/publication is enabled outside separately controlled acceptance;
