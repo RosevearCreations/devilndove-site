@@ -25,7 +25,7 @@ def hasall(body,tokens,label):
 def one_h1(body,label):req(len(re.findall(r'<h1(?:\s|>)',body,re.I))==1,f'{label} must contain exactly one H1')
 
 p=load('current-development-authority.json');m=load('release467-build18-order-fulfillment-customer-care.json');mig=load('migrations/canonical/manifest.json')
-b17=read('scripts/release467_build17_gate.py');api=read('functions/api/admin/order-fulfillment-care.js');client=read('public/js/admin-order-fulfillment-care.js');page=read('admin/order-fulfillment-care/index.html');orders_page=read('admin/orders/index.html');css=read('css/admin-order-fulfillment-care.css');doc=read('docs/operations/RELEASE_467_BUILD_18_ORDER_FULFILLMENT_CUSTOMER_CARE.md')
+b16=read('scripts/release467_build16_gate.py');b17=read('scripts/release467_build17_gate.py');api=read('functions/api/admin/order-fulfillment-care.js');client=read('public/js/admin-order-fulfillment-care.js');page=read('admin/order-fulfillment-care/index.html');orders_page=read('admin/orders/index.html');css=read('css/admin-order-fulfillment-care.css');doc=read('docs/operations/RELEASE_467_BUILD_18_ORDER_FULFILLMENT_CUSTOMER_CARE.md')
 
 req(p.get('release')==467 and p.get('build')==18 and p.get('title')=='Order Fulfillment & Customer Care Command Center','Build 18 pointer identity drifted')
 req(p.get('state')=='DEVELOPMENT_CANDIDATE' and p.get('feature_branch')=='release467-build18-order-fulfillment-customer-care','Build 18 candidate/branch drifted')
@@ -53,7 +53,9 @@ for k in ('automatic_order_status_mutation','automatic_payment_mutation','automa
 for k in ('schema_change_authorized','request_time_schema_mutation','new_d1_mutation_authorized','d1_mutation_authorized','new_r2_mutation_authorized','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_policy_mutation_authorized','main_mutation_authorized','production_mutation_authorized','secret_values_emitted'):req(m.get(k) is False,f'manifest safety drift: {k}')
 req(m.get('runtime_existing_operational_writes_only') is False,'Build 18 runtime must remain write-free')
 
-# Build 17 must explicitly support newer pointers and retain exact merged Build 17 proof.
+# Build 16 provenance must be transitive after Build 17, while Build 17 is the direct predecessor.
+b16c=b16.replace(' ','');req('elifpointer_build==17' in b16c and "b17m=load('release467-build17-creator-content-completeness.json')" in b16c,'Build 16 gate lost transitive newer-build preservation')
+hasall(b16,['MERGED_SHA','MERGED_TREE','MERGED_SYSTEM_GATE','MERGED_BUILD16_PROOF','Build16_provenance=TRANSITIVE_VIA_BUILD17'],'Build 16 transitive provenance markers')
 b17c=b17.replace(' ','');req('pointer_build>=17' in b17c and 'ifpointer_build==17' in b17c,'Build 17 gate lost forward compatibility')
 hasall(b17,[BASE_SHA,BASE_TREE,str(SYSTEM_GATE),str(BUILD17_PROOF),'PASS Release 467 Build 17 retained gate'],'Build 17 merged provenance')
 
@@ -76,13 +78,14 @@ req([x.get('file') for x in mig.get('migrations',[])]==MIGRATIONS,'canonical mig
 hasall(doc,['Release 467 Build 18','Order Fulfillment & Customer Care Command Center',BASE_SHA,'Release 467 Build 17','HOLD_EXTERNAL','Canada-only','U.S. sales/shipping suspension','read-only'],'Build 18 documentation')
 
 allowed={
- '.github/workflows/release467-build18-proof.yml','AI_HANDOFF.md','MARKDOWN_INDEX.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','admin/order-fulfillment-care/index.html','admin/orders/index.html','css/admin-order-fulfillment-care.css','current-development-authority.json','docs/operations/RELEASE_467_BUILD_18_ORDER_FULFILLMENT_CUSTOMER_CARE.md','functions/api/admin/order-fulfillment-care.js','public/js/admin-order-fulfillment-care.js','release467-build18-order-fulfillment-customer-care.json','scripts/release467_build17_gate.py','scripts/release467_build18_gate.py'
+ '.github/workflows/release467-build18-proof.yml','AI_HANDOFF.md','MARKDOWN_INDEX.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','admin/order-fulfillment-care/index.html','admin/orders/index.html','css/admin-order-fulfillment-care.css','current-development-authority.json','docs/operations/RELEASE_467_BUILD_18_ORDER_FULFILLMENT_CUSTOMER_CARE.md','functions/api/admin/order-fulfillment-care.js','public/js/admin-order-fulfillment-care.js','release467-build18-order-fulfillment-customer-care.json','scripts/release467_build16_gate.py','scripts/release467_build17_gate.py','scripts/release467_build18_gate.py'
 }
 ch=changed();extra=[x for x in ch if x not in allowed];req(not extra,f'files outside Build 18 scope changed: {extra}')
 req(not [x for x in ch if x.startswith('migrations/') or x.lower().endswith('.sql')],'Build 18 must not change schema/migrations')
 if FAIL:
  print('FAIL Release 467 Build 18 Order Fulfillment & Customer Care gate');[print(f'- {x}') for x in FAIL];sys.exit(1)
 print('PASS Release 467 Build 18 Order Fulfillment & Customer Care gate')
+print('build16_provenance=TRANSITIVE_VIA_BUILD17')
 print('build17_predecessor=EXACT_GREEN')
 print('order_fulfillment_projection=READ_ONLY')
 print('refund_execution=NONE')
