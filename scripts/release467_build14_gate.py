@@ -36,6 +36,7 @@ manifest=load("release467-build14-product-release-quality.json")
 compat=load("development-release.json")
 migrations=load("migrations/canonical/manifest.json")
 b13=read("scripts/release467_build13_gate.py")
+b13workflow=read(".github/workflows/release467-build13-proof.yml")
 quality=read("public/js/admin-product-quality-command-center.js")
 products_page=read("admin/products/index.html")
 readiness=read("functions/api/admin/product-readiness.js")
@@ -79,6 +80,8 @@ for k in ("schema_change_authorized","request_time_schema_mutation","new_d1_muta
 b13c=b13.replace(" ","")
 req("pointer_build>=13" in b13c,"Build 13 gate is not forward-compatible")
 req("ifpointer_build==13" in b13c,"Build 13 exact-scope branch missing")
+req("pointer_build" in b13workflow and 'if [ "${pointer_build}" -eq 13 ]' in b13workflow,"Build 13 workflow diff safety is not forward-compatible")
+req("runtime scope is governed by the newer build gate" in b13workflow,"Build 13 workflow preservation-mode boundary missing")
 
 for token in ("Product Release Quality Command Center","/api/admin/products","/api/admin/product-readiness?limit=300&show_ready=1","Crop / focal","Proof-image recommendations","Marketplace image checks","read-only","nothing is published automatically","linked_resource_cost_cents","gross_margin_cents","inventory","hero","gallery","alt","seo","canonical","shipping","structured","marketplace"):
     req(token.lower() in quality.lower(),f"Build 14 quality UI marker missing: {token}")
@@ -109,7 +112,7 @@ for body in docs:
 allowed={
 "functions/api/admin/product-readiness.js","functions/api/_lib/marketplaceReadiness.js","public/js/admin-product-quality-command-center.js","admin/products/index.html",
 "current-development-authority.json","release467-build14-product-release-quality.json","scripts/release467_build13_gate.py","scripts/release467_build14_gate.py",
-".github/workflows/release467-build14-proof.yml","AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md",
+".github/workflows/release467-build13-proof.yml",".github/workflows/release467-build14-proof.yml","AI_HANDOFF.md","PROJECT_STATUS_AND_ROADMAP.md","SANITY_HEALTH_CHECK.md","MARKDOWN_INDEX.md",
 "docs/operations/RELEASE_467_BUILD_14_PRODUCT_RELEASE_QUALITY.md","docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md"
 }
 ch=changed()
