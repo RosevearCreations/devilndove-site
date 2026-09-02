@@ -2,29 +2,29 @@
 
 ## Current authority
 
-**Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction** is the active Development source candidate.
+**Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics** is the active Development source candidate.
 
-The exact green predecessor is **Release 467 Build 8 — Authority Convergence and Restart Safety** at `94a891d3cb0608a91550c90fb04acea05cff75b3` with tree `09d9f822c9987d3422921e819c913427af664184`.
+The exact green predecessor is **Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction** at `d8a9ffba03f980b9632643d91d9aa69b25bd94fd` with tree `949f2523d31e0f47ed1e19ff7655de2762fbc1df`.
 
-- [x] Build 8 System Gate `33631757568` — SUCCESS.
-- [x] Build 8 Proof `33631758140` — SUCCESS.
-- [x] `current-development-authority.json` identifies Build 9 and preserves Build 8 as last-green.
+- [x] Build 9 System Gate `33633043297` — SUCCESS.
+- [x] Build 9 Proof `33633043229` — SUCCESS.
+- [x] `current-development-authority.json` identifies Build 10 and preserves Build 9 as last-green.
 - [x] `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY**.
+- [x] Middleware Release 466 header is explicitly classified **INHERITED_RUNTIME_COMPATIBILITY**, not current Release 467 authority.
 
-Build 8 retained its locked predecessor evidence: Release 467 Build 7 `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, System Gate `33591744817`, Build 7 Proof `33591744787`.
+Release 467 Build 8 — Authority Convergence and Restart Safety remains the authority that established the current-vs-compatibility split. Release 467 Build 9 remains the authority that retired obsolete Release 466 automatic CI fanout.
 
-## Build 9 historical CI retirement
+## Build 10 I.T. Control Tower
 
-- [x] Release 466 Build 1 Proof is `workflow_dispatch` only.
-- [x] Release 466 Build 2 Proof is `workflow_dispatch` only.
-- [x] Release 466 Build 3 Proof is `workflow_dispatch` only.
-- [x] Release 466 Build 4 Proof is `workflow_dispatch` only.
-- [x] Release 466 Build 5 Proof is `workflow_dispatch` only.
-- [x] Release 466 Build 6 Proof is `workflow_dispatch` only.
-- [x] Historical `scripts/release466_build1_gate.py` through `release466_build6_gate.py` remain in source.
-- [x] Historical Git/Actions history remains available.
-- [x] Current Release 467/System Gate workflows remain active.
-- [x] Build 8 gate is forward-compatible with Build 9+ pointers without changing locked Build 8 manifest evidence.
+- [x] New read-only endpoint: `/api/admin/it-operations-control-tower`.
+- [x] Existing `/api/admin/it-control-tower` subsystem engine is retained rather than bypassed.
+- [x] Current Release 467 Build 10 authority and exact Build 9 predecessor evidence are surfaced together.
+- [x] Development target/D1/R2/runtime ancestry summary is surfaced without inferring opaque binding identities.
+- [x] Root-admin, active profile/admin, module, D1 migration/proof and FK metrics are summarized.
+- [x] Non-green subsystem findings are flattened into one severity-sorted recovery queue.
+- [x] Recovery guidance links to corrective workspaces but performs no automatic repairs.
+- [x] External acceptance policy states are displayed independently from runtime/source success.
+- [x] No secret values are emitted.
 
 ## Environment boundary
 
@@ -33,21 +33,22 @@ Build 8 retained its locked predecessor evidence: Release 467 Build 7 `5eef764a6
 - [x] Development D1 remains `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
 - [x] Development Product R2 remains `devilndove-toolshed-images-dev`.
 - [x] Development CAIP R2 remains `devilndove-caip-media-dev`.
-- [x] Build 9 authorizes no D1/R2 mutation.
-- [x] Build 9 authorizes no Cloudflare Access mutation.
-- [x] Build 9 authorizes no `main` mutation.
-- [x] Build 9 authorizes no Production mutation.
+- [x] Build 10 authorizes no D1/R2 mutation.
+- [x] Build 10 authorizes no Cloudflare Access policy mutation.
+- [x] Build 10 authorizes no `main` mutation.
+- [x] Build 10 authorizes no Production mutation/contact.
 
 ## D1 / schema sanity
 
 - [x] Canonical migration stream remains exactly `0001`–`0004`.
-- [x] Build 9 adds no migration.
+- [x] Build 10 adds no migration.
 - [x] Request-time schema DDL remains forbidden.
 - [x] A new chat/workstation/deployment is not a migration event.
+- [x] Build 10 reads existing D1 readiness/profile/module evidence only.
 
 ## External acceptance sanity
 
-Build 9 source state and external acceptance are intentionally independent.
+Build 10 source/runtime state and external acceptance are intentionally independent.
 
 - [ ] Cloudflare Access service-token acceptance — `HOLD_EXTERNAL` until deliberate Build 6 evidence succeeds.
 - [ ] Stripe Development acceptance — `HOLD_EXTERNAL` until deliberate test-mode evidence succeeds.
@@ -55,21 +56,28 @@ Build 9 source state and external acceptance are intentionally independent.
 - [ ] Social/OAuth controlled acceptance — `HOLD_EXTERNAL` until deliberate intended-account evidence succeeds.
 - [ ] CAIP private-media current state — use fresh Build 7 runtime evidence.
 
-- [x] Provider execution from Build 9: NONE.
-- [x] Provider publication from Build 9: NONE.
-- [x] Payment/refund execution from Build 9: NONE.
-- [x] OAuth connect/revoke from Build 9: NONE.
-- [x] Secret values inspected/emitted by Build 9: NONE.
+- [x] Provider execution from Build 10: NONE.
+- [x] Provider publication from Build 10: NONE.
+- [x] Payment/refund execution from Build 10: NONE.
+- [x] OAuth connect/revoke from Build 10: NONE.
+- [x] Secret values inspected/emitted by Build 10: NONE.
+
+## CI / prior authority sanity
+
+- [x] Release 466 Build 1–6 proof workflows remain manual-only provenance under Build 9.
+- [x] Build 9 gate is forward-compatible with Build 10 while retaining locked Build 9 manifest/history assertions.
+- [x] Release 467 Build 6, Build 7, Build 8 and Build 9 authorities remain separate and retained.
+- [x] Production Promotion Readiness remains the separate Build 5 authority.
 
 ## Main / Production sanity
 
 The carried-forward source-head observation for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`; this is not proof of the currently deployed Production release.
 
-- [x] Build 9 does not update `main`.
-- [x] Build 9 does not contact Production resources.
-- [x] Build 9 does not copy Development business data to Production.
+- [x] Build 10 does not update `main`.
+- [x] Build 10 does not contact Production resources.
+- [x] Build 10 does not copy Development business data to Production.
 - [x] Production promotion remains a separate exact-candidate review under Release 467 Build 5 Production Promotion Readiness.
 
 ## Current verdict
 
-Release 467 Build 8 is the exact proven Development predecessor. Release 467 Build 9 is a bounded CI/release-mechanics candidate that removes obsolete Release 466 automatic fanout while retaining historical provenance. External lanes remain truthfully `HOLD_EXTERNAL`.
+Release 467 Build 9 is the exact proven Development predecessor. Release 467 Build 10 is a bounded, schema-neutral I.T. application candidate that consolidates current operational evidence and corrective guidance without repairing data/access automatically or changing external/Production authority. External lanes remain truthfully `HOLD_EXTERNAL`.
