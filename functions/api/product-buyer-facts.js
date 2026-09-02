@@ -21,9 +21,7 @@ export async function onRequestGet({ request, env }) {
   if (!ids.length) return json({ ok: true, release: 467, build: 15, products: {}, read_only: true, request_time_schema_mutation: false });
   const placeholders = ids.map(() => '?').join(',');
   const productRows = rows(await db.prepare(`
-    SELECT product_id, name, slug, product_category, product_type, merchandise_origin, requires_shipping,
-           inventory_tracking, inventory_quantity, weight_grams, primary_material, material, material_tags,
-           making_process, process_notes, condition_summary, local_pickup_note
+    SELECT *
     FROM products
     WHERE product_id IN (${placeholders}) AND LOWER(COALESCE(status,'active'))='active'
   `).bind(...ids).all());
@@ -61,14 +59,20 @@ export async function onRequestGet({ request, env }) {
     const id = Number(product.product_id || 0);
     products[id] = {
       product: {
-        ...product,
         product_id: id,
+        name: text(product.name),
+        slug: text(product.slug),
+        product_category: text(product.product_category || product.category),
+        product_type: text(product.product_type || 'physical'),
+        merchandise_origin: text(product.merchandise_origin || 'handmade'),
+        condition_summary: text(product.condition_summary),
         requires_shipping: Number(product.requires_shipping || 0),
         inventory_tracking: Number(product.inventory_tracking || 0),
-        inventory_quantity: Number(product.inventory_quantity || 0),
+        inventory_quantity: Number(product.inventory_quantity || product.on_hand_quantity || 0),
         weight_grams: Number(product.weight_grams || 0),
-        proof_material: text(product.material_tags || product.primary_material || product.material),
-        proof_process: text(product.making_process || product.process_notes)
+        proof_material: text(product.material_tags || product.materials_json || product.primary_material || product.material || product.product_category),
+        proof_process: text(product.making_process || product.process_notes || product.process_tags),
+        local_pickup_note: text(product.local_pickup_note || product.sourcing_notes)
       },
       listing_profile: profiles.get(id) || null,
       story_notes: stories.get(id) || null
