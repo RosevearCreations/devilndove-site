@@ -1,0 +1,78 @@
+{
+  "release": 467,
+  "build": 17,
+  "title": "Creator & Content Completeness",
+  "feature_branch": "release467-build17-creator-content-completeness",
+  "source_base_sha": "c05c7ff64e01672b04ec1768b696e163adeeca0f",
+  "source_base_tree_sha": "1635f19b24df5c37358925948b51e5a43c20cf99",
+  "predecessor": {
+    "build": 16,
+    "merged_dev_sha": "c05c7ff64e01672b04ec1768b696e163adeeca0f",
+    "merged_dev_tree_sha": "1635f19b24df5c37358925948b51e5a43c20cf99",
+    "system_gate_run": 33658864411,
+    "build16_proof_run": 33658864422,
+    "production_main_sha": "296e53b079bba53126c80902be36a9271d82cea4",
+    "production_pages_deploy_run": 33655223149
+  },
+  "backlog_items": [16, 17, 18, 19, 20],
+  "workspace": "/admin/creator-content-completeness/",
+  "creative_project_completeness": {
+    "source_authority": "/api/admin/creative-process",
+    "projection_endpoint": "/api/admin/creator-content-completeness",
+    "dimensions": ["material_usage", "costing", "finished_output", "lessons_learned", "content_studio_handoff"],
+    "rough_result_is_project_level_only": true,
+    "automatic_project_mutation": false
+  },
+  "caip_story_candidates": {
+    "source_table": "creative_media_evidence_ranges",
+    "existing_facts_only": true,
+    "rank_inputs": ["review_status", "verification_status", "confidence_score", "transcript_excerpt", "note_text", "linked_story_evidence_id", "bounded_time_range"],
+    "ranking_is_approval": false,
+    "automatic_handoff": false,
+    "automatic_social_publication": false
+  },
+  "media_diagnostics": {
+    "source_authority": "/api/admin/media-content-studio",
+    "unassigned_media_visible": true,
+    "unfilled_visual_slots_visible": true,
+    "recommended_target_is_routing_hint_only": true,
+    "automatic_assignment": false,
+    "raw_r2_deletion": false
+  },
+  "marketplace_presets": {
+    "endpoint": "/api/admin/marketplace-presets",
+    "supported_channels": ["etsy", "facebook_marketplace", "pinterest"],
+    "existing_rows_only": true,
+    "request_time_insert": false,
+    "request_time_schema_mutation": false,
+    "editable_fields": ["title_prefix", "title_suffix", "description_intro", "category_path", "default_tags_json", "default_materials_json", "shipping_profile_reference", "content_strategy"],
+    "policy_overrides_locked": true,
+    "canada_only_locked": true,
+    "review_before_publish_locked": true,
+    "no_automatic_posting_locked": true,
+    "provider_execution": false,
+    "provider_publication": false
+  },
+  "placeholder_policy": {
+    "registry": "release467-build17-placeholder-registry.json",
+    "gate": "scripts/release467_build17_placeholder_gate.py",
+    "silent_placeholders": false,
+    "invented_marketing_fallback": false,
+    "waiver_requires": ["reason", "owner", "remediation"],
+    "stale_waivers_fail": true
+  },
+  "runtime_existing_operational_writes_only": true,
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "new_d1_mutation_authorized": false,
+  "d1_mutation_authorized": false,
+  "new_r2_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false,
+  "external_acceptance": "HOLD_EXTERNAL"
+}

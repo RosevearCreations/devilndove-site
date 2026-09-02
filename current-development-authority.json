@@ -1,17 +1,17 @@
 {
   "release": 467,
-  "build": 16,
-  "title": "Custom Request & Made Today Journey",
+  "build": 17,
+  "title": "Creator & Content Completeness",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build16-custom-request-made-today-journey",
-  "source_base_sha": "cb6a69ebf544a8eb74efeec409aeeb7ad1852a33",
-  "source_base_tree_sha": "2e9befcb349bbbb5b4dfd06f56b3d4b7bfdf9d60",
-  "last_green_build": 15,
-  "last_green_dev_sha": "cb6a69ebf544a8eb74efeec409aeeb7ad1852a33",
-  "last_green_dev_tree_sha": "2e9befcb349bbbb5b4dfd06f56b3d4b7bfdf9d60",
-  "last_green_system_gate_run": 33654847043,
-  "last_green_build_proof_run": 33654846823,
+  "feature_branch": "release467-build17-creator-content-completeness",
+  "source_base_sha": "c05c7ff64e01672b04ec1768b696e163adeeca0f",
+  "source_base_tree_sha": "1635f19b24df5c37358925948b51e5a43c20cf99",
+  "last_green_build": 16,
+  "last_green_dev_sha": "c05c7ff64e01672b04ec1768b696e163adeeca0f",
+  "last_green_dev_tree_sha": "1635f19b24df5c37358925948b51e5a43c20cf99",
+  "last_green_system_gate_run": 33658864411,
+  "last_green_build_proof_run": 33658864422,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {"name": "devilndove-dev", "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
   "development_r2": ["devilndove-toolshed-images-dev", "devilndove-caip-media-dev"],
@@ -24,9 +24,10 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Build 16 advances current Custom Request and Made Today journey quality while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
+    "reason": "Build 17 advances Creator and Content completeness while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
   },
   "current_release_authorities": [
+    "release467-build17-creator-content-completeness.json",
     "release467-build16-custom-request-made-today-journey.json",
     "release467-build15-storefront-seo-parity.json",
     "release467-build14-product-release-quality.json",
@@ -42,8 +43,8 @@
     "release467-build5-ci-access-readiness.json"
   ],
   "autonomous_backlog": "docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md",
-  "autonomous_backlog_active_build": 16,
-  "autonomous_backlog_active_items": [11, 12, 13, 14, 15],
+  "autonomous_backlog_active_build": 17,
+  "autonomous_backlog_active_items": [16, 17, 18, 19, 20],
   "external_lanes": {
     "cloudflare_access_service_token": "HOLD_EXTERNAL",
     "stripe_development": "HOLD_EXTERNAL",
@@ -62,5 +63,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md, docs/operations/RELEASE_467_BUILD_16_CUSTOM_REQUEST_MADE_TODAY_JOURNEY.md, and docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md. Build 16 owns autonomous items 11-15: the visible request-to-complete journey, customer-safe private order-stage messaging with internal notes hidden, evidence-backed candle/soap examples, consent-cleared public proof, and phone-first Made Today review capture. Captures remain private/review-only until explicit moderation. Canada-only fulfillment and the U.S. sales/shipping suspension remain intact. Development first; provider execution and Production promotion remain closed."
+  "restart_rule": "Read this file first, then AI_HANDOFF.md, docs/operations/RELEASE_467_BUILD_17_CREATOR_CONTENT_COMPLETENESS.md, and docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md. Build 17 owns autonomous items 16-20: Creative Project to Content Studio completeness, evidence-only CAIP story-candidate ranking, Media Studio orphan/unassigned diagnostics, editable existing marketplace presets with fail-closed preflight, and a no-silent-placeholder gate. Existing operational preset-row updates remain narrow and explicit; there is no request-time DDL, automatic media assignment, raw R2 deletion, automatic story/social/marketplace publication, provider execution, Access mutation, or Production promotion."
 }

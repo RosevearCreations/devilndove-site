@@ -1,0 +1,67 @@
+name: Release 467 Build 17 Creator Content Completeness Proof
+
+on:
+  push:
+    branches:
+      - release467-build17-creator-content-completeness
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Preserve Release 467 Build 16 authority
+        run: python scripts/release467_build16_gate.py
+      - name: Prove no-silent-placeholder policy
+        run: python scripts/release467_build17_placeholder_gate.py
+      - name: Prove Release 467 Build 17 Creator and Content Completeness
+        run: python scripts/release467_build17_gate.py
+      - name: Preserve whole-site public SEO quality
+        run: python scripts/release467_build15_public_seo_gate.py
+      - name: Validate authority JSON
+        run: |
+          python -m json.tool current-development-authority.json >/dev/null
+          python -m json.tool release467-build17-creator-content-completeness.json >/dev/null
+          python -m json.tool release467-build17-placeholder-registry.json >/dev/null
+      - name: Validate Python syntax
+        run: python -m py_compile scripts/release467_build16_gate.py scripts/release467_build17_gate.py scripts/release467_build17_placeholder_gate.py scripts/release467_build15_public_seo_gate.py
+      - name: Validate JavaScript syntax
+        run: |
+          node --check functions/api/admin/creator-content-completeness.js
+          node --check functions/api/admin/marketplace-presets.js
+          node --check public/js/admin-creator-content-completeness.js
+      - name: Diff safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="$(git merge-base HEAD origin/dev)"
+          git diff --check "${base}...HEAD"
+          if git diff --name-only "${base}...HEAD" | grep -E '(^migrations/|\.sql$)'; then
+            echo 'Build 17 must not change schema or migration files.' >&2
+            exit 1
+          fi
+      - name: Boundary
+        run: |
+          echo 'Build 17 owns autonomous backlog items 16-20.'
+          echo 'Creative Project completeness, CAIP evidence-only ranking, media diagnostics, reviewed marketplace presets, and no-silent-placeholder governance are guarded.'
+          echo 'Marketplace presets update existing rows only and retain policy overrides; provider execution/publication remain false.'
+          echo 'Media recommendations never assign automatically and raw R2 deletion is not added.'
+          echo 'No schema migration, new broad D1/R2 authority, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'

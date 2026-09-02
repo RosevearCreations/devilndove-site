@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Creator & Content Completeness — Devil n Dove Admin</title>
+  <meta name="description" content="Review Devil n Dove creative-project completeness, CAIP story candidates, media assignment diagnostics, and marketplace preset preflight."/>
+  <link href="/css/styles.css" rel="stylesheet"/>
+  <link href="/css/creator-content-completeness.css?v=467b17" rel="stylesheet"/>
+  <link href="/assets/mark.png" rel="icon" type="image/png"/>
+</head>
+<body>
+<div class="container admin-shell">
+  <div class="nav">
+    <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Creator & Content Completeness</div></div></div>
+    <div class="links"><a href="/admin/">Admin</a><a href="/admin/creative-process/">Creative Process</a><a href="/admin/caip/">CAIP</a><a href="/admin/content/">Content Studio</a><a href="/admin/media-content-studio/">Media Studio</a><button class="btn" data-nav-logout="" type="button">Logout</button></div>
+  </div>
+
+  <main class="hero creator-completeness-hero">
+    <p class="small creator-eyebrow">Release 467 Build 17 • autonomous items 16–20</p>
+    <h1>Creator & Content Completeness</h1>
+    <p>One review surface for project completeness, evidence-backed story candidates, media assignment gaps, marketplace preset readiness, and placeholder governance. It does not publish content, assign media automatically, delete R2 originals, execute marketplace providers, or change Production.</p>
+  </main>
+
+  <section class="card creator-boundary" aria-labelledby="creatorBoundaryHeading">
+    <h2 id="creatorBoundaryHeading" style="margin-top:0">Review boundary</h2>
+    <div class="creator-chip-row"><span class="status-note">Creative writes stay in Creative Process</span><span class="status-note">CAIP review stays in CAIP</span><span class="status-note">Media assignment stays explicit</span><span class="status-note">Marketplace provider execution is off</span></div>
+    <p class="small">Marketplace preset saves update existing Development preset rows only. Policy overrides remain locked to their current reviewed values. Story ranking uses existing evidence facts only and is a prioritization aid, not an approval or marketing claim.</p>
+    <button class="btn" id="creatorCompletenessRefresh" type="button">Refresh completeness</button>
+    <span class="small" id="creatorCompletenessStatus" role="status" aria-live="polite">Loading…</span>
+  </section>
+
+  <section class="card" aria-labelledby="projectCompletenessHeading">
+    <div class="creator-section-head"><div><h2 id="projectCompletenessHeading">Creative Project → Content Studio completeness</h2><p class="small">Projects needing material usage, costing, finished outputs, lessons, or a Content Studio handoff rise to the top.</p></div><a class="btn" href="/admin/creative-process/">Open Creative Process</a></div>
+    <div id="creatorProjectCompletenessMount"></div>
+  </section>
+
+  <section class="card" aria-labelledby="storyCandidateHeading">
+    <div class="creator-section-head"><div><h2 id="storyCandidateHeading">CAIP story-candidate ranking</h2><p class="small">Deterministic ranking from review status, verification, confidence, transcript/note evidence, linked story evidence, and bounded time ranges. No claim or social post is generated.</p></div><a class="btn" href="/admin/caip/">Open CAIP review</a></div>
+    <div id="creatorStoryCandidateMount"></div>
+  </section>
+
+  <section class="card" aria-labelledby="mediaDiagnosticHeading">
+    <div class="creator-section-head"><div><h2 id="mediaDiagnosticHeading">Media assignment & orphan diagnostics</h2><p class="small">Shows unassigned public/static media and unfilled visual slots. Recommendations are routing hints only; assignment remains an explicit Media Studio action.</p></div><a class="btn" href="/admin/media-content-studio/">Open Media Studio</a></div>
+    <div id="creatorMediaDiagnosticsMount"></div>
+  </section>
+
+  <section class="card" aria-labelledby="marketplacePresetHeading">
+    <div class="creator-section-head"><div><h2 id="marketplacePresetHeading">Marketplace preset editor & preflight</h2><p class="small">Edit the existing Etsy, Facebook Marketplace, and Pinterest preparation presets. Preflight validates readiness; saving never publishes or executes a provider.</p></div><a class="btn" href="/admin/custom-request/">Custom Requests</a></div>
+    <div id="creatorMarketplacePresetsMount"></div>
+  </section>
+
+  <section class="card" aria-labelledby="placeholderGateHeading">
+    <h2 id="placeholderGateHeading">No-silent-placeholder source gate</h2>
+    <p>Critical runtime fallback markers must be either removed or registered with an explicit reason, owner, and remediation path. The registry cannot authorize invented marketing content.</p>
+    <div class="creator-chip-row"><span class="status-note">Silent placeholders: blocked</span><span class="status-note">Invented fallback claims: blocked</span><span class="status-note">Reason + owner + remediation: required</span></div>
+  </section>
+
+  <div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js?v=467"></script>
+<script src="/public/js/auth.js?v=467"></script>
+<script src="/public/js/site-auth-ui.js?v=467"></script>
+<script src="/public/js/admin-creator-content-completeness.js?v=467b17"></script>
+</body>
+</html>
