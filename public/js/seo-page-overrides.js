@@ -21,7 +21,7 @@
     const path=location.pathname;
     if(path==='/shop/'||path.endsWith('/shop/index.html')) await loadScript('/public/js/shop-parity.js?v=467b15','release467Build15ShopParity');
     if(path==='/shop/product/'||path.endsWith('/shop/product/index.html')) await loadScript('/public/js/product-detail-parity.js?v=467b15','release467Build15ProductParity');
-    if(path.startsWith('/shop/')||path.startsWith('/cart/')||path.startsWith('/checkout/')) await loadScript('/public/js/storefront-shipping-policy.js?v=467b15','release467Build15ShippingPolicy');
+    if(path.startsWith('/shop/')||path.startsWith('/cart/')||path.startsWith('/checkout/')||path==='/custom-request/'||path.endsWith('/custom-request/index.html')) await loadScript('/public/js/storefront-shipping-policy.js?v=467b15','release467Build15ShippingPolicy');
   }
   async function productSeo(){
     if(location.pathname!=='/shop/product/'&&!location.pathname.endsWith('/shop/product/index.html'))return;
