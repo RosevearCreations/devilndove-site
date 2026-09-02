@@ -57,6 +57,7 @@ migrations = load("migrations/canonical/manifest.json")
 endpoint = read("functions/api/admin/it-operations-control-tower.js")
 ui = read("public/js/admin-it-control-tower.js")
 html = read("admin/it/index.html")
+build1_gate = read("scripts/release467_build1_gate.py")
 build9_gate = read("scripts/release467_build9_gate.py")
 
 req(pointer.get("release") == 467 and pointer.get("build") == 10, "current authority pointer must identify Release 467 Build 10")
@@ -143,6 +144,8 @@ req("Release 467 Build 10" in html, "I.T. workspace must name Release 467 Build 
 req("consolidates current release/deployment authority" in html, "I.T. workspace Build 10 purpose missing")
 req("/public/js/admin-it-control-tower.js?v=467" in html, "I.T. control tower script mount drifted")
 
+req("direct_ui or wrapped_ui" in build1_gate, "Build 1 gate must allow the newer wrapper while retaining its original readiness engine")
+req("getReadinessControlTower" in build1_gate, "Build 1 gate wrapper proof marker missing")
 req("pointer_build >= 9" in build9_gate, "Build 9 gate must be forward-compatible with Build 10")
 req("if pointer_build == 9" in build9_gate, "Build 9 exact changed-file scope must be limited to Build 9 itself")
 req("newer Release 467 authority must retain Build 9 provenance" in build9_gate, "Build 9 provenance retention check missing")
@@ -159,6 +162,7 @@ req(not list((ROOT / "migrations/canonical").glob("*467*build10*")), "Build 10 i
 allowed = {
     "current-development-authority.json",
     "release467-build10-it-control-tower-consolidation.json",
+    "scripts/release467_build1_gate.py",
     "scripts/release467_build9_gate.py",
     "scripts/release467_build10_gate.py",
     ".github/workflows/release467-build10-proof.yml",
@@ -190,6 +194,7 @@ print(f"predecessor_dev_sha={BASE_SHA}")
 print(f"predecessor_system_gate={SYSTEM_GATE}")
 print(f"predecessor_build9_proof={BUILD9_PROOF}")
 print("control_tower=CONSOLIDATED_READ_ONLY")
+print("build1_readiness_engine=RETAINED_THROUGH_WRAPPER_OR_DIRECT_UI")
 print("recovery_queue=PRIORITIZED_NO_AUTOMATIC_REPAIR")
 print("external_acceptance=HOLD_EXTERNAL")
 print("schema_d1_r2_provider_access_main_production_mutation=NONE")
