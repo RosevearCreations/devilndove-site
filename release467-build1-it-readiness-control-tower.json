@@ -2,12 +2,14 @@
   "release": 467,
   "build": 1,
   "title": "I.T. Readiness Control Tower",
-  "state": "development_candidate",
+  "state": "development_green_external_acceptance_hold",
   "scope": [
     "it_preflight_command_center",
     "automatic_release_readiness_score",
     "sanitized_configuration_drift_detection",
-    "exact_sha_deployment_ancestry_evidence"
+    "exact_sha_deployment_ancestry_evidence",
+    "admin_profile_module_authority",
+    "authenticated_runtime_acceptance_boundary"
   ],
   "schema_change_required": false,
   "request_time_schema_mutation": false,
@@ -19,6 +21,7 @@
   "api_methods": ["GET"],
   "expected_development_authority": {
     "pages_project": "devilndove-site",
+    "preview_alias": "https://dev.devilndove-site.pages.dev",
     "d1_name": "devilndove-dev",
     "d1_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
     "product_r2_bucket": "devilndove-toolshed-images-dev",
@@ -33,13 +36,40 @@
     "red": "A required binding, authority, safety boundary, migration proof, environment marker, or relational invariant is missing or drifted.",
     "unknown_is_green": false,
     "configuration_is_external_acceptance": false,
-    "runtime_binding_presence_is_exact_identity": false
+    "runtime_binding_presence_is_exact_identity": false,
+    "external_access_block_is_runtime_green": false
+  },
+  "admin_module_authority": {
+    "profiles_loading": "development_proven",
+    "root_admin_business_manage_defaults": 4,
+    "root_admin_it_explicit_manage": true,
+    "it_role_derived_grants": 0,
+    "root_admin_business_denials": 0,
+    "enabled_modules": 5,
+    "d1_repair_required": false
+  },
+  "cloudflare_access_ci": {
+    "state": "AMBER_EXTERNAL_ACCESS",
+    "preview_protection": "proven_http_302_to_cloudflare_access",
+    "access_tenant": "devilndove-site-pages.cloudflareaccess.com",
+    "access_audience": "573c244509977f7ce7ec7e644f5ee5fd1e9bc18c9d07bce4a75ea6f9cc7b6464",
+    "access_inventory_read": "green",
+    "visible_service_tokens": 0,
+    "visible_standard_access_apps": 0,
+    "pages_project_api_with_current_token": "http_403_error_10000",
+    "ephemeral_service_token_write_probe": "http_403_error_1010",
+    "service_token_created": false,
+    "access_policy_mutated": false,
+    "github_access_secret_references_configured": false,
+    "required_external_action": "Grant the existing automation credential Access: Service Tokens Write or provision an equivalent least-privilege credential, then configure masked CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET references for GitHub Actions. Do not weaken Preview Access.",
+    "authenticated_runtime_semantics": "AMBER_EXTERNAL_ACCESS until the outer Access layer can be crossed; application-session and root-admin authority remain independently proven."
   },
   "external_acceptance": {
     "stripe": "pending_real_development_evidence",
     "paypal": "pending_real_sandbox_evidence",
     "social_oauth": "pending_controlled_development_evidence",
     "github_native_ruleset": "external_repository_setting_pending",
+    "cloudflare_access_ci": "blocked_missing_access_service_tokens_write_authority",
     "launch_state_until_proven": "HOLD_EXTERNAL_ACCEPTANCE"
   },
   "ancestry_policy": {
@@ -49,7 +79,19 @@
   },
   "secret_policy": {
     "secret_values_emitted": false,
-    "only_presence_and_sanitized_type_are_reported": true
+    "only_presence_and_sanitized_type_are_reported": true,
+    "service_token_probe_credentials_created": false
+  },
+  "development_evidence": {
+    "it_admin_candidate_sha": "f1eeeecb55d2e0e5a49082580ed03c8b21a3fb43",
+    "system_gate_run": 33574451221,
+    "system_gate_state": "success",
+    "runtime_request_sha": "24ccebbfa7843ea7813c01cc4f1d87969bfad761",
+    "runtime_acceptance_run": 33574611686,
+    "runtime_prerequisites": "green",
+    "runtime_http_state": "AMBER_EXTERNAL_ACCESS",
+    "access_preflight_run": 33575394144,
+    "access_preflight_state": "success"
   },
   "base_development_sha": "b70c3fa372e0c99ae9a1bf4195130c0f7cb14439",
   "production_sha_at_build_start": "d5009d9c622bdf84232b3aa7bd24a1c3d61581b2",
