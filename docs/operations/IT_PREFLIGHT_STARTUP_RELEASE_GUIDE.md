@@ -1,77 +1,78 @@
-# I.T. Preflight / Startup Release Guide — Current Authority
+# I.T. Preflight / Startup Release Guide — Release 467 Current Authority
 
-This is the short operator guide for the canonical Devil n Dove Development environment. The source-of-truth environment and release details live in `development-release.json`, `release463-environment.json`, and `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`.
+This guide defines the safe restart sequence for the canonical Devil n Dove Development environment.
+
+`current-development-authority.json` is the current Release 467 machine-readable restart pointer. `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY** for old gates and must not be used as the current release selector.
 
 ## Startup sequence
 
-1. Read `development-release.json` and confirm the intended source branch is `dev`.
-2. Read `docs/operations/DEVELOPMENT_CLOUDFLARE_CONNECTION_AUTHORITY.md`.
-3. Confirm the one canonical Pages project is `devilndove-site`; Development is the `dev` **Preview** environment and Production is the `main` **Production** environment.
-4. Confirm tracked `wrangler.toml` is Development-safe and has no `account_id`.
-5. Resolve the exact current `dev` SHA.
-6. Run current source/System gates.
-7. Check D1/R2 identity/readiness **read-only** before deciding whether a migration is needed.
-8. Never replay historical migrations merely because a new chat, workstation or deployment starts.
-9. Future schema changes must be added only to `migrations/canonical` and proven on Development first.
-10. Apply only pending canonical migrations through `scripts/d1_migrate.py` / the guarded Development workflow.
-11. Run a separate read-only remote verifier afterward.
-12. Verify Application Modules returns account profiles and that the active root administrator has effective `manage` access to all five modules. I.T. remains an explicit-user grant.
-13. Use the I.T. Control Tower for readiness/preflight status; unresolved external, transient-session, or provider evidence remains amber/HOLD rather than being inferred green.
-14. Keep provider execution/publication closed unless a separate controlled acceptance step explicitly opens it.
-15. Promote only an exact System-Gate-green Development tree to `main`; never overwrite Production business data wholesale from Development.
+1. Read `current-development-authority.json` and confirm the current Release 467 build, exact green predecessor and safety boundaries.
+2. Read `AI_HANDOFF.md` for the current restart point, authority separation and next bounded work.
+3. Read `release467-build8-authority-convergence.json` when Build 8 is active.
+4. Confirm the intended source branch is `dev` and resolve its exact current commit SHA.
+5. Confirm the canonical Pages project is `devilndove-site`; Development is the `dev` Preview environment and Production is the `main` Production environment.
+6. Confirm tracked `wrangler.toml` remains Development-safe and contains no `account_id`.
+7. Run current source/System gates before making a release claim.
+8. Check Development D1/R2 identity/readiness read-only before deciding whether a migration is required.
+9. Never replay historical migrations merely because a chat, workstation, deployment or source commit changed.
+10. Future schema changes must be added only to `migrations/canonical`, proven on Development first, and applied to Production only before dependent Production code when separately authorized.
+11. Apply only genuinely pending canonical migrations through the guarded migration tooling; run a separate read-only verifier afterward.
+12. Verify Application Modules returns account profiles and the root administrator retains effective `manage` access to all five modules. I.T. remains an explicit-user grant.
+13. Use the I.T. Control Tower for current readiness. External/provider/Access evidence remains amber/HOLD until independently proven.
+14. Keep provider execution/publication closed unless a separate controlled acceptance step explicitly opens a Development/test/sandbox lane.
+15. Promote only a separately reviewed exact System-Gate-green Development candidate through the Release 467 Production Promotion Readiness process; never overwrite Production business data from Development.
 
 ## Canonical Development connection
 
-- Cloudflare account ID pinned by tooling: `c0d5bc25df16ae5b7d47c985c4b7b787`
+- Source branch: `dev`
 - Pages project: `devilndove-site`
 - Pages environment: Preview
-- Source branch: `dev`
 - Canonical Preview alias: `https://dev.devilndove-site.pages.dev`
 - D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
 - Product R2: `devilndove-toolshed-images-dev`
 - CAIP private R2: `devilndove-caip-media-dev`
+- Canonical migration directory: `migrations/canonical`
+- Canonical migration stream at Build 8: exactly `0001`–`0004`
 - GitHub Actions Cloudflare credential reference: `CLOUDFLARE_API_TOKEN`
-- Local read-only Cloudflare helper: `python scripts/cloudflare_development_access.py --auth-only`
-- Authenticated runtime harness: `python scripts/development_runtime_acceptance.py --base-url https://dev.devilndove-site.pages.dev`
-- Optional Cloudflare Access service-token references used by CI: `CF_ACCESS_CLIENT_ID` + `CF_ACCESS_CLIENT_SECRET`
+- Optional outer Access service-token references: `CF_ACCESS_CLIENT_ID` + `CF_ACCESS_CLIENT_SECRET`
 
-Credential values must never be printed, committed or pasted into release evidence.
+Credential **values** must never be printed, committed, serialized into evidence or pasted into release documents.
 
-## Current Cloudflare Access CI boundary
+## Current exact predecessor evidence
 
-The canonical Preview is intentionally protected by Cloudflare Access. Current Release 467 evidence proves anonymous requests to `dev.devilndove-site.pages.dev` redirect to the Pages-managed Access tenant `devilndove-site-pages.cloudflareaccess.com`. The Access audience is known and matched from signed redirect metadata; this is evidence only and is not used to bypass Access.
+Release 467 Build 7 is the Build 8 predecessor:
 
-The existing masked `CLOUDFLARE_API_TOKEN` can read Access service-token/application inventory, but the current account inventory exposes zero service tokens and zero standard Access applications. A bounded ephemeral service-token creation probe was refused with HTTP 403 / Cloudflare code 1010, so **no service token was created**. The same credential is also refused by the Pages project API with HTTP 403 / code 10000. No Access policy was modified.
+- merged Development commit: `5eef764a67466dc2989a4681c6a7cc782b9d4df9`
+- tree: `f7327733dc423982016829d717521ceab2029f35`
+- System Gate: `33591744817` — SUCCESS
+- Build 7 Proof: `33591744787` — SUCCESS
 
-Therefore the outer Access portion of authenticated HTTP acceptance is **AMBER_EXTERNAL_ACCESS**, not RED application failure and not GREEN runtime acceptance. Development D1 identity, module/profile authority, and root-administrator effective manage authority are independently proven.
+Build 8 must not rewrite those predecessor facts until Build 8 itself is merged and re-proven on an exact new `dev` SHA.
 
-To close this boundary, provision the automation path with the least privilege needed to create/use a Cloudflare Access service token (currently `Access: Service Tokens Write` for token creation) and configure the resulting values only as masked GitHub Actions secrets `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If the Pages-managed policy then requires an explicit Service Auth policy, that policy change must be separately reviewed and proven. **Do not disable or weaken Preview Access for testing.**
+## Current-vs-compatibility authority
 
-The canonical runtime workflow treats this known outer-Access condition as `AMBER_EXTERNAL_ACCESS`. Any unrelated runtime error, a partially configured service token, or configured service-token credentials that Access refuses remains a real workflow failure.
+The Release 467 restart chain is:
 
-## Transient admin-session boundary
+1. `current-development-authority.json`
+2. `AI_HANDOFF.md`
+3. current Release 467 build manifest
+4. current roadmap/sanity/operations authority
 
-Authenticated runtime acceptance never manufactures an application login session. It may use a preconfigured masked Development session credential, or it may resolve an already-existing unexpired admin session **read-only** from Development D1.
+`development-release.json` intentionally stays on its inherited Release 466 compatibility contract because still-valid Release 466 gates assert its historical convergence fields. Do not “modernize” that file independently. Migrate the consuming regression gates first, then retire historical compatibility fields deliberately.
 
-If no unexpired admin session exists, the workflow records `AMBER_NO_ACTIVE_SESSION` and does not attempt authenticated HTTP. This is a transient readiness condition, not evidence that the admin account is broken. The root administrator's account/module authority is proved separately from the session table and remains RED only if those authority invariants actually fail.
+The Build 8 gate fails if stale compatibility evidence is promoted back into current authority or if current restart files disagree.
 
-When an admin session is later available, the same workflow can continue to authenticated HTTP. If Pages Access is then the only blocker, the result becomes `AMBER_EXTERNAL_ACCESS`; if both session and Access service-token paths are available and the protected application checks pass, authenticated runtime may become GREEN. The workflow never creates a session, weakens Access, or changes D1/R2 to force a green result.
+## Cloudflare Access boundary
 
-## Canonical Production boundary
+The canonical Preview remains protected by Cloudflare Access. Release 467 Build 6 owns the separate Development Access service-token acceptance harness. A browser/application-admin success is not CI Access success, and outer Access success is not application-admin authentication.
 
-- Pages project: `devilndove-site`
-- Pages environment: Production
-- Source branch: `main`
-- Live domain: `https://devilndove.com`
-- D1: `devilndove-prod-r462` / `f34a741b-0000-45b0-9a96-6be08754d563`
-- Product R2: `devilndove-toolshed-images`
-- CAIP private R2: `devilndove-caip-media`
+The service-token acceptance lane remains `HOLD_EXTERNAL` until its deliberate Development-only workflow succeeds with correctly provisioned masked `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` references.
 
-Production transactional/business data are Production-owned. Development migrations are proven first, then the same pending canonical migration is applied to Production before dependent code. Development data are never copied wholesale over Production.
+Do not disable, bypass or weaken Preview Access to make smoke/runtime tests green. Build 8 performs no Access policy/token mutation.
 
-## Module and root-admin recovery authority
+## Root administrator / module recovery authority
 
-The canonical runtime modules are:
+The canonical modules are:
 
 - Storefront
 - Creators
@@ -79,40 +80,52 @@ The canonical runtime modules are:
 - Financials
 - I.T.
 
-The `admin` role must retain `manage` defaults for Storefront, Creators, Socials and Financials. I.T. intentionally remains explicit-user-only. The active root administrator must have an explicit `it-platform/manage` grant so the recovery/control surface cannot become inaccessible.
+The `admin` role retains `manage` defaults for Storefront, Creators, Socials and Financials. I.T. intentionally remains explicit-user-only. The active root administrator must retain an explicit `it-platform/manage` grant.
 
-Use `python scripts/release467_root_admin_access.py --verify-only` for read-only Development verification. A deliberate `--repair` may restore only the root administrator's missing I.T. manage grant; it cannot repair broader permission drift and has no Production target capability.
+Use `python scripts/release467_root_admin_access.py --verify-only` for read-only Development verification. A separately deliberate repair may restore only the bounded root-administrator I.T. grant; it is not authority for broad permission rewrites or Production mutation.
 
-## Authenticated Development runtime acceptance
+## External commercial/provider boundary
 
-The canonical workflow is `.github/workflows/development-runtime-acceptance.yml`. It is GET-only over HTTP and uses only an existing unexpired Development admin session when one is available.
+Release 467 Build 7 owns the current external-commercial visibility bridge. Build 8 does not execute providers.
 
-Cloudflare Access is never weakened for testing. If Access protects the Preview, CI may pass an already-configured service token through `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If those references are absent and the only refusal is the proven outer Access boundary, the workflow records sanitized `AMBER_EXTERNAL_ACCESS` evidence. If no unexpired admin application session is available before that HTTP phase, it records sanitized `AMBER_NO_ACTIVE_SESSION` evidence instead. Neither state is called runtime GREEN. Unexpected runtime failures still fail the job.
+Keep these separate and truthful:
 
-Runtime acceptance verifies, among other carried-forward contracts:
+- Stripe Development — `HOLD_EXTERNAL` until deliberate test-mode acceptance evidence exists;
+- PayPal sandbox — `HOLD_EXTERNAL` until deliberate sandbox acceptance evidence exists;
+- Social/OAuth — `HOLD_EXTERNAL` until controlled intended-provider/account lifecycle evidence exists; publication remains closed;
+- CAIP private media — use fresh current Build 7 runtime evidence rather than stale historical wording;
+- native GitHub rulesets — separate external repository-setting authority.
 
-- Application Modules returns all five modules and account profiles when authenticated HTTP is available;
-- the root administrator has full effective manage authority through independent read-only D1 proof;
-- the I.T. Control Tower is reachable and reports Development readiness honestly when authenticated HTTP is available;
-- inventory base-unit authority remains intact;
-- product-media quality thresholds remain intact;
-- CAIP provider execution/publication/raw-delete paths remain closed.
+Do not create provider activity merely to turn an I.T. card green.
+
+## Canonical Production boundary
+
+- Source branch: `main`
+- Pages project: `devilndove-site`
+- Pages environment: Production
+- Live domain: `https://devilndove.com`
+- Production D1/R2 remain Production-owned authorities.
+
+The last source-head verification before Build 8 found `main` at `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. This is not sufficient to assert the exact deployed Production release. Verify Production deployment independently before any promotion decision.
+
+Build 8 does not update `main`, contact Production, mutate Production D1/R2/business data or authorize deployment.
 
 ## Stop conditions
 
-Stop mutation or promotion when:
+Stop mutation/promotion when:
 
-- the exact `dev` SHA is unknown or not System-Gate green;
-- the Pages project is anything other than `devilndove-site`;
-- the environment is not the intended `dev` Preview;
-- D1 identity does not exactly match both expected Development name and ID;
-- an inherited Cloudflare credential targets/authorizes the wrong account;
+- `current-development-authority.json` is missing, invalid or disagrees with `AI_HANDOFF.md`;
+- the exact `dev` SHA is unknown or not proven by the required gates;
+- the Pages project/environment is not the intended `devilndove-site` Preview;
+- D1 identity does not match `devilndove-dev` and its exact ID;
 - `account_id` has been restored to tracked `wrangler.toml`;
 - current migration state is uncertain;
-- a historical migration is being proposed only because the chat/workstation changed;
-- Application Modules source/runtime contract cannot load account profiles;
-- the root administrator lacks full effective manage access;
+- a historical migration is proposed only because work resumed;
+- stale Release 466 documentation is being used to override current Release 467 authority;
+- Application Modules cannot load profiles or root-admin authority is broken;
 - request-time code attempts schema DDL;
-- provider execution/publication becomes enabled outside controlled acceptance;
-- a command could touch Production unintentionally;
-- Production business data would be replaced wholesale from Development.
+- provider execution/publication is enabled outside separately controlled acceptance;
+- Cloudflare Access would need to be weakened for a test;
+- a command could touch `main` or Production unintentionally;
+- Production business data would be replaced wholesale from Development;
+- a secret value would be displayed, logged or committed.
