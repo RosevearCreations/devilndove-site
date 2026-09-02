@@ -1,0 +1,72 @@
+{
+  "release": 467,
+  "build": 21,
+  "title": "Release State, Branch & CI Hygiene Convergence",
+  "role": "REPOSITORY_GOVERNANCE_CONVERGENCE",
+  "source_branch": "dev",
+  "feature_branch": "release467-build21-release-state-branch-ci-hygiene",
+  "source_base_sha": "7b38af543400a81593a8dc1b7caa4ad9a43033ea",
+  "source_base_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
+  "predecessor": {
+    "build": 20,
+    "title": "Workshop Tool & Equipment Readiness Command Center",
+    "merged_dev_sha": "7b38af543400a81593a8dc1b7caa4ad9a43033ea",
+    "merged_dev_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
+    "system_gate_run": 33688666947,
+    "build20_proof_run": 33688733720,
+    "production_main_sha": "055cbc973c667b35a209c7ea207779089f6fed3a",
+    "production_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
+    "production_pages_deploy_run": 33688892602
+  },
+  "branch_hygiene": {
+    "persistent_branches": ["main", "dev"],
+    "cleanup_workflow": ".github/workflows/repository-branch-hygiene.yml",
+    "cleanup_trigger": "push_to_dev_or_manual",
+    "delete_merged_non_core_branches": true,
+    "archive_then_delete_unmerged_legacy": [
+      {"branch": "backup-main-before-dev-replacement-20260830", "sha": "985ecfad41207f8bf46ad99e1346e6e69ece5a69"},
+      {"branch": "release467-build7-handoff-convergence", "sha": "1486777699808c1252f585b7024e2fcfd6296b26"}
+    ],
+    "archive_tag_prefix": "archive/branch-hygiene/",
+    "unknown_unmerged_action": "RETAIN_WITH_WARNING",
+    "core_branch_deletion_authorized": false
+  },
+  "workflow_hygiene": {
+    "retained_proofs_dispatch_only": [
+      ".github/workflows/release467-build16-proof.yml",
+      ".github/workflows/release467-build17-proof.yml",
+      ".github/workflows/release467-build18-proof.yml",
+      ".github/workflows/release467-build19-proof.yml",
+      ".github/workflows/release467-build20-proof.yml"
+    ],
+    "current_automatic_proofs": [
+      ".github/workflows/system-gate.yml",
+      ".github/workflows/release467-build21-proof.yml"
+    ],
+    "branch_cleanup_automatic": [".github/workflows/repository-branch-hygiene.yml"],
+    "historical_source_and_actions_evidence_preserved": true
+  },
+  "authority_convergence": {
+    "restart_pointer": "current-development-authority.json",
+    "handoff": "AI_HANDOFF.md",
+    "roadmap": "PROJECT_STATUS_AND_ROADMAP.md",
+    "sanity": "SANITY_HEALTH_CHECK.md",
+    "markdown_index": "MARKDOWN_INDEX.md",
+    "build20_runtime_authority_preserved": true,
+    "build20_production_green_recorded": true
+  },
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "new_d1_mutation_authorized": false,
+  "d1_mutation_authorized": false,
+  "new_r2_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "runtime_application_change_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false,
+  "repository_non_core_ref_mutation_authorized": true
+}
