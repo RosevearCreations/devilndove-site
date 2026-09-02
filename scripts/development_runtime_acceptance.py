@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Current authenticated GET-only Development runtime acceptance.
 
-Targets only the canonical `dev` Preview alias or an exact hashed Preview deployment.
+Only the canonical `dev` Preview alias or an exact hashed Preview is accepted.
 Application-session credentials and optional Cloudflare Access service-token credentials
-are read from environment variables and are never emitted.
+come from environment variables and are never emitted.
 """
 from __future__ import annotations
 
@@ -83,28 +83,31 @@ def request_raw(base_url: str, path: str, cookie: str | None, timeout: float = 2
     request = Request(urljoin(base_url + '/', path.lstrip('/')), headers=headers, method='GET')
     try:
         with urlopen(request, timeout=timeout) as response:
-            status = int(getattr(response, 'status', 200))
-            raw = response.read(600000).decode('utf-8', errors='replace')
-            content_type = str(response.headers.get('content-type') or '').lower()
-            final_url = str(response.geturl() or '')
+            return (
+                int(getattr(response, 'status', 200)),
+                response.read(600000).decode('utf-8', errors='replace'),
+                str(response.headers.get('content-type') or '').lower(),
+                str(response.geturl() or ''),
+            )
     except HTTPError as error:
-        status = int(error.code)
-        raw = error.read(600000).decode('utf-8', errors='replace')
-        content_type = str(error.headers.get('content-type') or '').lower()
-        final_url = str(error.geturl() or '')
+        return (
+            int(error.code),
+            error.read(600000).decode('utf-8', errors='replace'),
+            str(error.headers.get('content-type') or '').lower(),
+            str(error.geturl() or ''),
+        )
     except URLError as error:
         raise AcceptanceError(f'GET {path} failed: {error.reason}') from error
-    return status, raw, content_type, final_url
 
 
 def looks_like_cloudflare_access(raw: str, content_type: str, final_url: str) -> bool:
-    text = str(raw or '').lower()
+    body = str(raw or '').lower()
     final = str(final_url or '').lower()
     return (
-        'cloudflare access' in text
-        or 'cdn-cgi/access' in text
+        'cloudflare access' in body
+        or 'cdn-cgi/access' in body
         or '/cdn-cgi/access/' in final
-        or ('text/html' in content_type and ('access' in text and 'cloudflare' in text))
+        or ('text/html' in content_type and 'cloudflare' in body and 'access' in body)
     )
 
 
@@ -130,13 +133,14 @@ def record(checks: list[dict], name: str, passed: bool, detail: str) -> None:
 def invariant(name: str, payload: dict, app_release: int) -> tuple[bool, str]:
     if payload.get('ok') is not True:
         return False, 'ok is not true'
+
     if name == 'modules':
-        rows = payload.get('modules', []) if isinstance(payload.get('modules'), list) else []
+        modules = payload.get('modules', []) if isinstance(payload.get('modules'), list) else []
         profiles = payload.get('profiles', []) if isinstance(payload.get('profiles'), list) else []
-        keys = sorted(str(x.get('module_key') or '').lower() for x in rows if isinstance(x, dict) and x.get('module_key'))
+        keys = sorted(str(row.get('module_key') or '').lower() for row in modules if isinstance(row, dict) and row.get('module_key'))
         diagnostics = payload.get('diagnostics', {}) if isinstance(payload.get('diagnostics'), dict) else {}
-        root_profiles = [p for p in profiles if isinstance(p, dict) and p.get('is_root_admin') is True]
-        root_full = bool(root_profiles and root_profiles[0].get('full_manage') is True)
+        roots = [row for row in profiles if isinstance(row, dict) and row.get('is_root_admin') is True]
+        root_full = bool(roots and roots[0].get('full_manage') is True)
         passed = (
             int(payload.get('release') or 0) == app_release
             and payload.get('schema_ready') is True
@@ -147,30 +151,57 @@ def invariant(name: str, payload: dict, app_release: int) -> tuple[bool, str]:
             and root_full
             and diagnostics.get('healthy') is True
         )
-        return passed, f"release={payload.get('release')!r}; schema_ready={payload.get('schema_ready')!r}; modules={keys}; profiles={len(profiles)}; root_admin_full_manage={diagnostics.get('root_admin_full_manage')!r}; healthy={diagnostics.get('healthy')!r}"
+        return passed, f"release={payload.get('release')!r}; modules={keys}; profiles={len(profiles)}; root_admin_full_manage={diagnostics.get('root_admin_full_manage')!r}; healthy={diagnostics.get('healthy')!r}"
+
     if name == 'it_control_tower':
-        diagnostics = payload.get('diagnostics', {}) if isinstance(payload.get('diagnostics'), dict) else {}
-        state = str(payload.get('overall_state') or payload.get('state') or diagnostics.get('overall_state') or '').upper()
-        passed = int(payload.get('release') or 0) == 467 and bool(payload.get('sections') or payload.get('checks') or diagnostics) and state not in {'RED', 'FAIL'}
-        return passed, f"release={payload.get('release')!r}; state={state or 'unspecified'}; has_readiness_payload={bool(payload.get('sections') or payload.get('checks') or diagnostics)}"
+        readiness = payload.get('readiness', {}) if isinstance(payload.get('readiness'), dict) else {}
+        subsystems = payload.get('subsystems', {}) if isinstance(payload.get('subsystems'), dict) else {}
+        database = subsystems.get('database', {}) if isinstance(subsystems.get('database'), dict) else {}
+        passed = (
+            int(payload.get('release') or 0) == 467
+            and int(payload.get('build') or 0) == 1
+            and payload.get('environment') == 'development'
+            and payload.get('request_time_schema_mutation') is False
+            and payload.get('production_mutation') is False
+            and payload.get('production_provider_execution') is False
+            and database.get('state') == 'green'
+            and str(readiness.get('launch_state') or '') in {'HOLD_EXTERNAL_ACCEPTANCE', 'READY_FOR_SEPARATE_PROMOTION_REVIEW'}
+        )
+        return passed, f"release={payload.get('release')!r}; build={payload.get('build')!r}; database={database.get('state')!r}; overall={readiness.get('overall')!r}; launch_state={readiness.get('launch_state')!r}"
+
     if name == 'inventory_base_units':
         rows = []
         for key in ('items', 'results'):
             if isinstance(payload.get(key), list):
-                rows.extend(x for x in payload[key] if isinstance(x, dict) and int(x.get('site_item_inventory_id') or 0) > 0)
-        row_authority_ok = all(x.get('quantity_authority') == 'base' for x in rows)
+                rows.extend(row for row in payload[key] if isinstance(row, dict) and int(row.get('site_item_inventory_id') or 0) > 0)
+        row_authority_ok = all(row.get('quantity_authority') == 'base' for row in rows)
         passed = payload.get('quantity_authority') == 'base' and row_authority_ok
         return passed, f"quantity_authority={payload.get('quantity_authority')!r}; inventory_rows={len(rows)}; all_rows_base_authority={row_authority_ok}"
+
     if name == 'product_media_quality':
         thresholds = payload.get('primary_image_thresholds', {}) if isinstance(payload.get('primary_image_thresholds'), dict) else {}
         roles = payload.get('roles', []) if isinstance(payload.get('roles'), list) else []
-        role_keys = {str(x.get('role_key') or '') for x in roles if isinstance(x, dict)}
-        passed = int(thresholds.get('min_width_px') or 0) == 1200 and int(thresholds.get('min_height_px') or 0) == 1200 and int(thresholds.get('min_alt_characters') or 0) == 12 and int(thresholds.get('min_quality_score') or 0) == 70 and 'main' in role_keys
-        return passed, f"thresholds={thresholds}; roles={sorted(role_keys)}"
+        role_keys = {str(row.get('role_key') or '') for row in roles if isinstance(row, dict)}
+        passed = (
+            int(thresholds.get('min_width_px') or 0) == 1200
+            and int(thresholds.get('min_height_px') or 0) == 1200
+            and int(thresholds.get('min_alt_characters') or 0) == 12
+            and int(thresholds.get('min_quality_score') or 0) == 70
+            and 'main' in role_keys
+        )
+        return passed, f'thresholds={thresholds}; roles={sorted(role_keys)}'
+
     if name == 'caip_pipeline':
-        passed = int(payload.get('release') or 0) == CAIP_CONTRACT_RELEASE and payload.get('schema_ready') is True and payload.get('provider_execution_active') is False and payload.get('publication_active') is False and payload.get('r2_delete_active') is False
         projects = payload.get('projects', []) if isinstance(payload.get('projects'), list) else []
+        passed = (
+            int(payload.get('release') or 0) == CAIP_CONTRACT_RELEASE
+            and payload.get('schema_ready') is True
+            and payload.get('provider_execution_active') is False
+            and payload.get('publication_active') is False
+            and payload.get('r2_delete_active') is False
+        )
         return passed, f"contract_release={payload.get('release')!r}; schema_ready={payload.get('schema_ready')!r}; projects={len(projects)}; execution={payload.get('provider_execution_active')!r}; publication={payload.get('publication_active')!r}; r2_delete={payload.get('r2_delete_active')!r}"
+
     return True, 'contract ok'
 
 
@@ -180,26 +211,26 @@ def run_anonymous_check(base_url: str, timeout: float) -> dict:
         status, raw, content_type, final_url = request_raw(base_url, path, None, timeout)
         access_protected = looks_like_cloudflare_access(raw, content_type, final_url)
         refused = status in (401, 403) or access_protected
-        detail = f'HTTP {status}; access_protected={access_protected}; expected application 401/403 or Cloudflare Access refusal'
-        record(checks, f'anonymous_{name}_refused', refused, detail)
+        record(checks, f'anonymous_{name}_refused', refused, f'HTTP {status}; access_protected={access_protected}; expected application 401/403 or Cloudflare Access refusal')
     return {
         'mode': 'anonymous-protected-route-check',
         'release': current_application_release(),
         'target': base_url,
         'checks': checks,
-        'overall': 'PASS' if all(x['status'] == 'PASS' for x in checks) else 'FAIL',
+        'overall': 'PASS' if all(row['status'] == 'PASS' for row in checks) else 'FAIL',
     }
 
 
 def run_authenticated(base_url: str, cookie: str, timeout: float) -> dict:
     app_release = current_application_release()
-    checks = []
-    payloads = {}
+    checks: list[dict] = []
+    payloads: dict[str, dict] = {}
     for name, path in PROTECTED_ENDPOINTS.items():
         status, payload = get_json(base_url, path, cookie, timeout)
         payloads[name] = payload
-        passed, detail = invariant(name, payload) if False else invariant(name, payload, app_release)
-        if status != 200:
+        if status == 200:
+            passed, detail = invariant(name, payload, app_release)
+        else:
             passed, detail = False, f'HTTP {status}; error={payload.get("error")!r}'
         record(checks, name, status == 200 and passed, f'HTTP {status}; {detail}')
 
@@ -212,12 +243,20 @@ def run_authenticated(base_url: str, cookie: str, timeout: float) -> dict:
                 break
     if project_id:
         status, handoff = get_json(base_url, f'/api/admin/caip-content-handoff?creative_project_id={project_id}', cookie, timeout)
-        passed = status == 200 and handoff.get('ok') is True and int(handoff.get('release') or 0) == CAIP_CONTRACT_RELEASE and handoff.get('schema_ready') is True and handoff.get('provider_execution_active') is False and handoff.get('publication_active') is False and handoff.get('source_media_unchanged') is True
-        record(checks, 'caip_reviewed_handoff', passed, f"HTTP {status}; project={project_id}; contract_release={handoff.get('release')!r}; schema_ready={handoff.get('schema_ready')!r}; execution={handoff.get('provider_execution_active')!r}; publication={handoff.get('publication_active')!r}; source_media_unchanged={handoff.get('source_media_unchanged')!r}")
+        passed = (
+            status == 200
+            and handoff.get('ok') is True
+            and int(handoff.get('release') or 0) == CAIP_CONTRACT_RELEASE
+            and handoff.get('schema_ready') is True
+            and handoff.get('provider_execution_active') is False
+            and handoff.get('publication_active') is False
+            and handoff.get('source_media_unchanged') is True
+        )
+        record(checks, 'caip_reviewed_handoff', passed, f"HTTP {status}; project={project_id}; contract_release={handoff.get('release')!r}; source_media_unchanged={handoff.get('source_media_unchanged')!r}")
     else:
-        record(checks, 'caip_reviewed_handoff_no_project_fixture', True, 'No CAIP project exists to select; authenticated pipeline schema/safety contract passed and no fixture was fabricated.')
+        record(checks, 'caip_reviewed_handoff_no_project_fixture', True, 'No CAIP project exists to select; no fixture was fabricated.')
 
-    core = all(x['status'] == 'PASS' for x in checks)
+    core = all(row['status'] == 'PASS' for row in checks)
     return {
         'authority': 'development-runtime-acceptance',
         'release': app_release,
@@ -264,7 +303,7 @@ def self_check() -> int:
     record(checks, 'access_service_token_environment_only', ACCESS_ID_ENV == 'CF_ACCESS_CLIENT_ID' and ACCESS_SECRET_ENV == 'CF_ACCESS_CLIENT_SECRET', f'{ACCESS_ID_ENV}+{ACCESS_SECRET_ENV}')
     record(checks, 'current_it_and_module_surfaces_declared', {'modules', 'it_control_tower'}.issubset(PROTECTED_ENDPOINTS), str(PROTECTED_ENDPOINTS))
     record(checks, 'get_only_manifest', all(path.startswith('/api/') for path in PROTECTED_ENDPOINTS.values()), f'{len(PROTECTED_ENDPOINTS)} protected GET surfaces')
-    overall = all(x['status'] == 'PASS' for x in checks)
+    overall = all(row['status'] == 'PASS' for row in checks)
     print('DEVELOPMENT RUNTIME ACCEPTANCE SELF-CHECK')
     for row in checks:
         print(f"{row['status']}: {row['check']} — {row['detail']}")
