@@ -2,6 +2,7 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit
 
 const RELEASE = 467;
 const BUILD = 1;
+const EXPECTED_MODULE_KEYS = Object.freeze(['storefront', 'creators', 'socials', 'financials', 'it-platform']);
 const EXPECTED = Object.freeze({
   pages_project: 'devilndove-site',
   development_d1_name: 'devilndove-dev',
@@ -64,6 +65,147 @@ function scoreSubsystems(subsystems) {
   const amber = values.filter((item) => item.state === 'amber').length;
   const overall = red ? 'red' : amber ? 'amber' : 'green';
   return { score, overall, green: values.length - red - amber, amber, red, subsystem_count: values.length };
+}
+
+function manages(row) {
+  return Number(row?.is_allowed || 0) === 1 && text(row?.access_level).toLowerCase() === 'manage';
+}
+
+async function adminModuleAuthority(db) {
+  if (!db) {
+    return {
+      state: 'red',
+      metrics: {
+        root_admin_user_id: null,
+        active_profile_count: 0,
+        active_admin_count: 0,
+        enabled_modules: 0,
+        root_admin_full_manage: false,
+        root_admin_missing_manage_modules: EXPECTED_MODULE_KEYS,
+        root_it_explicit_manage: false,
+      },
+      findings: [state(
+        'red',
+        'admin_authority_db_unavailable',
+        'Administrator authority unavailable',
+        'Development D1 is unavailable, so administrator and module authority cannot be proven.',
+        'Restore Development D1 before changing access.',
+        '/admin/application-modules/',
+      )],
+    };
+  }
+
+  const [rootAdmin, profileCounts, moduleRows, roleRows] = await Promise.all([
+    safeFirst(db, `
+      SELECT user_id
+      FROM users
+      WHERE is_active=1 AND lower(trim(role))='admin'
+      ORDER BY user_id ASC
+      LIMIT 1
+    `),
+    safeFirst(db, `
+      SELECT
+        SUM(CASE WHEN is_active=1 THEN 1 ELSE 0 END) AS active_profiles,
+        SUM(CASE WHEN is_active=1 AND lower(trim(role))='admin' THEN 1 ELSE 0 END) AS active_admins
+      FROM users
+    `),
+    safeAll(db, 'SELECT module_key,is_enabled FROM app_modules ORDER BY module_key ASC'),
+    safeAll(db, `
+      SELECT module_key,is_allowed,access_level
+      FROM app_module_role_access
+      WHERE lower(trim(role_code))='admin'
+      ORDER BY module_key ASC
+    `),
+  ]);
+
+  const rootAdminId = integer(rootAdmin?.user_id);
+  const explicitRows = rootAdminId
+    ? await safeAll(db, `
+        SELECT module_key,is_allowed,access_level
+        FROM app_module_user_access
+        WHERE user_id=?
+        ORDER BY module_key ASC
+      `, [rootAdminId])
+    : [];
+
+  const modules = new Map(moduleRows.map((row) => [text(row?.module_key).toLowerCase(), row]));
+  const roleAccess = new Map(roleRows.map((row) => [text(row?.module_key).toLowerCase(), row]));
+  const explicitAccess = new Map(explicitRows.map((row) => [text(row?.module_key).toLowerCase(), row]));
+
+  const missing = [];
+  for (const moduleKey of EXPECTED_MODULE_KEYS) {
+    const module = modules.get(moduleKey);
+    if (Number(module?.is_enabled || 0) !== 1) {
+      missing.push(moduleKey);
+      continue;
+    }
+    const explicit = explicitAccess.get(moduleKey);
+    if (explicit) {
+      if (!manages(explicit)) missing.push(moduleKey);
+      continue;
+    }
+    if (moduleKey === 'it-platform' || !manages(roleAccess.get(moduleKey))) missing.push(moduleKey);
+  }
+
+  const enabledModules = EXPECTED_MODULE_KEYS.filter((moduleKey) => Number(modules.get(moduleKey)?.is_enabled || 0) === 1).length;
+  const rootItExplicitManage = manages(explicitAccess.get('it-platform'));
+  const rootAdminFullManage = Boolean(rootAdminId) && enabledModules === EXPECTED.application_modules && missing.length === 0;
+  const metrics = {
+    root_admin_user_id: rootAdminId || null,
+    active_profile_count: integer(profileCounts?.active_profiles),
+    active_admin_count: integer(profileCounts?.active_admins),
+    enabled_modules: enabledModules,
+    root_admin_full_manage: rootAdminFullManage,
+    root_admin_missing_manage_modules: missing,
+    root_it_explicit_manage: rootItExplicitManage,
+  };
+
+  const findings = [];
+  if (!rootAdminId) {
+    findings.push(state(
+      'red',
+      'root_admin_missing',
+      'Active root administrator missing',
+      'No active administrator profile can be selected as the root recovery administrator.',
+      'Restore an active administrator profile before continuing.',
+      '/admin/application-modules/',
+    ));
+  } else if (!rootAdminFullManage) {
+    findings.push(state(
+      'red',
+      'root_admin_module_authority_drift',
+      'Root administrator module authority drift',
+      `Root administrator ${rootAdminId} is missing effective manage authority for: ${missing.join(', ') || 'unknown'}.`,
+      'Open Application Modules and restore full manage authority. I.T. must remain an explicit user manage grant.',
+      '/admin/application-modules/',
+    ));
+  } else {
+    findings.push(state(
+      'green',
+      'root_admin_full_manage',
+      'Root administrator full module authority',
+      `Root administrator ${rootAdminId} has effective manage authority across all ${EXPECTED.application_modules} enabled modules; I.T. is an explicit user manage grant.`,
+      'No action required.',
+      '/admin/application-modules/',
+    ));
+  }
+
+  if (metrics.active_profile_count <= 0) {
+    findings.push(state(
+      'red',
+      'admin_profiles_missing',
+      'Account profiles unavailable',
+      'No active account profiles were returned from the canonical users authority.',
+      'Inspect Application Modules and the canonical users authority before continuing.',
+      '/admin/application-modules/',
+    ));
+  }
+
+  return {
+    state: findings.some((item) => item.state === 'red') ? 'red' : 'green',
+    metrics,
+    findings,
+  };
 }
 
 async function databaseAuthority(db) {
@@ -157,6 +299,7 @@ export async function onRequestGet({ request, env }) {
   if (!admin) return json({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(env);
   const database = await databaseAuthority(db);
+  const adminAuthority = await adminModuleAuthority(db);
 
   const secretReferences = SECRET_KEYS.map((key) => secretDescriptor(env, key));
   const secretReady = secretReferences.every((row) => row.present);
@@ -198,7 +341,15 @@ export async function onRequestGet({ request, env }) {
       : state('red', 'provider_configuration_drift', 'Provider configuration incomplete', 'Required provider references or PayPal sandbox boundary are incomplete.', 'Repair Preview configuration before provider acceptance.', '/admin/it-integrations/')],
   };
 
-  const subsystems = { database, storage, configuration, provider_configuration: providerConfiguration, external_acceptance: external, deployment_ancestry: ancestry };
+  const subsystems = {
+    database,
+    admin_authority: adminAuthority,
+    storage,
+    configuration,
+    provider_configuration: providerConfiguration,
+    external_acceptance: external,
+    deployment_ancestry: ancestry,
+  };
   const readiness = scoreSubsystems(subsystems);
   const launchState = readiness.overall === 'green' && external.accepted ? 'READY_FOR_SEPARATE_PROMOTION_REVIEW' : 'HOLD_EXTERNAL_ACCEPTANCE';
 
@@ -223,7 +374,7 @@ export async function onRequestGet({ request, env }) {
       secret_references: secretReferences,
       secret_values_emitted: false,
     },
-    drift_policy: 'Runtime binding presence is never promoted to exact control-plane identity. Exact D1/R2 names, Pages project and deployed SHA remain canonical System Gate/control-plane evidence.',
+    drift_policy: 'Runtime binding presence is never promoted to exact control-plane identity. Exact D1/R2 names, Pages project and deployed SHA remain canonical System Gate/control-plane evidence. Root-administrator module authority is read directly from canonical users/module access tables and is never repaired by this endpoint.',
     generated_at: new Date().toISOString(),
   });
 }
