@@ -1,0 +1,199 @@
+name: Development Runtime Acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: "Exact reviewed dev SHA"
+        required: true
+        type: string
+  push:
+    branches: [dev]
+    paths:
+      - 'data/development-runtime-acceptance-request.json'
+
+permissions: {contents: read}
+
+jobs:
+  runtime-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      DND_DEV_BASE_URL: https://dev.devilndove-site.pages.dev
+      DND_DEV_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Resolve exact runtime request
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = workflow_dispatch ]; then
+            EXPECTED='${{ inputs.expected_sha }}'
+          else
+            test "$(git diff --name-only HEAD^ HEAD)" = 'data/development-runtime-acceptance-request.json' || { echo 'STOP: runtime request push changed more than the dedicated request file.'; exit 1; }
+            EXPECTED="$(python - <<'PY'
+          import json,subprocess
+          release=json.load(open('development-release.json',encoding='utf-8'))
+          request=json.load(open('data/development-runtime-acceptance-request.json',encoding='utf-8'))
+          parent=subprocess.check_output(['git','rev-parse','HEAD^'],text=True).strip()
+          assert int(request.get('authority_release') or 0)>=467,request
+          assert int(request.get('application_release') or 0)==int(release.get('release') or 0),(request,release.get('release'))
+          assert str(request.get('expected_parent_sha') or '')==parent,(request.get('expected_parent_sha'),parent)
+          assert request.get('production_mutation') is False
+          assert request.get('provider_execution') is False
+          assert request.get('d1_mutation') is False
+          assert request.get('r2_mutation') is False
+          print(subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+          PY
+          )"
+          fi
+          test "$(git rev-parse HEAD)" = "${EXPECTED}" || { echo 'STOP: dev moved from the exact runtime acceptance source.'; exit 1; }
+          echo "EXPECTED_SOURCE_SHA=${EXPECTED}" >> "$GITHUB_ENV"
+
+      - name: Re-run current I.T./Admin runtime source authority
+        run: |
+          python scripts/release467_it_admin_runtime_gate.py
+          python scripts/repository_forward_sanity.py
+
+      - name: Prove exact Development D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development Cloudflare D1 read credential is not configured.'; exit 1; }
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/development-runtime-d1-info.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/development-runtime-d1-info.json'))
+          def walk(value):
+              if isinstance(value,dict):
+                  yield value
+                  for child in value.values(): yield from walk(child)
+              elif isinstance(value,list):
+                  for child in value: yield from walk(child)
+          rows=list(walk(data))
+          ids={str(row.get('uuid') or row.get('id') or '') for row in rows}
+          names={str(row.get('name') or '') for row in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids,(ids,names)
+          assert os.environ['DEV_D1_DATABASE_NAME'] in names,(ids,names)
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+
+      - name: Prove root administrator module authority read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT (SELECT user_id FROM users WHERE is_active=1 AND lower(trim(role))='admin' ORDER BY user_id ASC LIMIT 1) AS root_user_id, (SELECT COUNT(*) FROM app_module_role_access WHERE role_code='admin' AND module_key IN ('storefront','creators','socials','financials') AND is_allowed=1 AND access_level='manage') AS business_admin_manage, (SELECT COUNT(*) FROM app_module_role_access WHERE module_key='it-platform' AND is_allowed<>0) AS it_role_grants, (SELECT COUNT(*) FROM app_module_user_access WHERE module_key='it-platform' AND user_id=(SELECT user_id FROM users WHERE is_active=1 AND lower(trim(role))='admin' ORDER BY user_id ASC LIMIT 1) AND is_allowed=1 AND access_level='manage') AS root_it_manage, (SELECT COUNT(*) FROM app_module_user_access WHERE user_id=(SELECT user_id FROM users WHERE is_active=1 AND lower(trim(role))='admin' ORDER BY user_id ASC LIMIT 1) AND module_key IN ('storefront','creators','socials','financials') AND is_allowed=0) AS root_business_denials, (SELECT COUNT(*) FROM app_modules WHERE is_enabled=1) AS enabled_modules;" > /tmp/development-root-admin-authority.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/development-root-admin-authority.json'))
+          keys=('root_user_id','business_admin_manage','it_role_grants','root_it_manage','root_business_denials','enabled_modules')
+          rows=[]
+          def walk(value):
+              if isinstance(value,dict):
+                  if all(key in value for key in keys): rows.append(value)
+                  for child in value.values(): walk(child)
+              elif isinstance(value,list):
+                  for child in value: walk(child)
+          walk(data); assert rows,data
+          row={key:int(rows[0].get(key) or 0) for key in keys}
+          assert row['root_user_id']>0,row
+          assert row['business_admin_manage']==4,row
+          assert row['it_role_grants']==0,row
+          assert row['root_it_manage']==1,row
+          assert row['root_business_denials']==0,row
+          assert row['enabled_modules']==5,row
+          print('ROOT ADMIN MODULE AUTHORITY: PASS',row)
+          PY
+
+      - name: Resolve authenticated Development session without creating one
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${DND_DEV_SESSION_COOKIE}" ]; then
+            echo 'Using configured masked Development session credential.'
+            exit 0
+          fi
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(u.role)='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/development-runtime-session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/development-runtime-session.json'))
+          def walk(value):
+              if isinstance(value,dict):
+                  if value.get('runtime_token'): yield str(value['runtime_token'])
+                  for child in value.values(): yield from walk(child)
+              elif isinstance(value,list):
+                  for child in value: yield from walk(child)
+          token=next(walk(data),'').strip()
+          assert token,'No unexpired active admin Development session exists; authenticated acceptance remains closed.'
+          print(token)
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          echo "DND_DEV_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
+          unset TOKEN
+          rm -f /tmp/development-runtime-session.json
+          echo 'Existing active Development admin session resolved read-only; token value was not emitted.'
+
+      - name: Report Cloudflare Access credential mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then
+            echo 'Cloudflare Access service-token references: CONFIGURED / MASKED'
+          elif [ -z "${CF_ACCESS_CLIENT_ID}" ] && [ -z "${CF_ACCESS_CLIENT_SECRET}" ]; then
+            echo 'Cloudflare Access service-token references: NOT CONFIGURED; authenticated acceptance will remain closed if outer Access requires them.'
+          else
+            echo 'STOP: Cloudflare Access service-token references are only partially configured.'
+            exit 1
+          fi
+
+      - name: Anonymous protected-route proof
+        run: python scripts/development_runtime_acceptance.py --base-url "${DND_DEV_BASE_URL}" --anonymous-check
+
+      - name: Authenticated current Development GET-only runtime proof
+        run: python scripts/development_runtime_acceptance.py --base-url "${DND_DEV_BASE_URL}" --evidence-json /tmp/development-runtime-evidence.json
+
+      - name: Preserve sanitized runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: development-runtime-acceptance-${{ github.sha }}
+          path: /tmp/development-runtime-evidence.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Acceptance boundary
+        if: always()
+        run: |
+          echo "Exact source SHA: ${EXPECTED_SOURCE_SHA}"
+          echo 'Target: canonical devilndove-site / dev Preview only'
+          echo 'HTTP acceptance: GET ONLY'
+          echo 'D1 identity/root-admin/session lookup: READ ONLY'
+          echo 'Cloudflare Access: never weakened; optional service-token references remain masked'
+          echo 'D1 mutation: NONE'
+          echo 'R2 mutation: NONE'
+          echo 'Provider execution/publication: CLOSED'
+          echo 'Raw CAIP R2 delete: CLOSED'
+          echo 'Production mutation: NONE'
