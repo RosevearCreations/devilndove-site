@@ -2,128 +2,130 @@
 
 ## Current authority
 
-**Release 467 Build 8 — Authority Convergence and Restart Safety** is the active Development source candidate.
+**Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction** is the active Development source candidate.
 
 Start every new chat/workstation/restart by reading `current-development-authority.json`, then this file. `development-release.json` is compatibility evidence and is not the current Release 467 selector.
 
-Release 467 Build 7 is the exact proven predecessor:
+The exact Development-green predecessor is **Release 467 Build 8 — Authority Convergence and Restart Safety**:
 
-- merged `dev` commit: `5eef764a67466dc2989a4681c6a7cc782b9d4df9`
-- tree: `f7327733dc423982016829d717521ceab2029f35`
-- System Gate `33591744817` — SUCCESS
-- Release 467 Build 7 Proof `33591744787` — SUCCESS
+- merged `dev` commit: `94a891d3cb0608a91550c90fb04acea05cff75b3`
+- tree: `09d9f822c9987d3422921e819c913427af664184`
+- System Gate `33631757568` — SUCCESS
+- Release 467 Build 8 Authority Convergence Proof `33631758140` — SUCCESS
 
-Build 8 repairs authority/restart drift only. It does not add schema, mutate D1/R2, execute providers, publish providers, change Cloudflare Access, update `main`, contact Production resources, expose secrets or authorize Production promotion.
+Build 9 removes obsolete automatic Release 466 workflow fanout from current Release 467 pushes and pull requests. It does not delete the historical proof scripts or Git/Actions history.
+
+## Build 9 technical authority
+
+- current pointer: `current-development-authority.json`
+- Build 9 manifest: `release467-build9-historical-ci-retirement.json`
+- source gate: `scripts/release467_build9_gate.py`
+- source proof: `.github/workflows/release467-build9-proof.yml`
+- operations authority: `docs/operations/RELEASE_467_BUILD_9_HISTORICAL_CI_RETIREMENT.md`
+- source base: exact merged Build 8 `94a891d3cb0608a91550c90fb04acea05cff75b3`
+
+Release 466 Build 1–6 proof workflows are now **MANUAL_ONLY_PROVENANCE**. Their gate scripts remain in `scripts/`, and historical workflow runs/artifacts remain GitHub evidence. The canonical current `System Gate` and Release 467 gates remain active.
 
 ## Historical authority compatibility boundary
 
-`development-release.json` deliberately remains **INHERITED_REGRESSION_COMPATIBILITY** for still-valid Release 466 gates. Those inherited gates assert historical convergence and Production compatibility fields, so changing that file merely to make its version label look current would invalidate valid regression proofs.
+`development-release.json` deliberately remains **INHERITED_REGRESSION_COMPATIBILITY** for still-valid historical assertions. Release 467 Build 9 retires obsolete automatic workflow triggers; it does not rewrite historical convergence evidence merely to make old version fields look current.
 
-Therefore the current Release 467 pointer is `current-development-authority.json`; Release 466 compatibility assertions are retired only after their consuming gates are deliberately migrated. Historical compatibility evidence never overrides current Release 467 authority.
-
-## Current Development authority continues
-
-### Build 8 technical authority
-
-- current pointer: `current-development-authority.json`
-- Build 8 manifest: `release467-build8-authority-convergence.json`
-- source gate: `scripts/release467_build8_gate.py`
-- source proof: `.github/workflows/release467-build8-proof.yml`
-- operations authority: `docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md`
-- canonical I.T. workspace: `/admin/it/`
-
-The Build 8 gate reruns Release 467 Build 7 source authority and proves that inherited compatibility fields were not silently rewritten.
-
-### Exact Development boundary
-
-- source branch: `dev`
-- canonical Development target: `https://dev.devilndove-site.pages.dev`
-- D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
-- Product R2: `devilndove-toolshed-images-dev`
-- CAIP private R2: `devilndove-caip-media-dev`
-- canonical migrations: exactly `0001`–`0004`
-- Build 8 schema change: NONE
-
-A chat, workstation, deployment or source commit is not a migration event. Historical migrations are never replayed merely because work resumed.
+Historical compatibility evidence never overrides `current-development-authority.json`.
 
 ## Release 467 authority separation
 
 ### Builds 1–4
 
-Builds 1–4 established the I.T. readiness control tower, readiness/recovery actions, authenticated browser runtime acceptance, and sanitized evidence/acceptance ledger. Their source authority is merged and carried forward.
+Builds 1–4 established the I.T. readiness control tower, recovery/readiness actions, authenticated browser runtime acceptance, and sanitized evidence/acceptance ledger. Their current Release 467 source authority is carried forward.
 
 ### Build 5 — CI / Cloudflare Access readiness
 
-Build 5 CI / Access readiness remains a separate authority from browser acceptance and application-admin authentication. Its canonical masked GitHub Actions secret references are `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; secret values never appear in browser UI, logs, artifacts or committed evidence.
+Build 5 — CI / Cloudflare Access readiness remains separate from browser acceptance and application-admin authentication. Canonical masked GitHub Actions references are `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; secret values must never appear in UI, logs, artifacts or committed evidence.
 
-**Production Promotion Readiness** is the separate Build 5 HOLD/READY review authority for one exact Development candidate. It does not deploy Production itself.
+**Production Promotion Readiness** remains the separate Build 5 HOLD/READY review authority. It does not deploy Production automatically.
 
 ### Release 467 Build 6 — Development Cloudflare Access acceptance harness
 
-Release 467 Build 6 provides the dispatch-only outer Cloudflare Access service-token acceptance harness for the canonical Development Preview. It never creates an application-admin session. The real service-token lane remains `HOLD_EXTERNAL` until the deliberate Development-only workflow succeeds using the masked `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` references.
+Release 467 Build 6 remains the dispatch-only Development Cloudflare Access service-token acceptance authority. Real Access acceptance remains `HOLD_EXTERNAL` until deliberately proven.
 
 ### Release 467 Build 7 — External Commercial Acceptance Bridge
 
-Release 467 Build 7 — **External Commercial Acceptance Bridge** — is merged and source green. It bridges current operator visibility for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth controlled acceptance, but performs no provider action automatically.
+Release 467 Build 7 — **External Commercial Acceptance Bridge** — remains the current operator visibility bridge for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth acceptance. Build 7 performs no provider action automatically.
 
 ### Release 467 Build 8 — Authority Convergence and Restart Safety
 
-Build 8 prevents current work from being reopened or misdirected by stale “current release” documents. Its proof fails closed if the current pointer, handoff, roadmap, sanity file, Markdown index, I.T. guide or inherited compatibility boundary disagree.
+Release 467 Build 8 established the current restart pointer and separated current Release 467 authority from inherited compatibility evidence. Build 8 is Development green at `94a891d3cb0608a91550c90fb04acea05cff75b3`.
+
+### Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction
+
+Build 9 makes Release 466 Build 1–6 workflow files manual-only so current Release 467 work no longer produces false-red legacy fanout. Proof scripts/history remain available.
+
+## Exact environment boundary
+
+- source authority: `dev`
+- Development target: `https://dev.devilndove-site.pages.dev`
+- Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
+- Product R2: `devilndove-toolshed-images-dev`
+- CAIP private R2: `devilndove-caip-media-dev`
+- canonical migrations: exactly `0001`–`0004`
+- Build 9 schema/D1/R2 mutation: NONE
+
+A chat, workstation, deployment or source commit is not a migration event. Historical migrations are never replayed merely because work resumed.
 
 ## External/provider acceptance remains bounded
 
 External lanes remain truthfully **`HOLD_EXTERNAL`** unless separately and deliberately proven:
 
-- Cloudflare Access CI service-token acceptance — Release 467 Build 6 authority;
+- Cloudflare Access service-token acceptance — Build 6 authority;
 - Stripe Development/test acceptance — operator/provider controlled;
 - PayPal sandbox acceptance — operator/provider controlled;
-- Social/OAuth controlled acceptance — operator/provider controlled; publication remains closed;
+- Social/OAuth controlled acceptance — operator/provider controlled, publication closed;
 - native GitHub rulesets — separate repository-setting authority;
-- CAIP private media — determine current state from fresh Build 7 runtime evidence, not stale historical wording.
+- CAIP private media — use fresh Build 7 runtime evidence.
 
-No real Stripe, PayPal, OAuth or Cloudflare Access execution is authorized merely because a source gate is green.
+No real Stripe, PayPal, OAuth or Cloudflare Access execution is authorized merely because source gates are green.
 
 ## Main / Production boundary
 
-The last source-head verification before Build 8 found `main` at `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. That is a repository source-head observation only. Before any future Production promotion, independently verify the exact deployed Production release; do not infer deployment from the branch head.
+The last source-head verification carried forward for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`; this is a source-head observation only, not proof of the deployed Production release.
 
-Build 8 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute live provider/payment/OAuth actions or authorize a Production deployment.
+Build 9 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute provider/payment/OAuth actions, change Cloudflare Access policy, expose secrets or authorize Production promotion.
 
 ## Permanent safety rules
 
 - Development first; Production promotion requires a separately reviewed exact-green Development candidate.
-- Main-only application patches are forbidden.
-- Production transactional/business data are never overwritten wholesale from Development.
+- Production transactional/business data remain Production-owned.
 - Request-time schema DDL remains forbidden.
-- Canonical migrations are forward-only under `migrations/canonical` and Development-first.
-- Build 8 D1/R2 mutation is closed.
-- Build 8 provider execution/publication is closed.
-- Build 8 Cloudflare Access mutation is closed.
-- Secret values must never appear in UI, logs, committed evidence or handoff documents.
-- Browser acceptance, CI Access acceptance, commercial/provider acceptance and application-admin authentication are distinct authorities.
-- Build 5 remains the promotion HOLD/READY authority.
-- Build 6 remains the outer Access service-token authority.
-- Build 7 remains the external-commercial visibility authority.
+- Canonical migrations remain forward-only and Development-first.
 - Raw CAIP R2 deletion remains closed.
+- Provider execution/publication remains closed outside deliberate acceptance.
+- Secret values never belong in UI, logs, artifacts or handoff documents.
+- Build 5 remains Production Promotion Readiness authority.
+- Build 6 remains outer Access service-token authority.
+- Build 7 remains external-commercial visibility authority.
 
 ## Next bounded work
 
-First prove Build 8 on its feature branch with the Build 8 proof and canonical pull-request gates, merge only when green, and then re-prove the exact merged `dev` SHA.
+Prove Build 9 with its dedicated source proof and canonical System Gate, merge only when current Release 467 checks are green, then re-prove the exact merged `dev` SHA. Do not reactivate Release 466 automatic workflow fanout.
 
-After Build 8 is Development-green, deliberately choose the highest-priority external acceptance lane only when the required operator authorization and credentials are available. Do not automatically execute Stripe, PayPal, OAuth or Cloudflare Access merely to make the dashboard green. If authorization is unavailable, leave the lane at `HOLD_EXTERNAL` and continue to the next bounded non-provider application/release-mechanics improvement.
+After Build 9 closure, continue with the next non-provider application/release improvement unless we deliberately choose and authorize one of the external `HOLD_EXTERNAL` acceptance lanes.
 
 ## Canonical reading order
 
 1. `current-development-authority.json`
 2. `AI_HANDOFF.md`
-3. `release467-build8-authority-convergence.json`
+3. `release467-build9-historical-ci-retirement.json`
 4. `PROJECT_STATUS_AND_ROADMAP.md`
 5. `SANITY_HEALTH_CHECK.md`
-6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
-7. `docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md`
-8. `release467-build7-external-commercial-acceptance.json`
-9. `release467-build6-access-acceptance-harness.json`
-10. `release467-build5-production-promotion-readiness.json`
-11. `release467-build5-ci-access-readiness.json`
-12. `release467-build4-evidence-acceptance-ledger.json`
+6. `docs/operations/RELEASE_467_BUILD_9_HISTORICAL_CI_RETIREMENT.md`
+7. `release467-build8-authority-convergence.json`
+8. `docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md`
+9. `release467-build7-external-commercial-acceptance.json`
+10. `release467-build6-access-acceptance-harness.json`
+11. `release467-build5-production-promotion-readiness.json`
+12. `release467-build5-ci-access-readiness.json`
 13. `development-release.json` — compatibility evidence only
+
+## Historical authority
+
+Release 466 and earlier release/build files remain provenance and compatibility evidence. Their Build 1–6 workflow definitions are manual-only under Build 9 and cannot override current Release 467 authority.
