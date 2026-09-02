@@ -16,7 +16,7 @@ This is the short operator guide for the canonical Devil n Dove Development envi
 10. Apply only pending canonical migrations through `scripts/d1_migrate.py` / the guarded Development workflow.
 11. Run a separate read-only remote verifier afterward.
 12. Verify Application Modules returns account profiles and that the active root administrator has effective `manage` access to all five modules. I.T. remains an explicit-user grant.
-13. Use the I.T. Control Tower for readiness/preflight status; unresolved external/provider evidence remains amber/HOLD rather than being inferred green.
+13. Use the I.T. Control Tower for readiness/preflight status; unresolved external, transient-session, or provider evidence remains amber/HOLD rather than being inferred green.
 14. Keep provider execution/publication closed unless a separate controlled acceptance step explicitly opens it.
 15. Promote only an exact System-Gate-green Development tree to `main`; never overwrite Production business data wholesale from Development.
 
@@ -43,11 +43,19 @@ The canonical Preview is intentionally protected by Cloudflare Access. Current R
 
 The existing masked `CLOUDFLARE_API_TOKEN` can read Access service-token/application inventory, but the current account inventory exposes zero service tokens and zero standard Access applications. A bounded ephemeral service-token creation probe was refused with HTTP 403 / Cloudflare code 1010, so **no service token was created**. The same credential is also refused by the Pages project API with HTTP 403 / code 10000. No Access policy was modified.
 
-Therefore authenticated HTTP acceptance through CI is currently **AMBER_EXTERNAL_ACCESS**, not RED application failure and not GREEN runtime acceptance. The application-side prerequisites are independently proven: Development D1 identity is exact, an active admin session can be resolved read-only, Application Modules profiles load from the current source contract, and the root administrator has effective manage authority across all five modules.
+Therefore the outer Access portion of authenticated HTTP acceptance is **AMBER_EXTERNAL_ACCESS**, not RED application failure and not GREEN runtime acceptance. Development D1 identity, module/profile authority, and root-administrator effective manage authority are independently proven.
 
 To close this boundary, provision the automation path with the least privilege needed to create/use a Cloudflare Access service token (currently `Access: Service Tokens Write` for token creation) and configure the resulting values only as masked GitHub Actions secrets `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If the Pages-managed policy then requires an explicit Service Auth policy, that policy change must be separately reviewed and proven. **Do not disable or weaken Preview Access for testing.**
 
 The canonical runtime workflow treats this known outer-Access condition as `AMBER_EXTERNAL_ACCESS`. Any unrelated runtime error, a partially configured service token, or configured service-token credentials that Access refuses remains a real workflow failure.
+
+## Transient admin-session boundary
+
+Authenticated runtime acceptance never manufactures an application login session. It may use a preconfigured masked Development session credential, or it may resolve an already-existing unexpired admin session **read-only** from Development D1.
+
+If no unexpired admin session exists, the workflow records `AMBER_NO_ACTIVE_SESSION` and does not attempt authenticated HTTP. This is a transient readiness condition, not evidence that the admin account is broken. The root administrator's account/module authority is proved separately from the session table and remains RED only if those authority invariants actually fail.
+
+When an admin session is later available, the same workflow can continue to authenticated HTTP. If Pages Access is then the only blocker, the result becomes `AMBER_EXTERNAL_ACCESS`; if both session and Access service-token paths are available and the protected application checks pass, authenticated runtime may become GREEN. The workflow never creates a session, weakens Access, or changes D1/R2 to force a green result.
 
 ## Canonical Production boundary
 
@@ -77,15 +85,15 @@ Use `python scripts/release467_root_admin_access.py --verify-only` for read-only
 
 ## Authenticated Development runtime acceptance
 
-The canonical workflow is `.github/workflows/development-runtime-acceptance.yml`. It is GET-only over HTTP and uses only an existing unexpired Development admin session, resolved read-only from Development D1 when necessary.
+The canonical workflow is `.github/workflows/development-runtime-acceptance.yml`. It is GET-only over HTTP and uses only an existing unexpired Development admin session when one is available.
 
-Cloudflare Access is never weakened for testing. If Access protects the Preview, CI may pass an already-configured service token through `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If those references are absent and the only refusal is the proven outer Access boundary, the workflow records sanitized `AMBER_EXTERNAL_ACCESS` evidence. It does not call the application runtime GREEN. Unexpected runtime failures still fail the job.
+Cloudflare Access is never weakened for testing. If Access protects the Preview, CI may pass an already-configured service token through `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`. If those references are absent and the only refusal is the proven outer Access boundary, the workflow records sanitized `AMBER_EXTERNAL_ACCESS` evidence. If no unexpired admin application session is available before that HTTP phase, it records sanitized `AMBER_NO_ACTIVE_SESSION` evidence instead. Neither state is called runtime GREEN. Unexpected runtime failures still fail the job.
 
 Runtime acceptance verifies, among other carried-forward contracts:
 
-- Application Modules returns all five modules and account profiles;
-- the root administrator has full effective manage authority;
-- the I.T. Control Tower is reachable and reports Development readiness honestly;
+- Application Modules returns all five modules and account profiles when authenticated HTTP is available;
+- the root administrator has full effective manage authority through independent read-only D1 proof;
+- the I.T. Control Tower is reachable and reports Development readiness honestly when authenticated HTTP is available;
 - inventory base-unit authority remains intact;
 - product-media quality thresholds remain intact;
 - CAIP provider execution/publication/raw-delete paths remain closed.
@@ -102,7 +110,7 @@ Stop mutation or promotion when:
 - `account_id` has been restored to tracked `wrangler.toml`;
 - current migration state is uncertain;
 - a historical migration is being proposed only because the chat/workstation changed;
-- Application Modules cannot load account profiles;
+- Application Modules source/runtime contract cannot load account profiles;
 - the root administrator lacks full effective manage access;
 - request-time code attempts schema DDL;
 - provider execution/publication becomes enabled outside controlled acceptance;
