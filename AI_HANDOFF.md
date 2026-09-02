@@ -2,130 +2,135 @@
 
 ## Current authority
 
-**Release 466 — Operational Resilience and Commercial Readiness.** Builds 1–3 are Development green. Build 4 implementation is **technical green / external acceptance HOLD**. CAIP private-media acceptance is green. Payment-refund hardening is Development green. Stripe, PayPal and Social/OAuth acceptance remain incomplete. Native GitHub `dev`/`main` ruleset application remains external/pending because the connected integration cannot write repository rulesets.
+**Release 467 Build 5 — CI / Cloudflare Access service-token readiness** is the active Development convergence.
 
-Release 465 remains fully GREEN on Production and must not be reopened unless a current gate proves drift.
+Release 467 Builds 1–4 are already merged on `dev`. Build 5 adds a dedicated, read-only CI / Access readiness lane so authenticated browser success can never be mistaken for automated Cloudflare Access acceptance.
 
-## Exact environment boundary
+Build 5 technical source authority:
+
+- manifest: `release467-build5-ci-access-readiness.json`
+- I.T. panel: `public/js/admin-it-ci-access-readiness.js`
+- source gate: `scripts/release467_build5_gate.py`
+- workflow: `.github/workflows/release467-build5-proof.yml`
+- canonical I.T. workspace: `/admin/it/`
+
+The external Cloudflare Access service-token lane remains **`HOLD_EXTERNAL`** until an independently observed Development-only CI run succeeds with sanitized evidence. Build 5 does not create Access tokens, GitHub secrets or application sessions.
+
+## Exact source boundary
 
 ### Development
-- branch: `dev`
-- Pages: `devilndove-site` / Preview
+
+- source branch: `dev`
+- Build 5 feature branch: `release467-build5-ci-access-readiness`
+- Build 5 source base: `85b68116c8a467c480e4e3ef7fe32eee6968975c`
+- Build 4 merge base tree: `3a867b8c83d9598b7afa7f388a7a9f76f13878a5`
 - D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
 - Product R2: `devilndove-toolshed-images-dev`
 - CAIP R2: `devilndove-caip-media-dev`
 
-### Production
-- branch: `main`
-- current Production release: **465**
-- current Production source: `d5009d9c622bdf84232b3aa7bd24a1c3d61581b2`
-- live: `https://devilndove.com`
-- D1: `devilndove-prod-r462` (`f34a741b-0000-45b0-9a96-6be08754d563`)
-- Product R2: `devilndove-toolshed-images`
-- CAIP R2: `devilndove-caip-media`
+### Main / Production boundary
 
-Production business/transactional data remain Production-owned. Release 466 has **not** been promoted.
+- `main` source head observed before Build 5: `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`
+- Build 5 does **not** update `main`.
+- Build 5 does **not** authorize a Production deployment.
+- Build 5 does **not** mutate Production D1/R2, business data, provider state, OAuth state or Cloudflare Access configuration.
+- Before any future Production promotion, re-verify the exact deployed Production release independently; do not infer deployment state merely from the `main` branch head.
 
-## Builds 1–3
+## Release 467 status
 
-Builds 1–3 remain Development green and must continue to pass inherited proofs on every Build 4 source tree. **Build 3 is Development green.**
+### Build 1 — I.T. readiness control tower
 
-- Build 1 closure SHA `3ac3e249f1dfd45bb7b9d20aeb2cdcb16f178a1e`.
-- Build 2 closure SHA `855171430c6b14c4f4a6ff24a120bcce722294f9`.
-- Build 3 Development-green closure remains the last fully accepted convergence in `development-release.json` while Build 4 external evidence is HOLD.
+Development source authority is merged. Root-admin readiness, module authority, platform/provider findings and correction mechanics are surfaced through the I.T. workspace.
 
-## Release 466 Build 4 current technical closure
+The Cloudflare Access CI action established the canonical GitHub Actions secret names:
 
-Current fully proven payment-hardening technical closure SHA: `8f6cb19f69f102b09685dbb4cf410fe123e5775d`.
+- `CF_ACCESS_CLIENT_ID`
+- `CF_ACCESS_CLIENT_SECRET`
 
-- System Gate `33510294636` — PASS
-- exact Preview `https://83bc32a3.devilndove-site.pages.dev`
-- Build 1 Proof `33510294602` — PASS
-- Build 2 Proof `33510294860` — PASS
-- Build 3 Proof `33510294792` — PASS
-- Build 4 Proof `33510294597` — PASS
-- Build 4 proof artifact `9801397939`
-- artifact SHA-256 `af257b6a2976b5d51f1667d2c8f045dfbe7f4d6a0e0ff753f7aa42bb7fce8508`
-- Development deploy artifact `9801387368`, SHA-256 `b56ce91f7654664cfa3e8ebd13ac2c931fcbd67fd75c546a2b9b4379b26cdeb7`
-- canonical D1 remains exactly `0001`–`0004`, with no Build 4 migration and zero Development FK violations
-- Development remains `583` tables / `4` migrations / `4` proofs / `0` FK violations
-- Production business rows read by Build 4 proof ZERO; Production mutation ZERO
-- automated provider/payment/refund/OAuth execution ZERO
+Only the names are repository/UI authority. Secret values must never be displayed, logged, serialized or downloaded.
 
-## Build 4 status
+### Build 2 — readiness actions and recovery queue
 
-16. **CAIP private-media browser/range-streaming acceptance — DEVELOPMENT GREEN.** `3` qualifying `review_proxy_served` range audits exist with ranged streaming, no copy and no cache evidence.
-17. **Stripe Development acceptance — EXTERNAL ACCEPTANCE PENDING.** Current Development evidence is `0/6`, including `0` successful provider-synchronized refunds. Acceptance requires credentials, checkout, signed webhook, real provider-synchronized Development refund, reconciliation and idempotent replay.
-18. **PayPal sandbox acceptance — EXTERNAL ACCEPTANCE PENDING.** Current Development evidence is `0/6`, including `0` successful provider-synchronized refunds. Acceptance requires sandbox credentials, approval/capture, verified webhook, real provider-synchronized sandbox refund, reconciliation and idempotent replay.
-19. **Social/OAuth controlled acceptance — EXTERNAL ACCEPTANCE PENDING.** Selected providers/connections/security events remain `0/0/0` until a provider is deliberately selected and tested.
-20. **Production-launch readiness cockpit — TECHNICAL GREEN / HOLD.** Current launch state `HOLD_EXTERNAL_ACCEPTANCE`.
+Development source authority is merged. Non-GREEN findings are converted into prioritized read-only recovery/runbook actions.
 
-## Payment refund hardening — DEVELOPMENT GREEN
+### Build 3 — browser runtime acceptance
 
-The payment-refund hardening is fully source-gated, exact-SHA Development-deployed and runtime-proven on `8f6cb19f69f102b09685dbb4cf410fe123e5775d`.
+Development source authority is merged. Same-origin authenticated browser acceptance proves the root-admin runtime surfaces only.
 
-Enforced behavior:
+**Browser runtime PASS is not CI / Cloudflare Access PASS.**
 
-- direct `/api/admin/payment-actions` defaults provider synchronization OFF;
-- remote refund requires `PAYMENT_PROVIDER_MUTATIONS_ENABLED=1` and explicit `provider_sync_confirmed=true`;
-- remote refund additionally requires the Release 466 payment boundary: Development host, `DND_ENVIRONMENT=development`, `PAYMENT_PROVIDER_EXECUTION_MODE=development-explicit`, and test/sandbox credentials;
-- Stripe refund retries use `Idempotency-Key`;
-- PayPal refund retries use `PayPal-Request-Id` and the sandbox API only;
-- a failed provider refund cannot mark the local payment/order refunded;
-- refund acceptance is derived from a successful Development `payment_refunds` provider synchronization with a provider refund ID;
-- a local-only refund is not external acceptance;
-- no D1 schema change was required;
-- Build 4 CI performs zero external provider/refund calls.
+### Build 4 — evidence and acceptance ledger
 
-Do **not** execute a Stripe/PayPal refund merely because this machinery exists. Real provider acceptance remains a separate deliberate operator action.
+Development source authority is merged. Build 4 consolidates source gates, exact-SHA/runtime evidence, browser acceptance and outstanding external HOLDs into a sanitized evidence ledger.
 
-## SEO correction staged in Release 466
+Build 4 explicitly forbids inferring CI/service-token readiness from browser success.
 
-Build 2 measured six live Release 465 sitemap/noindex conflicts: `/cart/`, `/checkout/`, `/checkout/confirmation/`, `/supplies/health/`, `/tools/health/` and `/toolshed/duplicates/`.
+### Build 5 — CI / Cloudflare Access readiness
 
-Release 466 Development source removes those six noindex utility/health routes from `sitemap.xml`, and the corrected source passed the public SEO gates. Release 465 Production remains unchanged until a later promotion.
+Build 5 makes the separate automation-authentication lane explicit.
+
+Current external state: **`HOLD_EXTERNAL`**.
+
+Closure requires all of the following:
+
+1. Create or reuse a Cloudflare Access service token accepted by the **Development host only**.
+2. Store its client ID in the GitHub Actions repository secret named `CF_ACCESS_CLIENT_ID`.
+3. Store its client secret in the GitHub Actions repository secret named `CF_ACCESS_CLIENT_SECRET`.
+4. Exercise a bounded Development-only CI check that uses the token without echoing or persisting either value.
+5. Capture only sanitized evidence: workflow name/run, status/conclusion, Development host, commit SHA and timestamp.
+6. Keep application-admin authentication a separate proof. A Cloudflare Access service token is **not** an admin login/session.
+
+Until that independent evidence exists, the state stays `HOLD_EXTERNAL` even when browser/root-admin acceptance is GREEN.
+
+## External/provider acceptance still bounded
+
+The following remain deliberate external acceptance lanes and must not be faked or inferred:
+
+- Cloudflare Access CI service-token acceptance — `HOLD_EXTERNAL`
+- Stripe Development/test acceptance — external/operator controlled
+- PayPal sandbox acceptance — external/operator controlled
+- Social/OAuth controlled acceptance — external/operator controlled; publication remains closed
+- Native repository/ruleset changes — external when write authority is unavailable
+
+No real Stripe, PayPal or OAuth execution is authorized merely because the I.T. readiness surfaces exist.
 
 ## Permanent safety rules
 
-- Exact green Development tree only may move to `main`.
+- Development first; Production promotion requires a separately reviewed exact-green Development tree.
 - Main-only application patches are forbidden.
-- Production transactional data are never overwritten from Development.
+- Production transactional/business data are never overwritten from Development.
 - Request-time schema DDL remains forbidden.
-- Canonical migrations remain exactly `0001`–`0004`; Release 466 Builds 1–4 are schema-neutral.
-- Business-data restore is never automatic.
-- Native Git-triggered Cloudflare Pages deployment remains frozen.
-- Provider/payment execution remains closed except separately authorized, bounded Development test/sandbox acceptance.
-- Provider publication remains closed.
+- Build 5 is schema-neutral.
+- D1/R2 business-data mutation is outside Build 5.
+- Cloudflare Access policy/token creation is outside Build 5.
+- GitHub secret creation is outside the browser/admin application.
+- Secret values must never appear in the I.T. UI, logs, evidence downloads or committed artifacts.
+- Browser acceptance and CI Access acceptance are distinct authorities.
+- A Cloudflare Access token does not prove application-admin authentication.
+- Provider/payment execution remains closed except separately authorized bounded Development test/sandbox acceptance.
+- Provider/social publication remains closed.
 - Raw CAIP R2 deletion remains closed.
-- Cloudflare Access is never weakened for Preview smoke.
-- Build 3 business scores remain recommendation-only.
 
 ## Next bounded work
 
-Do **not** start another feature build. The remaining Release 466 work is deliberate external acceptance:
+Do not reopen Release 467 Builds 1–4 unless a current gate proves drift.
 
-1. Stripe Development — complete all six evidence dimensions in test mode only.
-2. PayPal sandbox — complete all six evidence dimensions in sandbox only.
-3. Social/OAuth — deliberately choose intended provider(s), verify intended account, and exercise controlled connection lifecycle; publication remains closed.
-4. Native GitHub rulesets — apply/review externally when repository-settings write access is available.
-5. Rerun strict Build 4 acceptance and all exact inherited proofs after real external evidence exists.
-6. Only after those are green may a separate Release 466 Production-promotion decision be considered.
+For Build 5, first prove the source gate and merge the exact green feature branch into `dev`. The remaining external CI / Access acceptance stays `HOLD_EXTERNAL` until the real Development-only service-token workflow evidence exists.
 
-No real Stripe/PayPal/OAuth action should be faked or inferred. If credentials/session/operator authorization are unavailable, keep the item HOLD and surface the exact correction mechanics in the I.T. readiness workspace.
+After Build 5 source convergence, the next work must come from the I.T. readiness/evidence ledger and should prioritize unresolved external acceptance or release-mechanics blockers before unrelated feature expansion.
 
 ## Canonical reading order
 
-1. `development-release.json` — last fully accepted convergence remains Build 3 while Build 4 external acceptance is HOLD.
-2. `release466-build4-external-commercial-readiness.json` — Build 4 technical/evidence authority.
-3. `LIVE_TESTING_GUIDE.md` — current Build 4 operator acceptance procedure.
-4. `docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md`
-5. `AI_HANDOFF.md`
-6. `PROJECT_STATUS_AND_ROADMAP.md`
-7. `SANITY_HEALTH_CHECK.md`
-8. `release466-build3-revenue-business-intelligence.json`
-9. `release466-build2-runtime-storefront-intelligence.json`
-10. `release466-build1-governance-recovery-reliability.json`
-11. `.github/RELEASE466_BRANCH_PROTECTION_POLICY.md`
-12. `release463-environment.json`
+1. `AI_HANDOFF.md`
+2. `release467-build5-ci-access-readiness.json`
+3. `release467-build4-evidence-acceptance-ledger.json`
+4. `release467-build3-browser-runtime-acceptance.json`
+5. `release467-build2-it-readiness-actions.json`
+6. `release467-build1-it-readiness-control-tower.json`
+7. `development-release.json`
+8. `PROJECT_STATUS_AND_ROADMAP.md`
+9. `SANITY_HEALTH_CHECK.md`
 
-Release 465 files remain immutable historical acceptance authorities and must continue to pass their append-safe gates.
+## Historical authority
+
+Release 466 and earlier release files remain historical evidence only. They must not be used as the current Development restart point unless a current Release 467 gate specifically delegates to them.
