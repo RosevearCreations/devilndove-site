@@ -1,17 +1,17 @@
 {
   "release": 467,
-  "build": 19,
-  "title": "Inventory Replenishment & Procurement Readiness Command Center",
+  "build": 20,
+  "title": "Workshop Tool & Equipment Readiness Command Center",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build19-inventory-replenishment-procurement-readiness",
-  "source_base_sha": "ce01014e201df9a8a8496945bd71212bd688c6f6",
-  "source_base_tree_sha": "131948dc58cc455ab4e7a6f5e883edf47adfb00f",
-  "last_green_build": 18,
-  "last_green_dev_sha": "ce01014e201df9a8a8496945bd71212bd688c6f6",
-  "last_green_dev_tree_sha": "131948dc58cc455ab4e7a6f5e883edf47adfb00f",
-  "last_green_system_gate_run": 33669162936,
-  "last_green_build_proof_run": 33669163159,
+  "feature_branch": "release-467-build-20-workshop-tool-equipment-readiness",
+  "source_base_sha": "9c814314dea5ddc664e73b9d822c8a41423c3aca",
+  "source_base_tree_sha": "9be57e9c0e090f8edf210ce62fcf8b093e703506",
+  "last_green_build": 19,
+  "last_green_dev_sha": "9c814314dea5ddc664e73b9d822c8a41423c3aca",
+  "last_green_dev_tree_sha": "9be57e9c0e090f8edf210ce62fcf8b093e703506",
+  "last_green_system_gate_run": 33673793408,
+  "last_green_build_proof_run": 33673793538,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {"name": "devilndove-dev", "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
   "development_r2": ["devilndove-toolshed-images-dev", "devilndove-caip-media-dev"],
@@ -24,9 +24,10 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Build 19 advances inventory replenishment and procurement readiness while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
+    "reason": "Build 20 adds a read-only workshop Tool readiness projection while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
   },
   "current_release_authorities": [
+    "release467-build20-workshop-tool-equipment-readiness.json",
     "release467-build19-inventory-replenishment-procurement-readiness.json",
     "release467-build18-order-fulfillment-customer-care.json",
     "release467-build17-creator-content-completeness.json",
@@ -48,7 +49,7 @@
   "autonomous_backlog_state": "COMPLETE_THROUGH_BUILD_17",
   "autonomous_backlog_active_build": null,
   "autonomous_backlog_active_items": [],
-  "post_autonomous_sequence": "INVENTORY_REPLENISHMENT_PROCUREMENT_READINESS",
+  "post_autonomous_sequence": "WORKSHOP_TOOL_EQUIPMENT_READINESS",
   "external_lanes": {
     "cloudflare_access_service_token": "HOLD_EXTERNAL",
     "stripe_development": "HOLD_EXTERNAL",
@@ -67,5 +68,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md and docs/operations/RELEASE_467_BUILD_19_INVENTORY_REPLENISHMENT_PROCUREMENT_READINESS.md. Build 19 is a read-only inventory replenishment and procurement-readiness command center over existing Inventory, Purchase Order and Receiving authorities. All mutations remain in existing owner workspaces. External provider lanes remain HOLD_EXTERNAL and Production promotion remains closed."
+  "restart_rule": "Read this file first, then docs/operations/RELEASE_467_BUILD_20_WORKSHOP_TOOL_EQUIPMENT_READINESS.md, then AI_HANDOFF.md. Build 20 is a read-only workshop Tool and equipment readiness command center over existing Inventory and durable Tool Lifecycle authorities. All mutations remain in existing owner workspaces. Calibration is event history only because no independent calibration due-date authority exists. External provider lanes remain HOLD_EXTERNAL and Production promotion remains closed."
 }
