@@ -1,5 +1,6 @@
 // File: /functions/api/admin/custom-order-stage-photos.js
 // Brief description: Admin-only list/upload endpoint for custom work stage photos, including R2 direct upload and moderation state.
+// Release 467 Build 16: schema is migration-owned; request-time DDL is forbidden.
 
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 function json(data, status = 200) { return jsonResponse(data, status); }
@@ -8,38 +9,9 @@ function clean(value, limit = 240) { const text = normalizeText(value); return t
 function sanitizeFilename(filename) { return String(filename || 'stage-photo').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/^[-.]+|[-.]+$/g, '') || 'stage-photo'; }
 function ext(filename, mime) { const from = String(filename || '').match(/\.([a-zA-Z0-9]+)$/)?.[1]?.toLowerCase(); if (from) return from; return ({ 'image/jpeg':'jpg', 'image/png':'png', 'image/webp':'webp', 'image/gif':'gif', 'image/avif':'avif' }[String(mime || '').toLowerCase()] || 'jpg'); }
 function publicUrl(env, key) { const base = clean(env.ORDER_STAGE_PHOTO_PUBLIC_BASE_URL || env.PRODUCT_MEDIA_PUBLIC_BASE_URL || env.R2_PUBLIC_BASE_URL || env.PUBLIC_R2_BASE_URL || env.ASSET_ORIGIN || 'https://assets.devilndove.com'); return `${base.replace(/\/$/, '')}/${String(key || '').replace(/^\/+/, '')}`; }
-async function ensureSchema(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS custom_order_stage_photos (
-    custom_order_stage_photo_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    custom_request_id INTEGER,
-    order_id INTEGER,
-    stage_key TEXT NOT NULL DEFAULT 'planning',
-    image_url TEXT,
-    object_key TEXT,
-    original_filename TEXT,
-    mime_type TEXT,
-    file_size_bytes INTEGER NOT NULL DEFAULT 0,
-    image_caption TEXT,
-    public_use_status TEXT NOT NULL DEFAULT 'internal_review',
-    moderation_status TEXT NOT NULL DEFAULT 'needs_review',
-    proof_candidate_status TEXT NOT NULL DEFAULT 'not_requested',
-    uploaded_by_user_id INTEGER,
-    approved_by_user_id INTEGER,
-    approved_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  for (const sql of [
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN object_key TEXT`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN original_filename TEXT`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN mime_type TEXT`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN file_size_bytes INTEGER NOT NULL DEFAULT 0`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN moderation_status TEXT NOT NULL DEFAULT 'needs_review'`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN proof_candidate_status TEXT NOT NULL DEFAULT 'not_requested'`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN approved_by_user_id INTEGER`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN approved_at TEXT`,
-    `ALTER TABLE custom_order_stage_photos ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP`
-  ]) await db.prepare(sql).run().catch(() => null);
+async function schemaReady(db) {
+  try { await db.prepare(`SELECT custom_order_stage_photo_id, custom_request_id, order_id, stage_key, image_url, image_caption, public_use_status, moderation_status, proof_candidate_status FROM custom_order_stage_photos LIMIT 0`).all(); return true; }
+  catch { return false; }
 }
 async function insertPhoto(db, adminUser, body) {
   const customRequestId = Number(body.custom_request_id || 0) || null;
@@ -47,7 +19,7 @@ async function insertPhoto(db, adminUser, body) {
   const imageUrl = clean(body.image_url, 1200);
   if (!customRequestId && !orderId) throw new Error('custom_request_id or order_id is required.');
   if (!imageUrl) throw new Error('image_url is required.');
-  const result = await db.prepare(`INSERT INTO custom_order_stage_photos (custom_request_id, order_id, stage_key, image_url, object_key, original_filename, mime_type, file_size_bytes, image_caption, public_use_status, moderation_status, proof_candidate_status, uploaded_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(customRequestId, orderId, clean(body.stage_key || 'planning', 80), imageUrl, clean(body.object_key || '', 1200) || null, clean(body.original_filename || '', 240) || null, clean(body.mime_type || '', 120) || null, Number(body.file_size_bytes || 0) || 0, clean(body.image_caption || '', 500), clean(body.public_use_status || 'internal_review', 80), clean(body.moderation_status || 'needs_review', 80), clean(body.proof_candidate_status || 'not_requested', 80), Number(adminUser.user_id || 0)).run();
+  const result = await db.prepare(`INSERT INTO custom_order_stage_photos (custom_request_id, order_id, stage_key, image_url, object_key, original_filename, mime_type, file_size_bytes, image_caption, public_use_status, moderation_status, proof_candidate_status, uploaded_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(customRequestId, orderId, clean(body.stage_key || 'planning', 80), imageUrl, clean(body.object_key || '', 1200) || null, clean(body.original_filename || '', 240) || null, clean(body.mime_type || '', 120) || null, Number(body.file_size_bytes || 0) || 0, clean(body.image_caption || '', 500), clean(body.public_use_status || 'customer_private', 80), clean(body.moderation_status || 'needs_review', 80), clean(body.proof_candidate_status || 'not_requested', 80), Number(adminUser.user_id || 0)).run();
   return Number(result?.meta?.last_row_id || 0);
 }
 export async function onRequestGet(context) {
@@ -56,12 +28,12 @@ export async function onRequestGet(context) {
   if (!db) return json({ ok: false, error: 'Database binding is missing.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await ensureSchema(db);
+  if (!(await schemaReady(db))) return json({ ok: false, error: 'custom_order_stage_photos_schema_unavailable' }, 503);
   const url = new URL(request.url);
   const customRequestId = Number(url.searchParams.get('custom_request_id') || 0);
   const moderation = clean(url.searchParams.get('moderation_status') || '', 80);
   const result = rows(await db.prepare(`SELECT * FROM custom_order_stage_photos WHERE (? <= 0 OR custom_request_id=?) AND (?='' OR moderation_status=?) ORDER BY datetime(created_at) DESC LIMIT 120`).bind(customRequestId, customRequestId, moderation, moderation).all());
-  return json({ ok: true, photos: result, summary: { total: result.length, needs_review: result.filter((row) => String(row.moderation_status || '') === 'needs_review').length } });
+  return json({ ok: true, photos: result, summary: { total: result.length, needs_review: result.filter((row) => String(row.moderation_status || '') === 'needs_review').length }, schema_authority: 'migration_owned' });
 }
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -69,7 +41,7 @@ export async function onRequestPost(context) {
   if (!db) return json({ ok: false, error: 'Database binding is missing.' }, 500);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
-  await ensureSchema(db);
+  if (!(await schemaReady(db))) return json({ ok: false, error: 'custom_order_stage_photos_schema_unavailable' }, 503);
   const contentType = String(request.headers.get('content-type') || '').toLowerCase();
   try {
     if (contentType.includes('multipart/form-data')) {
@@ -85,7 +57,7 @@ export async function onRequestPost(context) {
       const objectKey = `custom-order-stage-photos/${clean(form.get('custom_request_id') || form.get('order_id') || 'unlinked', 80)}/${Date.now()}-${crypto.randomUUID()}.${ext(original, mimeType)}`;
       await bucket.put(objectKey, await file.arrayBuffer(), { httpMetadata: { contentType: mimeType, cacheControl: 'public, max-age=31536000' }, customMetadata: { original_name: original, uploaded_by_user_id: String(adminUser.user_id || '') } });
       const id = await insertPhoto(db, adminUser, { custom_request_id: form.get('custom_request_id'), order_id: form.get('order_id'), stage_key: form.get('stage_key') || 'planning', image_url: publicUrl(env, objectKey), object_key: objectKey, original_filename: original, mime_type: mimeType, file_size_bytes: Number(file.size || 0), image_caption: form.get('image_caption') || '', public_use_status: form.get('public_use_status') || 'customer_private', moderation_status: 'needs_review' });
-      return json({ ok: true, message: 'Stage photo uploaded for moderation.', custom_order_stage_photo_id: id, image_url: publicUrl(env, objectKey), object_key: objectKey });
+      return json({ ok: true, message: 'Stage photo uploaded for moderation.', custom_order_stage_photo_id: id, image_url: publicUrl(env, objectKey), object_key: objectKey, automatic_publication: false });
     }
     const body = await request.json();
     if (clean(body.action) === 'moderate') {
@@ -95,7 +67,7 @@ export async function onRequestPost(context) {
       return json({ ok: true, message: `Stage photo moderation set to ${next}.` });
     }
     const id = await insertPhoto(db, adminUser, body);
-    return json({ ok: true, message: 'Stage photo recorded.', custom_order_stage_photo_id: id });
+    return json({ ok: true, message: 'Stage photo recorded.', custom_order_stage_photo_id: id, automatic_publication: false });
   } catch (error) {
     return json({ ok: false, error: error?.message || 'Stage photo save failed.' }, 400);
   }
