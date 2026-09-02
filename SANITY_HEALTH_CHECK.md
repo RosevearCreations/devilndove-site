@@ -12,7 +12,9 @@ The exact green predecessor is **Release 467 Build 9 — Historical CI Retiremen
 - [x] `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY**.
 - [x] Middleware Release 466 header is explicitly classified **INHERITED_RUNTIME_COMPATIBILITY**, not current Release 467 authority.
 
-Release 467 Build 8 — Authority Convergence and Restart Safety remains the authority that established the current-vs-compatibility split. Release 467 Build 9 remains the authority that retired obsolete Release 466 automatic CI fanout.
+## Locked Build 8 provenance sanity
+
+**Release 467 Build 8 — Authority Convergence and Restart Safety** remains the locked authority-convergence provenance. Its exact Build 7 predecessor was `5eef764a67466dc2989a4681c6a7cc782b9d4df9`; System Gate `33591744817` and Build 7 Proof `33591744787` were SUCCESS. External acceptance remained `HOLD_EXTERNAL`. These facts are retained for regression proof without overriding current Build 10 authority.
 
 ## Build 10 I.T. Control Tower
 
@@ -65,6 +67,7 @@ Build 10 source/runtime state and external acceptance are intentionally independ
 ## CI / prior authority sanity
 
 - [x] Release 466 Build 1–6 proof workflows remain manual-only provenance under Build 9.
+- [x] Build 1 gate permits the original browser-direct control tower or a newer read-only wrapper that demonstrably retains the Build 1 engine in the active path.
 - [x] Build 9 gate is forward-compatible with Build 10 while retaining locked Build 9 manifest/history assertions.
 - [x] Release 467 Build 6, Build 7, Build 8 and Build 9 authorities remain separate and retained.
 - [x] Production Promotion Readiness remains the separate Build 5 authority.
