@@ -24,6 +24,10 @@ Build 14 source base is current `dev` `86907d512c5121bb05306ca9d31d4aecb5fd6c50`
 | 13 | Repository Hygiene and Historical CI Cleanup | Development green at `794fd5b3…` |
 | 14 | Product Release Quality Command Center | Active Development candidate |
 
+## Retained Build 12 provenance
+
+**Release 467 Build 12 — Finance Operations Command Center** remains a closed Development authority. Its exact Build 11 source base is `ce42f3b2ea553b69085705f500a9e2bd2f689818`; financial write authority remains owned by Accounting and external acceptance remains `HOLD_EXTERNAL`.
+
 ## Build 14 scope — autonomous backlog items 1–5
 
 The exact autonomous backlog is `docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md`. Build 14 closes the first five items as one coherent Product Release Quality slice:
