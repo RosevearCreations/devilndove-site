@@ -1,0 +1,56 @@
+{
+  "release": 467,
+  "build": 3,
+  "title": "Authenticated Browser Runtime Acceptance",
+  "state": "development_candidate",
+  "base_development_sha": "768ef9bd8930d99fd2bd61a78dd551a5f63b0336",
+  "scope": [
+    "same_origin_authenticated_browser_acceptance",
+    "get_only_admin_runtime_contracts",
+    "root_admin_and_module_runtime_verification",
+    "inventory_quantity_authority_runtime_verification",
+    "product_media_quality_runtime_verification",
+    "caip_fail_closed_runtime_verification",
+    "sanitized_operator_evidence_copy"
+  ],
+  "browser_runtime_route": "/admin/it/",
+  "browser_runtime_script": "/public/js/admin-it-browser-runtime-acceptance.js",
+  "protected_endpoints": [
+    "/api/admin/app-modules",
+    "/api/admin/it-control-tower",
+    "/api/admin/site-item-inventory",
+    "/api/admin/product-media-score",
+    "/api/admin/caip-production-pipeline"
+  ],
+  "http_methods": ["GET"],
+  "schema_change_required": false,
+  "runtime_api_change": false,
+  "request_time_schema_mutation": false,
+  "d1_mutation": false,
+  "r2_mutation": false,
+  "production_mutation": false,
+  "production_provider_execution": false,
+  "provider_publication": false,
+  "cloudflare_access_policy_mutation": false,
+  "secret_values_emitted": false,
+  "ci_service_token_readiness_inferred_from_browser": false,
+  "acceptance_semantics": {
+    "browser_pass": "The already-authenticated Development browser session reached and passed the declared GET-only runtime contracts.",
+    "browser_fail": "At least one declared runtime contract failed or could not be read from the authenticated Development session.",
+    "ci_lane": "Automated CI Cloudflare Access service-token readiness remains a separate authority and is never inferred GREEN from browser acceptance.",
+    "external_acceptance": "Stripe, PayPal, Social/OAuth and other real external acceptance remain separate and continue to HOLD until independently proven."
+  },
+  "safety_boundary": {
+    "target": "current_authenticated_development_origin_only",
+    "cloudflare_access": "never_weakened",
+    "production": "forbidden",
+    "external_provider_execution": "closed",
+    "raw_caip_r2_delete": "closed",
+    "credentials": "never_emitted"
+  },
+  "inherited_proofs": [
+    "release467_build1_gate",
+    "release467_build2_gate",
+    "release467_it_admin_runtime_gate"
+  ]
+}
