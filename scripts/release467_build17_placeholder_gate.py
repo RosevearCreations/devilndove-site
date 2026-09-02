@@ -8,6 +8,7 @@ FAIL=[]
 REGISTRY=ROOT/'release467-build17-placeholder-registry.json'
 CRITICAL=[
  'admin/creator-content-completeness/index.html',
+ 'admin/creative-process/index.html',
  'public/js/admin-creator-content-completeness.js',
  'functions/api/admin/creator-content-completeness.js',
  'functions/api/admin/marketplace-presets.js',
@@ -17,7 +18,7 @@ CRITICAL=[
  'public/js/shop-parity.js',
  'public/js/storefront-parity.js',
 ]
-MARKERS=['coming soon','tbd','todo','fallback_empty','temporarily unavailable','placeholder content']
+MARKERS=['coming soon','tbd','todo','fallback_empty','temporarily unavailable','placeholder content','content-only workflow placeholder']
 
 def fail(msg): FAIL.append(msg)
 def read(path):

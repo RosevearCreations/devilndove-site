@@ -19,6 +19,14 @@
       "owner": "Storefront + Creator Content",
       "remediation": "Resolve the underlying approved-evidence read failure; do not replace it with guessed candle/soap claims.",
       "allows_invented_content": false
+    },
+    {
+      "path": "admin/creative-process/index.html",
+      "marker": "content-only workflow placeholder",
+      "reason": "The Creative Process hero intentionally labels its generic content-only workflow illustration as a placeholder; it is not represented as finished project evidence.",
+      "owner": "Creators / Media Content Studio",
+      "remediation": "Replace the labelled workflow illustration with approved representative project media through the Media Content Studio when suitable evidence is available.",
+      "allows_invented_content": false
     }
   ]
 }
