@@ -15,7 +15,7 @@ Read current authority in this order:
 7. `docs/operations/RELEASE_467_BUILD_14_PRODUCT_RELEASE_QUALITY.md` — Build 14 operating details.
 8. `release467-build13-repository-hygiene-cleanup.json` — Build 13 cleanup contract.
 9. `docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md` — Build 13 cleanup authority.
-10. `release467-build12-finance-operations-command-center.json` — Build 12 Finance authority.
+10. `release467-build12-finance-operations-command-center.json` — **Release 467 Build 12 — Finance Operations Command Center** authority.
 11. `release467-build11-admin-operations-command-center.json` — Build 11 daily Admin command authority.
 12. `release467-build10-it-control-tower-consolidation.json` — Build 10 I.T. technical-first-stop authority.
 13. `release467-build9-historical-ci-retirement.json` — Build 9 historical CI authority.
@@ -28,6 +28,10 @@ Read current authority in this order:
 ## Build 14 autonomous scope
 
 Build 14 owns exact backlog items 1–5: Product Release Quality Command Center, visual readiness badges, direct crop/focal discoverability, marketplace-image readiness checks, and product-specific proof-image recommendations. It reuses existing Product, Inventory, Media, SEO and Marketplace authorities and remains schema-neutral/provider-closed.
+
+## Retained Build 12 provenance
+
+**Release 467 Build 12 — Finance Operations Command Center** remains a closed authority with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818`. Accounting remains the financial write owner and external acceptance remains `HOLD_EXTERNAL`.
 
 ## Retained Build 13 cleanup boundary
 
