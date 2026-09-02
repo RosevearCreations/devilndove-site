@@ -1,15 +1,6 @@
 name: Release 467 Build 17 Creator Content Completeness Proof
 
 on:
-  push:
-    branches:
-      - release467-build17-creator-content-completeness
-      - dev
-      - main
-  pull_request:
-    branches:
-      - dev
-      - main
   workflow_dispatch:
 
 permissions:
@@ -60,8 +51,6 @@ jobs:
           fi
       - name: Boundary
         run: |
-          echo 'Build 17 owns autonomous backlog items 16-20.'
+          echo 'Build 17 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Creative Project completeness, CAIP evidence-only ranking, media diagnostics, reviewed marketplace presets, and no-silent-placeholder governance are guarded.'
-          echo 'Marketplace presets update existing rows only and retain policy overrides; provider execution/publication remain false.'
-          echo 'Media recommendations never assign automatically and raw R2 deletion is not added.'
-          echo 'No schema migration, new broad D1/R2 authority, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
+          echo 'No schema migration, new broad D1/R2 authority, provider execution/publication, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
