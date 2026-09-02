@@ -2,13 +2,11 @@
 
 ## Current release
 
-**Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction** is the active Development source candidate.
+**Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics** is the active Development source candidate.
 
-Its exact Development-green predecessor is **Release 467 Build 8 — Authority Convergence and Restart Safety**, merged to `dev` at `94a891d3cb0608a91550c90fb04acea05cff75b3`, with System Gate `33631757568` and Build 8 proof `33631758140` both successful.
+Its exact Development-green predecessor is **Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction**, merged to `dev` at `d8a9ffba03f980b9632643d91d9aa69b25bd94fd`, tree `949f2523d31e0f47ed1e19ff7655de2762fbc1df`, with System Gate `33633043297` and Build 9 proof `33633043229` both successful.
 
-Build 8 itself preserved Release 467 Build 7 predecessor evidence at `5eef764a67466dc2989a4681c6a7cc782b9d4df9`; real external lanes remain `HOLD_EXTERNAL`.
-
-The current restart pointer is `current-development-authority.json`. `development-release.json` remains inherited Release 466 regression compatibility and must not be treated as the current Release 467 selector.
+The current restart pointer is `current-development-authority.json`. `development-release.json` remains inherited Release 466 regression compatibility and the middleware Release 466 header remains explicit runtime compatibility; neither is the current Release 467 selector.
 
 ## Release 467 progression
 
@@ -19,31 +17,38 @@ The current restart pointer is `current-development-authority.json`. `developmen
 | 3 | Same-origin authenticated browser runtime acceptance | Development source merged |
 | 4 | Sanitized evidence and acceptance ledger | Development source merged |
 | 5 | CI/Cloudflare Access readiness plus separate Production Promotion Readiness | Source green; external/promotion decisions separate |
-| 6 | Development Cloudflare Access service-token acceptance harness | Development-proven harness; real Access `HOLD_EXTERNAL` |
-| 7 | External Commercial Acceptance Bridge | Merged/source green; real external lanes bounded |
-| 8 | Authority Convergence and Restart Safety | Development green at `94a891d3…` |
-| 9 | Historical CI Retirement & Gate Fanout Reduction | Active Development candidate |
+| 6 | Development Cloudflare Access service-token acceptance harness | Harness green; real Access `HOLD_EXTERNAL` |
+| 7 | External Commercial Acceptance Bridge | Source green; real external lanes bounded |
+| 8 | Authority Convergence and Restart Safety | Development green |
+| 9 | Historical CI Retirement & Gate Fanout Reduction | Development green at `d8a9ffba…` |
+| 10 | I.T. Control Tower Consolidation and Self-Diagnostics | Active Development candidate |
 
-## Build 9 scope
+## Build 10 scope
 
-Build 9 removes obsolete automatic Release 466 Build 1–6 workflow fanout from current `dev` pushes and pull requests. Those workflow files become `workflow_dispatch`-only provenance; their proof scripts and historical GitHub Actions evidence remain available.
+Build 10 makes `/admin/it/` the operational first stop instead of requiring the operator to interpret multiple older Build 1–7 panels before knowing what matters now.
 
-This addresses the concrete Build 8 merge symptom: all current Release 467 gates were green while several inherited Release 466 workflows produced false-red checks solely because their handoff assertions belonged to an older authority model.
+It adds:
 
-Build 9 also makes the Build 8 authority gate forward-compatible with newer Release 467 pointers while keeping the original Build 8 manifest and predecessor evidence locked.
+- `/api/admin/it-operations-control-tower` as a read-only wrapper around the existing subsystem preflight engine;
+- current Release 467 Build 10 and exact last-green Build 9 evidence;
+- Development target, D1/R2 and runtime SHA/host summary;
+- root-admin, profile, module, D1 migration/proof and foreign-key headline metrics;
+- one severity-sorted recovery queue generated from existing subsystem findings;
+- explicit external acceptance policy states that remain separate from runtime evidence;
+- explicit labeling of Release 466 runtime/regression metadata as inherited compatibility rather than current authority.
 
-Build 9 is schema-neutral. Canonical migrations remain exactly `0001`–`0004`.
+The endpoint performs no automatic permission repair, schema work, data mutation or provider action. Build 10 is schema-neutral and canonical migrations remain exactly `0001`–`0004`.
 
-## Current CI authority
+## Current I.T. operating model
 
-Automatic current-development CI remains centered on:
+The top I.T. Control Tower answers four questions first:
 
-- canonical `System Gate`;
-- Release 467 proof workflows;
-- current I.T./Admin runtime source authority;
-- any deliberately scoped current-release workflow.
+1. **What exact release/build are we working on, and what was the last proven Development predecessor?**
+2. **Are Development D1/R2, root-admin/module authority and runtime ancestry healthy?**
+3. **What is blocking or needs attention next?**
+4. **Which external lanes remain policy HOLDs even if source/runtime checks are green?**
 
-Release 466 Build 1–6 workflows are historical/manual evidence only and no longer determine whether new Release 467 work is green.
+Builds 2–7 remain visible below as bounded specialist evidence lanes. Build 10 does not collapse or falsely promote those authorities.
 
 ## External acceptance remains separate
 
@@ -53,7 +58,7 @@ Release 466 Build 1–6 workflows are historical/manual evidence only and no lon
 - Social/OAuth — `HOLD_EXTERNAL` until deliberate intended-account lifecycle evidence succeeds with publication closed.
 - CAIP private media — use fresh Build 7 runtime evidence.
 
-No credential or provider action is executed merely to make a dashboard green.
+No credential or provider action is executed merely to make the I.T. dashboard green.
 
 ## Development boundary
 
@@ -62,17 +67,19 @@ No credential or provider action is executed merely to make a dashboard green.
 - D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
 - Product R2: `devilndove-toolshed-images-dev`.
 - CAIP private R2: `devilndove-caip-media-dev`.
-- Canonical migrations: `0001`–`0004`; Build 9 adds none.
+- Canonical migrations: `0001`–`0004`; Build 10 adds none.
 
 ## Main / Production boundary
 
 The carried-forward source-head observation for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. The exact deployed Production release must still be verified independently before any future promotion decision.
 
-Build 9 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute Production providers, change Cloudflare Access policy, or authorize deployment. Production promotion remains governed separately by `release467-build5-production-promotion-readiness.json` for one exact reviewed Development candidate.
+Build 10 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute Production providers, change Cloudflare Access policy, or authorize deployment. Production promotion remains governed separately by `release467-build5-production-promotion-readiness.json` for one exact reviewed Development candidate.
 
 ## Next bounded work
 
-Make Build 9 source proof and canonical System Gate green, merge to `dev`, then verify the exact merged SHA. Once Build 9 is closed, move to the next non-provider application/release improvement unless an external `HOLD_EXTERNAL` lane is deliberately authorized for acceptance.
+First make Build 10 proof and current Release 467/System gates green, merge to `dev`, and prove/deploy the exact merged Development SHA.
+
+After Build 10 closure, use the consolidated I.T. recovery queue to select the next non-provider application improvement. External `HOLD_EXTERNAL` lanes remain deliberate acceptance work, not a reason to manufacture green status.
 
 ## Permanent boundaries
 
