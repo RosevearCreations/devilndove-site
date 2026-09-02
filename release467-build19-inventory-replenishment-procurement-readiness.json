@@ -1,0 +1,56 @@
+{
+  "release": 467,
+  "build": 19,
+  "title": "Inventory Replenishment & Procurement Readiness Command Center",
+  "feature_branch": "release467-build19-inventory-replenishment-procurement-readiness",
+  "source_base_sha": "ce01014e201df9a8a8496945bd71212bd688c6f6",
+  "source_base_tree_sha": "131948dc58cc455ab4e7a6f5e883edf47adfb00f",
+  "predecessor": {
+    "build": 18,
+    "merged_dev_sha": "ce01014e201df9a8a8496945bd71212bd688c6f6",
+    "merged_dev_tree_sha": "131948dc58cc455ab4e7a6f5e883edf47adfb00f",
+    "system_gate_run": 33669162936,
+    "build18_proof_run": 33669163159,
+    "production_main_sha": "296e53b079bba53126c80902be36a9271d82cea4",
+    "production_pages_deploy_run": 33655223149
+  },
+  "workspace": "/admin/inventory-replenishment/",
+  "projection_endpoint": "/api/admin/inventory-replenishment",
+  "role": "READ_ONLY_OPERATIONS_PROJECTION",
+  "source_authorities": {
+    "inventory": ["site_item_inventory"],
+    "procurement": ["supplier_purchase_orders", "supplier_purchase_order_items"],
+    "receiving": ["inventory_receiving_claims", "inventory_purchase_lots"],
+    "write_owners": ["/admin/inventory-operations/", "/admin/inventory-operations/#inventoryReceivingMount"]
+  },
+  "attention_lanes": ["replenishment", "supplier", "procurement", "receiving", "inventory_accuracy"],
+  "thresholds": {
+    "stale_draft_days": 3,
+    "stale_ordered_record_days": 10,
+    "stale_inventory_count_days": 30,
+    "ordered_record_age_is_not_supplier_due_date": true
+  },
+  "operator_boundary": {
+    "automatic_purchase_order_creation": false,
+    "automatic_purchase_order_submission": false,
+    "automatic_purchase_order_mutation": false,
+    "automatic_inventory_adjustment": false,
+    "automatic_receiving_action": false,
+    "automatic_supplier_message": false,
+    "provider_execution": false
+  },
+  "runtime_existing_operational_writes_only": false,
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "new_d1_mutation_authorized": false,
+  "d1_mutation_authorized": false,
+  "new_r2_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false,
+  "external_acceptance": "HOLD_EXTERNAL"
+}

@@ -1,17 +1,17 @@
 {
   "release": 467,
-  "build": 18,
-  "title": "Order Fulfillment & Customer Care Command Center",
+  "build": 19,
+  "title": "Inventory Replenishment & Procurement Readiness Command Center",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build18-order-fulfillment-customer-care",
-  "source_base_sha": "7f3363954434801e9226b29d83899ea795713525",
-  "source_base_tree_sha": "0df69c0b24484536e6f50e21a523c915d101923a",
-  "last_green_build": 17,
-  "last_green_dev_sha": "7f3363954434801e9226b29d83899ea795713525",
-  "last_green_dev_tree_sha": "0df69c0b24484536e6f50e21a523c915d101923a",
-  "last_green_system_gate_run": 33665275366,
-  "last_green_build_proof_run": 33665275406,
+  "feature_branch": "release467-build19-inventory-replenishment-procurement-readiness",
+  "source_base_sha": "ce01014e201df9a8a8496945bd71212bd688c6f6",
+  "source_base_tree_sha": "131948dc58cc455ab4e7a6f5e883edf47adfb00f",
+  "last_green_build": 18,
+  "last_green_dev_sha": "ce01014e201df9a8a8496945bd71212bd688c6f6",
+  "last_green_dev_tree_sha": "131948dc58cc455ab4e7a6f5e883edf47adfb00f",
+  "last_green_system_gate_run": 33669162936,
+  "last_green_build_proof_run": 33669163159,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {"name": "devilndove-dev", "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
   "development_r2": ["devilndove-toolshed-images-dev", "devilndove-caip-media-dev"],
@@ -24,9 +24,10 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Build 18 advances order fulfillment and customer-care operations while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
+    "reason": "Build 19 advances inventory replenishment and procurement readiness while inherited Release 466 regression/runtime compatibility remains intentionally separate from current Release 467 authority."
   },
   "current_release_authorities": [
+    "release467-build19-inventory-replenishment-procurement-readiness.json",
     "release467-build18-order-fulfillment-customer-care.json",
     "release467-build17-creator-content-completeness.json",
     "release467-build16-custom-request-made-today-journey.json",
@@ -47,7 +48,7 @@
   "autonomous_backlog_state": "COMPLETE_THROUGH_BUILD_17",
   "autonomous_backlog_active_build": null,
   "autonomous_backlog_active_items": [],
-  "post_autonomous_sequence": "ORDER_FULFILLMENT_CUSTOMER_CARE",
+  "post_autonomous_sequence": "INVENTORY_REPLENISHMENT_PROCUREMENT_READINESS",
   "external_lanes": {
     "cloudflare_access_service_token": "HOLD_EXTERNAL",
     "stripe_development": "HOLD_EXTERNAL",
@@ -66,5 +67,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md and docs/operations/RELEASE_467_BUILD_18_ORDER_FULFILLMENT_CUSTOMER_CARE.md. Build 18 is a read-only Order Fulfillment & Customer Care command center over existing orders, payments, refunds and custom-request progress. All mutations remain in existing owner workspaces. Canada-only shipping and the U.S. sales/shipping suspension remain intact. External provider lanes remain HOLD_EXTERNAL and Production promotion remains closed."
+  "restart_rule": "Read this file first, then AI_HANDOFF.md and docs/operations/RELEASE_467_BUILD_19_INVENTORY_REPLENISHMENT_PROCUREMENT_READINESS.md. Build 19 is a read-only inventory replenishment and procurement-readiness command center over existing Inventory, Purchase Order and Receiving authorities. All mutations remain in existing owner workspaces. External provider lanes remain HOLD_EXTERNAL and Production promotion remains closed."
 }
