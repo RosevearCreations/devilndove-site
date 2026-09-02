@@ -9,6 +9,7 @@ on:
       - 'public/js/admin-it-promotion-readiness.js'
       - 'admin/it/index.html'
       - 'docs/operations/RELEASE_467_PRODUCTION_PROMOTION.md'
+      - 'docs/operations/RELEASE_467_BUILD_5_PROMOTION_READINESS.md'
       - 'release467-build5-production-promotion-readiness.json'
       - 'scripts/release467_build5_gate.py'
       - 'scripts/release467_build4_gate.py'
