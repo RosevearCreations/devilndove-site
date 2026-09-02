@@ -32,21 +32,31 @@
   },
   "readiness_policy": {
     "green": "Direct runtime or canonical control-plane evidence proves the requirement.",
-    "amber": "Evidence is pending, external, opaque at runtime, or requires canonical System Gate confirmation.",
-    "red": "A required binding, authority, safety boundary, migration proof, environment marker, or relational invariant is missing or drifted.",
+    "amber": "Evidence is pending, external, transient, opaque at runtime, or requires canonical System Gate confirmation.",
+    "red": "A required binding, authority, safety boundary, migration proof, environment marker, relational invariant, or attempted authenticated runtime contract is missing or drifted.",
     "unknown_is_green": false,
     "configuration_is_external_acceptance": false,
     "runtime_binding_presence_is_exact_identity": false,
-    "external_access_block_is_runtime_green": false
+    "external_access_block_is_runtime_green": false,
+    "no_active_session_is_auth_failure": false
   },
   "admin_module_authority": {
     "profiles_loading": "development_proven",
+    "root_admin_user_id": 1,
     "root_admin_business_manage_defaults": 4,
     "root_admin_it_explicit_manage": true,
     "it_role_derived_grants": 0,
     "root_admin_business_denials": 0,
     "enabled_modules": 5,
     "d1_repair_required": false
+  },
+  "runtime_session_ci": {
+    "state": "AMBER_NO_ACTIVE_SESSION",
+    "session_source": "existing Development admin session only",
+    "latest_read_only_lookup": "no_unexpired_active_admin_session",
+    "session_created_by_acceptance": false,
+    "session_mutated_by_acceptance": false,
+    "semantic_boundary": "Session availability is transient readiness evidence. Missing an unexpired session keeps authenticated HTTP acceptance amber; it does not invalidate independently proven root-admin module authority."
   },
   "cloudflare_access_ci": {
     "state": "AMBER_EXTERNAL_ACCESS",
@@ -62,7 +72,7 @@
     "access_policy_mutated": false,
     "github_access_secret_references_configured": false,
     "required_external_action": "Grant the existing automation credential Access: Service Tokens Write or provision an equivalent least-privilege credential, then configure masked CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET references for GitHub Actions. Do not weaken Preview Access.",
-    "authenticated_runtime_semantics": "AMBER_EXTERNAL_ACCESS until the outer Access layer can be crossed; application-session and root-admin authority remain independently proven."
+    "authenticated_runtime_semantics": "If an existing admin session is available but the outer Access layer cannot be crossed, record AMBER_EXTERNAL_ACCESS."
   },
   "external_acceptance": {
     "stripe": "pending_real_development_evidence",
@@ -70,6 +80,7 @@
     "social_oauth": "pending_controlled_development_evidence",
     "github_native_ruleset": "external_repository_setting_pending",
     "cloudflare_access_ci": "blocked_missing_access_service_tokens_write_authority",
+    "authenticated_admin_session": "transient_no_unexpired_session_at_latest_check",
     "launch_state_until_proven": "HOLD_EXTERNAL_ACCEPTANCE"
   },
   "ancestry_policy": {
@@ -80,16 +91,19 @@
   "secret_policy": {
     "secret_values_emitted": false,
     "only_presence_and_sanitized_type_are_reported": true,
-    "service_token_probe_credentials_created": false
+    "service_token_probe_credentials_created": false,
+    "admin_session_created_by_acceptance": false
   },
   "development_evidence": {
     "it_admin_candidate_sha": "f1eeeecb55d2e0e5a49082580ed03c8b21a3fb43",
-    "system_gate_run": 33574451221,
-    "system_gate_state": "success",
-    "runtime_request_sha": "24ccebbfa7843ea7813c01cc4f1d87969bfad761",
-    "runtime_acceptance_run": 33574611686,
-    "runtime_prerequisites": "green",
-    "runtime_http_state": "AMBER_EXTERNAL_ACCESS",
+    "closure_deployed_sha": "5071146d5fcc9935ff3f59349a0dd7648fa3fc05",
+    "closure_system_gate_run": 33575688787,
+    "closure_system_gate_state": "success",
+    "runtime_request_sha": "e42e2aedd3f94b5ed59c01bf35fdb976dff3de32",
+    "runtime_acceptance_run": 33575823453,
+    "runtime_prerequisites": "green_through_root_admin_authority",
+    "runtime_http_state": "AMBER_NO_ACTIVE_SESSION_BEFORE_HTTP",
+    "prior_runtime_access_state": "AMBER_EXTERNAL_ACCESS",
     "access_preflight_run": 33575394144,
     "access_preflight_state": "success"
   },
