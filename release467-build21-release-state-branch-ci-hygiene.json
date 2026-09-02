@@ -25,7 +25,8 @@
     "delete_merged_non_core_branches": true,
     "archive_then_delete_unmerged_legacy": [
       {"branch": "backup-main-before-dev-replacement-20260830", "sha": "985ecfad41207f8bf46ad99e1346e6e69ece5a69"},
-      {"branch": "release467-build7-handoff-convergence", "sha": "1486777699808c1252f585b7024e2fcfd6296b26"}
+      {"branch": "release467-build7-handoff-convergence", "sha": "1486777699808c1252f585b7024e2fcfd6296b26"},
+      {"branch": "release467-build21-stage", "sha": "f6d5acb76788c0fc7224f9f08db29591ce5d24fb"}
     ],
     "archive_tag_prefix": "archive/branch-hygiene/",
     "unknown_unmerged_action": "RETAIN_WITH_WARNING",
