@@ -2,9 +2,9 @@
 
 ## Current authority
 
-**Release 467 Build 6 — Development Cloudflare Access service-token acceptance harness** is the active Development convergence.
+**Release 467 Build 6 — Development Cloudflare Access service-token acceptance harness** is the current Development authority.
 
-Release 467 Builds 1–5 are merged on `dev`. Build 6 adds the bounded external-acceptance harness required to close the separate Cloudflare Access automation lane without creating, reusing or implying an application-admin session.
+Release 467 Builds 1–6 source implementation is merged on `dev`. Build 6 adds the bounded external-acceptance harness required to close the separate Cloudflare Access automation lane without creating, reusing or implying an application-admin session.
 
 Build 6 technical source authority:
 
@@ -16,25 +16,29 @@ Build 6 technical source authority:
 - external acceptance workflow: `.github/workflows/release467-build6-cloudflare-access-acceptance.yml`
 - canonical I.T. workspace: `/admin/it/`
 
-The Build 6 source harness can be GREEN while the real Cloudflare Access service-token lane remains **`HOLD_EXTERNAL`**. External closure requires a deliberate workflow dispatch against the exact reviewed `dev` SHA with the two canonical GitHub Actions secrets configured and a successful sanitized evidence artifact.
+The Build 6 source harness is Development-green while the real Cloudflare Access service-token lane remains **`HOLD_EXTERNAL`**. External closure still requires a deliberate workflow dispatch against the exact reviewed `dev` SHA with the two canonical GitHub Actions secrets configured and a successful sanitized evidence artifact.
 
 ## Exact source boundary
 
 ### Development
 
 - source branch: `dev`
-- current Build 6 feature branch: `release467-build6-access-acceptance-current-dev`
-- Build 6 source base: `70015d78ae516050feb168be4190447256032d8c`
+- Build 6 merged Development SHA: `43bbf5fb329bd006777b6ef45a3669c7b4c00ef8`
+- Build 6 implementation branch: `release467-build6-access-acceptance-current-dev` — merged; disposable after handoff convergence
+- Build 6 source base before merge: `70015d78ae516050feb168be4190447256032d8c`
+- Build 6 post-merge System Gate: run `33589669513` — source gate GREEN and exact Development deployment GREEN
 - canonical Development Access target: `https://dev.devilndove-site.pages.dev`
 - Build 6 probe path: `/api/auth/me`
 - D1: `devilndove-dev` (`dbc1615b-dcbe-4951-973b-b47c99c73bfa`)
 - Product R2: `devilndove-toolshed-images-dev`
 - CAIP R2: `devilndove-caip-media-dev`
 
+The Build 6 post-merge System Gate proved canonical Development D1 convergence, Development data authority read-only, exact-SHA Preview deployment, canonical Preview control-plane bindings and non-secret exact Preview smoke acceptance on `43bbf5fb329bd006777b6ef45a3669c7b4c00ef8`.
+
 ### Main / Production boundary
 
 - current `main` source head observed at Build 6 start: `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`
-- Build 6 does **not** update `main`.
+- Build 6 did **not** update `main`.
 - Build 6 does **not** authorize a Production deployment.
 - Build 6 never targets Production from its Access acceptance workflow.
 - Build 6 does **not** mutate Production D1/R2, business data, provider state, OAuth state or Cloudflare Access configuration.
@@ -77,11 +81,11 @@ Build 5 source authority is merged and GREEN. It defines the separate automation
 
 Build 5 also adds a separate read-only **Production Promotion Readiness** review. It can report only `HOLD` or `READY_FOR_MANUAL_PROMOTION` for one exact Development candidate SHA. It never advances `main`, contacts Production resources, or converts unresolved external acceptance into PASS.
 
-The CI / Access lane and Production Promotion Readiness lane are distinct authorities and both must remain intact through Build 6.
+The CI / Access lane and Production Promotion Readiness lane are distinct authorities and both remain intact through Build 6.
 
 ### Build 6 — Development Access acceptance harness
 
-Build 6 implements the bounded workflow needed to satisfy the Build 5 Cloudflare Access closure condition without mixing authentication authorities.
+Build 6 source implementation is merged and Development-proven. Its source-proof workflow retains both Build 5 authorities and the post-merge System Gate deployed the exact Build 6 tree successfully.
 
 The acceptance workflow is **`workflow_dispatch` only**. Normal pushes and pull requests do not contact Cloudflare through this workflow.
 
@@ -97,7 +101,7 @@ The deliberate probe:
 
 Why `401 Unauthorized.` is the correct PASS contract: it proves the request passed the outer Cloudflare Access layer and reached the Devil n Dove application, while also proving the Access token was **not** silently treated as an application-admin session.
 
-Current external state remains **`HOLD_EXTERNAL`** until that exact workflow succeeds with the real Development-only service token.
+Current external state remains **`HOLD_EXTERNAL`** until that exact workflow succeeds with the real Development-only service token. The connected GitHub control surface used for this build does not expose workflow-dispatch execution, so no external Access PASS is inferred from the green source/deployment proof.
 
 ## External/provider acceptance still bounded
 
@@ -132,13 +136,13 @@ No real Stripe, PayPal or OAuth execution is authorized merely because the I.T. 
 
 ## Next bounded work
 
-Do not reopen Release 467 Builds 1–5 unless a current gate proves drift.
+Do not reopen Release 467 Builds 1–5 unless a current gate proves drift. Build 6 source implementation is merged and Development-green.
 
-For Build 6, first prove and merge the source harness through the exact-green feature branch. After merge, the remaining Cloudflare Access external acceptance is a deliberate operator/CI action: dispatch `.github/workflows/release467-build6-cloudflare-access-acceptance.yml` against the exact reviewed `dev` SHA only when both canonical Access secrets are configured.
+The remaining Build 6 Cloudflare Access external acceptance is a deliberate operator/CI action: dispatch `.github/workflows/release467-build6-cloudflare-access-acceptance.yml` against the exact reviewed current `dev` SHA only when both canonical Access secrets are configured.
 
 A successful Build 6 external acceptance run may close only the **outer Cloudflare Access service-token lane**. It must not be used as application-admin, payment-provider, social-provider or Production acceptance evidence.
 
-After that lane is proven or explicitly remains blocked, return to the Release 467 I.T. evidence/readiness ledger and select the highest-priority unresolved external/release-mechanics blocker before unrelated feature expansion.
+Until that deliberate external proof is available, retain `HOLD_EXTERNAL` and return to the Release 467 I.T. evidence/readiness ledger to select the highest-priority unresolved external/release-mechanics blocker before unrelated feature expansion.
 
 ## Canonical reading order
 
