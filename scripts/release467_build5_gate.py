@@ -82,7 +82,7 @@ def main() -> None:
     for marker in forbidden_js_markers:
         require(marker not in js, f"forbidden Build 5 browser behavior found: {marker}")
 
-    require("Release 467 Build 5" in handoff, "canonical handoff has not converged to Release 467 Build 5")
+    require("Build 5 — CI / Cloudflare Access readiness" in handoff, "canonical handoff must retain Release 467 Build 5 CI / Access authority")
     require("HOLD_EXTERNAL" in handoff, "canonical handoff must preserve external CI Access hold")
     require("CF_ACCESS_CLIENT_ID" in handoff and "CF_ACCESS_CLIENT_SECRET" in handoff, "handoff must name canonical secret names")
     require("Release 466" not in handoff.split("## Historical authority", 1)[0], "stale Release 466 current authority remains in handoff")

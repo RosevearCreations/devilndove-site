@@ -1,0 +1,98 @@
+{
+  "release": 467,
+  "build": 6,
+  "title": "Development Cloudflare Access service-token acceptance harness",
+  "source_branch": "release467-build6-access-acceptance-current-dev",
+  "source_base_sha": "70015d78ae516050feb168be4190447256032d8c",
+  "state": "READY_FOR_EXTERNAL_ACCEPTANCE",
+  "external_acceptance_state": "HOLD_EXTERNAL",
+  "production_mutation_authorized": false,
+  "schema_change_authorized": false,
+  "purpose": "Provide a bounded Development-only GitHub Actions harness that independently proves Cloudflare Access service-token admission without creating or implying an application-admin session.",
+  "inherited_build5_authorities": [
+    "release467-build5-ci-access-readiness.json",
+    "release467-build5-production-promotion-readiness.json"
+  ],
+  "target": {
+    "base_url": "https://dev.devilndove-site.pages.dev",
+    "path": "/api/auth/me",
+    "method": "GET",
+    "development_only": true,
+    "application_cookie_sent": false,
+    "authorization_header_sent": false,
+    "expected_application_status": 401,
+    "expected_application_json": {
+      "ok": false,
+      "error": "Unauthorized."
+    }
+  },
+  "service_token": {
+    "required_github_actions_secret_names": [
+      "CF_ACCESS_CLIENT_ID",
+      "CF_ACCESS_CLIENT_SECRET"
+    ],
+    "secret_values_forbidden_in_logs_artifacts_ui": true,
+    "headers_used_only_inside_acceptance_runner": true,
+    "browser_runtime_must_not_receive_service_token": true
+  },
+  "acceptance_workflow": {
+    "path": ".github/workflows/release467-build6-cloudflare-access-acceptance.yml",
+    "trigger": "workflow_dispatch",
+    "workflow_dispatch_only": true,
+    "requires_exact_dev_sha": true,
+    "network_target": "https://dev.devilndove-site.pages.dev/api/auth/me",
+    "success_contract": "Cloudflare Access admits the service token and the application itself returns its unauthenticated 401 JSON response because no application session credential is sent."
+  },
+  "sanitized_evidence": {
+    "artifact_name_prefix": "release467-build6-access-evidence-",
+    "allowed_fields": [
+      "authority",
+      "release",
+      "build",
+      "state",
+      "workflow_name",
+      "workflow_run_id",
+      "workflow_run_url",
+      "status",
+      "conclusion",
+      "development_host",
+      "request_path",
+      "http_status",
+      "application_response_profile",
+      "commit_sha",
+      "observed_at",
+      "access_headers_sent",
+      "application_session_sent",
+      "secret_values_included",
+      "production_mutation",
+      "d1_r2_mutation",
+      "provider_execution"
+    ],
+    "forbidden_fields": [
+      "CF_ACCESS_CLIENT_ID value",
+      "CF_ACCESS_CLIENT_SECRET value",
+      "Cookie header",
+      "Authorization header",
+      "response body",
+      "provider credentials"
+    ]
+  },
+  "authority_separation": {
+    "outer_access": "A successful Build 6 probe proves only that the Development Cloudflare Access layer accepted the service token.",
+    "application_auth": "The expected application response is 401 Unauthorized because Build 6 deliberately sends no application cookie or bearer token.",
+    "browser_runtime": "Browser/root-admin acceptance remains a separate Release 467 Build 3/4 authority.",
+    "promotion_readiness": "Build 5 Production promotion readiness remains a separate HOLD/READY review and is not satisfied by Access admission.",
+    "production": "Build 6 never targets or authorizes Production."
+  },
+  "closure_condition": "The external Cloudflare Access lane may move from HOLD_EXTERNAL only after this workflow is dispatched against the exact reviewed dev SHA with both canonical secrets configured and it completes successfully with sanitized evidence. That success does not prove application-admin authentication and does not authorize Production.",
+  "blocked_mutations": [
+    "Production deployment or configuration mutation",
+    "Production D1 or R2 mutation",
+    "Development D1 or R2 business-data mutation",
+    "Cloudflare Access policy or token creation",
+    "GitHub repository secret creation",
+    "Application session creation",
+    "Stripe or PayPal provider execution",
+    "Social OAuth publish or revoke"
+  ]
+}
