@@ -17,7 +17,7 @@ export async function onRequestGet(context){
   if(!link)return json({ok:false,error:'Order status link was not found or is no longer active.'},404);
   await db.prepare(`UPDATE custom_request_order_status_links SET link_status=CASE WHEN link_status='active' THEN 'viewed' ELSE link_status END, updated_at=CURRENT_TIMESTAMP WHERE custom_request_order_status_link_id=?`).bind(Number(link.custom_request_order_status_link_id||0)).run().catch(()=>null);
 
-  // Deliberately omit orders.notes and all raw stage_notes from this customer surface.
+  // Deliberately omit all raw internal order and stage notes from this customer surface.
   const order=await db.prepare(`SELECT order_id, order_number, customer_email, customer_name, order_status, payment_status, payment_method, fulfillment_type, currency, subtotal_cents, discount_cents, shipping_cents, tax_cents, total_cents, created_at, updated_at FROM orders WHERE order_id=? LIMIT 1`).bind(Number(link.order_id||0)).first().catch(()=>null);
   if(!order)return json({ok:false,error:'The connected order record was not found.'},404);
 
