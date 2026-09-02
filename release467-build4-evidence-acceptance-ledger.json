@@ -1,0 +1,79 @@
+{
+  "release": 467,
+  "build": 4,
+  "title": "I.T. Evidence & Acceptance Ledger",
+  "state": "development_candidate",
+  "base_development_sha": "af611cc117d445687ffb905123db7bec8c6fc2ba",
+  "proof_policy": "The exact feature-candidate head must complete the Release 467 Build 4 Proof before PR merge; post-merge dev gates remain a separate confirmation.",
+  "final_candidate_green_ci_required": true,
+  "scope": [
+    "consolidated_it_evidence_ledger",
+    "same_session_browser_evidence_bridge",
+    "runtime_exact_sha_visibility",
+    "runtime_database_and_admin_authority_summary",
+    "external_acceptance_hold_summary",
+    "sanitized_operator_ledger_copy"
+  ],
+  "it_route": "/admin/it/",
+  "ledger_script": "/public/js/admin-it-evidence-ledger.js",
+  "existing_runtime_api": "/api/admin/it-control-tower",
+  "api_methods": ["GET"],
+  "schema_change_required": false,
+  "runtime_api_change": false,
+  "request_time_schema_mutation": false,
+  "d1_mutation": false,
+  "r2_mutation": false,
+  "production_mutation": false,
+  "production_provider_execution": false,
+  "provider_publication": false,
+  "cloudflare_access_policy_mutation": false,
+  "secret_values_emitted": false,
+  "browser_evidence": {
+    "storage": "sessionStorage",
+    "persistence_scope": "same_browser_session_only",
+    "maximum_age_hours": 8,
+    "same_origin_required": true,
+    "accepted_authority": "release467-build3-browser-runtime-acceptance",
+    "ci_service_token_readiness_inferred": false
+  },
+  "evidence_classes": [
+    "ci_source_proof_authority",
+    "authenticated_runtime_evidence",
+    "same_session_browser_acceptance",
+    "exact_sha_runtime_visibility",
+    "external_acceptance_evidence",
+    "control_plane_follow_up"
+  ],
+  "source_proof_chain": [
+    "Release 467 Build 1 Proof",
+    "Release 467 Build 2 Proof",
+    "Release 467 I.T. Admin Runtime Proof",
+    "Release 467 Build 3 Proof",
+    "Release 467 Build 4 Proof"
+  ],
+  "acceptance_semantics": {
+    "runtime_core_pass": "Development D1 and administrator/module runtime authorities are GREEN.",
+    "exact_sha_proven": "The runtime exposes a trusted 40-character source SHA; canonical System Gate ancestry remains the separate control-plane cross-check.",
+    "browser_pass": "Fresh same-origin Build 3 GET-only browser evidence from the current authenticated session is PASS.",
+    "external_pass": "Required Development/test/sandbox external evidence is independently accepted by the existing I.T. Control Tower authority.",
+    "release_ready": "Only a fully proven runtime core, exact-SHA visibility, fresh browser PASS, external PASS and READY_FOR_SEPARATE_PROMOTION_REVIEW launch state may display release-ready."
+  },
+  "safety_boundary": {
+    "environment": "development",
+    "http": "GET_ONLY",
+    "schema": "UNCHANGED",
+    "d1": "READ_ONLY",
+    "r2": "READ_ONLY",
+    "cloudflare_access": "NEVER_WEAKENED",
+    "production": "FORBIDDEN",
+    "provider_execution": "CLOSED",
+    "provider_publication": "CLOSED",
+    "credentials": "NEVER_EMITTED"
+  },
+  "inherited_proofs": [
+    "release467_build1_gate",
+    "release467_build2_gate",
+    "release467_it_admin_runtime_gate",
+    "release467_build3_gate"
+  ]
+}

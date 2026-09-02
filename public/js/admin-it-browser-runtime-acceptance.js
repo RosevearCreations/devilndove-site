@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }[ch]));
   const apiFetch = (...args) => window.DDAuth?.apiFetch ? window.DDAuth.apiFetch(...args) : fetch(...args);
   const EXPECTED_MODULES = ['creators', 'financials', 'it-platform', 'socials', 'storefront'];
+  const STORAGE_KEY = 'dnd.release467.browserRuntimeEvidence';
   const ENDPOINTS = Object.freeze({
     modules: '/api/admin/app-modules',
     it_control_tower: '/api/admin/it-control-tower',
@@ -215,6 +216,10 @@ document.addEventListener('DOMContentLoaded', () => {
       overall,
       checks,
     };
+
+    try { window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(latestEvidence)); }
+    catch { /* Same-session evidence persistence is best-effort only. */ }
+    window.dispatchEvent(new CustomEvent('dnd:browser-runtime-acceptance', { detail: latestEvidence }));
 
     renderResults(checks, overall);
     if (button) button.disabled = false;
