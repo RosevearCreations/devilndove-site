@@ -1,0 +1,64 @@
+{
+  "release": 467,
+  "build": 2,
+  "title": "I.T. Readiness Action Queue & Recovery Runbooks",
+  "state": "development_candidate",
+  "depends_on": "release467-build1-it-readiness-control-tower",
+  "scope": [
+    "non_green_readiness_action_queue",
+    "red_before_amber_priority",
+    "deterministic_recovery_runbooks",
+    "correction_workspace_routing",
+    "explicit_pass_conditions",
+    "read_only_it_recovery_guidance"
+  ],
+  "schema_change_required": false,
+  "request_time_schema_mutation": false,
+  "production_mutation": false,
+  "production_provider_execution": false,
+  "secret_values_emitted": false,
+  "access_policy_mutation": false,
+  "new_api_route": false,
+  "read_authority": "/api/admin/it-control-tower",
+  "read_methods": ["GET"],
+  "ui_mount": "itReadinessActionQueueMount",
+  "queue_policy": {
+    "source": "Build 1 Control Tower subsystem findings",
+    "included_states": ["red", "amber"],
+    "green_findings_in_open_queue": false,
+    "priority_order": ["red", "amber"],
+    "unknown_is_green": false,
+    "automatic_repair": false,
+    "mutation_buttons": false
+  },
+  "runbooks": [
+    "RB-D1-01",
+    "RB-ADMIN-01",
+    "RB-R2-01",
+    "RB-CONFIG-01",
+    "RB-PROVIDER-01",
+    "RB-ACCEPT-01",
+    "RB-SHA-01"
+  ],
+  "runbook_policy": {
+    "each_runbook_has_trigger": true,
+    "each_runbook_has_safe_steps": true,
+    "each_runbook_has_pass_condition": true,
+    "corrections_execute_in_existing_audited_workspaces": true,
+    "request_handler_schema_repair": false,
+    "production_repair_from_queue": false,
+    "secret_disclosure": false,
+    "hostname_or_release_number_sha_inference": false
+  },
+  "safety_boundaries": {
+    "development_first": true,
+    "production_closed": true,
+    "external_acceptance_hold_preserved": true,
+    "it_last_manager_lockout_protection_preserved": true,
+    "opaque_r2_binding_identity_not_inferred": true,
+    "configuration_presence_not_equal_external_acceptance": true
+  },
+  "expected_admin_navigation": ["storefront", "creator", "finance", "it"],
+  "base_development_sha": "0ee8d9a59fe0fbe9c13b0a8cf70c909f04997bca",
+  "promotion": "closed_until_build2_gate_and_exact_development_deployment_proof"
+}
