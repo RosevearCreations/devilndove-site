@@ -1,0 +1,70 @@
+{
+  "release": 467,
+  "build": 5,
+  "title": "CI / Cloudflare Access service-token readiness",
+  "source_branch": "release467-build5-ci-access-readiness",
+  "source_base_sha": "85b68116c8a467c480e4e3ef7fe32eee6968975c",
+  "production_mutation_authorized": false,
+  "schema_change_authorized": false,
+  "state": "HOLD_EXTERNAL",
+  "purpose": "Keep automated CI authentication through Cloudflare Access separate from authenticated browser acceptance and expose the exact safe correction mechanics without inspecting, storing or revealing secret values.",
+  "authority_separation": {
+    "browser_runtime": "Release 467 Build 3 and Build 4 browser evidence proves same-origin authenticated admin runtime only.",
+    "ci_access": "A browser PASS is never CI Access proof. CI Access remains HOLD_EXTERNAL until an independent Development workflow succeeds using the approved Cloudflare Access service token.",
+    "application_admin": "A Cloudflare Access service token is not application-admin authentication and must not be treated as an admin session.",
+    "production": "No Build 5 evidence authorizes Production access or mutation."
+  },
+  "cloudflare_access_service_token": {
+    "state": "HOLD_EXTERNAL",
+    "blocker": "blocked_missing_access_service_token_acceptance_evidence",
+    "required_github_actions_secret_names": [
+      "CF_ACCESS_CLIENT_ID",
+      "CF_ACCESS_CLIENT_SECRET"
+    ],
+    "secret_values_forbidden_in_ui_logs_artifacts": true,
+    "development_only": true,
+    "manual_correction_mechanics": [
+      "Create or reuse a Cloudflare Access service token accepted by the Development host only.",
+      "Store the client ID as the GitHub Actions repository secret CF_ACCESS_CLIENT_ID.",
+      "Store the client secret as the GitHub Actions repository secret CF_ACCESS_CLIENT_SECRET.",
+      "Use the token only in a bounded Development CI acceptance workflow that sends CF-Access-Client-Id and CF-Access-Client-Secret headers.",
+      "Do not echo, serialize, download or persist either secret value.",
+      "Do not infer application-admin authentication from successful Cloudflare Access authentication.",
+      "Capture only sanitized workflow evidence after the Development check succeeds."
+    ]
+  },
+  "allowed_sanitized_evidence": [
+    "workflow_name",
+    "workflow_run_id",
+    "workflow_run_url",
+    "status",
+    "conclusion",
+    "development_host",
+    "commit_sha",
+    "observed_at"
+  ],
+  "forbidden_evidence": [
+    "CF_ACCESS_CLIENT_ID value",
+    "CF_ACCESS_CLIENT_SECRET value",
+    "session cookies",
+    "authorization headers",
+    "provider credentials"
+  ],
+  "closure_condition": "CI Access may move from HOLD_EXTERNAL only after an independently observed Development-only workflow succeeds with the Cloudflare Access service token and sanitized evidence is captured. That success does not prove application-admin authentication and does not authorize Production.",
+  "blocked_mutations": [
+    "Production deployment or configuration mutation",
+    "Production D1 or R2 mutation",
+    "Development D1 or R2 business-data mutation",
+    "Cloudflare Access policy or token creation from the application",
+    "GitHub repository secret creation from the application",
+    "Stripe or PayPal provider execution",
+    "Social OAuth publish or revoke"
+  ],
+  "build5_source_gate": {
+    "script": "scripts/release467_build5_gate.py",
+    "workflow": ".github/workflows/release467-build5-proof.yml",
+    "cloudflare_contact": "NONE",
+    "provider_contact": "NONE",
+    "d1_r2_mutation": "NONE"
+  }
+}
