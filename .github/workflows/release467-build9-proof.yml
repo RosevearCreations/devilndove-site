@@ -1,0 +1,48 @@
+name: Release 467 Build 9 Historical CI Retirement Proof
+
+on:
+  push:
+    branches: [release467-build9-historical-ci-retirement, dev]
+  pull_request:
+    branches: [dev]
+
+permissions: {contents: read}
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Preserve Release 467 Build 8 authority
+        run: python scripts/release467_build8_gate.py
+      - name: Prove Release 467 Build 9 historical CI retirement
+        run: python scripts/release467_build9_gate.py
+      - name: Validate Build 9 authority JSON
+        run: python -m json.tool release467-build9-historical-ci-retirement.json >/dev/null
+      - name: Validate current Development authority JSON
+        run: python -m json.tool current-development-authority.json >/dev/null
+      - name: Validate Build 9 Python syntax
+        run: python -m py_compile scripts/release467_build8_gate.py scripts/release467_build9_gate.py
+      - name: Diff safety
+        run: git diff --check origin/dev...HEAD
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'Scope: Release 467 Build 9 historical CI retirement and gate fanout reduction'
+          echo 'Release 466 Build 1-6 automatic triggers: RETIRED'
+          echo 'Release 466 proof scripts/history: RETAINED'
+          echo 'Canonical current System Gate: RETAINED'
+          echo 'Schema change: NONE'
+          echo 'D1/R2 mutation: NONE'
+          echo 'Provider execution/publication: NONE'
+          echo 'Cloudflare Access mutation: NONE'
+          echo 'Main mutation: NONE'
+          echo 'Production mutation: NONE'
+          echo 'Secret values inspected/emitted: NONE'
+          echo 'External acceptance: HOLD_EXTERNAL'
