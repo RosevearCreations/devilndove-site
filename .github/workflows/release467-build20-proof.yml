@@ -1,15 +1,6 @@
 name: Release 467 Build 20 Workshop Tool Equipment Readiness Proof
 
 on:
-  push:
-    branches:
-      - release-467-build-20-workshop-tool-equipment-readiness
-      - dev
-      - main
-  pull_request:
-    branches:
-      - dev
-      - main
   workflow_dispatch:
 
 permissions:
@@ -56,8 +47,7 @@ jobs:
           fi
       - name: Boundary
         run: |
-          echo 'Build 20 is a read-only Workshop Tool & Equipment Readiness command center.'
+          echo 'Build 20 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Tool Lifecycle and Inventory Operations retain all write authority.'
-          echo 'No Tool state change, Inventory mutation, lifecycle-event recording, service completion, replacement procurement, or provider execution is authorized.'
           echo 'Calibration and inspection are event history only; Build 20 invents no independent due schedule.'
-          echo 'No schema migration, new broad D1/R2 authority, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
+          echo 'No schema migration, new broad D1/R2 authority, provider execution, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
