@@ -23,6 +23,10 @@ The current restart pointer is `current-development-authority.json`. `developmen
 | 9 | Historical CI Retirement & Gate Fanout Reduction | Development green at `d8a9ffba…` |
 | 10 | I.T. Control Tower Consolidation and Self-Diagnostics | Active Development candidate |
 
+## Locked Build 8 provenance
+
+**Release 467 Build 8 — Authority Convergence and Restart Safety** remains retained provenance for the current-vs-compatibility authority model. Its locked predecessor was Release 467 Build 7 at `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, with System Gate `33591744817` and Build 7 Proof `33591744787`. Real external acceptance remained `HOLD_EXTERNAL`; these historical facts are retained rather than promoted into current Build 10 state.
+
 ## Build 10 scope
 
 Build 10 makes `/admin/it/` the operational first stop instead of requiring the operator to interpret multiple older Build 1–7 panels before knowing what matters now.
