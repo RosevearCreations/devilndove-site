@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ${renderSpecs(data.specs)}
       <h3>Order items</h3>
       <div class="admin-table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead><tbody>${items.map((item) => `<tr><td>${esc(item.product_name || 'Custom item')}<br><span class="small">${esc(item.sku || '')}</span></td><td>${esc(item.quantity || 1)}</td><td>${money(item.line_subtotal_cents || item.unit_price_cents, order.currency || 'CAD')}</td></tr>`).join('') || '<tr><td colspan="3">No item rows are attached yet.</td></tr>'}</tbody></table></div>
-      <p class="small">This page is private and not indexed. Internal production notes are deliberately not included here; only customer-safe reviewed progress is shown.</p>
+      <p class="small">This page is private and not indexed. internal production notes are deliberately not included here; only customer-safe reviewed progress is shown.</p>
     </div>`;
   }
 
