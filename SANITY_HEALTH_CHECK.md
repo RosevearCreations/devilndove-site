@@ -45,7 +45,14 @@ Exact green predecessor: **Release 467 Build 17 — Creator & Content Completene
 - [x] **Release 467 Build 8 — Authority Convergence and Restart Safety** remains locked provenance at Build 7 predecessor `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, System Gate `33591744817`, Build 7 Proof `33591744787`; current authority remains separate from inherited Release 466 compatibility evidence.
 - [x] **Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction** remains retained.
 - [x] **Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics** remains retained. Build 4 consolidates source-proof authorities into its same-session evidence and acceptance ledger; Build 10 preserves that ledger rather than replacing it.
-- [x] Release 467 Builds 12–17 remain retained predecessors/authorities.
+
+### Exact retained Build 12–15 provenance
+
+- [x] **Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818`; external acceptance remains `HOLD_EXTERNAL`.
+- [x] **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** retains exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`; external acceptance remains `HOLD_EXTERNAL`.
+- [x] **Release 467 Build 14 — Product Release Quality Command Center** retains exact green **Release 467 Build 13 — Repository Hygiene** SHA `794fd5b36191fff4c9e8376197f968d9c6d6da80` and retained predecessor `374983f68fb16172fb357b1755293a29e5d2953f`; external lanes remain `HOLD_EXTERNAL`.
+- [x] **Release 467 Build 15 — Storefront / SEO Parity** retains **Release 467 Build 14 — Product Release Quality Command Center** and keeps external lanes `HOLD_EXTERNAL`.
+- [x] **Release 467 Build 16 — Custom Request & Made Today Journey** and **Release 467 Build 17 — Creator & Content Completeness** remain retained Development-green authorities.
 
 ## Environment / schema sanity
 
