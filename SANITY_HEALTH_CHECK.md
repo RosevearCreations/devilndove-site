@@ -14,6 +14,10 @@ Exact last green predecessor: **Release 467 Build 13 — Repository Hygiene and 
 - [x] `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY**.
 - [x] Runtime Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**.
 
+## Retained Build 12 provenance sanity
+
+**Release 467 Build 12 — Finance Operations Command Center** remains a closed authority. Its exact Build 11 source base is `ce42f3b2ea553b69085705f500a9e2bd2f689818`; the shared Finance view remains read-only and external acceptance remains `HOLD_EXTERNAL`.
+
 ## Locked Build 8 provenance sanity
 
 **Release 467 Build 8 — Authority Convergence and Restart Safety** remains locked historical provenance. Its exact Build 7 predecessor was `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, with System Gate `33591744817` and Build 7 Proof `33591744787` both SUCCESS. External acceptance remained `HOLD_EXTERNAL`.
@@ -35,6 +39,7 @@ Exact last green predecessor: **Release 467 Build 13 — Repository Hygiene and 
 
 ## Retained Build 13 repository hygiene
 
+- [x] **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** remains retained with exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`.
 - [x] Exactly 39 obsolete Release 448–461 workflow definitions remain retired.
 - [x] Historical commits/scripts remain available in Git history.
 - [x] Current `system-gate.yml`, Development runtime acceptance and Production deploy/rollback safety remain.
