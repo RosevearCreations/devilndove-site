@@ -34,14 +34,20 @@ I.T. readiness, recovery actions, authenticated runtime acceptance and sanitized
 ### Build 5 — CI / Cloudflare Access readiness
 Build 5 — CI / Cloudflare Access readiness remains separate. Masked secret references are `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; secret values never belong in source, UI, logs or evidence. **Production Promotion Readiness** remains a separate HOLD/READY authority and never deploys automatically.
 
-### Release 467 Build 6
+### Release 467 Build 6 — Development Cloudflare Access acceptance harness
 Release 467 Build 6 remains the dispatch-only Development Cloudflare Access service-token acceptance harness. Real Access acceptance remains `HOLD_EXTERNAL` until deliberately proven.
 
 ### Release 467 Build 7 — External Commercial Acceptance Bridge
 Release 467 Build 7 — **External Commercial Acceptance Bridge** remains the visibility authority for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth. It does not execute providers automatically.
 
-### Builds 8–10
-Build 8 retains Authority Convergence and Restart Safety. Build 9 retains Historical CI Retirement. Build 10 retains the read-only I.T. Control Tower at `/admin/it/`.
+### Release 467 Build 8 — Authority Convergence and Restart Safety
+Release 467 Build 8 established `current-development-authority.json` as the current restart pointer and fenced inherited Release 466 compatibility evidence away from current Release 467 authority.
+
+### Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction
+Release 467 Build 9 retired obsolete Release 466 automatic CI fanout while preserving historical proof source and Actions evidence.
+
+### Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics
+Release 467 Build 10 retains the read-only I.T. technical first stop at `/admin/it/`.
 
 ### Release 467 Build 11 — Admin Operations Command Center
 Build 11 remains the daily cross-business first stop at `/admin/`, sharing the owned Today Tasks read contract and retained explicit administrator Done/Ignore/Snooze action authority. Four operator workspaces remain backed by five permission modules; Socials/CAIP remains independently permissioned.
