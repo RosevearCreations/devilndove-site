@@ -4,7 +4,7 @@
 
 **Release 467 Build 8 — Authority Convergence and Restart Safety** is the active Development source candidate.
 
-Start every new chat/workstation/restart by reading `current-development-authority.json`, then this file. Do **not** use `development-release.json` as the current Release 467 selector: its role is deliberately **INHERITED_REGRESSION_COMPATIBILITY** for still-valid Release 466 gates.
+Start every new chat/workstation/restart by reading `current-development-authority.json`, then this file. `development-release.json` is compatibility evidence and is not the current Release 467 selector.
 
 Release 467 Build 7 is the exact proven predecessor:
 
@@ -15,7 +15,15 @@ Release 467 Build 7 is the exact proven predecessor:
 
 Build 8 repairs authority/restart drift only. It does not add schema, mutate D1/R2, execute providers, publish providers, change Cloudflare Access, update `main`, contact Production resources, expose secrets or authorize Production promotion.
 
-## Build 8 technical authority
+## Historical authority compatibility boundary
+
+`development-release.json` deliberately remains **INHERITED_REGRESSION_COMPATIBILITY** for still-valid Release 466 gates. Those inherited gates assert historical convergence and Production compatibility fields, so changing that file merely to make its version label look current would invalidate valid regression proofs.
+
+Therefore the current Release 467 pointer is `current-development-authority.json`; Release 466 compatibility assertions are retired only after their consuming gates are deliberately migrated. Historical compatibility evidence never overrides current Release 467 authority.
+
+## Current Development authority continues
+
+### Build 8 technical authority
 
 - current pointer: `current-development-authority.json`
 - Build 8 manifest: `release467-build8-authority-convergence.json`
@@ -24,20 +32,9 @@ Build 8 repairs authority/restart drift only. It does not add schema, mutate D1/
 - operations authority: `docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md`
 - canonical I.T. workspace: `/admin/it/`
 
-The Build 8 gate also reruns the Release 467 Build 7 source gate and proves that the inherited Release 466 compatibility fields have not been silently rewritten.
+The Build 8 gate reruns Release 467 Build 7 source authority and proves that inherited compatibility fields were not silently rewritten.
 
-## Why `development-release.json` still says Release 466
-
-That file is consumed by inherited regression gates, including Release 466 Build 4, which intentionally asserts historical convergence and Production compatibility fields. Changing its top-level release merely to make the label look current would invalidate those proofs.
-
-Therefore:
-
-- `current-development-authority.json` is the current Release 467 restart pointer;
-- `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY**;
-- old compatibility assertions are retired only after their consuming gates are deliberately migrated;
-- no new chat or deployment may infer that Release 466 is current merely because the compatibility file still contains Release 466 fields.
-
-## Exact Development boundary
+### Exact Development boundary
 
 - source branch: `dev`
 - canonical Development target: `https://dev.devilndove-site.pages.dev`
@@ -53,43 +50,31 @@ A chat, workstation, deployment or source commit is not a migration event. Histo
 
 ### Builds 1–4
 
-Builds 1–4 established the I.T. readiness control tower, recovery/readiness actions, authenticated browser runtime acceptance, and the sanitized evidence/acceptance ledger. Their source authority is merged and carried forward.
+Builds 1–4 established the I.T. readiness control tower, readiness/recovery actions, authenticated browser runtime acceptance, and sanitized evidence/acceptance ledger. Their source authority is merged and carried forward.
 
-### Build 5 — CI / Access and Production Promotion Readiness
+### Build 5 — CI / Cloudflare Access readiness
 
-Build 5 preserves two separate concepts:
+Build 5 CI / Access readiness remains a separate authority from browser acceptance and application-admin authentication. Its canonical masked GitHub Actions secret references are `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; secret values never appear in browser UI, logs, artifacts or committed evidence.
 
-- CI/Cloudflare Access readiness; and
-- Production Promotion Readiness for one exact Development candidate.
+**Production Promotion Readiness** is the separate Build 5 HOLD/READY review authority for one exact Development candidate. It does not deploy Production itself.
 
-Production Promotion Readiness is the only current Release 467 HOLD/READY promotion review authority. It does not itself deploy Production.
+### Release 467 Build 6 — Development Cloudflare Access acceptance harness
 
-### Build 6 — Development Access acceptance harness
+Release 467 Build 6 provides the dispatch-only outer Cloudflare Access service-token acceptance harness for the canonical Development Preview. It never creates an application-admin session. The real service-token lane remains `HOLD_EXTERNAL` until the deliberate Development-only workflow succeeds using the masked `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` references.
 
-Build 6 provides the dispatch-only outer Cloudflare Access service-token acceptance harness for the canonical Development Preview. It never creates an application-admin session.
+### Release 467 Build 7 — External Commercial Acceptance Bridge
 
-The real service-token lane remains `HOLD_EXTERNAL` until the deliberate Development-only workflow succeeds with correctly provisioned masked credentials. Build 8 does not infer or alter that lane.
+Release 467 Build 7 — **External Commercial Acceptance Bridge** — is merged and source green. It bridges current operator visibility for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth controlled acceptance, but performs no provider action automatically.
 
-### Build 7 — External Commercial Acceptance Bridge
+### Release 467 Build 8 — Authority Convergence and Restart Safety
 
-Build 7 is merged and source green. It bridges current operator visibility for:
-
-1. CAIP private-media runtime evidence;
-2. Stripe Development acceptance;
-3. PayPal sandbox acceptance;
-4. Social/OAuth controlled acceptance.
-
-Build 7 performs none of those provider actions automatically.
-
-### Build 8 — Authority Convergence and Restart Safety
-
-Build 8 prevents current Release 467 work from being reopened or misdirected by stale Release 462/466 “current release” documents. Its proof fails closed if the current pointer, handoff, roadmap, sanity file, Markdown index, I.T. guide or inherited compatibility boundary disagree.
+Build 8 prevents current work from being reopened or misdirected by stale “current release” documents. Its proof fails closed if the current pointer, handoff, roadmap, sanity file, Markdown index, I.T. guide or inherited compatibility boundary disagree.
 
 ## External/provider acceptance remains bounded
 
 External lanes remain truthfully **`HOLD_EXTERNAL`** unless separately and deliberately proven:
 
-- Cloudflare Access CI service-token acceptance — separate Build 6 authority;
+- Cloudflare Access CI service-token acceptance — Release 467 Build 6 authority;
 - Stripe Development/test acceptance — operator/provider controlled;
 - PayPal sandbox acceptance — operator/provider controlled;
 - Social/OAuth controlled acceptance — operator/provider controlled; publication remains closed;
@@ -102,13 +87,7 @@ No real Stripe, PayPal, OAuth or Cloudflare Access execution is authorized merel
 
 The last source-head verification before Build 8 found `main` at `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. That is a repository source-head observation only. Before any future Production promotion, independently verify the exact deployed Production release; do not infer deployment from the branch head.
 
-Build 8:
-
-- does not update `main`;
-- does not contact Production resources;
-- does not mutate Production D1/R2 or business data;
-- does not execute live provider/payment/OAuth actions;
-- does not authorize a Production deployment.
+Build 8 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute live provider/payment/OAuth actions or authorize a Production deployment.
 
 ## Permanent safety rules
 
@@ -129,11 +108,9 @@ Build 8:
 
 ## Next bounded work
 
-First prove Build 8 on its feature branch with the Build 8 proof and canonical System Gate, merge only when green, and then re-prove the exact merged `dev` SHA.
+First prove Build 8 on its feature branch with the Build 8 proof and canonical pull-request gates, merge only when green, and then re-prove the exact merged `dev` SHA.
 
-After Build 8 is Development-green, deliberately choose the highest-priority external acceptance lane only when the required operator authorization and credentials are available. Do not automatically execute Stripe, PayPal, OAuth or Cloudflare Access merely to make the dashboard green.
-
-If operator authorization is unavailable, leave the lane at **`HOLD_EXTERNAL`** and continue to the next bounded non-provider application/release-mechanics improvement.
+After Build 8 is Development-green, deliberately choose the highest-priority external acceptance lane only when the required operator authorization and credentials are available. Do not automatically execute Stripe, PayPal, OAuth or Cloudflare Access merely to make the dashboard green. If authorization is unavailable, leave the lane at `HOLD_EXTERNAL` and continue to the next bounded non-provider application/release-mechanics improvement.
 
 ## Canonical reading order
 
@@ -150,5 +127,3 @@ If operator authorization is unavailable, leave the lane at **`HOLD_EXTERNAL`** 
 11. `release467-build5-ci-access-readiness.json`
 12. `release467-build4-evidence-acceptance-ledger.json`
 13. `development-release.json` — compatibility evidence only
-
-Release 466 and earlier release files remain historical/provenance/compatibility evidence and cannot override the current Release 467 authority above.
