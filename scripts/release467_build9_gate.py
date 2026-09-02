@@ -44,8 +44,7 @@ def load(path: str) -> dict:
 
 
 def trigger_header(body: str) -> str:
-    before_permissions = body.split("permissions:", 1)[0]
-    return before_permissions
+    return body.split("permissions:", 1)[0]
 
 
 def changed_files() -> list[str]:
@@ -61,16 +60,12 @@ pointer = load("current-development-authority.json")
 manifest = load("release467-build9-historical-ci-retirement.json")
 build8 = load("release467-build8-authority-convergence.json")
 compat = load("development-release.json")
+pointer_build = int(pointer.get("build") or 0)
 
-req(pointer.get("release") == 467 and pointer.get("build") == 9, "current authority pointer must identify Release 467 Build 9")
-req(pointer.get("state") == "DEVELOPMENT_CANDIDATE", "Build 9 source pointer must remain DEVELOPMENT_CANDIDATE before merge")
-req(pointer.get("source_base_sha") == BASE_SHA, "Build 9 pointer source base drifted")
-req(pointer.get("last_green_build") == 8, "Build 8 must be the last green predecessor")
-req(pointer.get("last_green_dev_sha") == BASE_SHA, "last green Build 8 dev SHA drifted")
-req(pointer.get("last_green_dev_tree_sha") == BASE_TREE, "last green Build 8 tree drifted")
-req(pointer.get("last_green_system_gate_run") == SYSTEM_GATE, "Build 8 System Gate evidence drifted")
-req(pointer.get("last_green_build_proof_run") == BUILD8_PROOF, "Build 8 proof evidence drifted")
-req(pointer.get("promotion_state") == "NO_AUTOMATIC_PROMOTION", "Build 9 cannot authorize automatic promotion")
+req(pointer.get("release") == 467 and pointer_build >= 9, "current authority must remain Release 467 Build 9 or newer")
+req(pointer.get("promotion_state") == "NO_AUTOMATIC_PROMOTION", "current Release 467 authority cannot authorize automatic promotion")
+req((pointer.get("compatibility_authority") or {}).get("role") == "INHERITED_REGRESSION_COMPATIBILITY", "compatibility authority role drifted")
+req("release467-build9-historical-ci-retirement.json" in (pointer.get("current_release_authorities") or []), "newer Release 467 authority must retain Build 9 provenance")
 
 for key in (
     "schema_change_authorized", "d1_mutation_authorized", "r2_mutation_authorized",
@@ -79,6 +74,15 @@ for key in (
     "production_mutation_authorized", "secret_values_emitted",
 ):
     req(pointer.get(key) is False, f"current pointer safety flag must remain false: {key}")
+
+if pointer_build == 9:
+    req(pointer.get("state") == "DEVELOPMENT_CANDIDATE", "Build 9 source pointer must remain DEVELOPMENT_CANDIDATE before merge")
+    req(pointer.get("source_base_sha") == BASE_SHA, "Build 9 pointer source base drifted")
+    req(pointer.get("last_green_build") == 8, "Build 8 must be the last green predecessor for Build 9")
+    req(pointer.get("last_green_dev_sha") == BASE_SHA, "last green Build 8 dev SHA drifted")
+    req(pointer.get("last_green_dev_tree_sha") == BASE_TREE, "last green Build 8 tree drifted")
+    req(pointer.get("last_green_system_gate_run") == SYSTEM_GATE, "Build 8 System Gate evidence drifted")
+    req(pointer.get("last_green_build_proof_run") == BUILD8_PROOF, "Build 8 proof evidence drifted")
 
 req(manifest.get("release") == 467 and manifest.get("build") == 9, "Build 9 manifest identity drifted")
 req(manifest.get("source_base_sha") == BASE_SHA and manifest.get("source_base_tree_sha") == BASE_TREE, "Build 9 exact predecessor drifted")
@@ -105,7 +109,6 @@ req(pred.get("build8_proof_run") == BUILD8_PROOF, "Build 9 predecessor proof dri
 req(build8.get("release") == 467 and build8.get("build") == 8, "Build 8 authority must remain present")
 req(build8.get("external_acceptance_state") == "HOLD_EXTERNAL", "Build 8 external HOLD must remain")
 req(compat.get("release") == 466, "development-release.json must remain compatibility evidence")
-req((pointer.get("compatibility_authority") or {}).get("role") == "INHERITED_REGRESSION_COMPATIBILITY", "compatibility authority role drifted")
 
 for workflow in HISTORICAL_WORKFLOWS:
     body = read(workflow)
@@ -136,25 +139,26 @@ expected = [
 req([row.get("file") for row in migration_manifest.get("migrations", [])] == expected, "Build 9 must preserve canonical migrations 0001-0004 exactly")
 req(not list((ROOT / "migrations/canonical").glob("*467*build9*")), "Build 9 is schema-neutral but a Build 9 migration exists")
 
-allowed = set(HISTORICAL_WORKFLOWS + [
-    "current-development-authority.json",
-    "release467-build9-historical-ci-retirement.json",
-    "scripts/release467_build6_gate.py",
-    "scripts/release467_build8_gate.py",
-    "scripts/release467_build9_gate.py",
-    ".github/workflows/release467-build9-proof.yml",
-    "AI_HANDOFF.md",
-    "PROJECT_STATUS_AND_ROADMAP.md",
-    "SANITY_HEALTH_CHECK.md",
-    "MARKDOWN_INDEX.md",
-    "docs/operations/RELEASE_467_BUILD_9_HISTORICAL_CI_RETIREMENT.md",
-])
-changed = changed_files()
-if changed:
-    unexpected = [path for path in changed if path not in allowed]
-    req(not unexpected, f"Build 9 changed files outside bounded CI/authority scope: {unexpected}")
-    migration_changes = [path for path in changed if path.startswith("migrations/") or path.lower().endswith(".sql")]
-    req(not migration_changes, f"Build 9 is schema-neutral but migration/SQL files changed: {migration_changes}")
+if pointer_build == 9:
+    allowed = set(HISTORICAL_WORKFLOWS + [
+        "current-development-authority.json",
+        "release467-build9-historical-ci-retirement.json",
+        "scripts/release467_build6_gate.py",
+        "scripts/release467_build8_gate.py",
+        "scripts/release467_build9_gate.py",
+        ".github/workflows/release467-build9-proof.yml",
+        "AI_HANDOFF.md",
+        "PROJECT_STATUS_AND_ROADMAP.md",
+        "SANITY_HEALTH_CHECK.md",
+        "MARKDOWN_INDEX.md",
+        "docs/operations/RELEASE_467_BUILD_9_HISTORICAL_CI_RETIREMENT.md",
+    ])
+    changed = changed_files()
+    if changed:
+        unexpected = [path for path in changed if path not in allowed]
+        req(not unexpected, f"Build 9 changed files outside bounded CI/authority scope: {unexpected}")
+        migration_changes = [path for path in changed if path.startswith("migrations/") or path.lower().endswith(".sql")]
+        req(not migration_changes, f"Build 9 is schema-neutral but migration/SQL files changed: {migration_changes}")
 
 if FAIL:
     print("FAIL Release 467 Build 9 historical CI retirement gate")
@@ -163,6 +167,7 @@ if FAIL:
     sys.exit(1)
 
 print("PASS Release 467 Build 9 historical CI retirement gate")
+print(f"current_pointer_build={pointer_build}")
 print("release466_build1_6_workflows=MANUAL_ONLY_PROVENANCE")
 print("historical_proof_scripts=RETAINED")
 print("canonical_current_system_gate=RETAINED")
