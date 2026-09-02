@@ -12,12 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[ch]));
 
-  const pill = (state) => {
+  const stateClass = (state) => {
+    const value = String(state || '').toUpperCase();
+    if (['PASS', 'GREEN', 'PROVEN', 'READY', 'READY_FOR_MANUAL_PROMOTION'].includes(value)) return 'good';
+    if (['FAIL', 'RED', 'BLOCKED'].includes(value)) return 'bad';
+    return 'warn';
+  };
+
+  const badge = (state) => {
     const value = String(state || 'HOLD').toUpperCase();
-    const cls = ['PASS', 'GREEN', 'READY', 'READY_FOR_MANUAL_PROMOTION'].includes(value)
-      ? 'good'
-      : ['FAIL', 'RED', 'BLOCKED'].includes(value) ? 'bad' : 'warn';
-    return `<span class="pill ${cls}">${esc(value)}</span>`;
+    return `<span class="badge ${stateClass(value)}">${esc(value)}</span>`;
   };
 
   function browserEvidence() {
@@ -40,7 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
         && evidence?.ci_service_token_readiness_inferred === false;
       const fresh = age >= 0 && age <= MAX_BROWSER_EVIDENCE_AGE_MS;
       if (!sameOrigin || !correctAuthority || !readOnly || !fresh) {
-        return { state: 'STALE', reason: `same_origin=${sameOrigin}; authority=${correctAuthority}; read_only=${readOnly}; fresh=${fresh}` };
+        return {
+          state: 'STALE',
+          reason: `Browser evidence rejected: same_origin=${sameOrigin}; authority=${correctAuthority}; read_only=${readOnly}; fresh=${fresh}.`,
+        };
       }
       return {
         state: evidence?.overall === 'PASS' ? 'PASS' : 'FAIL',
@@ -62,84 +69,105 @@ document.addEventListener('DOMContentLoaded', () => {
     return data;
   }
 
-  function subsystemState(subsystem) {
-    return String(subsystem?.state || subsystem?.status || 'UNKNOWN').toUpperCase();
+  function findingEvidence(subsystemKey, subsystem) {
+    const findings = Array.isArray(subsystem?.findings) ? subsystem.findings : [];
+    return findings.map((finding, index) => ({
+      id: `${subsystemKey}:${finding?.code || index}`,
+      subsystem: subsystemKey,
+      code: String(finding?.code || 'finding'),
+      label: String(finding?.label || subsystemKey),
+      state: String(finding?.state || subsystem?.state || 'AMBER').toUpperCase(),
+      detail: String(finding?.detail || ''),
+      correction: String(finding?.correction || ''),
+    }));
   }
 
   function allFindings(tower) {
     const subsystems = tower?.subsystems && typeof tower.subsystems === 'object' ? tower.subsystems : {};
-    return Object.entries(subsystems).flatMap(([subsystem, value]) => {
-      const findings = Array.isArray(value?.findings) ? value.findings : [];
-      return findings.map((finding, index) => ({
-        id: `${subsystem}:${finding?.code || index}`,
-        subsystem,
-        code: String(finding?.code || 'finding'),
-        label: String(finding?.label || subsystem),
-        state: String(finding?.state || value?.state || 'AMBER').toUpperCase(),
-        detail: String(finding?.detail || ''),
-        correction: String(finding?.correction || ''),
-      }));
-    });
+    return Object.entries(subsystems).flatMap(([key, value]) => findingEvidence(key, value));
   }
 
-  function trustedSha(tower) {
-    const candidates = [
-      tower?.runtime_source_sha,
-      tower?.source_sha,
-      tower?.deployment_sha,
-      tower?.subsystems?.deployment_ancestry?.runtime_source_sha,
-      tower?.subsystems?.deployment_ancestry?.source_sha,
-      tower?.subsystems?.deployment_ancestry?.deployment_sha,
-    ];
-    const found = candidates.find((value) => /^[0-9a-f]{40}$/i.test(String(value || '')));
-    return found ? String(found).toLowerCase() : null;
+  function trustedRuntimeSha(tower) {
+    const ancestry = tower?.subsystems?.deployment_ancestry || {};
+    if (ancestry?.exact_sha_available !== true) return null;
+    const value = String(ancestry?.runtime_source_sha || '');
+    return /^[0-9a-f]{40}$/i.test(value) ? value.toLowerCase() : null;
   }
 
   function buildPackage(tower, browser) {
     const subsystems = tower?.subsystems && typeof tower.subsystems === 'object' ? tower.subsystems : {};
+    const database = subsystems?.database || {};
+    const admin = subsystems?.admin_authority || {};
+    const storage = subsystems?.storage || {};
+    const configuration = subsystems?.configuration || {};
+    const providerConfiguration = subsystems?.provider_configuration || {};
+    const external = subsystems?.external_acceptance || {};
     const findings = allFindings(tower);
-    const openFindings = findings.filter((row) => !['GREEN', 'PASS', 'READY', 'PROVEN'].includes(row.state));
-    const externalState = subsystemState(subsystems?.external_acceptance);
-    const databaseState = subsystemState(subsystems?.database);
-    const adminState = subsystemState(subsystems?.admin_authority);
-    const storageState = subsystemState(subsystems?.storage);
-    const configurationState = subsystemState(subsystems?.configuration);
-    const sha = trustedSha(tower);
+    const openFindings = findings.filter((row) => !['GREEN', 'PASS', 'PROVEN'].includes(row.state));
+    const sha = trustedRuntimeSha(tower);
 
-    const runtimeCoreGreen = [databaseState, adminState, storageState, configurationState]
-      .every((state) => ['GREEN', 'PASS', 'READY', 'PROVEN'].includes(state));
+    // Build 5 deliberately inherits the exact Build 4 release-readiness authorities.
+    const runtimeCoreGreen = database?.state === 'green' && admin?.state === 'green';
     const exactShaProven = Boolean(sha);
     const browserPass = browser?.state === 'PASS';
-    const externalPass = ['GREEN', 'PASS', 'READY', 'PROVEN'].includes(externalState);
-    const launchState = String(tower?.launch_state || tower?.release_state || '').toUpperCase();
-    const launchReady = ['READY_FOR_SEPARATE_PROMOTION_REVIEW', 'READY_FOR_MANUAL_PROMOTION', 'READY'].includes(launchState);
+    const externalPass = external?.accepted === true;
+    const externalState = String(external?.state || 'unknown').toUpperCase();
+    const launchState = String(tower?.readiness?.launch_state || 'HOLD_EXTERNAL_ACCEPTANCE').toUpperCase();
+    const launchReady = launchState === 'READY_FOR_SEPARATE_PROMOTION_REVIEW';
 
     const blockers = [];
-    if (!runtimeCoreGreen) blockers.push('Development runtime core is not fully GREEN.');
-    if (!exactShaProven) blockers.push('Trusted 40-character runtime source SHA is unavailable.');
-    if (!browserPass) blockers.push('Fresh same-origin browser runtime acceptance is not PASS.');
+    if (!runtimeCoreGreen) blockers.push(`Development runtime core is not GREEN (database=${database?.state || 'unknown'}; admin=${admin?.state || 'unknown'}).`);
+    if (!exactShaProven) blockers.push('Trusted 40-character runtime source SHA is unavailable from deployment ancestry.');
+    if (!browserPass) blockers.push('Fresh same-origin Build 3 browser runtime acceptance is not PASS.');
     if (!externalPass) blockers.push('External acceptance remains incomplete or on HOLD.');
-    if (!launchReady) blockers.push(`Launch state is ${launchState || 'UNKNOWN'}, not promotion-review ready.`);
+    if (!launchReady) blockers.push(`Control Tower launch state is ${launchState}, not READY_FOR_SEPARATE_PROMOTION_REVIEW.`);
 
     const decision = blockers.length === 0 ? 'READY_FOR_MANUAL_PROMOTION' : 'HOLD';
     return {
       authority: 'release467-build5-production-promotion-readiness',
       release: 467,
       build: 5,
+      mode: 'authenticated-development-read-only-promotion-review',
       generated_at: new Date().toISOString(),
       target_origin: window.location.origin,
       decision,
       candidate_sha: sha,
-      runtime_core_green: runtimeCoreGreen,
+      evidence: {
+        runtime_core: runtimeCoreGreen ? 'PASS' : 'FAIL',
+        exact_sha: exactShaProven ? 'PROVEN' : 'PENDING',
+        browser_runtime: browserPass ? 'PASS' : browser?.state || 'PENDING',
+        external_acceptance: externalPass ? 'PASS' : 'HOLD',
+        control_tower_launch_state: launchState,
+        database_state: database?.state || 'unknown',
+        admin_authority_state: admin?.state || 'unknown',
+        storage_state: storage?.state || 'unknown',
+        configuration_state: configuration?.state || 'unknown',
+        provider_configuration_state: providerConfiguration?.state || 'unknown',
+      },
       browser_acceptance: browser,
-      external_acceptance_state: externalState,
-      launch_state: launchState || 'UNKNOWN',
+      external_acceptance: {
+        accepted: externalPass,
+        state: externalState,
+        findings: findingEvidence('external_acceptance', external).map((row) => ({
+          code: row.code,
+          label: row.label,
+          state: row.state,
+          detail: row.detail,
+          correction: row.correction,
+        })),
+      },
       blockers,
-      open_findings: openFindings,
+      open_findings: openFindings.map((row) => ({
+        subsystem: row.subsystem,
+        code: row.code,
+        state: row.state,
+        label: row.label,
+      })),
       promotion_contract: {
         source_authority: 'dev',
         production_source: 'main',
         cloudflare_pages_project: 'devilndove-site',
+        exact_green_development_tree_only: true,
         production_business_data_is_production_owned: true,
         canonical_d1_migrations_only: true,
         production_contacted: false,
@@ -153,6 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       safety: {
         http_method: 'GET',
+        schema_change: false,
+        request_time_schema_mutation: false,
         d1_mutation: false,
         r2_mutation: false,
         production_mutation: false,
@@ -167,25 +197,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function render(pkg) {
     const blockers = pkg.blockers.length
       ? `<ul>${pkg.blockers.map((row) => `<li>${esc(row)}</li>`).join('')}</ul>`
-      : '<p class="small">No Build 5 blockers are present in the current read-only Development evidence.</p>';
+      : '<p class="small">All Build 5 read-only Development promotion evidence is proven for the displayed candidate SHA.</p>';
     const findings = pkg.open_findings.length
-      ? `<details><summary>${pkg.open_findings.length} open finding(s)</summary><ul>${pkg.open_findings.map((row) => `<li><strong>${esc(row.label)}</strong> — ${esc(row.state)}${row.detail ? `: ${esc(row.detail)}` : ''}${row.correction ? `<br><span class="small">Correction: ${esc(row.correction)}</span>` : ''}</li>`).join('')}</ul></details>`
+      ? `<details><summary>${pkg.open_findings.length} open Control Tower finding(s)</summary><ul>${pkg.open_findings.map((row) => `<li><strong>${esc(row.label)}</strong> — ${esc(row.state)} <span class="small">(${esc(row.subsystem)})</span></li>`).join('')}</ul></details>`
       : '<p class="small">No non-GREEN Control Tower findings were reported.</p>';
 
     mount.innerHTML = `
       <section class="card" style="margin-top:18px">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
           <div>
+            <p class="eyebrow">Release 467 • Build 5</p>
             <h2 style="margin-top:0">Production Promotion Readiness</h2>
-            <p class="small">Release 467 Build 5 freezes the current Development evidence into a sanitized HOLD/READY package. It never promotes, contacts Production resources, executes providers, changes Cloudflare Access, or mutates D1/R2.</p>
+            <p class="small">Freezes the current Development evidence into a sanitized HOLD/READY package. Build 5 never promotes, contacts Production resources, executes providers, changes Cloudflare Access, or mutates D1/R2.</p>
           </div>
-          ${pill(pkg.decision)}
+          ${badge(pkg.decision)}
         </div>
-        <div class="grid" style="margin-top:12px">
-          <div><strong>Candidate SHA</strong><br><code>${esc(pkg.candidate_sha || 'UNAVAILABLE')}</code></div>
-          <div><strong>Browser acceptance</strong><br>${pill(pkg.browser_acceptance?.state)}</div>
-          <div><strong>External acceptance</strong><br>${pill(pkg.external_acceptance_state)}</div>
-          <div><strong>Launch state</strong><br>${pill(pkg.launch_state)}</div>
+        <div class="admin-compact-tool-grid" style="margin-top:14px">
+          <div><strong>Candidate SHA</strong><small><code>${esc(pkg.candidate_sha || 'UNAVAILABLE')}</code></small></div>
+          <div><strong>Runtime core</strong><small>${esc(pkg.evidence.runtime_core)}</small></div>
+          <div><strong>Browser proof</strong><small>${esc(pkg.evidence.browser_runtime)}</small></div>
+          <div><strong>External proof</strong><small>${esc(pkg.evidence.external_acceptance)}</small></div>
+          <div><strong>Launch state</strong><small>${esc(pkg.evidence.control_tower_launch_state)}</small></div>
+          <div><strong>Promotion</strong><small>MANUAL / SEPARATE</small></div>
         </div>
         <h3>Promotion blockers</h3>
         ${blockers}
@@ -193,19 +226,20 @@ document.addEventListener('DOMContentLoaded', () => {
         ${findings}
         <p class="small"><strong>Production expectations only:</strong> D1 <code>devilndove-prod-r462</code>; Product R2 <code>devilndove-toolshed-images</code>; CAIP private R2 <code>devilndove-caip-media</code>. Build 5 does not contact or mutate those resources.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <button type="button" id="copyBuild5PromotionPackage">Copy sanitized readiness package</button>
-          <button type="button" id="refreshBuild5PromotionReadiness">Refresh review</button>
+          <button class="btn" type="button" id="refreshBuild5PromotionReadiness">Refresh review</button>
+          <button class="btn secondary" type="button" id="copyBuild5PromotionPackage">Copy sanitized readiness package</button>
+          <a class="btn secondary" href="/admin/deployment-preflight/">Deployment preflight</a>
         </div>
       </section>`;
 
+    document.getElementById('refreshBuild5PromotionReadiness')?.addEventListener('click', load);
     document.getElementById('copyBuild5PromotionPackage')?.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(JSON.stringify(latestPackage, null, 2));
       } catch {
-        window.alert('The browser could not copy the readiness package automatically.');
+        // Copy is an operator convenience only; readiness evidence remains visible on screen.
       }
     });
-    document.getElementById('refreshBuild5PromotionReadiness')?.addEventListener('click', load);
   }
 
   async function load() {
@@ -216,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
       render(latestPackage);
     } catch (error) {
       latestPackage = null;
-      mount.innerHTML = `<section class="card" style="margin-top:18px"><h2 style="margin-top:0">Production Promotion Readiness</h2><p>${pill('HOLD')}</p><p class="small">${esc(error?.message || error)}</p><p class="small">No Production resource was contacted and no mutation was attempted.</p></section>`;
+      mount.innerHTML = `<section class="card" style="margin-top:18px"><h2 style="margin-top:0">Production Promotion Readiness</h2><p>${badge('HOLD')}</p><p class="small">${esc(error?.message || error)}</p><p class="small">No Production resource was contacted and no mutation was attempted.</p></section>`;
     }
   }
 
