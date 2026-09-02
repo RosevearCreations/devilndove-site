@@ -81,7 +81,7 @@ for k in ("schema_change_authorized","request_time_schema_mutation","new_d1_muta
 
 b14c=b14.replace(" ","")
 req("pointer_build>=14" in b14c and "ifpointer_build==14" in b14c,"Build 14 gate must remain forward-compatible")
-for token in ("Product","Offer","BreadcrumbList","shippingDestination","additionalProperty","CA_ONLY","shipping_country_not_supported","relationshipLinks","buyerFacts"):
+for token in ("Product","Offer","BreadcrumbList","shippingDestination","additionalProperty","CA_ONLY","relationshipLinks","buyerFacts"):
     req(token in shared,f"shared storefront parity marker missing: {token}")
 for token in ("storefront-parity.js","product-detail-parity.js","shop-parity.js","storefront-shipping-policy.js","custom-request"):
     req(token in seo,f"retained SEO bootstrap parity marker missing: {token}")
@@ -93,16 +93,18 @@ for token in ("checkoutForm","shipping_country","customRequestForm","customQuote
     req(token in shipping,f"shipping policy surface marker missing: {token}")
 for token in ("SELECT *","product_listing_profiles","product_story_public_notes","read_only: true","request_time_schema_mutation: false"):
     req(token in buyer,f"buyer-fact read authority marker missing: {token}")
-for forbidden in ("CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDATE products","DELETE FROM"):
+for forbidden in ("CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDATE PRODUCTS","DELETE FROM"):
     req(forbidden not in buyer.upper(),f"buyer-fact public GET must stay read-only: {forbidden}")
-for token in ("Buyer facts","Materials","Finish / condition","Size / dimensions","Care","Personalization limits","Availability","/api/product-buyer-facts"):
-    req(token in quality,f"Product Quality buyer-fact remediation marker missing: {token}")
+quality_lower=quality.lower()
+for token in ("buyer facts","buyer fact: materials","buyer fact: finish / condition","buyer fact: size / dimensions","buyer fact: care","buyer fact: personalization limits","buyer fact: availability","/api/product-buyer-facts"):
+    req(token in quality_lower,f"Product Quality buyer-fact remediation marker missing: {token}")
 
 for body,name in ((middleware,"middleware"),(checkout,"checkout create order")):
     req("shipping_country_not_supported" in body and "limited to Canada" in body,f"{name} Canada-only fail-closed guard missing")
 req("allowed_countries][0]" in payment and '"CA"' in payment,"payment preparation must retain Canada-only shipping collection")
 req("shipping_profile_reference" in market and "provider_execution_allowed" in market and "publication_allowed" in market,"marketplace preparation shipping/provider boundary missing")
-req("Canada" in quote and "storefront-shipping-policy.js" in quote,"private custom quote must surface Canada-only policy")
+req("storefront-parity.js" in quote and "storefront-shipping-policy.js" in quote and "customQuotePreviewMount" in quote,"private custom quote must load the shared Canada-only policy")
+req("limited to Canada" in shared and "allowed_countries: ['CA']" in shared,"shared client policy must visibly define Canada-only fulfillment")
 
 for token in ("exactly one H1","meta description","canonical","crawlable internal links","meaningful alt text","structured data","Product schema parity","storefront-parity.js"):
     req(token.lower() in public_gate.lower(),f"whole-site public SEO gate marker missing: {token}")
