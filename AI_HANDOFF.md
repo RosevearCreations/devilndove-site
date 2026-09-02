@@ -2,152 +2,99 @@
 
 ## Current authority
 
-**Release 467 Build 11 — Admin Operations Command Center** is the active Development source candidate.
+**Release 467 Build 12 — Finance Operations Command Center** is the active Development source candidate.
 
-Start every new chat/workstation/restart by reading `current-development-authority.json`, then this file. `development-release.json` remains compatibility evidence and is not the current Release 467 selector.
+Start every restart by reading `current-development-authority.json`, then this file. `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY** and is not the current Release 467 selector. The middleware Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**.
 
-The exact Development-green predecessor is **Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics**:
+The exact Development-green predecessor is **Release 467 Build 11 — Admin Operations Command Center**:
 
-- merged `dev` commit: `cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a`
-- tree: `c2de52782f96fa43d1e5d2eabd80b30a23c62ecd`
-- System Gate `33635318725` — SUCCESS
-- Release 467 Build 10 I.T. Control Tower Proof `33635318747` — SUCCESS
+- merged `dev`: `ce42f3b2ea553b69085705f500a9e2bd2f689818`
+- tree: `191e4a92ebcbc94b29cfbf6a83259acd4981d302`
+- System Gate `33637049566` — SUCCESS
+- Build 11 Proof `33637049079` — SUCCESS
 
-Build 11 makes `/admin/` the daily operating first stop. It mounts the already-owned Today Tasks read contract on the desktop dashboard and exposes the retained explicit Done/Ignore/Snooze action authority without creating a second task engine or background mutation path.
+## Build 12 technical authority
 
-## Build 11 technical authority
+- manifest: `release467-build12-finance-operations-command-center.json`
+- gate: `scripts/release467_build12_gate.py`
+- proof: `.github/workflows/release467-build12-proof.yml`
+- workspace: `/admin/finance/`
+- shared read engine: `public/js/admin-accounting-operations.js`
+- Finance mount: `financeOperationsMount`
+- write owner: existing `/admin/accounting/` workflows
+- source base: exact merged Build 11 `ce42f3b2ea553b69085705f500a9e2bd2f689818`
 
-- current pointer: `current-development-authority.json`
-- Build 11 manifest: `release467-build11-admin-operations-command-center.json`
-- source gate: `scripts/release467_build11_gate.py`
-- source proof: `.github/workflows/release467-build11-proof.yml`
-- operator workspace: `/admin/`
-- full queue: `/admin/today-tasks/`
-- retained read contract: `/api/admin/contracts/operations-today-tasks-read`
-- retained action authority: `/api/admin/today-task-actions`
-- operations authority: `docs/operations/RELEASE_467_BUILD_11_ADMIN_OPERATIONS_COMMAND_CENTER.md`
-- source base: exact merged Build 10 `cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a`
-
-The desktop Command Center adds module ownership, category/minimum-count filtering, exact-work links, runtime incident detail visibility and explicit administrator Done/Ignore/Snooze controls. Loading the page does not perform task actions.
-
-## Historical authority compatibility boundary
-
-`development-release.json` deliberately remains **INHERITED_REGRESSION_COMPATIBILITY** for still-valid Release 466 historical assertions. The application middleware runtime release header remains `466` as explicit **INHERITED_RUNTIME_COMPATIBILITY** until that separate compatibility contract is deliberately migrated. Neither compatibility surface overrides `current-development-authority.json` or the Release 467 Build 11 operator authority.
-
-Release 467 Build 8 — Authority Convergence and Restart Safety established this current-vs-compatibility separation. Release 467 Build 9 then retired obsolete Release 466 automatic CI fanout while retaining historical proof source and evidence.
+Build 12 promotes the existing read-only Accounting Financial Operations intelligence to the Finance landing page. It surfaces current-month reconciliation exceptions, statement/evidence gaps, product-costing gaps, month-close blockers, recognized revenue/cost snapshots and direct owner links. On Finance, every Accounting anchor resolves to `/admin/accounting/`; no write authority is duplicated or moved.
 
 ## Release 467 authority separation
 
 ### Builds 1–4
-
-Builds 1–4 established the I.T. readiness control tower, recovery/readiness actions, authenticated browser runtime acceptance, and sanitized evidence/acceptance ledger. Build 10 consolidated their read-only findings without removing those bounded authorities.
+I.T. readiness, recovery actions, authenticated runtime acceptance and sanitized evidence ledger remain retained authorities.
 
 ### Build 5 — CI / Cloudflare Access readiness
+Build 5 — CI / Cloudflare Access readiness remains separate. Masked secret references are `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; secret values never belong in source, UI, logs or evidence. **Production Promotion Readiness** remains a separate HOLD/READY authority and never deploys automatically.
 
-Build 5 — CI / Cloudflare Access readiness remains separate from browser acceptance and application-admin authentication. Canonical masked GitHub Actions references are `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; secret values must never appear in UI, logs, artifacts or committed evidence.
-
-**Production Promotion Readiness** remains the separate Build 5 HOLD/READY review authority. It does not deploy Production automatically.
-
-### Release 467 Build 6 — Development Cloudflare Access acceptance harness
-
-Release 467 Build 6 remains the dispatch-only Development Cloudflare Access service-token acceptance authority. Real Access acceptance remains `HOLD_EXTERNAL` until deliberately proven.
+### Release 467 Build 6
+Release 467 Build 6 remains the dispatch-only Development Cloudflare Access service-token acceptance harness. Real Access acceptance remains `HOLD_EXTERNAL` until deliberately proven.
 
 ### Release 467 Build 7 — External Commercial Acceptance Bridge
+Release 467 Build 7 — **External Commercial Acceptance Bridge** remains the visibility authority for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth. It does not execute providers automatically.
 
-Release 467 Build 7 — **External Commercial Acceptance Bridge** — remains the operator visibility bridge for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth acceptance. Build 7 performs no provider action automatically.
-
-### Release 467 Build 8 — Authority Convergence and Restart Safety
-
-Release 467 Build 8 established `current-development-authority.json` as the restart pointer and fenced inherited compatibility evidence away from current Release 467 authority.
-
-### Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction
-
-Build 9 made Release 466 Build 1–6 workflow files manual-only so current Release 467 work no longer produces false-red legacy fanout. Proof scripts/history remain available.
-
-### Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics
-
-Build 10 added the current I.T. operations wrapper and UI summary. It surfaces release/deployment authority, runtime ancestry, root-admin/profile/module metrics, D1 migration/FK metrics, explicit external policy HOLDs and a severity-sorted recovery queue. `/admin/it/` remains the technical first stop.
+### Builds 8–10
+Build 8 retains Authority Convergence and Restart Safety. Build 9 retains Historical CI Retirement. Build 10 retains the read-only I.T. Control Tower at `/admin/it/`.
 
 ### Release 467 Build 11 — Admin Operations Command Center
+Build 11 remains the daily cross-business first stop at `/admin/`, sharing the owned Today Tasks read contract and retained explicit administrator Done/Ignore/Snooze action authority. Four operator workspaces remain backed by five permission modules; Socials/CAIP remains independently permissioned.
 
-Build 11 adds the daily cross-business first stop to `/admin/`. The four operator workspaces remain Storefront, Creator, Finance and I.T.; the underlying permission model remains five modules because Socials/CAIP retains independent module authority while its operator navigation is grouped with Creator.
-
-Today Tasks ownership does not move. Reads stay on the Build 366/369 owned read contract. `POST /api/admin/today-task-actions` remains the Build 393 explicit administrator mutation authority for `completed`, `ignored` and `snoozed`. Build 11 only surfaces that retained authority on desktop and adds visible action feedback.
+### Release 467 Build 12 — Finance Operations Command Center
+Build 12 makes `/admin/finance/` the financial operating first stop. It shares the existing Accounting read engine; it does not create another ledger, reconciliation service, statement importer, costing service or close workflow. Accounting remains the only write owner for those operations.
 
 ## Exact environment boundary
 
-- source authority: `dev`
-- Development target: `https://dev.devilndove-site.pages.dev`
+- source: `dev`
+- Development Preview: `https://dev.devilndove-site.pages.dev`
 - Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
 - Product R2: `devilndove-toolshed-images-dev`
 - CAIP private R2: `devilndove-caip-media-dev`
 - canonical migrations: exactly `0001`–`0004`
-- Build 11 schema change: NONE
-- Build 11 new D1/R2 mutation authority: NONE
-- retained explicit Today Task administrator action authority: unchanged
+- Build 12 schema change: NONE
+- Build 12 new D1/R2 mutation authority: NONE
 
-A chat, workstation, deployment or source commit is not a migration event. Historical migrations are never replayed merely because work resumed.
+A chat, workstation, deployment or source commit is not a migration event. Never replay historical migrations merely because work resumed.
 
-## External/provider acceptance remains bounded
+## External/provider boundary
 
-External lanes remain truthfully **`HOLD_EXTERNAL`** unless separately and deliberately proven:
-
-- Cloudflare Access service-token acceptance — Build 6 authority;
-- Stripe Development/test acceptance — operator/provider controlled;
-- PayPal sandbox acceptance — operator/provider controlled;
-- Social/OAuth controlled acceptance — operator/provider controlled, publication closed;
-- native GitHub rulesets — separate repository-setting authority;
-- CAIP private media — use fresh Build 7 runtime evidence.
-
-Build 11 may display Today task links that lead toward operational work, but it performs no Stripe, PayPal, OAuth or Cloudflare Access execution merely because the dashboard loads.
+External lanes remain truthfully **`HOLD_EXTERNAL`** unless separately and deliberately proven: Cloudflare Access service token, Stripe Development, PayPal sandbox and Social/OAuth. CAIP private-media status uses fresh Build 7 evidence. Build 12 performs no provider/payment/refund/OAuth action merely by rendering Finance intelligence.
 
 ## Main / Production boundary
 
-The last source-head verification carried forward for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`; this is a source-head observation only, not proof of the deployed Production release.
-
-Build 11 does not update `main`, contact Production resources, mutate Production D1/R2/business data, execute provider/payment/OAuth actions, change Cloudflare Access policy, expose secrets or authorize Production promotion.
+The carried-forward `main` source-head observation is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`; it is not proof of the deployed Production release. Build 12 does not update `main`, contact Production, mutate Production D1/R2/business data, change Cloudflare Access policy or authorize Production promotion.
 
 ## Permanent safety rules
 
-- Development first; Production promotion requires a separately reviewed exact-green Development candidate.
-- Production transactional/business data remain Production-owned.
-- Request-time schema DDL remains forbidden.
-- Canonical migrations remain forward-only and Development-first.
-- Raw CAIP R2 deletion remains closed.
-- Provider execution/publication remains closed outside deliberate acceptance.
-- Secret values never belong in UI, logs, artifacts or handoff documents.
-- Build 5 remains Production Promotion Readiness authority.
-- Build 6 remains outer Access service-token authority.
-- Build 7 remains external-commercial visibility authority.
-- Build 9 remains historical-CI retirement authority.
-- Build 10 I.T. recovery guidance remains read-only.
-- Build 11 Today Task writes require an explicit administrator action and do not move the existing mutation authority.
+Development first. Request-time schema DDL remains forbidden. Canonical migrations remain forward-only and Development-first. Raw CAIP deletion remains closed. Provider execution/publication remains closed outside deliberate acceptance. Production business data remain Production-owned. Secret values never belong in UI/logs/artifacts/docs. Build 5 remains Production Promotion Readiness authority; Build 6 Access acceptance; Build 7 external-commercial visibility; Build 9 historical-CI retirement; Build 10 technical first stop; Build 11 daily cross-business first stop; Build 12 Finance projection remains read-only.
 
 ## Next bounded work
 
-Prove Build 11 with its dedicated source proof and all current Release 467/System gates, merge only when green, then re-prove and deploy the exact merged `dev` SHA to the canonical Development Preview.
-
-After Build 11 closure, use `/admin/` for daily business work and `/admin/it/` for technical readiness. Select the next **non-provider** Storefront, Creator or Finance improvement unless we deliberately authorize an external `HOLD_EXTERNAL` acceptance lane.
+Prove Build 12 on its exact feature SHA, open a PR to `dev`, require all current Release 467/System checks green, merge only the unchanged green head, then require the merged Build 12 proof and canonical System Gate to deploy and smoke-test that exact merged `dev` SHA.
 
 ## Canonical reading order
 
 1. `current-development-authority.json`
 2. `AI_HANDOFF.md`
-3. `release467-build11-admin-operations-command-center.json`
+3. `release467-build12-finance-operations-command-center.json`
 4. `PROJECT_STATUS_AND_ROADMAP.md`
 5. `SANITY_HEALTH_CHECK.md`
-6. `docs/operations/RELEASE_467_BUILD_11_ADMIN_OPERATIONS_COMMAND_CENTER.md`
-7. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
+6. `docs/operations/RELEASE_467_BUILD_12_FINANCE_OPERATIONS_COMMAND_CENTER.md`
+7. `release467-build11-admin-operations-command-center.json`
 8. `release467-build10-it-control-tower-consolidation.json`
-9. `docs/operations/RELEASE_467_BUILD_10_IT_CONTROL_TOWER.md`
-10. `release467-build9-historical-ci-retirement.json`
-11. `release467-build8-authority-convergence.json`
-12. `release467-build7-external-commercial-acceptance.json`
-13. `release467-build6-access-acceptance-harness.json`
-14. `release467-build5-production-promotion-readiness.json`
-15. `release467-build5-ci-access-readiness.json`
-16. `development-release.json` — compatibility evidence only
+9. `release467-build9-historical-ci-retirement.json`
+10. `release467-build8-authority-convergence.json`
+11. `release467-build7-external-commercial-acceptance.json`
+12. `release467-build6-access-acceptance-harness.json`
+13. `release467-build5-production-promotion-readiness.json`
+14. `development-release.json` — compatibility evidence only
 
 ## Historical authority
 
-Release 466 and earlier release/build files remain provenance and compatibility evidence. Their manual-only workflow definitions and compatibility metadata cannot override current Release 467 Build 11 authority.
+Release 466 and earlier material is compatibility/provenance only and cannot override current Release 467 Build 12 authority.

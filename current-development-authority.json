@@ -1,25 +1,19 @@
 {
   "release": 467,
-  "build": 11,
-  "title": "Admin Operations Command Center",
+  "build": 12,
+  "title": "Finance Operations Command Center",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build11-admin-operations-command-center",
-  "source_base_sha": "cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a",
-  "last_green_build": 10,
-  "last_green_dev_sha": "cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a",
-  "last_green_dev_tree_sha": "c2de52782f96fa43d1e5d2eabd80b30a23c62ecd",
-  "last_green_system_gate_run": 33635318725,
-  "last_green_build_proof_run": 33635318747,
+  "feature_branch": "release467-build12-finance-operations-command-center",
+  "source_base_sha": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
+  "last_green_build": 11,
+  "last_green_dev_sha": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
+  "last_green_dev_tree_sha": "191e4a92ebcbc94b29cfbf6a83259acd4981d302",
+  "last_green_system_gate_run": 33637049566,
+  "last_green_build_proof_run": 33637049079,
   "development_target": "https://dev.devilndove-site.pages.dev",
-  "development_d1": {
-    "name": "devilndove-dev",
-    "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
-  },
-  "development_r2": [
-    "devilndove-toolshed-images-dev",
-    "devilndove-caip-media-dev"
-  ],
+  "development_d1": {"name": "devilndove-dev", "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
+  "development_r2": ["devilndove-toolshed-images-dev", "devilndove-caip-media-dev"],
   "main_source_head_last_verified": "fcf92f5342c04f0f0d07387034e852b4cc40f3f9",
   "production_deployment_must_be_verified_independently": true,
   "compatibility_authority": {
@@ -28,9 +22,10 @@
     "top_level_release_remains": 466,
     "runtime_release_header": 466,
     "runtime_release_header_role": "INHERITED_RUNTIME_COMPATIBILITY",
-    "reason": "Release 467 current operator/restart authority remains separate from inherited Release 466 regression fields and the compatibility runtime release header. Build 11 changes the admin operator surface, not that compatibility contract."
+    "reason": "Release 467 Build 12 advances the Finance operator surface only. Inherited Release 466 regression fields and runtime header remain compatibility evidence, not current release authority."
   },
   "current_release_authorities": [
+    "release467-build12-finance-operations-command-center.json",
     "release467-build11-admin-operations-command-center.json",
     "release467-build10-it-control-tower-consolidation.json",
     "release467-build9-historical-ci-retirement.json",
@@ -59,5 +54,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 11 makes /admin/ the daily operations first stop while Build 10 keeps /admin/it/ as the read-only technical first stop. Today task writes remain explicit administrator actions through the retained audited action authority; no new mutation authority is introduced."
+  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 12 makes /admin/finance/ the read-only financial operating first stop by sharing the existing Accounting operations-intelligence engine; Accounting retains every reconciliation, statement-import, costing, close and ledger write authority."
 }
