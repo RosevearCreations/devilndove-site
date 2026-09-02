@@ -12,6 +12,10 @@ Exact green predecessor: Release 467 Build 11 at `ce42f3b2ea553b69085705f500a9e2
 - [x] `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY**.
 - [x] Runtime Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**.
 
+## Locked Build 8 provenance sanity
+
+**Release 467 Build 8 — Authority Convergence and Restart Safety** remains locked historical provenance. Its exact Build 7 predecessor was `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, with System Gate `33591744817` and Build 7 Proof `33591744787` both SUCCESS. External acceptance remained `HOLD_EXTERNAL`. These facts are retained for regression proof and do not override current Build 12 authority.
+
 ## Build 12 Finance Operations Command Center
 
 - [x] `/admin/finance/` contains `financeOperationsMount`.
@@ -57,12 +61,13 @@ Exact green predecessor: Release 467 Build 11 at `ce42f3b2ea553b69085705f500a9e2
 
 ## Main / Production sanity
 
-Carried-forward `main` source-head observation: `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`; not proof of deployed Production.
-
-- [x] Build 12 does not update `main`.
-- [x] Build 12 does not contact or mutate Production resources/data.
-- [x] Build 12 does not authorize Production promotion.
+- [x] `main` is exact Build 11 SHA `ce42f3b2ea553b69085705f500a9e2bd2f689818`, tree `191e4a92ebcbc94b29cfbf6a83259acd4981d302`.
+- [x] Production Pages Deploy `33640133776` — SUCCESS on that exact SHA.
+- [x] Production business counts were snapshotted and preserved through the canonical migration proof.
+- [x] Production D1 isolation, canonical migrations, migration proofs and foreign keys passed.
+- [x] Exact Production Pages deployment, bindings and public smoke acceptance passed.
+- [x] Build 12 remains Development-only and does not authorize a further Production promotion.
 
 ## Current verdict
 
-Release 467 Build 11 is the exact proven Development predecessor. Release 467 Build 12 is a bounded, schema-neutral Finance application candidate that promotes existing Accounting read intelligence to `/admin/finance/` while keeping every financial write owner unchanged. External lanes remain truthfully `HOLD_EXTERNAL`.
+Release 467 Build 11 is the exact proven Development and Production baseline. Release 467 Build 12 is a bounded, schema-neutral Finance application candidate that promotes existing Accounting read intelligence to `/admin/finance/` while keeping every financial write owner unchanged. External lanes remain truthfully `HOLD_EXTERNAL`.
