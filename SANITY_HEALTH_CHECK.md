@@ -4,7 +4,7 @@
 
 **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** is the active Development source candidate.
 
-Exact green predecessor: Release 467 Build 12 at `374983f68fb16172fb357b1755293a29e5d2953f`, tree `339f13b5a6e6ba5cc4a9c64ea3b04b70ad8aef91`.
+Exact green predecessor: Release 467 Build 12 — **Finance Operations Command Center** at `374983f68fb16172fb357b1755293a29e5d2953f`, tree `339f13b5a6e6ba5cc4a9c64ea3b04b70ad8aef91`.
 
 - [x] Build 12 System Gate `33642231716` — SUCCESS.
 - [x] Build 12 Proof `33642231794` — SUCCESS.
