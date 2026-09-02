@@ -1,0 +1,53 @@
+{
+  "release": 467,
+  "build": 8,
+  "title": "Authority Convergence and Restart Safety",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_branch": "release467-build8-authority-convergence",
+  "source_base_sha": "5eef764a67466dc2989a4681c6a7cc782b9d4df9",
+  "purpose": "Eliminate restart-authority drift after Release 467 Build 7 without rewriting inherited Release 466 regression evidence or executing any external provider lane.",
+  "scope": [
+    "current_development_authority_pointer",
+    "restart_reading_order",
+    "project_roadmap_convergence",
+    "sanity_health_convergence",
+    "it_preflight_convergence",
+    "markdown_index_convergence",
+    "authority_drift_source_gate"
+  ],
+  "required_current_files": [
+    "current-development-authority.json",
+    "AI_HANDOFF.md",
+    "PROJECT_STATUS_AND_ROADMAP.md",
+    "SANITY_HEALTH_CHECK.md",
+    "MARKDOWN_INDEX.md",
+    "docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md",
+    "docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md"
+  ],
+  "compatibility_rule": {
+    "development_release_json_is_current_restart_pointer": false,
+    "development_release_json_role": "INHERITED_REGRESSION_COMPATIBILITY",
+    "development_release_json_release_must_remain": 466,
+    "release466_build4_gate_must_continue_to_pass": true
+  },
+  "predecessor": {
+    "release": 467,
+    "build": 7,
+    "merged_dev_sha": "5eef764a67466dc2989a4681c6a7cc782b9d4df9",
+    "tree_sha": "f7327733dc423982016829d717521ceab2029f35",
+    "system_gate_run": 33591744817,
+    "build7_proof_run": 33591744787
+  },
+  "external_acceptance_state": "HOLD_EXTERNAL",
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false,
+  "completion_contract": "Build 8 is source-green only when the current authority pointer and all restart documents agree on Release 467, Build 7 remains proven, inherited Release 466 regression contracts remain intact, and no external or Production boundary is widened."
+}

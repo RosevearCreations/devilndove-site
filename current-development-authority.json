@@ -1,0 +1,57 @@
+{
+  "release": 467,
+  "build": 8,
+  "title": "Authority Convergence and Restart Safety",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_authority": "dev",
+  "feature_branch": "release467-build8-authority-convergence",
+  "source_base_sha": "5eef764a67466dc2989a4681c6a7cc782b9d4df9",
+  "last_green_build": 7,
+  "last_green_dev_sha": "5eef764a67466dc2989a4681c6a7cc782b9d4df9",
+  "last_green_dev_tree_sha": "f7327733dc423982016829d717521ceab2029f35",
+  "last_green_system_gate_run": 33591744817,
+  "last_green_build_proof_run": 33591744787,
+  "development_target": "https://dev.devilndove-site.pages.dev",
+  "development_d1": {
+    "name": "devilndove-dev",
+    "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+  },
+  "development_r2": [
+    "devilndove-toolshed-images-dev",
+    "devilndove-caip-media-dev"
+  ],
+  "main_source_head_last_verified": "fcf92f5342c04f0f0d07387034e852b4cc40f3f9",
+  "production_deployment_must_be_verified_independently": true,
+  "compatibility_authority": {
+    "file": "development-release.json",
+    "role": "INHERITED_REGRESSION_COMPATIBILITY",
+    "top_level_release_remains": 466,
+    "reason": "Inherited Release 466 gates intentionally consume its historical convergence fields. It is not the current restart pointer for Release 467."
+  },
+  "current_release_authorities": [
+    "release467-build7-external-commercial-acceptance.json",
+    "release467-build6-access-acceptance-harness.json",
+    "release467-build5-production-promotion-readiness.json",
+    "release467-build5-ci-access-readiness.json",
+    "release467-build4-evidence-acceptance-ledger.json"
+  ],
+  "external_lanes": {
+    "cloudflare_access_service_token": "HOLD_EXTERNAL",
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "USE_FRESH_BUILD7_RUNTIME_EVIDENCE"
+  },
+  "promotion_authority": "release467-build5-production-promotion-readiness.json",
+  "promotion_state": "NO_AUTOMATIC_PROMOTION",
+  "schema_change_authorized": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false,
+  "restart_rule": "Read this file first, then AI_HANDOFF.md. Do not infer current Release 467 state from development-release.json or older Release 466 documents."
+}

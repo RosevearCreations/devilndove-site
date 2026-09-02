@@ -82,10 +82,22 @@ def main() -> None:
     for marker in forbidden_js_markers:
         require(marker not in js, f"forbidden Build 5 browser behavior found: {marker}")
 
-    require("Build 5 — CI / Cloudflare Access readiness" in handoff, "canonical handoff must retain Release 467 Build 5 CI / Access authority")
-    require("HOLD_EXTERNAL" in handoff, "canonical handoff must preserve external CI Access hold")
-    require("CF_ACCESS_CLIENT_ID" in handoff and "CF_ACCESS_CLIENT_SECRET" in handoff, "handoff must name canonical secret names")
-    require("Release 466" not in handoff.split("## Historical authority", 1)[0], "stale Release 466 current authority remains in handoff")
+    # Older Build 5 handoffs used exact-current wording. Newer Release 467 builds may supersede
+    # that wording only when the Build 5 CI/Access authority remains explicit and bounded.
+    forward_release467 = any(marker in handoff for marker in (
+        "Release 467 Build 6", "Release 467 Build 7", "Release 467 Build 8", "Release 467 Build 9"
+    ))
+    if forward_release467:
+        require("Build 5" in handoff and "Cloudflare Access" in handoff, "forward handoff must retain Build 5 CI / Access authority")
+        require("Production Promotion Readiness" in handoff, "forward handoff must preserve separate Build 5 promotion authority")
+        require("HOLD_EXTERNAL" in handoff, "forward handoff must preserve external CI Access hold")
+        require("CF_ACCESS_CLIENT_ID" in handoff and "CF_ACCESS_CLIENT_SECRET" in handoff, "handoff must name canonical secret names")
+        require("development-release.json" in handoff and "INHERITED_REGRESSION_COMPATIBILITY" in handoff, "forward handoff must fence inherited compatibility evidence")
+    else:
+        require("Build 5 — CI / Cloudflare Access readiness" in handoff, "canonical handoff must retain Release 467 Build 5 CI / Access authority")
+        require("HOLD_EXTERNAL" in handoff, "canonical handoff must preserve external CI Access hold")
+        require("CF_ACCESS_CLIENT_ID" in handoff and "CF_ACCESS_CLIENT_SECRET" in handoff, "handoff must name canonical secret names")
+        require("Release 466" not in handoff.split("## Historical authority", 1)[0], "stale Release 466 current authority remains in handoff")
 
     require("python scripts/release467_build5_gate.py" in workflow, "Build 5 workflow does not execute the source gate")
     require("Cloudflare contact: NONE" in workflow, "Build 5 source workflow boundary missing")

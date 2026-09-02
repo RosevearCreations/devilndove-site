@@ -154,13 +154,24 @@ def main() -> None:
     ):
         req(forbidden not in ui, f'forbidden Build 7 browser behavior found: {forbidden}')
 
-    req('Release 467 Build 7' in handoff, 'canonical handoff has not converged to Build 7')
-    req('External Commercial Acceptance Bridge' in handoff, 'Build 7 handoff title missing')
-    req('HOLD_EXTERNAL' in handoff, 'Build 7 handoff must retain external hold semantics')
-    req('Build 5 — CI / Cloudflare Access readiness' in handoff, 'Build 5 CI / Access handoff authority must remain')
-    req('Production Promotion Readiness' in handoff, 'Build 5 promotion handoff authority must remain')
-    req('Release 467 Build 6' in handoff, 'Build 6 handoff authority must remain')
-    req('Release 466' not in handoff.split('## Historical authority', 1)[0], 'stale Release 466 current authority remains in handoff')
+    # Preserve Build 7's handoff contract while allowing a newer Release 467 build to become current.
+    forward_release467 = 'Release 467 Build 8' in handoff or 'Release 467 Build 9' in handoff
+    if forward_release467:
+        req('Release 467 Build 7' in handoff, 'forward handoff must retain Build 7 predecessor authority')
+        req('External Commercial Acceptance Bridge' in handoff, 'forward handoff must retain Build 7 title/context')
+        req('HOLD_EXTERNAL' in handoff, 'forward handoff must retain external hold semantics')
+        req('Build 5' in handoff and 'Production Promotion Readiness' in handoff, 'forward handoff must retain Build 5 promotion authority')
+        req('Build 6' in handoff and 'Cloudflare Access' in handoff, 'forward handoff must retain Build 6 Access authority')
+        req('development-release.json' in handoff and 'INHERITED_REGRESSION_COMPATIBILITY' in handoff, 'forward handoff must fence inherited Release 466 compatibility evidence')
+        req('Release 466' in handoff, 'forward handoff must explain inherited Release 466 compatibility rather than silently deleting it')
+    else:
+        req('Release 467 Build 7' in handoff, 'canonical handoff has not converged to Build 7')
+        req('External Commercial Acceptance Bridge' in handoff, 'Build 7 handoff title missing')
+        req('HOLD_EXTERNAL' in handoff, 'Build 7 handoff must retain external hold semantics')
+        req('Build 5 — CI / Cloudflare Access readiness' in handoff, 'Build 5 CI / Access handoff authority must remain')
+        req('Production Promotion Readiness' in handoff, 'Build 5 promotion handoff authority must remain')
+        req('Release 467 Build 6' in handoff, 'Build 6 handoff authority must remain')
+        req('Release 466' not in handoff.split('## Historical authority', 1)[0], 'stale Release 466 current authority remains in handoff')
 
     for marker in (
         'python scripts/release467_build6_gate.py',
