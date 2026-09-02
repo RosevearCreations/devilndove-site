@@ -22,7 +22,103 @@ function boolInt(value) {
   return null;
 }
 
-function diagnosticsFor(config) {
+function roleAccessFor(config, moduleKey, roleCode) {
+  return (config?.role_access || []).find((row) =>
+    normalizeText(row?.module_key).toLowerCase() === moduleKey &&
+    normalizeText(row?.role_code).toLowerCase() === roleCode
+  ) || null;
+}
+
+function effectiveAccess(config, profile, explicitRows, moduleKey) {
+  const module = (config?.modules || []).find((row) => normalizeText(row?.module_key).toLowerCase() === moduleKey) || null;
+  if (!module || Number(module.is_enabled || 0) !== 1) return { allowed: false, access_level: 'none', source: 'module_disabled' };
+  const explicit = explicitRows.find((row) => normalizeText(row?.module_key).toLowerCase() === moduleKey);
+  if (explicit) {
+    const allowed = Number(explicit.is_allowed || 0) === 1 && normalizeText(explicit.access_level).toLowerCase() !== 'none';
+    return { allowed, access_level: allowed ? normalizeText(explicit.access_level).toLowerCase() : 'none', source: allowed ? 'explicit_user_grant' : 'explicit_user_denial' };
+  }
+  const role = roleAccessFor(config, moduleKey, normalizeText(profile.role).toLowerCase());
+  const allowed = Number(role?.is_allowed || 0) === 1 && normalizeText(role?.access_level).toLowerCase() !== 'none';
+  return { allowed, access_level: allowed ? normalizeText(role?.access_level).toLowerCase() : 'none', source: allowed ? 'role' : 'role_denied' };
+}
+
+async function loadProfiles(db, config) {
+  try {
+    const [userResult, accessResult] = await Promise.all([
+      db.prepare(`
+        SELECT user_id,email,display_name,role,is_active
+        FROM users
+        ORDER BY CASE WHEN lower(trim(role))='admin' THEN 0 ELSE 1 END, user_id ASC
+      `).all(),
+      db.prepare(`
+        SELECT module_key,user_id,is_allowed,access_level
+        FROM app_module_user_access
+        ORDER BY user_id ASC,module_key ASC
+      `).all(),
+    ]);
+    const users = userResult?.results || [];
+    const access = accessResult?.results || [];
+    const activeAdminIds = users
+      .filter((row) => Number(row?.is_active || 0) === 1 && normalizeText(row?.role).toLowerCase() === 'admin')
+      .map((row) => Number(row.user_id || 0))
+      .filter(Boolean)
+      .sort((a, b) => a - b);
+    const rootAdminId = activeAdminIds[0] || 0;
+    const profiles = users.map((row) => {
+      const userId = Number(row.user_id || 0);
+      const explicitRows = access.filter((entry) => Number(entry?.user_id || 0) === userId).map((entry) => ({
+        module_key: normalizeText(entry.module_key).toLowerCase(),
+        is_allowed: Number(entry.is_allowed || 0) === 1 ? 1 : 0,
+        access_level: normalizeText(entry.access_level).toLowerCase() || 'none',
+      }));
+      const moduleAccess = EXPECTED_MODULE_KEYS.map((moduleKey) => {
+        const explicit = explicitRows.find((entry) => entry.module_key === moduleKey) || null;
+        const effective = effectiveAccess(config, row, explicitRows, moduleKey);
+        return {
+          module_key: moduleKey,
+          explicit: explicit ? { is_allowed: explicit.is_allowed, access_level: explicit.access_level } : null,
+          effective_allowed: effective.allowed,
+          effective_access_level: effective.access_level,
+          effective_source: effective.source,
+        };
+      });
+      const fullManage = moduleAccess.every((entry) => entry.effective_allowed && entry.effective_access_level === 'manage');
+      return {
+        user_id: userId,
+        email: row.email || '',
+        display_name: row.display_name || '',
+        role: normalizeText(row.role).toLowerCase() || 'member',
+        is_active: Number(row.is_active || 0) === 1,
+        is_root_admin: userId === rootAdminId,
+        full_manage: fullManage,
+        module_access: moduleAccess,
+      };
+    });
+    const root = profiles.find((row) => row.is_root_admin) || null;
+    return {
+      schema_ready: true,
+      profiles,
+      root_admin_user_id: rootAdminId || null,
+      root_admin_full_manage: Boolean(root?.full_manage),
+      root_admin_missing_manage_modules: root ? root.module_access.filter((entry) => !(entry.effective_allowed && entry.effective_access_level === 'manage')).map((entry) => entry.module_key) : EXPECTED_MODULE_KEYS,
+      active_admin_count: activeAdminIds.length,
+      active_profile_count: profiles.filter((row) => row.is_active).length,
+    };
+  } catch (error) {
+    return {
+      schema_ready: false,
+      profiles: [],
+      root_admin_user_id: null,
+      root_admin_full_manage: false,
+      root_admin_missing_manage_modules: EXPECTED_MODULE_KEYS,
+      active_admin_count: 0,
+      active_profile_count: 0,
+      reason: normalizeText(error?.message) || 'profile_access_read_failed',
+    };
+  }
+}
+
+function diagnosticsFor(config, profileSnapshot = null) {
   const modules = Array.isArray(config?.modules) ? config.modules : [];
   const roleAccess = Array.isArray(config?.role_access) ? config.role_access : [];
   const moduleKeys = modules.map((row) => normalizeText(row?.module_key).toLowerCase()).filter(Boolean).sort();
@@ -40,12 +136,14 @@ function diagnosticsFor(config) {
   const roleRecoveryModules = EXPECTED_MODULE_KEYS.filter((key) => key !== MODULE_KEYS.IT_PLATFORM);
   const adminRecoveryRisks = roleRecoveryModules.filter((moduleKey) => {
     const row = roleAccess.find((entry) => normalizeText(entry?.module_key).toLowerCase() === moduleKey && normalizeText(entry?.role_code).toLowerCase() === 'admin');
-    return !row || Number(row.is_allowed || 0) !== 1 || normalizeText(row.access_level).toLowerCase() === 'none';
+    return !row || Number(row.is_allowed || 0) !== 1 || normalizeText(row.access_level).toLowerCase() !== 'manage';
   });
   const routeSnapshot = snapshotRouteOwnership();
+  const profileReady = profileSnapshot?.schema_ready === true;
+  const rootAdminReady = profileSnapshot?.root_admin_full_manage === true;
 
   const healthy = Boolean(
-    config?.schema_ready && !config?.migration_required &&
+    config?.schema_ready && !config?.migration_required && profileReady && rootAdminReady &&
     modules.length === EXPECTED_MODULE_KEYS.length &&
     roleAccess.length === EXPECTED_ROLE_KEYS.length &&
     missingModules.length === 0 && unexpectedModules.length === 0 &&
@@ -71,6 +169,12 @@ function diagnosticsFor(config) {
     invalid_role_rows: invalidRoleRows.map((row) => `${row.module_key}:${row.role_code}`),
     disabled_with_background: disabledWithBackground.map((row) => row.module_key),
     admin_recovery_risks: adminRecoveryRisks,
+    profile_schema_ready: profileReady,
+    active_profile_count: Number(profileSnapshot?.active_profile_count || 0),
+    active_admin_count: Number(profileSnapshot?.active_admin_count || 0),
+    root_admin_user_id: profileSnapshot?.root_admin_user_id || null,
+    root_admin_full_manage: rootAdminReady,
+    root_admin_missing_manage_modules: profileSnapshot?.root_admin_missing_manage_modules || EXPECTED_MODULE_KEYS,
     it_access_model: 'explicit-user-grant',
   };
 }
@@ -81,10 +185,24 @@ async function requireAdmin(request, env) {
   return { admin };
 }
 
+async function requireItManager(db, admin) {
+  const row = await db.prepare(`
+    SELECT is_allowed,access_level
+    FROM app_module_user_access
+    WHERE module_key='it-platform' AND user_id=?
+    LIMIT 1
+  `).bind(Number(admin.user_id || 0)).first();
+  return Number(row?.is_allowed || 0) === 1 && normalizeText(row?.access_level).toLowerCase() === 'manage';
+}
+
 export async function onRequestGet({ request, env }) {
   const auth = await requireAdmin(request, env);
   if (auth.error) return auth.error;
+  const db = getDb(env);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
   const config = await readModuleConfig(env, { force: true });
+  const profileSnapshot = await loadProfiles(db, config);
+  const canManageUserAccess = await requireItManager(db, auth.admin).catch(() => false);
   return json({
     ok: true,
     release: CURRENT_RELEASE,
@@ -94,11 +212,14 @@ export async function onRequestGet({ request, env }) {
     reason: config.reason || null,
     modules: config.modules,
     role_access: config.role_access,
-    diagnostics: diagnosticsFor(config),
+    profiles: profileSnapshot.profiles,
+    current_admin: { user_id: Number(auth.admin.user_id || 0), email: auth.admin.email || '', display_name: auth.admin.display_name || '' },
+    can_manage_user_access: canManageUserAccess,
+    diagnostics: diagnosticsFor(config, profileSnapshot),
     recovery_surface: true,
     notes: config.migration_required
       ? 'Canonical five-module registry migration is required before module-control writes are enabled.'
-      : 'Module changes are audited and never delete module business data.',
+      : 'Module, role and explicit-user changes are audited. I.T. grants remain explicit-user only.',
   });
 }
 
@@ -112,7 +233,7 @@ export async function onRequestPost({ request, env }) {
   if (!config.schema_ready || config.migration_required) {
     return json({
       ok: false,
-      error: 'Canonical five-module registry is not ready. Apply database_platform_convergence.sql before changing module state.',
+      error: 'Canonical five-module registry is not ready. Apply the canonical migration stream before changing module state.',
       code: 'app_module_registry_migration_required',
       source: config.source || 'unknown',
       reason: config.reason || null,
@@ -205,6 +326,61 @@ export async function onRequestPost({ request, env }) {
       details: { before: before || null, after: { module_key: moduleKey, role_code: roleCode, is_allowed: isAllowed, access_level: accessLevel } },
     });
     return json({ ok: true, release: CURRENT_RELEASE, module_key: moduleKey, role_code: roleCode, is_allowed: isAllowed, access_level: accessLevel });
+  }
+
+  if (action === 'set_user_access' || action === 'clear_user_access') {
+    if (!(await requireItManager(db, auth.admin))) {
+      return json({ ok: false, error: 'Explicit user-module grants may only be changed by an I.T. manager.', code: 'it_manager_required' }, 403);
+    }
+    const userId = Number(body?.user_id || 0);
+    if (!Number.isInteger(userId) || userId <= 0) return json({ ok: false, error: 'A valid user_id is required.' }, 400);
+    const target = await db.prepare('SELECT user_id,email,display_name,role,is_active FROM users WHERE user_id=? LIMIT 1').bind(userId).first();
+    if (!target) return json({ ok: false, error: 'User profile was not found.' }, 404);
+    const activeRoot = await db.prepare("SELECT user_id FROM users WHERE is_active=1 AND lower(trim(role))='admin' ORDER BY user_id ASC LIMIT 1").first();
+    const rootAdminId = Number(activeRoot?.user_id || 0);
+    const before = await db.prepare(`
+      SELECT module_key,user_id,is_allowed,access_level FROM app_module_user_access
+      WHERE module_key=? AND user_id=? LIMIT 1
+    `).bind(moduleKey, userId).first();
+
+    if (action === 'clear_user_access') {
+      if (userId === rootAdminId && moduleKey === MODULE_KEYS.IT_PLATFORM) {
+        return json({ ok: false, error: 'The root administrator I.T. manage grant is a recovery invariant and cannot be cleared here.', code: 'root_admin_it_recovery_guard' }, 409);
+      }
+      await db.prepare('DELETE FROM app_module_user_access WHERE module_key=? AND user_id=?').bind(moduleKey, userId).run();
+      await auditAdminAction(env, request, auth.admin, {
+        action_type: 'application_module_user_access_cleared',
+        target_type: 'app_module_user_access',
+        target_id: userId,
+        target_key: `${moduleKey}:${userId}`,
+        details: { before: before || null, after: null },
+      });
+      return json({ ok: true, release: CURRENT_RELEASE, module_key: moduleKey, user_id: userId, explicit_access: null });
+    }
+
+    const isAllowed = boolInt(body?.is_allowed);
+    let accessLevel = normalizeText(body?.access_level).toLowerCase() || (isAllowed ? 'read' : 'none');
+    if (isAllowed == null) return json({ ok: false, error: 'is_allowed must be true/false or 1/0.' }, 400);
+    if (!ALLOWED_ACCESS_LEVELS.has(accessLevel)) return json({ ok: false, error: 'Unsupported access_level.' }, 400);
+    if (isAllowed === 0) accessLevel = 'none';
+    if (isAllowed === 1 && accessLevel === 'none') return json({ ok: false, error: 'An allowed user grant must have a non-none access_level.' }, 400);
+    if (userId === rootAdminId && moduleKey === MODULE_KEYS.IT_PLATFORM && !(isAllowed === 1 && accessLevel === 'manage')) {
+      return json({ ok: false, error: 'The root administrator must retain explicit I.T. manage access.', code: 'root_admin_it_recovery_guard' }, 409);
+    }
+    await db.prepare(`
+      INSERT INTO app_module_user_access (module_key,user_id,is_allowed,access_level,created_at,updated_at)
+      VALUES (?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      ON CONFLICT(module_key,user_id) DO UPDATE SET
+        is_allowed=excluded.is_allowed, access_level=excluded.access_level, updated_at=CURRENT_TIMESTAMP
+    `).bind(moduleKey, userId, isAllowed, accessLevel).run();
+    await auditAdminAction(env, request, auth.admin, {
+      action_type: 'application_module_user_access_changed',
+      target_type: 'app_module_user_access',
+      target_id: userId,
+      target_key: `${moduleKey}:${userId}`,
+      details: { before: before || null, after: { module_key: moduleKey, user_id: userId, is_allowed: isAllowed, access_level: accessLevel } },
+    });
+    return json({ ok: true, release: CURRENT_RELEASE, module_key: moduleKey, user_id: userId, is_allowed: isAllowed, access_level: accessLevel });
   }
 
   return json({ ok: false, error: 'Unsupported module-control action.' }, 400);
