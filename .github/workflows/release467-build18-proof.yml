@@ -1,15 +1,6 @@
 name: Release 467 Build 18 Order Fulfillment Customer Care Proof
 
 on:
-  push:
-    branches:
-      - release467-build18-order-fulfillment-customer-care
-      - dev
-      - main
-  pull_request:
-    branches:
-      - dev
-      - main
   workflow_dispatch:
 
 permissions:
@@ -58,9 +49,7 @@ jobs:
           fi
       - name: Boundary
         run: |
-          echo 'Build 18 is a read-only Order Fulfillment and Customer Care command center.'
-          echo 'Build 16 provenance is retained transitively through exact Build 17 predecessor evidence.'
+          echo 'Build 18 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Orders, Custom Requests, Customers and Accounting retain all write authority.'
-          echo 'No automatic order status, payment, refund, customer message, custom stage, fulfillment, shipping-provider or payment-provider action is authorized.'
           echo 'Canada-only shipping and the U.S. sales/shipping suspension remain preserved.'
-          echo 'No schema migration, new broad D1/R2 authority, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
+          echo 'No schema migration, new broad D1/R2 authority, provider execution, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
