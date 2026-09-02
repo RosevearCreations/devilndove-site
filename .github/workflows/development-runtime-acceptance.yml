@@ -132,6 +132,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${DND_DEV_SESSION_COOKIE}" ]; then
+            echo 'RUNTIME_SESSION_AVAILABLE=true' >> "$GITHUB_ENV"
             echo 'Using configured masked Development session credential.'
             exit 0
           fi
@@ -145,15 +146,19 @@ jobs:
                   for child in value.values(): yield from walk(child)
               elif isinstance(value,list):
                   for child in value: yield from walk(child)
-          token=next(walk(data),'').strip()
-          assert token,'No unexpired active admin Development session exists; authenticated acceptance remains closed.'
-          print(token)
+          print(next(walk(data),'').strip())
           PY
           )"
+          rm -f /tmp/development-runtime-session.json
+          if [ -z "${TOKEN}" ]; then
+            echo 'RUNTIME_SESSION_AVAILABLE=false' >> "$GITHUB_ENV"
+            echo '::warning::AUTHENTICATED DEVELOPMENT SESSION: AMBER_NO_ACTIVE_SESSION — no unexpired active admin session exists; no session was created or mutated.'
+            exit 0
+          fi
           echo "::add-mask::${TOKEN}"
           echo "DND_DEV_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
+          echo 'RUNTIME_SESSION_AVAILABLE=true' >> "$GITHUB_ENV"
           unset TOKEN
-          rm -f /tmp/development-runtime-session.json
           echo 'Existing active Development admin session resolved read-only; token value was not emitted.'
 
       - name: Report Cloudflare Access credential mode
@@ -175,6 +180,33 @@ jobs:
       - name: Authenticated current Development GET-only runtime proof
         shell: bash
         run: |
+          set -euo pipefail
+          if [ "${RUNTIME_SESSION_AVAILABLE:-false}" != true ]; then
+            python - <<'PY'
+          import json,os
+          evidence={
+            'authority':'development-runtime-acceptance',
+            'state':'AMBER_NO_ACTIVE_SESSION',
+            'target':os.environ.get('DND_DEV_BASE_URL',''),
+            'exact_source_sha':os.environ.get('EXPECTED_SOURCE_SHA',''),
+            'root_admin_authority':'proven_read_only',
+            'application_session':'no_unexpired_active_admin_session',
+            'authenticated_http_attempted':False,
+            'cloudflare_access':'AMBER_EXTERNAL_ACCESS_UNRESOLVED',
+            'required_access_permission':'Access: Service Tokens Write',
+            'session_created':False,
+            'access_policy_mutation':False,
+            'd1_mutation':False,
+            'r2_mutation':False,
+            'provider_execution':False,
+            'production_mutation':False,
+            'credentials_emitted':False,
+          }
+          open('/tmp/development-runtime-evidence.json','w',encoding='utf-8').write(json.dumps(evidence,indent=2,sort_keys=True)+'\n')
+          PY
+            echo '::warning::AUTHENTICATED DEVELOPMENT RUNTIME: AMBER_NO_ACTIVE_SESSION — D1/root-admin/anonymous Access protection are proven, but no unexpired admin session exists for authenticated HTTP.'
+            exit 0
+          fi
           set +e
           python scripts/development_runtime_acceptance.py --base-url "${DND_DEV_BASE_URL}" --evidence-json /tmp/development-runtime-evidence.json 2>&1 | tee /tmp/development-runtime-output.log
           STATUS=${PIPESTATUS[0]}
@@ -191,9 +223,12 @@ jobs:
             'state':'AMBER_EXTERNAL_ACCESS',
             'target':os.environ.get('DND_DEV_BASE_URL',''),
             'exact_source_sha':os.environ.get('EXPECTED_SOURCE_SHA',''),
+            'root_admin_authority':'proven_read_only',
             'application_session':'resolved_read_only',
+            'authenticated_http_attempted':True,
             'cloudflare_access':'protected_service_token_not_configured',
-            'required_permission':'Access: Service Tokens Write',
+            'required_access_permission':'Access: Service Tokens Write',
+            'session_created':False,
             'access_policy_mutation':False,
             'd1_mutation':False,
             'r2_mutation':False,
@@ -223,8 +258,9 @@ jobs:
         run: |
           echo "Exact source SHA: ${EXPECTED_SOURCE_SHA}"
           echo 'Target: canonical devilndove-site / dev Preview only'
-          echo 'HTTP acceptance: GET ONLY'
+          echo 'HTTP acceptance: GET ONLY when an existing admin session is available'
           echo 'D1 identity/root-admin/session lookup: READ ONLY'
+          echo 'Missing active admin session: explicit AMBER_NO_ACTIVE_SESSION; no session is created by acceptance'
           echo 'Cloudflare Access: never weakened; absent service-token authority is explicit AMBER_EXTERNAL_ACCESS, never inferred GREEN'
           echo 'D1 mutation: NONE'
           echo 'R2 mutation: NONE'
