@@ -2,120 +2,102 @@
 
 ## Current authority
 
-**Release 467 Build 14 — Product Release Quality Command Center** is the active Development source candidate.
+**Release 467 Build 15 — Storefront / SEO Parity** is the active Development source candidate.
 
-Start every restart by reading `current-development-authority.json`, then this file, then `docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md`. `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY** and is not the current Release 467 selector. The middleware Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**.
+Read `current-development-authority.json` first, then this file, then `docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md`. `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY** and the middleware Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**.
 
-Build 14 started from current `dev` `86907d512c5121bb05306ca9d31d4aecb5fd6c50`, tree `9740eec99afbcd93773ab7e3b875037c183591db`. The exact last Development-green application/maintenance predecessor is **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup**:
+Exact Development-green predecessor: **Release 467 Build 14 — Product Release Quality Command Center**:
 
-- merged `dev`: `794fd5b36191fff4c9e8376197f968d9c6d6da80`
-- tree: `9c2bcdcb12bcbf2f00aeb19345329cdce39c65d9`
-- System Gate `33643833623` — SUCCESS
-- Build 13 Proof `33643833608` — SUCCESS
+- merged `dev`: `dd92a10799f0f7656fe9508a25a983839117a1d0`
+- tree: `dbe3ed8e1be82c02223a346f58a626654f8d5382`
+- System Gate `33649971571` — SUCCESS
+- Build 14 Proof `33649971525` — SUCCESS
 
-The Build 14 source base also contains the documentation-only autonomous backlog/index merges after Build 13; they did not change application runtime or the Build 13 green evidence.
+Build 14 retained Release 467 Build 13 — **Repository Hygiene and Historical CI Cleanup** at `794fd5b36191fff4c9e8376197f968d9c6d6da80`; Build 13 retained exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`.
 
-## Build 14 technical authority
+## Build 15 scope — autonomous items 6–10
 
-- manifest: `release467-build14-product-release-quality.json`
-- gate: `scripts/release467_build14_gate.py`
-- proof: `.github/workflows/release467-build14-proof.yml`
-- workspace: `/admin/products/`
-- quality UI: `public/js/admin-product-quality-command-center.js`
-- product read authority: `/api/admin/products`
-- readiness authority: `/api/admin/product-readiness`
-- existing crop/focal authority: `public/js/admin-product-images.js` + `/api/admin/product-images`
-- existing marketplace export authority: `/api/admin/marketplace-export-preview`
-- marketplace validation helper: `functions/api/_lib/marketplaceReadiness.js`
-- schema/D1/R2 migration change: NONE
-- provider publication/execution: NONE
+Build 15 is schema-neutral Storefront quality work:
 
-Build 14 owns autonomous backlog items **1–5**. It creates one ranked Product Release Quality Command Center, exposes visual quality/readiness badges, links product cards directly to the existing non-destructive crop/focal/derivative workflow, extends local marketplace image readiness checks, and recommends useful missing proof-image roles from existing product facts. The command center is read-only; corrections remain explicit in their owning workspaces.
+1. Product/Offer/Breadcrumb structured-data parity with visible Product facts.
+2. Full checked-in indexable public SEO quality audit: one H1, useful title/meta, canonical, internal links, image/alt quality and applicable structured data.
+3. Normalized buyer facts across Product Detail, Shop and schema; missing materials, finish/condition, dimensions, care, personalization limits or availability become Product Quality remediation rather than invented public copy.
+4. Stronger Shop/Product/Collection relationships by material, process, type, origin and category.
+5. Shipping/pickup/policy convergence around the existing Canada-only server authority while preserving the U.S. sales/shipping suspension.
+
+Primary Build 15 authorities:
+
+- `release467-build15-storefront-seo-parity.json`
+- `scripts/release467_build15_gate.py`
+- `scripts/release467_build15_public_seo_gate.py`
+- `.github/workflows/release467-build15-proof.yml`
+- `public/js/storefront-parity.js`
+- `public/js/seo-page-overrides.js` — retained Release 465 bootstrap extended, not replaced
+- `public/js/product-detail-parity.js`
+- `public/js/shop-parity.js`
+- `public/js/storefront-shipping-policy.js`
+- `functions/api/product-buyer-facts.js` — read-only public-safe approved facts
+- `public/js/admin-product-quality-command-center.js` — retained Build 14 Product Quality owner, extended with buyer-fact remediation
+- `functions/api/checkout-create-order.js` — retained real Canada-only shipping enforcement
+- `functions/api/_lib/marketplaceReadiness.js` — retained local marketplace preparation authority
+
+## Shipping / U.S. policy
+
+The existing checkout server rejects non-Canada shipping before local order mutation and before provider network activity using `shipping_country_not_supported`, `allowed_countries: ['CA']`, `local_order_mutation_performed: false`, and `provider_network_call_performed: false`.
+
+Build 15 surfaces that same policy on Shop, Product, Cart and Checkout. **Existing U.S. sales/shipping suspension remains intact.** Build 15 does not add U.S. checkout or provider execution.
 
 ## Release 467 retained authority separation
 
-### Builds 1–4
-I.T. readiness, recovery actions, **same-origin authenticated browser runtime acceptance** and sanitized evidence ledger remain retained authorities. **Build 4 consolidates source-proof authorities into its same-session evidence and acceptance ledger; Build 10 preserves that ledger rather than replacing it.**
+Builds 1–4 retain I.T. readiness, recovery actions, **same-origin authenticated browser runtime acceptance**, and sanitized evidence. **Build 4 consolidates source-proof authorities into its same-session evidence and acceptance ledger; Build 10 preserves that ledger rather than replacing it.**
 
-### Build 5 — CI / Cloudflare Access readiness
-**Build 5 — CI / Cloudflare Access readiness** remains separate. Masked references are `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; secret values never belong in source, UI, logs or evidence. **Production Promotion Readiness** remains a separate HOLD/READY authority and never deploys automatically.
+**Build 5 — CI / Cloudflare Access readiness** remains separate from **Production Promotion Readiness**. Masked references `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` are names only; secret values never belong in source, UI, logs or evidence.
 
-### Release 467 Build 6 — Development Cloudflare Access acceptance harness
-Release 467 Build 6 remains the dispatch-only Development Cloudflare Access service-token acceptance harness. Real Access acceptance remains `HOLD_EXTERNAL` until deliberately proven.
+Release 467 Build 6 — Development Cloudflare Access acceptance harness remains dispatch-only. Release 467 Build 7 — **External Commercial Acceptance Bridge** owns visibility for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth. Release 467 Build 8 — Authority Convergence and Restart Safety retains current-vs-compatibility separation. Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction remains retained. Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics remains the technical first stop. Release 467 Build 11 — Admin Operations Command Center remains the daily business first stop.
 
-### Release 467 Build 7 — External Commercial Acceptance Bridge
-Release 467 Build 7 — **External Commercial Acceptance Bridge** remains the visibility authority for CAIP private media, Stripe Development, PayPal sandbox and Social/OAuth. It does not execute providers automatically.
+**Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818`. **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** remains retained with exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`. **Release 467 Build 14 — Product Release Quality Command Center** remains the Product quality authority and is extended, not replaced, by Build 15.
 
-### Release 467 Build 8 — Authority Convergence and Restart Safety
-Release 467 Build 8 established `current-development-authority.json` as the current restart pointer and fenced inherited Release 466 compatibility evidence away from current Release 467 authority. Its locked predecessor was Build 7 at `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, System Gate `33591744817`, Build 7 Proof `33591744787`, with external lanes `HOLD_EXTERNAL`.
-
-### Release 467 Build 9 — Historical CI Retirement & Gate Fanout Reduction
-Release 467 Build 9 made Release 466 Build 1–6 proof workflows manual-only while preserving historical proof source and Actions evidence. Build 13 retained those manual-only files.
-
-### Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics
-Release 467 Build 10 retains the read-only I.T. technical first stop at `/admin/it/`.
-
-### Release 467 Build 11 — Admin Operations Command Center
-Build 11 remains the daily cross-business first stop at `/admin/`, sharing the owned Today Tasks read contract and retained explicit administrator Done/Ignore/Snooze action authority.
-
-### Release 467 Build 12 — Finance Operations Command Center
-Build 12 makes `/admin/finance/` the financial operating first stop. It shares the existing Accounting read engine; it does not create another ledger, reconciliation service, statement importer, costing service or close workflow.
-
-### Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup
-**Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** retired 39 obsolete Release 448–461 workflow definitions from the live repository surface and added a permanent hygiene assertion preventing their return. Its exact Build 12 predecessor was `374983f68fb16172fb357b1755293a29e5d2953f`. Historical Git provenance remains available.
-
-### Release 467 Build 14 — Product Release Quality Command Center
-Build 14 consolidates existing Catalog, Inventory, Product Media, SEO and local Marketplace-readiness signals into one operator-visible ranked remediation surface. It does not replace any owning business authority and never publishes or repairs automatically.
-
-## Exact environment boundary
+## Environment / safety boundary
 
 - source: `dev`
 - Development Preview: `https://dev.devilndove-site.pages.dev`
 - Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
 - Product R2: `devilndove-toolshed-images-dev`
-- CAIP private R2: `devilndove-caip-media-dev`
+- CAIP R2: `devilndove-caip-media-dev`
 - canonical migrations: exactly `0001`–`0004`
-- Build 14 schema change: NONE
-- Build 14 new D1/R2 mutation authority: NONE
+- Build 15 migration/request-time DDL/new D1/R2 mutation: NONE
+- provider execution/publication: NONE
+- Cloudflare Access policy mutation: NONE
+- `main` / Production mutation: NONE
 
-A chat, workstation, deployment or source commit is not a migration event. Never replay historical migrations merely because work resumed.
-
-## External/provider boundary
-
-External lanes remain truthfully **`HOLD_EXTERNAL`** unless separately and deliberately proven: Cloudflare Access service token, Stripe Development, PayPal sandbox and Social/OAuth. CAIP private-media status uses fresh Build 7 evidence. Build 14 performs no provider/payment/refund/OAuth action and marketplace work remains local draft/export preparation only.
+External lanes remain **`HOLD_EXTERNAL`**: Cloudflare Access service token, Stripe Development, PayPal sandbox, Social/OAuth. CAIP private-media status uses fresh Build 7 evidence.
 
 ## Main / Production boundary
 
-`main` is verified at Build 11 SHA `ce42f3b2ea553b69085705f500a9e2bd2f689818`, tree `191e4a92ebcbc94b29cfbf6a83259acd4981d302`. Production Pages Deploy `33640133776` completed successfully on that exact SHA. Builds 12–14 remain Development-only until separately authorized for Production promotion. Build 14 does not update `main`, contact Production, mutate Production D1/R2/business data or change Cloudflare Access policy.
-
-## Permanent safety rules
-
-Development first. Request-time schema DDL remains forbidden. Canonical migrations remain forward-only and Development-first. Raw CAIP deletion remains closed. Provider execution/publication remains closed outside deliberate acceptance. Production business data remain Production-owned. Secret values never belong in UI/logs/artifacts/docs. Existing U.S. sales/shipping suspension remains intact. Build 5 remains Production Promotion Readiness authority.
-
-## Autonomous backlog
-
-`docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md` is the exact agreed Builds 14–17 sequence. Build 14 executes items 1–5 only. Stripe, PayPal, Social/OAuth, real Cloudflare Access acceptance and Production promotion are excluded from this autonomous sequence.
+`main` remains verified at Build 11 `ce42f3b2ea553b69085705f500a9e2bd2f689818`, tree `191e4a92ebcbc94b29cfbf6a83259acd4981d302`; Production Pages Deploy `33640133776` succeeded there. Builds 12–15 remain Development-only until separate deliberate promotion.
 
 ## Canonical reading order
 
 1. `current-development-authority.json`
 2. `AI_HANDOFF.md`
-3. `release467-build14-product-release-quality.json`
+3. `release467-build15-storefront-seo-parity.json`
 4. `docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md`
 5. `PROJECT_STATUS_AND_ROADMAP.md`
 6. `SANITY_HEALTH_CHECK.md`
-7. `docs/operations/RELEASE_467_BUILD_14_PRODUCT_RELEASE_QUALITY.md`
-8. `release467-build13-repository-hygiene-cleanup.json`
-9. `release467-build12-finance-operations-command-center.json`
-10. `release467-build11-admin-operations-command-center.json`
-11. `release467-build10-it-control-tower-consolidation.json`
-12. `release467-build9-historical-ci-retirement.json`
-13. `release467-build8-authority-convergence.json`
-14. `release467-build7-external-commercial-acceptance.json`
-15. `release467-build6-access-acceptance-harness.json`
-16. `release467-build5-production-promotion-readiness.json`
-17. `development-release.json` — compatibility evidence only
+7. `docs/operations/RELEASE_467_BUILD_15_STOREFRONT_SEO_PARITY.md`
+8. `release467-build14-product-release-quality.json`
+9. `docs/operations/RELEASE_467_BUILD_14_PRODUCT_RELEASE_QUALITY.md`
+10. `release467-build13-repository-hygiene-cleanup.json`
+11. `release467-build12-finance-operations-command-center.json`
+12. `release467-build11-admin-operations-command-center.json`
+13. `release467-build10-it-control-tower-consolidation.json`
+14. `release467-build9-historical-ci-retirement.json`
+15. `release467-build8-authority-convergence.json`
+16. `release467-build7-external-commercial-acceptance.json`
+17. `release467-build6-access-acceptance-harness.json`
+18. `release467-build5-production-promotion-readiness.json`
+19. `development-release.json` — compatibility evidence only
 
 ## Restart point
 
-Continue Build 14 from the exact current feature head. Prove Build 13 preservation and Build 14 source safety, require the full current Release 467/System PR fanout green on one immutable head, merge only that head, then require Build 14 proof and canonical System Gate on the exact merged `dev` SHA before calling Build 14 complete.
+Do not redo Build 14. Continue Build 15 from `release467-build15-storefront-seo-parity`, prove the exact feature SHA, require all current Release 467/System PR checks green, merge only the unchanged green head, then require exact merged Build 15 proof and canonical System Gate Development deployment before calling Build 15 complete.
