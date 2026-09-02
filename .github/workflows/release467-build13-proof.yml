@@ -1,0 +1,91 @@
+name: Release 467 Build 13 Repository Hygiene Proof
+
+on:
+  push:
+    branches:
+      - release467-build13-repository-hygiene-cleanup
+      - dev
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/release467_build12_gate.py'
+      - 'scripts/release467_build13_gate.py'
+      - 'scripts/repository_hygiene_gate.py'
+      - 'current-development-authority.json'
+      - 'release467-build13-repository-hygiene-cleanup.json'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'SANITY_HEALTH_CHECK.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md'
+  pull_request:
+    branches: [dev]
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/release467_build12_gate.py'
+      - 'scripts/release467_build13_gate.py'
+      - 'scripts/repository_hygiene_gate.py'
+      - 'current-development-authority.json'
+      - 'release467-build13-repository-hygiene-cleanup.json'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'SANITY_HEALTH_CHECK.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Preserve Release 467 Build 12 authority
+        run: python scripts/release467_build12_gate.py
+      - name: Prove Release 467 Build 13 repository hygiene
+        run: python scripts/release467_build13_gate.py
+      - name: Prove permanent repository hygiene fence
+        run: python scripts/repository_hygiene_gate.py
+      - name: Validate authority JSON
+        run: |
+          python -m json.tool current-development-authority.json >/dev/null
+          python -m json.tool release467-build13-repository-hygiene-cleanup.json >/dev/null
+      - name: Validate Python syntax
+        run: |
+          python -m py_compile scripts/release467_build12_gate.py scripts/release467_build13_gate.py scripts/repository_hygiene_gate.py
+      - name: Diff safety
+        run: |
+          set -euo pipefail
+          git diff --check origin/dev...HEAD
+          pointer_build="$(python - <<'PY'
+          import json
+          with open('current-development-authority.json', encoding='utf-8') as handle:
+              print(int(json.load(handle).get('build') or 0))
+          PY
+          )"
+          if [ "${pointer_build}" -eq 13 ]; then
+            if git diff --name-only origin/dev...HEAD | grep -E '^(functions/|public/|admin/|migrations/)|\.sql$'; then
+              echo 'Build 13 must not alter application runtime or schema while Build 13 is current.' >&2
+              exit 1
+            fi
+          else
+            echo "Build 13 preservation mode for current pointer Build ${pointer_build}; runtime scope is governed by the newer build gate."
+          fi
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'Scope: Release 467 Build 13 Repository Hygiene and Historical CI Cleanup'
+          echo 'Retired live workflow definitions: 39'
+          echo 'Historical Git evidence: RETAINED'
+          echo 'Build 13 runtime-neutral scope: preserved when Build 13 is current; newer builds use their own bounded runtime gate'
+          echo 'Schema/D1/R2 mutation: NONE from Build 13'
+          echo 'Provider execution/publication: NONE'
+          echo 'Cloudflare Access policy mutation: NONE'
+          echo 'Main/Production mutation: NONE'
+          echo 'External acceptance remains HOLD_EXTERNAL'

@@ -1,58 +1,52 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Canonical current authority — Release 467 Build 11
+## Canonical current authority — Release 467 Build 15
 
-**Release 467 Build 11 — Admin Operations Command Center** is the active Development source candidate. The exact Development-green predecessor is **Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics** at `cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a`.
+**Release 467 Build 15 — Storefront / SEO Parity** is the active Development source candidate. Exact Development-green predecessor: **Release 467 Build 14 — Product Release Quality Command Center** at `dd92a10799f0f7656fe9508a25a983839117a1d0`, tree `dbe3ed8e1be82c02223a346f58a626654f8d5382`, System Gate `33649971571`, Build 14 Proof `33649971525`.
 
 Read current authority in this order:
 
-1. `current-development-authority.json` — machine-readable current Release 467 restart pointer and safety boundary.
-2. `AI_HANDOFF.md` — exact restart instructions, current external HOLDs and next bounded work.
-3. `release467-build11-admin-operations-command-center.json` — Build 11 admin runtime/UI contract.
-4. `PROJECT_STATUS_AND_ROADMAP.md` — current release/build progression.
-5. `SANITY_HEALTH_CHECK.md` — current evidence and safety checklist.
-6. `docs/operations/RELEASE_467_BUILD_11_ADMIN_OPERATIONS_COMMAND_CENTER.md` — Build 11 operator authority.
-7. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — canonical startup/preflight mechanics.
-8. `release467-build10-it-control-tower-consolidation.json` — Build 10 technical first-stop authority.
-9. `docs/operations/RELEASE_467_BUILD_10_IT_CONTROL_TOWER.md` — Build 10 I.T. operations authority.
-10. `release467-build9-historical-ci-retirement.json` — Build 9 CI retirement authority.
-11. `docs/operations/RELEASE_467_BUILD_9_HISTORICAL_CI_RETIREMENT.md` — Build 9 rationale/evidence.
-12. `release467-build8-authority-convergence.json` — locked Build 8 authority.
-13. `docs/operations/RELEASE_467_BUILD_8_AUTHORITY_CONVERGENCE.md` — Build 8 current-vs-compatibility rationale.
-14. `release467-build7-external-commercial-acceptance.json` — commercial/provider acceptance bridge.
-15. `release467-build6-access-acceptance-harness.json` — separate Development Cloudflare Access authority.
-16. `release467-build5-production-promotion-readiness.json` — separate exact-candidate Production promotion HOLD/READY authority.
-17. `development-release.json` — **inherited Release 466 regression compatibility evidence only; not the current Release 467 restart pointer**.
+1. `current-development-authority.json` — current Release 467 restart pointer and safety boundary.
+2. `AI_HANDOFF.md` — restart instructions and external HOLDs.
+3. `release467-build15-storefront-seo-parity.json` — Build 15 scope/safety contract.
+4. `docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md` — exact Builds 14–17 autonomous sequence.
+5. `PROJECT_STATUS_AND_ROADMAP.md` — current release progression.
+6. `SANITY_HEALTH_CHECK.md` — current evidence and safety checklist.
+7. `docs/operations/RELEASE_467_BUILD_15_STOREFRONT_SEO_PARITY.md` — Build 15 operating details.
+8. `release467-build14-product-release-quality.json` — **Release 467 Build 14 — Product Release Quality Command Center** authority.
+9. `docs/operations/RELEASE_467_BUILD_14_PRODUCT_RELEASE_QUALITY.md`.
+10. `release467-build13-repository-hygiene-cleanup.json` — **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** authority.
+11. `docs/operations/RELEASE_467_BUILD_13_REPOSITORY_HYGIENE.md`.
+12. `release467-build12-finance-operations-command-center.json` — **Release 467 Build 12 — Finance Operations Command Center** authority.
+13. `release467-build11-admin-operations-command-center.json` — Admin Operations Command Center.
+14. `release467-build10-it-control-tower-consolidation.json` — I.T. Control Tower.
+15. `release467-build9-historical-ci-retirement.json` — Historical CI Retirement & Gate Fanout Reduction.
+16. `release467-build8-authority-convergence.json` — Authority Convergence and Restart Safety.
+17. `release467-build7-external-commercial-acceptance.json` — External Commercial Acceptance Bridge.
+18. `release467-build6-access-acceptance-harness.json` — Development Cloudflare Access acceptance harness.
+19. `release467-build5-production-promotion-readiness.json` — Production Promotion Readiness.
+20. `development-release.json` — **INHERITED_REGRESSION_COMPATIBILITY** only.
 
-## Exact green predecessor
+## Build 15 autonomous scope
 
-Release 467 Build 10 merged to `dev` at `cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a` with tree `c2de52782f96fa43d1e5d2eabd80b30a23c62ecd`.
+Build 15 owns items 6–10: visible-fact Product/Offer/Breadcrumb parity, full public SEO quality, normalized buyer facts with Product Quality remediation, Shop/Collection relationship depth, and Canada-only shipping/pickup/policy consistency. Existing U.S. sales/shipping suspension remains intact.
 
-- System Gate `33635318725` — SUCCESS.
-- Release 467 Build 10 I.T. Control Tower Proof `33635318747` — SUCCESS.
-- Exact Development Preview deployment/binding/smoke phase — SUCCESS in the same System Gate.
-- Build 10 schema/D1/R2/provider/Access/main/Production mutation authority — NONE.
+## Retained authority/provenance
 
-## Build 11 admin boundary
+Builds 1–4 retain I.T. readiness, recovery, **same-origin authenticated browser runtime acceptance**, and the evidence ledger. **Build 4 consolidates source-proof authorities into its same-session evidence and acceptance ledger; Build 10 preserves that ledger rather than replacing it.**
 
-Build 11 makes `/admin/` the daily cross-business operating first stop by mounting the existing Today Tasks contract on desktop. It adds filters, module ownership, direct work links and explicit Done/Ignore/Snooze controls while keeping the full `/admin/today-tasks/` workspace available.
+**Build 5 — CI / Cloudflare Access readiness** remains separate from **Production Promotion Readiness**; masked names `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` are not secret-value evidence. Release 467 Build 6 remains the Development Access acceptance harness. Release 467 Build 7 — **External Commercial Acceptance Bridge** remains provider/CAIP visibility authority. Release 467 Build 8 retains compatibility separation; its Build 7 predecessor was `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, System Gate `33591744817`, Build 7 Proof `33591744787`, external state `HOLD_EXTERNAL`.
 
-Today Tasks read ownership remains separate and unchanged. Today Task write ownership remains `/api/admin/today-task-actions`; Build 11 does not rewrite that endpoint or invoke it automatically.
+**Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818`. **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** retains exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f`. **Release 467 Build 14 — Product Release Quality Command Center** retains exact Build 13 predecessor `794fd5b36191fff4c9e8376197f968d9c6d6da80`.
 
-The four admin operator workspaces remain Storefront, Creator, Finance and I.T. The underlying application permission architecture remains five modules because Socials/CAIP is independently permissioned even though its operator navigation is grouped with Creator.
+## Compatibility / external boundary
 
-## Locked Build 8 / compatibility boundary
+`development-release.json` remains Release 466 **INHERITED_REGRESSION_COMPATIBILITY** and the middleware Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**. Cloudflare Access service-token, Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private-media status uses fresh Build 7 evidence.
 
-**Release 467 Build 8 — Authority Convergence and Restart Safety** remains retained provenance. `development-release.json` intentionally remains top-level Release 466 because inherited regression assertions still consume historical convergence fields. The middleware runtime Release 466 header is retained as explicit **INHERITED_RUNTIME_COMPATIBILITY**. Neither surface selects the current release; the selector remains `current-development-authority.json`.
+## Main / Production boundary
 
-Do not rewrite historical compatibility evidence merely to make version labels newer.
+`main` remains Build 11 SHA `ce42f3b2ea553b69085705f500a9e2bd2f689818`, tree `191e4a92ebcbc94b29cfbf6a83259acd4981d302`; Production Pages Deploy `33640133776` succeeded. Build 15 adds no schema migration, new D1/R2 mutation, provider execution/publication, Access mutation, `main` mutation, Production contact or secret exposure.
 
-## External boundaries
+## Autonomous sequence
 
-External acceptance remains truthful `HOLD_EXTERNAL` unless separately proven. Cloudflare Access service-token acceptance, Stripe Development, PayPal sandbox and Social/OAuth remain separate from source/runtime-green Release 467 work. CAIP private-media status comes from fresh Build 7 runtime evidence.
-
-Production promotion remains separate and manual. Build 11 does not change `main`, Production data, D1/R2, providers, OAuth state, Cloudflare Access policy or secrets.
-
-## Historical material
-
-Release 466 and earlier release/build documents remain provenance and compatibility evidence. Release 466 Build 1–6 workflow definitions remain manual-only under Build 9; they cannot reopen historical migrations, authorize provider execution/publication, or authorize Production promotion.
+`docs/operations/RELEASE_467_AUTONOMOUS_20_ITEM_BACKLOG.md` remains canonical: Build 14 = items 1–5, Build 15 = 6–10, Build 16 = 11–15, Build 17 = 16–20. Stripe, PayPal, Social/OAuth, real Access acceptance and Production promotion remain outside that autonomous sequence.

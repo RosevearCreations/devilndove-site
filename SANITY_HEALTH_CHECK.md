@@ -2,99 +2,97 @@
 
 ## Current authority
 
-**Release 467 Build 11 — Admin Operations Command Center** is the active Development source candidate.
+**Release 467 Build 15 — Storefront / SEO Parity** is the active Development source candidate.
 
-The exact green predecessor is **Release 467 Build 10 — I.T. Control Tower Consolidation and Self-Diagnostics** at `cba1fbe1c0acc71c9f2f0d29bdb6d5bef09e380a` with tree `c2de52782f96fa43d1e5d2eabd80b30a23c62ecd`.
+Exact green predecessor: **Release 467 Build 14 — Product Release Quality Command Center** at `dd92a10799f0f7656fe9508a25a983839117a1d0`, tree `dbe3ed8e1be82c02223a346f58a626654f8d5382`.
 
-- [x] Build 10 System Gate `33635318725` — SUCCESS.
-- [x] Build 10 Proof `33635318747` — SUCCESS.
-- [x] `current-development-authority.json` identifies Build 11 and preserves Build 10 as last-green.
+- [x] Build 14 System Gate `33649971571` — SUCCESS.
+- [x] Build 14 Proof `33649971525` — SUCCESS.
+- [x] Build 14 exact Build 13 predecessor `794fd5b36191fff4c9e8376197f968d9c6d6da80` remains retained.
+- [x] Build 13 exact Build 12 predecessor `374983f68fb16172fb357b1755293a29e5d2953f` remains retained.
 - [x] `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY**.
-- [x] Middleware Release 466 header remains explicitly **INHERITED_RUNTIME_COMPATIBILITY**, not current Release 467 authority.
+- [x] Runtime Release 466 header remains **INHERITED_RUNTIME_COMPATIBILITY**.
 
-## Locked Build 8 provenance sanity
+## Retained historical authority sanity
 
-**Release 467 Build 8 — Authority Convergence and Restart Safety** remains the locked authority-convergence provenance. Its exact Build 7 predecessor was `5eef764a67466dc2989a4681c6a7cc782b9d4df9`; System Gate `33591744817` and Build 7 Proof `33591744787` were SUCCESS. External acceptance remained `HOLD_EXTERNAL`. These facts are retained for regression proof without overriding current Build 11 authority.
+- [x] **Release 467 Build 8 — Authority Convergence and Restart Safety** remains locked provenance. Its exact Build 7 predecessor is `5eef764a67466dc2989a4681c6a7cc782b9d4df9`; System Gate `33591744817` and Build 7 Proof `33591744787` remain the retained successful evidence, with external acceptance `HOLD_EXTERNAL`.
+- [x] **Release 467 Build 12 — Finance Operations Command Center** remains read-only with exact Build 11 source base `ce42f3b2ea553b69085705f500a9e2bd2f689818` and `HOLD_EXTERNAL` provider state.
+- [x] **Release 467 Build 13 — Repository Hygiene and Historical CI Cleanup** remains retained; 39 obsolete Release 448–461 workflows remain retired and repository hygiene remains guarded.
+- [x] **Release 467 Build 14 — Product Release Quality Command Center** remains the Product quality owner; Build 15 extends rather than duplicates it.
+- [x] Build 4 same-session evidence and acceptance ledger remains retained; Build 10 preserves that ledger rather than replacing it.
+- [x] Build 5 — CI / Cloudflare Access readiness remains separate from Production Promotion Readiness.
+- [x] `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` remain masked names only.
 
-## Build 11 Admin Operations Command Center
+## Build 15 structured-data parity sanity
 
-- [x] `/admin/` exposes a `desktopTodayTasksMount` above the workspace cards.
-- [x] The desktop panel reads from `/api/admin/contracts/operations-today-tasks-read`.
-- [x] The full `/admin/today-tasks/` workspace remains available and unchanged as the dedicated queue.
-- [x] Catalog, customers, orders, inventory, accounting and runtime-health groups map visibly to Creator, Storefront, Finance or I.T. operator workspaces.
-- [x] Category and minimum-count filters are available on desktop.
-- [x] Direct work links remain the task authority's own links.
-- [x] Done, Ignore and Snooze use the retained `/api/admin/today-task-actions` endpoint.
-- [x] Every action requires an explicit administrator click.
-- [x] Build 11 adds visible success/failure feedback after an action.
-- [x] Loading `/admin/` performs no Today Task mutation automatically.
-- [x] The admin landing page retains exactly one H1.
-- [x] The page explains that four operator workspaces are backed by five permission modules and Socials/CAIP remains independently permissioned.
+- [x] Shared `storefront-parity.js` derives Product, Offer and BreadcrumbList from visible Product facts.
+- [x] Price, currency, SKU, inventory availability, Product images, category and canonical URL share the visible Product authority.
+- [x] Canada shipping schema uses `OfferShippingDetails` / `shippingDestination` only for products that require shipping.
+- [x] Schema-only marketing facts are not generated.
+- [x] Retained Release 465 `seo-page-overrides.js` loads/converges on the Build 15 visible-fact model.
 
-## Retained task authority sanity
+## Build 15 public SEO sanity
 
-- [x] Today Tasks read ownership remains Build 366/369 and is not rewritten by Build 11.
-- [x] Today Task write ownership remains Build 393.
-- [x] Allowed retained write actions remain `completed`, `ignored` and `snoozed`.
-- [x] `today_task_actions` schema authority remains `database_today_task_actions_runtime_parity.sql`.
-- [x] Build 11 does not edit the retained action endpoint.
-- [x] Build 11 does not edit the owned Today Tasks read contract.
-- [x] No request-time `CREATE TABLE`, `ALTER TABLE` or `DROP TABLE` is introduced.
+- [x] Full checked-in indexable public HTML audit is a release proof input.
+- [x] Exactly one H1 is required on each audited public page.
+- [x] Useful title/meta description, canonical, crawlable internal links, valid images/alt text and applicable JSON-LD are required.
+- [x] Dynamic Product visible-fact Product/Offer/Breadcrumb parity has an explicit source assertion.
 
-## Environment boundary
+## Build 15 buyer-fact sanity
 
-- [x] Source authority remains `dev`.
-- [x] Development Preview remains `https://dev.devilndove-site.pages.dev`.
-- [x] Development D1 remains `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
-- [x] Development Product R2 remains `devilndove-toolshed-images-dev`.
-- [x] Development CAIP R2 remains `devilndove-caip-media-dev`.
-- [x] Build 11 adds no new D1/R2 mutation authority.
-- [x] Build 11 authorizes no Cloudflare Access policy mutation.
-- [x] Build 11 authorizes no `main` mutation.
-- [x] Build 11 authorizes no Production mutation/contact.
+- [x] `/api/product-buyer-facts` is read-only and request-time-schema-read-only.
+- [x] Only active Products and approved/published supporting facts are exposed.
+- [x] Public-safe story-note privacy status remains required.
+- [x] Materials, process, finish/condition, dimensions, care, personalization limits, availability, shipping/pickup and handmade limitations use one normalization model.
+- [x] Missing approved facts become explicit Product Release Quality remediation.
+- [x] Missing facts are not silently manufactured for public display.
 
-## D1 / schema sanity
+## Build 15 Shop / Collection linking sanity
 
-- [x] Canonical migration stream remains exactly `0001`–`0004`.
-- [x] Build 11 adds no migration.
-- [x] Request-time schema DDL remains forbidden.
-- [x] A new chat/workstation/deployment is not a migration event.
-- [x] Explicit Today Task Done/Ignore/Snooze writes remain existing business-operation records, not a new migration or schema authority.
+- [x] Product Detail retains existing proof-related Product results and curated collection links.
+- [x] Shop/Product navigation can expose material, process, type, origin and category relationships.
+- [x] Supplemental relationship/fact reads fail open to the existing Shop/Product experience; they never replace Product authority.
+
+## Shipping / pickup / U.S. policy sanity
+
+- [x] Existing server checkout authority rejects non-Canada shipping with `shipping_country_not_supported`.
+- [x] Server reports `allowed_countries: ['CA']`.
+- [x] Unsupported shipping country performs no local order mutation and no provider network call.
+- [x] Shop, Product, Cart and Checkout visibly surface the same Canada-only policy.
+- [x] Checkout pins buyer shipping country to Canada before submission; the server remains the authoritative enforcement boundary.
+- [x] Existing U.S. sales/shipping suspension remains intact.
+- [x] Marketplace preparation remains local/export-only; no provider execution/publication is added.
+
+## Environment / schema sanity
+
+- [x] Source authority: `dev`.
+- [x] Preview: `https://dev.devilndove-site.pages.dev`.
+- [x] D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
+- [x] Product R2: `devilndove-toolshed-images-dev`.
+- [x] CAIP R2: `devilndove-caip-media-dev`.
+- [x] Canonical migrations remain exactly `0001`–`0004`.
+- [x] Build 15 adds no migration or request-time DDL.
+- [x] Build 15 authorizes no new D1/R2 mutation.
 
 ## External acceptance sanity
 
-Build 11 source/runtime state and external acceptance remain intentionally independent.
+- [ ] Cloudflare Access service token — `HOLD_EXTERNAL`.
+- [ ] Stripe Development — `HOLD_EXTERNAL`.
+- [ ] PayPal sandbox — `HOLD_EXTERNAL`.
+- [ ] Social/OAuth — `HOLD_EXTERNAL`.
+- [ ] CAIP private media — use fresh Build 7 evidence.
 
-- [ ] Cloudflare Access service-token acceptance — `HOLD_EXTERNAL` until deliberate Build 6 evidence succeeds.
-- [ ] Stripe Development acceptance — `HOLD_EXTERNAL` until deliberate test-mode evidence succeeds.
-- [ ] PayPal sandbox acceptance — `HOLD_EXTERNAL` until deliberate sandbox evidence succeeds.
-- [ ] Social/OAuth controlled acceptance — `HOLD_EXTERNAL` until deliberate intended-account evidence succeeds.
-- [ ] CAIP private-media current state — use fresh Build 7 runtime evidence.
-
-- [x] Provider execution from Build 11: NONE.
-- [x] Provider publication from Build 11: NONE.
-- [x] Payment/refund execution from Build 11: NONE.
-- [x] OAuth connect/revoke from Build 11: NONE.
-- [x] Secret values inspected/emitted by Build 11: NONE.
-
-## CI / prior authority sanity
-
-- [x] Release 466 Build 1–6 proof workflows remain manual-only provenance under Build 9.
-- [x] Build 8 remains forward-compatible while retaining locked Build 7 predecessor evidence.
-- [x] Build 9 remains forward-compatible while retaining historical-CI retirement provenance.
-- [x] Build 10 gate is forward-compatible with Build 11 while still proving the Build 10 I.T. runtime contract.
-- [x] Release 467 Build 6, Build 7, Build 8, Build 9 and Build 10 authorities remain separate and retained.
-- [x] Production Promotion Readiness remains the separate Build 5 authority.
+- [x] Provider/payment/refund/OAuth execution from Build 15: NONE.
+- [x] Cloudflare Access policy mutation from Build 15: NONE.
+- [x] Secret values emitted by Build 15: NONE.
 
 ## Main / Production sanity
 
-The carried-forward source-head observation for `main` is `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`; this is not proof of the currently deployed Production release.
-
-- [x] Build 11 does not update `main`.
-- [x] Build 11 does not contact Production resources.
-- [x] Build 11 does not copy Development business data to Production.
-- [x] Production promotion remains a separate exact-candidate review under Release 467 Build 5 Production Promotion Readiness.
+- [x] `main` remains Build 11 SHA `ce42f3b2ea553b69085705f500a9e2bd2f689818`, tree `191e4a92ebcbc94b29cfbf6a83259acd4981d302`.
+- [x] Production Pages Deploy `33640133776` — SUCCESS.
+- [x] Builds 12–15 remain Development-only.
+- [x] Build 15 does not contact or mutate Production.
 
 ## Current verdict
 
-Release 467 Build 10 is the exact proven Development predecessor. Release 467 Build 11 is a bounded, schema-neutral admin application candidate that brings the existing daily Operations queue onto the desktop admin home without duplicating read ownership, moving task mutation authority, or opening any external/Production lane. External lanes remain truthfully `HOLD_EXTERNAL`.
+Release 467 Build 14 is the exact proven Development predecessor. Release 467 Build 15 is a schema-neutral Storefront / SEO parity candidate: visible Product facts, schema, Shop relationships and fulfillment policy converge while missing evidence becomes admin remediation and all provider/Production lanes remain closed. External lanes remain truthfully `HOLD_EXTERNAL`.

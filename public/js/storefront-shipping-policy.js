@@ -1,0 +1,12 @@
+// Release 467 Build 15 — visible fulfillment-policy parity for Shop, Product, Cart, Checkout and custom quotes.
+(function initShippingPolicy(){
+  const run=()=>{
+    const parity=window.DDStorefrontParity;if(!parity)return;const policy=parity.SHIPPING_POLICY,notice=document.createElement('div');notice.className='status-note';notice.setAttribute('data-storefront-shipping-policy',policy.code);notice.innerHTML=`<strong>Current shipping policy:</strong> ${policy.public_message}`;
+    if(window.location.pathname.startsWith('/checkout/')){const shippingCountry=document.getElementById('shipping_country');if(shippingCountry){shippingCountry.value=policy.country_name;shippingCountry.readOnly=true;shippingCountry.setAttribute('aria-describedby','storefrontShippingPolicyNotice');}const form=document.getElementById('checkoutForm');if(form){notice.id='storefrontShippingPolicyNotice';form.prepend(notice);form.addEventListener('submit',(event)=>{if(!parity.isAllowedShippingCountry(shippingCountry?.value||policy.country_name)){event.preventDefault();event.stopImmediatePropagation();const message=document.getElementById('checkoutMessage');if(message){message.textContent=policy.public_message;message.style.display='';message.style.color='#b00020';}}},true);}return;}
+    const customForm=document.getElementById('customRequestForm');if(customForm){customForm.parentNode?.insertBefore(notice,customForm);return;}
+    const quoteHost=document.getElementById('customQuotePreviewMount');if(quoteHost){quoteHost.parentNode?.insertBefore(notice,quoteHost);return;}
+    const orderHost=document.getElementById('customOrderPreviewMount')||document.getElementById('customRequestOrderMount');if(orderHost){orderHost.parentNode?.insertBefore(notice,orderHost);return;}
+    const cartHost=document.getElementById('cartPolicyTrustMount');if(cartHost){cartHost.prepend(notice);return;}const shopHost=document.getElementById('shopPolicyFaqMount');if(shopHost){shopHost.parentNode?.insertBefore(notice,shopHost);return;}const policyCard=document.getElementById('productPolicyCard');if(policyCard)policyCard.prepend(notice);
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
+})();

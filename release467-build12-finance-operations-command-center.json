@@ -1,0 +1,75 @@
+{
+  "release": 467,
+  "build": 12,
+  "title": "Finance Operations Command Center",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_branch": "release467-build12-finance-operations-command-center",
+  "source_base_sha": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
+  "source_base_tree_sha": "191e4a92ebcbc94b29cfbf6a83259acd4981d302",
+  "predecessor": {
+    "release": 467,
+    "build": 11,
+    "merged_dev_sha": "ce42f3b2ea553b69085705f500a9e2bd2f689818",
+    "merged_dev_tree_sha": "191e4a92ebcbc94b29cfbf6a83259acd4981d302",
+    "system_gate_run": 33637049566,
+    "build11_proof_run": 33637049079
+  },
+  "scope": [
+    "Finance Operations Command Center on /admin/finance/",
+    "shared use of existing read-only Accounting financial operations intelligence",
+    "current-month reconciliation exception costing close and financial snapshot visibility",
+    "deep links from Finance intelligence to the owning /admin/accounting/ sections",
+    "retention of existing Finance grouped workspace navigation",
+    "forward-compatible Release 467 Build 11 proof gate"
+  ],
+  "runtime": {
+    "workspace": "/admin/finance/",
+    "shared_engine": "public/js/admin-accounting-operations.js",
+    "finance_mount": "financeOperationsMount",
+    "accounting_mount": "accountingOperationsMount",
+    "accounting_owner_workspace": "/admin/accounting/",
+    "authenticated_transport": "window.DDAuth.apiFetch",
+    "read_sources": [
+      "/api/admin/accounting-reconciliation",
+      "/api/admin/accounting-reconciliation-exceptions",
+      "/api/admin/accounting-statement-imports",
+      "/api/admin/accounting-profit-loss",
+      "/api/admin/accounting-item-costing",
+      "/api/admin/accounting-period-locks",
+      "/api/admin/accounting-gifi-summary"
+    ],
+    "write_authority_duplicated": false,
+    "automatic_finance_mutation": false,
+    "request_time_schema_mutation": false
+  },
+  "ownership": {
+    "finance_command_center_role": "READ_ONLY_PROJECTION",
+    "reconciliation_write_owner": "/admin/accounting/",
+    "statement_import_write_owner": "/admin/accounting/",
+    "costing_write_owner": "/admin/accounting/",
+    "close_write_owner": "/admin/accounting/",
+    "ledger_write_owner": "/admin/accounting/"
+  },
+  "development": {
+    "target": "https://dev.devilndove-site.pages.dev",
+    "d1_name": "devilndove-dev",
+    "d1_id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa",
+    "product_r2": "devilndove-toolshed-images-dev",
+    "caip_r2": "devilndove-caip-media-dev",
+    "canonical_migrations": 4
+  },
+  "external_acceptance_state": "HOLD_EXTERNAL",
+  "production_promotion_authority": "release467-build5-production-promotion-readiness.json",
+  "production_promotion_state": "NO_AUTOMATIC_PROMOTION",
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "new_d1_mutation_authorized": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_policy_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false
+}
