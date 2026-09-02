@@ -19,8 +19,12 @@ Exact Development-green predecessor: **Release 467 Build 11 — Admin Operations
 | 8 | Authority Convergence and Restart Safety | Development green |
 | 9 | Historical CI Retirement & Gate Fanout Reduction | Development green |
 | 10 | I.T. Control Tower Consolidation | Development green |
-| 11 | Admin Operations Command Center | Development green at `ce42f3b2…` |
+| 11 | Admin Operations Command Center | Development and Production green at `ce42f3b2…` |
 | 12 | Finance Operations Command Center | Active Development candidate |
+
+## Locked Build 8 provenance
+
+**Release 467 Build 8 — Authority Convergence and Restart Safety** remains retained provenance for the current-vs-compatibility authority model. Its locked predecessor was Release 467 Build 7 at `5eef764a67466dc2989a4681c6a7cc782b9d4df9`, with System Gate `33591744817` and Build 7 Proof `33591744787` both successful. Real external acceptance remained `HOLD_EXTERNAL`; these historical facts do not override current Build 12 authority or the Production boundary.
 
 ## Build 12 scope
 
@@ -70,7 +74,7 @@ Cloudflare Access service-token, Stripe Development, PayPal sandbox and Social/O
 
 ## Main / Production boundary
 
-Carried-forward `main` source-head observation: `fcf92f5342c04f0f0d07387034e852b4cc40f3f9`. This is not proof of the deployed Production release. Build 12 does not touch `main`, Production resources/data, Access policy, provider execution or promotion authority.
+`main` is now the exact fully-proven Build 11 commit `ce42f3b2ea553b69085705f500a9e2bd2f689818`, tree `191e4a92ebcbc94b29cfbf6a83259acd4981d302`. Production Pages Deploy `33640133776` completed successfully for that exact SHA, including Production business-data preservation, canonical migration proof, isolated D1/FK proof, exact Pages deployment, binding verification and public smoke acceptance. Build 12 remains Development-only and does not change `main` until separately promoted after full current-gate closure.
 
 ## Next bounded work
 
