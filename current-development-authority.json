@@ -1,16 +1,16 @@
 {
   "release": 467,
-  "build": 8,
-  "title": "Authority Convergence and Restart Safety",
+  "build": 9,
+  "title": "Historical CI Retirement and Gate Fanout Reduction",
   "state": "DEVELOPMENT_CANDIDATE",
   "source_authority": "dev",
-  "feature_branch": "release467-build8-authority-convergence",
-  "source_base_sha": "5eef764a67466dc2989a4681c6a7cc782b9d4df9",
-  "last_green_build": 7,
-  "last_green_dev_sha": "5eef764a67466dc2989a4681c6a7cc782b9d4df9",
-  "last_green_dev_tree_sha": "f7327733dc423982016829d717521ceab2029f35",
-  "last_green_system_gate_run": 33591744817,
-  "last_green_build_proof_run": 33591744787,
+  "feature_branch": "release467-build9-historical-ci-retirement",
+  "source_base_sha": "94a891d3cb0608a91550c90fb04acea05cff75b3",
+  "last_green_build": 8,
+  "last_green_dev_sha": "94a891d3cb0608a91550c90fb04acea05cff75b3",
+  "last_green_dev_tree_sha": "09d9f822c9987d3422921e819c913427af664184",
+  "last_green_system_gate_run": 33631757568,
+  "last_green_build_proof_run": 33631758140,
   "development_target": "https://dev.devilndove-site.pages.dev",
   "development_d1": {
     "name": "devilndove-dev",
@@ -26,9 +26,11 @@
     "file": "development-release.json",
     "role": "INHERITED_REGRESSION_COMPATIBILITY",
     "top_level_release_remains": 466,
-    "reason": "Inherited Release 466 gates intentionally consume its historical convergence fields. It is not the current restart pointer for Release 467."
+    "reason": "Inherited Release 466 source gates retain historical compatibility evidence, while their obsolete automatic workflow fanout is retired by Release 467 Build 9."
   },
   "current_release_authorities": [
+    "release467-build9-historical-ci-retirement.json",
+    "release467-build8-authority-convergence.json",
     "release467-build7-external-commercial-acceptance.json",
     "release467-build6-access-acceptance-harness.json",
     "release467-build5-production-promotion-readiness.json",
@@ -53,5 +55,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Read this file first, then AI_HANDOFF.md. Do not infer current Release 467 state from development-release.json or older Release 466 documents."
+  "restart_rule": "Read this file first, then AI_HANDOFF.md. Build 9 retires obsolete Release 466 automatic CI triggers but does not delete their proof scripts or historical evidence."
 }
