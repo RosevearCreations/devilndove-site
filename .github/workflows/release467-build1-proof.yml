@@ -1,18 +1,11 @@
 name: Release 467 Build 1 Proof
+
 on:
-  push:
-    branches: [dev, release467-it-readiness-control-tower]
-    paths:
-      - 'functions/api/admin/it-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'release467-build1-it-readiness-control-tower.json'
-      - 'scripts/release467_build1_gate.py'
-      - '.github/workflows/release467-build1-proof.yml'
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   build467-it-readiness:
     runs-on: ubuntu-latest
@@ -39,11 +32,10 @@ jobs:
         run: git diff --check origin/dev...HEAD
       - name: Build 467 safety statement
         run: |
+          echo 'Build 1 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Release 467 Build 1: I.T. Readiness Control Tower'
           echo 'Schema migration: NONE'
           echo 'Request-time schema mutation: CLOSED'
-          echo 'Production mutation: CLOSED'
-          echo 'Production provider execution: CLOSED'
+          echo 'Production mutation/provider execution: CLOSED'
           echo 'Unknown runtime evidence: AMBER / NEVER GREEN BY INFERENCE'
           echo 'External acceptance: HOLD UNTIL REAL EVIDENCE'
-          echo 'Admin root cards: Storefront / Creator / Finance / I.T.'

@@ -1,10 +1,7 @@
 name: Release 467 Build 5 CI Access Readiness Proof
 
 on:
-  push:
-    branches: [release467-build5-ci-access-readiness]
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
 
 permissions: {contents: read}
 
@@ -26,10 +23,7 @@ jobs:
       - name: Boundary
         if: always()
         run: |
+          echo 'Build 5 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Scope: Release 467 Build 5 CI / Cloudflare Access readiness'
-          echo 'Cloudflare contact: NONE'
-          echo 'Secret values inspected: NONE'
-          echo 'D1/R2 mutation: NONE'
-          echo 'Provider execution/publication: NONE'
-          echo 'Production mutation: NONE'
+          echo 'Cloudflare contact/secret inspection/D1/R2/provider/Production mutation: NONE'
           echo 'External CI Access acceptance: HOLD_EXTERNAL'
