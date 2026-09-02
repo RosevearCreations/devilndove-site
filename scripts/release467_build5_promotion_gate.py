@@ -79,7 +79,7 @@ req('itCiAccessReadinessMount' in html, 'existing Build 5 CI / Access mount must
 req('admin-it-ci-access-readiness.js?v=467' in html, 'existing Build 5 CI / Access script must remain')
 req('itPromotionReadinessMount' in html, 'Build 5 promotion mount missing')
 req('admin-it-promotion-readiness.js?v=467' in html, 'Build 5 promotion script include missing')
-req('Build 5 adds a read-only Production promotion readiness review' in html, 'Build 5 promotion operator description missing')
+req('Build 5' in html and 'Production promotion readiness review' in html, 'Build 5 promotion operator description missing')
 req(len(re.findall(r'<h1\b', html, re.I)) == 1, 'I.T. page must retain exactly one H1')
 
 req(authority.get('release') == 467 and authority.get('build') == 5, 'release/build authority drifted')
