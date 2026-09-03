@@ -2,11 +2,11 @@
 
 ## Current authority
 
-**Release 467 Build 27 — Order ↔ Finance Settlement Readiness Reconciliation is DEVELOPMENT GREEN.**
+**Release 467 Build 28 — Inventory ↔ Finance Valuation Readiness Reconciliation is DEVELOPMENT GREEN.**
 
-Accepted runtime is `e900e8388cae83b610a36af58df77ee91c3d3bbd`, tree `516115b53161e80eecbaee5ded95305f5d16b5a9`; System Gate `33767567434`, Build 27 Proof `33767567460`, and Branch Hygiene `33767567492` are SUCCESS.
+Accepted runtime is `d9717bb81a52584abe1a45c83fc67889a5770f35`, tree `88f17be8a85cce4e588ef5171004ad28c875332e`; System Gate `33770297641`, Build 28 Proof `33770297583`, and Branch Hygiene `33770297625` are SUCCESS.
 
-Build 27 is a read-only Orders ↔ Finance reconciliation. It compares order/payment/refund evidence with the Accounting-owned order-financial read contract. Missing or mismatched Accounting evidence fails closed to review. It does not execute payments/refunds, post accounting, alter orders, reserve/mutate Inventory, change schema, mutate D1/R2 business data, execute providers, change Access, `main`, or Production.
+Build 28 is a read-only Inventory ↔ Finance valuation-readiness reconciliation. Finance consumes Inventory-owned current-cost and optional cost-history evidence; positive on-hand stock with missing current cost or provenance fails closed to review, while tools/equipment route to fixed-asset review. Operational inventory value is not book or tax value and does not authorize accounting posting, fixed-asset classification, Inventory cost/quantity mutation, schema/D1/R2 business-data mutation, provider execution/publication, Access, `main`, or Production mutation.
 
 The merged System Gate proved canonical Development D1 convergence, Development data authority read-only, exact-SHA Preview deployment, binding proof, smoke acceptance, and regression evidence.
 
@@ -14,4 +14,4 @@ Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`
 
 ## Restart
 
-Do not redo Build 27. After the evidence-only Build 27 closure is merged, start Build 28 from the resulting current `dev` descendant. First inspect current authority and remaining bounded cross-module gaps; keep Production closed unless deliberate promotion is explicitly authorized.
+Do not redo Build 28. After this evidence-only Build 28 closure is merged, start Build 29 from the resulting current `dev` descendant. First inspect current authority and remaining bounded cross-module gaps; do not create a second ledger, duplicate module ownership, or reopen an external provider lane merely to create scope. Keep Production closed unless deliberate promotion is explicitly authorized.
