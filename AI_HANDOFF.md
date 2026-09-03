@@ -2,14 +2,19 @@
 
 ## Current authority
 
-**Release 467 Build 30 — Admin Account Security + Release-State Cleanup is GREEN in Development and Production.**
+**Release 467 Build 31 — Password Hash Hardening + Transparent Legacy Upgrade is the active Development candidate.**
 
-Development runtime: `873d9819332a92d9eb7b0eea7ea99c311bb7734d` / `4d3a1720bf09aba0fdba0f5927314f3ef1b56bea`; System Gate `33781662628`, Build 30 Proof `33781662644`, Branch Hygiene `33781662638` SUCCESS. Final Development closure source is `0c056b9fc87164f63f1828212d62de288c3f3ff1` / `07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff`; closure System Gate `33782423050` SUCCESS.
+Start boundary was re-verified before Build 31: synchronized Build 30 `dev` `9ef3d76fb23d88d2ff712222b30393aa8de53b3c` and `main` `49eeae5ee864da0f52fd3c15728cff0392ed7dd1` share tree `97d2d3c57db0f37bcd9cb0761d5bc3a7f4b2556b`; Production Pages Deploy `33783699520` SUCCESS.
 
-Accepted Production runtime: `main` `239fff2fc24529cfe5d1d0883ee8d7f0d6d411eb`, tree `07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff`; Production Pages Deploy `33782747132` SUCCESS.
+Build 31 security contract:
+- current writes: salted/iterated `pbkdf2-sha256`
+- legacy `sha256$`: verification-only compatibility
+- successful legacy login: conditional transparent upgrade inside the existing atomic login batch
+- no plaintext password storage or response
+- no reusable static credential hash in the administrator seed template
+- no forced mass reset
+- no schema change; canonical D1 migrations remain `0001`–`0004`
 
-Build 30 lets an authorized admin select a user and assign a new/temporary password without knowing the old password, generate/copy it, reveal entered password fields, and optionally invalidate that user's sessions. Reset actions are audited without emitting plaintext or password hashes. Member Account password fields have matching eye controls. Stored existing passwords cannot be displayed because authentication retains one-way hashes only.
+Build 30 remains the last accepted Production release until Build 31 is proven on Development and deliberately promoted. External HOLD lanes remain deferred and must not be opened merely to create scope.
 
-I.T. readiness removes superseded/passed checks from the current action queue while retaining them as historical evidence. Explicit HOLD_EXTERNAL lanes remain deferred, not passed.
-
-Do not redo Build 30. Start Build 31 only from the synchronized final authority descendant.
+Do not redo Build 30 or bypass Build 31 exact-head proof.

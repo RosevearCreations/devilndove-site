@@ -2,20 +2,20 @@
 
 ## Current release
 
-**Release 467 Build 30 — Admin Account Security + Release-State Cleanup is GREEN in Development and Production.**
+**Release 467 Build 31 — Password Hash Hardening + Transparent Legacy Upgrade is the active Development candidate.**
 
-Accepted Development runtime: `873d9819332a92d9eb7b0eea7ea99c311bb7734d`, tree `4d3a1720bf09aba0fdba0f5927314f3ef1b56bea`; System Gate `33781662628`, Build 30 Proof `33781662644`, Branch Hygiene `33781662638` SUCCESS.
+Build 31 started only after synchronized Build 30 was re-verified: `dev` `9ef3d76fb23d88d2ff712222b30393aa8de53b3c` and `main` `49eeae5ee864da0f52fd3c15728cff0392ed7dd1` both resolve to tree `97d2d3c57db0f37bcd9cb0761d5bc3a7f4b2556b`; Production Pages Deploy `33783699520` is SUCCESS.
 
-Final Development closure source: `0c056b9fc87164f63f1828212d62de288c3f3ff1`, tree `07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff`; exact closure System Gate `33782423050` SUCCESS.
+Build 31 replaces new password writes with a unique salted `pbkdf2-sha256` hash using Web Crypto, while retaining verification-only compatibility for existing `sha256$` credentials. A successful legacy login upgrades that user's hash conditionally inside the existing atomic login batch. Registration, bootstrap, self-service password change, admin user creation, and admin password reset write only the current format. The reusable legacy password hash was removed from `database_admin_seed_template.sql`.
 
-Accepted Production runtime: `main` `239fff2fc24529cfe5d1d0883ee8d7f0d6d411eb`, tree `07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff`; Production Pages Deploy `33782747132` SUCCESS. Production proved the exact Development tree, preserved business counts, applied/proved canonical migrations, verified isolated D1 and Production bindings, deployed exact main SHA, passed public smoke, and preserved promotion proof.
+No plaintext password is stored or returned. No mass reset is required. No schema change is introduced and canonical migrations remain exactly `0001`–`0004`.
 
-Build 30 adds user-directory password administration, temporary-password generation/copy/reveal, member Account eye controls, audited admin resets without requiring the prior password, and optional target-session invalidation. Stored existing passwords remain unreadable because only one-way hashes are retained.
+## Current boundary
 
-I.T./Admin readiness treats superseded GREEN tests/preflights as historical evidence rather than recurring open requirements. Explicit external HOLD lanes remain visible as deferred work and are not falsely marked passed.
+Build 31 is Development-only until its exact feature head and merged `dev` runtime pass Build 31 Proof, System Gate, I.T./root-admin authority, Branch Hygiene, exact Preview deployment/bindings and smoke.
 
-Canonical migrations remain exactly `0001`–`0004`.
+Production remains the synchronized Build 30 boundary until a later explicit promotion is requested and independently verified.
 
 ## Next
 
-Start Build 31 from the synchronized Build 30 authority descendant. Select the next bounded business/application gap from current evidence; do not reopen completed preflight prerequisites or external HOLD lanes merely to create scope.
+Complete Build 31 feature proof and Development acceptance. Do not open an external HOLD lane or invent unrelated scope while this security slice is active.
