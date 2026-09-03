@@ -1,6 +1,4 @@
-// File: /public/js/admin-users.js
-// Brief description: Renders the admin user directory with profile/contact summary fields
-// and action buttons for managing profiles and access tiers.
+// Release 467 Build 30 — admin user directory with direct password-reset targeting.
 
 document.addEventListener("DOMContentLoaded", () => {
   const mountEl = document.getElementById("usersAdminMount");
@@ -11,20 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let allUsers = [];
 
   function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('\"', "&quot;")
-      .replaceAll("'", "&#039;");
+    return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
   }
-
   function titleCase(value) {
     const text = String(value || "").trim();
     if (!text) return "—";
     return text.replaceAll("_", " ").replaceAll("-", " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
   }
-
   function setMessage(message, isError = false) {
     const el = document.getElementById("adminUsersMessage");
     if (!el) return;
@@ -32,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
     el.style.display = message ? "block" : "none";
     el.style.color = isError ? "#b00020" : "";
   }
-
   function getRoleFilter() { return String(document.getElementById("adminUsersRoleFilter")?.value || "").trim().toLowerCase(); }
   function getActiveFilter() { return String(document.getElementById("adminUsersActiveFilter")?.value || "").trim().toLowerCase(); }
   function getSearchValue() { return String(document.getElementById("adminUsersSearchInput")?.value || "").trim().toLowerCase(); }
@@ -48,8 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (activeFilter === "inactive" && isActive) return false;
     }
     if (search) {
-      const haystack = [user.user_id, user.email, user.display_name, user.preferred_name, user.phone, user.company_name, user.access_tier_codes, user.department, user.job_title, user.role]
-        .map((value) => String(value || "").toLowerCase()).join(" " );
+      const haystack = [user.user_id, user.email, user.display_name, user.preferred_name, user.phone, user.company_name, user.access_tier_codes, user.department, user.job_title, user.role].map((value) => String(value || "").toLowerCase()).join(" ");
       if (!haystack.includes(search)) return false;
     }
     return true;
@@ -68,6 +57,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function verificationLabel(user) {
     return `${Number(user.email_verified || 0) === 1 ? "Email ✓" : "Email ✕"} • ${Number(user.phone_verified || 0) === 1 ? "Phone ✓" : "Phone ✕"}`;
+  }
+
+  function selectPasswordTarget(userId) {
+    const user = allUsers.find((row) => Number(row.user_id) === Number(userId));
+    if (!user) return setMessage("The selected user is no longer in the current directory. Refresh and try again.", true);
+    document.dispatchEvent(new CustomEvent("dd:admin-reset-password-target", { detail: { user } }));
   }
 
   function renderTable(users) {
@@ -92,25 +87,26 @@ document.addEventListener("DOMContentLoaded", () => {
         <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(user.access_tier_codes || "—")}</td>
         <td style="padding:8px;border-bottom:1px solid #ddd">${Number(user.is_active || 0) === 1 ? "Active" : "Inactive"}</td>
         <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(String(user.active_sessions || 0))}/${escapeHtml(String(user.total_sessions || 0))}</td>
-        <td style="padding:8px;border-bottom:1px solid #ddd"><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" type="button" data-manage-profile-user-id="${escapeHtml(String(user.user_id || ""))}">Profile</button><button class="btn" type="button" data-manage-access-tiers-user-id="${escapeHtml(String(user.user_id || ""))}">Tiers</button></div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd"><div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" type="button" data-manage-profile-user-id="${escapeHtml(String(user.user_id || ""))}">Profile</button>
+          <button class="btn" type="button" data-manage-access-tiers-user-id="${escapeHtml(String(user.user_id || ""))}">Tiers</button>
+          <button class="btn" type="button" data-reset-password-user-id="${escapeHtml(String(user.user_id || ""))}">Password</button>
+        </div></td>
       </tr>`).join("");
+    tableBody.querySelectorAll("[data-reset-password-user-id]").forEach((button) => button.addEventListener("click", () => selectPasswordTarget(button.dataset.resetPasswordUserId)));
   }
 
   function renderUi() {
     if (hasRendered) return;
     hasRendered = true;
     mountEl.innerHTML = `
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0">User Directory</h3><p class="small" style="margin:8px 0 0 0">Review users, profile state, verification flags, tiers, and sessions.</p></div><button class="btn" type="button" id="refreshAdminUsersButton">Refresh Users</button></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0">User Directory</h3><p class="small" style="margin:8px 0 0 0">Review users, profile state, verification flags, tiers, sessions, and select an account for an administrator password reset.</p></div><button class="btn" type="button" id="refreshAdminUsersButton">Refresh Users</button></div>
       <div class="grid cols-3" style="gap:12px;margin-top:14px"><div><label class="small" for="adminUsersRoleFilter">Role</label><select id="adminUsersRoleFilter"><option value="">All</option><option value="member">Member</option><option value="admin">Admin</option></select></div><div><label class="small" for="adminUsersActiveFilter">Status</label><select id="adminUsersActiveFilter"><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select></div><div><label class="small" for="adminUsersSearchInput">Search</label><input id="adminUsersSearchInput" type="text" placeholder="User ID, name, email, phone, tier..." autocomplete="off" /></div></div>
       <div id="adminUsersMessage" class="small" style="display:none;margin-top:12px"></div><div id="adminUsersSummary" class="small" style="margin-top:10px"></div><div id="adminUsersEmpty" class="small" style="display:none;margin-top:10px">No users available.</div>
       <div style="overflow:auto;margin-top:14px"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">ID</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">User</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Role</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Profile</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Contact</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Verified</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Tiers</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Status</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Sessions</th><th style="text-align:left;padding:8px;border-bottom:1px solid #ddd">Action</th></tr></thead><tbody id="adminUsersTableBody"><tr><td colspan="10" style="padding:12px">Loading users...</td></tr></tbody></table></div>`;
-    const refreshButton = document.getElementById("refreshAdminUsersButton");
-    const roleFilter = document.getElementById("adminUsersRoleFilter");
-    const activeFilter = document.getElementById("adminUsersActiveFilter");
-    const searchInput = document.getElementById("adminUsersSearchInput");
-    if (refreshButton) refreshButton.addEventListener("click", async () => { await loadUsers(); });
-    [roleFilter, activeFilter].forEach((el) => el && el.addEventListener("change", () => renderTable(allUsers.filter(matchesFilters))));
-    if (searchInput) searchInput.addEventListener("input", () => renderTable(allUsers.filter(matchesFilters)));
+    document.getElementById("refreshAdminUsersButton")?.addEventListener("click", loadUsers);
+    [document.getElementById("adminUsersRoleFilter"), document.getElementById("adminUsersActiveFilter")].forEach((el) => el && el.addEventListener("change", () => renderTable(allUsers.filter(matchesFilters))));
+    document.getElementById("adminUsersSearchInput")?.addEventListener("input", () => renderTable(allUsers.filter(matchesFilters)));
   }
 
   async function fetchUsers() {
@@ -142,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.addEventListener("dd:admin-ready", async (event) => { if (!event?.detail?.ok) return; renderUi(); await loadUsers(); });
-  document.addEventListener("dd:user-updated", async () => { await loadUsers(); });
+  document.addEventListener("dd:user-updated", loadUsers);
   renderUi();
   loadUsers();
 });
