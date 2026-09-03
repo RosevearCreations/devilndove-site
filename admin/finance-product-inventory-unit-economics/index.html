@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Finance ↔ Product/Inventory Unit Economics — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css?v=467"/>
+  <link rel="stylesheet" href="/css/admin-convergence.css?v=454"/>
+  <link rel="stylesheet" href="/css/admin-finance-product-inventory-unit-economics.css?v=46725"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="finance-product-inventory-unit-economics" data-admin-module="finance">
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Finance / Product / Inventory readiness</div></div></div>
+      <div class="links"><a href="/admin/accounting/">Finance</a><a href="/admin/storefront-inventory-sellability/">Sellability</a><a href="/admin/inventory-intelligence/">Inventory</a><a href="/admin/products/">Products</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+    </div>
+    <main>
+      <section class="hero compact-hero">
+        <div>
+          <p class="eyebrow">Release 467 Build 25</p>
+          <h1>Finance ↔ Product/Inventory Unit-Economics Readiness</h1>
+          <p>Reconcile current Product sellability with Accounting-owned monthly item-cost evidence. This workspace is read-only and does not change prices, Products, inventory, public offers, or accounting records.</p>
+        </div>
+      </section>
+      <section class="card ue-boundary">
+        <strong>Evidence boundary</strong>
+        <p class="small">Estimated price headroom is Product price minus the selected-period Accounting estimated full unit cost. It is not accounting profit. “Review supported” is evidence for operator review only—not authorization to price, publish, sell, build, reserve, ship, or post accounting.</p>
+        <p class="small" id="ueMessage" role="status" aria-live="polite" data-admin-workspace-status data-admin-retry-action="reload">Loading Build 25 reconciliation…</p>
+      </section>
+      <section id="ueSummary" class="ue-summary" aria-label="Unit economics readiness summary"></section>
+      <section class="card ue-toolbar">
+        <label>Period<input id="ueMonth" type="month"/></label>
+        <label>Queue<select id="ueState"><option value="all">All Products</option><option value="publication_blocked">Publication blocked</option><option value="fulfillment_blocked">Fulfillment blocked</option><option value="fulfillment_unverified">Fulfillment unverified</option><option value="costing_incomplete">Costing incomplete</option><option value="costing_unverified">Costing unverified</option><option value="nonpositive_estimated_headroom">Non-positive estimated headroom</option><option value="review_supported">Review supported</option></select></label>
+        <label class="ue-search">Search<input id="ueSearch" type="search" placeholder="Product, SKU, state…"/></label>
+        <button class="btn" id="ueRefresh" type="button">Refresh</button>
+        <button class="btn secondary" id="ueReset" type="button">Reset</button>
+      </section>
+      <section class="ue-results-head"><p class="small" id="ueCount"></p></section>
+      <section id="ueList" class="ue-list" aria-live="polite"><div class="card">Loading Finance and Product/Inventory evidence…</div></section>
+    </main>
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=467"></script>
+  <script src="/public/js/auth.js?v=467"></script>
+  <script src="/public/js/site-auth-ui.js?v=467"></script>
+  <script src="/public/js/admin-self-protect.js?v=467"></script>
+  <script src="/public/js/admin.js?v=467"></script>
+  <script src="/public/js/admin-module-nav.js?v=454"></script>
+  <script src="/public/js/admin-workspace-state.js?v=467"></script>
+  <script src="/public/js/admin-finance-product-inventory-unit-economics.js?v=46725"></script>
+</body>
+</html>
