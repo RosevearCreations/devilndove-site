@@ -1,11 +1,11 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Current authority — Release 467 Build 29
+## Current authority — Release 467 Build 30
 
-Build 29 — Order ↔ Production Release Readiness Reconciliation is DEVELOPMENT GREEN.
+Build 30 — Admin Account Security + Release-State Cleanup is DEVELOPMENT GREEN.
 
-Accepted runtime is `b225a66e9224d05f75a740dc9fe7d06ce3edba09`, tree `3265745ffd00064007da10944781efceba91b78d`; System Gate `33774734543`, Build 29 Proof `33774734506`, Branch Hygiene `33774734659` SUCCESS.
+Accepted Development runtime is `873d9819332a92d9eb7b0eea7ea99c311bb7734d`, tree `4d3a1720bf09aba0fdba0f5927314f3ef1b56bea`; System Gate `33781662628`, Build 30 Proof `33781662644`, Branch Hygiene `33781662638` SUCCESS.
 
-Read `current-development-authority.json`, `AI_HANDOFF.md`, `release467-build29-order-production-release-readiness.json`, then retained Build 28/27/26/25/24/23/22/21/20 authorities.
+Read `current-development-authority.json`, `AI_HANDOFF.md`, `release467-build30-admin-account-security-release-cleanup.json`, then retained Build 29/28/27/26/25/24/23/22/21/20 authorities.
 
-Build 20 remains the current Production authority: `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, deploy `33688892602`.
+Production remains Build 20 until the explicitly requested Build 30 promotion is independently verified and recorded.

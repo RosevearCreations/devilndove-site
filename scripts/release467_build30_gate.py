@@ -4,6 +4,7 @@ import json,re,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
 BASE='65287ea4333156242396d0cc91ca767fe5629dad'; BASE_TREE='c7b696020d3d3c8d0853ae4b49c721f902658aff'
+ACCEPTED='873d9819332a92d9eb7b0eea7ea99c311bb7734d'; ACCEPTED_TREE='4d3a1720bf09aba0fdba0f5927314f3ef1b56bea'; SYSTEM=33781662628; BUILD_RUN=33781662644; HYGIENE=33781662638
 PROD='055cbc973c667b35a209c7ea207779089f6fed3a'; PROD_TREE='550272841e764d77fc21297abede3d4cae1aaea0'; PROD_DEPLOY=33688892602
 MIGRATIONS=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql']
 def req(ok,msg):
@@ -18,14 +19,21 @@ def load(p):
 p=load('current-development-authority.json'); prev=load('release467-build29-order-production-release-readiness.json'); m=load('release467-build30-admin-account-security-release-cleanup.json'); mig=load('migrations/canonical/manifest.json')
 reset=read('functions/api/admin/reset-password.js'); resetui=read('public/js/admin-reset-password.js'); users=read('public/js/admin-users.js'); createui=read('public/js/admin-create-user.js'); member=read('public/js/change-password.js'); readiness=read('public/js/admin-it-readiness-actions.js'); promotion=read('public/js/admin-it-promotion-readiness.js'); userspage=read('admin/users/index.html'); memberspage=read('members/index.html'); oldwf=read('.github/workflows/release467-build29-proof.yml')
 req(p.get('release')==467 and int(p.get('build') or 0)>=29,'current pointer must retain Build 29 authority')
-req(p.get('main_source_head_last_verified')==PROD and p.get('production_tree_last_verified')==PROD_TREE and p.get('production_pages_deploy_last_verified')==PROD_DEPLOY,'Production Build 20 predecessor proof drifted')
+# Until Production evidence is independently recorded, preserve the previously proven Production baseline.
+if int(p.get('production_build_last_verified') or 0)<30:
+    req(p.get('main_source_head_last_verified')==PROD and p.get('production_tree_last_verified')==PROD_TREE and p.get('production_pages_deploy_last_verified')==PROD_DEPLOY,'Production Build 20 predecessor proof drifted')
 req(prev.get('state')=='DEVELOPMENT_GREEN' and prev.get('accepted_dev_sha')=='b225a66e9224d05f75a740dc9fe7d06ce3edba09','Build 29 accepted runtime drifted')
-req(m.get('release')==467 and m.get('build')==30 and m.get('state') in ('FEATURE_IMPLEMENTED','DEVELOPMENT_GREEN'),'Build 30 identity/state drifted')
+req(m.get('release')==467 and m.get('build')==30 and m.get('state') in ('FEATURE_IMPLEMENTED','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 30 identity/state drifted')
 req(m.get('source_base_sha')==BASE and m.get('source_base_tree_sha')==BASE_TREE,'Build 30 source base drifted')
 for k in ('admin_password_reset_without_existing_password','temporary_password_generation','password_reset_audited_without_secret_values','password_reset_session_invalidation_supported','member_password_reveal_controls','superseded_passed_requirements_removed_from_open_queue','historical_green_evidence_retained','external_hold_lanes_marked_deferred_not_passed','current_green_authority_drives_promotion_readiness'):
     req(m.get(k) is True,f'Build 30 contract drift: {k}')
 for k in ('stored_password_plaintext_readable','schema_change_authorized','request_time_schema_mutation','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_mutation_authorized','secret_values_emitted'):
     req(m.get(k) is False,f'Build 30 safety drift: {k}')
+if m.get('state') in ('DEVELOPMENT_GREEN','PRODUCTION_GREEN'):
+    req(m.get('accepted_dev_sha')==ACCEPTED and m.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'Build 30 accepted Development SHA/tree drifted')
+    a=m.get('acceptance') or {}; req(a.get('merged_system_gate_run')==SYSTEM and a.get('merged_build30_proof_run')==BUILD_RUN and a.get('merged_branch_hygiene_run')==HYGIENE,'Build 30 accepted Development run evidence drifted')
+    req(int(p.get('build') or 0)>=30 and int(p.get('last_green_build') or 0)>=30,'Build 30 green authority must advance current pointer')
+    if int(p.get('build') or 0)==30: req(p.get('accepted_dev_sha')==ACCEPTED and p.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'current Build 30 authority must point to accepted Development runtime')
 for token in ('existing_password_required:false','password_value_emitted:false','password_hash_emitted:false','admin_user_password_reset','DELETE FROM sessions'):
     req(token in reset,f'password reset authority missing marker: {token}')
 req('new_password' in reset and 'password_hash' in reset and 'SELECT user_id,email,display_name,role,is_active' in reset,'password reset must update hash while never returning stored credential data')

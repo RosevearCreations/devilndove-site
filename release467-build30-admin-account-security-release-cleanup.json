@@ -2,9 +2,16 @@
   "release": 467,
   "build": 30,
   "title": "Admin Account Security + Release-State Cleanup",
-  "state": "FEATURE_IMPLEMENTED",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "65287ea4333156242396d0cc91ca767fe5629dad",
   "source_base_tree_sha": "c7b696020d3d3c8d0853ae4b49c721f902658aff",
+  "accepted_dev_sha": "873d9819332a92d9eb7b0eea7ea99c311bb7734d",
+  "accepted_dev_tree_sha": "4d3a1720bf09aba0fdba0f5927314f3ef1b56bea",
+  "acceptance": {
+    "merged_system_gate_run": 33781662628,
+    "merged_build30_proof_run": 33781662644,
+    "merged_branch_hygiene_run": 33781662638
+  },
   "password_visibility_scope": "ENTERED_VALUES_ONLY",
   "stored_password_plaintext_readable": false,
   "admin_password_reset_without_existing_password": true,
