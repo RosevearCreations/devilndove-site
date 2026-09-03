@@ -10,9 +10,7 @@
 - System Gate `33696534720`: SUCCESS
 - Repository Branch Hygiene `33696535136`: SUCCESS
 
-Release 467 Build 1–20 historical proof workflows are manual-only. Persistent branch policy is `main`, `dev`. Build 20 remains application/runtime and Production authority at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, runtime tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
-
-External Access, Stripe, PayPal and Social/OAuth remain HOLD_EXTERNAL; CAIP private-media remains evidence-dependent.
+Historical Release 467 build proofs are manual-only. Current automatic guards are System Gate, Build 21 proof, Release 467 I.T. Admin Runtime Proof with read-only Development root-admin verification, and Repository Branch Hygiene. Build 20 remains application/runtime and Production authority at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, runtime tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
 
 ## Current verdict
 

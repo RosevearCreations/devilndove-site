@@ -14,10 +14,10 @@ Build 21 changed repository/release governance only. Build 20 remains the deploy
 
 ## Repository / CI authority
 
-Persistent core branches are `main` and `dev`. Release 467 Build 1–20 proof workflows are retained for deliberate manual historical proof only. The current automatic chain is canonical System Gate + Build 21 proof + Repository Branch Hygiene.
+Persistent core branches are `main` and `dev`. Release 467 Build 1–20 proof workflows plus the old Build 5 promotion proof are retained for deliberate manual historical proof only. Current automatic guards are canonical System Gate, Build 21 proof, **Release 467 I.T. Admin Runtime Proof** (including read-only Development root-admin verification), and Repository Branch Hygiene on `dev` pushes.
 
 External lanes remain **HOLD_EXTERNAL** unless independently proven: Cloudflare Access service-token acceptance, Stripe Development, PayPal sandbox and Social/OAuth. CAIP private-media remains evidence-dependent. Canada-only fulfillment and the existing U.S. sales/shipping suspension remain intact.
 
 ## Restart point
 
-**Start the next bounded Devil n Dove build from current `dev` after Build 21. Do not redo Build 21.** Preserve Production at Build 20 unless a later promotion is explicitly authorized and independently proven. Read `current-development-authority.json` first, then this file, then `release467-build21-release-state-branch-ci-hygiene.json`.
+**Start the next bounded Devil n Dove build from current `dev` after Build 21. Do not redo Build 21.** Preserve Production at Build 20 unless a later promotion is explicitly authorized and independently proven.

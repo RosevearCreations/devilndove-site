@@ -10,7 +10,7 @@
 - System Gate `33696534720` — SUCCESS
 - Repository Branch Hygiene `33696535136` — SUCCESS
 
-Build 21 completed restart/repository convergence and retired Release 467 Build 1–20 proof workflows to manual historical evidence without changing application runtime behavior.
+Build 21 completed restart/repository convergence and retired historical Release 467 build proof fanout. Current automatic guards are System Gate, Build 21 proof, Release 467 I.T. Admin Runtime Proof, and Repository Branch Hygiene.
 
 ## Production
 
@@ -18,4 +18,4 @@ Production remains Build 20: `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, 
 
 ## Next roadmap after Build 21
 
-Select the next bounded internal product/business improvement from current `dev`. Prefer operator truth, customer journey, business efficiency, reliability or storefront quality without reopening completed Build 14–20 work. External lanes remain HOLD_EXTERNAL unless deliberately accepted with current evidence. Canada-only fulfillment, U.S. sales/shipping suspension, one-H1 SEO, canonical migrations and Production data ownership remain mandatory.
+Select the next bounded internal product/business improvement from current `dev`. Prefer operator truth, customer journey, business efficiency, reliability or storefront quality without reopening completed Build 14–20 work. External lanes remain HOLD_EXTERNAL unless deliberately accepted with current evidence.

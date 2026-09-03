@@ -13,9 +13,7 @@
 
 Build 21 is repository/release governance only. Build 20 remains application/runtime and Production authority at runtime tree `550272841e764d77fc21297abede3d4cae1aaea0`; Production `main` is `055cbc973c667b35a209c7ea207779089f6fed3a`, Production Pages Deploy `33688892602` SUCCESS.
 
-Persistent branches are `main` and `dev`. Release 467 Build 1–20 proof workflows are retained as deliberate manual historical evidence only. Current automatic validation is canonical System Gate, Build 21 Proof and Repository Branch Hygiene.
-
-Build 21 does not authorize runtime application changes, schema/request-time DDL, D1/R2 business-data mutation, provider execution/publication, Cloudflare Access mutation, secret-value output, `main` mutation or Production promotion. External lanes remain HOLD_EXTERNAL unless separately proven.
+Historical Release 467 build proofs are manual-only. The Release 467 I.T. Admin Runtime Proof remains automatic because it is current safety evidence, including read-only Development root-admin verification. Current automatic validation is canonical System Gate, Build 21 Proof, I.T. Admin Runtime Proof and Repository Branch Hygiene.
 
 ## Restart
 

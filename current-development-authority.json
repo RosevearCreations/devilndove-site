@@ -38,20 +38,10 @@
     "explicit_archive_then_delete": [{"branch": "backup-main-before-dev-replacement-20260830", "sha": "985ecfad41207f8bf46ad99e1346e6e69ece5a69"},{"branch": "release467-build7-handoff-convergence", "sha": "1486777699808c1252f585b7024e2fcfd6296b26"}],
     "retired_automatic_proof_builds": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
     "retired_extra_automatic_proof_workflows": [".github/workflows/release467-build5-promotion-proof.yml"],
-    "current_automatic_release_proofs": ["System Gate", "Release 467 Build 21 Release State Branch CI Hygiene Proof", "Repository Branch Hygiene"]
+    "current_automatic_release_proofs": ["System Gate", "Release 467 Build 21 Release State Branch CI Hygiene Proof", "Release 467 I.T. Admin Runtime Proof", "Repository Branch Hygiene"]
   },
   "external_lanes": {"stripe_development": "HOLD_EXTERNAL","paypal_sandbox": "HOLD_EXTERNAL","caip_private_media": "HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE","social_oauth": "HOLD_EXTERNAL","cloudflare_access_service_token": "HOLD_EXTERNAL"},
   "promotion_state": "NO_AUTOMATIC_PROMOTION",
-  "runtime_application_change_authorized": false,
-  "schema_change_authorized": false,
-  "d1_mutation_authorized": false,
-  "r2_mutation_authorized": false,
-  "provider_execution_authorized": false,
-  "provider_publication_authorized": false,
-  "cloudflare_access_mutation_authorized": false,
-  "main_mutation_authorized": false,
-  "production_mutation_authorized": false,
-  "secret_values_emitted": false,
-  "repository_non_core_ref_mutation_authorized": true,
+  "runtime_application_change_authorized": false,"schema_change_authorized": false,"d1_mutation_authorized": false,"r2_mutation_authorized": false,"provider_execution_authorized": false,"provider_publication_authorized": false,"cloudflare_access_mutation_authorized": false,"main_mutation_authorized": false,"production_mutation_authorized": false,"secret_values_emitted": false,"repository_non_core_ref_mutation_authorized": true,
   "restart_rule": "Build 21 is Development GREEN at 63c6e90b9637e7953020aa856017bfde3579b47e / tree 8b8ca34e0909d684de6e473007bd976e7948e52b. Start the next bounded Devil n Dove build from current dev. Preserve Build 20 as the application/runtime and Production authority unless a newer runtime build is deliberately proven. Keep Production at Build 20 until an explicit promotion is authorized and independently proven."
 }

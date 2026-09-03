@@ -11,6 +11,4 @@
 - Repository Branch Hygiene `33696535136` — SUCCESS
 - Production remains Build 20 at `055cbc973c667b35a209c7ea207779089f6fed3a`
 
-Read `current-development-authority.json`, `AI_HANDOFF.md`, `release467-build21-release-state-branch-ci-hygiene.json`, the Build 21 operations doc, then retained Build 20/runtime authorities.
-
-Build 21 retired Release 467 Build 1–20 proof workflows to manual historical execution. The current automatic validation chain is canonical System Gate + Build 21 proof + Repository Branch Hygiene. Build 21 changed no application runtime, schema, D1/R2 business data, provider state, Cloudflare Access policy, `main`, or Production.
+Build 21 retired historical Release 467 build proof fanout while retaining the current I.T. Admin Runtime proof as an automatic read-only Development/root-admin safety guard. Current automatic validation is System Gate + Build 21 proof + Release 467 I.T. Admin Runtime Proof + Repository Branch Hygiene.
