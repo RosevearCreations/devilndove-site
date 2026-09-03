@@ -3,15 +3,15 @@
   "build": 27,
   "title": "Order ↔ Finance Settlement Readiness Reconciliation",
   "role": "READ_ONLY_ORDER_FINANCE_SETTLEMENT_READINESS_RECONCILIATION",
-  "state": "FEATURE_IMPLEMENTED",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
   "source_base_tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
-  "accepted_dev_sha": null,
-  "accepted_dev_tree_sha": null,
+  "accepted_dev_sha": "e900e8388cae83b610a36af58df77ee91c3d3bbd",
+  "accepted_dev_tree_sha": "516115b53161e80eecbaee5ded95305f5d16b5a9",
   "acceptance": {
-    "merged_system_gate_run": null,
-    "merged_build27_proof_run": null,
-    "merged_branch_hygiene_run": null
+    "merged_system_gate_run": 33767567434,
+    "merged_build27_proof_run": 33767567460,
+    "merged_branch_hygiene_run": 33767567492
   },
   "missing_accounting_fails_closed": true,
   "settlement_readiness_is_posting_authorization": false,

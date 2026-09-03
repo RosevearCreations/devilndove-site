@@ -1,5 +1,8 @@
 # Release 467 Build 27 — Order ↔ Finance Settlement Readiness
 
+## Status
+DEVELOPMENT GREEN. Accepted runtime `e900e8388cae83b610a36af58df77ee91c3d3bbd`, tree `516115b53161e80eecbaee5ded95305f5d16b5a9`; System Gate `33767567434`, Build 27 Proof `33767567460`, Branch Hygiene `33767567492` SUCCESS.
+
 ## Goal
 Provide one bounded, read-only reconciliation between current order/payment/refund evidence and the existing Accounting-owned `accounting_order_records` read contract.
 

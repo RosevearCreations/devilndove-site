@@ -5,6 +5,8 @@ import json,re,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
 BASE_SHA='7c2509513b20892fd28f97dc3459a240a8019f32'; BASE_TREE='5f0c9a1893301fd040b35da8d03984e8841dc406'
+ACCEPTED_SHA='e900e8388cae83b610a36af58df77ee91c3d3bbd'; ACCEPTED_TREE='516115b53161e80eecbaee5ded95305f5d16b5a9'
+SYSTEM_RUN=33767567434; BUILD_RUN=33767567460; HYGIENE_RUN=33767567492
 PROD='055cbc973c667b35a209c7ea207779089f6fed3a'; PROD_TREE='550272841e764d77fc21297abede3d4cae1aaea0'; PROD_DEPLOY=33688892602
 TITLE='Order ↔ Finance Settlement Readiness Reconciliation'
 MIGRATIONS=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql']
@@ -34,6 +36,12 @@ req(m.get('source_base_sha')==BASE_SHA and m.get('source_base_tree_sha')==BASE_T
 req(m.get('missing_accounting_fails_closed') is True,'Build 27 missing Accounting evidence must fail closed')
 for k in ('settlement_readiness_is_posting_authorization','payment_execution_authorized','refund_execution_authorized','accounting_posting_authorized','order_mutation_authorized','inventory_mutation_authorized','schema_change_authorized','request_time_schema_mutation','d1_mutation_authorized','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_mutation_authorized','main_mutation_authorized','production_mutation_authorized','secret_values_emitted'):
     req(m.get(k) is False,f'Build 27 safety drift: {k}')
+if m.get('state')=='DEVELOPMENT_GREEN':
+    req(m.get('accepted_dev_sha')==ACCEPTED_SHA and m.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'green Build 27 accepted SHA/tree drifted')
+    ma=m.get('acceptance') or {}
+    req(ma.get('merged_system_gate_run')==SYSTEM_RUN and ma.get('merged_build27_proof_run')==BUILD_RUN and ma.get('merged_branch_hygiene_run')==HYGIENE_RUN,'green Build 27 accepted run evidence drifted')
+    req(int(p.get('build') or 0)>=27 and int(p.get('last_green_build') or 0)>=27,'green Build 27 must advance current pointer')
+    req(p.get('accepted_dev_sha')==ACCEPTED_SHA and p.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'current authority must point to accepted Build 27 runtime')
 hasall(api,['onRequestGet as loadAccounting','read_only_order_finance_settlement_readiness_reconciliation','accounting_record_missing','refund_review','paid_amount_mismatch','outstanding_amount_mismatch','settlement_readiness_is_posting_authorization:false','request_time_schema_mutation:false'],'Build 27 API')
 upper=api.upper()
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','INSERT INTO','UPDATE ','DELETE FROM'):
