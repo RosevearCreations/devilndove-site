@@ -2,16 +2,16 @@
 
 ## Current Development
 
-**Release 467 Build 29 — Order ↔ Production Release Readiness Reconciliation is DEVELOPMENT GREEN.**
+**Release 467 Build 30 — Admin Account Security + Release-State Cleanup is DEVELOPMENT GREEN.**
 
-Accepted runtime: `b225a66e9224d05f75a740dc9fe7d06ce3edba09`, tree `3265745ffd00064007da10944781efceba91b78d`; System Gate `33774734543`, Build 29 Proof `33774734506`, Branch Hygiene `33774734659` SUCCESS.
+Accepted runtime: `873d9819332a92d9eb7b0eea7ea99c311bb7734d`, tree `4d3a1720bf09aba0fdba0f5927314f3ef1b56bea`; System Gate `33781662628`, Build 30 Proof `33781662644`, Branch Hygiene `33781662638` SUCCESS.
 
-Build 29 connects real open-order finished-stock gaps to the existing lot-aware Product Production Release GET preview. The operator requests one exact-gap preview at a time. Current material, purchase-lot and ingredient blockers fail closed; a clear preview remains review evidence only and never posts production or reserves/deducts inventory.
+Build 30 adds user-directory password administration, temporary-password generation/copy/reveal, member Account eye controls, audited admin resets without requiring the prior password, and optional target-session invalidation. Existing stored passwords remain unreadable because only one-way hashes are retained.
 
-Production remains Build 20 at `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, deploy `33688892602`.
+The I.T./Admin readiness surfaces now treat superseded GREEN checks as historical evidence instead of recurring open requirements. Explicit external HOLD lanes remain visible as deferred work and are not falsely marked passed.
+
+Production remains Build 20 until the separately requested Build 30 promotion is merged and independently verified. Canonical migrations remain exactly `0001`–`0004`.
 
 ## Next
 
-Build 30 should begin from the final Build 29 closure descendant and select the next bounded gap from current authority/evidence. Prefer safe consumption of an existing owner contract; do not manufacture a ledger, duplicate ownership, or reopen an external provider lane merely to create scope.
-
-Canonical migrations remain exactly `0001`–`0004`. External lanes remain `HOLD_EXTERNAL`; Canada-only fulfillment, the U.S. sales/shipping suspension, one-H1 SEO and Production data ownership remain mandatory.
+Complete the explicitly requested Build 30 Production promotion from this exact GREEN Development descendant, verify Production independently, synchronize Production evidence back into both persistent branches, then begin Build 31 from the clean synchronized authority.

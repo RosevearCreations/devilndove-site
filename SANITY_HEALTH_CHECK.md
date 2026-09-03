@@ -1,20 +1,21 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 29 — Order ↔ Production Release Readiness Reconciliation: DEVELOPMENT GREEN.**
+**Release 467 Build 30 — Admin Account Security + Release-State Cleanup: DEVELOPMENT GREEN.**
 
-Accepted Build 29 runtime:
-- Dev SHA `b225a66e9224d05f75a740dc9fe7d06ce3edba09`
-- tree `3265745ffd00064007da10944781efceba91b78d`
-- System Gate `33774734543`: SUCCESS
-- Build 29 Proof `33774734506`: SUCCESS
-- Branch Hygiene `33774734659`: SUCCESS
+Accepted Build 30 Development runtime:
+- Dev SHA `873d9819332a92d9eb7b0eea7ea99c311bb7734d`
+- tree `4d3a1720bf09aba0fdba0f5927314f3ef1b56bea`
+- System Gate `33781662628`: SUCCESS
+- Build 30 Proof `33781662644`: SUCCESS
+- Branch Hygiene `33781662638`: SUCCESS
 - canonical Development D1 convergence: SUCCESS
 - Development data authority read-only proof: SUCCESS
 - exact Preview deployment, binding proof and smoke: SUCCESS
-- Production: Build 20 `055cbc973c667b35a209c7ea207779089f6fed3a`, deploy `33688892602`
 
-Build 29 remains read-only and fail-closed. Build 26 retains open-order stock-gap authority and Product Production Release retains material/lot preview ownership. A clear exact-gap preview is not production-post authorization. No automatic production, inventory reservation/deduction, order/shipment mutation, customer/provider action, schema/D1/R2 business-data mutation, Access, `main` or Production mutation is authorized.
+Account security: stored passwords remain one-way hashes and are never readable; eye controls reveal only entered values. Authorized admin reset does not require the prior password, supports temporary password generation/copy and optional session invalidation, and audits without secret values.
 
-Canonical D1 migrations remain exactly `0001`–`0004`. External lanes remain `HOLD_EXTERNAL`.
+Readiness cleanup: passed/superseded checks are evidence, not open work. Explicit external HOLD lanes remain deferred and visible.
 
-**Verdict: Development GREEN at Build 29; Production GREEN and unchanged at Build 20.**
+Production remains Build 20 until the separately requested Build 30 promotion is independently verified. Canonical D1 migrations remain exactly `0001`–`0004`.
+
+**Verdict: Development GREEN at Build 30; Production promotion explicitly requested and pending independent verification.**

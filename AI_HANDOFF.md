@@ -2,16 +2,12 @@
 
 ## Current authority
 
-**Release 467 Build 29 — Order ↔ Production Release Readiness Reconciliation is DEVELOPMENT GREEN.**
+**Release 467 Build 30 — Admin Account Security + Release-State Cleanup is DEVELOPMENT GREEN.**
 
-Accepted runtime is `b225a66e9224d05f75a740dc9fe7d06ce3edba09`, tree `3265745ffd00064007da10944781efceba91b78d`; System Gate `33774734543`, Build 29 Proof `33774734506`, and Branch Hygiene `33774734659` are SUCCESS.
+Accepted Development runtime is `873d9819332a92d9eb7b0eea7ea99c311bb7734d`, tree `4d3a1720bf09aba0fdba0f5927314f3ef1b56bea`; System Gate `33781662628`, Build 30 Proof `33781662644`, and Branch Hygiene `33781662638` are SUCCESS.
 
-Build 29 is a read-only Order ↔ Production Release readiness reconciliation. Build 26 owns recognized open-order finished-stock-gap evidence; the existing Product Production Release GET preview owns exact material, lot-provenance and ingredient blockers. An operator requests one exact-gap preview at a time. A clear preview is review evidence only and does not authorize production posting, automatic production, inventory reservation/deduction, order/shipment mutation, customer/provider action, schema/D1/R2 business-data mutation, Access, `main`, or Production mutation.
+Build 30 lets an authorized admin select a user and assign a new/temporary password without knowing the old password, generate/copy it, reveal entered password fields, and optionally invalidate the target user's other sessions. Reset actions are audited without emitting plaintext or password hashes. Member Account password fields have matching eye controls. Stored existing passwords cannot be displayed because authentication retains one-way hashes only.
 
-The merged System Gate proved canonical Development D1 convergence, Development data authority read-only, exact-SHA Preview deployment, binding proof, smoke acceptance, and regression evidence.
+I.T. readiness now removes superseded/passed checks from the current action queue while retaining them as historical evidence. Explicit HOLD_EXTERNAL lanes remain deferred, not passed.
 
-Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS. External lanes remain HOLD_EXTERNAL.
-
-## Restart
-
-Do not redo Build 29. After this evidence-only Build 29 closure is merged, start Build 30 from the resulting current `dev` descendant. First inspect current authority and remaining bounded cross-module gaps; do not duplicate owner contracts, create another ledger, or reopen external lanes merely to create scope. Keep Production closed unless deliberate promotion is explicitly authorized.
+Production is still Build 20 at this checkpoint. The user explicitly requested Build 30 promotion to `main` after Development acceptance; verify Production independently and then record/synchronize that evidence before starting Build 31.
