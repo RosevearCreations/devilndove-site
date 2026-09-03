@@ -1,10 +1,7 @@
 name: Release 467 Build 10 I.T. Control Tower Proof
 
 on:
-  push:
-    branches: [release467-build10-it-control-tower-consolidation, dev]
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
 
 permissions: {contents: read}
 
@@ -41,14 +38,11 @@ jobs:
       - name: Boundary
         if: always()
         run: |
+          echo 'Build 10 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Scope: Release 467 Build 10 I.T. Control Tower consolidation and self-diagnostics'
           echo 'Runtime endpoint: READ ONLY'
           echo 'Automatic repair: NONE'
-          echo 'Schema change: NONE'
-          echo 'D1/R2 mutation: NONE'
+          echo 'Schema/D1/R2 mutation: NONE'
           echo 'Provider execution/publication: NONE'
-          echo 'Cloudflare Access policy mutation: NONE'
-          echo 'Main mutation: NONE'
-          echo 'Production mutation/contact: NONE'
-          echo 'Secret values inspected/emitted: NONE'
+          echo 'Cloudflare Access/Main/Production mutation: NONE'
           echo 'External acceptance remains HOLD_EXTERNAL unless separately and deliberately proven'

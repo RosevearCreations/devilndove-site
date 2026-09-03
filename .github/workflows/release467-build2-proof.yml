@@ -1,19 +1,11 @@
 name: Release 467 Build 2 Proof
+
 on:
-  push:
-    branches: [dev, release467-build2-it-readiness-runbooks]
-    paths:
-      - 'public/js/admin-it-readiness-actions.js'
-      - 'admin/it/index.html'
-      - 'release467-build2-it-readiness-actions.json'
-      - 'scripts/release467_build2_gate.py'
-      - 'functions/api/admin/it-control-tower.js'
-      - 'scripts/release467_build1_gate.py'
-      - '.github/workflows/release467-build2-proof.yml'
-  pull_request:
-    branches: [dev]
+  workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   build467-it-readiness-actions:
     runs-on: ubuntu-latest
@@ -37,21 +29,13 @@ jobs:
           node --check public/js/admin-it-readiness-actions.js
           node --check public/js/admin-it-control-tower.js
       - name: Compile Release 467 gates
-        run: |
-          python -m py_compile scripts/release467_build1_gate.py
-          python -m py_compile scripts/release467_build2_gate.py
+        run: python -m py_compile scripts/release467_build1_gate.py scripts/release467_build2_gate.py
       - name: Whitespace validation
         run: git diff --check origin/dev...HEAD
       - name: Release 467 Build 2 safety statement
         run: |
+          echo 'Build 2 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Release 467 Build 2: I.T. Readiness Action Queue & Recovery Runbooks'
-          echo 'Schema migration: NONE'
-          echo 'Runtime API change: NONE'
-          echo 'Request-time schema mutation: CLOSED'
-          echo 'Production mutation: CLOSED'
-          echo 'Production provider execution: CLOSED'
-          echo 'Secret disclosure: CLOSED'
-          echo 'Access-policy mutation: CLOSED'
-          echo 'Queue priority: RED THEN AMBER'
-          echo 'Recovery execution: EXISTING AUDITED WORKSPACES ONLY'
+          echo 'Schema/runtime API mutation: NONE'
+          echo 'Production/provider/secret/Access-policy mutation: CLOSED'
           echo 'External acceptance: HOLD UNTIL REAL DEVELOPMENT EVIDENCE'
