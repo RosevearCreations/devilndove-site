@@ -1,74 +1,19 @@
 name: Release 467 Build 30 Admin Account Security Release Cleanup Proof
 
 on:
-  push:
-    branches: [release467-build30-admin-account-security-release-cleanup, release467-build30-production-evidence, dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  source-proof:
+  historical-proof:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with: {fetch-depth: 0}
       - uses: actions/setup-python@v7
         with: {python-version: '3.x'}
-      - uses: actions/setup-node@v7
-        with: {node-version: '24'}
-      - name: Preserve Release 467 Build 20 business baseline
-        run: python scripts/release467_build20_gate.py
-      - name: Retain superseded Build 21-29 evidence without rerunning historical prerequisites
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          expected = {
-            21:'release467-build21-release-state-branch-ci-hygiene.json',
-            22:'release467-build22-it-release-deployment-truth.json',
-            23:'release467-build23-creator-finance-profitability-reconciliation.json',
-            24:'release467-build24-storefront-inventory-sellability-reconciliation.json',
-            25:'release467-build25-finance-product-inventory-unit-economics.json',
-            26:'release467-build26-order-inventory-fulfillment-readiness.json',
-            27:'release467-build27-order-finance-settlement-readiness.json',
-            28:'release467-build28-inventory-finance-valuation-readiness.json',
-            29:'release467-build29-order-production-release-readiness.json',
-          }
-          for build,path in expected.items():
-              p=Path(path); assert p.is_file(), path
-              data=json.loads(p.read_text(encoding='utf-8'))
-              assert data.get('release')==467 and data.get('build')==build, (path,data.get('release'),data.get('build'))
-              assert data.get('state')=='DEVELOPMENT_GREEN', (path,data.get('state'))
-          print('PASS superseded Build 21-29 evidence retained; historical gates are not current promotion prerequisites')
-          PY
-      - name: Prove Release 467 Build 30 account security and release-state cleanup
+      - name: Preserve historical Build 30 authority
         run: python scripts/release467_build30_gate.py
-      - name: Preserve whole-site public SEO quality
-        run: python scripts/release467_build15_public_seo_gate.py
-      - name: Validate JSON
-        run: |
-          python -m json.tool current-development-authority.json >/dev/null
-          python -m json.tool release467-build30-admin-account-security-release-cleanup.json >/dev/null
-      - name: Validate syntax
-        run: |
-          python -m py_compile scripts/release467_build20_gate.py scripts/release467_build21_gate.py scripts/release467_build30_gate.py
-          node --check functions/api/admin/reset-password.js
-          node --check public/js/admin-reset-password.js
-          node --check public/js/admin-users.js
-          node --check public/js/admin-create-user.js
-          node --check public/js/change-password.js
-          node --check public/js/admin-it-readiness-actions.js
-          node --check public/js/admin-it-promotion-readiness.js
-      - name: Diff safety
-        run: git diff --check origin/dev...HEAD
       - name: Boundary
-        run: |
-          echo 'Build 30 never exposes stored plaintext passwords; eye controls reveal only entered values.'
-          echo 'Admin password replacement is an explicit audited action and may clear target sessions without requiring the prior password.'
-          echo 'Builds 21-29 remain immutable evidence but their superseded gates are not current prerequisites.'
-          echo 'Explicit external HOLD lanes remain deferred rather than falsely passed.'
-          echo 'No schema change, provider execution/publication, Access mutation or automatic Production mutation is authorized.'
+        run: echo 'Build 30 is retained historical evidence; Build 31+ owns current automatic release proof.'
