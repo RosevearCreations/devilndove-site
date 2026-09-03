@@ -1,18 +1,26 @@
 # Release 467 Build 23 — Creator ↔ Finance Profitability Reconciliation
 
+## State
+
+**DEVELOPMENT GREEN.**
+
+Accepted Development runtime evidence:
+
+- merged SHA `51074b89293057ac3021fca70997a4281cd02dbc`
+- tree `ad78fc93e7ec8c2a18785425bf15b5a09eca9213`
+- System Gate `33701463045` — SUCCESS
+- Build 23 Proof `33701462979` — SUCCESS
+- Repository Branch Hygiene `33701462891` — SUCCESS
+
+The System Gate proved canonical Development D1 convergence, read-only Development data authority, exact-SHA Preview deployment, control-plane bindings, non-secret smoke acceptance and retained regression evidence.
+
 ## Purpose
 
-Build 23 begins from exact green Build 22 closure `ff1bc04ebdf51b1a2cf868269310a29c79588dfb`, tree `ef6100c2bfceb024bd64b531a86af1e2df54d411`, System Gate `33698947509`, Build 22 Proof `33698947534`, and Branch Hygiene `33698947647`.
+Build 17 intentionally labelled the Creative Project result as a **rough project result, not accounting truth**. Build 23 closes the operator gap between that Creator evidence and the existing Finance profitability intelligence without creating a second calculator or ledger.
 
-Build 17 intentionally labelled the Creative Project result as a **rough project result, not accounting truth**. Finance already owns the existing profitability intelligence and Accounting owns financial writes. Build 23 closes the operator gap between those authorities without creating a second calculator or ledger.
+`GET /api/admin/project-profitability-reconciliation` is authenticated and read-only. It combines existing `creative_work_projects` / `creative_work_events` evidence with the existing `loadProfitabilityIntelligence` Finance projection. The operator workspace is `/admin/project-profitability-reconciliation/`.
 
-## Runtime
-
-`GET /api/admin/project-profitability-reconciliation` is authenticated and read-only. It combines existing `creative_work_projects` / `creative_work_events` evidence with the existing `loadProfitabilityIntelligence` Finance projection. The API reports the exact Creator cost source used, Finance captured cost components, rough Creator result, recorded profitability result, and exact variance.
-
-A non-zero variance means **review the evidence owners**. It is not automatically classified as an error because Finance can legitimately include labour, packaging, overhead, channel fees and shipping that the Creator rough result does not include.
-
-The operator workspace is `/admin/project-profitability-reconciliation/`. It ranks evidence gaps, supports lane/search filters, and links directly back to Creative Process and Accounting for any explicit correction.
+A non-zero variance means **review the evidence owners**. It is not automatically an error because Finance can legitimately include labour, packaging, overhead, channel fees and shipping that the Creator rough result does not include.
 
 ## Authority boundary
 
@@ -28,8 +36,6 @@ The operator workspace is `/admin/project-profitability-reconciliation/`. It ran
 - `main` / Production mutation: **NONE**.
 - external acceptance lanes remain `HOLD_EXTERNAL`.
 
+Production remains Release 467 Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
+
 Canada-only fulfillment, the U.S. sales/shipping suspension, canonical migrations, one-H1 public SEO and Production business-data ownership remain unchanged.
-
-## Acceptance
-
-Build 23 is complete only after its exact feature head passes the focused proof and current PR guards, merges unchanged into `dev`, and the exact merged SHA passes the canonical System Gate including Development D1 convergence/read-only proof, exact Preview deployment, binding proof and smoke acceptance. Production promotion remains separate.

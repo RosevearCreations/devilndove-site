@@ -2,9 +2,9 @@
 
 ## Current authority — Release 467 Build 23
 
-Build 23 — Creator ↔ Finance Profitability Reconciliation is the active Development candidate.
+Build 23 — Creator ↔ Finance Profitability Reconciliation is DEVELOPMENT GREEN.
 
-Exact green predecessor is final Build 22 closure `ff1bc04ebdf51b1a2cf868269310a29c79588dfb`, tree `ef6100c2bfceb024bd64b531a86af1e2df54d411`; System Gate `33698947509`, Build 22 Proof `33698947534`, Branch Hygiene `33698947647` SUCCESS.
+Accepted Build 23 runtime evidence is `51074b89293057ac3021fca70997a4281cd02dbc`, tree `ad78fc93e7ec8c2a18785425bf15b5a09eca9213`; System Gate `33701463045`, Build 23 Proof `33701462979`, Branch Hygiene `33701462891` SUCCESS.
 
 Read `current-development-authority.json`, `AI_HANDOFF.md`, `release467-build23-creator-finance-profitability-reconciliation.json`, `docs/operations/RELEASE_467_BUILD_23_CREATOR_FINANCE_PROFITABILITY_RECONCILIATION.md`, then retained Build 22/21/20 authorities.
 

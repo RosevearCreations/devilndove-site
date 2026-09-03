@@ -2,7 +2,7 @@
   "release": 467,
   "build": 23,
   "title": "Creator ↔ Finance Profitability Reconciliation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "role": "READ_ONLY_CROSS_MODULE_PROFITABILITY_RECONCILIATION",
   "source_base_sha": "ff1bc04ebdf51b1a2cf868269310a29c79588dfb",
   "source_base_tree_sha": "ef6100c2bfceb024bd64b531a86af1e2df54d411",
@@ -17,6 +17,18 @@
     "production_main_sha": "055cbc973c667b35a209c7ea207779089f6fed3a",
     "production_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
     "production_pages_deploy_run": 33688892602
+  },
+  "accepted_dev_sha": "51074b89293057ac3021fca70997a4281cd02dbc",
+  "accepted_dev_tree_sha": "ad78fc93e7ec8c2a18785425bf15b5a09eca9213",
+  "acceptance": {
+    "merged_system_gate_run": 33701463045,
+    "merged_build23_proof_run": 33701462979,
+    "merged_branch_hygiene_run": 33701462891,
+    "canonical_development_d1": "SUCCESS",
+    "development_data_authority_read_only": "SUCCESS",
+    "exact_preview_deployment": "SUCCESS",
+    "preview_binding_proof": "SUCCESS",
+    "preview_smoke": "SUCCESS"
   },
   "workspace": "/admin/project-profitability-reconciliation/",
   "projection_endpoint": "/api/admin/project-profitability-reconciliation",
