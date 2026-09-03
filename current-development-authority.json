@@ -2,17 +2,18 @@
   "release": 467,
   "build": 24,
   "title": "Storefront ↔ Inventory Sellability Reconciliation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "feature_branch": "release467-build24-storefront-inventory-sellability-reconciliation",
   "source_base_sha": "9e61f20635b963d77c0b5c0c7bf7fb37d8a00d4d",
   "source_base_tree_sha": "323f9af57b905ea3e762e01cdbad2976197ea930",
-  "last_green_build": 23,
-  "last_green_dev_sha": "9e61f20635b963d77c0b5c0c7bf7fb37d8a00d4d",
-  "last_green_dev_tree_sha": "323f9af57b905ea3e762e01cdbad2976197ea930",
-  "last_green_system_gate_run": 33701882478,
-  "last_green_build_proof_run": 33701882382,
-  "last_green_branch_hygiene_run": 33701882340,
+  "accepted_dev_sha": "b04aeb89d4d22b1b158244c86256ad39f31da70b",
+  "accepted_dev_tree_sha": "f70c733f9544764bd7d68af3d85383e133ee77db",
+  "last_green_build": 24,
+  "last_green_dev_sha": "b04aeb89d4d22b1b158244c86256ad39f31da70b",
+  "last_green_dev_tree_sha": "f70c733f9544764bd7d68af3d85383e133ee77db",
+  "last_green_system_gate_run": 33703326878,
+  "last_green_build_proof_run": 33703326916,
+  "last_green_branch_hygiene_run": 33703326867,
   "predecessor_accepted_runtime": {
     "build": 23,
     "sha": "51074b89293057ac3021fca70997a4281cd02dbc",
@@ -48,5 +49,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Prove Build 24 from exact final Build 23 closure 9e61f20635b963d77c0b5c0c7bf7fb37d8a00d4d / 323f9af57b905ea3e762e01cdbad2976197ea930. Do not redo Build 23. Production remains Build 20 and external lanes remain HOLD_EXTERNAL unless separately proven."
+  "restart_rule": "Build 24 is Development GREEN. Start the next bounded Devil n Dove build from the current dev HEAD after verifying it descends from accepted Build 24 runtime evidence b04aeb89d4d22b1b158244c86256ad39f31da70b / f70c733f9544764bd7d68af3d85383e133ee77db. Do not redo Build 24. Production remains Build 20 and external lanes remain HOLD_EXTERNAL unless separately proven."
 }

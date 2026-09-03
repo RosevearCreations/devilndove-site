@@ -2,7 +2,7 @@
   "release": 467,
   "build": 24,
   "title": "Storefront ↔ Inventory Sellability Reconciliation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "role": "READ_ONLY_CROSS_MODULE_SELLABILITY_RECONCILIATION",
   "source_base_sha": "9e61f20635b963d77c0b5c0c7bf7fb37d8a00d4d",
   "source_base_tree_sha": "323f9af57b905ea3e762e01cdbad2976197ea930",
@@ -19,6 +19,18 @@
     "production_main_sha": "055cbc973c667b35a209c7ea207779089f6fed3a",
     "production_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
     "production_pages_deploy_run": 33688892602
+  },
+  "accepted_dev_sha": "b04aeb89d4d22b1b158244c86256ad39f31da70b",
+  "accepted_dev_tree_sha": "f70c733f9544764bd7d68af3d85383e133ee77db",
+  "acceptance": {
+    "merged_system_gate_run": 33703326878,
+    "merged_build24_proof_run": 33703326916,
+    "merged_branch_hygiene_run": 33703326867,
+    "development_d1_convergence": "SUCCESS",
+    "development_data_authority_read_only": "SUCCESS",
+    "exact_preview_deployment": "SUCCESS",
+    "preview_control_plane_bindings": "SUCCESS",
+    "preview_smoke": "SUCCESS"
   },
   "workspace": "/admin/storefront-inventory-sellability/",
   "projection_endpoint": "/api/admin/storefront-inventory-sellability",
