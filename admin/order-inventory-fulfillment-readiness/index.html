@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Order ↔ Inventory Fulfillment Readiness — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css?v=467"/>
+  <link rel="stylesheet" href="/css/admin-convergence.css?v=454"/>
+  <link rel="stylesheet" href="/css/admin-order-inventory-fulfillment-readiness.css?v=46726"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="order-inventory-fulfillment-readiness">
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Orders / Inventory readiness</div></div></div>
+      <div class="links"><a href="/admin/order-fulfillment-care/">Order Care</a><a href="/admin/storefront-inventory-sellability/">Sellability</a><a href="/admin/inventory-intelligence/">Inventory</a><a href="/admin/products/">Products</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+    </div>
+    <main>
+      <section class="hero compact-hero">
+        <div><p class="eyebrow">Release 467 Build 26</p><h1>Order ↔ Inventory Fulfillment Readiness</h1><p>Compare recognized open physical-order demand with current finished-stock and Build 24 buildability evidence. This workspace is read-only and never reserves, deducts, builds, fulfills, ships, or contacts a customer.</p></div>
+      </section>
+      <section class="card ofr-boundary"><strong>Evidence boundary</strong><p class="small">“Finished-stock supported” means current gross finished stock is at least recognized pre-fulfillment demand; it is not a reservation. When finished stock is short but buildability exists, this view requires operator review and does not add the two figures into a promised capacity total.</p><p class="small" id="ofrMessage" role="status" aria-live="polite" data-admin-workspace-status data-admin-retry-action="reload">Loading Build 26 reconciliation…</p></section>
+      <section id="ofrSummary" class="ofr-summary" aria-label="Fulfillment readiness summary"></section>
+      <section class="card ofr-toolbar"><label>Queue<select id="ofrState"><option value="all">All open demand</option><option value="finished_stock_supported">Finished-stock supported</option><option value="buildability_review">Buildability review</option><option value="finished_stock_shortfall">Finished-stock shortfall</option><option value="resource_shortage">Resource shortage</option><option value="demand_unverified">Demand unverified</option><option value="capacity_unverified">Capacity unverified</option><option value="product_missing">Product missing</option></select></label><label class="ofr-search">Search<input id="ofrSearch" type="search" placeholder="Product, SKU, state…"/></label><button class="btn" id="ofrRefresh" type="button">Refresh</button><button class="btn secondary" id="ofrReset" type="button">Reset</button></section>
+      <section class="ofr-results-head"><p class="small" id="ofrCount"></p></section>
+      <section id="ofrList" class="ofr-list" aria-live="polite"><div class="card">Loading order and Inventory evidence…</div></section>
+    </main>
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=467"></script><script src="/public/js/auth.js?v=467"></script><script src="/public/js/site-auth-ui.js?v=467"></script><script src="/public/js/admin-self-protect.js?v=467"></script><script src="/public/js/admin.js?v=467"></script><script src="/public/js/admin-workspace-state.js?v=467"></script><script src="/public/js/admin-order-inventory-fulfillment-readiness.js?v=46726"></script>
+</body>
+</html>
