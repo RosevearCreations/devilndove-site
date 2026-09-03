@@ -1,10 +1,6 @@
 name: Release 467 Build 27 Order Finance Settlement Readiness Proof
 
 on:
-  push:
-    branches: [release467-build27, dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:
@@ -38,10 +34,7 @@ jobs:
           python -m py_compile scripts/release467_build20_gate.py scripts/release467_build21_gate.py scripts/release467_build22_gate.py scripts/release467_build23_gate.py scripts/release467_build24_gate.py scripts/release467_build25_gate.py scripts/release467_build26_gate.py scripts/release467_build27_gate.py
           node --check functions/api/admin/order-finance-settlement-readiness.js
           node --check public/js/admin-order-finance-settlement-readiness.js
-      - name: Diff safety
-        run: git diff --check origin/dev...HEAD
       - name: Boundary
         run: |
-          echo 'Build 27 compares order/payment/refund evidence with the Accounting-owned bounded order-financial read contract.'
-          echo 'Missing or mismatched Accounting evidence fails closed to operator review.'
+          echo 'Historical Build 27 proof is manual-only after Build 28.'
           echo 'No payment/refund execution, accounting posting, order/Inventory mutation, schema/D1/R2 business mutation, provider execution, Access, main or Production mutation is authorized.'
