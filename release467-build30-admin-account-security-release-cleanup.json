@@ -2,7 +2,7 @@
   "release": 467,
   "build": 30,
   "title": "Admin Account Security + Release-State Cleanup",
-  "state": "DEVELOPMENT_GREEN",
+  "state": "PRODUCTION_GREEN",
   "source_base_sha": "65287ea4333156242396d0cc91ca767fe5629dad",
   "source_base_tree_sha": "c7b696020d3d3c8d0853ae4b49c721f902658aff",
   "accepted_dev_sha": "873d9819332a92d9eb7b0eea7ea99c311bb7734d",
@@ -10,7 +10,13 @@
   "acceptance": {
     "merged_system_gate_run": 33781662628,
     "merged_build30_proof_run": 33781662644,
-    "merged_branch_hygiene_run": 33781662638
+    "merged_branch_hygiene_run": 33781662638,
+    "final_dev_closure_sha": "0c056b9fc87164f63f1828212d62de288c3f3ff1",
+    "final_dev_closure_tree_sha": "07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff",
+    "final_dev_closure_system_gate_run": 33782423050,
+    "accepted_production_main_sha": "239fff2fc24529cfe5d1d0883ee8d7f0d6d411eb",
+    "accepted_production_tree_sha": "07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff",
+    "production_pages_deploy_run": 33782747132
   },
   "password_visibility_scope": "ENTERED_VALUES_ONLY",
   "stored_password_plaintext_readable": false,
