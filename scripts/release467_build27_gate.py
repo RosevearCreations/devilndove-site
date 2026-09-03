@@ -41,7 +41,8 @@ if m.get('state')=='DEVELOPMENT_GREEN':
     ma=m.get('acceptance') or {}
     req(ma.get('merged_system_gate_run')==SYSTEM_RUN and ma.get('merged_build27_proof_run')==BUILD_RUN and ma.get('merged_branch_hygiene_run')==HYGIENE_RUN,'green Build 27 accepted run evidence drifted')
     req(int(p.get('build') or 0)>=27 and int(p.get('last_green_build') or 0)>=27,'green Build 27 must advance current pointer')
-    req(p.get('accepted_dev_sha')==ACCEPTED_SHA and p.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'current authority must point to accepted Build 27 runtime')
+    if int(p.get('build') or 0)==27:
+        req(p.get('accepted_dev_sha')==ACCEPTED_SHA and p.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'Build 27 current authority must point to accepted Build 27 runtime')
 hasall(api,['onRequestGet as loadAccounting','read_only_order_finance_settlement_readiness_reconciliation','accounting_record_missing','refund_review','paid_amount_mismatch','outstanding_amount_mismatch','settlement_readiness_is_posting_authorization:false','request_time_schema_mutation:false'],'Build 27 API')
 upper=api.upper()
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','INSERT INTO','UPDATE ','DELETE FROM'):
