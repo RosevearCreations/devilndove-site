@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 28,
-  "title": "Inventory ↔ Finance Valuation Readiness Reconciliation",
+  "build": 29,
+  "title": "Order ↔ Production Release Readiness Reconciliation",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "ac525c4cc9442c7ba5efb2fd752ee79c14f834df",
-  "source_base_tree_sha": "8b00e6baff55c769aff0a47caaf4e5dfca10bad1",
-  "accepted_dev_sha": "d9717bb81a52584abe1a45c83fc67889a5770f35",
-  "accepted_dev_tree_sha": "88f17be8a85cce4e588ef5171004ad28c875332e",
-  "last_green_build": 28,
-  "last_green_dev_sha": "d9717bb81a52584abe1a45c83fc67889a5770f35",
-  "last_green_dev_tree_sha": "88f17be8a85cce4e588ef5171004ad28c875332e",
-  "last_green_system_gate_run": 33770297641,
-  "last_green_build_proof_run": 33770297583,
-  "last_green_branch_hygiene_run": 33770297625,
+  "source_base_sha": "1c97c63b3e7dbf81a4861fa77f3f93cc448e275a",
+  "source_base_tree_sha": "ffac7ef6367414d4e9a8e090ff9c63d4b2df42ed",
+  "accepted_dev_sha": "b225a66e9224d05f75a740dc9fe7d06ce3edba09",
+  "accepted_dev_tree_sha": "3265745ffd00064007da10944781efceba91b78d",
+  "last_green_build": 29,
+  "last_green_dev_sha": "b225a66e9224d05f75a740dc9fe7d06ce3edba09",
+  "last_green_dev_tree_sha": "3265745ffd00064007da10944781efceba91b78d",
+  "last_green_system_gate_run": 33774734543,
+  "last_green_build_proof_run": 33774734506,
+  "last_green_branch_hygiene_run": 33774734659,
   "predecessor_accepted_runtime": {
-    "build": 27,
-    "sha": "e900e8388cae83b610a36af58df77ee91c3d3bbd",
-    "tree_sha": "516115b53161e80eecbaee5ded95305f5d16b5a9",
-    "system_gate_run": 33767567434,
-    "build_proof_run": 33767567460,
-    "branch_hygiene_run": 33767567492
+    "build": 28,
+    "sha": "d9717bb81a52584abe1a45c83fc67889a5770f35",
+    "tree_sha": "88f17be8a85cce4e588ef5171004ad28c875332e",
+    "system_gate_run": 33770297641,
+    "build_proof_run": 33770297583,
+    "branch_hygiene_run": 33770297625
   },
   "predecessor_final_closure": {
-    "build": 27,
-    "sha": "ac525c4cc9442c7ba5efb2fd752ee79c14f834df",
-    "tree_sha": "8b00e6baff55c769aff0a47caaf4e5dfca10bad1"
+    "build": 28,
+    "sha": "1c97c63b3e7dbf81a4861fa77f3f93cc448e275a",
+    "tree_sha": "ffac7ef6367414d4e9a8e090ff9c63d4b2df42ed"
   },
   "business_application_baseline_build": 20,
   "business_application_baseline_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
@@ -47,6 +47,7 @@
   "production_pages_deploy_last_verified": 33688892602,
   "production_deployment_must_be_verified_independently": true,
   "current_release_authorities": [
+    "release467-build29-order-production-release-readiness.json",
     "release467-build28-inventory-finance-valuation-readiness.json",
     "release467-build27-order-finance-settlement-readiness.json",
     "release467-build26-order-inventory-fulfillment-readiness.json",
@@ -60,10 +61,10 @@
   "repository_governance": {
     "persistent_branches": ["main", "dev"],
     "cleanup_workflow": ".github/workflows/repository-branch-hygiene.yml",
-    "historical_build_proofs_manual_through": 27,
+    "historical_build_proofs_manual_through": 28,
     "current_automatic_release_proofs": [
       "System Gate",
-      "Release 467 Build 28 Inventory Finance Valuation Readiness Proof",
+      "Release 467 Build 29 Order Production Release Readiness Proof",
       "Release 467 I.T. Admin Runtime Proof",
       "Repository Branch Hygiene"
     ]
@@ -86,5 +87,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 28 runtime is accepted on dev at d9717bb81a52584abe1a45c83fc67889a5770f35 / 88f17be8a85cce4e588ef5171004ad28c875332e with System Gate 33770297641, Build 28 Proof 33770297583 and Branch Hygiene 33770297625. After this evidence-only closure merges, start Build 29 from the resulting current dev descendant. Production remains Build 20 and external lanes remain HOLD_EXTERNAL."
+  "restart_rule": "Build 29 runtime is accepted on dev at b225a66e9224d05f75a740dc9fe7d06ce3edba09 / 3265745ffd00064007da10944781efceba91b78d with System Gate 33774734543, Build 29 Proof 33774734506 and Branch Hygiene 33774734659. After this evidence-only closure merges, start Build 30 from the resulting current dev descendant. Production remains Build 20 and external lanes remain HOLD_EXTERNAL."
 }

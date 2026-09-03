@@ -43,7 +43,8 @@ if m.get('state')=='DEVELOPMENT_GREEN':
     ma=m.get('acceptance') or {}
     req(ma.get('merged_system_gate_run')==SYSTEM_RUN and ma.get('merged_build28_proof_run')==BUILD_RUN and ma.get('merged_branch_hygiene_run')==HYGIENE_RUN,'green Build 28 accepted run evidence drifted')
     req(int(p.get('build') or 0)>=28 and int(p.get('last_green_build') or 0)>=28,'green Build 28 must advance current pointer')
-    req(p.get('accepted_dev_sha')==ACCEPTED_SHA and p.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'current authority must point to accepted Build 28 runtime')
+    if int(p.get('build') or 0)==28:
+        req(p.get('accepted_dev_sha')==ACCEPTED_SHA and p.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'Build 28 current authority must point to accepted Build 28 runtime')
 hasall(api,['onRequestGet as loadInventoryCost','read_only_inventory_finance_valuation_readiness_reconciliation','unvalued_on_hand','provenance_missing','current_cost_unreconciled','source_evidence_missing','tool_asset_review','operational_inventory_value_is_book_value: false','finance_review_is_accounting_posting_authorization: false','request_time_schema_mutation: false'],'Build 28 API')
 upper=api.upper()
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','INSERT INTO','UPDATE ','DELETE FROM'):
