@@ -2,11 +2,11 @@
 
 ## Current authority
 
-**Release 467 Build 24 — Storefront ↔ Inventory Sellability Reconciliation is the active Development candidate.**
+**Release 467 Build 24 — Storefront ↔ Inventory Sellability Reconciliation is DEVELOPMENT GREEN.**
 
-Exact green predecessor is final Build 23 closure `9e61f20635b963d77c0b5c0c7bf7fb37d8a00d4d`, tree `323f9af57b905ea3e762e01cdbad2976197ea930`; System Gate `33701882478`, Build 23 Proof `33701882382`, and Branch Hygiene `33701882340` are SUCCESS.
+Accepted Build 24 runtime evidence is `b04aeb89d4d22b1b158244c86256ad39f31da70b`, tree `f70c733f9544764bd7d68af3d85383e133ee77db`; System Gate `33703326878`, Build 24 Proof `33703326916`, and Branch Hygiene `33703326867` are SUCCESS.
 
-Build 24 adds a read-only bridge between existing Product publication readiness and existing finished-stock/resource-buildability evidence. `sellability_supported` is review evidence only; it is not authorization to publish, sell, build, reserve or ship. Product/Storefront and Inventory remain the write owners.
+Build 24 provides a read-only bridge between existing Product publication readiness and existing finished-stock/resource-buildability evidence. `sellability_supported` is review evidence only; it is not authorization to publish, sell, build, reserve or ship. Product/Storefront and Inventory remain the write owners. No second readiness, inventory or fulfillment authority was created.
 
 Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
 
@@ -14,4 +14,4 @@ No schema/D1/R2 business-data/provider/Access/main/Production mutation is author
 
 ## Restart
 
-Prove Build 24 from the exact final Build 23 closure. Do not redo Build 23 unless fresh evidence proves drift.
+Start the next bounded Devil n Dove build from current `dev` after confirming it descends from accepted Build 24 evidence. Do not redo Build 24 unless fresh evidence proves drift.

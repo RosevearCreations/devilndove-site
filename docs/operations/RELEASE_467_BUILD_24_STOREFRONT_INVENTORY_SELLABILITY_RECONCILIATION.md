@@ -2,9 +2,13 @@
 
 ## State
 
-Development candidate from exact final Build 23 closure `9e61f20635b963d77c0b5c0c7bf7fb37d8a00d4d`, tree `323f9af57b905ea3e762e01cdbad2976197ea930`.
+**DEVELOPMENT GREEN.**
 
-Build 23 final closure evidence: System Gate `33701882478`, Build 23 Proof `33701882382`, Branch Hygiene `33701882340` — SUCCESS.
+Accepted runtime SHA `b04aeb89d4d22b1b158244c86256ad39f31da70b`, tree `f70c733f9544764bd7d68af3d85383e133ee77db`.
+
+Accepted evidence: System Gate `33703326878`, Build 24 Proof `33703326916`, Branch Hygiene `33703326867` — SUCCESS. The System Gate proved canonical Development D1 convergence, Development data authority read-only, exact-SHA Preview deployment, control-plane bindings, non-secret smoke acceptance and regression evidence.
+
+Exact green predecessor was final Build 23 closure `9e61f20635b963d77c0b5c0c7bf7fb37d8a00d4d`, tree `323f9af57b905ea3e762e01cdbad2976197ea930`.
 
 ## Purpose
 
