@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Storefront ↔ Inventory Sellability — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/styles.css?v=467"/>
+  <link rel="stylesheet" href="/css/admin-convergence.css?v=454"/>
+  <link rel="stylesheet" href="/css/admin-storefront-inventory-sellability.css?v=46724"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="storefront-inventory-sellability" data-admin-module="storefront">
+  <div class="container admin-shell">
+    <div class="nav">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Storefront / Inventory reconciliation</div></div></div>
+      <div class="links"><a href="/admin/storefront-quality/">Storefront Quality</a><a href="/admin/inventory-intelligence/">Inventory Intelligence</a><a href="/admin/products/">Products</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+    </div>
+    <main>
+      <section class="hero compact-hero">
+        <div>
+          <p class="eyebrow">Release 467 Build 24</p>
+          <h1>Storefront ↔ Inventory Sellability Reconciliation</h1>
+          <p>Separate Product publication readiness from fulfillment evidence. This workspace is read-only: it does not unpublish Products, change stock, alter resource links, reserve inventory, or change public offer rules.</p>
+        </div>
+      </section>
+      <section class="card si-boundary">
+        <strong>Evidence boundary</strong>
+        <p class="small">“Sellability supported” means the current read model has both publication readiness and positive fulfillment evidence. It is review evidence only—not authorization to publish, sell, build, reserve, ship, or post accounting.</p>
+        <p class="small" id="siMessage" role="status" aria-live="polite" data-admin-workspace-status data-admin-retry-action="reload">Loading Build 24 reconciliation…</p>
+      </section>
+      <section id="siSummary" class="si-summary" aria-label="Sellability summary"></section>
+      <section class="card si-toolbar">
+        <label>Queue<select id="siState"><option value="all">All Products</option><option value="publication_blocked">Publication blocked</option><option value="fulfillment_blocked">Fulfillment blocked</option><option value="fulfillment_unverified">Fulfillment unverified</option><option value="sellability_supported">Sellability supported</option></select></label>
+        <label>Fulfillment<select id="siFulfillment"><option value="all">All fulfillment states</option><option value="in_stock">In stock</option><option value="buildable">Buildable</option><option value="stock_blocked">Stock blocked</option><option value="resource_blocked">Resource blocked</option><option value="unverified">Unverified</option><option value="not_applicable">Digital / not applicable</option></select></label>
+        <label class="si-search">Search<input id="siSearch" type="search" placeholder="Product, SKU, status…"/></label>
+        <button class="btn" id="siRefresh" type="button">Refresh</button>
+        <button class="btn secondary" id="siReset" type="button">Reset</button>
+      </section>
+      <section class="si-results-head"><p class="small" id="siCount"></p></section>
+      <section id="siList" class="si-list" aria-live="polite"><div class="card">Loading Product sellability evidence…</div></section>
+    </main>
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=467"></script>
+  <script src="/public/js/auth.js?v=467"></script>
+  <script src="/public/js/site-auth-ui.js?v=467"></script>
+  <script src="/public/js/admin-self-protect.js?v=467"></script>
+  <script src="/public/js/admin.js?v=467"></script>
+  <script src="/public/js/admin-module-nav.js?v=454"></script>
+  <script src="/public/js/admin-workspace-state.js?v=467"></script>
+  <script src="/public/js/admin-storefront-inventory-sellability.js?v=46724"></script>
+</body>
+</html>
