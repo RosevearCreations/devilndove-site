@@ -37,8 +37,12 @@ jobs:
               p=Path(path); assert p.is_file(), path
               data=json.loads(p.read_text(encoding='utf-8'))
               assert data.get('release')==467 and data.get('build')==build, path
-              allowed={'DEVELOPMENT_GREEN','PRODUCTION_GREEN'}
-              assert data.get('state') in allowed, (path,data.get('state'))
+              if build == 20:
+                  assert data.get('title') == 'Workshop Tool & Equipment Readiness Command Center', (path,data.get('title'))
+              elif build == 30:
+                  assert data.get('state') == 'PRODUCTION_GREEN', (path,data.get('state'))
+              else:
+                  assert data.get('state') == 'DEVELOPMENT_GREEN', (path,data.get('state'))
           print('PASS superseded Build 20-30 evidence retained; historical gates are not current prerequisites')
           PY
       - name: Prove Release 467 Build 31 password hash hardening
