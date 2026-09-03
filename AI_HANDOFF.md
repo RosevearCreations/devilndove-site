@@ -2,22 +2,12 @@
 
 ## Current authority
 
-**Release 467 Build 21 — Release State, Branch & CI Hygiene Convergence is DEVELOPMENT GREEN.**
+**Release 467 Build 22 — I.T. Release & Deployment Truth Convergence is the active Development candidate.**
 
-- merged `dev`: `63c6e90b9637e7953020aa856017bfde3579b47e`
-- tree: `8b8ca34e0909d684de6e473007bd976e7948e52b`
-- Build 21 Proof `33696534777` — SUCCESS
-- System Gate `33696534720` — SUCCESS
-- Repository Branch Hygiene `33696535136` — SUCCESS
+Exact green predecessor: Build 21 closure `d411d4a21b2172de20722776b7ba3514310aeca1`, tree `eaf8e58ec3c985a8909df324b18e1ab0f8dfd089`, System Gate `33697923893`, Build 21 Proof `33697923897`, Branch Hygiene `33697923895` — all SUCCESS.
 
-Build 21 changed repository/release governance only. Build 20 remains the deployed application/runtime and Production authority at runtime tree `550272841e764d77fc21297abede3d4cae1aaea0`; Production `main` is `055cbc973c667b35a209c7ea207779089f6fed3a`, Production Pages Deploy `33688892602` SUCCESS.
+Build 22 updates the read-only I.T. operator truth surface so current operator authority, last-green Development, application/runtime authority and Production authority are not conflated.
 
-## Repository / CI authority
+Build 20 remains application/runtime authority at tree `550272841e764d77fc21297abede3d4cae1aaea0` and Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, Production Pages Deploy `33688892602` SUCCESS.
 
-Persistent core branches are `main` and `dev`. Release 467 Build 1–20 proof workflows plus the old Build 5 promotion proof are retained for deliberate manual historical proof only. Current automatic guards are canonical System Gate, Build 21 proof, **Release 467 I.T. Admin Runtime Proof** (including read-only Development root-admin verification), and Repository Branch Hygiene on `dev` pushes.
-
-External lanes remain **HOLD_EXTERNAL** unless independently proven: Cloudflare Access service-token acceptance, Stripe Development, PayPal sandbox and Social/OAuth. CAIP private-media remains evidence-dependent. Canada-only fulfillment and the existing U.S. sales/shipping suspension remain intact.
-
-## Restart point
-
-**Start the next bounded Devil n Dove build from current `dev` after Build 21. Do not redo Build 21.** Preserve Production at Build 20 unless a later promotion is explicitly authorized and independently proven.
+No schema/D1/R2/provider/Access/main/Production mutation is authorized. External lanes remain HOLD_EXTERNAL. Start by proving Build 22; do not redo Build 21.

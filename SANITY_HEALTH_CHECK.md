@@ -1,17 +1,11 @@
 # Devil n Dove — Sanity / Health Check
 
-## Current release state
+## Current state
 
-**Release 467 Build 21 — Release State, Branch & CI Hygiene Convergence: DEVELOPMENT GREEN.**
+Build 22 — I.T. Release & Deployment Truth Convergence is DEVELOPMENT CANDIDATE.
 
-- `dev`: `63c6e90b9637e7953020aa856017bfde3579b47e`
-- tree: `8b8ca34e0909d684de6e473007bd976e7948e52b`
-- Build 21 Proof `33696534777`: SUCCESS
-- System Gate `33696534720`: SUCCESS
-- Repository Branch Hygiene `33696535136`: SUCCESS
+GREEN predecessor: Build 21 `d411d4a21b2172de20722776b7ba3514310aeca1`, tree `eaf8e58ec3c985a8909df324b18e1ab0f8dfd089`, System Gate `33697923893`, proof `33697923897`, branch hygiene `33697923895`.
 
-Historical Release 467 build proofs are manual-only. Current automatic guards are System Gate, Build 21 proof, Release 467 I.T. Admin Runtime Proof with read-only Development root-admin verification, and Repository Branch Hygiene. Build 20 remains application/runtime and Production authority at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, runtime tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
+Application/runtime authority remains Build 20 tree `550272841e764d77fc21297abede3d4cae1aaea0`. Production remains Build 20 at `055cbc973c667b35a209c7ea207779089f6fed3a`, deploy `33688892602`.
 
-## Current verdict
-
-**Development: GREEN at Build 21. Application/runtime: GREEN at Build 20. Production: GREEN at Build 20. Next safe action: begin the next bounded build from current `dev`; do not redo Build 21.**
+Build 22 is read-only I.T. truth convergence: no schema, D1/R2 business-data, provider, Access, main or Production mutation. External lanes remain HOLD_EXTERNAL.

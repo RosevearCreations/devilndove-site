@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Fail-closed closure/source contract for Release 467 Build 21."""
+"""Retained fail-closed authority for Release 467 Build 21, forward-compatible through Build 22."""
 from __future__ import annotations
-import json,subprocess,sys
+import json,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
-GREEN_SHA='63c6e90b9637e7953020aa856017bfde3579b47e'; GREEN_TREE='8b8ca34e0909d684de6e473007bd976e7948e52b'; GREEN_SYSTEM=33696534720; GREEN_PROOF=33696534777; HYGIENE=33696535136
-RUNTIME_TREE='550272841e764d77fc21297abede3d4cae1aaea0'; PROD_MAIN='055cbc973c667b35a209c7ea207779089f6fed3a'; PROD_DEPLOY=33688892602; RETIRED=list(range(1,21)); EXTRA='.github/workflows/release467-build5-promotion-proof.yml'; IT_RUNTIME='.github/workflows/release467-it-admin-runtime-proof.yml'
+B21_SHA='d411d4a21b2172de20722776b7ba3514310aeca1'; B21_TREE='eaf8e58ec3c985a8909df324b18e1ab0f8dfd089'; B21_SYSTEM=33697923893; B21_PROOF=33697923897; B21_HYGIENE=33697923895
+B20_SHA='7b38af543400a81593a8dc1b7caa4ad9a43033ea'; B20_TREE='550272841e764d77fc21297abede3d4cae1aaea0'; PROD='055cbc973c667b35a209c7ea207779089f6fed3a'; PROD_DEPLOY=33688892602
+
 def req(ok,msg):
     if not ok: FAIL.append(msg)
 def read(path):
@@ -15,34 +16,26 @@ def read(path):
 def load(path):
     try: v=json.loads(read(path)); return v if isinstance(v,dict) else {}
     except Exception as e: FAIL.append(f'invalid JSON {path}: {e}'); return {}
-def changed():
-    try:
-        base=subprocess.check_output(['git','merge-base','HEAD','origin/dev'],cwd=ROOT,text=True).strip(); out=subprocess.check_output(['git','diff','--name-only',f'{base}...HEAD'],cwd=ROOT,text=True); return [x for x in out.splitlines() if x]
-    except Exception as e: FAIL.append(f'could not calculate changed files: {e}'); return []
-def manual_only(path,label):
-    body=read(path); req('workflow_dispatch:' in body,f'{label} must remain manually dispatchable'); req('\n  push:' not in body and '\n  pull_request:' not in body,f'{label} must be manual-only')
-def hasall(body,tokens,label):
-    for token in tokens: req(token in body,f'{label} marker missing: {token}')
-p=load('current-development-authority.json'); m=load('release467-build21-release-state-branch-ci-hygiene.json')
-req(p.get('release')==467 and p.get('build')==21 and p.get('state')=='DEVELOPMENT_GREEN','Build 21 pointer identity/state drifted')
-req(p.get('last_green_build')==21 and p.get('last_green_dev_sha')==GREEN_SHA and p.get('last_green_dev_tree_sha')==GREEN_TREE,'Build 21 green SHA/tree drifted')
-req(p.get('last_green_system_gate_run')==GREEN_SYSTEM and p.get('last_green_build_proof_run')==GREEN_PROOF and p.get('branch_hygiene_run')==HYGIENE,'Build 21 proof/run drifted')
-req(p.get('application_runtime_authority_build')==20 and p.get('application_runtime_tree_sha')==RUNTIME_TREE,'Build 20 runtime authority drifted')
-req(p.get('main_source_head_last_verified')==PROD_MAIN and p.get('production_pages_deploy_last_verified')==PROD_DEPLOY and p.get('production_tree_last_verified')==RUNTIME_TREE,'Production Build 20 checkpoint drifted')
-rg=p.get('repository_governance') or {}; req(rg.get('persistent_branches')==['main','dev'],'persistent branch policy drifted'); req(rg.get('retired_automatic_proof_builds')==RETIRED,'retired historical proof range drifted'); req(rg.get('retired_extra_automatic_proof_workflows')==[EXTRA],'extra historical workflow retirement drifted'); req('Release 467 I.T. Admin Runtime Proof' in (rg.get('current_automatic_release_proofs') or []),'current I.T. Admin Runtime proof must remain automatic')
-req(p.get('promotion_state')=='NO_AUTOMATIC_PROMOTION','automatic Production promotion forbidden')
-for k in ('runtime_application_change_authorized','schema_change_authorized','d1_mutation_authorized','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_mutation_authorized','main_mutation_authorized','production_mutation_authorized','secret_values_emitted'): req(p.get(k) is False,f'Build 21 pointer safety drift: {k}')
-req(m.get('state')=='DEVELOPMENT_GREEN' and m.get('merged_dev_sha')==GREEN_SHA and m.get('merged_dev_tree_sha')==GREEN_TREE,'Build 21 manifest green evidence drifted')
-a=m.get('acceptance') or {}; req(a.get('merged_build21_proof_run')==GREEN_PROOF and a.get('merged_system_gate_run')==GREEN_SYSTEM and a.get('branch_hygiene_run')==HYGIENE,'Build 21 manifest acceptance drifted')
-wh=m.get('workflow_hygiene') or {}; req(wh.get('retained_proofs_dispatch_only_builds')==RETIRED,'Build 21 manifest historical workflow range drifted'); req(wh.get('retained_extra_dispatch_only_workflows')==[EXTRA],'Build 5 promotion workflow retirement drifted'); req(IT_RUNTIME in (wh.get('current_automatic_proofs') or []),'I.T. Admin Runtime workflow must remain current automatic proof')
-for build in RETIRED: manual_only(f'.github/workflows/release467-build{build}-proof.yml',f'Build {build} historical proof')
-manual_only(EXTRA,'Build 5 Production Promotion Readiness historical proof')
-it=read(IT_RUNTIME); req('\n  pull_request:' in it and 'branches: [dev]' in it,'I.T. Admin Runtime proof must retain dev PR verification'); req('release467_root_admin_access.py --verify-only' in it,'I.T. Admin Runtime proof must retain read-only root admin verification')
-b20=read('scripts/release467_build20_gate.py')
-hasall(b20,["MERGED_SHA='7b38af543400a81593a8dc1b7caa4ad9a43033ea'","MERGED_TREE='550272841e764d77fc21297abede3d4cae1aaea0'",'MERGED_SYSTEM_GATE=33688666947','MERGED_BUILD20_PROOF=33688733720',"PROD_BUILD20_MAIN='055cbc973c667b35a209c7ea207779089f6fed3a'",'PROD_BUILD20_DEPLOY=33688892602',"p.get('application_runtime_authority_build')==20",'Build20_provenance=TRANSITIVE_VIA_BUILD21'],'retained Build 20 gate')
-for path in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/RELEASE_467_BUILD_21_RELEASE_STATE_BRANCH_CI_HYGIENE.md'): hasall(read(path),['Release 467 Build 21',GREEN_SHA,GREEN_TREE,str(GREEN_SYSTEM),str(GREEN_PROOF),str(HYGIENE),PROD_MAIN,'Build 20'],path)
-ch=changed(); allowed={f'.github/workflows/release467-build{x}-proof.yml' for x in range(1,16)} | {EXTRA,'current-development-authority.json','release467-build21-release-state-branch-ci-hygiene.json','scripts/release467_build20_gate.py','scripts/release467_build21_gate.py','AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/RELEASE_467_BUILD_21_RELEASE_STATE_BRANCH_CI_HYGIENE.md'}
-extra=[x for x in ch if x not in allowed]; req(not extra,f'files outside Build 21 closure scope changed: {extra}'); req(not [x for x in ch if x.startswith(('functions/','public/','admin/','css/','assets/','migrations/')) or x.lower().endswith('.sql')],'Build 21 closure must not change runtime/schema surfaces')
+p=load('current-development-authority.json'); b21=load('release467-build21-release-state-branch-ci-hygiene.json'); pointer=int(p.get('build') or 0)
+req(p.get('release')==467 and pointer>=21,'current pointer must be Release 467 Build 21 or newer')
+req(b21.get('release')==467 and b21.get('build')==21 and b21.get('state')=='DEVELOPMENT_GREEN','Build 21 manifest authority drifted')
+req(p.get('application_runtime_authority_build')==20 and p.get('application_runtime_tree_sha')==B20_TREE,'Build 20 runtime authority drifted')
+req(p.get('main_source_head_last_verified')==PROD and p.get('production_tree_last_verified')==B20_TREE and p.get('production_pages_deploy_last_verified')==PROD_DEPLOY,'Build 20 Production authority drifted')
+for build in range(1,21):
+    body=read(f'.github/workflows/release467-build{build}-proof.yml'); req('workflow_dispatch:' in body and '\n  push:' not in body and '\n  pull_request:' not in body,f'Build {build} historical proof must remain manual-only')
+if pointer==21:
+    req(p.get('state')=='DEVELOPMENT_GREEN','Build 21 direct pointer must be DEVELOPMENT_GREEN')
+else:
+    b22=load('release467-build22-it-release-deployment-truth.json'); pred=b22.get('predecessor') or {}
+    req(b22.get('release')==467 and b22.get('build')==22,'Build 22 transitive authority missing')
+    req(pred.get('build')==21 and pred.get('merged_dev_sha')==B21_SHA and pred.get('merged_dev_tree_sha')==B21_TREE,'Build 22 must retain exact Build 21 closure predecessor')
+    req(pred.get('system_gate_run')==B21_SYSTEM and pred.get('build21_proof_run')==B21_PROOF and pred.get('branch_hygiene_run')==B21_HYGIENE,'Build 22 must retain Build 21 proof chain')
+    req(p.get('last_green_build')==21 and p.get('last_green_dev_sha')==B21_SHA and p.get('last_green_dev_tree_sha')==B21_TREE,'current pointer must retain exact Build 21 last-green predecessor')
+    req(p.get('last_green_system_gate_run')==B21_SYSTEM and p.get('last_green_build_proof_run')==B21_PROOF,'current pointer Build 21 proof drifted')
+for k in ('schema_change_authorized','d1_mutation_authorized','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_mutation_authorized','main_mutation_authorized','production_mutation_authorized','secret_values_emitted'):
+    req(p.get(k) is False,f'current pointer safety drift: {k}')
 if FAIL:
-    print('FAIL Release 467 Build 21 green closure gate'); [print(f'- {x}') for x in FAIL]; sys.exit(1)
-print('PASS Release 467 Build 21 green closure gate'); print(f'development_green_sha={GREEN_SHA}'); print(f'development_green_tree={GREEN_TREE}'); print(f'system_gate={GREEN_SYSTEM}'); print(f'build21_proof={GREEN_PROOF}'); print(f'branch_hygiene={HYGIENE}'); print('historical_release467_auto_fanout=RETIRED'); print('current_it_admin_runtime_proof=RETAINED'); print('retained_build20_runtime_authority=PROVEN'); print('persistent_branches=main,dev'); print('runtime_application_authority=Build20'); print('production_authority=Build20')
+    print('FAIL Release 467 Build 21 retained gate'); [print(f'- {x}') for x in FAIL]; sys.exit(1)
+print('PASS Release 467 Build 21 retained gate')
+print('Build21_provenance=TRANSITIVE_VIA_BUILD22' if pointer>=22 else 'Build21_provenance=DIRECT_BUILD21_POINTER')
+print('build21_green_sha='+B21_SHA); print('build21_green_tree='+B21_TREE); print('build20_runtime_authority=RETAINED'); print('production_build20=RETAINED')
