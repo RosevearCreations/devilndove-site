@@ -1,28 +1,19 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 30 — Admin Account Security + Release-State Cleanup: DEVELOPMENT GREEN + PRODUCTION GREEN.**
+**Release 467 Build 31 — Password Hash Hardening + Transparent Legacy Upgrade: DEVELOPMENT CANDIDATE.**
 
-Development:
-- accepted runtime `873d9819332a92d9eb7b0eea7ea99c311bb7734d` / tree `4d3a1720bf09aba0fdba0f5927314f3ef1b56bea`
-- System Gate `33781662628`: SUCCESS
-- Build 30 Proof `33781662644`: SUCCESS
-- Branch Hygiene `33781662638`: SUCCESS
-- final closure `0c056b9fc87164f63f1828212d62de288c3f3ff1` / tree `07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff`
-- closure System Gate `33782423050`: SUCCESS
+Verified predecessor boundary before Build 31:
+- `dev` `9ef3d76fb23d88d2ff712222b30393aa8de53b3c`
+- `main` `49eeae5ee864da0f52fd3c15728cff0392ed7dd1`
+- shared tree `97d2d3c57db0f37bcd9cb0761d5bc3a7f4b2556b`
+- Production Pages Deploy `33783699520`: SUCCESS
 
-Production:
-- accepted main runtime `239fff2fc24529cfe5d1d0883ee8d7f0d6d411eb`
-- tree `07c7e9e542dfa7fcb0e93c1e1c5e270a295129ff`
-- Production Pages Deploy `33782747132`: SUCCESS
-- exact Development-tree promotion gate: SUCCESS
-- Production business-count preservation: SUCCESS
-- canonical D1 migration convergence: SUCCESS
-- isolated Production D1 proof: SUCCESS
-- exact Pages deploy and Production binding proof: SUCCESS
-- public Production smoke: SUCCESS
+Build 31 candidate security state:
+- new password writes use unique salted `pbkdf2-sha256`
+- legacy `sha256$` remains verification-only compatibility
+- successful legacy login upgrades the hash conditionally in the login batch
+- reusable static admin password hash removed
+- plaintext password storage/readback remains forbidden
+- no schema change; canonical migrations remain exactly `0001`–`0004`
 
-Account security: stored passwords remain one-way hashes and cannot be read. Eye controls reveal only entered values. Authorized admin reset does not require the prior password, supports temporary-password generation/copy and optional session invalidation, and audits without secret values.
-
-Readiness cleanup: passed/superseded checks are evidence, not open work. Explicit external HOLD lanes remain deferred and visible. Canonical D1 migrations remain exactly `0001`–`0004`.
-
-**Verdict: Build 30 GREEN in Development and Production.**
+**Verdict: Build 30 remains GREEN in Development/Production; Build 31 must still complete exact-head and merged Development acceptance before becoming GREEN.**

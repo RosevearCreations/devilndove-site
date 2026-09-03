@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {
+  PASSWORD_HASH_ITERATIONS,
+  PASSWORD_HASH_SCHEME,
+  formatStoredPasswordHashFromPlaintext,
+  getStoredPasswordHashScheme,
+  storedPasswordHashNeedsUpgrade,
+  verifyStoredPasswordHash
+} from '../functions/api/_lib/passwordHash.js';
+
+const password = 'Build31-Test-Password!';
+const first = await formatStoredPasswordHashFromPlaintext(password);
+const second = await formatStoredPasswordHashFromPlaintext(password);
+assert.ok(first.startsWith(`${PASSWORD_HASH_SCHEME}$${PASSWORD_HASH_ITERATIONS}$`));
+assert.ok(second.startsWith(`${PASSWORD_HASH_SCHEME}$${PASSWORD_HASH_ITERATIONS}$`));
+assert.notEqual(first, second, 'salted hashes for the same password must differ');
+assert.equal(await verifyStoredPasswordHash(password, first), true);
+assert.equal(await verifyStoredPasswordHash('wrong-password', first), false);
+assert.equal(getStoredPasswordHashScheme(first), PASSWORD_HASH_SCHEME);
+assert.equal(storedPasswordHashNeedsUpgrade(first), false);
+
+const bytes = new TextEncoder().encode(password);
+const legacyDigest = await crypto.subtle.digest('SHA-256', bytes);
+const legacyHex = Array.from(new Uint8Array(legacyDigest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+const legacy = `sha256$${legacyHex}`;
+assert.equal(await verifyStoredPasswordHash(password, legacy), true);
+assert.equal(await verifyStoredPasswordHash('wrong-password', legacy), false);
+assert.equal(getStoredPasswordHashScheme(legacy), 'sha256-legacy');
+assert.equal(storedPasswordHashNeedsUpgrade(legacy), true);
+assert.equal(await verifyStoredPasswordHash(password, 'unknown$bad'), false);
+
+console.log('PASS Build 31 password hash compatibility proof');
+console.log(`current_scheme=${PASSWORD_HASH_SCHEME}`);
+console.log(`iterations=${PASSWORD_HASH_ITERATIONS}`);
+console.log('legacy_sha256=VERIFY_ONLY_AND_UPGRADE_ON_LOGIN');
