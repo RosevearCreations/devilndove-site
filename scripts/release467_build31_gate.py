@@ -29,8 +29,8 @@ for k in ('new_password_writes_use_current_scheme','legacy_sha256_verification_s
     req(m.get(k) is True,f'Build 31 contract drift: {k}')
 for k in ('stored_password_plaintext_readable','forced_mass_password_reset_required','schema_change_authorized','request_time_schema_mutation','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_mutation_authorized','automatic_production_promotion_authorized','secret_values_emitted'):
     req(m.get(k) is False,f'Build 31 safety drift: {k}')
-for token in ("PASSWORD_HASH_SCHEME = 'pbkdf2-sha256'",'PASSWORD_HASH_ITERATIONS = 210000','crypto.getRandomValues','PBKDF2','legacy compatibility only','sha256$'):
-    req(token in helper,f'password hash helper missing marker: {token}')
+for token in ("PASSWORD_HASH_SCHEME = 'pbkdf2-sha256'",'PASSWORD_HASH_ITERATIONS = 210000','crypto.getRandomValues','PBKDF2',"value.startsWith('sha256$')","return (await sha256Hex(password)) === value.slice('sha256$'.length)"):
+    req(token in helper,f'password hash helper missing functional marker: {token}')
 req(helper==roothelper,'root/functions password hash authorities must match')
 req("storedPasswordHashNeedsUpgrade(user.password_hash)" in login,'login must identify legacy hash after successful verification')
 req('formatStoredPasswordHashFromPlaintext(password)' in login,'login must create current hash during legacy upgrade')
