@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-"""Fail-closed retained contract for Release 467 Build 20 — Workshop Tool & Equipment Readiness Command Center."""
+"""Fail-closed retained contract for Release 467 Build 20 — Workshop Tool & Equipment Readiness Command Center.
+
+Build 20 is the immutable application/runtime authority beneath later repository-only builds.
+A newer current Development pointer may therefore be GREEN without pretending Build 20 is still
+`last_green_build`; Build 20 provenance is instead anchored by its manifest, Build 21 predecessor
+evidence, the explicit application_runtime_authority fields, and exact Production proof.
+"""
 from __future__ import annotations
 import json,re,subprocess,sys
 from pathlib import Path
 
-ROOT=Path(__file__).resolve().parents[1];FAIL=[]
+ROOT=Path(__file__).resolve().parents[1]
+FAIL=[]
 SOURCE_BASE_SHA='9c814314dea5ddc664e73b9d822c8a41423c3aca'
 SOURCE_BASE_TREE='9be57e9c0e090f8edf210ce62fcf8b093e703506'
 SOURCE_SYSTEM_GATE=33673793408
@@ -23,20 +30,25 @@ def req(ok,msg):
     if not ok: FAIL.append(msg)
 def read(path):
     p=ROOT/path
-    if not p.is_file(): FAIL.append(f'missing required file: {path}'); return ''
+    if not p.is_file():
+        FAIL.append(f'missing required file: {path}')
+        return ''
     return p.read_text(encoding='utf-8',errors='replace')
 def load(path):
     try:
-        value=json.loads(read(path)); return value if isinstance(value,dict) else {}
+        value=json.loads(read(path))
+        return value if isinstance(value,dict) else {}
     except Exception as exc:
-        FAIL.append(f'invalid JSON {path}: {exc}'); return {}
+        FAIL.append(f'invalid JSON {path}: {exc}')
+        return {}
 def changed():
     try:
         base=subprocess.check_output(['git','merge-base','HEAD','origin/dev'],cwd=ROOT,text=True).strip()
         out=subprocess.check_output(['git','diff','--name-only',f'{base}...HEAD'],cwd=ROOT,text=True)
         return [x for x in out.splitlines() if x]
     except Exception as exc:
-        FAIL.append(f'could not calculate changed files: {exc}'); return []
+        FAIL.append(f'could not calculate changed files: {exc}')
+        return []
 def hasall(body,tokens,label):
     for token in tokens: req(token in body,f'{label} marker missing: {token}')
 def one_h1(body,label):
@@ -73,8 +85,9 @@ else:
     req(pred.get('build')==20 and pred.get('merged_dev_sha')==MERGED_SHA and pred.get('merged_dev_tree_sha')==MERGED_TREE,'Build 21 predecessor must retain exact merged Build 20')
     req(pred.get('system_gate_run')==MERGED_SYSTEM_GATE and pred.get('build20_proof_run')==MERGED_BUILD20_PROOF,'Build 21 must retain exact Build 20 Development proof')
     req(pred.get('production_main_sha')==PROD_BUILD20_MAIN and pred.get('production_tree_sha')==MERGED_TREE and pred.get('production_pages_deploy_run')==PROD_BUILD20_DEPLOY,'Build 21 must retain exact Build 20 Production proof')
-    req(p.get('last_green_build')==20 and p.get('last_green_dev_sha')==MERGED_SHA and p.get('last_green_dev_tree_sha')==MERGED_TREE,'current pointer must retain Build 20 as last green application build')
-    req(p.get('last_green_system_gate_run')==MERGED_SYSTEM_GATE and p.get('last_green_build_proof_run')==MERGED_BUILD20_PROOF,'current pointer Build 20 proof drifted')
+    req(p.get('application_runtime_authority_build')==20,'current pointer must explicitly retain Build 20 as application runtime authority')
+    req(p.get('application_runtime_tree_sha')==MERGED_TREE,'current pointer Build 20 runtime tree drifted')
+    req(int(p.get('last_green_build') or 0)>=21,'newer repository-only Development green authority is missing')
     req(p.get('main_source_head_last_verified')==PROD_BUILD20_MAIN and p.get('production_tree_last_verified')==MERGED_TREE and p.get('production_pages_deploy_last_verified')==PROD_BUILD20_DEPLOY,'current pointer Production Build 20 proof drifted')
 
 req(m.get('release')==467 and m.get('build')==20 and m.get('title')=='Workshop Tool & Equipment Readiness Command Center','Build 20 manifest identity drifted')
@@ -125,6 +138,7 @@ if FAIL:
 print('PASS Release 467 Build 20 Workshop Tool & Equipment Readiness gate')
 if pointer_build>=21:
     print('Build20_provenance=TRANSITIVE_VIA_BUILD21')
+    print('Build20_runtime_authority=EXPLICIT_CURRENT_POINTER')
 else:
     print('Build20_provenance=DIRECT_BUILD20_POINTER')
 print('build19_predecessor=EXACT_GREEN')
