@@ -2,16 +2,16 @@
 
 ## Current Development
 
-**Release 467 Build 27 — Order ↔ Finance Settlement Readiness Reconciliation is DEVELOPMENT GREEN.**
+**Release 467 Build 28 — Inventory ↔ Finance Valuation Readiness Reconciliation is DEVELOPMENT GREEN.**
 
-Accepted runtime: `e900e8388cae83b610a36af58df77ee91c3d3bbd`, tree `516115b53161e80eecbaee5ded95305f5d16b5a9`; System Gate `33767567434`, Build 27 Proof `33767567460`, Branch Hygiene `33767567492` SUCCESS.
+Accepted runtime: `d9717bb81a52584abe1a45c83fc67889a5770f35`, tree `88f17be8a85cce4e588ef5171004ad28c875332e`; System Gate `33770297641`, Build 28 Proof `33770297583`, Branch Hygiene `33770297625` SUCCESS.
 
-Build 27 compares current order/payment/refund evidence with the existing Accounting-owned order-financial read contract. Missing or mismatched Accounting evidence fails closed to operator review. Settlement support is evidence only and never authorizes payment/refund execution, accounting posting, order mutation, or Inventory reservation/mutation.
+Build 28 reconciles Inventory-owned current-cost and optional cost-history evidence into a bounded Finance valuation-readiness review. Positive on-hand stock with missing current cost or provenance fails closed; tools/equipment route to fixed-asset review. Operational inventory value is not book/tax value and the review never authorizes posting or Inventory mutation.
 
 Production remains Build 20 at `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, deploy `33688892602`.
 
 ## Next
 
-Build 28 should begin from the final Build 27 closure descendant and select the next bounded cross-module gap from current authority/evidence. Do not manufacture a new ledger, duplicate module ownership, or open an external provider lane merely to create scope.
+Build 29 should begin from the final Build 28 closure descendant and select the next bounded cross-module gap from current authority/evidence. Prefer an existing owner contract that another module needs to consume safely; do not manufacture a new ledger, duplicate module ownership, or open an external provider lane merely to create scope.
 
 Canonical migrations remain exactly `0001`–`0004`. External lanes remain `HOLD_EXTERNAL`; Canada-only fulfillment, the U.S. sales/shipping suspension, one-H1 SEO and Production data ownership remain mandatory.
