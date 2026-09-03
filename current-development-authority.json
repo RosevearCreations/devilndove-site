@@ -14,19 +14,8 @@
   "last_green_system_gate_run": 33781662628,
   "last_green_build_proof_run": 33781662644,
   "last_green_branch_hygiene_run": 33781662638,
-  "predecessor_accepted_runtime": {
-    "build": 29,
-    "sha": "b225a66e9224d05f75a740dc9fe7d06ce3edba09",
-    "tree_sha": "3265745ffd00064007da10944781efceba91b78d",
-    "system_gate_run": 33774734543,
-    "build_proof_run": 33774734506,
-    "branch_hygiene_run": 33774734659
-  },
-  "predecessor_final_closure": {
-    "build": 29,
-    "sha": "65287ea4333156242396d0cc91ca767fe5629dad",
-    "tree_sha": "c7b696020d3d3c8d0853ae4b49c721f902658aff"
-  },
+  "predecessor_accepted_runtime": {"build":29,"sha":"b225a66e9224d05f75a740dc9fe7d06ce3edba09","tree_sha":"3265745ffd00064007da10944781efceba91b78d","system_gate_run":33774734543,"build_proof_run":33774734506,"branch_hygiene_run":33774734659},
+  "predecessor_final_closure": {"build":29,"sha":"65287ea4333156242396d0cc91ca767fe5629dad","tree_sha":"c7b696020d3d3c8d0853ae4b49c721f902658aff"},
   "business_application_baseline_build": 20,
   "business_application_baseline_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
   "application_runtime_authority_build": 30,
@@ -40,33 +29,11 @@
   "production_tree_last_verified": "550272841e764d77fc21297abede3d4cae1aaea0",
   "production_pages_deploy_last_verified": 33688892602,
   "production_deployment_must_be_verified_independently": true,
-  "current_release_authorities": [
-    "release467-build30-admin-account-security-release-cleanup.json",
-    "release467-build29-order-production-release-readiness.json",
-    "release467-build28-inventory-finance-valuation-readiness.json",
-    "release467-build27-order-finance-settlement-readiness.json",
-    "release467-build26-order-inventory-fulfillment-readiness.json",
-    "release467-build25-finance-product-inventory-unit-economics.json",
-    "release467-build24-storefront-inventory-sellability-reconciliation.json",
-    "release467-build23-creator-finance-profitability-reconciliation.json",
-    "release467-build22-it-release-deployment-truth.json",
-    "release467-build21-release-state-branch-ci-hygiene.json",
-    "release467-build20-workshop-tool-equipment-readiness.json"
-  ],
-  "repository_governance": {
-    "persistent_branches": ["main","dev"],
-    "cleanup_workflow": ".github/workflows/repository-branch-hygiene.yml",
-    "historical_build_proofs_manual_through": 29,
-    "current_automatic_release_proofs": ["System Gate","Release 467 Build 30 Admin Account Security Release Cleanup Proof","Release 467 I.T. Admin Runtime Proof","Repository Branch Hygiene"]
-  },
-  "external_lanes": {
-    "stripe_development": "HOLD_EXTERNAL",
-    "paypal_sandbox": "HOLD_EXTERNAL",
-    "caip_private_media": "HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE",
-    "social_oauth": "HOLD_EXTERNAL",
-    "cloudflare_access_service_token": "HOLD_EXTERNAL"
-  },
-  "promotion_state": "EXPLICIT_PROMOTION_REQUESTED_AFTER_DEVELOPMENT_GREEN",
+  "current_release_authorities": ["release467-build30-admin-account-security-release-cleanup.json","release467-build29-order-production-release-readiness.json","release467-build28-inventory-finance-valuation-readiness.json","release467-build27-order-finance-settlement-readiness.json","release467-build26-order-inventory-fulfillment-readiness.json","release467-build25-finance-product-inventory-unit-economics.json","release467-build24-storefront-inventory-sellability-reconciliation.json","release467-build23-creator-finance-profitability-reconciliation.json","release467-build22-it-release-deployment-truth.json","release467-build21-release-state-branch-ci-hygiene.json","release467-build20-workshop-tool-equipment-readiness.json"],
+  "repository_governance": {"persistent_branches":["main","dev"],"cleanup_workflow":".github/workflows/repository-branch-hygiene.yml","historical_build_proofs_manual_through":29,"current_automatic_release_proofs":["System Gate","Release 467 Build 30 Admin Account Security Release Cleanup Proof","Release 467 I.T. Admin Runtime Proof","Repository Branch Hygiene"]},
+  "external_lanes": {"stripe_development":"HOLD_EXTERNAL","paypal_sandbox":"HOLD_EXTERNAL","caip_private_media":"HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE","social_oauth":"HOLD_EXTERNAL","cloudflare_access_service_token":"HOLD_EXTERNAL"},
+  "promotion_state": "NO_AUTOMATIC_PROMOTION",
+  "explicit_manual_promotion_requested": true,
   "runtime_application_change_authorized": true,
   "schema_change_authorized": false,
   "d1_mutation_authorized": false,
@@ -77,5 +44,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 30 runtime is accepted on dev at 873d9819332a92d9eb7b0eea7ea99c311bb7734d / 4d3a1720bf09aba0fdba0f5927314f3ef1b56bea with System Gate 33781662628, Build 30 Proof 33781662644 and Branch Hygiene 33781662638. User explicitly requested promotion to main after Development acceptance. Production must still be verified independently after promotion."
+  "restart_rule": "Build 30 runtime is accepted on dev at 873d9819332a92d9eb7b0eea7ea99c311bb7734d / 4d3a1720bf09aba0fdba0f5927314f3ef1b56bea with System Gate 33781662628, Build 30 Proof 33781662644 and Branch Hygiene 33781662638. User explicitly requested a separate manual promotion to main. Production must be independently verified after that deliberate promotion."
 }
