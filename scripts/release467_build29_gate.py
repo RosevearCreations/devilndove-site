@@ -6,6 +6,8 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
 BASE_SHA='1c97c63b3e7dbf81a4861fa77f3f93cc448e275a'; BASE_TREE='ffac7ef6367414d4e9a8e090ff9c63d4b2df42ed'
 BUILD28_ACCEPTED_SHA='d9717bb81a52584abe1a45c83fc67889a5770f35'; BUILD28_ACCEPTED_TREE='88f17be8a85cce4e588ef5171004ad28c875332e'
+ACCEPTED_SHA='b225a66e9224d05f75a740dc9fe7d06ce3edba09'; ACCEPTED_TREE='3265745ffd00064007da10944781efceba91b78d'
+SYSTEM_RUN=33774734543; BUILD_RUN=33774734506; HYGIENE_RUN=33774734659
 PROD='055cbc973c667b35a209c7ea207779089f6fed3a'; PROD_TREE='550272841e764d77fc21297abede3d4cae1aaea0'; PROD_DEPLOY=33688892602
 TITLE='Order ↔ Production Release Readiness Reconciliation'
 MIGRATIONS=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql']
@@ -36,6 +38,13 @@ for k in ('exact_gap_preview_only','operator_requested_preview_only','unclassifi
     req(m.get(k) is True,f'Build 29 fail-closed/ownership drift: {k}')
 for k in ('production_preview_is_post_authorization','automatic_production_authorized','production_post_authorized','inventory_reservation_authorized','inventory_deduction_authorized','order_mutation_authorized','shipment_mutation_authorized','customer_contact_authorized','schema_change_authorized','request_time_schema_mutation','d1_mutation_authorized','r2_mutation_authorized','provider_execution_authorized','provider_publication_authorized','cloudflare_access_mutation_authorized','main_mutation_authorized','production_mutation_authorized','secret_values_emitted'):
     req(m.get(k) is False,f'Build 29 safety drift: {k}')
+if m.get('state')=='DEVELOPMENT_GREEN':
+    req(m.get('accepted_dev_sha')==ACCEPTED_SHA and m.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'green Build 29 accepted SHA/tree drifted')
+    ma=m.get('acceptance') or {}
+    req(ma.get('merged_system_gate_run')==SYSTEM_RUN and ma.get('merged_build29_proof_run')==BUILD_RUN and ma.get('merged_branch_hygiene_run')==HYGIENE_RUN,'green Build 29 accepted run evidence drifted')
+    req(int(p.get('build') or 0)>=29 and int(p.get('last_green_build') or 0)>=29,'green Build 29 must advance current pointer')
+    if int(p.get('build') or 0)==29:
+        req(p.get('accepted_dev_sha')==ACCEPTED_SHA and p.get('accepted_dev_tree_sha')==ACCEPTED_TREE,'Build 29 current authority must point to accepted Build 29 runtime')
 hasall(api,['onRequestGet as loadFulfillmentReadiness','onRequestGet as loadProductionPreview','read_only_order_production_release_readiness_reconciliation','production_preview_required','production_preview_ready_for_review','production_blocked','demand_unverified','exact_gap_preview_only: true','production_post_authorized: false','inventory_reservation: false','inventory_deduction: false','request_time_schema_mutation: false'],'Build 29 API')
 req("onRequestPost as" not in api and 'export async function onRequestPost' not in api,'Build 29 endpoint must expose/import no POST handler')
 upper=api.upper()
