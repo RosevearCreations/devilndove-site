@@ -1,11 +1,15 @@
 # Devil n Dove — Sanity / Health Check
 
-## Current state
+**Release 467 Build 22 — I.T. Release & Deployment Truth Convergence: DEVELOPMENT GREEN.**
 
-Build 22 — I.T. Release & Deployment Truth Convergence is DEVELOPMENT CANDIDATE.
+- accepted Dev SHA `73c852a71dc900a3a70cc84d0b622dfdc0c174fd`
+- accepted tree `05d25c8455c0bfe42955fc67fb1ee3a518ce272a`
+- System Gate `33698425301`: SUCCESS
+- Build 22 Proof `33698425317`: SUCCESS
+- Branch Hygiene `33698425312`: SUCCESS
+- retained business baseline: Build 20 tree `550272841e764d77fc21297abede3d4cae1aaea0`
+- Production: Build 20 `055cbc973c667b35a209c7ea207779089f6fed3a`, deploy `33688892602`
 
-GREEN predecessor: Build 21 `d411d4a21b2172de20722776b7ba3514310aeca1`, tree `eaf8e58ec3c985a8909df324b18e1ab0f8dfd089`, System Gate `33697923893`, proof `33697923897`, branch hygiene `33697923895`.
+Build 22 is read-only I.T. release/deployment truth convergence. No schema, D1/R2 business-data, provider, Access, main or Production mutation. External lanes remain HOLD_EXTERNAL.
 
-Application/runtime authority remains Build 20 tree `550272841e764d77fc21297abede3d4cae1aaea0`. Production remains Build 20 at `055cbc973c667b35a209c7ea207779089f6fed3a`, deploy `33688892602`.
-
-Build 22 is read-only I.T. truth convergence: no schema, D1/R2 business-data, provider, Access, main or Production mutation. External lanes remain HOLD_EXTERNAL.
+**Verdict: Development GREEN at Build 22; Production GREEN and unchanged at Build 20.**

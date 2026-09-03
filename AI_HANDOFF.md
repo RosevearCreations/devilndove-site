@@ -2,12 +2,16 @@
 
 ## Current authority
 
-**Release 467 Build 22 — I.T. Release & Deployment Truth Convergence is the active Development candidate.**
+**Release 467 Build 22 — I.T. Release & Deployment Truth Convergence is DEVELOPMENT GREEN.**
 
-Exact green predecessor: Build 21 closure `d411d4a21b2172de20722776b7ba3514310aeca1`, tree `eaf8e58ec3c985a8909df324b18e1ab0f8dfd089`, System Gate `33697923893`, Build 21 Proof `33697923897`, Branch Hygiene `33697923895` — all SUCCESS.
+Accepted Development evidence: `73c852a71dc900a3a70cc84d0b622dfdc0c174fd`, tree `05d25c8455c0bfe42955fc67fb1ee3a518ce272a`; System Gate `33698425301`, Build 22 Proof `33698425317`, Branch Hygiene `33698425312` — SUCCESS.
 
-Build 22 updates the read-only I.T. operator truth surface so current operator authority, last-green Development, application/runtime authority and Production authority are not conflated.
+Build 22 makes the I.T. first-stop view distinguish current live Development deployment ancestry, accepted Build 22 evidence, retained Build 20 business baseline and Build 20 Production authority. It remains read-only and never upgrades external HOLDs by inference.
 
-Build 20 remains application/runtime authority at tree `550272841e764d77fc21297abede3d4cae1aaea0` and Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, Production Pages Deploy `33688892602` SUCCESS.
+Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
 
-No schema/D1/R2/provider/Access/main/Production mutation is authorized. External lanes remain HOLD_EXTERNAL. Start by proving Build 22; do not redo Build 21.
+No schema/D1/R2 business-data/provider/Access/main/Production mutation is authorized. External lanes remain HOLD_EXTERNAL.
+
+## Restart
+
+Start the next bounded Devil n Dove build from current `dev`. Do not redo Build 22 unless fresh evidence proves drift.

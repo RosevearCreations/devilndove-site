@@ -4,17 +4,17 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 const RELEASE = 467;
 const BUILD = 22;
 const TITLE = 'I.T. Release & Deployment Truth Convergence';
-const LAST_GREEN = Object.freeze({
+const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 21,
-  title: 'Release State, Branch & CI Hygiene Convergence',
-  dev_sha: 'd411d4a21b2172de20722776b7ba3514310aeca1',
-  dev_tree_sha: 'eaf8e58ec3c985a8909df324b18e1ab0f8dfd089',
-  system_gate_run: 33697923893,
-  build_proof_run: 33697923897,
-  branch_hygiene_run: 33697923895,
+  build: 22,
+  title: TITLE,
+  accepted_sha: '73c852a71dc900a3a70cc84d0b622dfdc0c174fd',
+  accepted_tree_sha: '05d25c8455c0bfe42955fc67fb1ee3a518ce272a',
+  system_gate_run: 33698425301,
+  build_proof_run: 33698425317,
+  branch_hygiene_run: 33698425312,
 });
-const APPLICATION_RUNTIME = Object.freeze({
+const BUSINESS_BASELINE = Object.freeze({
   release: 467,
   build: 20,
   title: 'Workshop Tool & Equipment Readiness Command Center',
@@ -22,6 +22,7 @@ const APPLICATION_RUNTIME = Object.freeze({
   tree_sha: '550272841e764d77fc21297abede3d4cae1aaea0',
   system_gate_run: 33688666947,
   build_proof_run: 33688733720,
+  role: 'RETAINED_BUSINESS_APPLICATION_BASELINE',
 });
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -66,16 +67,7 @@ function recoveryQueue(subsystems = {}) {
       const code = clean(finding.code) || `${subsystem}:${clean(finding.label)}`;
       if (seen.has(code)) continue;
       seen.add(code);
-      queue.push({
-        subsystem,
-        state: finding.state,
-        priority: finding.state === 'red' ? 'BLOCKING' : 'ATTENTION',
-        code,
-        label: clean(finding.label) || 'Readiness finding',
-        detail: clean(finding.detail),
-        correction: clean(finding.correction) || 'Open the linked corrective workspace and re-run I.T. preflight.',
-        href: clean(finding.href) || '/admin/it/',
-      });
+      queue.push({ subsystem, state: finding.state, priority: finding.state === 'red' ? 'BLOCKING' : 'ATTENTION', code, label: clean(finding.label) || 'Readiness finding', detail: clean(finding.detail), correction: clean(finding.correction) || 'Open the linked corrective workspace and re-run I.T. preflight.', href: clean(finding.href) || '/admin/it/' });
     }
   }
   queue.sort((a, b) => priority(a.state) - priority(b.state) || a.label.localeCompare(b.label));
@@ -86,9 +78,7 @@ export async function onRequestGet(context) {
   const baseResponse = await getReadinessControlTower(context);
   if (!baseResponse.ok) return baseResponse;
   const base = await baseResponse.json().catch(() => null);
-  if (!base?.ok) {
-    return jsonResponse({ release: RELEASE, build: BUILD, ok: false, error: 'I.T. readiness authority returned an invalid payload.' }, 503, { 'Cache-Control': 'no-store' });
-  }
+  if (!base?.ok) return jsonResponse({ release: RELEASE, build: BUILD, ok: false, error: 'I.T. readiness authority returned an invalid payload.' }, 503, { 'Cache-Control': 'no-store' });
 
   const subsystems = base.subsystems || {};
   const queue = recoveryQueue(subsystems);
@@ -106,24 +96,19 @@ export async function onRequestGet(context) {
     title: TITLE,
     ok: true,
     authority: 'release467-build22-it-release-deployment-truth',
-    state: 'DEVELOPMENT_CANDIDATE',
+    state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
-      current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_CANDIDATE' },
-      last_green_development: LAST_GREEN,
-      application_runtime: APPLICATION_RUNTIME,
+      current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_GREEN' },
+      accepted_development: ACCEPTED_DEVELOPMENT,
+      business_application_baseline: BUSINESS_BASELINE,
       production: PRODUCTION,
       compatibility_runtime_release_header: 466,
       compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY',
       current_automatic_guards: CURRENT_GUARDS,
       persistent_branches: ['main', 'dev'],
     },
-    development: {
-      ...DEVELOPMENT,
-      runtime_source_sha: runtimeSha,
-      runtime_host: runtimeHost,
-      exact_runtime_sha_available: Boolean(runtimeSha),
-    },
+    development: { ...DEVELOPMENT, runtime_source_sha: runtimeSha, runtime_host: runtimeHost, exact_runtime_sha_available: Boolean(runtimeSha) },
     readiness: base.readiness || {},
     headline_metrics: {
       readiness_score: Number(base.readiness?.score || 0),
@@ -145,33 +130,15 @@ export async function onRequestGet(context) {
     next_action: queue[0] || null,
     subsystems,
     sanitized_configuration: base.sanitized_configuration || {},
-    source_preflight_engine: {
-      release: Number(base.release || 0),
-      build: Number(base.build || 0),
-      authority: clean(base.authority),
-      role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE',
-    },
+    source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 22 is the current I.T. operator/release-truth surface, not a new schema or business-data authority.',
-      'Build 21 is the exact green Development predecessor for this build.',
-      'Build 20 remains the application/runtime and current Production authority until a newer runtime build is deliberately proven and promoted.',
+      'Build 22 is Development-green and owns the current I.T. operator/release-truth surface.',
+      'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from the accepted Build 22 evidence anchor.',
+      'Build 20 remains the retained business-application baseline and the current Production authority; it is not presented as the current Development runtime.',
       'Opaque runtime bindings never substitute for System Gate/control-plane D1 and R2 identity proof.',
       'External HOLDs never become GREEN by inference from source or deployment success.',
     ],
-    safety: {
-      read_only_projection: true,
-      automatic_repair: false,
-      schema_change_required: false,
-      request_time_schema_mutation: false,
-      d1_mutation_from_endpoint: false,
-      r2_mutation_from_endpoint: false,
-      provider_execution: false,
-      provider_publication: false,
-      cloudflare_access_policy_mutation: false,
-      main_mutation: false,
-      production_mutation: false,
-      secret_values_emitted: false,
-    },
+    safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
     generated_at: new Date().toISOString(),
   }, 200, { 'Cache-Control': 'no-store' });
 }
