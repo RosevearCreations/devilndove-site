@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 26,
-  "title": "Order ↔ Inventory Fulfillment Readiness Reconciliation",
+  "build": 27,
+  "title": "Order ↔ Finance Settlement Readiness Reconciliation",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "76723c1f4356cf3d9372f7985bd94cdd44d8780c",
-  "source_base_tree_sha": "c261e010e5939c9dec98682e452820dd640dccd7",
-  "accepted_dev_sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
-  "accepted_dev_tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
-  "last_green_build": 26,
-  "last_green_dev_sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
-  "last_green_dev_tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
-  "last_green_system_gate_run": 33763972878,
-  "last_green_build_proof_run": 33763973014,
-  "last_green_branch_hygiene_run": 33763972802,
+  "source_base_sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
+  "source_base_tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
+  "accepted_dev_sha": "e900e8388cae83b610a36af58df77ee91c3d3bbd",
+  "accepted_dev_tree_sha": "516115b53161e80eecbaee5ded95305f5d16b5a9",
+  "last_green_build": 27,
+  "last_green_dev_sha": "e900e8388cae83b610a36af58df77ee91c3d3bbd",
+  "last_green_dev_tree_sha": "516115b53161e80eecbaee5ded95305f5d16b5a9",
+  "last_green_system_gate_run": 33767567434,
+  "last_green_build_proof_run": 33767567460,
+  "last_green_branch_hygiene_run": 33767567492,
   "predecessor_accepted_runtime": {
-    "build": 25,
-    "sha": "a57f632898bebfd4bf3f6be39c99857a8a9da701",
-    "tree_sha": "33ff551739099ced69c12e826b5b4fbe477623ab",
-    "system_gate_run": 33758969424,
-    "build_proof_run": 33758969830,
-    "branch_hygiene_run": 33758969440
+    "build": 26,
+    "sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
+    "tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
+    "system_gate_run": 33763972878,
+    "build_proof_run": 33763973014,
+    "branch_hygiene_run": 33763972802
   },
   "predecessor_final_closure": {
-    "build": 25,
-    "sha": "76723c1f4356cf3d9372f7985bd94cdd44d8780c",
-    "tree_sha": "c261e010e5939c9dec98682e452820dd640dccd7"
+    "build": 26,
+    "sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
+    "tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406"
   },
   "business_application_baseline_build": 20,
   "business_application_baseline_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
@@ -47,6 +47,7 @@
   "production_pages_deploy_last_verified": 33688892602,
   "production_deployment_must_be_verified_independently": true,
   "current_release_authorities": [
+    "release467-build27-order-finance-settlement-readiness.json",
     "release467-build26-order-inventory-fulfillment-readiness.json",
     "release467-build25-finance-product-inventory-unit-economics.json",
     "release467-build24-storefront-inventory-sellability-reconciliation.json",
@@ -56,15 +57,12 @@
     "release467-build20-workshop-tool-equipment-readiness.json"
   ],
   "repository_governance": {
-    "persistent_branches": [
-      "main",
-      "dev"
-    ],
+    "persistent_branches": ["main", "dev"],
     "cleanup_workflow": ".github/workflows/repository-branch-hygiene.yml",
-    "historical_build_proofs_manual_through": 25,
+    "historical_build_proofs_manual_through": 26,
     "current_automatic_release_proofs": [
       "System Gate",
-      "Release 467 Build 26 Order Inventory Fulfillment Readiness Proof",
+      "Release 467 Build 27 Order Finance Settlement Readiness Proof",
       "Release 467 I.T. Admin Runtime Proof",
       "Repository Branch Hygiene"
     ]
@@ -87,5 +85,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 26 is accepted on dev at 7c2509513b20892fd28f97dc3459a240a8019f32 / 5f0c9a1893301fd040b35da8d03984e8841dc406 with System Gate 33763972878, Build 26 Proof 33763973014 and Branch Hygiene 33763972802. Start the next bounded build from this exact green descendant. Production remains Build 20 and external lanes remain HOLD_EXTERNAL."
+  "restart_rule": "Build 27 runtime is accepted on dev at e900e8388cae83b610a36af58df77ee91c3d3bbd / 516115b53161e80eecbaee5ded95305f5d16b5a9 with System Gate 33767567434, Build 27 Proof 33767567460 and Branch Hygiene 33767567492. After this evidence-only closure merges, start Build 28 from the resulting current dev descendant. Production remains Build 20 and external lanes remain HOLD_EXTERNAL."
 }
