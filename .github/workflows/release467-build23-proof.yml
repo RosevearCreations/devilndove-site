@@ -1,10 +1,6 @@
 name: Release 467 Build 23 Creator Finance Profitability Reconciliation Proof
 
 on:
-  push:
-    branches: [release467-build23-creator-finance-profitability-reconciliation, dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:
@@ -40,9 +36,8 @@ jobs:
           node --check functions/api/admin/project-profitability-reconciliation.js
           node --check public/js/admin-project-profitability-reconciliation.js
       - name: Diff safety
-        run: git diff --check origin/dev...HEAD
+        run: git diff --check
       - name: Boundary
         run: |
-          echo 'Build 23 reconciles existing Creator project evidence with existing Finance profitability intelligence.'
-          echo 'It is read-only and performs no accounting posting, project mutation, schema/D1/R2 business mutation, provider execution, Access, main or Production mutation.'
-          echo 'External acceptance lanes remain HOLD_EXTERNAL and Production remains Build 20.'
+          echo 'Historical Build 23 proof is manual-only after Build 24 owns the current focused proof.'
+          echo 'Build 23 remains read-only and Production remains Build 20.'
