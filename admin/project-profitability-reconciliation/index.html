@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Creator ↔ Finance Profitability Reconciliation — Devil n Dove Admin</title>
+  <meta name="description" content="Read-only Devil n Dove reconciliation of Creative Project cost and revenue evidence against existing Finance profitability intelligence."/>
+  <link href="/css/styles.css?v=467" rel="stylesheet"/>
+  <link href="/css/admin-project-profitability-reconciliation.css?v=467b23" rel="stylesheet"/>
+  <link href="/assets/mark.png" rel="icon" type="image/png"/>
+</head>
+<body>
+<div class="container admin-shell">
+  <div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Release 467 Build 23</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/creator/">Creator</a><a href="/admin/finance/">Finance</a><a href="/admin/accounting/">Accounting</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
+  <main>
+    <section class="hero"><p class="eyebrow">Release 467 Build 23 • Creator ↔ Finance evidence bridge</p><h1>Creator ↔ Finance Profitability Reconciliation</h1><p>Compare Creative Project revenue and cost evidence with the existing Finance profitability calculation. This surface is review-only: it does not post accounting entries, rewrite project facts, execute payment providers, or change Production.</p></section>
+    <section class="card pr-boundary" aria-labelledby="profitBoundaryHeading"><h2 id="profitBoundaryHeading" style="margin-top:0">Truth boundary</h2><p><strong>Creator:</strong> owns project facts, actual/project-entered cost and tracked material/time evidence. <strong>Finance:</strong> owns the existing profitability intelligence and routes financial corrections to Accounting. A variance is a review signal, not an automatic error judgment.</p><div class="pr-toolbar"><button class="btn" id="profitabilityReconciliationRefresh" type="button">Refresh reconciliation</button><label>Attention lane<select id="profitabilityLaneFilter"><option value="all">All lanes</option><option value="finance_record">Finance record missing</option><option value="creator_cost">Creator cost missing</option><option value="finance_cost">Finance cost missing</option><option value="revenue">Revenue missing</option><option value="variance">Variance review</option><option value="reconciled">Reconciled</option></select></label><label>Search<input id="profitabilitySearch" type="search" placeholder="Project, type, status…"/></label><span class="small" id="profitabilityReconciliationStatus" role="status" aria-live="polite">Loading…</span></div></section>
+    <div class="pr-stats" id="profitabilityReconciliationStats" aria-live="polite"></div>
+    <div id="profitabilityReconciliationMount" aria-live="polite"></div>
+  </main>
+  <div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js?v=467"></script><script src="/public/js/auth.js?v=467"></script><script src="/public/js/site-auth-ui.js?v=467"></script><script src="/public/js/admin-project-profitability-reconciliation.js?v=467b23"></script>
+</body>
+</html>

@@ -2,11 +2,11 @@
 
 ## Current authority
 
-**Release 467 Build 22 — I.T. Release & Deployment Truth Convergence is DEVELOPMENT GREEN.**
+**Release 467 Build 23 — Creator ↔ Finance Profitability Reconciliation is the active Development candidate.**
 
-Accepted Development evidence: `73c852a71dc900a3a70cc84d0b622dfdc0c174fd`, tree `05d25c8455c0bfe42955fc67fb1ee3a518ce272a`; System Gate `33698425301`, Build 22 Proof `33698425317`, Branch Hygiene `33698425312` — SUCCESS.
+Exact green predecessor is final Build 22 closure `ff1bc04ebdf51b1a2cf868269310a29c79588dfb`, tree `ef6100c2bfceb024bd64b531a86af1e2df54d411`; System Gate `33698947509`, Build 22 Proof `33698947534`, Branch Hygiene `33698947647` — SUCCESS.
 
-Build 22 makes the I.T. first-stop view distinguish current live Development deployment ancestry, accepted Build 22 evidence, retained Build 20 business baseline and Build 20 Production authority. It remains read-only and never upgrades external HOLDs by inference.
+Build 23 adds a read-only evidence bridge between Creative Project rough revenue/cost facts and the existing Finance profitability intelligence. A variance is a review signal only. Creative Process remains the project-fact owner; Accounting remains the financial write/posting owner.
 
 Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
 
@@ -14,4 +14,4 @@ No schema/D1/R2 business-data/provider/Access/main/Production mutation is author
 
 ## Restart
 
-Start the next bounded Devil n Dove build from current `dev`. Do not redo Build 22 unless fresh evidence proves drift.
+Prove Build 23 from the exact Build 22 closure. Do not redo Build 22 unless fresh evidence proves drift.
