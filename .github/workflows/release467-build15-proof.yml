@@ -1,15 +1,6 @@
 name: Release 467 Build 15 Storefront SEO Parity Proof
 
 on:
-  push:
-    branches:
-      - release467-build15-storefront-seo-parity
-      - dev
-      - main
-  pull_request:
-    branches:
-      - dev
-      - main
   workflow_dispatch:
 
 permissions:
@@ -48,17 +39,10 @@ jobs:
           node --check public/js/admin-product-quality-command-center.js
       - name: Diff safety
         shell: bash
-        run: |
-          set -euo pipefail
-          base="$(git merge-base HEAD origin/dev)"
-          git diff --check "${base}...HEAD"
-          if git diff --name-only "${base}...HEAD" | grep -E '(^migrations/|\.sql$)'; then
-            echo 'Build 15 must not change schema or migration files.' >&2
-            exit 1
-          fi
+        run: git diff --check origin/dev...HEAD
       - name: Boundary
         run: |
-          echo 'Build 15 owns autonomous backlog items 6-10.'
-          echo 'Visible Product/Offer/Breadcrumb facts, public SEO quality, buyer facts, internal relationships, and Canada-only fulfillment parity are guarded.'
+          echo 'Build 15 is retained historical proof and runs only by deliberate manual dispatch.'
+          echo 'Visible Product/Offer/Breadcrumb facts, public SEO quality, buyer facts, internal relationships, and Canada-only fulfillment parity remain guarded.'
           echo 'U.S. sales/shipping suspension remains preserved.'
           echo 'No schema migration, request-time DDL, new D1/R2 mutation authority, provider publication/execution, Cloudflare Access policy mutation, automatic Production promotion, or secret-value exposure is authorized.'

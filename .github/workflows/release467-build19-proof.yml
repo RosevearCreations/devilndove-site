@@ -1,15 +1,6 @@
 name: Release 467 Build 19 Inventory Replenishment Procurement Readiness Proof
 
 on:
-  push:
-    branches:
-      - release467-build19-inventory-replenishment-procurement-readiness
-      - dev
-      - main
-  pull_request:
-    branches:
-      - dev
-      - main
   workflow_dispatch:
 
 permissions:
@@ -56,8 +47,6 @@ jobs:
           fi
       - name: Boundary
         run: |
-          echo 'Build 19 is a read-only Inventory Replenishment & Procurement Readiness command center.'
+          echo 'Build 19 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Inventory Operations, Purchase Orders and Receiving retain all write authority.'
-          echo 'No automatic PO creation/submission, inventory adjustment, receiving action, supplier message, or provider execution is authorized.'
-          echo 'Stale ordered-record review is not represented as a supplier due-date claim.'
-          echo 'No schema migration, new broad D1/R2 authority, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'
+          echo 'No schema migration, new broad D1/R2 authority, provider execution, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'

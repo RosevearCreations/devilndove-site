@@ -2,15 +2,35 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 10;
-const TITLE = 'I.T. Control Tower Consolidation and Self-Diagnostics';
-const LAST_GREEN = Object.freeze({
+const BUILD = 22;
+const TITLE = 'I.T. Release & Deployment Truth Convergence';
+const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 9,
-  dev_sha: 'd8a9ffba03f980b9632643d91d9aa69b25bd94fd',
-  dev_tree_sha: '949f2523d31e0f47ed1e19ff7655de2762fbc1df',
-  system_gate_run: 33633043297,
-  build_proof_run: 33633043229,
+  build: 22,
+  title: TITLE,
+  accepted_sha: '73c852a71dc900a3a70cc84d0b622dfdc0c174fd',
+  accepted_tree_sha: '05d25c8455c0bfe42955fc67fb1ee3a518ce272a',
+  system_gate_run: 33698425301,
+  build_proof_run: 33698425317,
+  branch_hygiene_run: 33698425312,
+});
+const BUSINESS_BASELINE = Object.freeze({
+  release: 467,
+  build: 20,
+  title: 'Workshop Tool & Equipment Readiness Command Center',
+  dev_sha: '7b38af543400a81593a8dc1b7caa4ad9a43033ea',
+  tree_sha: '550272841e764d77fc21297abede3d4cae1aaea0',
+  system_gate_run: 33688666947,
+  build_proof_run: 33688733720,
+  role: 'RETAINED_BUSINESS_APPLICATION_BASELINE',
+});
+const PRODUCTION = Object.freeze({
+  release: 467,
+  build: 20,
+  main_sha: '055cbc973c667b35a209c7ea207779089f6fed3a',
+  tree_sha: '550272841e764d77fc21297abede3d4cae1aaea0',
+  pages_deploy_run: 33688892602,
+  promotion_state: 'NO_AUTOMATIC_PROMOTION',
 });
 const DEVELOPMENT = Object.freeze({
   target: 'https://dev.devilndove-site.pages.dev',
@@ -21,12 +41,18 @@ const DEVELOPMENT = Object.freeze({
   caip_r2: 'devilndove-caip-media-dev',
   canonical_migrations: 4,
 });
+const CURRENT_GUARDS = Object.freeze([
+  'System Gate',
+  'Release 467 Build 22 I.T. Release Deployment Truth Proof',
+  'Release 467 I.T. Admin Runtime Proof',
+  'Repository Branch Hygiene',
+]);
 const EXTERNAL_POLICY = Object.freeze([
-  { key: 'cloudflare_access_service_token', label: 'Cloudflare Access service-token acceptance', state: 'HOLD_EXTERNAL', authority: 'Release 467 Build 6', href: '/admin/it/' },
-  { key: 'stripe_development', label: 'Stripe Development acceptance', state: 'HOLD_EXTERNAL', authority: 'Release 467 Build 7', href: '/admin/release-control/external-commercial-readiness/' },
-  { key: 'paypal_sandbox', label: 'PayPal sandbox acceptance', state: 'HOLD_EXTERNAL', authority: 'Release 467 Build 7', href: '/admin/release-control/external-commercial-readiness/' },
-  { key: 'social_oauth', label: 'Social/OAuth controlled acceptance', state: 'HOLD_EXTERNAL', authority: 'Release 467 Build 7', href: '/admin/release-control/external-commercial-readiness/' },
-  { key: 'caip_private_media', label: 'CAIP private-media acceptance', state: 'USE_FRESH_BUILD7_RUNTIME_EVIDENCE', authority: 'Release 467 Build 7', href: '/admin/release-control/external-commercial-readiness/' },
+  { key: 'cloudflare_access_service_token', label: 'Cloudflare Access service-token acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 6 authority', href: '/admin/it/' },
+  { key: 'stripe_development', label: 'Stripe Development acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 7 authority', href: '/admin/release-control/external-commercial-readiness/' },
+  { key: 'paypal_sandbox', label: 'PayPal sandbox acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 7 authority', href: '/admin/release-control/external-commercial-readiness/' },
+  { key: 'social_oauth', label: 'Social/OAuth controlled acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 7 authority', href: '/admin/release-control/external-commercial-readiness/' },
+  { key: 'caip_private_media', label: 'CAIP private-media acceptance', state: 'EVIDENCE_DEPENDENT', authority: 'fresh authenticated runtime evidence required', href: '/admin/release-control/external-commercial-readiness/' },
 ]);
 
 const priority = (state) => state === 'red' ? 0 : state === 'amber' ? 1 : 2;
@@ -41,16 +67,7 @@ function recoveryQueue(subsystems = {}) {
       const code = clean(finding.code) || `${subsystem}:${clean(finding.label)}`;
       if (seen.has(code)) continue;
       seen.add(code);
-      queue.push({
-        subsystem,
-        state: finding.state,
-        priority: finding.state === 'red' ? 'BLOCKING' : 'ATTENTION',
-        code,
-        label: clean(finding.label) || 'Readiness finding',
-        detail: clean(finding.detail),
-        correction: clean(finding.correction) || 'Open the linked corrective workspace and re-run I.T. preflight.',
-        href: clean(finding.href) || '/admin/it/',
-      });
+      queue.push({ subsystem, state: finding.state, priority: finding.state === 'red' ? 'BLOCKING' : 'ATTENTION', code, label: clean(finding.label) || 'Readiness finding', detail: clean(finding.detail), correction: clean(finding.correction) || 'Open the linked corrective workspace and re-run I.T. preflight.', href: clean(finding.href) || '/admin/it/' });
     }
   }
   queue.sort((a, b) => priority(a.state) - priority(b.state) || a.label.localeCompare(b.label));
@@ -60,11 +77,8 @@ function recoveryQueue(subsystems = {}) {
 export async function onRequestGet(context) {
   const baseResponse = await getReadinessControlTower(context);
   if (!baseResponse.ok) return baseResponse;
-
   const base = await baseResponse.json().catch(() => null);
-  if (!base?.ok) {
-    return jsonResponse({ release: RELEASE, build: BUILD, ok: false, error: 'I.T. readiness authority returned an invalid payload.' }, 503, { 'Cache-Control': 'no-store' });
-  }
+  if (!base?.ok) return jsonResponse({ release: RELEASE, build: BUILD, ok: false, error: 'I.T. readiness authority returned an invalid payload.' }, 503, { 'Cache-Control': 'no-store' });
 
   const subsystems = base.subsystems || {};
   const queue = recoveryQueue(subsystems);
@@ -81,23 +95,20 @@ export async function onRequestGet(context) {
     build: BUILD,
     title: TITLE,
     ok: true,
-    authority: 'release467-build10-it-operations-control-tower',
-    state: 'DEVELOPMENT_CANDIDATE',
+    authority: 'release467-build22-it-release-deployment-truth',
+    state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
-      current: { release: RELEASE, build: BUILD, title: TITLE },
-      last_green: LAST_GREEN,
+      current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_GREEN' },
+      accepted_development: ACCEPTED_DEVELOPMENT,
+      business_application_baseline: BUSINESS_BASELINE,
+      production: PRODUCTION,
       compatibility_runtime_release_header: 466,
       compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY',
-      production_promotion_authority: 'Release 467 Build 5 Production Promotion Readiness',
-      production_promotion_state: 'NO_AUTOMATIC_PROMOTION',
+      current_automatic_guards: CURRENT_GUARDS,
+      persistent_branches: ['main', 'dev'],
     },
-    development: {
-      ...DEVELOPMENT,
-      runtime_source_sha: runtimeSha,
-      runtime_host: runtimeHost,
-      exact_runtime_sha_available: Boolean(runtimeSha),
-    },
+    development: { ...DEVELOPMENT, runtime_source_sha: runtimeSha, runtime_host: runtimeHost, exact_runtime_sha_available: Boolean(runtimeSha) },
     readiness: base.readiness || {},
     headline_metrics: {
       readiness_score: Number(base.readiness?.score || 0),
@@ -119,25 +130,15 @@ export async function onRequestGet(context) {
     next_action: queue[0] || null,
     subsystems,
     sanitized_configuration: base.sanitized_configuration || {},
-    source_preflight_engine: {
-      release: Number(base.release || 0),
-      build: Number(base.build || 0),
-      authority: clean(base.authority),
-      retained_for_compatibility: true,
-    },
-    safety: {
-      schema_change_required: false,
-      request_time_schema_mutation: false,
-      d1_mutation_from_endpoint: false,
-      r2_mutation_from_endpoint: false,
-      provider_execution: false,
-      provider_publication: false,
-      cloudflare_access_policy_mutation: false,
-      main_mutation: false,
-      production_mutation: false,
-      secret_values_emitted: false,
-    },
-    drift_policy: 'Build 10 consolidates existing read-only readiness evidence. It does not infer exact D1/R2 identity from opaque runtime bindings, does not repair administrator permissions automatically, and does not convert external HOLDs into acceptance.',
+    source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
+    truth_notes: [
+      'Build 22 is Development-green and owns the current I.T. operator/release-truth surface.',
+      'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from the accepted Build 22 evidence anchor.',
+      'Build 20 remains the retained business-application baseline and the current Production authority; it is not presented as the current Development runtime.',
+      'Opaque runtime bindings never substitute for System Gate/control-plane D1 and R2 identity proof.',
+      'External HOLDs never become GREEN by inference from source or deployment success.',
+    ],
+    safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
     generated_at: new Date().toISOString(),
   }, 200, { 'Cache-Control': 'no-store' });
 }

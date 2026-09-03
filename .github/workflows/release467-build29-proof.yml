@@ -1,0 +1,37 @@
+name: Release 467 Build 29 Order Production Release Readiness Proof
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: Preserve Release 467 Build 20 business baseline
+        run: python scripts/release467_build20_gate.py
+      - name: Preserve Release 467 Builds 21-28 authority
+        run: python scripts/release467_build21_gate.py && python scripts/release467_build22_gate.py && python scripts/release467_build23_gate.py && python scripts/release467_build24_gate.py && python scripts/release467_build25_gate.py && python scripts/release467_build26_gate.py && python scripts/release467_build27_gate.py && python scripts/release467_build28_gate.py
+      - name: Prove Release 467 Build 29 Order Production Release readiness
+        run: python scripts/release467_build29_gate.py
+      - name: Preserve whole-site public SEO quality
+        run: python scripts/release467_build15_public_seo_gate.py
+      - name: Validate JSON
+        run: |
+          python -m json.tool current-development-authority.json >/dev/null
+          python -m json.tool release467-build29-order-production-release-readiness.json >/dev/null
+      - name: Validate syntax
+        run: |
+          python -m py_compile scripts/release467_build29_gate.py
+          node --check functions/api/admin/order-production-release-readiness.js
+          node --check public/js/admin-order-production-release-readiness.js
+      - name: Boundary
+        run: echo 'Build 29 retained as historical evidence; Build 30 is the current automatic proof.'

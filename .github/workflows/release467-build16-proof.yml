@@ -1,15 +1,6 @@
 name: Release 467 Build 16 Custom Request Made Today Journey Proof
 
 on:
-  push:
-    branches:
-      - release467-build16-custom-request-made-today-journey
-      - dev
-      - main
-  pull_request:
-    branches:
-      - dev
-      - main
   workflow_dispatch:
 
 permissions:
@@ -62,9 +53,6 @@ jobs:
           fi
       - name: Boundary
         run: |
-          echo 'Build 16 owns autonomous backlog items 11-15.'
+          echo 'Build 16 is retained historical proof and runs only by deliberate manual dispatch.'
           echo 'Customer-safe custom-request journey, evidence-backed candle/soap examples, consent-cleared proof, and Made Today review capture are guarded.'
-          echo 'Made Today reuses the existing authenticated stage-photo upload authority and never auto-publishes or auto-advances order stage.'
-          echo 'The touched stage-photo route performs no request-time DDL.'
-          echo 'Canada-only fulfillment and the U.S. sales/shipping suspension remain preserved.'
           echo 'No schema migration, new broad D1/R2 authority, provider publication/execution, Cloudflare Access mutation, automatic Production promotion, or secret-value exposure is authorized.'

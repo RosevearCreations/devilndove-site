@@ -1,0 +1,40 @@
+{
+  "release": 467,
+  "build": 26,
+  "title": "Order ↔ Inventory Fulfillment Readiness Reconciliation",
+  "role": "READ_ONLY_ORDER_INVENTORY_FULFILLMENT_READINESS_RECONCILIATION",
+  "state": "DEVELOPMENT_GREEN",
+  "source_base_sha": "76723c1f4356cf3d9372f7985bd94cdd44d8780c",
+  "source_base_tree_sha": "c261e010e5939c9dec98682e452820dd640dccd7",
+  "accepted_dev_sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
+  "accepted_dev_tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
+  "acceptance": {
+    "merged_system_gate_run": 33763972878,
+    "merged_build26_proof_run": 33763973014,
+    "merged_branch_hygiene_run": 33763972802
+  },
+  "recognized_active_order_statuses": [
+    "pending",
+    "draft",
+    "processing",
+    "paid"
+  ],
+  "unclassified_open_demand_fails_closed": true,
+  "finished_stock_buildability_additive_promise": false,
+  "inventory_reservation_authorized": false,
+  "inventory_deduction_authorized": false,
+  "automatic_build_authorized": false,
+  "order_mutation_authorized": false,
+  "shipment_mutation_authorized": false,
+  "customer_contact_authorized": false,
+  "schema_change_authorized": false,
+  "request_time_schema_mutation": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "cloudflare_access_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
+  "secret_values_emitted": false
+}

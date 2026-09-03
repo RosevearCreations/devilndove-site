@@ -1,0 +1,18 @@
+{
+  "release": 467,
+  "build": 22,
+  "title": "I.T. Release & Deployment Truth Convergence",
+  "state": "DEVELOPMENT_GREEN",
+  "role": "READ_ONLY_IT_RELEASE_TRUTH",
+  "feature_head_sha": "c73fc4e90bd7ce24ad89ee0b00e16924b894774d",
+  "accepted_dev_sha": "73c852a71dc900a3a70cc84d0b622dfdc0c174fd",
+  "accepted_dev_tree_sha": "05d25c8455c0bfe42955fc67fb1ee3a518ce272a",
+  "acceptance": {"pr_number":75,"merged_system_gate_run":33698425301,"merged_build22_proof_run":33698425317,"merged_branch_hygiene_run":33698425312},
+  "predecessor": {"release":467,"build":21,"merged_dev_sha":"d411d4a21b2172de20722776b7ba3514310aeca1","merged_dev_tree_sha":"eaf8e58ec3c985a8909df324b18e1ab0f8dfd089","system_gate_run":33697923893,"build21_proof_run":33697923897,"branch_hygiene_run":33697923895},
+  "business_application_baseline": {"build":20,"dev_sha":"7b38af543400a81593a8dc1b7caa4ad9a43033ea","tree_sha":"550272841e764d77fc21297abede3d4cae1aaea0","system_gate_run":33688666947,"build20_proof_run":33688733720},
+  "production_authority": {"build":20,"main_sha":"055cbc973c667b35a209c7ea207779089f6fed3a","tree_sha":"550272841e764d77fc21297abede3d4cae1aaea0","pages_deploy_run":33688892602},
+  "runtime": {"endpoint":"/api/admin/it-operations-control-tower","workspace":"/admin/it/","source_preflight_engine":"/api/admin/it-control-tower","source_preflight_engine_role":"RETAINED_READ_ONLY_PREFLIGHT_ENGINE","read_only":true,"automatic_repair":false,"secret_values_emitted":false},
+  "truth_dimensions": ["current_operator_authority","accepted_development","live_deployment_ancestry","business_application_baseline","production_authority","current_automatic_guards","external_acceptance_policy"],
+  "external_acceptance_state": "HOLD_EXTERNAL",
+  "schema_change_authorized": false,"request_time_schema_mutation": false,"d1_mutation_authorized": false,"r2_mutation_authorized": false,"provider_execution_authorized": false,"provider_publication_authorized": false,"cloudflare_access_policy_mutation_authorized": false,"runtime_application_change_authorized": true,"main_mutation_authorized": false,"production_mutation_authorized": false,"secret_values_emitted": false
+}
