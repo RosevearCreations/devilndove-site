@@ -2,7 +2,7 @@
   "release": 467,
   "build": 25,
   "title": "Finance ↔ Product/Inventory Unit-Economics Readiness",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "role": "READ_ONLY_CROSS_MODULE_UNIT_ECONOMICS_READINESS",
   "predecessor": {
     "final_build24_dev_sha": "a08502e615aa5fdeb29deddec031223215ae1fa3",
@@ -44,7 +44,21 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "accepted_dev_sha": null,
-  "accepted_dev_tree_sha": null,
-  "acceptance": null
+  "accepted_dev_sha": "a57f632898bebfd4bf3f6be39c99857a8a9da701",
+  "accepted_dev_tree_sha": "33ff551739099ced69c12e826b5b4fbe477623ab",
+  "acceptance": {
+    "feature_pr": 81,
+    "feature_head_sha": "fa2e37d856fe9d70bb2c3a9813debd28bfade8aa",
+    "merged_dev_sha": "a57f632898bebfd4bf3f6be39c99857a8a9da701",
+    "merged_dev_tree_sha": "33ff551739099ced69c12e826b5b4fbe477623ab",
+    "merged_system_gate_run": 33758969424,
+    "merged_build25_proof_run": 33758969830,
+    "merged_branch_hygiene_run": 33758969440,
+    "canonical_development_d1_convergence": "SUCCESS",
+    "development_data_authority_read_only": "SUCCESS",
+    "exact_development_sha_preview_deployment": "SUCCESS",
+    "preview_control_plane_bindings": "SUCCESS",
+    "non_secret_exact_preview_smoke": "SUCCESS",
+    "regression_evidence": "SUCCESS"
+  }
 }

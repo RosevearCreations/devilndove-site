@@ -1,40 +1,35 @@
 # Release 467 Build 25 — Finance ↔ Product/Inventory Unit-Economics Readiness
 
-Status: **DEVELOPMENT_CANDIDATE**
+Status: **DEVELOPMENT_GREEN**
 
 ## Purpose
 
-Build 24 answers whether a Product has Storefront publication readiness plus positive fulfillment evidence. Build 25 adds the missing operator bridge to existing Finance cost evidence without inventing another costing formula.
+Build 25 closes the operator gap between Build 24 current Storefront/Inventory sellability evidence and the existing Accounting-owned monthly item-costing authority. It does not create a second costing formula.
 
-The new read-only endpoint and workspace reconcile:
-
-- Build 24 current Product/Inventory sellability evidence;
-- the Accounting-owned `accounting-item-costing-read` monthly contract;
-- direct Product cost, linked-resource cost, allocated overhead, selected-period sales evidence, and estimated full unit cost;
-- current Product price and the resulting estimated price headroom.
+The read-only endpoint `/api/admin/finance-product-inventory-unit-economics` and workspace `/admin/finance-product-inventory-unit-economics/` reconcile Product price and sellability with direct Product cost, linked-resource cost, allocated overhead, selected-period sales evidence, and Accounting estimated full unit cost.
 
 ## Accounting semantics
 
-`estimated_price_headroom_cents` is current Product price minus the Accounting-owned selected-period estimated full unit cost. It is **not accounting profit** and Build 25 does not define a target margin.
+`estimated_price_headroom_cents` is Product price minus the Accounting-owned selected-period estimated full unit cost. It is **not accounting profit**. Build 25 defines no target margin.
 
-A Product with no positive cost evidence is `costing_unverified`; zero visible cost is not automatically treated as a genuine zero-cost Product. Missing linked-resource costs are `costing_incomplete`. A non-positive estimate is surfaced for review, not automatically repriced or unpublished.
+Zero visible cost remains `costing_unverified`, not an automatic zero-cost conclusion. Missing linked-resource costs are `costing_incomplete`. Non-positive estimated headroom is a review queue only. `review_supported` is evidence only and does not authorize price changes, publication, fulfillment, shipment, or accounting posting.
 
-`review_supported` means only that current sellability is supported, Finance costing evidence is present, and estimated price headroom is positive. It is not authorization to price, publish, sell, build, reserve, ship, or post accounting.
+## Accepted Development runtime
+
+- merged Dev SHA `a57f632898bebfd4bf3f6be39c99857a8a9da701`
+- tree `33ff551739099ced69c12e826b5b4fbe477623ab`
+- System Gate `33758969424`: SUCCESS
+- Build 25 Proof `33758969830`: SUCCESS
+- Branch Hygiene `33758969440`: SUCCESS
+- canonical Development D1 convergence: SUCCESS
+- Development data authority read-only proof: SUCCESS
+- exact Development SHA Preview deployment: SUCCESS
+- Preview control-plane binding proof: SUCCESS
+- non-secret exact Preview smoke acceptance: SUCCESS
+- regression evidence: SUCCESS
 
 ## Safety boundary
 
-Build 25 performs no POST, DDL, DML, request-time schema mutation, Product mutation, price mutation, Inventory mutation, accounting posting, public-offer rule change, D1/R2 business-data mutation, provider execution/publication, Cloudflare Access mutation, `main` mutation, or Production mutation.
+Build 25 performs no POST, DDL, DML, request-time schema mutation, price/Product/Inventory mutation, accounting posting, public-offer rule change, D1/R2 business-data mutation, provider execution/publication, Cloudflare Access mutation, `main` mutation, or Production mutation. Canonical migrations remain exactly `0001`–`0004`.
 
-Canonical migrations remain exactly `0001` through `0004`. Production remains Release 467 Build 20. External acceptance lanes remain HOLD_EXTERNAL.
-
-## Development provenance
-
-Build 25 starts from final Build 24 closure:
-
-- SHA `a08502e615aa5fdeb29deddec031223215ae1fa3`
-- tree `4e6bc235382a9125f64ed15ecebf488fbfe0fbdd`
-- System Gate `33703653554` SUCCESS
-- Build 24 Proof `33703653563` SUCCESS
-- Branch Hygiene `33703653564` SUCCESS
-
-Build 25 must not be called GREEN until its exact merged Development SHA passes the current System Gate, Build 25 proof, exact Preview deployment/smoke, and branch hygiene.
+Production remains Release 467 Build 20 at `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602`. External lanes remain HOLD_EXTERNAL.

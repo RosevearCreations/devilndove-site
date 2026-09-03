@@ -2,16 +2,16 @@
 
 ## Current authority
 
-**Release 467 Build 24 — Storefront ↔ Inventory Sellability Reconciliation is DEVELOPMENT GREEN.**
+**Release 467 Build 25 — Finance ↔ Product/Inventory Unit-Economics Readiness is DEVELOPMENT GREEN.**
 
-Accepted Build 24 runtime evidence is `b04aeb89d4d22b1b158244c86256ad39f31da70b`, tree `f70c733f9544764bd7d68af3d85383e133ee77db`; System Gate `33703326878`, Build 24 Proof `33703326916`, and Branch Hygiene `33703326867` are SUCCESS.
+Accepted Build 25 functional runtime is `a57f632898bebfd4bf3f6be39c99857a8a9da701`, tree `33ff551739099ced69c12e826b5b4fbe477623ab`; System Gate `33758969424`, Build 25 Proof `33758969830`, and Branch Hygiene `33758969440` are SUCCESS.
 
-Build 24 provides a read-only bridge between existing Product publication readiness and existing finished-stock/resource-buildability evidence. `sellability_supported` is review evidence only; it is not authorization to publish, sell, build, reserve or ship. Product/Storefront and Inventory remain the write owners. No second readiness, inventory or fulfillment authority was created.
+Build 25 reuses Build 24 sellability evidence plus the Accounting-owned monthly item-costing contract. Estimated price headroom is review evidence, not accounting profit; no target margin or automatic price/Product/Inventory/accounting action was introduced.
 
-Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS.
+The merged System Gate proved canonical Development D1 convergence, Development data authority read-only, exact-SHA Preview deployment, binding proof, smoke acceptance, and regression evidence.
 
-No schema/D1/R2 business-data/provider/Access/main/Production mutation is authorized. External lanes remain HOLD_EXTERNAL. Canada-only fulfillment and the U.S. sales/shipping suspension remain policy.
+Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS. External lanes remain HOLD_EXTERNAL. Canada-only fulfillment and the U.S. sales/shipping suspension remain policy.
 
 ## Restart
 
-Start the next bounded Devil n Dove build from current `dev` after confirming it descends from accepted Build 24 evidence. Do not redo Build 24 unless fresh evidence proves drift.
+Do not redo Build 25. Start the next bounded Devil n Dove build from the current final `dev` closure descendant after verifying it retains accepted Build 25 runtime evidence. Keep Production closed unless a deliberate promotion is explicitly authorized.
