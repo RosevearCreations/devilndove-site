@@ -1,10 +1,6 @@
 name: Release 467 Build 25 Finance Product Inventory Unit Economics Proof
 
 on:
-  push:
-    branches: [release467-build25-finance-product-inventory-unit-economics, dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:
@@ -43,11 +39,7 @@ jobs:
           python -m py_compile scripts/release467_build20_gate.py scripts/release467_build21_gate.py scripts/release467_build22_gate.py scripts/release467_build23_gate.py scripts/release467_build24_gate.py scripts/release467_build25_gate.py
           node --check functions/api/admin/finance-product-inventory-unit-economics.js
           node --check public/js/admin-finance-product-inventory-unit-economics.js
-      - name: Diff safety
-        run: git diff --check origin/dev...HEAD
       - name: Boundary
         run: |
-          echo 'Build 25 reconciles Build 24 sellability evidence with the existing Accounting-owned monthly item-costing read contract.'
-          echo 'Estimated price headroom is review evidence, not accounting profit, and no target margin is defined.'
-          echo 'It performs no price/Product/Inventory/accounting mutation, schema/D1/R2 business mutation, provider execution, Access, main or Production mutation.'
-          echo 'External acceptance lanes remain HOLD_EXTERNAL and Production remains Build 20.'
+          echo 'Build 25 retained proof is manual-only after Build 26 becomes the current decisive source proof.'
+          echo 'Build 25 remains accepted read-only unit-economics authority and Production remains Build 20.'
