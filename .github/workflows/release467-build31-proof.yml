@@ -20,27 +20,26 @@ jobs:
         with: {python-version: '3.x'}
       - uses: actions/setup-node@v7
         with: {node-version: '24'}
-      - name: Preserve Release 467 Build 20 business baseline
-        run: python scripts/release467_build20_gate.py
-      - name: Retain superseded Build 21-30 evidence without rerunning historical prerequisites
+      - name: Retain superseded Build 20-30 evidence without rerunning historical prerequisites
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           expected = {
-            21:'release467-build21-release-state-branch-ci-hygiene.json',22:'release467-build22-it-release-deployment-truth.json',
-            23:'release467-build23-creator-finance-profitability-reconciliation.json',24:'release467-build24-storefront-inventory-sellability-reconciliation.json',
-            25:'release467-build25-finance-product-inventory-unit-economics.json',26:'release467-build26-order-inventory-fulfillment-readiness.json',
-            27:'release467-build27-order-finance-settlement-readiness.json',28:'release467-build28-inventory-finance-valuation-readiness.json',
-            29:'release467-build29-order-production-release-readiness.json',30:'release467-build30-admin-account-security-release-cleanup.json',
+            20:'release467-build20-workshop-tool-equipment-readiness.json',21:'release467-build21-release-state-branch-ci-hygiene.json',
+            22:'release467-build22-it-release-deployment-truth.json',23:'release467-build23-creator-finance-profitability-reconciliation.json',
+            24:'release467-build24-storefront-inventory-sellability-reconciliation.json',25:'release467-build25-finance-product-inventory-unit-economics.json',
+            26:'release467-build26-order-inventory-fulfillment-readiness.json',27:'release467-build27-order-finance-settlement-readiness.json',
+            28:'release467-build28-inventory-finance-valuation-readiness.json',29:'release467-build29-order-production-release-readiness.json',
+            30:'release467-build30-admin-account-security-release-cleanup.json',
           }
           for build,path in expected.items():
               p=Path(path); assert p.is_file(), path
               data=json.loads(p.read_text(encoding='utf-8'))
               assert data.get('release')==467 and data.get('build')==build, path
-              expected_states={'DEVELOPMENT_GREEN','PRODUCTION_GREEN'} if build==30 else {'DEVELOPMENT_GREEN'}
-              assert data.get('state') in expected_states, (path,data.get('state'))
-          print('PASS superseded Build 21-30 evidence retained; historical gates are not current prerequisites')
+              allowed={'DEVELOPMENT_GREEN','PRODUCTION_GREEN'}
+              assert data.get('state') in allowed, (path,data.get('state'))
+          print('PASS superseded Build 20-30 evidence retained; historical gates are not current prerequisites')
           PY
       - name: Prove Release 467 Build 31 password hash hardening
         run: python scripts/release467_build31_gate.py
@@ -68,5 +67,6 @@ jobs:
         run: |
           echo 'New password writes use salted PBKDF2-HMAC-SHA256; legacy sha256 is verification-only compatibility.'
           echo 'Successful legacy login upgrades the hash conditionally inside the existing atomic login batch.'
+          echo 'Builds 20-30 remain retained evidence but their superseded gates are not current prerequisites.'
           echo 'No plaintext passwords or reusable credential hashes are emitted or committed.'
           echo 'No schema change, provider execution/publication, Access mutation, R2 mutation or automatic Production promotion is authorized.'
