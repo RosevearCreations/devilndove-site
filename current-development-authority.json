@@ -1,34 +1,31 @@
 {
   "release": 467,
-  "build": 25,
-  "title": "Finance ↔ Product/Inventory Unit-Economics Readiness",
+  "build": 26,
+  "title": "Order ↔ Inventory Fulfillment Readiness Reconciliation",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "a08502e615aa5fdeb29deddec031223215ae1fa3",
-  "source_base_tree_sha": "4e6bc235382a9125f64ed15ecebf488fbfe0fbdd",
-  "accepted_dev_sha": "a57f632898bebfd4bf3f6be39c99857a8a9da701",
-  "accepted_dev_tree_sha": "33ff551739099ced69c12e826b5b4fbe477623ab",
-  "last_green_build": 25,
-  "last_green_dev_sha": "a57f632898bebfd4bf3f6be39c99857a8a9da701",
-  "last_green_dev_tree_sha": "33ff551739099ced69c12e826b5b4fbe477623ab",
-  "last_green_system_gate_run": 33758969424,
-  "last_green_build_proof_run": 33758969830,
-  "last_green_branch_hygiene_run": 33758969440,
+  "source_base_sha": "76723c1f4356cf3d9372f7985bd94cdd44d8780c",
+  "source_base_tree_sha": "c261e010e5939c9dec98682e452820dd640dccd7",
+  "accepted_dev_sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
+  "accepted_dev_tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
+  "last_green_build": 26,
+  "last_green_dev_sha": "7c2509513b20892fd28f97dc3459a240a8019f32",
+  "last_green_dev_tree_sha": "5f0c9a1893301fd040b35da8d03984e8841dc406",
+  "last_green_system_gate_run": 33763972878,
+  "last_green_build_proof_run": 33763973014,
+  "last_green_branch_hygiene_run": 33763972802,
   "predecessor_accepted_runtime": {
-    "build": 24,
-    "sha": "b04aeb89d4d22b1b158244c86256ad39f31da70b",
-    "tree_sha": "f70c733f9544764bd7d68af3d85383e133ee77db",
-    "system_gate_run": 33703326878,
-    "build_proof_run": 33703326916,
-    "branch_hygiene_run": 33703326867
+    "build": 25,
+    "sha": "a57f632898bebfd4bf3f6be39c99857a8a9da701",
+    "tree_sha": "33ff551739099ced69c12e826b5b4fbe477623ab",
+    "system_gate_run": 33758969424,
+    "build_proof_run": 33758969830,
+    "branch_hygiene_run": 33758969440
   },
   "predecessor_final_closure": {
-    "build": 24,
-    "sha": "a08502e615aa5fdeb29deddec031223215ae1fa3",
-    "tree_sha": "4e6bc235382a9125f64ed15ecebf488fbfe0fbdd",
-    "system_gate_run": 33703653554,
-    "build_proof_run": 33703653563,
-    "branch_hygiene_run": 33703653564
+    "build": 25,
+    "sha": "76723c1f4356cf3d9372f7985bd94cdd44d8780c",
+    "tree_sha": "c261e010e5939c9dec98682e452820dd640dccd7"
   },
   "business_application_baseline_build": 20,
   "business_application_baseline_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
@@ -36,16 +33,49 @@
   "application_runtime_tree_sha": "550272841e764d77fc21297abede3d4cae1aaea0",
   "application_runtime_authority_role": "RETAINED_BUSINESS_APPLICATION_BASELINE_COMPATIBILITY",
   "development_target": "https://dev.devilndove-site.pages.dev",
-  "development_d1": {"name":"devilndove-dev","id":"dbc1615b-dcbe-4951-973b-b47c99c73bfa"},
-  "development_r2": {"products":"devilndove-toolshed-images-dev","caip":"devilndove-caip-media-dev"},
+  "development_d1": {
+    "name": "devilndove-dev",
+    "id": "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+  },
+  "development_r2": {
+    "products": "devilndove-toolshed-images-dev",
+    "caip": "devilndove-caip-media-dev"
+  },
   "main_source_head_last_verified": "055cbc973c667b35a209c7ea207779089f6fed3a",
   "production_build_last_verified": 20,
   "production_tree_last_verified": "550272841e764d77fc21297abede3d4cae1aaea0",
   "production_pages_deploy_last_verified": 33688892602,
   "production_deployment_must_be_verified_independently": true,
-  "current_release_authorities": ["release467-build25-finance-product-inventory-unit-economics.json","release467-build24-storefront-inventory-sellability-reconciliation.json","release467-build23-creator-finance-profitability-reconciliation.json","release467-build22-it-release-deployment-truth.json","release467-build21-release-state-branch-ci-hygiene.json","release467-build20-workshop-tool-equipment-readiness.json"],
-  "repository_governance": {"persistent_branches":["main","dev"],"cleanup_workflow":".github/workflows/repository-branch-hygiene.yml","historical_build_proofs_manual_through":24,"current_automatic_release_proofs":["System Gate","Release 467 Build 25 Finance Product Inventory Unit Economics Proof","Release 467 I.T. Admin Runtime Proof","Repository Branch Hygiene"]},
-  "external_lanes": {"stripe_development":"HOLD_EXTERNAL","paypal_sandbox":"HOLD_EXTERNAL","caip_private_media":"HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE","social_oauth":"HOLD_EXTERNAL","cloudflare_access_service_token":"HOLD_EXTERNAL"},
+  "current_release_authorities": [
+    "release467-build26-order-inventory-fulfillment-readiness.json",
+    "release467-build25-finance-product-inventory-unit-economics.json",
+    "release467-build24-storefront-inventory-sellability-reconciliation.json",
+    "release467-build23-creator-finance-profitability-reconciliation.json",
+    "release467-build22-it-release-deployment-truth.json",
+    "release467-build21-release-state-branch-ci-hygiene.json",
+    "release467-build20-workshop-tool-equipment-readiness.json"
+  ],
+  "repository_governance": {
+    "persistent_branches": [
+      "main",
+      "dev"
+    ],
+    "cleanup_workflow": ".github/workflows/repository-branch-hygiene.yml",
+    "historical_build_proofs_manual_through": 25,
+    "current_automatic_release_proofs": [
+      "System Gate",
+      "Release 467 Build 26 Order Inventory Fulfillment Readiness Proof",
+      "Release 467 I.T. Admin Runtime Proof",
+      "Repository Branch Hygiene"
+    ]
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "caip_private_media": "HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE",
+    "social_oauth": "HOLD_EXTERNAL",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
   "promotion_state": "NO_AUTOMATIC_PROMOTION",
   "runtime_application_change_authorized": true,
   "schema_change_authorized": false,
@@ -57,5 +87,5 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 25 functional runtime is accepted at a57f632898bebfd4bf3f6be39c99857a8a9da701 / 33ff551739099ced69c12e826b5b4fbe477623ab with System Gate 33758969424, Build 25 Proof 33758969830 and Branch Hygiene 33758969440. Start the next bounded build from the current final dev closure descendant after verifying it retains this accepted evidence. Do not redo Build 25 unless fresh evidence proves drift. Production remains Build 20 and external lanes remain HOLD_EXTERNAL."
+  "restart_rule": "Build 26 is accepted on dev at 7c2509513b20892fd28f97dc3459a240a8019f32 / 5f0c9a1893301fd040b35da8d03984e8841dc406 with System Gate 33763972878, Build 26 Proof 33763973014 and Branch Hygiene 33763972802. Start the next bounded build from this exact green descendant. Production remains Build 20 and external lanes remain HOLD_EXTERNAL."
 }
