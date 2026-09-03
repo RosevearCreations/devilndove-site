@@ -1,14 +1,11 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Canonical current authority — Release 467 Build 21
+## Current authority — Release 467 Build 22
 
-**Release 467 Build 21 — Release State, Branch & CI Hygiene Convergence is DEVELOPMENT GREEN.**
+Build 22 — I.T. Release & Deployment Truth Convergence is the active Development candidate.
 
-- `dev`: `63c6e90b9637e7953020aa856017bfde3579b47e`
-- tree: `8b8ca34e0909d684de6e473007bd976e7948e52b`
-- Build 21 Proof `33696534777` — SUCCESS
-- System Gate `33696534720` — SUCCESS
-- Repository Branch Hygiene `33696535136` — SUCCESS
-- Production remains Build 20 at `055cbc973c667b35a209c7ea207779089f6fed3a`
+Read in order: `current-development-authority.json`, `AI_HANDOFF.md`, `release467-build22-it-release-deployment-truth.json`, `docs/operations/RELEASE_467_BUILD_22_IT_RELEASE_DEPLOYMENT_TRUTH.md`, then retained Build 21 and Build 20 authorities.
 
-Build 21 retired historical Release 467 build proof fanout while retaining the current I.T. Admin Runtime proof as an automatic read-only Development/root-admin safety guard. Current automatic validation is System Gate + Build 21 proof + Release 467 I.T. Admin Runtime Proof + Repository Branch Hygiene.
+Exact green predecessor is Build 21 `d411d4a21b2172de20722776b7ba3514310aeca1`, tree `eaf8e58ec3c985a8909df324b18e1ab0f8dfd089`, System Gate `33697923893`, Build 21 Proof `33697923897`, Branch Hygiene `33697923895`.
+
+Build 20 remains application/runtime and Production authority; Production `main` is `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, deploy `33688892602`.
