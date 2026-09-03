@@ -1,10 +1,6 @@
 name: Release 467 Build 28 Inventory Finance Valuation Readiness Proof
 
 on:
-  push:
-    branches: [release467-build28-inventory-finance-valuation-readiness, dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:
