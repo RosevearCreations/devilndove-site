@@ -1,11 +1,11 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Current authority — Release 467 Build 24
+## Current authority — Release 467 Build 25
 
-Build 24 — Storefront ↔ Inventory Sellability Reconciliation is DEVELOPMENT GREEN.
+Build 25 — Finance ↔ Product/Inventory Unit-Economics Readiness is DEVELOPMENT GREEN.
 
-Accepted Build 24 runtime evidence is `b04aeb89d4d22b1b158244c86256ad39f31da70b`, tree `f70c733f9544764bd7d68af3d85383e133ee77db`; System Gate `33703326878`, Build 24 Proof `33703326916`, Branch Hygiene `33703326867` SUCCESS.
+Accepted Build 25 functional runtime is `a57f632898bebfd4bf3f6be39c99857a8a9da701`, tree `33ff551739099ced69c12e826b5b4fbe477623ab`; System Gate `33758969424`, Build 25 Proof `33758969830`, Branch Hygiene `33758969440` SUCCESS.
 
-Read `current-development-authority.json`, `AI_HANDOFF.md`, `release467-build24-storefront-inventory-sellability-reconciliation.json`, `docs/operations/RELEASE_467_BUILD_24_STOREFRONT_INVENTORY_SELLABILITY_RECONCILIATION.md`, then retained Build 23/22/21/20 authorities.
+Read `current-development-authority.json`, `AI_HANDOFF.md`, `release467-build25-finance-product-inventory-unit-economics.json`, `docs/operations/RELEASE_467_BUILD_25_FINANCE_PRODUCT_INVENTORY_UNIT_ECONOMICS.md`, then retained Build 24/23/22/21/20 authorities.
 
 Build 20 remains the retained business baseline and current Production authority. Production `main` is `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, deploy `33688892602`.
