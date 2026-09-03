@@ -1,10 +1,6 @@
 name: Release 467 Build 26 Order Inventory Fulfillment Readiness Proof
 
 on:
-  push:
-    branches: [release467-build26-order-inventory-fulfillment-readiness, dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:
@@ -22,34 +18,16 @@ jobs:
         with: {node-version: '24'}
       - name: Preserve Release 467 Build 20 business baseline
         run: python scripts/release467_build20_gate.py
-      - name: Preserve Release 467 Build 21 repository authority
-        run: python scripts/release467_build21_gate.py
-      - name: Preserve Release 467 Build 22 green authority
-        run: python scripts/release467_build22_gate.py
-      - name: Preserve Release 467 Build 23 green authority
-        run: python scripts/release467_build23_gate.py
-      - name: Preserve Release 467 Build 24 green authority
-        run: python scripts/release467_build24_gate.py
-      - name: Preserve Release 467 Build 25 green authority
-        run: python scripts/release467_build25_gate.py
-      - name: Prove Release 467 Build 26 order/inventory fulfillment readiness
+      - name: Preserve Release 467 Builds 21-25 authority
+        run: python scripts/release467_build21_gate.py && python scripts/release467_build22_gate.py && python scripts/release467_build23_gate.py && python scripts/release467_build24_gate.py && python scripts/release467_build25_gate.py
+      - name: Prove retained Release 467 Build 26 authority
         run: python scripts/release467_build26_gate.py
-      - name: Preserve whole-site public SEO quality
-        run: python scripts/release467_build15_public_seo_gate.py
-      - name: Validate JSON
-        run: |
-          python -m json.tool current-development-authority.json >/dev/null
-          python -m json.tool release467-build26-order-inventory-fulfillment-readiness.json >/dev/null
       - name: Validate syntax
         run: |
-          python -m py_compile scripts/release467_build20_gate.py scripts/release467_build21_gate.py scripts/release467_build22_gate.py scripts/release467_build23_gate.py scripts/release467_build24_gate.py scripts/release467_build25_gate.py scripts/release467_build26_gate.py
+          python -m py_compile scripts/release467_build26_gate.py
           node --check functions/api/admin/order-inventory-fulfillment-readiness.js
           node --check public/js/admin-order-inventory-fulfillment-readiness.js
-      - name: Diff safety
-        run: git diff --check origin/dev...HEAD
       - name: Boundary
         run: |
-          echo 'Build 26 reconciles recognized open physical-order demand with Build 24 Product/Inventory fulfillment evidence.'
-          echo 'Finished-stock support is readiness evidence only; no reservation is created and finished stock plus buildability is not promoted to a promised total.'
-          echo 'Unclassified non-closed order states fail closed to operator review.'
-          echo 'No order, shipment, customer, Product, Inventory, schema, D1/R2 business, provider, Access, main or Production mutation is authorized.'
+          echo 'Build 26 retained proof is manual-only after Build 27 becomes the current decisive source proof.'
+          echo 'Production remains Release 467 Build 20.'

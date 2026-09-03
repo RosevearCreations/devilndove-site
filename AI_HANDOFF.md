@@ -2,16 +2,16 @@
 
 ## Current authority
 
-**Release 467 Build 25 — Finance ↔ Product/Inventory Unit-Economics Readiness is DEVELOPMENT GREEN.**
+**Release 467 Build 26 — Order ↔ Inventory Fulfillment Readiness Reconciliation is DEVELOPMENT GREEN.**
 
-Accepted Build 25 functional runtime is `a57f632898bebfd4bf3f6be39c99857a8a9da701`, tree `33ff551739099ced69c12e826b5b4fbe477623ab`; System Gate `33758969424`, Build 25 Proof `33758969830`, and Branch Hygiene `33758969440` are SUCCESS.
+Accepted Build 26 runtime is `7c2509513b20892fd28f97dc3459a240a8019f32`, tree `5f0c9a1893301fd040b35da8d03984e8841dc406`; System Gate `33763972878`, Build 26 Proof `33763973014`, and Branch Hygiene `33763972802` are SUCCESS.
 
-Build 25 reuses Build 24 sellability evidence plus the Accounting-owned monthly item-costing contract. Estimated price headroom is review evidence, not accounting profit; no target margin or automatic price/Product/Inventory/accounting action was introduced.
+Build 26 is read-only. It does not reserve/deduct Inventory, start production, change an order or shipment, contact a customer, or combine finished stock plus theoretical buildability into a promise. Unclassified non-closed demand fails closed to review.
 
 The merged System Gate proved canonical Development D1 convergence, Development data authority read-only, exact-SHA Preview deployment, binding proof, smoke acceptance, and regression evidence.
 
-Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS. External lanes remain HOLD_EXTERNAL. Canada-only fulfillment and the U.S. sales/shipping suspension remain policy.
+Production remains Build 20 at `main` `055cbc973c667b35a209c7ea207779089f6fed3a`, tree `550272841e764d77fc21297abede3d4cae1aaea0`, Production Pages Deploy `33688892602` SUCCESS. External lanes remain HOLD_EXTERNAL.
 
 ## Restart
 
-Do not redo Build 25. Start the next bounded Devil n Dove build from the current final `dev` closure descendant after verifying it retains accepted Build 25 runtime evidence. Keep Production closed unless a deliberate promotion is explicitly authorized.
+Do not redo Build 26. Start the next bounded build from the exact accepted Build 26 Development descendant. Build 27 should remain a read-only Orders ↔ Finance settlement-readiness bridge unless fresh evidence requires a narrower correction. Keep Production closed unless deliberate promotion is explicitly authorized.
