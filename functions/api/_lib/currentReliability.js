@@ -1,13 +1,25 @@
-// Release 467 Build 48 — current read-only reliability projection.
-// Build 49 restart-integrity convergence keeps implementation acceptance separate
-// from the later exact branch-head closure proof.
+// Release 467 Build 49 — current read-only reliability projection.
+// Implementation acceptance is distinct from the last externally verified closure.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 48;
-export const CURRENT_RELIABILITY_TITLE = 'Automated Production Acceptance';
+export const CURRENT_RELIABILITY_BUILD = 49;
+export const CURRENT_RELIABILITY_TITLE = 'Current Authority Convergence & Restart Integrity';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
+export const ACCEPTED_DEVELOPMENT = Object.freeze({
+  release: 467,
+  build: 49,
+  title: CURRENT_RELIABILITY_TITLE,
+  accepted_dev_sha: '7bbfbf10a531898052771d9db1cfbb1a9e7d893a',
+  accepted_dev_tree_sha: '7a74af809182a0eb6befb56e34d2869b44090c6e',
+  system_gate_run: 33928678750,
+  current_application_quality_run: 33928678778,
+  it_admin_runtime_proof_run: 33928678807,
+  branch_hygiene_run: 33928678789,
+  exact_preview_deployment: true,
+  role: 'IMPLEMENTATION_ACCEPTANCE',
+});
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
   build: 48,
@@ -55,8 +67,10 @@ export async function loadCurrentReliability(db, env = {}) {
       inherited_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority: 'release467-build36-current-reliability-operational-health.json',
       current_operator_authority: 'current-development-authority.json',
+      accepted_development: ACCEPTED_DEVELOPMENT,
       last_fully_verified_development: LAST_FULLY_VERIFIED_DEVELOPMENT,
       implementation_acceptance_is_distinct_from_final_closure: true,
+      closure_candidate_requires_external_exact_head_proof: true,
       production_baseline_build: 32,
     },
     safety: {
