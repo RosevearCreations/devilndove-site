@@ -14,7 +14,7 @@
     <div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">I.T. Workspace • Release 467</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/storefront/">Storefront</a><a href="/admin/creator/">Creator</a><a href="/admin/finance/">Finance</a><a href="/admin/it/">I.T.</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
     <div class="hero"><div><h1>I.T.</h1><p id="adminModuleHubIntro">System readiness, settings, integrations, testing, diagnostics, releases, deployment controls, security and continuity.</p></div></div>
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
-    <div class="card" style="margin-top:18px"><strong>Release 467 Build 37 — Development GREEN:</strong> Deployment Preflight now uses current GET-only canonical migration truth. Forward D1 schema authority is the four-file canonical manifest applied through <code>scripts/d1_migrate.py</code>; historical Build 171–176 migration instructions and request-time schema repair are no longer active authority. Reliability truth is synchronized to Build 37. Production promotion still requires all four Development proofs, rollback remains release-neutral/read-only, and Build 32 remains Production GREEN.</div>
+    <div class="card" style="margin-top:18px"><strong>Release 467 Build 38 — Development GREEN:</strong> Accounting core no longer carries request-time schema DDL. It now asserts the proven <code>accounting_order_records</code> baseline read-only across 22 required columns and 2 required indexes before preserving the real accounting write path. Repository runtime-schema residue is ratcheted to ceilings of 60 files, 526 statements and 4 delegated/shared helpers with zero raw D1 bypasses. Canonical migrations remain exactly <code>0001</code>–<code>0004</code>. Reliability and Deployment Preflight are synchronized to Build 38 read-only truth. Build 32 remains Production GREEN.</div>
     <main id="itControlTowerMount" aria-live="polite"><section class="card" style="margin-top:18px"><p class="small">Loading current I.T. release/deployment truth…</p></section></main>
     <section id="itReadinessActionQueueMount" aria-live="polite"><div class="card" style="margin-top:18px"><p class="small">Loading readiness action queue…</p></div></section>
     <section id="itBrowserRuntimeAcceptanceMount" aria-live="polite"><div class="card" style="margin-top:18px"><p class="small">Loading authenticated browser runtime acceptance…</p></div></section>
@@ -32,7 +32,7 @@
   <script src="/public/js/site-auth-ui.js?v=467"></script>
   <script src="/public/js/admin-self-protect.js?v=467"></script>
   <script src="/public/js/admin.js?v=467"></script>
-  <script src="/public/js/admin-it-control-tower.js?v=467b37"></script>
+  <script src="/public/js/admin-it-control-tower.js?v=467b38"></script>
   <script src="/public/js/admin-it-readiness-actions.js?v=467"></script>
   <script src="/public/js/admin-it-browser-runtime-acceptance.js?v=467"></script>
   <script src="/public/js/admin-it-evidence-ledger.js?v=467"></script>

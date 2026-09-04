@@ -2,19 +2,19 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 37;
-const TITLE = 'Deployment Preflight Canonical Migration & Runtime-Schema Convergence';
+const BUILD = 38;
+const TITLE = 'Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 37,
+  build: 38,
   title: TITLE,
   state: 'DEVELOPMENT_GREEN',
-  accepted_sha: '2db13923a4356182b98d30e0d1a3025d78065791',
-  accepted_tree_sha: '178d608a187d221e8fe119b7da5dec6a4c52564e',
-  system_gate_run: 33878548937,
-  current_application_quality_run: 33878549068,
-  it_admin_runtime_proof_run: 33878549217,
-  branch_hygiene_run: 33878549129,
+  accepted_sha: 'a48a44558e2438d7db4d994da0012b0cae703689',
+  accepted_tree_sha: '27adcad60e871921ea3fb9372b03f8a38b22daa8',
+  system_gate_run: 33881012179,
+  current_application_quality_run: 33881011819,
+  it_admin_runtime_proof_run: 33881011733,
+  branch_hygiene_run: 33881011711,
 });
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -89,7 +89,7 @@ export async function onRequestGet(context) {
     build: BUILD,
     title: TITLE,
     ok: true,
-    authority: 'release467-build37-deployment-preflight-canonical-migration',
+    authority: 'release467-build38-accounting-core-runtime-ddl-elimination',
     state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
@@ -103,10 +103,18 @@ export async function onRequestGet(context) {
       production_promotion_required_development_proofs: CURRENT_GUARDS,
       rollback_readiness: 'RELEASE_NEUTRAL_READ_ONLY',
       reliability_authority: 'current-development-authority.json',
-      reliability_projection_build: 37,
+      reliability_projection_build: 38,
       historical_build36_reliability_authority: 'release467-build36-current-reliability-operational-health',
       historical_reliability_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
-      deployment_preflight_authority: 'release467-build37-deployment-preflight-canonical-migration',
+      deployment_preflight_authority: 'current-development-authority.json',
+      deployment_preflight_projection_build: 38,
+      historical_build37_deployment_preflight_authority: 'release467-build37-deployment-preflight-canonical-migration',
+      accounting_schema_authority: 'release467-build38-accounting-core-runtime-ddl-elimination',
+      accounting_request_time_ddl: 0,
+      runtime_schema_residue_files_ceiling: 60,
+      runtime_schema_residue_occurrences_ceiling: 526,
+      runtime_schema_residue_shared_helpers_ceiling: 4,
+      raw_d1_bypass_with_ddl_ceiling: 0,
       canonical_migration_authority: 'migrations/canonical/manifest.json + scripts/d1_migrate.py',
       request_time_schema_mutation: false,
     },
@@ -134,14 +142,15 @@ export async function onRequestGet(context) {
     sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 37 is Development GREEN and owns current I.T. operator truth.',
-      'Deployment Preflight is current Release 467 Build 37 GET-only truth and uses only the canonical four-migration stream as forward schema authority.',
-      'Historical Build 171-176 migration SQL and preflight write behavior remain provenance only and are not active operator authority.',
-      'The active Reliability projection is synchronized to Release 467 Build 37 while the Release 466 engine remains historical regression compatibility.',
+      'Build 38 is Development GREEN and owns current I.T. operator truth.',
+      'Accounting core carries zero request-time schema DDL and asserts the proven accounting_order_records baseline read-only before real accounting writes.',
+      'Historical runtime schema residue is ratcheted to ceilings of 60 files, 526 DDL statements and 4 delegated/shared helpers, with zero raw D1 bypasses carrying DDL.',
+      'The canonical D1 migration stream remains exactly four files; Build 38 adds no migration because accounting_order_records is part of the proven baseline.',
+      'Deployment Preflight and Reliability are synchronized to Release 467 Build 38 as read-only current projections; their Build 37 and Build 36 feature authorities remain historical evidence.',
       'Production promotion requires the exact current Development tree plus successful System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene proofs.',
       'Production rollback readiness remains release-neutral and read-only and does not execute rollback, schema reversal or business-data restoration.',
       'Build 32 remains the independently verified Production-green baseline until a deliberate Production promotion is requested and proven.',
-      'External HOLDs never become GREEN by inference from source, D1 convergence, deployment success, reliability health or preflight status.',
+      'External HOLDs never become GREEN by inference from source, D1 convergence, deployment success, reliability health, preflight status or Accounting schema readiness.',
     ],
     safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
     generated_at: new Date().toISOString(),

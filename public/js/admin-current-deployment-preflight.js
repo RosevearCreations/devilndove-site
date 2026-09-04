@@ -1,4 +1,4 @@
-// Release 467 Build 37 — current read-only Deployment Preflight renderer.
+// Release 467 Build 38 — current read-only Deployment Preflight renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('deploymentPreflightMount');
   const message = document.getElementById('deploymentPreflightMessage');
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const runs = Array.isArray(data.recent_runs) ? data.recent_runs : [];
     const confirmations = Array.isArray(data.post_deploy_confirmations) ? data.post_deploy_confirmations : [];
     return `<section class="card" style="margin-top:14px"><h3 style="margin-top:0">Historical evidence visibility</h3>
-      <p class="small">Previous saved snapshots and confirmation rows remain visible when their tables exist, but Build 37 does not create, update, or confirm them.</p>
+      <p class="small">Previous saved snapshots and confirmation rows remain visible when their tables exist, but Build 38 does not create, update, or confirm them.</p>
       <details><summary><strong>Recent saved snapshots (${runs.length})</strong></summary><div class="table-wrap"><table class="admin-table"><thead><tr><th>When</th><th>Build label</th><th>Status</th><th>Blockers</th><th>Warnings</th></tr></thead><tbody>${runs.map((run) => `<tr><td>${esc(run.created_at || '')}</td><td>${esc(run.build_label || '')}</td><td>${esc(run.run_status || '')}</td><td>${esc(run.blocker_count ?? 0)}</td><td>${esc(run.warning_count ?? 0)}</td></tr>`).join('') || '<tr><td colspan="5">No historical snapshots returned.</td></tr>'}</tbody></table></div></details>
       <details style="margin-top:10px"><summary><strong>Post-deploy confirmation history (${confirmations.length})</strong></summary><div class="table-wrap"><table class="admin-table"><thead><tr><th>Item</th><th>Status</th><th>Notes</th></tr></thead><tbody>${confirmations.map((row) => `<tr><td>${esc(row.label || row.confirmation_label || row.confirmation_key || '')}</td><td>${esc(row.confirmation_status || 'pending')}</td><td>${esc(row.notes || row.detail || '')}</td></tr>`).join('') || '<tr><td colspan="3">No historical confirmation rows returned.</td></tr>'}</tbody></table></div></details>
     </section>`;
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `devilndove-release-${latest?.release || 467}-build-${latest?.build || 37}-deployment-preflight.md`;
+      link.download = `devilndove-release-${latest?.release || 467}-build-${latest?.build || 38}-deployment-preflight.md`;
       document.body.appendChild(link);
       link.click();
       link.remove();
