@@ -20,12 +20,13 @@ for path in (SERVICE, BROWSER, COMPAT):
 service = SERVICE.read_text(encoding='utf-8')
 browser = BROWSER.read_text(encoding='utf-8')
 compat = COMPAT.read_text(encoding='utf-8')
+compact_service = re.sub(r'\s+', '', service)
 
-require('const BUILD=42' in service.replace(' ', ''), 'service must retain Build 42 identity')
-require("new Set(['required','print_default','optional','internal_only'])" in service.replace(' ', ''), 'four inheritance policies changed or disappeared')
-require("new Set(['needs_review','supplier_declared','supplier_verified','owner_verified','internal_note'])" in service.replace(' ', ''), 'provenance states changed or disappeared')
-require("action==='save_template_intelligence'" in service.replace(' ', ''), 'template intelligence save action missing')
-require("action==='normalize_project_inheritance'" in service.replace(' ', ''), 'project inheritance normalization action missing')
+require('constBUILD=42;' in compact_service, 'service must retain Build 42 identity')
+require("newSet(['required','print_default','optional','internal_only'])" in compact_service, 'four inheritance policies changed or disappeared')
+require("newSet(['needs_review','supplier_declared','supplier_verified','owner_verified','internal_note'])" in compact_service, 'provenance states changed or disappeared')
+require("action==='save_template_intelligence'" in compact_service, 'template intelligence save action missing')
+require("action==='normalize_project_inheritance'" in compact_service, 'project inheritance normalization action missing')
 require('duplicates_removed' in service and 'policies_applied' in service, 'normalization evidence must remain explicit')
 require('canonical(' in service and 'keeperByKey' in service, 'canonical INCI deduplication authority missing')
 require('POLICY_PRIORITY' in service and 'choosePolicy' in service, 'deterministic policy precedence missing')
@@ -58,7 +59,8 @@ require('/public/js/admin-packaging-material-intelligence-v42.js?v=46742' in com
 require("document.addEventListener('dd:packaging-material-intelligence-active', publishState)" in compat, 'compatibility status must observe Build 42 activation')
 require('materialIntelligenceBuild' in compat and 'materialIntelligenceActive' in compat, 'compatibility snapshot must project Build 42 state')
 
-require(not list(ROOT.glob('database_build42*.sql')), 'Build 42 must not introduce a legacy root schema migration')
-require(not list((ROOT / 'migrations').glob('*build42*')) if (ROOT / 'migrations').exists() else True, 'Build 42 must not introduce a canonical schema migration')
+# This Release 467 Build 42 must not add a new migration. Historical build-numbered files,
+# if any, are evaluated relative to the branch diff by GitHub diff safety and canonical migration gates.
+require(not list((ROOT / 'migrations').glob('*467*42*')) if (ROOT / 'migrations').exists() else True, 'Build 42 must not introduce a Release 467 canonical schema migration')
 
 print('CURRENT PACKAGING MATERIAL INTELLIGENCE GATE: PASS')
