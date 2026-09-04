@@ -2,35 +2,28 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 22;
-const TITLE = 'I.T. Release & Deployment Truth Convergence';
-const ACCEPTED_DEVELOPMENT = Object.freeze({
+const BUILD = 33;
+const TITLE = 'I.T. Current Release & Production Truth Convergence';
+const ACCEPTED_BASELINE = Object.freeze({
   release: 467,
-  build: 22,
-  title: TITLE,
-  accepted_sha: '73c852a71dc900a3a70cc84d0b622dfdc0c174fd',
-  accepted_tree_sha: '05d25c8455c0bfe42955fc67fb1ee3a518ce272a',
-  system_gate_run: 33698425301,
-  build_proof_run: 33698425317,
-  branch_hygiene_run: 33698425312,
-});
-const BUSINESS_BASELINE = Object.freeze({
-  release: 467,
-  build: 20,
-  title: 'Workshop Tool & Equipment Readiness Command Center',
-  dev_sha: '7b38af543400a81593a8dc1b7caa4ad9a43033ea',
-  tree_sha: '550272841e764d77fc21297abede3d4cae1aaea0',
-  system_gate_run: 33688666947,
-  build_proof_run: 33688733720,
-  role: 'RETAINED_BUSINESS_APPLICATION_BASELINE',
+  build: 32,
+  title: 'Help, Search & Responsive Convergence',
+  state: 'PRODUCTION_GREEN',
+  accepted_dev_sha: '79c9a6c4af0f5c82f474964485e2cde535f85045',
+  accepted_tree_sha: '2c1b4a3694779996e1bdb094be5e9e043834276e',
+  system_gate_run: 33829550860,
+  current_application_quality_run: 33829550795,
+  it_admin_runtime_proof_run: 33829550834,
+  branch_hygiene_run: 33829550749,
 });
 const PRODUCTION = Object.freeze({
   release: 467,
-  build: 20,
-  main_sha: '055cbc973c667b35a209c7ea207779089f6fed3a',
-  tree_sha: '550272841e764d77fc21297abede3d4cae1aaea0',
-  pages_deploy_run: 33688892602,
-  promotion_state: 'NO_AUTOMATIC_PROMOTION',
+  build: 32,
+  state: 'PRODUCTION_GREEN',
+  main_sha: '816490a9f36ffc2a730d8149549e5a2fbd609966',
+  tree_sha: '2c1b4a3694779996e1bdb094be5e9e043834276e',
+  pages_deploy_run: 33866964958,
+  promotion_state: 'EXACT_TREE_PRODUCTION_GREEN',
 });
 const DEVELOPMENT = Object.freeze({
   target: 'https://dev.devilndove-site.pages.dev',
@@ -43,15 +36,15 @@ const DEVELOPMENT = Object.freeze({
 });
 const CURRENT_GUARDS = Object.freeze([
   'System Gate',
-  'Release 467 Build 22 I.T. Release Deployment Truth Proof',
-  'Release 467 I.T. Admin Runtime Proof',
+  'Current Application Quality Proof',
+  'I.T. Admin Runtime Proof',
   'Repository Branch Hygiene',
 ]);
 const EXTERNAL_POLICY = Object.freeze([
-  { key: 'cloudflare_access_service_token', label: 'Cloudflare Access service-token acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 6 authority', href: '/admin/it/' },
-  { key: 'stripe_development', label: 'Stripe Development acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 7 authority', href: '/admin/release-control/external-commercial-readiness/' },
-  { key: 'paypal_sandbox', label: 'PayPal sandbox acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 7 authority', href: '/admin/release-control/external-commercial-readiness/' },
-  { key: 'social_oauth', label: 'Social/OAuth controlled acceptance', state: 'HOLD_EXTERNAL', authority: 'retained Release 467 Build 7 authority', href: '/admin/release-control/external-commercial-readiness/' },
+  { key: 'cloudflare_access_service_token', label: 'Cloudflare Access service-token acceptance', state: 'HOLD_EXTERNAL', authority: 'fresh external acceptance required', href: '/admin/it/' },
+  { key: 'stripe_development', label: 'Stripe Development acceptance', state: 'HOLD_EXTERNAL', authority: 'fresh external acceptance required', href: '/admin/release-control/external-commercial-readiness/' },
+  { key: 'paypal_sandbox', label: 'PayPal sandbox acceptance', state: 'HOLD_EXTERNAL', authority: 'fresh external acceptance required', href: '/admin/release-control/external-commercial-readiness/' },
+  { key: 'social_oauth', label: 'Social/OAuth controlled acceptance', state: 'HOLD_EXTERNAL', authority: 'fresh external acceptance required', href: '/admin/release-control/external-commercial-readiness/' },
   { key: 'caip_private_media', label: 'CAIP private-media acceptance', state: 'EVIDENCE_DEPENDENT', authority: 'fresh authenticated runtime evidence required', href: '/admin/release-control/external-commercial-readiness/' },
 ]);
 
@@ -95,13 +88,13 @@ export async function onRequestGet(context) {
     build: BUILD,
     title: TITLE,
     ok: true,
-    authority: 'release467-build22-it-release-deployment-truth',
-    state: 'DEVELOPMENT_GREEN',
+    authority: 'release467-build33-it-current-release-production-truth',
+    state: 'DEVELOPMENT_CANDIDATE',
     environment: 'development',
     release_authority: {
-      current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_GREEN' },
-      accepted_development: ACCEPTED_DEVELOPMENT,
-      business_application_baseline: BUSINESS_BASELINE,
+      current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_CANDIDATE' },
+      accepted_baseline: ACCEPTED_BASELINE,
+      accepted_development: ACCEPTED_BASELINE,
       production: PRODUCTION,
       compatibility_runtime_release_header: 466,
       compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY',
@@ -132,11 +125,11 @@ export async function onRequestGet(context) {
     sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 22 is Development-green and owns the current I.T. operator/release-truth surface.',
-      'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from the accepted Build 22 evidence anchor.',
-      'Build 20 remains the retained business-application baseline and the current Production authority; it is not presented as the current Development runtime.',
+      'Build 33 owns the current I.T. operator/release-truth surface and is a Development candidate until exact post-merge CI accepts it.',
+      'Build 32 is the independently verified Production-green baseline: final Development closure and Production carry the same tree.',
+      'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from accepted release evidence.',
       'Opaque runtime bindings never substitute for System Gate/control-plane D1 and R2 identity proof.',
-      'External HOLDs never become GREEN by inference from source or deployment success.',
+      'External HOLDs never become GREEN by inference from source, D1 convergence or deployment success.',
     ],
     safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
     generated_at: new Date().toISOString(),

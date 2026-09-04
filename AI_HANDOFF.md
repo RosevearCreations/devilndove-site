@@ -2,28 +2,33 @@
 
 ## Current authority
 
-**Release 467 Build 32 — Help, Search & Responsive Convergence is Development GREEN.**
+**Release 467 Build 33 — I.T. Current Release & Production Truth Convergence is a FEATURE CANDIDATE.**
 
-Accepted application runtime: `1b68fed65844938bcee38169bfe7d783abd160d4` / tree `8c76339af56304651c9e81c70bdceea14393ffff`.
-Accepted proof: System Gate `33827496687`, Current Application Quality `33827496693`, I.T. Admin Runtime Proof `33827496691`, Repository Branch Hygiene `33827496696` — all SUCCESS on that exact Development SHA.
+Build 32 is fully closed in Production:
+- final Development SHA `79c9a6c4af0f5c82f474964485e2cde535f85045`
+- exact tree `2c1b4a3694779996e1bdb094be5e9e043834276e`
+- System Gate `33829550860` SUCCESS
+- Current Application Quality `33829550795` SUCCESS
+- I.T. Admin Runtime Proof `33829550834` SUCCESS
+- Repository Branch Hygiene `33829550749` SUCCESS
+- Production `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`
+- Production Pages Deploy `33866964958` SUCCESS on the same exact tree.
 
-Build 32 operating boundary:
-- Online Help Centre is current and release-neutral; internal Help remains `noindex,nofollow`
-- stale/duplicate active files and retired legacy calibration surfaces are removed from the active application
-- `/search/` is `noindex,follow`
-- sitemap policy is canonical-only and excludes the empty generic product shell
-- public pages enforce exactly one H1 in source with a runtime backstop
-- responsive safeguards cover phone, tablet, PC/app and wide-web layouts
-- password-hash security compatibility remains protected
-- schema change: none; canonical migrations remain `0001`–`0004`
-- D1/R2/provider/Cloudflare Access mutation: none
+## Build 33 scope
 
-## Promotion and restart rule
+Build 33 corrects stale I.T. release truth that still described Build 22 as current operator authority and Build 20 as Production. The read-only I.T. Operations Control Tower now separates:
+- current Build 33 operator state;
+- accepted Build 32 Development baseline;
+- exact Build 32 Production-GREEN authority;
+- live Development ancestry/readiness; and
+- external HOLD lanes that still require their own evidence.
 
-Do **not** freeze a Production SHA in this handoff. Before starting the next build, verify from current GitHub/CI evidence that `main` carries the exact fully-green Build 32 Development closure tree and that Production has independently passed its exact-source deployment/system proof. If either condition is not true, finish Build 32 promotion/verification first.
+A new `current_it_release_truth_gate.py` is part of the release-neutral Current Application Quality Proof. Future builds must keep the I.T. current-build pointer and Production baseline synchronized or quality fails.
 
-The final Development closure commit must itself have a successful push-triggered System Gate; Production promotion must fail closed when that exact-commit proof is absent.
+No schema change, D1/R2 business-data mutation, provider execution/publication, Cloudflare Access mutation or Production mutation is authorized by Build 33.
 
-External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access HOLD lanes remain deferred unless current evidence explicitly proves acceptance.
+## Acceptance rule
 
-After Build 32 is proven GREEN in Production, select Build 33 from current repository evidence; do not reopen completed Build 31/32 work.
+Build 33 is not GREEN yet. Merge its feature PR through GitHub to `dev`, then require push-triggered System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof and Repository Branch Hygiene on the exact merged SHA. Only after those proofs succeed may Build 33 be marked Development GREEN.
+
+External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access lanes remain HOLD unless fresh evidence explicitly accepts them.

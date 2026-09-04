@@ -1,20 +1,18 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Current authority — Release 467 Build 32
+## Current authority — Release 467 Build 33
 
-Build 32 — Help, Search & Responsive Convergence is GREEN on Development.
+Build 33 — I.T. Current Release & Production Truth Convergence is the active Development candidate.
 
-Accepted Development application runtime: `1b68fed65844938bcee38169bfe7d783abd160d4` / tree `8c76339af56304651c9e81c70bdceea14393ffff`.
-Accepted runs: System Gate `33827496687`, Current Application Quality `33827496693`, I.T. Admin Runtime Proof `33827496691`, Repository Branch Hygiene `33827496696` — all SUCCESS.
-
-Production authority is determined from current exact-tree branch/deployment evidence. Do not use a frozen historical Production SHA from this index as current truth.
+Build 32 is independently Production GREEN on exact tree `2c1b4a3694779996e1bdb094be5e9e043834276e` with final Development SHA `79c9a6c4af0f5c82f474964485e2cde535f85045`, Production `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, System Gate `33829550860`, Current Application Quality `33829550795`, I.T. Admin Runtime Proof `33829550834`, Repository Branch Hygiene `33829550749`, and Production Pages Deploy `33866964958` — all SUCCESS.
 
 Read current authority in this order:
 1. `current-development-authority.json`
-2. `release467-build32-help-search-responsive-convergence.json`
-3. `AI_HANDOFF.md`
-4. `PROJECT_STATUS_AND_ROADMAP.md`
-5. `SANITY_HEALTH_CHECK.md`
-6. retained Build 31 and earlier authorities as historical evidence only.
+2. `release467-build33-it-current-release-production-truth.json`
+3. `release467-build32-help-search-responsive-convergence.json`
+4. `AI_HANDOFF.md`
+5. `PROJECT_STATUS_AND_ROADMAP.md`
+6. `SANITY_HEALTH_CHECK.md`
+7. retained Build 31 and earlier authorities as historical evidence only.
 
-Before Build 33 begins, current `main` must match the fully-green Build 32 Development closure tree and Production must independently prove that exact tree. If either proof is absent, finish Build 32 promotion/verification first.
+Build 33 adds a release-neutral I.T. current-truth gate to the Current Application Quality Proof. Do not call Build 33 GREEN until its exact merged `dev` SHA passes the required push-triggered CI proofs.
