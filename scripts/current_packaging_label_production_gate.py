@@ -29,7 +29,7 @@ require('constBUILD=44;' in compact, 'service must retain Build 44 identity')
 for authority in ('packaging_printer_profiles', 'packaging_project_versions', 'soap_label_print_tests', 'packaging_export_history'):
     require(authority in service, f'existing production authority missing: {authority}')
 require('scale===100' in compact, 'printer profiles must prove exact 100% scale')
-require("review_status==='approved'" in compact or "review_status) === 'approved'" in service, 'approved saved version requirement missing')
+require("String(row.review_status||'')==='approved'" in compact, 'approved saved version requirement missing')
 require('immutable_svg_artifact' in service and 'reusable_production_version' in service, 'immutable reusable version proof missing')
 require("wrap_fit_status:'passed'" in compact and "legibility_status:'passed'" in compact and "overlap_status:'passed'" in compact, 'physical QA pass rules missing')
 require('build41_safe_area_required_at_print_time:true' in compact, 'Build 41 safe-area dependency missing')
