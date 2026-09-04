@@ -1,4 +1,4 @@
-// Release 467 Build 47 — AI Story & Edit Planning renderer.
+// Release 467 Build 48 — Automated Production Acceptance renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
