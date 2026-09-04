@@ -1,0 +1,45 @@
+{
+  "release": 467,
+  "build": 50,
+  "title": "Reviewed CAIP to Content Studio Handoff",
+  "state": "IMPLEMENTATION_IN_PROGRESS",
+  "source_authority": "dev",
+  "source_base": {
+    "build": 49,
+    "title": "Current Authority Convergence & Restart Integrity",
+    "dev_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+    "tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
+    "proofs": {
+      "system_gate_run": 33929301077,
+      "current_application_quality_run": 33929301018,
+      "it_admin_runtime_proof_run": 33929301051,
+      "branch_hygiene_run": 33929300999
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true
+  },
+  "scope": {
+    "name": "reviewed_caip_to_content_studio_handoff",
+    "build48_acceptance_required": true,
+    "human_review_remains_required": true,
+    "content_studio_package_create_or_refresh": true,
+    "exact_story_timeline_evidence_provenance": true,
+    "render_execution_authorized": false,
+    "provider_execution_authorized": false,
+    "publication_authorized": false,
+    "social_queue_authorized": false,
+    "r2_mutation_authorized": false,
+    "schema_change_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false
+  },
+  "canonical_d1_migration_count": 4,
+  "external_lanes_remain_separate": true,
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  }
+}
