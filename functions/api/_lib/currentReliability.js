@@ -1,10 +1,10 @@
-// Release 467 Build 47 — current read-only reliability projection.
+// Release 467 Build 48 — current read-only reliability projection.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 47;
-export const CURRENT_RELIABILITY_TITLE = 'AI Story & Edit Planning';
+export const CURRENT_RELIABILITY_BUILD = 48;
+export const CURRENT_RELIABILITY_TITLE = 'Automated Production Acceptance';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 
 export async function loadCurrentReliability(db, env = {}) {
