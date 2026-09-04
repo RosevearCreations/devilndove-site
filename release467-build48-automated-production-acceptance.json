@@ -53,6 +53,19 @@
     "preview_smoke_acceptance": true,
     "current_regression_evidence": true
   },
+  "final_closure": {
+    "dev_sha": "3980661045c68f55fa64e66e6414055ee0d359f6",
+    "tree_sha": "66e5e0a088d6eb9f4f85f70791de8925ac40adb0",
+    "proofs": {
+      "system_gate_run": 33925647553,
+      "current_application_quality_run": 33925647532,
+      "it_admin_runtime_proof_run": 33925647561,
+      "branch_hygiene_run": 33925647559
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "closure_rule": "Final closure evidence is ingested by the next build after the closure commit itself has completed the external exact-branch-head proof cycle."
+  },
   "production_checkpoint": {
     "build": 32,
     "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
@@ -83,9 +96,9 @@
     "social OAuth HOLD",
     "Cloudflare Access service-token HOLD"
   ],
-  "next_build": null,
-  "next_build_title": null,
-  "next_build_state": "AWAITING_APPROVED_SCOPE",
-  "next_build_rule": "No Build 49 scope is currently approved. Choose the next bounded workstream only after this Build 48 authority closure independently passes the final four-proof Development cycle.",
+  "next_build": 49,
+  "next_build_title": "Current Authority Convergence & Restart Integrity",
+  "next_build_state": "AUTHORIZED_IN_PROGRESS",
+  "next_build_rule": "Build 49 is bounded to restart/authority convergence. It must not reopen Grey Hair scope, mutate Production, add schema, or infer external acceptance.",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
 }
