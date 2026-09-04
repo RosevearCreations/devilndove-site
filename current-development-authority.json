@@ -1,18 +1,18 @@
 {
   "release": 467,
-  "build": 48,
-  "title": "Automated Production Acceptance",
+  "build": 49,
+  "title": "Current Authority Convergence & Restart Integrity",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "c163691020bc0b3cb729b810280c0ce788351542",
-  "source_base_tree_sha": "6d4f6b22bd42d4b6e1f28819416d28c9089f85d6",
-  "accepted_dev_sha": "19ee5739ff5f374fae4faf6c003ffca2a0ca557a",
-  "accepted_dev_tree_sha": "aef0bf492ffbbee0f4d39e19c84fdbd874a9aaa7",
+  "source_base_sha": "3980661045c68f55fa64e66e6414055ee0d359f6",
+  "source_base_tree_sha": "66e5e0a088d6eb9f4f85f70791de8925ac40adb0",
+  "accepted_dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
+  "accepted_dev_tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
   "acceptance": {
-    "system_gate_run": 33925012698,
-    "current_application_quality_run": 33925012735,
-    "it_admin_runtime_proof_run": 33925012737,
-    "branch_hygiene_run": 33925012709
+    "system_gate_run": 33928678750,
+    "current_application_quality_run": 33928678778,
+    "it_admin_runtime_proof_run": 33928678807,
+    "branch_hygiene_run": 33928678789
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
@@ -32,19 +32,34 @@
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 49,
+      "title": "Current Authority Convergence & Restart Integrity",
+      "authority": "release467-build49-current-authority-convergence-restart-integrity.json",
+      "accepted_dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
+      "accepted_dev_tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
+      "acceptance": {
+        "system_gate_run": 33928678750,
+        "current_application_quality_run": 33928678778,
+        "it_admin_runtime_proof_run": 33928678807,
+        "branch_hygiene_run": 33928678789
+      },
+      "state": "AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF"
+    },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
     "next_build_ingests_previous_final_closure": true,
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
-  "last_green_build": 48,
-  "last_green_build_name": "Automated Production Acceptance",
-  "last_green_dev_sha": "3980661045c68f55fa64e66e6414055ee0d359f6",
-  "last_green_dev_tree_sha": "66e5e0a088d6eb9f4f85f70791de8925ac40adb0",
-  "last_green_system_gate_run": 33925647553,
-  "last_green_application_quality_run": 33925647532,
-  "last_green_it_admin_runtime_run": 33925647561,
-  "last_green_branch_hygiene_run": 33925647559,
+  "last_green_build": 49,
+  "last_green_build_name": "Current Authority Convergence & Restart Integrity",
+  "last_green_dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
+  "last_green_dev_tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
+  "last_green_system_gate_run": 33928678750,
+  "last_green_application_quality_run": 33928678778,
+  "last_green_it_admin_runtime_run": 33928678807,
+  "last_green_branch_hygiene_run": 33928678789,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -55,6 +70,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build49-current-authority-convergence-restart-integrity.json",
     "release467-build48-automated-production-acceptance.json",
     "release467-build47-ai-story-edit-planning.json",
     "release467-build46-four-camera-sync-audio-alignment.json",
@@ -122,9 +138,9 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 49,
-  "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Current Authority Convergence & Restart Integrity",
+  "next_build": 50,
+  "next_build_state": "READY_AFTER_BUILD_49_FINAL_CLOSURE_PROOF",
+  "next_build_title": null,
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -135,5 +151,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Release 467 Build 48 is fully closed at dev SHA 3980661045c68f55fa64e66e6414055ee0d359f6 / tree 66e5e0a088d6eb9f4f85f70791de8925ac40adb0 with System Gate 33925647553, Current Application Quality 33925647532, I.T. Admin Runtime Proof 33925647561 and Branch Hygiene 33925647559 all successful on that exact branch head. Build 49 — Current Authority Convergence & Restart Integrity — is the authorized next bounded workstream. It separates implementation acceptance from the last externally verified closure checkpoint so a static commit never falsely claims proofs that can execute only after that commit exists. The canonical D1 migration stream remains exactly 0001-0004; Production remains Build 32 and external HOLD lanes remain separate."
+  "restart_rule": "Release 467 Build 49 implementation acceptance is GREEN at dev SHA 7bbfbf10a531898052771d9db1cfbb1a9e7d893a / tree 7a74af809182a0eb6befb56e34d2869b44090c6e with System Gate 33928678750, Current Application Quality 33928678778, I.T. Admin Runtime Proof 33928678807 and Branch Hygiene 33928678789 successful plus exact Development Preview acceptance. The last fully verified restart checkpoint remains Build 48 at 3980661045c68f55fa64e66e6414055ee0d359f6 until the Build 49 authority-closure merged dev head itself completes the external exact-head four-proof and Preview cycle. Do not create another evidence-only commit merely to embed those post-commit results; Build 50, when separately scoped, must ingest the externally verified Build 49 final closure before source mutation. Production remains Build 32, canonical migrations remain exactly 0001-0004 and external HOLD lanes remain separate."
 }
