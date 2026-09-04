@@ -4,21 +4,22 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 const RELEASE = 467;
 const BUILD = 33;
 const TITLE = 'I.T. Current Release & Production Truth Convergence';
-const ACCEPTED_BASELINE = Object.freeze({
+const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 32,
-  title: 'Help, Search & Responsive Convergence',
-  state: 'PRODUCTION_GREEN',
-  accepted_dev_sha: '79c9a6c4af0f5c82f474964485e2cde535f85045',
-  accepted_tree_sha: '2c1b4a3694779996e1bdb094be5e9e043834276e',
-  system_gate_run: 33829550860,
-  current_application_quality_run: 33829550795,
-  it_admin_runtime_proof_run: 33829550834,
-  branch_hygiene_run: 33829550749,
+  build: 33,
+  title: TITLE,
+  state: 'DEVELOPMENT_GREEN',
+  accepted_sha: 'e8c4931b75aa066fd28119bcbe0fbbe699f863d2',
+  accepted_tree_sha: '873a98aa6d8dd2ecee2f2b137dcf2aca5be36608',
+  system_gate_run: 33870645740,
+  current_application_quality_run: 33870645748,
+  it_admin_runtime_proof_run: 33870645724,
+  branch_hygiene_run: 33870645746,
 });
 const PRODUCTION = Object.freeze({
   release: 467,
   build: 32,
+  title: 'Help, Search & Responsive Convergence',
   state: 'PRODUCTION_GREEN',
   main_sha: '816490a9f36ffc2a730d8149549e5a2fbd609966',
   tree_sha: '2c1b4a3694779996e1bdb094be5e9e043834276e',
@@ -89,12 +90,11 @@ export async function onRequestGet(context) {
     title: TITLE,
     ok: true,
     authority: 'release467-build33-it-current-release-production-truth',
-    state: 'DEVELOPMENT_CANDIDATE',
+    state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
-      current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_CANDIDATE' },
-      accepted_baseline: ACCEPTED_BASELINE,
-      accepted_development: ACCEPTED_BASELINE,
+      current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_GREEN' },
+      accepted_development: ACCEPTED_DEVELOPMENT,
       production: PRODUCTION,
       compatibility_runtime_release_header: 466,
       compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY',
@@ -125,9 +125,9 @@ export async function onRequestGet(context) {
     sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 33 owns the current I.T. operator/release-truth surface and is a Development candidate until exact post-merge CI accepts it.',
-      'Build 32 is the independently verified Production-green baseline: final Development closure and Production carry the same tree.',
-      'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from accepted release evidence.',
+      'Build 33 is Development GREEN and owns the current I.T. operator/release-truth surface.',
+      'Build 32 remains the independently verified Production-green baseline until a deliberate Build 33 Production promotion is requested and proven.',
+      'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from accepted Development evidence.',
       'Opaque runtime bindings never substitute for System Gate/control-plane D1 and R2 identity proof.',
       'External HOLDs never become GREEN by inference from source, D1 convergence or deployment success.',
     ],
