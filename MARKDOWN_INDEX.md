@@ -1,17 +1,20 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Current authority — Release 467 Build 48
+## Last fully verified authority — Release 467 Build 48
 
-Build 48 — Automated Production Acceptance is Development accepted pending final authority-only closure proof.
+Build 48 — Automated Production Acceptance is fully GREEN/CLOSED on Development.
 
-Accepted implementation: `19ee5739ff5f374fae4faf6c003ffca2a0ca557a` / tree `aef0bf492ffbbee0f4d39e19c84fdbd874a9aaa7`.
-Runs: System Gate `33925012698`, Current Application Quality `33925012735`, I.T. Admin Runtime Proof `33925012737`, Repository Branch Hygiene `33925012709` — all SUCCESS. Canonical D1 migration proof, Development data-authority read-only proof, exact Preview deployment, binding proof, non-secret smoke and regression evidence also passed inside System Gate.
+Final closure: `3980661045c68f55fa64e66e6414055ee0d359f6` / tree `66e5e0a088d6eb9f4f85f70791de8925ac40adb0`.
+Final exact-head runs: System Gate `33925647553`, Current Application Quality `33925647532`, I.T. Admin Runtime Proof `33925647561`, Repository Branch Hygiene `33925647559` — all SUCCESS. Exact Development Preview deployment acceptance also passed inside the System Gate.
+
+Build 48 implementation acceptance remains separately recorded at `19ee5739ff5f374fae4faf6c003ffca2a0ca557a` / tree `aef0bf492ffbbee0f4d39e19c84fdbd874a9aaa7`.
 
 Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, tree `2c1b4a3694779996e1bdb094be5e9e043834276e`, Production Pages Deploy `33866964958` SUCCESS.
 
-Read current authority in this order:
-1. `current-development-authority.json`
-2. `release467-build48-automated-production-acceptance.json`
+## Current reading order
+
+1. `current-development-authority.json` — machine pointer, including `restart_integrity.last_fully_verified`
+2. `release467-build48-automated-production-acceptance.json` — Build 48 implementation and final-closure evidence
 3. `release467-build47-ai-story-edit-planning.json`
 4. `release467-build46-four-camera-sync-audio-alignment.json`
 5. `release467-build45-grey-hair-media-intelligence.json`
@@ -24,10 +27,14 @@ Read current authority in this order:
 12. `AI_HANDOFF.md`
 13. `PROJECT_STATUS_AND_ROADMAP.md`
 14. `SANITY_HEALTH_CHECK.md`
-15. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`.
+15. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
-Build 48 is a GET-only deterministic acceptance authority over Build 47 reviewed story/edit planning. It validates human approval, current source evidence, exact story-to-clip evidence coverage, source bounds, contiguous timing, confirmed synchronization offsets, supported aspect ratio and target duration before returning `HOLD` or `ACCEPTED_FOR_CONTROLLED_PRODUCTION`.
+## Build 49 — Current Authority Convergence & Restart Integrity
 
-Build 48 adds no schema or canonical migration. Canonical migrations remain exactly `0001`–`0004`. A passing acceptance package authorizes no renderer/provider/publication/social/R2/`main`/application Production action.
+Build 49 is authorized and bounded to restart-state convergence. The new `scripts/current_authority_restart_integrity_gate.py` prevents static authority, Markdown and read-only operator surfaces from silently falling back to a pre-closure checkpoint after a later exact `dev` head has already completed its four-proof cycle.
 
-There is **no approved Build 49 scope**. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access lanes remain HOLD/evidence-dependent absent fresh acceptance evidence.
+The protocol deliberately does not require a closure commit to contain the run IDs of workflows that have not run yet. Instead, each new build ingests the previous build's externally verified final closure checkpoint before moving source forward. This makes restart truth finite and auditable rather than self-referential.
+
+Build 49 adds no schema or canonical migration. Canonical migrations remain exactly `0001`–`0004`. It opens no renderer/provider/publication/social/R2/`main`/Production path.
+
+External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access lanes remain HOLD/evidence-dependent absent fresh acceptance evidence.
