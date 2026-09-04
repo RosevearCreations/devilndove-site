@@ -22,6 +22,19 @@
     "preview_smoke_acceptance": true,
     "current_regression_evidence": true
   },
+  "final_closure": {
+    "dev_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+    "tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
+    "proofs": {
+      "system_gate_run": 33929301077,
+      "current_application_quality_run": 33929301018,
+      "it_admin_runtime_proof_run": 33929301051,
+      "branch_hygiene_run": 33929300999
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "recorded_by_next_build": 50
+  },
   "scope": [
     "Separate implementation acceptance from the later exact-dev final closure checkpoint",
     "Ingest the externally proven final Build 48 closure without creating an evidence-only self-referential commit loop",
@@ -98,8 +111,8 @@
     "Cloudflare Access service-token HOLD"
   ],
   "next_build": 50,
-  "next_build_state": "READY_AFTER_BUILD_49_FINAL_CLOSURE_PROOF",
-  "next_build_title": null,
-  "next_build_rule": "Do not start Build 50 until the exact Build 49 authority-closure merged dev head has successful System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene proofs plus exact Development Preview acceptance. The next build then ingests those external final closure values before source mutation. Build 50 scope is unresolved during Build 49 closure.",
+  "next_build_state": "BUILD50_IN_PROGRESS_AFTER_VERIFIED_FINAL_CLOSURE",
+  "next_build_title": "Reviewed CAIP to Content Studio Handoff",
+  "next_build_rule": "Build 50 ingested this externally verified Build 49 final closure before source mutation. Future builds continue the same protocol: verify the preceding exact closure head externally, then ingest it in the following build without evidence-only self-referential commits.",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
 }
