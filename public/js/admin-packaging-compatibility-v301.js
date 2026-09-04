@@ -2,11 +2,12 @@
 // Build 301 is the single live browser compatibility identity for the Packaging page.
 // Older build numbers remain visible as implementation provenance only; this layer does
 // not replace, copy, or mutate the proven Build 297/298/300 runtime authorities.
-// Release 467 Build 42 loads its additive Material Template Intelligence layer here so
-// the mature editor markup and proven Packaging client stack remain unchanged.
+// Release 467 Build 42 loads its additive Material Template Intelligence layer here.
+// Release 467 Build 43 then loads its additive Label Composition & Overrides layer here.
 (() => {
   const BUILD = 301;
   const MATERIAL_INTELLIGENCE_BUILD = 42;
+  const LABEL_COMPOSITION_BUILD = 43;
   const EXPECTED = Object.freeze({
     startupGateBuild: 297,
     clientTransportBuild: 297,
@@ -30,6 +31,7 @@
     const client = safeStatus(globalThis.DDPackagingClient);
     const stabilizer = safeStatus(globalThis.DDPackagingSaveStabilizer);
     const materialIntelligence = safeStatus(globalThis.DDPackagingMaterialIntelligence);
+    const labelComposition = safeStatus(globalThis.DDPackagingLabelComposition);
 
     const active = Boolean(
       Number(gate?.build || 0) === EXPECTED.startupGateBuild
@@ -68,6 +70,10 @@
       materialIntelligenceBuild: Number(materialIntelligence?.build || client?.materialIntelligenceBuild || 0) || null,
       materialIntelligenceActive: Boolean(materialIntelligence?.state === 'active' || client?.materialIntelligenceActive),
       materialIntelligenceNormalizationFailures: Number(materialIntelligence?.normalizationFailureCount ?? client?.normalizationFailureCount ?? 0),
+      labelCompositionBuild: Number(labelComposition?.build || 0) || null,
+      labelCompositionActive: Boolean(labelComposition?.state === 'active'),
+      labelCompositionAuthoritativeReadback: Boolean(labelComposition?.authoritativeReadback),
+      labelCompositionFailures: Number(labelComposition?.failureCount || 0),
       legacyCompatibilityTraffic: Object.freeze({
         delayed: Number(gate?.delayedLegacyRequests || 0),
         replayed: Number(gate?.replayedLegacyRequests || 0),
@@ -95,15 +101,28 @@
     return status;
   }
 
+  function loadLabelComposition() {
+    if (typeof document === 'undefined') return;
+    if (!String(globalThis.location?.pathname || '').includes('/admin/packaging-studio')) return;
+    if (document.querySelector('script[data-dd-packaging-label-composition]')) return;
+    const script = document.createElement('script');
+    script.src = '/public/js/admin-packaging-label-composition-v43.js?v=46743';
+    script.async = false;
+    script.dataset.ddPackagingLabelComposition = String(LABEL_COMPOSITION_BUILD);
+    script.addEventListener('load', publishState, { once: true });
+    document.head.appendChild(script);
+  }
+
   function loadMaterialIntelligence() {
     if (typeof document === 'undefined') return;
     if (!String(globalThis.location?.pathname || '').includes('/admin/packaging-studio')) return;
-    if (document.querySelector('script[data-dd-packaging-material-intelligence]')) return;
+    const existing = document.querySelector('script[data-dd-packaging-material-intelligence]');
+    if (existing) { loadLabelComposition(); return; }
     const script = document.createElement('script');
     script.src = '/public/js/admin-packaging-material-intelligence-v42.js?v=46742';
     script.async = false;
     script.dataset.ddPackagingMaterialIntelligence = String(MATERIAL_INTELLIGENCE_BUILD);
-    script.addEventListener('load', publishState, { once: true });
+    script.addEventListener('load', () => { publishState(); loadLabelComposition(); }, { once: true });
     document.head.appendChild(script);
   }
 
@@ -118,6 +137,7 @@
     document.addEventListener('dd:packaging-contract-bootstrap', publishState);
     document.addEventListener('dd:packaging-native-client-write', publishState);
     document.addEventListener('dd:packaging-material-intelligence-active', publishState);
+    document.addEventListener('dd:packaging-label-composition-active', publishState);
     document.addEventListener('input', (event) => {
       if (event?.target?.closest?.('#packagingStudioMain')) queueMicrotask(publishState);
     }, { passive: true });

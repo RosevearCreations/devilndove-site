@@ -1,5 +1,6 @@
 // Release 467 Build 42 — Material Template Intelligence.
 // Reuses existing Packaging JSON authorities; no schema creation or request-time DDL.
+// Release 467 Build 43 compatibility: project-level label composition overrides survive inheritance normalization.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
 const RELEASE=467;
@@ -73,7 +74,21 @@ async function saveTemplateIntelligence(db,adminUser,sourceId,inputRows){
   return enriched;
 }
 function choosePolicy(current,next){return POLICY_PRIORITY[next]>POLICY_PRIORITY[current]?next:current;}
-async function normalizeProject(db,projectId){
+function effectiveWithOverride(policy,current,decision){
+  const inherited=policy?(['required','print_default'].includes(policy)?1:0):(Number(current)!==0?1:0);
+  if(decision==='omit'&&policy!=='required')return 0;
+  if(decision==='print'&&policy!=='internal_only')return 1;
+  return inherited;
+}
+async function projectOverrideMap(db,projectId){
+  const project=await db.prepare(`SELECT artwork_json FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first();
+  const artwork=safeJson(project?.artwork_json,{});const result=new Map();
+  for(const row of (Array.isArray(artwork.label_composition_overrides)?artwork.label_composition_overrides:[])){
+    const key=canonical(row?.key||row?.inci_name);const decision=String(row?.decision||'');if(key&&['print','omit'].includes(decision))result.set(key,decision);
+  }
+  return result;
+}
+async function normalizeProject(db,projectId,adminUserId=0){
   const attached=rows(await db.prepare(`SELECT smt.master_inci_json,smt.verification_status,smt.supplier_name FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id`).bind(projectId).all());
   const policyByKey=new Map();
   for(const source of attached){
@@ -82,8 +97,9 @@ async function normalizeProject(db,projectId){
       const current=policyByKey.get(key);policyByKey.set(key,current?choosePolicy(current,row.print_policy):row.print_policy);
     }
   }
+  const overrideByKey=await projectOverrideMap(db,projectId);
   const projectRows=rows(await db.prepare(`SELECT packaging_project_ingredient_id,sort_order,site_item_inventory_id,inci_name,display_name_en,display_name_fr,organic_flag,allergen_note,required_on_label FROM packaging_project_ingredients WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_ingredient_id`).bind(projectId).all());
-  const keeperByKey=new Map();let duplicateCount=0;let policyCount=0;
+  const keeperByKey=new Map();let duplicateCount=0;let policyCount=0;let overridesPreserved=0;
   for(const row of projectRows){
     const key=canonical(row.inci_name||row.display_name_en||row.display_name_fr);if(!key)continue;
     const keeper=keeperByKey.get(key);
@@ -92,12 +108,16 @@ async function normalizeProject(db,projectId){
     keeperByKey.set(key,merged);duplicateCount+=1;
     await db.prepare(`DELETE FROM packaging_project_ingredients WHERE packaging_project_ingredient_id=?`).bind(row.packaging_project_ingredient_id).run();
   }
-  let sort=0;
+  let sort=0;const printable=[];
   for(const [key,row] of keeperByKey){
-    sort+=1;const policy=policyByKey.get(key);const required=policy?(['required','print_default'].includes(policy)?1:0):Number(row.required_on_label)!==0?1:0;if(policy)policyCount+=1;
+    sort+=1;const policy=policyByKey.get(key);const decision=overrideByKey.get(key)||'';const required=effectiveWithOverride(policy,row.required_on_label,decision);if(policy)policyCount+=1;if(decision)overridesPreserved+=1;
     await db.prepare(`UPDATE packaging_project_ingredients SET sort_order=?,site_item_inventory_id=?,inci_name=?,display_name_en=?,display_name_fr=?,organic_flag=?,allergen_note=?,required_on_label=? WHERE packaging_project_ingredient_id=?`).bind(sort,row.site_item_inventory_id||null,row.inci_name||null,row.display_name_en||null,row.display_name_fr||null,Number(row.organic_flag)!==0?1:0,row.allergen_note||null,required,row.packaging_project_ingredient_id).run();
+    if(required)printable.push(row);
   }
-  return{ingredient_count:keeperByKey.size,duplicates_removed:duplicateCount,policies_applied:policyCount};
+  const inci=printable.map((row)=>text(row.inci_name,300)).filter(Boolean).join(', ');const en=printable.map((row)=>text(row.display_name_en||row.inci_name,500)).filter(Boolean).join(', ');const fr=printable.map((row)=>text(row.display_name_fr||row.inci_name,500)).filter(Boolean).join(', ');
+  if(adminUserId)await db.prepare(`UPDATE packaging_projects SET ingredients_inci=?,ingredients_en=?,ingredients_fr=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_project_id=?`).bind(inci||null,en||null,fr||null,adminUserId,projectId).run();
+  else await db.prepare(`UPDATE packaging_projects SET ingredients_inci=?,ingredients_en=?,ingredients_fr=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_project_id=?`).bind(inci||null,en||null,fr||null,projectId).run();
+  return{ingredient_count:keeperByKey.size,duplicates_removed:duplicateCount,policies_applied:policyCount,overrides_preserved:overridesPreserved};
 }
 
 export async function onRequestGet(context){
@@ -117,8 +137,8 @@ export async function onRequestPost(context){
     if(action==='normalize_project_inheritance'){
       const projectId=id(body.packaging_project_id);if(!projectId)return json({ok:false,error:'Packaging project is required.'},400);
       const project=await a.db.prepare(`SELECT packaging_project_id FROM packaging_projects WHERE packaging_project_id=?`).bind(projectId).first();if(!project)return json({ok:false,error:'Packaging project was not found.'},404);
-      const result=await normalizeProject(a.db,projectId);
-      return json({ok:true,release:RELEASE,build:BUILD,message:'Material inheritance normalized.',...result});
+      const result=await normalizeProject(a.db,projectId,a.adminUser.user_id);
+      return json({ok:true,release:RELEASE,build:BUILD,message:'Material inheritance normalized while preserving reviewed Build 43 label overrides.',...result});
     }
     return json({ok:false,error:'Unsupported Material Template Intelligence action.'},400);
   }catch(error){return json({ok:false,error:error?.message||'Material Template Intelligence failed.',release:RELEASE,build:BUILD},409);}
