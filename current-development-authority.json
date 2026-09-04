@@ -1,27 +1,27 @@
 {
   "release": 467,
-  "build": 37,
-  "title": "Deployment Preflight Canonical Migration & Runtime-Schema Convergence",
+  "build": 38,
+  "title": "Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "e77bed366a8717ac74e3a3534f5539d14b0ab243",
-  "source_base_tree_sha": "9febef037a02725a9bc13abd33a4b902c775b5ce",
-  "accepted_dev_sha": "2db13923a4356182b98d30e0d1a3025d78065791",
-  "accepted_dev_tree_sha": "178d608a187d221e8fe119b7da5dec6a4c52564e",
+  "source_base_sha": "f831dcd017fa0bf1db6f637f08355c1deb9aedaf",
+  "source_base_tree_sha": "b6004b79b072ff33d8a87b9de05001c691042341",
+  "accepted_dev_sha": "a48a44558e2438d7db4d994da0012b0cae703689",
+  "accepted_dev_tree_sha": "27adcad60e871921ea3fb9372b03f8a38b22daa8",
   "acceptance": {
-    "system_gate_run": 33878548937,
-    "current_application_quality_run": 33878549068,
-    "it_admin_runtime_proof_run": 33878549217,
-    "branch_hygiene_run": 33878549129
+    "system_gate_run": 33881012179,
+    "current_application_quality_run": 33881011819,
+    "it_admin_runtime_proof_run": 33881011733,
+    "branch_hygiene_run": 33881011711
   },
-  "last_green_build": 37,
-  "last_green_build_name": "Deployment Preflight Canonical Migration & Runtime-Schema Convergence",
-  "last_green_dev_sha": "2db13923a4356182b98d30e0d1a3025d78065791",
-  "last_green_dev_tree_sha": "178d608a187d221e8fe119b7da5dec6a4c52564e",
-  "last_green_system_gate_run": 33878548937,
-  "last_green_application_quality_run": 33878549068,
-  "last_green_it_admin_runtime_run": 33878549217,
-  "last_green_branch_hygiene_run": 33878549129,
+  "last_green_build": 38,
+  "last_green_build_name": "Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion",
+  "last_green_dev_sha": "a48a44558e2438d7db4d994da0012b0cae703689",
+  "last_green_dev_tree_sha": "27adcad60e871921ea3fb9372b03f8a38b22daa8",
+  "last_green_system_gate_run": 33881012179,
+  "last_green_application_quality_run": 33881011819,
+  "last_green_it_admin_runtime_run": 33881011733,
+  "last_green_branch_hygiene_run": 33881011711,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -32,8 +32,9 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
-    "release467-build37-deployment-preflight-canonical-migration.json",
+    "release467-build38-accounting-core-runtime-ddl-elimination.json",
     "release467-build32-help-search-responsive-convergence.json",
+    "release467-build37-deployment-preflight-canonical-migration.json",
     "release467-build36-current-reliability-operational-health.json"
   ],
   "repository_governance": {
@@ -57,10 +58,17 @@
     "active_reliability_authority": "current-development-authority.json",
     "historical_build36_reliability_authority": "release467-build36-current-reliability-operational-health.json",
     "historical_release466_reliability_role": "HISTORICAL_REGRESSION_COMPATIBILITY",
-    "active_deployment_preflight_authority": "release467-build37-deployment-preflight-canonical-migration.json",
+    "active_deployment_preflight_authority": "current-development-authority.json",
+    "historical_build37_deployment_preflight_authority": "release467-build37-deployment-preflight-canonical-migration.json",
+    "active_accounting_schema_authority": "release467-build38-accounting-core-runtime-ddl-elimination.json",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
     "canonical_d1_migration_count": 4,
+    "runtime_schema_residue_files_ceiling": 60,
+    "runtime_schema_residue_occurrences_ceiling": 526,
+    "runtime_schema_residue_shared_helpers_ceiling": 4,
+    "raw_d1_bypass_with_ddl_ceiling": 0,
+    "accounting_request_time_schema_ddl": false,
     "request_time_schema_mutation": false
   },
   "external_lanes": {
@@ -70,8 +78,8 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 38,
-  "next_build_state": "READY_AFTER_BUILD_37_FINAL_CLOSURE_PROOF",
+  "next_build": 39,
+  "next_build_state": "READY_AFTER_BUILD_38_FINAL_CLOSURE_PROOF",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -82,5 +90,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 37 is accepted on Development at implementation SHA 2db13923a4356182b98d30e0d1a3025d78065791 / tree 178d608a187d221e8fe119b7da5dec6a4c52564e with System Gate 33878548937, Current Application Quality 33878549068, I.T. Admin Runtime Proof 33878549217 and Branch Hygiene 33878549129. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 38 starts. Build 32 remains Production GREEN. Deployment Preflight is Release 467 Build 37 current GET-only canonical migration truth; historical Build 171-176 migration instructions and request-time schema DDL are not active authority."
+  "restart_rule": "Build 38 is accepted on Development at implementation SHA a48a44558e2438d7db4d994da0012b0cae703689 / tree 27adcad60e871921ea3fb9372b03f8a38b22daa8 with System Gate 33881012179, Current Application Quality 33881011819, I.T. Admin Runtime Proof 33881011733 and Branch Hygiene 33881011711. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 39 starts. Build 32 remains Production GREEN. Accounting core carries zero request-time schema DDL and asserts the proven accounting_order_records baseline read-only; repository runtime-schema residue is ratcheted to ceilings of 60 files, 526 statements and 4 delegated/shared helpers with zero raw D1 bypasses. Canonical migrations remain exactly 0001-0004."
 }
