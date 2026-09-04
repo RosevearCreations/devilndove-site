@@ -1,4 +1,4 @@
-// Release 467 Build 46 — Four-Camera Synchronization & Audio Alignment renderer.
+// Release 467 Build 47 — AI Story & Edit Planning renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
