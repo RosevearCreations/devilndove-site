@@ -1,64 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
   <meta charset="utf-8"/>
-  <meta content="width=device-width,initial-scale=1" name="viewport"/>
-  <title>Deployment Preflight — Devil n Dove Admin</title>
-  <meta content="Run D1 migration safety, schema diff, one-H1, CSS, JSON, schema.org, image-alt, canonical, release-manifest, and local SEO preflight checks before deploying Devil n Dove." name="description"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <link href="/css/styles.css" rel="stylesheet"/>
+  <title>Deployment Preflight — Devil n Dove Admin</title>
+  <meta name="description" content="Read-only Devil n Dove deployment preflight for canonical D1 migration evidence, schema integrity, runtime health, SEO, release provenance and Production safety."/>
+  <link href="/css/styles.css?v=467" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
 </head>
 <body>
   <div class="container admin-shell">
     <div class="nav">
-      <div class="brand">
-        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
-        <div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Deployment Preflight</div></div>
-      </div>
-      <div class="links"><a href="/admin/prelaunch/">Process Map</a><a href="/admin/startup-readiness/">Blockers</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout="" type="button">Logout</button></div>
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Deployment Preflight • Release 467</div></div></div>
+      <div class="links"><a href="/admin/it/">I.T.</a><a href="/admin/release-control/">Release Control</a><a href="/admin/reliability/">Reliability</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout type="button">Logout</button></div>
     </div>
 
-    <div class="hero">
-      <div>
-        <h1>Deployment Preflight</h1>
-        <p>Check the live build for D1 migration ledger safety, schema drift, public page H1/title/meta/canonical/schema.org/image-alt health, CSS drift, static JSON fallbacks, release manifests, and local-search wording before pushing or swapping branches.</p>
-      </div>
-    </div>
+    <div class="hero"><div><h1>Deployment Preflight</h1><p>Current Release 467 Build 37 read-only preflight for canonical D1 migration proof, foreign-key integrity, schema visibility, public/admin quality, D1/R2 health and release safety.</p></div></div>
 
-    <div class="admin-department-links card">
-      <a class="btn" href="/admin/">Dashboard</a>
-      <a class="btn" href="/admin/operations/">Operations</a>
-      <a class="btn" href="/admin/safe-deploy-package/">Safe Deploy Package</a>
-      <a class="btn" href="/admin/release-notes/">Release Notes</a>
-      <a class="btn" href="/admin/post-deploy-smoke-tests/">Smoke Tests</a>
+    <div class="card" style="margin-top:18px"><strong>Release 467 Build 37 — current read-only authority:</strong> forward D1 schema authority is only <code>migrations/canonical/manifest.json</code> applied through <code>scripts/d1_migrate.py</code>. Historical build-numbered migration SQL is provenance only. This page never creates or repairs schema during a request and never promotes Production.</div>
+
+    <div class="admin-department-links card" style="margin-top:18px">
+      <a class="btn" href="/admin/it/">I.T. Control Tower</a>
+      <a class="btn" href="/admin/reliability/">Reliability</a>
       <a class="btn" href="/admin/release-control/">Release Control</a>
+      <a class="btn" href="/admin/post-deploy-smoke-tests/">Smoke Tests</a>
+      <a class="btn" href="/admin/safe-deploy-package/">Safe Deploy Package</a>
     </div>
 
-    <div class="card" id="deploymentPreflightMount" style="margin-top:18px">
-      <h2 style="margin-top:0">Preflight checks</h2>
-      <p class="small">Use this page before deploy and after D1 schema changes. It does not run destructive changes.</p>
+    <section class="card" style="margin-top:18px">
+      <h2 style="margin-top:0">Run current preflight</h2>
+      <p class="small">The active endpoint is GET-only. Saved historical snapshots and confirmations remain visible when present, but Build 37 does not mutate them.</p>
       <div class="small" id="deploymentPreflightMessage">Waiting for admin session…</div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
         <button class="btn" id="runDeploymentPreflightButton" type="button">Run Preflight</button>
-        <button class="btn secondary" id="saveDeploymentPreflightButton" type="button">Save Snapshot</button>
         <button class="btn secondary" id="exportDeploymentPreflightButton" type="button">Export Markdown</button>
       </div>
-      <div id="deploymentPreflightSummary" style="margin-top:14px"></div>
-      <div id="deploymentPreflightChecks" style="margin-top:14px"></div>
-      <div id="deploymentPreflightDetails" style="margin-top:14px"></div>
-      <div id="deploymentPostDeployConfirmations" style="margin-top:14px"></div>
-      <div id="deploymentPreflightRuns" style="margin-top:14px"></div>
-    </div>
+    </section>
 
+    <main id="deploymentPreflightMount" aria-live="polite"><section class="card" style="margin-top:18px"><p class="small">Loading current Deployment Preflight…</p></section></main>
     <div class="footer card" style="margin-top:18px"></div>
   </div>
-  <script src="/js/main.js?v=440"></script>
-  <script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script>
-  <script src="/public/js/site-auth-ui.js?v=440"></script>
-  <script src="/public/js/site-analytics.js?v=440"></script>
-  <script src="/public/js/admin-self-protect.js?v=440"></script>
-  <script src="/public/js/admin-deployment-preflight.js"></script>
+  <script src="/js/main.js?v=467"></script>
+  <script src="/public/js/auth.js?v=467"></script>
+  <script src="/public/js/admin-route-usage.js?v=467"></script>
+  <script src="/public/js/site-auth-ui.js?v=467"></script>
+  <script src="/public/js/admin-self-protect.js?v=467"></script>
+  <script src="/public/js/admin-current-deployment-preflight.js?v=467b37"></script>
 </body>
 </html>
