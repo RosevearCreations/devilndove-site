@@ -13,12 +13,8 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
-function isApiPath(pathname) {
-  return String(pathname || '').startsWith('/api/');
-}
-function isReadMethod(method) {
-  return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase());
-}
+function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
+function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
 function normalizedPagePath(pathname) {
   let path = String(pathname || '/');
   if (!path.endsWith('/')) path += '/';
@@ -30,6 +26,14 @@ function isStorefrontDiscoveryPath(pathname) {
 function isPublicRuntimeIntelligencePath(pathname) {
   const path = normalizedPagePath(pathname);
   return path !== '/admin/' && !path.startsWith('/admin/');
+}
+function publicProductRequestInfo(request, pathname) {
+  if (normalizedPagePath(pathname) !== '/shop/product/') return null;
+  const url = new URL(request.url);
+  const slug = String(url.searchParams.get('slug') || '').trim();
+  if (!slug) return { slug: '', canonical: 'https://devilndove.com/shop/product/' };
+  const canonical = `https://devilndove.com/shop/product/?slug=${encodeURIComponent(slug)}`;
+  return { slug, canonical };
 }
 function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) {
   const headers = new Headers(response.headers);
@@ -44,20 +48,30 @@ function withPlatformClient(response, request) {
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
   if (!contentType.includes('text/html')) return response;
   const pathname = new URL(request.url).pathname;
+  const productRequest = publicProductRequestInfo(request, pathname);
   try {
-    return new HTMLRewriter()
+    let rewriter = new HTMLRewriter()
       .on('head', {
         element(element) {
+          element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
+          element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           if (isPublicRuntimeIntelligencePath(pathname)) {
+            element.append('<script defer src="/public/js/public-heading-guard.js?v=current"></script>', { html: true });
             element.append(`<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
           if (isStorefrontDiscoveryPath(pathname)) {
             element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${CURRENT_RELEASE}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
         },
-      })
-      .transform(response);
+      });
+    if (productRequest) {
+      rewriter = rewriter
+        .on('meta[name="robots"]', { element(element) { element.setAttribute('content', productRequest.slug ? 'index,follow' : 'noindex,follow'); } })
+        .on('link[rel="canonical"]', { element(element) { element.setAttribute('href', productRequest.canonical); } })
+        .on('meta[property="og:url"]', { element(element) { element.setAttribute('content', productRequest.canonical); } });
+    }
+    return rewriter.transform(response);
   } catch {
     return response;
   }
@@ -97,12 +111,10 @@ async function resolveGuardUser(request, env, pathname) {
     return appModuleSessionUnavailableResponse({ api: isApiPath(pathname) });
   }
 }
-
 export async function onRequest(context) {
   const { request, env } = context;
   const pathname = new URL(request.url).pathname;
   if (shouldBypass(pathname)) return finish(await context.next(), request);
-
   const sharedContract = sharedServiceContractForPath(pathname);
   if (sharedContract) {
     const resolvedUser = await resolveGuardUser(request, env, pathname);
@@ -113,13 +125,10 @@ export async function onRequest(context) {
     if (!sharedAccess.allowed) return finish(sharedServiceUnavailableResponse(sharedAccess), request, { contractPath: sharedContract.path });
     return finish(await context.next(), request, { contractPath: sharedContract.path });
   }
-
   const moduleKey = moduleKeyForPath(pathname);
   if (!moduleKey) return finish(await context.next(), request);
-
   const resolvedUser = await resolveGuardUser(request, env, pathname);
   if (resolvedUser instanceof Response) return finish(resolvedUser, request, { moduleKey });
-
   const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
   context.data.ddModuleAccess = access;
   context.data.ddModuleRelease = CURRENT_RELEASE;

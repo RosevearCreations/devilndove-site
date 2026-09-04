@@ -1,14 +1,12 @@
-// Release 467 Build 30 — current admin navigation renderer.
-// Historical evidence routes remain addressable but are not presented as current operational tools.
+// Current admin navigation renderer. The manifest contains current operational tools only.
 document.addEventListener('DOMContentLoaded', () => {
   const hubKey = document.body?.dataset?.adminModuleHub || '';
   const hubMount = document.getElementById('adminModuleHubMount');
   const cardCounts = Array.from(document.querySelectorAll('[data-admin-module-card]'));
   if (!hubMount && !cardCounts.length) return;
 
-  const HISTORICAL_ONLY_HREFS = new Set(['/admin/release448-calibration/']);
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const currentLinks = (section) => (Array.isArray(section?.links) ? section.links : []).filter((link) => !HISTORICAL_ONLY_HREFS.has(String(link?.href || '')));
+  const currentLinks = (section) => Array.isArray(section?.links) ? section.links : [];
 
   const load = async () => {
     try {
@@ -33,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sections = Array.isArray(module.sections) ? module.sections : [];
       const toolCount = sections.reduce((total, section) => total + currentLinks(section).length, 0);
       const intro = document.getElementById('adminModuleHubIntro');
-      if (intro) intro.textContent = `${module.summary || ''} ${toolCount} current grouped tool${toolCount === 1 ? '' : 's'}. Historical evidence routes are intentionally omitted from the current tool list.`;
+      if (intro) intro.textContent = `${module.summary || ''} ${toolCount} current grouped tool${toolCount === 1 ? '' : 's'}.`;
 
       hubMount.innerHTML = sections.map((section) => {
         const links = currentLinks(section);
@@ -44,6 +42,5 @@ document.addEventListener('DOMContentLoaded', () => {
       if (hubMount) hubMount.innerHTML = `<section class="card"><h2>Navigation unavailable</h2><p class="small">${escapeHtml(error?.message || 'Unable to load admin navigation.')}</p><a class="btn" href="/admin/">Return to Admin</a></section>`;
     }
   };
-
   void load();
 });

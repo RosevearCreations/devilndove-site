@@ -1,15 +1,20 @@
 {
-  "release": 466,
-  "build": 5,
-  "navigation_model": "four-module-admin-cockpit",
-  "runtime_authorities_preserved": ["storefront", "creators", "socials", "financials", "it"],
-  "navigation_note": "Admin navigation is grouped into four business workspaces. Socials and CAIP are grouped under Creator for navigation only; canonical runtime module authority remains separate.",
+  "schema_version": 2,
+  "navigation_model": "business-workspace-navigation",
+  "runtime_authorities_preserved": [
+    "storefront",
+    "creators",
+    "socials",
+    "financials",
+    "it"
+  ],
+  "navigation_note": "Current operational navigation only. Historical release/build evidence remains in Git history and release authorities, not in the active tool menu.",
   "modules": [
     {
       "key": "storefront",
       "label": "Storefront",
       "href": "/admin/storefront/",
-      "summary": "Everything that presents, merchandises, markets, and sells the public Devil n Dove experience.",
+      "summary": "Present, merchandise, market, and sell the public Devil n Dove experience.",
       "sections": [
         {
           "label": "Merchandising & presentation",
@@ -20,7 +25,7 @@
             {"href": "/admin/media-content-studio/", "label": "Website Media & Content Studio"},
             {"href": "/admin/image-manifest/", "label": "Visual Image Manifest"},
             {"href": "/admin/visual-enrichment-studio/", "label": "Visual Enrichment Studio"},
-            {"href": "/admin/visual-polish/", "label": "Visual Polish & Mobile Parity"},
+            {"href": "/admin/visual-polish/", "label": "Visual Polish & Responsive Layout"},
             {"href": "/admin/storefront-quality/", "label": "Storefront Quality"}
           ]
         },
@@ -38,10 +43,9 @@
         {
           "label": "Search & sales channels",
           "links": [
-            {"href": "/admin/local-seo-review/", "label": "SEO Review"},
+            {"href": "/admin/local-seo-review/", "label": "Search & SEO Review"},
             {"href": "/admin/marketplace-readiness/", "label": "Marketplace Readiness"},
             {"href": "/admin/marketplace-mapping/", "label": "Marketplace Mapping"},
-            {"href": "/admin/marketplace-calibration/", "label": "Marketplace Calibration"},
             {"href": "/admin/marketplace-exports/", "label": "Marketplace Exports"}
           ]
         },
@@ -57,7 +61,7 @@
       "key": "creator",
       "label": "Creator",
       "href": "/admin/creator/",
-      "summary": "Product entry, materials, tools, creative projects, CAIP evidence, storytelling, content packages and publication.",
+      "summary": "Products, materials, tools, creative projects, CAIP evidence, storytelling, content packages and publication.",
       "sections": [
         {
           "label": "Product entry & catalog",
@@ -81,7 +85,6 @@
             {"href": "/admin/supply-sourcing/", "label": "Supply Sourcing"},
             {"href": "/admin/tool-lifecycle/", "label": "Tool Lifecycle"},
             {"href": "/admin/vendor-reviews/", "label": "Vendor & Manufacturer Reviews"},
-            {"href": "/admin/packaging/soap-labels/", "label": "Soap Labels"},
             {"href": "/admin/packaging-studio/", "label": "Labeling & Packaging Studio"}
           ]
         },
@@ -141,11 +144,12 @@
       "key": "it",
       "label": "I.T.",
       "href": "/admin/it/",
-      "summary": "System settings, integrations, testing, diagnostics, releases, deployment controls, security and operational continuity.",
+      "summary": "Help, settings, integrations, testing, diagnostics, releases, deployment controls, security and operational continuity.",
       "sections": [
         {
-          "label": "Platform, access & settings",
+          "label": "Help, platform & access",
           "links": [
+            {"href": "/admin/help/", "label": "Online Help Centre"},
             {"href": "/admin/it-platform/", "label": "I.T. Platform"},
             {"href": "/admin/it-integrations/", "label": "External API & Integration Registry"},
             {"href": "/admin/application-modules/", "label": "Application Modules"},
@@ -155,16 +159,15 @@
           ]
         },
         {
-          "label": "Testing, diagnostics & sanity",
+          "label": "Testing, diagnostics & quality",
           "links": [
             {"href": "/admin/application-sanity/", "label": "Application Sanity Check"},
-            {"href": "/admin/markdown-sanity/", "label": "Markdown Sanity"},
+            {"href": "/admin/markdown-sanity/", "label": "Documentation Sanity"},
             {"href": "/admin/runtime-acceptance/", "label": "Runtime Acceptance"},
             {"href": "/admin/post-deploy-smoke-tests/", "label": "Post-Deploy Smoke Tests"},
             {"href": "/admin/reliability/", "label": "Reliability"},
-            {"href": "/admin/dark-theme-evidence/", "label": "Dark Theme Evidence"},
-            {"href": "/admin/release448-calibration/", "label": "Legacy Calibration Evidence"},
-            {"href": "/admin/startup-readiness/", "label": "Startup Readiness Guide"}
+            {"href": "/admin/local-seo-review/", "label": "Search & SEO Review"},
+            {"href": "/admin/visual-polish/", "label": "Responsive Layout Review"}
           ]
         },
         {
@@ -173,9 +176,6 @@
             {"href": "/admin/prelaunch/", "label": "Release & Go-Live Center"},
             {"href": "/admin/deployment-preflight/", "label": "Pre-Deploy Validation"},
             {"href": "/admin/release-control/", "label": "Release Evidence"},
-            {"href": "/admin/release-control/runtime-storefront-intelligence/", "label": "Runtime & Storefront Intelligence Evidence"},
-            {"href": "/admin/release-control/revenue-business-intelligence/", "label": "Revenue & Business Intelligence Evidence"},
-            {"href": "/admin/release-control/external-commercial-readiness/", "label": "External Commercial Readiness Evidence"},
             {"href": "/admin/deploy-readiness/", "label": "Promote / Hold Decision"},
             {"href": "/admin/promotion-control/", "label": "Promotion Gate"},
             {"href": "/admin/go-live-execution/", "label": "Go-Live Actions"},
