@@ -55,6 +55,7 @@ function withPlatformClient(response, request) {
         element(element) {
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
           element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
+          element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           if (isPublicRuntimeIntelligencePath(pathname)) {
             element.append('<script defer src="/public/js/public-heading-guard.js?v=current"></script>', { html: true });
