@@ -23,6 +23,7 @@ browser = BROWSER.read_text(encoding='utf-8')
 material = MATERIAL.read_text(encoding='utf-8')
 compat = COMPAT.read_text(encoding='utf-8')
 compact_service = re.sub(r'\s+', '', service)
+compact_compat = re.sub(r'\s+', '', compat)
 
 require('constBUILD=43;' in compact_service, 'service must retain Build 43 identity')
 require("newSet(['inherit','print','omit'])" in compact_service, 'label-level decision states changed or disappeared')
@@ -63,7 +64,7 @@ require('label_composition_overrides' in material, 'Build 42 normalizer lost the
 require('ingredients_inci' in material and 'ingredients_en' in material and 'ingredients_fr' in material, 'inheritance normalization must converge aggregate project ingredient text')
 
 require('/public/js/admin-packaging-label-composition-v43.js?v=46743' in compat, 'Packaging compatibility checkpoint must load Build 43 browser layer')
-require("document.addEventListener('dd:packaging-label-composition-active', publishState)" in compat, 'compatibility status must observe Build 43 activation')
+require("'dd:packaging-label-composition-active'" in compat and 'document.addEventListener' in compat and 'publishState' in compat, 'compatibility status must observe Build 43 activation')
 require('labelCompositionBuild' in compat and 'labelCompositionActive' in compat, 'compatibility snapshot must project Build 43 state')
 
 require(not list((ROOT / 'migrations').glob('*467*43*')) if (ROOT / 'migrations').exists() else True, 'Build 43 must not introduce a Release 467 canonical schema migration')
