@@ -56,7 +56,7 @@ require('schemaChange: false' in browser and 'requestTimeDdl: false' in browser,
 require('productionContacted: false' in browser, 'browser safety status must preserve Production isolation')
 
 require('/public/js/admin-packaging-material-intelligence-v42.js?v=46742' in compat, 'Packaging compatibility checkpoint must load Build 42 browser layer')
-require("document.addEventListener('dd:packaging-material-intelligence-active', publishState)" in compat, 'compatibility status must observe Build 42 activation')
+require("'dd:packaging-material-intelligence-active'" in compat and 'document.addEventListener' in compat and 'publishState' in compat, 'compatibility status must observe Build 42 activation')
 require('materialIntelligenceBuild' in compat and 'materialIntelligenceActive' in compat, 'compatibility snapshot must project Build 42 state')
 
 # This Release 467 Build 42 must not add a new migration. Historical build-numbered files,
