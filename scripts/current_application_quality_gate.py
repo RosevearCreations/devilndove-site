@@ -9,6 +9,7 @@ for script in (
     'current_search_quality_gate.py',
     'current_responsive_layout_gate.py',
     'current_packaging_safe_area_gate.py',
+    'current_packaging_material_intelligence_gate.py',
     'current_it_release_truth_gate.py',
     'current_system_gate_provenance_gate.py',
     'current_production_promotion_provenance_gate.py',
