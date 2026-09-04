@@ -2,19 +2,19 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 43;
-const TITLE = 'Label Composition & Overrides';
+const BUILD = 44;
+const TITLE = 'Label Production & Reuse';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 43,
+  build: 44,
   title: TITLE,
   state: 'DEVELOPMENT_GREEN',
-  accepted_sha: '41d3bc9ba849b5b0a646d002aa72593368444fcc',
-  accepted_tree_sha: '2891a0d7591cbe72acc6f94ec6bec69b2ae13a7f',
-  system_gate_run: 33898520091,
-  current_application_quality_run: 33898520539,
-  it_admin_runtime_proof_run: 33898520189,
-  branch_hygiene_run: 33898520069,
+  accepted_sha: '70e4b0d948b569c1b2fb64ccbf9d078c3189e2a5',
+  accepted_tree_sha: '46459cf9fde7b3eb38601af1ce40d3ba794965ab',
+  system_gate_run: 33901240494,
+  current_application_quality_run: 33901240474,
+  it_admin_runtime_proof_run: 33901240545,
+  branch_hygiene_run: 33901240496,
 });
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -89,7 +89,7 @@ export async function onRequestGet(context) {
     build: BUILD,
     title: TITLE,
     ok: true,
-    authority: 'release467-build43-label-composition-overrides',
+    authority: 'release467-build44-label-production-reuse',
     state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
@@ -103,11 +103,11 @@ export async function onRequestGet(context) {
       production_promotion_required_development_proofs: CURRENT_GUARDS,
       rollback_readiness: 'RELEASE_NEUTRAL_READ_ONLY',
       reliability_authority: 'current-development-authority.json',
-      reliability_projection_build: 43,
+      reliability_projection_build: 44,
       historical_build36_reliability_authority: 'release467-build36-current-reliability-operational-health',
       historical_reliability_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
       deployment_preflight_authority: 'current-development-authority.json',
-      deployment_preflight_projection_build: 43,
+      deployment_preflight_projection_build: 44,
       historical_build37_deployment_preflight_authority: 'release467-build37-deployment-preflight-canonical-migration',
       accounting_schema_authority: 'release467-build38-accounting-core-runtime-ddl-elimination',
       accounting_request_time_ddl: 0,
@@ -126,6 +126,9 @@ export async function onRequestGet(context) {
       packaging_label_composition_authority: 'release467-build43-label-composition-overrides',
       packaging_label_composition_gate: 'scripts/current_packaging_label_composition_gate.py',
       packaging_label_composition_request_time_ddl: 0,
+      packaging_label_production_authority: 'release467-build44-label-production-reuse',
+      packaging_label_production_gate: 'scripts/current_packaging_label_production_gate.py',
+      packaging_label_production_request_time_ddl: 0,
       runtime_schema_residue_files_ceiling: 58,
       runtime_schema_residue_occurrences_ceiling: 522,
       runtime_schema_residue_shared_helpers_ceiling: 2,
@@ -157,18 +160,19 @@ export async function onRequestGet(context) {
     sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 43 is Development GREEN and owns current I.T. operator truth.',
-      'Label Composition & Overrides adds reviewed per-label inherit, print and omit decisions plus a live What Will Print inspector.',
-      'Required inherited ingredients fail closed against omission and Internal Only ingredients cannot be forced onto a label.',
-      'Build 42 Material Template Intelligence remains the reusable inherited-policy authority and preserves reviewed Build 43 project-level decisions during normalization.',
-      'Build 43 adds no schema or canonical migration and performs zero request-time DDL; the canonical D1 stream remains exactly four files.',
-      'Build 41 printable safe-area enforcement remains active and continues to fail closed for protected printable content.',
+      'Build 44 is Development GREEN and owns current I.T. operator truth.',
+      'Label Production & Reuse converges existing printer profiles, immutable project versions, export history and physical print-test history into one fail-closed Production Library.',
+      'Reusable production versions require approved immutable SVG content, an exact 100 percent printer profile and matching passed physical QA.',
+      'Build 41 printable safe-area enforcement and Build 43 authoritative label composition remain mandatory print-time dependencies.',
+      'Build 42 Material Template Intelligence remains the reusable inherited-policy authority.',
+      'Build 44 adds no schema or canonical migration and performs zero request-time DDL; the canonical D1 stream remains exactly four files.',
       'Product Social Automation remains pinned at zero request-time schema DDL under the Build 40 authority; Accounting and Product Numbering remain zero-DDL under Builds 38 and 39.',
       'Historical runtime schema residue remains ratcheted to ceilings of 58 files, 522 DDL statements and 2 delegated/shared helpers, with zero raw D1 bypasses carrying DDL.',
-      'Deployment Preflight and Reliability are synchronized to Release 467 Build 43 as read-only current projections; their Build 37 and Build 36 feature authorities remain historical evidence.',
+      'Deployment Preflight and Reliability are synchronized to Release 467 Build 44 as read-only current projections; their Build 37 and Build 36 feature authorities remain historical evidence.',
       'Production promotion requires the exact current Development tree plus successful System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene proofs.',
       'Production rollback readiness remains release-neutral and read-only and does not execute rollback, schema reversal or business-data restoration.',
       'Build 32 remains the independently verified Production-green baseline until a deliberate Production promotion is requested and proven.',
+      'Build 45 is Grey Hair Media Intelligence and may begin only after the Build 44 authority descendant independently passes the final four-proof Development closure cycle.',
       'External HOLDs never become GREEN by inference from source, D1 convergence, deployment success, reliability health, preflight status or schema-readiness gates.',
     ],
     safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
