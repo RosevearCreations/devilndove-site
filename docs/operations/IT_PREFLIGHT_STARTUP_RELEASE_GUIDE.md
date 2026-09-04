@@ -4,30 +4,30 @@ This guide defines the safe restart sequence for the canonical Devil n Dove Deve
 
 `current-development-authority.json` is the current Release 467 machine-readable restart pointer. `development-release.json` remains **INHERITED_REGRESSION_COMPATIBILITY** and the middleware Release 466 header remains explicit **INHERITED_RUNTIME_COMPATIBILITY**; neither is the current release selector.
 
-## Current Build 45 checkpoint
+## Current Build 46 checkpoint
 
-Release 467 Build 45 — Grey Hair Media Intelligence is accepted on Development at:
+Release 467 Build 46 — Four-Camera Synchronization & Audio Alignment is accepted on Development at:
 
-- merged `dev` SHA `77bd11541095358d21dc18b98270f00d00242f7f`
-- tree `0127bc8558e8f37a886c33bddb8a295f6aaa32d9`
-- System Gate `33912776513` SUCCESS
-- Current Application Quality `33912776473` SUCCESS
-- I.T. Admin Runtime Proof `33912776406` SUCCESS
-- Repository Branch Hygiene `33912776442` SUCCESS
+- merged `dev` SHA `f72de937342f4d213243f35a278429be078df85d`
+- tree `d0eefd5362b167fd01602205915b6966b080af61`
+- System Gate `33914234895` SUCCESS
+- Current Application Quality `33914234888` SUCCESS
+- I.T. Admin Runtime Proof `33914234944` SUCCESS
+- Repository Branch Hygiene `33914234946` SUCCESS
 - canonical D1 migration proof, Development data-authority read-only proof, exact canonical Preview deployment, control-plane binding proof, non-secret smoke acceptance and regression evidence: SUCCESS.
 
-Build 45 adds a private read-only Grey Hair Media Intelligence workspace over existing CAIP assets, technical observations, temporal evidence, transcript excerpts, processing jobs and verified artifacts. Source originals remain private and immutable. Raw public R2 URLs, R2 mutation, provider execution/publication, four-camera synchronization, audio alignment and story/edit generation are disabled. Build 45 adds no canonical migration or request-time DDL. The canonical migration stream remains exactly `0001`–`0004`. This authority-only documentation/read-only descendant must itself pass the same four push-triggered proofs after merge before Build 46 starts.
+Build 46 reuses existing `caip_capture_groups` and `caip_capture_tracks` to require exactly four distinct Build-45-ready private video sources, a camera anchor, reviewed millisecond offsets/confidence/method, and at most one separately reviewed private audio track before a synchronization group can become confirmed. Timestamp/timecode alignment remains suggestion-only until reviewed; unresolved alignment fails closed. Source originals remain private and immutable. Raw public R2 URLs, R2 mutation, waveform/media processing, AI story/edit generation, provider execution and publication are disabled. Build 46 adds no canonical migration or request-time DDL. The canonical migration stream remains exactly `0001`–`0004`. This authority-only documentation/read-only descendant must itself pass the same four push-triggered proofs after merge before Build 47 starts.
 
 Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, tree `2c1b4a3694779996e1bdb094be5e9e043834276e`, Production Pages Deploy `33866964958` SUCCESS.
 
 ## Startup sequence
 
-1. Read `current-development-authority.json` and confirm Release 467 Build 45, its exact accepted Development implementation and safety boundaries.
-2. Read `release467-build45-grey-hair-media-intelligence.json`, then retained Build 44 Label Production, Build 43 Composition, Build 42 Material Intelligence and Build 41 Safe Area authorities.
+1. Read `current-development-authority.json` and confirm Release 467 Build 46, its exact accepted Development implementation and safety boundaries.
+2. Read `release467-build46-four-camera-sync-audio-alignment.json`, then retained Build 45 Grey Hair Media Intelligence and Builds 44–41 Packaging authorities.
 3. Read `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `SANITY_HEALTH_CHECK.md` and `MARKDOWN_INDEX.md`.
-4. Confirm source branch `dev` is at or descended from the final Build 45 documentation-green closure SHA before starting Build 46.
-5. Open `/admin/it/` after authenticated access and confirm the Build 45 read-only Control Tower truth agrees with the pointer.
-6. Open `/admin/deployment-preflight/` and `/admin/reliability/` and confirm their active Release 467 Build 45 projections remain read-only.
+4. Confirm source branch `dev` is at or descended from the final Build 46 documentation-green closure SHA before starting Build 47.
+5. Open `/admin/it/` after authenticated access and confirm the Build 46 read-only Control Tower truth agrees with the pointer.
+6. Open `/admin/deployment-preflight/` and `/admin/reliability/` and confirm their active Release 467 Build 46 projections remain read-only.
 7. Confirm the canonical Pages project is `devilndove-site`; Development is the `dev` Preview environment and Production is the `main` Production environment.
 8. Confirm tracked `wrangler.toml` remains Development-safe and contains no `account_id`.
 9. Run current source/System gates before making a release claim.
@@ -39,7 +39,7 @@ Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd6
 15. Keep external provider/Access states separate from source/runtime health. Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain HOLD/evidence-dependent unless fresh evidence explicitly accepts them.
 16. Provider execution/publication remains closed unless a separate controlled Development/test/sandbox acceptance explicitly opens that lane.
 17. Promote only a separately reviewed exact fully-green Development tree. Never overwrite Production business data from Development.
-18. After final Build 45 closure proof, Build 46 may begin Four-Camera Synchronization & Audio Alignment only. Build 47 follows with AI story/edit planning. Do not reopen completed Packaging Builds 41–44 unless regression evidence proves a defect.
+18. After final Build 46 closure proof, Build 47 may begin **AI Story & Edit Planning** only from the exact final documentation-green Build 46 `dev` head. Build 47 may consume only confirmed Build 46 synchronization groups and Build 45 reviewed media intelligence. Do not weaken private-media/review/provider boundaries or reopen completed Packaging Builds 41–44 unless regression evidence proves a defect.
 
 ## Canonical Development connection
 
@@ -62,17 +62,18 @@ Credential **values** must never be printed, committed, serialized into evidence
 Current reading order:
 
 1. `current-development-authority.json`
-2. `release467-build45-grey-hair-media-intelligence.json`
-3. `release467-build44-label-production-reuse.json`
-4. `release467-build43-label-composition-overrides.json`
-5. `release467-build42-material-template-intelligence.json`
-6. `release467-build41-unified-interface-label-fit-foundation.json`
-7. `AI_HANDOFF.md`
-8. `PROJECT_STATUS_AND_ROADMAP.md`
-9. `SANITY_HEALTH_CHECK.md`
-10. `MARKDOWN_INDEX.md`
-11. historical feature authorities only as needed.
+2. `release467-build46-four-camera-sync-audio-alignment.json`
+3. `release467-build45-grey-hair-media-intelligence.json`
+4. `release467-build44-label-production-reuse.json`
+5. `release467-build43-label-composition-overrides.json`
+6. `release467-build42-material-template-intelligence.json`
+7. `release467-build41-unified-interface-label-fit-foundation.json`
+8. `AI_HANDOFF.md`
+9. `PROJECT_STATUS_AND_ROADMAP.md`
+10. `SANITY_HEALTH_CHECK.md`
+11. `MARKDOWN_INDEX.md`
+12. historical feature authorities only as needed.
 
-Build 44 remains historical Label Production authority; Build 43 per-label composition; Build 42 Packaging Material Intelligence; Build 41 Packaging safe area; Build 40 Product Social schema authority; Build 39 Product Numbering; Build 38 Accounting; Build 37 Deployment Preflight; Build 36 Reliability. Their bounded protections remain active, but none supersedes the current Build 45 Development pointer.
+Build 46 is the current synchronization authority; Build 45 remains Grey Hair Media Intelligence; Build 44 remains historical Label Production authority; Build 43 per-label composition; Build 42 Packaging Material Intelligence; Build 41 Packaging safe area; Build 40 Product Social schema authority; Build 39 Product Numbering; Build 38 Accounting; Build 37 Deployment Preflight; Build 36 Reliability. Their bounded protections remain active, but none supersedes the current Build 46 Development pointer.
 
 The active I.T., Reliability and Deployment Preflight surfaces are read-only projections. They never perform permission repair, request-time schema mutation, D1/R2 business-data writes, provider execution, Access policy mutation, `main` mutation, Production mutation or rollback execution.
