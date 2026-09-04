@@ -2,9 +2,17 @@
   "release": 467,
   "build": 36,
   "title": "Current Reliability & Operational Health Truth Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "1ec4eae64201ae4362dd08a1a5118c7b64bcff93",
   "source_base_tree_sha": "4b44b12c5b11c6c87de64625c973f2128164f9a6",
+  "accepted_dev_sha": "22b1efbf48b67f91024d277566ce51ac1263c970",
+  "accepted_dev_tree_sha": "bb020637765dd21b262a5007162141bf03bd658c",
+  "acceptance": {
+    "system_gate_run": 33875163710,
+    "current_application_quality_run": 33875163581,
+    "it_admin_runtime_proof_run": 33875163703,
+    "branch_hygiene_run": 33875163813
+  },
   "build35_final_closure": {
     "dev_sha": "1ec4eae64201ae4362dd08a1a5118c7b64bcff93",
     "tree_sha": "4b44b12c5b11c6c87de64625c973f2128164f9a6",

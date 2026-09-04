@@ -1,30 +1,30 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 35 — Production Promotion & Rollback Provenance Convergence: DEVELOPMENT GREEN.**
+**Release 467 Build 36 — Current Reliability & Operational Health Truth Convergence: DEVELOPMENT GREEN.**
 
 Accepted Development implementation:
-- SHA `b3fd1777c41f9b459048b441254f2fa762692051`
-- tree `c88d7e9fc3f43dcdd6d0e05cbe14c6cc7c3fc461`
-- System Gate `33873907300`: SUCCESS
-- Current Application Quality `33873908526`: SUCCESS
-- I.T. Admin Runtime Proof `33873907340`: SUCCESS
-- Repository Branch Hygiene `33873907303`: SUCCESS
+- SHA `22b1efbf48b67f91024d277566ce51ac1263c970`
+- tree `bb020637765dd21b262a5007162141bf03bd658c`
+- System Gate `33875163710`: SUCCESS
+- Current Application Quality `33875163581`: SUCCESS
+- I.T. Admin Runtime Proof `33875163703`: SUCCESS
+- Repository Branch Hygiene `33875163813`: SUCCESS
 
 Current Production baseline remains Build 32:
 - `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`
 - tree `2c1b4a3694779996e1bdb094be5e9e043834276e`
 - Production Pages Deploy `33866964958`: SUCCESS.
 
-Build 35 health boundary:
-- Production promotion requires exact tree ancestry from Development plus four successful Development proofs
-- Production promotion resolves `current-development-authority.json`, not stale Build 1 I.T. authority
-- existing Production business snapshot, D1, exact deployment, binding, smoke and evidence safeguards remain intact
-- Production rollback readiness is release-neutral and read-only
-- rollback execution, schema reversal and automatic business-data restore remain closed
-- Current Application Quality fails on stale/weakened Production promotion or rollback provenance
-- accepted implementation passed canonical Development D1 proof, exact Preview deployment, bindings and smoke
+Build 36 health boundary:
+- active Reliability operator truth is Release 467 Build 36
+- active Reliability endpoint is GET-only and mutation capability is none
+- historical Release 466 reliability code remains regression compatibility only
+- current reliability truth is enforced by Current Application Quality
+- Production promotion still requires all four Development proofs
+- Production rollback readiness remains release-neutral/read-only
+- exact Preview deployment, bindings and smoke passed on the accepted implementation SHA
 - canonical migrations remain exactly `0001`–`0004`
-- no Production deployment or rollback was executed by Build 35
-- no provider, Cloudflare Access, `main` or Production mutation is authorized.
+- no schema or D1/R2 business-data mutation is authorized
+- no provider, Cloudflare Access, `main`, Production or rollback mutation is authorized.
 
-**Verdict: Build 35 accepted implementation is Development GREEN; this authority-only closure still requires its own exact push-triggered CI proof before Build 36 starts.**
+**Verdict: Build 36 accepted implementation is Development GREEN; this authority-only closure still requires its own exact push-triggered CI proof before Build 37 starts.**
