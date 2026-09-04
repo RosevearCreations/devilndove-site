@@ -1,49 +1,49 @@
 {
   "release": 467,
-  "build": 49,
-  "title": "Current Authority Convergence & Restart Integrity",
+  "build": 50,
+  "title": "Reviewed CAIP to Content Studio Handoff",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "3980661045c68f55fa64e66e6414055ee0d359f6",
-  "source_base_tree_sha": "66e5e0a088d6eb9f4f85f70791de8925ac40adb0",
-  "accepted_dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
-  "accepted_dev_tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
+  "source_base_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+  "source_base_tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
+  "accepted_dev_sha": "dddd7c9423132dd22b179348a5644362f7b9f46c",
+  "accepted_dev_tree_sha": "1d5d4859c55fae404a79eb8cef85e1e0d3f30826",
   "acceptance": {
-    "system_gate_run": 33928678750,
-    "current_application_quality_run": 33928678778,
-    "it_admin_runtime_proof_run": 33928678807,
-    "branch_hygiene_run": 33928678789
+    "system_gate_run": 33930359847,
+    "current_application_quality_run": 33930359835,
+    "it_admin_runtime_proof_run": 33930359865,
+    "branch_hygiene_run": 33930359956
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 48,
-      "title": "Automated Production Acceptance",
-      "authority": "release467-build48-automated-production-acceptance.json",
-      "dev_sha": "3980661045c68f55fa64e66e6414055ee0d359f6",
-      "tree_sha": "66e5e0a088d6eb9f4f85f70791de8925ac40adb0",
+      "build": 49,
+      "title": "Current Authority Convergence & Restart Integrity",
+      "authority": "release467-build49-current-authority-convergence-restart-integrity.json",
+      "dev_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+      "tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
       "proofs": {
-        "system_gate_run": 33925647553,
-        "current_application_quality_run": 33925647532,
-        "it_admin_runtime_proof_run": 33925647561,
-        "branch_hygiene_run": 33925647559
+        "system_gate_run": 33929301077,
+        "current_application_quality_run": 33929301018,
+        "it_admin_runtime_proof_run": 33929301051,
+        "branch_hygiene_run": 33929300999
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 49,
-      "title": "Current Authority Convergence & Restart Integrity",
-      "authority": "release467-build49-current-authority-convergence-restart-integrity.json",
-      "accepted_dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
-      "accepted_dev_tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
+      "build": 50,
+      "title": "Reviewed CAIP to Content Studio Handoff",
+      "authority": "release467-build50-reviewed-caip-content-studio-handoff.json",
+      "accepted_dev_sha": "dddd7c9423132dd22b179348a5644362f7b9f46c",
+      "accepted_dev_tree_sha": "1d5d4859c55fae404a79eb8cef85e1e0d3f30826",
       "acceptance": {
-        "system_gate_run": 33928678750,
-        "current_application_quality_run": 33928678778,
-        "it_admin_runtime_proof_run": 33928678807,
-        "branch_hygiene_run": 33928678789
+        "system_gate_run": 33930359847,
+        "current_application_quality_run": 33930359835,
+        "it_admin_runtime_proof_run": 33930359865,
+        "branch_hygiene_run": 33930359956
       },
       "state": "AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF"
     },
@@ -52,14 +52,14 @@
     "next_build_ingests_previous_final_closure": true,
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
-  "last_green_build": 49,
-  "last_green_build_name": "Current Authority Convergence & Restart Integrity",
-  "last_green_dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
-  "last_green_dev_tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
-  "last_green_system_gate_run": 33928678750,
-  "last_green_application_quality_run": 33928678778,
-  "last_green_it_admin_runtime_run": 33928678807,
-  "last_green_branch_hygiene_run": 33928678789,
+  "last_green_build": 50,
+  "last_green_build_name": "Reviewed CAIP to Content Studio Handoff",
+  "last_green_dev_sha": "dddd7c9423132dd22b179348a5644362f7b9f46c",
+  "last_green_dev_tree_sha": "1d5d4859c55fae404a79eb8cef85e1e0d3f30826",
+  "last_green_system_gate_run": 33930359847,
+  "last_green_application_quality_run": 33930359835,
+  "last_green_it_admin_runtime_run": 33930359865,
+  "last_green_branch_hygiene_run": 33930359956,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -70,6 +70,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build50-reviewed-caip-content-studio-handoff.json",
     "release467-build49-current-authority-convergence-restart-integrity.json",
     "release467-build48-automated-production-acceptance.json",
     "release467-build47-ai-story-edit-planning.json",
@@ -110,6 +111,7 @@
     "active_grey_hair_sync_alignment_gate": "scripts/current_grey_hair_sync_alignment_gate.py",
     "active_grey_hair_story_edit_planning_gate": "scripts/current_grey_hair_story_edit_planning_gate.py",
     "active_grey_hair_production_acceptance_gate": "scripts/current_grey_hair_production_acceptance_gate.py",
+    "active_grey_hair_content_studio_handoff_gate": "scripts/current_grey_hair_content_studio_handoff_gate.py",
     "active_authority_restart_integrity_gate": "scripts/current_authority_restart_integrity_gate.py",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
@@ -128,6 +130,7 @@
     "grey_hair_sync_alignment_request_time_schema_ddl": false,
     "grey_hair_story_edit_planning_request_time_schema_ddl": false,
     "grey_hair_production_acceptance_request_time_schema_ddl": false,
+    "grey_hair_content_studio_handoff_request_time_schema_ddl": false,
     "authority_restart_integrity_request_time_schema_ddl": false,
     "request_time_schema_mutation": false
   },
@@ -138,8 +141,8 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 50,
-  "next_build_state": "READY_AFTER_BUILD_49_FINAL_CLOSURE_PROOF",
+  "next_build": 51,
+  "next_build_state": "AWAITING_BUILD_50_FINAL_CLOSURE_PROOF",
   "next_build_title": null,
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
@@ -151,5 +154,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Release 467 Build 49 implementation acceptance is GREEN at dev SHA 7bbfbf10a531898052771d9db1cfbb1a9e7d893a / tree 7a74af809182a0eb6befb56e34d2869b44090c6e with System Gate 33928678750, Current Application Quality 33928678778, I.T. Admin Runtime Proof 33928678807 and Branch Hygiene 33928678789 successful plus exact Development Preview acceptance. The last fully verified restart checkpoint remains Build 48 at 3980661045c68f55fa64e66e6414055ee0d359f6 until the Build 49 authority-closure merged dev head itself completes the external exact-head four-proof and Preview cycle. Do not create another evidence-only commit merely to embed those post-commit results; Build 50, when separately scoped, must ingest the externally verified Build 49 final closure before source mutation. Production remains Build 32, canonical migrations remain exactly 0001-0004 and external HOLD lanes remain separate."
+  "restart_rule": "Release 467 Build 50 implementation acceptance is GREEN at dev SHA dddd7c9423132dd22b179348a5644362f7b9f46c / tree 1d5d4859c55fae404a79eb8cef85e1e0d3f30826 with System Gate 33930359847, Current Application Quality 33930359835, I.T. Admin Runtime Proof 33930359865 and Repository Branch Hygiene 33930359956 successful plus exact Development Preview acceptance. The last fully verified restart checkpoint is Build 49 final closure at 28307cd8939329db05dab61c336d0c7a49f8759e / tree 0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7 with System 33929301077, Quality 33929301018, I.T. 33929301051 and Hygiene 33929300999 successful. Build 50 remains a closure candidate until its authority-closure merged dev head independently completes the external exact-head four-proof and Preview cycle. Do not create another evidence-only commit to embed those later results; Build 51, when separately scoped, must ingest the externally verified Build 50 final closure before source mutation. Production remains Build 32, canonical migrations remain exactly 0001-0004 and external HOLD lanes remain separate."
 }
