@@ -1,4 +1,4 @@
-// Release 467 Build 42 — Material Template Intelligence renderer.
+// Release 467 Build 43 — Label Composition & Overrides renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
