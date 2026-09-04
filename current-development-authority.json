@@ -1,27 +1,27 @@
 {
   "release": 467,
-  "build": 45,
-  "title": "Grey Hair Media Intelligence",
+  "build": 46,
+  "title": "Four-Camera Synchronization & Audio Alignment",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "74092203dc69a5fa02b36be24f7837a7cb163659",
-  "source_base_tree_sha": "4601e87291d9f0f9807f6a4af36d7dcd67c8374e",
-  "accepted_dev_sha": "77bd11541095358d21dc18b98270f00d00242f7f",
-  "accepted_dev_tree_sha": "0127bc8558e8f37a886c33bddb8a295f6aaa32d9",
+  "source_base_sha": "8ca1c5994742694f7bee424a44076cf9af03700a",
+  "source_base_tree_sha": "a439117c058d28437f764ecd2d7b8a9a21bfa4df",
+  "accepted_dev_sha": "f72de937342f4d213243f35a278429be078df85d",
+  "accepted_dev_tree_sha": "d0eefd5362b167fd01602205915b6966b080af61",
   "acceptance": {
-    "system_gate_run": 33912776513,
-    "current_application_quality_run": 33912776473,
-    "it_admin_runtime_proof_run": 33912776406,
-    "branch_hygiene_run": 33912776442
+    "system_gate_run": 33914234895,
+    "current_application_quality_run": 33914234888,
+    "it_admin_runtime_proof_run": 33914234944,
+    "branch_hygiene_run": 33914234946
   },
-  "last_green_build": 45,
-  "last_green_build_name": "Grey Hair Media Intelligence",
-  "last_green_dev_sha": "77bd11541095358d21dc18b98270f00d00242f7f",
-  "last_green_dev_tree_sha": "0127bc8558e8f37a886c33bddb8a295f6aaa32d9",
-  "last_green_system_gate_run": 33912776513,
-  "last_green_application_quality_run": 33912776473,
-  "last_green_it_admin_runtime_run": 33912776406,
-  "last_green_branch_hygiene_run": 33912776442,
+  "last_green_build": 46,
+  "last_green_build_name": "Four-Camera Synchronization & Audio Alignment",
+  "last_green_dev_sha": "f72de937342f4d213243f35a278429be078df85d",
+  "last_green_dev_tree_sha": "d0eefd5362b167fd01602205915b6966b080af61",
+  "last_green_system_gate_run": 33914234895,
+  "last_green_application_quality_run": 33914234888,
+  "last_green_it_admin_runtime_run": 33914234944,
+  "last_green_branch_hygiene_run": 33914234946,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -32,6 +32,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build46-four-camera-sync-audio-alignment.json",
     "release467-build45-grey-hair-media-intelligence.json",
     "release467-build44-label-production-reuse.json",
     "release467-build43-label-composition-overrides.json",
@@ -75,6 +76,7 @@
     "active_packaging_label_composition_gate": "scripts/current_packaging_label_composition_gate.py",
     "active_packaging_label_production_gate": "scripts/current_packaging_label_production_gate.py",
     "active_grey_hair_media_intelligence_gate": "scripts/current_grey_hair_media_intelligence_gate.py",
+    "active_grey_hair_sync_alignment_gate": "scripts/current_grey_hair_sync_alignment_gate.py",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
     "canonical_d1_migration_count": 4,
@@ -89,6 +91,7 @@
     "packaging_label_composition_request_time_schema_ddl": false,
     "packaging_label_production_request_time_schema_ddl": false,
     "grey_hair_media_intelligence_request_time_schema_ddl": false,
+    "grey_hair_sync_alignment_request_time_schema_ddl": false,
     "request_time_schema_mutation": false
   },
   "external_lanes": {
@@ -98,9 +101,9 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 46,
-  "next_build_state": "READY_AFTER_BUILD_45_FINAL_CLOSURE_PROOF",
-  "next_build_title": "Four-Camera Synchronization & Audio Alignment",
+  "next_build": 47,
+  "next_build_state": "READY_AFTER_BUILD_46_FINAL_CLOSURE_PROOF",
+  "next_build_title": "AI Story & Edit Planning",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -111,5 +114,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 45 implementation is accepted on Development at SHA 77bd11541095358d21dc18b98270f00d00242f7f / tree 0127bc8558e8f37a886c33bddb8a295f6aaa32d9 with System Gate 33912776513, Current Application Quality 33912776473, I.T. Admin Runtime Proof 33912776406 and Branch Hygiene 33912776442. The exact canonical Preview deployment, binding proof, canonical D1 migration proof, read-only Development data-authority proof and non-secret smoke acceptance passed in the System Gate. Build 45 adds a private read-only Grey Hair Media Intelligence workspace over existing CAIP assets, technical observations, temporal evidence, transcript excerpts, processing jobs and verified artifacts. It adds no schema or canonical migration, performs no request-time DDL, provider execution, publication or R2 mutation, and explicitly leaves four-camera synchronization/audio alignment to Build 46 and story/edit automation to Build 47. This authority-only closure must independently pass the same push-triggered four-proof set before Build 46 starts. Build 32 remains Production GREEN."
+  "restart_rule": "Build 46 implementation is accepted on Development at SHA f72de937342f4d213243f35a278429be078df85d / tree d0eefd5362b167fd01602205915b6966b080af61 with System Gate 33914234895, Current Application Quality 33914234888, I.T. Admin Runtime Proof 33914234944 and Branch Hygiene 33914234946. The exact canonical Preview deployment, binding proof, canonical D1 migration proof, read-only Development data-authority proof, non-secret smoke acceptance and regression evidence passed in System Gate 33914234895. Build 46 reuses existing caip_capture_groups and caip_capture_tracks to require exactly four distinct Build-45-ready private video sources, a camera anchor, reviewed millisecond offsets/confidence/method, and at most one separately reviewed private audio track before a synchronization group can become confirmed. It adds no schema or canonical migration, performs no request-time DDL, waveform/media processing, provider execution, publication or R2 mutation, and leaves AI story selection/edit planning/script generation to Build 47. This authority-only closure must independently pass the same push-triggered four-proof set before Build 47 starts. Build 32 remains Production GREEN."
 }
