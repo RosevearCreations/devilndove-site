@@ -1,12 +1,12 @@
-// Release 467 Build 45 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 46 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical preflight diagnostics are reused read-only; schema authority is
 // migrations/canonical + scripts/d1_migrate.py and is never repaired during a request.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 45;
-const TITLE = 'Grey Hair Media Intelligence';
+const BUILD = 46;
+const TITLE = 'Four-Camera Synchronization & Audio Alignment';
 const AUTHORITY = 'current-development-authority.json';
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -223,15 +223,17 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is a current read-only Release 467 Build 45 projection.',
+      'The active Deployment Preflight is a current read-only Release 467 Build 46 projection.',
       'Release 467 Build 37 remains the historical feature authority that converged Deployment Preflight with canonical migration truth.',
       'The retained historical preflight engine supplies diagnostics only; it is not schema or release authority.',
       'Historical build-numbered SQL is provenance only. Forward D1 schema authority is migrations/canonical/manifest.json.',
       'Missing schema fails closed. No request-time schema creation or repair is available from this endpoint.',
-      'Build 45 adds no canonical migration and no request-time DDL; the stream remains exactly 0001-0004.',
-      'Grey Hair Media Intelligence is a private read-only convergence over existing CAIP assets, technical observations, temporal evidence, transcript excerpts, processing jobs and verified artifacts.',
-      'Build 45 does not synchronize cameras, align audio, select stories, generate scripts, publish content, mutate R2 or execute external providers.',
-      'Build 46 owns four-camera synchronization and audio alignment; Build 47 owns story/edit automation.',
+      'Build 46 adds no canonical migration and no request-time DDL; the stream remains exactly 0001-0004.',
+      'Build 45 Grey Hair Media Intelligence remains the private reviewed-input authority for Build 46.',
+      'Build 46 reuses existing caip_capture_groups and caip_capture_tracks for exactly four private camera tracks plus at most one private dedicated audio track.',
+      'A Build 46 synchronization group cannot become confirmed until every included non-anchor offset is explicitly reviewed and the exact-four-camera boundary passes.',
+      'Build 46 does not process waveforms/media, select stories, generate scripts, publish content, mutate R2 or execute external providers.',
+      'Build 47 owns AI story selection and edit planning and may consume only a confirmed Build 46 synchronization group.',
       'Builds 41-44 remain the historical Packaging safe-area, material intelligence, label composition and label production authorities.',
       'Build 40 Product Social Automation, Build 39 Product Numbering and Build 38 Accounting remain historical feature authorities with their zero-DDL boundaries intact.',
       'Production remains Build 32 until a deliberate exact-tree promotion is requested and independently proven.',
