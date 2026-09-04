@@ -1,23 +1,26 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 31 — Password Hash Hardening + Transparent Legacy Upgrade: DEVELOPMENT GREEN.**
+**Release 467 Build 32 — Help, Search & Responsive Convergence: DEVELOPMENT GREEN.**
 
-Accepted Development evidence:
-- runtime `d2bae947e7256113b5cc665a24bcb26431a5ab1a`
-- tree `d1092b24208cc707281406ffc818e615eb7b4d24`
-- System Gate `33791051877`: SUCCESS
-- Build 31 Proof `33791052029`: SUCCESS
-- Branch Hygiene `33791051829`: SUCCESS
+Accepted Development application evidence:
+- runtime `1b68fed65844938bcee38169bfe7d783abd160d4`
+- tree `8c76339af56304651c9e81c70bdceea14393ffff`
+- System Gate `33827496687`: SUCCESS
+- Current Application Quality `33827496693`: SUCCESS
+- I.T. Admin Runtime Proof `33827496691`: SUCCESS
+- Repository Branch Hygiene `33827496696`: SUCCESS
 
 Development System Gate passed canonical D1 convergence, read-only data proof, exact Preview deployment, control-plane bindings, smoke and regression evidence.
 
-Credential health:
-- new writes use salted PBKDF2-HMAC-SHA256
-- legacy SHA-256 remains verification-only and upgrades after successful login
-- static reusable credential seed disabled
-- plaintext readback forbidden
+Current application health:
+- Help Centre and active navigation are current/release-neutral
+- internal Help is `noindex,nofollow`; `/search/` is `noindex,follow`
+- sitemap is canonical-only and excludes the empty generic product shell
+- public pages enforce exactly one H1 with source and runtime safeguards
+- responsive safeguards cover phone, tablet, PC/app and wide web
+- Build 31 password-hash hardening remains regression-protected
 - no schema change; migrations remain `0001`–`0004`
 
-Production remains Build 30 at `main` `49eeae5ee864da0f52fd3c15728cff0392ed7dd1`, tree `97d2d3c57db0f37bcd9cb0761d5bc3a7f4b2556b`, Production Pages Deploy `33783699520` SUCCESS.
+Production health is **not** inferred from an embedded historical SHA. Before the next build, verify that current `main` matches the exact fully-green Build 32 Development closure tree and that the corresponding Production deployment/system proof is SUCCESS.
 
-**Verdict: Development GREEN. Production unchanged and GREEN on Build 30.**
+**Verdict: Development GREEN. Production must be independently exact-tree verified before Build 33 starts.**

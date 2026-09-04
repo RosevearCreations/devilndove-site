@@ -2,14 +2,23 @@
   "release": 467,
   "build": 32,
   "title": "Help, Search & Responsive Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "09d6df54a419c0537c77141924024ed12687ba4c",
   "source_base_tree_sha": "268927e3cb8c401c6edf22b68b1fcf1c473ba49c",
+  "accepted_dev_sha": "1b68fed65844938bcee38169bfe7d783abd160d4",
+  "accepted_dev_tree_sha": "8c76339af56304651c9e81c70bdceea14393ffff",
+  "acceptance": {
+    "system_gate_run": 33827496687,
+    "current_application_quality_run": 33827496693,
+    "it_admin_runtime_proof_run": 33827496691,
+    "branch_hygiene_run": 33827496696
+  },
   "predecessor": {
     "build": 31,
-    "production_main_sha": "ccc2bbf1de4acbede58763f9532d9e633c0279da",
-    "production_tree_sha": "268927e3cb8c401c6edf22b68b1fcf1c473ba49c",
-    "production_pages_deploy_run": 33823805781
+    "production_main_sha_at_dev_acceptance": "ccc2bbf1de4acbede58763f9532d9e633c0279da",
+    "production_tree_sha_at_dev_acceptance": "268927e3cb8c401c6edf22b68b1fcf1c473ba49c",
+    "production_pages_deploy_run_at_dev_acceptance": 33823805781,
+    "historical_checkpoint_only": true
   },
   "scope": {
     "online_help_current_and_release_neutral": true,
@@ -17,7 +26,9 @@
     "legacy_calibration_removed_from_active_application": true,
     "active_navigation_release_build_neutral": true,
     "historical_evidence_preserved_in_git_history": true,
+    "internal_help_noindex_nofollow": true,
     "internal_search_noindex_follow": true,
+    "canonical_only_sitemap": true,
     "empty_product_shell_excluded_from_sitemap": true,
     "slugged_product_indexing_preserved": true,
     "single_public_h1_source_gate": true,
@@ -38,5 +49,6 @@
     "main_only_application_patch_authorized": false,
     "automatic_production_promotion_authorized": false,
     "secret_values_emitted": false
-  }
+  },
+  "production_closure_rule": "Promote only the exact fully-green Development closure tree to main, then independently verify the exact Production source/deployment/system proof before starting Build 33."
 }

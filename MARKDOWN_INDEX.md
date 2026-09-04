@@ -1,19 +1,20 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Current authority — Release 467 Build 31
+## Current authority — Release 467 Build 32
 
-Build 31 — Password Hash Hardening + Transparent Legacy Upgrade is GREEN on Development.
+Build 32 — Help, Search & Responsive Convergence is GREEN on Development.
 
-Accepted Development runtime: `d2bae947e7256113b5cc665a24bcb26431a5ab1a` / tree `d1092b24208cc707281406ffc818e615eb7b4d24`.
-Accepted runs: System Gate `33791051877`, Build 31 Proof `33791052029`, Branch Hygiene `33791051829`.
+Accepted Development application runtime: `1b68fed65844938bcee38169bfe7d783abd160d4` / tree `8c76339af56304651c9e81c70bdceea14393ffff`.
+Accepted runs: System Gate `33827496687`, Current Application Quality `33827496693`, I.T. Admin Runtime Proof `33827496691`, Repository Branch Hygiene `33827496696` — all SUCCESS.
 
-Production remains synchronized Build 30: `main` `49eeae5ee864da0f52fd3c15728cff0392ed7dd1` / tree `97d2d3c57db0f37bcd9cb0761d5bc3a7f4b2556b`; Production Pages Deploy `33783699520` SUCCESS.
+Production authority is determined from current exact-tree branch/deployment evidence. Do not use a frozen historical Production SHA from this index as current truth.
 
 Read current authority in this order:
 1. `current-development-authority.json`
-2. `AI_HANDOFF.md`
-3. `release467-build31-password-hash-hardening.json`
-4. `docs/operations/RELEASE_467_BUILD_31_PASSWORD_HASH_HARDENING.md`
-5. retained Build 30–20 authorities as historical evidence.
+2. `release467-build32-help-search-responsive-convergence.json`
+3. `AI_HANDOFF.md`
+4. `PROJECT_STATUS_AND_ROADMAP.md`
+5. `SANITY_HEALTH_CHECK.md`
+6. retained Build 31 and earlier authorities as historical evidence only.
 
-Build 32 may start only after the Build 31 evidence-only closure is merged and re-proven.
+Before Build 33 begins, current `main` must match the fully-green Build 32 Development closure tree and Production must independently prove that exact tree. If either proof is absent, finish Build 32 promotion/verification first.

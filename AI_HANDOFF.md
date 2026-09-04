@@ -2,20 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 31 — Password Hash Hardening + Transparent Legacy Upgrade is Development GREEN.**
+**Release 467 Build 32 — Help, Search & Responsive Convergence is Development GREEN.**
 
-Accepted runtime: `d2bae947e7256113b5cc665a24bcb26431a5ab1a` / tree `d1092b24208cc707281406ffc818e615eb7b4d24`.
-Accepted proof: System Gate `33791051877`, Build 31 Proof `33791052029`, Branch Hygiene `33791051829` — all SUCCESS.
+Accepted application runtime: `1b68fed65844938bcee38169bfe7d783abd160d4` / tree `8c76339af56304651c9e81c70bdceea14393ffff`.
+Accepted proof: System Gate `33827496687`, Current Application Quality `33827496693`, I.T. Admin Runtime Proof `33827496691`, Repository Branch Hygiene `33827496696` — all SUCCESS on that exact Development SHA.
 
-Build 31 security boundary:
-- current password writes: salted/iterated `pbkdf2-sha256`
-- legacy SHA-256 passwords: verification-only compatibility
-- successful legacy login: conditional transparent hash upgrade in the existing atomic login batch
-- plaintext password storage/readback: forbidden
-- reusable static password seed: disabled
-- forced mass reset: not required
+Build 32 operating boundary:
+- Online Help Centre is current and release-neutral; internal Help remains `noindex,nofollow`
+- stale/duplicate active files and retired legacy calibration surfaces are removed from the active application
+- `/search/` is `noindex,follow`
+- sitemap policy is canonical-only and excludes the empty generic product shell
+- public pages enforce exactly one H1 in source with a runtime backstop
+- responsive safeguards cover phone, tablet, PC/app and wide-web layouts
+- password-hash security compatibility remains protected
 - schema change: none; canonical migrations remain `0001`–`0004`
+- D1/R2/provider/Cloudflare Access mutation: none
 
-Production remains Build 30 and was not changed by Build 31: `main` `49eeae5ee864da0f52fd3c15728cff0392ed7dd1`, tree `97d2d3c57db0f37bcd9cb0761d5bc3a7f4b2556b`, Production Pages Deploy `33783699520` SUCCESS.
+## Promotion and restart rule
 
-Do not redo Build 31. Start Build 32 only from the final Build 31 green-closure descendant after closure CI passes. External HOLD lanes remain deferred unless current evidence explicitly changes them.
+Do **not** freeze a Production SHA in this handoff. Before starting the next build, verify from current GitHub/CI evidence that `main` carries the exact fully-green Build 32 Development closure tree and that Production has independently passed its exact-source deployment/system proof. If either condition is not true, finish Build 32 promotion/verification first.
+
+External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access HOLD lanes remain deferred unless current evidence explicitly proves acceptance.
+
+After Build 32 is proven GREEN in Production, select Build 33 from current repository evidence; do not reopen completed Build 31/32 work.
