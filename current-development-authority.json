@@ -1,27 +1,27 @@
 {
   "release": 467,
-  "build": 44,
-  "title": "Label Production & Reuse",
+  "build": 45,
+  "title": "Grey Hair Media Intelligence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "1a6c7caf0ecb1fcca31b5a5f84d9f7c207d0d5aa",
-  "source_base_tree_sha": "30d09c73a0a1be6f69aa005348c41ad95e974882",
-  "accepted_dev_sha": "70e4b0d948b569c1b2fb64ccbf9d078c3189e2a5",
-  "accepted_dev_tree_sha": "46459cf9fde7b3eb38601af1ce40d3ba794965ab",
+  "source_base_sha": "74092203dc69a5fa02b36be24f7837a7cb163659",
+  "source_base_tree_sha": "4601e87291d9f0f9807f6a4af36d7dcd67c8374e",
+  "accepted_dev_sha": "77bd11541095358d21dc18b98270f00d00242f7f",
+  "accepted_dev_tree_sha": "0127bc8558e8f37a886c33bddb8a295f6aaa32d9",
   "acceptance": {
-    "system_gate_run": 33901240494,
-    "current_application_quality_run": 33901240474,
-    "it_admin_runtime_proof_run": 33901240545,
-    "branch_hygiene_run": 33901240496
+    "system_gate_run": 33912776513,
+    "current_application_quality_run": 33912776473,
+    "it_admin_runtime_proof_run": 33912776406,
+    "branch_hygiene_run": 33912776442
   },
-  "last_green_build": 44,
-  "last_green_build_name": "Label Production & Reuse",
-  "last_green_dev_sha": "70e4b0d948b569c1b2fb64ccbf9d078c3189e2a5",
-  "last_green_dev_tree_sha": "46459cf9fde7b3eb38601af1ce40d3ba794965ab",
-  "last_green_system_gate_run": 33901240494,
-  "last_green_application_quality_run": 33901240474,
-  "last_green_it_admin_runtime_run": 33901240545,
-  "last_green_branch_hygiene_run": 33901240496,
+  "last_green_build": 45,
+  "last_green_build_name": "Grey Hair Media Intelligence",
+  "last_green_dev_sha": "77bd11541095358d21dc18b98270f00d00242f7f",
+  "last_green_dev_tree_sha": "0127bc8558e8f37a886c33bddb8a295f6aaa32d9",
+  "last_green_system_gate_run": 33912776513,
+  "last_green_application_quality_run": 33912776473,
+  "last_green_it_admin_runtime_run": 33912776406,
+  "last_green_branch_hygiene_run": 33912776442,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -32,6 +32,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build45-grey-hair-media-intelligence.json",
     "release467-build44-label-production-reuse.json",
     "release467-build43-label-composition-overrides.json",
     "release467-build42-material-template-intelligence.json",
@@ -73,6 +74,7 @@
     "active_packaging_material_intelligence_gate": "scripts/current_packaging_material_intelligence_gate.py",
     "active_packaging_label_composition_gate": "scripts/current_packaging_label_composition_gate.py",
     "active_packaging_label_production_gate": "scripts/current_packaging_label_production_gate.py",
+    "active_grey_hair_media_intelligence_gate": "scripts/current_grey_hair_media_intelligence_gate.py",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
     "canonical_d1_migration_count": 4,
@@ -86,6 +88,7 @@
     "packaging_material_intelligence_request_time_schema_ddl": false,
     "packaging_label_composition_request_time_schema_ddl": false,
     "packaging_label_production_request_time_schema_ddl": false,
+    "grey_hair_media_intelligence_request_time_schema_ddl": false,
     "request_time_schema_mutation": false
   },
   "external_lanes": {
@@ -95,9 +98,9 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 45,
-  "next_build_state": "READY_AFTER_BUILD_44_FINAL_CLOSURE_PROOF",
-  "next_build_title": "Grey Hair Media Intelligence",
+  "next_build": 46,
+  "next_build_state": "READY_AFTER_BUILD_45_FINAL_CLOSURE_PROOF",
+  "next_build_title": "Four-Camera Synchronization & Audio Alignment",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -108,5 +111,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 44 implementation is accepted on Development at SHA 70e4b0d948b569c1b2fb64ccbf9d078c3189e2a5 / tree 46459cf9fde7b3eb38601af1ce40d3ba794965ab with System Gate 33901240494, Current Application Quality 33901240474, I.T. Admin Runtime Proof 33901240545 and Branch Hygiene 33901240496. The exact canonical Preview deployment, binding proof, canonical D1 migration proof, read-only Development data-authority proof and non-secret smoke acceptance passed in the System Gate. Build 44 converges existing Packaging printer profiles, immutable versions, export history and physical QA into a fail-closed Production Library with true-size output, version reuse and QA history. Build 44 adds no schema or canonical migration and performs no request-time DDL. This authority-only closure must independently pass the same push-triggered four-proof set before Build 45 starts. Build 32 remains Production GREEN."
+  "restart_rule": "Build 45 implementation is accepted on Development at SHA 77bd11541095358d21dc18b98270f00d00242f7f / tree 0127bc8558e8f37a886c33bddb8a295f6aaa32d9 with System Gate 33912776513, Current Application Quality 33912776473, I.T. Admin Runtime Proof 33912776406 and Branch Hygiene 33912776442. The exact canonical Preview deployment, binding proof, canonical D1 migration proof, read-only Development data-authority proof and non-secret smoke acceptance passed in the System Gate. Build 45 adds a private read-only Grey Hair Media Intelligence workspace over existing CAIP assets, technical observations, temporal evidence, transcript excerpts, processing jobs and verified artifacts. It adds no schema or canonical migration, performs no request-time DDL, provider execution, publication or R2 mutation, and explicitly leaves four-camera synchronization/audio alignment to Build 46 and story/edit automation to Build 47. This authority-only closure must independently pass the same push-triggered four-proof set before Build 46 starts. Build 32 remains Production GREEN."
 }
