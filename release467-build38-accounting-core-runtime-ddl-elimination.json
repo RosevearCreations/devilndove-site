@@ -1,0 +1,65 @@
+{
+  "release": 467,
+  "build": 38,
+  "title": "Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion",
+  "state": "FEATURE_CANDIDATE",
+  "source_base_sha": "f831dcd017fa0bf1db6f637f08355c1deb9aedaf",
+  "source_base_tree_sha": "b6004b79b072ff33d8a87b9de05001c691042341",
+  "build37_final_closure": {
+    "dev_sha": "f831dcd017fa0bf1db6f637f08355c1deb9aedaf",
+    "tree_sha": "b6004b79b072ff33d8a87b9de05001c691042341",
+    "system_gate_run": 33879347403,
+    "current_application_quality_run": 33879347483,
+    "it_admin_runtime_proof_run": 33879347662,
+    "branch_hygiene_run": 33879347531,
+    "state": "DEVELOPMENT_GREEN"
+  },
+  "production_baseline": {
+    "build": 32,
+    "authority": "release467-build32-help-search-responsive-convergence.json",
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "accounting_order_records_baseline_assertion": true,
+    "runtime_accounting_schema_ddl_removed": true,
+    "accounting_required_columns": 22,
+    "accounting_required_indexes": 2,
+    "accounting_business_write_path_preserved": true,
+    "accounting_schema_failure_mode": "FAIL_CLOSED_CANONICAL_MIGRATION_REQUIRED",
+    "runtime_schema_residue_files_before": 61,
+    "runtime_schema_residue_occurrences_before": 529,
+    "runtime_schema_residue_shared_helpers_before": 5,
+    "runtime_schema_residue_files_ceiling_after": 60,
+    "runtime_schema_residue_occurrences_ceiling_after": 526,
+    "runtime_schema_residue_shared_helpers_ceiling_after": 4,
+    "raw_d1_bypass_with_ddl_ceiling": 0,
+    "canonical_migration_stream_unchanged": true,
+    "canonical_migration_count": 4,
+    "canonical_migration_files": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "new_canonical_migration_added": false,
+    "current_accounting_schema_authority_guard_added": true,
+    "runtime_schema_residue_ratchet_added": true,
+    "current_application_quality_covers_accounting_schema_authority": true
+  },
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "rollback_execution_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  }
+}
