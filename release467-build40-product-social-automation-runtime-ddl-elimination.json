@@ -2,17 +2,19 @@
   "release": 467,
   "build": 40,
   "title": "Product Social Automation Runtime-DDL Elimination & Baseline Schema Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "source_base_sha": "011615d43ba9cbbfb27f309e8fc3ee20deed657d",
   "source_base_tree_sha": "2fde0e1b2049ab585b8652538eae5ae050c2745a",
+  "accepted_dev_sha": "addcb5533d3a53465bb9d4ae8398952b8836ccc4",
+  "accepted_dev_tree_sha": "92b80e37385186343d20aae9c4453d9db3f94ca1",
   "historical_schema_provenance": {
     "authority": "Build 210 product-to-social automation plus historical social-post-queue baseline",
     "tables": [
       "product_social_automation_settings",
       "social_post_queue"
     ],
-    "role": "PROVEN_PRE_CANONICAL_BASELINE_PENDING_EXACT_DEVELOPMENT_READ_ONLY_PROOF",
+    "role": "PROVEN_PRE_CANONICAL_BASELINE_READ_ONLY_VERIFIED",
     "forward_migration_required": false
   },
   "scope": {
@@ -73,10 +75,10 @@
     "secret_values_emitted": false
   },
   "acceptance": {
-    "system_gate_run": null,
-    "current_application_quality_run": null,
-    "it_admin_runtime_proof_run": null,
-    "branch_hygiene_run": null
+    "system_gate_run": 33887320361,
+    "current_application_quality_run": 33887320336,
+    "it_admin_runtime_proof_run": 33887320333,
+    "branch_hygiene_run": 33887320328
   },
-  "promotion_state": "FEATURE_CANDIDATE_NOT_YET_DEVELOPMENT_GREEN"
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
 }

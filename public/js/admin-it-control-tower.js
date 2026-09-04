@@ -1,4 +1,4 @@
-// Release 467 Build 39 — Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence renderer.
+// Release 467 Build 40 — Product Social Automation Runtime-DDL Elimination & Baseline Schema Convergence renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;

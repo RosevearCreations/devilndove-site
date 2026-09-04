@@ -1,27 +1,27 @@
 {
   "release": 467,
-  "build": 39,
-  "title": "Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence",
+  "build": 40,
+  "title": "Product Social Automation Runtime-DDL Elimination & Baseline Schema Convergence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "cc26b34ca31ec3e142149bd30f8eadd7dea7a112",
-  "source_base_tree_sha": "b4943a502d44d2e2bf2b113210326fe59409fd10",
-  "accepted_dev_sha": "8f94a6b49b6353946d96afbe2c7eb0b5ce6ca6b1",
-  "accepted_dev_tree_sha": "1dba2f02509e7fe0c7046541f126f80aa5170d8b",
+  "source_base_sha": "011615d43ba9cbbfb27f309e8fc3ee20deed657d",
+  "source_base_tree_sha": "2fde0e1b2049ab585b8652538eae5ae050c2745a",
+  "accepted_dev_sha": "addcb5533d3a53465bb9d4ae8398952b8836ccc4",
+  "accepted_dev_tree_sha": "92b80e37385186343d20aae9c4453d9db3f94ca1",
   "acceptance": {
-    "system_gate_run": 33883587705,
-    "current_application_quality_run": 33883587677,
-    "it_admin_runtime_proof_run": 33883587724,
-    "branch_hygiene_run": 33883587669
+    "system_gate_run": 33887320361,
+    "current_application_quality_run": 33887320336,
+    "it_admin_runtime_proof_run": 33887320333,
+    "branch_hygiene_run": 33887320328
   },
-  "last_green_build": 39,
-  "last_green_build_name": "Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence",
-  "last_green_dev_sha": "8f94a6b49b6353946d96afbe2c7eb0b5ce6ca6b1",
-  "last_green_dev_tree_sha": "1dba2f02509e7fe0c7046541f126f80aa5170d8b",
-  "last_green_system_gate_run": 33883587705,
-  "last_green_application_quality_run": 33883587677,
-  "last_green_it_admin_runtime_run": 33883587724,
-  "last_green_branch_hygiene_run": 33883587669,
+  "last_green_build": 40,
+  "last_green_build_name": "Product Social Automation Runtime-DDL Elimination & Baseline Schema Convergence",
+  "last_green_dev_sha": "addcb5533d3a53465bb9d4ae8398952b8836ccc4",
+  "last_green_dev_tree_sha": "92b80e37385186343d20aae9c4453d9db3f94ca1",
+  "last_green_system_gate_run": 33887320361,
+  "last_green_application_quality_run": 33887320336,
+  "last_green_it_admin_runtime_run": 33887320333,
+  "last_green_branch_hygiene_run": 33887320328,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -32,8 +32,9 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
-    "release467-build39-product-numbering-runtime-ddl-elimination.json",
+    "release467-build40-product-social-automation-runtime-ddl-elimination.json",
     "release467-build32-help-search-responsive-convergence.json",
+    "release467-build39-product-numbering-runtime-ddl-elimination.json",
     "release467-build38-accounting-core-runtime-ddl-elimination.json",
     "release467-build37-deployment-preflight-canonical-migration.json",
     "release467-build36-current-reliability-operational-health.json"
@@ -63,15 +64,17 @@
     "historical_build37_deployment_preflight_authority": "release467-build37-deployment-preflight-canonical-migration.json",
     "active_accounting_schema_authority": "release467-build38-accounting-core-runtime-ddl-elimination.json",
     "active_product_numbering_schema_authority": "release467-build39-product-numbering-runtime-ddl-elimination.json",
+    "active_product_social_automation_schema_authority": "release467-build40-product-social-automation-runtime-ddl-elimination.json",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
     "canonical_d1_migration_count": 4,
-    "runtime_schema_residue_files_ceiling": 59,
-    "runtime_schema_residue_occurrences_ceiling": 525,
-    "runtime_schema_residue_shared_helpers_ceiling": 3,
+    "runtime_schema_residue_files_ceiling": 58,
+    "runtime_schema_residue_occurrences_ceiling": 522,
+    "runtime_schema_residue_shared_helpers_ceiling": 2,
     "raw_d1_bypass_with_ddl_ceiling": 0,
     "accounting_request_time_schema_ddl": false,
     "product_numbering_request_time_schema_ddl": false,
+    "product_social_automation_request_time_schema_ddl": false,
     "request_time_schema_mutation": false
   },
   "external_lanes": {
@@ -81,8 +84,8 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 40,
-  "next_build_state": "READY_AFTER_BUILD_39_FINAL_CLOSURE_PROOF",
+  "next_build": 41,
+  "next_build_state": "READY_AFTER_BUILD_40_FINAL_CLOSURE_PROOF",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -93,5 +96,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 39 is accepted on Development at implementation SHA 8f94a6b49b6353946d96afbe2c7eb0b5ce6ca6b1 / tree 1dba2f02509e7fe0c7046541f126f80aa5170d8b with System Gate 33883587705, Current Application Quality 33883587677, I.T. Admin Runtime Proof 33883587724 and Branch Hygiene 33883587669. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 40 starts. Build 32 remains Production GREEN. Product Numbering carries zero request-time schema DDL and asserts the proven catalog_product_number_sequence baseline read-only across sequence_key, next_product_number and updated_at; repository runtime-schema residue is ratcheted to ceilings of 59 files, 525 statements and 3 delegated/shared helpers with zero raw D1 bypasses. Accounting remains zero-DDL. Canonical migrations remain exactly 0001-0004."
+  "restart_rule": "Build 40 implementation is accepted on Development at SHA addcb5533d3a53465bb9d4ae8398952b8836ccc4 / tree 92b80e37385186343d20aae9c4453d9db3f94ca1 with System Gate 33887320361, Current Application Quality 33887320336, I.T. Admin Runtime Proof 33887320333 and Branch Hygiene 33887320328. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 41 starts. Build 32 remains Production GREEN. Product Social Automation now carries zero request-time schema DDL, asserts the proven product_social_automation_settings and social_post_queue baselines read-only, preserves settings and review-first queue DML, and fails closed on schema drift. Repository runtime-schema residue is ratcheted to ceilings of 58 files, 522 statements and 2 delegated/shared helpers with zero raw D1 bypasses. Accounting and Product Numbering remain zero-DDL. Canonical migrations remain exactly 0001-0004."
 }
