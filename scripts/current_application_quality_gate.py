@@ -16,6 +16,7 @@ for script in (
     'current_grey_hair_sync_alignment_gate.py',
     'current_grey_hair_story_edit_planning_gate.py',
     'current_grey_hair_production_acceptance_gate.py',
+    'current_grey_hair_content_studio_handoff_gate.py',
     'current_authority_restart_integrity_gate.py',
     'current_it_release_truth_gate.py',
     'current_system_gate_provenance_gate.py',
