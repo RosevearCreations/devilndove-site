@@ -94,7 +94,7 @@ req(scope.get('missing_sequence_schema_fails_closed') is True, 'Build 39 fail-cl
 req(int(scope.get('runtime_schema_residue_files_ceiling_after') or 0) <= 59, 'Build 39 runtime DDL file ceiling weakened')
 req(int(scope.get('runtime_schema_residue_occurrences_ceiling_after') or 0) <= 525, 'Build 39 runtime DDL occurrence ceiling weakened')
 req(int(scope.get('runtime_schema_residue_shared_helpers_ceiling_after') or 0) <= 3, 'Build 39 shared-helper DDL ceiling weakened')
-req(int(scope.get('raw_d1_bypass_with_ddl_ceiling') or -1) == 0, 'Build 39 raw D1 bypass ceiling weakened')
+req(int(scope.get('raw_d1_bypass_with_ddl_ceiling', -1)) == 0, 'Build 39 raw D1 bypass ceiling weakened')
 req(scope.get('canonical_migration_stream_unchanged') is True and int(scope.get('canonical_migration_count') or 0) == 4, 'Build 39 canonical migration boundary drifted')
 
 safety = authority.get('safety') or {}
