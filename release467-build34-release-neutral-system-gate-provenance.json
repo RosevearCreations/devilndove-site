@@ -2,9 +2,17 @@
   "release": 467,
   "build": 34,
   "title": "Release-Neutral System Gate & Provenance Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "005569859475f8561af99f824e6e621738d273e4",
   "source_base_tree_sha": "c7cfcfa4b54d5ff567af3ea47f4a65d8e17dbe13",
+  "accepted_dev_sha": "5a212ea10e3ad24163a0228b9ff8c46190e1d678",
+  "accepted_dev_tree_sha": "e8c42182099e6a81191989d2c7216fa2976b68b2",
+  "acceptance": {
+    "system_gate_run": 33872053495,
+    "current_application_quality_run": 33872053816,
+    "it_admin_runtime_proof_run": 33872053528,
+    "branch_hygiene_run": 33872053880
+  },
   "build33_final_closure": {
     "dev_sha": "005569859475f8561af99f824e6e621738d273e4",
     "tree_sha": "c7cfcfa4b54d5ff567af3ea47f4a65d8e17dbe13",
@@ -27,11 +35,18 @@
     "active_deployment_proof_names_release_neutral": true,
     "active_regression_evidence_release_neutral": true,
     "historical_release464_465_prerequisite_gates_preserved": true,
+    "historical_build3_gate_current_contract_compatible": true,
     "it_release_truth_authority_resolution_dynamic": true,
     "current_system_gate_provenance_guard_added": true,
     "current_application_quality_covers_system_gate_provenance": true,
     "build33_final_closure_baseline_recorded": true,
+    "generic_deployment_artifacts_proven_in_ci": true,
     "self_referential_final_sha_not_required_in_authority": true
+  },
+  "artifacts": {
+    "system_gate_run": 33872053495,
+    "current_development_deploy_proof": "current-development-deploy-proof",
+    "current_regression_evidence": "current-regression-evidence"
   },
   "provenance_model": {
     "accepted_implementation": "record the exact merged Development implementation SHA/tree and its push-triggered proof runs",

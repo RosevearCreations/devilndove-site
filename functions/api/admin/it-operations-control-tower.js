@@ -2,19 +2,19 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 33;
-const TITLE = 'I.T. Current Release & Production Truth Convergence';
+const BUILD = 34;
+const TITLE = 'Release-Neutral System Gate & Provenance Convergence';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 33,
+  build: 34,
   title: TITLE,
   state: 'DEVELOPMENT_GREEN',
-  accepted_sha: 'e8c4931b75aa066fd28119bcbe0fbbe699f863d2',
-  accepted_tree_sha: '873a98aa6d8dd2ecee2f2b137dcf2aca5be36608',
-  system_gate_run: 33870645740,
-  current_application_quality_run: 33870645748,
-  it_admin_runtime_proof_run: 33870645724,
-  branch_hygiene_run: 33870645746,
+  accepted_sha: '5a212ea10e3ad24163a0228b9ff8c46190e1d678',
+  accepted_tree_sha: 'e8c42182099e6a81191989d2c7216fa2976b68b2',
+  system_gate_run: 33872053495,
+  current_application_quality_run: 33872053816,
+  it_admin_runtime_proof_run: 33872053528,
+  branch_hygiene_run: 33872053880,
 });
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -89,7 +89,7 @@ export async function onRequestGet(context) {
     build: BUILD,
     title: TITLE,
     ok: true,
-    authority: 'release467-build33-it-current-release-production-truth',
+    authority: 'release467-build34-release-neutral-system-gate-provenance',
     state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
@@ -125,8 +125,9 @@ export async function onRequestGet(context) {
     sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 33 is Development GREEN and owns the current I.T. operator/release-truth surface.',
-      'Build 32 remains the independently verified Production-green baseline until a deliberate Build 33 Production promotion is requested and proven.',
+      'Build 34 is Development GREEN and owns the current I.T. operator/release-provenance surface.',
+      'System Gate current deployment/proof identities are release-neutral and current Release 467 authority changes trigger the canonical gate.',
+      'Build 32 remains the independently verified Production-green baseline until a deliberate Production promotion is requested and proven.',
       'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from accepted Development evidence.',
       'Opaque runtime bindings never substitute for System Gate/control-plane D1 and R2 identity proof.',
       'External HOLDs never become GREEN by inference from source, D1 convergence or deployment success.',
