@@ -2,17 +2,16 @@
   "release": 467,
   "build": 33,
   "title": "I.T. Current Release & Production Truth Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
   "source_base_tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
-  "accepted_baseline": {
-    "build": 32,
-    "dev_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
-    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
-    "system_gate_run": 33829550860,
-    "current_application_quality_run": 33829550795,
-    "it_admin_runtime_proof_run": 33829550834,
-    "branch_hygiene_run": 33829550749
+  "accepted_dev_sha": "e8c4931b75aa066fd28119bcbe0fbbe699f863d2",
+  "accepted_dev_tree_sha": "873a98aa6d8dd2ecee2f2b137dcf2aca5be36608",
+  "acceptance": {
+    "system_gate_run": 33870645740,
+    "current_application_quality_run": 33870645748,
+    "it_admin_runtime_proof_run": 33870645724,
+    "branch_hygiene_run": 33870645746
   },
   "production_baseline": {
     "build": 32,
@@ -24,7 +23,7 @@
   "scope": {
     "it_operator_release_truth_current": true,
     "build32_production_closure_recorded": true,
-    "accepted_baseline_and_current_candidate_separated": true,
+    "accepted_development_and_production_baseline_separated": true,
     "exact_production_tree_and_deploy_run_visible": true,
     "stale_build22_current_operator_removed": true,
     "stale_build20_production_authority_removed": true,
@@ -46,5 +45,5 @@
     "automatic_production_promotion_authorized": false,
     "secret_values_emitted": false
   },
-  "acceptance_rule": "Merge through GitHub to dev, then require exact push-triggered System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof and Repository Branch Hygiene before changing state to DEVELOPMENT_GREEN."
+  "development_closure_rule": "Accepted implementation e8c4931b75aa066fd28119bcbe0fbbe699f863d2 passed exact push-triggered System Gate 33870645740, Current Application Quality 33870645748, I.T. Admin Runtime Proof 33870645724 and Repository Branch Hygiene 33870645746. The final authority-only closure must itself be merged through GitHub and pass the same release-neutral push-triggered proof set before Build 33 is treated as fully closed on Development."
 }

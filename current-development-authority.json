@@ -2,34 +2,34 @@
   "release": 467,
   "build": 33,
   "title": "I.T. Current Release & Production Truth Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "source_base_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
   "source_base_tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
-  "accepted_baseline": {
-    "build": 32,
-    "dev_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
-    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
-    "system_gate_run": 33829550860,
-    "current_application_quality_run": 33829550795,
-    "it_admin_runtime_proof_run": 33829550834,
-    "branch_hygiene_run": 33829550749
+  "accepted_dev_sha": "e8c4931b75aa066fd28119bcbe0fbbe699f863d2",
+  "accepted_dev_tree_sha": "873a98aa6d8dd2ecee2f2b137dcf2aca5be36608",
+  "acceptance": {
+    "system_gate_run": 33870645740,
+    "current_application_quality_run": 33870645748,
+    "it_admin_runtime_proof_run": 33870645724,
+    "branch_hygiene_run": 33870645746
   },
-  "production_baseline": {
+  "last_green_build": 33,
+  "last_green_build_name": "I.T. Current Release & Production Truth Convergence",
+  "last_green_dev_sha": "e8c4931b75aa066fd28119bcbe0fbbe699f863d2",
+  "last_green_dev_tree_sha": "873a98aa6d8dd2ecee2f2b137dcf2aca5be36608",
+  "last_green_system_gate_run": 33870645740,
+  "last_green_application_quality_run": 33870645748,
+  "last_green_it_admin_runtime_run": 33870645724,
+  "last_green_branch_hygiene_run": 33870645746,
+  "production_checkpoint": {
     "build": 32,
     "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
     "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
     "production_pages_deploy_run": 33866964958,
-    "state": "PRODUCTION_GREEN"
+    "state": "PRODUCTION_GREEN",
+    "role": "CURRENT_PRODUCTION_BASELINE"
   },
-  "last_green_build": 32,
-  "last_green_build_name": "Help, Search & Responsive Convergence",
-  "last_green_dev_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
-  "last_green_dev_tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
-  "last_green_system_gate_run": 33829550860,
-  "last_green_application_quality_run": 33829550795,
-  "last_green_it_admin_runtime_run": 33829550834,
-  "last_green_branch_hygiene_run": 33829550749,
   "current_release_authorities": [
     "release467-build33-it-current-release-production-truth.json",
     "release467-build32-help-search-responsive-convergence.json",
@@ -53,9 +53,9 @@
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
   "next_build": 34,
-  "next_build_state": "BLOCKED_UNTIL_BUILD_33_DEVELOPMENT_GREEN",
-  "promotion_state": "BUILD_33_FEATURE_CANDIDATE",
-  "runtime_application_change_authorized": true,
+  "next_build_state": "READY_AFTER_BUILD_33_DEVELOPMENT_GREEN",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
+  "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
   "d1_mutation_authorized": false,
   "r2_mutation_authorized": false,
@@ -64,5 +64,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 32 is independently Production GREEN at final Development SHA 79c9a6c4af0f5c82f474964485e2cde535f85045 and Production main 816490a9f36ffc2a730d8149549e5a2fbd609966 on exact tree 2c1b4a3694779996e1bdb094be5e9e043834276e. Build 33 updates the read-only I.T. release-truth surface and adds a forward quality guard; do not call Build 33 GREEN until its exact merged dev SHA passes the required push-triggered proofs."
+  "restart_rule": "Build 33 is Development GREEN at accepted implementation SHA e8c4931b75aa066fd28119bcbe0fbbe699f863d2 / tree 873a98aa6d8dd2ecee2f2b137dcf2aca5be36608 with System Gate 33870645740, Current Application Quality 33870645748, I.T. Admin Runtime Proof 33870645724 and Branch Hygiene 33870645746. Build 32 remains the independently verified Production baseline at main 816490a9f36ffc2a730d8149549e5a2fbd609966 / tree 2c1b4a3694779996e1bdb094be5e9e043834276e / Production Pages Deploy 33866964958. Before any Production promotion, promote only the exact fully-green final Development closure tree and verify it independently in Production."
 }
