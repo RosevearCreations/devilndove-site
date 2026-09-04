@@ -3,6 +3,6 @@
 from pathlib import Path
 import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1]
-for script in ('current_help_hygiene_gate.py','current_search_quality_gate.py','current_responsive_layout_gate.py'):
- subprocess.run([sys.executable,str(ROOT/'scripts'/script)],cwd=ROOT,check=True)
+for script in ('current_help_hygiene_gate.py','current_search_quality_gate.py','current_responsive_layout_gate.py','current_it_release_truth_gate.py'):
+    subprocess.run([sys.executable,str(ROOT/'scripts'/script)],cwd=ROOT,check=True)
 print('CURRENT APPLICATION QUALITY GATE: PASS')

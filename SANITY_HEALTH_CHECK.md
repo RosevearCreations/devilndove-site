@@ -1,26 +1,25 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 32 — Help, Search & Responsive Convergence: DEVELOPMENT GREEN.**
+**Release 467 Build 33 — I.T. Current Release & Production Truth Convergence: FEATURE CANDIDATE.**
 
-Accepted Development application evidence:
-- runtime `1b68fed65844938bcee38169bfe7d783abd160d4`
-- tree `8c76339af56304651c9e81c70bdceea14393ffff`
-- System Gate `33827496687`: SUCCESS
-- Current Application Quality `33827496693`: SUCCESS
-- I.T. Admin Runtime Proof `33827496691`: SUCCESS
-- Repository Branch Hygiene `33827496696`: SUCCESS
+Build 32 is fully Production GREEN:
+- final Development SHA `79c9a6c4af0f5c82f474964485e2cde535f85045`
+- exact tree `2c1b4a3694779996e1bdb094be5e9e043834276e`
+- System Gate `33829550860`: SUCCESS
+- Current Application Quality `33829550795`: SUCCESS
+- I.T. Admin Runtime Proof `33829550834`: SUCCESS
+- Repository Branch Hygiene `33829550749`: SUCCESS
+- Production `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`
+- Production Pages Deploy `33866964958`: SUCCESS on the same exact tree.
 
-Development System Gate passed canonical D1 convergence, read-only data proof, exact Preview deployment, control-plane bindings, smoke and regression evidence.
+Build 33 health boundary:
+- I.T. current operator truth updated from stale Build 22 to Build 33 candidate
+- Production authority updated from stale Build 20 to exact Build 32 Production GREEN
+- live Development ancestry remains runtime-derived
+- external acceptance remains separately evidence-gated
+- new release-neutral I.T. truth quality guard prevents silent future drift
+- exactly one H1 remains on the I.T. page
+- no schema change; canonical migrations remain `0001`–`0004`
+- no D1/R2/provider/Cloudflare Access/Production mutation is authorized.
 
-Current application health:
-- Help Centre and active navigation are current/release-neutral
-- internal Help is `noindex,nofollow`; `/search/` is `noindex,follow`
-- sitemap is canonical-only and excludes the empty generic product shell
-- public pages enforce exactly one H1 with source and runtime safeguards
-- responsive safeguards cover phone, tablet, PC/app and wide web
-- Build 31 password-hash hardening remains regression-protected
-- no schema change; migrations remain `0001`–`0004`
-
-Production health is **not** inferred from an embedded historical SHA. Before the next build, verify that current `main` matches the exact fully-green Build 32 Development closure tree and that the corresponding Production deployment/system proof is SUCCESS.
-
-**Verdict: Development GREEN. Production must be independently exact-tree verified before Build 33 starts.**
+**Verdict: Build 32 Production GREEN. Build 33 candidate requires exact merged-dev CI before Development GREEN.**

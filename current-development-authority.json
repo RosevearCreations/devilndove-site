@@ -1,34 +1,39 @@
 {
   "release": 467,
-  "build": 32,
-  "title": "Help, Search & Responsive Convergence",
-  "state": "DEVELOPMENT_GREEN",
+  "build": 33,
+  "title": "I.T. Current Release & Production Truth Convergence",
+  "state": "FEATURE_CANDIDATE",
   "source_authority": "dev",
-  "source_base_sha": "09d6df54a419c0537c77141924024ed12687ba4c",
-  "source_base_tree_sha": "268927e3cb8c401c6edf22b68b1fcf1c473ba49c",
-  "accepted_dev_sha": "1b68fed65844938bcee38169bfe7d783abd160d4",
-  "accepted_dev_tree_sha": "8c76339af56304651c9e81c70bdceea14393ffff",
+  "source_base_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
+  "source_base_tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+  "accepted_baseline": {
+    "build": 32,
+    "dev_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "system_gate_run": 33829550860,
+    "current_application_quality_run": 33829550795,
+    "it_admin_runtime_proof_run": 33829550834,
+    "branch_hygiene_run": 33829550749
+  },
+  "production_baseline": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
   "last_green_build": 32,
   "last_green_build_name": "Help, Search & Responsive Convergence",
-  "last_green_dev_sha": "1b68fed65844938bcee38169bfe7d783abd160d4",
-  "last_green_dev_tree_sha": "8c76339af56304651c9e81c70bdceea14393ffff",
-  "last_green_system_gate_run": 33827496687,
-  "last_green_application_quality_run": 33827496693,
-  "last_green_it_admin_runtime_run": 33827496691,
-  "last_green_branch_hygiene_run": 33827496696,
-  "production_checkpoint_at_dev_acceptance": {
-    "build": 31,
-    "main_sha": "ccc2bbf1de4acbede58763f9532d9e633c0279da",
-    "tree_sha": "268927e3cb8c401c6edf22b68b1fcf1c473ba49c",
-    "production_pages_deploy_run": 33823805781,
-    "historical_checkpoint_only": true
-  },
-  "production_deployment_must_be_verified_independently": true,
-  "production_authority_rule": "Determine current Production from current main tree plus exact-source Production deployment/system proof; do not treat the historical predecessor checkpoint as current after promotion.",
+  "last_green_dev_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
+  "last_green_dev_tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+  "last_green_system_gate_run": 33829550860,
+  "last_green_application_quality_run": 33829550795,
+  "last_green_it_admin_runtime_run": 33829550834,
+  "last_green_branch_hygiene_run": 33829550749,
   "current_release_authorities": [
+    "release467-build33-it-current-release-production-truth.json",
     "release467-build32-help-search-responsive-convergence.json",
-    "release467-build31-password-hash-hardening.json",
-    "release467-build30-admin-account-security-release-cleanup.json"
+    "release467-build31-password-hash-hardening.json"
   ],
   "repository_governance": {
     "persistent_branches": ["main", "dev"],
@@ -47,10 +52,10 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 33,
-  "next_build_state": "BLOCKED_UNTIL_BUILD_32_PRODUCTION_VERIFIED",
-  "promotion_state": "DEVELOPMENT_GREEN_REQUIRES_EXACT_DEV_TO_MAIN_AND_PRODUCTION_PROOF",
-  "runtime_application_change_authorized": false,
+  "next_build": 34,
+  "next_build_state": "BLOCKED_UNTIL_BUILD_33_DEVELOPMENT_GREEN",
+  "promotion_state": "BUILD_33_FEATURE_CANDIDATE",
+  "runtime_application_change_authorized": true,
   "schema_change_authorized": false,
   "d1_mutation_authorized": false,
   "r2_mutation_authorized": false,
@@ -59,5 +64,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 32 application runtime is GREEN in Development at 1b68fed65844938bcee38169bfe7d783abd160d4 / 8c76339af56304651c9e81c70bdceea14393ffff with System Gate 33827496687, Current Application Quality 33827496693, I.T. Admin Runtime Proof 33827496691 and Branch Hygiene 33827496696. Before Build 33, verify current main equals the fully-green Build 32 closure tree and independently verify Production on that exact tree. If not, finish Build 32 promotion first."
+  "restart_rule": "Build 32 is independently Production GREEN at final Development SHA 79c9a6c4af0f5c82f474964485e2cde535f85045 and Production main 816490a9f36ffc2a730d8149549e5a2fbd609966 on exact tree 2c1b4a3694779996e1bdb094be5e9e043834276e. Build 33 updates the read-only I.T. release-truth surface and adds a forward quality guard; do not call Build 33 GREEN until its exact merged dev SHA passes the required push-triggered proofs."
 }

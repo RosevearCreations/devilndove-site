@@ -1,0 +1,50 @@
+{
+  "release": 467,
+  "build": 33,
+  "title": "I.T. Current Release & Production Truth Convergence",
+  "state": "FEATURE_CANDIDATE",
+  "source_base_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
+  "source_base_tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+  "accepted_baseline": {
+    "build": 32,
+    "dev_sha": "79c9a6c4af0f5c82f474964485e2cde535f85045",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "system_gate_run": 33829550860,
+    "current_application_quality_run": 33829550795,
+    "it_admin_runtime_proof_run": 33829550834,
+    "branch_hygiene_run": 33829550749
+  },
+  "production_baseline": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "it_operator_release_truth_current": true,
+    "build32_production_closure_recorded": true,
+    "accepted_baseline_and_current_candidate_separated": true,
+    "exact_production_tree_and_deploy_run_visible": true,
+    "stale_build22_current_operator_removed": true,
+    "stale_build20_production_authority_removed": true,
+    "release_truth_quality_guard_added": true,
+    "future_current_build_drift_fails_quality": true,
+    "read_only_control_tower_preserved": true,
+    "external_hold_fail_closed_preserved": true
+  },
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "automatic_repair_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  },
+  "acceptance_rule": "Merge through GitHub to dev, then require exact push-triggered System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof and Repository Branch Hygiene before changing state to DEVELOPMENT_GREEN."
+}
