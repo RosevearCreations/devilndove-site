@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Current help, search, H1, responsive and I.T. release truth quality
+      - name: Current help, search, H1, responsive, I.T. truth and System Gate provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
         run: |
@@ -41,14 +41,15 @@ jobs:
           node --check public/js/layout-overflow-guard.js
           node --check public/js/public-heading-guard.js
       - name: Python syntax
-        run: python -m py_compile scripts/current_application_quality_gate.py scripts/current_help_hygiene_gate.py scripts/current_search_quality_gate.py scripts/current_responsive_layout_gate.py scripts/current_it_release_truth_gate.py scripts/current_password_hash_gate.py
+        run: python -m py_compile scripts/current_application_quality_gate.py scripts/current_help_hygiene_gate.py scripts/current_search_quality_gate.py scripts/current_responsive_layout_gate.py scripts/current_it_release_truth_gate.py scripts/current_system_gate_provenance_gate.py scripts/current_regression_evidence.py scripts/current_password_hash_gate.py
       - name: Diff safety
         run: git diff --check origin/dev...HEAD
       - name: Boundary
         run: |
-          echo 'Current active help/navigation/workflow names are release-neutral.'
+          echo 'Current active help/navigation/workflow proof identities are release-neutral.'
           echo 'Public sitemap excludes internal search and the empty product shell.'
           echo 'Exactly one H1 is source-gated and runtime-guarded on public pages.'
           echo 'Responsive convergence covers phone, tablet, PC/app and wide web layouts.'
-          echo 'I.T. current-release truth must match the current development authority and exact Production baseline.'
+          echo 'I.T. current-release truth resolves the current authority dynamically and preserves exact Production baseline truth.'
+          echo 'System Gate current proof/deployment provenance is release-neutral while historical regression gates remain preserved.'
           echo 'No D1/R2/provider/Production mutation is performed by this quality proof.'
