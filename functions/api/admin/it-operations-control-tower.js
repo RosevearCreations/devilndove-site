@@ -2,27 +2,27 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 49;
-const TITLE = 'Current Authority Convergence & Restart Integrity';
+const BUILD = 50;
+const TITLE = 'Reviewed CAIP to Content Studio Handoff';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 49, title: TITLE, state: 'DEVELOPMENT_GREEN',
-  accepted_sha: '7bbfbf10a531898052771d9db1cfbb1a9e7d893a',
-  accepted_tree_sha: '7a74af809182a0eb6befb56e34d2869b44090c6e',
-  system_gate_run: 33928678750,
-  current_application_quality_run: 33928678778,
-  it_admin_runtime_proof_run: 33928678807,
-  branch_hygiene_run: 33928678789,
+  release: 467, build: 50, title: TITLE, state: 'DEVELOPMENT_GREEN',
+  accepted_sha: 'dddd7c9423132dd22b179348a5644362f7b9f46c',
+  accepted_tree_sha: '1d5d4859c55fae404a79eb8cef85e1e0d3f30826',
+  system_gate_run: 33930359847,
+  current_application_quality_run: 33930359835,
+  it_admin_runtime_proof_run: 33930359865,
+  branch_hygiene_run: 33930359956,
   exact_preview_deployment: true,
   role: 'IMPLEMENTATION_ACCEPTANCE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 48, title: 'Automated Production Acceptance', state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
-  dev_sha: '3980661045c68f55fa64e66e6414055ee0d359f6',
-  tree_sha: '66e5e0a088d6eb9f4f85f70791de8925ac40adb0',
-  system_gate_run: 33925647553,
-  current_application_quality_run: 33925647532,
-  it_admin_runtime_proof_run: 33925647561,
-  branch_hygiene_run: 33925647559,
+  release: 467, build: 49, title: 'Current Authority Convergence & Restart Integrity', state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  dev_sha: '28307cd8939329db05dab61c336d0c7a49f8759e',
+  tree_sha: '0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7',
+  system_gate_run: 33929301077,
+  current_application_quality_run: 33929301018,
+  it_admin_runtime_proof_run: 33929301051,
+  branch_hygiene_run: 33929300999,
   exact_preview_deployment: true,
   role: 'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT',
 });
@@ -64,7 +64,7 @@ export async function onRequestGet(context) {
   const runtimeSha = clean(ancestry.runtime_source_sha) || null; const runtimeHost = clean(ancestry.deployment_host) || null;
   return jsonResponse({
     release: RELEASE, build: BUILD, title: TITLE, ok: true,
-    authority: 'release467-build49-current-authority-convergence-restart-integrity', state: 'DEVELOPMENT_GREEN', environment: 'development',
+    authority: 'release467-build50-reviewed-caip-content-studio-handoff', state: 'DEVELOPMENT_GREEN', environment: 'development',
     release_authority: {
       current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_GREEN' },
       accepted_development: ACCEPTED_DEVELOPMENT,
@@ -81,9 +81,9 @@ export async function onRequestGet(context) {
       production: PRODUCTION,
       compatibility_runtime_release_header: 466, compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY', current_automatic_guards: CURRENT_GUARDS,
       persistent_branches: ['main','dev'], production_promotion_required_development_proofs: CURRENT_GUARDS, rollback_readiness: 'RELEASE_NEUTRAL_READ_ONLY',
-      reliability_authority: 'current-development-authority.json', reliability_projection_build: 49,
+      reliability_authority: 'current-development-authority.json', reliability_projection_build: 50,
       historical_build36_reliability_authority: 'release467-build36-current-reliability-operational-health', historical_reliability_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
-      deployment_preflight_authority: 'current-development-authority.json', deployment_preflight_projection_build: 49,
+      deployment_preflight_authority: 'current-development-authority.json', deployment_preflight_projection_build: 50,
       historical_build37_deployment_preflight_authority: 'release467-build37-deployment-preflight-canonical-migration',
       accounting_schema_authority: 'release467-build38-accounting-core-runtime-ddl-elimination', accounting_request_time_ddl: 0,
       product_numbering_schema_authority: 'release467-build39-product-numbering-runtime-ddl-elimination', product_numbering_request_time_ddl: 0, product_numbering_required_columns: ['sequence_key','next_product_number','updated_at'],
@@ -97,6 +97,7 @@ export async function onRequestGet(context) {
       grey_hair_story_edit_planning_authority: 'release467-build47-ai-story-edit-planning', grey_hair_story_edit_planning_gate: 'scripts/current_grey_hair_story_edit_planning_gate.py', grey_hair_story_edit_planning_request_time_ddl: 0,
       grey_hair_production_acceptance_authority: 'release467-build48-automated-production-acceptance', grey_hair_production_acceptance_gate: 'scripts/current_grey_hair_production_acceptance_gate.py', grey_hair_production_acceptance_request_time_ddl: 0,
       authority_restart_integrity_authority: 'release467-build49-current-authority-convergence-restart-integrity', authority_restart_integrity_gate: 'scripts/current_authority_restart_integrity_gate.py', authority_restart_integrity_request_time_ddl: 0,
+      grey_hair_content_studio_handoff_authority: 'release467-build50-reviewed-caip-content-studio-handoff', grey_hair_content_studio_handoff_gate: 'scripts/current_grey_hair_content_studio_handoff_gate.py', grey_hair_content_studio_handoff_request_time_ddl: 0,
       runtime_schema_residue_files_ceiling: 58, runtime_schema_residue_occurrences_ceiling: 522, runtime_schema_residue_shared_helpers_ceiling: 2, raw_d1_bypass_with_ddl_ceiling: 0,
       canonical_migration_authority: 'migrations/canonical/manifest.json + scripts/d1_migrate.py', request_time_schema_mutation: false,
     },
@@ -106,11 +107,12 @@ export async function onRequestGet(context) {
     external_policy: EXTERNAL_POLICY, recovery_queue: queue, next_action: queue[0] || null, subsystems, sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 49 implementation acceptance is dev 7bbfbf10a531898052771d9db1cfbb1a9e7d893a / tree 7a74af809182a0eb6befb56e34d2869b44090c6e with System 33928678750, Quality 33928678778, I.T. 33928678807 and Hygiene 33928678789 successful plus exact Preview acceptance.',
-      'Build 48 remains the last fully verified restart checkpoint at dev 3980661045c68f55fa64e66e6414055ee0d359f6 / tree 66e5e0a088d6eb9f4f85f70791de8925ac40adb0 with System 33925647553, Quality 33925647532, I.T. 33925647561 and Hygiene 33925647559 until the Build 49 closure merged head completes its external exact-head cycle.',
-      'Build 49 formalizes a finite restart protocol: a closure candidate never self-claims post-commit workflow evidence, and the next build ingests the preceding externally verified final closure before source mutation.',
-      'Build 49 adds no schema, canonical migration, request-time DDL, D1/R2 business-data mutation, provider/render/publication execution, Cloudflare Access mutation, main mutation or application Production promotion.',
-      'The canonical D1 stream remains exactly four files and request-time schema DDL remains zero for Builds 38-49 protected current authorities.',
+      'Build 50 implementation acceptance is dev dddd7c9423132dd22b179348a5644362f7b9f46c / tree 1d5d4859c55fae404a79eb8cef85e1e0d3f30826 with System 33930359847, Quality 33930359835, I.T. 33930359865 and Hygiene 33930359956 successful plus exact Preview acceptance.',
+      'Build 49 is the last fully verified restart checkpoint at dev 28307cd8939329db05dab61c336d0c7a49f8759e / tree 0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7 with System 33929301077, Quality 33929301018, I.T. 33929301051 and Hygiene 33929300999.',
+      'Build 50 re-proves the exact Build 48 accepted planning package and hands reviewed IDs/timecodes/synchronization provenance into the existing Content Studio review authority only.',
+      'Build 50 keeps human Content Studio review mandatory and authorizes no rendering, provider execution, publication, social queueing or R2 mutation.',
+      'Build 50 adds no schema or canonical migration; the canonical D1 stream remains exactly four files.',
+      'A closure candidate never self-claims post-commit workflow evidence; the next build ingests the preceding externally verified final closure before source mutation.',
       'Deployment Preflight and Reliability remain read-only current projections; Build 37 and Build 36 remain historical feature evidence.',
       'Production promotion still requires the exact current Development tree plus successful System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene proofs.',
       'Build 32 remains the independently verified Production-green baseline until a deliberate Production promotion is requested and proven.',

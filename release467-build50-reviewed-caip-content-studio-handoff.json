@@ -2,8 +2,18 @@
   "release": 467,
   "build": 50,
   "title": "Reviewed CAIP to Content Studio Handoff",
-  "state": "IMPLEMENTATION_IN_PROGRESS",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
+  "source_base_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+  "source_base_tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
+  "accepted_dev_sha": "dddd7c9423132dd22b179348a5644362f7b9f46c",
+  "accepted_dev_tree_sha": "1d5d4859c55fae404a79eb8cef85e1e0d3f30826",
+  "acceptance": {
+    "system_gate_run": 33930359847,
+    "current_application_quality_run": 33930359835,
+    "it_admin_runtime_proof_run": 33930359865,
+    "branch_hygiene_run": 33930359956
+  },
   "source_base": {
     "build": 49,
     "title": "Current Authority Convergence & Restart Integrity",
@@ -17,6 +27,41 @@
     },
     "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
     "exact_preview_deployment": true
+  },
+  "accepted_implementation": {
+    "dev_sha": "dddd7c9423132dd22b179348a5644362f7b9f46c",
+    "tree_sha": "1d5d4859c55fae404a79eb8cef85e1e0d3f30826",
+    "proofs": {
+      "system_gate_run": 33930359847,
+      "current_application_quality_run": 33930359835,
+      "it_admin_runtime_proof_run": 33930359865,
+      "branch_hygiene_run": 33930359956
+    },
+    "deployment_acceptance": {
+      "canonical_development_migration_proof": true,
+      "development_data_authority_read_only_proof": true,
+      "exact_preview_deployment": true,
+      "preview_binding_proof": true,
+      "preview_smoke_acceptance": true,
+      "current_regression_evidence": true
+    }
+  },
+  "restart_integrity": {
+    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+    "last_fully_verified_before_build50_closure": {
+      "build": 49,
+      "dev_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+      "tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
+      "proofs": {
+        "system_gate_run": 33929301077,
+        "current_application_quality_run": 33929301018,
+        "it_admin_runtime_proof_run": 33929301051,
+        "branch_hygiene_run": 33929300999
+      }
+    },
+    "closure_candidate_must_not_self_claim_final_proof": true,
+    "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE",
+    "next_build_ingests_previous_final_closure": true
   },
   "scope": {
     "name": "reviewed_caip_to_content_studio_handoff",
@@ -34,6 +79,15 @@
     "production_mutation_authorized": false
   },
   "canonical_d1_migration_count": 4,
+  "data_authority": {
+    "schema_change": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4,
+    "request_time_ddl": false,
+    "raw_public_r2_urls": false,
+    "d1_business_data_mutation_outside_existing_content_studio_authority": false,
+    "r2_mutation": false
+  },
   "external_lanes_remain_separate": true,
   "production_checkpoint": {
     "build": 32,
@@ -41,5 +95,9 @@
     "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
     "production_pages_deploy_run": 33866964958,
     "state": "PRODUCTION_GREEN"
-  }
+  },
+  "next_build": 51,
+  "next_build_state": "AWAITING_BUILD_50_FINAL_CLOSURE_PROOF",
+  "next_build_title": null,
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
 }

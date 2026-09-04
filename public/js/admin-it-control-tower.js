@@ -1,4 +1,4 @@
-// Release 467 Build 49 — Current Authority Convergence & Restart Integrity renderer.
+// Release 467 Build 50 — Reviewed CAIP to Content Studio Handoff renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
