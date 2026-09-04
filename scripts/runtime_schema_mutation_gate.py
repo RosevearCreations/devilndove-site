@@ -15,11 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 FUNCTIONS = ROOT / "functions"
 FAIL: list[str] = []
 
-# Release 467 Build 38 ratchet. Future cleanup may reduce these values further, but no
+# Release 467 Build 39 ratchet. Future cleanup may reduce these values further, but no
 # accepted source may increase them again without deliberately changing this authority.
-MAX_DDL_FILES = 60
-MAX_DDL_OCCURRENCES = 526
-MAX_DELEGATED_LIBRARIES = 4
+MAX_DDL_FILES = 59
+MAX_DDL_OCCURRENCES = 525
+MAX_DELEGATED_LIBRARIES = 3
 
 DDL = re.compile(
     r"(?P<quote>[`\"'])\s*(?P<sql>(?:CREATE\s+(?:TABLE|INDEX|TRIGGER|VIEW)|ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW)|VACUUM\b|REINDEX\b))",
@@ -102,12 +102,19 @@ accounting_text = accounting_path.read_text(encoding="utf-8", errors="replace") 
 accounting_matches = list(DDL.finditer(accounting_text)) + list(DDL_AFTER_NEWLINE.finditer(accounting_text))
 if accounting_matches:
     FAIL.append("functions/api/_lib/accounting.js regained request-time schema DDL after Build 38 cleanup")
+
+product_numbering_path = ROOT / "functions/api/admin/_product-numbering.js"
+product_numbering_text = product_numbering_path.read_text(encoding="utf-8", errors="replace") if product_numbering_path.is_file() else ""
+product_numbering_matches = list(DDL.finditer(product_numbering_text)) + list(DDL_AFTER_NEWLINE.finditer(product_numbering_text))
+if product_numbering_matches:
+    FAIL.append("functions/api/admin/_product-numbering.js regained request-time schema DDL after Build 39 cleanup")
+
 if files_with_ddl > MAX_DDL_FILES:
-    FAIL.append(f"historical DDL-bearing runtime files increased above Build 38 ceiling: {files_with_ddl} > {MAX_DDL_FILES}")
+    FAIL.append(f"historical DDL-bearing runtime files increased above Build 39 ceiling: {files_with_ddl} > {MAX_DDL_FILES}")
 if ddl_occurrences > MAX_DDL_OCCURRENCES:
-    FAIL.append(f"historical DDL string occurrences increased above Build 38 ceiling: {ddl_occurrences} > {MAX_DDL_OCCURRENCES}")
+    FAIL.append(f"historical DDL string occurrences increased above Build 39 ceiling: {ddl_occurrences} > {MAX_DDL_OCCURRENCES}")
 if delegated_libraries > MAX_DELEGATED_LIBRARIES:
-    FAIL.append(f"DDL-bearing delegated/shared helpers increased above Build 38 ceiling: {delegated_libraries} > {MAX_DELEGATED_LIBRARIES}")
+    FAIL.append(f"DDL-bearing delegated/shared helpers increased above Build 39 ceiling: {delegated_libraries} > {MAX_DELEGATED_LIBRARIES}")
 
 print("RUNTIME SCHEMA MUTATION AUTHORITY GATE")
 print(f"Runtime JS files scanned: {sum(1 for _ in FUNCTIONS.rglob('*.js'))}")
@@ -117,6 +124,7 @@ print(f"DDL-bearing admin routes behind guarded DB: {protected_routes}")
 print(f"DDL-bearing delegated/shared helpers: {delegated_libraries} (ceiling {MAX_DELEGATED_LIBRARIES})")
 print(f"Raw D1 bypasses carrying DDL: {len(unprotected)}")
 print(f"Accounting core request-time DDL statements: {len(accounting_matches)}")
+print(f"Product-numbering request-time DDL statements: {len(product_numbering_matches)}")
 if FAIL:
     print("RUNTIME SCHEMA MUTATION AUTHORITY GATE: FAIL")
     for index, message in enumerate(FAIL, 1):
@@ -126,6 +134,7 @@ if FAIL:
 print("RUNTIME SCHEMA MUTATION AUTHORITY GATE: PASS")
 print("Request-time schema mutation capability: BLOCKED")
 print("Accounting core schema ownership: READ-ONLY BASELINE ASSERTION")
+print("Product-number sequence schema ownership: READ-ONLY BASELINE ASSERTION")
 print("Legacy ensure-DDL behind guarded DB: NON-MUTATING AND RATCHETED")
 print("Raw D1 bypass with DDL: ZERO")
 print("Schema change authority: migrations/canonical + scripts/d1_migrate.py")
