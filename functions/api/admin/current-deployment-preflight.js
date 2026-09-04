@@ -1,12 +1,12 @@
-// Release 467 Build 42 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 43 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical preflight diagnostics are reused read-only; schema authority is
 // migrations/canonical + scripts/d1_migrate.py and is never repaired during a request.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 42;
-const TITLE = 'Material Template Intelligence';
+const BUILD = 43;
+const TITLE = 'Label Composition & Overrides';
 const AUTHORITY = 'current-development-authority.json';
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -223,13 +223,14 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is a current read-only Release 467 Build 42 projection.',
+      'The active Deployment Preflight is a current read-only Release 467 Build 43 projection.',
       'Release 467 Build 37 remains the historical feature authority that converged Deployment Preflight with canonical migration truth.',
       'The retained historical preflight engine supplies diagnostics only; it is not schema or release authority.',
       'Historical build-numbered SQL is provenance only. Forward D1 schema authority is migrations/canonical/manifest.json.',
       'Missing schema fails closed. No request-time schema creation or repair is available from this endpoint.',
-      'Build 42 adds no canonical migration and no request-time DDL; the stream remains exactly 0001-0004.',
-      'Material Template Intelligence reuses existing Packaging JSON/table authorities for reusable print policy, review-first provenance, canonical INCI deduplication and authoritative read-back after source attachment.',
+      'Build 43 adds no canonical migration and no request-time DDL; the stream remains exactly 0001-0004.',
+      'Label Composition & Overrides reuses existing Packaging project JSON and ingredient authorities for inherit/print/omit decisions, fail-closed Required/Internal Only policy enforcement and authoritative D1 read-back.',
+      'Build 42 Material Template Intelligence remains the reusable inherited-policy authority and now preserves reviewed Build 43 project-level decisions during normalization.',
       'Build 41 printable safe-area enforcement remains active; Build 40 Product Social Automation, Build 39 Product Numbering and Build 38 Accounting remain historical feature authorities with their zero-DDL boundaries intact.',
       'Production remains Build 32 until a deliberate exact-tree promotion is requested and independently proven.',
     ],
