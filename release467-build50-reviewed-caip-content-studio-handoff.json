@@ -78,6 +78,7 @@
     "main_mutation_authorized": false,
     "production_mutation_authorized": false
   },
+  "canonical_d1_migration_count": 4,
   "data_authority": {
     "schema_change": false,
     "canonical_migration_added": false,
