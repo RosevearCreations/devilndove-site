@@ -149,7 +149,7 @@ function currentMigrationPlan() {
     canonical_authority: [
       'Treat migrations/canonical/manifest.json as the only forward D1 schema authority.',
       'Historical build-numbered migration files are provenance only and must not be replayed from Deployment Preflight.',
-      'Never create, alter, drop, reindex, vacuum, or otherwise repair schema during an HTTP request.',
+      'Never perform schema repair during an HTTP request; use only the approved canonical migration path.',
     ],
     development: [
       'Add a new monotonically numbered canonical migration only when a real forward schema change is required.',
