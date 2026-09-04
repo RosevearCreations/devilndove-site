@@ -1,27 +1,27 @@
 {
   "release": 467,
-  "build": 35,
-  "title": "Production Promotion & Rollback Provenance Convergence",
+  "build": 36,
+  "title": "Current Reliability & Operational Health Truth Convergence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "4cba824be269ce30b7a113e0033e7a91d7b6c5d4",
-  "source_base_tree_sha": "a2ed00510bf727c28a41193f66f0de8f76a60e6e",
-  "accepted_dev_sha": "b3fd1777c41f9b459048b441254f2fa762692051",
-  "accepted_dev_tree_sha": "c88d7e9fc3f43dcdd6d0e05cbe14c6cc7c3fc461",
+  "source_base_sha": "1ec4eae64201ae4362dd08a1a5118c7b64bcff93",
+  "source_base_tree_sha": "4b44b12c5b11c6c87de64625c973f2128164f9a6",
+  "accepted_dev_sha": "22b1efbf48b67f91024d277566ce51ac1263c970",
+  "accepted_dev_tree_sha": "bb020637765dd21b262a5007162141bf03bd658c",
   "acceptance": {
-    "system_gate_run": 33873907300,
-    "current_application_quality_run": 33873908526,
-    "it_admin_runtime_proof_run": 33873907340,
-    "branch_hygiene_run": 33873907303
+    "system_gate_run": 33875163710,
+    "current_application_quality_run": 33875163581,
+    "it_admin_runtime_proof_run": 33875163703,
+    "branch_hygiene_run": 33875163813
   },
-  "last_green_build": 35,
-  "last_green_build_name": "Production Promotion & Rollback Provenance Convergence",
-  "last_green_dev_sha": "b3fd1777c41f9b459048b441254f2fa762692051",
-  "last_green_dev_tree_sha": "c88d7e9fc3f43dcdd6d0e05cbe14c6cc7c3fc461",
-  "last_green_system_gate_run": 33873907300,
-  "last_green_application_quality_run": 33873908526,
-  "last_green_it_admin_runtime_run": 33873907340,
-  "last_green_branch_hygiene_run": 33873907303,
+  "last_green_build": 36,
+  "last_green_build_name": "Current Reliability & Operational Health Truth Convergence",
+  "last_green_dev_sha": "22b1efbf48b67f91024d277566ce51ac1263c970",
+  "last_green_dev_tree_sha": "bb020637765dd21b262a5007162141bf03bd658c",
+  "last_green_system_gate_run": 33875163710,
+  "last_green_application_quality_run": 33875163581,
+  "last_green_it_admin_runtime_run": 33875163703,
+  "last_green_branch_hygiene_run": 33875163813,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -32,9 +32,9 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
-    "release467-build35-production-promotion-rollback-provenance.json",
+    "release467-build36-current-reliability-operational-health.json",
     "release467-build32-help-search-responsive-convergence.json",
-    "release467-build34-release-neutral-system-gate-provenance.json"
+    "release467-build35-production-promotion-rollback-provenance.json"
   ],
   "repository_governance": {
     "persistent_branches": ["main", "dev"],
@@ -53,7 +53,9 @@
       "I.T. Admin Runtime Proof",
       "Repository Branch Hygiene"
     ],
-    "production_rollback_readiness": "release-neutral-read-only"
+    "production_rollback_readiness": "release-neutral-read-only",
+    "active_reliability_authority": "release467-build36-current-reliability-operational-health.json",
+    "historical_release466_reliability_role": "HISTORICAL_REGRESSION_COMPATIBILITY"
   },
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
@@ -62,8 +64,8 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 36,
-  "next_build_state": "READY_AFTER_BUILD_35_FINAL_CLOSURE_PROOF",
+  "next_build": 37,
+  "next_build_state": "READY_AFTER_BUILD_36_FINAL_CLOSURE_PROOF",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -74,5 +76,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 35 is accepted on Development at implementation SHA b3fd1777c41f9b459048b441254f2fa762692051 / tree c88d7e9fc3f43dcdd6d0e05cbe14c6cc7c3fc461 with System Gate 33873907300, Current Application Quality 33873908526, I.T. Admin Runtime Proof 33873907340 and Branch Hygiene 33873907303. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 36 starts. Build 32 remains Production GREEN. Production promotion requires the exact current fully-green Development tree and all four Development proofs; rollback readiness remains release-neutral and read-only."
+  "restart_rule": "Build 36 is accepted on Development at implementation SHA 22b1efbf48b67f91024d277566ce51ac1263c970 / tree bb020637765dd21b262a5007162141bf03bd658c with System Gate 33875163710, Current Application Quality 33875163581, I.T. Admin Runtime Proof 33875163703 and Branch Hygiene 33875163813. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 37 starts. Build 32 remains Production GREEN. The active Reliability workspace is Release 467 Build 36 current read-only truth; Release 466 reliability remains historical regression compatibility only."
 }
