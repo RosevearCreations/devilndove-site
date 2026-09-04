@@ -131,7 +131,7 @@ export async function onRequestGet(context) {
       implementation_acceptance_is_distinct_from_final_closure: true,
       production: PRODUCTION,
       rollback_readiness: 'release-neutral-read-only',
-      historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration'
+      historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json'
     },
     truth_notes: [
       'The active Deployment Preflight is a current read-only Release 467 Build 48 projection while Build 49 converges restart integrity.',
