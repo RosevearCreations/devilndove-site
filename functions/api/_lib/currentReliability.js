@@ -1,10 +1,10 @@
-// Release 467 Build 42 — current read-only reliability projection.
+// Release 467 Build 43 — current read-only reliability projection.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 42;
-export const CURRENT_RELIABILITY_TITLE = 'Material Template Intelligence';
+export const CURRENT_RELIABILITY_BUILD = 43;
+export const CURRENT_RELIABILITY_TITLE = 'Label Composition & Overrides';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 
 export async function loadCurrentReliability(db, env = {}) {
