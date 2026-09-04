@@ -1,0 +1,76 @@
+{
+  "release": 467,
+  "build": 44,
+  "title": "Label Production & Reuse",
+  "state": "DEVELOPMENT_GREEN",
+  "source_branch": "dev",
+  "source_base_sha": "1a6c7caf0ecb1fcca31b5a5f84d9f7c207d0d5aa",
+  "source_base_tree_sha": "30d09c73a0a1be6f69aa005348c41ad95e974882",
+  "accepted_dev_sha": "70e4b0d948b569c1b2fb64ccbf9d078c3189e2a5",
+  "accepted_dev_tree_sha": "46459cf9fde7b3eb38601af1ce40d3ba794965ab",
+  "scope": [
+    "Converge existing Packaging printer profiles, immutable project versions, export history and physical print-test history into one Label Production & Reuse workflow",
+    "Production Library read-only readiness authority over existing Packaging tables rather than a new persistence model",
+    "Reusable production versions require approved immutable saved SVG content and matching passed physical QA",
+    "True-size production requires an exact 100 percent printer profile and forces the mature Packaging print path to 100 percent scale",
+    "Physical QA remains fail-closed unless 100 percent scale, wrap fit, legibility and overlap all pass",
+    "Production printing preserves Build 41 safe-area protection and Build 43 authoritative label-composition readiness",
+    "Version and QA history remain visible for repeatable label production",
+    "Build 42 and Build 43 compatibility gates were made forward-safe for the shared Packaging activation listener without weakening their semantic or safety requirements",
+    "Forward Current Application Quality regression protection for the zero-schema production/reuse boundary"
+  ],
+  "build45_boundary": "Grey Hair media intelligence and CAIP automation begin in Build 45; Build 44 does not introduce CAIP media processing or provider execution.",
+  "data_authority": {
+    "schema_change": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4,
+    "request_time_ddl": false,
+    "printer_profiles": "packaging_printer_profiles",
+    "immutable_versions": "packaging_project_versions",
+    "physical_qa_history": "soap_label_print_tests",
+    "export_history": "packaging_export_history",
+    "production_readback_endpoint": "/api/admin/packaging-label-production",
+    "production_readback_mutation_capability": "none"
+  },
+  "acceptance": {
+    "system_gate_run": 33901240494,
+    "current_application_quality_run": 33901240474,
+    "it_admin_runtime_proof_run": 33901240545,
+    "branch_hygiene_run": 33901240496
+  },
+  "deployment_acceptance": {
+    "canonical_development_migration_proof": true,
+    "development_data_authority_read_only_proof": true,
+    "exact_preview_deployment": true,
+    "preview_binding_proof": true,
+    "preview_smoke_acceptance": true,
+    "current_regression_evidence": true
+  },
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "state": "PRODUCTION_GREEN"
+  },
+  "safety": {
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "cloudflare_access_mutation": false,
+    "main_mutation": false,
+    "production_mutation": false,
+    "automatic_production_promotion": false,
+    "secret_values_emitted": false
+  },
+  "external_lanes": [
+    "Stripe Development HOLD",
+    "PayPal sandbox HOLD",
+    "CAIP private-media HOLD unless current evidence proves acceptance",
+    "social OAuth HOLD",
+    "Cloudflare Access service-token HOLD"
+  ],
+  "next_build": 45,
+  "next_build_title": "Grey Hair Media Intelligence",
+  "next_build_rule": "Begin only after the Build 44 authority-only descendant independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on its exact merged dev SHA.",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
+}
