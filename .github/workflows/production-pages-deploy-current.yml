@@ -38,7 +38,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Prove exact green Development tree before Production work
+      - name: Prove exact fully-green Development tree before Production work
+        id: development-proof
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python scripts/main_promotion_gate.py
@@ -61,8 +62,8 @@ jobs:
           python - <<'PY'
           import json
           release=json.load(open('development-release.json'))
+          authority=json.load(open('current-development-authority.json'))
           environment=json.load(open('release463-environment.json'))
-          control=json.load(open('release467-build1-it-readiness-control-tower.json'))
 
           assert int(release['release']) >= 466, release
           policy=release['release_policy']
@@ -78,10 +79,16 @@ jobs:
           assert all(x['development_apply']=='applied_and_verified' for x in migrations), migrations
           assert all(x['production_apply']=='applied_and_verified' for x in migrations), migrations
 
-          assert control['release']==467 and control['build']==1, control
-          assert control['schema_change_required'] is False, control
-          assert control['production_mutation'] is False, control
-          assert control['production_provider_execution'] is False, control
+          assert int(authority.get('release') or 0)>=467,authority
+          assert authority.get('state')=='DEVELOPMENT_GREEN',authority
+          assert authority.get('automatic_production_promotion_authorized') is False,authority
+          assert authority.get('promotion_state')=='DEVELOPMENT_GREEN_NOT_YET_PRODUCTION',authority
+          production=authority.get('production_checkpoint') or {}
+          assert production.get('state')=='PRODUCTION_GREEN',production
+          assert production.get('role')=='CURRENT_PRODUCTION_BASELINE',production
+          external=authority.get('external_lanes') or {}
+          assert all(str(value).startswith('HOLD_EXTERNAL') for key,value in external.items() if key!='caip_private_media'),external
+          assert str(external.get('caip_private_media') or '').startswith('HOLD_EXTERNAL'),external
 
           assert environment['environment_release']==463, environment
           assert environment['canonical_pages_project']=='devilndove-site', environment
@@ -93,8 +100,10 @@ jobs:
           print('CURRENT PRODUCTION BOUNDARY: PASS')
           print(json.dumps({
               'development_release': release['release'],
-              'release467_build': control['build'],
-              'external_acceptance_state': control['external_acceptance']['launch_state_until_proven'],
+              'current_authority_release': authority['release'],
+              'current_authority_build': authority['build'],
+              'required Development proofs': ['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene'],
+              'external_lanes': external,
               'provider_execution': policy['provider_execution'],
               'provider_publication': policy['provider_publication'],
               'production_target': environment['production'],
@@ -236,12 +245,8 @@ jobs:
           CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
         run: |
           set -euo pipefail
-          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site/deployments" \
-            > /tmp/production-deployments.json
-          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site" \
-            > /tmp/production-project.json
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site/deployments" > /tmp/production-deployments.json
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site" > /tmp/production-project.json
           python - <<'PY'
           import json,os
           exact=open('/tmp/production-url').read().strip().rstrip('/')
@@ -252,8 +257,7 @@ jobs:
           assert matches,(exact,(deployments.get('result') or [])[:3])
           dep=matches[0]
           meta=(dep.get('deployment_trigger') or {}).get('metadata') or {}
-          branch=str(meta.get('branch') or '')
-          commit=str(meta.get('commit_hash') or '')
+          branch=str(meta.get('branch') or ''); commit=str(meta.get('commit_hash') or '')
           assert dep.get('project_name')=='devilndove-site',dep
           assert dep.get('environment')=='production',dep
           assert branch=='main',(branch,meta)
@@ -270,7 +274,7 @@ jobs:
           assert (d1.get('DB') or {}).get('id')=='f34a741b-0000-45b0-9a96-6be08754d563',d1
           assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images',r2
           assert (r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}).get('name')=='devilndove-caip-media',r2
-          control=json.load(open('release467-build1-it-readiness-control-tower.json'))
+          authority=json.load(open('current-development-authority.json'))
           proof={
             'status':'PASS','source_sha':expected_sha,
             'deployment_id':dep.get('id'),'deployment_url':exact,
@@ -278,8 +282,10 @@ jobs:
             'project':'devilndove-site','production_d1':'devilndove-prod-r462',
             'product_r2':'devilndove-toolshed-images','caip_r2':'devilndove-caip-media',
             'd1_authority':json.load(open('/tmp/production-d1-authority.json')),
-            'promotion_policy':'exact_green_development_tree_only',
-            'external_acceptance_state':control['external_acceptance']['launch_state_until_proven'],
+            'promotion_policy':'exact fully-green Development tree',
+            'development_authority':{'release':authority.get('release'),'build':authority.get('build'),'state':authority.get('state')},
+            'required_development_proofs':['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene'],
+            'external_lanes':authority.get('external_lanes') or {},
             'provider_execution_authorized':False,
             'provider_publication_authorized':False,
             'native_git_deployments':False
@@ -296,15 +302,8 @@ jobs:
           export EXACT_PROD_URL="$(cat /tmp/production-url)"
           python - <<'PY'
           import json, os, time, urllib.request
-          exact=os.environ['EXACT_PROD_URL'].rstrip('/')
-          live=os.environ['PROD_LIVE_BASE'].rstrip('/')
-          targets=[
-              ('exact_home',exact+'/', 'html'),
-              ('live_home',live+'/', 'html'),
-              ('live_shop',live+'/shop/', 'html'),
-              ('live_manifest',live+'/manifest.webmanifest', 'manifest'),
-              ('live_public_api',live+'/api/creations', 'json'),
-          ]
+          exact=os.environ['EXACT_PROD_URL'].rstrip('/'); live=os.environ['PROD_LIVE_BASE'].rstrip('/')
+          targets=[('exact_home',exact+'/', 'html'),('live_home',live+'/', 'html'),('live_shop',live+'/shop/', 'html'),('live_manifest',live+'/manifest.webmanifest', 'manifest'),('live_public_api',live+'/api/creations', 'json')]
           proof={}
           for name,url,kind in targets:
               last=''
@@ -315,19 +314,15 @@ jobs:
                           status=int(response.status); ctype=str(response.headers.get('content-type') or '').lower(); body=response.read(600000)
                       text=body.decode('utf-8','replace')
                       if status==200:
-                          if kind=='html':
-                              assert '<html' in text.lower() or '<!doctype' in text.lower(),(name,ctype,text[:200])
+                          if kind=='html': assert '<html' in text.lower() or '<!doctype' in text.lower(),(name,ctype,text[:200])
                           elif kind=='manifest':
                               parsed=json.loads(text); assert parsed.get('name') or parsed.get('short_name'),parsed
-                          elif kind=='json':
-                              json.loads(text)
+                          elif kind=='json': json.loads(text)
                           proof[name]={'url':url,'status':status,'content_type':ctype,'bytes':len(body)}
                           break
-                  except Exception as exc:
-                      last=repr(exc)
+                  except Exception as exc: last=repr(exc)
                   time.sleep(3)
-              else:
-                  raise SystemExit(f'Production smoke failed for {name} {url}: {last}')
+              else: raise SystemExit(f'Production smoke failed for {name} {url}: {last}')
           json.dump({'status':'PASS','checks':proof},open('/tmp/production-smoke.json','w'),indent=2,sort_keys=True)
           print('PRODUCTION PUBLIC SMOKE: PASS')
           print(json.dumps(proof,indent=2,sort_keys=True))
@@ -350,7 +345,8 @@ jobs:
           echo 'Current release: deliberate Production promotion'
           echo 'Target: Cloudflare Pages devilndove-site / main Production'
           echo "Source SHA: ${GITHUB_SHA}"
-          echo 'Promotion prerequisite: exact tree already proven green on Development'
+          echo 'Promotion prerequisite: exact fully-green Development tree with all required Development proofs'
+          echo 'Required Development proofs: System Gate + Current Application Quality + I.T. Admin Runtime + Repository Branch Hygiene'
           echo 'Canonical migrations: Development-proven before Production apply'
           echo 'Production migration: applied/proven before dependent code deployment'
           echo 'Production business counts: SNAPSHOT + PRESERVATION PROOF'
