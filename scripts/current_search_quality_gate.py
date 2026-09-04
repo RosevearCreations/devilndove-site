@@ -49,15 +49,32 @@ search=read('search/index.html').lower().replace(' ','');req('name="robots"' in 
 req('Sitemap: https://devilndove.com/sitemap.xml' in read('robots.txt'),'robots.txt must advertise canonical sitemap')
 middleware=read('functions/_middleware.js')
 for needle in ('publicProductRequestInfo',"productRequest.slug ? 'index,follow' : 'noindex,follow'",'productRequest.canonical'):req(needle in middleware,f'product-shell/indexing middleware missing {needle!r}')
-dynamic=[]
+# Runtime H1 creation is normally forbidden. Three narrowly proven cases are allowed:
+# 1) the Workshop Journal story replaces the entire <main> that contains the source H1,
+#    so exactly one story H1 remains after render; and
+# 2) the two admin document/print scripts create separate popup/print documents whose
+#    markup itself contains exactly one H1. They do not add an H1 to the current page.
+SAFE_RUNTIME_H1={
+ 'public/js/workshop-journal-story.js':("data-workshop-journal-story","mount.innerHTML =",'<h1>'),
+ 'public/js/admin-packaging-print-source-v299.js':('win.document.write','<!doctype html>','<h1>Packaging print could not be prepared</h1>'),
+ 'public/js/admin-customer-documents.js':('function documentHtml','<!doctype html>','.title h1'),
+}
+dynamic=[];safe_seen=set()
 for base in ('public/js','js'):
  folder=ROOT/base
  if not folder.is_dir():continue
  for path in folder.rglob('*'):
   if not path.is_file() or path.suffix.lower() not in {'.js','.mjs'}:continue
-  text=path.read_text(encoding='utf-8',errors='replace')
-  if re.search(r"createElement\(\s*['\"]h1['\"]",text,re.I) or re.search(r'<h1(?:\s|>)',text,re.I):dynamic.append(str(path.relative_to(ROOT)))
-req(not dynamic,f'runtime scripts may not create extra H1 elements: {dynamic[:20]}')
+  text=path.read_text(encoding='utf-8',errors='replace');rel=str(path.relative_to(ROOT)).replace('\\','/')
+  has_h1=bool(re.search(r"createElement\(\s*['\"]h1['\"]",text,re.I) or re.search(r'<h1(?:\s|>)',text,re.I))
+  if not has_h1:continue
+  proof=SAFE_RUNTIME_H1.get(rel)
+  if proof and all(needle in text for needle in proof):safe_seen.add(rel);continue
+  dynamic.append(rel)
+req(not dynamic,f'runtime scripts may not add H1 elements to an existing document: {dynamic[:20]}')
+for rel in SAFE_RUNTIME_H1:req(rel in safe_seen,f'safe runtime H1 proof drifted or disappeared: {rel}')
+heading_guard=read('public/js/public-heading-guard.js')
+req('querySelectorAll(\'h1\')' in heading_guard or 'querySelectorAll("h1")' in heading_guard,'public H1 runtime guard must remain active')
 print('CURRENT SEARCH / SEO / ONE-H1 GATE');print(f'Sitemap index destinations: {len(urls)}')
 if FAIL:
  for i,x in enumerate(FAIL,1):print(f'{i:03d}. FAIL — {x}')
