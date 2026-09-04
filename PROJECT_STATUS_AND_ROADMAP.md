@@ -2,41 +2,35 @@
 
 ## Current release
 
-**Release 467 Build 47 — AI Story & Edit Planning is Development accepted pending final documentation/read-only authority closure proof.**
+**Release 467 Build 48 — Automated Production Acceptance is Development accepted pending final authority-only closure proof.**
 
-Accepted Build 47 implementation:
-- merged `dev` SHA `091fe5b7c3311bb9fb1bc54218be16952d999e7e`
-- tree `9b6f28c4d4963e398adda8e59b2ccf3a8c4167aa`
-- System Gate `33916429890` SUCCESS
-- Current Application Quality `33916429943` SUCCESS
-- I.T. Admin Runtime Proof `33916429939` SUCCESS
-- Repository Branch Hygiene `33916430024` SUCCESS
-- exact Development Preview deployment, canonical D1 migration proof, read-only Development data-authority proof, binding proof, non-secret smoke acceptance and regression evidence passed in System Gate `33916429890`.
+Accepted Build 48 implementation:
+- merged `dev` SHA `19ee5739ff5f374fae4faf6c003ffca2a0ca557a`
+- tree `aef0bf492ffbbee0f4d39e19c84fdbd874a9aaa7`
+- System Gate `33925012698` SUCCESS
+- Current Application Quality `33925012735` SUCCESS
+- I.T. Admin Runtime Proof `33925012737` SUCCESS
+- Repository Branch Hygiene `33925012709` SUCCESS
+- exact Development Preview deployment, canonical D1 migration proof, read-only Development data-authority proof, binding proof, non-secret smoke acceptance and regression evidence all passed in System Gate `33925012698`.
 
-Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, tree `2c1b4a3694779996e1bdb094be5e9e043834276e`, Production Pages Deploy `33866964958` SUCCESS. Production has not been promoted during Builds 33–47.
+Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, tree `2c1b4a3694779996e1bdb094be5e9e043834276e`, Production Pages Deploy `33866964958` SUCCESS. Production has not been promoted during Builds 33–48.
 
-## Build 47 result
+## Build 48 result
 
-Build 47 completes the approved AI Story & Edit Planning slice:
-1. existing CAIP story-builder and edit-timeline authorities are reused rather than duplicated;
-2. one confirmed Build 46 group with exactly four confirmed camera tracks is required before planning can run;
-3. only active approved source-backed evidence from confirmed camera tracks is eligible;
-4. rejected/purge-requested lifecycle records and rejected footage quality are excluded;
-5. evidence is ranked deterministically from category, source confidence, footage quality, approved semantics and transcript coverage;
-6. generated story/script beats remain source-linked through `creative_media_evidence_range_id` and start as `draft`;
-7. explicit human story `review` or `approved` state is required before edit-plan generation;
-8. edit clips preserve source asset/evidence IDs, source in/out points, camera labels, captions and confirmed sync offsets;
-9. reviewed story/edit changes are revalidated against current approved source evidence and followed by fresh authoritative read-back;
-10. target-duration overflow is surfaced for review rather than silently dropping approved beats;
-11. external AI/LLM provider execution, media rendering, publication, raw public R2 URLs and R2 mutation remain closed;
-12. `scripts/current_grey_hair_story_edit_planning_gate.py` is included in Current Application Quality with syntax coverage for the new server/client authority.
+Build 48 completes the approved Grey Hair CAIP four-build sequence:
+1. Build 45 established private-media intelligence;
+2. Build 46 established reviewed four-camera synchronization and audio alignment;
+3. Build 47 established source-backed, human-reviewed story/edit planning;
+4. Build 48 adds deterministic production acceptance over that approved planning package.
 
-Build 47 adds no schema change, canonical migration, request-time DDL, provider/Access/R2 infrastructure change, `main`, or Production mutation. The canonical migration stream remains exactly `0001`–`0004`. Build 45 remains Grey Hair Media Intelligence; Build 46 remains Four-Camera Synchronization & Audio Alignment. Packaging Builds 41–44 remain historical active authorities, Product Social Automation remains protected by Build 40, Product Numbering by Build 39, Accounting by Build 38, Deployment Preflight historical feature provenance by Build 37 and Reliability historical feature provenance by Build 36.
+Build 48 is GET-only. It requires the dedicated Grey Hair project, a confirmed Build 46 group with exactly four distinct confirmed camera tracks, an approved human-reviewed Build 47 story and approved human-reviewed timeline. It verifies current approved evidence, exact story-to-clip evidence coverage, clip source bounds, contiguous timeline timing, confirmed synchronization offsets, aspect ratio and target-duration compliance.
 
-I.T., Reliability and Deployment Preflight are synchronized to Build 47 current read-only truth. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access lanes remain separate HOLD/evidence-dependent items unless fresh acceptance evidence explicitly clears them.
+The result is fail-closed: `HOLD` exposes blockers; `ACCEPTED_FOR_CONTROLLED_PRODUCTION` indicates only that the planning metadata is internally consistent and approved. It does **not** authorize rendering, external AI/provider execution, transcoding, publication, social handoff, R2 mutation, `main` mutation or application Production promotion.
 
-## Next — Build 48: Grey Hair CAIP Automation Continuation
+Build 48 adds no schema change, canonical migration or request-time DDL. The canonical migration stream remains exactly `0001`–`0004`. I.T., Reliability and Deployment Preflight are synchronized to Build 48 current read-only truth. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access lanes remain separate HOLD/evidence-dependent items.
 
-Build 48 may begin only after this documentation/read-only Build 47 closure merges to `dev` and the exact resulting SHA independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene, including exact Development Preview deployment acceptance.
+## Next
 
-The current approved sequence establishes Build 48 as the next Grey Hair CAIP automation build, but the repository does not yet record a narrower exact Build 48 title/scope. Resolve that bounded scope deliberately from the final Build 47 state rather than inventing it during closure. Continue PR → exact merged-`dev` proof → authority closure before calling the next build GREEN.
+There is currently **no approved Build 49 scope**. After this authority-only Build 48 descendant merges and independently passes the final exact-`dev` four-proof/deployment cycle, choose the next bounded workstream deliberately from the fully-green Build 48 baseline.
+
+Do not infer that Build 48 acceptance opens media rendering or application Production promotion. Both remain separately governed.
