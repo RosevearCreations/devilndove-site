@@ -2,19 +2,19 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 34;
-const TITLE = 'Release-Neutral System Gate & Provenance Convergence';
+const BUILD = 35;
+const TITLE = 'Production Promotion & Rollback Provenance Convergence';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 34,
+  build: 35,
   title: TITLE,
   state: 'DEVELOPMENT_GREEN',
-  accepted_sha: '5a212ea10e3ad24163a0228b9ff8c46190e1d678',
-  accepted_tree_sha: 'e8c42182099e6a81191989d2c7216fa2976b68b2',
-  system_gate_run: 33872053495,
-  current_application_quality_run: 33872053816,
-  it_admin_runtime_proof_run: 33872053528,
-  branch_hygiene_run: 33872053880,
+  accepted_sha: 'b3fd1777c41f9b459048b441254f2fa762692051',
+  accepted_tree_sha: 'c88d7e9fc3f43dcdd6d0e05cbe14c6cc7c3fc461',
+  system_gate_run: 33873907300,
+  current_application_quality_run: 33873908526,
+  it_admin_runtime_proof_run: 33873907340,
+  branch_hygiene_run: 33873907303,
 });
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -89,7 +89,7 @@ export async function onRequestGet(context) {
     build: BUILD,
     title: TITLE,
     ok: true,
-    authority: 'release467-build34-release-neutral-system-gate-provenance',
+    authority: 'release467-build35-production-promotion-rollback-provenance',
     state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
@@ -100,6 +100,8 @@ export async function onRequestGet(context) {
       compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY',
       current_automatic_guards: CURRENT_GUARDS,
       persistent_branches: ['main', 'dev'],
+      production_promotion_required_development_proofs: CURRENT_GUARDS,
+      rollback_readiness: 'RELEASE_NEUTRAL_READ_ONLY',
     },
     development: { ...DEVELOPMENT, runtime_source_sha: runtimeSha, runtime_host: runtimeHost, exact_runtime_sha_available: Boolean(runtimeSha) },
     readiness: base.readiness || {},
@@ -125,12 +127,12 @@ export async function onRequestGet(context) {
     sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 34 is Development GREEN and owns the current I.T. operator/release-provenance surface.',
-      'System Gate current deployment/proof identities are release-neutral and current Release 467 authority changes trigger the canonical gate.',
+      'Build 35 is Development GREEN and owns the current I.T. operator/release-provenance surface.',
+      'Production promotion now requires the exact current Development tree plus successful System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene proofs.',
+      'Production promotion resolves current-development-authority.json rather than a stale build-specific I.T. authority.',
+      'Production rollback readiness is release-neutral, read-only and does not execute rollback, schema reversal or business-data restoration.',
       'Build 32 remains the independently verified Production-green baseline until a deliberate Production promotion is requested and proven.',
-      'The exact currently deployed Development SHA comes from live deployment ancestry and is shown separately from accepted Development evidence.',
-      'Opaque runtime bindings never substitute for System Gate/control-plane D1 and R2 identity proof.',
-      'External HOLDs never become GREEN by inference from source, D1 convergence or deployment success.',
+      'External HOLDs never become GREEN by inference from source, D1 convergence, deployment success or promotion readiness.',
     ],
     safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
     generated_at: new Date().toISOString(),
