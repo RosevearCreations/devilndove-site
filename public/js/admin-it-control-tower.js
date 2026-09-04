@@ -1,4 +1,4 @@
-// Release 467 Build 43 — Label Composition & Overrides renderer.
+// Release 467 Build 44 — Label Production & Reuse renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
