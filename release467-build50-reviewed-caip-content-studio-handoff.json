@@ -4,6 +4,16 @@
   "title": "Reviewed CAIP to Content Studio Handoff",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
+  "source_base_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+  "source_base_tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
+  "accepted_dev_sha": "dddd7c9423132dd22b179348a5644362f7b9f46c",
+  "accepted_dev_tree_sha": "1d5d4859c55fae404a79eb8cef85e1e0d3f30826",
+  "acceptance": {
+    "system_gate_run": 33930359847,
+    "current_application_quality_run": 33930359835,
+    "it_admin_runtime_proof_run": 33930359865,
+    "branch_hygiene_run": 33930359956
+  },
   "source_base": {
     "build": 49,
     "title": "Current Authority Convergence & Restart Integrity",
