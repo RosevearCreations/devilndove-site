@@ -1,0 +1,72 @@
+{
+  "release": 467,
+  "build": 41,
+  "title": "Unified Interface & Label Fit Foundation",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "source_base_sha": "685c8a0688f7431c54cc391179d7798778fd80d2",
+  "source_base_tree_sha": "c1c254c0299146c414db3ba271e80392e846e586",
+  "accepted_dev_sha": "e98a7b1e00257ad3ffa277aa66efb42de3e94a29",
+  "accepted_dev_tree_sha": "cc958ea90566c36fde341706666c3a0ce4f440e5",
+  "scope": {
+    "responsive_acceptance_viewports": ["360", "390", "768", "1024", "1280+", "1440+"],
+    "packaging_device_appropriate_workspace": true,
+    "printable_safe_area_fail_closed": true,
+    "protected_content": ["text", "ingredients", "artwork", "logo_brand_content"],
+    "export_blocked_when_safe_area_unproven_or_failed": true,
+    "optimized_print_blocked_when_safe_area_unproven_or_failed": true,
+    "geometry_validation_runtime_only": true,
+    "current_application_quality_forward_regression": true,
+    "schema_change_added": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4
+  },
+  "quality_contract": {
+    "packaging_safe_area_gate": "scripts/current_packaging_safe_area_gate.py",
+    "responsive_gate": "scripts/current_responsive_layout_gate.py",
+    "current_application_quality_gate": "scripts/current_application_quality_gate.py",
+    "runtime_guard": "public/js/packaging-safe-area-guard.js",
+    "responsive_layer": "css/current-responsive.css"
+  },
+  "development_deployment": {
+    "system_gate_run": 33893099319,
+    "canonical_preview_exact_sha_deploy": "SUCCESS",
+    "canonical_preview_binding_proof": "SUCCESS",
+    "non_secret_preview_smoke": "SUCCESS",
+    "current_regression_evidence": "SUCCESS"
+  },
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "caip_private_media": "HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE",
+    "social_oauth": "HOLD_EXTERNAL",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized_by_build": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "rollback_execution_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  },
+  "acceptance": {
+    "system_gate_run": 33893099319,
+    "current_application_quality_run": 33893099369,
+    "it_admin_runtime_proof_run": 33893099321,
+    "branch_hygiene_run": 33893099355
+  },
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
+}

@@ -1,12 +1,12 @@
-// Release 467 Build 40 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 41 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical preflight diagnostics are reused read-only; schema authority is
 // migrations/canonical + scripts/d1_migrate.py and is never repaired during a request.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 40;
-const TITLE = 'Product Social Automation Runtime-DDL Elimination & Baseline Schema Convergence';
+const BUILD = 41;
+const TITLE = 'Unified Interface & Label Fit Foundation';
 const AUTHORITY = 'current-development-authority.json';
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -223,13 +223,13 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is a current read-only Release 467 Build 40 projection.',
+      'The active Deployment Preflight is a current read-only Release 467 Build 41 projection.',
       'Release 467 Build 37 remains the historical feature authority that converged Deployment Preflight with canonical migration truth.',
       'The retained historical preflight engine supplies diagnostics only; it is not schema or release authority.',
       'Historical build-numbered SQL is provenance only. Forward D1 schema authority is migrations/canonical/manifest.json.',
       'Missing schema fails closed. No request-time schema creation or repair is available from this endpoint.',
-      'Build 40 adds no canonical migration; Product Social Automation uses proven pre-canonical baseline tables and the stream remains exactly 0001-0004.',
-      'Build 38 Accounting and Build 39 Product Numbering remain historical feature authorities; both continue to carry zero request-time DDL.',
+      'Build 41 adds no canonical migration; the stream remains exactly 0001-0004 while Packaging Studio responsive/safe-area work remains source/UI only.',
+      'Build 40 Product Social Automation, Build 39 Product Numbering and Build 38 Accounting remain historical feature authorities; all continue to carry zero request-time DDL in their bounded areas.',
       'Production remains Build 32 until a deliberate exact-tree promotion is requested and independently proven.',
     ],
     safety: {
