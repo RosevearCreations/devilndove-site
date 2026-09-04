@@ -1,4 +1,4 @@
-// Release 467 Build 41 — Unified Interface & Label Fit Foundation renderer.
+// Release 467 Build 42 — Material Template Intelligence renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
