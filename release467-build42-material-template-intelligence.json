@@ -1,0 +1,67 @@
+{
+  "release": 467,
+  "build": 42,
+  "title": "Material Template Intelligence",
+  "state": "DEVELOPMENT_GREEN",
+  "source_branch": "dev",
+  "source_base_sha": "bcd85795d236d0e6e02c0203b5e8b106b71e2644",
+  "accepted_dev_sha": "276aa755935cbccdfe87c7311d276aadbf4759bd",
+  "accepted_dev_tree_sha": "4b249a13e4828fc862446b401f3553c2b86141de",
+  "scope": [
+    "Reusable Material Library ingredient inheritance policy: Required, Print by Default, Optional, Internal Only",
+    "Review-first ingredient provenance: needs review, supplier declared, supplier verified, owner verified, internal note",
+    "Deterministic canonical INCI deduplication across inherited source materials",
+    "Strongest-policy precedence when the same INCI arrives from multiple attached sources",
+    "Fresh authoritative Packaging read-back after source-material attachment and normalization",
+    "Material Library browser controls and forward Current Application Quality regression protection"
+  ],
+  "build43_boundary": "Per-label composition, overrides and What Will Print inspection remain Build 43 authority and are not silently implemented by Build 42.",
+  "data_authority": {
+    "schema_change": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4,
+    "request_time_ddl": false,
+    "template_intelligence_storage": "packaging_source_material_templates.master_inci_json",
+    "reusable_projection_storage": "packaging_content_library.metadata_json",
+    "project_inheritance_storage": "packaging_project_ingredients"
+  },
+  "acceptance": {
+    "system_gate_run": 33895643967,
+    "current_application_quality_run": 33895644065,
+    "it_admin_runtime_proof_run": 33895644098,
+    "branch_hygiene_run": 33895644039
+  },
+  "deployment_acceptance": {
+    "exact_preview_deployment": true,
+    "preview_binding_proof": true,
+    "preview_smoke_acceptance": true,
+    "development_data_authority_read_only_proof": true
+  },
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "state": "PRODUCTION_GREEN"
+  },
+  "safety": {
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "cloudflare_access_mutation": false,
+    "main_mutation": false,
+    "production_mutation": false,
+    "automatic_production_promotion": false,
+    "secret_values_emitted": false
+  },
+  "external_lanes": [
+    "Stripe Development HOLD",
+    "PayPal sandbox HOLD",
+    "CAIP private-media HOLD unless current evidence proves acceptance",
+    "social OAuth HOLD",
+    "Cloudflare Access service-token HOLD"
+  ],
+  "next_build": 43,
+  "next_build_title": "Label Composition & Overrides",
+  "next_build_rule": "Begin only after the Build 42 authority-only descendant independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on its exact merged dev SHA.",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
+}
