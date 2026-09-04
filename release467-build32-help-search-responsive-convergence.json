@@ -1,0 +1,42 @@
+{
+  "release": 467,
+  "build": 32,
+  "title": "Help, Search & Responsive Convergence",
+  "state": "FEATURE_CANDIDATE",
+  "source_base_sha": "09d6df54a419c0537c77141924024ed12687ba4c",
+  "source_base_tree_sha": "268927e3cb8c401c6edf22b68b1fcf1c473ba49c",
+  "predecessor": {
+    "build": 31,
+    "production_main_sha": "ccc2bbf1de4acbede58763f9532d9e633c0279da",
+    "production_tree_sha": "268927e3cb8c401c6edf22b68b1fcf1c473ba49c",
+    "production_pages_deploy_run": 33823805781
+  },
+  "scope": {
+    "online_help_current_and_release_neutral": true,
+    "stale_duplicate_active_files_removed": true,
+    "legacy_calibration_removed_from_active_application": true,
+    "active_navigation_release_build_neutral": true,
+    "historical_evidence_preserved_in_git_history": true,
+    "internal_search_noindex_follow": true,
+    "empty_product_shell_excluded_from_sitemap": true,
+    "slugged_product_indexing_preserved": true,
+    "single_public_h1_source_gate": true,
+    "single_public_h1_runtime_backstop": true,
+    "phone_tablet_pc_app_wide_web_responsive_guard": true,
+    "wide_table_containment": true,
+    "touch_target_guard": true,
+    "password_hash_security_regression_preserved": true,
+    "release_neutral_current_quality_workflow": true
+  },
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_only_application_patch_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  }
+}

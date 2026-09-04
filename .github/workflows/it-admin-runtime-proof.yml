@@ -1,12 +1,14 @@
-name: Release 467 I.T. Admin Runtime Proof
+name: I.T. Admin Runtime Proof
 
 on:
-  push:
-    branches: [release467-it-admin-runtime-reliability]
   pull_request:
     branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
 
-permissions: {contents: read}
+permissions:
+  contents: read
 
 jobs:
   source-proof:
@@ -22,19 +24,20 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Prove Release 467 I.T./Admin runtime reliability source authority
+      - name: Prove current I.T./Admin runtime reliability source authority
         run: python scripts/release467_it_admin_runtime_gate.py
       - name: Diff safety
         run: git diff --check origin/dev...HEAD
       - name: Boundary
         run: |
-          echo 'Scope: I.T./Admin runtime reliability items 1-7'
+          echo 'I.T./Admin reliability source proof'
           echo 'Cloudflare contact: NONE in source-proof'
           echo 'D1/R2 mutation: NONE'
           echo 'Provider execution/publication: CLOSED'
           echo 'Production mutation: NONE'
 
   development-root-admin-proof:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
