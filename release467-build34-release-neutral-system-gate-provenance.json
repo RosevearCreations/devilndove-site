@@ -1,0 +1,53 @@
+{
+  "release": 467,
+  "build": 34,
+  "title": "Release-Neutral System Gate & Provenance Convergence",
+  "state": "FEATURE_CANDIDATE",
+  "source_base_sha": "005569859475f8561af99f824e6e621738d273e4",
+  "source_base_tree_sha": "c7cfcfa4b54d5ff567af3ea47f4a65d8e17dbe13",
+  "build33_final_closure": {
+    "dev_sha": "005569859475f8561af99f824e6e621738d273e4",
+    "tree_sha": "c7cfcfa4b54d5ff567af3ea47f4a65d8e17dbe13",
+    "system_gate_run": 33871077506,
+    "current_application_quality_run": 33871077329,
+    "it_admin_runtime_proof_run": 33871077254,
+    "branch_hygiene_run": 33871077275,
+    "state": "DEVELOPMENT_GREEN"
+  },
+  "production_baseline": {
+    "build": 32,
+    "authority": "release467-build32-help-search-responsive-convergence.json",
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "system_gate_current_authority_paths_triggered": true,
+    "active_deployment_proof_names_release_neutral": true,
+    "active_regression_evidence_release_neutral": true,
+    "historical_release464_465_prerequisite_gates_preserved": true,
+    "it_release_truth_authority_resolution_dynamic": true,
+    "current_system_gate_provenance_guard_added": true,
+    "current_application_quality_covers_system_gate_provenance": true,
+    "build33_final_closure_baseline_recorded": true,
+    "self_referential_final_sha_not_required_in_authority": true
+  },
+  "provenance_model": {
+    "accepted_implementation": "record the exact merged Development implementation SHA/tree and its push-triggered proof runs",
+    "authority_only_descendants": "must independently pass the same release-neutral push-triggered proof set",
+    "production_promotion": "resolve and promote the exact current fully-green dev tree at promotion time; do not depend on a frozen self-referential closure SHA"
+  },
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  }
+}
