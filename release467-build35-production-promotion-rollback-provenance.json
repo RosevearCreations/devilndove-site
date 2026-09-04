@@ -2,9 +2,17 @@
   "release": 467,
   "build": 35,
   "title": "Production Promotion & Rollback Provenance Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "4cba824be269ce30b7a113e0033e7a91d7b6c5d4",
   "source_base_tree_sha": "a2ed00510bf727c28a41193f66f0de8f76a60e6e",
+  "accepted_dev_sha": "b3fd1777c41f9b459048b441254f2fa762692051",
+  "accepted_dev_tree_sha": "c88d7e9fc3f43dcdd6d0e05cbe14c6cc7c3fc461",
+  "acceptance": {
+    "system_gate_run": 33873907300,
+    "current_application_quality_run": 33873908526,
+    "it_admin_runtime_proof_run": 33873907340,
+    "branch_hygiene_run": 33873907303
+  },
   "build34_final_closure": {
     "dev_sha": "4cba824be269ce30b7a113e0033e7a91d7b6c5d4",
     "tree_sha": "a2ed00510bf727c28a41193f66f0de8f76a60e6e",
