@@ -1,27 +1,27 @@
 {
   "release": 467,
-  "build": 42,
-  "title": "Material Template Intelligence",
+  "build": 43,
+  "title": "Label Composition & Overrides",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "bcd85795d236d0e6e02c0203b5e8b106b71e2644",
-  "source_base_tree_sha": "33ea220f862e88b0bd72c84e2123b27e4faf56c4",
-  "accepted_dev_sha": "276aa755935cbccdfe87c7311d276aadbf4759bd",
-  "accepted_dev_tree_sha": "4b249a13e4828fc862446b401f3553c2b86141de",
+  "source_base_sha": "0fa8c2d49457ecb9f4b478f660ceea05a4f71ee4",
+  "source_base_tree_sha": "cda2f8d71dd9191f303e55f7f21d4caa1e48cd75",
+  "accepted_dev_sha": "41d3bc9ba849b5b0a646d002aa72593368444fcc",
+  "accepted_dev_tree_sha": "2891a0d7591cbe72acc6f94ec6bec69b2ae13a7f",
   "acceptance": {
-    "system_gate_run": 33895643967,
-    "current_application_quality_run": 33895644065,
-    "it_admin_runtime_proof_run": 33895644098,
-    "branch_hygiene_run": 33895644039
+    "system_gate_run": 33898520091,
+    "current_application_quality_run": 33898520539,
+    "it_admin_runtime_proof_run": 33898520189,
+    "branch_hygiene_run": 33898520069
   },
-  "last_green_build": 42,
-  "last_green_build_name": "Material Template Intelligence",
-  "last_green_dev_sha": "276aa755935cbccdfe87c7311d276aadbf4759bd",
-  "last_green_dev_tree_sha": "4b249a13e4828fc862446b401f3553c2b86141de",
-  "last_green_system_gate_run": 33895643967,
-  "last_green_application_quality_run": 33895644065,
-  "last_green_it_admin_runtime_run": 33895644098,
-  "last_green_branch_hygiene_run": 33895644039,
+  "last_green_build": 43,
+  "last_green_build_name": "Label Composition & Overrides",
+  "last_green_dev_sha": "41d3bc9ba849b5b0a646d002aa72593368444fcc",
+  "last_green_dev_tree_sha": "2891a0d7591cbe72acc6f94ec6bec69b2ae13a7f",
+  "last_green_system_gate_run": 33898520091,
+  "last_green_application_quality_run": 33898520539,
+  "last_green_it_admin_runtime_run": 33898520189,
+  "last_green_branch_hygiene_run": 33898520069,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -32,6 +32,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build43-label-composition-overrides.json",
     "release467-build42-material-template-intelligence.json",
     "release467-build41-unified-interface-label-fit-foundation.json",
     "release467-build32-help-search-responsive-convergence.json",
@@ -69,6 +70,7 @@
     "active_product_social_automation_schema_authority": "release467-build40-product-social-automation-runtime-ddl-elimination.json",
     "active_packaging_safe_area_gate": "scripts/current_packaging_safe_area_gate.py",
     "active_packaging_material_intelligence_gate": "scripts/current_packaging_material_intelligence_gate.py",
+    "active_packaging_label_composition_gate": "scripts/current_packaging_label_composition_gate.py",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
     "canonical_d1_migration_count": 4,
@@ -80,6 +82,7 @@
     "product_numbering_request_time_schema_ddl": false,
     "product_social_automation_request_time_schema_ddl": false,
     "packaging_material_intelligence_request_time_schema_ddl": false,
+    "packaging_label_composition_request_time_schema_ddl": false,
     "request_time_schema_mutation": false
   },
   "external_lanes": {
@@ -89,8 +92,9 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 43,
-  "next_build_state": "READY_AFTER_BUILD_42_FINAL_CLOSURE_PROOF",
+  "next_build": 44,
+  "next_build_state": "READY_AFTER_BUILD_43_FINAL_CLOSURE_PROOF",
+  "next_build_title": "Label Production & Reuse",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -101,5 +105,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 42 implementation is accepted on Development at SHA 276aa755935cbccdfe87c7311d276aadbf4759bd / tree 4b249a13e4828fc862446b401f3553c2b86141de with System Gate 33895643967, Current Application Quality 33895644065, I.T. Admin Runtime Proof 33895644098 and Branch Hygiene 33895644039. The exact canonical Preview deployment, binding proof and non-secret smoke acceptance passed in the System Gate. Build 42 adds Material Library inheritance policies Required, Print by Default, Optional and Internal Only; review-first provenance; deterministic canonical INCI deduplication; strongest-policy inheritance; and fresh authoritative Packaging read-back after source attachment. Build 42 adds no schema or canonical migration and performs no request-time DDL. This authority-only closure must independently pass the same push-triggered four-proof set before Build 43 starts. Build 32 remains Production GREEN."
+  "restart_rule": "Build 43 implementation is accepted on Development at SHA 41d3bc9ba849b5b0a646d002aa72593368444fcc / tree 2891a0d7591cbe72acc6f94ec6bec69b2ae13a7f with System Gate 33898520091, Current Application Quality 33898520539, I.T. Admin Runtime Proof 33898520189 and Branch Hygiene 33898520069. The exact canonical Preview deployment, binding proof, canonical D1 migration proof, read-only Development data-authority proof and non-secret smoke acceptance passed in the System Gate. Build 43 adds project-level inherit/print/omit decisions, a live What Will Print inspector, fail-closed Required/Internal Only rules, authoritative D1 read-back and Build 42 inheritance compatibility. Build 43 adds no schema or canonical migration and performs no request-time DDL. This authority-only closure must independently pass the same push-triggered four-proof set before Build 44 starts. Build 32 remains Production GREEN."
 }
