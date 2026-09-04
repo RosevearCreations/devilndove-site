@@ -1,4 +1,4 @@
-// Release 467 Build 45 — Grey Hair Media Intelligence renderer.
+// Release 467 Build 46 — Four-Camera Synchronization & Audio Alignment renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
