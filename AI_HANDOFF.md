@@ -2,36 +2,36 @@
 
 ## Current authority
 
-**Release 467 Build 44 — Label Production & Reuse is accepted on Development pending the final documentation/read-only authority closure proof.**
+**Release 467 Build 45 — Grey Hair Media Intelligence is accepted on Development pending the final documentation/read-only authority closure proof.**
 
-Accepted Build 44 implementation:
-- merged `dev` SHA `70e4b0d948b569c1b2fb64ccbf9d078c3189e2a5`
-- tree `46459cf9fde7b3eb38601af1ce40d3ba794965ab`
-- System Gate `33901240494` SUCCESS
-- Current Application Quality `33901240474` SUCCESS
-- I.T. Admin Runtime Proof `33901240545` SUCCESS
-- Repository Branch Hygiene `33901240496` SUCCESS
-- exact canonical Preview deployment, canonical D1 migration proof, Development data-authority read-only proof, binding proof, non-secret smoke acceptance and regression evidence: SUCCESS inside System Gate `33901240494`.
+Accepted Build 45 implementation:
+- merged `dev` SHA `77bd11541095358d21dc18b98270f00d00242f7f`
+- tree `0127bc8558e8f37a886c33bddb8a295f6aaa32d9`
+- System Gate `33912776513` SUCCESS
+- Current Application Quality `33912776473` SUCCESS
+- I.T. Admin Runtime Proof `33912776406` SUCCESS
+- Repository Branch Hygiene `33912776442` SUCCESS
+- exact canonical Preview deployment, canonical D1 migration proof, Development data-authority read-only proof, binding proof, non-secret smoke acceptance and regression evidence: SUCCESS inside System Gate `33912776513`.
 
 Build 32 remains the independently verified Production baseline:
 - Production `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`
 - tree `2c1b4a3694779996e1bdb094be5e9e043834276e`
 - Production Pages Deploy `33866964958` SUCCESS.
 
-## Build 44 result
+## Build 45 result
 
-Packaging Studio now has a unified **Production Library** over the existing `packaging_printer_profiles`, immutable `packaging_project_versions`, `packaging_export_history`, and `soap_label_print_tests` authorities. Build 44 creates no competing production persistence model.
+Grey Hair Media Intelligence now provides a private read-only workspace over the existing CAIP media/evidence authorities: `creative_assets`, technical observations, temporal evidence ranges, story evidence links, processing jobs and verified processing artifacts. It produces deterministic per-asset coverage/readiness from private-source evidence, technical observations, temporal markers, transcript excerpts, approved review state and verified artifacts.
 
-A reusable production version must have approved immutable SVG content, an exact 100% printer profile, and matching passed physical QA. A passed physical print test still requires exact 100% scale plus passed wrap fit, legibility and overlap. Production printing uses the mature immutable-version print path and remains fail-closed when Build 41 safe-area readiness or Build 43 authoritative label-composition readiness is not proven.
+Build 45 does not create a competing media persistence model. Existing CAIP evidence authority is reused and the workspace fails closed when that authority is incomplete rather than creating schema during an HTTP request. Source originals remain private and immutable; raw public R2 URLs, R2 mutation, provider execution and provider publication remain disabled.
 
-Version history, QA history and production readiness are visible together for repeatable label output. Build 42 Material Template Intelligence remains the inherited reusable-material authority and Build 43 remains the per-label composition authority. Their compatibility gates were made forward-safe for the shared Packaging activation-listener pattern without weakening their semantic or safety requirements.
+Build 45 explicitly prepares trusted inputs only. Build 46 owns four-camera synchronization and audio alignment. Build 47 owns AI story selection/edit planning/script generation. Build 45 performs none of those later-stage operations and publishes nothing.
 
-Build 44 adds no schema or canonical migration and performs no request-time DDL. The canonical D1 migration stream remains exactly `0001`–`0004`. No provider execution/publication, Cloudflare Access mutation, R2 infrastructure mutation, `main` mutation, Production deployment/promotion or rollback execution is authorized by Build 44.
+Build 45 adds no schema or canonical migration and performs no request-time DDL. The canonical D1 migration stream remains exactly `0001`–`0004`. `scripts/current_grey_hair_media_intelligence_gate.py` is part of Current Application Quality. Completed Packaging Builds 41–44 remain historical active protections and should not be reopened without regression evidence.
 
 ## Restart rule
 
-This documentation/read-only Build 44 authority closure must merge to `dev` and independently pass the push-triggered System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on its exact merged SHA before Build 44 is called fully closed and before Build 45 starts.
+This documentation/read-only Build 45 authority closure must merge to `dev` and independently pass the push-triggered System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on its exact merged SHA before Build 45 is called fully closed and before Build 46 starts.
 
-After that proof, start **Release 467 Build 45 — Grey Hair Media Intelligence** from the exact final Build 44 documentation-green `dev` head. Build 45 begins the Grey Hair CAIP automation sequence; do not reopen completed Packaging Builds 41–44 unless regression evidence proves a defect.
+After that proof, start **Release 467 Build 46 — Four-Camera Synchronization & Audio Alignment** from the exact final Build 45 documentation-green `dev` head. Build 46 may consume Build 45 intelligence-ready private-media metadata, but must not weaken private-media, review, provider or Production boundaries.
 
 External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access lanes remain HOLD unless fresh evidence explicitly accepts them. Build 32 remains Production until a deliberate current fully-green Development promotion is explicitly requested and independently proven.

@@ -1,0 +1,87 @@
+{
+  "release": 467,
+  "build": 45,
+  "title": "Grey Hair Media Intelligence",
+  "state": "DEVELOPMENT_GREEN",
+  "source_branch": "dev",
+  "source_base_sha": "74092203dc69a5fa02b36be24f7837a7cb163659",
+  "source_base_tree_sha": "4601e87291d9f0f9807f6a4af36d7dcd67c8374e",
+  "accepted_dev_sha": "77bd11541095358d21dc18b98270f00d00242f7f",
+  "accepted_dev_tree_sha": "0127bc8558e8f37a886c33bddb8a295f6aaa32d9",
+  "scope": [
+    "Add a private read-only Grey Hair Media Intelligence workspace over existing CAIP media and evidence authorities",
+    "Reuse creative assets, technical observations, temporal evidence, transcript excerpts, processing jobs and verified processing artifacts",
+    "Produce deterministic per-asset coverage and readiness for later synchronization and story automation builds",
+    "Prefer Grey Hair project matches while retaining a safe active-project fallback for operator review",
+    "Fail closed when the established CAIP temporal-evidence authority is incomplete rather than creating schema during a request",
+    "Keep source originals private and immutable and never expose raw public R2 object URLs",
+    "Keep provider execution, publication and R2 mutation disabled",
+    "Reserve four-camera synchronization and audio alignment for Build 46",
+    "Reserve story selection, edit planning, script generation and publication for Build 47 or later",
+    "Add forward Current Application Quality protection for the Build 45 boundary"
+  ],
+  "build46_boundary": "Build 46 owns four-camera synchronization and audio alignment. Build 45 only supplies reviewed private-media intelligence inputs and performs no synchronization or alignment.",
+  "build47_boundary": "Build 47 owns AI story/edit planning. Build 45 only supplies reviewed evidence/transcript coverage and performs no story selection, scripting, editing or publication.",
+  "data_authority": {
+    "schema_change": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4,
+    "request_time_ddl": false,
+    "creative_assets": "creative_assets",
+    "technical_observations": "creative_asset_technical_observations",
+    "temporal_evidence": "creative_media_evidence_ranges",
+    "story_evidence_links": "creative_story_segment_evidence_links",
+    "processing_jobs": "caip_media_processing_jobs",
+    "processing_artifacts": "caip_media_processing_artifacts",
+    "intelligence_endpoint": "/api/admin/grey-hair-media-intelligence",
+    "mutation_capability": "none"
+  },
+  "acceptance": {
+    "system_gate_run": 33912776513,
+    "current_application_quality_run": 33912776473,
+    "it_admin_runtime_proof_run": 33912776406,
+    "branch_hygiene_run": 33912776442
+  },
+  "deployment_acceptance": {
+    "canonical_development_migration_proof": true,
+    "development_data_authority_read_only_proof": true,
+    "exact_preview_deployment": true,
+    "preview_binding_proof": true,
+    "preview_smoke_acceptance": true,
+    "current_regression_evidence": true
+  },
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "state": "PRODUCTION_GREEN"
+  },
+  "safety": {
+    "private_media_only": true,
+    "source_originals_immutable": true,
+    "raw_public_r2_urls": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "camera_synchronization": false,
+    "audio_alignment": false,
+    "story_editing": false,
+    "script_generation": false,
+    "cloudflare_access_mutation": false,
+    "main_mutation": false,
+    "production_mutation": false,
+    "automatic_production_promotion": false,
+    "secret_values_emitted": false
+  },
+  "external_lanes": [
+    "Stripe Development HOLD",
+    "PayPal sandbox HOLD",
+    "CAIP private-media HOLD unless fresh authenticated runtime evidence proves acceptance",
+    "social OAuth HOLD",
+    "Cloudflare Access service-token HOLD"
+  ],
+  "next_build": 46,
+  "next_build_title": "Four-Camera Synchronization & Audio Alignment",
+  "next_build_rule": "Begin only after the Build 45 authority-only descendant independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on its exact merged dev SHA.",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
+}
