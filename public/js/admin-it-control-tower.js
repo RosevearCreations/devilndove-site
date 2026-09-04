@@ -1,4 +1,4 @@
-// Release 467 Build 37 — Deployment Preflight Canonical Migration & Runtime-Schema Convergence renderer.
+// Release 467 Build 38 — Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
