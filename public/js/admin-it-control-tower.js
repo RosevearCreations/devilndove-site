@@ -1,4 +1,4 @@
-// Release 467 Build 44 — Label Production & Reuse renderer.
+// Release 467 Build 45 — Grey Hair Media Intelligence renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
