@@ -1,0 +1,71 @@
+{
+  "release": 467,
+  "build": 37,
+  "title": "Deployment Preflight Canonical Migration & Runtime-Schema Convergence",
+  "state": "FEATURE_CANDIDATE",
+  "source_base_sha": "e77bed366a8717ac74e3a3534f5539d14b0ab243",
+  "source_base_tree_sha": "9febef037a02725a9bc13abd33a4b902c775b5ce",
+  "build36_accepted_implementation": {
+    "dev_sha": "22b1efbf48b67f91024d277566ce51ac1263c970",
+    "tree_sha": "bb020637765dd21b262a5007162141bf03bd658c",
+    "system_gate_run": 33875163710,
+    "current_application_quality_run": 33875163581,
+    "it_admin_runtime_proof_run": 33875163703,
+    "branch_hygiene_run": 33875163813,
+    "state": "DEVELOPMENT_GREEN"
+  },
+  "build36_final_closure": {
+    "dev_sha": "e77bed366a8717ac74e3a3534f5539d14b0ab243",
+    "tree_sha": "9febef037a02725a9bc13abd33a4b902c775b5ce",
+    "system_gate_run": 33875695649,
+    "current_application_quality_run": 33875695852,
+    "it_admin_runtime_proof_run": 33875695643,
+    "branch_hygiene_run": 33875695778,
+    "state": "DEVELOPMENT_GREEN"
+  },
+  "production_baseline": {
+    "build": 32,
+    "authority": "release467-build32-help-search-responsive-convergence.json",
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "active_deployment_preflight_release467_build37": true,
+    "active_deployment_preflight_get_only": true,
+    "active_deployment_preflight_canonical_migration_authority": true,
+    "canonical_migration_stream_count": 4,
+    "canonical_native_ledger": "d1_migrations",
+    "canonical_proof_table": "app_schema_migration_proofs",
+    "historical_build_numbered_sql_operator_instructions_removed": true,
+    "active_request_time_schema_ddl_removed": true,
+    "historical_preflight_engine_preserved_non_route": true,
+    "historical_preflight_post_fail_closed_405": true,
+    "current_preflight_client_has_no_post": true,
+    "current_preflight_snapshot_writes_removed": true,
+    "current_preflight_confirmation_writes_removed": true,
+    "current_preflight_truth_guard_added": true,
+    "current_application_quality_covers_preflight_truth": true,
+    "deployment_preflight_page_exactly_one_h1": true
+  },
+  "canonical_migrations": [
+    "0001_release464_migration_authority.sql",
+    "0002_release464_operational_acceptance.sql",
+    "0003_release464_business_growth.sql",
+    "0004_release465_storefront_quality.sql"
+  ],
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "rollback_execution_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  }
+}
