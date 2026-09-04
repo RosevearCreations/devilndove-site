@@ -35,6 +35,11 @@ def load(path):
         return {}
 
 
+def ratchet_value(text, name):
+    match = re.search(rf'^\s*{re.escape(name)}\s*=\s*(\d+)\s*$', text, re.M)
+    return int(match.group(1)) if match else None
+
+
 pointer = load('current-development-authority.json')
 authority = load('release467-build39-product-numbering-runtime-ddl-elimination.json')
 manifest = load('migrations/canonical/manifest.json')
@@ -46,7 +51,7 @@ runtime_gate = read('scripts/runtime_schema_mutation_gate.py')
 pointer_release = int(pointer.get('release') or 0)
 pointer_build = int(pointer.get('build') or 0)
 req(pointer_release == 467, 'current Development pointer must remain Release 467')
-req(pointer_build in (38, 39), 'Build 39 Product Numbering authority requires current pointer Build 38 or 39')
+req(pointer_build >= 39, 'Build 39 Product Numbering authority requires current pointer Build 39 or later')
 req(int(authority.get('release') or 0) == 467 and int(authority.get('build') or 0) == 39, 'Build 39 Product Numbering authority identity drifted')
 req(authority.get('title') == 'Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence', 'Build 39 title drifted')
 req(authority.get('state') in ('FEATURE_CANDIDATE', 'DEVELOPMENT_GREEN'), 'Build 39 authority must be candidate or Development GREEN')
@@ -74,8 +79,14 @@ for token in ('allocateNextProductNumber', 'ensureProductNumberSequenceAtLeast',
     req(token in desktop, f'Desktop product creation lost Product Numbering contract: {token}')
     req(token in mobile, f'Mobile product creation lost Product Numbering contract: {token}')
 
-for token in ('MAX_DDL_FILES = 59', 'MAX_DDL_OCCURRENCES = 525', 'MAX_DELEGATED_LIBRARIES = 3'):
-    req(token in runtime_gate, f'Build 39 runtime-schema ratchet missing: {token}')
+# Build 39 established ceilings of 59 files / 525 statements / 3 delegated helpers.
+# Later builds are allowed—and expected—to tighten those values, but may never weaken them.
+current_files = ratchet_value(runtime_gate, 'MAX_DDL_FILES')
+current_occurrences = ratchet_value(runtime_gate, 'MAX_DDL_OCCURRENCES')
+current_helpers = ratchet_value(runtime_gate, 'MAX_DELEGATED_LIBRARIES')
+req(current_files is not None and current_files <= 59, f'Runtime DDL file ratchet weakened beyond Build 39: {current_files!r} > 59')
+req(current_occurrences is not None and current_occurrences <= 525, f'Runtime DDL occurrence ratchet weakened beyond Build 39: {current_occurrences!r} > 525')
+req(current_helpers is not None and current_helpers <= 3, f'Delegated/shared-helper DDL ratchet weakened beyond Build 39: {current_helpers!r} > 3')
 req('functions/api/admin/_product-numbering.js regained request-time schema DDL after Build 39 cleanup' in runtime_gate, 'Runtime schema gate does not pin Product Numbering cleanup')
 
 migrations = manifest.get('migrations') if isinstance(manifest.get('migrations'), list) else []
@@ -121,6 +132,6 @@ if FAIL:
 print('CURRENT PRODUCT NUMBERING SCHEMA AUTHORITY GATE: PASS')
 print('Product-number sequence schema: PROVEN BASELINE / READ-ONLY ASSERTION')
 print('Product-numbering request-time DDL: ZERO')
-print('Runtime schema residue ceiling: 59 files / 525 statements / 3 delegated helpers')
+print(f'Runtime schema residue ceiling: {current_files} files / {current_occurrences} statements / {current_helpers} delegated helpers (Build 39 maxima 59 / 525 / 3)')
 print('Canonical migration stream: UNCHANGED 0001-0004')
 print('Desktop/mobile product-number allocation: PRESERVED / FAIL-CLOSED ON SCHEMA DRIFT')
