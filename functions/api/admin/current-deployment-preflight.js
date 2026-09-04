@@ -1,12 +1,12 @@
-// Release 467 Build 38 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 39 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical preflight diagnostics are reused read-only; schema authority is
 // migrations/canonical + scripts/d1_migrate.py and is never repaired during a request.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 38;
-const TITLE = 'Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion';
+const BUILD = 39;
+const TITLE = 'Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence';
 const AUTHORITY = 'current-development-authority.json';
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -36,9 +36,7 @@ const LEGACY_MIGRATION_CHECK_PREFIXES = Object.freeze([
   'build175_',
   'build176_',
 ]);
-const LEGACY_MIGRATION_CHECK_CODES = new Set([
-  'expected_schema_diff',
-]);
+const LEGACY_MIGRATION_CHECK_CODES = new Set(['expected_schema_diff']);
 
 const lc = (value) => normalizeText(value).toLowerCase();
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
@@ -75,12 +73,8 @@ async function safeAll(db, sql) {
 async function canonicalMigrationTruth(db) {
   const nativeLedgerExists = await tableExists(db, 'd1_migrations');
   const proofTableExists = await tableExists(db, 'app_schema_migration_proofs');
-  const nativeRows = nativeLedgerExists
-    ? await safeAll(db, 'SELECT id, name, applied_at FROM d1_migrations ORDER BY id')
-    : [];
-  const proofRows = proofTableExists
-    ? await safeAll(db, 'SELECT migration_name, migration_sha256, manifest_sha256, source_sha, environment, applied_at, verified_at FROM app_schema_migration_proofs ORDER BY schema_migration_proof_id')
-    : [];
+  const nativeRows = nativeLedgerExists ? await safeAll(db, 'SELECT id, name, applied_at FROM d1_migrations ORDER BY id') : [];
+  const proofRows = proofTableExists ? await safeAll(db, 'SELECT migration_name, migration_sha256, manifest_sha256, source_sha, environment, applied_at, verified_at FROM app_schema_migration_proofs ORDER BY schema_migration_proof_id') : [];
   const fkRows = await safeAll(db, 'PRAGMA foreign_key_check');
   const nativeNames = new Set(nativeRows.map((row) => normalizeText(row.name)));
   const proofNames = new Set(proofRows.map((row) => normalizeText(row.migration_name)));
@@ -168,20 +162,15 @@ function currentMigrationPlan() {
 
 function markdownReport(data) {
   const lines = [
-    `# Release ${RELEASE} Build ${BUILD} Deployment Preflight`,
-    '',
-    `Generated: ${data.generated_at}`,
-    '',
-    '## Current authority',
-    '',
+    `# Release ${RELEASE} Build ${BUILD} Deployment Preflight`, '',
+    `Generated: ${data.generated_at}`, '',
+    '## Current authority', '',
     `- State: ${data.state}`,
     `- Status: ${data.summary?.status || 'unknown'}`,
     `- Canonical migrations: ${data.canonical_migration_truth?.native_applied_count || 0}/${data.canonical_migration_truth?.expected_count || 0}`,
     `- Canonical proof rows: ${data.canonical_migration_truth?.proof_recorded_count || 0}/${data.canonical_migration_truth?.expected_count || 0}`,
-    `- Foreign-key violations: ${data.canonical_migration_truth?.foreign_key_violations || 0}`,
-    '',
-    '## Checklist',
-    '',
+    `- Foreign-key violations: ${data.canonical_migration_truth?.foreign_key_violations || 0}`, '',
+    '## Checklist', '',
   ];
   for (const check of data.checks || []) lines.push(`- **${check.status || 'unknown'}** — ${check.label || check.code}: ${normalizeText(check.detail)}`);
   lines.push('', '## Canonical migration plan', '');
@@ -234,12 +223,13 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is a current read-only Release 467 Build 38 projection.',
+      'The active Deployment Preflight is a current read-only Release 467 Build 39 projection.',
       'Release 467 Build 37 remains the historical feature authority that converged Deployment Preflight with canonical migration truth.',
       'The retained historical preflight engine supplies diagnostics only; it is not schema or release authority.',
       'Historical build-numbered SQL is provenance only. Forward D1 schema authority is migrations/canonical/manifest.json.',
       'Missing schema fails closed. No request-time schema creation or repair is available from this endpoint.',
-      'Build 38 adds no canonical migration; the stream remains exactly 0001-0004.',
+      'Build 39 adds no canonical migration; Product Numbering uses a proven pre-canonical baseline and the stream remains exactly 0001-0004.',
+      'Build 38 remains historical Accounting feature authority; Accounting and Product Numbering both carry zero request-time DDL.',
       'Production remains Build 32 until a deliberate exact-tree promotion is requested and independently proven.',
     ],
     safety: {
