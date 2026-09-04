@@ -58,7 +58,7 @@ req("from '../_lib/currentReliability.js'" in endpoint, 'current endpoint must u
 req("mutation_capability: 'none'" in endpoint, 'current endpoint must explicitly expose no mutation capability')
 
 req(len(re.findall(r'<h1(?:\s|>)', page, re.I)) == 1, 'active Reliability page must contain exactly one H1')
-req('Release 467 • Build 36' in page, 'Build 36 Reliability page identity is missing')
+req(f'Release {active_release} • Build {active_build}' in page, 'active Reliability page identity must match current reliability projection')
 req('/public/js/admin-current-reliability.js' in page, 'active Reliability page must load the current client')
 req('/public/js/admin-release466-reliability.js' not in page, 'active Reliability page must not load the historical client')
 req('Loading Release 466 reliability snapshot' not in page, 'active Reliability page still presents stale Release 466 loading truth')

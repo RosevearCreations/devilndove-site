@@ -1,11 +1,11 @@
-// Release 467 Build 36 — current read-only reliability projection.
+// Release 467 Build 37 — current read-only reliability projection.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 36;
-export const CURRENT_RELIABILITY_TITLE = 'Current Reliability & Operational Health Truth Convergence';
-export const CURRENT_RELIABILITY_AUTHORITY = 'release467-build36-current-reliability-operational-health';
+export const CURRENT_RELIABILITY_BUILD = 37;
+export const CURRENT_RELIABILITY_TITLE = 'Deployment Preflight Canonical Migration & Runtime-Schema Convergence';
+export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 
 export async function loadCurrentReliability(db, env = {}) {
   const inherited = await loadRelease466Reliability(db, env);
@@ -38,6 +38,7 @@ export async function loadCurrentReliability(db, env = {}) {
       current_surface_build: CURRENT_RELIABILITY_BUILD,
       inherited_engine: 'functions/api/_lib/release466Reliability.js',
       inherited_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
+      historical_feature_authority: 'release467-build36-current-reliability-operational-health.json',
       current_operator_authority: 'current-development-authority.json',
       production_baseline_build: 32,
     },

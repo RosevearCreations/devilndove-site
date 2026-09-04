@@ -2,19 +2,19 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 36;
-const TITLE = 'Current Reliability & Operational Health Truth Convergence';
+const BUILD = 37;
+const TITLE = 'Deployment Preflight Canonical Migration & Runtime-Schema Convergence';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 36,
+  build: 37,
   title: TITLE,
   state: 'DEVELOPMENT_GREEN',
-  accepted_sha: '22b1efbf48b67f91024d277566ce51ac1263c970',
-  accepted_tree_sha: 'bb020637765dd21b262a5007162141bf03bd658c',
-  system_gate_run: 33875163710,
-  current_application_quality_run: 33875163581,
-  it_admin_runtime_proof_run: 33875163703,
-  branch_hygiene_run: 33875163813,
+  accepted_sha: '2db13923a4356182b98d30e0d1a3025d78065791',
+  accepted_tree_sha: '178d608a187d221e8fe119b7da5dec6a4c52564e',
+  system_gate_run: 33878548937,
+  current_application_quality_run: 33878549068,
+  it_admin_runtime_proof_run: 33878549217,
+  branch_hygiene_run: 33878549129,
 });
 const PRODUCTION = Object.freeze({
   release: 467,
@@ -89,7 +89,7 @@ export async function onRequestGet(context) {
     build: BUILD,
     title: TITLE,
     ok: true,
-    authority: 'release467-build36-current-reliability-operational-health',
+    authority: 'release467-build37-deployment-preflight-canonical-migration',
     state: 'DEVELOPMENT_GREEN',
     environment: 'development',
     release_authority: {
@@ -102,8 +102,13 @@ export async function onRequestGet(context) {
       persistent_branches: ['main', 'dev'],
       production_promotion_required_development_proofs: CURRENT_GUARDS,
       rollback_readiness: 'RELEASE_NEUTRAL_READ_ONLY',
-      reliability_authority: 'release467-build36-current-reliability-operational-health',
+      reliability_authority: 'current-development-authority.json',
+      reliability_projection_build: 37,
+      historical_build36_reliability_authority: 'release467-build36-current-reliability-operational-health',
       historical_reliability_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
+      deployment_preflight_authority: 'release467-build37-deployment-preflight-canonical-migration',
+      canonical_migration_authority: 'migrations/canonical/manifest.json + scripts/d1_migrate.py',
+      request_time_schema_mutation: false,
     },
     development: { ...DEVELOPMENT, runtime_source_sha: runtimeSha, runtime_host: runtimeHost, exact_runtime_sha_available: Boolean(runtimeSha) },
     readiness: base.readiness || {},
@@ -129,12 +134,14 @@ export async function onRequestGet(context) {
     sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 36 is Development GREEN and owns the current I.T. operator and Reliability / Operational Health truth surface.',
-      'The active Reliability workspace is Release 467 Build 36 current read-only truth; the Release 466 reliability engine is retained only as historical regression compatibility.',
+      'Build 37 is Development GREEN and owns current I.T. operator truth.',
+      'Deployment Preflight is current Release 467 Build 37 GET-only truth and uses only the canonical four-migration stream as forward schema authority.',
+      'Historical Build 171-176 migration SQL and preflight write behavior remain provenance only and are not active operator authority.',
+      'The active Reliability projection is synchronized to Release 467 Build 37 while the Release 466 engine remains historical regression compatibility.',
       'Production promotion requires the exact current Development tree plus successful System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene proofs.',
       'Production rollback readiness remains release-neutral and read-only and does not execute rollback, schema reversal or business-data restoration.',
       'Build 32 remains the independently verified Production-green baseline until a deliberate Production promotion is requested and proven.',
-      'External HOLDs never become GREEN by inference from source, D1 convergence, deployment success or reliability health.',
+      'External HOLDs never become GREEN by inference from source, D1 convergence, deployment success, reliability health or preflight status.',
     ],
     safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
     generated_at: new Date().toISOString(),

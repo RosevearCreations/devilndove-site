@@ -1,27 +1,27 @@
 {
   "release": 467,
-  "build": 36,
-  "title": "Current Reliability & Operational Health Truth Convergence",
+  "build": 37,
+  "title": "Deployment Preflight Canonical Migration & Runtime-Schema Convergence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "1ec4eae64201ae4362dd08a1a5118c7b64bcff93",
-  "source_base_tree_sha": "4b44b12c5b11c6c87de64625c973f2128164f9a6",
-  "accepted_dev_sha": "22b1efbf48b67f91024d277566ce51ac1263c970",
-  "accepted_dev_tree_sha": "bb020637765dd21b262a5007162141bf03bd658c",
+  "source_base_sha": "e77bed366a8717ac74e3a3534f5539d14b0ab243",
+  "source_base_tree_sha": "9febef037a02725a9bc13abd33a4b902c775b5ce",
+  "accepted_dev_sha": "2db13923a4356182b98d30e0d1a3025d78065791",
+  "accepted_dev_tree_sha": "178d608a187d221e8fe119b7da5dec6a4c52564e",
   "acceptance": {
-    "system_gate_run": 33875163710,
-    "current_application_quality_run": 33875163581,
-    "it_admin_runtime_proof_run": 33875163703,
-    "branch_hygiene_run": 33875163813
+    "system_gate_run": 33878548937,
+    "current_application_quality_run": 33878549068,
+    "it_admin_runtime_proof_run": 33878549217,
+    "branch_hygiene_run": 33878549129
   },
-  "last_green_build": 36,
-  "last_green_build_name": "Current Reliability & Operational Health Truth Convergence",
-  "last_green_dev_sha": "22b1efbf48b67f91024d277566ce51ac1263c970",
-  "last_green_dev_tree_sha": "bb020637765dd21b262a5007162141bf03bd658c",
-  "last_green_system_gate_run": 33875163710,
-  "last_green_application_quality_run": 33875163581,
-  "last_green_it_admin_runtime_run": 33875163703,
-  "last_green_branch_hygiene_run": 33875163813,
+  "last_green_build": 37,
+  "last_green_build_name": "Deployment Preflight Canonical Migration & Runtime-Schema Convergence",
+  "last_green_dev_sha": "2db13923a4356182b98d30e0d1a3025d78065791",
+  "last_green_dev_tree_sha": "178d608a187d221e8fe119b7da5dec6a4c52564e",
+  "last_green_system_gate_run": 33878548937,
+  "last_green_application_quality_run": 33878549068,
+  "last_green_it_admin_runtime_run": 33878549217,
+  "last_green_branch_hygiene_run": 33878549129,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -32,9 +32,9 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
-    "release467-build36-current-reliability-operational-health.json",
+    "release467-build37-deployment-preflight-canonical-migration.json",
     "release467-build32-help-search-responsive-convergence.json",
-    "release467-build35-production-promotion-rollback-provenance.json"
+    "release467-build36-current-reliability-operational-health.json"
   ],
   "repository_governance": {
     "persistent_branches": ["main", "dev"],
@@ -54,8 +54,14 @@
       "Repository Branch Hygiene"
     ],
     "production_rollback_readiness": "release-neutral-read-only",
-    "active_reliability_authority": "release467-build36-current-reliability-operational-health.json",
-    "historical_release466_reliability_role": "HISTORICAL_REGRESSION_COMPATIBILITY"
+    "active_reliability_authority": "current-development-authority.json",
+    "historical_build36_reliability_authority": "release467-build36-current-reliability-operational-health.json",
+    "historical_release466_reliability_role": "HISTORICAL_REGRESSION_COMPATIBILITY",
+    "active_deployment_preflight_authority": "release467-build37-deployment-preflight-canonical-migration.json",
+    "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
+    "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
+    "canonical_d1_migration_count": 4,
+    "request_time_schema_mutation": false
   },
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
@@ -64,8 +70,8 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 37,
-  "next_build_state": "READY_AFTER_BUILD_36_FINAL_CLOSURE_PROOF",
+  "next_build": 38,
+  "next_build_state": "READY_AFTER_BUILD_37_FINAL_CLOSURE_PROOF",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
@@ -76,5 +82,5 @@
   "cloudflare_access_mutation_authorized": false,
   "automatic_production_promotion_authorized": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 36 is accepted on Development at implementation SHA 22b1efbf48b67f91024d277566ce51ac1263c970 / tree bb020637765dd21b262a5007162141bf03bd658c with System Gate 33875163710, Current Application Quality 33875163581, I.T. Admin Runtime Proof 33875163703 and Branch Hygiene 33875163813. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 37 starts. Build 32 remains Production GREEN. The active Reliability workspace is Release 467 Build 36 current read-only truth; Release 466 reliability remains historical regression compatibility only."
+  "restart_rule": "Build 37 is accepted on Development at implementation SHA 2db13923a4356182b98d30e0d1a3025d78065791 / tree 178d608a187d221e8fe119b7da5dec6a4c52564e with System Gate 33878548937, Current Application Quality 33878549068, I.T. Admin Runtime Proof 33878549217 and Branch Hygiene 33878549129. This authority-only closure and any later authority-only descendant must independently pass the same push-triggered four-proof set before Build 38 starts. Build 32 remains Production GREEN. Deployment Preflight is Release 467 Build 37 current GET-only canonical migration truth; historical Build 171-176 migration instructions and request-time schema DDL are not active authority."
 }
