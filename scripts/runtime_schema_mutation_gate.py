@@ -19,11 +19,10 @@ ROOT = Path(__file__).resolve().parents[1]
 FUNCTIONS = ROOT / "functions"
 FAIL: list[str] = []
 
-# Release 467 Build 39 ratchet. Build 40 first exposes exact residue ownership; the
-# ceilings are lowered only after a current owner is removed and measured by this gate.
-MAX_DDL_FILES = 59
-MAX_DDL_OCCURRENCES = 525
-MAX_DELEGATED_LIBRARIES = 3
+# Release 467 Build 40 ratchet after Product Social Automation cleanup.
+MAX_DDL_FILES = 58
+MAX_DDL_OCCURRENCES = 522
+MAX_DELEGATED_LIBRARIES = 2
 
 DDL = re.compile(
     r"(?P<quote>[`\"'])\s*(?P<sql>(?:CREATE\s+(?:TABLE|INDEX|TRIGGER|VIEW)|ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW)|VACUUM\b|REINDEX\b))",
@@ -111,12 +110,18 @@ product_numbering_matches = list(DDL.finditer(product_numbering_text)) + list(DD
 if product_numbering_matches:
     FAIL.append("functions/api/admin/_product-numbering.js regained request-time schema DDL after Build 39 cleanup")
 
+product_social_path = ROOT / "functions/api/_lib/productSocialAutomation.js"
+product_social_text = product_social_path.read_text(encoding="utf-8", errors="replace") if product_social_path.is_file() else ""
+product_social_matches = list(DDL.finditer(product_social_text)) + list(DDL_AFTER_NEWLINE.finditer(product_social_text))
+if product_social_matches:
+    FAIL.append("functions/api/_lib/productSocialAutomation.js regained request-time schema DDL after Build 40 cleanup")
+
 if files_with_ddl > MAX_DDL_FILES:
-    FAIL.append(f"historical DDL-bearing runtime files increased above Build 39 ceiling: {files_with_ddl} > {MAX_DDL_FILES}")
+    FAIL.append(f"historical DDL-bearing runtime files increased above Build 40 ceiling: {files_with_ddl} > {MAX_DDL_FILES}")
 if ddl_occurrences > MAX_DDL_OCCURRENCES:
-    FAIL.append(f"historical DDL string occurrences increased above Build 39 ceiling: {ddl_occurrences} > {MAX_DDL_OCCURRENCES}")
+    FAIL.append(f"historical DDL string occurrences increased above Build 40 ceiling: {ddl_occurrences} > {MAX_DDL_OCCURRENCES}")
 if delegated_libraries > MAX_DELEGATED_LIBRARIES:
-    FAIL.append(f"DDL-bearing delegated/shared helpers increased above Build 39 ceiling: {delegated_libraries} > {MAX_DELEGATED_LIBRARIES}")
+    FAIL.append(f"DDL-bearing delegated/shared helpers increased above Build 40 ceiling: {delegated_libraries} > {MAX_DELEGATED_LIBRARIES}")
 
 print("RUNTIME SCHEMA MUTATION AUTHORITY GATE")
 print(f"Runtime JS files scanned: {sum(1 for _ in FUNCTIONS.rglob('*.js'))}")
@@ -127,6 +132,7 @@ print(f"DDL-bearing delegated/shared helpers: {delegated_libraries} (ceiling {MA
 print(f"Raw D1 bypasses carrying DDL: {len(unprotected)}")
 print(f"Accounting core request-time DDL statements: {len(accounting_matches)}")
 print(f"Product-numbering request-time DDL statements: {len(product_numbering_matches)}")
+print(f"Product-social automation request-time DDL statements: {len(product_social_matches)}")
 print("RUNTIME SCHEMA RESIDUE OWNERS (highest occurrence count first)")
 for count, rel, classification, statements in sorted(residue_inventory, key=lambda item: (-item[0], item[1])):
     print(f"RESIDUE {count:03d} {classification} {rel}")
@@ -142,6 +148,7 @@ print("RUNTIME SCHEMA MUTATION AUTHORITY GATE: PASS")
 print("Request-time schema mutation capability: BLOCKED")
 print("Accounting core schema ownership: READ-ONLY BASELINE ASSERTION")
 print("Product-number sequence schema ownership: READ-ONLY BASELINE ASSERTION")
+print("Product-social automation schema ownership: READ-ONLY BASELINE ASSERTION")
 print("Legacy ensure-DDL behind guarded DB: NON-MUTATING, RATCHETED, AND OWNER-REPORTED")
 print("Raw D1 bypass with DDL: ZERO")
 print("Schema change authority: migrations/canonical + scripts/d1_migrate.py")
