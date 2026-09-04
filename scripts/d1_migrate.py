@@ -7,6 +7,11 @@ Development apply/proof -> approved source promotion -> Production apply/proof -
 Cloudflare's native d1_migrations table is the applied-migration authority. The
 app_schema_migration_proofs table supplements it with immutable SHA-256 identity,
 source provenance and recovery-note identity. Historical migrations are never replayed.
+
+The transport is deliberately bounded: an already-converged database is proven with
+one combined ledger/proof read plus one foreign-key check instead of dozens of
+sequential Wrangler calls. Native migration apply is skipped when every canonical
+migration is already visible and immutable proof rows agree.
 """
 from __future__ import annotations
 
@@ -29,6 +34,7 @@ ENVIRONMENT_PATH = ROOT / "release463-environment.json"
 WRANGLER_VERSION = "4"
 PROOF_TABLE = "app_schema_migration_proofs"
 NATIVE_LEDGER = "d1_migrations"
+DEFAULT_REMOTE_TIMEOUT_SECONDS = 420
 
 
 class Stop(RuntimeError):
@@ -171,14 +177,36 @@ def make_config(target: str, d1: dict[str, str]) -> Path:
     return path
 
 
-def run(args: list[str], *, capture: bool = False) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(
-        args, cwd=ROOT, text=True,
-        stdout=subprocess.PIPE if capture else None,
-        stderr=subprocess.PIPE if capture else None,
-        check=False,
-    )
-    if result.returncode:
+def remote_timeout_seconds() -> int:
+    raw = str(os.environ.get("DND_WRANGLER_TIMEOUT_SECONDS") or DEFAULT_REMOTE_TIMEOUT_SECONDS).strip()
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise Stop("DND_WRANGLER_TIMEOUT_SECONDS must be an integer.") from exc
+    if value < 60 or value > 900:
+        raise Stop("DND_WRANGLER_TIMEOUT_SECONDS must be between 60 and 900 seconds.")
+    return value
+
+
+def run(
+    args: list[str],
+    *,
+    capture: bool = False,
+    allow_failure: bool = False,
+    timeout_seconds: int | None = None,
+) -> subprocess.CompletedProcess[str]:
+    timeout = timeout_seconds if timeout_seconds is not None else remote_timeout_seconds()
+    try:
+        result = subprocess.run(
+            args, cwd=ROOT, text=True,
+            stdout=subprocess.PIPE if capture else None,
+            stderr=subprocess.PIPE if capture else None,
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise Stop(f"Command exceeded bounded timeout ({timeout}s): {' '.join(args[:6])}") from exc
+    if result.returncode and not allow_failure:
         detail = ""
         if capture:
             detail = (result.stderr or result.stdout or "").strip()
@@ -190,19 +218,24 @@ def wrangler_args(config: Path, *parts: str) -> list[str]:
     return [npx_executable(), "--yes", f"wrangler@{WRANGLER_VERSION}", *parts, "--config", str(config)]
 
 
+def decode_json_result(result: subprocess.CompletedProcess[str], context: str) -> Any:
+    try:
+        return json.loads(result.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        raise Stop(f"Wrangler did not return JSON for {context}: {exc}") from exc
+
+
 def execute_json(config: Path, sql: str) -> Any:
     result = run(
         wrangler_args(config, "d1", "execute", "DB", "--remote", "--json", "--command", sql),
         capture=True,
     )
-    try:
-        return json.loads(result.stdout or "[]")
-    except json.JSONDecodeError as exc:
-        raise Stop(f"Wrangler did not return JSON for a D1 verification query: {exc}") from exc
+    return decode_json_result(result, "a D1 verification query")
 
 
 def result_rows(value: Any) -> list[dict[str, Any]]:
     found: list[dict[str, Any]] = []
+
     def walk(node: Any) -> None:
         if isinstance(node, dict):
             results = node.get("results")
@@ -215,66 +248,142 @@ def result_rows(value: Any) -> list[dict[str, Any]]:
         elif isinstance(node, list):
             for child in node:
                 walk(child)
+
     walk(value)
     return found
 
 
-def table_exists(config: Path, table: str) -> bool:
-    safe = table.replace("'", "''")
-    rows = result_rows(execute_json(config, f"SELECT name FROM sqlite_master WHERE type='table' AND name='{safe}';"))
-    return any(str(row.get("name") or "") == table for row in rows)
+def canonical_remote_state(
+    config: Path,
+    *,
+    allow_uninitialized: bool = False,
+) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    sql = f"""
+SELECT
+  'ledger' AS row_kind,
+  name AS migration_name,
+  '' AS migration_sha256,
+  '' AS manifest_sha256,
+  '' AS source_sha,
+  '' AS environment,
+  '' AS recovery_note_sha256,
+  applied_at AS applied_at,
+  '' AS verified_at
+FROM {NATIVE_LEDGER}
+UNION ALL
+SELECT
+  'proof' AS row_kind,
+  migration_name,
+  migration_sha256,
+  manifest_sha256,
+  source_sha,
+  environment,
+  recovery_note_sha256,
+  applied_at,
+  verified_at
+FROM {PROOF_TABLE}
+ORDER BY row_kind, migration_name;
+""".strip()
+    result = run(
+        wrangler_args(config, "d1", "execute", "DB", "--remote", "--json", "--command", sql),
+        capture=True,
+        allow_failure=allow_uninitialized,
+    )
+    if result.returncode:
+        detail = (result.stderr or result.stdout or "").strip()
+        if allow_uninitialized and "no such table" in detail.lower():
+            return {}, {}
+        raise Stop(f"Cannot read canonical D1 state: {detail[-1500:] or 'unknown Wrangler failure'}")
 
-
-def native_migrations(config: Path) -> dict[str, dict[str, Any]]:
-    if not table_exists(config, NATIVE_LEDGER):
-        return {}
-    rows = result_rows(execute_json(config, f"SELECT id, name, applied_at FROM {NATIVE_LEDGER} ORDER BY id;"))
-    return {str(row.get("name") or ""): row for row in rows if str(row.get("name") or "")}
-
-
-def proof_rows(config: Path) -> dict[str, dict[str, Any]]:
-    if not table_exists(config, PROOF_TABLE):
-        return {}
-    rows = result_rows(execute_json(config, f"SELECT migration_name, migration_sha256, manifest_sha256, source_sha, environment, recovery_note_sha256, applied_at, verified_at FROM {PROOF_TABLE} ORDER BY schema_migration_proof_id;"))
-    return {str(row.get("migration_name") or ""): row for row in rows if str(row.get("migration_name") or "")}
+    rows = result_rows(decode_json_result(result, "canonical D1 state"))
+    ledger: dict[str, dict[str, Any]] = {}
+    proofs: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        name = str(row.get("migration_name") or "").strip()
+        if not name:
+            continue
+        kind = str(row.get("row_kind") or "").strip().lower()
+        if kind == "ledger":
+            ledger[name] = row
+        elif kind == "proof":
+            proofs[name] = row
+    return ledger, proofs
 
 
 def sql_string(value: str) -> str:
     return "'" + str(value).replace("'", "''") + "'"
 
 
-def record_proof(config: Path, target: str, item: dict[str, Any], manifest_hash: str, source_sha: str) -> None:
-    existing = proof_rows(config).get(item["file"])
-    if existing:
-        if str(existing.get("migration_sha256") or "") != item["sha256"]:
-            raise Stop(f"IMMUTABILITY FAILURE: {item['file']} checksum differs from its existing {target} proof.")
-        if str(existing.get("recovery_note_sha256") or "") != item["recovery_sha256"]:
-            raise Stop(f"IMMUTABILITY FAILURE: {item['file']} recovery note differs from its existing {target} proof.")
-        return
-    sql = (
-        f"INSERT INTO {PROOF_TABLE} (migration_name, migration_sha256, manifest_sha256, source_sha, environment, recovery_note_sha256, applied_at, verified_at) VALUES ("
-        f"{sql_string(item['file'])}, {sql_string(item['sha256'])}, {sql_string(manifest_hash)}, {sql_string(source_sha)}, "
-        f"{sql_string(target)}, {sql_string(item['recovery_sha256'])}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);"
-    )
-    execute_json(config, sql)
-
-
-def verify_canonical_state(config: Path, target: str, items: list[dict[str, Any]], manifest_hash: str) -> dict[str, Any]:
-    ledger = native_migrations(config)
-    missing = [item["file"] for item in items if item["file"] not in ledger]
-    if missing:
-        raise Stop(f"{target.title()} canonical D1 migrations are missing from {NATIVE_LEDGER}: {', '.join(missing)}")
-    proofs = proof_rows(config)
+def validate_existing_proofs(
+    target: str,
+    items: list[dict[str, Any]],
+    proofs: dict[str, dict[str, Any]],
+    *,
+    phase: str,
+) -> None:
     for item in items:
         proof = proofs.get(item["file"])
         if not proof:
-            raise Stop(f"{target.title()} migration proof is missing for {item['file']}.")
+            continue
         if str(proof.get("migration_sha256") or "") != item["sha256"]:
-            raise Stop(f"{target.title()} checksum proof mismatch for {item['file']}.")
+            raise Stop(f"IMMUTABILITY FAILURE {phase}: {item['file']} checksum differs from its existing {target} proof.")
         if str(proof.get("recovery_note_sha256") or "") != item["recovery_sha256"]:
-            raise Stop(f"{target.title()} recovery-note proof mismatch for {item['file']}.")
+            raise Stop(f"IMMUTABILITY FAILURE {phase}: recovery note changed for {item['file']}.")
         if str(proof.get("environment") or "") != target:
-            raise Stop(f"{target.title()} proof environment mismatch for {item['file']}.")
+            raise Stop(f"IMMUTABILITY FAILURE {phase}: {item['file']} proof environment is not {target}.")
+
+
+def record_missing_proofs(
+    config: Path,
+    target: str,
+    items: list[dict[str, Any]],
+    manifest_hash: str,
+    source_sha: str,
+    proofs: dict[str, dict[str, Any]],
+) -> list[str]:
+    missing = [item for item in items if item["file"] not in proofs]
+    if not missing:
+        return []
+    selects = []
+    for item in missing:
+        filename = sql_string(item["file"])
+        selects.append(
+            "SELECT "
+            f"{filename}, {sql_string(item['sha256'])}, {sql_string(manifest_hash)}, "
+            f"{sql_string(source_sha)}, {sql_string(target)}, {sql_string(item['recovery_sha256'])}, "
+            "CURRENT_TIMESTAMP, CURRENT_TIMESTAMP "
+            f"WHERE EXISTS (SELECT 1 FROM {NATIVE_LEDGER} WHERE name={filename}) "
+            f"AND NOT EXISTS (SELECT 1 FROM {PROOF_TABLE} WHERE migration_name={filename})"
+        )
+    sql = (
+        f"INSERT INTO {PROOF_TABLE} "
+        "(migration_name, migration_sha256, manifest_sha256, source_sha, environment, "
+        "recovery_note_sha256, applied_at, verified_at) "
+        + " UNION ALL ".join(selects)
+        + ";"
+    )
+    execute_json(config, sql)
+    return [item["file"] for item in missing]
+
+
+def verify_canonical_state(
+    config: Path,
+    target: str,
+    items: list[dict[str, Any]],
+    manifest_hash: str,
+    *,
+    ledger: dict[str, dict[str, Any]] | None = None,
+    proofs: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    if ledger is None or proofs is None:
+        ledger, proofs = canonical_remote_state(config)
+    validate_existing_proofs(target, items, proofs, phase="during verification")
+    missing_ledger = [item["file"] for item in items if item["file"] not in ledger]
+    if missing_ledger:
+        raise Stop(f"{target.title()} canonical D1 migrations are missing from {NATIVE_LEDGER}: {', '.join(missing_ledger)}")
+    missing_proofs = [item["file"] for item in items if item["file"] not in proofs]
+    if missing_proofs:
+        raise Stop(f"{target.title()} migration proofs are missing: {', '.join(missing_proofs)}")
     fk = result_rows(execute_json(config, "PRAGMA foreign_key_check;"))
     if fk:
         raise Stop(f"{target.title()} foreign_key_check returned {len(fk)} violation row(s).")
@@ -292,7 +401,10 @@ def verify_development_before_production(items: list[dict[str, Any]], manifest_h
     dev = environment_authority("development")
     config = make_config("development", dev)
     try:
-        state = verify_canonical_state(config, "development", items, manifest_hash)
+        ledger, proofs = canonical_remote_state(config)
+        state = verify_canonical_state(
+            config, "development", items, manifest_hash, ledger=ledger, proofs=proofs
+        )
         print("DEVELOPMENT-FIRST MIGRATION PROOF: PASS", json.dumps(state, sort_keys=True))
     finally:
         config.unlink(missing_ok=True)
@@ -328,32 +440,52 @@ def main() -> int:
     authority = environment_authority(target)
     config = make_config(target, authority)
     try:
-        before = native_migrations(config)
-        if args.apply:
-            # Existing proof rows are checked before mutation so an edited migration cannot
-            # silently progress after it has already been proven in this environment.
-            existing_proofs = proof_rows(config)
-            for item in items:
-                proof = existing_proofs.get(item["file"])
-                if proof and str(proof.get("migration_sha256") or "") != item["sha256"]:
-                    raise Stop(f"IMMUTABILITY FAILURE before apply: {item['file']} changed after {target} proof.")
-                if proof and str(proof.get("recovery_note_sha256") or "") != item["recovery_sha256"]:
-                    raise Stop(f"IMMUTABILITY FAILURE before apply: recovery note changed for {item['file']}.")
+        before_ledger, before_proofs = canonical_remote_state(config, allow_uninitialized=args.apply)
+        validate_existing_proofs(target, items, before_proofs, phase="before apply")
+
+        pending = [item for item in items if item["file"] not in before_ledger]
+        native_apply_performed = False
+        if args.apply and pending:
             apply_native(config, target)
+            native_apply_performed = True
+            after_ledger, after_proofs = canonical_remote_state(config)
+        else:
+            after_ledger, after_proofs = before_ledger, before_proofs
+            if args.apply:
+                print(f"Canonical {target} D1 already converged; native migration apply skipped.")
 
-        after = native_migrations(config)
-        newly_visible = [item for item in items if item["file"] in after and item["file"] not in before]
-        already_visible = [item for item in items if item["file"] in after and item["file"] in before]
-        for item in [*already_visible, *newly_visible]:
-            record_proof(config, target, item, manifest_hash, source_sha)
+        validate_existing_proofs(target, items, after_proofs, phase="after apply")
+        missing_proof_items = [
+            item for item in items
+            if item["file"] in after_ledger and item["file"] not in after_proofs
+        ]
+        proof_rows_created: list[str] = []
+        if args.apply and missing_proof_items:
+            proof_rows_created = record_missing_proofs(
+                config, target, missing_proof_items, manifest_hash, source_sha, after_proofs
+            )
+            after_ledger, after_proofs = canonical_remote_state(config)
 
-        state = verify_canonical_state(config, target, items, manifest_hash)
+        newly_visible = [
+            item for item in items
+            if item["file"] in after_ledger and item["file"] not in before_ledger
+        ]
+
+        state = verify_canonical_state(
+            config, target, items, manifest_hash, ledger=after_ledger, proofs=after_proofs
+        )
+        mode = "verify-only"
+        if args.apply:
+            mode = "apply-and-verify" if native_apply_performed else "converged-noop-verify"
         state.update({
             "database_name": authority["name"],
             "database_id": authority["id"],
             "source_sha": source_sha,
             "newly_applied": [item["file"] for item in newly_visible],
-            "mode": "apply-and-verify" if args.apply else "verify-only",
+            "proof_rows_created": proof_rows_created,
+            "native_apply_performed": native_apply_performed,
+            "bounded_remote_timeout_seconds": remote_timeout_seconds(),
+            "mode": mode,
         })
         print("CANONICAL D1 MIGRATION AUTHORITY: PASS")
         print(json.dumps(state, indent=2, sort_keys=True))
