@@ -1,13 +1,13 @@
-// Release 467 Build 37 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 38 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical preflight diagnostics are reused read-only; schema authority is
 // migrations/canonical + scripts/d1_migrate.py and is never repaired during a request.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 37;
-const TITLE = 'Deployment Preflight Canonical Migration & Runtime-Schema Convergence';
-const AUTHORITY = 'release467-build37-deployment-preflight-canonical-migration';
+const BUILD = 38;
+const TITLE = 'Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion';
+const AUTHORITY = 'current-development-authority.json';
 const PRODUCTION = Object.freeze({
   release: 467,
   build: 32,
@@ -231,12 +231,15 @@ export async function onRequestGet(context) {
       required_development_proofs: REQUIRED_DEVELOPMENT_PROOFS,
       production: PRODUCTION,
       rollback_readiness: 'release-neutral-read-only',
+      historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is a current read-only projection.',
+      'The active Deployment Preflight is a current read-only Release 467 Build 38 projection.',
+      'Release 467 Build 37 remains the historical feature authority that converged Deployment Preflight with canonical migration truth.',
       'The retained historical preflight engine supplies diagnostics only; it is not schema or release authority.',
       'Historical build-numbered SQL is provenance only. Forward D1 schema authority is migrations/canonical/manifest.json.',
       'Missing schema fails closed. No request-time schema creation or repair is available from this endpoint.',
+      'Build 38 adds no canonical migration; the stream remains exactly 0001-0004.',
       'Production remains Build 32 until a deliberate exact-tree promotion is requested and independently proven.',
     ],
     safety: {
