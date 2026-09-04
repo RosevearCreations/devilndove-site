@@ -22,6 +22,8 @@ Build 32 operating boundary:
 
 Do **not** freeze a Production SHA in this handoff. Before starting the next build, verify from current GitHub/CI evidence that `main` carries the exact fully-green Build 32 Development closure tree and that Production has independently passed its exact-source deployment/system proof. If either condition is not true, finish Build 32 promotion/verification first.
 
+The final Development closure commit must itself have a successful push-triggered System Gate; Production promotion must fail closed when that exact-commit proof is absent.
+
 External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access HOLD lanes remain deferred unless current evidence explicitly proves acceptance.
 
 After Build 32 is proven GREEN in Production, select Build 33 from current repository evidence; do not reopen completed Build 31/32 work.
