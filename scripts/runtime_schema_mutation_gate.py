@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Prove runtime D1 schema mutation is unreachable.
+"""Prove runtime D1 schema mutation is unreachable and ratchet historical DDL residue down.
 
 Historical schema-description/ensure SQL may remain temporarily in source, but any
 runtime path capable of executing it must receive a schema-safe D1 binding. This gate
-inventories that residue and fails on raw D1 acquisition/execution bypasses.
+inventories that residue, fails on raw D1 acquisition/execution bypasses, and prevents
+cleaned runtime helpers from regaining schema ownership.
 """
 from __future__ import annotations
 
@@ -13,6 +14,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FUNCTIONS = ROOT / "functions"
 FAIL: list[str] = []
+
+# Release 467 Build 38 ratchet. Future cleanup may reduce these values further, but no
+# accepted source may increase them again without deliberately changing this authority.
+MAX_DDL_FILES = 60
+MAX_DDL_OCCURRENCES = 526
+MAX_DELEGATED_LIBRARIES = 4
 
 DDL = re.compile(
     r"(?P<quote>[`\"'])\s*(?P<sql>(?:CREATE\s+(?:TABLE|INDEX|TRIGGER|VIEW)|ALTER\s+TABLE|DROP\s+(?:TABLE|INDEX|TRIGGER|VIEW)|VACUUM\b|REINDEX\b))",
@@ -90,13 +97,26 @@ for path in sorted(FUNCTIONS.rglob("*.js")):
 if unprotected:
     FAIL.extend(unprotected)
 
+accounting_path = ROOT / "functions/api/_lib/accounting.js"
+accounting_text = accounting_path.read_text(encoding="utf-8", errors="replace") if accounting_path.is_file() else ""
+accounting_matches = list(DDL.finditer(accounting_text)) + list(DDL_AFTER_NEWLINE.finditer(accounting_text))
+if accounting_matches:
+    FAIL.append("functions/api/_lib/accounting.js regained request-time schema DDL after Build 38 cleanup")
+if files_with_ddl > MAX_DDL_FILES:
+    FAIL.append(f"historical DDL-bearing runtime files increased above Build 38 ceiling: {files_with_ddl} > {MAX_DDL_FILES}")
+if ddl_occurrences > MAX_DDL_OCCURRENCES:
+    FAIL.append(f"historical DDL string occurrences increased above Build 38 ceiling: {ddl_occurrences} > {MAX_DDL_OCCURRENCES}")
+if delegated_libraries > MAX_DELEGATED_LIBRARIES:
+    FAIL.append(f"DDL-bearing delegated/shared helpers increased above Build 38 ceiling: {delegated_libraries} > {MAX_DELEGATED_LIBRARIES}")
+
 print("RUNTIME SCHEMA MUTATION AUTHORITY GATE")
 print(f"Runtime JS files scanned: {sum(1 for _ in FUNCTIONS.rglob('*.js'))}")
-print(f"Historical DDL-bearing files inventoried: {files_with_ddl}")
-print(f"Historical DDL string occurrences inventoried: {ddl_occurrences}")
+print(f"Historical DDL-bearing files inventoried: {files_with_ddl} (ceiling {MAX_DDL_FILES})")
+print(f"Historical DDL string occurrences inventoried: {ddl_occurrences} (ceiling {MAX_DDL_OCCURRENCES})")
 print(f"DDL-bearing admin routes behind guarded DB: {protected_routes}")
-print(f"DDL-bearing delegated/shared helpers: {delegated_libraries}")
+print(f"DDL-bearing delegated/shared helpers: {delegated_libraries} (ceiling {MAX_DELEGATED_LIBRARIES})")
 print(f"Raw D1 bypasses carrying DDL: {len(unprotected)}")
+print(f"Accounting core request-time DDL statements: {len(accounting_matches)}")
 if FAIL:
     print("RUNTIME SCHEMA MUTATION AUTHORITY GATE: FAIL")
     for index, message in enumerate(FAIL, 1):
@@ -105,6 +125,7 @@ if FAIL:
 
 print("RUNTIME SCHEMA MUTATION AUTHORITY GATE: PASS")
 print("Request-time schema mutation capability: BLOCKED")
-print("Legacy ensure-DDL behind guarded DB: NON-MUTATING")
+print("Accounting core schema ownership: READ-ONLY BASELINE ASSERTION")
+print("Legacy ensure-DDL behind guarded DB: NON-MUTATING AND RATCHETED")
 print("Raw D1 bypass with DDL: ZERO")
 print("Schema change authority: migrations/canonical + scripts/d1_migrate.py")

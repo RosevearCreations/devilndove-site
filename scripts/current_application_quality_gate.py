@@ -13,6 +13,7 @@ for script in (
     'current_production_promotion_provenance_gate.py',
     'current_reliability_truth_gate.py',
     'current_deployment_preflight_truth_gate.py',
+    'current_accounting_schema_authority_gate.py',
 ):
     subprocess.run([sys.executable, str(ROOT / 'scripts' / script)], cwd=ROOT, check=True)
 print('CURRENT APPLICATION QUALITY GATE: PASS')
