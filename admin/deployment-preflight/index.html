@@ -16,9 +16,9 @@
       <div class="links"><a href="/admin/it/">I.T.</a><a href="/admin/release-control/">Release Control</a><a href="/admin/reliability/">Reliability</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout type="button">Logout</button></div>
     </div>
 
-    <div class="hero"><div><h1>Deployment Preflight</h1><p>Current Release 467 Build 40 read-only preflight for canonical D1 migration proof, foreign-key integrity, schema visibility, public/admin quality, D1/R2 health and release safety.</p></div></div>
+    <div class="hero"><div><h1>Deployment Preflight</h1><p>Current Release 467 Build 41 read-only preflight for canonical D1 migration proof, foreign-key integrity, schema visibility, public/admin quality, D1/R2 health and release safety.</p></div></div>
 
-    <div class="card" style="margin-top:18px"><strong>Release 467 Build 40 — current read-only authority:</strong> forward D1 schema authority remains only <code>migrations/canonical/manifest.json</code> applied through <code>scripts/d1_migrate.py</code>. The canonical stream remains exactly <code>0001</code>–<code>0004</code>. Build 40 adds no migration because Product Social Automation uses proven pre-canonical baseline tables. Release 467 Build 37 remains the historical feature authority that converged this workspace. This page never creates or repairs schema during a request and never promotes Production.</div>
+    <div class="card" style="margin-top:18px"><strong>Release 467 Build 41 — current read-only authority:</strong> forward D1 schema authority remains only <code>migrations/canonical/manifest.json</code> applied through <code>scripts/d1_migrate.py</code>. The canonical stream remains exactly <code>0001</code>–<code>0004</code>. Build 41 adds no migration; its responsive Packaging Studio and printable safe-area work is source/UI/quality-gate only. Release 467 Build 37 remains the historical feature authority that converged this workspace. This page never creates or repairs schema during a request and never promotes Production.</div>
 
     <div class="admin-department-links card" style="margin-top:18px">
       <a class="btn" href="/admin/it/">I.T. Control Tower</a>
@@ -30,7 +30,7 @@
 
     <section class="card" style="margin-top:18px">
       <h2 style="margin-top:0">Run current preflight</h2>
-      <p class="small">The active endpoint is GET-only. Saved historical snapshots and confirmations remain visible when present, but Build 40 does not mutate them.</p>
+      <p class="small">The active endpoint is GET-only. Saved historical snapshots and confirmations remain visible when present, but Build 41 does not mutate them.</p>
       <div class="small" id="deploymentPreflightMessage">Waiting for admin session…</div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
         <button class="btn" id="runDeploymentPreflightButton" type="button">Run Preflight</button>
@@ -46,6 +46,6 @@
   <script src="/public/js/admin-route-usage.js?v=467"></script>
   <script src="/public/js/site-auth-ui.js?v=467"></script>
   <script src="/public/js/admin-self-protect.js?v=467"></script>
-  <script src="/public/js/admin-current-deployment-preflight.js?v=467b40"></script>
+  <script src="/public/js/admin-current-deployment-preflight.js?v=467b41"></script>
 </body>
 </html>
