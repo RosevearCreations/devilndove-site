@@ -29,7 +29,9 @@
     "system_gate_run": 33895643967,
     "current_application_quality_run": 33895644065,
     "it_admin_runtime_proof_run": 33895644098,
-    "branch_hygiene_run": 33895644039,
+    "branch_hygiene_run": 33895644039
+  },
+  "deployment_acceptance": {
     "exact_preview_deployment": true,
     "preview_binding_proof": true,
     "preview_smoke_acceptance": true,
