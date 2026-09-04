@@ -1,23 +1,27 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <meta name="robots" content="noindex,nofollow"/>
-  <title>Startup Readiness Cockpit — Devil n Dove Admin</title>
-  <meta name="description" content="Track every Devil n Dove go-live blocker with status, owner, due date, detailed instructions, evidence, pass conditions, and change history."/>
-  <link rel="stylesheet" href="/css/styles.css"/>
-  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operational Readiness | Devil n Dove Admin</title>
+<meta name="description" content="Current Devil n Dove operational readiness entry point.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/assets/mark.png" type="image/png">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/current-responsive.css">
 </head>
-<body data-admin-page="startup-readiness">
-  <main class="container admin-shell startup-readiness-page">
-    <nav class="nav"><div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"/><div><strong>Devil n Dove</strong><div class="small">Startup Readiness Cockpit</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/prelaunch/">Process Map</a><a href="/admin/deployment-preflight/">Deployment Preflight</a><a href="/admin/release-preflight/">Product Preflight</a><a href="/admin/packaging-studio/">Packaging</a><button class="btn" data-nav-logout type="button">Logout</button></div></nav>
-    <section class="hero"><div><p class="eyebrow">Build 230 • 43 gates • Test, correct, prove, retest</p><h1>Startup Readiness Cockpit</h1><p>Work through every launch gate in order, assign an owner and due date, save proof, correct failures using the gate-specific procedure, and reopen an item when production evidence changes. The database is the status authority; <code>STARTUP_GO_LIVE_GUIDE.md</code> is the detailed human-readable operating guide. Missing, broken, fallback, placeholder, or unproved launch imagery remains its own Critical gate.</p><div class="packaging-hero-actions"><a class="btn primary" href="/STARTUP_GO_LIVE_GUIDE.md">Open detailed Startup Guide</a><a class="btn" href="/admin/image-manifest/">Open visual image manifest</a><a class="btn" href="/admin/prelaunch/">Open Process Map</a><a class="btn" href="/admin/post-deploy-smoke-tests/">Open Smoke Tests</a></div></div></section>
-    <section class="card startup-how-to"><h2>How to use this page</h2><ol><li>The initial view shows <strong>All statuses</strong>, preventing completed D1 records from producing a confusing empty screen. Switch to Open only when actively closing gates.</li><li>Open the exact internal page and follow Preparation, every numbered test step, Correction if failed, Evidence, Retest, and Pass condition.</li><li>Record the owner, due date, factual result, and a safe evidence link or reference.</li><li>Use <strong>Blocked</strong> only with a clear reason. Use <strong>Complete</strong> only after the pass condition is proven.</li><li>Reopen a completed gate after a related deployment, credential rotation, provider version, schema, policy, or material data change.</li></ol><p class="small">When D1 or the network is unavailable, changes are stored only in this browser and visibly marked <strong>Unsynced</strong>. They are not treated as server evidence until synchronization succeeds.</p></section>
-    <div id="startupReadinessMessage" class="card startup-message" hidden></div>
-    <div id="startupReadinessMount"><section class="card"><p>Loading startup readiness…</p></section></div>
-    <div class="footer card" style="margin-top:18px"></div>
-  </main>
-  <script src="/js/main.js?v=440"></script><script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script><script src="/public/js/site-auth-ui.js?v=440"></script><script src="/public/js/site-analytics.js?v=440"></script><script src="/public/js/admin-self-protect.js?v=440"></script><script src="/public/js/admin.js?v=440"></script><script src="/public/js/admin-startup-readiness.js?v=440"></script>
+<body data-admin-page="operational-readiness">
+<main class="container admin-shell">
+<nav class="nav"><div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"><div><strong>Devil n Dove</strong><div class="small">Operational Readiness</div></div></div><div class="links"><a href="/admin/">Admin</a><a href="/admin/help/">Help</a><a href="/admin/prelaunch/">Release &amp; Go-Live</a><a href="/admin/application-sanity/">Sanity</a></div></nav>
+<section class="hero"><div><p class="eyebrow">Current readiness entry point</p><h1>Operational Readiness</h1><p>The former numbered startup checklist has been retired as a current instruction surface. Use the current Help Centre, application sanity checks, pre-deploy validation and Release &amp; Go-Live workflow instead.</p></div></section>
+<section class="grid cols-2">
+<a class="card" href="/admin/help/"><h2>Online Help Centre</h2><p>Current guidance for security, SEO/search engines, responsive layouts, releases and external HOLD states.</p></a>
+<a class="card" href="/admin/application-sanity/"><h2>Application Sanity</h2><p>Current application-level health and consistency checks.</p></a>
+<a class="card" href="/admin/deployment-preflight/"><h2>Pre-Deploy Validation</h2><p>Validate the exact Development candidate before promotion.</p></a>
+<a class="card" href="/admin/prelaunch/"><h2>Release &amp; Go-Live Center</h2><p>Current release sequencing, evidence and Production decision path.</p></a>
+</section>
+<footer class="footer card">Historical readiness records remain auditable; they are no longer presented as current launch instructions.</footer>
+</main>
+<script src="/js/main.js"></script><script src="/public/js/auth.js"></script><script src="/public/js/admin-route-usage.js"></script><script src="/public/js/site-auth-ui.js"></script><script src="/public/js/admin-self-protect.js"></script>
 </body>
 </html>

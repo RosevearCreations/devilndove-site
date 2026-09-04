@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Online Help Centre | Devil n Dove Admin</title>
+<meta name="description" content="Current Devil n Dove administrator help for security, storefront SEO, responsive layouts, releases, integrations, finance, inventory and creative workflows.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/assets/mark.png" type="image/png">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/current-responsive.css">
+</head>
+<body data-admin-page="help">
+<main class="container admin-shell">
+  <nav class="nav">
+    <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"><div><strong>Devil n Dove</strong><div class="small">Online Help Centre</div></div></div>
+    <div class="links"><a href="/admin/">Admin</a><a href="/admin/it/">I.T.</a><a href="/admin/application-sanity/">Sanity</a><a href="/admin/prelaunch/">Release &amp; Go-Live</a></div>
+  </nav>
+  <section class="hero">
+    <div><p class="eyebrow">Current operating help</p><h1>Devil n Dove Online Help Centre</h1>
+    <p>Use this page as the current operating guide. Historical release and build evidence stays auditable in source history but is not a current instruction set.</p></div>
+  </section>
+
+  <section class="card" id="help-security"><h2>Accounts, passwords and security</h2>
+    <ul class="clean">
+      <li>Stored passwords are one-way hashes and cannot be displayed. Eye controls reveal only a password currently typed or generated in an input.</li>
+      <li>New password writes use the current salted adaptive hashing scheme. Older compatible hashes are upgraded after a successful verified login.</li>
+      <li>An administrator may issue a temporary password without knowing the old password. Clearing the target user’s other sessions is the safe default.</li>
+      <li>Never place passwords, session tokens, API tokens, signing secrets or private keys in visible help, logs, D1 reference fields or screenshots.</li>
+    </ul>
+    <p><a class="btn" href="/admin/users/">Users &amp; Access</a> <a class="btn" href="/members/">Account settings</a></p>
+  </section>
+
+  <section class="card" id="help-search"><h2>SEO, Google and search engines</h2>
+    <ul class="clean">
+      <li>Every indexable public page must expose exactly one H1, one useful title, one useful meta description and one clean HTTPS canonical URL.</li>
+      <li>Internal search, account, cart, admin and empty template surfaces must not compete with real public content in search results.</li>
+      <li>The sitemap contains canonical indexable public destinations only. Product detail shells are excluded; real product URLs set product-specific canonical metadata at runtime.</li>
+      <li>Open Graph, social preview metadata, descriptive image alt text, crawlable links and valid JSON-LD support discovery without keyword stuffing.</li>
+      <li>Mobile and desktop must expose equivalent important content; do not hide essential product facts or headings on the phone layout.</li>
+    </ul>
+    <p><a class="btn" href="/admin/local-seo-review/">Search &amp; SEO Review</a> <a class="btn" href="/admin/storefront-quality/">Storefront Quality</a></p>
+  </section>
+
+  <section class="card" id="help-responsive"><h2>Phone, tablet, PC app and web layout</h2>
+    <ul class="clean">
+      <li>The shared responsive layer protects 360–390px phones, tablet widths, laptop/PC layouts and wide desktop web layouts.</li>
+      <li>Navigation and card grids must wrap instead of forcing page-level horizontal scrolling. Images and media stay within their containers.</li>
+      <li>Wide data tables use their own horizontal scroll region. Touch controls keep a practical minimum target size on coarse-pointer devices.</li>
+      <li>When adding a new interface, verify it at phone, tablet, 1024px desktop and wide desktop widths before considering it complete.</li>
+    </ul>
+    <p><a class="btn" href="/admin/visual-polish/">Responsive Layout Review</a></p>
+  </section>
+
+  <section class="card" id="help-release"><h2>Development, release and Production</h2>
+    <ol>
+      <li>Make application changes in Development.</li>
+      <li>Pass source quality, database safety, responsive/search checks and the exact Development Preview acceptance.</li>
+      <li>Promote only the exact green Development tree to <code>main</code>; do not create a main-only application patch.</li>
+      <li>Production independently snapshots business data, proves canonical D1 convergence, deploys the exact main SHA, verifies bindings and runs public smoke acceptance.</li>
+      <li>If any Production proof fails, Production remains on hold until the owning problem is corrected and the full proof is rerun.</li>
+    </ol>
+    <p><a class="btn" href="/admin/prelaunch/">Release &amp; Go-Live Center</a> <a class="btn" href="/admin/deploy-readiness/">Promote / Hold</a></p>
+  </section>
+
+  <section class="card" id="help-integrations"><h2>External services and HOLD states</h2>
+    <p>Configured does not mean tested. Stripe, PayPal, social OAuth, private-media acceptance and Cloudflare Access service-token work remain separate evidence lanes until a current real acceptance proves them.</p>
+    <p>Do not mark an external lane passed because environment-variable names exist or a provider page can be opened.</p>
+    <p><a class="btn" href="/admin/it-integrations/">Integration Registry</a> <a class="btn" href="/admin/it-platform/">I.T. Platform</a></p>
+  </section>
+
+  <section class="card" id="help-workflows"><h2>Where work belongs</h2>
+    <div class="grid cols-2">
+      <div><h3>Storefront</h3><p>Public presentation, merchandising, products, search quality, media and conversion.</p></div>
+      <div><h3>Creator / Socials</h3><p>Materials, tools, projects, CAIP evidence, content packages and reviewed publication workflows.</p></div>
+      <div><h3>Finance</h3><p>Orders, payments, customer documents, accounting, reconciliation, close and business health.</p></div>
+      <div><h3>I.T.</h3><p>Access, integrations, infrastructure, diagnostics, release evidence, deployment controls and operational continuity.</p></div>
+    </div>
+  </section>
+
+  <footer class="footer card">Help is explanatory and read-only. Business data remains owned by the application workflow that created it.</footer>
+</main>
+<script src="/js/main.js"></script>
+<script src="/public/js/auth.js"></script>
+<script src="/public/js/admin-route-usage.js"></script>
+<script src="/public/js/site-auth-ui.js"></script>
+<script src="/public/js/admin-self-protect.js"></script>
+<script src="/public/js/admin-module-nav.js"></script>
+</body>
+</html>
