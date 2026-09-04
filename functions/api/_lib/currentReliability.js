@@ -1,35 +1,35 @@
-// Release 467 Build 49 — current read-only reliability projection.
+// Release 467 Build 50 — current read-only reliability projection.
 // Implementation acceptance is distinct from the last externally verified closure.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 49;
-export const CURRENT_RELIABILITY_TITLE = 'Current Authority Convergence & Restart Integrity';
+export const CURRENT_RELIABILITY_BUILD = 50;
+export const CURRENT_RELIABILITY_TITLE = 'Reviewed CAIP to Content Studio Handoff';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 49,
+  build: 50,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: '7bbfbf10a531898052771d9db1cfbb1a9e7d893a',
-  accepted_dev_tree_sha: '7a74af809182a0eb6befb56e34d2869b44090c6e',
-  system_gate_run: 33928678750,
-  current_application_quality_run: 33928678778,
-  it_admin_runtime_proof_run: 33928678807,
-  branch_hygiene_run: 33928678789,
+  accepted_dev_sha: 'dddd7c9423132dd22b179348a5644362f7b9f46c',
+  accepted_dev_tree_sha: '1d5d4859c55fae404a79eb8cef85e1e0d3f30826',
+  system_gate_run: 33930359847,
+  current_application_quality_run: 33930359835,
+  it_admin_runtime_proof_run: 33930359865,
+  branch_hygiene_run: 33930359956,
   exact_preview_deployment: true,
   role: 'IMPLEMENTATION_ACCEPTANCE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 48,
-  title: 'Automated Production Acceptance',
-  dev_sha: '3980661045c68f55fa64e66e6414055ee0d359f6',
-  tree_sha: '66e5e0a088d6eb9f4f85f70791de8925ac40adb0',
-  system_gate_run: 33925647553,
-  current_application_quality_run: 33925647532,
-  it_admin_runtime_proof_run: 33925647561,
-  branch_hygiene_run: 33925647559,
+  build: 49,
+  title: 'Current Authority Convergence & Restart Integrity',
+  dev_sha: '28307cd8939329db05dab61c336d0c7a49f8759e',
+  tree_sha: '0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7',
+  system_gate_run: 33929301077,
+  current_application_quality_run: 33929301018,
+  it_admin_runtime_proof_run: 33929301051,
+  branch_hygiene_run: 33929300999,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 
