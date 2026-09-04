@@ -2,9 +2,17 @@
   "release": 467,
   "build": 38,
   "title": "Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_base_sha": "f831dcd017fa0bf1db6f637f08355c1deb9aedaf",
   "source_base_tree_sha": "b6004b79b072ff33d8a87b9de05001c691042341",
+  "accepted_dev_sha": "a48a44558e2438d7db4d994da0012b0cae703689",
+  "accepted_dev_tree_sha": "27adcad60e871921ea3fb9372b03f8a38b22daa8",
+  "acceptance": {
+    "system_gate_run": 33881012179,
+    "current_application_quality_run": 33881011819,
+    "it_admin_runtime_proof_run": 33881011733,
+    "branch_hygiene_run": 33881011711
+  },
   "build37_final_closure": {
     "dev_sha": "f831dcd017fa0bf1db6f637f08355c1deb9aedaf",
     "tree_sha": "b6004b79b072ff33d8a87b9de05001c691042341",
@@ -35,7 +43,12 @@
     "runtime_schema_residue_files_ceiling_after": 60,
     "runtime_schema_residue_occurrences_ceiling_after": 526,
     "runtime_schema_residue_shared_helpers_ceiling_after": 4,
+    "runtime_schema_residue_files_after": 60,
+    "runtime_schema_residue_occurrences_after": 526,
+    "runtime_schema_residue_shared_helpers_after": 4,
+    "accounting_request_time_ddl_after": 0,
     "raw_d1_bypass_with_ddl_ceiling": 0,
+    "raw_d1_bypass_with_ddl_after": 0,
     "canonical_migration_stream_unchanged": true,
     "canonical_migration_count": 4,
     "canonical_migration_files": [
@@ -49,6 +62,7 @@
     "runtime_schema_residue_ratchet_added": true,
     "current_application_quality_covers_accounting_schema_authority": true
   },
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "safety": {
     "schema_change_authorized": false,
     "d1_business_data_mutation_authorized": false,
