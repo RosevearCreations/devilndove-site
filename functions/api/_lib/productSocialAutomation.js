@@ -1,10 +1,60 @@
 // File: /functions/api/_lib/productSocialAutomation.js
 // Build 210 — safe product-to-social queue automation.
+// Release 467 Build 40 — schema ownership removed; historical baseline is asserted read-only.
 // This module never publishes directly. It can create one review-first queue item
 // when an eligible product becomes approved/published. Human privacy + release review
 // remains required before any platform API call is attempted.
 
 const PLATFORM_KEYS = new Set(['facebook', 'instagram', 'tiktok', 'x', 'youtube', 'pinterest']);
+const REQUIRED_SETTINGS_COLUMNS = Object.freeze([
+  'settings_id',
+  'auto_queue_enabled',
+  'auto_queue_on_review_status',
+  'require_active_product',
+  'require_featured_image',
+  'default_platforms_json',
+  'caption_template_key',
+  'default_hashtags',
+  'default_utm_campaign',
+  'notes',
+  'updated_by_user_id',
+  'updated_at'
+]);
+const REQUIRED_QUEUE_COLUMNS = Object.freeze([
+  'social_post_queue_id',
+  'social_post_key',
+  'source_type',
+  'source_id',
+  'title',
+  'summary',
+  'caption',
+  'hashtags',
+  'target_platforms_json',
+  'image_urls_json',
+  'link_url',
+  'approval_status',
+  'post_status',
+  'created_by_user_id',
+  'updated_by_user_id',
+  'notes',
+  'platform_caption_overrides_json',
+  'media_quality_warnings_json',
+  'duplicate_signature',
+  'do_not_repost',
+  'schedule_timezone',
+  'caption_template_key',
+  'content_pillar',
+  'call_to_action',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_url',
+  'privacy_status',
+  'approved_for_public_post',
+  'api_publish_mode',
+  'created_at',
+  'updated_at'
+]);
 
 function clean(value, max = 0) {
   const text = String(value ?? '').trim();
@@ -68,21 +118,29 @@ async function getColumns(db, tableName) {
   return new Set((result?.results || []).map((row) => clean(row?.name).toLowerCase()).filter(Boolean));
 }
 
-export async function ensureProductSocialAutomationSchema(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS product_social_automation_settings (
-    settings_id INTEGER PRIMARY KEY CHECK (settings_id = 1),
-    auto_queue_enabled INTEGER NOT NULL DEFAULT 0,
-    auto_queue_on_review_status TEXT NOT NULL DEFAULT 'approved',
-    require_active_product INTEGER NOT NULL DEFAULT 1,
-    require_featured_image INTEGER NOT NULL DEFAULT 1,
-    default_platforms_json TEXT NOT NULL DEFAULT '["facebook","instagram","pinterest"]',
-    caption_template_key TEXT NOT NULL DEFAULT 'new_product',
-    default_hashtags TEXT NOT NULL DEFAULT 'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada',
-    default_utm_campaign TEXT NOT NULL DEFAULT 'new_product',
-    notes TEXT,
-    updated_by_user_id INTEGER,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
+function baselineSchemaError(details) {
+  const error = new Error('Product social automation baseline schema is not ready. Repair through approved migration authority; runtime schema repair is disabled.');
+  error.code = 'product_social_automation_schema_not_ready';
+  error.details = details;
+  return error;
+}
+
+async function requireTableColumns(db, tableName, requiredColumns) {
+  if (!(await tableExists(db, tableName))) {
+    throw baselineSchemaError({ table: tableName, missing_table: true, missing_columns: [...requiredColumns] });
+  }
+  const columns = await getColumns(db, tableName);
+  const missing = requiredColumns.filter((column) => !columns.has(column));
+  if (missing.length) throw baselineSchemaError({ table: tableName, missing_table: false, missing_columns: missing });
+}
+
+export async function requireProductSocialAutomationSchema(db) {
+  await requireTableColumns(db, 'product_social_automation_settings', REQUIRED_SETTINGS_COLUMNS);
+  await requireTableColumns(db, 'social_post_queue', REQUIRED_QUEUE_COLUMNS);
+  return { ok: true, schema_mutation: false };
+}
+
+async function ensureProductSocialAutomationSettingsRow(db) {
   await db.prepare(`INSERT OR IGNORE INTO product_social_automation_settings (
     settings_id, auto_queue_enabled, auto_queue_on_review_status, require_active_product,
     require_featured_image, default_platforms_json, caption_template_key, default_hashtags,
@@ -92,59 +150,15 @@ export async function ensureProductSocialAutomationSchema(db) {
     'DevilnDove,HandmadeOntario,WorkshopMade,SmallBusinessCanada', 'new_product',
     'Disabled by default. When enabled, an approved product creates one review-first social queue item; it never auto-publishes.', CURRENT_TIMESTAMP
   )`).run();
+}
 
-  // Keep product approval independent from whether the Social Queue page has already
-  // been opened. This compatible baseline table is also used by the queue endpoint.
-  await db.prepare(`CREATE TABLE IF NOT EXISTS social_post_queue (
-    social_post_queue_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    social_post_key TEXT NOT NULL UNIQUE,
-    source_type TEXT NOT NULL DEFAULT 'job_update',
-    source_id TEXT,
-    title TEXT NOT NULL,
-    summary TEXT,
-    caption TEXT,
-    hashtags TEXT,
-    target_platforms_json TEXT NOT NULL DEFAULT '[]',
-    image_urls_json TEXT NOT NULL DEFAULT '[]',
-    video_url TEXT,
-    link_url TEXT,
-    approval_status TEXT NOT NULL DEFAULT 'needs_review',
-    post_status TEXT NOT NULL DEFAULT 'draft',
-    scheduled_at TEXT,
-    published_at TEXT,
-    created_by_user_id INTEGER,
-    updated_by_user_id INTEGER,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
-  )`).run();
-
-  // Existing queue tables are owned by the social-post-queue migration. These columns
-  // make this module safe when a user enables product automation before the settings UI.
-  if (await tableExists(db, 'social_post_queue')) {
-    const columns = await getColumns(db, 'social_post_queue');
-    const additions = [
-      ['source_type', 'source_type TEXT NOT NULL DEFAULT "job_update"'],
-      ['source_id', 'source_id TEXT'],
-      ['content_pillar', 'content_pillar TEXT'],
-      ['caption_template_key', 'caption_template_key TEXT'],
-      ['utm_source', 'utm_source TEXT'],
-      ['utm_medium', 'utm_medium TEXT'],
-      ['utm_campaign', 'utm_campaign TEXT'],
-      ['utm_url', 'utm_url TEXT'],
-      ['platform_caption_overrides_json', "platform_caption_overrides_json TEXT DEFAULT '{}'"],
-      ['media_quality_warnings_json', "media_quality_warnings_json TEXT DEFAULT '[]'"],
-      ['duplicate_signature', 'duplicate_signature TEXT'],
-      ['do_not_repost', 'do_not_repost INTEGER DEFAULT 0'],
-      ['schedule_timezone', 'schedule_timezone TEXT'],
-      ['privacy_status', 'privacy_status TEXT DEFAULT "needs_review"'],
-      ['approved_for_public_post', 'approved_for_public_post INTEGER DEFAULT 0'],
-      ['api_publish_mode', 'api_publish_mode TEXT DEFAULT "review_first"']
-    ];
-    for (const [column, definition] of additions) {
-      if (!columns.has(column)) await db.prepare(`ALTER TABLE social_post_queue ADD COLUMN ${definition}`).run().catch(() => null);
-    }
-  }
+// Compatibility export for existing callers. Build 40 keeps the public helper contract
+// while changing its schema behavior to a read-only baseline assertion plus normal
+// settings-row DML. It never repairs table or column structure at request time.
+export async function ensureProductSocialAutomationSchema(db) {
+  const result = await requireProductSocialAutomationSchema(db);
+  await ensureProductSocialAutomationSettingsRow(db);
+  return result;
 }
 
 export async function getProductSocialAutomationSettings(db) {
