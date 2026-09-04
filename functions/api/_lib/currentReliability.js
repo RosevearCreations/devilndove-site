@@ -1,10 +1,10 @@
-// Release 467 Build 38 — current read-only reliability projection.
+// Release 467 Build 39 — current read-only reliability projection.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 38;
-export const CURRENT_RELIABILITY_TITLE = 'Accounting Core Runtime-DDL Elimination & Baseline Schema Assertion';
+export const CURRENT_RELIABILITY_BUILD = 39;
+export const CURRENT_RELIABILITY_TITLE = 'Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 
 export async function loadCurrentReliability(db, env = {}) {

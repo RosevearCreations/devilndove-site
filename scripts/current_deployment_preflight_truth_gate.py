@@ -48,7 +48,7 @@ req(pointer_release == 467, 'current Development pointer must remain Release 467
 req(active_release == pointer_release, 'Deployment Preflight release must match current Development release')
 req(active_build in (pointer_build, pointer_build + 1), 'Deployment Preflight build must be current pointer build or the in-flight next build')
 req(active_build >= pointer_build, 'Deployment Preflight may never lag current Development')
-req(active_build == 38, 'Build 38 Deployment Preflight identity is missing')
+req(active_build == 39, 'Build 39 Deployment Preflight identity is missing')
 
 migrations = manifest.get('migrations') if isinstance(manifest.get('migrations'), list) else []
 canonical_files = [str(row.get('file') or '') for row in migrations if isinstance(row, dict)]
@@ -58,7 +58,7 @@ req(canonical_files == [
     '0002_release464_operational_acceptance.sql',
     '0003_release464_business_growth.sql',
     '0004_release465_storefront_quality.sql',
-], 'Build 38 expects the current four-file canonical migration stream')
+], 'Build 39 expects the current four-file canonical migration stream')
 for filename in canonical_files:
     req(filename in current, f'current Deployment Preflight missing canonical migration: {filename}')
 
@@ -110,7 +110,7 @@ req('_historicalDeploymentPreflight.js' in current, 'current endpoint must expli
 req('/api/admin/deployment-preflight' in legacy_client, 'historical Deployment Preflight client provenance drifted')
 
 req(len(re.findall(r'<h1(?:\s|>)', page, re.I)) == 1, 'Deployment Preflight page must contain exactly one H1')
-req('Release 467 Build 38' in page, 'Deployment Preflight page Build 38 identity missing')
+req('Release 467 Build 39' in page, 'Deployment Preflight page Build 39 identity missing')
 req('read-only' in page.lower(), 'Deployment Preflight page must explain read-only boundary')
 req('migrations/canonical/manifest.json' in page and 'scripts/d1_migrate.py' in page, 'page must expose canonical migration authority')
 req('/public/js/admin-current-deployment-preflight.js' in page, 'page must load current Deployment Preflight client')
@@ -130,7 +130,7 @@ if FAIL:
         print('-', item)
     sys.exit(1)
 print('CURRENT DEPLOYMENT PREFLIGHT TRUTH GATE: PASS')
-print('Active Deployment Preflight: RELEASE 467 BUILD 38 READ-ONLY')
+print('Active Deployment Preflight: RELEASE 467 BUILD 39 READ-ONLY')
 print('Historical feature authority: RELEASE 467 BUILD 37')
 print('Canonical D1 authority: migrations/canonical + scripts/d1_migrate.py')
 print('Historical build-numbered SQL: PROVENANCE ONLY')

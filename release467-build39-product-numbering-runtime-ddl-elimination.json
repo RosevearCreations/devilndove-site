@@ -2,10 +2,12 @@
   "release": 467,
   "build": 39,
   "title": "Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence",
-  "state": "FEATURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "source_base_sha": "cc26b34ca31ec3e142149bd30f8eadd7dea7a112",
   "source_base_tree_sha": "b4943a502d44d2e2bf2b113210326fe59409fd10",
+  "accepted_dev_sha": "8f94a6b49b6353946d96afbe2c7eb0b5ce6ca6b1",
+  "accepted_dev_tree_sha": "1dba2f02509e7fe0c7046541f126f80aa5170d8b",
   "historical_schema_provenance": {
     "authority": "Build 195 product lifecycle",
     "table": "catalog_product_number_sequence",
@@ -16,11 +18,7 @@
     "product_number_sequence_baseline_assertion": true,
     "runtime_product_numbering_schema_ddl_removed": true,
     "required_sequence_columns": 3,
-    "required_sequence_column_names": [
-      "sequence_key",
-      "next_product_number",
-      "updated_at"
-    ],
+    "required_sequence_column_names": ["sequence_key", "next_product_number", "updated_at"],
     "desktop_product_creation_allocation_preserved": true,
     "mobile_product_creation_allocation_preserved": true,
     "custom_product_number_sequence_floor_preserved": true,
@@ -42,6 +40,12 @@
     "sequence_helper": "functions/api/admin/_product-numbering.js",
     "desktop_create_route": "functions/api/admin/create-product.js",
     "mobile_create_route": "functions/api/admin/mobile-create-product.js"
+  },
+  "acceptance": {
+    "system_gate_run": 33883587705,
+    "current_application_quality_run": 33883587677,
+    "it_admin_runtime_proof_run": 33883587724,
+    "branch_hygiene_run": 33883587669
   },
   "production_checkpoint": {
     "build": 32,
@@ -70,11 +74,5 @@
     "automatic_production_promotion_authorized": false,
     "secret_values_emitted": false
   },
-  "acceptance": {
-    "system_gate_run": null,
-    "current_application_quality_run": null,
-    "it_admin_runtime_proof_run": null,
-    "branch_hygiene_run": null
-  },
-  "promotion_state": "FEATURE_CANDIDATE_NOT_YET_DEVELOPMENT_GREEN"
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
 }
