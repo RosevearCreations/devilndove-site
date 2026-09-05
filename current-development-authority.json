@@ -67,7 +67,7 @@
     "tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
     "production_pages_deploy_run": 33970506769,
     "state": "PRODUCTION_GREEN",
-    "role": "CURRENT_PRODUCTION_BASELINE_WITH_REPORTED_RESIDUAL_RUNTIME_INCIDENT"
+    "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
     "release467-build60-production-resource-binding-auth-recovery.json",
