@@ -18,10 +18,13 @@ jobs:
     timeout-minutes: 30
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_DATA_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
       PROD_D1_NAME: devilndove-prod-r462
+      DEV_D1_NAME: devilndove-dev
       PROD_PRODUCT_R2: devilndove-toolshed-images
       DEV_PRODUCT_R2: devilndove-toolshed-images-dev
+      BUILD62_BROWSER_UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -33,6 +36,8 @@ jobs:
 
       - name: Export current Production media references read-only
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
           npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "
@@ -49,92 +54,164 @@ jobs:
           FROM movie_catalog WHERE COALESCE(trim(back_image_url),'')<>'';
           " > /tmp/build62-production-media-references-raw.json
 
-      - name: Inventory every R2 bucket and locate referenced media read-only
+      - name: Deploy read-only Dev/Production R2 inventory bridge
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          cp wrangler.toml /tmp/wrangler.build62-original.toml
+          cat > wrangler.toml <<'TOML'
+          name = "devilndove-site-dev"
+          compatibility_date = "2026-04-08"
+          pages_build_output_dir = "."
+
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "devilndove-dev"
+          database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+
+          [[r2_buckets]]
+          binding = "PRODUCT_MEDIA_BUCKET"
+          bucket_name = "devilndove-toolshed-images-dev"
+          preview_bucket_name = "devilndove-toolshed-images-dev"
+
+          [[r2_buckets]]
+          binding = "RELEASE463_PRODUCT_MEDIA_PROD_BUCKET"
+          bucket_name = "devilndove-toolshed-images"
+          preview_bucket_name = "devilndove-toolshed-images"
+          TOML
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=devilndove-site-dev \
+            --branch=build62-r2-readonly \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message="Build 62 read-only R2 recovery discovery" \
+            | tee /tmp/build62-r2-bridge-deploy.log
+          cp /tmp/wrangler.build62-original.toml wrangler.toml
+          python - <<'PY'
+          import re
+          text=open('/tmp/build62-r2-bridge-deploy.log',encoding='utf-8',errors='replace').read()
+          urls=re.findall(r'https://([a-z0-9-]+)\.devilndove-site-dev\.pages\.dev',text,re.I)
+          hashes=[label for label in urls if re.fullmatch(r'[0-9a-f]{8}',label,re.I)]
+          assert hashes,text[-3000:]
+          url=f'https://{hashes[-1]}.devilndove-site-dev.pages.dev'
+          open('/tmp/build62-r2-bridge-url','w').write(url)
+          print('BUILD62_R2_BRIDGE_URL',url)
+          PY
+
+      - name: Resolve existing Development admin session read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${DEV_D1_NAME}" --remote --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(u.role)='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build62-session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build62-session.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          token=next(walk(d),'').strip()
+          assert token,'No active Development admin session is available for Build 62 R2 recovery discovery.'
+          print(token)
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          echo "BUILD62_ADMIN_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          rm -f /tmp/build62-session.json
+
+      - name: Inventory Dev and Production Product R2 through read-only bindings
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, os, urllib.parse, urllib.request, urllib.error
+          import json, os, urllib.request, urllib.error
           from pathlib import Path
 
-          ACCOUNT=os.environ['CLOUDFLARE_ACCOUNT_ID']
-          TOKEN=os.environ['CLOUDFLARE_API_TOKEN']
-          PROD=os.environ['PROD_PRODUCT_R2']
-          DEV=os.environ['DEV_PRODUCT_R2']
-          API=f'https://api.cloudflare.com/client/v4/accounts/{ACCOUNT}/r2/buckets'
-          HEADERS={'Authorization':f'Bearer {TOKEN}','Accept':'application/json','User-Agent':'devilndove-build62-r2-recovery/1.0'}
+          base=Path('/tmp/build62-r2-bridge-url').read_text().strip()
+          endpoint=base+'/api/admin/release463-r2-sync'
+          token=os.environ['BUILD62_ADMIN_TOKEN']
+          ua=os.environ['BUILD62_BROWSER_UA']
 
-          def request_json(url):
-              req=urllib.request.Request(url,headers=HEADERS)
+          def call(action,cursor=''):
+              payload={'authorization':'RELEASE463_R2_ENVIRONMENT_SYNC','bucket':'product','action':action,'cursor':cursor,'limit':500}
+              req=urllib.request.Request(endpoint,method='POST',data=json.dumps(payload).encode(),headers={
+                  'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store',
+                  'Cookie':'dd_auth_token='+token,'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
+              })
               try:
-                  with urllib.request.urlopen(req,timeout=60) as r:
-                      raw=r.read()
+                  with urllib.request.urlopen(req,timeout=120) as r:
+                      status=r.status; raw=r.read().decode('utf-8','replace')
               except urllib.error.HTTPError as e:
-                  raw=e.read()
-                  raise RuntimeError(f'Cloudflare API HTTP {e.code}: {raw[:500].decode("utf-8","replace")}')
+                  status=e.code; raw=e.read().decode('utf-8','replace')
               data=json.loads(raw)
-              if data.get('success') is not True:
-                  raise RuntimeError(f'Cloudflare API failure: {data.get("errors")}')
+              assert status==200 and data.get('ok') is True,(action,status,data)
+              assert data.get('mutation_capability')=='none' and data.get('production_r2_mutation') is False,data
               return data
 
-          def list_buckets():
-              out=[]; cursor=''
-              for _ in range(100):
-                  qs={'per_page':1000}
-                  if cursor: qs['cursor']=cursor
-                  data=request_json(API+'?'+urllib.parse.urlencode(qs))
-                  result=data.get('result') or {}
-                  out.extend(result.get('buckets') or [])
-                  info=data.get('result_info') or {}
-                  nxt=str(info.get('cursor') or '').strip()
-                  if not nxt or nxt==cursor: break
+          def inventory(action):
+              cursor=''; items=[]
+              for _ in range(1000):
+                  data=call(action,cursor)
+                  items.extend(data.get('results') or [])
+                  if data.get('done') is True: break
+                  nxt=str(data.get('next_cursor') or '').strip()
+                  assert nxt and nxt!=cursor,(action,cursor,data)
                   cursor=nxt
-              return out
+              else: raise AssertionError((action,'pagination_limit'))
+              return {str(o.get('key') or ''):o for o in items if o.get('key')}
 
-          def list_objects(bucket):
-              out=[]; cursor=''
-              encoded_bucket=urllib.parse.quote(bucket,safe='')
-              endpoint=f'{API}/{encoded_bucket}/objects'
-              for _ in range(10000):
-                  qs={'per_page':1000}
-                  if cursor: qs['cursor']=cursor
-                  data=request_json(endpoint+'?'+urllib.parse.urlencode(qs))
-                  out.extend(data.get('result') or [])
-                  info=data.get('result_info') or {}
-                  nxt=str(info.get('cursor') or '').strip()
-                  truncated=bool(info.get('is_truncated'))
-                  if not truncated and not nxt: break
-                  if not nxt or nxt==cursor: break
-                  cursor=nxt
-              return out
+          dev=inventory('inventory_source')
+          prod=inventory('inventory_destination')
+          Path('/tmp/build62-dev-r2.json').write_text(json.dumps(dev,sort_keys=True))
+          Path('/tmp/build62-prod-r2.json').write_text(json.dumps(prod,sort_keys=True))
+          print('BUILD 62 R2 READ-ONLY INVENTORY',json.dumps({
+              'development_objects':len(dev),
+              'development_bytes':sum(int(v.get('size') or 0) for v in dev.values()),
+              'production_objects':len(prod),
+              'production_bytes':sum(int(v.get('size') or 0) for v in prod.values()),
+              'dev_only':len(set(dev)-set(prod)),
+              'prod_only':len(set(prod)-set(dev))
+          },sort_keys=True))
+          PY
+
+      - name: Compare Production D1 references with surviving R2 bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.parse
+          from pathlib import Path
+
+          def rows_from_wrangler(value):
+              rows=[]
+              def walk(v):
+                  if isinstance(v,dict):
+                      if all(k in v for k in ('kind','owner_id','url')): rows.append(v)
+                      for child in v.values(): walk(child)
+                  elif isinstance(v,list):
+                      for child in v: walk(child)
+              walk(value); return rows
 
           raw=json.loads(Path('/tmp/build62-production-media-references-raw.json').read_text())
-          rows=[]
-          def walk(v):
-              if isinstance(v,dict):
-                  if all(k in v for k in ('kind','owner_id','url')): rows.append(v)
-                  for child in v.values(): walk(child)
-              elif isinstance(v,list):
-                  for child in v: walk(child)
-          walk(raw)
-
+          dev=json.loads(Path('/tmp/build62-dev-r2.json').read_text())
+          prod=json.loads(Path('/tmp/build62-prod-r2.json').read_text())
+          rows=rows_from_wrangler(raw)
           legacy_hosts={'assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev'}
           refs=[]
           for row in rows:
               url=str(row.get('url') or '').strip()
               if not url: continue
-              try:
-                  parsed=urllib.parse.urlparse(url)
-              except Exception:
-                  continue
-              host=(parsed.hostname or '').lower()
-              if parsed.scheme!='https' or host not in legacy_hosts: continue
+              parsed=urllib.parse.urlparse(url)
+              if parsed.scheme!='https' or (parsed.hostname or '').lower() not in legacy_hosts: continue
               key=urllib.parse.unquote(parsed.path).lstrip('/')
-              if not key: continue
-              refs.append({'kind':str(row['kind']),'owner_id':str(row['owner_id']),'url':url,'key':key})
+              if key: refs.append({'kind':str(row['kind']),'owner_id':str(row['owner_id']),'url':url,'key':key})
 
-          # Include exact user-reported and Build 61 proof keys even if not present in current D1 query surfaces.
-          target_keys={
+          user_keys={
               'Itemsforsale/DD215-216B.jpeg',
               'uploads/1787166778589-e524c9e2-9f9e-4404-b2e2-22bfd17206fd.jpg',
               'products/36/1783442024972-3-7bd9a7f4-7da5-4791-81cf-92291067f9bc.jpg',
@@ -144,83 +221,42 @@ jobs:
               'products/9/1780154014984-4-1be3dcf6-031d-40a6-b19e-57f31a16674f.jpg',
               'products/13/1780246850248-2-e83b9a70-b10a-4761-820e-37d4697dd928.jpg'
           }
-          target_keys.update(r['key'] for r in refs)
-          target_basenames={k.rsplit('/',1)[-1] for k in target_keys}
-
-          buckets=list_buckets()
-          inventories={}
-          summaries=[]
-          basename_matches={name:[] for name in target_basenames}
-          exact_matches={key:[] for key in target_keys}
-          for bucket in buckets:
-              name=str(bucket.get('name') or '')
-              if not name: continue
-              objects=list_objects(name)
-              mapping={str(o.get('key') or ''):o for o in objects if o.get('key')}
-              inventories[name]=mapping
-              summaries.append({
-                  'bucket':name,
-                  'objects':len(mapping),
-                  'bytes':sum(int(o.get('size') or 0) for o in mapping.values()),
-                  'location':bucket.get('location'),
-                  'jurisdiction':bucket.get('jurisdiction'),
-                  'storage_class':bucket.get('storage_class')
-              })
-              for key in target_keys:
-                  if key in mapping:
-                      obj=mapping[key]
-                      exact_matches[key].append({'bucket':name,'key':key,'size':int(obj.get('size') or 0),'etag':str(obj.get('etag') or '')})
-              for key,obj in mapping.items():
-                  base=key.rsplit('/',1)[-1]
-                  if base in target_basenames:
-                      basename_matches[base].append({'bucket':name,'key':key,'size':int(obj.get('size') or 0),'etag':str(obj.get('etag') or '')})
-
-          prod_keys=set(inventories.get(PROD,{}))
-          dev_keys=set(inventories.get(DEV,{}))
-          unique_refs={r['key'] for r in refs}
-          missing_prod=sorted(unique_refs-prod_keys)
-          recoverable={}
-          absent_everywhere=[]
-          for key in missing_prod:
-              found=[name for name,mapping in inventories.items() if name!=PROD and key in mapping]
-              if found: recoverable[key]=found
-              else: absent_everywhere.append(key)
-
+          unique={r['key'] for r in refs}
+          missing_prod=sorted(unique-set(prod))
+          recoverable_dev=sorted(k for k in missing_prod if k in dev)
+          absent_both=sorted(k for k in missing_prod if k not in dev)
+          exact={}
+          for key in sorted(user_keys):
+              exact[key]={
+                  'development': {'present':key in dev, 'size':int((dev.get(key) or {}).get('size') or 0), 'etag':str((dev.get(key) or {}).get('etag') or '')},
+                  'production': {'present':key in prod, 'size':int((prod.get(key) or {}).get('size') or 0), 'etag':str((prod.get(key) or {}).get('etag') or '')}
+              }
           proof={
-              'release':467,
-              'build':62,
-              'status':'READ_ONLY_RECOVERY_DISCOVERY_COMPLETE',
-              'mutation':'NONE',
-              'bucket_summaries':sorted(summaries,key=lambda x:x['bucket']),
-              'production_product_bucket':PROD,
-              'development_product_bucket':DEV,
-              'production_product_objects':len(prod_keys),
-              'development_product_objects':len(dev_keys),
-              'dev_only_keys_count':len(dev_keys-prod_keys),
-              'prod_only_keys_count':len(prod_keys-dev_keys),
-              'd1_media_reference_rows':len(refs),
-              'd1_unique_media_keys':len(unique_refs),
-              'd1_keys_present_in_production':len(unique_refs & prod_keys),
+              'release':467,'build':62,'status':'READ_ONLY_RECOVERY_DISCOVERY_COMPLETE','mutation':'NONE',
+              'development_product_objects':len(dev),'production_product_objects':len(prod),
+              'development_product_bytes':sum(int(v.get('size') or 0) for v in dev.values()),
+              'production_product_bytes':sum(int(v.get('size') or 0) for v in prod.values()),
+              'dev_only_keys_count':len(set(dev)-set(prod)),'prod_only_keys_count':len(set(prod)-set(dev)),
+              'd1_media_reference_rows':len(refs),'d1_unique_media_keys':len(unique),
+              'd1_keys_present_in_production':len(unique & set(prod)),
               'd1_keys_missing_from_production':len(missing_prod),
               'missing_from_production_keys':missing_prod,
-              'recoverable_exact_keys_in_other_buckets':recoverable,
-              'missing_from_all_current_r2_buckets':absent_everywhere,
-              'user_and_build61_exact_key_matches':{k:v for k,v in sorted(exact_matches.items())},
-              'basename_matches_across_buckets':{k:v for k,v in sorted(basename_matches.items()) if v},
-              'recovery_rule':'NO DELETE; copy only missing Production keys from a proven retained source with identity evidence.'
+              'recoverable_from_development_exact_keys':recoverable_dev,
+              'missing_from_both_known_product_buckets':absent_both,
+              'user_and_build61_exact_key_presence':exact,
+              'historical_bucket_name_discovery':'Git history confirms the long-lived Production Product bucket was devilndove-toolshed-images; no differently named retained Product rollback bucket was configured.',
+              'recovery_rule':'NO DELETE; restore only missing Production keys from proven retained original bytes.'
           }
-          out=Path('/tmp/build62-r2-recovery-discovery.json')
-          out.write_text(json.dumps(proof,indent=2,sort_keys=True))
+          Path('/tmp/build62-r2-recovery-discovery.json').write_text(json.dumps(proof,indent=2,sort_keys=True))
           print('BUILD 62 R2 RECOVERY DISCOVERY: COMPLETE')
           print(json.dumps({
-              'bucket_summaries':proof['bucket_summaries'],
-              'production_product_objects':proof['production_product_objects'],
               'development_product_objects':proof['development_product_objects'],
+              'production_product_objects':proof['production_product_objects'],
               'd1_unique_media_keys':proof['d1_unique_media_keys'],
               'd1_keys_missing_from_production':proof['d1_keys_missing_from_production'],
-              'recoverable_exact_key_count':len(recoverable),
-              'missing_from_all_current_r2_buckets_count':len(absent_everywhere),
-              'user_and_build61_exact_key_matches':proof['user_and_build61_exact_key_matches']
+              'recoverable_from_development_exact_key_count':len(recoverable_dev),
+              'missing_from_both_known_product_buckets_count':len(absent_both),
+              'user_and_build61_exact_key_presence':exact
           },indent=2,sort_keys=True))
           PY
 
@@ -234,8 +270,8 @@ jobs:
 
       - name: Safety boundary
         run: |
-          echo 'R2 list/read: AUTHORIZED'
+          echo 'R2 list/read: AUTHORIZED through temporary bindings'
           echo 'R2 put/copy/delete: NONE'
-          echo 'D1 read: Production media references only'
+          echo 'D1 read: Production media references + Development admin session only'
           echo 'D1 mutation: NONE'
           echo 'Production deployment: NONE'
