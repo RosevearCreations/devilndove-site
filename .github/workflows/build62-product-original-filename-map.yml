@@ -1,0 +1,119 @@
+name: Build 62 Product Original Filename Map
+
+on:
+  push:
+    branches: [build62-production-r2-object-recovery-firewall]
+    paths:
+      - '.github/workflows/build62-product-original-filename-map.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  product-original-filename-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_D1_NAME: devilndove-prod-r462
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Export schema and original-filename authorities read-only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.129.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA table_info(media_assets); PRAGMA table_info(mobile_resumable_upload_sessions); PRAGMA table_info(product_images);" > /tmp/build62-schema.json
+          npx --yes wrangler@4.129.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "
+          SELECT p.product_id,p.name,p.status,pi.product_image_id,pi.image_url,pi.alt_text,pi.sort_order,pi.created_at,
+                 ma.media_asset_id,ma.object_key,ma.original_filename,ma.mime_type,ma.file_size_bytes,ma.created_at AS media_created_at,
+                 NULL AS mobile_file_name,NULL AS mobile_expected_bytes,NULL AS mobile_created_at,'media_assets' AS mapping_source
+          FROM products p
+          JOIN product_images pi ON pi.product_id=p.product_id
+          LEFT JOIN media_assets ma
+            ON ma.product_id=p.product_id
+           AND (ma.public_url=pi.image_url OR ma.object_key=replace(replace(pi.image_url,'https://assets.devilndove.com/',''),'https://pub-f8137eb938da486a9f24410ccf49087c.r2.dev/',''))
+          UNION ALL
+          SELECT p.product_id,p.name,p.status,pi.product_image_id,pi.image_url,pi.alt_text,pi.sort_order,pi.created_at,
+                 NULL,NULL,NULL,mru.mime_type,NULL,NULL,
+                 mru.file_name,mru.expected_bytes,mru.created_at,'mobile_resumable' AS mapping_source
+          FROM products p
+          JOIN product_images pi ON pi.product_id=p.product_id
+          JOIN mobile_resumable_upload_sessions mru
+            ON mru.product_id=p.product_id
+           AND mru.r2_object_key=replace(replace(pi.image_url,'https://assets.devilndove.com/',''),'https://pub-f8137eb938da486a9f24410ccf49087c.r2.dev/','')
+          ORDER BY product_id,sort_order,product_image_id,mapping_source;
+          " > /tmp/build62-product-original-map-raw.json
+
+      - name: Build exact mapping proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.parse
+          from pathlib import Path
+          raw=json.loads(Path('/tmp/build62-product-original-map-raw.json').read_text())
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'product_id' in v and 'image_url' in v and 'mapping_source' in v: rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          # Deduplicate one logical product image while preferring a row that carries an original filename.
+          by_image={}
+          for r in rows:
+              image_id=int(r.get('product_image_id') or 0)
+              if not image_id: continue
+              name=str(r.get('original_filename') or r.get('mobile_file_name') or '').strip()
+              existing=by_image.get(image_id)
+              if existing is None or (name and not existing.get('original_filename')):
+                  url=str(r.get('image_url') or '')
+                  p=urllib.parse.urlparse(url)
+                  by_image[image_id]={
+                    'product_id':int(r.get('product_id') or 0),'product_name':str(r.get('name') or ''),'product_status':str(r.get('status') or ''),
+                    'product_image_id':image_id,'image_url':url,'object_key':urllib.parse.unquote(p.path).lstrip('/'),
+                    'alt_text':str(r.get('alt_text') or ''),'sort_order':int(r.get('sort_order') or 0),'image_created_at':r.get('created_at'),
+                    'original_filename':name,'mime_type':str(r.get('mime_type') or ''),'file_size_bytes':int(r.get('file_size_bytes') or r.get('mobile_expected_bytes') or 0),
+                    'mapping_source':str(r.get('mapping_source') or ''),'mapping_created_at':r.get('media_created_at') or r.get('mobile_created_at')
+                  }
+          values=sorted(by_image.values(),key=lambda r:(r['product_id'],r['sort_order'],r['product_image_id']))
+          named=[r for r in values if r['original_filename']]
+          unnamed=[r for r in values if not r['original_filename']]
+          proof={'release':467,'build':62,'status':'READ_ONLY_PRODUCT_ORIGINAL_FILENAME_MAP_COMPLETE','mutation':'NONE',
+                 'product_image_rows':len(values),'rows_with_original_filename':len(named),'rows_without_original_filename':len(unnamed),
+                 'products_with_original_filename':len({r['product_id'] for r in named}),
+                 'named_rows':named,'unnamed_rows':unnamed}
+          Path('/tmp/build62-product-original-filename-map.json').write_text(json.dumps(proof,indent=2,sort_keys=True))
+          print('BUILD 62 PRODUCT ORIGINAL FILENAME MAP COMPLETE')
+          print(json.dumps({k:proof[k] for k in ('product_image_rows','rows_with_original_filename','rows_without_original_filename','products_with_original_filename')},indent=2,sort_keys=True))
+          print('NAMED_PRODUCT_IMAGES')
+          for r in named:
+              print(json.dumps(r,sort_keys=True))
+          if unnamed:
+              print('UNNAMED_PRODUCT_IMAGES')
+              for r in unnamed: print(json.dumps(r,sort_keys=True))
+          PY
+
+      - name: Preserve exact original-filename map
+        uses: actions/upload-artifact@v4
+        with:
+          name: build62-product-original-filename-map-${{ github.sha }}
+          path: /tmp/build62-product-original-filename-map.json
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Safety boundary
+        run: |
+          echo 'Production D1 read only.'
+          echo 'D1 mutation: NONE.'
+          echo 'R2 mutation: NONE.'
