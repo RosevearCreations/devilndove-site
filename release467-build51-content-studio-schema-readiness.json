@@ -1,0 +1,56 @@
+{
+  "release": 467,
+  "build": 51,
+  "title": "Explicit Content Studio Schema Readiness",
+  "state": "IMPLEMENTATION_IN_PROGRESS",
+  "source_authority": "dev",
+  "source_base": {
+    "build": 50,
+    "title": "Reviewed CAIP to Content Studio Handoff",
+    "dev_sha": "d14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa",
+    "tree_sha": "c01d433a0434e893a8b21d9ffded8587732f9a32",
+    "proofs": {
+      "system_gate_run": 33931172444,
+      "current_application_quality_run": 33931172515,
+      "it_admin_runtime_proof_run": 33931172403,
+      "branch_hygiene_run": 33931172411
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "authority": "release467-build50-reviewed-caip-content-studio-handoff.json"
+  },
+  "restart_integrity": {
+    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+    "previous_final_closure_ingested_before_source_mutation": true,
+    "source_base_exact_sha_verified": true,
+    "source_base_exact_tree_verified": true
+  },
+  "scope": {
+    "name": "content_studio_schema_readiness_authority_clarity",
+    "content_studio_active_post_route_uses_explicit_readiness_authority": true,
+    "product_content_bridge_uses_explicit_readiness_authority": true,
+    "legacy_ensure_alias_removed_from_active_routes": true,
+    "readiness_is_read_only": true,
+    "request_time_ddl_authorized": false,
+    "schema_change_authorized": false,
+    "canonical_migration_added": false,
+    "renderer_execution_authorized": false,
+    "provider_execution_authorized": false,
+    "publication_authorized": false,
+    "social_queue_authorized": false,
+    "r2_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false
+  },
+  "canonical_d1_migration_count": 4,
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "promotion_state": "DEVELOPMENT_ONLY",
+  "next_build": 52,
+  "next_build_state": "BLOCKED_UNTIL_BUILD_51_GREEN"
+}
