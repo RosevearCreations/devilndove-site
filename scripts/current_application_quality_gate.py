@@ -31,6 +31,7 @@ for script in (
     'current_accounting_schema_authority_gate.py',
     'current_product_numbering_schema_authority_gate.py',
     'current_product_social_automation_schema_authority_gate.py',
+    'build62_r2_destructive_convergence_gate.py',
 ):
     subprocess.run([sys.executable, str(ROOT / 'scripts' / script)], cwd=ROOT, check=True)
 print('CURRENT APPLICATION QUALITY GATE: PASS')
