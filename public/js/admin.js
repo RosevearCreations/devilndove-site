@@ -7,6 +7,7 @@
 // Build 438: authoritative server module availability is loaded before any top-level runtime activation.
 // Build 440: Products loads the audited finished-production reversal workspace on demand.
 // Release 461: backend external-information fields receive reusable circled help with provider acquisition steps.
+// Build 56: Products, Product Photography Manager and Packaging Studio load workflow-guidance overlays without changing their underlying write authorities.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -43,9 +44,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.addEventListener('dd:auth-rejected', renderDenied);
 
-  if (document.body?.dataset?.adminPage === 'products') {
+  const adminPage = document.body?.dataset?.adminPage || '';
+  if (adminPage === 'products') {
     void import('/public/js/admin-product-production-reversal.js?v=440')
       .catch((error) => console.warn('[DD Build 440] production reversal workspace unavailable', error));
+    void import('/public/js/admin-product-image-quality-editor-bridge-v56.js?v=56')
+      .catch((error) => console.warn('[DD Build 56] Product Editor image-quality bridge unavailable', error));
+  }
+  if (adminPage === 'product-image-quality') {
+    void import('/public/js/admin-product-image-quality-guidance-v56.js?v=56')
+      .catch((error) => console.warn('[DD Build 56] photography coaching unavailable', error));
+  }
+  if (adminPage === 'packaging-studio') {
+    void import('/public/js/admin-packaging-onboarding-v56.js?v=56')
+      .catch((error) => console.warn('[DD Build 56] Packaging walkthrough unavailable', error));
   }
 });
 
