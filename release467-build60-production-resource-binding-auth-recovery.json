@@ -1,0 +1,54 @@
+{
+  "release": 467,
+  "build": 60,
+  "title": "Production Resource Binding & Account/Auth Recovery",
+  "state": "PRODUCTION_INCIDENT_HOTFIX_CANDIDATE",
+  "first_source_mutation": true,
+  "restart_integrity_protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+  "starting_point": {
+    "development": {
+      "build": 59,
+      "sha": "44483117210e93ce7126cd19510b090d88f663a7",
+      "tree": "3523119d31bbde05ba98faa530acc3dae88920d2",
+      "system_gate_run": 33969967713,
+      "quality_run": 33969967734,
+      "it_admin_runtime_run": 33969967704,
+      "repository_hygiene_run": 33969967656,
+      "exact_preview_deployment": true,
+      "canonical_development_d1_proof": true,
+      "development_data_authority_read_only": true,
+      "preview_bindings_proven": true,
+      "non_secret_preview_smoke": true,
+      "regression_evidence": true
+    },
+    "production": {
+      "build": 59,
+      "sha": "9411c0968d2f0cae57f25d36f0664729cd81c61f",
+      "tree": "3523119d31bbde05ba98faa530acc3dae88920d2",
+      "production_pages_deploy_run": 33970506769,
+      "data_snapshot_preserved": true,
+      "canonical_production_d1_proof": true,
+      "production_d1_isolation_proof": true,
+      "exact_main_deployment": true,
+      "production_bindings_proven": true,
+      "public_smoke": true,
+      "promotion_proof": true
+    }
+  },
+  "reported_incident": {
+    "severity": "PRODUCTION_AVAILABILITY",
+    "account_admin": "POST /api/admin/create-user returns HTTP 503 with ADMIN_CREATE_USER_FAILED despite valid admin login.",
+    "product_media": "Product images are unavailable across live storefront/public surfaces after Build 59 promotion.",
+    "operator_request": "Verify Production uses live D1/R2 resources and correct live tables/objects; send correction to main ASAP."
+  },
+  "scope": {
+    "production_d1_binding_and_schema_compatibility": true,
+    "admin_session_lookup_compatibility": true,
+    "product_media_r2_binding_and_object_path": true,
+    "production_smoke_resource_read_proof": true,
+    "business_data_mutation": false,
+    "r2_mutation": false,
+    "new_schema_migration": false
+  },
+  "closure_rule": "Build 60 must be tested on an exact branch head before Production merge. Final merged-dev and Production proof values are external evidence and must not be self-claimed by this first mutation."
+}
