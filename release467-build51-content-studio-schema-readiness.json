@@ -47,6 +47,19 @@
       "current_regression_evidence": true
     }
   },
+  "final_closure": {
+    "dev_sha": "3f5e10f4ad005945ed4092b63079b11f62c4d7ee",
+    "tree_sha": "baca33be1a9b0dc888f12c2882f97545faed97a8",
+    "proofs": {
+      "system_gate_run": 33932323391,
+      "current_application_quality_run": 33932323375,
+      "it_admin_runtime_proof_run": 33932323392,
+      "branch_hygiene_run": 33932323423
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "recorded_by_next_build": 52
+  },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "previous_final_closure_ingested_before_source_mutation": true,
@@ -83,6 +96,6 @@
   },
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "next_build": 52,
-  "next_build_state": "AWAITING_BUILD_51_FINAL_CLOSURE_PROOF",
-  "next_build_title": null
+  "next_build_state": "BUILD52_IN_PROGRESS_AFTER_VERIFIED_FINAL_CLOSURE",
+  "next_build_title": "Content Studio Render Readiness / Explicit Execution Boundary"
 }
