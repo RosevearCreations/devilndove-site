@@ -1,4 +1,4 @@
-name: Recovery Product Census
+name: Recovery Product R2 Audit
 
 on:
   push:
@@ -12,85 +12,115 @@ permissions:
   actions: read
 
 jobs:
-  census:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
-      CANDIDATES: devilndove-dev devilndove-prod devilndove-prod-r462 devilndove-prod-repl-20260823
-      LEGACY_CANDIDATES: devilndove-prod devilndove-prod-repl-20260823
-      RECOVERY_EVIDENCE_DBS: devilndove-prod-r462 devilndove-prod devilndove-dev
+      PROD_D1: devilndove-prod-r462
+      DEV_BUCKET: devilndove-toolshed-images-dev
+      PROD_BUCKET: devilndove-toolshed-images
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
 
-      - name: Census known D1 Product authorities read-only
+      - name: Read Product media authority from Production D1
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          mkdir -p /tmp/product-recovery-census
-          npx --yes wrangler@4.128.0 d1 list --json > /tmp/product-recovery-census/d1-list.json
-          for db in ${CANDIDATES}; do
-            safe="$(printf '%s' "$db" | tr -c 'A-Za-z0-9._-' '_')"
-            echo "==== ${db} ===="
-            npx --yes wrangler@4.128.0 d1 info "$db" --json > "/tmp/product-recovery-census/${safe}.info.json" 2> "/tmp/product-recovery-census/${safe}.info.stderr" || true
-            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "SELECT count(*) AS products FROM products; SELECT min(product_id) AS min_product_id,max(product_id) AS max_product_id FROM products; PRAGMA table_info(products); SELECT name,sql FROM sqlite_master WHERE type='table' AND (lower(name) LIKE '%product%' OR lower(name) LIKE '%image%' OR lower(name) LIKE '%media%' OR lower(name) LIKE '%movie%') ORDER BY name; SELECT * FROM products ORDER BY product_id;" > "/tmp/product-recovery-census/${safe}.json" 2> "/tmp/product-recovery-census/${safe}.stderr"
-            echo "${db}: PRODUCT_QUERY_OK"
-          done
+          mkdir -p /tmp/product-r2-audit
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT product_id,image_url AS media_url,'product_images' AS source FROM product_images WHERE TRIM(COALESCE(image_url,''))<>'' UNION ALL SELECT product_id,featured_image_url AS media_url,'featured_image_url' AS source FROM products WHERE TRIM(COALESCE(featured_image_url,''))<>'' ORDER BY product_id;" > /tmp/product-r2-audit/d1-media.json
 
-      - name: Inspect Product deletion and media recovery evidence read-only
+      - name: Audit every authoritative Product key in Dev and Production R2 read-only
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          mkdir -p /tmp/product-recovery-census/recovery-evidence
-          for db in ${RECOVERY_EVIDENCE_DBS}; do
-            safe="$(printf '%s' "$db" | tr -c 'A-Za-z0-9._-' '_')"
-            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "SELECT * FROM product_deletion_audit ORDER BY deleted_at, product_deletion_audit_id; SELECT product_id, count(*) AS image_count FROM product_images GROUP BY product_id ORDER BY product_id; SELECT * FROM product_images ORDER BY product_id, sort_order, product_image_id; SELECT * FROM product_media_change_audit ORDER BY created_at, product_media_change_audit_id; SELECT * FROM product_media_integrity_snapshots ORDER BY created_at, product_media_integrity_snapshot_id; SELECT * FROM mobile_product_server_drafts ORDER BY updated_at, mobile_product_server_draft_id;" > "/tmp/product-recovery-census/recovery-evidence/${safe}.json" 2> "/tmp/product-recovery-census/recovery-evidence/${safe}.stderr" || {
-              echo "${db}: RECOVERY_EVIDENCE_QUERY_FAILED" | tee "/tmp/product-recovery-census/recovery-evidence/${safe}.status"
-              continue
-            }
-            echo "${db}: RECOVERY_EVIDENCE_QUERY_OK" | tee "/tmp/product-recovery-census/recovery-evidence/${safe}.status"
-          done
+          python - <<'PY'
+          import concurrent.futures, hashlib, json, os, pathlib, subprocess, tempfile, urllib.parse
 
-      - name: Probe legacy D1 Time Travel availability read-only
-        shell: bash
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/product-recovery-census/time-travel
-          for db in ${LEGACY_CANDIDATES}; do
-            for ts in 2026-08-22T00:00:00Z 2026-08-20T00:00:00Z 2026-08-15T00:00:00Z 2026-08-10T00:00:00Z 2026-08-06T00:00:00Z; do
-              key="$(printf '%s_%s' "$db" "$ts" | tr ':.' '__')"
-              if npx --yes wrangler@4.128.0 d1 time-travel info "$db" --timestamp="$ts" --json > "/tmp/product-recovery-census/time-travel/${key}.json" 2> "/tmp/product-recovery-census/time-travel/${key}.stderr"; then
-                echo "$db $ts: BOOKMARK_AVAILABLE" > "/tmp/product-recovery-census/time-travel/${key}.status"
-              else
-                echo "$db $ts: BOOKMARK_UNAVAILABLE" > "/tmp/product-recovery-census/time-travel/${key}.status"
-              fi
-            done
-          done
+          root=pathlib.Path('/tmp/product-r2-audit')
+          payload=json.loads((root/'d1-media.json').read_text())
+          blocks=payload if isinstance(payload,list) else [payload]
+          rows=[]
+          for block in blocks:
+              if isinstance(block,dict) and isinstance(block.get('results'),list): rows.extend(block['results'])
+
+          allowed_hosts={'assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev'}
+          records=[]
+          for row in rows:
+              raw=str(row.get('media_url') or '').strip()
+              key=''
+              try:
+                  u=urllib.parse.urlparse(raw)
+                  if u.scheme in ('http','https'):
+                      if (u.hostname or '').lower() in allowed_hosts: key=urllib.parse.unquote(u.path.lstrip('/'))
+                  else: key=urllib.parse.unquote(raw.lstrip('/'))
+              except Exception: pass
+              if key and '..' not in key and '\\' not in key:
+                  records.append({'product_id':row.get('product_id'),'source':row.get('source'),'url':raw,'key':key})
+
+          by_key={}
+          for r in records: by_key.setdefault(r['key'],[]).append(r)
+          keys=sorted(by_key)
+          (root/'keys.json').write_text(json.dumps({'record_count':len(records),'unique_key_count':len(keys),'keys':keys,'references':by_key},indent=2))
+          print(f'D1 media refs={len(records)} unique keys={len(keys)}')
+
+          dev=os.environ['DEV_BUCKET']; prod=os.environ['PROD_BUCKET']
+          cache=root/'objects'; cache.mkdir(exist_ok=True)
+          def get(bucket,key):
+              token=hashlib.sha256((bucket+'\0'+key).encode()).hexdigest()
+              path=cache/token
+              cmd=['npx','--yes','wrangler@4.128.0','r2','object','get',f'{bucket}/{key}','--remote','--file',str(path)]
+              p=subprocess.run(cmd,capture_output=True,text=True,timeout=120,env=os.environ.copy())
+              if p.returncode:
+                  msg=(p.stdout+'\n'+p.stderr).strip()[-800:]
+                  path.unlink(missing_ok=True)
+                  low=msg.lower()
+                  if 'does not exist' in low or 'not found' in low or 'specified key' in low:
+                      return {'present':False,'error':'missing'}
+                  return {'present':False,'error':msg or f'exit {p.returncode}'}
+              data=path.read_bytes(); path.unlink(missing_ok=True)
+              return {'present':True,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
+
+          def audit(key):
+              d=get(dev,key); p=get(prod,key)
+              status='missing_both'
+              if d['present'] and p['present']:
+                  status='present_both_identical' if (d.get('bytes'),d.get('sha256'))==(p.get('bytes'),p.get('sha256')) else 'present_both_mismatch'
+              elif d['present'] and not p['present']: status='prod_missing_dev_present'
+              elif p['present'] and not d['present']: status='dev_missing_prod_present'
+              return {'key':key,'references':by_key[key],'dev':d,'prod':p,'status':status}
+
+          results=[]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=10) as ex:
+              futs={ex.submit(audit,k):k for k in keys}
+              for i,f in enumerate(concurrent.futures.as_completed(futs),1):
+                  results.append(f.result())
+                  if i%25==0 or i==len(keys): print(f'audited {i}/{len(keys)}')
+          results.sort(key=lambda x:x['key'])
+          counts={}
+          for r in results: counts[r['status']]=counts.get(r['status'],0)+1
+          summary={'d1_media_records':len(records),'unique_keys':len(keys),'status_counts':counts,'copy_candidates':[r['key'] for r in results if r['status']=='prod_missing_dev_present'],'missing_both':[r['key'] for r in results if r['status']=='missing_both'],'mismatches':[r['key'] for r in results if r['status']=='present_both_mismatch']}
+          (root/'r2-audit.json').write_text(json.dumps(results,indent=2))
+          (root/'summary.json').write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          PY
 
       - name: Recovery boundary
         shell: bash
         run: |
-          {
-            echo 'READ_ONLY=TRUE'
-            echo 'D1_MUTATION=ZERO'
-            echo 'R2_MUTATION=ZERO'
-            echo 'TIME_TRAVEL_RESTORE=ZERO'
-            echo 'PRODUCTION_BUSINESS_MUTATION=ZERO'
-          } > /tmp/product-recovery-census/boundary.txt
+          printf '%s\n' 'READ_ONLY=TRUE' 'D1_MUTATION=ZERO' 'R2_MUTATION=ZERO' 'PRODUCTION_BUSINESS_MUTATION=ZERO' > /tmp/product-r2-audit/boundary.txt
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: product-recovery-census
-          path: /tmp/product-recovery-census
+          name: product-r2-audit
+          path: /tmp/product-r2-audit
           retention-days: 30
           if-no-files-found: error
