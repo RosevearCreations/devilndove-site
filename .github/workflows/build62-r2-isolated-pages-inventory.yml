@@ -1,0 +1,271 @@
+name: Build 62 Isolated Pages R2 Recovery Inventory
+
+on:
+  push:
+    branches: [build62-production-r2-object-recovery-firewall]
+    paths:
+      - '.github/workflows/build62-r2-isolated-pages-inventory.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROBE_PROJECT: devilndove-build62-r2-probe
+      PROD_D1_NAME: devilndove-prod-r462
+      DEV_D1_NAME: devilndove-dev
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Export Production Product and Movie media references read-only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.129.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "
+          SELECT 'product_featured' AS kind, CAST(product_id AS TEXT) AS owner_id, featured_image_url AS url
+          FROM products WHERE COALESCE(trim(featured_image_url),'')<>''
+          UNION ALL
+          SELECT 'product_gallery', CAST(product_id AS TEXT), image_url
+          FROM product_images WHERE COALESCE(trim(image_url),'')<>''
+          UNION ALL
+          SELECT 'movie_front', CAST(movie_catalog_id AS TEXT), front_image_url
+          FROM movie_catalog WHERE COALESCE(trim(front_image_url),'')<>''
+          UNION ALL
+          SELECT 'movie_back', CAST(movie_catalog_id AS TEXT), back_image_url
+          FROM movie_catalog WHERE COALESCE(trim(back_image_url),'')<>'';
+          " > /tmp/build62-production-media-references-raw.json
+
+      - name: Resolve existing Development admin session read-only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.129.0 d1 execute "${DEV_D1_NAME}" --remote --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(u.role)='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build62-session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build62-session.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          token=next(walk(d),'').strip()
+          assert token,'No active Development admin session available for recovery bridge.'
+          print(token)
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          echo "BUILD62_ADMIN_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          rm -f /tmp/build62-session.json
+
+      - name: Create isolated recovery Pages project if needed
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          npx --yes wrangler@4.129.0 pages project create "${PROBE_PROJECT}" --production-branch=build62-r2-probe > /tmp/build62-project-create.log 2>&1
+          rc=$?
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            if grep -Eqi 'already exists|already been taken|exists' /tmp/build62-project-create.log; then
+              echo 'Build 62 isolated Pages project already exists; reusing it.'
+            else
+              cat /tmp/build62-project-create.log
+              exit "$rc"
+            fi
+          else
+            cat /tmp/build62-project-create.log
+          fi
+
+      - name: Deploy isolated read-only R2 recovery bridge
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp wrangler.toml /tmp/build62-original-wrangler.toml
+          cat > wrangler.toml <<'TOML'
+          name = "devilndove-build62-r2-probe"
+          compatibility_date = "2026-09-05"
+          pages_build_output_dir = "."
+
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "devilndove-dev"
+          database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"
+
+          [[r2_buckets]]
+          binding = "PRODUCT_MEDIA_BUCKET"
+          bucket_name = "devilndove-toolshed-images-dev"
+          preview_bucket_name = "devilndove-toolshed-images-dev"
+
+          [[r2_buckets]]
+          binding = "RELEASE463_PRODUCT_MEDIA_PROD_BUCKET"
+          bucket_name = "devilndove-toolshed-images"
+          preview_bucket_name = "devilndove-toolshed-images"
+          TOML
+          npx --yes wrangler@4.129.0 pages deploy . \
+            --project-name="${PROBE_PROJECT}" \
+            --branch=build62-r2-probe \
+            --commit-hash="${GITHUB_SHA}" \
+            --commit-message='Build 62 isolated read-only R2 recovery inventory' \
+            | tee /tmp/build62-probe-deploy.log
+          cp /tmp/build62-original-wrangler.toml wrangler.toml
+          python - <<'PY'
+          import re
+          text=open('/tmp/build62-probe-deploy.log',encoding='utf-8',errors='replace').read()
+          urls=re.findall(r'https://[a-z0-9-]+\.devilndove-build62-r2-probe\.pages\.dev',text,re.I)
+          assert urls,text[-3000:]
+          url=urls[0].rstrip('/')
+          open('/tmp/build62-probe-url','w').write(url)
+          print('BUILD62_PROBE_URL',url)
+          PY
+
+      - name: Inventory both Product R2 buckets through isolated bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,time,urllib.request,urllib.error
+          from pathlib import Path
+          base=Path('/tmp/build62-probe-url').read_text().strip()
+          endpoint=base+'/api/admin/release463-r2-sync'
+          token=os.environ['BUILD62_ADMIN_TOKEN']
+          def call(action,cursor=''):
+              body=json.dumps({'authorization':'RELEASE463_R2_ENVIRONMENT_SYNC','bucket':'product','action':action,'cursor':cursor,'limit':500}).encode()
+              headers={'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store','Cookie':'dd_auth_token='+token,'User-Agent':'devilndove-build62-recovery/1.0'}
+              last=None
+              for attempt in range(12):
+                  req=urllib.request.Request(endpoint,method='POST',data=body,headers=headers)
+                  try:
+                      with urllib.request.urlopen(req,timeout=120) as r:
+                          status=r.status; raw=r.read().decode('utf-8','replace')
+                  except urllib.error.HTTPError as e:
+                      status=e.code; raw=e.read().decode('utf-8','replace')
+                  last=(status,raw)
+                  if status in (502,503,522,523) or (status==404 and attempt<8):
+                      time.sleep(3); continue
+                  try: data=json.loads(raw)
+                  except Exception as exc: raise AssertionError((action,status,raw[:1000])) from exc
+                  assert status==200 and data.get('ok') is True,(action,status,data)
+                  assert data.get('mutation_capability')=='none' and data.get('production_r2_mutation') is False,data
+                  return data
+              raise AssertionError((action,'retry_exhausted',last))
+          def inventory(action):
+              cursor=''; out={}
+              for _ in range(1000):
+                  data=call(action,cursor)
+                  for obj in data.get('results') or []:
+                      key=str(obj.get('key') or '')
+                      if key: out[key]=obj
+                  if data.get('done') is True: return out
+                  nxt=str(data.get('next_cursor') or '').strip()
+                  assert nxt and nxt!=cursor,(action,cursor,data)
+                  cursor=nxt
+              raise AssertionError((action,'pagination_limit'))
+          dev=inventory('inventory_source')
+          prod=inventory('inventory_destination')
+          Path('/tmp/build62-dev-r2.json').write_text(json.dumps(dev,sort_keys=True))
+          Path('/tmp/build62-prod-r2.json').write_text(json.dumps(prod,sort_keys=True))
+          print('BUILD 62 R2 INVENTORY',json.dumps({'development_objects':len(dev),'production_objects':len(prod),'dev_only':len(set(dev)-set(prod)),'prod_only':len(set(prod)-set(dev))},sort_keys=True))
+          PY
+
+      - name: Compare Product and Movie references with surviving original bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,urllib.parse
+          from collections import defaultdict
+          from pathlib import Path
+          raw=json.loads(Path('/tmp/build62-production-media-references-raw.json').read_text())
+          dev=json.loads(Path('/tmp/build62-dev-r2.json').read_text())
+          prod=json.loads(Path('/tmp/build62-prod-r2.json').read_text())
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('kind','owner_id','url')): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          allowed={'assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev'}
+          refs=[]
+          for row in rows:
+              url=str(row.get('url') or '').strip(); p=urllib.parse.urlparse(url)
+              if p.scheme=='https' and (p.hostname or '').lower() in allowed:
+                  key=urllib.parse.unquote(p.path).lstrip('/')
+                  if key: refs.append({'kind':str(row['kind']),'owner_id':str(row['owner_id']),'url':url,'key':key})
+          prodkeys=set(prod); devkeys=set(dev)
+          product_refs=[r for r in refs if r['kind'].startswith('product_')]
+          movie_refs=[r for r in refs if r['kind'].startswith('movie_')]
+          product_keys={r['key'] for r in product_refs}; movie_keys={r['key'] for r in movie_refs}
+          per_product=defaultdict(lambda:{'references':0,'unique_keys':set(),'present_prod':0,'recoverable_dev':0,'absent_both':0})
+          for r in product_refs:
+              s=per_product[r['owner_id']]
+              if r['key'] in s['unique_keys']: continue
+              s['unique_keys'].add(r['key']); s['references']+=1
+              if r['key'] in prodkeys: s['present_prod']+=1
+              elif r['key'] in devkeys: s['recoverable_dev']+=1
+              else: s['absent_both']+=1
+          serial={}
+          for pid,s in sorted(per_product.items(),key=lambda kv:int(kv[0])):
+              serial[pid]={k:(len(v) if k=='unique_keys' else v) for k,v in s.items()}
+          proof={
+              'release':467,'build':62,'status':'READ_ONLY_PRODUCT_MOVIE_RECOVERY_INVENTORY_COMPLETE','mutation':'NONE',
+              'development_product_objects':len(dev),'production_product_objects':len(prod),
+              'product_reference_rows':len(product_refs),'product_ids_with_media':len(per_product),'product_unique_keys':len(product_keys),
+              'product_present_in_production':len(product_keys & prodkeys),
+              'product_missing_from_production':len(product_keys-prodkeys),
+              'product_recoverable_from_development':len((product_keys-prodkeys)&devkeys),
+              'product_missing_from_both_known_buckets':len((product_keys-prodkeys)-devkeys),
+              'movie_reference_rows':len(movie_refs),'movie_unique_keys':len(movie_keys),
+              'movie_present_in_production':len(movie_keys & prodkeys),
+              'movie_missing_from_production':len(movie_keys-prodkeys),
+              'movie_recoverable_from_development':len((movie_keys-prodkeys)&devkeys),
+              'movie_missing_from_both_known_buckets':len((movie_keys-prodkeys)-devkeys),
+              'per_product':serial,
+              'product_recoverable_keys_from_development':sorted((product_keys-prodkeys)&devkeys),
+              'product_missing_from_both_known_buckets_keys':sorted((product_keys-prodkeys)-devkeys),
+              'movie_recoverable_keys_from_development':sorted((movie_keys-prodkeys)&devkeys),
+              'movie_missing_from_both_known_buckets_keys':sorted((movie_keys-prodkeys)-devkeys),
+              'safety':'READ/LIST ONLY; no R2 or D1 mutation.'
+          }
+          Path('/tmp/build62-product-movie-recovery-inventory.json').write_text(json.dumps(proof,indent=2,sort_keys=True))
+          summary={k:proof[k] for k in ('development_product_objects','production_product_objects','product_reference_rows','product_ids_with_media','product_unique_keys','product_present_in_production','product_missing_from_production','product_recoverable_from_development','product_missing_from_both_known_buckets','movie_reference_rows','movie_unique_keys','movie_present_in_production','movie_missing_from_production','movie_recoverable_from_development','movie_missing_from_both_known_buckets')}
+          print('BUILD 62 PRODUCT/MOVIE RECOVERY INVENTORY COMPLETE')
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          print('PER_PRODUCT_RECOVERY_SUMMARY')
+          print(json.dumps(serial,indent=2,sort_keys=True))
+          PY
+
+      - name: Preserve exact recovery inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: build62-product-movie-isolated-r2-inventory-${{ github.sha }}
+          path: /tmp/build62-product-movie-recovery-inventory.json
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Restore checked-out configuration
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/build62-original-wrangler.toml ]; then cp /tmp/build62-original-wrangler.toml wrangler.toml; fi
+          echo 'Build 62 isolated recovery inventory performed no D1/R2 mutation.'
