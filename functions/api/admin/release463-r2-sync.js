@@ -14,7 +14,9 @@ function isRelease463DevelopmentHost(request) {
   return host === 'localhost' || host === '127.0.0.1'
     || (host.endsWith('.devilndove-site.pages.dev') && host !== 'devilndove-site.pages.dev')
     || host === 'devilndove-site-dev.pages.dev'
-    || host.endsWith('.devilndove-site-dev.pages.dev');
+    || host.endsWith('.devilndove-site-dev.pages.dev')
+    || host === 'devilndove-build62-r2-probe.pages.dev'
+    || host.endsWith('.devilndove-build62-r2-probe.pages.dev');
 }
 
 function bucketPair(env, key) {
@@ -73,7 +75,7 @@ async function inventoryBatch(bucket, cursor, limit) {
 
 export async function onRequestPost({ request, env }) {
   if (!isRelease463DevelopmentHost(request)) {
-    return json({ ok: false, release: RELEASE, code: 'development_only', error: 'Release 463 R2 inventory diagnostics are available only on Development/legacy Preview hosts.' }, 403);
+    return json({ ok: false, release: RELEASE, code: 'development_only', error: 'Release 463 R2 inventory diagnostics are available only on approved Development or Build 62 recovery-probe hosts.' }, 403);
   }
   const admin = await getAdminUserFromRequest(request, env);
   if (!admin) return json({ ok: false, release: RELEASE, code: 'unauthorized', error: 'Unauthorized.' }, 401);
