@@ -13,32 +13,37 @@ permissions:
 jobs:
   census:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
     steps:
       - uses: actions/checkout@v4
-      - name: Export retained Product media ledgers read-only
+      - name: Export retained Product media evidence read-only
         shell: bash
         run: |
           set -u
           mkdir -p /tmp/product-ledgers
           dbs=(devilndove-prod-r462 devilndove-prod-repl-20260823 devilndove-dev devilndove-prod)
-          media_sql="SELECT media_asset_id,product_id,bucket_name,object_key,public_url,original_filename,mime_type,file_size_bytes,created_at FROM media_assets ORDER BY media_asset_id;"
-          image_sql="SELECT product_image_id,product_id,image_url,alt_text,sort_order,created_at FROM product_images ORDER BY product_id,sort_order,product_image_id;"
-          product_sql="SELECT product_id,name,slug,featured_image_url FROM products ORDER BY product_id;"
+          declare -A sqls
+          sqls[media_assets]="SELECT * FROM media_assets ORDER BY media_asset_id;"
+          sqls[product_images]="SELECT * FROM product_images ORDER BY product_id,sort_order,product_image_id;"
+          sqls[products]="SELECT * FROM products ORDER BY product_id;"
+          sqls[annotations]="SELECT * FROM product_image_annotations ORDER BY product_id,product_image_id;"
+          sqls[roles]="SELECT * FROM product_media_role_assignments ORDER BY product_id;"
+          sqls[audit]="SELECT * FROM admin_action_audit WHERE action_type='media_upload' OR target_type='media_asset' ORDER BY created_at, target_key;"
+          sqls[tables]="SELECT name,sql FROM sqlite_master WHERE type='table' AND (lower(name) LIKE '%media%' OR lower(name) LIKE '%image%' OR lower(name) LIKE '%audit%' OR lower(name) LIKE '%snapshot%' OR lower(name) LIKE '%recover%') ORDER BY name;"
           for db in "${dbs[@]}"; do
             echo "Reading $db"
-            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "$media_sql" > "/tmp/product-ledgers/${db}-media_assets.json" 2> "/tmp/product-ledgers/${db}-media_assets.err" || true
-            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "$image_sql" > "/tmp/product-ledgers/${db}-product_images.json" 2> "/tmp/product-ledgers/${db}-product_images.err" || true
-            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "$product_sql" > "/tmp/product-ledgers/${db}-products.json" 2> "/tmp/product-ledgers/${db}-products.err" || true
+            for label in media_assets product_images products annotations roles audit tables; do
+              npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "${sqls[$label]}" > "/tmp/product-ledgers/${db}-${label}.json" 2> "/tmp/product-ledgers/${db}-${label}.err" || true
+            done
           done
           python - <<'PY'
           import json, pathlib
           root=pathlib.Path('/tmp/product-ledgers')
           summary={}
-          for p in root.glob('*.json'):
+          for p in sorted(root.glob('*.json')):
               try:
                   obj=json.loads(p.read_text())
                   rows=sum(len(x.get('results',[])) for x in (obj if isinstance(obj,list) else [obj]) if isinstance(x,dict))
