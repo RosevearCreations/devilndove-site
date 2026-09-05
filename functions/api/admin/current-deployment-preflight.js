@@ -1,39 +1,39 @@
-// Release 467 Build 60 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 61 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical diagnostics are reused read-only; forward schema authority remains canonical.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 60;
-const TITLE = 'Production Resource Binding & Account/Auth Recovery';
+const BUILD = 61;
+const TITLE = 'Production Live Resource Proof Repair';
 const AUTHORITY = 'current-development-authority.json';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 60, title: TITLE,
-  accepted_dev_sha: '44483117210e93ce7126cd19510b090d88f663a7',
-  accepted_dev_tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
-  system_gate_run: 33969967713,
-  current_application_quality_run: 33969967734,
-  it_admin_runtime_proof_run: 33969967704,
-  branch_hygiene_run: 33969967656,
+  release: 467, build: 61, title: TITLE,
+  accepted_dev_sha: '2f099d88b39a35a3bb8cf73798ba2c30b2b82083',
+  accepted_dev_tree_sha: '66bbd5b61e815b2bd9f2483eaa5161542c177e9a',
+  system_gate_run: 33972673238,
+  current_application_quality_run: 33972673246,
+  it_admin_runtime_proof_run: 33972673266,
+  branch_hygiene_run: 33972673254,
   exact_preview_deployment: true,
-  role: 'PRODUCTION_RESOURCE_RECOVERY_CANDIDATE_BASE',
+  role: 'PRODUCTION_LIVE_RESOURCE_REPAIR_CANDIDATE_BASE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 59, title: 'Storefront Media Availability & Merchandising Recovery',
-  dev_sha: '44483117210e93ce7126cd19510b090d88f663a7',
-  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
-  system_gate_run: 33969967713,
-  current_application_quality_run: 33969967734,
-  it_admin_runtime_proof_run: 33969967704,
-  branch_hygiene_run: 33969967656,
+  release: 467, build: 60, title: 'Production Resource Binding & Account/Auth Recovery',
+  dev_sha: '2f099d88b39a35a3bb8cf73798ba2c30b2b82083',
+  tree_sha: '66bbd5b61e815b2bd9f2483eaa5161542c177e9a',
+  system_gate_run: 33972673238,
+  current_application_quality_run: 33972673246,
+  it_admin_runtime_proof_run: 33972673266,
+  branch_hygiene_run: 33972673254,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment: true,
 });
 const PRODUCTION = Object.freeze({
-  release: 467, build: 59, state: 'PRODUCTION_GREEN',
-  main_sha: '9411c0968d2f0cae57f25d36f0664729cd81c61f',
-  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
-  pages_deploy_run: 33970506769,
+  release: 467, build: 60, state: 'PRODUCTION_GREEN',
+  main_sha: '732bac55a4a43434a31090bb3b9c6b7b2c5a7939',
+  tree_sha: '66bbd5b61e815b2bd9f2483eaa5161542c177e9a',
+  pages_deploy_run: 33972781588,
 });
 const REQUIRED_DEVELOPMENT_PROOFS = Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene']);
 const CANONICAL_MIGRATIONS = Object.freeze([
@@ -112,7 +112,7 @@ function canonicalChecks(truth, expectedSchema) {
     currentCheck(truth.foreign_key_violations ? 'fail' : 'pass','canonical_foreign_keys','D1 foreign-key integrity',truth.foreign_key_violations ? `${truth.foreign_key_violations} foreign-key violation(s) returned.` : 'PRAGMA foreign_key_check returned zero violations.','',{ rows: truth.foreign_key_rows }),
     currentCheck(schemaDrift.length ? 'warn' : 'pass','current_schema_visibility','Current expected application schema visibility',schemaDrift.length ? `${schemaDrift.length} application schema group(s) need review.` : `${expectedSchema.length} current application schema groups are visible.`),
     currentCheck('pass','runtime_schema_mutation_boundary','Request-time schema mutation boundary','This current Deployment Preflight endpoint is GET-only and has no schema repair capability.'),
-    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} is the current Production resource recovery candidate.`,'Verify the exact Build 60 merged dev head externally before Production promotion.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT, production: PRODUCTION }),
+    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} is the current live-resource repair candidate.`,'Verify the exact Build 61 merged dev head externally before Production promotion.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT, production: PRODUCTION }),
   ];
 }
 function statusSummary(checks) {
@@ -176,10 +176,10 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is the current read-only Release 467 Build 60 projection.',
-      'Build 59 is the last fully verified Development checkpoint at 44483117210e93ce7126cd19510b090d88f663a7 / 3523119d31bbde05ba98faa530acc3dae88920d2 with System 33969967713, Quality 33969967734, I.T. 33969967704 and Hygiene 33969967656 plus exact Preview acceptance.',
-      'Build 59 is Production GREEN source/deployment authority at main 9411c0968d2f0cae57f25d36f0664729cd81c61f / tree 3523119d31bbde05ba98faa530acc3dae88920d2 with Production Pages Deploy 33970506769 successful.',
-      'Build 60 addresses the residual live Product-media/account-admin incident and adds no schema migration or R2 mutation.',
+      'The active Deployment Preflight is the current read-only Release 467 Build 61 projection.',
+      'Build 60 is the last fully verified Development checkpoint at 2f099d88b39a35a3bb8cf73798ba2c30b2b82083 / 66bbd5b61e815b2bd9f2483eaa5161542c177e9a with System 33972673238, Quality 33972673246, I.T. 33972673266 and Hygiene 33972673254 plus exact Preview acceptance.',
+      'Build 60 is Production GREEN source/deployment authority at main 732bac55a4a43434a31090bb3b9c6b7b2c5a7939 / tree 66bbd5b61e815b2bd9f2483eaa5161542c177e9a with Production Pages Deploy 33972781588 successful.',
+      'Build 61 repairs live Product/Movie media delivery routing, the account password-writer runtime boundary and canonical module activation; it adds no schema migration or R2 mutation.',
       'Canonical migrations remain exactly 0001-0004; external HOLD lanes remain separate.',
     ],
     safety: {
