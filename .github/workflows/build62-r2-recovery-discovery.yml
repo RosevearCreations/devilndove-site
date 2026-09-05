@@ -20,6 +20,8 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CF_DATA_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
       PROD_D1_NAME: devilndove-prod-r462
       DEV_D1_NAME: devilndove-dev
       PROD_PRODUCT_R2: devilndove-toolshed-images
@@ -136,19 +138,32 @@ jobs:
           endpoint=base+'/api/admin/release463-r2-sync'
           token=os.environ['BUILD62_ADMIN_TOKEN']
           ua=os.environ['BUILD62_BROWSER_UA']
+          access_id=os.environ.get('CF_ACCESS_CLIENT_ID','').strip()
+          access_secret=os.environ.get('CF_ACCESS_CLIENT_SECRET','').strip()
+          if bool(access_id) != bool(access_secret):
+              raise AssertionError('CF_ACCESS_CLIENT_ID/CF_ACCESS_CLIENT_SECRET must both be present or both absent')
 
           def call(action,cursor=''):
               payload={'authorization':'RELEASE463_R2_ENVIRONMENT_SYNC','bucket':'product','action':action,'cursor':cursor,'limit':500}
-              req=urllib.request.Request(endpoint,method='POST',data=json.dumps(payload).encode(),headers={
+              headers={
                   'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store',
                   'Cookie':'dd_auth_token='+token,'User-Agent':ua,'Accept-Language':'en-CA,en;q=0.9'
-              })
+              }
+              if access_id:
+                  headers['CF-Access-Client-Id']=access_id
+                  headers['CF-Access-Client-Secret']=access_secret
+              req=urllib.request.Request(endpoint,method='POST',data=json.dumps(payload).encode(),headers=headers)
               try:
                   with urllib.request.urlopen(req,timeout=120) as r:
-                      status=r.status; raw=r.read().decode('utf-8','replace')
+                      status=r.status; raw=r.read().decode('utf-8','replace'); ctype=str(r.headers.get('content-type') or '').lower(); final=str(r.geturl() or '')
               except urllib.error.HTTPError as e:
-                  status=e.code; raw=e.read().decode('utf-8','replace')
-              data=json.loads(raw)
+                  status=e.code; raw=e.read().decode('utf-8','replace'); ctype=str(e.headers.get('content-type') or '').lower(); final=str(e.geturl() or '')
+              if 'cloudflare access' in raw.lower() or 'cdn-cgi/access' in raw.lower() or '/cdn-cgi/access/' in final.lower():
+                  raise AssertionError(f'Cloudflare Access rejected Build 62 recovery probe (HTTP {status}; access_service_token_configured={bool(access_id)})')
+              try:
+                  data=json.loads(raw)
+              except json.JSONDecodeError as exc:
+                  raise AssertionError(f'Inventory endpoint returned non-JSON (HTTP {status}; content-type={ctype or "unknown"}; final={final}; prefix={raw[:240]!r})') from exc
               assert status==200 and data.get('ok') is True,(action,status,data)
               assert data.get('mutation_capability')=='none' and data.get('production_r2_mutation') is False,data
               return data
@@ -274,5 +289,6 @@ jobs:
           echo 'R2 put/copy/delete: NONE'
           echo 'D1 read: Production media references + Development admin session only'
           echo 'D1 mutation: NONE'
+          echo 'Cloudflare Access policy: UNCHANGED'
           echo 'Canonical dev alias: UNCHANGED'
           echo 'Production deployment: NONE'
