@@ -2,8 +2,8 @@
   "release": 467,
   "build": 54,
   "title": "Production Authority Synchronization",
-  "state": "IN_PROGRESS_AUTHORITY_ONLY",
-  "scope": "Record the externally verified Build 53 final Development closure and its deliberate Production promotion without changing application runtime behavior.",
+  "state": "DEVELOPMENT_GREEN_AUTHORITY_SYNC_CANDIDATE",
+  "scope": "Record the externally verified Build 53 final Development closure and deliberate Build 53 Production promotion without changing application runtime behavior.",
   "source_base": {
     "build": 53,
     "dev_sha": "9cb10fb3361455b33e7907c187de4d9432588705",
@@ -48,6 +48,13 @@
     "social_queue_expansion": false,
     "cloudflare_access_mutation": false,
     "secret_values_emitted": false
+  },
+  "restart_integrity": {
+    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+    "last_fully_verified_build": 53,
+    "current_closure_candidate_build": 54,
+    "closure_candidate_must_not_self_claim_final_proof": true,
+    "next_build_ingests_previous_final_closure": true
   },
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
