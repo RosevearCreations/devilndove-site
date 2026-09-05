@@ -46,6 +46,19 @@
       "current_regression_evidence": true
     }
   },
+  "final_closure": {
+    "dev_sha": "d14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa",
+    "tree_sha": "c01d433a0434e893a8b21d9ffded8587732f9a32",
+    "proofs": {
+      "system_gate_run": 33931172444,
+      "current_application_quality_run": 33931172515,
+      "it_admin_runtime_proof_run": 33931172403,
+      "branch_hygiene_run": 33931172411
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "recorded_by_next_build": 51
+  },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified_before_build50_closure": {
@@ -97,7 +110,7 @@
     "state": "PRODUCTION_GREEN"
   },
   "next_build": 51,
-  "next_build_state": "AWAITING_BUILD_50_FINAL_CLOSURE_PROOF",
-  "next_build_title": null,
+  "next_build_state": "BUILD51_IN_PROGRESS_AFTER_VERIFIED_FINAL_CLOSURE",
+  "next_build_title": "Explicit Content Studio Schema Readiness",
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
 }
