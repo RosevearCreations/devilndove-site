@@ -1,0 +1,39 @@
+name: Recovery Drive Public Probe
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-drive-public-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe one recovered Product source without authentication
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/recovery-drive-probe
+          url='https://drive.google.com/uc?export=download&id=10c7fZ0phIedjoxdZOHCLpzRWMpHzsMMY'
+          curl -fL --retry 2 --connect-timeout 15 --max-time 120 \
+            -A 'Mozilla/5.0 DevilNDove-Recovery/1.0' \
+            "$url" -o /tmp/recovery-drive-probe/source.jpg
+          bytes=$(wc -c </tmp/recovery-drive-probe/source.jpg | tr -d ' ')
+          echo "Downloaded bytes: $bytes"
+          test "$bytes" = '442583'
+          file /tmp/recovery-drive-probe/source.jpg
+          printf '%s\n' "drive_file_id=10c7fZ0phIedjoxdZOHCLpzRWMpHzsMMY" "expected_bytes=442583" "actual_bytes=$bytes" > /tmp/recovery-drive-probe/result.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-drive-public-probe
+          path: /tmp/recovery-drive-probe
+          retention-days: 7
+          if-no-files-found: warn
