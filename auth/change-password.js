@@ -1,34 +1,22 @@
 // File: /functions/api/auth/change-password.js
-// Release 467 Build 58: verifies either current or legacy hashes, writes only the current salted format,
-// and returns structured JSON for unexpected runtime/D1 failures.
+// Release 467 Build 60: verify/write passwords against the live D1 users/sessions authority
+// without assuming optional legacy/current token or updated_at columns.
 import {
   PASSWORD_HASH_SCHEME,
   formatStoredPasswordHashFromPlaintext,
   verifyStoredPasswordHash
 } from '../_lib/passwordHash.js';
+import { readUserById, resolveSessionUser, updateUserPasswordCompatible } from '../_lib/accountAuthCompat.js';
 
-function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } }); }
+function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "Content-Type":"application/json", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } }); }
 function compactError(error) { return String(error?.message || error || '').trim().replace(/\s+/g, ' ').slice(0, 300); }
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   try {
     const db = env.DB || env.DD_DB;
-    if (!db) return json({ ok:false,error:"Password change is temporarily unavailable.",code:"AUTH_CHANGE_PASSWORD_DB_UNAVAILABLE",hint:"Check the current D1 binding in I.T. readiness." },503);
-    const token = getBearerToken(request);
-    if (!token) return json({ ok:false,error:"Unauthorized." },401);
-
-    const sessionUser = await db.prepare(`
-      SELECT s.session_id,s.user_id,s.session_token,s.token,s.expires_at,
-        u.user_id AS resolved_user_id,u.email,u.password_hash,u.display_name,u.role,u.is_active,u.created_at,u.updated_at
-      FROM sessions s INNER JOIN users u ON u.user_id=s.user_id
-      WHERE (s.session_token=? OR s.token=?) AND s.expires_at>datetime('now') LIMIT 1
-    `).bind(token,token).first();
+    if (!db) return json({ ok:false,error:"Password change is temporarily unavailable.",code:"AUTH_CHANGE_PASSWORD_DB_UNAVAILABLE",hint:"Check the Production D1 binding named DB in I.T. readiness." },503);
+    const sessionUser = await resolveSessionUser(request,db,{includePassword:true});
     if (!sessionUser) return json({ ok:false,error:"Invalid or expired session." },401);
     if (Number(sessionUser.is_active || 0) !== 1) return json({ ok:false,error:"Account is inactive." },403);
 
@@ -42,13 +30,13 @@ export async function onRequestPost(context) {
     if (await verifyStoredPasswordHash(new_password,sessionUser.password_hash)) return json({ ok:false,error:"New password must be different from the current password." },400);
 
     const new_password_hash = await formatStoredPasswordHashFromPlaintext(new_password);
-    const userId = Number(sessionUser.resolved_user_id || sessionUser.user_id || 0);
-    await db.prepare(`UPDATE users SET password_hash=?,updated_at=CURRENT_TIMESTAMP WHERE user_id=?`).bind(new_password_hash,userId).run();
-    const updatedUser = await db.prepare(`SELECT user_id,email,display_name,role,is_active,created_at,updated_at FROM users WHERE user_id=? LIMIT 1`).bind(userId).first();
+    const userId = Number(sessionUser.user_id || sessionUser.session_user_id || 0);
+    await updateUserPasswordCompatible(db,userId,new_password_hash);
+    const updatedUser = await readUserById(db,userId);
     return json({ ok:true,message:"Password changed successfully.",credential_hash_scheme:PASSWORD_HASH_SCHEME,user:{ user_id:Number(updatedUser?.user_id || userId || 0),email:updatedUser?.email || sessionUser.email || "",display_name:updatedUser?.display_name || sessionUser.display_name || "",role:updatedUser?.role || sessionUser.role || "member",is_active:Number(updatedUser?.is_active || sessionUser.is_active || 0),created_at:updatedUser?.created_at || null,updated_at:updatedUser?.updated_at || null } });
   } catch (error) {
     const detail = compactError(error);
     console.error('[auth/change-password]', detail);
-    return json({ ok:false,error:"Password change is temporarily unavailable.",code:"AUTH_CHANGE_PASSWORD_FAILED",hint:"Check the current users/session D1 schema and I.T. runtime diagnostics.",detail },503);
+    return json({ ok:false,error:"Password change is temporarily unavailable.",code:"AUTH_CHANGE_PASSWORD_FAILED",hint:"Production must expose live users/sessions tables through the DB binding; share this detail if the hotfix still fails.",detail },503);
   }
 }
