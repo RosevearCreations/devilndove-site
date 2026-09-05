@@ -1,4 +1,4 @@
-// Release 467 Build 60 — Production Resource Binding & Account/Auth Recovery renderer.
+// Release 467 Build 61 — Production Live Resource Proof Repair renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
