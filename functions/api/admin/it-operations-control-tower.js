@@ -2,27 +2,27 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 57;
-const TITLE = 'Current Authority / Restart Truth Convergence';
+const BUILD = 58;
+const TITLE = 'Account Administration JSON Response Hardening';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 57, title: TITLE, state: 'DEVELOPMENT_GREEN',
-  accepted_sha: 'c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26',
-  accepted_tree_sha: 'bb75eac5302c0acba7fea35d4bbed6c41d5d64ab',
-  system_gate_run: 33937292286,
-  current_application_quality_run: 33937292299,
-  it_admin_runtime_proof_run: 33937292333,
-  branch_hygiene_run: 33937292280,
+  release: 467, build: 58, title: TITLE, state: 'DEVELOPMENT_GREEN',
+  accepted_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
+  accepted_tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
+  system_gate_run: 33967307608,
+  current_application_quality_run: 33967307714,
+  it_admin_runtime_proof_run: 33967307740,
+  branch_hygiene_run: 33967307653,
   exact_preview_deployment: true,
-  role: 'AUTHORITY_SYNC_CANDIDATE',
+  role: 'ACCOUNT_ADMIN_JSON_HARDENING_CANDIDATE_BASE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 56, title: 'Product Photo Guidance and Packaging Onboarding', state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
-  dev_sha: 'c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26',
-  tree_sha: 'bb75eac5302c0acba7fea35d4bbed6c41d5d64ab',
-  system_gate_run: 33937292286,
-  current_application_quality_run: 33937292299,
-  it_admin_runtime_proof_run: 33937292333,
-  branch_hygiene_run: 33937292280,
+  release: 467, build: 57, title: 'Current Authority / Restart Truth Convergence', state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  dev_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
+  tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
+  system_gate_run: 33967307608,
+  current_application_quality_run: 33967307714,
+  it_admin_runtime_proof_run: 33967307740,
+  branch_hygiene_run: 33967307653,
   exact_preview_deployment: true,
   role: 'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT',
 });
@@ -64,7 +64,7 @@ export async function onRequestGet(context) {
   const runtimeSha = clean(ancestry.runtime_source_sha) || null; const runtimeHost = clean(ancestry.deployment_host) || null;
   return jsonResponse({
     release: RELEASE, build: BUILD, title: TITLE, ok: true,
-    authority: 'release467-build57-current-authority-restart-truth-convergence', state: 'DEVELOPMENT_GREEN', environment: 'development',
+    authority: 'release467-build58-account-administration-json-response-hardening', state: 'DEVELOPMENT_GREEN', environment: 'development',
     release_authority: {
       current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_GREEN' },
       accepted_development: ACCEPTED_DEVELOPMENT,
@@ -81,9 +81,9 @@ export async function onRequestGet(context) {
       production: PRODUCTION,
       compatibility_runtime_release_header: 466, compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY', current_automatic_guards: CURRENT_GUARDS,
       persistent_branches: ['main','dev'], production_promotion_required_development_proofs: CURRENT_GUARDS, rollback_readiness: 'RELEASE_NEUTRAL_READ_ONLY',
-      reliability_authority: 'current-development-authority.json', reliability_projection_build: 57,
+      reliability_authority: 'current-development-authority.json', reliability_projection_build: 58,
       historical_build36_reliability_authority: 'release467-build36-current-reliability-operational-health', historical_reliability_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
-      deployment_preflight_authority: 'current-development-authority.json', deployment_preflight_projection_build: 57,
+      deployment_preflight_authority: 'current-development-authority.json', deployment_preflight_projection_build: 58,
       historical_build37_deployment_preflight_authority: 'release467-build37-deployment-preflight-canonical-migration',
       accounting_schema_authority: 'release467-build38-accounting-core-runtime-ddl-elimination', accounting_request_time_ddl: 0,
       product_numbering_schema_authority: 'release467-build39-product-numbering-runtime-ddl-elimination', product_numbering_request_time_ddl: 0, product_numbering_required_columns: ['sequence_key','next_product_number','updated_at'],
@@ -105,6 +105,7 @@ export async function onRequestGet(context) {
       inventory_intelligence_schema_compatibility_authority: 'release467-build55-inventory-intelligence-manufacturer-link-schema-compatibility', inventory_intelligence_schema_migration: false,
       product_photo_packaging_onboarding_authority: 'release467-build56-product-photo-guidance-packaging-onboarding', product_photo_packaging_onboarding_schema_migration: false,
       current_authority_restart_truth_convergence: 'release467-build57-current-authority-restart-truth-convergence', current_authority_restart_truth_runtime_business_change: false,
+      account_administration_json_response_hardening: 'release467-build58-account-administration-json-response-hardening', account_administration_schema_migration: false,
       runtime_schema_residue_files_ceiling: 58, runtime_schema_residue_occurrences_ceiling: 522, runtime_schema_residue_shared_helpers_ceiling: 2, raw_d1_bypass_with_ddl_ceiling: 0,
       canonical_migration_authority: 'migrations/canonical/manifest.json + scripts/d1_migrate.py', request_time_schema_mutation: false,
     },
@@ -114,11 +115,11 @@ export async function onRequestGet(context) {
     external_policy: EXTERNAL_POLICY, recovery_queue: queue, next_action: queue[0] || null, subsystems, sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 56 is the last fully verified Development checkpoint at dev c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26 / tree bb75eac5302c0acba7fea35d4bbed6c41d5d64ab with System 33937292286, Quality 33937292299, I.T. 33937292333 and Hygiene 33937292280 successful plus exact Preview acceptance.',
+      'Build 57 is the last fully verified Development checkpoint at dev 8dc267594534bc51797f5cf4e59fc6dec6e8d9b6 / tree c2f31450d59477fc313c9c0b25637f7bc9bc35e0 with System 33967307608, Quality 33967307714, I.T. 33967307740 and Hygiene 33967307653 successful plus exact Preview acceptance.',
       'Build 55 is Production GREEN at main ee42e7838a83def94e858b3d0d6c1a23947e2344 / tree a338071e446f5b18db3f26d8a0c0ca07141cd158 with Production Pages Deploy 33936229477 successful.',
       'The Build 55 Production workflow proved business-data preservation, canonical Production D1, foreign-key/isolation integrity, exact deployment, Production bindings and public smoke.',
-      'Build 57 synchronizes current authority/read-only restart truth only; it changes no business runtime behavior and adds no schema migration.',
-      'A closure candidate never self-claims post-merge workflow evidence; Build 58 must ingest Build 57 final closure after the exact-head proof cycle.',
+      'Build 58 is the current account-administration JSON response hardening candidate; it adds no schema migration and does not self-claim final merged-dev proof.',
+      'A closure candidate never self-claims post-merge workflow evidence; Build 59 must ingest Build 58 final closure after the exact-head proof cycle.',
       'External HOLDs never become GREEN by inference from source or Production deployment acceptance.'
     ],
     safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
