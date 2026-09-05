@@ -2,8 +2,18 @@
   "release": 467,
   "build": 52,
   "title": "Content Studio Render Readiness / Explicit Execution Boundary",
-  "state": "IMPLEMENTATION_IN_PROGRESS",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
+  "source_base_sha": "3f5e10f4ad005945ed4092b63079b11f62c4d7ee",
+  "source_base_tree_sha": "baca33be1a9b0dc888f12c2882f97545faed97a8",
+  "accepted_dev_sha": "24f66983bf052280f62d0983f27d9707ef20d8f2",
+  "accepted_dev_tree_sha": "de49d1b7ad75a7fbff31749165d93b2f1aba94a9",
+  "acceptance": {
+    "system_gate_run": 33932827712,
+    "current_application_quality_run": 33932827708,
+    "it_admin_runtime_proof_run": 33932827704,
+    "branch_hygiene_run": 33932827696
+  },
   "source_base": {
     "build": 51,
     "title": "Explicit Content Studio Schema Readiness",
@@ -19,11 +29,32 @@
     "exact_preview_deployment": true,
     "authority": "release467-build51-content-studio-schema-readiness.json"
   },
+  "accepted_implementation": {
+    "dev_sha": "24f66983bf052280f62d0983f27d9707ef20d8f2",
+    "tree_sha": "de49d1b7ad75a7fbff31749165d93b2f1aba94a9",
+    "proofs": {
+      "system_gate_run": 33932827712,
+      "current_application_quality_run": 33932827708,
+      "it_admin_runtime_proof_run": 33932827704,
+      "branch_hygiene_run": 33932827696
+    },
+    "deployment_acceptance": {
+      "canonical_development_migration_proof": true,
+      "development_data_authority_read_only_proof": true,
+      "exact_preview_deployment": true,
+      "preview_binding_proof": true,
+      "preview_smoke_acceptance": true,
+      "current_regression_evidence": true
+    }
+  },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "previous_final_closure_ingested_before_source_mutation": true,
     "source_base_exact_sha_verified": true,
-    "source_base_exact_tree_verified": true
+    "source_base_exact_tree_verified": true,
+    "closure_candidate_must_not_self_claim_final_proof": true,
+    "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE",
+    "next_build_ingests_previous_final_closure": true
   },
   "scope": {
     "name": "content_studio_render_readiness_explicit_execution_boundary",
@@ -50,7 +81,8 @@
     "production_pages_deploy_run": 33866964958,
     "state": "PRODUCTION_GREEN"
   },
-  "promotion_state": "DEVELOPMENT_ONLY",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "next_build": 53,
-  "next_build_state": "BLOCKED_UNTIL_BUILD_52_GREEN"
+  "next_build_state": "AWAITING_BUILD_52_FINAL_CLOSURE_PROOF",
+  "next_build_title": null
 }
