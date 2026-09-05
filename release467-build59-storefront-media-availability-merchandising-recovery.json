@@ -2,7 +2,7 @@
   "release": 467,
   "build": 59,
   "title": "Storefront Media Availability & Merchandising Recovery",
-  "state": "DEVELOPMENT_GREEN",
+  "state": "DEVELOPMENT_GREEN_PRODUCTION_GREEN_WITH_REPORTED_RESIDUAL_INCIDENT",
   "accepted_dev_sha": "91106c2156e209045ed49cfd48220550c7afca57",
   "accepted_dev_tree_sha": "ab8d5dae6bba682dad438937ca63c38955e0ff8a",
   "acceptance": {
@@ -12,8 +12,34 @@
     "branch_hygiene_run": 33968914412
   },
   "accepted_checkpoint_role": "BUILD_58_LAST_FULLY_VERIFIED_BASE_FOR_BUILD_59_CANDIDATE",
-  "final_closure": null,
-  "final_closure_state": "AWAITING_EXTERNAL_EXACT_MERGED_DEV_FOUR_PROOF",
+  "final_closure": {
+    "dev_sha": "44483117210e93ce7126cd19510b090d88f663a7",
+    "tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
+    "system_gate_run": 33969967713,
+    "current_application_quality_run": 33969967734,
+    "it_admin_runtime_proof_run": 33969967704,
+    "branch_hygiene_run": 33969967656,
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proven": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true
+  },
+  "final_closure_state": "EXTERNAL_EXACT_MERGED_DEV_FOUR_PROOF_GREEN",
+  "production_closure": {
+    "main_sha": "9411c0968d2f0cae57f25d36f0664729cd81c61f",
+    "tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
+    "production_pages_deploy_run": 33970506769,
+    "data_snapshot_preserved": true,
+    "canonical_production_d1_proof": true,
+    "production_d1_isolation_proof": true,
+    "exact_main_deployment": true,
+    "production_bindings_proven": true,
+    "public_smoke": true,
+    "promotion_proof": true,
+    "residual_incident": "Production public smoke did not prove a real Product R2 object read or authenticated account-admin mutation; user later reported missing images site-wide and Create User HTTP 503."
+  },
   "restart_integrity_protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
   "first_source_mutation": true,
   "starting_point": {
@@ -47,7 +73,7 @@
     "media_origin": "https://assets.devilndove.com",
     "media_symptom": "Many product image requests returned NS_ERROR_DOM_NETWORK_ERR and product photography disappeared from the Store.",
     "classification": "STOREFRONT_AVAILABILITY_INCIDENT",
-    "source_evidence": "Production storefront merchandising currently uses a fixed products-column SELECT and product media relies on a separate public R2 custom hostname."
+    "source_evidence": "Production storefront merchandising used a fixed products-column SELECT and Build 59 recovery initially covered only products/* media on Shop."
   },
   "scope": {
     "storefront_merchandising_schema_compatibility": true,
@@ -59,5 +85,5 @@
     "provider_execution": false,
     "production_promotion": false
   },
-  "closure_rule": "Build 59 must not self-claim its final merged-dev proof values. A later build must ingest Build 59's externally verified exact merged-dev closure before its first source mutation."
+  "closure_rule": "Build 59 final Development and Production proof was ingested by Build 60. Build 60 owns the residual Production incident correction."
 }
