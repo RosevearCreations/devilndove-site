@@ -40,4 +40,6 @@ jobs:
           for row in rows: print(row)
           PY
       - name: Boundary
-        run: echo 'Production D1 mutation: NONE'
+        shell: bash
+        run: |
+          echo 'Production D1 mutation: NONE'
