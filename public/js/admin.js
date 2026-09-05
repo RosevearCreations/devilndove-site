@@ -44,18 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.addEventListener('dd:auth-rejected', renderDenied);
 
-  const adminPage = document.body?.dataset?.adminPage || '';
-  if (adminPage === 'products') {
+  if (document.body?.dataset?.adminPage === 'products') {
     void import('/public/js/admin-product-production-reversal.js?v=440')
       .catch((error) => console.warn('[DD Build 440] production reversal workspace unavailable', error));
     void import('/public/js/admin-product-image-quality-editor-bridge-v56.js?v=56')
       .catch((error) => console.warn('[DD Build 56] Product Editor image-quality bridge unavailable', error));
   }
-  if (adminPage === 'product-image-quality') {
+  if (document.body?.dataset?.adminPage === 'product-image-quality') {
     void import('/public/js/admin-product-image-quality-guidance-v56.js?v=56')
       .catch((error) => console.warn('[DD Build 56] photography coaching unavailable', error));
   }
-  if (adminPage === 'packaging-studio') {
+  if (document.body?.dataset?.adminPage === 'packaging-studio') {
     void import('/public/js/admin-packaging-onboarding-v56.js?v=56')
       .catch((error) => console.warn('[DD Build 56] Packaging walkthrough unavailable', error));
   }
