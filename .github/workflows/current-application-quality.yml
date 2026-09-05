@@ -38,6 +38,8 @@ jobs:
           node --check functions/api/admin/it-operations-control-tower.js
           node --check functions/api/admin/current-deployment-preflight.js
           node --check functions/api/admin/deployment-preflight.js
+          node --check functions/api/admin/content-studio.js
+          node --check functions/api/admin/product-content-bridge.js
           node --check functions/api/admin/packaging-material-intelligence.js
           node --check functions/api/admin/grey-hair-media-intelligence.js
           node --check functions/api/admin/grey-hair-sync-alignment.js
@@ -59,7 +61,7 @@ jobs:
           node --check public/js/layout-overflow-guard.js
           node --check public/js/public-heading-guard.js
       - name: Python syntax
-        run: python -m py_compile scripts/current_application_quality_gate.py scripts/current_help_hygiene_gate.py scripts/current_search_quality_gate.py scripts/current_responsive_layout_gate.py scripts/current_packaging_safe_area_gate.py scripts/current_packaging_material_intelligence_gate.py scripts/current_packaging_label_composition_gate.py scripts/current_packaging_label_production_gate.py scripts/current_grey_hair_media_intelligence_gate.py scripts/current_grey_hair_sync_alignment_gate.py scripts/current_grey_hair_story_edit_planning_gate.py scripts/current_grey_hair_production_acceptance_gate.py scripts/current_grey_hair_content_studio_handoff_gate.py scripts/current_authority_restart_integrity_gate.py scripts/current_it_release_truth_gate.py scripts/current_system_gate_provenance_gate.py scripts/current_production_promotion_provenance_gate.py scripts/current_reliability_truth_gate.py scripts/current_deployment_preflight_truth_gate.py scripts/current_accounting_schema_authority_gate.py scripts/current_product_numbering_schema_authority_gate.py scripts/current_product_social_automation_schema_authority_gate.py scripts/current_rollback_plan.py scripts/current_regression_evidence.py scripts/current_password_hash_gate.py scripts/main_promotion_gate.py
+        run: python -m py_compile scripts/current_application_quality_gate.py scripts/current_help_hygiene_gate.py scripts/current_search_quality_gate.py scripts/current_responsive_layout_gate.py scripts/current_packaging_safe_area_gate.py scripts/current_packaging_material_intelligence_gate.py scripts/current_packaging_label_composition_gate.py scripts/current_packaging_label_production_gate.py scripts/current_grey_hair_media_intelligence_gate.py scripts/current_grey_hair_sync_alignment_gate.py scripts/current_grey_hair_story_edit_planning_gate.py scripts/current_grey_hair_production_acceptance_gate.py scripts/current_grey_hair_content_studio_handoff_gate.py scripts/current_content_studio_schema_readiness_gate.py scripts/current_authority_restart_integrity_gate.py scripts/current_it_release_truth_gate.py scripts/current_system_gate_provenance_gate.py scripts/current_production_promotion_provenance_gate.py scripts/current_reliability_truth_gate.py scripts/current_deployment_preflight_truth_gate.py scripts/current_accounting_schema_authority_gate.py scripts/current_product_numbering_schema_authority_gate.py scripts/current_product_social_automation_schema_authority_gate.py scripts/current_rollback_plan.py scripts/current_regression_evidence.py scripts/current_password_hash_gate.py scripts/main_promotion_gate.py
       - name: Diff safety
         run: git diff --check origin/dev...HEAD
       - name: Boundary
@@ -74,6 +76,7 @@ jobs:
           echo 'Grey Hair AI Story & Edit Planning consumes only confirmed four-camera synchronization plus approved source-backed evidence, requires human story review before edit planning, and keeps external AI/provider/render/publication/R2 execution closed.'
           echo 'Grey Hair Automated Production Acceptance is GET-only and fail-closed over approved story/timeline review, exact source-evidence coverage, source bounds, timeline continuity, synchronization offsets and target duration; it authorizes no renderer/provider/publication/R2/main/Production execution.'
           echo 'Build 50 Reviewed CAIP to Content Studio Handoff requires an exact Build 48 accepted package, reuses the existing Creative Process and Content Studio authorities, copies only reviewed IDs/timecodes/sync provenance into a ready-for-review deliverable, and authorizes no renderer/provider/publication/social/R2/main/Production execution.'
+          echo 'Build 51 Content Studio schema readiness uses the explicit read-only readiness authority on active Content Studio mutation routes and prohibits the ambiguous legacy ensure alias or request-time DDL on those routes.'
           echo 'Authority restart integrity separates implementation acceptance from the last fully verified exact dev branch head and prohibits self-claiming workflow evidence that can only exist after a closure commit is created.'
           echo 'I.T. current-release truth resolves the current authority dynamically and preserves exact Production baseline truth.'
           echo 'System Gate current proof/deployment provenance is release-neutral while historical regression gates remain preserved.'
@@ -84,5 +87,5 @@ jobs:
           echo 'Accounting core treats accounting_order_records as proven baseline schema, asserts its table/index shape read-only, and carries zero request-time DDL.'
           echo 'Product Numbering treats catalog_product_number_sequence as proven baseline schema, asserts its required shape read-only, and carries zero request-time DDL.'
           echo 'Runtime schema residue remains governed by current-development-authority.json with zero raw D1 bypasses carrying DDL.'
-          echo 'Canonical migration stream remains unchanged at 0001-0004; Builds 42-50 add no schema migration.'
+          echo 'Canonical migration stream remains unchanged at 0001-0004; Builds 42-51 add no schema migration.'
           echo 'No D1/R2/provider/Production mutation is performed by this quality proof.'

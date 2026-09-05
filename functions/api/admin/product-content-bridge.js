@@ -7,9 +7,9 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import {
   CONTENT_STUDIO_BUILD,
-  createOrRefreshContentProjectForProduct,
-  ensureContentAutomationSchema
+  createOrRefreshContentProjectForProduct
 } from '../_lib/contentAutomationStudio.js';
+import { requireContentAutomationSchema } from '../_lib/contentAutomationSchemaReadiness.js';
 import {
   CAIP_BUILD,
   ensureCreativeAssetIntelligenceSchema,
@@ -261,7 +261,7 @@ export async function onRequestPost(context) {
     const before = await readBridge(access.db, productId);
     if (!before.product) return json({ ok: false, error: 'Product not found.' }, 404);
 
-    await ensureContentAutomationSchema(access.db);
+    await requireContentAutomationSchema(access.db);
     await ensureCreativeAssetIntelligenceSchema(access.db);
     let contentProjectId = Number(before.content?.content_project_id || 0);
     let result = {};
