@@ -5,6 +5,28 @@
   "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
   "first_source_mutation": true,
   "restart_integrity_protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+  "starting_point": {
+    "development": {
+      "sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
+      "tree": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+      "system_gate_run": 33972673238,
+      "quality_run": 33972673246,
+      "it_admin_runtime_run": 33972673266,
+      "repository_hygiene_run": 33972673254,
+      "exact_preview_deployment": true,
+      "canonical_development_d1_proof": true,
+      "development_data_authority_read_only": true,
+      "preview_bindings_proven": true,
+      "non_secret_preview_smoke": true,
+      "regression_evidence": true
+    },
+    "production": {
+      "main_sha": "732bac55a4a43434a31090bb3b9c6b7b2c5a7939",
+      "tree": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+      "production_pages_deploy_run": 33972781588,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
   "build60_final_development": {
     "dev_sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
     "tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
@@ -35,16 +57,33 @@
     "public_smoke": true,
     "promotion_proof": true
   },
+  "incident_evidence": {
+    "product_database_rows_intact": true,
+    "movie_database_rows_intact": true,
+    "historical_product_media_host_returned_404": true,
+    "historical_movie_media_host_returned_404": true,
+    "production_account_tables_present": true,
+    "production_account_schema_compatible": true,
+    "cloudflare_r2_inventory_permission_available": false,
+    "r2_inventory_permission_result": "HOLD_EXTERNAL_PERMISSION_403",
+    "blind_r2_copy_performed": false
+  },
+  "repairs": {
+    "password_writer": "New password writes use PBKDF2-HMAC-SHA256 with 100000 iterations, within the Cloudflare Workers WebCrypto runtime boundary; legacy SHA-256 verification remains compatibility-only and existing PBKDF2 hashes retain their embedded iteration count for verification.",
+    "application_modules": "Browser runtime classification now converges legacy domain routes onto the canonical Storefront, Creators, Socials, Financials and I.T. module keys; /admin/users/ resolves to it-platform instead of retired business-administration.",
+    "public_media": "Product and Movie historical public-media URLs may recover through the read-only same-origin /api/product-media route using the environment-bound PRODUCT_MEDIA_BUCKET. The route performs bucket.get only and never lists or mutates R2.",
+    "live_resource_proof": "The Production live-resource integrity workflow is strengthened to distinguish source/deployment green from actual live Product/Movie/account resource evidence."
+  },
   "validation_followup": {
     "production_live_resource_integrity_run": 33972823412,
     "result": "FAILED_BEFORE_RESOURCE_ASSERTIONS",
     "classification": "PROOF_HARNESS_EXECUTION_CONTEXT_DEFECT",
-    "evidence": "The new workflow invoked wrangler D1 commands without the CLOUDFLARE_ACCOUNT_ID context used by the successful Production deployment workflow; execution exited before schema assertion output and skipped R2/auth live checks.",
+    "evidence": "The earlier workflow invoked Wrangler D1 commands without the canonical Cloudflare account context and exited before resource assertions. Subsequent Build 61 read-only diagnostics confirmed Product/Movie rows and account schema remained present while historical media delivery URLs returned 404.",
     "must_not_be_interpreted_as": "LIVE_D1_SCHEMA_FAILURE",
-    "required_repair": "Add the canonical Cloudflare account context, capture Wrangler output explicitly, and rerun read-only live D1/R2/API assertions after the normal Production deployment chain."
+    "required_repair": "Deploy the exact fully-green Build 61 tree through Development and Production, then verify real live account behavior and Product/Movie image bytes without inferring R2 object presence from database metadata."
   },
   "scope": {
-    "application_runtime_change": false,
+    "application_runtime_change": true,
     "schema_migration": false,
     "d1_business_data_migration": false,
     "d1_mutation": false,
@@ -54,5 +93,5 @@
     "production_promotion": false,
     "validation_workflow_repair": true
   },
-  "closure_rule": "Build 61 repairs validation only. It must pass exact-head Development proofs before the same tree may be promoted to main to re-run the standard Production chain and the repaired live-resource proof."
+  "closure_rule": "Build 61 is a runtime and live-resource verification repair. It must pass the exact-head Development source/quality/I.T. proof set, merge that tested head to dev, pass the exact merged-dev four-proof closure and Preview deployment, then only the same exact tree may be promoted to main under the user's explicit authorization. Production is not considered incident-green unless live account behavior and Product/Movie image bytes are actually proven; database image metadata alone is insufficient."
 }
