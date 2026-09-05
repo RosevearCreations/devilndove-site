@@ -1,45 +1,45 @@
-// Release 467 Build 59 — current read-only reliability projection.
-// Build 59 exposes Build 58 as the last fully verified Development checkpoint while
-// Storefront media availability / merchandising recovery remains the current closure candidate.
+// Release 467 Build 60 — current read-only reliability projection.
+// Build 60 exposes Build 59 as the last fully verified Development checkpoint and current
+// Production baseline while live account/media recovery remains the current closure candidate.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 59;
-export const CURRENT_RELIABILITY_TITLE = 'Storefront Media Availability & Merchandising Recovery';
+export const CURRENT_RELIABILITY_BUILD = 60;
+export const CURRENT_RELIABILITY_TITLE = 'Production Resource Binding & Account/Auth Recovery';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 59,
+  build: 60,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: '91106c2156e209045ed49cfd48220550c7afca57',
-  accepted_dev_tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
-  system_gate_run: 33968914405,
-  current_application_quality_run: 33968914416,
-  it_admin_runtime_proof_run: 33968914417,
-  branch_hygiene_run: 33968914412,
+  accepted_dev_sha: '44483117210e93ce7126cd19510b090d88f663a7',
+  accepted_dev_tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
+  system_gate_run: 33969967713,
+  current_application_quality_run: 33969967734,
+  it_admin_runtime_proof_run: 33969967704,
+  branch_hygiene_run: 33969967656,
   exact_preview_deployment: true,
-  role: 'STOREFRONT_MEDIA_RECOVERY_CANDIDATE_BASE',
+  role: 'PRODUCTION_RESOURCE_RECOVERY_CANDIDATE_BASE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 58,
-  title: 'Account Administration JSON Response Hardening',
-  dev_sha: '91106c2156e209045ed49cfd48220550c7afca57',
-  tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
-  system_gate_run: 33968914405,
-  current_application_quality_run: 33968914416,
-  it_admin_runtime_proof_run: 33968914417,
-  branch_hygiene_run: 33968914412,
+  build: 59,
+  title: 'Storefront Media Availability & Merchandising Recovery',
+  dev_sha: '44483117210e93ce7126cd19510b090d88f663a7',
+  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
+  system_gate_run: 33969967713,
+  current_application_quality_run: 33969967734,
+  it_admin_runtime_proof_run: 33969967704,
+  branch_hygiene_run: 33969967656,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 export const CURRENT_PRODUCTION = Object.freeze({
   release: 467,
-  build: 55,
-  title: 'Inventory Intelligence Manufacturer-Link Schema Compatibility',
-  main_sha: 'ee42e7838a83def94e858b3d0d6c1a23947e2344',
-  tree_sha: 'a338071e446f5b18db3f26d8a0c0ca07141cd158',
-  production_pages_deploy_run: 33936229477,
+  build: 59,
+  title: 'Storefront Media Availability & Merchandising Recovery',
+  main_sha: '9411c0968d2f0cae57f25d36f0664729cd81c61f',
+  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
+  production_pages_deploy_run: 33970506769,
   state: 'PRODUCTION_GREEN',
 });
 
@@ -90,8 +90,10 @@ export async function loadCurrentReliability(db, env = {}) {
       build56_product_photo_packaging_onboarding_development_green: true,
       build57_authority_restart_truth_convergence_development_green: true,
       build58_account_administration_json_response_hardening_development_green: true,
-      build59_storefront_media_availability_merchandising_recovery_candidate: true,
-      production_baseline_build: 55,
+      build59_storefront_media_availability_merchandising_recovery_development_and_production_green: true,
+      build60_production_resource_binding_account_auth_recovery_candidate: true,
+      production_baseline_build: 59,
+      live_resource_incident_open: true,
     },
     safety: {
       ...inherited.safety,
