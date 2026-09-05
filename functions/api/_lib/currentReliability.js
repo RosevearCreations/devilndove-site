@@ -1,35 +1,35 @@
-// Release 467 Build 50 — current read-only reliability projection.
+// Release 467 Build 51 — current read-only reliability projection.
 // Implementation acceptance is distinct from the last externally verified closure.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 50;
-export const CURRENT_RELIABILITY_TITLE = 'Reviewed CAIP to Content Studio Handoff';
+export const CURRENT_RELIABILITY_BUILD = 51;
+export const CURRENT_RELIABILITY_TITLE = 'Explicit Content Studio Schema Readiness';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 50,
+  build: 51,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: 'dddd7c9423132dd22b179348a5644362f7b9f46c',
-  accepted_dev_tree_sha: '1d5d4859c55fae404a79eb8cef85e1e0d3f30826',
-  system_gate_run: 33930359847,
-  current_application_quality_run: 33930359835,
-  it_admin_runtime_proof_run: 33930359865,
-  branch_hygiene_run: 33930359956,
+  accepted_dev_sha: 'd62273bd57e0d542a3746b65b9b2ba03b1c8c0f0',
+  accepted_dev_tree_sha: 'a5fc48a4b21441dee7e81ecf4685cbad7cc236a6',
+  system_gate_run: 33931737250,
+  current_application_quality_run: 33931737252,
+  it_admin_runtime_proof_run: 33931737261,
+  branch_hygiene_run: 33931737243,
   exact_preview_deployment: true,
   role: 'IMPLEMENTATION_ACCEPTANCE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 49,
-  title: 'Current Authority Convergence & Restart Integrity',
-  dev_sha: '28307cd8939329db05dab61c336d0c7a49f8759e',
-  tree_sha: '0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7',
-  system_gate_run: 33929301077,
-  current_application_quality_run: 33929301018,
-  it_admin_runtime_proof_run: 33929301051,
-  branch_hygiene_run: 33929300999,
+  build: 50,
+  title: 'Reviewed CAIP to Content Studio Handoff',
+  dev_sha: 'd14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa',
+  tree_sha: 'c01d433a0434e893a8b21d9ffded8587732f9a32',
+  system_gate_run: 33931172444,
+  current_application_quality_run: 33931172515,
+  it_admin_runtime_proof_run: 33931172403,
+  branch_hygiene_run: 33931172411,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 

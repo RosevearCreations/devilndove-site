@@ -1,31 +1,31 @@
-// Release 467 Build 50 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 51 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical diagnostics are reused read-only; forward schema authority remains canonical.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 50;
-const TITLE = 'Reviewed CAIP to Content Studio Handoff';
+const BUILD = 51;
+const TITLE = 'Explicit Content Studio Schema Readiness';
 const AUTHORITY = 'current-development-authority.json';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 50, title: TITLE,
-  accepted_dev_sha: 'dddd7c9423132dd22b179348a5644362f7b9f46c',
-  accepted_dev_tree_sha: '1d5d4859c55fae404a79eb8cef85e1e0d3f30826',
-  system_gate_run: 33930359847,
-  current_application_quality_run: 33930359835,
-  it_admin_runtime_proof_run: 33930359865,
-  branch_hygiene_run: 33930359956,
+  release: 467, build: 51, title: TITLE,
+  accepted_dev_sha: 'd62273bd57e0d542a3746b65b9b2ba03b1c8c0f0',
+  accepted_dev_tree_sha: 'a5fc48a4b21441dee7e81ecf4685cbad7cc236a6',
+  system_gate_run: 33931737250,
+  current_application_quality_run: 33931737252,
+  it_admin_runtime_proof_run: 33931737261,
+  branch_hygiene_run: 33931737243,
   exact_preview_deployment: true,
   role: 'IMPLEMENTATION_ACCEPTANCE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 49, title: 'Current Authority Convergence & Restart Integrity',
-  dev_sha: '28307cd8939329db05dab61c336d0c7a49f8759e',
-  tree_sha: '0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7',
-  system_gate_run: 33929301077,
-  current_application_quality_run: 33929301018,
-  it_admin_runtime_proof_run: 33929301051,
-  branch_hygiene_run: 33929300999,
+  release: 467, build: 50, title: 'Reviewed CAIP to Content Studio Handoff',
+  dev_sha: 'd14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa',
+  tree_sha: 'c01d433a0434e893a8b21d9ffded8587732f9a32',
+  system_gate_run: 33931172444,
+  current_application_quality_run: 33931172515,
+  it_admin_runtime_proof_run: 33931172403,
+  branch_hygiene_run: 33931172411,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment: true,
 });
@@ -112,7 +112,7 @@ function canonicalChecks(truth, expectedSchema) {
     currentCheck(truth.foreign_key_violations ? 'fail' : 'pass','canonical_foreign_keys','D1 foreign-key integrity',truth.foreign_key_violations ? `${truth.foreign_key_violations} foreign-key violation(s) returned.` : 'PRAGMA foreign_key_check returned zero violations.','',{ rows: truth.foreign_key_rows }),
     currentCheck(schemaDrift.length ? 'warn' : 'pass','current_schema_visibility','Current expected application schema visibility',schemaDrift.length ? `${schemaDrift.length} application schema group(s) need review.` : `${expectedSchema.length} current application schema groups are visible.`),
     currentCheck('pass','runtime_schema_mutation_boundary','Request-time schema mutation boundary','This current Deployment Preflight endpoint is GET-only and has no schema repair capability.'),
-    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} implementation acceptance is ${ACCEPTED_DEVELOPMENT.accepted_dev_sha}.`,'Verify the exact Build 50 closure merged dev head externally before it becomes the next restart checkpoint.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT }),
+    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} implementation acceptance is ${ACCEPTED_DEVELOPMENT.accepted_dev_sha}.`,'Verify the exact Build 51 closure merged dev head externally before it becomes the next restart checkpoint.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT }),
   ];
 }
 function statusSummary(checks) {
@@ -176,10 +176,10 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is the current read-only Release 467 Build 50 projection.',
-      'Build 50 implementation acceptance is dddd7c9423132dd22b179348a5644362f7b9f46c / 1d5d4859c55fae404a79eb8cef85e1e0d3f30826 with System 33930359847, Quality 33930359835, I.T. 33930359865 and Hygiene 33930359956 successful plus exact Preview acceptance.',
-      'Build 49 is the last fully verified restart checkpoint at 28307cd8939329db05dab61c336d0c7a49f8759e / 0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7 with System 33929301077, Quality 33929301018, I.T. 33929301051 and Hygiene 33929300999.',
-      'Build 50 reuses the existing Content Studio authority and adds no canonical migration or request-time schema mutation.',
+      'The active Deployment Preflight is the current read-only Release 467 Build 51 projection.',
+      'Build 51 implementation acceptance is d62273bd57e0d542a3746b65b9b2ba03b1c8c0f0 / a5fc48a4b21441dee7e81ecf4685cbad7cc236a6 with System 33931737250, Quality 33931737252, I.T. 33931737261 and Hygiene 33931737243 successful plus exact Preview acceptance.',
+      'Build 50 is the last fully verified restart checkpoint at d14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa / c01d433a0434e893a8b21d9ffded8587732f9a32 with System 33931172444, Quality 33931172515, I.T. 33931172403 and Hygiene 33931172411.',
+      'Build 51 uses the explicit read-only Content Studio schema readiness authority and adds no canonical migration or request-time schema mutation.',
       'Rendering, provider execution, publication, social queueing, R2 mutation, main mutation and Production promotion remain closed.',
       'Build 32 remains the current Production baseline and external HOLD lanes remain separate.',
     ],

@@ -1,4 +1,4 @@
-// Release 467 Build 50 — Reviewed CAIP to Content Studio Handoff renderer.
+// Release 467 Build 51 — Explicit Content Studio Schema Readiness renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;

@@ -2,8 +2,18 @@
   "release": 467,
   "build": 51,
   "title": "Explicit Content Studio Schema Readiness",
-  "state": "IMPLEMENTATION_IN_PROGRESS",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
+  "source_base_sha": "d14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa",
+  "source_base_tree_sha": "c01d433a0434e893a8b21d9ffded8587732f9a32",
+  "accepted_dev_sha": "d62273bd57e0d542a3746b65b9b2ba03b1c8c0f0",
+  "accepted_dev_tree_sha": "a5fc48a4b21441dee7e81ecf4685cbad7cc236a6",
+  "acceptance": {
+    "system_gate_run": 33931737250,
+    "current_application_quality_run": 33931737252,
+    "it_admin_runtime_proof_run": 33931737261,
+    "branch_hygiene_run": 33931737243
+  },
   "source_base": {
     "build": 50,
     "title": "Reviewed CAIP to Content Studio Handoff",
@@ -19,11 +29,32 @@
     "exact_preview_deployment": true,
     "authority": "release467-build50-reviewed-caip-content-studio-handoff.json"
   },
+  "accepted_implementation": {
+    "dev_sha": "d62273bd57e0d542a3746b65b9b2ba03b1c8c0f0",
+    "tree_sha": "a5fc48a4b21441dee7e81ecf4685cbad7cc236a6",
+    "proofs": {
+      "system_gate_run": 33931737250,
+      "current_application_quality_run": 33931737252,
+      "it_admin_runtime_proof_run": 33931737261,
+      "branch_hygiene_run": 33931737243
+    },
+    "deployment_acceptance": {
+      "canonical_development_migration_proof": true,
+      "development_data_authority_read_only_proof": true,
+      "exact_preview_deployment": true,
+      "preview_binding_proof": true,
+      "preview_smoke_acceptance": true,
+      "current_regression_evidence": true
+    }
+  },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "previous_final_closure_ingested_before_source_mutation": true,
     "source_base_exact_sha_verified": true,
-    "source_base_exact_tree_verified": true
+    "source_base_exact_tree_verified": true,
+    "closure_candidate_must_not_self_claim_final_proof": true,
+    "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE",
+    "next_build_ingests_previous_final_closure": true
   },
   "scope": {
     "name": "content_studio_schema_readiness_authority_clarity",
@@ -50,7 +81,8 @@
     "production_pages_deploy_run": 33866964958,
     "state": "PRODUCTION_GREEN"
   },
-  "promotion_state": "DEVELOPMENT_ONLY",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "next_build": 52,
-  "next_build_state": "BLOCKED_UNTIL_BUILD_51_GREEN"
+  "next_build_state": "AWAITING_BUILD_51_FINAL_CLOSURE_PROOF",
+  "next_build_title": null
 }
