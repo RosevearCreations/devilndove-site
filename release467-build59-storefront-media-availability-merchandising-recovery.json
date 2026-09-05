@@ -2,7 +2,7 @@
   "release": 467,
   "build": 59,
   "title": "Storefront Media Availability & Merchandising Recovery",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "accepted_dev_sha": "91106c2156e209045ed49cfd48220550c7afca57",
   "accepted_dev_tree_sha": "ab8d5dae6bba682dad438937ca63c38955e0ff8a",
   "acceptance": {
