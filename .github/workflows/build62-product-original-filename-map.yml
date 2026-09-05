@@ -25,80 +25,93 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Export schema and original-filename authorities read-only
+      - name: Export historical Product media authorities read-only
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.129.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA table_info(media_assets); PRAGMA table_info(mobile_resumable_upload_sessions); PRAGMA table_info(product_images);" > /tmp/build62-schema.json
-          npx --yes wrangler@4.129.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "
-          SELECT p.product_id,p.name,p.status,pi.product_image_id,pi.image_url,pi.alt_text,pi.sort_order,pi.created_at,
-                 ma.media_asset_id,ma.object_key,ma.original_filename,ma.mime_type,ma.file_size_bytes,ma.created_at AS media_created_at,
-                 NULL AS mobile_file_name,NULL AS mobile_expected_bytes,NULL AS mobile_created_at,'media_assets' AS mapping_source
-          FROM products p
-          JOIN product_images pi ON pi.product_id=p.product_id
-          LEFT JOIN media_assets ma
-            ON ma.product_id=p.product_id
-           AND (ma.public_url=pi.image_url OR ma.object_key=replace(replace(pi.image_url,'https://assets.devilndove.com/',''),'https://pub-f8137eb938da486a9f24410ccf49087c.r2.dev/',''))
-          UNION ALL
-          SELECT p.product_id,p.name,p.status,pi.product_image_id,pi.image_url,pi.alt_text,pi.sort_order,pi.created_at,
-                 NULL,NULL,NULL,mru.mime_type,NULL,NULL,
-                 mru.file_name,mru.expected_bytes,mru.created_at,'mobile_resumable' AS mapping_source
-          FROM products p
-          JOIN product_images pi ON pi.product_id=p.product_id
-          JOIN mobile_resumable_upload_sessions mru
-            ON mru.product_id=p.product_id
-           AND mru.r2_object_key=replace(replace(pi.image_url,'https://assets.devilndove.com/',''),'https://pub-f8137eb938da486a9f24410ccf49087c.r2.dev/','')
-          ORDER BY product_id,sort_order,product_image_id,mapping_source;
-          " > /tmp/build62-product-original-map-raw.json
+          python - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          db=os.environ['PROD_D1_NAME']
+          def query(sql):
+              cmd=['npx','--yes','wrangler@4.129.0','d1','execute',db,'--remote','--json','--command',sql]
+              p=subprocess.run(cmd,text=True,capture_output=True)
+              if p.returncode:
+                  raise SystemExit(f'D1 read failed rc={p.returncode}: {p.stderr[-2000:]} {p.stdout[-2000:]}')
+              return json.loads(p.stdout)
+          def rows(payload):
+              out=[]
+              def walk(v):
+                  if isinstance(v,dict):
+                      if isinstance(v.get('results'),list):
+                          out.extend(x for x in v['results'] if isinstance(x,dict))
+                      for x in v.values(): walk(x)
+                  elif isinstance(v,list):
+                      for x in v: walk(x)
+              walk(payload); return out
+          tables={}
+          for table in ('products','product_images','media_assets','mobile_resumable_upload_sessions','mobile_resumable_upload_runtime_rows'):
+              schema=rows(query(f'PRAGMA table_info({table});'))
+              cols=[str(r.get('name') or '') for r in schema if r.get('name')]
+              tables[table]={'columns':cols,'rows':[]}
+              if cols:
+                  tables[table]['rows']=rows(query(f'SELECT * FROM {table};'))
+          Path('/tmp/build62-product-media-authorities.json').write_text(json.dumps(tables,sort_keys=True))
+          print('BUILD62_TABLE_COUNTS',json.dumps({k:{'columns':len(v['columns']),'rows':len(v['rows'])} for k,v in tables.items()},sort_keys=True))
+          print('BUILD62_MEDIA_ASSET_COLUMNS',json.dumps(tables['media_assets']['columns']))
+          print('BUILD62_MOBILE_SESSION_COLUMNS',json.dumps(tables['mobile_resumable_upload_sessions']['columns']))
+          PY
 
-      - name: Build exact mapping proof
+      - name: Build schema-adaptive exact filename map
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json,urllib.parse
           from pathlib import Path
-          raw=json.loads(Path('/tmp/build62-product-original-map-raw.json').read_text())
-          rows=[]
-          def walk(v):
-              if isinstance(v,dict):
-                  if 'product_id' in v and 'image_url' in v and 'mapping_source' in v: rows.append(v)
-                  for x in v.values(): walk(x)
-              elif isinstance(v,list):
-                  for x in v: walk(x)
-          walk(raw)
-          # Deduplicate one logical product image while preferring a row that carries an original filename.
-          by_image={}
-          for r in rows:
-              image_id=int(r.get('product_image_id') or 0)
-              if not image_id: continue
-              name=str(r.get('original_filename') or r.get('mobile_file_name') or '').strip()
-              existing=by_image.get(image_id)
-              if existing is None or (name and not existing.get('original_filename')):
-                  url=str(r.get('image_url') or '')
-                  p=urllib.parse.urlparse(url)
-                  by_image[image_id]={
-                    'product_id':int(r.get('product_id') or 0),'product_name':str(r.get('name') or ''),'product_status':str(r.get('status') or ''),
-                    'product_image_id':image_id,'image_url':url,'object_key':urllib.parse.unquote(p.path).lstrip('/'),
-                    'alt_text':str(r.get('alt_text') or ''),'sort_order':int(r.get('sort_order') or 0),'image_created_at':r.get('created_at'),
-                    'original_filename':name,'mime_type':str(r.get('mime_type') or ''),'file_size_bytes':int(r.get('file_size_bytes') or r.get('mobile_expected_bytes') or 0),
-                    'mapping_source':str(r.get('mapping_source') or ''),'mapping_created_at':r.get('media_created_at') or r.get('mobile_created_at')
-                  }
-          values=sorted(by_image.values(),key=lambda r:(r['product_id'],r['sort_order'],r['product_image_id']))
-          named=[r for r in values if r['original_filename']]
-          unnamed=[r for r in values if not r['original_filename']]
+          tables=json.loads(Path('/tmp/build62-product-media-authorities.json').read_text())
+          products=tables['products']['rows']; images=tables['product_images']['rows']; assets=tables['media_assets']['rows']; sessions=tables['mobile_resumable_upload_sessions']['rows']; runtime=tables['mobile_resumable_upload_runtime_rows']['rows']
+          pmap={int(r.get('product_id') or r.get('id') or 0):r for r in products if int(r.get('product_id') or r.get('id') or 0)}
+          def key_from_url(url):
+              p=urllib.parse.urlparse(str(url or ''))
+              return urllib.parse.unquote(p.path).lstrip('/')
+          def akey(a): return str(a.get('object_key') or a.get('r2_object_key') or '').lstrip('/')
+          assets_by_key={akey(a):a for a in assets if akey(a)}
+          sessions_by_key={str(s.get('r2_object_key') or '').lstrip('/'):s for s in sessions if s.get('r2_object_key')}
+          runtime_by_key={str(s.get('r2_object_key') or '').lstrip('/'):s for s in runtime if s.get('r2_object_key')}
+          mapped=[]
+          for i,r in enumerate(images,1):
+              pid=int(r.get('product_id') or 0); url=str(r.get('image_url') or r.get('url') or ''); key=key_from_url(url)
+              asset=assets_by_key.get(key,{})
+              sess=sessions_by_key.get(key,{})
+              run=runtime_by_key.get(key,{})
+              original=str(asset.get('original_filename') or asset.get('original_name') or sess.get('file_name') or sess.get('filename') or '').strip()
+              size=int(asset.get('file_size_bytes') or asset.get('size_bytes') or sess.get('expected_bytes') or 0)
+              mime=str(asset.get('mime_type') or sess.get('mime_type') or '').strip()
+              source='media_assets' if asset else ('mobile_resumable_upload_sessions' if sess else ('mobile_resumable_upload_runtime_rows' if run else 'none'))
+              product=pmap.get(pid,{})
+              image_id=int(r.get('product_image_id') or r.get('id') or i)
+              mapped.append({
+                  'product_id':pid,'product_name':str(product.get('name') or product.get('title') or ''),'product_status':str(product.get('status') or product.get('product_status') or ''),
+                  'product_image_id':image_id,'image_url':url,'object_key':key,'alt_text':str(r.get('alt_text') or ''),
+                  'sort_order':int(r.get('sort_order') or r.get('display_order') or 0),'image_created_at':r.get('created_at'),
+                  'original_filename':original,'mime_type':mime,'file_size_bytes':size,'mapping_source':source,
+                  'mapping_created_at':asset.get('created_at') or sess.get('created_at') or run.get('created_at')
+              })
+          mapped.sort(key=lambda r:(r['product_id'],r['sort_order'],r['product_image_id']))
+          named=[r for r in mapped if r['original_filename']]
+          unnamed=[r for r in mapped if not r['original_filename']]
           proof={'release':467,'build':62,'status':'READ_ONLY_PRODUCT_ORIGINAL_FILENAME_MAP_COMPLETE','mutation':'NONE',
-                 'product_image_rows':len(values),'rows_with_original_filename':len(named),'rows_without_original_filename':len(unnamed),
-                 'products_with_original_filename':len({r['product_id'] for r in named}),
+                 'product_image_rows':len(mapped),'rows_with_original_filename':len(named),'rows_without_original_filename':len(unnamed),
+                 'products_with_original_filename':len({r['product_id'] for r in named}),'products_total_in_image_rows':len({r['product_id'] for r in mapped}),
                  'named_rows':named,'unnamed_rows':unnamed}
           Path('/tmp/build62-product-original-filename-map.json').write_text(json.dumps(proof,indent=2,sort_keys=True))
           print('BUILD 62 PRODUCT ORIGINAL FILENAME MAP COMPLETE')
-          print(json.dumps({k:proof[k] for k in ('product_image_rows','rows_with_original_filename','rows_without_original_filename','products_with_original_filename')},indent=2,sort_keys=True))
+          print(json.dumps({k:proof[k] for k in ('product_image_rows','rows_with_original_filename','rows_without_original_filename','products_with_original_filename','products_total_in_image_rows')},indent=2,sort_keys=True))
           print('NAMED_PRODUCT_IMAGES')
-          for r in named:
-              print(json.dumps(r,sort_keys=True))
+          for r in named: print(json.dumps(r,sort_keys=True))
           if unnamed:
               print('UNNAMED_PRODUCT_IMAGES')
               for r in unnamed: print(json.dumps(r,sort_keys=True))
