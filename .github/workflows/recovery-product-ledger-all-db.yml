@@ -32,10 +32,15 @@ jobs:
           sqls[annotations]="SELECT * FROM product_image_annotations ORDER BY product_id,product_image_id;"
           sqls[roles]="SELECT * FROM product_media_role_assignments ORDER BY product_id;"
           sqls[audit]="SELECT * FROM admin_action_audit WHERE action_type='media_upload' OR target_type='media_asset' ORDER BY created_at, target_key;"
+          sqls[product_media_change_audit]="SELECT * FROM product_media_change_audit ORDER BY product_id, created_at, product_media_change_audit_id;"
+          sqls[mobile_recovery]="SELECT * FROM mobile_product_autosave_recovery_snapshots ORDER BY created_at, mobile_product_autosave_recovery_snapshot_id;"
+          sqls[managed_media_metadata]="SELECT * FROM managed_media_metadata ORDER BY media_asset_id;"
+          sqls[media_content_change_audit]="SELECT * FROM media_content_change_audit ORDER BY created_at, media_content_change_audit_id;"
+          sqls[integrity_snapshots]="SELECT * FROM product_media_integrity_snapshots ORDER BY created_at, product_media_integrity_snapshot_id;"
           sqls[tables]="SELECT name,sql FROM sqlite_master WHERE type='table' AND (lower(name) LIKE '%media%' OR lower(name) LIKE '%image%' OR lower(name) LIKE '%audit%' OR lower(name) LIKE '%snapshot%' OR lower(name) LIKE '%recover%') ORDER BY name;"
           for db in "${dbs[@]}"; do
             echo "Reading $db"
-            for label in media_assets product_images products annotations roles audit tables; do
+            for label in media_assets product_images products annotations roles audit product_media_change_audit mobile_recovery managed_media_metadata media_content_change_audit integrity_snapshots tables; do
               npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "${sqls[$label]}" > "/tmp/product-ledgers/${db}-${label}.json" 2> "/tmp/product-ledgers/${db}-${label}.err" || true
             done
           done
