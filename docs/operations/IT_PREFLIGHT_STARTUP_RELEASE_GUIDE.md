@@ -4,24 +4,24 @@ This guide defines the safe restart sequence for the canonical Devil n Dove Deve
 
 ## Current accepted Development implementation
 
-Release 467 Build 51 — Explicit Content Studio Schema Readiness has GREEN implementation acceptance at:
-- `dev` SHA `d62273bd57e0d542a3746b65b9b2ba03b1c8c0f0`
-- tree `a5fc48a4b21441dee7e81ecf4685cbad7cc236a6`
-- System Gate `33931737250` SUCCESS
-- Current Application Quality `33931737252` SUCCESS
-- I.T. Admin Runtime Proof `33931737261` SUCCESS
-- Repository Branch Hygiene `33931737243` SUCCESS
+Release 467 Build 52 — Content Studio Render Readiness / Explicit Execution Boundary has GREEN implementation acceptance at:
+- `dev` SHA `24f66983bf052280f62d0983f27d9707ef20d8f2`
+- tree `de49d1b7ad75a7fbff31749165d93b2f1aba94a9`
+- System Gate `33932827712` SUCCESS
+- Current Application Quality `33932827708` SUCCESS
+- I.T. Admin Runtime Proof `33932827704` SUCCESS
+- Repository Branch Hygiene `33932827696` SUCCESS
 - canonical Development migration proof, Development data-authority read-only proof, exact Preview deployment, control-plane binding proof, non-secret smoke acceptance and regression evidence: SUCCESS.
 
 ## Last fully verified restart checkpoint
 
-Build 50 — Reviewed CAIP to Content Studio Handoff is the last fully verified restart checkpoint:
-- `dev` SHA `d14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa`
-- tree `c01d433a0434e893a8b21d9ffded8587732f9a32`
-- System Gate `33931172444` SUCCESS
-- Current Application Quality `33931172515` SUCCESS
-- I.T. Admin Runtime Proof `33931172403` SUCCESS
-- Repository Branch Hygiene `33931172411` SUCCESS
+Build 51 — Explicit Content Studio Schema Readiness is the last fully verified restart checkpoint:
+- `dev` SHA `3f5e10f4ad005945ed4092b63079b11f62c4d7ee`
+- tree `baca33be1a9b0dc888f12c2882f97545faed97a8`
+- System Gate `33932323391` SUCCESS
+- Current Application Quality `33932323375` SUCCESS
+- I.T. Admin Runtime Proof `33932323392` SUCCESS
+- Repository Branch Hygiene `33932323423` SUCCESS
 - exact Preview acceptance: SUCCESS.
 
 Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, tree `2c1b4a3694779996e1bdb094be5e9e043834276e`, Production Pages Deploy `33866964958` SUCCESS.
@@ -39,10 +39,10 @@ Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd6
 ## Startup sequence
 
 1. Read `current-development-authority.json` first.
-2. Read `restart_integrity.last_fully_verified`; current verified checkpoint is Build 50 at `d14e41cf4c1b0c12ce597f6fe3ab05d74901a0fa`, tree `c01d433a0434e893a8b21d9ffded8587732f9a32`, with System `33931172444`, Quality `33931172515`, I.T. `33931172403` and Hygiene `33931172411`.
+2. Read `restart_integrity.last_fully_verified`; current verified checkpoint is Build 51 at `3f5e10f4ad005945ed4092b63079b11f62c4d7ee`, tree `baca33be1a9b0dc888f12c2882f97545faed97a8`, with System `33932323391`, Quality `33932323375`, I.T. `33932323392` and Hygiene `33932323423`.
 3. Fetch current `dev`. It must be at or descended from that checkpoint.
-4. If current `dev` is newer because it is the Build 51 closure candidate, verify System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on that exact current `dev` SHA plus exact Preview acceptance before starting Build 52.
-5. Build 52, if separately scoped, must ingest the externally verified Build 51 final closure before any source mutation.
+4. If current `dev` is newer because it is the Build 52 closure candidate, verify System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on that exact current `dev` SHA plus exact Preview acceptance before starting Build 53.
+5. Build 53, if separately scoped, must ingest the externally verified Build 52 final closure before any source mutation.
 6. Read the current release authority, then `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `SANITY_HEALTH_CHECK.md` and `MARKDOWN_INDEX.md`.
 7. Open `/admin/it/`, `/admin/deployment-preflight/` and `/admin/reliability/`; confirm their active projections remain read-only and distinguish implementation acceptance from the verified restart checkpoint.
 8. Confirm the canonical Pages project is `devilndove-site`; Development is the `dev` Preview environment and Production is the `main` Production environment.
@@ -56,9 +56,9 @@ Build 32 remains Production GREEN at `main` `816490a9f36ffc2a730d8149549e5a2fbd6
 16. External AI/provider execution, rendering, publication, social handoff and R2 writes remain closed unless a future separately approved controlled workflow explicitly opens them.
 17. Promote only a separately reviewed exact fully-green Development tree. Never overwrite Production business data from Development.
 
-## Current Build 51 boundary
+## Current Build 52 boundary
 
-Build 51 makes active Content Studio mutation routes call the explicit read-only schema-readiness authority directly. `scripts/current_content_studio_schema_readiness_gate.py` rejects use of the ambiguous legacy ensure alias and rejects request-time DDL on those active routes. Build 51 adds no schema migration and authorizes no renderer, provider execution, publication, social queueing, R2 mutation, `main` mutation or Production promotion.
+Build 52 adds GET-only fail-closed Content Studio render readiness. The active `ready_for_render` transition requires approved project/deliverable state, selected public-cleared planned sources, review-first/no-auto-publish policy, applicable video script/target duration, no existing output and no active planned/rendering job. The protected route creates no render job and invokes no provider. `scripts/current_content_render_readiness_gate.py` prevents bypass regressions. Build 52 adds no schema migration and authorizes no renderer/provider execution, publication, social queue expansion, R2 mutation, `main` mutation or Production promotion.
 
 ## Canonical Development connection
 
@@ -78,6 +78,6 @@ Credential values must never be printed, committed or serialized into evidence.
 
 ## Current vs historical authority
 
-Build 51 is the current accepted implementation; Build 50 is the last fully verified restart checkpoint during the Build 51 closure cycle. Build 50 retains the reviewed CAIP-to-Content-Studio handoff authority; Builds 48–45 retain Grey Hair acceptance/planning/synchronization/media authority; Builds 44–41 retain Packaging protections; Build 40 Product Social, Build 39 Product Numbering, Build 38 Accounting, Build 37 Deployment Preflight and Build 36 Reliability remain historical bounded authorities.
+Build 52 is the current accepted implementation; Build 51 is the last fully verified restart checkpoint during the Build 52 closure cycle. Build 51 retains explicit Content Studio schema-readiness authority; Build 50 retains the reviewed CAIP-to-Content-Studio handoff authority; Builds 48–45 retain Grey Hair acceptance/planning/synchronization/media authority; Builds 44–41 retain Packaging protections; Build 40 Product Social, Build 39 Product Numbering, Build 38 Accounting, Build 37 Deployment Preflight and Build 36 Reliability remain historical bounded authorities.
 
-The active I.T., Reliability and Deployment Preflight surfaces are read-only projections. Build 52 is not scoped until Build 51 final closure is externally proven.
+The active I.T., Reliability and Deployment Preflight surfaces are read-only projections. Build 53 is not scoped until Build 52 final closure is externally proven.
