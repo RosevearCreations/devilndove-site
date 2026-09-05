@@ -2,7 +2,15 @@
   "release": 467,
   "build": 54,
   "title": "Production Authority Synchronization",
-  "state": "DEVELOPMENT_GREEN_AUTHORITY_SYNC_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
+  "accepted_dev_sha": "9cb10fb3361455b33e7907c187de4d9432588705",
+  "accepted_dev_tree_sha": "71a28e315628aed4f8a8610be9b3c5eed7d6ea4a",
+  "acceptance": {
+    "system_gate_run": 33934329508,
+    "current_application_quality_run": 33934329486,
+    "it_admin_runtime_proof_run": 33934329585,
+    "branch_hygiene_run": 33934329539
+  },
   "scope": "Record the externally verified Build 53 final Development closure and deliberate Build 53 Production promotion without changing application runtime behavior.",
   "source_base": {
     "build": 53,
