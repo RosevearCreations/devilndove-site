@@ -1,6 +1,8 @@
 import { createSchemaSafeD1 } from './schemaSafeD1.js';
 
 // Shared accounting shadow helpers for order-linked bookkeeping records.
+// Release 467 Build 38: accounting_order_records is part of the proven baseline.
+// Runtime requests only assert its shape; they never create or repair schema.
 
 function normalizeText(value) {
   return String(value || '').trim();
@@ -10,40 +12,67 @@ function normalizeResults(result) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
+const ACCOUNTING_ORDER_RECORD_COLUMNS = Object.freeze([
+  'accounting_order_record_id',
+  'order_id',
+  'order_number',
+  'entry_status',
+  'customer_name',
+  'customer_email',
+  'currency',
+  'subtotal_cents',
+  'discount_cents',
+  'shipping_cents',
+  'tax_cents',
+  'total_cents',
+  'amount_paid_cents',
+  'amount_outstanding_cents',
+  'revenue_cents',
+  'tax_liability_cents',
+  'source_order_status',
+  'source_payment_status',
+  'notes',
+  'created_at',
+  'updated_at',
+  'last_synced_at',
+]);
+
+const ACCOUNTING_ORDER_RECORD_INDEXES = Object.freeze([
+  'idx_accounting_order_records_status',
+  'idx_accounting_order_records_customer_email',
+]);
+
 export function getDb(env) {
   return createSchemaSafeD1(env.DB || env.DD_DB);
 }
 
+async function accountingOrderRecordColumns(db) {
+  const result = await db.prepare('PRAGMA table_info(accounting_order_records)').all();
+  return new Set(normalizeResults(result).map((row) => normalizeText(row?.name)).filter(Boolean));
+}
+
+async function accountingOrderRecordIndexes(db) {
+  const result = await db.prepare('PRAGMA index_list(accounting_order_records)').all();
+  return new Set(normalizeResults(result).map((row) => normalizeText(row?.name)).filter(Boolean));
+}
+
 export async function ensureAccountingSchema(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS accounting_order_records (
-      accounting_order_record_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id INTEGER NOT NULL UNIQUE,
-      order_number TEXT NOT NULL,
-      entry_status TEXT NOT NULL DEFAULT 'open' CHECK (entry_status IN ('open','partially_paid','paid','refunded','cancelled','archived')),
-      customer_name TEXT,
-      customer_email TEXT,
-      currency TEXT NOT NULL DEFAULT 'CAD',
-      subtotal_cents INTEGER NOT NULL DEFAULT 0,
-      discount_cents INTEGER NOT NULL DEFAULT 0,
-      shipping_cents INTEGER NOT NULL DEFAULT 0,
-      tax_cents INTEGER NOT NULL DEFAULT 0,
-      total_cents INTEGER NOT NULL DEFAULT 0,
-      amount_paid_cents INTEGER NOT NULL DEFAULT 0,
-      amount_outstanding_cents INTEGER NOT NULL DEFAULT 0,
-      revenue_cents INTEGER NOT NULL DEFAULT 0,
-      tax_liability_cents INTEGER NOT NULL DEFAULT 0,
-      source_order_status TEXT,
-      source_payment_status TEXT,
-      notes TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      last_synced_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
-    )
-  `).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_order_records_status ON accounting_order_records(entry_status, created_at DESC)`).run();
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_accounting_order_records_customer_email ON accounting_order_records(customer_email, created_at DESC)`).run();
+  const columns = await accountingOrderRecordColumns(db);
+  const missingColumns = ACCOUNTING_ORDER_RECORD_COLUMNS.filter((name) => !columns.has(name));
+  if (missingColumns.length) {
+    const error = new Error(`Accounting baseline schema is not ready: accounting_order_records is missing ${missingColumns.join(', ')}. Repair only through canonical migration authority.`);
+    error.code = 'accounting_baseline_schema_not_ready';
+    throw error;
+  }
+
+  const indexes = await accountingOrderRecordIndexes(db);
+  const missingIndexes = ACCOUNTING_ORDER_RECORD_INDEXES.filter((name) => !indexes.has(name));
+  if (missingIndexes.length) {
+    const error = new Error(`Accounting baseline schema is not ready: accounting_order_records is missing index ${missingIndexes.join(', ')}. Repair only through canonical migration authority.`);
+    error.code = 'accounting_baseline_schema_not_ready';
+    throw error;
+  }
+  return true;
 }
 
 function deriveEntryStatus(orderStatus, paymentStatus, totalCents, netPaidCents) {

@@ -1,64 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width,initial-scale=1" name="viewport"/>
-  <title>Deployment Preflight — Devil n Dove Admin</title>
-  <meta content="Run D1 migration safety, schema diff, one-H1, CSS, JSON, schema.org, image-alt, canonical, release-manifest, and local SEO preflight checks before deploying Devil n Dove." name="description"/>
-  <meta name="robots" content="noindex,nofollow"/>
-  <link href="/css/styles.css" rel="stylesheet"/>
-  <link href="/assets/mark.png" rel="icon" type="image/png"/>
-</head>
-<body>
-  <div class="container admin-shell">
-    <div class="nav">
-      <div class="brand">
-        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
-        <div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Deployment Preflight</div></div>
-      </div>
-      <div class="links"><a href="/admin/prelaunch/">Process Map</a><a href="/admin/startup-readiness/">Blockers</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout="" type="button">Logout</button></div>
-    </div>
-
-    <div class="hero">
-      <div>
-        <h1>Deployment Preflight</h1>
-        <p>Check the live build for D1 migration ledger safety, schema drift, public page H1/title/meta/canonical/schema.org/image-alt health, CSS drift, static JSON fallbacks, release manifests, and local-search wording before pushing or swapping branches.</p>
-      </div>
-    </div>
-
-    <div class="admin-department-links card">
-      <a class="btn" href="/admin/">Dashboard</a>
-      <a class="btn" href="/admin/operations/">Operations</a>
-      <a class="btn" href="/admin/safe-deploy-package/">Safe Deploy Package</a>
-      <a class="btn" href="/admin/release-notes/">Release Notes</a>
-      <a class="btn" href="/admin/post-deploy-smoke-tests/">Smoke Tests</a>
-      <a class="btn" href="/admin/release-control/">Release Control</a>
-    </div>
-
-    <div class="card" id="deploymentPreflightMount" style="margin-top:18px">
-      <h2 style="margin-top:0">Preflight checks</h2>
-      <p class="small">Use this page before deploy and after D1 schema changes. It does not run destructive changes.</p>
-      <div class="small" id="deploymentPreflightMessage">Waiting for admin session…</div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
-        <button class="btn" id="runDeploymentPreflightButton" type="button">Run Preflight</button>
-        <button class="btn secondary" id="saveDeploymentPreflightButton" type="button">Save Snapshot</button>
-        <button class="btn secondary" id="exportDeploymentPreflightButton" type="button">Export Markdown</button>
-      </div>
-      <div id="deploymentPreflightSummary" style="margin-top:14px"></div>
-      <div id="deploymentPreflightChecks" style="margin-top:14px"></div>
-      <div id="deploymentPreflightDetails" style="margin-top:14px"></div>
-      <div id="deploymentPostDeployConfirmations" style="margin-top:14px"></div>
-      <div id="deploymentPreflightRuns" style="margin-top:14px"></div>
-    </div>
-
-    <div class="footer card" style="margin-top:18px"></div>
-  </div>
-  <script src="/js/main.js?v=440"></script>
-  <script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script>
-  <script src="/public/js/site-auth-ui.js?v=440"></script>
-  <script src="/public/js/site-analytics.js?v=440"></script>
-  <script src="/public/js/admin-self-protect.js?v=440"></script>
-  <script src="/public/js/admin-deployment-preflight.js"></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><title>Deployment Preflight — Devil n Dove Admin</title><meta name="description" content="Read-only Devil n Dove deployment preflight for canonical D1 migration evidence, schema integrity, runtime health, SEO, release provenance and Production safety."/><link href="/css/styles.css?v=467" rel="stylesheet"/><link href="/assets/mark.png" rel="icon" type="image/png"/></head>
+<body><div class="container admin-shell"><div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Deployment Preflight • Release 467</div></div></div><div class="links"><a href="/admin/it/">I.T.</a><a href="/admin/release-control/">Release Control</a><a href="/admin/reliability/">Reliability</a><a href="/admin/">Admin</a><button class="btn" data-nav-logout type="button">Logout</button></div></div>
+<div class="hero"><div><h1>Deployment Preflight</h1><p>Current Release 467 Build 53 read-only preflight for canonical D1 migration proof, foreign-key integrity, schema visibility, restart integrity, public/admin quality, D1/R2 health and release safety.</p></div></div>
+<div class="card" style="margin-top:18px"><strong>Release 467 Build 53 — current read-only authority:</strong> Build 53 implementation acceptance is <code>4ba42dba64c4d1ca46cd145add24128ab3f17be4</code> / tree <code>2fed089e03b4c545aaa330e7767a8e9a127dc58d</code> with System <code>33933835769</code>, Quality <code>33933835712</code>, I.T. <code>33933835781</code> and Hygiene <code>33933835787</code> successful plus exact Preview acceptance. The last fully verified restart checkpoint is Build 52 at <code>33ead64048edf0b089b49c4a02783f468dc806a5</code> / tree <code>8c25dfedc31bd27cb7b79429c15b669830e176f8</code> with System <code>33933307193</code>, Quality <code>33933307182</code>, I.T. <code>33933307188</code> and Hygiene <code>33933307190</code>. Forward D1 schema authority remains only <code>migrations/canonical/manifest.json</code> applied through <code>scripts/d1_migrate.py</code>; the stream remains exactly <code>0001</code>–<code>0004</code>. Build 53 closes the generated-deliverable review-state bypass; <code>ready_for_render</code> remains reserved for Build 52's fail-closed explicit transition. No render job/provider/publication/social/R2/<code>main</code>/Production execution is opened. Release 467 Build 37 remains the historical feature authority that converged this workspace.</div>
+<div class="admin-department-links card" style="margin-top:18px"><a class="btn" href="/admin/it/">I.T. Control Tower</a><a class="btn" href="/admin/reliability/">Reliability</a><a class="btn" href="/admin/release-control/">Release Control</a><a class="btn" href="/admin/post-deploy-smoke-tests/">Smoke Tests</a><a class="btn" href="/admin/safe-deploy-package/">Safe Deploy Package</a></div>
+<section class="card" style="margin-top:18px"><h2 style="margin-top:0">Run current preflight</h2><p class="small">The active endpoint is GET-only. Historical snapshots and confirmations remain visible when present, but Build 53 does not mutate them.</p><div class="small" id="deploymentPreflightMessage">Waiting for admin session…</div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px"><button class="btn" id="runDeploymentPreflightButton" type="button">Run Preflight</button><button class="btn secondary" id="exportDeploymentPreflightButton" type="button">Export Markdown</button></div></section>
+<main id="deploymentPreflightMount" aria-live="polite"><section class="card" style="margin-top:18px"><p class="small">Loading current Deployment Preflight…</p></section></main><div class="footer card" style="margin-top:18px"></div></div>
+<script src="/js/main.js?v=467"></script><script src="/public/js/auth.js?v=467"></script><script src="/public/js/admin-route-usage.js?v=467"></script><script src="/public/js/site-auth-ui.js?v=467"></script><script src="/public/js/admin-self-protect.js?v=467"></script><script src="/public/js/admin-current-deployment-preflight.js?v=467b53"></script></body></html>

@@ -270,7 +270,7 @@ function deliverableSpecs(project, facts, assets) {
   const approved = assets.filter((asset) => asset.is_selected && asset.safety_status !== 'blocked');
   const usable = approved.length ? approved : assets.filter((asset) => asset.safety_status !== 'blocked');
   const hasPublicCleared = usable.some((asset) => asset.safety_status === 'public_allowed');
-  const baseStatus = usable.length ? (hasPublicCleared ? 'ready_for_render' : 'needs_media_review') : 'needs_media_review';
+  const baseStatus = usable.length && usable.every((asset) => asset.safety_status === 'public_allowed') ? 'ready_for_review' : 'needs_media_review';
   const items = [];
 
   items.push({

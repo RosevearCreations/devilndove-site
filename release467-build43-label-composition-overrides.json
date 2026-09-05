@@ -1,0 +1,72 @@
+{
+  "release": 467,
+  "build": 43,
+  "title": "Label Composition & Overrides",
+  "state": "DEVELOPMENT_GREEN",
+  "source_branch": "dev",
+  "source_base_sha": "0fa8c2d49457ecb9f4b478f660ceea05a4f71ee4",
+  "source_base_tree_sha": "cda2f8d71dd9191f303e55f7f21d4caa1e48cd75",
+  "accepted_dev_sha": "41d3bc9ba849b5b0a646d002aa72593368444fcc",
+  "accepted_dev_tree_sha": "2891a0d7591cbe72acc6f94ec6bec69b2ae13a7f",
+  "scope": [
+    "Per-label ingredient decisions: inherit material policy, print on this label, or omit from this label",
+    "Explicit project-level label decisions persisted in existing packaging_projects.artwork_json without mutating reusable source templates",
+    "Required inherited ingredients fail closed against omission and Internal Only ingredients cannot be forced to print",
+    "Live What Will Print inspector covering identity, ingredient composition, claims, warnings, net quantity, dealer/contact data and artwork visibility",
+    "Authoritative D1 read-back after label composition saves with native Packaging ingredient controls converged to the saved effective result",
+    "Build 42 Material Template Intelligence normalization preserves reviewed Build 43 project-level overrides",
+    "Forward Current Application Quality regression protection for the zero-schema composition boundary"
+  ],
+  "build44_boundary": "Printer profiles, true-size production output, versioned label libraries and Label QA history remain Build 44 authority.",
+  "data_authority": {
+    "schema_change": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4,
+    "request_time_ddl": false,
+    "reusable_material_policy_authority": "packaging_source_material_templates.master_inci_json",
+    "project_override_storage": "packaging_projects.artwork_json.label_composition_overrides",
+    "effective_project_print_flag": "packaging_project_ingredients.required_on_label",
+    "composition_readback_endpoint": "/api/admin/packaging-label-composition"
+  },
+  "acceptance": {
+    "system_gate_run": 33898520091,
+    "current_application_quality_run": 33898520539,
+    "it_admin_runtime_proof_run": 33898520189,
+    "branch_hygiene_run": 33898520069
+  },
+  "deployment_acceptance": {
+    "canonical_development_migration_proof": true,
+    "development_data_authority_read_only_proof": true,
+    "exact_preview_deployment": true,
+    "preview_binding_proof": true,
+    "preview_smoke_acceptance": true,
+    "current_regression_evidence": true
+  },
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "state": "PRODUCTION_GREEN"
+  },
+  "safety": {
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "cloudflare_access_mutation": false,
+    "main_mutation": false,
+    "production_mutation": false,
+    "automatic_production_promotion": false,
+    "secret_values_emitted": false
+  },
+  "external_lanes": [
+    "Stripe Development HOLD",
+    "PayPal sandbox HOLD",
+    "CAIP private-media HOLD unless current evidence proves acceptance",
+    "social OAuth HOLD",
+    "Cloudflare Access service-token HOLD"
+  ],
+  "next_build": 44,
+  "next_build_title": "Label Production & Reuse",
+  "next_build_rule": "Begin only after the Build 43 authority-only descendant independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene on its exact merged dev SHA.",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
+}

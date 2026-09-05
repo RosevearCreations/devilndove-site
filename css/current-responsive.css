@@ -33,3 +33,73 @@ pre,code{overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Build 41 — Packaging Studio responsive workspace convergence. */
+body[data-admin-page="packaging-studio"] .packaging-studio-page{width:min(100%,1720px);max-width:1720px}
+body[data-admin-page="packaging-studio"] .packaging-editor-card,
+body[data-admin-page="packaging-studio"] .packaging-studio-main,
+body[data-admin-page="packaging-studio"] .packaging-tab-panel{min-width:0}
+body[data-admin-page="packaging-studio"] .packaging-tab-list{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
+body[data-admin-page="packaging-studio"] .packaging-tab{white-space:nowrap}
+body[data-admin-page="packaging-studio"] .packaging-svg-preview{max-width:100%;overflow:auto}
+body[data-admin-page="packaging-studio"] .packaging-safe-area-status{display:grid;gap:6px;margin-top:12px;padding:12px 14px;border:1px solid currentColor;border-radius:10px}
+body[data-admin-page="packaging-studio"] .packaging-safe-area-status[data-state="safe"]{opacity:.92}
+body[data-admin-page="packaging-studio"] .packaging-safe-area-status[data-state="blocked"]{font-weight:600}
+body[data-admin-page="packaging-studio"] .packaging-safe-area-status span,
+body[data-admin-page="packaging-studio"] .packaging-safe-area-status li{font-weight:400}
+
+@media(max-width:390px){
+  body[data-admin-page="packaging-studio"] .packaging-studio-hero,
+  body[data-admin-page="packaging-studio"] .packaging-studio-layout,
+  body[data-admin-page="packaging-studio"] .packaging-reference-source-grid,
+  body[data-admin-page="packaging-studio"] .packaging-system-placeholder-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+  body[data-admin-page="packaging-studio"] .packaging-project-sidebar{position:static!important;top:auto!important}
+  body[data-admin-page="packaging-studio"] .packaging-project-list{max-height:42vh}
+  body[data-admin-page="packaging-studio"] .packaging-hero-actions,
+  body[data-admin-page="packaging-studio"] .packaging-project-actions,
+  body[data-admin-page="packaging-studio"] .packaging-save-actions,
+  body[data-admin-page="packaging-studio"] .packaging-export-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%}
+  body[data-admin-page="packaging-studio"] .packaging-hero-actions>.btn,
+  body[data-admin-page="packaging-studio"] .packaging-project-actions>.btn,
+  body[data-admin-page="packaging-studio"] .packaging-save-actions>.btn,
+  body[data-admin-page="packaging-studio"] .packaging-export-actions>.btn{width:100%;justify-content:center}
+  body[data-admin-page="packaging-studio"] .packaging-tab-panel .grid{grid-template-columns:minmax(0,1fr)!important}
+  body[data-admin-page="packaging-studio"] .section-heading-row{align-items:flex-start;flex-direction:column}
+}
+
+@media(min-width:391px) and (max-width:767px){
+  body[data-admin-page="packaging-studio"] .packaging-studio-hero,
+  body[data-admin-page="packaging-studio"] .packaging-studio-layout{grid-template-columns:minmax(0,1fr)!important}
+  body[data-admin-page="packaging-studio"] .packaging-project-sidebar{position:static!important;top:auto!important}
+  body[data-admin-page="packaging-studio"] .packaging-project-list{max-height:44vh}
+  body[data-admin-page="packaging-studio"] .packaging-tab-panel .grid{grid-template-columns:minmax(0,1fr)!important}
+}
+
+@media(min-width:768px) and (max-width:1023px){
+  body[data-admin-page="packaging-studio"] .packaging-studio-hero{grid-template-columns:minmax(0,1.15fr) minmax(240px,.85fr)!important}
+  body[data-admin-page="packaging-studio"] .packaging-studio-layout{grid-template-columns:minmax(0,1fr)!important}
+  body[data-admin-page="packaging-studio"] .packaging-project-sidebar{position:static!important;top:auto!important}
+  body[data-admin-page="packaging-studio"] .packaging-project-list{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);grid-template-columns:none;max-height:none;overflow-x:auto;overflow-y:hidden;padding-bottom:6px}
+  body[data-admin-page="packaging-studio"] .packaging-tab-panel .grid.cols-3,
+  body[data-admin-page="packaging-studio"] .packaging-tab-panel .grid.cols-4,
+  body[data-admin-page="packaging-studio"] .packaging-tab-panel .grid.cols-5{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+@media(min-width:1024px) and (max-width:1279px){
+  body[data-admin-page="packaging-studio"] .packaging-studio-layout{grid-template-columns:minmax(230px,250px) minmax(0,1fr)!important;gap:16px}
+  body[data-admin-page="packaging-studio"] .packaging-project-sidebar{position:sticky;top:14px}
+  body[data-admin-page="packaging-studio"] .packaging-tab-panel .grid.cols-4,
+  body[data-admin-page="packaging-studio"] .packaging-tab-panel .grid.cols-5{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+@media(min-width:1280px) and (max-width:1439px){
+  body[data-admin-page="packaging-studio"] .packaging-studio-layout{grid-template-columns:minmax(270px,300px) minmax(0,1fr)!important;gap:20px}
+  body[data-admin-page="packaging-studio"] .packaging-project-sidebar{position:sticky;top:14px}
+}
+
+@media(min-width:1440px){
+  body[data-admin-page="packaging-studio"] .packaging-studio-layout{grid-template-columns:minmax(300px,340px) minmax(0,1fr)!important;gap:24px}
+  body[data-admin-page="packaging-studio"] .packaging-project-sidebar{position:sticky;top:14px}
+  body[data-admin-page="packaging-studio"] .packaging-project-list{max-height:72vh}
+  body[data-admin-page="packaging-studio"] .packaging-editor-card{padding-inline:24px}
+}

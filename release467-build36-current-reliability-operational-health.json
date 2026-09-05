@@ -1,0 +1,59 @@
+{
+  "release": 467,
+  "build": 36,
+  "title": "Current Reliability & Operational Health Truth Convergence",
+  "state": "DEVELOPMENT_GREEN",
+  "source_base_sha": "1ec4eae64201ae4362dd08a1a5118c7b64bcff93",
+  "source_base_tree_sha": "4b44b12c5b11c6c87de64625c973f2128164f9a6",
+  "accepted_dev_sha": "22b1efbf48b67f91024d277566ce51ac1263c970",
+  "accepted_dev_tree_sha": "bb020637765dd21b262a5007162141bf03bd658c",
+  "acceptance": {
+    "system_gate_run": 33875163710,
+    "current_application_quality_run": 33875163581,
+    "it_admin_runtime_proof_run": 33875163703,
+    "branch_hygiene_run": 33875163813
+  },
+  "build35_final_closure": {
+    "dev_sha": "1ec4eae64201ae4362dd08a1a5118c7b64bcff93",
+    "tree_sha": "4b44b12c5b11c6c87de64625c973f2128164f9a6",
+    "system_gate_run": 33874448734,
+    "current_application_quality_run": 33874448739,
+    "it_admin_runtime_proof_run": 33874448775,
+    "branch_hygiene_run": 33874448774,
+    "state": "DEVELOPMENT_GREEN"
+  },
+  "production_baseline": {
+    "build": 32,
+    "authority": "release467-build32-help-search-responsive-convergence.json",
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "active_reliability_surface_release467": true,
+    "active_reliability_endpoint_current": true,
+    "active_reliability_client_current": true,
+    "historical_release466_reliability_preserved": true,
+    "historical_release466_engine_role_explicit": true,
+    "current_release_authority_exposed": true,
+    "four_proof_production_promotion_exposed": true,
+    "release_neutral_read_only_rollback_exposed": true,
+    "current_reliability_truth_guard_added": true,
+    "current_application_quality_covers_reliability_truth": true,
+    "reliability_page_exactly_one_h1": true
+  },
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "rollback_execution_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  }
+}

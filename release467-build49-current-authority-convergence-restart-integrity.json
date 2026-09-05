@@ -1,0 +1,118 @@
+{
+  "release": 467,
+  "build": 49,
+  "title": "Current Authority Convergence & Restart Integrity",
+  "state": "DEVELOPMENT_GREEN",
+  "source_branch": "dev",
+  "source_base_sha": "3980661045c68f55fa64e66e6414055ee0d359f6",
+  "source_base_tree_sha": "66e5e0a088d6eb9f4f85f70791de8925ac40adb0",
+  "accepted_dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
+  "accepted_dev_tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
+  "acceptance": {
+    "system_gate_run": 33928678750,
+    "current_application_quality_run": 33928678778,
+    "it_admin_runtime_proof_run": 33928678807,
+    "branch_hygiene_run": 33928678789
+  },
+  "deployment_acceptance": {
+    "canonical_development_migration_proof": true,
+    "development_data_authority_read_only_proof": true,
+    "exact_preview_deployment": true,
+    "preview_binding_proof": true,
+    "preview_smoke_acceptance": true,
+    "current_regression_evidence": true
+  },
+  "final_closure": {
+    "dev_sha": "28307cd8939329db05dab61c336d0c7a49f8759e",
+    "tree_sha": "0120c5ca4ccaabb00f3f4ef6f685ae0f8fabcaf7",
+    "proofs": {
+      "system_gate_run": 33929301077,
+      "current_application_quality_run": 33929301018,
+      "it_admin_runtime_proof_run": 33929301051,
+      "branch_hygiene_run": 33929300999
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "recorded_by_next_build": 50
+  },
+  "scope": [
+    "Separate implementation acceptance from the later exact-dev final closure checkpoint",
+    "Ingest the externally proven final Build 48 closure without creating an evidence-only self-referential commit loop",
+    "Add a release-neutral restart-integrity gate to Current Application Quality",
+    "Synchronize machine authority, restart Markdown, I.T., Reliability and Deployment Preflight around one restart protocol",
+    "Require exact current-dev System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene proof before a newer closure candidate becomes restart authority",
+    "Require the next build to ingest the preceding build's externally verified final closure before source mutation begins"
+  ],
+  "restart_integrity": {
+    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+    "implementation_acceptance_is_distinct_from_final_closure": true,
+    "last_fully_verified_before_build49_closure": {
+      "release": 467,
+      "build": 48,
+      "dev_sha": "3980661045c68f55fa64e66e6414055ee0d359f6",
+      "tree_sha": "66e5e0a088d6eb9f4f85f70791de8925ac40adb0",
+      "proofs": {
+        "system_gate_run": 33925647553,
+        "current_application_quality_run": 33925647532,
+        "it_admin_runtime_proof_run": 33925647561,
+        "branch_hygiene_run": 33925647559
+      }
+    },
+    "build49_implementation_checkpoint": {
+      "dev_sha": "7bbfbf10a531898052771d9db1cfbb1a9e7d893a",
+      "tree_sha": "7a74af809182a0eb6befb56e34d2869b44090c6e",
+      "proofs": {
+        "system_gate_run": 33928678750,
+        "current_application_quality_run": 33928678778,
+        "it_admin_runtime_proof_run": 33928678807,
+        "branch_hygiene_run": 33928678789
+      },
+      "exact_preview_deployment": true
+    },
+    "closure_candidate_must_not_self_claim_final_proof": true,
+    "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE",
+    "next_build_ingests_previous_final_closure": true
+  },
+  "data_authority": {
+    "schema_change": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4,
+    "request_time_ddl": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false
+  },
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "safety": {
+    "read_only_authority_convergence": true,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "media_rendering": false,
+    "provider_publication": false,
+    "social_handoff": false,
+    "cloudflare_access_mutation": false,
+    "main_mutation": false,
+    "production_mutation": false,
+    "automatic_production_promotion": false,
+    "secret_values_emitted": false
+  },
+  "external_lanes": [
+    "Stripe Development HOLD",
+    "PayPal sandbox HOLD",
+    "CAIP private-media evidence-dependent HOLD",
+    "social OAuth HOLD",
+    "Cloudflare Access service-token HOLD"
+  ],
+  "next_build": 50,
+  "next_build_state": "BUILD50_IN_PROGRESS_AFTER_VERIFIED_FINAL_CLOSURE",
+  "next_build_title": "Reviewed CAIP to Content Studio Handoff",
+  "next_build_rule": "Build 50 ingested this externally verified Build 49 final closure before source mutation. Future builds continue the same protocol: verify the preceding exact closure head externally, then ingest it in the following build without evidence-only self-referential commits.",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
+}

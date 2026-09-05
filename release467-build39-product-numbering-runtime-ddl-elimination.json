@@ -1,0 +1,78 @@
+{
+  "release": 467,
+  "build": 39,
+  "title": "Product Numbering Runtime-DDL Elimination & Sequence Safety Convergence",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "source_base_sha": "cc26b34ca31ec3e142149bd30f8eadd7dea7a112",
+  "source_base_tree_sha": "b4943a502d44d2e2bf2b113210326fe59409fd10",
+  "accepted_dev_sha": "8f94a6b49b6353946d96afbe2c7eb0b5ce6ca6b1",
+  "accepted_dev_tree_sha": "1dba2f02509e7fe0c7046541f126f80aa5170d8b",
+  "historical_schema_provenance": {
+    "authority": "Build 195 product lifecycle",
+    "table": "catalog_product_number_sequence",
+    "role": "PROVEN_PRE_CANONICAL_BASELINE",
+    "forward_migration_required": false
+  },
+  "scope": {
+    "product_number_sequence_baseline_assertion": true,
+    "runtime_product_numbering_schema_ddl_removed": true,
+    "required_sequence_columns": 3,
+    "required_sequence_column_names": ["sequence_key", "next_product_number", "updated_at"],
+    "desktop_product_creation_allocation_preserved": true,
+    "mobile_product_creation_allocation_preserved": true,
+    "custom_product_number_sequence_floor_preserved": true,
+    "missing_sequence_schema_fails_closed": true,
+    "runtime_schema_residue_files_ceiling_before": 60,
+    "runtime_schema_residue_occurrences_ceiling_before": 526,
+    "runtime_schema_residue_shared_helpers_ceiling_before": 4,
+    "runtime_schema_residue_files_ceiling_after": 59,
+    "runtime_schema_residue_occurrences_ceiling_after": 525,
+    "runtime_schema_residue_shared_helpers_ceiling_after": 3,
+    "raw_d1_bypass_with_ddl_ceiling": 0,
+    "canonical_migration_stream_unchanged": true,
+    "canonical_migration_count": 4
+  },
+  "quality_contract": {
+    "runtime_schema_gate": "scripts/runtime_schema_mutation_gate.py",
+    "product_numbering_gate": "scripts/current_product_numbering_schema_authority_gate.py",
+    "current_application_quality_gate": "scripts/current_application_quality_gate.py",
+    "sequence_helper": "functions/api/admin/_product-numbering.js",
+    "desktop_create_route": "functions/api/admin/create-product.js",
+    "mobile_create_route": "functions/api/admin/mobile-create-product.js"
+  },
+  "acceptance": {
+    "system_gate_run": 33883587705,
+    "current_application_quality_run": 33883587677,
+    "it_admin_runtime_proof_run": 33883587724,
+    "branch_hygiene_run": 33883587669
+  },
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "caip_private_media": "HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE",
+    "social_oauth": "HOLD_EXTERNAL",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "rollback_execution_authorized": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  },
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION"
+}

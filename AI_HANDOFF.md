@@ -1,29 +1,35 @@
 # Devil n Dove — AI Handoff
 
-## Current authority
+## Current Development authority
 
-**Release 467 Build 32 — Help, Search & Responsive Convergence is Development GREEN.**
+Release 467 Build 53 — **Generated Deliverable Review-State Convergence** has GREEN implementation acceptance:
+- `dev` SHA `4ba42dba64c4d1ca46cd145add24128ab3f17be4`
+- tree `2fed089e03b4c545aaa330e7767a8e9a127dc58d`
+- System Gate `33933835769` SUCCESS
+- Current Application Quality `33933835712` SUCCESS
+- I.T. Admin Runtime Proof `33933835781` SUCCESS
+- Repository Branch Hygiene `33933835787` SUCCESS
+- exact Development Preview deployment, canonical D1 migration proof, Development data-authority read-only proof, bindings, smoke and regression evidence: SUCCESS.
 
-Accepted application runtime: `1b68fed65844938bcee38169bfe7d783abd160d4` / tree `8c76339af56304651c9e81c70bdceea14393ffff`.
-Accepted proof: System Gate `33827496687`, Current Application Quality `33827496693`, I.T. Admin Runtime Proof `33827496691`, Repository Branch Hygiene `33827496696` — all SUCCESS on that exact Development SHA.
+Build 53 closes the creation-time review-state bypass. Generated video deliverables now originate as `ready_for_review` only when every usable source is public-cleared; otherwise they originate as `needs_media_review`. `ready_for_render` is reserved for Build 52's fail-closed explicit transition. No render job or provider execution is created by Build 53.
 
-Build 32 operating boundary:
-- Online Help Centre is current and release-neutral; internal Help remains `noindex,nofollow`
-- stale/duplicate active files and retired legacy calibration surfaces are removed from the active application
-- `/search/` is `noindex,follow`
-- sitemap policy is canonical-only and excludes the empty generic product shell
-- public pages enforce exactly one H1 in source with a runtime backstop
-- responsive safeguards cover phone, tablet, PC/app and wide-web layouts
-- password-hash security compatibility remains protected
-- schema change: none; canonical migrations remain `0001`–`0004`
-- D1/R2/provider/Cloudflare Access mutation: none
+## Last fully verified restart checkpoint
 
-## Promotion and restart rule
+Build 52 — **Content Studio Render Readiness / Explicit Execution Boundary** is the last externally verified exact-branch-head restart checkpoint:
+- `dev` SHA `33ead64048edf0b089b49c4a02783f468dc806a5`
+- tree `8c25dfedc31bd27cb7b79429c15b669830e176f8`
+- System Gate `33933307193` SUCCESS
+- Current Application Quality `33933307182` SUCCESS
+- I.T. Admin Runtime Proof `33933307188` SUCCESS
+- Repository Branch Hygiene `33933307190` SUCCESS
+- exact Development Preview acceptance: SUCCESS.
 
-Do **not** freeze a Production SHA in this handoff. Before starting the next build, verify from current GitHub/CI evidence that `main` carries the exact fully-green Build 32 Development closure tree and that Production has independently passed its exact-source deployment/system proof. If either condition is not true, finish Build 32 promotion/verification first.
+Build 53 becomes the next restart checkpoint only after its authority closure merges and that exact `dev` head independently passes the same four external proofs and exact Preview acceptance. Build 54 must then ingest that externally verified final closure before source mutation.
 
-The final Development closure commit must itself have a successful push-triggered System Gate; Production promotion must fail closed when that exact-commit proof is absent.
+## Safety and restart rules
 
-External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access HOLD lanes remain deferred unless current evidence explicitly proves acceptance.
+Production remains Release 467 Build 32 at `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, tree `2c1b4a3694779996e1bdb094be5e9e043834276e`, Production Pages Deploy `33866964958` SUCCESS. Do not touch `main` or Production without deliberate promotion authority.
 
-After Build 32 is proven GREEN in Production, select Build 33 from current repository evidence; do not reopen completed Build 31/32 work.
+Canonical D1 migrations remain exactly `0001`–`0004`; Build 53 adds no schema migration. Render-job creation, renderer/provider execution, publication, social queue expansion and R2 mutation remain closed. Stripe Development, PayPal sandbox, CAIP private-media evidence, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes.
+
+Build 54 is not scoped. Do not start it until the exact Build 53 closure head is externally proven and then ingested under `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1`.

@@ -1,0 +1,64 @@
+{
+  "release": 467,
+  "build": 35,
+  "title": "Production Promotion & Rollback Provenance Convergence",
+  "state": "DEVELOPMENT_GREEN",
+  "source_base_sha": "4cba824be269ce30b7a113e0033e7a91d7b6c5d4",
+  "source_base_tree_sha": "a2ed00510bf727c28a41193f66f0de8f76a60e6e",
+  "accepted_dev_sha": "b3fd1777c41f9b459048b441254f2fa762692051",
+  "accepted_dev_tree_sha": "c88d7e9fc3f43dcdd6d0e05cbe14c6cc7c3fc461",
+  "acceptance": {
+    "system_gate_run": 33873907300,
+    "current_application_quality_run": 33873908526,
+    "it_admin_runtime_proof_run": 33873907340,
+    "branch_hygiene_run": 33873907303
+  },
+  "build34_final_closure": {
+    "dev_sha": "4cba824be269ce30b7a113e0033e7a91d7b6c5d4",
+    "tree_sha": "a2ed00510bf727c28a41193f66f0de8f76a60e6e",
+    "system_gate_run": 33872544699,
+    "current_application_quality_run": 33872544674,
+    "it_admin_runtime_proof_run": 33872544686,
+    "branch_hygiene_run": 33872544646,
+    "state": "DEVELOPMENT_GREEN"
+  },
+  "production_baseline": {
+    "build": 32,
+    "authority": "release467-build32-help-search-responsive-convergence.json",
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "production_promotion_requires_four_development_proofs": true,
+    "production_promotion_resolves_current_development_authority": true,
+    "stale_release467_build1_production_authority_removed": true,
+    "production_control_plane_proof_records_current_authority": true,
+    "rollback_readiness_release_neutral": true,
+    "rollback_plan_release_neutral": true,
+    "production_promotion_rollback_provenance_guard_added": true,
+    "current_application_quality_covers_production_release_provenance": true,
+    "historical_schema_migration_authority_preserved": true
+  },
+  "required_development_proofs_for_production": [
+    "System Gate",
+    "Current Application Quality Proof",
+    "I.T. Admin Runtime Proof",
+    "Repository Branch Hygiene"
+  ],
+  "safety": {
+    "schema_change_authorized": false,
+    "d1_business_data_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "cloudflare_access_mutation_authorized": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false,
+    "production_deployment_executed_by_build35": false,
+    "rollback_executed_by_build35": false,
+    "automatic_production_promotion_authorized": false,
+    "secret_values_emitted": false
+  }
+}
