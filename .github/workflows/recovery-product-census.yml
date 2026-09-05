@@ -14,15 +14,17 @@ permissions:
 jobs:
   census:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CANDIDATES: devilndove-dev devilndove-prod devilndove-prod-r462 devilndove-prod-repl-20260823
+      LEGACY_CANDIDATES: devilndove-prod devilndove-prod-repl-20260823
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+
       - name: Census known D1 Product authorities read-only
         shell: bash
         env:
@@ -30,19 +32,55 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/product-recovery-census
-          npx --yes wrangler@4 d1 list --json > /tmp/product-recovery-census/d1-list.json
+          npx --yes wrangler@4.128.0 d1 list --json > /tmp/product-recovery-census/d1-list.json
+
           for db in ${CANDIDATES}; do
             safe="$(printf '%s' "$db" | tr -c 'A-Za-z0-9._-' '_')"
             echo "==== ${db} ===="
-            if npx --yes wrangler@4 d1 execute "$db" --remote --json --command "SELECT count(*) AS products FROM products; SELECT min(id) AS min_id,max(id) AS max_id FROM products; PRAGMA table_info(products); SELECT name,sql FROM sqlite_master WHERE type='table' AND (lower(name) LIKE '%product%' OR lower(name) LIKE '%image%' OR lower(name) LIKE '%media%' OR lower(name) LIKE '%movie%') ORDER BY name; SELECT * FROM products ORDER BY id;" > "/tmp/product-recovery-census/${safe}.json" 2> "/tmp/product-recovery-census/${safe}.stderr"; then
-              echo "${db}: OK"
+            npx --yes wrangler@4.128.0 d1 info "$db" --json > "/tmp/product-recovery-census/${safe}.info.json" 2> "/tmp/product-recovery-census/${safe}.info.stderr" || true
+            if npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "SELECT count(*) AS products FROM products; SELECT min(product_id) AS min_product_id,max(product_id) AS max_product_id FROM products; PRAGMA table_info(products); SELECT name,sql FROM sqlite_master WHERE type='table' AND (lower(name) LIKE '%product%' OR lower(name) LIKE '%image%' OR lower(name) LIKE '%media%' OR lower(name) LIKE '%movie%') ORDER BY name; SELECT * FROM products ORDER BY product_id;" > "/tmp/product-recovery-census/${safe}.json" 2> "/tmp/product-recovery-census/${safe}.stderr"; then
+              echo "${db}: PRODUCT_QUERY_OK"
             else
-              echo "${db}: QUERY_FAILED" | tee "/tmp/product-recovery-census/${safe}.status"
+              echo "${db}: PRODUCT_QUERY_FAILED" | tee "/tmp/product-recovery-census/${safe}.status"
             fi
           done
-          echo 'READ_ONLY=TRUE' > /tmp/product-recovery-census/boundary.txt
-          echo 'MUTATION=ZERO' >> /tmp/product-recovery-census/boundary.txt
+
+      - name: Probe legacy D1 Time Travel availability read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/product-recovery-census/time-travel
+          for db in ${LEGACY_CANDIDATES}; do
+            for ts in \
+              2026-08-22T00:00:00Z \
+              2026-08-20T00:00:00Z \
+              2026-08-15T00:00:00Z \
+              2026-08-10T00:00:00Z \
+              2026-08-06T00:00:00Z; do
+              key="$(printf '%s_%s' "$db" "$ts" | tr ':.' '__')"
+              if npx --yes wrangler@4.128.0 d1 time-travel info "$db" --timestamp="$ts" --json > "/tmp/product-recovery-census/time-travel/${key}.json" 2> "/tmp/product-recovery-census/time-travel/${key}.stderr"; then
+                echo "$db $ts: BOOKMARK_AVAILABLE" | tee "/tmp/product-recovery-census/time-travel/${key}.status"
+              else
+                echo "$db $ts: BOOKMARK_UNAVAILABLE" | tee "/tmp/product-recovery-census/time-travel/${key}.status"
+              fi
+            done
+          done
+
+      - name: Recovery boundary
+        shell: bash
+        run: |
+          {
+            echo 'READ_ONLY=TRUE'
+            echo 'D1_MUTATION=ZERO'
+            echo 'R2_MUTATION=ZERO'
+            echo 'TIME_TRAVEL_RESTORE=ZERO'
+            echo 'PRODUCTION_BUSINESS_MUTATION=ZERO'
+          } > /tmp/product-recovery-census/boundary.txt
+
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: product-recovery-census
           path: /tmp/product-recovery-census
