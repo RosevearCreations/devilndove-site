@@ -2,10 +2,18 @@
   "release": 467,
   "build": 53,
   "title": "Generated Deliverable Review-State Convergence",
-  "state": "IN_PROGRESS",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "source_base_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
   "source_base_tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
+  "accepted_dev_sha": "4ba42dba64c4d1ca46cd145add24128ab3f17be4",
+  "accepted_dev_tree_sha": "2fed089e03b4c545aaa330e7767a8e9a127dc58d",
+  "acceptance": {
+    "system_gate_run": 33933835769,
+    "current_application_quality_run": 33933835712,
+    "it_admin_runtime_proof_run": 33933835781,
+    "branch_hygiene_run": 33933835787
+  },
   "source_base": {
     "build": 52,
     "title": "Content Studio Render Readiness / Explicit Execution Boundary",
@@ -20,6 +28,24 @@
     "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
     "exact_preview_deployment": true,
     "authority": "release467-build52-content-studio-render-readiness.json"
+  },
+  "accepted_implementation": {
+    "dev_sha": "4ba42dba64c4d1ca46cd145add24128ab3f17be4",
+    "tree_sha": "2fed089e03b4c545aaa330e7767a8e9a127dc58d",
+    "proofs": {
+      "system_gate_run": 33933835769,
+      "current_application_quality_run": 33933835712,
+      "it_admin_runtime_proof_run": 33933835781,
+      "branch_hygiene_run": 33933835787
+    },
+    "deployment_acceptance": {
+      "canonical_development_migration_proof": true,
+      "development_data_authority_read_only_proof": true,
+      "exact_preview_deployment": true,
+      "preview_binding_proof": true,
+      "preview_smoke_acceptance": true,
+      "current_regression_evidence": true
+    }
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
@@ -57,8 +83,8 @@
     "production_pages_deploy_run": 33866964958,
     "state": "PRODUCTION_GREEN"
   },
-  "promotion_state": "DEVELOPMENT_ONLY",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "next_build": 54,
-  "next_build_state": "BLOCKED_UNTIL_BUILD_53_FINAL_CLOSURE_PROOF",
+  "next_build_state": "AWAITING_BUILD_53_FINAL_CLOSURE_PROOF",
   "next_build_title": null
 }
