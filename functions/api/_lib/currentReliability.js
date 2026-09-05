@@ -1,36 +1,36 @@
-// Release 467 Build 58 — current read-only reliability projection.
-// Build 58 exposes Build 57 as the last fully verified Development checkpoint while
-// account-administration JSON response hardening remains the current closure candidate.
+// Release 467 Build 59 — current read-only reliability projection.
+// Build 59 exposes Build 58 as the last fully verified Development checkpoint while
+// Storefront media availability / merchandising recovery remains the current closure candidate.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 58;
-export const CURRENT_RELIABILITY_TITLE = 'Account Administration JSON Response Hardening';
+export const CURRENT_RELIABILITY_BUILD = 59;
+export const CURRENT_RELIABILITY_TITLE = 'Storefront Media Availability & Merchandising Recovery';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 58,
+  build: 59,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
-  accepted_dev_tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
-  system_gate_run: 33967307608,
-  current_application_quality_run: 33967307714,
-  it_admin_runtime_proof_run: 33967307740,
-  branch_hygiene_run: 33967307653,
+  accepted_dev_sha: '91106c2156e209045ed49cfd48220550c7afca57',
+  accepted_dev_tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
+  system_gate_run: 33968914405,
+  current_application_quality_run: 33968914416,
+  it_admin_runtime_proof_run: 33968914417,
+  branch_hygiene_run: 33968914412,
   exact_preview_deployment: true,
-  role: 'ACCOUNT_ADMIN_JSON_HARDENING_CANDIDATE_BASE',
+  role: 'STOREFRONT_MEDIA_RECOVERY_CANDIDATE_BASE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 57,
-  title: 'Current Authority / Restart Truth Convergence',
-  dev_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
-  tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
-  system_gate_run: 33967307608,
-  current_application_quality_run: 33967307714,
-  it_admin_runtime_proof_run: 33967307740,
-  branch_hygiene_run: 33967307653,
+  build: 58,
+  title: 'Account Administration JSON Response Hardening',
+  dev_sha: '91106c2156e209045ed49cfd48220550c7afca57',
+  tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
+  system_gate_run: 33968914405,
+  current_application_quality_run: 33968914416,
+  it_admin_runtime_proof_run: 33968914417,
+  branch_hygiene_run: 33968914412,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 export const CURRENT_PRODUCTION = Object.freeze({
@@ -89,7 +89,8 @@ export async function loadCurrentReliability(db, env = {}) {
       build55_production_green: true,
       build56_product_photo_packaging_onboarding_development_green: true,
       build57_authority_restart_truth_convergence_development_green: true,
-      build58_account_administration_json_response_hardening_candidate: true,
+      build58_account_administration_json_response_hardening_development_green: true,
+      build59_storefront_media_availability_merchandising_recovery_candidate: true,
       production_baseline_build: 55,
     },
     safety: {
