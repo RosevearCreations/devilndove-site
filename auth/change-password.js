@@ -8,7 +8,7 @@ import {
 } from '../_lib/passwordHash.js';
 import { readUserById, resolveSessionUser, updateUserPasswordCompatible } from '../_lib/accountAuthCompat.js';
 
-function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "Content-Type":"application/json", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } }); }
+function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } }); }
 function compactError(error) { return String(error?.message || error || '').trim().replace(/\s+/g, ' ').slice(0, 300); }
 
 export async function onRequestPost(context) {
