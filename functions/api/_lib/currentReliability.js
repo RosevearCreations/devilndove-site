@@ -1,35 +1,35 @@
-// Release 467 Build 52 — current read-only reliability projection.
+// Release 467 Build 53 — current read-only reliability projection.
 // Implementation acceptance is distinct from the last externally verified closure.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 52;
-export const CURRENT_RELIABILITY_TITLE = 'Content Studio Render Readiness / Explicit Execution Boundary';
+export const CURRENT_RELIABILITY_BUILD = 53;
+export const CURRENT_RELIABILITY_TITLE = 'Generated Deliverable Review-State Convergence';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 52,
+  build: 53,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: '24f66983bf052280f62d0983f27d9707ef20d8f2',
-  accepted_dev_tree_sha: 'de49d1b7ad75a7fbff31749165d93b2f1aba94a9',
-  system_gate_run: 33932827712,
-  current_application_quality_run: 33932827708,
-  it_admin_runtime_proof_run: 33932827704,
-  branch_hygiene_run: 33932827696,
+  accepted_dev_sha: '4ba42dba64c4d1ca46cd145add24128ab3f17be4',
+  accepted_dev_tree_sha: '2fed089e03b4c545aaa330e7767a8e9a127dc58d',
+  system_gate_run: 33933835769,
+  current_application_quality_run: 33933835712,
+  it_admin_runtime_proof_run: 33933835781,
+  branch_hygiene_run: 33933835787,
   exact_preview_deployment: true,
   role: 'IMPLEMENTATION_ACCEPTANCE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 51,
-  title: 'Explicit Content Studio Schema Readiness',
-  dev_sha: '3f5e10f4ad005945ed4092b63079b11f62c4d7ee',
-  tree_sha: 'baca33be1a9b0dc888f12c2882f97545faed97a8',
-  system_gate_run: 33932323391,
-  current_application_quality_run: 33932323375,
-  it_admin_runtime_proof_run: 33932323392,
-  branch_hygiene_run: 33932323423,
+  build: 52,
+  title: 'Content Studio Render Readiness / Explicit Execution Boundary',
+  dev_sha: '33ead64048edf0b089b49c4a02783f468dc806a5',
+  tree_sha: '8c25dfedc31bd27cb7b79429c15b669830e176f8',
+  system_gate_run: 33933307193,
+  current_application_quality_run: 33933307182,
+  it_admin_runtime_proof_run: 33933307188,
+  branch_hygiene_run: 33933307190,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 
@@ -73,6 +73,8 @@ export async function loadCurrentReliability(db, env = {}) {
       closure_candidate_requires_external_exact_head_proof: true,
       build52_render_readiness_read_only: true,
       build52_render_job_creation: false,
+      build53_generated_review_state_convergence: true,
+      build53_generated_ready_for_render: false,
       production_baseline_build: 32,
     },
     safety: {
