@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 60,
-  "title": "Production Resource Binding & Account/Auth Recovery",
+  "build": 61,
+  "title": "Production Live Resource Proof Repair",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "44483117210e93ce7126cd19510b090d88f663a7",
-  "source_base_tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
-  "accepted_dev_sha": "44483117210e93ce7126cd19510b090d88f663a7",
-  "accepted_dev_tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
+  "source_base_sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
+  "source_base_tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+  "accepted_dev_sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
+  "accepted_dev_tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
   "acceptance": {
-    "system_gate_run": 33969967713,
-    "current_application_quality_run": 33969967734,
-    "it_admin_runtime_proof_run": 33969967704,
-    "branch_hygiene_run": 33969967656
+    "system_gate_run": 33972673238,
+    "current_application_quality_run": 33972673246,
+    "it_admin_runtime_proof_run": 33972673266,
+    "branch_hygiene_run": 33972673254
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 59,
-      "title": "Storefront Media Availability & Merchandising Recovery",
-      "authority": "release467-build59-storefront-media-availability-merchandising-recovery.json",
-      "dev_sha": "44483117210e93ce7126cd19510b090d88f663a7",
-      "tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
+      "build": 60,
+      "title": "Production Resource Binding & Account/Auth Recovery",
+      "authority": "release467-build60-production-resource-binding-auth-recovery.json",
+      "dev_sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
+      "tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
       "proofs": {
-        "system_gate_run": 33969967713,
-        "current_application_quality_run": 33969967734,
-        "it_admin_runtime_proof_run": 33969967704,
-        "branch_hygiene_run": 33969967656
+        "system_gate_run": 33972673238,
+        "current_application_quality_run": 33972673246,
+        "it_admin_runtime_proof_run": 33972673266,
+        "branch_hygiene_run": 33972673254
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true,
@@ -39,9 +39,9 @@
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 60,
-      "title": "Production Resource Binding & Account/Auth Recovery",
-      "authority": "release467-build60-production-resource-binding-auth-recovery.json",
+      "build": 61,
+      "title": "Production Live Resource Proof Repair",
+      "authority": "release467-build61-production-live-resource-proof-repair.json",
       "accepted_dev_sha": null,
       "accepted_dev_tree_sha": null,
       "acceptance": null,
@@ -52,24 +52,25 @@
     "next_build_ingests_previous_final_closure": true,
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
-  "last_green_build": 59,
-  "last_green_build_name": "Storefront Media Availability & Merchandising Recovery",
-  "last_green_dev_sha": "44483117210e93ce7126cd19510b090d88f663a7",
-  "last_green_dev_tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
-  "last_green_system_gate_run": 33969967713,
-  "last_green_application_quality_run": 33969967734,
-  "last_green_it_admin_runtime_run": 33969967704,
-  "last_green_branch_hygiene_run": 33969967656,
+  "last_green_build": 60,
+  "last_green_build_name": "Production Resource Binding & Account/Auth Recovery",
+  "last_green_dev_sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
+  "last_green_dev_tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+  "last_green_system_gate_run": 33972673238,
+  "last_green_application_quality_run": 33972673246,
+  "last_green_it_admin_runtime_run": 33972673266,
+  "last_green_branch_hygiene_run": 33972673254,
   "production_checkpoint": {
-    "build": 59,
-    "authority": "release467-build59-storefront-media-availability-merchandising-recovery.json",
-    "main_sha": "9411c0968d2f0cae57f25d36f0664729cd81c61f",
-    "tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
-    "production_pages_deploy_run": 33970506769,
+    "build": 60,
+    "authority": "release467-build60-production-resource-binding-auth-recovery.json",
+    "main_sha": "732bac55a4a43434a31090bb3b9c6b7b2c5a7939",
+    "tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+    "production_pages_deploy_run": 33972781588,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build61-production-live-resource-proof-repair.json",
     "release467-build60-production-resource-binding-auth-recovery.json",
     "release467-build59-storefront-media-availability-merchandising-recovery.json",
     "release467-build58-account-administration-json-response-hardening.json",
@@ -106,9 +107,6 @@
     "production_rollback_readiness": "release-neutral-read-only",
     "active_reliability_authority": "current-development-authority.json",
     "active_deployment_preflight_authority": "current-development-authority.json",
-    "active_content_studio_schema_readiness_gate": "scripts/current_content_studio_schema_readiness_gate.py",
-    "active_content_render_readiness_gate": "scripts/current_content_render_readiness_gate.py",
-    "active_content_generated_review_state_gate": "scripts/current_content_generated_review_state_gate.py",
     "active_authority_restart_integrity_gate": "scripts/current_authority_restart_integrity_gate.py",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
@@ -120,11 +118,11 @@
     "request_time_schema_mutation": false
   },
   "incident": {
-    "severity": "PRODUCTION_AVAILABILITY",
-    "reported_after_build59_production": true,
-    "create_user": "POST /api/admin/create-user returns HTTP 503 with structured ADMIN_CREATE_USER_FAILED response.",
-    "product_media": "Product images remain unavailable across public site surfaces.",
-    "build60_response": "Use read-only live users/sessions schema compatibility; broaden same-origin R2 recovery to current and legacy public prefixes; inject fallback on all HTML; strengthen live Production resource proof."
+    "severity": "PRODUCTION_VALIDATION_BLOCKER",
+    "build60_standard_production_green": true,
+    "build60_live_resource_proof_run": 33972823412,
+    "build60_live_resource_proof_state": "HARNESS_FAILED_BEFORE_RESOURCE_ASSERTIONS",
+    "build61_response": "Restore canonical Cloudflare account context to the proof and require read-only evidence for live account tables, known R2 bytes, nonempty Product API image URLs, fetched Product photography, merchandising API and auth D1 diagnostic."
   },
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
@@ -133,11 +131,11 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 61,
-  "next_build_state": "BLOCKED_UNTIL_BUILD_60_EXTERNAL_FINAL_CLOSURE",
+  "next_build": 62,
+  "next_build_state": "BLOCKED_UNTIL_BUILD_61_EXTERNAL_FINAL_CLOSURE",
   "next_build_title": null,
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
-  "runtime_application_change_authorized": true,
+  "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
   "d1_mutation_authorized": false,
   "r2_mutation_authorized": false,
@@ -147,5 +145,5 @@
   "automatic_production_promotion_authorized": false,
   "request_time_schema_mutation": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 59 is the last fully verified Development checkpoint at dev 44483117210e93ce7126cd19510b090d88f663a7 / tree 3523119d31bbde05ba98faa530acc3dae88920d2 with System 33969967713, Quality 33969967734, I.T. 33969967704 and Hygiene 33969967656 successful plus exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression acceptance. Build 59 Production is main 9411c0968d2f0cae57f25d36f0664729cd81c61f / same tree with Production Pages Deploy 33970506769 successful, but the later user-reported residual Production incident proves that prior public smoke did not cover a real R2 Product object or authenticated account-admin write. Build 60 is the active Production resource/account/media recovery candidate and must pass exact-head Development proofs before deliberate Production promotion. Canonical migrations remain 0001-0004 and external HOLD lanes remain separate."
+  "restart_rule": "Build 60 is the last fully verified Development checkpoint at dev 2f099d88b39a35a3bb8cf73798ba2c30b2b82083 / tree 66bbd5b61e815b2bd9f2483eaa5161542c177e9a with System 33972673238, Quality 33972673246, I.T. 33972673266 and Hygiene 33972673254 successful plus exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression acceptance. Build 60 Production is main 732bac55a4a43434a31090bb3b9c6b7b2c5a7939 / same tree with Production Pages Deploy 33972781588 successful. Production Live Resource Integrity run 33972823412 failed before resource assertions because the new proof omitted Cloudflare account context; it is not evidence of a live D1/R2 failure. Build 61 repairs and strengthens that read-only proof. Canonical migrations remain 0001-0004 and external HOLD lanes remain separate."
 }

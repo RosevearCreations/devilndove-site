@@ -1,43 +1,38 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 60 — Production Resource Binding & Account/Auth Recovery is the current Production-incident hotfix candidate.**
+**Release 467 Build 61 — Production Live Resource Proof Repair is the current validation-only candidate.**
 
-Last fully verified Development checkpoint is Build 59:
-- SHA `44483117210e93ce7126cd19510b090d88f663a7`
-- tree `3523119d31bbde05ba98faa530acc3dae88920d2`
-- System Gate `33969967713`: SUCCESS
-- Current Application Quality `33969967734`: SUCCESS
-- I.T. Admin Runtime Proof `33969967704`: SUCCESS
-- Repository Branch Hygiene `33969967656`: SUCCESS
-- exact Development Preview deployment, canonical D1 proof, read-only data authority, bindings, smoke and regression evidence: SUCCESS.
+Last fully verified Development is Build 60:
+- SHA `2f099d88b39a35a3bb8cf73798ba2c30b2b82083`
+- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
+- System Gate `33972673238`: SUCCESS
+- Current Application Quality `33972673246`: SUCCESS
+- I.T. Admin Runtime Proof `33972673266`: SUCCESS
+- Repository Branch Hygiene `33972673254`: SUCCESS
+- exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression evidence: SUCCESS.
 
-Current Production is Build 59:
-- `main` `9411c0968d2f0cae57f25d36f0664729cd81c61f`
-- tree `3523119d31bbde05ba98faa530acc3dae88920d2`
-- Production Pages Deploy `33970506769`: SUCCESS.
+Current Production is Build 60:
+- `main` `732bac55a4a43434a31090bb3b9c6b7b2c5a7939`
+- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
+- Production Pages Deploy `33972781588`: SUCCESS
+- Production snapshot/preservation, canonical D1, isolation/FK, exact deployment, bindings, public smoke and promotion proof: SUCCESS.
 
-Production acceptance proved business-data snapshot/preservation, canonical Production D1, isolation/foreign-key integrity, exact-main deployment, Production bindings, public smoke and promotion proof. A later user report proves that prior public smoke did not cover two critical runtime paths.
+## Current validation boundary
 
-## Current Build 60 incident boundary
+- Build 60 application corrections are deployed to both `dev` and `main`.
+- Production Live Resource Integrity run `33972823412` failed during its first Wrangler D1 invocation before schema assertions; later R2/API checks were skipped.
+- The failed proof omitted `CLOUDFLARE_ACCOUNT_ID`, while the successful Production deployment workflow carries that account context. Therefore the run is classified as a proof-harness execution defect, not a proven live D1 failure.
+- Build 61 restores canonical Cloudflare account context and requires read-only proof of live account tables, known R2 bytes, nonzero Product API rows, public image URLs, actual Product image bytes, merchandising JSON and auth D1 reachability.
+- No application runtime, D1 data, R2 object, canonical migration, provider or Cloudflare Access mutation is introduced.
 
-- Product images remain unavailable across live public site surfaces.
-- Authenticated `POST /api/admin/create-user` returns HTTP 503 with a structured `ADMIN_CREATE_USER_FAILED` response.
-- Build 59 recovery was too narrow: it covered only `/products/` media and was installed only on Shop, while existing public media includes case-sensitive R2 keys such as `Itemsforsale/DD215-216B.jpeg` and other legacy public prefixes.
-- Build 60 broadens `/api/product-media` to approved public R2 prefixes while remaining GET-only and adds case-compatible lookup for historical URL/key differences.
-- Shared HTML middleware injects the recovery client on every HTML page.
-- Create User, Admin Reset Password and Member Change Password now resolve the live `users`/`sessions` schema with read-only `PRAGMA table_info` inspection instead of hard-coding both `sessions.session_token` and `sessions.token` plus optional user columns.
-- No request-time DDL, table creation, blind migration, Development-to-Production data copy or R2 mutation is introduced.
-- The Production workflow is confirmed to target live resources: D1 `devilndove-prod-r462` / `f34a741b-0000-45b0-9a96-6be08754d563`, Product R2 `devilndove-toolshed-images`, CAIP R2 `devilndove-caip-media`.
-- Build 60 acceptance must prove the actual live account table shape and a real known Product R2 object read before the incident is called closed.
+The `business-administration` browser warning remains a separate legacy module-name issue and is not treated as the Create User 503 cause.
 
-The console warning `runtime activation suppressed for unavailable module business-administration` remains a separate legacy module-name cleanup issue; it is not the structured Create User 503 source.
+## Safety boundary
 
-## Current safety boundary
+- Canonical migrations remain exactly `0001`–`0004`.
+- No request-time DDL, Dev-to-Production business-data overwrite, D1 business-data mutation or R2 mutation.
+- Production resource names remain D1 `devilndove-prod-r462`, Product R2 `devilndove-toolshed-images`, CAIP R2 `devilndove-caip-media`.
+- Restart integrity remains `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1`.
+- External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access lanes remain HOLD/evidence-dependent.
 
-- Canonical migrations remain exactly `0001`–`0004`; Build 60 adds no migration.
-- No D1 business-data mutation, R2 mutation, renderer/provider execution, publication, social queue expansion or Cloudflare Access mutation.
-- No Development-to-Production business-data overwrite.
-- Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain HOLD/evidence-dependent.
-- Restart integrity remains `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` and requires exact tested feature-head evidence followed by exact merged-Development four-proof + Preview acceptance.
-
-**Verdict:** Build 59 Development and Production source/deployment proofs are GREEN, but the live Production account/media incident is OPEN. Build 60 is the bounded recovery candidate; it must prove both actual live resource contracts before Production is called GREEN for this incident.
+**Verdict:** Build 60 Development and standard Production chains are GREEN. The incident is not yet fully closed because the first live-resource proof did not execute its resource assertions. Build 61 is the bounded validation repair that must prove the live Product/account resource path before final closure.

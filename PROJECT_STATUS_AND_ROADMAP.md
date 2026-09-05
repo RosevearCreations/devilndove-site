@@ -2,66 +2,52 @@
 
 ## Current Development and Production authority
 
-**Release 467 Build 60 — Production Resource Binding & Account/Auth Recovery** is the current Production-incident hotfix candidate.
+**Release 467 Build 61 — Production Live Resource Proof Repair** is the current validation-only closure candidate.
 
-Last fully verified Development is Build 59 — Storefront Media Availability & Merchandising Recovery:
-- `dev` `44483117210e93ce7126cd19510b090d88f663a7`
-- tree `3523119d31bbde05ba98faa530acc3dae88920d2`
-- System `33969967713` SUCCESS
-- Quality `33969967734` SUCCESS
-- I.T. `33969967704` SUCCESS
-- Hygiene `33969967656` SUCCESS
-- exact Preview deployment, canonical Development D1 proof, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
+Last fully verified Development is Build 60 — Production Resource Binding & Account/Auth Recovery:
+- `dev` `2f099d88b39a35a3bb8cf73798ba2c30b2b82083`
+- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
+- System `33972673238` SUCCESS
+- Quality `33972673246` SUCCESS
+- I.T. `33972673266` SUCCESS
+- Hygiene `33972673254` SUCCESS
+- exact Preview, canonical Development D1, read-only data authority, bindings, non-secret smoke and regression evidence: SUCCESS.
 
-Current Production is Build 59:
-- `main` `9411c0968d2f0cae57f25d36f0664729cd81c61f`
-- tree `3523119d31bbde05ba98faa530acc3dae88920d2`
-- Production Pages Deploy `33970506769` SUCCESS.
+Current Production is Build 60:
+- `main` `732bac55a4a43434a31090bb3b9c6b7b2c5a7939`
+- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
+- Production Pages Deploy `33972781588` SUCCESS.
 
-The Production workflow proved the exact fully-green Development tree, snapshotted and preserved Production business data, proved canonical Production D1 and isolation/foreign-key integrity, deployed the exact `main` SHA with Production bindings, passed public live smoke acceptance, and preserved promotion proof. A later user report nevertheless exposed two runtime gaps that the prior smoke did not test: a real public Product R2 object read and an authenticated account-administration write.
+The Build 60 Production workflow proved the exact fully-green Development tree, snapshotted/preserved Production business data, proved canonical Production D1 and isolation/FK integrity, deployed the exact main SHA with live bindings, passed public smoke and preserved promotion proof.
 
-## Recent completed work
+## Build 60 incident correction
 
-### Build 55 — Inventory Intelligence schema compatibility
+Build 60 corrected the live account/session compatibility path used by Create User and password operations, broadened Product-media recovery across current and legacy public R2 prefixes, and injected that recovery site-wide. It added no migration, D1 business-data copy or R2 mutation.
 
-The Inventory Intelligence manufacturer-link query was corrected to follow the canonical one-link-per-inventory-item schema instead of querying the nonexistent `iml.is_current` column. This was a runtime-query fix, not a migration. Build 55 closed green in Development and was deliberately promoted as a Production hotfix.
+## Why Build 61 exists
 
-### Build 56 — Product photo guidance and Packaging onboarding
+The new post-deploy `Production Live Resource Integrity Proof` run `33972823412` failed before its first resource assertion. The proof workflow omitted the Cloudflare account context that the successful Production deployment workflow supplies to Wrangler. Therefore that run is a **validation-harness failure**, not evidence that Production D1 or R2 failed.
 
-The Product Editor exposes existing deterministic image-quality assessments and can score unscored images or deliberately rescore the current set. Human-readable improvement guidance uses the existing Release 448 scoring authority. Packaging Studio has a resumable 12-step first-time-user walkthrough with Show-me navigation, blocker explanations and Advanced mode. Build 56 added no migration or provider execution.
+Build 61 repairs and strengthens the proof so Production cannot be called fully incident-validated unless it proves:
+- live `users`/`sessions` schema compatibility read-only;
+- a known real R2 Product object through the deployed same-origin media route;
+- nonzero live `/api/products` rows and at least one public Product image URL;
+- real Product image bytes from the public URL or same-origin recovery route;
+- healthy `/api/storefront-merchandising` JSON;
+- Production D1 reachability through the public auth diagnostic.
 
-### Build 57 — Current authority / restart truth convergence
+Build 61 is validation-only: no application runtime change, canonical migration, D1 business-data mutation, R2 mutation, provider execution or Cloudflare Access mutation.
 
-Build 57 synchronized the canonical restart documents and read-only I.T./Reliability/Deployment Preflight projections and added a release-neutral freshness guard so the machine pointer cannot silently remain behind a newer Release 467 authority.
+## Next sequence
 
-### Build 58 — Account Administration JSON Response Hardening
+1. Pass Build 61 exact feature-head System, Quality and I.T. proofs.
+2. Merge the exact tested head to `dev`.
+3. Require exact merged-`dev` System + Quality + I.T. + Hygiene and exact Preview acceptance.
+4. Promote that exact tree to `main` under the user’s explicit incident-validation authorization.
+5. Require the normal Production preservation/D1/FK/binding/smoke proof **and** the repaired live-resource proof.
+6. If the live Product API returns zero products or zero public image URLs, treat that as the next concrete Storefront defect rather than calling the image incident closed.
+7. If live resources are green but authenticated Create User still returns 503, use the structured response detail/Cloudflare Function evidence for the next bounded account-write correction; do not mutate Production schema by guesswork.
 
-Build 58 hardened Create User, Admin Reset Password and member Change Password so clients no longer throw raw JSON.parse failures when a platform response is not JSON, unexpected account-write failures return structured JSON, and a wrong current password no longer invalidates an otherwise valid session.
+After the incident is actually proven closed, resume the separate legacy browser-module naming convergence (`business-administration` → canonical five-module runtime) without weakening root-admin full access.
 
-### Build 59 — Storefront Media Availability & Merchandising Recovery
-
-Build 59 made storefront merchandising schema-compatible and added a read-only same-origin R2 fallback for `products/*` on Shop. It closed fully green in Development and was promoted to Production. The later live incident proved its media recovery coverage was too narrow for the older public R2 prefixes and its Production smoke did not test a real media object.
-
-## Build 60 purpose
-
-The live Production report after Build 59 is treated as a serious availability incident:
-- Product images remain unavailable across public site surfaces.
-- Authenticated `POST /api/admin/create-user` returns HTTP 503 with `ADMIN_CREATE_USER_FAILED` / “User creation is temporarily unavailable.”
-- The console’s `business-administration` module warning is a separate legacy module-name issue and is not the structured Create User failure source.
-
-Build 60 is a bounded live-resource compatibility and proof build:
-- Create User, Admin Reset Password and Member Change Password use one read-only account-schema compatibility helper that inspects the actual live `users` and `sessions` columns and dynamically uses whichever supported session-token columns are present.
-- Account writes no longer assume optional `display_name`, `created_at` or `updated_at` fields exist; required credential/role fields still fail closed if absent.
-- No request-time DDL, emergency table creation, blind Development-to-Production data copy or new migration is permitted.
-- `/api/product-media` remains GET-only but now supports existing public R2 prefixes such as `products/`, `Itemsforsale/`, `Toolshed/`, `Tools/` and `Supplies/`, including historical case differences between URLs and R2 object keys.
-- Shared HTML middleware injects the media recovery on every HTML page, so public pages are not dependent on Shop-specific script ordering.
-- Regression tests prove unsafe/non-public prefixes never reach R2 and the recovery endpoint cannot list, put, delete or multipart-mutate objects.
-- Production acceptance must be strengthened to prove the live account table shape and fetch a real known Product R2 object through `devilndove.com` before Build 60 is called Production green.
-
-## Roadmap after Build 60
-
-First close Build 60 through exact feature-head proofs, exact merged-Development four-proof + Preview acceptance, then deliberately promote the exact green tree to Production under the user’s explicit incident authorization. Do not call the incident closed until live resource acceptance proves the account table contract and a real R2 media object.
-
-After Production availability is stable, the next bounded platform cleanup remains convergence of the legacy three-module browser runtime (`commerce-operations`, `creative-production`, `business-administration`) with the canonical five modules (`storefront`, `creators`, `socials`, `financials`, `it-platform`) without weakening server authorization or root-admin full access.
-
-Canonical migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, CAIP private-media, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes. Provider execution/publication and automatic Production promotion remain closed.
+Canonical migrations remain exactly `0001`–`0004`. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes.
