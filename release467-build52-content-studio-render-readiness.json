@@ -27,10 +27,10 @@
   },
   "scope": {
     "name": "content_studio_render_readiness_explicit_execution_boundary",
-    "generated_video_deliverables_default_to_review": true,
+    "generated_deliverable_status_semantics_unchanged": true,
     "ready_for_render_requires_fail_closed_readiness": true,
     "render_readiness_is_read_only": true,
-    "implicit_render_job_creation_removed": true,
+    "implicit_render_job_creation_blocked_on_active_route": true,
     "render_job_creation_authorized": false,
     "renderer_execution_authorized": false,
     "provider_execution_authorized": false,
