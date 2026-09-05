@@ -49,11 +49,13 @@ req(shop.lower().count('<h1')==1,'Shop must retain exactly one H1')
 manifest=json.loads(read('migrations/canonical/manifest.json'))
 req(len(manifest.get('migrations') or [])==4,'Build 59 must not change canonical migration count')
 
-for js in ('functions/api/storefront-merchandising.js','functions/api/product-media.js','public/js/product-media-fallback.js'):
+for js in ('functions/api/storefront-merchandising.js','functions/api/product-media.js','public/js/product-media-fallback.js','scripts/current_storefront_media_recovery_test.mjs'):
     subprocess.run(['node','--check',str(ROOT/js)],cwd=ROOT,check=True)
+subprocess.run(['node',str(ROOT/'scripts/current_storefront_media_recovery_test.mjs')],cwd=ROOT,check=True)
 
 print('CURRENT STOREFRONT MEDIA RECOVERY GATE: PASS')
 print('Merchandising Product read: SCHEMA-COMPATIBLE / READ-ONLY')
 print('Product media recovery: PUBLIC products/* ONLY / R2 READ-ONLY')
+print('Product media runtime unit proof: PASS')
 print('Shop fallback ordering: INSTALLED BEFORE PRODUCT RENDERERS')
 print('Canonical migrations: UNCHANGED')
