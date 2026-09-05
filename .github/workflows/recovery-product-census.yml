@@ -1,0 +1,50 @@
+name: Recovery Product Census
+
+on:
+  push:
+    branches: [recovery-product-census]
+    paths:
+      - '.github/workflows/recovery-product-census.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CANDIDATES: devilndove-dev devilndove-prod devilndove-prod-r462 devilndove-prod-repl-20260823
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Census known D1 Product authorities read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/product-recovery-census
+          npx --yes wrangler@4 d1 list --json > /tmp/product-recovery-census/d1-list.json
+          for db in ${CANDIDATES}; do
+            safe="$(printf '%s' "$db" | tr -c 'A-Za-z0-9._-' '_')"
+            echo "==== ${db} ===="
+            if npx --yes wrangler@4 d1 execute "$db" --remote --json --command "SELECT count(*) AS products FROM products; SELECT min(id) AS min_id,max(id) AS max_id FROM products; PRAGMA table_info(products); SELECT name,sql FROM sqlite_master WHERE type='table' AND (lower(name) LIKE '%product%' OR lower(name) LIKE '%image%' OR lower(name) LIKE '%media%' OR lower(name) LIKE '%movie%') ORDER BY name; SELECT * FROM products ORDER BY id;" > "/tmp/product-recovery-census/${safe}.json" 2> "/tmp/product-recovery-census/${safe}.stderr"; then
+              echo "${db}: OK"
+            else
+              echo "${db}: QUERY_FAILED" | tee "/tmp/product-recovery-census/${safe}.status"
+            fi
+          done
+          echo 'READ_ONLY=TRUE' > /tmp/product-recovery-census/boundary.txt
+          echo 'MUTATION=ZERO' >> /tmp/product-recovery-census/boundary.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: product-recovery-census
+          path: /tmp/product-recovery-census
+          retention-days: 30
+          if-no-files-found: error
