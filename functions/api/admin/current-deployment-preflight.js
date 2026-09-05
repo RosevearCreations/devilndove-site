@@ -1,31 +1,31 @@
-// Release 467 Build 52 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 53 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical diagnostics are reused read-only; forward schema authority remains canonical.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 52;
-const TITLE = 'Content Studio Render Readiness / Explicit Execution Boundary';
+const BUILD = 53;
+const TITLE = 'Generated Deliverable Review-State Convergence';
 const AUTHORITY = 'current-development-authority.json';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 52, title: TITLE,
-  accepted_dev_sha: '24f66983bf052280f62d0983f27d9707ef20d8f2',
-  accepted_dev_tree_sha: 'de49d1b7ad75a7fbff31749165d93b2f1aba94a9',
-  system_gate_run: 33932827712,
-  current_application_quality_run: 33932827708,
-  it_admin_runtime_proof_run: 33932827704,
-  branch_hygiene_run: 33932827696,
+  release: 467, build: 53, title: TITLE,
+  accepted_dev_sha: '4ba42dba64c4d1ca46cd145add24128ab3f17be4',
+  accepted_dev_tree_sha: '2fed089e03b4c545aaa330e7767a8e9a127dc58d',
+  system_gate_run: 33933835769,
+  current_application_quality_run: 33933835712,
+  it_admin_runtime_proof_run: 33933835781,
+  branch_hygiene_run: 33933835787,
   exact_preview_deployment: true,
   role: 'IMPLEMENTATION_ACCEPTANCE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 51, title: 'Explicit Content Studio Schema Readiness',
-  dev_sha: '3f5e10f4ad005945ed4092b63079b11f62c4d7ee',
-  tree_sha: 'baca33be1a9b0dc888f12c2882f97545faed97a8',
-  system_gate_run: 33932323391,
-  current_application_quality_run: 33932323375,
-  it_admin_runtime_proof_run: 33932323392,
-  branch_hygiene_run: 33932323423,
+  release: 467, build: 52, title: 'Content Studio Render Readiness / Explicit Execution Boundary',
+  dev_sha: '33ead64048edf0b089b49c4a02783f468dc806a5',
+  tree_sha: '8c25dfedc31bd27cb7b79429c15b669830e176f8',
+  system_gate_run: 33933307193,
+  current_application_quality_run: 33933307182,
+  it_admin_runtime_proof_run: 33933307188,
+  branch_hygiene_run: 33933307190,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment: true,
 });
@@ -112,7 +112,7 @@ function canonicalChecks(truth, expectedSchema) {
     currentCheck(truth.foreign_key_violations ? 'fail' : 'pass','canonical_foreign_keys','D1 foreign-key integrity',truth.foreign_key_violations ? `${truth.foreign_key_violations} foreign-key violation(s) returned.` : 'PRAGMA foreign_key_check returned zero violations.','',{ rows: truth.foreign_key_rows }),
     currentCheck(schemaDrift.length ? 'warn' : 'pass','current_schema_visibility','Current expected application schema visibility',schemaDrift.length ? `${schemaDrift.length} application schema group(s) need review.` : `${expectedSchema.length} current application schema groups are visible.`),
     currentCheck('pass','runtime_schema_mutation_boundary','Request-time schema mutation boundary','This current Deployment Preflight endpoint is GET-only and has no schema repair capability.'),
-    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} implementation acceptance is ${ACCEPTED_DEVELOPMENT.accepted_dev_sha}.`,'Verify the exact Build 52 closure merged dev head externally before it becomes the next restart checkpoint.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT }),
+    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} implementation acceptance is ${ACCEPTED_DEVELOPMENT.accepted_dev_sha}.`,'Verify the exact Build 53 closure merged dev head externally before it becomes the next restart checkpoint.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT }),
   ];
 }
 function statusSummary(checks) {
@@ -176,10 +176,10 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is the current read-only Release 467 Build 52 projection.',
-      'Build 52 implementation acceptance is 24f66983bf052280f62d0983f27d9707ef20d8f2 / de49d1b7ad75a7fbff31749165d93b2f1aba94a9 with System 33932827712, Quality 33932827708, I.T. 33932827704 and Hygiene 33932827696 successful plus exact Preview acceptance.',
-      'Build 51 is the last fully verified restart checkpoint at 3f5e10f4ad005945ed4092b63079b11f62c4d7ee / baca33be1a9b0dc888f12c2882f97545faed97a8 with System 33932323391, Quality 33932323375, I.T. 33932323392 and Hygiene 33932323423.',
-      'Build 52 adds read-only fail-closed Content Studio render readiness, blocks implicit render-job creation on the active route and adds no canonical migration.',
+      'The active Deployment Preflight is the current read-only Release 467 Build 53 projection.',
+      'Build 53 implementation acceptance is 4ba42dba64c4d1ca46cd145add24128ab3f17be4 / 2fed089e03b4c545aaa330e7767a8e9a127dc58d with System 33933835769, Quality 33933835712, I.T. 33933835781 and Hygiene 33933835787 successful plus exact Preview acceptance.',
+      'Build 52 is the last fully verified restart checkpoint at 33ead64048edf0b089b49c4a02783f468dc806a5 / 8c25dfedc31bd27cb7b79429c15b669830e176f8 with System 33933307193, Quality 33933307182, I.T. 33933307188 and Hygiene 33933307190.',
+      'Build 53 closes the generated-deliverable creation-time review-state bypass; ready_for_render remains reserved for the Build 52 explicit fail-closed transition.',
       'Render-job creation, renderer/provider execution, publication, social queue expansion, R2 mutation, main mutation and Production promotion remain closed.',
       'Build 32 remains the current Production baseline and external HOLD lanes remain separate.',
     ],

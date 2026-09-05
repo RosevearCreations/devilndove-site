@@ -1,4 +1,4 @@
-// Release 467 Build 52 — Content Studio Render Readiness / Explicit Execution Boundary renderer.
+// Release 467 Build 53 — Generated Deliverable Review-State Convergence renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;

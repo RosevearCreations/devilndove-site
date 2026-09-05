@@ -1,49 +1,49 @@
 {
   "release": 467,
-  "build": 52,
-  "title": "Content Studio Render Readiness / Explicit Execution Boundary",
+  "build": 53,
+  "title": "Generated Deliverable Review-State Convergence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "3f5e10f4ad005945ed4092b63079b11f62c4d7ee",
-  "source_base_tree_sha": "baca33be1a9b0dc888f12c2882f97545faed97a8",
-  "accepted_dev_sha": "24f66983bf052280f62d0983f27d9707ef20d8f2",
-  "accepted_dev_tree_sha": "de49d1b7ad75a7fbff31749165d93b2f1aba94a9",
+  "source_base_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
+  "source_base_tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
+  "accepted_dev_sha": "4ba42dba64c4d1ca46cd145add24128ab3f17be4",
+  "accepted_dev_tree_sha": "2fed089e03b4c545aaa330e7767a8e9a127dc58d",
   "acceptance": {
-    "system_gate_run": 33932827712,
-    "current_application_quality_run": 33932827708,
-    "it_admin_runtime_proof_run": 33932827704,
-    "branch_hygiene_run": 33932827696
+    "system_gate_run": 33933835769,
+    "current_application_quality_run": 33933835712,
+    "it_admin_runtime_proof_run": 33933835781,
+    "branch_hygiene_run": 33933835787
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 51,
-      "title": "Explicit Content Studio Schema Readiness",
-      "authority": "release467-build51-content-studio-schema-readiness.json",
-      "dev_sha": "3f5e10f4ad005945ed4092b63079b11f62c4d7ee",
-      "tree_sha": "baca33be1a9b0dc888f12c2882f97545faed97a8",
+      "build": 52,
+      "title": "Content Studio Render Readiness / Explicit Execution Boundary",
+      "authority": "release467-build52-content-studio-render-readiness.json",
+      "dev_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
+      "tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
       "proofs": {
-        "system_gate_run": 33932323391,
-        "current_application_quality_run": 33932323375,
-        "it_admin_runtime_proof_run": 33932323392,
-        "branch_hygiene_run": 33932323423
+        "system_gate_run": 33933307193,
+        "current_application_quality_run": 33933307182,
+        "it_admin_runtime_proof_run": 33933307188,
+        "branch_hygiene_run": 33933307190
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 52,
-      "title": "Content Studio Render Readiness / Explicit Execution Boundary",
-      "authority": "release467-build52-content-studio-render-readiness.json",
-      "accepted_dev_sha": "24f66983bf052280f62d0983f27d9707ef20d8f2",
-      "accepted_dev_tree_sha": "de49d1b7ad75a7fbff31749165d93b2f1aba94a9",
+      "build": 53,
+      "title": "Generated Deliverable Review-State Convergence",
+      "authority": "release467-build53-generated-deliverable-review-state-convergence.json",
+      "accepted_dev_sha": "4ba42dba64c4d1ca46cd145add24128ab3f17be4",
+      "accepted_dev_tree_sha": "2fed089e03b4c545aaa330e7767a8e9a127dc58d",
       "acceptance": {
-        "system_gate_run": 33932827712,
-        "current_application_quality_run": 33932827708,
-        "it_admin_runtime_proof_run": 33932827704,
-        "branch_hygiene_run": 33932827696
+        "system_gate_run": 33933835769,
+        "current_application_quality_run": 33933835712,
+        "it_admin_runtime_proof_run": 33933835781,
+        "branch_hygiene_run": 33933835787
       },
       "state": "AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF"
     },
@@ -52,14 +52,14 @@
     "next_build_ingests_previous_final_closure": true,
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
-  "last_green_build": 52,
-  "last_green_build_name": "Content Studio Render Readiness / Explicit Execution Boundary",
-  "last_green_dev_sha": "24f66983bf052280f62d0983f27d9707ef20d8f2",
-  "last_green_dev_tree_sha": "de49d1b7ad75a7fbff31749165d93b2f1aba94a9",
-  "last_green_system_gate_run": 33932827712,
-  "last_green_application_quality_run": 33932827708,
-  "last_green_it_admin_runtime_run": 33932827704,
-  "last_green_branch_hygiene_run": 33932827696,
+  "last_green_build": 53,
+  "last_green_build_name": "Generated Deliverable Review-State Convergence",
+  "last_green_dev_sha": "4ba42dba64c4d1ca46cd145add24128ab3f17be4",
+  "last_green_dev_tree_sha": "2fed089e03b4c545aaa330e7767a8e9a127dc58d",
+  "last_green_system_gate_run": 33933835769,
+  "last_green_application_quality_run": 33933835712,
+  "last_green_it_admin_runtime_run": 33933835781,
+  "last_green_branch_hygiene_run": 33933835787,
   "production_checkpoint": {
     "build": 32,
     "authority": "release467-build32-help-search-responsive-convergence.json",
@@ -70,6 +70,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build53-generated-deliverable-review-state-convergence.json",
     "release467-build52-content-studio-render-readiness.json",
     "release467-build51-content-studio-schema-readiness.json",
     "release467-build50-reviewed-caip-content-studio-handoff.json",
@@ -116,6 +117,7 @@
     "active_grey_hair_content_studio_handoff_gate": "scripts/current_grey_hair_content_studio_handoff_gate.py",
     "active_content_studio_schema_readiness_gate": "scripts/current_content_studio_schema_readiness_gate.py",
     "active_content_render_readiness_gate": "scripts/current_content_render_readiness_gate.py",
+    "active_content_generated_review_state_gate": "scripts/current_content_generated_review_state_gate.py",
     "active_authority_restart_integrity_gate": "scripts/current_authority_restart_integrity_gate.py",
     "canonical_d1_migration_manifest": "migrations/canonical/manifest.json",
     "canonical_d1_migration_applicator": "scripts/d1_migrate.py",
@@ -137,6 +139,7 @@
     "grey_hair_content_studio_handoff_request_time_schema_ddl": false,
     "content_studio_schema_readiness_request_time_schema_ddl": false,
     "content_render_readiness_request_time_schema_ddl": false,
+    "content_generated_review_state_request_time_schema_ddl": false,
     "authority_restart_integrity_request_time_schema_ddl": false,
     "request_time_schema_mutation": false
   },
@@ -147,8 +150,8 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 53,
-  "next_build_state": "AWAITING_BUILD_52_FINAL_CLOSURE_PROOF",
+  "next_build": 54,
+  "next_build_state": "AWAITING_BUILD_53_FINAL_CLOSURE_PROOF",
   "next_build_title": null,
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
@@ -161,5 +164,5 @@
   "automatic_production_promotion_authorized": false,
   "request_time_schema_mutation": false,
   "secret_values_emitted": false,
-  "restart_rule": "Release 467 Build 52 implementation acceptance is GREEN at dev SHA 24f66983bf052280f62d0983f27d9707ef20d8f2 / tree de49d1b7ad75a7fbff31749165d93b2f1aba94a9 with System Gate 33932827712, Current Application Quality 33932827708, I.T. Admin Runtime Proof 33932827704 and Repository Branch Hygiene 33932827696 successful plus exact Development Preview acceptance. The last fully verified restart checkpoint is Build 51 final closure at 3f5e10f4ad005945ed4092b63079b11f62c4d7ee / tree baca33be1a9b0dc888f12c2882f97545faed97a8 with System 33932323391, Quality 33932323375, I.T. 33932323392 and Hygiene 33932323423 successful. Build 52 remains a closure candidate until its authority-closure merged dev head independently completes the external exact-head four-proof and Preview cycle. Do not create an evidence-only commit to embed those later results; Build 53 must ingest the externally verified Build 52 final closure before source mutation. Production remains Build 32, canonical migrations remain exactly 0001-0004 and external HOLD lanes remain separate."
+  "restart_rule": "Release 467 Build 53 implementation acceptance is GREEN at dev SHA 4ba42dba64c4d1ca46cd145add24128ab3f17be4 / tree 2fed089e03b4c545aaa330e7767a8e9a127dc58d with System Gate 33933835769, Current Application Quality 33933835712, I.T. Admin Runtime Proof 33933835781 and Repository Branch Hygiene 33933835787 successful plus exact Development Preview acceptance. The last fully verified restart checkpoint is Build 52 final closure at 33ead64048edf0b089b49c4a02783f468dc806a5 / tree 8c25dfedc31bd27cb7b79429c15b669830e176f8 with System 33933307193, Quality 33933307182, I.T. 33933307188 and Hygiene 33933307190 successful. Build 53 remains a closure candidate until its authority-closure merged dev head independently completes the external exact-head four-proof and Preview cycle. Do not create an evidence-only commit to embed those later results; Build 54 must ingest the externally verified Build 53 final closure before source mutation. Production remains Build 32, canonical migrations remain exactly 0001-0004 and external HOLD lanes remain separate."
 }
