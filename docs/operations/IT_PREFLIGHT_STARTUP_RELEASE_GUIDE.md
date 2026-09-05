@@ -4,62 +4,54 @@
 
 ## Verified Development
 
-Build 59 — Storefront Media Availability & Merchandising Recovery is the last fully verified restart checkpoint:
-- `dev` `44483117210e93ce7126cd19510b090d88f663a7`
-- tree `3523119d31bbde05ba98faa530acc3dae88920d2`
-- System Gate `33969967713` SUCCESS
-- Current Application Quality `33969967734` SUCCESS
-- I.T. Admin Runtime Proof `33969967704` SUCCESS
-- Repository Branch Hygiene `33969967656` SUCCESS
-- exact Preview deployment, canonical Development D1 proof, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
+Build 60 — Production Resource Binding & Account/Auth Recovery is the last fully verified checkpoint:
+- `dev` `2f099d88b39a35a3bb8cf73798ba2c30b2b82083`
+- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
+- System Gate `33972673238` SUCCESS
+- Current Application Quality `33972673246` SUCCESS
+- I.T. Admin Runtime Proof `33972673266` SUCCESS
+- Repository Branch Hygiene `33972673254` SUCCESS
+- exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 59 is the current proven Production source/deployment checkpoint:
-- `main` `9411c0968d2f0cae57f25d36f0664729cd81c61f`
-- tree `3523119d31bbde05ba98faa530acc3dae88920d2`
-- Production Pages Deploy `33970506769` SUCCESS.
+Build 60 is the current standard Production checkpoint:
+- `main` `732bac55a4a43434a31090bb3b9c6b7b2c5a7939`
+- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
+- Production Pages Deploy `33972781588` SUCCESS.
 
-The Build 59 Production workflow proved the exact fully-green Development tree before Production work, snapshotted and preserved Production business data, proved canonical Production D1 plus isolation/foreign-key integrity, deployed the exact `main` SHA, proved Production bindings, passed public smoke and preserved promotion proof. A later live account/media report proves that the previous public smoke did not test a real Product R2 object or an authenticated account-admin write.
+The Production workflow proved exact green Development ancestry, Production business-data snapshot/preservation, canonical Production D1, isolation/FK integrity, exact deployment, live bindings, public smoke and promotion proof.
+
+## Build 61 validation boundary
+
+Production Live Resource Integrity run `33972823412` failed before its resource assertions because its Wrangler D1 invocation omitted the Cloudflare account context present in the successful Production deployment workflow. Its R2/API checks were skipped. Do not interpret that run as a proven live D1/R2 failure.
+
+Build 61 — **Production Live Resource Proof Repair**:
+- adds the canonical `CLOUDFLARE_ACCOUNT_ID` to the proof;
+- exposes Wrangler output instead of redirecting the critical diagnostic silently;
+- proves supported `users`/`sessions` table columns read-only;
+- fetches known R2 object `Itemsforsale/DD215-216B.jpeg` through the live same-origin route;
+- requires `/api/products` to return at least one Product and at least one public image URL;
+- fetches real Product image bytes, using the same-origin fallback when the custom asset hostname fails;
+- requires `/api/storefront-merchandising` JSON/OK;
+- requires the public auth diagnostic to reach Production D1.
+
+Build 61 changes no application runtime, D1 business data, R2 object, canonical migration, provider execution or Cloudflare Access policy.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. A closure candidate never self-claims proofs that can only exist after its merge commit. The next build ingests the previous final closure before any other source mutation.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 61’s first source mutation ingested the exact Build 60 Development and Production closure. Build 61 must pass exact feature-head proofs, then exact merged-`dev` System + Quality + I.T. + Hygiene and Preview acceptance. Only that exact green tree may be promoted to `main` to execute the repaired live-resource proof.
 
-Build 60 ingested the exact Build 59 Development and Production closure in its first source mutation and is the active **Production Resource Binding & Account/Auth Recovery** candidate. After Build 60 merges, its exact `dev` head must independently pass System Gate, Current Application Quality, I.T. Admin Runtime Proof, Repository Branch Hygiene and exact Preview acceptance before the explicitly authorized Production hotfix is promoted.
+## Environment boundaries
 
-## Current Build 60 incident boundary
+- Development Pages: `dev` / `https://dev.devilndove-site.pages.dev`
+- Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
+- Development Product R2: `devilndove-toolshed-images-dev`
+- Development CAIP R2: `devilndove-caip-media-dev`
+- Production Pages: `main` / `https://devilndove.com`
+- Production D1: `devilndove-prod-r462` / `f34a741b-0000-45b0-9a96-6be08754d563`
+- Production Product R2: `devilndove-toolshed-images`
+- Production CAIP R2: `devilndove-caip-media`
+- Canonical migrations: exactly `0001`–`0004` via `scripts/d1_migrate.py`.
 
-- Product images remain unavailable across live public site surfaces after Build 59 Production.
-- Authenticated `POST /api/admin/create-user` returns HTTP 503 with `ADMIN_CREATE_USER_FAILED`.
-- The Production deploy workflow is configured for live resources: D1 `devilndove-prod-r462` / `f34a741b-0000-45b0-9a96-6be08754d563`, Product R2 `devilndove-toolshed-images`, CAIP R2 `devilndove-caip-media`.
-- Build 60 account routes inspect the actual live `users`/`sessions` columns read-only and dynamically select the supported session token/user timestamp fields. No request-time DDL or blind migration is allowed.
-- Build 60 `/api/product-media` remains GET-only and supports both current `products/` and approved legacy public prefixes including `Itemsforsale/`, `Toolshed/`, `Tools/` and `Supplies/`, with historical case compatibility.
-- Shared HTML middleware injects the recovery client on every HTML page.
-- Production acceptance must now prove the live account schema contract and fetch a real known public R2 object before the incident is called closed.
-
-The separate `business-administration` module-runtime suppression warning remains a legacy module mapping issue and is not the structured Create User 503 source.
-
-## Startup sequence
-
-1. Read `current-development-authority.json`.
-2. Confirm Build 59 verified Development SHA/tree/runs above.
-3. Fetch current `dev`; it must be at or descended from `44483117210e93ce7126cd19510b090d88f663a7`.
-4. If Build 60 is current, verify its exact feature head and later merged `dev` head externally before claiming it GREEN.
-5. Confirm current Production checkpoint is Build 59 at `9411c0968d2f0cae57f25d36f0664729cd81c61f`, tree `3523119d31bbde05ba98faa530acc3dae88920d2`, Production run `33970506769`.
-6. Read `release467-build60-production-resource-binding-auth-recovery.json`, then Build 59/58/57/56 authorities, handoff, roadmap, sanity and Markdown index.
-7. Confirm `/admin/it/`, `/admin/deployment-preflight/` and `/admin/reliability/` remain read-only projections.
-8. Development remains `dev` Preview on Pages project `devilndove-site`; Production remains `main` Production.
-9. Development D1 remains `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`.
-10. Development Product R2 remains `devilndove-toolshed-images-dev`; CAIP private R2 remains `devilndove-caip-media-dev`.
-11. Production D1 remains `devilndove-prod-r462` / `f34a741b-0000-45b0-9a96-6be08754d563`; Product R2 remains `devilndove-toolshed-images`.
-12. Canonical migrations remain exactly `0001`–`0004` under `migrations/canonical`, applied only through `scripts/d1_migrate.py`.
-13. Never overwrite Production business data from Development.
-14. Verify Application Modules and root administrator full-manage authority before release claims.
-15. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain independent HOLD/evidence-dependent lanes.
-16. Renderer/provider execution, publication, social handoff and R2 mutation remain closed unless separately authorized.
-17. Confirm the current pointer build equals the newest `release467-buildNN-*.json` authority before calling restart truth current.
-
-## Build 60 boundary
-
-Build 60 changes account-schema compatibility, public media read recovery and release proof coverage only. It adds no schema migration, D1 business-data migration, R2 mutation, provider execution or automatic Production promotion. The user has explicitly authorized this incident correction to be promoted to `main` after exact Development acceptance passes.
+Never overwrite Production business data from Development. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain independent HOLD/evidence-dependent lanes. The `business-administration` browser warning remains a separate legacy module-name convergence task.
