@@ -1,4 +1,4 @@
-// Release 467 Build 59 — Storefront Media Availability & Merchandising Recovery renderer.
+// Release 467 Build 60 — Production Resource Binding & Account/Auth Recovery renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;

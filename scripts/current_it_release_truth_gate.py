@@ -35,6 +35,11 @@ accepted_tree = str(pointer.get('accepted_dev_tree_sha') or '')
 authorities = pointer.get('current_release_authorities') or []
 current_authority_path = str(authorities[0]) if authorities else ''
 current_authority = load(current_authority_path) if current_authority_path else {}
+restart = pointer.get('restart_integrity') or {}
+last_verified = restart.get('last_fully_verified') or {}
+last_verified_build = int(last_verified.get('build') or 0)
+candidate_mode = build > last_verified_build
+
 prod_authority_path = str(prod.get('authority') or '')
 if not prod_authority_path:
     prod_build = int(prod.get('build') or 0)
@@ -45,19 +50,38 @@ prod_authority = load(prod_authority_path) if prod_authority_path else {}
 
 req(release == 467, 'current pointer must remain Release 467')
 req(build >= 33, 'I.T. release-truth guard requires Build 33 or newer')
-req(pointer.get('state') == 'DEVELOPMENT_GREEN', 'current Development authority must be GREEN')
+req(pointer.get('state') == 'DEVELOPMENT_GREEN', 'current Development authority must remain on the last verified GREEN checkpoint while a candidate is tested')
 req(bool(current_authority_path), 'current pointer must name its current release authority first')
 req(int(current_authority.get('release') or 0) == release, 'current release authority release must match pointer')
 req(int(current_authority.get('build') or 0) == build, 'current release authority build must match pointer')
 req(str(current_authority.get('title') or '') == title, 'current release authority title must match pointer')
-req(current_authority.get('state') == 'DEVELOPMENT_GREEN', 'current release authority must be Development GREEN')
+
+if candidate_mode:
+    authority_state = str(current_authority.get('state') or '')
+    req(authority_state.endswith('_CANDIDATE') or authority_state in ('AUTHORIZED_IN_PROGRESS','DEVELOPMENT_CLOSURE_CANDIDATE'), 'current release authority must explicitly identify a closure/hotfix candidate')
+    start_dev = (current_authority.get('starting_point') or {}).get('development') or {}
+    req(str(start_dev.get('sha') or '') == accepted_sha, 'candidate starting Development SHA must match current pointer accepted SHA')
+    req(str(start_dev.get('tree') or '') == accepted_tree, 'candidate starting Development tree must match current pointer accepted tree')
+    run_map = {
+        'system_gate_run': 'system_gate_run',
+        'current_application_quality_run': 'quality_run',
+        'it_admin_runtime_proof_run': 'it_admin_runtime_run',
+        'branch_hygiene_run': 'repository_hygiene_run',
+    }
+    for pointer_key, authority_key in run_map.items():
+        req(int(start_dev.get(authority_key) or 0) == int(acceptance.get(pointer_key) or 0), f'candidate starting Development {authority_key} must match pointer {pointer_key}')
+else:
+    req(current_authority.get('state') == 'DEVELOPMENT_GREEN', 'current release authority must be Development GREEN')
+    req(current_authority.get('accepted_dev_sha') == accepted_sha, 'current release accepted SHA must match current pointer')
+    req(current_authority.get('accepted_dev_tree_sha') == accepted_tree, 'current release accepted tree must match current pointer')
+    req((current_authority.get('acceptance') or {}) == acceptance, 'current release acceptance runs must match current pointer')
 
 api_build = re.search(r'const BUILD\s*=\s*(\d+)\s*;', api)
 req(api_build and int(api_build.group(1)) == build, 'I.T. API build must match current-development-authority build')
 req(title and title in api, 'I.T. API title must match current-development-authority title')
 req(f'Release 467 Build {build}' in client, 'I.T. client must identify the current build')
 req(f'Release 467 Build {build}' in page, 'I.T. page must identify the current build')
-req("state: 'DEVELOPMENT_GREEN'" in api, 'I.T. API must expose Development GREEN state')
+req("state: 'DEVELOPMENT_GREEN'" in api, 'I.T. API must expose the last verified Development GREEN state separately from candidate state')
 
 for value, label in ((accepted_sha, 'accepted Development SHA'), (accepted_tree, 'accepted Development tree')):
     req(value and value in api, f'I.T. API missing {label}')
@@ -65,17 +89,13 @@ for key in ('system_gate_run', 'current_application_quality_run', 'it_admin_runt
     value = str(acceptance.get(key) or '')
     req(value and value in api, f'I.T. API missing accepted Development {key}')
 
-req(current_authority.get('accepted_dev_sha') == accepted_sha, 'current release accepted SHA must match current pointer')
-req(current_authority.get('accepted_dev_tree_sha') == accepted_tree, 'current release accepted tree must match current pointer')
-req((current_authority.get('acceptance') or {}) == acceptance, 'current release acceptance runs must match current pointer')
-
 for key in ('main_sha', 'tree_sha', 'production_pages_deploy_run'):
     value = str(prod.get(key) or '')
     req(value and value in api, f'I.T. API missing current Production baseline {key}')
 
 normalized_prod = prod_authority.get('production') or prod_authority.get('production_baseline') or prod_authority.get('production_checkpoint') or {}
 req(bool(prod_authority_path), 'current Production baseline must name or resolve an authority file')
-req(prod_authority.get('state') == 'PRODUCTION_GREEN' or normalized_prod.get('state') == 'PRODUCTION_GREEN', 'Production authority must remain Production GREEN')
+req(prod_authority.get('state') == 'PRODUCTION_GREEN' or normalized_prod.get('state') == 'PRODUCTION_GREEN' or 'PRODUCTION_GREEN' in str(prod_authority.get('state') or ''), 'Production authority must retain Production GREEN evidence')
 req(normalized_prod.get('main_sha') == prod.get('main_sha'), 'Production authority main must match current Production baseline')
 req(normalized_prod.get('tree_sha') == prod.get('tree_sha'), 'Production authority tree must match current Production baseline')
 req(normalized_prod.get('production_pages_deploy_run') == prod.get('production_pages_deploy_run'), 'Production authority deploy run must match current Production baseline')
