@@ -1,0 +1,292 @@
+name: Recovery Production Product R2 Restore
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-production-product-r2-restore.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-production-product-r2-restore
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PROD_D1: devilndove-prod-r462
+      PROD_BUCKET: devilndove-toolshed-images
+      LIVE_BASE: https://devilndove.com
+      FIRESTORAGE_API: https://api.firestorage.ai/dev/file
+      FIRESTORAGE_SHARE: Du_6a_urMG5o
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Establish non-destructive recovery boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/product-r2-restore/transports /tmp/product-r2-restore/payload /tmp/product-r2-restore/proof
+          cat > /tmp/product-r2-restore/proof/boundary.txt <<'EOF'
+          TARGET=Production Product R2 only
+          BUCKET=devilndove-toolshed-images
+          AUTHORITY=Current Production D1 Product image keys + verified Google Drive source bytes
+          EXPECTED_CURRENT_KEYS=150
+          D1_MUTATION=FORBIDDEN
+          R2_DELETE=FORBIDDEN
+          R2_OVERWRITE_CONFLICT=FORBIDDEN
+          SOURCE_PROMOTION=NONE
+          MAIN_MUTATION=NONE
+          EOF
+
+      - name: Download and byte-verify Firestorage recovery transports
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files?maxResults=1000" -o /tmp/product-r2-restore/firestorage-list.json
+          cat > /tmp/product-r2-restore/expected-transports.tsv <<'EOF'
+          product-live-restore-150.transport-01.zip	33366760	763a95c32ea5d235dfea6c55f41aa0886c50dd81675d8929e100aadb662525b9
+          product-live-restore-150.transport-02.zip	31776846	19e730e54a78b221b06b7e3bc40eaf575a5a6b829180b4b73f4dc16e8e24ad0e
+          product-live-restore-150.transport-03.zip	30799489	d264926e267c53133b6c161c3b2297d7a87e452f8474744ec3506504fd88e8ae
+          product-live-restore-150.transport-04.zip	33424356	8d2d09b65459a1a8a2107d2516b5e8a9f931247f5e45228497ce005cce1ce497
+          product-live-restore-150.transport-05.zip	31295584	54e888b3f591b7ccffc5de7669db3716f294a0cbfc8c643f0b918e3940d51f0c
+          product-live-restore-150.transport-06.zip	32835452	71bb1744a94a9d5c708072e606985925f53b774e80107d47ffd17309b00e6ea3
+          product-live-restore-150.transport-07.zip	31756125	8f3350a84c16613eaf0940acae0b60ab47e3d907ae1ad04b6030c97eeb798ab8
+          product-live-restore-150.transport-08.zip	30710527	fce4528ef17b765df17eeff21082911b447ffe990ef25056856e996ef317ddec
+          EOF
+          python - <<'PY' > /tmp/product-r2-restore/firestorage-files.tsv
+          import json
+          d=json.load(open('/tmp/product-r2-restore/firestorage-list.json'))
+          for f in d.get('files') or []:
+              print(str(f.get('fileName') or ''),str(f.get('sizeBytes') or ''),str(f.get('fileId') or ''),sep='\t')
+          PY
+          sort /tmp/product-r2-restore/expected-transports.tsv -o /tmp/product-r2-restore/expected-transports.tsv
+          sort /tmp/product-r2-restore/firestorage-files.tsv -o /tmp/product-r2-restore/firestorage-files.tsv
+          join -t $'\t' -1 1 -2 1 /tmp/product-r2-restore/expected-transports.tsv /tmp/product-r2-restore/firestorage-files.tsv > /tmp/product-r2-restore/transport-map.tsv
+          test "$(wc -l </tmp/product-r2-restore/transport-map.tsv)" -eq 8
+          : > /tmp/product-r2-restore/proof/transport-proof.tsv
+          while IFS=$'\t' read -r name expected_size expected_sha api_size file_id; do
+            test "$expected_size" = "$api_size" || { echo "Firestorage metadata size mismatch: $name"; exit 20; }
+            meta=$(curl -fsSL --retry 3 -X POST "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files/$file_id/download")
+            url=$(python -c 'import json,sys; print(json.load(sys.stdin)["downloadUrl"])' <<<"$meta")
+            out="/tmp/product-r2-restore/transports/$name"
+            curl -fsSL --retry 3 --connect-timeout 20 --max-time 300 "$url" -o "$out"
+            got_size=$(wc -c <"$out" | tr -d ' ')
+            got_sha=$(sha256sum "$out" | awk '{print $1}')
+            test "$got_size" = "$expected_size" || { echo "Firestorage download size mismatch: $name"; exit 21; }
+            test "$got_sha" = "$expected_sha" || { echo "Firestorage download SHA mismatch: $name"; exit 22; }
+            printf '%s\t%s\t%s\n' "$name" "$got_size" "$got_sha" >> /tmp/product-r2-restore/proof/transport-proof.tsv
+          done < /tmp/product-r2-restore/transport-map.tsv
+          echo 'FIRESTORAGE_TRANSPORT=PASS'
+
+      - name: Assemble and verify exactly 150 authorized Product objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,pathlib,re,zipfile
+          root=pathlib.Path('/tmp/product-r2-restore')
+          payload=root/'payload'; payload.mkdir(exist_ok=True)
+          union=[]; keys=set(); files=set()
+          forbidden={2,16,17,42,44,45}
+          for zp in sorted((root/'transports').glob('*.zip')):
+              with zipfile.ZipFile(zp) as z:
+                  part=json.loads(z.read('product-live-restore-150/part-manifest.json'))
+                  for item in part:
+                      key=str(item.get('key') or '')
+                      rel=str(item.get('file') or '')
+                      pid=int(item.get('product_id'))
+                      assert key not in keys,('duplicate key',key)
+                      assert rel not in files,('duplicate payload ref',rel)
+                      assert re.fullmatch(r'products/[1-9][0-9]*/[A-Za-z0-9._-]+\.jpg',key),key
+                      assert int(key.split('/')[1])==pid,(key,pid)
+                      assert pid not in forbidden,(key,'deliberately deleted Product')
+                      assert item.get('mime')=='image/jpeg',(key,item.get('mime'))
+                      arc='product-live-restore-150/'+rel
+                      data=z.read(arc)
+                      size=len(data); sha=hashlib.sha256(data).hexdigest()
+                      assert size==int(item['size']),(key,size,item['size'])
+                      assert sha==item['sha256'],(key,sha,item['sha256'])
+                      dest=payload/rel
+                      dest.parent.mkdir(parents=True,exist_ok=True)
+                      dest.write_bytes(data)
+                      union.append(item); keys.add(key); files.add(rel)
+          assert len(union)==150,len(union)
+          assert len(keys)==150 and len(files)==150
+          json.dump(sorted(union,key=lambda x:x['key']),open(root/'proof'/'authorized-manifest.json','w'),indent=2)
+          print('AUTHORIZED_MANIFEST=PASS count=150 bytes=',sum(int(x['size']) for x in union))
+          PY
+
+      - name: Re-prove all 150 target keys are current Production D1 Product references
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT product_id,image_url FROM product_images ORDER BY product_id,sort_order,product_image_id;" > /tmp/product-r2-restore/proof/d1-current-product-images.json
+          python - <<'PY'
+          import json,urllib.parse
+          root='/tmp/product-r2-restore/proof'
+          manifest=json.load(open(root+'/authorized-manifest.json'))
+          raw=json.load(open(root+'/d1-current-product-images.json'))
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'product_id' in v and 'image_url' in v: rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          current=set()
+          for r in rows:
+              u=str(r.get('image_url') or '').strip()
+              if not u: continue
+              p=urllib.parse.urlparse(u)
+              key=''
+              if p.hostname and p.hostname.lower()=='assets.devilndove.com': key=urllib.parse.unquote(p.path.lstrip('/'))
+              elif p.path.endswith('/api/product-media'):
+                  q=urllib.parse.parse_qs(p.query)
+                  key=(q.get('key') or [''])[0]
+                  if not key and (q.get('src') or [''])[0]:
+                      s=urllib.parse.urlparse((q.get('src') or [''])[0]); key=urllib.parse.unquote(s.path.lstrip('/'))
+              elif u.startswith('products/'): key=u
+              if key: current.add(key)
+          targets={x['key'] for x in manifest}
+          missing=sorted(targets-current)
+          assert not missing,('Recovery targets no longer current in Production D1',missing[:20],len(missing))
+          print('PRODUCTION_D1_AUTHORITY=PASS targets=150 current_product_image_keys=',len(current))
+          PY
+
+      - name: Preflight live target keys and refuse any conflicting object
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,time,urllib.error,urllib.parse,urllib.request
+          root='/tmp/product-r2-restore/proof'
+          m=json.load(open(root+'/authorized-manifest.json'))
+          results=[]
+          for i,x in enumerate(m,1):
+              key=x['key']; expected_sha=x['sha256']; expected_size=int(x['size'])
+              url='https://devilndove.com/api/product-media?'+urllib.parse.urlencode({'key':key,'recovery_preflight':str(time.time_ns())})
+              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-r2-recovery/1.0','Accept':'image/*','Cache-Control':'no-store'})
+              try:
+                  with urllib.request.urlopen(req,timeout=30) as r:
+                      status=int(r.status); body=r.read(20*1024*1024); resolved=str(r.headers.get('x-dd-media-key') or '')
+              except urllib.error.HTTPError as e:
+                  if e.code==404:
+                      results.append({'key':key,'state':'missing'}); continue
+                  raise
+              assert status==200,(key,status)
+              got_sha=hashlib.sha256(body).hexdigest(); got_size=len(body)
+              if resolved: assert resolved==key,(key,resolved)
+              assert got_size==expected_size and got_sha==expected_sha,('LIVE R2 CONFLICT - REFUSING WRITE',key,expected_size,got_size,expected_sha,got_sha)
+              results.append({'key':key,'state':'already_exact','size':got_size,'sha256':got_sha})
+              if i%25==0: print('preflight',i,'of',len(m))
+          json.dump(results,open(root+'/preflight.json','w'),indent=2)
+          exact=sum(x['state']=='already_exact' for x in results); missing=sum(x['state']=='missing' for x in results)
+          print('PRODUCTION_PREFLIGHT=PASS exact=',exact,'missing=',missing,'conflicts=0')
+          PY
+
+      - name: Restore only missing verified objects to Production R2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/product-r2-restore/restore.tsv
+          import json
+          root='/tmp/product-r2-restore'
+          m={x['key']:x for x in json.load(open(root+'/proof/authorized-manifest.json'))}
+          pre=json.load(open(root+'/proof/preflight.json'))
+          for p in pre:
+              if p['state']!='missing': continue
+              x=m[p['key']]
+              print(root+'/payload/'+x['file'],x['key'],x['mime'],x['size'],x['sha256'],sep='\t')
+          PY
+          total=$(wc -l < /tmp/product-r2-restore/restore.tsv | tr -d ' ')
+          echo "objects_to_restore=$total"
+          : > /tmp/product-r2-restore/proof/restored.tsv
+          n=0
+          while IFS=$'\t' read -r file key mime size sha; do
+            [ -n "$key" ] || continue
+            n=$((n+1))
+            echo "[$n/$total] PUT $key"
+            npx --yes wrangler@4.128.0 r2 object put "$PROD_BUCKET/$key" --remote --file "$file" --content-type "$mime" --cache-control 'public, max-age=31536000, immutable' --force
+            printf '%s\t%s\t%s\n' "$key" "$size" "$sha" >> /tmp/product-r2-restore/proof/restored.tsv
+          done < /tmp/product-r2-restore/restore.tsv
+          test "$n" -eq "$total"
+          echo "PRODUCTION_R2_ADDITIVE_WRITE=PASS restored=$n deletes=0"
+
+      - name: Read back all 150 objects through live Production route and verify SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,time,urllib.parse,urllib.request
+          root='/tmp/product-r2-restore/proof'
+          m=json.load(open(root+'/authorized-manifest.json'))
+          proof=[]
+          for i,x in enumerate(m,1):
+              key=x['key']; url='https://devilndove.com/api/product-media?'+urllib.parse.urlencode({'key':key,'recovery_verify':str(time.time_ns())})
+              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-r2-recovery/1.0','Accept':'image/*','Cache-Control':'no-store'})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  status=int(r.status); ctype=str(r.headers.get('content-type') or '').lower(); resolved=str(r.headers.get('x-dd-media-key') or ''); body=r.read(20*1024*1024)
+              got_sha=hashlib.sha256(body).hexdigest(); got_size=len(body)
+              assert status==200,(key,status)
+              assert ctype.startswith('image/'),(key,ctype)
+              if resolved: assert resolved==key,(key,resolved)
+              assert got_size==int(x['size']),(key,got_size,x['size'])
+              assert got_sha==x['sha256'],(key,got_sha,x['sha256'])
+              proof.append({'key':key,'status':status,'content_type':ctype,'size':got_size,'sha256':got_sha})
+              if i%25==0: print('verified',i,'of',len(m))
+          assert len(proof)==150
+          json.dump(proof,open(root+'/live-readback.json','w'),indent=2)
+          print('PRODUCTION_LIVE_READBACK=PASS exact_keys=150')
+          PY
+
+      - name: Write recovery result
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('/tmp/product-r2-restore/proof')
+          pre=json.load(open(root/'preflight.json'))
+          live=json.load(open(root/'live-readback.json'))
+          exact=sum(x['state']=='already_exact' for x in pre)
+          missing=sum(x['state']=='missing' for x in pre)
+          restored=sum(1 for _ in open(root/'restored.tsv')) if (root/'restored.tsv').exists() else 0
+          summary={
+            'status':'GREEN_VERIFIED_SUBSET',
+            'production_bucket':'devilndove-toolshed-images',
+            'authorized_keys':150,
+            'already_exact_before_restore':exact,
+            'missing_before_restore':missing,
+            'restored':restored,
+            'live_readback_verified':len(live),
+            'conflicts':0,
+            'r2_deletes':0,
+            'd1_mutations':0,
+            'main_mutations':0,
+            'unresolved_excluded_current_references':88
+          }
+          assert restored==missing
+          assert len(live)==150
+          (root/'result.json').write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-production-product-r2-restore-proof
+          path: /tmp/product-r2-restore/proof
+          retention-days: 30
+          if-no-files-found: error
