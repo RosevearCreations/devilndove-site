@@ -29,13 +29,15 @@ req("code: 'historical_r2_mutation_retired'" in legacy,'historical mutation reti
 req("mutation_capability: 'none'" in legacy,'historical R2 route must expose no mutation capability')
 req("production_r2_mutation: false" in legacy,'historical R2 route must explicitly report no Production mutation')
 
-# Recovery discovery is deliberately read-only. Prevent accidental PUT/DELETE HTTP methods or Wrangler object mutation commands.
+# Recovery discovery is deliberately read-only. POST to the inventory-only application endpoint is allowed;
+# direct object mutation verbs/commands remain forbidden.
 for pattern,label in (
-    (r"method\s*=\s*['\"](?:PUT|DELETE|POST|PATCH)['\"]",'write HTTP method'),
+    (r"method\s*=\s*['\"](?:PUT|DELETE|PATCH)['\"]",'direct write HTTP method'),
     (r'wrangler[^\n]+r2\s+object\s+(?:put|delete)', 'Wrangler R2 object mutation'),
-    (r'/objects/[^\n]+\s+-X\s+(?:PUT|DELETE)', 'Cloudflare R2 REST mutation'),
+    (r'/objects/[^\n]+\s+-X\s+(?:PUT|DELETE|PATCH)', 'Cloudflare R2 REST mutation'),
 ):
     req(re.search(pattern,workflow,re.I) is None,f'Build 62 recovery discovery contains {label}')
+req("method='POST'" in workflow and "'action':action" in workflow,'read-only inventory bridge call must remain explicit')
 req("'mutation':'NONE'" in workflow and "R2 put/copy/delete: NONE" in workflow,'recovery workflow read-only boundary missing')
 req('build62_r2_destructive_convergence_gate.py' in quality,'current Quality gate must enforce Build 62 Production R2 ownership firewall')
 
