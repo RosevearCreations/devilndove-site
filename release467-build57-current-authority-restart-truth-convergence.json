@@ -6,13 +6,13 @@
   "source_authority": "dev",
   "source_base_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
   "source_base_tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
-  "accepted_dev_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
-  "accepted_dev_tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
+  "accepted_dev_sha": "8dc267594534bc51797f5cf4e59fc6dec6e8d9b6",
+  "accepted_dev_tree_sha": "c2f31450d59477fc313c9c0b25637f7bc9bc35e0",
   "acceptance": {
-    "system_gate_run": 33937292286,
-    "current_application_quality_run": 33937292299,
-    "it_admin_runtime_proof_run": 33937292333,
-    "branch_hygiene_run": 33937292280
+    "system_gate_run": 33967307608,
+    "current_application_quality_run": 33967307714,
+    "it_admin_runtime_proof_run": 33967307740,
+    "branch_hygiene_run": 33967307653
   },
   "restart_integrity_protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
   "previous_final_development_closure": {
@@ -35,6 +35,24 @@
     "non_secret_preview_smoke": true,
     "regression_evidence": true,
     "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "8dc267594534bc51797f5cf4e59fc6dec6e8d9b6",
+    "tree_sha": "c2f31450d59477fc313c9c0b25637f7bc9bc35e0",
+    "proofs": {
+      "system_gate_run": 33967307608,
+      "current_application_quality_run": 33967307714,
+      "it_admin_runtime_proof_run": 33967307740,
+      "branch_hygiene_run": 33967307653
+    },
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 58
   },
   "production_checkpoint": {
     "release": 467,
@@ -73,12 +91,12 @@
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
-    "last_fully_verified_build": 56,
-    "current_closure_candidate_build": 57,
+    "last_fully_verified_build": 57,
+    "current_closure_candidate_build": null,
     "closure_candidate_must_not_self_claim_final_proof": true,
     "next_build_ingests_previous_final_closure": true
   },
-  "closure_rule": "Build 57 must not self-claim final merged Development proof. After the exact tested feature head is merged to dev, the merged dev SHA must independently pass System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof and Repository Branch Hygiene plus exact Preview acceptance. Build 58 must ingest those externally verified Build 57 values before its first source mutation.",
+  "closure_rule": "Build 57 final closure was independently verified after merge to dev and is recorded here only by Build 58. Build 58 must independently pass its own exact merged-dev four-proof and Preview cycle and must not self-claim those later values.",
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
     "paypal_sandbox": "HOLD_EXTERNAL",
@@ -87,6 +105,6 @@
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
   "next_build": 58,
-  "next_build_state": "AWAITING_BUILD_57_FINAL_CLOSURE_PROOF",
-  "next_build_title": null
+  "next_build_state": "AUTHORIZED_IN_PROGRESS",
+  "next_build_title": "Account Administration JSON Response Hardening"
 }
