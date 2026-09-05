@@ -1,0 +1,41 @@
+{
+  "release": 467,
+  "build": 55,
+  "title": "Inventory Intelligence Manufacturer-Link Schema Compatibility",
+  "state": "IN_PROGRESS",
+  "source_base": {
+    "dev_sha": "5834af2f50cc51f7052b1416aa4a17f8ba592192",
+    "tree_sha": "9b99c66cb648b8ebd7bc6e52555e49c2198b52af",
+    "proofs": {
+      "system_gate_run": 33935424946,
+      "current_application_quality_run": 33935424947,
+      "it_admin_runtime_proof_run": 33935424955,
+      "branch_hygiene_run": 33935424973
+    },
+    "exact_preview_deployment": true,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_base": {
+    "main_sha": "a6b65efc03ea3de147e5a4e0dd0c35221cfc8182",
+    "tree_sha": "9b99c66cb648b8ebd7bc6e52555e49c2198b52af",
+    "production_pages_deploy_run": 33935508224,
+    "state": "PRODUCTION_GREEN"
+  },
+  "defect": {
+    "surface": "Inventory Intelligence",
+    "error": "D1_ERROR: no such column: iml.is_current",
+    "runtime_file": "functions/api/admin/inventory-intelligence.js",
+    "canonical_table": "inventory_manufacturer_links",
+    "canonical_shape": "site_item_inventory_id is the primary key; no is_current column exists",
+    "root_cause": "Runtime query inferred a nonexistent historical/current-row flag from table existence instead of following the canonical one-link-per-inventory-item schema."
+  },
+  "scope": {
+    "schema_migration": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "runtime_fix": true,
+    "regression_gate": true,
+    "production_hotfix_after_green_dev": true
+  },
+  "external_lanes_unchanged": true
+}
