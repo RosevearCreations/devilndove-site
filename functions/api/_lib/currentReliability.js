@@ -1,44 +1,44 @@
-// Release 467 Build 54 — current read-only reliability projection.
-// Build 54 synchronizes verified Development and Production authority only.
+// Release 467 Build 57 — current read-only reliability projection.
+// Build 57 synchronizes verified Development and Production authority only.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 54;
-export const CURRENT_RELIABILITY_TITLE = 'Production Authority Synchronization';
+export const CURRENT_RELIABILITY_BUILD = 57;
+export const CURRENT_RELIABILITY_TITLE = 'Current Authority / Restart Truth Convergence';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 54,
+  build: 57,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: '9cb10fb3361455b33e7907c187de4d9432588705',
-  accepted_dev_tree_sha: '71a28e315628aed4f8a8610be9b3c5eed7d6ea4a',
-  system_gate_run: 33934329508,
-  current_application_quality_run: 33934329486,
-  it_admin_runtime_proof_run: 33934329585,
-  branch_hygiene_run: 33934329539,
+  accepted_dev_sha: 'c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26',
+  accepted_dev_tree_sha: 'bb75eac5302c0acba7fea35d4bbed6c41d5d64ab',
+  system_gate_run: 33937292286,
+  current_application_quality_run: 33937292299,
+  it_admin_runtime_proof_run: 33937292333,
+  branch_hygiene_run: 33937292280,
   exact_preview_deployment: true,
   role: 'AUTHORITY_SYNC_CANDIDATE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 53,
-  title: 'Generated Deliverable Review-State Convergence',
-  dev_sha: '9cb10fb3361455b33e7907c187de4d9432588705',
-  tree_sha: '71a28e315628aed4f8a8610be9b3c5eed7d6ea4a',
-  system_gate_run: 33934329508,
-  current_application_quality_run: 33934329486,
-  it_admin_runtime_proof_run: 33934329585,
-  branch_hygiene_run: 33934329539,
+  build: 56,
+  title: 'Product Photo Guidance and Packaging Onboarding',
+  dev_sha: 'c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26',
+  tree_sha: 'bb75eac5302c0acba7fea35d4bbed6c41d5d64ab',
+  system_gate_run: 33937292286,
+  current_application_quality_run: 33937292299,
+  it_admin_runtime_proof_run: 33937292333,
+  branch_hygiene_run: 33937292280,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 export const CURRENT_PRODUCTION = Object.freeze({
   release: 467,
-  build: 53,
-  title: 'Generated Deliverable Review-State Convergence',
-  main_sha: 'da365adb82860551d9a7bf4ca4d7463efa2642c6',
-  tree_sha: '71a28e315628aed4f8a8610be9b3c5eed7d6ea4a',
-  production_pages_deploy_run: 33934583466,
+  build: 55,
+  title: 'Inventory Intelligence Manufacturer-Link Schema Compatibility',
+  main_sha: 'ee42e7838a83def94e858b3d0d6c1a23947e2344',
+  tree_sha: 'a338071e446f5b18db3f26d8a0c0ca07141cd158',
+  production_pages_deploy_run: 33936229477,
   state: 'PRODUCTION_GREEN',
 });
 
@@ -85,8 +85,10 @@ export async function loadCurrentReliability(db, env = {}) {
       build52_render_job_creation: false,
       build53_generated_review_state_convergence: true,
       build53_generated_ready_for_render: false,
-      build53_production_green: true,
-      production_baseline_build: 53,
+      build55_production_green: true,
+      build56_product_photo_packaging_onboarding_development_green: true,
+      build57_authority_restart_truth_convergence: true,
+      production_baseline_build: 55,
     },
     safety: {
       ...inherited.safety,

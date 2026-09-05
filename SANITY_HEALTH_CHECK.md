@@ -1,31 +1,32 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 54 — Production Authority Synchronization is authority/read-only only.**
+**Release 467 Build 57 — Current Authority / Restart Truth Convergence is authority/read-only convergence.**
 
-Last fully verified Development checkpoint is Build 53:
-- SHA `9cb10fb3361455b33e7907c187de4d9432588705`
-- tree `71a28e315628aed4f8a8610be9b3c5eed7d6ea4a`
-- System Gate `33934329508`: SUCCESS
-- Current Application Quality `33934329486`: SUCCESS
-- I.T. Admin Runtime Proof `33934329585`: SUCCESS
-- Repository Branch Hygiene `33934329539`: SUCCESS
-- exact Development Preview acceptance: SUCCESS.
+Last fully verified Development checkpoint is Build 56:
+- SHA `c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26`
+- tree `bb75eac5302c0acba7fea35d4bbed6c41d5d64ab`
+- System Gate `33937292286`: SUCCESS
+- Current Application Quality `33937292299`: SUCCESS
+- I.T. Admin Runtime Proof `33937292333`: SUCCESS
+- Repository Branch Hygiene `33937292280`: SUCCESS
+- exact Development Preview deployment, canonical D1 proof, read-only data authority, bindings, smoke and regression evidence: SUCCESS.
 
-Current Production is Build 53:
-- `main` `da365adb82860551d9a7bf4ca4d7463efa2642c6`
-- tree `71a28e315628aed4f8a8610be9b3c5eed7d6ea4a`
-- Production Pages Deploy `33934583466`: SUCCESS.
+Current Production is Build 55:
+- `main` `ee42e7838a83def94e858b3d0d6c1a23947e2344`
+- tree `a338071e446f5b18db3f26d8a0c0ca07141cd158`
+- Production Pages Deploy `33936229477`: SUCCESS.
 
-Production acceptance proved business-data snapshot/preservation, all four canonical D1 migrations, foreign-key integrity, exact-main deployment, Production D1/R2 bindings, live public smoke and promotion-proof artifact preservation. The live Production tree exactly matches the verified Build 53 Development tree.
+Production acceptance proved business-data snapshot/preservation, canonical Production D1, foreign-key/isolation integrity, exact-main deployment, Production bindings, public smoke and promotion proof. Build 56 is Development-only and has not been promoted.
 
 ## Current safety boundary
 
 - Generated deliverables cannot originate `ready_for_render`; Build 52's fail-closed transition remains authoritative.
-- No new schema change; canonical migrations remain exactly `0001`–`0004`.
-- Build 54 changes authority/projections only; no application runtime behavior.
+- Canonical migrations remain exactly `0001`–`0004`; Build 57 adds no migration.
+- Build 57 changes authority and read-only I.T./Reliability/Deployment Preflight projections only; no business runtime behavior.
 - No renderer/provider execution, publication, social queue expansion, R2 mutation or Cloudflare Access mutation.
-- Production business data was preserved; no Development-to-Production business-data overwrite occurred.
+- No Development-to-Production business-data overwrite.
 - Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain HOLD/evidence-dependent.
-- Restart integrity is release-neutral for Production evidence and still requires the exact four-proof Development closure cycle.
+- Restart integrity remains `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` and requires the exact merged-Development four-proof plus Preview cycle.
+- The current pointer must not remain behind a newer Release 467 build authority.
 
-**Verdict:** Build 53 Development and Production are GREEN. Build 54 is the synchronization closure candidate and must receive its own exact merged-head Development proofs before Build 55 starts.
+**Verdict:** Build 56 Development is GREEN. Build 55 Production is GREEN. Build 57 is the current authority-convergence closure candidate and must receive its own exact merged-head Development proofs before Build 58 starts.
