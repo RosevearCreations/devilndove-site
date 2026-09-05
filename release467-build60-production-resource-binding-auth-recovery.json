@@ -2,7 +2,7 @@
   "release": 467,
   "build": 60,
   "title": "Production Resource Binding & Account/Auth Recovery",
-  "state": "PRODUCTION_INCIDENT_HOTFIX_CANDIDATE",
+  "state": "PRODUCTION_GREEN_WITH_VALIDATION_HARNESS_FOLLOWUP",
   "first_source_mutation": true,
   "restart_integrity_protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
   "starting_point": {
@@ -25,21 +25,44 @@
       "build": 59,
       "sha": "9411c0968d2f0cae57f25d36f0664729cd81c61f",
       "tree": "3523119d31bbde05ba98faa530acc3dae88920d2",
-      "production_pages_deploy_run": 33970506769,
-      "data_snapshot_preserved": true,
-      "canonical_production_d1_proof": true,
-      "production_d1_isolation_proof": true,
-      "exact_main_deployment": true,
-      "production_bindings_proven": true,
-      "public_smoke": true,
-      "promotion_proof": true
+      "production_pages_deploy_run": 33970506769
     }
   },
-  "reported_incident": {
-    "severity": "PRODUCTION_AVAILABILITY",
-    "account_admin": "POST /api/admin/create-user returns HTTP 503 with ADMIN_CREATE_USER_FAILED despite valid admin login.",
-    "product_media": "Product images are unavailable across live storefront/public surfaces after Build 59 promotion.",
-    "operator_request": "Verify Production uses live D1/R2 resources and correct live tables/objects; send correction to main ASAP."
+  "final_closure": {
+    "dev_sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
+    "tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+    "proofs": {
+      "system_gate_run": 33972673238,
+      "current_application_quality_run": 33972673246,
+      "it_admin_runtime_proof_run": 33972673266,
+      "branch_hygiene_run": 33972673254
+    },
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proven": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true
+  },
+  "production_checkpoint": {
+    "main_sha": "732bac55a4a43434a31090bb3b9c6b7b2c5a7939",
+    "tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+    "production_pages_deploy_run": 33972781588,
+    "state": "PRODUCTION_GREEN",
+    "data_snapshot_preserved": true,
+    "canonical_production_d1_proof": true,
+    "production_d1_isolation_proof": true,
+    "exact_main_deployment": true,
+    "production_bindings_proven": true,
+    "public_smoke": true,
+    "promotion_proof": true
+  },
+  "live_resource_validation": {
+    "run": 33972823412,
+    "state": "HARNESS_FAILED_BEFORE_RESOURCE_ASSERTIONS",
+    "root_cause": "The newly introduced validation workflow did not carry CLOUDFLARE_ACCOUNT_ID into its Wrangler D1 invocations. The successful Production deploy workflow did carry that account context.",
+    "resource_failure_proven": false,
+    "followup_authority": "release467-build61-production-live-resource-proof-repair.json"
   },
   "scope": {
     "production_d1_binding_and_schema_compatibility": true,
@@ -50,5 +73,5 @@
     "r2_mutation": false,
     "new_schema_migration": false
   },
-  "closure_rule": "Build 60 must be tested on an exact branch head before Production merge. Final merged-dev and Production proof values are external evidence and must not be self-claimed by this first mutation."
+  "closure_rule": "Build 60 is externally closed in Development and standard Production deployment. Build 61 owns the validation-harness repair and must not reinterpret run 33972823412 as a proven live D1/R2 failure."
 }
