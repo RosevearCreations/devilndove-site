@@ -14,6 +14,7 @@ import {
   updateContentProjectMedia
 } from '../_lib/contentAutomationStudio.js';
 import { requireContentAutomationSchema } from '../_lib/contentAutomationSchemaReadiness.js';
+import { requireContentRenderReadiness } from '../_lib/contentRenderReadiness.js';
 import { readContentStudio } from '../_lib/contentStudioReadService.js';
 import { syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 
@@ -125,9 +126,26 @@ export async function onRequestPost(context) {
       }
       result = { content_project_id: projectId, content_project_media_id: number(body.content_project_media_id), creative_project_id: caip?.project?.creative_project_id || null };
     } else if (action === 'update_deliverable') {
-      if (!projectId || !number(body.content_project_deliverable_id)) throw new Error('Content project and deliverable are required.');
-      detail = await updateContentDeliverable(db, projectId, number(body.content_project_deliverable_id), body, adminUser.user_id);
-      result = { content_project_id: projectId, content_project_deliverable_id: number(body.content_project_deliverable_id) };
+      const deliverableId = number(body.content_project_deliverable_id);
+      if (!projectId || !deliverableId) throw new Error('Content project and deliverable are required.');
+      const requestedStatus = normalizeText(body.deliverable_status).toLowerCase();
+      if (requestedStatus === 'ready_for_render') {
+        const readiness = await requireContentRenderReadiness(db, projectId, deliverableId, {
+          approval_status: body.approval_status,
+          title: body.title,
+          script_text: body.script_text,
+          body_content: body.body_content,
+          output_url: body.output_url
+        });
+        detail = await updateContentDeliverable(db, projectId, deliverableId, { ...body, deliverable_status: 'ready_for_review' }, adminUser.user_id);
+        await db.prepare(`UPDATE content_project_deliverables SET deliverable_status='ready_for_render',updated_at=CURRENT_TIMESTAMP WHERE content_project_id=? AND content_project_deliverable_id=?`).bind(projectId, deliverableId).run();
+        await db.prepare(`INSERT INTO content_project_events(content_project_id,event_type,actor_user_id,details_json,created_at) VALUES(?,'render_readiness_passed',?,?,CURRENT_TIMESTAMP)`).bind(projectId, adminUser.user_id || null, JSON.stringify({ release: 467, build: 52, content_project_deliverable_id: deliverableId, render_job_created: false, provider_execution: false })).run().catch(()=>null);
+        detail = await getContentProjectDetail(db, projectId);
+        result = { content_project_id: projectId, content_project_deliverable_id: deliverableId, render_readiness: readiness, render_job_created: false };
+      } else {
+        detail = await updateContentDeliverable(db, projectId, deliverableId, body, adminUser.user_id);
+        result = { content_project_id: projectId, content_project_deliverable_id: deliverableId };
+      }
     } else if (action === 'send_to_social_queue') {
       if (!projectId || !number(body.content_project_deliverable_id)) throw new Error('Content project and deliverable are required.');
       result = await queueSocialDeliverable(db, projectId, number(body.content_project_deliverable_id), adminUser.user_id);
@@ -163,8 +181,8 @@ export async function onRequestPost(context) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'content_automation_studio', incident_code: 'content_studio_post_failed', severity: 'warning',
       message: error?.message || 'Content Automation Studio could not save.', related_user_id: adminUser.user_id,
-      details: { release: RELEASE, provenance_build: CONTENT_STUDIO_BUILD, action, project_id: projectId || null, error: String(error?.stack || error?.message || error) }
+      details: { release: RELEASE, provenance_build: CONTENT_STUDIO_BUILD, action, project_id: projectId || null, error: String(error?.stack || error?.message || error), render_readiness: error?.readiness || null }
     });
-    return json({ ok: false, provenance_build: CONTENT_STUDIO_BUILD, error: error?.message || 'Content Automation Studio could not save right now.' }, 400);
+    return json({ ok: false, provenance_build: CONTENT_STUDIO_BUILD, error: error?.message || 'Content Automation Studio could not save right now.', code: error?.code || null, render_readiness: error?.readiness || null }, 400);
   }
 }
