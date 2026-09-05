@@ -1,31 +1,31 @@
-// Release 467 Build 58 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 59 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical diagnostics are reused read-only; forward schema authority remains canonical.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 58;
-const TITLE = 'Account Administration JSON Response Hardening';
+const BUILD = 59;
+const TITLE = 'Storefront Media Availability & Merchandising Recovery';
 const AUTHORITY = 'current-development-authority.json';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 58, title: TITLE,
-  accepted_dev_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
-  accepted_dev_tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
-  system_gate_run: 33967307608,
-  current_application_quality_run: 33967307714,
-  it_admin_runtime_proof_run: 33967307740,
-  branch_hygiene_run: 33967307653,
+  release: 467, build: 59, title: TITLE,
+  accepted_dev_sha: '91106c2156e209045ed49cfd48220550c7afca57',
+  accepted_dev_tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
+  system_gate_run: 33968914405,
+  current_application_quality_run: 33968914416,
+  it_admin_runtime_proof_run: 33968914417,
+  branch_hygiene_run: 33968914412,
   exact_preview_deployment: true,
-  role: 'ACCOUNT_ADMIN_JSON_HARDENING_CANDIDATE_BASE',
+  role: 'STOREFRONT_MEDIA_RECOVERY_CANDIDATE_BASE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 57, title: 'Current Authority / Restart Truth Convergence',
-  dev_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
-  tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
-  system_gate_run: 33967307608,
-  current_application_quality_run: 33967307714,
-  it_admin_runtime_proof_run: 33967307740,
-  branch_hygiene_run: 33967307653,
+  release: 467, build: 58, title: 'Account Administration JSON Response Hardening',
+  dev_sha: '91106c2156e209045ed49cfd48220550c7afca57',
+  tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
+  system_gate_run: 33968914405,
+  current_application_quality_run: 33968914416,
+  it_admin_runtime_proof_run: 33968914417,
+  branch_hygiene_run: 33968914412,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment: true,
 });
@@ -112,7 +112,7 @@ function canonicalChecks(truth, expectedSchema) {
     currentCheck(truth.foreign_key_violations ? 'fail' : 'pass','canonical_foreign_keys','D1 foreign-key integrity',truth.foreign_key_violations ? `${truth.foreign_key_violations} foreign-key violation(s) returned.` : 'PRAGMA foreign_key_check returned zero violations.','',{ rows: truth.foreign_key_rows }),
     currentCheck(schemaDrift.length ? 'warn' : 'pass','current_schema_visibility','Current expected application schema visibility',schemaDrift.length ? `${schemaDrift.length} application schema group(s) need review.` : `${expectedSchema.length} current application schema groups are visible.`),
     currentCheck('pass','runtime_schema_mutation_boundary','Request-time schema mutation boundary','This current Deployment Preflight endpoint is GET-only and has no schema repair capability.'),
-    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} is the current account-administration hardening candidate.`,'Verify the exact Build 58 merged dev head externally before Build 59 starts.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT, production: PRODUCTION }),
+    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} is the current Storefront recovery candidate.`,'Verify the exact Build 59 merged dev head externally before Build 60 starts.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT, production: PRODUCTION }),
   ];
 }
 function statusSummary(checks) {
@@ -176,10 +176,10 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is the current read-only Release 467 Build 58 projection.',
-      'Build 57 is the last fully verified Development checkpoint at 8dc267594534bc51797f5cf4e59fc6dec6e8d9b6 / c2f31450d59477fc313c9c0b25637f7bc9bc35e0 with System 33967307608, Quality 33967307714, I.T. 33967307740 and Hygiene 33967307653 plus exact Preview acceptance.',
-      'Build 55 is Production GREEN at main ee42e7838a83def94e858b3d0d6c1a23947e2344 / tree a338071e446f5b18db3f26d8a0c0ca07141cd158 with Production Pages Deploy 33936229477 successful.',
-      'Build 58 hardens account-administration response handling and adds no schema migration.',
+      'The active Deployment Preflight is the current read-only Release 467 Build 59 projection.',
+      'Build 58 is the last fully verified Development checkpoint at 91106c2156e209045ed49cfd48220550c7afca57 / ab8d5dae6bba682dad438937ca63c38955e0ff8a with System 33968914405, Quality 33968914416, I.T. 33968914417 and Hygiene 33968914412 plus exact Preview acceptance.',
+      'Build 55 is Production GREEN source/deployment authority at main ee42e7838a83def94e858b3d0d6c1a23947e2344 / tree a338071e446f5b18db3f26d8a0c0ca07141cd158 with Production Pages Deploy 33936229477 successful.',
+      'Build 59 addresses the live Storefront merchandising/media availability incident and adds no schema migration or R2 mutation.',
       'Canonical migrations remain exactly 0001-0004; external HOLD lanes remain separate.',
     ],
     safety: {

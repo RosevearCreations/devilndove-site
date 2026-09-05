@@ -13,6 +13,7 @@ for script in (
     'current_packaging_label_composition_gate.py',
     'current_packaging_label_production_gate.py',
     'current_build56_product_photo_packaging_onboarding_gate.py',
+    'current_storefront_media_recovery_gate.py',
     'current_grey_hair_media_intelligence_gate.py',
     'current_grey_hair_sync_alignment_gate.py',
     'current_grey_hair_story_edit_planning_gate.py',

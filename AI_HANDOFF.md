@@ -2,15 +2,15 @@
 
 ## Current authority
 
-Release 467 Build 58 — **Account Administration JSON Response Hardening** is the current Development closure candidate. It hardens Create User, Admin Reset Password and member Change Password error handling after live Production exposed HTTP 500/non-JSON responses. It adds no schema migration and does not authorize Production automatically.
+Release 467 Build 59 — **Storefront Media Availability & Merchandising Recovery** is the current Development closure candidate. It responds to live Production evidence that `/api/storefront-merchandising` returned HTTP 500 while product images from `assets.devilndove.com/products/...` failed with `NS_ERROR_DOM_NETWORK_ERR`, leaving Store product photography unavailable.
 
-The last fully verified Development checkpoint is Build 57 — **Current Authority / Restart Truth Convergence**:
-- `dev` SHA `8dc267594534bc51797f5cf4e59fc6dec6e8d9b6`
-- tree `c2f31450d59477fc313c9c0b25637f7bc9bc35e0`
-- System Gate `33967307608` SUCCESS
-- Current Application Quality `33967307714` SUCCESS
-- I.T. Admin Runtime Proof `33967307740` SUCCESS
-- Repository Branch Hygiene `33967307653` SUCCESS
+The last fully verified Development checkpoint is Build 58 — **Account Administration JSON Response Hardening**:
+- `dev` SHA `91106c2156e209045ed49cfd48220550c7afca57`
+- tree `ab8d5dae6bba682dad438937ca63c38955e0ff8a`
+- System Gate `33968914405` SUCCESS
+- Current Application Quality `33968914416` SUCCESS
+- I.T. Admin Runtime Proof `33968914417` SUCCESS
+- Repository Branch Hygiene `33968914412` SUCCESS
 - exact Development Preview deployment, canonical Development D1 proof, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 Current Production remains Build 55 — **Inventory Intelligence Manufacturer-Link Schema Compatibility**:
@@ -21,21 +21,20 @@ Current Production remains Build 55 — **Inventory Intelligence Manufacturer-Li
 
 Development is intentionally ahead of Production.
 
-## Build 58 scope
+## Build 59 scope
 
-Build 58 responds to live account-administration failures where `/api/admin/create-user` returned HTTP 500 and the browser then exposed `JSON.parse: unexpected character at line 1 column 1`.
+Build 59 is schema-neutral and read-only with respect to Product media storage:
+- Storefront merchandising now inspects the actual `products` table columns and uses safe fallbacks for optional Product fields rather than a brittle fixed-column SELECT.
+- A new public same-origin `/api/product-media` route reads only validated `products/*` objects from the existing `PRODUCT_MEDIA_BUCKET` R2 binding.
+- The Shop loads a browser media-recovery listener before its Product renderers. If `https://assets.devilndove.com/products/...` fails, the exact object is retried through `/api/product-media` on the same site.
+- The recovery endpoint has no R2 list, put, delete or multipart capability and rejects non-Product/traversal keys.
+- Current quality/System regression protection executes a runtime unit proof of the Product-media read path and preserves the canonical four-migration stream.
+- No D1 schema/business-data migration, R2 mutation, provider execution, Cloudflare Access change or automatic Production promotion.
 
-The bounded changes are:
-- Create User and Admin Reset Password clients use the shared safe `DDAuth.readApiJson` parser instead of raw `response.json()`.
-- Create User, Admin Reset Password and member Change Password APIs convert unexpected D1/runtime exceptions into structured JSON error codes/hints instead of allowing platform HTML/plain text to escape.
-- An incorrect current password is a validation failure rather than HTTP 401, so a valid session is not cleared merely because the current password was mistyped.
-- Password hashing remains the existing PBKDF2-SHA256 salted/iterated authority; plaintext passwords are never returned or audited.
-- No D1 schema/business-data migration, R2 mutation, provider execution or automatic Production promotion.
-
-The separate console warning `runtime activation suppressed for unavailable module business-administration` is a legacy three-module/canonical-five-module runtime mapping issue. It did not cause the Create User HTTP 500 and is not silently folded into this account-writing hotfix.
+Build 58 remains the account-administration fix that prevents raw `JSON.parse` errors and returns structured account-write failures. The separate `business-administration` module warning remains a legacy module-mapping cleanup item; it did not cause the Create User 500.
 
 ## Safety and restart rules
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 58 becomes the next restart checkpoint only after its exact merged `dev` head independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof, Repository Branch Hygiene and exact Preview acceptance. Do not add an evidence-only commit afterward; Build 59 must ingest those externally verified Build 58 values before its first source mutation.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 59 becomes the next restart checkpoint only after its exact merged `dev` head independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof, Repository Branch Hygiene and exact Preview acceptance. Do not add an evidence-only commit afterward; Build 60 must ingest those externally verified Build 59 values before its first source mutation.
 
 Canonical D1 migrations remain exactly `0001`–`0004`. Renderer/provider execution, publication, social queue expansion, R2 mutation and Cloudflare Access mutation remain closed. Stripe Development, PayPal sandbox, CAIP private-media evidence, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes.
