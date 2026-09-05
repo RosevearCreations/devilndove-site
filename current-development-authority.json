@@ -123,7 +123,7 @@
   "next_build": 55,
   "next_build_state": "AWAITING_BUILD_54_FINAL_CLOSURE_PROOF",
   "next_build_title": null,
-  "promotion_state": "BUILD_53_PRODUCTION_GREEN_BUILD_54_AUTHORITY_SYNC_PENDING_FINAL_PROOF",
+  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "runtime_application_change_authorized": false,
   "schema_change_authorized": false,
   "d1_mutation_authorized": false,
