@@ -62,7 +62,7 @@ jobs:
           set -euo pipefail
           cp wrangler.toml /tmp/wrangler.build62-original.toml
           cat > wrangler.toml <<'TOML'
-          name = "devilndove-site-dev"
+          name = "devilndove-site"
           compatibility_date = "2026-04-08"
           pages_build_output_dir = "."
 
@@ -82,7 +82,7 @@ jobs:
           preview_bucket_name = "devilndove-toolshed-images"
           TOML
           npx --yes wrangler@4 pages deploy . \
-            --project-name=devilndove-site-dev \
+            --project-name=devilndove-site \
             --branch=build62-r2-readonly \
             --commit-hash="${GITHUB_SHA}" \
             --commit-message="Build 62 read-only R2 recovery discovery" \
@@ -91,10 +91,10 @@ jobs:
           python - <<'PY'
           import re
           text=open('/tmp/build62-r2-bridge-deploy.log',encoding='utf-8',errors='replace').read()
-          urls=re.findall(r'https://([a-z0-9-]+)\.devilndove-site-dev\.pages\.dev',text,re.I)
+          urls=re.findall(r'https://([a-z0-9-]+)\.devilndove-site\.pages\.dev',text,re.I)
           hashes=[label for label in urls if re.fullmatch(r'[0-9a-f]{8}',label,re.I)]
           assert hashes,text[-3000:]
-          url=f'https://{hashes[-1]}.devilndove-site-dev.pages.dev'
+          url=f'https://{hashes[-1]}.devilndove-site.pages.dev'
           open('/tmp/build62-r2-bridge-url','w').write(url)
           print('BUILD62_R2_BRIDGE_URL',url)
           PY
@@ -270,8 +270,9 @@ jobs:
 
       - name: Safety boundary
         run: |
-          echo 'R2 list/read: AUTHORIZED through temporary bindings'
+          echo 'R2 list/read: AUTHORIZED through isolated canonical hashed Preview bindings'
           echo 'R2 put/copy/delete: NONE'
           echo 'D1 read: Production media references + Development admin session only'
           echo 'D1 mutation: NONE'
+          echo 'Canonical dev alias: UNCHANGED'
           echo 'Production deployment: NONE'
