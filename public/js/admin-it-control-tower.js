@@ -1,4 +1,4 @@
-// Release 467 Build 58 — Account Administration JSON Response Hardening renderer.
+// Release 467 Build 59 — Storefront Media Availability & Merchandising Recovery renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
