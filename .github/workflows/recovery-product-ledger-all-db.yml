@@ -1,0 +1,57 @@
+name: Recovery Product Ledger All D1
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-product-ledger-all-db.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export retained Product media ledgers read-only
+        shell: bash
+        run: |
+          set -u
+          mkdir -p /tmp/product-ledgers
+          dbs=(devilndove-prod-r462 devilndove-prod-repl-20260823 devilndove-dev devilndove-prod)
+          media_sql="SELECT media_asset_id,product_id,bucket_name,object_key,public_url,original_filename,mime_type,file_size_bytes,created_at FROM media_assets ORDER BY media_asset_id;"
+          image_sql="SELECT product_image_id,product_id,image_url,alt_text,sort_order,created_at FROM product_images ORDER BY product_id,sort_order,product_image_id;"
+          product_sql="SELECT product_id,name,slug,featured_image_url FROM products ORDER BY product_id;"
+          for db in "${dbs[@]}"; do
+            echo "Reading $db"
+            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "$media_sql" > "/tmp/product-ledgers/${db}-media_assets.json" 2> "/tmp/product-ledgers/${db}-media_assets.err" || true
+            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "$image_sql" > "/tmp/product-ledgers/${db}-product_images.json" 2> "/tmp/product-ledgers/${db}-product_images.err" || true
+            npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "$product_sql" > "/tmp/product-ledgers/${db}-products.json" 2> "/tmp/product-ledgers/${db}-products.err" || true
+          done
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('/tmp/product-ledgers')
+          summary={}
+          for p in root.glob('*.json'):
+              try:
+                  obj=json.loads(p.read_text())
+                  rows=sum(len(x.get('results',[])) for x in (obj if isinstance(obj,list) else [obj]) if isinstance(x,dict))
+                  summary[p.name]=rows
+              except Exception as e:
+                  summary[p.name]=f'parse_error:{e}'
+          (root/'summary.json').write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-product-ledgers-all-d1
+          path: /tmp/product-ledgers
+          retention-days: 14
+          if-no-files-found: error
