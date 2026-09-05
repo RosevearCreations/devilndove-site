@@ -1,0 +1,91 @@
+name: Production R2 and Account Read-Only Diagnostic
+
+on:
+  push:
+    branches: [build61-production-live-resource-proof-repair]
+
+permissions:
+  contents: read
+
+jobs:
+  pinpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_D1_NAME: devilndove-prod-r462
+      PROD_PRODUCT_R2: devilndove-toolshed-images
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Inspect account write constraints without mutation
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT name,sql FROM sqlite_master WHERE type='trigger' AND tbl_name IN ('users','sessions') ORDER BY name;" > /tmp/auth-triggers.json
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT name,sql FROM sqlite_master WHERE type='index' AND tbl_name IN ('users','sessions') ORDER BY name;" > /tmp/auth-indexes.json
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT role,is_active,CASE WHEN password_hash LIKE 'pbkdf2-sha256$%' THEN 'pbkdf2-sha256' WHEN password_hash LIKE 'sha256$%' THEN 'legacy-sha256' ELSE 'other' END AS password_scheme,COUNT(*) AS count FROM users GROUP BY role,is_active,password_scheme;" > /tmp/hash-scheme.json
+          python - <<'PY'
+          import json
+          def rows(path):
+              data=json.load(open(path)); out=[]
+              def walk(v):
+                  if isinstance(v,dict):
+                      if isinstance(v.get('results'),list): out.extend(x for x in v['results'] if isinstance(x,dict))
+                      for c in v.values(): walk(c)
+                  elif isinstance(v,list):
+                      for c in v: walk(c)
+              walk(data); return out
+          print('AUTH TRIGGERS',rows('/tmp/auth-triggers.json'))
+          print('AUTH INDEXES',rows('/tmp/auth-indexes.json'))
+          print('PASSWORD SCHEME COUNTS',rows('/tmp/hash-scheme.json'))
+          PY
+
+      - name: Fetch exact Product object directly from Production R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          key='products/50/1785121890878-2f229e62-1429-43bd-b7d8-a0858e646a30.jpg'
+          rm -f /tmp/product.jpg
+          if npx --yes wrangler@4 r2 object get "${PROD_PRODUCT_R2}/${key}" --remote --file /tmp/product.jpg; then
+            echo "PRODUCT_R2_OBJECT_PRESENT key=${key} bytes=$(wc -c </tmp/product.jpg)"
+            file /tmp/product.jpg || true
+          else
+            echo "PRODUCT_R2_OBJECT_MISSING key=${key}"
+          fi
+
+      - name: Fetch exact Movie object directly from Production Product R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          key='movies/043396278998f.jpg'
+          rm -f /tmp/movie.jpg
+          if npx --yes wrangler@4 r2 object get "${PROD_PRODUCT_R2}/${key}" --remote --file /tmp/movie.jpg; then
+            echo "MOVIE_R2_OBJECT_PRESENT_IN_PRODUCT_BUCKET key=${key} bytes=$(wc -c </tmp/movie.jpg)"
+            file /tmp/movie.jpg || true
+          else
+            echo "MOVIE_R2_OBJECT_MISSING_IN_PRODUCT_BUCKET key=${key}"
+          fi
+
+      - name: List accessible R2 bucket names only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 r2 bucket list --json | python -c "import json,sys; data=json.load(sys.stdin); print('R2_BUCKET_NAMES', sorted([str(x.get('name') or '') for x in data if isinstance(x,dict) and x.get('name')]))"
+
+      - name: Boundary
+        run: |
+          echo 'D1 writes: NONE'
+          echo 'R2 writes: NONE'
+          echo 'Secrets/object bytes: NOT PRINTED'
