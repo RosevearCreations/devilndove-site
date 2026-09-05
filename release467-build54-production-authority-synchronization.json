@@ -1,0 +1,77 @@
+{
+  "release": 467,
+  "build": 54,
+  "title": "Production Authority Synchronization",
+  "state": "DEVELOPMENT_GREEN",
+  "accepted_dev_sha": "9cb10fb3361455b33e7907c187de4d9432588705",
+  "accepted_dev_tree_sha": "71a28e315628aed4f8a8610be9b3c5eed7d6ea4a",
+  "acceptance": {
+    "system_gate_run": 33934329508,
+    "current_application_quality_run": 33934329486,
+    "it_admin_runtime_proof_run": 33934329585,
+    "branch_hygiene_run": 33934329539
+  },
+  "scope": "Record the externally verified Build 53 final Development closure and deliberate Build 53 Production promotion without changing application runtime behavior.",
+  "source_base": {
+    "build": 53,
+    "dev_sha": "9cb10fb3361455b33e7907c187de4d9432588705",
+    "tree_sha": "71a28e315628aed4f8a8610be9b3c5eed7d6ea4a",
+    "proofs": {
+      "system_gate_run": 33934329508,
+      "current_application_quality_run": 33934329486,
+      "it_admin_runtime_proof_run": 33934329585,
+      "branch_hygiene_run": 33934329539
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "restart_protocol_ingested_before_source_mutation": true
+  },
+  "production_promotion": {
+    "promoted_build": 53,
+    "main_sha": "da365adb82860551d9a7bf4ca4d7463efa2642c6",
+    "tree_sha": "71a28e315628aed4f8a8610be9b3c5eed7d6ea4a",
+    "production_pages_deploy_run": 33934583466,
+    "state": "PRODUCTION_GREEN",
+    "exact_green_development_tree": true,
+    "production_business_snapshot": true,
+    "canonical_production_d1_migrations_proven": true,
+    "production_business_counts_preserved": true,
+    "production_foreign_keys_proven": true,
+    "exact_main_pages_deployment": true,
+    "production_bindings_proven": true,
+    "public_smoke_acceptance": true,
+    "promotion_proof_artifact": true
+  },
+  "boundaries": {
+    "application_runtime_change": false,
+    "schema_change": false,
+    "canonical_migration_added": false,
+    "canonical_migration_count": 4,
+    "d1_business_data_overwrite": false,
+    "r2_mutation": false,
+    "render_job_creation": false,
+    "renderer_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "social_queue_expansion": false,
+    "cloudflare_access_mutation": false,
+    "secret_values_emitted": false
+  },
+  "restart_integrity": {
+    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+    "last_fully_verified_build": 53,
+    "current_closure_candidate_build": 54,
+    "closure_candidate_must_not_self_claim_final_proof": true,
+    "next_build_ingests_previous_final_closure": true
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "caip_private_media": "HOLD_EXTERNAL_UNLESS_CURRENT_EVIDENCE_PROVES_ACCEPTANCE",
+    "social_oauth": "HOLD_EXTERNAL",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "next_build": 55,
+  "next_build_state": "AWAITING_BUILD_54_FINAL_CLOSURE_PROOF",
+  "next_build_title": null
+}

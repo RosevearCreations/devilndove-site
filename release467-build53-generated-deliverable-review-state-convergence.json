@@ -2,7 +2,7 @@
   "release": 467,
   "build": 53,
   "title": "Generated Deliverable Review-State Convergence",
-  "state": "DEVELOPMENT_GREEN",
+  "state": "PRODUCTION_GREEN",
   "source_authority": "dev",
   "source_base_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
   "source_base_tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
@@ -16,7 +16,6 @@
   },
   "source_base": {
     "build": 52,
-    "title": "Content Studio Render Readiness / Explicit Execution Boundary",
     "dev_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
     "tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
     "proofs": {
@@ -37,33 +36,26 @@
       "current_application_quality_run": 33933835712,
       "it_admin_runtime_proof_run": 33933835781,
       "branch_hygiene_run": 33933835787
-    },
-    "deployment_acceptance": {
-      "canonical_development_migration_proof": true,
-      "development_data_authority_read_only_proof": true,
-      "exact_preview_deployment": true,
-      "preview_binding_proof": true,
-      "preview_smoke_acceptance": true,
-      "current_regression_evidence": true
     }
   },
-  "restart_integrity": {
-    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
-    "previous_final_closure_ingested_before_source_mutation": true,
-    "source_base_exact_sha_verified": true,
-    "source_base_exact_tree_verified": true,
-    "closure_candidate_must_not_self_claim_final_proof": true,
-    "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE",
-    "next_build_ingests_previous_final_closure": true
+  "final_closure": {
+    "dev_sha": "9cb10fb3361455b33e7907c187de4d9432588705",
+    "tree_sha": "71a28e315628aed4f8a8610be9b3c5eed7d6ea4a",
+    "proofs": {
+      "system_gate_run": 33934329508,
+      "current_application_quality_run": 33934329486,
+      "it_admin_runtime_proof_run": 33934329585,
+      "branch_hygiene_run": 33934329539
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "recorded_by_next_build": 54
   },
   "scope": {
-    "name": "generated_deliverable_review_state_convergence",
     "generated_deliverables_may_start_ready_for_render": false,
     "ready_for_render_reserved_for_guarded_transition": true,
-    "public_cleared_media_skips_human_review": false,
-    "needs_media_review_preserved_when_media_not_public_cleared": true,
     "ready_for_review_used_when_media_is_public_cleared": true,
-    "implicit_render_job_creation_authorized": false,
+    "needs_media_review_preserved_when_media_not_public_cleared": true,
     "render_job_creation_authorized": false,
     "renderer_execution_authorized": false,
     "provider_execution_authorized": false,
@@ -71,20 +63,23 @@
     "social_queue_expansion_authorized": false,
     "r2_mutation_authorized": false,
     "schema_change_authorized": false,
-    "canonical_migration_added": false,
-    "main_mutation_authorized": false,
-    "production_mutation_authorized": false
+    "canonical_migration_added": false
   },
   "canonical_d1_migration_count": 4,
   "production_checkpoint": {
-    "build": 32,
-    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
-    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
-    "production_pages_deploy_run": 33866964958,
-    "state": "PRODUCTION_GREEN"
+    "build": 53,
+    "main_sha": "da365adb82860551d9a7bf4ca4d7463efa2642c6",
+    "tree_sha": "71a28e315628aed4f8a8610be9b3c5eed7d6ea4a",
+    "production_pages_deploy_run": 33934583466,
+    "state": "PRODUCTION_GREEN",
+    "exact_green_development_tree": true,
+    "business_data_preservation_proven": true,
+    "canonical_d1_proven": true,
+    "bindings_proven": true,
+    "public_smoke_acceptance": true
   },
-  "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
+  "promotion_state": "PRODUCTION_GREEN",
   "next_build": 54,
-  "next_build_state": "AWAITING_BUILD_53_FINAL_CLOSURE_PROOF",
-  "next_build_title": null
+  "next_build_state": "AUTHORIZED_AUTHORITY_SYNCHRONIZATION",
+  "next_build_title": "Production Authority Synchronization"
 }

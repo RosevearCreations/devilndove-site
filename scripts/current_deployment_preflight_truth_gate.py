@@ -36,6 +36,7 @@ current = read('functions/api/admin/current-deployment-preflight.js')
 compat = read('functions/api/admin/deployment-preflight.js')
 historical = read('functions/api/admin/_historicalDeploymentPreflight.js')
 legacy_client = read('public/js/admin-deployment-preflight.js')
+prod = pointer.get('production_checkpoint') or {}
 
 pointer_release = int(pointer.get('release') or 0)
 pointer_build = int(pointer.get('build') or 0)
@@ -62,30 +63,19 @@ for filename in canonical_files:
     req(filename in current, f'current Deployment Preflight missing canonical migration: {filename}')
 
 for stale in (
-    'database_upgrade_current_pass.sql',
-    'database_build171_ledger_repair.sql',
-    'database_build173_deployment_preflight.sql',
-    'database_build174_deployment_preflight_detail.sql',
-    'database_build175_release_control.sql',
-    'database_build176_release_safety_controls.sql',
-    'build_171_admin_safety_release_readiness',
-    'build_173_deployment_preflight_release_safety',
-    'build_174_preflight_detail_manifest',
-    'build_175_release_control_center',
-    'build_176_release_safety_controls',
+    'database_upgrade_current_pass.sql','database_build171_ledger_repair.sql','database_build173_deployment_preflight.sql',
+    'database_build174_deployment_preflight_detail.sql','database_build175_release_control.sql','database_build176_release_safety_controls.sql',
+    'build_171_admin_safety_release_readiness','build_173_deployment_preflight_release_safety','build_174_preflight_detail_manifest',
+    'build_175_release_control_center','build_176_release_safety_controls',
 ):
     req(stale not in current, f'current Deployment Preflight still contains historical migration authority: {stale}')
 
-for ddl in (
-    'CREATE TABLE', 'CREATE INDEX', 'CREATE TRIGGER', 'CREATE VIEW',
-    'ALTER TABLE', 'DROP TABLE', 'DROP INDEX', 'DROP TRIGGER', 'DROP VIEW',
-    'VACUUM', 'REINDEX',
-):
+for ddl in ('CREATE TABLE','CREATE INDEX','CREATE TRIGGER','CREATE VIEW','ALTER TABLE','DROP TABLE','DROP INDEX','DROP TRIGGER','DROP VIEW','VACUUM','REINDEX'):
     req(ddl not in current.upper(), f'current Deployment Preflight endpoint carries request-time DDL token: {ddl}')
     req(ddl not in compat.upper(), f'Deployment Preflight compatibility route carries request-time DDL token: {ddl}')
 
 req('export async function onRequestGet' in current, 'current Deployment Preflight must expose GET')
-for method in ('onRequestPost', 'onRequestPut', 'onRequestPatch', 'onRequestDelete'):
+for method in ('onRequestPost','onRequestPut','onRequestPatch','onRequestDelete'):
     req(method not in current, f'current Deployment Preflight must remain GET-only ({method} found)')
 req("mutation_capability: 'none'" in current, 'current Deployment Preflight must explicitly expose no mutation capability')
 req('request_time_schema_mutation: false' in current, 'request-time schema mutation boundary missing')
@@ -94,15 +84,16 @@ req("applicator: 'scripts/d1_migrate.py'" in current, 'canonical migration appli
 req("native_ledger: 'd1_migrations'" in current, 'native d1_migrations authority missing')
 req("proof_table: 'app_schema_migration_proofs'" in current, 'canonical migration proof-table authority missing')
 req('PRAGMA foreign_key_check' in current, 'foreign-key integrity check missing')
-for proof in ('System Gate', 'Current Application Quality Proof', 'I.T. Admin Runtime Proof', 'Repository Branch Hygiene'):
+for proof in ('System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene'):
     req(proof in current, f'four-proof Development promotion requirement missing: {proof}')
-req('816490a9f36ffc2a730d8149549e5a2fbd609966' in current, 'Build 32 Production baseline SHA missing')
+for key in ('main_sha','tree_sha','production_pages_deploy_run'):
+    value = str(prod.get(key) or '')
+    req(value and value in current, f'current Deployment Preflight missing current Production {key}')
 req("historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json'" in current, 'Build 37 Deployment Preflight feature provenance must remain explicit')
 
 req('getCurrentDeploymentPreflight' in compat and "from './current-deployment-preflight.js'" in compat, 'compatibility GET route must delegate to current Deployment Preflight')
 req('export async function onRequestPost' in compat and '405' in compat and "Allow: 'GET'" in compat, 'historical Deployment Preflight POST must fail closed with 405')
 req("mutation_capability: 'none'" in compat, 'compatibility route must expose no mutation capability')
-
 req("const BUILD_LABEL = 'Build 176'" in historical, 'historical Deployment Preflight provenance identity drifted')
 req('ensurePreflightTables' in historical and 'CREATE TABLE IF NOT EXISTS deployment_preflight_runs' in historical, 'historical preflight implementation must remain preserved as non-route provenance')
 req('_historicalDeploymentPreflight.js' in current, 'current endpoint must explicitly delegate historical diagnostics through non-route helper')
@@ -115,11 +106,10 @@ req('migrations/canonical/manifest.json' in page and 'scripts/d1_migrate.py' in 
 req('/public/js/admin-current-deployment-preflight.js' in page, 'page must load current Deployment Preflight client')
 req('/public/js/admin-deployment-preflight.js' not in page, 'page must not load historical writable client')
 req('saveDeploymentPreflightButton' not in page and 'Save Snapshot' not in page, 'active page must not expose historical snapshot writes')
-
 req('/api/admin/current-deployment-preflight' in client, 'current client must call current Deployment Preflight endpoint')
 req('/api/admin/deployment-preflight' not in client, 'current client must not call historical compatibility endpoint')
 req("method: 'POST'" not in client and 'method:"POST"' not in client, 'current client must not POST')
-for stale_label in ('Build 175', 'Build 176', 'build-174'):
+for stale_label in ('Build 175','Build 176','build-174'):
     req(stale_label not in client, f'current client contains stale build label: {stale_label}')
 req('Run Preflight' in page and 'Export Markdown' in page, 'current read-only controls missing')
 

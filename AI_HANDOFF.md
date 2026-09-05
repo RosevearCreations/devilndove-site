@@ -1,35 +1,30 @@
 # Devil n Dove — AI Handoff
 
-## Current Development authority
+## Current authority
 
-Release 467 Build 53 — **Generated Deliverable Review-State Convergence** has GREEN implementation acceptance:
-- `dev` SHA `4ba42dba64c4d1ca46cd145add24128ab3f17be4`
-- tree `2fed089e03b4c545aaa330e7767a8e9a127dc58d`
-- System Gate `33933835769` SUCCESS
-- Current Application Quality `33933835712` SUCCESS
-- I.T. Admin Runtime Proof `33933835781` SUCCESS
-- Repository Branch Hygiene `33933835787` SUCCESS
-- exact Development Preview deployment, canonical D1 migration proof, Development data-authority read-only proof, bindings, smoke and regression evidence: SUCCESS.
+Release 467 Build 54 — **Production Authority Synchronization** is an authority/read-only synchronization candidate. It makes no application runtime or schema change.
 
-Build 53 closes the creation-time review-state bypass. Generated video deliverables now originate as `ready_for_review` only when every usable source is public-cleared; otherwise they originate as `needs_media_review`. `ready_for_render` is reserved for Build 52's fail-closed explicit transition. No render job or provider execution is created by Build 53.
+The last fully verified Development checkpoint is Build 53 — **Generated Deliverable Review-State Convergence**:
+- `dev` SHA `9cb10fb3361455b33e7907c187de4d9432588705`
+- tree `71a28e315628aed4f8a8610be9b3c5eed7d6ea4a`
+- System Gate `33934329508` SUCCESS
+- Current Application Quality `33934329486` SUCCESS
+- I.T. Admin Runtime Proof `33934329585` SUCCESS
+- Repository Branch Hygiene `33934329539` SUCCESS
+- exact Development Preview, canonical D1, read-only authority, bindings, smoke and regression acceptance: SUCCESS.
 
-## Last fully verified restart checkpoint
+Build 53 is also **Production GREEN**:
+- `main` SHA `da365adb82860551d9a7bf4ca4d7463efa2642c6`
+- tree `71a28e315628aed4f8a8610be9b3c5eed7d6ea4a`
+- Production Pages Deploy `33934583466` SUCCESS
+- Production business-data snapshot/preservation, canonical D1 proof, foreign-key integrity, exact Pages deployment, D1/R2 bindings and public live smoke: SUCCESS.
 
-Build 52 — **Content Studio Render Readiness / Explicit Execution Boundary** is the last externally verified exact-branch-head restart checkpoint:
-- `dev` SHA `33ead64048edf0b089b49c4a02783f468dc806a5`
-- tree `8c25dfedc31bd27cb7b79429c15b669830e176f8`
-- System Gate `33933307193` SUCCESS
-- Current Application Quality `33933307182` SUCCESS
-- I.T. Admin Runtime Proof `33933307188` SUCCESS
-- Repository Branch Hygiene `33933307190` SUCCESS
-- exact Development Preview acceptance: SUCCESS.
-
-Build 53 becomes the next restart checkpoint only after its authority closure merges and that exact `dev` head independently passes the same four external proofs and exact Preview acceptance. Build 54 must then ingest that externally verified final closure before source mutation.
+The Production tree exactly matches the fully verified Build 53 Development tree. The different commit SHAs are expected because `main` is the promotion merge commit.
 
 ## Safety and restart rules
 
-Production remains Release 467 Build 32 at `main` `816490a9f36ffc2a730d8149549e5a2fbd609966`, tree `2c1b4a3694779996e1bdb094be5e9e043834276e`, Production Pages Deploy `33866964958` SUCCESS. Do not touch `main` or Production without deliberate promotion authority.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 54 becomes the next restart checkpoint only after its exact merged `dev` head independently passes System Gate, Current Application Quality, I.T. Admin Runtime Proof, Repository Branch Hygiene and exact Preview acceptance. Do not add an evidence-only commit afterward; Build 55 must ingest those later results.
 
-Canonical D1 migrations remain exactly `0001`–`0004`; Build 53 adds no schema migration. Render-job creation, renderer/provider execution, publication, social queue expansion and R2 mutation remain closed. Stripe Development, PayPal sandbox, CAIP private-media evidence, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes.
+Canonical D1 migrations remain exactly `0001`–`0004`. Build 54 adds no migration and changes no application behavior. Render-job creation, renderer/provider execution, publication, social queue expansion, R2 mutation and Cloudflare Access mutation remain closed. Stripe Development, PayPal sandbox, CAIP private-media evidence, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes.
 
-Build 54 is not scoped. Do not start it until the exact Build 53 closure head is externally proven and then ingested under `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1`.
+Build 55 is not scoped.

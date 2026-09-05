@@ -73,7 +73,7 @@ for key in ('main_sha', 'tree_sha', 'production_pages_deploy_run'):
     value = str(prod.get(key) or '')
     req(value and value in api, f'I.T. API missing current Production baseline {key}')
 
-normalized_prod = prod_authority.get('production') or prod_authority.get('production_baseline') or {}
+normalized_prod = prod_authority.get('production') or prod_authority.get('production_baseline') or prod_authority.get('production_checkpoint') or {}
 req(bool(prod_authority_path), 'current Production baseline must name or resolve an authority file')
 req(prod_authority.get('state') == 'PRODUCTION_GREEN' or normalized_prod.get('state') == 'PRODUCTION_GREEN', 'Production authority must remain Production GREEN')
 req(normalized_prod.get('main_sha') == prod.get('main_sha'), 'Production authority main must match current Production baseline')
