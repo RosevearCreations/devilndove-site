@@ -1,4 +1,4 @@
-// Release 467 Build 51 — Explicit Content Studio Schema Readiness renderer.
+// Release 467 Build 52 — Content Studio Render Readiness / Explicit Execution Boundary renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;
