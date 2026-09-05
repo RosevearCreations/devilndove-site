@@ -1,4 +1,4 @@
-// Release 467 Build 30 — admin user creation with reveal and temporary-password generator.
+// Release 467 Build 58 — admin user creation with safe API response handling.
 
 document.addEventListener("DOMContentLoaded", () => {
   const mountEl = document.getElementById("usersAdminMount");
@@ -92,8 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage("Creating user...");
       if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Creating..."; }
       const response = await window.DDAuth.apiFetch("/api/admin/create-user", { method: "POST", body: JSON.stringify({ email, display_name, password, confirm_password, role, is_active }) });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to create user.");
+      const data = await window.DDAuth.readApiJson(response, { fallbackMessage: "Failed to create user." });
       document.getElementById("adminCreateUserForm")?.reset();
       document.getElementById("adminCreateUserIsActive").checked = true;
       document.getElementById("adminCreateUserRole").value = "member";

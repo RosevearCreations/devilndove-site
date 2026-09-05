@@ -1,0 +1,79 @@
+{
+  "release": 467,
+  "build": 56,
+  "title": "Product Photo Guidance and Packaging Onboarding",
+  "state": "DEVELOPMENT_GREEN",
+  "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+  "source_boundary": {
+    "development": {
+      "branch": "dev",
+      "sha": "190a8960ab259bbb3cfb87d8215d32b2d6da13cb",
+      "tree": "a338071e446f5b18db3f26d8a0c0ca07141cd158",
+      "system_gate_run": 33936132522,
+      "quality_run": 33936132397,
+      "it_admin_runtime_run": 33936132405,
+      "repository_hygiene_run": 33936132426,
+      "exact_preview_deployment": true,
+      "canonical_development_d1_proof": true,
+      "development_data_authority_read_only": true,
+      "preview_bindings": true,
+      "non_secret_smoke": true,
+      "regression_evidence": true
+    },
+    "production": {
+      "branch": "main",
+      "sha": "ee42e7838a83def94e858b3d0d6c1a23947e2344",
+      "tree": "a338071e446f5b18db3f26d8a0c0ca07141cd158",
+      "production_pages_deploy_run": 33936229477,
+      "exact_green_dev_tree_proof": true,
+      "production_data_snapshot_preservation": true,
+      "canonical_production_d1": true,
+      "foreign_key_isolation_proof": true,
+      "exact_main_deployment": true,
+      "production_bindings": true,
+      "public_smoke": true,
+      "promotion_proof": true
+    }
+  },
+  "scope": {
+    "product_editor_image_scoring_integration": true,
+    "human_readable_image_score_explanations": true,
+    "photography_manager_guidance": true,
+    "packaging_studio_first_time_walkthrough": true,
+    "packaging_contextual_help": true,
+    "packaging_resume_progress": true,
+    "packaging_readiness_checklist": true,
+    "packaging_block_reason_explanations": true,
+    "guided_and_advanced_modes": true,
+    "schema_migration": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "production_promotion": false,
+    "external_provider_lanes_unchanged": true
+  },
+  "final_closure": {
+    "dev_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
+    "tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
+    "proofs": {
+      "system_gate_run": 33937292286,
+      "current_application_quality_run": 33937292299,
+      "it_admin_runtime_proof_run": 33937292333,
+      "branch_hygiene_run": 33937292280
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true
+  },
+  "production_checkpoint": {
+    "build": 55,
+    "authority": "release467-build55-inventory-intelligence-manufacturer-link-schema-compatibility.json",
+    "main_sha": "ee42e7838a83def94e858b3d0d6c1a23947e2344",
+    "tree_sha": "a338071e446f5b18db3f26d8a0c0ca07141cd158",
+    "production_pages_deploy_run": 33936229477,
+    "state": "PRODUCTION_GREEN"
+  }
+}

@@ -1,4 +1,4 @@
-// Release 467 Build 30 — admin-selected temporary password reset with reveal/generate controls.
+// Release 467 Build 58 — admin-selected temporary password reset with safe API response handling.
 // Existing passwords are never returned: users.password_hash remains one-way authentication data.
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -166,8 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         body: JSON.stringify({ user_id, new_password, confirm_password, clear_sessions })
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to reset password.");
+      const data = await window.DDAuth.readApiJson(response, { fallbackMessage: "Failed to reset password." });
 
       const password = document.getElementById("adminResetPasswordNewPassword");
       const confirm = document.getElementById("adminResetPasswordConfirmPassword");

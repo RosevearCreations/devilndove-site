@@ -6,6 +6,7 @@ import json, re, sys
 ROOT = Path(__file__).resolve().parents[1]
 FAIL = []
 SHA_RE = re.compile(r'^[0-9a-f]{40}$')
+AUTHORITY_RE = re.compile(r'^release467-build(\d+)-.+\.json$')
 
 
 def req(ok, msg):
@@ -34,6 +35,24 @@ req(ri.get('protocol') == 'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1', 'restart-i
 req(ri.get('restart_requires_exact_dev_head_proof_verification') is True, 'restart must require exact dev-head proof verification')
 req(ri.get('closure_candidate_must_not_self_claim_final_proof') is True, 'closure candidate must not self-claim later proofs')
 req(ri.get('next_build_ingests_previous_final_closure') is True, 'next build must ingest previous final closure evidence')
+
+# The machine pointer may be a closure candidate, but it may not silently remain on an
+# older build after a newer Release 467 authority file has been introduced. This turns
+# the stale-pointer condition Build 57 repaired into a release-neutral regression guard.
+authority_builds = []
+for path in ROOT.glob('release467-build*.json'):
+    match = AUTHORITY_RE.match(path.name)
+    if match:
+        authority_builds.append((int(match.group(1)), path.name))
+if authority_builds:
+    newest_build = max(item[0] for item in authority_builds)
+    req(build == newest_build, f'current authority pointer Build {build} must match newest Release 467 authority Build {newest_build}')
+    named = pointer.get('current_release_authorities') or []
+    req(bool(named), 'current authority must list current release authorities')
+    if named:
+        first = str(named[0])
+        first_match = AUTHORITY_RE.match(Path(first).name)
+        req(bool(first_match) and int(first_match.group(1)) == build, 'first current release authority must match current pointer build')
 
 last_release = int(last.get('release') or 0)
 last_build = int(last.get('build') or 0)
