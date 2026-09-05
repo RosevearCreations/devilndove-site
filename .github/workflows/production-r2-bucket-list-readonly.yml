@@ -1,0 +1,53 @@
+name: Production R2 Bucket List Read-Only
+
+on:
+  push:
+    branches: [build61-production-live-resource-proof-repair]
+
+permissions:
+  contents: read
+
+jobs:
+  list-r2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: List R2 bucket names with deployment token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        shell: bash
+        run: |
+          set +e
+          echo '=== Wrangler R2 bucket list ==='
+          npx --yes wrangler@4 r2 bucket list 2>&1 | sed -E 's/(Bearer|token)[^ ]*/[redacted]/Ig'
+          echo '=== Cloudflare R2 REST bucket list ==='
+          python - <<'PY'
+          import json,os,urllib.error,urllib.request
+          account=os.environ['CLOUDFLARE_ACCOUNT_ID']; token=os.environ.get('CLOUDFLARE_API_TOKEN','')
+          url=f'https://api.cloudflare.com/client/v4/accounts/{account}/r2/buckets'
+          req=urllib.request.Request(url,headers={'Authorization':f'Bearer {token}','Content-Type':'application/json','User-Agent':'dd-r2-bucket-discovery/1.0'})
+          try:
+              with urllib.request.urlopen(req,timeout=25) as r: status=r.status; data=json.loads(r.read().decode())
+          except urllib.error.HTTPError as e:
+              status=e.code
+              try: data=json.loads(e.read().decode())
+              except: data={}
+          print('REST_STATUS',status)
+          result=data.get('result')
+          buckets=[]
+          if isinstance(result,dict): buckets=result.get('buckets') or []
+          elif isinstance(result,list): buckets=result
+          print('R2_BUCKET_NAMES',sorted(str(x.get('name') or '') for x in buckets if isinstance(x,dict) and x.get('name')))
+          if status != 200: print('REST_ERROR_CODES',[x.get('code') for x in data.get('errors') or [] if isinstance(x,dict)])
+          PY
+          exit 0
+      - name: Boundary
+        run: |
+          echo 'R2 writes: NONE'
+          echo 'Only bucket names/error codes are printed'
