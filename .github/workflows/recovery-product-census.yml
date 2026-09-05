@@ -2,7 +2,7 @@ name: Recovery Product Census
 
 on:
   push:
-    branches: [recovery-product-census]
+    branches: [dev]
     paths:
       - '.github/workflows/recovery-product-census.yml'
   workflow_dispatch:
