@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Historical acceptance for Release 465 Build 1, append-safe for later releases."""
 from __future__ import annotations
-import json
+import json, subprocess, sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
 def read(p):
@@ -28,4 +28,5 @@ release=json.loads(read('development-release.json') or '{}');req(int(release.get
 print('RELEASE 465 BUILD 1 — HISTORICAL STOREFRONT & SEO QUALITY — APPEND SAFE')
 if FAIL:
  print('FAIL');[print(f'{i:03d}. {x}') for i,x in enumerate(FAIL,1)];raise SystemExit(1)
+subprocess.run([sys.executable,str(ROOT/'scripts/current_storefront_media_recovery_gate.py')],cwd=ROOT,check=True)
 print('PASS')
