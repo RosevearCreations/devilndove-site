@@ -1,0 +1,64 @@
+{
+  "release": 467,
+  "build": 53,
+  "title": "Generated Deliverable Review-State Convergence",
+  "state": "IN_PROGRESS",
+  "source_authority": "dev",
+  "source_base_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
+  "source_base_tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
+  "source_base": {
+    "build": 52,
+    "title": "Content Studio Render Readiness / Explicit Execution Boundary",
+    "dev_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
+    "tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
+    "proofs": {
+      "system_gate_run": 33933307193,
+      "current_application_quality_run": 33933307182,
+      "it_admin_runtime_proof_run": 33933307188,
+      "branch_hygiene_run": 33933307190
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "authority": "release467-build52-content-studio-render-readiness.json"
+  },
+  "restart_integrity": {
+    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+    "previous_final_closure_ingested_before_source_mutation": true,
+    "source_base_exact_sha_verified": true,
+    "source_base_exact_tree_verified": true,
+    "closure_candidate_must_not_self_claim_final_proof": true,
+    "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE",
+    "next_build_ingests_previous_final_closure": true
+  },
+  "scope": {
+    "name": "generated_deliverable_review_state_convergence",
+    "generated_deliverables_may_start_ready_for_render": false,
+    "ready_for_render_reserved_for_guarded_transition": true,
+    "public_cleared_media_skips_human_review": false,
+    "needs_media_review_preserved_when_media_not_public_cleared": true,
+    "ready_for_review_used_when_media_is_public_cleared": true,
+    "implicit_render_job_creation_authorized": false,
+    "render_job_creation_authorized": false,
+    "renderer_execution_authorized": false,
+    "provider_execution_authorized": false,
+    "publication_authorized": false,
+    "social_queue_expansion_authorized": false,
+    "r2_mutation_authorized": false,
+    "schema_change_authorized": false,
+    "canonical_migration_added": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false
+  },
+  "canonical_d1_migration_count": 4,
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "promotion_state": "DEVELOPMENT_ONLY",
+  "next_build": 54,
+  "next_build_state": "BLOCKED_UNTIL_BUILD_53_FINAL_CLOSURE_PROOF",
+  "next_build_title": null
+}
