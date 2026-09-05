@@ -15,10 +15,12 @@
   "final_closure": {
     "dev_sha": "44483117210e93ce7126cd19510b090d88f663a7",
     "tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
-    "system_gate_run": 33969967713,
-    "current_application_quality_run": 33969967734,
-    "it_admin_runtime_proof_run": 33969967704,
-    "branch_hygiene_run": 33969967656,
+    "proofs": {
+      "system_gate_run": 33969967713,
+      "current_application_quality_run": 33969967734,
+      "it_admin_runtime_proof_run": 33969967704,
+      "branch_hygiene_run": 33969967656
+    },
     "exact_preview_deployment": true,
     "canonical_development_d1_proof": true,
     "development_data_authority_read_only": true,
@@ -27,10 +29,12 @@
     "regression_evidence": true
   },
   "final_closure_state": "EXTERNAL_EXACT_MERGED_DEV_FOUR_PROOF_GREEN",
-  "production_closure": {
+  "production_checkpoint": {
     "main_sha": "9411c0968d2f0cae57f25d36f0664729cd81c61f",
     "tree_sha": "3523119d31bbde05ba98faa530acc3dae88920d2",
     "production_pages_deploy_run": 33970506769,
+    "state": "PRODUCTION_GREEN",
+    "role": "CURRENT_PRODUCTION_BASELINE",
     "data_snapshot_preserved": true,
     "canonical_production_d1_proof": true,
     "production_d1_isolation_proof": true,
