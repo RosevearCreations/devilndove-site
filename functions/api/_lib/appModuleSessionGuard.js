@@ -2,6 +2,7 @@
 // A transient D1/session read failure must not be converted into a false 401/logout.
 
 import { getDb, getRequestToken, normalizeText } from './adminAudit.js';
+import { resolveSessionUser } from './accountAuthCompat.js';
 import { readUserModuleAccess } from './appModules.js';
 import { CURRENT_RELEASE } from './releaseAuthority.js';
 
@@ -27,16 +28,7 @@ export async function resolveAppModuleRequestUser(request, env) {
   if (!db) throw new AppModuleSessionVerificationUnavailable('database_binding_missing');
 
   try {
-    const row = await db.prepare(`
-      SELECT s.session_id, s.expires_at,
-             u.user_id, u.email, u.display_name, u.role, u.is_active
-      FROM sessions s
-      INNER JOIN users u ON u.user_id = s.user_id
-      WHERE (s.session_token = ? OR s.token = ?)
-        AND s.expires_at > datetime('now')
-      LIMIT 1
-    `).bind(token, token).first();
-
+    const row = await resolveSessionUser(request,db);
     if (!row || Number(row.is_active || 0) !== 1) return null;
     let moduleAccess;
     try {

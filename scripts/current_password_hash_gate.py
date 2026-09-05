@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Current password-hash compatibility, writer-safety and account-response gate."""
 from pathlib import Path
-import sys
+import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
 WRITERS=['functions/api/auth/register.js','functions/api/auth/change-password.js','functions/api/auth/bootstrap-admin.js','functions/api/admin/create-user.js','functions/api/admin/reset-password.js'];MIRRORS=['auth/login.js','auth/register.js','auth/change-password.js','auth/bootstrap-admin.js']
 def req(ok,msg):
@@ -10,7 +10,7 @@ def read(p):
  q=ROOT/p
  if not q.is_file():FAIL.append(f'missing required file: {p}');return ''
  return q.read_text(encoding='utf-8',errors='replace')
-helper=read('functions/api/_lib/passwordHash.js');roothelper=read('_lib/passwordHash.js');login=read('functions/api/auth/login.js');seed=read('database_admin_seed_template.sql')
+helper=read('functions/api/_lib/passwordHash.js');roothelper=read('_lib/passwordHash.js');compat=read('functions/api/_lib/accountAuthCompat.js');login=read('functions/api/auth/login.js');seed=read('database_admin_seed_template.sql')
 change=read('functions/api/auth/change-password.js');create=read('functions/api/admin/create-user.js');reset=read('functions/api/admin/reset-password.js');createui=read('public/js/admin-create-user.js');resetui=read('public/js/admin-reset-password.js')
 for token in ("PASSWORD_HASH_SCHEME = 'pbkdf2-sha256'",'PASSWORD_HASH_ITERATIONS = 210000','crypto.getRandomValues','PBKDF2',"value.startsWith('sha256$')","return (await sha256Hex(password)) === value.slice('sha256$'.length)"):req(token in helper,f'password hash helper missing functional marker: {token}')
 req(helper==roothelper,'root/functions password hash authorities must match');req('storedPasswordHashNeedsUpgrade(user.password_hash)' in login,'login must identify legacy hash only after successful verification');req('formatStoredPasswordHashFromPlaintext(password)' in login,'login must create current hash during legacy upgrade');req('WHERE user_id = ? AND password_hash = ?' in login,'legacy login upgrade must be conditional on the verified stored hash');req('env.DB.batch(statements)' in login,'login hash upgrade must remain inside the atomic login batch')
@@ -30,9 +30,20 @@ for path,body,code in [
  req('catch(error)' in body or 'catch (error)' in body,f'{path} must contain an unexpected-error boundary')
  req(code in body,f'{path} must expose structured failure code {code}')
  req('Content-Type":"application/json"' in body or '"Content-Type": "application/json"' in body,f'{path} must return JSON content type')
+# Build 60: live account routes must adapt to the actual users/sessions table shape rather than selecting both token columns blindly.
+for token in ('PRAGMA table_info','session_token','token','resolveSessionUser','createUserCompatible','updateUserPasswordCompatible'):
+ req(token in compat,f'account schema compatibility helper missing {token}')
+for path,body in [('functions/api/admin/create-user.js',create),('functions/api/admin/reset-password.js',reset),('functions/api/auth/change-password.js',change)]:
+ req('accountAuthCompat.js' in body,f'{path} must use the live account schema compatibility authority')
+ req('s.session_token,s.token' not in body and '(s.session_token=? OR s.token=?)' not in body,f'{path} regressed to fixed dual-token session SQL')
+req('createUserCompatible' in create and 'resolveSessionUser' in create,'Create User must use schema-compatible session and users writes')
+req('updateUserPasswordCompatible' in reset and 'resolveSessionUser' in reset,'Admin password reset must use schema-compatible account access')
+req('updateUserPasswordCompatible' in change and 'resolveSessionUser' in change,'Member password change must use schema-compatible account access')
 req('AUTH_CURRENT_PASSWORD_INCORRECT' in change and '},400)' in change,'wrong current password must be a validation error and must not clear a valid session via 401')
+for js in ('functions/api/_lib/accountAuthCompat.js','functions/api/admin/create-user.js','functions/api/admin/reset-password.js','functions/api/auth/change-password.js'):
+ subprocess.run(['node','--check',str(ROOT/js)],cwd=ROOT,check=True)
 if FAIL:
  print('CURRENT PASSWORD HASH GATE: FAIL')
  for x in FAIL:print('- '+x)
  sys.exit(1)
-print('CURRENT PASSWORD HASH GATE: PASS');print('current=PBKDF2_SHA256_SALTED_ITERATED');print('legacy_sha256=VERIFY_ONLY_TRANSPARENT_UPGRADE');print('plaintext_existing_password=UNAVAILABLE_BY_DESIGN');print('account_write_response_parsing=SAFE_JSON');print('unexpected_account_write_failures=STRUCTURED_JSON')
+print('CURRENT PASSWORD HASH GATE: PASS');print('current=PBKDF2_SHA256_SALTED_ITERATED');print('legacy_sha256=VERIFY_ONLY_TRANSPARENT_UPGRADE');print('plaintext_existing_password=UNAVAILABLE_BY_DESIGN');print('account_write_response_parsing=SAFE_JSON');print('live_account_schema=PRAGMA_READ_ONLY_COMPATIBLE');print('unexpected_account_write_failures=STRUCTURED_JSON')

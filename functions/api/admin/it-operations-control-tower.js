@@ -2,35 +2,35 @@ import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 
 const RELEASE = 467;
-const BUILD = 59;
-const TITLE = 'Storefront Media Availability & Merchandising Recovery';
+const BUILD = 60;
+const TITLE = 'Production Resource Binding & Account/Auth Recovery';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 59, title: TITLE, state: 'DEVELOPMENT_GREEN',
-  accepted_sha: '91106c2156e209045ed49cfd48220550c7afca57',
-  accepted_tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
-  system_gate_run: 33968914405,
-  current_application_quality_run: 33968914416,
-  it_admin_runtime_proof_run: 33968914417,
-  branch_hygiene_run: 33968914412,
+  release: 467, build: 60, title: TITLE, state: 'DEVELOPMENT_GREEN',
+  accepted_sha: '44483117210e93ce7126cd19510b090d88f663a7',
+  accepted_tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
+  system_gate_run: 33969967713,
+  current_application_quality_run: 33969967734,
+  it_admin_runtime_proof_run: 33969967704,
+  branch_hygiene_run: 33969967656,
   exact_preview_deployment: true,
-  role: 'STOREFRONT_MEDIA_RECOVERY_CANDIDATE_BASE',
+  role: 'PRODUCTION_RESOURCE_RECOVERY_CANDIDATE_BASE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 58, title: 'Account Administration JSON Response Hardening', state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
-  dev_sha: '91106c2156e209045ed49cfd48220550c7afca57',
-  tree_sha: 'ab8d5dae6bba682dad438937ca63c38955e0ff8a',
-  system_gate_run: 33968914405,
-  current_application_quality_run: 33968914416,
-  it_admin_runtime_proof_run: 33968914417,
-  branch_hygiene_run: 33968914412,
+  release: 467, build: 59, title: 'Storefront Media Availability & Merchandising Recovery', state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  dev_sha: '44483117210e93ce7126cd19510b090d88f663a7',
+  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
+  system_gate_run: 33969967713,
+  current_application_quality_run: 33969967734,
+  it_admin_runtime_proof_run: 33969967704,
+  branch_hygiene_run: 33969967656,
   exact_preview_deployment: true,
   role: 'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT',
 });
 const PRODUCTION = Object.freeze({
-  release: 467, build: 55, title: 'Inventory Intelligence Manufacturer-Link Schema Compatibility', state: 'PRODUCTION_GREEN',
-  main_sha: 'ee42e7838a83def94e858b3d0d6c1a23947e2344',
-  tree_sha: 'a338071e446f5b18db3f26d8a0c0ca07141cd158',
-  pages_deploy_run: 33936229477, promotion_state: 'EXACT_TREE_PRODUCTION_GREEN',
+  release: 467, build: 59, title: 'Storefront Media Availability & Merchandising Recovery', state: 'PRODUCTION_GREEN',
+  main_sha: '9411c0968d2f0cae57f25d36f0664729cd81c61f',
+  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
+  pages_deploy_run: 33970506769, promotion_state: 'EXACT_TREE_PRODUCTION_GREEN_WITH_REPORTED_RESIDUAL_RUNTIME_INCIDENT',
 });
 const DEVELOPMENT = Object.freeze({ target: 'https://dev.devilndove-site.pages.dev', pages_project: 'devilndove-site', d1_name: 'devilndove-dev', d1_id: 'dbc1615b-dcbe-4951-973b-b47c99c73bfa', product_r2: 'devilndove-toolshed-images-dev', caip_r2: 'devilndove-caip-media-dev', canonical_migrations: 4 });
 const CURRENT_GUARDS = Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene']);
@@ -64,7 +64,7 @@ export async function onRequestGet(context) {
   const runtimeSha = clean(ancestry.runtime_source_sha) || null; const runtimeHost = clean(ancestry.deployment_host) || null;
   return jsonResponse({
     release: RELEASE, build: BUILD, title: TITLE, ok: true,
-    authority: 'release467-build59-storefront-media-availability-merchandising-recovery', state: 'DEVELOPMENT_GREEN', environment: 'development',
+    authority: 'release467-build60-production-resource-binding-auth-recovery', state: 'DEVELOPMENT_GREEN', environment: 'development',
     release_authority: {
       current_operator: { release: RELEASE, build: BUILD, title: TITLE, state: 'DEVELOPMENT_GREEN' },
       accepted_development: ACCEPTED_DEVELOPMENT,
@@ -81,9 +81,9 @@ export async function onRequestGet(context) {
       production: PRODUCTION,
       compatibility_runtime_release_header: 466, compatibility_runtime_release_header_role: 'INHERITED_RUNTIME_COMPATIBILITY', current_automatic_guards: CURRENT_GUARDS,
       persistent_branches: ['main','dev'], production_promotion_required_development_proofs: CURRENT_GUARDS, rollback_readiness: 'RELEASE_NEUTRAL_READ_ONLY',
-      reliability_authority: 'current-development-authority.json', reliability_projection_build: 59,
+      reliability_authority: 'current-development-authority.json', reliability_projection_build: 60,
       historical_build36_reliability_authority: 'release467-build36-current-reliability-operational-health', historical_reliability_engine_role: 'HISTORICAL_REGRESSION_COMPATIBILITY',
-      deployment_preflight_authority: 'current-development-authority.json', deployment_preflight_projection_build: 59,
+      deployment_preflight_authority: 'current-development-authority.json', deployment_preflight_projection_build: 60,
       historical_build37_deployment_preflight_authority: 'release467-build37-deployment-preflight-canonical-migration',
       accounting_schema_authority: 'release467-build38-accounting-core-runtime-ddl-elimination', accounting_request_time_ddl: 0,
       product_numbering_schema_authority: 'release467-build39-product-numbering-runtime-ddl-elimination', product_numbering_request_time_ddl: 0, product_numbering_required_columns: ['sequence_key','next_product_number','updated_at'],
@@ -107,6 +107,7 @@ export async function onRequestGet(context) {
       current_authority_restart_truth_convergence: 'release467-build57-current-authority-restart-truth-convergence', current_authority_restart_truth_runtime_business_change: false,
       account_administration_json_response_hardening: 'release467-build58-account-administration-json-response-hardening', account_administration_schema_migration: false,
       storefront_media_availability_merchandising_recovery: 'release467-build59-storefront-media-availability-merchandising-recovery', storefront_media_recovery_r2_mutation: false,
+      production_resource_binding_account_auth_recovery: 'release467-build60-production-resource-binding-auth-recovery', production_resource_recovery_schema_migration: false, production_resource_recovery_r2_mutation: false,
       runtime_schema_residue_files_ceiling: 58, runtime_schema_residue_occurrences_ceiling: 522, runtime_schema_residue_shared_helpers_ceiling: 2, raw_d1_bypass_with_ddl_ceiling: 0,
       canonical_migration_authority: 'migrations/canonical/manifest.json + scripts/d1_migrate.py', request_time_schema_mutation: false,
     },
@@ -116,11 +117,11 @@ export async function onRequestGet(context) {
     external_policy: EXTERNAL_POLICY, recovery_queue: queue, next_action: queue[0] || null, subsystems, sanitized_configuration: base.sanitized_configuration || {},
     source_preflight_engine: { release: Number(base.release || 0), build: Number(base.build || 0), authority: clean(base.authority), role: 'RETAINED_READ_ONLY_PREFLIGHT_ENGINE' },
     truth_notes: [
-      'Build 58 is the last fully verified Development checkpoint at dev 91106c2156e209045ed49cfd48220550c7afca57 / tree ab8d5dae6bba682dad438937ca63c38955e0ff8a with System 33968914405, Quality 33968914416, I.T. 33968914417 and Hygiene 33968914412 successful plus exact Preview acceptance.',
-      'Build 55 is Production GREEN source/deployment authority at main ee42e7838a83def94e858b3d0d6c1a23947e2344 / tree a338071e446f5b18db3f26d8a0c0ca07141cd158 with Production Pages Deploy 33936229477 successful.',
-      'Live Production Storefront runtime evidence now reports /api/storefront-merchandising HTTP 500 and assets.devilndove.com Product image network failures; Build 59 is the bounded Development recovery candidate.',
-      'Build 59 adds no canonical migration or R2 mutation and does not self-claim final merged-dev proof.',
-      'A closure candidate never self-claims post-merge workflow evidence; Build 60 must ingest Build 59 final closure after the exact-head proof cycle.',
+      'Build 59 is the last fully verified Development checkpoint at dev 44483117210e93ce7126cd19510b090d88f663a7 / tree 3523119d31bbde05ba98faa530acc3dae88920d2 with System 33969967713, Quality 33969967734, I.T. 33969967704 and Hygiene 33969967656 successful plus exact Preview acceptance.',
+      'Build 59 is Production GREEN source/deployment authority at main 9411c0968d2f0cae57f25d36f0664729cd81c61f / tree 3523119d31bbde05ba98faa530acc3dae88920d2 with Production Pages Deploy 33970506769 successful.',
+      'A residual Production incident remains open: public Product media is unavailable and Create User returns HTTP 503; Build 60 is the bounded resource/account recovery candidate.',
+      'Build 60 adds no canonical migration or R2 mutation and does not self-claim final merged-dev proof.',
+      'Production live-resource acceptance must prove the account table contract and a real known R2 object read after deployment.',
       'External HOLDs never become GREEN by inference from source or Production deployment acceptance.'
     ],
     safety: { read_only_projection: true, automatic_repair: false, schema_change_required: false, request_time_schema_mutation: false, d1_mutation_from_endpoint: false, r2_mutation_from_endpoint: false, provider_execution: false, provider_publication: false, cloudflare_access_policy_mutation: false, main_mutation: false, production_mutation: false, secret_values_emitted: false },
