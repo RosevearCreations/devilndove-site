@@ -1,0 +1,56 @@
+{
+  "release": 467,
+  "build": 52,
+  "title": "Content Studio Render Readiness / Explicit Execution Boundary",
+  "state": "IMPLEMENTATION_IN_PROGRESS",
+  "source_authority": "dev",
+  "source_base": {
+    "build": 51,
+    "title": "Explicit Content Studio Schema Readiness",
+    "dev_sha": "3f5e10f4ad005945ed4092b63079b11f62c4d7ee",
+    "tree_sha": "baca33be1a9b0dc888f12c2882f97545faed97a8",
+    "proofs": {
+      "system_gate_run": 33932323391,
+      "current_application_quality_run": 33932323375,
+      "it_admin_runtime_proof_run": 33932323392,
+      "branch_hygiene_run": 33932323423
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "authority": "release467-build51-content-studio-schema-readiness.json"
+  },
+  "restart_integrity": {
+    "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+    "previous_final_closure_ingested_before_source_mutation": true,
+    "source_base_exact_sha_verified": true,
+    "source_base_exact_tree_verified": true
+  },
+  "scope": {
+    "name": "content_studio_render_readiness_explicit_execution_boundary",
+    "generated_video_deliverables_default_to_review": true,
+    "ready_for_render_requires_fail_closed_readiness": true,
+    "render_readiness_is_read_only": true,
+    "implicit_render_job_creation_removed": true,
+    "render_job_creation_authorized": false,
+    "renderer_execution_authorized": false,
+    "provider_execution_authorized": false,
+    "publication_authorized": false,
+    "social_queue_expansion_authorized": false,
+    "r2_mutation_authorized": false,
+    "schema_change_authorized": false,
+    "canonical_migration_added": false,
+    "main_mutation_authorized": false,
+    "production_mutation_authorized": false
+  },
+  "canonical_d1_migration_count": 4,
+  "production_checkpoint": {
+    "build": 32,
+    "main_sha": "816490a9f36ffc2a730d8149549e5a2fbd609966",
+    "tree_sha": "2c1b4a3694779996e1bdb094be5e9e043834276e",
+    "production_pages_deploy_run": 33866964958,
+    "state": "PRODUCTION_GREEN"
+  },
+  "promotion_state": "DEVELOPMENT_ONLY",
+  "next_build": 53,
+  "next_build_state": "BLOCKED_UNTIL_BUILD_52_GREEN"
+}
