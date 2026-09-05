@@ -12,7 +12,8 @@ def read(p):
  return q.read_text(encoding='utf-8',errors='replace')
 helper=read('functions/api/_lib/passwordHash.js');roothelper=read('_lib/passwordHash.js');compat=read('functions/api/_lib/accountAuthCompat.js');login=read('functions/api/auth/login.js');seed=read('database_admin_seed_template.sql')
 change=read('functions/api/auth/change-password.js');create=read('functions/api/admin/create-user.js');reset=read('functions/api/admin/reset-password.js');createui=read('public/js/admin-create-user.js');resetui=read('public/js/admin-reset-password.js')
-for token in ("PASSWORD_HASH_SCHEME = 'pbkdf2-sha256'",'PASSWORD_HASH_ITERATIONS = 210000','crypto.getRandomValues','PBKDF2',"value.startsWith('sha256$')","return (await sha256Hex(password)) === value.slice('sha256$'.length)"):req(token in helper,f'password hash helper missing functional marker: {token}')
+for token in ("PASSWORD_HASH_SCHEME = 'pbkdf2-sha256'",'PASSWORD_HASH_ITERATIONS = 100000','crypto.getRandomValues','PBKDF2',"value.startsWith('sha256$')","return (await sha256Hex(password)) === value.slice('sha256$'.length)"):req(token in helper,f'password hash helper missing functional marker: {token}')
+req('Cloudflare Workers WebCrypto' in helper,'password hash authority must document the edge-runtime PBKDF2 boundary')
 req(helper==roothelper,'root/functions password hash authorities must match');req('storedPasswordHashNeedsUpgrade(user.password_hash)' in login,'login must identify legacy hash only after successful verification');req('formatStoredPasswordHashFromPlaintext(password)' in login,'login must create current hash during legacy upgrade');req('WHERE user_id = ? AND password_hash = ?' in login,'legacy login upgrade must be conditional on the verified stored hash');req('env.DB.batch(statements)' in login,'login hash upgrade must remain inside the atomic login batch')
 for path in WRITERS:
  body=read(path);req('formatStoredPasswordHashFromPlaintext' in body,f'{path} must use shared current hash writer');req('sha256$' not in body,f'{path} must not write or embed legacy sha256 format');req('crypto.subtle.digest' not in body,f'{path} must not carry a local raw SHA-256 password writer')
@@ -46,4 +47,4 @@ if FAIL:
  print('CURRENT PASSWORD HASH GATE: FAIL')
  for x in FAIL:print('- '+x)
  sys.exit(1)
-print('CURRENT PASSWORD HASH GATE: PASS');print('current=PBKDF2_SHA256_SALTED_ITERATED');print('legacy_sha256=VERIFY_ONLY_TRANSPARENT_UPGRADE');print('plaintext_existing_password=UNAVAILABLE_BY_DESIGN');print('account_write_response_parsing=SAFE_JSON');print('live_account_schema=PRAGMA_READ_ONLY_COMPATIBLE');print('unexpected_account_write_failures=STRUCTURED_JSON')
+print('CURRENT PASSWORD HASH GATE: PASS');print('current=PBKDF2_SHA256_SALTED_ITERATED');print('iterations=100000_CLOUDFLARE_WEBCRYPTO_MAX');print('legacy_sha256=VERIFY_ONLY_TRANSPARENT_UPGRADE');print('plaintext_existing_password=UNAVAILABLE_BY_DESIGN');print('account_write_response_parsing=SAFE_JSON');print('live_account_schema=PRAGMA_READ_ONLY_COMPATIBLE');print('unexpected_account_write_failures=STRUCTURED_JSON')
