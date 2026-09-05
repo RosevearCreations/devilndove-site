@@ -1,39 +1,39 @@
-// Release 467 Build 53 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 54 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical diagnostics are reused read-only; forward schema authority remains canonical.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 53;
-const TITLE = 'Generated Deliverable Review-State Convergence';
+const BUILD = 54;
+const TITLE = 'Production Authority Synchronization';
 const AUTHORITY = 'current-development-authority.json';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 53, title: TITLE,
-  accepted_dev_sha: '4ba42dba64c4d1ca46cd145add24128ab3f17be4',
-  accepted_dev_tree_sha: '2fed089e03b4c545aaa330e7767a8e9a127dc58d',
-  system_gate_run: 33933835769,
-  current_application_quality_run: 33933835712,
-  it_admin_runtime_proof_run: 33933835781,
-  branch_hygiene_run: 33933835787,
+  release: 467, build: 54, title: TITLE,
+  accepted_dev_sha: '9cb10fb3361455b33e7907c187de4d9432588705',
+  accepted_dev_tree_sha: '71a28e315628aed4f8a8610be9b3c5eed7d6ea4a',
+  system_gate_run: 33934329508,
+  current_application_quality_run: 33934329486,
+  it_admin_runtime_proof_run: 33934329585,
+  branch_hygiene_run: 33934329539,
   exact_preview_deployment: true,
-  role: 'IMPLEMENTATION_ACCEPTANCE',
+  role: 'AUTHORITY_SYNC_CANDIDATE',
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release: 467, build: 52, title: 'Content Studio Render Readiness / Explicit Execution Boundary',
-  dev_sha: '33ead64048edf0b089b49c4a02783f468dc806a5',
-  tree_sha: '8c25dfedc31bd27cb7b79429c15b669830e176f8',
-  system_gate_run: 33933307193,
-  current_application_quality_run: 33933307182,
-  it_admin_runtime_proof_run: 33933307188,
-  branch_hygiene_run: 33933307190,
+  release: 467, build: 53, title: 'Generated Deliverable Review-State Convergence',
+  dev_sha: '9cb10fb3361455b33e7907c187de4d9432588705',
+  tree_sha: '71a28e315628aed4f8a8610be9b3c5eed7d6ea4a',
+  system_gate_run: 33934329508,
+  current_application_quality_run: 33934329486,
+  it_admin_runtime_proof_run: 33934329585,
+  branch_hygiene_run: 33934329539,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment: true,
 });
 const PRODUCTION = Object.freeze({
-  release: 467, build: 32, state: 'PRODUCTION_GREEN',
-  main_sha: '816490a9f36ffc2a730d8149549e5a2fbd609966',
-  tree_sha: '2c1b4a3694779996e1bdb094be5e9e043834276e',
-  pages_deploy_run: 33866964958,
+  release: 467, build: 53, state: 'PRODUCTION_GREEN',
+  main_sha: 'da365adb82860551d9a7bf4ca4d7463efa2642c6',
+  tree_sha: '71a28e315628aed4f8a8610be9b3c5eed7d6ea4a',
+  pages_deploy_run: 33934583466,
 });
 const REQUIRED_DEVELOPMENT_PROOFS = Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene']);
 const CANONICAL_MIGRATIONS = Object.freeze([
@@ -112,7 +112,7 @@ function canonicalChecks(truth, expectedSchema) {
     currentCheck(truth.foreign_key_violations ? 'fail' : 'pass','canonical_foreign_keys','D1 foreign-key integrity',truth.foreign_key_violations ? `${truth.foreign_key_violations} foreign-key violation(s) returned.` : 'PRAGMA foreign_key_check returned zero violations.','',{ rows: truth.foreign_key_rows }),
     currentCheck(schemaDrift.length ? 'warn' : 'pass','current_schema_visibility','Current expected application schema visibility',schemaDrift.length ? `${schemaDrift.length} application schema group(s) need review.` : `${expectedSchema.length} current application schema groups are visible.`),
     currentCheck('pass','runtime_schema_mutation_boundary','Request-time schema mutation boundary','This current Deployment Preflight endpoint is GET-only and has no schema repair capability.'),
-    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} implementation acceptance is ${ACCEPTED_DEVELOPMENT.accepted_dev_sha}.`,'Verify the exact Build 53 closure merged dev head externally before it becomes the next restart checkpoint.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT }),
+    currentCheck('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Last fully verified Development is Build ${VERIFIED_DEVELOPMENT.build} at ${VERIFIED_DEVELOPMENT.dev_sha}; Build ${ACCEPTED_DEVELOPMENT.build} is the current authority-sync candidate.`,'Verify the exact Build 54 merged dev head externally before Build 55 starts.',{ accepted: ACCEPTED_DEVELOPMENT, verified: VERIFIED_DEVELOPMENT, production: PRODUCTION }),
   ];
 }
 function statusSummary(checks) {
@@ -124,11 +124,11 @@ function migrationPlan() {
   return {
     canonical_authority: ['Treat migrations/canonical/manifest.json as the only forward D1 schema authority.','Historical build-numbered SQL is provenance only.','Keep this endpoint read-only.'],
     development: ['Use scripts/d1_migrate.py --target development --apply only when a real forward migration is approved.','Verify d1_migrations, app_schema_migration_proofs and PRAGMA foreign_key_check.','Require the exact Development four-proof set.'],
-    production: ['Production remains separate from Development acceptance.','Promote only an explicitly approved exact fully-green Development tree.','Apply immutable canonical migrations before dependent Production code when a future schema change exists.'],
+    production: ['Production is independently proven and never inferred from Development.','Promote only an explicitly approved exact fully-green Development tree.','Apply immutable canonical migrations before dependent Production code when a future schema change exists.'],
   };
 }
 function markdownReport(data) {
-  const lines = [`# Release ${RELEASE} Build ${BUILD} Deployment Preflight`,'',`Generated: ${data.generated_at}`,'',`- State: ${data.state}`,`- Status: ${data.summary?.status || 'unknown'}`,`- Accepted implementation: ${ACCEPTED_DEVELOPMENT.accepted_dev_sha}`,`- Last fully verified Development: ${VERIFIED_DEVELOPMENT.dev_sha}`,`- Canonical migrations: ${data.canonical_migration_truth?.native_applied_count || 0}/${CANONICAL_MIGRATIONS.length}`,'','## Checks'];
+  const lines = [`# Release ${RELEASE} Build ${BUILD} Deployment Preflight`,'',`Generated: ${data.generated_at}`,'',`- State: ${data.state}`,`- Status: ${data.summary?.status || 'unknown'}`,`- Authority sync base: ${ACCEPTED_DEVELOPMENT.accepted_dev_sha}`,`- Last fully verified Development: ${VERIFIED_DEVELOPMENT.dev_sha}`,`- Production: ${PRODUCTION.main_sha}`,`- Canonical migrations: ${data.canonical_migration_truth?.native_applied_count || 0}/${CANONICAL_MIGRATIONS.length}`,'','## Checks'];
   for (const check of data.checks || []) lines.push(`- **${check.status}** — ${check.label}: ${normalizeText(check.detail)}`);
   return `${lines.join('\n')}\n`;
 }
@@ -176,12 +176,11 @@ export async function onRequestGet(context) {
       historical_feature_authority: 'release467-build37-deployment-preflight-canonical-migration.json',
     },
     truth_notes: [
-      'The active Deployment Preflight is the current read-only Release 467 Build 53 projection.',
-      'Build 53 implementation acceptance is 4ba42dba64c4d1ca46cd145add24128ab3f17be4 / 2fed089e03b4c545aaa330e7767a8e9a127dc58d with System 33933835769, Quality 33933835712, I.T. 33933835781 and Hygiene 33933835787 successful plus exact Preview acceptance.',
-      'Build 52 is the last fully verified restart checkpoint at 33ead64048edf0b089b49c4a02783f468dc806a5 / 8c25dfedc31bd27cb7b79429c15b669830e176f8 with System 33933307193, Quality 33933307182, I.T. 33933307188 and Hygiene 33933307190.',
-      'Build 53 closes the generated-deliverable creation-time review-state bypass; ready_for_render remains reserved for the Build 52 explicit fail-closed transition.',
-      'Render-job creation, renderer/provider execution, publication, social queue expansion, R2 mutation, main mutation and Production promotion remain closed.',
-      'Build 32 remains the current Production baseline and external HOLD lanes remain separate.',
+      'The active Deployment Preflight is the current read-only Release 467 Build 54 projection.',
+      'Build 53 is the last fully verified Development checkpoint at 9cb10fb3361455b33e7907c187de4d9432588705 / 71a28e315628aed4f8a8610be9b3c5eed7d6ea4a with System 33934329508, Quality 33934329486, I.T. 33934329585 and Hygiene 33934329539.',
+      'Build 53 is Production GREEN at main da365adb82860551d9a7bf4ca4d7463efa2642c6 / the same tree with Production Pages Deploy 33934583466 successful.',
+      'Build 54 synchronizes authority only and adds no schema migration or runtime behavior.',
+      'Canonical migrations remain exactly 0001-0004; external HOLD lanes remain separate.',
     ],
     safety: {
       mutation_capability: 'none',
