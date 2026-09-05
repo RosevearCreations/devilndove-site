@@ -47,6 +47,19 @@
       "current_regression_evidence": true
     }
   },
+  "final_closure": {
+    "dev_sha": "33ead64048edf0b089b49c4a02783f468dc806a5",
+    "tree_sha": "8c25dfedc31bd27cb7b79429c15b669830e176f8",
+    "proofs": {
+      "system_gate_run": 33933307193,
+      "current_application_quality_run": 33933307182,
+      "it_admin_runtime_proof_run": 33933307188,
+      "branch_hygiene_run": 33933307190
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "recorded_by_next_build": 53
+  },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "previous_final_closure_ingested_before_source_mutation": true,
@@ -83,6 +96,6 @@
   },
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "next_build": 53,
-  "next_build_state": "AWAITING_BUILD_52_FINAL_CLOSURE_PROOF",
-  "next_build_title": null
+  "next_build_state": "BUILD53_IN_PROGRESS_AFTER_VERIFIED_FINAL_CLOSURE",
+  "next_build_title": "Generated Deliverable Review-State Convergence"
 }
