@@ -5,7 +5,6 @@ import {
   CONTENT_STUDIO_BUILD,
   createOrRefreshContentProjectForProduct,
   createOrRefreshContentProjectForCreativeProject,
-  ensureContentAutomationSchema,
   getContentProjectDetail,
   listContentStudioProjects,
   makeContentManifest,
@@ -14,6 +13,7 @@ import {
   updateContentProject,
   updateContentProjectMedia
 } from '../_lib/contentAutomationStudio.js';
+import { requireContentAutomationSchema } from '../_lib/contentAutomationSchemaReadiness.js';
 import { readContentStudio } from '../_lib/contentStudioReadService.js';
 import { syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
 
@@ -60,7 +60,7 @@ export async function onRequestPost(context) {
   const projectId = number(body.content_project_id || body.project_id);
 
   try {
-    await ensureContentAutomationSchema(db);
+    await requireContentAutomationSchema(db);
     let detail = null;
     let result = {};
     if (action === 'create_from_creative_project') {
