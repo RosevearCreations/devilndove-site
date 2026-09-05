@@ -1,8 +1,10 @@
-// Release 467 Build 31 — password hash authority.
-// New password writes use salted PBKDF2-HMAC-SHA256. Legacy sha256$ hashes are
+// Release 467 Build 61 — password hash authority.
+// New password writes use salted PBKDF2-HMAC-SHA256 at the maximum iteration
+// count accepted by Cloudflare Workers WebCrypto. Legacy sha256$ hashes remain
 // verification-only compatibility and are upgraded after a successful login.
+// Existing PBKDF2 hashes retain their embedded iteration count and continue to verify.
 export const PASSWORD_HASH_SCHEME = 'pbkdf2-sha256';
-export const PASSWORD_HASH_ITERATIONS = 210000;
+export const PASSWORD_HASH_ITERATIONS = 100000;
 const PASSWORD_HASH_BYTES = 32;
 const PASSWORD_SALT_BYTES = 16;
 const te = new TextEncoder();
@@ -84,7 +86,7 @@ export async function verifyStoredPasswordHash(password, storedHash) {
   }
 
   if (value.startsWith('sha256$')) {
-    // Legacy compatibility only. No Build 31 writer may produce this format.
+    // Legacy compatibility only. No Build 61 writer may produce this format.
     return (await sha256Hex(password)) === value.slice('sha256$'.length);
   }
 

@@ -1,45 +1,44 @@
-// Release 467 Build 60 — current read-only reliability projection.
-// Build 60 exposes Build 59 as the last fully verified Development checkpoint and current
-// Production baseline while live account/media recovery remains the current closure candidate.
-// Historical Release 466 reliability logic remains a retained regression engine only.
+// Release 467 Build 61 — current read-only reliability projection.
+// Build 61 exposes Build 60 as the last fully verified Development + Production checkpoint
+// while the Production live-resource validation harness is repaired and strengthened.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 60;
-export const CURRENT_RELIABILITY_TITLE = 'Production Resource Binding & Account/Auth Recovery';
+export const CURRENT_RELIABILITY_BUILD = 61;
+export const CURRENT_RELIABILITY_TITLE = 'Production Live Resource Proof Repair';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 60,
+  build: 61,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: '44483117210e93ce7126cd19510b090d88f663a7',
-  accepted_dev_tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
-  system_gate_run: 33969967713,
-  current_application_quality_run: 33969967734,
-  it_admin_runtime_proof_run: 33969967704,
-  branch_hygiene_run: 33969967656,
+  accepted_dev_sha: '2f099d88b39a35a3bb8cf73798ba2c30b2b82083',
+  accepted_dev_tree_sha: '66bbd5b61e815b2bd9f2483eaa5161542c177e9a',
+  system_gate_run: 33972673238,
+  current_application_quality_run: 33972673246,
+  it_admin_runtime_proof_run: 33972673266,
+  branch_hygiene_run: 33972673254,
   exact_preview_deployment: true,
-  role: 'PRODUCTION_RESOURCE_RECOVERY_CANDIDATE_BASE',
+  role: 'PRODUCTION_LIVE_RESOURCE_PROOF_REPAIR_CANDIDATE_BASE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 59,
-  title: 'Storefront Media Availability & Merchandising Recovery',
-  dev_sha: '44483117210e93ce7126cd19510b090d88f663a7',
-  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
-  system_gate_run: 33969967713,
-  current_application_quality_run: 33969967734,
-  it_admin_runtime_proof_run: 33969967704,
-  branch_hygiene_run: 33969967656,
+  build: 60,
+  title: 'Production Resource Binding & Account/Auth Recovery',
+  dev_sha: '2f099d88b39a35a3bb8cf73798ba2c30b2b82083',
+  tree_sha: '66bbd5b61e815b2bd9f2483eaa5161542c177e9a',
+  system_gate_run: 33972673238,
+  current_application_quality_run: 33972673246,
+  it_admin_runtime_proof_run: 33972673266,
+  branch_hygiene_run: 33972673254,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 export const CURRENT_PRODUCTION = Object.freeze({
   release: 467,
-  build: 59,
-  title: 'Storefront Media Availability & Merchandising Recovery',
-  main_sha: '9411c0968d2f0cae57f25d36f0664729cd81c61f',
-  tree_sha: '3523119d31bbde05ba98faa530acc3dae88920d2',
-  production_pages_deploy_run: 33970506769,
+  build: 60,
+  title: 'Production Resource Binding & Account/Auth Recovery',
+  main_sha: '732bac55a4a43434a31090bb3b9c6b7b2c5a7939',
+  tree_sha: '66bbd5b61e815b2bd9f2483eaa5161542c177e9a',
+  production_pages_deploy_run: 33972781588,
   state: 'PRODUCTION_GREEN',
 });
 
@@ -91,9 +90,11 @@ export async function loadCurrentReliability(db, env = {}) {
       build57_authority_restart_truth_convergence_development_green: true,
       build58_account_administration_json_response_hardening_development_green: true,
       build59_storefront_media_availability_merchandising_recovery_development_and_production_green: true,
-      build60_production_resource_binding_account_auth_recovery_candidate: true,
-      production_baseline_build: 59,
-      live_resource_incident_open: true,
+      build60_production_resource_binding_account_auth_recovery_development_and_production_green: true,
+      build61_production_live_resource_proof_repair_candidate: true,
+      production_baseline_build: 60,
+      production_live_resource_integrity_prior_run: 33972823412,
+      production_live_resource_prior_run_classification: 'HARNESS_FAILED_BEFORE_RESOURCE_ASSERTIONS',
     },
     safety: {
       ...inherited.safety,

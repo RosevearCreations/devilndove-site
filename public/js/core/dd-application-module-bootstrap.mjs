@@ -1,19 +1,37 @@
-// Devil n Dove Build 438 authoritative application-module bootstrap.
+// Devil n Dove Release 467 Build 61 authoritative application-module bootstrap.
 // One bounded read, no polling/timers. Server middleware remains the security boundary.
+// Build 61 converges legacy domain-group classification onto the canonical five-module API.
 
 import { createModuleRegistry } from './dd-module-registry.mjs';
 import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
-import { applicationModuleForDomain, getApplicationModule } from './dd-application-module-groups.mjs';
+import { getApplicationModule } from './dd-application-module-groups.mjs';
 
-export const BUILD = 438;
+export const BUILD = 61;
 
 const registry = createModuleRegistry(DD_MODULE_DEFINITIONS);
 const CLASSIFICATION_USER = Object.freeze({ role: 'admin' });
 const FALLBACK_MODULES = Object.freeze([
-  Object.freeze({ module_key: 'commerce-operations', display_name: 'Commerce & Operations', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
-  Object.freeze({ module_key: 'creative-production', display_name: 'Creative & Production', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
-  Object.freeze({ module_key: 'business-administration', display_name: 'Business & Administration', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
+  Object.freeze({ module_key: 'storefront', display_name: 'Storefront', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
+  Object.freeze({ module_key: 'creators', display_name: 'Creators', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
+  Object.freeze({ module_key: 'socials', display_name: 'Socials', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
+  Object.freeze({ module_key: 'financials', display_name: 'Financials', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
+  Object.freeze({ module_key: 'it-platform', display_name: 'I.T.', is_enabled: 1, available: true, background_activity_enabled: 0, background_allowed: false }),
 ]);
+
+const CANONICAL_MODULE_BY_DOMAIN = Object.freeze({
+  public: 'storefront',
+  catalog: 'storefront',
+  inventory: 'storefront',
+  operations: 'storefront',
+  creative: 'creators',
+  packaging: 'creators',
+  content: 'creators',
+  caip: 'socials',
+  marketing: 'socials',
+  accounting: 'financials',
+  platform: 'it-platform',
+  admin: 'it-platform',
+});
 
 let snapshot = Object.freeze({
   build: BUILD,
@@ -39,7 +57,8 @@ function domainForPath(pathname) {
 
 function applicationModuleIdForPath(pathname) {
   const definition = domainForPath(pathname);
-  return definition ? applicationModuleForDomain(definition.id) : null;
+  if (!definition) return null;
+  return CANONICAL_MODULE_BY_DOMAIN[String(definition.id || '').trim().toLowerCase()] || null;
 }
 
 function isEnabled(moduleKey) {
@@ -98,7 +117,7 @@ function injectAdminModuleControlCard() {
   card.className = 'card department-card startup-highlight-card';
   card.href = '/admin/application-modules/';
   card.dataset.ddModuleControlCard = '1';
-  card.innerHTML = `<h2>Application Modules</h2><p class="small">Enable or disable the three top-level application modules, review role access and control module-owned background activity. ${enabled}/${snapshot.modules.length} modules currently enabled.</p>`;
+  card.innerHTML = `<h2>Application Modules</h2><p class="small">Enable or disable the five canonical application modules, review role access and control module-owned background activity. ${enabled}/${snapshot.modules.length} modules currently enabled.</p>`;
   grid.prepend(card);
 }
 
@@ -152,8 +171,8 @@ if (document.readyState === 'loading') {
 
 await load();
 
-// The legacy/domain runtime is imported only after authoritative module availability
-// has been established. Server middleware already blocks disabled direct routes.
+// The legacy/domain runtime is imported only after authoritative canonical module
+// availability has been established. Server middleware remains the direct-route gate.
 const currentModuleId = applicationModuleIdForPath(window.location.pathname);
 if (!currentModuleId || isAvailable(currentModuleId)) {
   await import('./dd-admin-module-runtime.mjs?v=438');

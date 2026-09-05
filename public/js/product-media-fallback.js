@@ -1,17 +1,17 @@
-// Release 467 Build 60 — transparent public-media recovery.
-// If assets.devilndove.com fails, retry the same approved public R2 key through
-// the same-origin read-only /api/product-media endpoint. No media is mutated.
+// Release 467 Build 61 — transparent public-media recovery.
+// If a historical public Product/Movie media host fails, retry the same approved R2
+// key through the same-origin read-only /api/product-media endpoint. No media is mutated.
 (()=>{
   'use strict';
   if(window.DDProductMediaFallback?.installed)return;
-  const PUBLIC_HOST='assets.devilndove.com';
+  const PUBLIC_HOSTS=new Set(['assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
   const FLAG='ddMediaFallbackAttempted';
-  const PUBLIC_PREFIXES=['/products/','/Itemsforsale/','/itemsforsale/','/Toolshed/','/Tools/','/Supplies/','/toolshed/','/tools/','/supplies/'];
+  const PUBLIC_PREFIXES=['/products/','/movies/','/Itemsforsale/','/itemsforsale/','/Toolshed/','/Tools/','/Supplies/','/toolshed/','/tools/','/supplies/'];
 
   function fallbackUrl(raw){
     try{
       const url=new URL(String(raw||''),window.location.href);
-      if(url.protocol!=='https:'||url.hostname.toLowerCase()!==PUBLIC_HOST)return '';
+      if(url.protocol!=='https:'||!PUBLIC_HOSTS.has(url.hostname.toLowerCase()))return '';
       if(!PUBLIC_PREFIXES.some(prefix=>url.pathname.startsWith(prefix)))return '';
       const key=url.pathname.replace(/^\/+/, '');
       if(!key||key.includes('..')||key.includes('\\'))return '';

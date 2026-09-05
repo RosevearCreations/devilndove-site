@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       PROD_D1_NAME: devilndove-prod-r462
       PROD_D1_ID: f34a741b-0000-45b0-9a96-6be08754d563
       PROD_LIVE_BASE: https://devilndove.com
@@ -39,8 +40,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA table_info(users);" > /tmp/users-schema.json
-          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA table_info(sessions);" > /tmp/sessions-schema.json
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA table_info(users);" | tee /tmp/users-schema.json
+          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA table_info(sessions);" | tee /tmp/sessions-schema.json
           python - <<'PY'
           import json
           def columns(path):
@@ -64,14 +65,14 @@ jobs:
           print('sessions_columns', sorted(sessions))
           PY
 
-      - name: Prove live Product R2 object through same-origin route
+      - name: Prove known live Product R2 object through same-origin route
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import urllib.request
           url='https://devilndove.com/api/product-media?key=Itemsforsale%2FDD215-216B.jpeg'
-          req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/1.0','Accept':'image/*'})
+          req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/2.0','Accept':'image/*'})
           with urllib.request.urlopen(req,timeout=25) as response:
               status=int(response.status)
               ctype=str(response.headers.get('content-type') or '').lower()
@@ -81,7 +82,63 @@ jobs:
           assert ctype.startswith('image/'),(ctype,len(body))
           assert len(body)>100,(ctype,len(body))
           assert resolved.lower()=='itemsforsale/dd215-216b.jpeg'.lower(),resolved
-          print('PRODUCTION LIVE PRODUCT R2 READ: PASS',status,ctype,len(body),resolved)
+          print('PRODUCTION LIVE KNOWN R2 READ: PASS',status,ctype,len(body),resolved)
+          PY
+
+      - name: Prove live Product API exposes products and usable photography
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.parse, urllib.request
+          BASE='https://devilndove.com'
+          def fetch_json(path):
+              url=BASE+path
+              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/2.0','Accept':'application/json'})
+              with urllib.request.urlopen(req,timeout=25) as response:
+                  status=int(response.status); ctype=str(response.headers.get('content-type') or '').lower(); body=response.read(4*1024*1024)
+              assert status==200,(status,url,body[:300])
+              assert 'json' in ctype,(ctype,url)
+              return json.loads(body.decode('utf-8','replace'))
+          products_payload=fetch_json('/api/products')
+          assert products_payload.get('ok') is True,products_payload
+          products=products_payload.get('products') or []
+          assert products,('live Product API returned zero products',products_payload.get('summary'),products_payload.get('diagnostics'))
+          candidates=[]
+          for product in products:
+              urls=[]
+              if product.get('featured_image_url'): urls.append(product.get('featured_image_url'))
+              urls.extend(product.get('image_urls') or [])
+              urls.extend((row.get('image_url') for row in (product.get('images') or []) if isinstance(row,dict)))
+              for raw in urls:
+                  text=str(raw or '').strip()
+                  if text and text not in candidates: candidates.append(text)
+          assert candidates,('live products exist but expose zero public image URLs',len(products),products_payload.get('diagnostics'))
+          raw=candidates[0]
+          absolute=urllib.parse.urljoin(BASE+'/',raw)
+          def fetch_image(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/2.0','Accept':'image/*'})
+              with urllib.request.urlopen(req,timeout=25) as response:
+                  status=int(response.status); ctype=str(response.headers.get('content-type') or '').lower(); body=response.read(8*1024*1024)
+              return status,ctype,body
+          try:
+              status,ctype,body=fetch_image(absolute)
+          except Exception:
+              parsed=urllib.parse.urlparse(absolute)
+              if parsed.hostname and parsed.hostname.lower()=='assets.devilndove.com':
+                  fallback=BASE+'/api/product-media?src='+urllib.parse.quote(absolute,safe='')
+                  status,ctype,body=fetch_image(fallback)
+                  absolute=fallback
+              else:
+                  raise
+          assert status==200,(status,absolute)
+          assert ctype.startswith('image/'),(ctype,absolute,len(body))
+          assert len(body)>100,(absolute,len(body))
+          merch=fetch_json('/api/storefront-merchandising')
+          assert merch.get('ok') is True,merch
+          print('PRODUCTION LIVE PRODUCT API: PASS products=',len(products),'image_candidates=',len(candidates))
+          print('PRODUCTION LIVE PRODUCT PHOTOGRAPH: PASS',absolute,ctype,len(body))
+          print('PRODUCTION LIVE MERCHANDISING API: PASS')
           PY
 
       - name: Prove live account diagnostic reaches Production D1
@@ -91,7 +148,7 @@ jobs:
           python - <<'PY'
           import json,urllib.request
           url='https://devilndove.com/api/auth/login?diagnostic=full'
-          req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/1.0','Accept':'application/json'})
+          req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/2.0','Accept':'application/json'})
           with urllib.request.urlopen(req,timeout=25) as response:
               status=int(response.status); body=response.read(1000000)
           data=json.loads(body.decode('utf-8','replace'))
@@ -109,5 +166,8 @@ jobs:
           echo "Production D1: ${PROD_D1_NAME} / ${PROD_D1_ID}"
           echo 'Account table shape: READ-ONLY PROVEN'
           echo 'Known Product R2 object: LIVE SAME-ORIGIN READ PROVEN'
+          echo 'Live Product API: NONEMPTY + PUBLIC IMAGE URL PROVEN'
+          echo 'Live Product photograph: IMAGE BYTES PROVEN'
+          echo 'Live merchandising API: JSON/OK PROVEN'
           echo 'D1 mutation: NONE in this proof'
           echo 'R2 mutation: NONE in this proof'
