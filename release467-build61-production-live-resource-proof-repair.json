@@ -1,0 +1,58 @@
+{
+  "release": 467,
+  "build": 61,
+  "title": "Production Live Resource Proof Repair",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "first_source_mutation": true,
+  "restart_integrity_protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
+  "build60_final_development": {
+    "dev_sha": "2f099d88b39a35a3bb8cf73798ba2c30b2b82083",
+    "tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+    "proofs": {
+      "system_gate_run": 33972673238,
+      "current_application_quality_run": 33972673246,
+      "it_admin_runtime_proof_run": 33972673266,
+      "branch_hygiene_run": 33972673254
+    },
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proven": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true
+  },
+  "build60_production": {
+    "main_sha": "732bac55a4a43434a31090bb3b9c6b7b2c5a7939",
+    "tree_sha": "66bbd5b61e815b2bd9f2483eaa5161542c177e9a",
+    "production_pages_deploy_run": 33972781588,
+    "state": "PRODUCTION_GREEN_STANDARD_CHAIN",
+    "exact_green_development_tree_proven": true,
+    "production_business_data_snapshot_preserved": true,
+    "canonical_production_d1_proven": true,
+    "production_d1_isolation_and_fk_proven": true,
+    "exact_main_deployment": true,
+    "production_bindings_proven": true,
+    "public_smoke": true,
+    "promotion_proof": true
+  },
+  "validation_followup": {
+    "production_live_resource_integrity_run": 33972823412,
+    "result": "FAILED_BEFORE_RESOURCE_ASSERTIONS",
+    "classification": "PROOF_HARNESS_EXECUTION_CONTEXT_DEFECT",
+    "evidence": "The new workflow invoked wrangler D1 commands without the CLOUDFLARE_ACCOUNT_ID context used by the successful Production deployment workflow; execution exited before schema assertion output and skipped R2/auth live checks.",
+    "must_not_be_interpreted_as": "LIVE_D1_SCHEMA_FAILURE",
+    "required_repair": "Add the canonical Cloudflare account context, capture Wrangler output explicitly, and rerun read-only live D1/R2/API assertions after the normal Production deployment chain."
+  },
+  "scope": {
+    "application_runtime_change": false,
+    "schema_migration": false,
+    "d1_business_data_migration": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "cloudflare_access_mutation": false,
+    "production_promotion": false,
+    "validation_workflow_repair": true
+  },
+  "closure_rule": "Build 61 repairs validation only. It must pass exact-head Development proofs before the same tree may be promoted to main to re-run the standard Production chain and the repaired live-resource proof."
+}
