@@ -2,15 +2,15 @@
 
 ## Current Development and Production authority
 
-**Release 467 Build 57 — Current Authority / Restart Truth Convergence** is authority/read-only convergence. It does not add a canonical migration or change business runtime behavior.
+**Release 467 Build 58 — Account Administration JSON Response Hardening** is the current Development closure candidate.
 
-Last fully verified Development is Build 56 — Product Photo Guidance and Packaging Onboarding:
-- `dev` `c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26`
-- tree `bb75eac5302c0acba7fea35d4bbed6c41d5d64ab`
-- System `33937292286` SUCCESS
-- Quality `33937292299` SUCCESS
-- I.T. `33937292333` SUCCESS
-- Hygiene `33937292280` SUCCESS
+Last fully verified Development is Build 57 — Current Authority / Restart Truth Convergence:
+- `dev` `8dc267594534bc51797f5cf4e59fc6dec6e8d9b6`
+- tree `c2f31450d59477fc313c9c0b25637f7bc9bc35e0`
+- System `33967307608` SUCCESS
+- Quality `33967307714` SUCCESS
+- I.T. `33967307740` SUCCESS
+- Hygiene `33967307653` SUCCESS
 - exact Preview deployment, canonical Development D1 proof, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 Current Production remains Build 55 — Inventory Intelligence Manufacturer-Link Schema Compatibility:
@@ -18,7 +18,7 @@ Current Production remains Build 55 — Inventory Intelligence Manufacturer-Link
 - tree `a338071e446f5b18db3f26d8a0c0ca07141cd158`
 - Production Pages Deploy `33936229477` SUCCESS.
 
-The Build 55 Production workflow proved the exact fully-green Development tree before work, snapshotted and preserved Production business data, proved canonical Production D1 and foreign-key/isolation integrity, deployed the exact `main` SHA with Production bindings, passed public live smoke acceptance, and preserved promotion proof. Build 56 has not been promoted; Development is intentionally ahead of Production.
+The Build 55 Production workflow proved the exact fully-green Development tree before work, snapshotted and preserved Production business data, proved canonical Production D1 and foreign-key/isolation integrity, deployed the exact `main` SHA with Production bindings, passed public live smoke acceptance, and preserved promotion proof. Development is intentionally ahead of Production.
 
 ## Recent completed work
 
@@ -28,20 +28,29 @@ The Inventory Intelligence manufacturer-link query was corrected to follow the c
 
 ### Build 56 — Product photo guidance and Packaging onboarding
 
-The Product Editor now exposes existing deterministic image-quality assessments and can score unscored images or deliberately rescore the current set. Human-readable improvement guidance uses the existing Release 448 scoring authority. Product Photography Manager explains the score components and review loop. Packaging Studio now has a resumable 12-step first-time-user walkthrough with Show-me navigation, blocker explanations and Advanced mode. Build 56 added no migration or provider execution.
+The Product Editor exposes existing deterministic image-quality assessments and can score unscored images or deliberately rescore the current set. Human-readable improvement guidance uses the existing Release 448 scoring authority. Packaging Studio has a resumable 12-step first-time-user walkthrough with Show-me navigation, blocker explanations and Advanced mode. Build 56 added no migration or provider execution.
 
-## Build 57 purpose
+### Build 57 — Current authority / restart truth convergence
 
-Build 57 closes release-truth drift. The canonical pointer, handoff, roadmap, sanity/index/startup guidance and read-only I.T./Reliability/Deployment Preflight projections had remained on Build 53/54 after Builds 55–56 completed. Build 57 converges them to:
+Build 57 synchronized the canonical restart documents and read-only I.T./Reliability/Deployment Preflight projections and added a release-neutral freshness guard so the machine pointer cannot silently remain behind a newer Release 467 authority. Its exact merged Development closure is `8dc267594534bc51797f5cf4e59fc6dec6e8d9b6` / tree `c2f31450d59477fc313c9c0b25637f7bc9bc35e0`, with System `33967307608`, Quality `33967307714`, I.T. `33967307740` and Hygiene `33967307653` successful.
 
-- verified Development: Build 56 at `c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26` / tree `bb75eac5302c0acba7fea35d4bbed6c41d5d64ab`;
-- current Production: Build 55 at `ee42e7838a83def94e858b3d0d6c1a23947e2344` / tree `a338071e446f5b18db3f26d8a0c0ca07141cd158`, Production run `33936229477`;
-- Build 57 as the current closure candidate awaiting its own post-merge exact-head proof cycle.
+## Build 58 purpose
 
-The restart-integrity guard is also strengthened so the current pointer must catch up to the newest Release 467 build authority before a build can pass current quality/release proof.
+Live Production account administration exposed two related symptoms: `/api/admin/create-user` returned HTTP 500 and the Create User / password tools could then display Firefox `JSON.parse: unexpected character at line 1 column 1` because some account clients directly parsed the response as JSON.
 
-## Roadmap after Build 57
+Build 58 is a bounded account-administration hardening build:
+- Create User and Admin Reset Password use shared safe API response parsing.
+- Create User, Admin Reset Password and member Change Password return structured JSON on unexpected D1/runtime failures.
+- Wrong-current-password is a validation error, not a session-invalidating 401.
+- Password hashing remains PBKDF2-SHA256 salted/iterated; no plaintext password is emitted or audited.
+- No schema migration, D1 business-data migration, R2/provider execution or automatic Production promotion.
 
-Build 58 remains deliberately unscoped until Build 57 closes externally. At restart, inspect the current application/roadmap and select the highest-value bounded improvement. Do not infer external-lane readiness from source or deployment status.
+The separate `business-administration` runtime-suppression warning is a legacy module-runtime mapping issue and did not cause the Create User HTTP 500. It remains a separate convergence target rather than being mixed into this hotfix.
+
+## Roadmap after Build 58
+
+First close Build 58 through exact Development four-proof + Preview acceptance. Because the reported failure is on live Production, a deliberate hotfix promotion may follow only from that exact fully-green Development tree, with the normal Production data-preservation/D1/bindings/public-smoke proof chain.
+
+After account administration is stable, the next bounded platform cleanup should converge the legacy three-module browser runtime (`commerce-operations`, `creative-production`, `business-administration`) with the canonical five modules (`storefront`, `creators`, `socials`, `financials`, `it-platform`) without weakening server authorization or root-admin full access.
 
 Canonical migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, CAIP private-media, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes. Provider execution/publication and automatic Production promotion remain closed.

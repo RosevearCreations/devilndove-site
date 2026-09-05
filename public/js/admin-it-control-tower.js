@@ -1,4 +1,4 @@
-// Release 467 Build 57 — Current Authority / Restart Truth Convergence renderer.
+// Release 467 Build 58 — Account Administration JSON Response Hardening renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('itControlTowerMount');
   if (!mount) return;

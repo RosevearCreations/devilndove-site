@@ -1,35 +1,36 @@
-// Release 467 Build 57 — current read-only reliability projection.
-// Build 57 synchronizes verified Development and Production authority only.
+// Release 467 Build 58 — current read-only reliability projection.
+// Build 58 exposes Build 57 as the last fully verified Development checkpoint while
+// account-administration JSON response hardening remains the current closure candidate.
 // Historical Release 466 reliability logic remains a retained regression engine only.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE = 467;
-export const CURRENT_RELIABILITY_BUILD = 57;
-export const CURRENT_RELIABILITY_TITLE = 'Current Authority / Restart Truth Convergence';
+export const CURRENT_RELIABILITY_BUILD = 58;
+export const CURRENT_RELIABILITY_TITLE = 'Account Administration JSON Response Hardening';
 export const CURRENT_RELIABILITY_AUTHORITY = 'current-development-authority.json';
 export const ACCEPTED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 57,
+  build: 58,
   title: CURRENT_RELIABILITY_TITLE,
-  accepted_dev_sha: 'c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26',
-  accepted_dev_tree_sha: 'bb75eac5302c0acba7fea35d4bbed6c41d5d64ab',
-  system_gate_run: 33937292286,
-  current_application_quality_run: 33937292299,
-  it_admin_runtime_proof_run: 33937292333,
-  branch_hygiene_run: 33937292280,
+  accepted_dev_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
+  accepted_dev_tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
+  system_gate_run: 33967307608,
+  current_application_quality_run: 33967307714,
+  it_admin_runtime_proof_run: 33967307740,
+  branch_hygiene_run: 33967307653,
   exact_preview_deployment: true,
-  role: 'AUTHORITY_SYNC_CANDIDATE',
+  role: 'ACCOUNT_ADMIN_JSON_HARDENING_CANDIDATE_BASE',
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT = Object.freeze({
   release: 467,
-  build: 56,
-  title: 'Product Photo Guidance and Packaging Onboarding',
-  dev_sha: 'c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26',
-  tree_sha: 'bb75eac5302c0acba7fea35d4bbed6c41d5d64ab',
-  system_gate_run: 33937292286,
-  current_application_quality_run: 33937292299,
-  it_admin_runtime_proof_run: 33937292333,
-  branch_hygiene_run: 33937292280,
+  build: 57,
+  title: 'Current Authority / Restart Truth Convergence',
+  dev_sha: '8dc267594534bc51797f5cf4e59fc6dec6e8d9b6',
+  tree_sha: 'c2f31450d59477fc313c9c0b25637f7bc9bc35e0',
+  system_gate_run: 33967307608,
+  current_application_quality_run: 33967307714,
+  it_admin_runtime_proof_run: 33967307740,
+  branch_hygiene_run: 33967307653,
   proof_state: 'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
 });
 export const CURRENT_PRODUCTION = Object.freeze({
@@ -87,7 +88,8 @@ export async function loadCurrentReliability(db, env = {}) {
       build53_generated_ready_for_render: false,
       build55_production_green: true,
       build56_product_photo_packaging_onboarding_development_green: true,
-      build57_authority_restart_truth_convergence: true,
+      build57_authority_restart_truth_convergence_development_green: true,
+      build58_account_administration_json_response_hardening_candidate: true,
       production_baseline_build: 55,
     },
     safety: {

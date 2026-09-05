@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 57,
-  "title": "Current Authority / Restart Truth Convergence",
+  "build": 58,
+  "title": "Account Administration JSON Response Hardening",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "source_base_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
-  "source_base_tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
-  "accepted_dev_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
-  "accepted_dev_tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
+  "source_base_sha": "8dc267594534bc51797f5cf4e59fc6dec6e8d9b6",
+  "source_base_tree_sha": "c2f31450d59477fc313c9c0b25637f7bc9bc35e0",
+  "accepted_dev_sha": "8dc267594534bc51797f5cf4e59fc6dec6e8d9b6",
+  "accepted_dev_tree_sha": "c2f31450d59477fc313c9c0b25637f7bc9bc35e0",
   "acceptance": {
-    "system_gate_run": 33937292286,
-    "current_application_quality_run": 33937292299,
-    "it_admin_runtime_proof_run": 33937292333,
-    "branch_hygiene_run": 33937292280
+    "system_gate_run": 33967307608,
+    "current_application_quality_run": 33967307714,
+    "it_admin_runtime_proof_run": 33967307740,
+    "branch_hygiene_run": 33967307653
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 56,
-      "title": "Product Photo Guidance and Packaging Onboarding",
-      "authority": "release467-build56-product-photo-guidance-packaging-onboarding.json",
-      "dev_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
-      "tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
+      "build": 57,
+      "title": "Current Authority / Restart Truth Convergence",
+      "authority": "release467-build57-current-authority-restart-truth-convergence.json",
+      "dev_sha": "8dc267594534bc51797f5cf4e59fc6dec6e8d9b6",
+      "tree_sha": "c2f31450d59477fc313c9c0b25637f7bc9bc35e0",
       "proofs": {
-        "system_gate_run": 33937292286,
-        "current_application_quality_run": 33937292299,
-        "it_admin_runtime_proof_run": 33937292333,
-        "branch_hygiene_run": 33937292280
+        "system_gate_run": 33967307608,
+        "current_application_quality_run": 33967307714,
+        "it_admin_runtime_proof_run": 33967307740,
+        "branch_hygiene_run": 33967307653
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true,
@@ -39,17 +39,12 @@
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 57,
-      "title": "Current Authority / Restart Truth Convergence",
-      "authority": "release467-build57-current-authority-restart-truth-convergence.json",
-      "accepted_dev_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
-      "accepted_dev_tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
-      "acceptance": {
-        "system_gate_run": 33937292286,
-        "current_application_quality_run": 33937292299,
-        "it_admin_runtime_proof_run": 33937292333,
-        "branch_hygiene_run": 33937292280
-      },
+      "build": 58,
+      "title": "Account Administration JSON Response Hardening",
+      "authority": "release467-build58-account-administration-json-response-hardening.json",
+      "accepted_dev_sha": null,
+      "accepted_dev_tree_sha": null,
+      "acceptance": null,
       "state": "AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -57,14 +52,14 @@
     "next_build_ingests_previous_final_closure": true,
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
-  "last_green_build": 56,
-  "last_green_build_name": "Product Photo Guidance and Packaging Onboarding",
-  "last_green_dev_sha": "c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26",
-  "last_green_dev_tree_sha": "bb75eac5302c0acba7fea35d4bbed6c41d5d64ab",
-  "last_green_system_gate_run": 33937292286,
-  "last_green_application_quality_run": 33937292299,
-  "last_green_it_admin_runtime_run": 33937292333,
-  "last_green_branch_hygiene_run": 33937292280,
+  "last_green_build": 57,
+  "last_green_build_name": "Current Authority / Restart Truth Convergence",
+  "last_green_dev_sha": "8dc267594534bc51797f5cf4e59fc6dec6e8d9b6",
+  "last_green_dev_tree_sha": "c2f31450d59477fc313c9c0b25637f7bc9bc35e0",
+  "last_green_system_gate_run": 33967307608,
+  "last_green_application_quality_run": 33967307714,
+  "last_green_it_admin_runtime_run": 33967307740,
+  "last_green_branch_hygiene_run": 33967307653,
   "production_checkpoint": {
     "build": 55,
     "authority": "release467-build55-inventory-intelligence-manufacturer-link-schema-compatibility.json",
@@ -75,6 +70,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build58-account-administration-json-response-hardening.json",
     "release467-build57-current-authority-restart-truth-convergence.json",
     "release467-build56-product-photo-guidance-packaging-onboarding.json",
     "release467-build55-inventory-intelligence-manufacturer-link-schema-compatibility.json",
@@ -128,11 +124,11 @@
     "social_oauth": "HOLD_EXTERNAL",
     "cloudflare_access_service_token": "HOLD_EXTERNAL"
   },
-  "next_build": 58,
-  "next_build_state": "AWAITING_BUILD_57_FINAL_CLOSURE_PROOF",
+  "next_build": 59,
+  "next_build_state": "AWAITING_BUILD_58_FINAL_CLOSURE_PROOF",
   "next_build_title": null,
   "promotion_state": "DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
-  "runtime_application_change_authorized": false,
+  "runtime_application_change_authorized": true,
   "schema_change_authorized": false,
   "d1_mutation_authorized": false,
   "r2_mutation_authorized": false,
@@ -142,5 +138,5 @@
   "automatic_production_promotion_authorized": false,
   "request_time_schema_mutation": false,
   "secret_values_emitted": false,
-  "restart_rule": "Build 56 is the last fully verified Development checkpoint at c2bcfb9e10db8df54286fde3e2c4c39ffaf5cc26 / tree bb75eac5302c0acba7fea35d4bbed6c41d5d64ab with System 33937292286, Quality 33937292299, I.T. 33937292333 and Hygiene 33937292280 successful plus exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression acceptance. Current Production remains Build 55 at main ee42e7838a83def94e858b3d0d6c1a23947e2344 / tree a338071e446f5b18db3f26d8a0c0ca07141cd158 with Production Pages Deploy 33936229477 successful. Build 57 converges current authority/read-only restart truth only and becomes the next restart checkpoint only after its exact merged dev head independently completes the four-proof and Preview cycle. Build 58 must ingest those later values before its first source mutation. Canonical migrations remain 0001-0004 and external HOLD lanes remain separate."
+  "restart_rule": "Build 57 is the last fully verified Development checkpoint at 8dc267594534bc51797f5cf4e59fc6dec6e8d9b6 / tree c2f31450d59477fc313c9c0b25637f7bc9bc35e0 with System 33967307608, Quality 33967307714, I.T. 33967307740 and Hygiene 33967307653 successful plus exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression acceptance. Current Production remains Build 55 at main ee42e7838a83def94e858b3d0d6c1a23947e2344 / tree a338071e446f5b18db3f26d8a0c0ca07141cd158 with Production Pages Deploy 33936229477 successful. Build 58 is the active account-administration JSON response hardening candidate and must independently pass the merged-dev four-proof and Preview cycle before becoming the next restart checkpoint. Canonical migrations remain 0001-0004 and external HOLD lanes remain separate."
 }
