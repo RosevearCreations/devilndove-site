@@ -91,7 +91,7 @@ export async function onRequestGet({request,env}){
     const hasLifecycleProfiles=await tableExists(db,'inventory_tool_lifecycle_profiles');
     const hasLifecycleEvents=await tableExists(db,'inventory_tool_lifecycle_events');
     const hasLifecycle=hasLifecycleProfiles&&hasLifecycleEvents;
-    const manufacturerSelect=hasManufacturers?`(SELECT COUNT(*) FROM inventory_manufacturer_links iml WHERE iml.site_item_inventory_id=sii.site_item_inventory_id AND COALESCE(iml.is_current,1)=1)`:'0';
+    const manufacturerSelect=hasManufacturers?`(SELECT COUNT(*) FROM inventory_manufacturer_links iml WHERE iml.site_item_inventory_id=sii.site_item_inventory_id)`:'0';
     const usageSelect=hasUsage?`CASE WHEN EXISTS(SELECT 1 FROM site_inventory_usage_profiles up WHERE up.site_item_inventory_id=sii.site_item_inventory_id) THEN 1 ELSE 0 END`:'0';
     const lifecycleSelect=hasLifecycle?`
       (SELECT COUNT(*) FROM inventory_tool_lifecycle_profiles tlp WHERE tlp.site_item_inventory_id=sii.site_item_inventory_id) AS lifecycle_profile_count,
