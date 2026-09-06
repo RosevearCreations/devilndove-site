@@ -6,6 +6,10 @@ on:
     paths:
       - '.github/workflows/packaging-dropdown-readonly-audit.yml'
       - 'scripts/dropdown_population_audit.py'
+      - 'scripts/packaging_bootstrap_resilience_gate.py'
+      - 'public/js/modules/packaging/native-client-v298.mjs'
+      - 'public/js/admin-packaging-native-client-v298.js'
+      - 'admin/packaging-studio/index.html'
   workflow_dispatch:
 
 permissions:
@@ -13,7 +17,7 @@ permissions:
 
 concurrency:
   group: packaging-dropdown-readonly-audit
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   audit:
@@ -38,8 +42,11 @@ jobs:
           python-version: '3.12'
 
       - name: Static dropdown population inventory
-        if: hashFiles('scripts/dropdown_population_audit.py') != ''
         run: python scripts/dropdown_population_audit.py --output /tmp/dropdown-static-audit.json
+
+      - name: Packaging bootstrap resilience source gate
+        if: hashFiles('scripts/packaging_bootstrap_resilience_gate.py') != ''
+        run: python scripts/packaging_bootstrap_resilience_gate.py
 
       - name: Read Packaging and dropdown authorities from Development and Production D1
         shell: bash
@@ -54,7 +61,7 @@ jobs:
             npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('packaging_templates','packaging_projects','packaging_reference_sources','packaging_formula_library','packaging_content_library','packaging_source_material_templates','packaging_printer_profiles','products','site_item_inventory') ORDER BY name;" > "/tmp/packaging-dropdown-audit/${label}-tables.json"
             npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT packaging_template_id,template_key,template_name,package_type,is_system,is_active,page_width_mm,page_height_mm FROM packaging_templates ORDER BY is_active DESC,is_system DESC,packaging_template_id;" > "/tmp/packaging-dropdown-audit/${label}-templates.json"
             npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT COUNT(*) AS total_projects,SUM(CASE WHEN COALESCE(project_status,'draft')<>'archived' THEN 1 ELSE 0 END) AS active_projects FROM packaging_projects;" > "/tmp/packaging-dropdown-audit/${label}-projects.json"
-            npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT (SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')<>'archived') AS products,(SELECT COUNT(*) FROM site_item_inventory) AS inventory,(SELECT COUNT(*) FROM packaging_reference_sources WHERE is_active=1) AS references,(SELECT COUNT(*) FROM packaging_formula_library WHERE is_active=1) AS formulas,(SELECT COUNT(*) FROM packaging_content_library WHERE is_active=1) AS content_library,(SELECT COUNT(*) FROM packaging_source_material_templates WHERE is_active=1) AS source_materials,(SELECT COUNT(*) FROM packaging_printer_profiles WHERE is_active=1) AS printers;" > "/tmp/packaging-dropdown-audit/${label}-authorities.json"
+            npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT (SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')<>'archived') AS products,(SELECT COUNT(*) FROM site_item_inventory) AS inventory,(SELECT COUNT(*) FROM packaging_reference_sources WHERE is_active=1) AS reference_count,(SELECT COUNT(*) FROM packaging_formula_library WHERE is_active=1) AS formulas,(SELECT COUNT(*) FROM packaging_content_library WHERE is_active=1) AS content_library,(SELECT COUNT(*) FROM packaging_source_material_templates WHERE is_active=1) AS source_materials,(SELECT COUNT(*) FROM packaging_printer_profiles WHERE is_active=1) AS printers;" > "/tmp/packaging-dropdown-audit/${label}-authorities.json"
           done
 
       - name: Validate required Packaging template baseline
