@@ -34,6 +34,13 @@ pre,code{overflow-wrap:anywhere}
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 
+/* Shop tablet convergence: keep search controls readable and product cards useful
+   between the phone breakpoint and full desktop layout. */
+@media(min-width:721px) and (max-width:1023px){
+  body[data-media-managed-page="/shop/"] .grid.cols-4{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body[data-media-managed-page="/shop/"] #shopProducts.grid.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
 /* Build 41 — Packaging Studio responsive workspace convergence. */
 body[data-admin-page="packaging-studio"] .packaging-studio-page{width:min(100%,1720px);max-width:1720px}
 body[data-admin-page="packaging-studio"] .packaging-editor-card,
