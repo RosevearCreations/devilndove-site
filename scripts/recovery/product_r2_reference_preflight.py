@@ -18,6 +18,13 @@ def text(value):
     return str(value or "").strip()
 
 
+def optional_int(value):
+    try:
+        return int(value) if value is not None and str(value).strip() != "" else None
+    except Exception:
+        return None
+
+
 def walk_rows(value):
     rows = []
     def walk(node):
@@ -68,10 +75,19 @@ def read_source(path):
             "product_id": int(row.get("product_id") or 0),
             "product_name": text(row.get("product_name")),
             "status": text(row.get("status")),
-            "source": text(row.get("source")),
+            "source": text(row.get("source")) or path.stem,
             "source_id": text(row.get("source_id")),
             "image_url": url,
             "key": key,
+            "original_filename": text(row.get("original_filename")),
+            "alt_text": text(row.get("alt_text")),
+            "image_role": text(row.get("image_role") or row.get("variant_role") or row.get("role_key")),
+            "object_key": text(row.get("object_key")),
+            "mime_type": text(row.get("mime_type")),
+            "file_size_bytes": optional_int(row.get("file_size_bytes")),
+            "width_px": optional_int(row.get("width_px")),
+            "height_px": optional_int(row.get("height_px")),
+            "sort_order": optional_int(row.get("sort_order")),
         })
     return out
 
@@ -85,7 +101,7 @@ def probe(key):
         req = urllib.request.Request(url, headers={
             "Accept": "image/*",
             "Cache-Control": "no-store",
-            "User-Agent": "dnd-product-r2-preflight/2.0",
+            "User-Agent": "dnd-product-r2-preflight/3.0",
         })
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
@@ -121,6 +137,26 @@ def probe(key):
     return {"state": "issue", "http_status": 429, "error": "retry budget exhausted"}
 
 
+def append_unique(values, value):
+    if value not in (None, "", []) and value not in values:
+        values.append(value)
+
+
+def compact_reference(row):
+    reference = {
+        "source": row["source"],
+        "source_id": row["source_id"],
+    }
+    for field in (
+        "original_filename", "alt_text", "image_role", "object_key", "mime_type",
+        "file_size_bytes", "width_px", "height_px", "sort_order",
+    ):
+        value = row.get(field)
+        if value not in (None, ""):
+            reference[field] = value
+    return reference
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", required=True)
@@ -145,16 +181,26 @@ def main():
             "product_names": [],
             "sources": [],
             "urls": [],
+            "original_filenames": [],
+            "alt_texts": [],
+            "image_roles": [],
+            "object_keys": [],
+            "dimensions": [],
+            "references": [],
         })
-        if row["product_id"] and row["product_id"] not in item["product_ids"]:
-            item["product_ids"].append(row["product_id"])
-        if row["product_name"] and row["product_name"] not in item["product_names"]:
-            item["product_names"].append(row["product_name"])
-        source = row["source"] or path.stem
-        if source not in item["sources"]:
-            item["sources"].append(source)
-        if row["image_url"] not in item["urls"]:
-            item["urls"].append(row["image_url"])
+        append_unique(item["product_ids"], row["product_id"] if row["product_id"] else None)
+        append_unique(item["product_names"], row["product_name"])
+        append_unique(item["sources"], row["source"])
+        append_unique(item["urls"], row["image_url"])
+        append_unique(item["original_filenames"], row["original_filename"])
+        append_unique(item["alt_texts"], row["alt_text"])
+        append_unique(item["image_roles"], row["image_role"])
+        append_unique(item["object_keys"], row["object_key"])
+        if row.get("width_px") and row.get("height_px"):
+            append_unique(item["dimensions"], f"{row['width_px']}x{row['height_px']}")
+        reference = compact_reference(row)
+        if reference not in item["references"]:
+            item["references"].append(reference)
 
     keys = sorted(by_key)
     if not keys:
@@ -175,6 +221,7 @@ def main():
     missing = [x for x in results if x["state"] == "missing"]
     issues = [x for x in results if x["state"] == "issue"]
     impacted_products = sorted({pid for row in missing for pid in row["product_ids"]})
+    missing_with_original_filename = sum(bool(row.get("original_filenames")) for row in missing)
     summary = {
         "referenced_rows": len(all_rows),
         "unique_product_r2_keys": len(keys),
@@ -182,11 +229,12 @@ def main():
         "missing_keys": len(missing),
         "issue_keys": len(issues),
         "products_impacted_by_missing_keys": len(impacted_products),
+        "missing_keys_with_original_filename": missing_with_original_filename,
         "source_row_counts": source_counts,
         "d1_mutation": False,
         "r2_mutation": False,
         "r2_delete": False,
-        "method": "production_d1_reference_union_plus_public_product_media_get",
+        "method": "production_d1_reference_union_plus_public_product_media_get_with_recovery_metadata",
     }
     for name, value in (
         ("all-results", results),
