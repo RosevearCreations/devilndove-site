@@ -1,0 +1,385 @@
+name: Recovery Movie R2 Live Restore
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-movie-r2-live-restore.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: recovery-movie-r2-live-restore
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_BUCKET: devilndove-toolshed-images
+      TEMP_PROJECT: devilndove-movie-r2-recovery
+      FIRESTORAGE_API: https://api.firestorage.ai/dev/file
+      FIRESTORAGE_SHARE: tMLKzijYYWeR
+      PREFLIGHT_ARTIFACT_ID: '9980876243'
+      PREFLIGHT_MISSING_SHA256: 76a4f602784d5240d464d0925a1b910f6fb38607f08ead79b7ef947380001c69
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prove complete movie-image gap from final preflight
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/movie-recovery/{preflight,transports,payload,proof}
+          curl -fsSL --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${PREFLIGHT_ARTIFACT_ID}/zip" \
+            -o /tmp/movie-recovery/preflight.zip
+          unzip -q /tmp/movie-recovery/preflight.zip -d /tmp/movie-recovery/preflight
+          test "$(sha256sum /tmp/movie-recovery/preflight/missing-keys.txt | awk '{print $1}')" = "$PREFLIGHT_MISSING_SHA256"
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('/tmp/movie-recovery/preflight')
+          summary=json.loads((root/'summary.json').read_text(encoding='utf-8'))
+          missing=json.loads((root/'missing.json').read_text(encoding='utf-8'))
+          assert summary.get('expected_keys') == 2616, summary
+          assert summary.get('missing_keys') == 2616, summary
+          assert summary.get('present_keys') == 0, summary
+          assert summary.get('issue_keys') == 0, summary
+          assert summary.get('production_api_rows') == 1308, summary
+          assert len(missing) == 2616
+          assert all(x.get('state') == 'missing' and int(x.get('http_status') or 0) == 404 for x in missing)
+          (pathlib.Path('/tmp/movie-recovery/proof')/'preflight-summary.json').write_text(json.dumps(summary,indent=2),encoding='utf-8')
+          print('FINAL_PREFLIGHT=PASS expected=2616 missing=2616 issues=0')
+          PY
+
+      - name: Download and checksum the 11 validated backup transports
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/movie-recovery/expected.tsv <<'EOF'
+          movie-r2-recovery.transport-01.zip	25181721	f26cb76f8d38672af3724c482bd318e449943a27b5c6a4b41894c02b0bdc3ce5
+          movie-r2-recovery.transport-02.zip	25247956	b1dae6c4e17cb16b628fe85a556ef5e80943023d9325262ee7b3b027d35e919c
+          movie-r2-recovery.transport-03.zip	25137487	6f63ec0bc1af9c560fd2d05b0e3cc6fe8f8606c837bba09e351add7b348617fc
+          movie-r2-recovery.transport-04.zip	25245383	b3b5d59a232d59b30d439eb5f1deb471892f6537b00fe1c548d67a0411ac9829
+          movie-r2-recovery.transport-05.zip	25102674	1283c10e2dde35aa8257c25848d6864d3739cdd966afdfaefd24f79450725765
+          movie-r2-recovery.transport-06.zip	25239436	d722d2592c0cc5ea471de1fb95c11a4419418273a69d168ca33a0120997a45c1
+          movie-r2-recovery.transport-07.zip	25253863	d26f1969087914a277841479dbb1194e3701f8539c7b4030f6d90eb915974e84
+          movie-r2-recovery.transport-08.zip	25223442	bf9c2805141581326ec8688a005c1b1b59d1f072348c437ee689dbb5ea22f9e3
+          movie-r2-recovery.transport-09.zip	25248450	8535ad20915a016e29ecbc0af040188b01de0ca4cd293b093e7befed753b70da
+          movie-r2-recovery.transport-10.zip	25216452	593ab58a4448fc95d36b5b1c35623685c15fba04c1268d1723c05a36873ea174
+          movie-r2-recovery.transport-11.zip	14294103	7f11898bfb974c162d106d35932ddb435ba1f3c9c21c7ec162f086c5bfc21048
+          master-manifest.json	2855	ba0638be16de0c7554a1546f5f47ce37afb0af308a0113703f29ace04e5cc82d
+          EOF
+          sed -i 's/^          //' /tmp/movie-recovery/expected.tsv
+          curl -fsSL --retry 3 "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files?maxResults=1000" -o /tmp/movie-recovery/share.json
+          python - <<'PY' > /tmp/movie-recovery/share.tsv
+          import json
+          d=json.load(open('/tmp/movie-recovery/share.json'))
+          for f in d.get('files') or []:
+              print(f.get('fileName') or f.get('name') or '', f.get('sizeBytes') if f.get('sizeBytes') is not None else f.get('size'), f.get('fileId') or f.get('id') or '', sep='\t')
+          PY
+          sort /tmp/movie-recovery/expected.tsv -o /tmp/movie-recovery/expected.tsv
+          sort /tmp/movie-recovery/share.tsv -o /tmp/movie-recovery/share.tsv
+          join -t $'\t' -1 1 -2 1 /tmp/movie-recovery/expected.tsv /tmp/movie-recovery/share.tsv > /tmp/movie-recovery/map.tsv
+          test "$(wc -l < /tmp/movie-recovery/map.tsv)" -eq 12
+          while IFS=$'\t' read -r name esize esha asize fid; do
+            test "$esize" = "$asize"
+            meta="$(curl -fsSL --retry 3 -X POST "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files/$fid/download")"
+            url="$(python -c 'import json,sys; print(json.load(sys.stdin)["downloadUrl"])' <<<"$meta")"
+            out="/tmp/movie-recovery/transports/$name"
+            curl -fsSL --retry 3 --connect-timeout 20 --max-time 300 "$url" -o "$out"
+            test "$(wc -c < "$out" | tr -d ' ')" = "$esize"
+            test "$(sha256sum "$out" | awk '{print $1}')" = "$esha"
+            echo "verified transport: $name"
+          done < /tmp/movie-recovery/map.tsv
+
+      - name: Rebuild the 2608 valid catalog images and quarantine 8 invalid placeholders
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, pathlib, re, zipfile
+          root=pathlib.Path('/tmp/movie-recovery')
+          tr=root/'transports'
+          master=json.loads((tr/'master-manifest.json').read_text(encoding='utf-8'))
+          assert master.get('expected_catalog_keys') == 2616, master
+          assert master.get('valid_recoverable_keys') == 2608, master
+          quarantine=set(master.get('quarantined_invalid_keys') or [])
+          assert len(quarantine) == 8, quarantine
+          missing=set(x.strip() for x in (root/'preflight'/'missing-keys.txt').read_text(encoding='utf-8').splitlines() if x.strip())
+          assert len(missing) == 2616
+          assert quarantine <= missing
+
+          manifest={}
+          source={}
+          for zp in sorted(tr.glob('movie-r2-recovery.transport-*.zip')):
+              with zipfile.ZipFile(zp) as z:
+                  rows=json.loads(z.read('movie-r2-recovery/part-manifest.json'))
+                  for row in rows:
+                      key=str(row['key'])
+                      member='movie-r2-recovery/'+str(row['file'])
+                      body=z.read(member)
+                      assert re.fullmatch(r'movies/[A-Za-z0-9._-]+\.jpg',key), key
+                      assert key not in manifest
+                      assert len(body) == int(row['size'])
+                      assert hashlib.sha256(body).hexdigest() == row['sha256']
+                      assert body[:2] == b'\xff\xd8'
+                      manifest[key]=dict(row)
+                      source[key]=(zp,member)
+
+          assert len(manifest) == 2608
+          assert set(manifest) <= missing
+          assert missing - set(manifest) == quarantine
+          payload=root/'payload'; payload.mkdir(exist_ok=True)
+          rows=[]
+          for key in sorted(manifest):
+              row=dict(manifest[key])
+              zp,member=source[key]
+              with zipfile.ZipFile(zp) as z: body=z.read(member)
+              dest=payload/pathlib.Path(key).name
+              dest.write_bytes(body)
+              row['local_file']=str(dest)
+              rows.append(row)
+          assert len(rows) == 2608
+          (root/'proof'/'restore-manifest.json').write_text(json.dumps(rows,indent=2),encoding='utf-8')
+          (root/'proof'/'quarantined-invalid.json').write_text(json.dumps(sorted(quarantine),indent=2),encoding='utf-8')
+          print('BACKUP_RECONSTRUCTION=PASS valid=2608 quarantined=8')
+          PY
+
+      - name: Create isolated hash-locked recovery project
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
+          code="$(curl -sS -o /tmp/movie-recovery/project-check.json -w '%{http_code}' -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$API/$TEMP_PROJECT" || true)"
+          if [ "$code" = 404 ]; then
+            curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json' -X POST "$API" --data '{"name":"devilndove-movie-r2-recovery","production_branch":"main"}' > /tmp/movie-recovery/project-create.json
+            python - <<'PY'
+          import json
+          d=json.load(open('/tmp/movie-recovery/project-create.json'))
+          assert d.get('success') is True, d
+          print('TEMP_PROJECT_CREATE=PASS')
+          PY
+            touch /tmp/movie-recovery/project-created
+          elif [ "$code" = 200 ]; then
+            echo 'Refusing to reuse an existing recovery project.'
+            exit 31
+          else
+            cat /tmp/movie-recovery/project-check.json
+            exit 32
+          fi
+
+          mkdir -p /tmp/movie-bridge/functions/api
+          cat > /tmp/movie-bridge/index.html <<'EOF'
+          <!doctype html><title>Movie image recovery</title><p>Temporary hash-locked recovery endpoint.</p>
+          EOF
+          cat > /tmp/movie-bridge/wrangler.toml <<'EOF'
+          name = "devilndove-movie-r2-recovery"
+          compatibility_date = "2026-09-05"
+          pages_build_output_dir = "."
+
+          [[r2_buckets]]
+          binding = "MOVIE_PROD_BUCKET"
+          bucket_name = "devilndove-toolshed-images"
+          preview_bucket_name = "devilndove-toolshed-images"
+          EOF
+
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('/tmp/movie-recovery')
+          rows=json.loads((root/'proof'/'restore-manifest.json').read_text(encoding='utf-8'))
+          expected={x['key']:x['sha256'] for x in rows}
+          src='''const EXPECTED = Object.freeze(%s);
+          const KEY_RE = /^movies\\\/[A-Za-z0-9._-]+\\.jpg$/;
+          function respond(body,status=200){return new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});}
+          async function sha(bytes){const d=await crypto.subtle.digest("SHA-256",bytes);return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+          async function exact(bucket,key,expected){const o=await bucket.get(key);if(!o)return {state:"missing"};const b=await o.arrayBuffer();const got=await sha(b);return got===expected?{state:"exact",size:b.byteLength,sha256:got}:{state:"conflict",size:b.byteLength,sha256:got};}
+          export async function onRequestPost({request,env}){
+            if(!env.MOVIE_PROD_BUCKET)return respond({ok:false,error:"binding missing"},503);
+            const key=String(request.headers.get("x-recovery-key")||"").trim();
+            if(!KEY_RE.test(key)||!EXPECTED[key])return respond({ok:false,error:"key not authorized"},403);
+            const expected=EXPECTED[key];
+            const before=await exact(env.MOVIE_PROD_BUCKET,key,expected);
+            if(before.state==="exact")return respond({ok:true,key,state:"already_exact",size:before.size,sha256:before.sha256});
+            if(before.state==="conflict")return respond({ok:false,key,...before},409);
+            const body=await request.arrayBuffer();
+            const got=await sha(body);
+            if(got!==expected)return respond({ok:false,key,error:"body hash not authorized",expected,got},422);
+            const stored=await env.MOVIE_PROD_BUCKET.put(key,body,{onlyIf:new Headers({"If-None-Match":"*"}),httpMetadata:{contentType:"image/jpeg",cacheControl:"public, max-age=31536000, immutable"},customMetadata:{recovery:"movie-backup-20260906",recovery_sha256:expected}});
+            if(stored===null){const raced=await exact(env.MOVIE_PROD_BUCKET,key,expected);if(raced.state==="exact")return respond({ok:true,key,state:"already_exact",size:raced.size,sha256:raced.sha256});return respond({ok:false,key,...raced,error:"conditional write refused"},409);}
+            const after=await exact(env.MOVIE_PROD_BUCKET,key,expected);
+            if(after.state!=="exact")return respond({ok:false,key,...after,error:"readback failed"},500);
+            return respond({ok:true,key,state:"restored",size:after.size,sha256:after.sha256});
+          }
+          ''' % json.dumps(expected,separators=(',',':'))
+          pathlib.Path('/tmp/movie-bridge/functions/api/recovery.js').write_text(src,encoding='utf-8')
+          print('HASH_LOCKED_KEYS=',len(expected))
+          PY
+
+      - name: Deploy bridge and prove exact Production R2 binding
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          cd /tmp/movie-bridge
+          npx --yes wrangler@4.129.0 pages deploy . --project-name="$TEMP_PROJECT" --branch=main --commit-hash="$GITHUB_SHA" --commit-message='Temporary hash-locked movie image recovery' | tee /tmp/movie-recovery/proof/deploy.log
+          python - <<'PY'
+          import re
+          t=open('/tmp/movie-recovery/proof/deploy.log',encoding='utf-8',errors='replace').read()
+          urls=re.findall(r'https://[a-z0-9-]+\.devilndove-movie-r2-recovery\.pages\.dev',t,re.I)
+          open('/tmp/movie-recovery/bridge-url','w').write(urls[0] if urls else 'https://devilndove-movie-r2-recovery.pages.dev')
+          PY
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}"
+          curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$API" > /tmp/movie-recovery/proof/project.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/movie-recovery/proof/project.json'))
+          assert d.get('success') is True, d
+          cfg=((d.get('result') or {}).get('deployment_configs') or {}).get('production') or {}
+          r2=cfg.get('r2_buckets') or {}
+          assert (r2.get('MOVIE_PROD_BUCKET') or {}).get('name') == 'devilndove-toolshed-images', r2
+          print('PRODUCTION_R2_BINDING=PASS')
+          PY
+
+      - name: Prove hash lock before any valid write
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="$(cat /tmp/movie-recovery/bridge-url)/api/recovery"
+          ready=0
+          for attempt in $(seq 1 40); do
+            code="$(curl -sS -o /tmp/movie-recovery/guard.json -w '%{http_code}' -X POST "$URL" -H 'x-recovery-key: movies/not-authorized.jpg' --data-binary 'blocked' || true)"
+            if [ "$code" = 403 ]; then ready=1; break; fi
+            sleep 3
+          done
+          test "$ready" = 1
+          key="$(python -c 'import json; print(json.load(open("/tmp/movie-recovery/proof/restore-manifest.json"))[0]["key"])')"
+          code="$(curl -sS -o /tmp/movie-recovery/badhash.json -w '%{http_code}' -X POST "$URL" -H "x-recovery-key: $key" --data-binary 'deliberately-wrong-body')"
+          test "$code" = 422
+          echo 'HASH_LOCK_GUARD=PASS'
+
+      - name: Restore 2608 valid movie images with conditional no-overwrite writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import concurrent.futures, json, pathlib, time, urllib.error, urllib.request
+          root=pathlib.Path('/tmp/movie-recovery')
+          url=(root/'bridge-url').read_text().strip().rstrip('/')+'/api/recovery'
+          rows=json.loads((root/'proof'/'restore-manifest.json').read_text(encoding='utf-8'))
+
+          def one(row):
+              data=pathlib.Path(row['local_file']).read_bytes()
+              for attempt in range(7):
+                  req=urllib.request.Request(url,data=data,method='POST',headers={'Content-Type':'image/jpeg','Cache-Control':'no-store','x-recovery-key':row['key'],'User-Agent':'dnd-movie-r2-recovery/2.0'})
+                  try:
+                      with urllib.request.urlopen(req,timeout=90) as resp:
+                          payload=json.load(resp)
+                          return {'key':row['key'],'http_status':int(resp.status),**payload}
+                  except urllib.error.HTTPError as exc:
+                      body=exc.read().decode('utf-8','replace')
+                      if exc.code in (429,500,502,503,504) and attempt < 6:
+                          time.sleep(min(30,2**attempt)); continue
+                      try: payload=json.loads(body)
+                      except Exception: payload={'raw':body[:1000]}
+                      return {'key':row['key'],'http_status':int(exc.code),**payload}
+                  except Exception as exc:
+                      if attempt < 6:
+                          time.sleep(min(30,2**attempt)); continue
+                      return {'key':row['key'],'http_status':0,'error':repr(exc)}
+
+          results=[]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+              futures={pool.submit(one,row):row for row in rows}
+              for i,f in enumerate(concurrent.futures.as_completed(futures),1):
+                  r=f.result(); results.append(r)
+                  if r.get('http_status') != 200 or not r.get('ok') or r.get('state') not in ('restored','already_exact'):
+                      (root/'proof'/'write-results.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
+                      raise SystemExit('Recovery failed closed: '+json.dumps(r)[:1200])
+                  if i % 100 == 0 or i == len(rows):
+                      print('processed',i,'/',len(rows),'restored=',sum(x.get('state')=='restored' for x in results),'already_exact=',sum(x.get('state')=='already_exact' for x in results))
+                      (root/'proof'/'write-results.partial.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
+
+          assert len(results) == 2608
+          results.sort(key=lambda x:x['key'])
+          (root/'proof'/'write-results.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
+          summary={'total':len(results),'restored':sum(x.get('state')=='restored' for x in results),'already_exact':sum(x.get('state')=='already_exact' for x in results),'conflicts':sum(x.get('state')=='conflict' for x in results),'quarantined_invalid':8,'d1_mutation':False,'r2_delete':False}
+          (root/'proof'/'restore-summary.json').write_text(json.dumps(summary,indent=2),encoding='utf-8')
+          print(json.dumps(summary,indent=2))
+          PY
+
+      - name: Verify public delivery sample against backup SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, pathlib, time, urllib.error, urllib.parse, urllib.request
+          root=pathlib.Path('/tmp/movie-recovery')
+          rows=json.loads((root/'proof'/'restore-manifest.json').read_text(encoding='utf-8'))
+          indexes=[0,1,100,300,600,900,1200,1500,1800,2100,2400,2607]
+          results=[]
+          for i in indexes:
+              row=rows[i]
+              url='https://pub-f8137eb938da486a9f24410ccf49087c.r2.dev/'+urllib.parse.quote(row['key'],safe='/._-')+'?movie_recovery_verify='+str(time.time_ns())
+              for attempt in range(8):
+                  try:
+                      req=urllib.request.Request(url,headers={'Accept':'image/*','Cache-Control':'no-store','User-Agent':'dnd-movie-r2-recovery/2.0'})
+                      with urllib.request.urlopen(req,timeout=30) as resp: body=resp.read()
+                      got=hashlib.sha256(body).hexdigest()
+                      assert got == row['sha256'], (row['key'],got,row['sha256'])
+                      results.append({'key':row['key'],'size':len(body),'sha256':got,'state':'exact'})
+                      print('public exact',row['key'])
+                      break
+                  except urllib.error.HTTPError as exc:
+                      if exc.code == 429 and attempt < 7:
+                          time.sleep(min(30,2**attempt)); continue
+                      raise
+              time.sleep(1)
+          assert len(results) == len(indexes)
+          (root/'proof'/'public-sample.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
+          print('PUBLIC_SAMPLE=PASS keys=',len(results))
+          PY
+
+      - name: Upload recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: movie-r2-live-restore-evidence
+          path: /tmp/movie-recovery/proof/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Delete isolated recovery project
+        if: always()
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          if [ ! -f /tmp/movie-recovery/project-created ]; then
+            echo 'No temporary recovery project was created by this run.'
+            exit 0
+          fi
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}"
+          curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -X DELETE "$API" > /tmp/movie-recovery/project-delete.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/movie-recovery/project-delete.json'))
+          assert d.get('success') is True, d
+          print('TEMP_PROJECT_DELETE=PASS')
+          PY
