@@ -27,63 +27,65 @@ export async function onRequestGet(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+
+  // Decide the lightweight desktop path before touching Inventory schema. The desktop
+  // Product editor needs categories/colours/shipping/tax only; mobile capture owns the
+  // larger resource payload.
+  const optionsOnly = isDesktopProductsEditorRequest(request);
   const nextProductNumber = await getNextProductNumber(db);
   const productNumberStart = await getProductNumberStart(db);
-  const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
   const taxClassColumns = await getTableColumnSet(db, 'tax_classes');
   const taxRateExpr = taxClassColumns.has('tax_rate') ? 'tax_rate' : '0';
   const ratePercentExpr = taxClassColumns.has('rate_percent') ? 'rate_percent' : 'NULL';
-  const stockUnitExpr = inventoryColumns.has('stock_unit_label') ? `COALESCE(NULLIF(sii.stock_unit_label,''),'unit')` : `'unit'`;
-  const usageLabelExpr = inventoryColumns.has('usage_unit_label') ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : `'unit'`;
-  const usageUnitsExpr = inventoryColumns.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1`;
   const taxClasses = normalizeResults(await db.prepare(`SELECT tax_class_id, code, name, ${taxRateExpr} AS tax_rate, ${ratePercentExpr} AS rate_percent FROM tax_classes WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(name) ASC`).all().catch(() => ({ results: [] }))).map((row) => { const tax_rate = normalizeTaxRateFraction(row.tax_rate, row.rate_percent); return { ...row, tax_rate, rate_percent: taxRatePercent(tax_rate) }; });
   const optionSets = await loadCatalogOptionSets(db);
 
-  // The desktop Product editor only needs its option/tax bootstrap here. Loading the
-  // entire tool/supply catalog (historically up to 700 rows) duplicated the dedicated
-  // Product Resource search and could make a cold Ctrl+F5 render hundreds of images
-  // before the editor controls became usable. Mobile Product capture still receives
-  // the full bounded resource set because it owns that workflow directly.
-  const optionsOnly = isDesktopProductsEditorRequest(request);
-  const resources = optionsOnly ? [] : normalizeResults(await db.prepare(`
-    SELECT * FROM (
-      SELECT ci.item_kind, ci.source_key, ci.name, ci.image_url, ci.category, ci.subcategory,
-             COALESCE(sii.on_hand_quantity,0) AS on_hand_quantity,
-             COALESCE(sii.incoming_quantity,0) AS incoming_quantity,
-             COALESCE(sii.reorder_level,0) AS reorder_level,
-             COALESCE(sii.is_on_reorder_list,0) AS is_on_reorder_list,
-             COALESCE(sii.do_not_reuse,0) AS do_not_reuse,
-             ${stockUnitExpr} AS stock_unit_label,
-             ${usageLabelExpr} AS usage_unit_label,
-             ${usageUnitsExpr} AS usage_units_per_stock_unit,
-             COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents,
-             CASE WHEN COALESCE(sii.reorder_level,0) > 0 AND (COALESCE(sii.on_hand_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END AS reorder_needed
-      FROM catalog_items ci
-      LEFT JOIN site_item_inventory sii ON sii.source_type = ci.item_kind AND sii.external_key = ci.source_key
-      WHERE ci.item_kind IN ('tool','supply') AND COALESCE(ci.status,'active') != 'archived'
-      UNION ALL
-      SELECT sii.source_type AS item_kind, sii.external_key AS source_key, sii.item_name AS name, sii.image_url, sii.category, '' AS subcategory,
-             COALESCE(sii.on_hand_quantity,0) AS on_hand_quantity,
-             COALESCE(sii.incoming_quantity,0) AS incoming_quantity,
-             COALESCE(sii.reorder_level,0) AS reorder_level,
-             COALESCE(sii.is_on_reorder_list,0) AS is_on_reorder_list,
-             COALESCE(sii.do_not_reuse,0) AS do_not_reuse,
-             ${stockUnitExpr} AS stock_unit_label,
-             ${usageLabelExpr} AS usage_unit_label,
-             ${usageUnitsExpr} AS usage_units_per_stock_unit,
-             COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents,
-             CASE WHEN COALESCE(sii.reorder_level,0) > 0 AND (COALESCE(sii.on_hand_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END AS reorder_needed
-      FROM site_item_inventory sii
-      WHERE sii.source_type IN ('tool','supply')
-        AND COALESCE(sii.is_active,1) = 1
-        AND NOT EXISTS (
-          SELECT 1 FROM catalog_items ci
-          WHERE ci.item_kind = sii.source_type AND ci.source_key = sii.external_key
-        )
-    ) resource_pool
-    ORDER BY item_kind ASC, LOWER(name) ASC
-    LIMIT 700
-  `).all().catch(() => ({ results: [] })));
+  let resources = [];
+  if (!optionsOnly) {
+    const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
+    const stockUnitExpr = inventoryColumns.has('stock_unit_label') ? `COALESCE(NULLIF(sii.stock_unit_label,''),'unit')` : `'unit'`;
+    const usageLabelExpr = inventoryColumns.has('usage_unit_label') ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : `'unit'`;
+    const usageUnitsExpr = inventoryColumns.has('usage_units_per_stock_unit') ? `COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1)` : `1`;
+    resources = normalizeResults(await db.prepare(`
+      SELECT * FROM (
+        SELECT ci.item_kind, ci.source_key, ci.name, ci.image_url, ci.category, ci.subcategory,
+               COALESCE(sii.on_hand_quantity,0) AS on_hand_quantity,
+               COALESCE(sii.incoming_quantity,0) AS incoming_quantity,
+               COALESCE(sii.reorder_level,0) AS reorder_level,
+               COALESCE(sii.is_on_reorder_list,0) AS is_on_reorder_list,
+               COALESCE(sii.do_not_reuse,0) AS do_not_reuse,
+               ${stockUnitExpr} AS stock_unit_label,
+               ${usageLabelExpr} AS usage_unit_label,
+               ${usageUnitsExpr} AS usage_units_per_stock_unit,
+               COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents,
+               CASE WHEN COALESCE(sii.reorder_level,0) > 0 AND (COALESCE(sii.on_hand_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END AS reorder_needed
+        FROM catalog_items ci
+        LEFT JOIN site_item_inventory sii ON sii.source_type = ci.item_kind AND sii.external_key = ci.source_key
+        WHERE ci.item_kind IN ('tool','supply') AND COALESCE(ci.status,'active') != 'archived'
+        UNION ALL
+        SELECT sii.source_type AS item_kind, sii.external_key AS source_key, sii.item_name AS name, sii.image_url, sii.category, '' AS subcategory,
+               COALESCE(sii.on_hand_quantity,0) AS on_hand_quantity,
+               COALESCE(sii.incoming_quantity,0) AS incoming_quantity,
+               COALESCE(sii.reorder_level,0) AS reorder_level,
+               COALESCE(sii.is_on_reorder_list,0) AS is_on_reorder_list,
+               COALESCE(sii.do_not_reuse,0) AS do_not_reuse,
+               ${stockUnitExpr} AS stock_unit_label,
+               ${usageLabelExpr} AS usage_unit_label,
+               ${usageUnitsExpr} AS usage_units_per_stock_unit,
+               COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents,
+               CASE WHEN COALESCE(sii.reorder_level,0) > 0 AND (COALESCE(sii.on_hand_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END AS reorder_needed
+        FROM site_item_inventory sii
+        WHERE sii.source_type IN ('tool','supply')
+          AND COALESCE(sii.is_active,1) = 1
+          AND NOT EXISTS (
+            SELECT 1 FROM catalog_items ci
+            WHERE ci.item_kind = sii.source_type AND ci.source_key = sii.external_key
+          )
+      ) resource_pool
+      ORDER BY item_kind ASC, LOWER(name) ASC
+      LIMIT 700
+    `).all().catch(() => ({ results: [] })));
+  }
 
   const nextProductNumberValue = Number(nextProductNumber || productNumberStart || 1000);
 
