@@ -1,0 +1,108 @@
+name: Packaging Dropdown Read-only Audit
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/packaging-dropdown-readonly-audit.yml'
+      - 'scripts/dropdown_population_audit.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: packaging-dropdown-readonly-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1: devilndove-dev
+      PROD_D1: devilndove-prod-r462
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Static dropdown population inventory
+        if: hashFiles('scripts/dropdown_population_audit.py') != ''
+        run: python scripts/dropdown_population_audit.py --output /tmp/dropdown-static-audit.json
+
+      - name: Read Packaging and dropdown authorities from Development and Production D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/packaging-dropdown-audit
+          for pair in "development:${DEV_D1}" "production:${PROD_D1}"; do
+            label="${pair%%:*}"
+            db="${pair#*:}"
+            extra=()
+            if [ "$label" = development ]; then extra=(--config wrangler.toml); fi
+            npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('packaging_templates','packaging_projects','packaging_reference_sources','packaging_formula_library','packaging_content_library','packaging_source_material_templates','packaging_printer_profiles','products','site_item_inventory') ORDER BY name;" > "/tmp/packaging-dropdown-audit/${label}-tables.json"
+            npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT packaging_template_id,template_key,template_name,package_type,is_system,is_active,page_width_mm,page_height_mm FROM packaging_templates ORDER BY is_active DESC,is_system DESC,packaging_template_id;" > "/tmp/packaging-dropdown-audit/${label}-templates.json"
+            npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT COUNT(*) AS total_projects,SUM(CASE WHEN COALESCE(project_status,'draft')<>'archived' THEN 1 ELSE 0 END) AS active_projects FROM packaging_projects;" > "/tmp/packaging-dropdown-audit/${label}-projects.json"
+            npx --yes wrangler@4.129.0 d1 execute "$db" --remote "${extra[@]}" --json --command "SELECT (SELECT COUNT(*) FROM products WHERE COALESCE(status,'draft')<>'archived') AS products,(SELECT COUNT(*) FROM site_item_inventory) AS inventory,(SELECT COUNT(*) FROM packaging_reference_sources WHERE is_active=1) AS references,(SELECT COUNT(*) FROM packaging_formula_library WHERE is_active=1) AS formulas,(SELECT COUNT(*) FROM packaging_content_library WHERE is_active=1) AS content_library,(SELECT COUNT(*) FROM packaging_source_material_templates WHERE is_active=1) AS source_materials,(SELECT COUNT(*) FROM packaging_printer_profiles WHERE is_active=1) AS printers;" > "/tmp/packaging-dropdown-audit/${label}-authorities.json"
+          done
+
+      - name: Validate required Packaging template baseline
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('/tmp/packaging-dropdown-audit')
+          def rows(path):
+              data=json.load(open(path,encoding='utf-8')); out=[]
+              def walk(v):
+                  if isinstance(v,dict):
+                      if 'packaging_template_id' in v: out.append(v)
+                      for x in v.values(): walk(x)
+                  elif isinstance(v,list):
+                      for x in v: walk(x)
+              walk(data); return out
+          summary={}
+          for label in ('development','production'):
+              templates=rows(root/f'{label}-templates.json')
+              active=[r for r in templates if int(r.get('is_active') or 0)==1]
+              system=[r for r in active if int(r.get('is_system') or 0)==1]
+              summary[label]={
+                  'template_total':len(templates),
+                  'active_templates':len(active),
+                  'active_system_templates':len(system),
+                  'active_template_keys':[str(r.get('template_key') or '') for r in active],
+              }
+              assert active, f'{label}: packaging_templates exists but has zero active templates'
+          (root/'summary.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          PY
+
+      - name: Upload read-only audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: packaging-dropdown-readonly-audit-${{ github.sha }}
+          path: |
+            /tmp/packaging-dropdown-audit/
+            /tmp/dropdown-static-audit.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Safety boundary
+        if: always()
+        run: |
+          echo 'D1 mutation: NONE'
+          echo 'R2 mutation: NONE'
+          echo 'Provider execution: NONE'
+          echo 'Audit is SELECT/read-only for Development and Production D1.'
