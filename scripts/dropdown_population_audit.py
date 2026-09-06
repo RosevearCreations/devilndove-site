@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Read-only source inventory for HTML select/datalist population wiring.
+"""Read-only source inventory for select/datalist population wiring.
 
-A control with meaningful static options is static-populated. An empty control is
-considered dynamic-wired when its id/name is referenced by JavaScript or inline script.
-Everything else is reported as suspect for targeted runtime review. This audit never
-mutates D1, R2, source data, or provider state.
+The audit scans HTML plus JS/MJS-generated markup. A control with meaningful static
+options is static-populated. An empty control is dynamic-wired when source code references
+its id/name or its generated body contains an interpolation expression. Everything else is
+reported as suspect for targeted runtime review. No D1/R2/provider mutation occurs.
 """
 from __future__ import annotations
 
@@ -74,18 +74,30 @@ def analyze_control(path: Path, kind: str, match, corpus: str) -> dict:
     control_name = a.get('name', '')
     id_refs = ref_count(corpus, control_id)
     name_refs = ref_count(corpus, control_name) if control_name and control_name != control_id else 0
+
+    # JS/MJS-generated markup contributes one occurrence of its own id/name to the
+    # JavaScript corpus. Remove that self-reference so it does not masquerade as wiring.
+    if path.suffix.lower() in {'.js', '.mjs'}:
+        if control_id and control_id in match.group('attrs'):
+            id_refs = max(0, id_refs - 1)
+        if control_name and control_name != control_id and control_name in match.group('attrs'):
+            name_refs = max(0, name_refs - 1)
+
+    generated_expression = '${' in body or bool(re.search(r'\.(map|forEach|reduce)\s*\(', body))
     static = bool(meaningful)
-    dynamic = (not static) and bool(control_id or control_name) and (id_refs + name_refs > 0)
+    dynamic = (not static) and (generated_expression or (bool(control_id or control_name) and (id_refs + name_refs > 0)))
     classification = 'static-populated' if static else ('dynamic-wired' if dynamic else 'suspect-unpopulated')
 
     return {
         'kind': kind,
         'file': path.relative_to(ROOT).as_posix(),
+        'source_kind': path.suffix.lower().lstrip('.'),
         'id': control_id,
         'name': control_name,
         'static_option_count': len(options),
         'meaningful_static_option_count': len(meaningful),
         'javascript_reference_count': id_refs + name_refs,
+        'generated_expression': generated_expression,
         'classification': classification,
     }
 
@@ -99,21 +111,22 @@ def main() -> int:
     corpus = js_corpus(paths)
     controls = []
     for path in paths:
-        if path.suffix.lower() != '.html':
-            continue
         text = path.read_text(encoding='utf-8', errors='replace')
         controls.extend(analyze_control(path, 'select', m, corpus) for m in SELECT_RE.finditer(text))
         controls.extend(analyze_control(path, 'datalist', m, corpus) for m in DATALIST_RE.finditer(text))
 
     counts = {}
+    by_source = {}
     for row in controls:
         counts[row['classification']] = counts.get(row['classification'], 0) + 1
+        by_source[row['source_kind']] = by_source.get(row['source_kind'], 0) + 1
     suspects = [row for row in controls if row['classification'] == 'suspect-unpopulated']
 
     payload = {
-        'authority': 'dropdown_population_static_audit',
+        'authority': 'dropdown_population_static_audit_v2',
         'files_scanned': len(paths),
         'controls_found': len(controls),
+        'controls_by_source_kind': by_source,
         'classification_counts': counts,
         'suspect_count': len(suspects),
         'suspects': suspects,
@@ -121,12 +134,12 @@ def main() -> int:
         'd1_mutation': False,
         'r2_mutation': False,
         'provider_execution': False,
-        'note': 'Dynamic-wired means source wiring exists; runtime population still requires targeted endpoint/runtime acceptance.',
+        'note': 'Dynamic-wired proves source population wiring, not successful runtime data retrieval. Runtime-backed authorities are audited separately.',
     }
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
-    print(json.dumps({k: payload[k] for k in ('files_scanned','controls_found','classification_counts','suspect_count')}, indent=2))
+    print(json.dumps({k: payload[k] for k in ('files_scanned','controls_found','controls_by_source_kind','classification_counts','suspect_count')}, indent=2))
     return 0
 
 
