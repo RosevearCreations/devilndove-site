@@ -5,6 +5,7 @@ on:
     branches: [dev]
     paths:
       - '.github/workflows/recovery-movie-r2-live-restore-v2.yml'
+      - 'scripts/recovery/movie_r2_live_restore_v3.py'
   workflow_dispatch:
 
 permissions:
@@ -32,7 +33,7 @@ jobs:
 
       - name: Prepare exact Movie recovery payload
         run: |
-          python -m py_compile scripts/recovery/movie_r2_live_restore.py
+          python -m py_compile scripts/recovery/movie_r2_live_restore.py scripts/recovery/movie_r2_live_restore_v3.py
           python scripts/recovery/movie_r2_live_restore.py prepare
 
       - name: Create isolated recovery Pages project
@@ -60,11 +61,11 @@ jobs:
             --project-name="$TEMP_PROJECT" \
             --branch=main \
             --commit-hash="$GITHUB_SHA" \
-            --commit-message='Temporary verified movie image recovery v2' \
+            --commit-message='Temporary verified movie image recovery retry' \
             | tee /tmp/movie-recovery-v2/proof/deploy.log
 
       - name: Restore and publicly verify Movie images
-        run: python scripts/recovery/movie_r2_live_restore.py upload --base-url "https://${TEMP_PROJECT}.pages.dev"
+        run: python scripts/recovery/movie_r2_live_restore_v3.py --base-url "https://${TEMP_PROJECT}.pages.dev"
 
       - name: Delete isolated recovery project
         if: always()
