@@ -1,0 +1,110 @@
+name: Recovery Product Glacial Purple Current 2
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-product-glacial-purple-current-2-rescue.yml'
+      - 'scripts/recovery/product_glacial_purple_current_2_rescue.py'
+      - 'scripts/recovery/product-r2-exact-bridge-template.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-product-r2-exact
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      TEMP_PROJECT: devilndove-product-r2-exact-recovery
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prepare exact two-current-key Product payload
+        run: |
+          python -m py_compile scripts/recovery/product_glacial_purple_exact_rescue.py
+          python -m py_compile scripts/recovery/product_glacial_purple_current_2_rescue.py
+          python scripts/recovery/product_glacial_purple_current_2_rescue.py prepare
+
+      - name: Create isolated Product recovery Pages project
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
+          code="$(curl -sS -o /tmp/product-glacial-purple-current-2-rescue/project-check.json -w '%{http_code}' -H "Authorization: Bearer ${CF_PAGES_TOKEN}" "$API/$TEMP_PROJECT" || true)"
+          if [ "$code" = 404 ]; then
+            curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" -H 'Content-Type: application/json' -X POST "$API" --data '{"name":"devilndove-product-r2-exact-recovery","production_branch":"main"}' > /tmp/product-glacial-purple-current-2-rescue/proof/project-create.json
+            touch /tmp/product-glacial-purple-current-2-rescue/project-created
+          else
+            echo "Refusing to reuse temporary recovery project; HTTP $code"
+            cat /tmp/product-glacial-purple-current-2-rescue/project-check.json || true
+            exit 31
+          fi
+
+      - name: Deploy exact two-key Product hash-locked bridge
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          cd /tmp/product-glacial-purple-current-2-rescue/bridge
+          npx --yes wrangler@4.129.0 pages deploy . \
+            --project-name="$TEMP_PROJECT" \
+            --branch=main \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-message='Temporary Glacial Purple two-current-key exact rescue' \
+            | tee /tmp/product-glacial-purple-current-2-rescue/proof/deploy.log
+
+      - name: Restore and publicly verify exact current Product images
+        run: |
+          python scripts/recovery/product_glacial_purple_current_2_rescue.py upload \
+            --base-url "https://${TEMP_PROJECT}.pages.dev"
+
+      - name: Delete isolated Product recovery project
+        if: always()
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          if [ ! -f /tmp/product-glacial-purple-current-2-rescue/project-created ]; then
+            echo 'No temporary project created by this run.'
+            exit 0
+          fi
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}"
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" -X DELETE "$API" > /tmp/product-glacial-purple-current-2-rescue/proof/project-delete.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/product-glacial-purple-current-2-rescue/proof/project-delete.json'))
+          assert d.get('success') is True,d
+          print('TEMP_PROJECT_DELETE=PASS')
+          PY
+
+      - name: Upload Product current-key rescue evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-glacial-purple-current-2-evidence
+          path: /tmp/product-glacial-purple-current-2-rescue/proof/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Recovery safety boundary
+        if: always()
+        run: |
+          echo 'Authorized Production R2 keys: 2'
+          echo 'D1 mutation: NONE'
+          echo 'R2 delete: NONE'
+          echo 'R2 overwrite: REFUSED by conditional writes'
+          echo 'Same-origin public exact SHA verification: REQUIRED'
