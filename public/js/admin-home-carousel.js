@@ -1,8 +1,9 @@
-// Devil n Dove Build 443 — Home carousel editor UI.
+// Devil n Dove — Home carousel editor UI with direct approved-media upload.
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+  const TRUSTED_MEDIA_HOSTS = new Set(['assets.devilndove.com', 'pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
   let slides = [];
 
   function message(text, bad = false) {
@@ -29,13 +30,34 @@
     return new Date(date.getTime() - offset).toISOString().slice(0, 16);
   }
 
+  function normalizeMediaPath(value) {
+    const raw = String(value || '').trim();
+    if (!raw || raw.startsWith('/')) return raw;
+    try {
+      const parsed = new URL(raw);
+      if (parsed.protocol === 'https:' && TRUSTED_MEDIA_HOSTS.has(parsed.hostname.toLowerCase())) {
+        return `/api/product-media?src=${encodeURIComponent(raw)}`;
+      }
+    } catch {}
+    return raw;
+  }
+
+  function humanizeFilename(name) {
+    return String(name || '')
+      .replace(/\.[a-z0-9]+$/i, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 220);
+  }
+
   function payload(action) {
     return {
       action,
       slide_id: Number($('homeCarouselSlideId').value || 0),
       title: $('homeCarouselTitle').value,
       body_text: $('homeCarouselBody').value,
-      image_url: $('homeCarouselImage').value,
+      image_url: normalizeMediaPath($('homeCarouselImage').value),
       alt_text: $('homeCarouselAlt').value,
       cta_label: $('homeCarouselCtaLabel').value,
       cta_url: $('homeCarouselCtaUrl').value,
@@ -54,6 +76,7 @@
     $('homeCarouselSeconds').value = '7';
     $('homeCarouselStatus').value = 'draft';
     $('homeCarouselPreviewMount').hidden = true;
+    if ($('homeCarouselImageFile')) $('homeCarouselImageFile').value = '';
     $('homeCarouselTitle').focus();
   }
 
@@ -125,6 +148,48 @@
     }
   }
 
+  async function uploadChosenImage(file) {
+    if (!file) return;
+    const button = $('homeCarouselChooseImage');
+    const previousLabel = button?.textContent || 'Choose file';
+    try {
+      if (!String(file.type || '').toLowerCase().startsWith('image/')) throw new Error('Choose an image file.');
+      if (!Number(file.size || 0)) throw new Error('The selected image is empty.');
+      if (Number(file.size || 0) > 10 * 1024 * 1024) throw new Error('Carousel images must be 10 MB or smaller.');
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Uploading…';
+      }
+      message(`Uploading ${file.name || 'image'}…`);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_scope', 'brand');
+      formData.append('attach_to_product', '0');
+      formData.append('asset_tag', 'home_carousel');
+      formData.append('variant_role', 'hero');
+      const response = await DDAuth.apiFetch('/api/admin/media-upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) throw new Error(data?.error || `Image upload failed (${response.status}).`);
+      const objectKey = String(data?.asset?.object_key || '').trim();
+      if (!objectKey.startsWith('brand/')) throw new Error('The uploaded image did not return an approved brand-media key.');
+      const sameOriginPath = `/api/product-media?key=${encodeURIComponent(objectKey)}`;
+      $('homeCarouselImage').value = sameOriginPath;
+      if (!$('homeCarouselAlt').value.trim()) $('homeCarouselAlt').value = humanizeFilename(file.name);
+      message('Image uploaded. The carousel URL field has been filled automatically.');
+    } catch (error) {
+      message(error.message || 'Image upload failed.', true);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = previousLabel;
+      }
+      if ($('homeCarouselImageFile')) $('homeCarouselImageFile').value = '';
+    }
+  }
+
   $('homeCarouselForm')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (await send(payload('save'))) reset();
@@ -135,6 +200,12 @@
   $('homeCarouselPreview')?.addEventListener('click', preview);
   $('homeCarouselNew')?.addEventListener('click', reset);
   $('homeCarouselReload')?.addEventListener('click', load);
+  $('homeCarouselChooseImage')?.addEventListener('click', () => $('homeCarouselImageFile')?.click());
+  $('homeCarouselImageFile')?.addEventListener('change', async (event) => uploadChosenImage(event.target.files?.[0] || null));
+  $('homeCarouselImage')?.addEventListener('blur', (event) => {
+    const normalized = normalizeMediaPath(event.target.value);
+    if (normalized !== event.target.value) event.target.value = normalized;
+  });
   $('homeCarouselSaveOrder')?.addEventListener('click', () => send({ action:'reorder', items: slides.map((slide) => ({
     slide_id: slide.slide_id,
     sort_order: Number(document.querySelector(`[data-carousel-order="${slide.slide_id}"]`)?.value || slide.sort_order || 100),

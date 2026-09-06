@@ -1,8 +1,8 @@
 // Release 467 Build 61 — read-only same-origin public R2 media authority.
-// Product and Movie UIs route historical public URLs through the environment-bound
+// Product, Movie and approved brand-media UIs route public URLs through the environment-bound
 // PRODUCT_MEDIA_BUCKET. This route never lists or mutates R2.
 
-const PUBLIC_PREFIXES=['products/','movies/','Itemsforsale/','itemsforsale/','Toolshed/','Tools/','Supplies/','toolshed/','tools/','supplies/'];
+const PUBLIC_PREFIXES=['products/','movies/','brand/','Itemsforsale/','itemsforsale/','Toolshed/','Tools/','Supplies/','toolshed/','tools/','supplies/'];
 const LEGACY_PUBLIC_HOSTS=new Set(['assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
 
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});}
