@@ -27,16 +27,16 @@ for forbidden in ('bucket.put(', 'bucket.delete(', 'bucket.list(', 'createMultip
     req(forbidden not in media,f'Public media fallback acquired forbidden mutation/list capability: {forbidden}')
 
 fallback=read('public/js/product-media-fallback.js')
-for token in ('PUBLIC_HOSTS','assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev','PUBLIC_PREFIXES','/movies/','Itemsforsale/','/api/product-media?key=',"document.addEventListener('error'",'MutationObserver','ddMediaFallbackAttempted','removeAttribute(\'srcset\')'):
+for token in ('const VERSION=62','PUBLIC_HOSTS','assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev','PUBLIC_PREFIXES','/movies/','Itemsforsale/','/api/product-media?key=',"document.addEventListener('error'",'MutationObserver','ddMediaFallbackAttempted','ddMediaAlternateAttempts','promoteSameProductImage','removeAttribute(\'srcset\')'):
     req(token in fallback,f'Browser media recovery missing {token}')
 
 middleware=read('functions/_middleware.js')
-req('/public/js/product-media-fallback.js?v=60' in middleware or '/public/js/product-media-fallback.js?v=61' in middleware,'Global HTML middleware must inject media recovery site-wide')
+req('/public/js/product-media-fallback.js?v=62' in middleware,'Global HTML middleware must inject current v62 media recovery site-wide')
 shop=read('shop/index.html')
 req(shop.lower().count('<h1')==1,'Shop must retain exactly one H1')
 
 manifest=json.loads(read('migrations/canonical/manifest.json'))
-req(len(manifest.get('migrations') or [])==4,'Build 61 must not change canonical migration count')
+req(len(manifest.get('migrations') or [])==4,'Storefront media recovery must not change canonical migration count')
 
 for js in ('functions/api/storefront-merchandising.js','functions/api/product-media.js','public/js/product-media-fallback.js','functions/_middleware.js','scripts/current_storefront_media_recovery_test.mjs'):
     subprocess.run(['node','--check',str(ROOT/js)],cwd=ROOT,check=True)
@@ -45,5 +45,6 @@ print('CURRENT STOREFRONT MEDIA RECOVERY GATE: PASS')
 print('Merchandising Product read: SCHEMA-COMPATIBLE / READ-ONLY')
 print('Public media recovery: PRODUCT + MOVIE + LEGACY R2 PREFIXES / R2 READ-ONLY')
 print('Historical public host recovery: SAME-ORIGIN')
-print('Site-wide HTML fallback injection: PROVEN')
+print('Same-product surviving-image promotion: PROVEN')
+print('Site-wide HTML fallback injection: CURRENT V62')
 print('Canonical migrations: UNCHANGED')
