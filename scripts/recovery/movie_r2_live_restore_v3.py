@@ -3,6 +3,8 @@ import concurrent.futures
 import json
 import pathlib
 import time
+import urllib.error
+import urllib.request
 
 import movie_r2_live_restore as base
 
@@ -17,6 +19,55 @@ BATCH_SIZE = 2
 
 def log(*args):
     print(*args, flush=True)
+
+
+def deterministic_guard(url, token, rows):
+    """Prove token/key/body locks without depending on whether a key already exists."""
+    for _ in range(40):
+        status, _ = base.post_bridge(
+            url, "wrong-token", "movies/not-authorized.jpg", b"blocked", timeout=30
+        )
+        if status == 403:
+            break
+        time.sleep(3)
+    else:
+        raise RuntimeError("Recovery bridge did not become ready")
+
+    status, _ = base.post_bridge(
+        url, token, "movies/not-authorized.jpg", b"blocked", timeout=30
+    )
+    assert status == 403, status
+
+    key = rows[0]["key"]
+    req = urllib.request.Request(
+        url,
+        data=b"deliberately-wrong-body",
+        method="POST",
+        headers={
+            "Content-Type": "image/jpeg",
+            "Cache-Control": "no-store",
+            "x-movie-recovery-token": token,
+            "x-recovery-key": key,
+            "x-recovery-probe": "hash-lock",
+            "User-Agent": "dnd-movie-r2-recovery/3.1",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            status = int(resp.status)
+            payload = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        status = int(exc.code)
+        raw = exc.read().decode("utf-8", "replace")
+        try:
+            payload = json.loads(raw)
+        except Exception:
+            payload = {"raw": raw[:1000]}
+
+    assert status == 422, (status, payload)
+    assert payload.get("probe") is True, payload
+    assert payload.get("error") == "body hash not authorized", payload
+    log("HASH_LOCK_GUARD=PASS write_free_probe=true")
 
 
 def resilient_restore(rows, url, token):
@@ -116,6 +167,7 @@ def resilient_restore(rows, url, token):
         "batch_size": BATCH_SIZE,
         "max_attempts_per_object": MAX_ATTEMPTS,
         "transient_http_codes": sorted(TRANSIENT_HTTP),
+        "hash_guard": "write_free_probe",
     }
     (proof / "restore-summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
@@ -127,6 +179,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", required=True)
     args = parser.parse_args()
+    base.prove_guard = deterministic_guard
     base.restore = resilient_restore
     base.upload(args.base_url)
 
