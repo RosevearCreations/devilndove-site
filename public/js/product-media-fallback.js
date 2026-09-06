@@ -5,7 +5,8 @@
 // of a broken-image icon. No media or Product database records are mutated.
 (()=>{
   'use strict';
-  if(window.DDProductMediaFallback?.installed)return;
+  const VERSION=61;
+  if(Number(window.DDProductMediaFallback?.version||0)>=VERSION)return;
   const PUBLIC_HOSTS=new Set(['assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
   const FLAG='ddMediaFallbackAttempted';
   const FINAL_FLAG='ddMediaRecoveryPlaceholder';
@@ -87,5 +88,5 @@
   });
   observer.observe(document.documentElement,{childList:true,subtree:true});
 
-  window.DDProductMediaFallback={installed:true,fallbackUrl,recoverImage,showProductPlaceholder,scan};
+  window.DDProductMediaFallback={installed:true,version:VERSION,fallbackUrl,recoverImage,showProductPlaceholder,scan};
 })();
