@@ -2,14 +2,11 @@ name = "devilndove-site"
 compatibility_date = "2026-04-08"
 pages_build_output_dir = "."
 
-# TRACKED DEVELOPMENT-SAFE CONFIGURATION.
-# One Cloudflare Pages project is canonical: devilndove-site.
-# `dev` deploys as Preview/Development with the Development D1/R2 resources below.
-# `main` deploys as Production through .github/workflows/production-pages-deploy.yml,
-# which generates Production bindings ephemerally in the runner. Do not commit
-# Production resource IDs/bucket names here and do not add account_id here.
-# Future schema changes use only migrations/canonical through scripts/d1_migrate.py.
-# Historical migrations are provenance and must never be replayed automatically.
+# TEMPORARY PRODUCT RECOVERY CONFIGURATION.
+# Development remains the source application/environment. The additional Production
+# Product R2 binding below exists only so the guarded Development recovery bridge can
+# copy the 150 positively verified missing Product objects. Remove it immediately
+# after live read-back verification. No D1 mutation and no R2 deletion are authorized.
 
 [vars]
 DND_ENVIRONMENT = "development"
@@ -30,3 +27,8 @@ preview_bucket_name = "devilndove-toolshed-images-dev"
 binding = "CAIP_PRIVATE_MEDIA_BUCKET"
 bucket_name = "devilndove-caip-media-dev"
 preview_bucket_name = "devilndove-caip-media-dev"
+
+[[r2_buckets]]
+binding = "RELEASE463_PRODUCT_MEDIA_PROD_BUCKET"
+bucket_name = "devilndove-toolshed-images"
+preview_bucket_name = "devilndove-toolshed-images"
