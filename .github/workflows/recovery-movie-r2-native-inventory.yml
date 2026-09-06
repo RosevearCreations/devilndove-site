@@ -1,0 +1,124 @@
+name: Recovery Movie R2 Native Inventory
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-movie-r2-native-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-movie-r2-native-inventory
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DEV_HOST: https://devilndove-site-dev.pages.dev
+      DND_DEV_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Require configured Development admin session
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${DND_DEV_SESSION_COOKIE}"
+          echo 'ADMIN_SESSION_SECRET=AVAILABLE'
+
+      - name: Inventory Production Product R2 through native bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/movie-native-inventory
+          python - <<'PY'
+          import json, os, pathlib, urllib.request, urllib.error
+          root=pathlib.Path('/tmp/movie-native-inventory')
+          endpoint=os.environ['DEV_HOST'].rstrip('/')+'/api/admin/release463-r2-sync'
+          cookie=os.environ['DND_DEV_SESSION_COOKIE']
+          cursor=''
+          objects=[]
+          pages=0
+          while True:
+              payload={'authorization':'RELEASE463_R2_ENVIRONMENT_SYNC','bucket':'product','action':'inventory_destination','limit':500}
+              if cursor: payload['cursor']=cursor
+              req=urllib.request.Request(endpoint,data=json.dumps(payload).encode('utf-8'),headers={'Content-Type':'application/json','Accept':'application/json','Cache-Control':'no-store','Cookie':cookie,'User-Agent':'dnd-movie-r2-native-inventory/1.0'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=45) as resp: data=json.load(resp)
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode('utf-8','replace')
+                  raise SystemExit(f'Native R2 inventory HTTP {exc.code}: {body[:1000]}')
+              if not data.get('ok'): raise SystemExit('Native R2 inventory failed: '+json.dumps(data)[:1500])
+              if data.get('action')!='inventory_destination' or data.get('bucket')!='product': raise SystemExit('Unexpected bridge response identity.')
+              batch=data.get('results') or []
+              objects.extend(batch); pages+=1
+              print('inventory page',pages,'objects',len(batch),'total',len(objects))
+              if data.get('done'): break
+              cursor=str(data.get('next_cursor') or '').strip()
+              if not cursor: raise SystemExit('Truncated inventory returned no cursor.')
+              if pages>100: raise SystemExit('Inventory pagination safety limit exceeded.')
+          json.dump(objects,open(root/'destination-objects.json','w'),indent=2)
+          print('NATIVE_INVENTORY=PASS objects=',len(objects),'pages=',pages)
+          PY
+
+      - name: Compare exact catalog keys to Production R2 inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib, urllib.parse
+          root=pathlib.Path('/tmp/movie-native-inventory'); r2_host='pub-f8137eb938da486a9f24410ccf49087c.r2.dev'
+          def text(v): return str(v or '').strip()
+          def key_from_url(v):
+              v=text(v)
+              if not v: return ''
+              p=urllib.parse.urlparse(v)
+              if p.hostname and p.hostname.lower()==r2_host:
+                  path=urllib.parse.unquote(p.path.lstrip('/'))
+                  return path if path.startswith('movies/') and path.lower().endswith('.jpg') else ''
+              return v if v.startswith('movies/') and v.lower().endswith('.jpg') else ''
+          expected=set(); loaded=''
+          for path in [pathlib.Path('data/movies/movie_catalog_enriched.v2.json'),pathlib.Path('data/movies/movie_catalog_enriched.json'),pathlib.Path('data/catalog.json')]:
+              if not path.exists(): continue
+              try: data=json.loads(path.read_text(encoding='utf-8-sig'))
+              except Exception: continue
+              rows=data if isinstance(data,list) else (data.get('items') or data.get('movies') or data.get('titles') or []) if isinstance(data,dict) else []
+              if not isinstance(rows,list) or not rows: continue
+              loaded=str(path)
+              for row in rows:
+                  if not isinstance(row,dict) or text(row.get('status')).lower()=='archived': continue
+                  upc=text(row.get('upc') or row.get('UPC') or row.get('barcode') or row.get('code'))
+                  front=text(row.get('front_image_url') or row.get('front_image') or row.get('image_front') or row.get('cover_front') or row.get('frontImageUrl'))
+                  back=text(row.get('back_image_url') or row.get('back_image') or row.get('image_back') or row.get('cover_back') or row.get('backImageUrl'))
+                  if not front and upc: front=f'https://{r2_host}/movies/{upc}f.jpg'
+                  if not back and upc: back=f'https://{r2_host}/movies/{upc}b.jpg'
+                  for url in (front,back):
+                      key=key_from_url(url)
+                      if key: expected.add(key)
+              break
+          if not expected: raise SystemExit('No expected movie keys resolved from catalog.')
+          objects=json.load(open(root/'destination-objects.json'))
+          destination={text(x.get('key')) for x in objects if text(x.get('key'))}
+          live_movies={k for k in destination if k.startswith('movies/')}
+          present=sorted(expected & destination); missing=sorted(expected - destination); extras=sorted(live_movies - expected)
+          summary={'catalog':loaded,'expected_keys':len(expected),'present_keys':len(present),'missing_keys':len(missing),'live_movie_keys_total':len(live_movies),'extra_live_movie_keys':len(extras),'production_r2_mutation':False,'d1_mutation':False,'method':'native_product_bucket_destination_inventory'}
+          for name,value in [('summary',summary),('present',present),('missing',missing),('extras',extras)]: (root/f'{name}.json').write_text(json.dumps(value,indent=2),encoding='utf-8')
+          (root/'missing-keys.txt').write_text(''.join(k+'\n' for k in missing),encoding='utf-8')
+          print(json.dumps(summary,indent=2))
+          PY
+
+      - name: Upload native inventory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: movie-r2-native-inventory
+          path: /tmp/movie-native-inventory/
+          if-no-files-found: error
+          retention-days: 14
