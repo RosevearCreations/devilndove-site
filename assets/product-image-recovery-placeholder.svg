@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Product image temporarily unavailable</title>
+  <desc id="desc">Neutral Devil n Dove storefront placeholder used while an original product photograph is being recovered.</desc>
+  <rect width="1200" height="1200" fill="#f3efe8"/>
+  <rect x="105" y="105" width="990" height="990" rx="52" fill="#ffffff" stroke="#9b8f82" stroke-width="8"/>
+  <path d="M365 710l150-170 120 130 105-105 210 245H250z" fill="#d9d0c7"/>
+  <circle cx="430" cy="415" r="72" fill="#d9d0c7"/>
+  <text x="600" y="885" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700" fill="#403a35">Devil n Dove</text>
+  <text x="600" y="955" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" fill="#625a53">Product photo recovery in progress</text>
+</svg>
