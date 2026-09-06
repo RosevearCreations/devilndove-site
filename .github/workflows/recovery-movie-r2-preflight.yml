@@ -27,7 +27,6 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/movie-r2-preflight
           python - <<'PY'
-          import concurrent.futures
           import json
           import pathlib
           import time
@@ -38,6 +37,8 @@ jobs:
           ROOT = pathlib.Path('/tmp/movie-r2-preflight')
           R2_HOST = 'pub-f8137eb938da486a9f24410ccf49087c.r2.dev'
           R2_BASE = f'https://{R2_HOST}/movies'
+          REQUEST_GAP_SECONDS = 0.18
+          MAX_429_RETRIES = 8
 
           def text(value):
               return str(value or '').strip()
@@ -71,7 +72,13 @@ jobs:
                   key = movie_key_from_url(url)
                   if not key:
                       continue
-                  current = out.setdefault(key, {'key': key, 'url': f'https://{R2_HOST}/{urllib.parse.quote(key, safe="/.")}', 'sources': [], 'upcs': [], 'sides': []})
+                  current = out.setdefault(key, {
+                      'key': key,
+                      'url': f'https://{R2_HOST}/{urllib.parse.quote(key, safe="/.")}',
+                      'sources': [],
+                      'upcs': [],
+                      'sides': [],
+                  })
                   if source not in current['sources']:
                       current['sources'].append(source)
                   if upc and upc not in current['upcs']:
@@ -106,7 +113,11 @@ jobs:
               page = 1
               while True:
                   url = f'https://devilndove.com/api/movies?limit=500&page={page}&recovery_preflight={time.time_ns()}'
-                  req = urllib.request.Request(url, headers={'Accept': 'application/json', 'Cache-Control': 'no-store', 'User-Agent': 'dnd-movie-r2-recovery/1.0'})
+                  req = urllib.request.Request(url, headers={
+                      'Accept': 'application/json',
+                      'Cache-Control': 'no-store',
+                      'User-Agent': 'dnd-movie-r2-recovery/1.0',
+                  })
                   with urllib.request.urlopen(req, timeout=30) as resp:
                       data = json.load(resp)
                   items = data.get('items') or []
@@ -126,30 +137,48 @@ jobs:
 
           def probe(item):
               key = item['key']
-              url = item['url'] + ('&' if '?' in item['url'] else '?') + f'recovery_preflight={time.time_ns()}'
-              req = urllib.request.Request(url, headers={'Accept': 'image/*', 'Cache-Control': 'no-store', 'User-Agent': 'dnd-movie-r2-recovery/1.0'}, method='GET')
-              try:
-                  with urllib.request.urlopen(req, timeout=30) as resp:
-                      body = resp.read(1024)
-                      status = int(getattr(resp, 'status', 200) or 200)
-                      content_type = text(resp.headers.get('Content-Type')).lower()
-                      content_length = text(resp.headers.get('Content-Length'))
-                  if status == 200:
-                      return {**item, 'state': 'present', 'http_status': status, 'content_type': content_type, 'content_length': content_length, 'prefix_bytes': len(body)}
-                  return {**item, 'state': 'issue', 'http_status': status, 'content_type': content_type, 'content_length': content_length}
-              except urllib.error.HTTPError as exc:
-                  if exc.code == 404:
-                      return {**item, 'state': 'missing', 'http_status': 404}
-                  return {**item, 'state': 'issue', 'http_status': int(exc.code), 'error': str(exc)}
-              except Exception as exc:
-                  return {**item, 'state': 'issue', 'http_status': 0, 'error': repr(exc)}
+              for attempt in range(MAX_429_RETRIES + 1):
+                  url = item['url'] + f'?recovery_preflight={time.time_ns()}'
+                  req = urllib.request.Request(url, headers={
+                      'Accept': 'image/*',
+                      'Cache-Control': 'no-store',
+                      'User-Agent': 'dnd-movie-r2-recovery/1.0',
+                  }, method='HEAD')
+                  try:
+                      with urllib.request.urlopen(req, timeout=30) as resp:
+                          status = int(getattr(resp, 'status', 200) or 200)
+                          content_type = text(resp.headers.get('Content-Type')).lower()
+                          content_length = text(resp.headers.get('Content-Length'))
+                      if status == 200:
+                          return {**item, 'state': 'present', 'http_status': status, 'content_type': content_type, 'content_length': content_length}
+                      return {**item, 'state': 'issue', 'http_status': status, 'content_type': content_type, 'content_length': content_length}
+                  except urllib.error.HTTPError as exc:
+                      if exc.code == 404:
+                          return {**item, 'state': 'missing', 'http_status': 404}
+                      if exc.code == 429 and attempt < MAX_429_RETRIES:
+                          retry_after = text(exc.headers.get('Retry-After')) if exc.headers else ''
+                          try:
+                              wait = max(1.0, float(retry_after))
+                          except Exception:
+                              wait = min(30.0, 1.5 * (2 ** attempt))
+                          print(f'429 for {key}; retry {attempt + 1}/{MAX_429_RETRIES} after {wait:.1f}s')
+                          time.sleep(wait)
+                          continue
+                      return {**item, 'state': 'issue', 'http_status': int(exc.code), 'error': str(exc)}
+                  except Exception as exc:
+                      return {**item, 'state': 'issue', 'http_status': 0, 'error': repr(exc)}
+              return {**item, 'state': 'issue', 'http_status': 429, 'error': '429 retry budget exhausted'}
 
           results = []
-          with concurrent.futures.ThreadPoolExecutor(max_workers=24) as pool:
-              for index, result in enumerate(pool.map(probe, expected_list), 1):
-                  results.append(result)
-                  if index % 250 == 0:
-                      print('probed', index, 'of', len(expected_list))
+          started = time.time()
+          for index, item in enumerate(expected_list, 1):
+              result = probe(item)
+              results.append(result)
+              if index % 100 == 0 or index == len(expected_list):
+                  counts = {state: sum(1 for x in results if x['state'] == state) for state in ('present', 'missing', 'issue')}
+                  elapsed = time.time() - started
+                  print(f'probed {index}/{len(expected_list)} in {elapsed:.1f}s: {counts}')
+              time.sleep(REQUEST_GAP_SECONDS)
 
           present = sorted((x for x in results if x['state'] == 'present'), key=lambda x: x['key'])
           missing = sorted((x for x in results if x['state'] == 'missing'), key=lambda x: x['key'])
@@ -163,6 +192,8 @@ jobs:
               'present_keys': len(present),
               'missing_keys': len(missing),
               'issue_keys': len(issues),
+              'probe_method': 'throttled_HEAD_with_429_backoff',
+              'request_gap_seconds': REQUEST_GAP_SECONDS,
               'safety': {'d1_mutation': False, 'r2_mutation': False, 'r2_delete': False},
           }
           for name, value in [('expected', expected_list), ('present', present), ('missing', missing), ('issues', issues), ('summary', summary)]:
