@@ -1,0 +1,89 @@
+name: Recovery Product R2 Bucket Inventory
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-product-r2-bucket-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-product-r2-bucket-inventory
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      TEMP_PROJECT: devilndove-product-r2-inventory
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prepare read-only R2 inventory bridge
+        run: |
+          python -m py_compile scripts/recovery/product_r2_bucket_inventory.py
+          python scripts/recovery/product_r2_bucket_inventory.py prepare
+
+      - name: Create isolated inventory Pages project
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
+          code="$(curl -sS -o /tmp/product-r2-bucket-inventory/project-check.json -w '%{http_code}' -H "Authorization: Bearer ${CF_PAGES_TOKEN}" "$API/$TEMP_PROJECT" || true)"
+          if [ "$code" = 404 ]; then
+            curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" -H 'Content-Type: application/json' -X POST "$API" --data '{"name":"devilndove-product-r2-inventory","production_branch":"main"}' > /tmp/product-r2-bucket-inventory/proof/project-create.json
+            touch /tmp/product-r2-bucket-inventory/project-created
+          else
+            echo "Refusing to reuse or ambiguously resolve temporary project; HTTP $code"
+            exit 31
+          fi
+
+      - name: Deploy read-only inventory bridge
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          cd /tmp/product-r2-bucket-inventory/bridge
+          npx --yes wrangler@4.129.0 pages deploy . \
+            --project-name="$TEMP_PROJECT" \
+            --branch=main \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-message='Temporary read-only Product R2 inventory' \
+            | tee /tmp/product-r2-bucket-inventory/proof/deploy.log
+
+      - name: Collect Development and Production inventories
+        run: python scripts/recovery/product_r2_bucket_inventory.py collect --base-url "https://${TEMP_PROJECT}.pages.dev"
+
+      - name: Delete isolated inventory project
+        if: always()
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          if [ ! -f /tmp/product-r2-bucket-inventory/project-created ]; then
+            echo 'No temporary project created by this run.'
+            exit 0
+          fi
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}"
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" -X DELETE "$API" > /tmp/product-r2-bucket-inventory/proof/project-delete.json
+
+      - name: Upload R2 inventory evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-r2-bucket-inventory
+          path: /tmp/product-r2-bucket-inventory/proof/
+          if-no-files-found: warn
+          retention-days: 30
