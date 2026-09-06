@@ -88,7 +88,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          SQL="SELECT COUNT(*) AS n FROM product_images WHERE image_url LIKE '%' || replace(replace('${PROBE_KEY}','%','\\%'),'_','\\_') || '%' ESCAPE '\\';"
+          SQL="SELECT COUNT(*) AS n FROM product_images WHERE instr(image_url, '${PROBE_KEY}') > 0;"
           npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "$SQL" > /tmp/r2-probe/d1.json
           python - <<'PY'
           import json
@@ -112,20 +112,23 @@ jobs:
           key=os.environ['PROBE_KEY']; size=int(os.environ['PROBE_SIZE']); sha=os.environ['PROBE_SHA']
           url='https://devilndove.com/api/product-media?'+urllib.parse.urlencode({'key':key,'probe':str(time.time_ns())})
           req=urllib.request.Request(url,headers={'Cache-Control':'no-store','Accept':'image/*','User-Agent':'dnd-r2-edit-token-probe/1.0'})
+          needs='true'
           try:
               with urllib.request.urlopen(req,timeout=30) as r:
                   body=r.read(20*1024*1024)
               got=(len(body),hashlib.sha256(body).hexdigest())
               assert got==(size,sha),('LIVE CONFLICT',key,got,(size,sha))
               print('LIVE_PREFLIGHT=ALREADY_EXACT')
-              open('/tmp/r2-probe/already_exact','w').write('1')
+              needs='false'
           except urllib.error.HTTPError as e:
               if e.code!=404: raise
               print('LIVE_PREFLIGHT=MISSING')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as f:
+              f.write('PROBE_NEEDS_WRITE='+needs+'\n')
           PY
 
       - name: Write one verified Product object with edit token
-        if: ${{ hashFiles('/tmp/r2-probe/already_exact') == '' }}
+        if: ${{ env.PROBE_NEEDS_WRITE == 'true' }}
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
