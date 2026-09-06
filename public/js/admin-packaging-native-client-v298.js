@@ -1,13 +1,14 @@
 // Devil n Dove Build 298 Packaging native client launcher.
 // Exposes a synchronous browser facade immediately; native module loading is lazy so
 // the mature editor can call DDPackagingClient.request() safely during DOMContentLoaded.
+// v441 carries core-Packaging-first loading so templates/projects never wait on owner contracts.
 (() => {
   const BUILD = 298;
   let modulePromise = null;
 
   function loadModule() {
     if (!modulePromise) {
-      modulePromise = import('/public/js/modules/packaging/native-client-v298.mjs?v=440');
+      modulePromise = import('/public/js/modules/packaging/native-client-v298.mjs?v=441');
     }
     return modulePromise;
   }
