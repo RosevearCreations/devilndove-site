@@ -20,6 +20,15 @@ function positive(value, fallback = 1) {
   return parsed > 0 ? parsed : fallback;
 }
 
+function baseAuthorityUnavailableResource(item = {}, link = null) {
+  return {
+    ...item,
+    quantity_authority: Number(item?.site_item_inventory_id || 0) > 0 ? 'base_authority_unavailable' : 'catalog_only',
+    base_authority_available: false,
+    preview: legacy.resourcePreview(item, link)
+  };
+}
+
 export function resourcePreview(resource = {}, link = null) {
   if (String(resource?.quantity_authority || '') !== 'base') return legacy.resourcePreview(resource, link);
   const packageCostCents = Math.max(0, Math.round(number(resource.purchase_unit_cost_cents ?? resource.unit_cost_cents, 0)));
@@ -55,12 +64,20 @@ export function resourcePreview(resource = {}, link = null) {
 export async function searchResources(db, env, query = '', limit = 240) {
   const resources = await legacy.searchResources(db, env, query, limit);
   const ids = resources.map((item) => Number(item?.site_item_inventory_id || 0)).filter((id) => id > 0);
-  const balances = await loadInventoryBaseBalances(db, ids);
+  let balances;
+  try {
+    balances = await loadInventoryBaseBalances(db, ids);
+  } catch {
+    // Live admin availability must not depend on one derived inventory authority.
+    // Legacy package quantities are a compatibility fallback only; explicitly mark
+    // the base authority unavailable so callers never mistake them for canonical data.
+    return resources.map((item) => baseAuthorityUnavailableResource(item));
+  }
   return resources.map((item) => {
     const id = Number(item?.site_item_inventory_id || 0);
     if (!id) return { ...item, preview: legacy.resourcePreview(item) };
     const merged = mergeInventoryBaseAuthority(item, balances.get(id) || null);
-    return { ...merged, preview: resourcePreview(merged) };
+    return { ...merged, base_authority_available: true, preview: resourcePreview(merged) };
   });
 }
 
@@ -68,9 +85,20 @@ export async function loadProductLinks(db, productId) {
   const links = await legacy.loadProductLinks(db, productId);
   const out = [];
   for (const link of links) {
-    const balance = await loadInventoryBaseBalanceByIdentity(db, link?.resource_kind, link?.source_key);
+    let balance = null;
+    let baseAuthorityAvailable = true;
+    try {
+      balance = await loadInventoryBaseBalanceByIdentity(db, link?.resource_kind, link?.source_key);
+    } catch {
+      baseAuthorityAvailable = false;
+    }
+    if (!baseAuthorityAvailable) {
+      const resource = baseAuthorityUnavailableResource(link?.resource || {}, link);
+      out.push({ ...link, resource, preview: legacy.resourcePreview(resource, link) });
+      continue;
+    }
     const resource = balance ? mergeInventoryBaseAuthority(link?.resource || {}, balance) : { ...(link?.resource || {}) };
-    out.push({ ...link, resource, preview: resourcePreview(resource, link) });
+    out.push({ ...link, resource: { ...resource, base_authority_available: true }, preview: resourcePreview(resource, link) });
   }
   return out;
 }
