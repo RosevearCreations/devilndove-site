@@ -1,7 +1,7 @@
 // Temporary recovery-only Pages Function template.
 // The recovery runner replaces __EXPECTED_JSON__ and __TOKEN_SHA256__ before deploy.
-// An accepted request must match the exact backup key/hash authority and an ephemeral
-// runner-only token. Existing objects are never overwritten.
+// An accepted write request must match the exact backup key/hash authority and an
+// ephemeral runner-only token. Existing objects are never overwritten.
 const EXPECTED = Object.freeze(__EXPECTED_JSON__);
 const TOKEN_SHA256 = '__TOKEN_SHA256__';
 
@@ -46,6 +46,17 @@ export async function onRequestPost({ request, env }) {
   const key = String(request.headers.get('x-recovery-key') || '').trim();
   const expectedSha = EXPECTED[key];
   if (!expectedSha) return json({ ok: false, error: 'key not authorized' }, 403);
+
+  // Deterministic write-free guard probe. This proves the request-body SHA lock
+  // regardless of whether this key was already restored by an earlier partial run.
+  if (request.headers.get('x-recovery-probe') === 'hash-lock') {
+    const probeBytes = await request.arrayBuffer();
+    const probeSha = await sha256(probeBytes);
+    if (probeSha !== expectedSha) {
+      return json({ ok: false, key, probe: true, error: 'body hash not authorized', expected_sha256: expectedSha, actual_sha256: probeSha }, 422);
+    }
+    return json({ ok: true, key, probe: true, state: 'hash_lock_exact' });
+  }
 
   const before = await exactObject(env.MOVIE_PROD_BUCKET, key, expectedSha);
   if (before.state === 'exact') return json({ ok: true, key, ...before, state: 'already_exact' });
