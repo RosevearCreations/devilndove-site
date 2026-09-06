@@ -1,0 +1,41 @@
+name: Patch Movie Recovery Regex
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/patch-movie-recovery-regex.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+      - name: Patch over-escaped movie recovery regex
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/recovery-movie-r2-live-restore.yml')
+          s=p.read_text(encoding='utf-8')
+          old="const KEY_RE = /^movies\\\\\\/[A-Za-z0-9._-]+\\\\.jpg$/;"
+          new="const KEY_RE = /^movies\\/[A-Za-z0-9._-]+\\.jpg$/;"
+          if old not in s:
+              raise SystemExit('Expected over-escaped regex not found; refusing blind edit.')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          print('PATCH=PASS')
+          PY
+          git diff --check
+          git diff -- .github/workflows/recovery-movie-r2-live-restore.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/recovery-movie-r2-live-restore.yml
+          git commit -m 'recovery: fix movie R2 bridge regex'
+          git push origin HEAD:dev
