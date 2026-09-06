@@ -5,6 +5,7 @@ on:
     branches: [dev]
     paths:
       - '.github/workflows/recovery-product-r2-reference-preflight.yml'
+      - 'scripts/recovery/product_r2_reference_preflight.py'
   workflow_dispatch:
 
 permissions:
