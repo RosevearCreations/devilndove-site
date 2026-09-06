@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 """Restore one exact historical Glacial Purple Product image to Production R2.
 
-Safety boundary:
-- one exact current Product key only
-- exact historical Google Drive filename, byte size and SHA-256
-- source ZIP itself pinned by exact size and SHA-256
-- temporary Pages project and ephemeral token
-- body-hash lock before any write
-- conditional If-None-Match:* write; differing existing object is a conflict
-- exact R2 read-back and live same-origin Product-media verification
-- no D1 mutation, no R2 delete, no overwrite
+Safety boundary: one exact current Product key, pinned ZIP/image SHA-256 and byte size,
+ephemeral token/project, write-free guards, conditional no-overwrite write, exact live
+read-back, no D1 mutation and no R2 delete.
 """
 from __future__ import annotations
 
@@ -78,14 +72,10 @@ def reset_dirs():
 
 def download_bundle():
     _, _, listing = request_json(
-        f"{FIRESTORAGE_API}/shares/{FIRESTORAGE_SHARE}/files?maxResults=100",
-        timeout=60,
+        f"{FIRESTORAGE_API}/shares/{FIRESTORAGE_SHARE}/files?maxResults=100", timeout=60
     )
     item = next(
-        (
-            row for row in (listing.get("files") or [])
-            if (row.get("fileName") or row.get("name")) == ZIP_NAME
-        ),
+        (row for row in (listing.get("files") or []) if (row.get("fileName") or row.get("name")) == ZIP_NAME),
         None,
     )
     assert item, f"Missing rescue bundle {ZIP_NAME}"
@@ -99,12 +89,11 @@ def download_bundle():
         timeout=60,
     )
     _, _, body = request_bytes(meta["downloadUrl"], timeout=180)
-    assert len(body) == ZIP_SIZE, (len(body), ZIP_SIZE)
+    assert len(body) == ZIP_SIZE
     assert sha256_bytes(body) == ZIP_SHA256
     ZIP_FILE.write_bytes(body)
     (PROOF / "bundle-verification.json").write_text(
-        json.dumps({"name": ZIP_NAME, "size": ZIP_SIZE, "sha256": ZIP_SHA256}, indent=2),
-        encoding="utf-8",
+        json.dumps({"name": ZIP_NAME, "size": ZIP_SIZE, "sha256": ZIP_SHA256}, indent=2), encoding="utf-8"
     )
     log("PRODUCT_RESCUE_BUNDLE=PASS", ZIP_SIZE, ZIP_SHA256)
 
@@ -112,21 +101,26 @@ def download_bundle():
 def validate_payload():
     with zipfile.ZipFile(ZIP_FILE) as archive:
         manifest = json.loads(archive.read("manifest.json"))
-        assert int(manifest.get("product_id") or 0) == PRODUCT_ID, manifest
-        assert str(manifest.get("product_name") or "") == PRODUCT_NAME, manifest
-        assert str(manifest.get("target_key") or "") == TARGET_KEY, manifest
-        assert str(manifest.get("original_filename") or "") == ORIGINAL_FILENAME, manifest
-        assert int(manifest.get("size") or 0) == EXPECTED_SIZE, manifest
-        assert str(manifest.get("sha256") or "") == EXPECTED_SHA256, manifest
-        assert manifest.get("safety", {}).get("overwrite_allowed") is False, manifest
-        assert manifest.get("safety", {}).get("d1_mutation") is False, manifest
-        assert manifest.get("safety", {}).get("r2_delete") is False, manifest
+        assert int(manifest.get("product_id") or 0) == PRODUCT_ID
+        assert str(manifest.get("product_name") or "") == PRODUCT_NAME
+        assert str(manifest.get("target_key") or "") == TARGET_KEY
+        assert str(manifest.get("original_filename") or "") == ORIGINAL_FILENAME
+        assert int(manifest.get("size") or 0) == EXPECTED_SIZE
+        assert str(manifest.get("sha256") or "") == EXPECTED_SHA256
+        assert manifest.get("safety", {}).get("overwrite_allowed") is False
+        assert manifest.get("safety", {}).get("d1_mutation") is False
+        assert manifest.get("safety", {}).get("r2_delete") is False
         body = archive.read(ORIGINAL_FILENAME)
 
-    assert len(body) == EXPECTED_SIZE, (len(body), EXPECTED_SIZE)
+    assert len(body) == EXPECTED_SIZE
     assert sha256_bytes(body) == EXPECTED_SHA256
     assert body[:3] == b"\xff\xd8\xff", body[:8]
-    assert body[-2:] == b"\xff\xd9", body[-8:]
+    # Samsung/Android JPEGs may contain SEFT camera metadata after the JPEG EOI marker.
+    # The exact pinned byte hash remains the content authority; require an EOI marker
+    # somewhere in the source rather than incorrectly requiring it to be the last bytes.
+    eoi_offset = body.rfind(b"\xff\xd9")
+    assert eoi_offset > 2, "JPEG end marker missing"
+    trailing_bytes = len(body) - (eoi_offset + 2)
     IMAGE_FILE.write_bytes(body)
 
     authority = {
@@ -136,18 +130,21 @@ def validate_payload():
         "original_filename": ORIGINAL_FILENAME,
         "size": EXPECTED_SIZE,
         "sha256": EXPECTED_SHA256,
+        "jpeg_eoi_offset": eoi_offset,
+        "jpeg_trailing_camera_metadata_bytes": trailing_bytes,
         "source": "Google Drive historical exact-name copy",
         "evidence": [
             "exact original filename retained by Production media_assets",
             "exact stored byte size retained by Production media_assets",
             "visual content matches Glacial Purple soap",
+            "exact source byte hash pinned before recovery",
         ],
         "d1_mutation": False,
         "r2_delete": False,
         "overwrite_allowed": False,
     }
     (PROOF / "restore-authority.json").write_text(json.dumps(authority, indent=2), encoding="utf-8")
-    log("PRODUCT_RESCUE_PAYLOAD=PASS", TARGET_KEY, EXPECTED_SIZE, EXPECTED_SHA256)
+    log("PRODUCT_RESCUE_PAYLOAD=PASS", TARGET_KEY, EXPECTED_SIZE, EXPECTED_SHA256, "trailing_metadata=", trailing_bytes)
 
 
 def build_bridge():
@@ -162,8 +159,7 @@ def build_bridge():
     functions.mkdir(parents=True, exist_ok=True)
     (functions / "recovery.js").write_text(source, encoding="utf-8")
     (BRIDGE / "index.html").write_text(
-        "<!doctype html><title>Product exact recovery</title><p>Temporary recovery bridge.</p>\n",
-        encoding="utf-8",
+        "<!doctype html><title>Product exact recovery</title><p>Temporary recovery bridge.</p>\n", encoding="utf-8"
     )
     (BRIDGE / "wrangler.toml").write_text(
         f'name = "{PROJECT}"\n'
@@ -187,8 +183,7 @@ def build_bridge():
             "conditional_no_overwrite": True,
             "d1_binding_present": False,
             "delete_route_present": False,
-        }, indent=2),
-        encoding="utf-8",
+        }, indent=2), encoding="utf-8"
     )
     log("PRODUCT_BRIDGE_PREPARE=PASS authorized_keys=1")
 
@@ -214,8 +209,7 @@ def bridge_post(url, token, key, body, *, probe=False, timeout=45):
     req = urllib.request.Request(url, data=body, method="POST", headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8", "replace")
-            return int(resp.status), json.loads(raw)
+            return int(resp.status), json.loads(resp.read().decode("utf-8", "replace"))
     except urllib.error.HTTPError as exc:
         raw = exc.read().decode("utf-8", "replace")
         try:
@@ -235,7 +229,7 @@ def retry_expected(label, operation, expected_status, *, expected_probe=None):
         history.append({"attempt": attempt + 1, "http_status": status, "payload": payload})
         if status == expected_status and (expected_probe is None or payload.get("probe") is expected_probe):
             log(label, "PASS", "attempt", attempt + 1)
-            return status, payload, history
+            return history
         if (status in TRANSIENT_HTTP or status == 0) and attempt < MAX_ATTEMPTS - 1:
             time.sleep(min(30, 1.5 * (2 ** min(attempt, 5))))
             continue
@@ -245,13 +239,10 @@ def retry_expected(label, operation, expected_status, *, expected_probe=None):
 
 def live_preflight():
     url = PUBLIC_ENDPOINT + "?" + urllib.parse.urlencode({
-        "key": TARGET_KEY,
-        "exact_rescue_preflight": str(time.time_ns()),
+        "key": TARGET_KEY, "exact_rescue_preflight": str(time.time_ns())
     })
     req = urllib.request.Request(url, headers={
-        "Accept": "image/*",
-        "Cache-Control": "no-store",
-        "User-Agent": "dnd-product-exact-rescue/1.0",
+        "Accept": "image/*", "Cache-Control": "no-store", "User-Agent": "dnd-product-exact-rescue/1.0"
     })
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
@@ -260,9 +251,7 @@ def live_preflight():
         if len(body) == EXPECTED_SIZE and got == EXPECTED_SHA256:
             state = "already_exact"
         else:
-            raise RuntimeError(
-                f"LIVE_CONFLICT before recovery: size={len(body)} sha256={got}"
-            )
+            raise RuntimeError(f"LIVE_CONFLICT before recovery: size={len(body)} sha256={got}")
     except urllib.error.HTTPError as exc:
         if exc.code != 404:
             raise
@@ -276,31 +265,26 @@ def live_preflight():
 
 
 def deterministic_guard(url, token):
-    wrong_token = retry_expected(
-        "WRONG_TOKEN_GUARD",
-        lambda: bridge_post(url, "wrong-token", "products/999/not-authorized.jpg", b"blocked"),
-        403,
-    )
-    unauthorized = retry_expected(
-        "UNAUTHORIZED_KEY_GUARD",
-        lambda: bridge_post(url, token, "products/999/not-authorized.jpg", b"blocked"),
-        403,
-    )
-    hash_lock = retry_expected(
-        "HASH_LOCK_GUARD",
-        lambda: bridge_post(url, token, TARGET_KEY, b"deliberately-wrong-body", probe=True),
-        422,
-        expected_probe=True,
-    )
-    (PROOF / "guard-results.json").write_text(
-        json.dumps({
-            "wrong_token": wrong_token[2],
-            "unauthorized_key": unauthorized[2],
-            "hash_lock": hash_lock[2],
-            "write_free": True,
-        }, indent=2),
-        encoding="utf-8",
-    )
+    evidence = {
+        "wrong_token": retry_expected(
+            "WRONG_TOKEN_GUARD",
+            lambda: bridge_post(url, "wrong-token", "products/999/not-authorized.jpg", b"blocked"),
+            403,
+        ),
+        "unauthorized_key": retry_expected(
+            "UNAUTHORIZED_KEY_GUARD",
+            lambda: bridge_post(url, token, "products/999/not-authorized.jpg", b"blocked"),
+            403,
+        ),
+        "hash_lock": retry_expected(
+            "HASH_LOCK_GUARD",
+            lambda: bridge_post(url, token, TARGET_KEY, b"deliberately-wrong-body", probe=True),
+            422,
+            expected_probe=True,
+        ),
+        "write_free": True,
+    }
+    (PROOF / "guard-results.json").write_text(json.dumps(evidence, indent=2), encoding="utf-8")
 
 
 def restore(url, token, preflight_state):
@@ -319,35 +303,29 @@ def restore(url, token, preflight_state):
         if (status in TRANSIENT_HTTP or status == 0) and attempt < MAX_ATTEMPTS - 1:
             time.sleep(min(30, 1.5 * (2 ** min(attempt, 5))))
             continue
-        raise RuntimeError(
-            "PRODUCT_RESTORE failed closed: " + json.dumps({"status": status, "payload": payload})[:1600]
-        )
+        raise RuntimeError("PRODUCT_RESTORE failed closed: " + json.dumps({"status": status, "payload": payload})[:1600])
     assert result is not None
-    assert result.get("size") == EXPECTED_SIZE, result
+    assert int(result.get("size") or 0) == EXPECTED_SIZE, result
     assert result.get("sha256") == EXPECTED_SHA256, result
-    evidence = {
+    (PROOF / "restore-result.json").write_text(json.dumps({
         "preflight_state": preflight_state,
         "result": result,
         "history": history,
         "d1_mutation": False,
         "r2_delete": False,
         "overwrite_allowed": False,
-    }
-    (PROOF / "restore-result.json").write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+    }, indent=2), encoding="utf-8")
     log("PRODUCT_RESTORE=PASS", TARGET_KEY, result.get("state"))
 
 
 def verify_public():
-    results = []
+    attempts = []
     for attempt in range(MAX_ATTEMPTS):
         url = PUBLIC_ENDPOINT + "?" + urllib.parse.urlencode({
-            "key": TARGET_KEY,
-            "exact_rescue_verify": str(time.time_ns()),
+            "key": TARGET_KEY, "exact_rescue_verify": str(time.time_ns())
         })
         req = urllib.request.Request(url, headers={
-            "Accept": "image/*",
-            "Cache-Control": "no-store",
-            "User-Agent": "dnd-product-exact-rescue/1.0",
+            "Accept": "image/*", "Cache-Control": "no-store", "User-Agent": "dnd-product-exact-rescue/1.0"
         })
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
@@ -355,24 +333,17 @@ def verify_public():
                 ctype = str(resp.headers.get("Content-Type") or "").lower()
                 body = resp.read(20 * 1024 * 1024)
             got = sha256_bytes(body)
-            row = {
-                "attempt": attempt + 1,
-                "http_status": status,
-                "content_type": ctype,
-                "size": len(body),
-                "sha256": got,
-            }
-            results.append(row)
+            row = {"attempt": attempt + 1, "http_status": status, "content_type": ctype, "size": len(body), "sha256": got}
+            attempts.append(row)
             if status == 200 and ctype.startswith("image/") and len(body) == EXPECTED_SIZE and got == EXPECTED_SHA256:
                 (PROOF / "public-verification.json").write_text(
-                    json.dumps({"key": TARGET_KEY, "state": "exact", "attempts": results}, indent=2),
-                    encoding="utf-8",
+                    json.dumps({"key": TARGET_KEY, "state": "exact", "attempts": attempts}, indent=2), encoding="utf-8"
                 )
                 log("PUBLIC_VERIFY=PASS", TARGET_KEY, len(body), got)
                 return
             raise RuntimeError(f"public verification mismatch: {row}")
         except urllib.error.HTTPError as exc:
-            results.append({"attempt": attempt + 1, "http_status": int(exc.code)})
+            attempts.append({"attempt": attempt + 1, "http_status": int(exc.code)})
             if (exc.code == 404 or exc.code in TRANSIENT_HTTP) and attempt < MAX_ATTEMPTS - 1:
                 time.sleep(min(30, 2 ** min(attempt, 5)))
                 continue
