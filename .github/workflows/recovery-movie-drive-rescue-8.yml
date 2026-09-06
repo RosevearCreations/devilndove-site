@@ -1,0 +1,91 @@
+name: Recovery Movie Drive Rescue 8
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-movie-drive-rescue-8.yml'
+      - 'scripts/recovery/movie_drive_rescue_8.py'
+      - 'scripts/recovery/movie-r2-bridge-template.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-movie-r2-live-restore-v2
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      TEMP_PROJECT: devilndove-movie-r2-recovery
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prepare exact eight-cover Drive rescue payload
+        run: |
+          python -m py_compile scripts/recovery/movie_drive_rescue_8.py
+          python scripts/recovery/movie_drive_rescue_8.py prepare
+
+      - name: Create isolated recovery Pages project
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
+          code="$(curl -sS -o /tmp/movie-drive-rescue-8/project-check.json -w '%{http_code}' -H "Authorization: Bearer ${CF_PAGES_TOKEN}" "$API/$TEMP_PROJECT" || true)"
+          if [ "$code" = 404 ]; then
+            curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" -H 'Content-Type: application/json' -X POST "$API" --data '{"name":"devilndove-movie-r2-recovery","production_branch":"main"}' > /tmp/movie-drive-rescue-8/proof/project-create.json
+            touch /tmp/movie-drive-rescue-8/project-created
+          else
+            echo "Refusing to reuse or ambiguously resolve temporary project; HTTP $code"
+            exit 31
+          fi
+
+      - name: Deploy eight-key hash-locked bridge
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          cd /tmp/movie-drive-rescue-8/bridge
+          npx --yes wrangler@4.129.0 pages deploy . \
+            --project-name="$TEMP_PROJECT" \
+            --branch=main \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-message='Temporary final eight Movie cover rescue' \
+            | tee /tmp/movie-drive-rescue-8/proof/deploy.log
+
+      - name: Restore and publicly verify final eight Movie covers
+        run: python scripts/recovery/movie_drive_rescue_8.py upload --base-url "https://${TEMP_PROJECT}.pages.dev"
+
+      - name: Delete isolated recovery project
+        if: always()
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          if [ ! -f /tmp/movie-drive-rescue-8/project-created ]; then
+            echo 'No temporary project created by this run.'
+            exit 0
+          fi
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}"
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" -X DELETE "$API" > /tmp/movie-drive-rescue-8/proof/project-delete.json
+
+      - name: Upload rescue evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: movie-drive-rescue-8-evidence
+          path: /tmp/movie-drive-rescue-8/proof/
+          if-no-files-found: warn
+          retention-days: 30
