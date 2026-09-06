@@ -1,5 +1,17 @@
 // Current shared layout guard: contains wide tables without changing business data or headings.
 (() => {
+  // The Products page has several independent admin panels. On a cold Ctrl+F5 the
+  // analytics/resource panels must never hold the essential product picker/editor
+  // option controls in a permanent Loading state. Load the small recovery bootstrap
+  // only on that route; it remains inert everywhere else.
+  const path = String(window.location.pathname || '').replace(/\/+$/, '') || '/';
+  if (path === '/admin/products' && !document.querySelector('script[data-dd-products-cold-start]')) {
+    const script = document.createElement('script');
+    script.src = '/public/js/admin-products-cold-start-recovery.js?v=1';
+    script.dataset.ddProductsColdStart = '1';
+    document.head.appendChild(script);
+  }
+
   const wrapTables = (root = document) => {
     root.querySelectorAll?.('table').forEach((table) => {
       if (table.closest('.dd-table-scroll,[data-table-scroll],.table-scroll,.table-responsive')) return;
