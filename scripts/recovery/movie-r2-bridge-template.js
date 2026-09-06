@@ -48,7 +48,7 @@ export async function onRequestPost({ request, env }) {
   if (!expectedSha) return json({ ok: false, error: 'key not authorized' }, 403);
 
   const before = await exactObject(env.MOVIE_PROD_BUCKET, key, expectedSha);
-  if (before.state === 'exact') return json({ ok: true, key, state: 'already_exact', ...before });
+  if (before.state === 'exact') return json({ ok: true, key, ...before, state: 'already_exact' });
   if (before.state === 'conflict') return json({ ok: false, key, ...before }, 409);
 
   const bytes = await request.arrayBuffer();
@@ -71,11 +71,11 @@ export async function onRequestPost({ request, env }) {
 
   if (stored === null) {
     const raced = await exactObject(env.MOVIE_PROD_BUCKET, key, expectedSha);
-    if (raced.state === 'exact') return json({ ok: true, key, state: 'already_exact', ...raced });
+    if (raced.state === 'exact') return json({ ok: true, key, ...raced, state: 'already_exact' });
     return json({ ok: false, key, error: 'conditional write refused', ...raced }, 409);
   }
 
   const after = await exactObject(env.MOVIE_PROD_BUCKET, key, expectedSha);
   if (after.state !== 'exact') return json({ ok: false, key, error: 'read-back verification failed', ...after }, 500);
-  return json({ ok: true, key, state: 'restored', ...after });
+  return json({ ok: true, key, ...after, state: 'restored' });
 }
