@@ -6,6 +6,9 @@ on:
     paths:
       - '.github/workflows/recovery-product-r2-reference-preflight.yml'
       - 'scripts/recovery/product_r2_reference_preflight.py'
+  workflow_run:
+    workflows: ["Recovery Product Glacial Purple Exact Rescue"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +20,7 @@ concurrency:
 
 jobs:
   preflight:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -24,6 +28,8 @@ jobs:
       PROD_D1: devilndove-prod-r462
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
