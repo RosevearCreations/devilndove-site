@@ -1,11 +1,12 @@
-// Release 467 Build 61 — transparent public-media recovery.
+// Release 467 Build 62 — transparent public-media recovery.
 // If a historical public Product/Movie media host fails, retry the same approved R2
 // key through the same-origin read-only /api/product-media endpoint. If a Product
-// object is genuinely absent there too, show a neutral recovery placeholder instead
-// of a broken-image icon. No media or Product database records are mutated.
+// object is genuinely absent there too, prefer another image already attached to
+// that same product before showing a neutral recovery placeholder. No media or
+// Product database records are mutated.
 (()=>{
   'use strict';
-  const VERSION=61;
+  const VERSION=62;
   if(Number(window.DDProductMediaFallback?.version||0)>=VERSION)return;
   const PUBLIC_HOSTS=new Set(['assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
   const FLAG='ddMediaFallbackAttempted';
@@ -28,6 +29,53 @@
     return fallbackInfo(raw)?.url||'';
   }
 
+  function attemptedAlternateKeys(img){
+    return new Set(String(img?.dataset?.ddMediaAlternateAttempts||'').split('|').map((value)=>value.trim()).filter(Boolean));
+  }
+
+  function candidateProductUrls(img){
+    const values=[];
+    const add=(value)=>{
+      const raw=String(value||'').trim();
+      if(!raw||values.includes(raw))return;
+      values.push(raw);
+    };
+
+    const shopGallery=img.closest?.('[data-shop-card-gallery]');
+    shopGallery?.querySelectorAll?.('[data-shop-thumb]')?.forEach((button)=>add(button.getAttribute('data-shop-thumb')));
+
+    if(img.matches?.('[data-product-detail-main-image]')||img.closest?.('#productDetail')){
+      document.querySelectorAll?.('#productGallery [data-product-detail-thumb]')?.forEach((button)=>add(button.getAttribute('data-product-detail-thumb')));
+    }
+    return values;
+  }
+
+  function promoteSameProductImage(img){
+    if(!(img instanceof HTMLImageElement))return false;
+    const attempted=attemptedAlternateKeys(img);
+    const originalKey=String(img.dataset.ddMediaOriginalKey||'').trim();
+    const currentInfo=fallbackInfo(img.currentSrc||img.src||img.getAttribute('src')||'');
+    if(originalKey)attempted.add(originalKey);
+    if(currentInfo?.key)attempted.add(currentInfo.key);
+
+    for(const raw of candidateProductUrls(img)){
+      const info=fallbackInfo(raw);
+      if(!info?.isProduct||attempted.has(info.key))continue;
+      attempted.add(info.key);
+      img.dataset.ddMediaAlternateAttempts=[...attempted].join('|');
+      img.dataset[FLAG]='0';
+      img.dataset.ddMediaOriginalKey=info.key;
+      delete img.dataset[FINAL_FLAG];
+      img.removeAttribute('srcset');
+      img.removeAttribute('sizes');
+      img.src=raw;
+      img.classList.add('dd-product-media-same-product-fallback');
+      return true;
+    }
+    img.dataset.ddMediaAlternateAttempts=[...attempted].join('|');
+    return false;
+  }
+
   function showProductPlaceholder(img){
     if(!(img instanceof HTMLImageElement))return false;
     if(img.dataset[FINAL_FLAG]==='1')return false;
@@ -44,12 +92,15 @@
     if(!(img instanceof HTMLImageElement))return false;
     if(img.dataset[FINAL_FLAG]==='1')return false;
 
-    // The same-origin retry failed too. Only Product images get a neutral final
-    // placeholder; Movie/media evidence remains visibly missing rather than being
-    // misrepresented by a Product placeholder.
+    // The same-origin retry failed too. For Product cards/detail pages, first try
+    // another URL already attached to this exact product. Only when that product
+    // has no surviving candidate do we show the neutral recovery placeholder.
     if(img.dataset[FLAG]==='1'){
       const originalKey=String(img.dataset.ddMediaOriginalKey||'');
-      if(originalKey.startsWith('products/'))return showProductPlaceholder(img);
+      if(originalKey.startsWith('products/')){
+        if(promoteSameProductImage(img))return true;
+        return showProductPlaceholder(img);
+      }
       return false;
     }
 
@@ -88,5 +139,5 @@
   });
   observer.observe(document.documentElement,{childList:true,subtree:true});
 
-  window.DDProductMediaFallback={installed:true,version:VERSION,fallbackUrl,recoverImage,showProductPlaceholder,scan};
+  window.DDProductMediaFallback={installed:true,version:VERSION,fallbackUrl,recoverImage,promoteSameProductImage,showProductPlaceholder,scan};
 })();
