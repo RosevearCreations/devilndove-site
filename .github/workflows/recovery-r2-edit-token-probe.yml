@@ -1,0 +1,165 @@
+name: Recovery R2 Edit Token Probe
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-r2-edit-token-probe.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-r2-edit-token-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_D1: devilndove-prod-r462
+      PROD_BUCKET: devilndove-toolshed-images
+      FIRESTORAGE_API: https://api.firestorage.ai/dev/file
+      FIRESTORAGE_SHARE: Du_6a_urMG5o
+      PART_NAME: product-live-restore-150.transport-01.zip
+      PART_SIZE: '33366760'
+      PART_SHA: 763a95c32ea5d235dfea6c55f41aa0886c50dd81675d8929e100aadb662525b9
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Download and verify first recovery transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/r2-probe
+          curl -fsSL --retry 3 "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files?maxResults=1000" -o /tmp/r2-probe/list.json
+          FILE_ID="$(python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/r2-probe/list.json'))
+          matches=[f for f in (d.get('files') or []) if (f.get('fileName') or f.get('name'))==os.environ['PART_NAME']]
+          assert len(matches)==1,matches
+          f=matches[0]
+          assert int(f.get('sizeBytes') if f.get('sizeBytes') is not None else f.get('size'))==int(os.environ['PART_SIZE']),f
+          print(f.get('fileId') or f.get('id'))
+          PY
+          )"
+          test -n "$FILE_ID"
+          META="$(curl -fsSL --retry 3 -X POST "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files/$FILE_ID/download")"
+          URL="$(python -c 'import json,sys; print(json.load(sys.stdin)["downloadUrl"])' <<<"$META")"
+          curl -fsSL --retry 3 --connect-timeout 20 --max-time 300 "$URL" -o "/tmp/r2-probe/$PART_NAME"
+          test "$(wc -c <"/tmp/r2-probe/$PART_NAME" | tr -d ' ')" = "$PART_SIZE"
+          test "$(sha256sum "/tmp/r2-probe/$PART_NAME" | awk '{print $1}')" = "$PART_SHA"
+
+      - name: Extract and byte-verify exactly one authorized object
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os,pathlib,re,zipfile
+          zpath=pathlib.Path('/tmp/r2-probe')/os.environ['PART_NAME']
+          with zipfile.ZipFile(zpath) as z:
+              part=json.loads(z.read('product-live-restore-150/part-manifest.json'))
+              assert part,part
+              item=part[0]
+              key=str(item['key']); rel=str(item['file']); pid=int(item['product_id'])
+              assert re.fullmatch(r'products/[1-9][0-9]*/[A-Za-z0-9._-]+\.jpg',key),key
+              assert int(key.split('/')[1])==pid
+              assert pid not in {2,16,17,42,44,45}
+              data=z.read('product-live-restore-150/'+rel)
+              assert len(data)==int(item['size'])
+              assert hashlib.sha256(data).hexdigest()==item['sha256']
+              pathlib.Path('/tmp/r2-probe/object.jpg').write_bytes(data)
+              pathlib.Path('/tmp/r2-probe/item.json').write_text(json.dumps(item,indent=2),encoding='utf-8')
+              with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as f:
+                  f.write('PROBE_KEY='+key+'\n')
+                  f.write('PROBE_SIZE='+str(len(data))+'\n')
+                  f.write('PROBE_SHA='+item['sha256']+'\n')
+          print('PROBE_OBJECT=PASS',key,len(data),item['sha256'])
+          PY
+
+      - name: Re-prove key is current Production D1 authority
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          SQL="SELECT COUNT(*) AS n FROM product_images WHERE instr(image_url, '${PROBE_KEY}') > 0;"
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "$SQL" > /tmp/r2-probe/d1.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/r2-probe/d1.json')); vals=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'n' in v: vals.append(int(v['n']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d); assert vals and vals[0]>=1,vals
+          print('PRODUCTION_D1_KEY=PASS count=',vals[0])
+          PY
+
+      - name: Refuse overwrite unless live object is absent or already exact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,os,time,urllib.error,urllib.parse,urllib.request
+          key=os.environ['PROBE_KEY']; size=int(os.environ['PROBE_SIZE']); sha=os.environ['PROBE_SHA']
+          url='https://devilndove.com/api/product-media?'+urllib.parse.urlencode({'key':key,'probe':str(time.time_ns())})
+          req=urllib.request.Request(url,headers={'Cache-Control':'no-store','Accept':'image/*','User-Agent':'dnd-r2-edit-token-probe/1.0'})
+          needs='true'
+          try:
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  body=r.read(20*1024*1024)
+              got=(len(body),hashlib.sha256(body).hexdigest())
+              assert got==(size,sha),('LIVE CONFLICT',key,got,(size,sha))
+              print('LIVE_PREFLIGHT=ALREADY_EXACT')
+              needs='false'
+          except urllib.error.HTTPError as e:
+              if e.code!=404: raise
+              print('LIVE_PREFLIGHT=MISSING')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as f:
+              f.write('PROBE_NEEDS_WRITE='+needs+'\n')
+          PY
+
+      - name: Write one verified Product object with edit token
+        if: ${{ env.PROBE_NEEDS_WRITE == 'true' }}
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 r2 object put "$PROD_BUCKET/$PROBE_KEY" --remote --file /tmp/r2-probe/object.jpg --content-type image/jpeg --cache-control 'public, max-age=31536000, immutable' --force
+          echo 'EDIT_TOKEN_R2_WRITE=PASS'
+
+      - name: Verify live readback SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,os,time,urllib.parse,urllib.request
+          key=os.environ['PROBE_KEY']; size=int(os.environ['PROBE_SIZE']); sha=os.environ['PROBE_SHA']
+          url='https://devilndove.com/api/product-media?'+urllib.parse.urlencode({'key':key,'verify':str(time.time_ns())})
+          req=urllib.request.Request(url,headers={'Cache-Control':'no-store','Accept':'image/*','User-Agent':'dnd-r2-edit-token-probe/1.0'})
+          with urllib.request.urlopen(req,timeout=30) as r:
+              body=r.read(20*1024*1024); status=r.status; ctype=str(r.headers.get('content-type') or '')
+          assert status==200,status
+          assert ctype.lower().startswith('image/'),ctype
+          assert len(body)==size,(len(body),size)
+          assert hashlib.sha256(body).hexdigest()==sha,(hashlib.sha256(body).hexdigest(),sha)
+          print('LIVE_READBACK=PASS key=',key,'size=',size,'sha=',sha)
+          PY
+
+      - name: Preserve probe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-r2-edit-token-probe
+          path: /tmp/r2-probe
+          retention-days: 7
+          if-no-files-found: error

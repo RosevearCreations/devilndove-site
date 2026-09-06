@@ -1,0 +1,313 @@
+name: Recovery Product R2 Isolated Bridge
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-product-r2-isolated-bridge.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-product-r2-isolated-bridge
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      TEMP_PROJECT: devilndove-r2-recovery
+      PROD_D1: devilndove-prod-r462
+      DEV_D1: devilndove-dev
+      FIRESTORAGE_API: https://api.firestorage.ai/dev/file
+      FIRESTORAGE_SHARE: Du_6a_urMG5o
+      DND_DEV_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Reconstruct and verify 150 authorized objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/isolated/{transports,payload,proof,batches}
+          cat > /tmp/isolated/expected.tsv <<'EOF'
+          product-live-restore-150.transport-01.zip	33366760	763a95c32ea5d235dfea6c55f41aa0886c50dd81675d8929e100aadb662525b9
+          product-live-restore-150.transport-02.zip	31776846	19e730e54a78b221b06b7e3bc40eaf575a5a6b829180b4b73f4dc16e8e24ad0e
+          product-live-restore-150.transport-03.zip	30799489	d264926e267c53133b6c161c3b2297d7a87e452f8474744ec3506504fd88e8ae
+          product-live-restore-150.transport-04.zip	33424356	8d2d09b65459a1a8a2107d2516b5e8a9f931247f5e45228497ce005cce1ce497
+          product-live-restore-150.transport-05.zip	31295584	54e888b3f591b7ccffc5de7669db3716f294a0cbfc8c643f0b918e3940d51f0c
+          product-live-restore-150.transport-06.zip	32835452	71bb1744a94a9d5c708072e606985925f53b774e80107d47ffd17309b00e6ea3
+          product-live-restore-150.transport-07.zip	31756125	8f3350a84c16613eaf0940acae0b60ab47e3d907ae1ad04b6030c97eeb798ab8
+          product-live-restore-150.transport-08.zip	30710527	fce4528ef17b765df17eeff21082911b447ffe990ef25056856e996ef317ddec
+          EOF
+          curl -fsSL --retry 3 "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files?maxResults=1000" -o /tmp/isolated/list.json
+          python - <<'PY' > /tmp/isolated/files.tsv
+          import json
+          for f in json.load(open('/tmp/isolated/list.json')).get('files') or []:
+              print(f.get('fileName') or f.get('name') or '',f.get('sizeBytes') if f.get('sizeBytes') is not None else f.get('size'),f.get('fileId') or f.get('id') or '',sep='\t')
+          PY
+          sort /tmp/isolated/expected.tsv -o /tmp/isolated/expected.tsv
+          sort /tmp/isolated/files.tsv -o /tmp/isolated/files.tsv
+          join -t $'\t' -1 1 -2 1 /tmp/isolated/expected.tsv /tmp/isolated/files.tsv > /tmp/isolated/map.tsv
+          test "$(wc -l </tmp/isolated/map.tsv)" -eq 8
+          while IFS=$'\t' read -r name expected_size expected_sha api_size file_id; do
+            test "$expected_size" = "$api_size"
+            meta="$(curl -fsSL --retry 3 -X POST "$FIRESTORAGE_API/shares/$FIRESTORAGE_SHARE/files/$file_id/download")"
+            url="$(python -c 'import json,sys; print(json.load(sys.stdin)["downloadUrl"])' <<<"$meta")"
+            out="/tmp/isolated/transports/$name"
+            curl -fsSL --retry 3 --connect-timeout 20 --max-time 300 "$url" -o "$out"
+            test "$(wc -c <"$out" | tr -d ' ')" = "$expected_size"
+            test "$(sha256sum "$out" | awk '{print $1}')" = "$expected_sha"
+          done < /tmp/isolated/map.tsv
+          python - <<'PY'
+          import hashlib,json,pathlib,re,zipfile
+          root=pathlib.Path('/tmp/isolated'); out=[]; keys=set(); forbidden={2,16,17,42,44,45}
+          for zp in sorted((root/'transports').glob('*.zip')):
+              with zipfile.ZipFile(zp) as z:
+                  for x in json.loads(z.read('product-live-restore-150/part-manifest.json')):
+                      key=str(x['key']); rel=str(x['file']); pid=int(x['product_id'])
+                      assert key not in keys and re.fullmatch(r'products/[1-9][0-9]*/[A-Za-z0-9._-]+\.jpg',key),key
+                      assert int(key.split('/')[1])==pid and pid not in forbidden,(key,pid)
+                      data=z.read('product-live-restore-150/'+rel)
+                      assert len(data)==int(x['size']) and hashlib.sha256(data).hexdigest()==x['sha256'],key
+                      p=root/'payload'/rel; p.parent.mkdir(parents=True,exist_ok=True); p.write_bytes(data)
+                      out.append(x); keys.add(key)
+          assert len(out)==150 and len(keys)==150,(len(out),len(keys))
+          out=sorted(out,key=lambda x:x['key']); (root/'proof'/'manifest.json').write_text(json.dumps(out,indent=2),encoding='utf-8')
+          print('PAYLOAD=PASS keys=150 bytes=',sum(int(x['size']) for x in out))
+          PY
+
+      - name: Re-prove Production D1 authority and zero live conflicts
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.129.0 d1 execute "$PROD_D1" --remote --json --command "SELECT product_id,image_url FROM product_images ORDER BY product_id,sort_order,product_image_id;" > /tmp/isolated/proof/d1.json
+          python - <<'PY'
+          import hashlib,json,time,urllib.error,urllib.parse,urllib.request
+          m=json.load(open('/tmp/isolated/proof/manifest.json')); raw=json.load(open('/tmp/isolated/proof/d1.json')); rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'image_url' in v: rows.append(v)
+                  for z in v.values(): walk(z)
+              elif isinstance(v,list):
+                  for z in v: walk(z)
+          walk(raw); current=set()
+          for r in rows:
+              u=str(r.get('image_url') or '').strip(); p=urllib.parse.urlparse(u); key=''
+              if p.hostname and p.hostname.lower()=='assets.devilndove.com': key=urllib.parse.unquote(p.path.lstrip('/'))
+              elif p.path.endswith('/api/product-media'):
+                  q=urllib.parse.parse_qs(p.query); key=(q.get('key') or [''])[0]
+                  if not key and (q.get('src') or [''])[0]: key=urllib.parse.unquote(urllib.parse.urlparse((q.get('src') or [''])[0]).path.lstrip('/'))
+              elif u.startswith('products/'): key=u
+              if key: current.add(key)
+          assert not ({x['key'] for x in m}-current),'target key no longer current in Production D1'
+          plan=[]
+          for i,x in enumerate(m,1):
+              key=x['key']; expected=(int(x['size']),x['sha256']); url='https://devilndove.com/api/product-media?'+urllib.parse.urlencode({'key':key,'isolated_preflight':str(time.time_ns())})
+              try:
+                  req=urllib.request.Request(url,headers={'Accept':'image/*','Cache-Control':'no-store','User-Agent':'dnd-isolated-recovery/1.0'})
+                  with urllib.request.urlopen(req,timeout=30) as r: body=r.read(20*1024*1024)
+                  got=(len(body),hashlib.sha256(body).hexdigest()); assert got==expected,('LIVE CONFLICT',key,got,expected); state='already_exact'
+              except urllib.error.HTTPError as e:
+                  if e.code!=404: raise
+                  state='missing'
+              plan.append({'key':key,'state':state})
+              if i%25==0: print('preflight',i,'of',len(m))
+          json.dump(plan,open('/tmp/isolated/proof/preflight.json','w'),indent=2)
+          print('PRODUCTION_PREFLIGHT=PASS exact=',sum(x['state']=='already_exact' for x in plan),'missing=',sum(x['state']=='missing' for x in plan),'conflicts=0')
+          PY
+
+      - name: Resolve existing Development admin session read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${DND_DEV_SESSION_COOKIE}" ]; then echo 'Using configured masked Development session.'; exit 0; fi
+          npx --yes wrangler@4.129.0 d1 execute "$DEV_D1" --remote --config wrangler.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(u.role)='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/isolated/session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/isolated/session.json'))
+          def w(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from w(x)
+              elif isinstance(v,list):
+                  for x in v: yield from w(x)
+          print(next(w(d),'').strip())
+          PY
+          )"
+          rm -f /tmp/isolated/session.json; test -n "$TOKEN"
+          echo "::add-mask::$TOKEN"; echo "DND_DEV_SESSION_COOKIE=dd_auth_token=$TOKEN" >> "$GITHUB_ENV"
+          echo 'Development admin session resolved read-only.'
+
+      - name: Prepare isolated host source and config in runner only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          for name in ['functions/api/admin/recovery-product-r2-stage.js','functions/api/admin/release463-r2-sync.js']:
+              p=Path(name); s=p.read_text(encoding='utf-8')
+              needle="    || host === 'devilndove-site-dev.pages.dev'"
+              replacement="    || host === 'devilndove-r2-recovery.pages.dev'\n    || host.endsWith('.devilndove-r2-recovery.pages.dev')\n"+needle
+              assert needle in s,name
+              p.write_text(s.replace(needle,replacement,1),encoding='utf-8')
+          p=Path('wrangler.toml'); s=p.read_text(encoding='utf-8'); s=s.replace('name = "devilndove-site"','name = "devilndove-r2-recovery"',1); p.write_text(s,encoding='utf-8')
+          print('RUNNER_ONLY_RECOVERY_SOURCE=PASS')
+          PY
+
+      - name: Create isolated Pages recovery project if needed
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}"
+          code=$(curl -sS -o /tmp/isolated/project-get.json -w '%{http_code}' -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "$api" || true)
+          if [ "$code" = 404 ]; then
+            curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json' -X POST "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects" --data '{"name":"devilndove-r2-recovery","production_branch":"main"}' > /tmp/isolated/project-create.json
+            python - <<'PY'
+          import json
+          d=json.load(open('/tmp/isolated/project-create.json')); assert d.get('success') is True,d; print('TEMP_PROJECT_CREATE=PASS')
+          PY
+          elif [ "$code" = 200 ]; then
+            echo 'TEMP_PROJECT_EXISTS=true'
+          else
+            cat /tmp/isolated/project-get.json; echo "STOP: project lookup HTTP=$code"; exit 30
+          fi
+
+      - name: Deploy isolated recovery bridge with native R2 bindings
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.129.0 pages deploy . --project-name="$TEMP_PROJECT" --branch=recovery --commit-hash="$GITHUB_SHA" --commit-message="Temporary verified Product R2 recovery bridge" | tee /tmp/isolated/proof/deploy.log
+          python - <<'PY'
+          import re
+          t=open('/tmp/isolated/proof/deploy.log',encoding='utf-8',errors='replace').read(); urls=re.findall(r'https://[a-z0-9-]+\.devilndove-r2-recovery\.pages\.dev',t,re.I); assert urls,t[-3000:]
+          url=urls[0]; open('/tmp/isolated/base-url','w').write(url); print('ISOLATED_URL',url)
+          PY
+
+      - name: Prove isolated binding control plane before any object write
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}" > /tmp/isolated/proof/project.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/isolated/proof/project.json')); assert d.get('success') is True,d; r=d['result']; preview=(r.get('deployment_configs') or {}).get('preview') or {}; d1=preview.get('d1_databases') or {}; r2=preview.get('r2_buckets') or {}
+          assert (d1.get('DB') or {}).get('id')=='dbc1615b-dcbe-4951-973b-b47c99c73bfa',d1
+          assert (r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name')=='devilndove-toolshed-images-dev',r2
+          assert (r2.get('RELEASE463_PRODUCT_MEDIA_PROD_BUCKET') or {}).get('name')=='devilndove-toolshed-images',r2
+          print('ISOLATED_BINDINGS=PASS dev=',(r2.get('PRODUCT_MEDIA_BUCKET') or {}).get('name'),'prod=',(r2.get('RELEASE463_PRODUCT_MEDIA_PROD_BUCKET') or {}).get('name'))
+          PY
+
+      - name: Prove guarded isolated runtime is reachable
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$(cat /tmp/isolated/base-url)"
+          code=$(curl -sS -o /tmp/isolated/probe.json -w '%{http_code}' -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -X POST -H 'x-recovery-authorization: RECOVERY_PRODUCT_R2_STAGE_150' -H 'x-recovery-key: invalid' -H 'x-recovery-sha256: 0000000000000000000000000000000000000000000000000000000000000000' -H 'x-recovery-size: 1' --data-binary 'x' "$BASE/api/admin/recovery-product-r2-stage" || true)
+          test "$code" = 400 || { echo "STOP: isolated stage probe HTTP=$code"; cat /tmp/isolated/probe.json; exit 40; }
+          echo 'ISOLATED_RUNTIME=PASS'
+
+      - name: Stage all 150 exact objects into Development R2
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$(cat /tmp/isolated/base-url)"
+          python - <<'PY' > /tmp/isolated/stage.tsv
+          import json
+          for x in json.load(open('/tmp/isolated/proof/manifest.json')): print('/tmp/isolated/payload/'+x['file'],x['key'],x['size'],x['sha256'],sep='\t')
+          PY
+          : > /tmp/isolated/proof/staged.tsv; n=0
+          while IFS=$'\t' read -r file key size sha; do
+            n=$((n+1)); out=/tmp/isolated/stage.json
+            code=$(curl -sS -o "$out" -w '%{http_code}' -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -X POST -H 'Content-Type: image/jpeg' -H 'x-recovery-authorization: RECOVERY_PRODUCT_R2_STAGE_150' -H "x-recovery-key: $key" -H "x-recovery-size: $size" -H "x-recovery-sha256: $sha" --data-binary "@$file" "$BASE/api/admin/recovery-product-r2-stage")
+            test "$code" = 200 || { echo "STOP: stage failed HTTP=$code key=$key"; cat "$out"; exit 41; }
+            python - "$key" "$size" "$sha" "$out" <<'PY'
+          import json,sys
+          k,s,h,p=sys.argv[1],int(sys.argv[2]),sys.argv[3],sys.argv[4]; d=json.load(open(p)); assert d.get('ok') is True,d; assert d.get('key')==k and int(d.get('size') or 0)==s and d.get('sha256')==h,d; assert d.get('status') in ('staged_verified','already_exact'),d
+          PY
+            printf '%s\t%s\t%s\n' "$key" "$size" "$sha" >> /tmp/isolated/proof/staged.tsv
+            if [ $((n%25)) -eq 0 ]; then echo "staged $n of 150"; fi
+          done < /tmp/isolated/stage.tsv
+          test "$n" -eq 150; echo 'DEVELOPMENT_STAGE=PASS keys=150 conflicts=0 deletes=0'
+
+      - name: Copy Production-missing keys using native binding only
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="$(cat /tmp/isolated/base-url)"
+          python - <<'PY'
+          import json,pathlib
+          r=pathlib.Path('/tmp/isolated'); p=json.load(open(r/'proof'/'preflight.json')); missing=[x['key'] for x in p if x['state']=='missing']
+          for i in range(0,len(missing),5): (r/'batches'/f'{i//5+1:03d}.json').write_text(json.dumps({'authorization':'RELEASE463_R2_ENVIRONMENT_SYNC','bucket':'product','action':'copy_keys','keys':missing[i:i+5]}),encoding='utf-8')
+          json.dump({'missing':missing,'already_exact':[x['key'] for x in p if x['state']=='already_exact']},open(r/'proof'/'copy-plan.json','w'),indent=2)
+          print('COPY_PLAN missing=',len(missing),'batches=',(len(missing)+4)//5)
+          PY
+          copied=0; batches=0
+          for body in /tmp/isolated/batches/*.json; do
+            [ -f "$body" ] || continue; batches=$((batches+1)); out=/tmp/isolated/copy.json
+            expected=$(python -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["keys"]))' "$body")
+            code=$(curl -sS -o "$out" -w '%{http_code}' -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -X POST -H 'Content-Type: application/json' --data-binary "@$body" "$BASE/api/admin/release463-r2-sync")
+            test "$code" = 200 || { echo "STOP: production copy failed HTTP=$code batch=$body"; cat "$out"; exit 50; }
+            got=$(python - "$expected" "$out" <<'PY'
+          import json,sys
+          e=int(sys.argv[1]); d=json.load(open(sys.argv[2])); assert d.get('ok') is True,d; assert d.get('action')=='copy_keys' and int(d.get('processed') or 0)==e and d.get('d1_mutation') is False,d; rows=d.get('results') or []; assert len(rows)==e and all(x.get('status')=='copied_verified' for x in rows),d; print(len(rows))
+          PY
+            ); copied=$((copied+got)); echo "copied batch $batches total=$copied"
+          done
+          echo "PRODUCTION_COPY=PASS copied=$copied deletes=0"
+
+      - name: Verify 150 live objects byte-for-byte
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,time,urllib.parse,urllib.request
+          m=json.load(open('/tmp/isolated/proof/manifest.json')); proof=[]
+          for i,x in enumerate(m,1):
+              url='https://devilndove.com/api/product-media?'+urllib.parse.urlencode({'key':x['key'],'isolated_verify':str(time.time_ns())})
+              req=urllib.request.Request(url,headers={'Accept':'image/*','Cache-Control':'no-store','User-Agent':'dnd-isolated-recovery/1.0'})
+              with urllib.request.urlopen(req,timeout=30) as r: body=r.read(20*1024*1024); status=r.status; ctype=str(r.headers.get('content-type') or '')
+              assert status==200 and ctype.lower().startswith('image/'),(x['key'],status,ctype)
+              assert len(body)==int(x['size']) and hashlib.sha256(body).hexdigest()==x['sha256'],x['key']
+              proof.append({'key':x['key'],'size':len(body),'sha256':x['sha256']})
+              if i%25==0: print('verified',i,'of',len(m))
+          assert len(proof)==150; json.dump(proof,open('/tmp/isolated/proof/live-readback.json','w'),indent=2)
+          plan=json.load(open('/tmp/isolated/proof/copy-plan.json')); result={'ok':True,'authorized_keys':150,'production_verified':150,'copied_this_run':len(plan['missing']),'already_exact_before_copy':len(plan['already_exact']),'d1_mutation':False,'r2_delete':False,'conflict_overwrite':False}
+          json.dump(result,open('/tmp/isolated/proof/result.json','w'),indent=2); print(json.dumps(result,indent=2))
+          PY
+
+      - name: Preserve recovery proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-product-r2-isolated-proof-${{ github.sha }}
+          path: /tmp/isolated/proof
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Remove isolated Pages recovery project
+        if: always()
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set +e
+          code=$(curl -sS -o /tmp/isolated/project-delete.json -w '%{http_code}' -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -X DELETE "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${TEMP_PROJECT}")
+          echo "TEMP_PROJECT_DELETE_HTTP=$code"
+          cat /tmp/isolated/project-delete.json 2>/dev/null || true

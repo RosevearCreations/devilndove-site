@@ -1,0 +1,70 @@
+name: Recovery Firestorage Byte Proof
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-firestorage-byte-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download and hash all Firestorage transport files read-only
+        shell: bash
+        env:
+          API_BASE: https://api.firestorage.ai/dev/file
+          SHARE_ID: Du_6a_urMG5o
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/firestorage-byte-proof/files
+          curl -fsSL --retry 3 "$API_BASE/shares/$SHARE_ID/files?maxResults=1000" -o /tmp/firestorage-byte-proof/list.json
+          python - <<'PY' > /tmp/firestorage-byte-proof/expected.tsv
+          expected={
+            'product-live-restore-150.transport-01.zip':('33366760','763a95c32ea5d235dfea6c55f41aa0886c50dd81675d8929e100aadb662525b9'),
+            'product-live-restore-150.transport-02.zip':('31776846','19e730e54a78b221b06b7e3bc40eaf575a5a6b829180b4b73f4dc16e8e24ad0e'),
+            'product-live-restore-150.transport-03.zip':('30799489','d264926e267c53133b6c161c3b2297d7a87e452f8474744ec3506504fd88e8ae'),
+            'product-live-restore-150.transport-04.zip':('33424356','8d2d09b65459a1a8a2107d2516b5e8a9f931247f5e45228497ce005cce1ce497'),
+            'product-live-restore-150.transport-05.zip':('31295584','54e888b3f591b7ccffc5de7669db3716f294a0cbfc8c643f0b918e3940d51f0c'),
+            'product-live-restore-150.transport-06.zip':('32835452','71bb1744a94a9d5c708072e606985925f53b774e80107d47ffd17309b00e6ea3'),
+            'product-live-restore-150.transport-07.zip':('31756125','8f3350a84c16613eaf0940acae0b60ab47e3d907ae1ad04b6030c97eeb798ab8'),
+            'product-live-restore-150.transport-08.zip':('30710527','fce4528ef17b765df17eeff21082911b447ffe990ef25056856e996ef317ddec'),
+          }
+          for n,(s,h) in expected.items(): print(n,s,h,sep='\t')
+          PY
+          python - <<'PY' > /tmp/firestorage-byte-proof/files.tsv
+          import json
+          d=json.load(open('/tmp/firestorage-byte-proof/list.json'))
+          for f in d.get('files',[]):
+              print(f.get('fileName',''),f.get('sizeBytes',''),f.get('fileId',''),sep='\t')
+          PY
+          sort /tmp/firestorage-byte-proof/files.tsv -o /tmp/firestorage-byte-proof/files.tsv
+          sort /tmp/firestorage-byte-proof/expected.tsv -o /tmp/firestorage-byte-proof/expected.tsv
+          join -t $'\t' -1 1 -2 1 /tmp/firestorage-byte-proof/expected.tsv /tmp/firestorage-byte-proof/files.tsv > /tmp/firestorage-byte-proof/joined.tsv
+          test "$(wc -l </tmp/firestorage-byte-proof/joined.tsv)" -eq 8
+          while IFS=$'\t' read -r name expected_size expected_sha api_size file_id; do
+            test "$expected_size" = "$api_size" || { echo "metadata size mismatch $name expected=$expected_size api=$api_size"; exit 20; }
+            meta=$(curl -fsSL --retry 3 -X POST "$API_BASE/shares/$SHARE_ID/files/$file_id/download")
+            url=$(python -c 'import json,sys; print(json.load(sys.stdin)["downloadUrl"])' <<<"$meta")
+            out="/tmp/firestorage-byte-proof/files/$name"
+            curl -fsSL --retry 3 --connect-timeout 20 --max-time 300 "$url" -o "$out"
+            got_size=$(wc -c <"$out" | tr -d ' ')
+            got_sha=$(sha256sum "$out" | awk '{print $1}')
+            printf '%s\t%s\t%s\n' "$name" "$got_size" "$got_sha" | tee -a /tmp/firestorage-byte-proof/proof.tsv
+            test "$got_size" = "$expected_size" || { echo "download size mismatch $name"; exit 21; }
+            test "$got_sha" = "$expected_sha" || { echo "download sha mismatch $name"; exit 22; }
+          done < /tmp/firestorage-byte-proof/joined.tsv
+          echo 'FIRESTORAGE_BYTE_PROOF=PASS'
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-firestorage-byte-proof
+          path: /tmp/firestorage-byte-proof
+          retention-days: 2
+          if-no-files-found: error

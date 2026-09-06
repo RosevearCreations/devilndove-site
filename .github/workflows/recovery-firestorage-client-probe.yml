@@ -1,0 +1,50 @@
+name: Recovery Firestorage Client Probe
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-firestorage-client-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Inspect Firestorage public client bundles read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/firestorage-client-probe
+          base='https://firestorage.ai/_next/static/chunks'
+          urls=(
+            "$base/8500-f4d7bfbe7500f274.js"
+            "$base/8437-d65cc193dc908afa.js"
+            "$base/5841-1160578ba9bb4f3e.js"
+            "$base/4899-d89df949f2dbd5af.js"
+            "$base/3794-56f19dc9e2f95fcd.js"
+            "$base/main-app-7107f99dce0bf1eb.js"
+            "$base/webpack-276504efae57521f.js"
+          )
+          for u in "${urls[@]}"; do
+            name=$(basename "$u")
+            curl -sS -fL --connect-timeout 20 --max-time 120 "$u" -o "/tmp/firestorage-client-probe/$name" || true
+          done
+          : > /tmp/firestorage-client-probe/routes.txt
+          for f in /tmp/firestorage-client-probe/*.js; do
+            echo "===== $(basename "$f") =====" >> /tmp/firestorage-client-probe/routes.txt
+            grep -aoE '.{0,180}(/api/|download|shareId|publicId|public_id|subdir|presign|signedUrl|signed_url|objectKey|object_key|files/).{0,320}' "$f" | head -1000 >> /tmp/firestorage-client-probe/routes.txt || true
+          done
+          cat /tmp/firestorage-client-probe/routes.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-firestorage-client-probe
+          path: /tmp/firestorage-client-probe
+          retention-days: 2
+          if-no-files-found: error

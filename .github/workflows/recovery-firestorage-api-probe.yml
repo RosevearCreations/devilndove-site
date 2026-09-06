@@ -1,0 +1,66 @@
+name: Recovery Firestorage API Probe
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-firestorage-api-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Inspect Firestorage client and public routes read-only
+        shell: bash
+        env:
+          SHARE_ID: Du_6a_urMG5o
+          PUBLIC_ID: VSfSPbKcXfAPhrU4
+          SUBDIR: Y4ZcMY
+        run: |
+          set -u
+          mkdir -p /tmp/firestorage-api-probe
+          base='https://firestorage.ai'
+          js="$base/_next/static/chunks/app/(files)/ja/f/page-4d19ae0a4ce39d79.js"
+          curl -sS -fL --connect-timeout 20 --max-time 120 "$js" -o /tmp/firestorage-api-probe/page.js || true
+          echo '--- JS API ROUTES ---' > /tmp/firestorage-api-probe/routes.txt
+          if [ -s /tmp/firestorage-api-probe/page.js ]; then
+            grep -aoE '.{0,100}(/api/|download|shareId|publicId|subdir|presign|signed).{0,220}' /tmp/firestorage-api-probe/page.js | head -500 >> /tmp/firestorage-api-probe/routes.txt || true
+          fi
+          : > /tmp/firestorage-api-probe/probes.txt
+          probe() {
+            url="$1"
+            name=$(printf '%s' "$url" | sha256sum | cut -c1-12)
+            code=$(curl -sS -L --connect-timeout 15 --max-time 60 -A 'Mozilla/5.0 DevilNDove-Recovery/1.0' -o "/tmp/firestorage-api-probe/$name.body" -w '%{http_code}' "$url" || true)
+            bytes=$(wc -c < "/tmp/firestorage-api-probe/$name.body" 2>/dev/null | tr -d ' ' || echo 0)
+            final=$(curl -sS -L --connect-timeout 15 --max-time 60 -A 'Mozilla/5.0 DevilNDove-Recovery/1.0' -o /dev/null -w '%{url_effective}' "$url" || true)
+            printf '%s\tHTTP=%s\tbytes=%s\tfinal=%s\n' "$url" "$code" "$bytes" "$final" >> /tmp/firestorage-api-probe/probes.txt
+          }
+          for url in \
+            "$base/en/f/$SHARE_ID" \
+            "$base/ja/f/$SHARE_ID" \
+            "$base/f/$SHARE_ID" \
+            "$base/api/shares/$SHARE_ID" \
+            "$base/api/share/$SHARE_ID" \
+            "$base/api/public/shares/$SHARE_ID" \
+            "$base/api/public/share/$SHARE_ID" \
+            "$base/api/files/$SHARE_ID" \
+            "$base/api/share/$PUBLIC_ID" \
+            "$base/api/public/$PUBLIC_ID" \
+            "$base/api/public/$PUBLIC_ID/$SUBDIR"; do
+            probe "$url"
+          done
+          cat /tmp/firestorage-api-probe/probes.txt
+          cat /tmp/firestorage-api-probe/routes.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-firestorage-api-probe
+          path: /tmp/firestorage-api-probe
+          retention-days: 2
+          if-no-files-found: error

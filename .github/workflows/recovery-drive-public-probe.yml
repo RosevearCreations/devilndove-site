@@ -1,0 +1,46 @@
+name: Recovery Product Source Probe
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-drive-public-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe missing Product image recovery sources read-only
+        shell: bash
+        run: |
+          set -u
+          mkdir -p /tmp/recovery-source-probe
+          key='products/48/1785120087791-1-0535f7c1-df49-462a-a6c5-e42d93a5525e.jpg'
+          asset_url="https://assets.devilndove.com/$key"
+          drive_url='https://drive.google.com/uc?export=download&id=10c7fZ0phIedjoxdZOHCLpzRWMpHzsMMY'
+
+          probe() {
+            label="$1"; url="$2"; out="/tmp/recovery-source-probe/$label.bin"; hdr="/tmp/recovery-source-probe/$label.headers"
+            code=$(curl -sS -L --connect-timeout 15 --max-time 120 -A 'Mozilla/5.0 DevilNDove-Recovery/1.0' -D "$hdr" -o "$out" -w '%{http_code}' "$url" || true)
+            bytes=$(wc -c <"$out" 2>/dev/null | tr -d ' ' || echo 0)
+            type=$(file -b "$out" 2>/dev/null || true)
+            echo "$label HTTP=$code bytes=$bytes type=$type"
+            printf '%s\n' "label=$label" "http=$code" "bytes=$bytes" "type=$type" "url=$url" > "/tmp/recovery-source-probe/$label.txt"
+          }
+
+          probe asset_cdn "$asset_url"
+          probe google_drive "$drive_url"
+          printf '%s\n' "key=$key" "expected_original_bytes=442583" > /tmp/recovery-source-probe/authority.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-product-source-probe
+          path: /tmp/recovery-source-probe
+          retention-days: 7
+          if-no-files-found: error

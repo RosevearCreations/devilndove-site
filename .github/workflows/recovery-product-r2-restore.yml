@@ -1,0 +1,159 @@
+name: Recovery Product R2 Restore
+
+on:
+  workflow_dispatch:
+    inputs:
+      archive_url:
+        description: Public HTTPS URL for recovery ZIP containing manifest.json and files/
+        required: true
+        type: string
+      archive_sha256:
+        description: SHA-256 of the complete recovery ZIP
+        required: true
+        type: string
+      expected_items:
+        description: Exact number of manifest entries expected
+        required: true
+        type: string
+      target:
+        description: Restore destination
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - development
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      DEV_BUCKET: devilndove-toolshed-images-dev
+      PROD_BUCKET: devilndove-toolshed-images
+    steps:
+      - name: Fetch and validate recovery archive
+        shell: bash
+        env:
+          ARCHIVE_URL: ${{ inputs.archive_url }}
+          ARCHIVE_SHA256: ${{ inputs.archive_sha256 }}
+          EXPECTED_ITEMS: ${{ inputs.expected_items }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/product-r2-restore
+          cd /tmp/product-r2-restore
+          case "$ARCHIVE_URL" in
+            https://*) ;;
+            *) echo "archive_url must be HTTPS" >&2; exit 2;;
+          esac
+          curl --fail --location --retry 3 --retry-delay 2 --output recovery.zip "$ARCHIVE_URL"
+          actual_zip_sha="$(sha256sum recovery.zip | awk '{print $1}')"
+          test "$actual_zip_sha" = "$ARCHIVE_SHA256" || { echo "archive SHA mismatch" >&2; exit 3; }
+          unzip -q recovery.zip -d unpacked
+          test -f unpacked/manifest.json || { echo "manifest.json missing" >&2; exit 4; }
+          python - <<'PY'
+          import hashlib, json, pathlib, sys
+          root = pathlib.Path('/tmp/product-r2-restore/unpacked')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          if not isinstance(manifest, list):
+              raise SystemExit('manifest must be a JSON array')
+          expected = int(__import__('os').environ['EXPECTED_ITEMS'])
+          if len(manifest) != expected:
+              raise SystemExit(f'manifest count {len(manifest)} != expected {expected}')
+          seen = set()
+          for index, item in enumerate(manifest):
+              if not isinstance(item, dict):
+                  raise SystemExit(f'entry {index} is not an object')
+              key = str(item.get('key') or '')
+              rel = str(item.get('file') or '')
+              sha = str(item.get('sha256') or '').lower()
+              size = int(item.get('size') or 0)
+              mime = str(item.get('mime') or 'application/octet-stream')
+              if not key.startswith('products/') or '..' in key or key.startswith('/'):
+                  raise SystemExit(f'unsafe Product key: {key!r}')
+              if key in seen:
+                  raise SystemExit(f'duplicate Product key: {key}')
+              seen.add(key)
+              if not rel.startswith('files/') or '..' in rel or rel.startswith('/'):
+                  raise SystemExit(f'unsafe archive file: {rel!r}')
+              path = root / rel
+              if not path.is_file():
+                  raise SystemExit(f'missing archive member: {rel}')
+              data = path.read_bytes()
+              if len(data) != size:
+                  raise SystemExit(f'size mismatch for {key}: {len(data)} != {size}')
+              digest = hashlib.sha256(data).hexdigest()
+              if digest != sha:
+                  raise SystemExit(f'SHA mismatch for {key}: {digest} != {sha}')
+              if not mime.startswith('image/'):
+                  raise SystemExit(f'non-image MIME refused for {key}: {mime}')
+          print(f'PASS manifest entries={len(manifest)} unique_keys={len(seen)}')
+          PY
+
+      - name: Restore exact Product objects additively
+        shell: bash
+        env:
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          cd /tmp/product-r2-restore/unpacked
+          python - <<'PY' > /tmp/product-r2-restore/manifest.tsv
+          import json
+          for item in json.load(open('manifest.json', encoding='utf-8')):
+              print('\t'.join([
+                  item['key'], item['file'], item['sha256'], str(item['size']), item.get('mime') or 'image/jpeg'
+              ]))
+          PY
+          restore_bucket() {
+            bucket="$1"
+            while IFS=$'\t' read -r key rel expected_sha expected_size mime; do
+              src="/tmp/product-r2-restore/unpacked/$rel"
+              npx --yes wrangler@4.128.0 r2 object put "$bucket/$key" --remote --force --file "$src" --content-type "$mime" --cache-control "public, max-age=31536000, immutable" >/tmp/r2-put.log 2>&1 || { cat /tmp/r2-put.log; exit 10; }
+              verify="/tmp/product-r2-restore/verify.bin"
+              rm -f "$verify"
+              npx --yes wrangler@4.128.0 r2 object get "$bucket/$key" --remote --file "$verify" >/tmp/r2-get.log 2>&1 || { cat /tmp/r2-get.log; exit 11; }
+              actual_size="$(wc -c < "$verify" | tr -d ' ')"
+              actual_sha="$(sha256sum "$verify" | awk '{print $1}')"
+              test "$actual_size" = "$expected_size" || { echo "verify size mismatch $bucket/$key" >&2; exit 12; }
+              test "$actual_sha" = "$expected_sha" || { echo "verify SHA mismatch $bucket/$key" >&2; exit 13; }
+              echo "RESTORED $bucket/$key size=$actual_size sha256=$actual_sha"
+            done < /tmp/product-r2-restore/manifest.tsv
+          }
+          case "$TARGET" in
+            development) restore_bucket "$DEV_BUCKET" ;;
+            production) restore_bucket "$PROD_BUCKET" ;;
+            both) restore_bucket "$DEV_BUCKET"; restore_bucket "$PROD_BUCKET" ;;
+            *) echo "invalid target" >&2; exit 14;;
+          esac
+
+      - name: Final read-back census
+        shell: bash
+        env:
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          expected="${{ inputs.expected_items }}"
+          case "$TARGET" in
+            development) buckets=("$DEV_BUCKET") ;;
+            production) buckets=("$PROD_BUCKET") ;;
+            both) buckets=("$DEV_BUCKET" "$PROD_BUCKET") ;;
+          esac
+          for bucket in "${buckets[@]}"; do
+            count=0
+            while IFS=$'\t' read -r key rel expected_sha expected_size mime; do
+              verify="/tmp/product-r2-restore/final.bin"
+              rm -f "$verify"
+              npx --yes wrangler@4.128.0 r2 object get "$bucket/$key" --remote --file "$verify" >/dev/null 2>&1
+              test "$(wc -c < "$verify" | tr -d ' ')" = "$expected_size"
+              test "$(sha256sum "$verify" | awk '{print $1}')" = "$expected_sha"
+              count=$((count+1))
+            done < /tmp/product-r2-restore/manifest.tsv
+            test "$count" = "$expected"
+            echo "PASS $bucket restored_and_verified=$count"
+          done

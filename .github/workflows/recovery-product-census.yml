@@ -1,0 +1,110 @@
+name: Recovery Surviving Product R2 Inventory
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-product-census.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_D1: devilndove-prod-r462
+      LIVE_BASE: https://devilndove.com
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Resolve current Production admin session read-only
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/surviving-product-r2
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT COALESCE(NULLIF(session_token,''),token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(u.role)='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/surviving-product-r2/session.json
+          python - <<'PY'
+          import json, os
+          d=json.load(open('/tmp/surviving-product-r2/session.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          token=next(walk(d),'').strip()
+          assert token,'No active Production admin session is available.'
+          print('::add-mask::'+token)
+          with open(os.environ['GITHUB_ENV'],'a') as f: f.write('DD_ADMIN_TOKEN='+token+'\n')
+          PY
+          rm -f /tmp/surviving-product-r2/session.json
+
+      - name: Page through Production R2 metadata via read-only diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, pathlib, urllib.parse, urllib.request, urllib.error
+          root=pathlib.Path('/tmp/surviving-product-r2')
+          base=os.environ['LIVE_BASE'].rstrip('/')
+          token=os.environ['DD_ADMIN_TOKEN']
+          cursor=''; page=0; objects=[]; seen=set(); reference_counts=None
+          while True:
+              page += 1
+              query={'limit':'100'}
+              if cursor: query['product_cursor']=cursor
+              url=base+'/api/admin/storage-orphan-diagnostics?'+urllib.parse.urlencode(query)
+              req=urllib.request.Request(url,headers={'Cookie':'dd_auth_token='+token,'Accept':'application/json','Cache-Control':'no-store','User-Agent':'devilndove-recovery-r2-inventory/1.0'})
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as r:
+                      raw=r.read().decode('utf-8','replace'); status=r.status
+              except urllib.error.HTTPError as e:
+                  raw=e.read().decode('utf-8','replace'); status=e.code
+              try: data=json.loads(raw)
+              except Exception: raise AssertionError((status,url,raw[:500]))
+              assert status==200 and data.get('ok') is True,(status,data)
+              assert data.get('diagnostic_only') is True and data.get('r2_mutation_executed') is False,data
+              product=(data.get('buckets') or {}).get('product') or {}
+              if reference_counts is None: reference_counts=data.get('reference_counts') or {}
+              for obj in product.get('orphan_candidates') or []:
+                  key=str(obj.get('key') or '').strip()
+                  if key and key not in seen:
+                      seen.add(key); objects.append(obj)
+              print('PAGE',page,'scanned',product.get('scanned'),'referenced',product.get('referenced_in_page'),'orphans',product.get('orphan_candidate_count'),'truncated',product.get('truncated'))
+              (root/f'page-{page:02d}.json').write_text(json.dumps(data,indent=2))
+              if not product.get('truncated'): break
+              nxt=str(product.get('cursor') or '').strip()
+              assert nxt and nxt!=cursor,(page,product)
+              cursor=nxt
+              assert page<50,'Unexpected pagination depth'
+          summary={'pages':page,'orphan_objects_returned':len(objects),'reference_counts':reference_counts,'objects':objects,'diagnostic_only':True,'r2_mutation':False}
+          (root/'surviving-orphan-keys.json').write_text(json.dumps(summary,indent=2))
+          print('ORPHAN KEYS CAPTURED',len(objects))
+          PY
+
+      - name: Read all known Product-media object-key references from Production D1
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT media_asset_id,product_id,bucket_name,object_key,public_url,original_filename,file_size_bytes,created_at FROM media_assets WHERE TRIM(COALESCE(object_key,''))<>'' ORDER BY media_asset_id; SELECT product_id,image_url,alt_text,sort_order,created_at FROM product_images ORDER BY product_id,sort_order,product_image_id;" > /tmp/surviving-product-r2/d1-known-media.json
+          printf '%s\n' 'READ_ONLY=TRUE' 'D1_MUTATION=ZERO' 'R2_BODY_READS=ZERO' 'R2_MUTATION=ZERO' > /tmp/surviving-product-r2/boundary.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surviving-product-r2-inventory
+          path: /tmp/surviving-product-r2
+          retention-days: 30
+          if-no-files-found: error

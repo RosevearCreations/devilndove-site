@@ -1,0 +1,67 @@
+name: Recovery Product Ledger All D1
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-product-ledger-all-db.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export retained Product media evidence read-only
+        shell: bash
+        run: |
+          set -u
+          mkdir -p /tmp/product-ledgers
+          dbs=(devilndove-prod-r462 devilndove-prod-repl-20260823 devilndove-dev devilndove-prod)
+          declare -A sqls
+          sqls[media_assets]="SELECT * FROM media_assets ORDER BY media_asset_id;"
+          sqls[product_images]="SELECT * FROM product_images ORDER BY product_id,sort_order,product_image_id;"
+          sqls[products]="SELECT * FROM products ORDER BY product_id;"
+          sqls[annotations]="SELECT * FROM product_image_annotations ORDER BY product_id,product_image_id;"
+          sqls[roles]="SELECT * FROM product_media_role_assignments ORDER BY product_id;"
+          sqls[audit]="SELECT * FROM admin_action_audit WHERE action_type='media_upload' OR target_type='media_asset' ORDER BY created_at, target_key;"
+          sqls[product_media_change_audit]="SELECT * FROM product_media_change_audit ORDER BY product_id, created_at, product_media_change_audit_id;"
+          sqls[mobile_recovery]="SELECT * FROM mobile_product_autosave_recovery_snapshots ORDER BY created_at, mobile_product_autosave_recovery_snapshot_id;"
+          sqls[managed_media_metadata]="SELECT * FROM managed_media_metadata ORDER BY media_asset_id;"
+          sqls[media_content_change_audit]="SELECT * FROM media_content_change_audit ORDER BY created_at, media_content_change_audit_id;"
+          sqls[integrity_snapshots]="SELECT * FROM product_media_integrity_snapshots ORDER BY created_at, product_media_integrity_snapshot_id;"
+          sqls[tables]="SELECT name,sql FROM sqlite_master WHERE type='table' AND (lower(name) LIKE '%media%' OR lower(name) LIKE '%image%' OR lower(name) LIKE '%audit%' OR lower(name) LIKE '%snapshot%' OR lower(name) LIKE '%recover%') ORDER BY name;"
+          for db in "${dbs[@]}"; do
+            echo "Reading $db"
+            for label in media_assets product_images products annotations roles audit product_media_change_audit mobile_recovery managed_media_metadata media_content_change_audit integrity_snapshots tables; do
+              npx --yes wrangler@4.128.0 d1 execute "$db" --remote --json --command "${sqls[$label]}" > "/tmp/product-ledgers/${db}-${label}.json" 2> "/tmp/product-ledgers/${db}-${label}.err" || true
+            done
+          done
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('/tmp/product-ledgers')
+          summary={}
+          for p in sorted(root.glob('*.json')):
+              try:
+                  obj=json.loads(p.read_text())
+                  rows=sum(len(x.get('results',[])) for x in (obj if isinstance(obj,list) else [obj]) if isinstance(x,dict))
+                  summary[p.name]=rows
+              except Exception as e:
+                  summary[p.name]=f'parse_error:{e}'
+          (root/'summary.json').write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-product-ledgers-all-d1
+          path: /tmp/product-ledgers
+          retention-days: 14
+          if-no-files-found: error

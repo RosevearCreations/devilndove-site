@@ -1,0 +1,44 @@
+name: Recovery Firestorage Transport Probe
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-firestorage-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe Firestorage share read-only
+        shell: bash
+        env:
+          SHARE_URL: https://firestorage.ai/ja/f/Du_6a_urMG5o
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/firestorage-probe
+          curl -fL --retry 3 --connect-timeout 20 --max-time 120 \
+            -A 'Mozilla/5.0 DevilNDove-Recovery/1.0' \
+            -D /tmp/firestorage-probe/headers.txt \
+            "$SHARE_URL" -o /tmp/firestorage-probe/share.html
+          echo "bytes=$(wc -c </tmp/firestorage-probe/share.html)"
+          echo "content_type=$(file -b /tmp/firestorage-probe/share.html)"
+          echo '--- FILE NAMES ---'
+          grep -aoE 'product-live-restore-150\.transport-[0-9]{2}\.zip' /tmp/firestorage-probe/share.html | sort -u || true
+          echo '--- CANDIDATE URLS ---'
+          grep -aoE 'https?[^"'"'<> ]+' /tmp/firestorage-probe/share.html | sed 's/&amp;/\&/g' | grep -Ei 'download|firestorage|storage|object|file' | head -200 || true
+          echo '--- DOWNLOAD TOKENS / ROUTES ---'
+          grep -aoE '.{0,100}(download|publicId|public_id|file_id|fileId|shareId|api/).{0,180}' /tmp/firestorage-probe/share.html | head -300 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-firestorage-probe
+          path: /tmp/firestorage-probe
+          retention-days: 2
+          if-no-files-found: error

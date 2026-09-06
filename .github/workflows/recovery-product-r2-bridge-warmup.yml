@@ -1,0 +1,103 @@
+name: Recovery Product R2 Bridge Warmup
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-product-r2-bridge-warmup.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-product-r2-bridge-warmup
+  cancel-in-progress: false
+
+jobs:
+  warmup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      TEMP_PROJECT: devilndove-r2-recovery
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prepare runner-only recovery project config
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('wrangler.toml')
+          s=p.read_text(encoding='utf-8')
+          assert 'RELEASE463_PRODUCT_MEDIA_PROD_BUCKET' in s
+          s=s.replace('name = "devilndove-site"','name = "devilndove-r2-recovery"',1)
+          p.write_text(s,encoding='utf-8')
+          print('WARMUP_CONFIG=PASS')
+          PY
+
+      - name: Create recovery Pages project if absent
+        shell: bash
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects"
+          code=$(curl -sS -o /tmp/project.json -w '%{http_code}' -H "Authorization: Bearer ${CF_PAGES_TOKEN}" "$API/$TEMP_PROJECT" || true)
+          if [ "$code" = 404 ]; then
+            curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}" -H 'Content-Type: application/json' -X POST "$API" --data '{"name":"devilndove-r2-recovery","production_branch":"main"}' > /tmp/create.json
+            python - <<'PY'
+          import json
+          d=json.load(open('/tmp/create.json')); assert d.get('success') is True,d
+          print('WARMUP_PROJECT_CREATE=PASS')
+          PY
+          elif [ "$code" = 200 ]; then
+            echo 'WARMUP_PROJECT_EXISTS=PASS'
+          else
+            cat /tmp/project.json
+            exit 30
+          fi
+
+      - name: Deploy inert warmup and wait for TLS readiness
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.129.0 pages deploy . \
+            --project-name="$TEMP_PROJECT" \
+            --branch=recovery-warmup \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-message='Temporary recovery bridge TLS warmup; no R2 mutation' \
+            | tee /tmp/warmup-deploy.log
+          python - <<'PY'
+          import re
+          t=open('/tmp/warmup-deploy.log',encoding='utf-8',errors='replace').read()
+          u=re.findall(r'https://[a-z0-9-]+\.devilndove-r2-recovery\.pages\.dev',t,re.I)
+          assert u,t[-3000:]
+          open('/tmp/warmup-url','w').write(u[0])
+          print('WARMUP_URL',u[0])
+          PY
+          URL="$(cat /tmp/warmup-url)"
+          ready=0
+          for attempt in $(seq 1 60); do
+            code=$(curl --http1.1 -sS -o /tmp/warmup-body -w '%{http_code}' --connect-timeout 10 --max-time 20 "$URL/" 2>/tmp/warmup-error || true)
+            if [ "$code" != 000 ]; then
+              echo "TLS_READY=PASS attempt=$attempt http=$code url=$URL"
+              ready=1
+              break
+            fi
+            echo "TLS_READY=pending attempt=$attempt error=$(tr '\n' ' ' </tmp/warmup-error | head -c 240)"
+            sleep 3
+          done
+          test "$ready" -eq 1
+
+      - name: Boundary statement
+        run: |
+          echo 'R2_MUTATION=ZERO'
+          echo 'D1_MUTATION=ZERO'
+          echo 'TEMP_PROJECT_RETAINED_FOR_RECOVERY_RETRY=true'

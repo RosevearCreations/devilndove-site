@@ -1,0 +1,73 @@
+name: Recovery Firestorage File List
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/recovery-firestorage-file-list.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate Firestorage transport metadata read-only
+        shell: bash
+        env:
+          API_BASE: https://api.firestorage.ai/dev/file
+          SHARE_ID: Du_6a_urMG5o
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/firestorage-list
+          curl -fsSL --retry 3 --connect-timeout 20 --max-time 120 \
+            "$API_BASE/shares/$SHARE_ID/files?maxResults=1000" \
+            -o /tmp/firestorage-list/files.json
+          python - <<'PY'
+          import json
+          p='/tmp/firestorage-list/files.json'
+          data=json.load(open(p,encoding='utf-8'))
+          files=data.get('files') or []
+          expected={
+            'product-live-restore-150.transport-01.zip':30353852,
+            'product-live-restore-150.transport-02.zip':33452440,
+            'product-live-restore-150.transport-03.zip':32220187,
+            'product-live-restore-150.transport-04.zip':31383887,
+            'product-live-restore-150.transport-05.zip':30473236,
+            'product-live-restore-150.transport-06.zip':25208200,
+            'product-live-restore-150.transport-07.zip':31568528,
+            'product-live-restore-150.transport-08.zip':23463773,
+          }
+          got={}
+          safe=[]
+          for f in files:
+              name=f.get('fileName') or f.get('name')
+              size=f.get('sizeBytes') if f.get('sizeBytes') is not None else f.get('size')
+              fid=f.get('fileId') or f.get('id')
+              if name in expected:
+                  got[name]=int(size)
+                  safe.append({'fileName':name,'sizeBytes':int(size),'fileId':fid})
+          if set(got)!=set(expected):
+              raise SystemExit(f'expected 8 files, got {sorted(got)}')
+          bad={n:(expected[n],got[n]) for n in expected if expected[n]!=got[n]}
+          if bad:
+              raise SystemExit(f'size mismatch: {bad}')
+          if any(not x['fileId'] for x in safe):
+              raise SystemExit('missing Firestorage fileId')
+          json.dump({'shareId':'Du_6a_urMG5o','files':safe},open('/tmp/firestorage-list/validated.json','w'),indent=2)
+          print('validated_files=8')
+          print('validated_bytes=',sum(got.values()))
+          for x in sorted(safe,key=lambda x:x['fileName']):
+              print(x['fileName'],x['sizeBytes'],x['fileId'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery-firestorage-file-list
+          path: /tmp/firestorage-list
+          retention-days: 2
+          if-no-files-found: error
