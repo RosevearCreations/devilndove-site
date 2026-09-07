@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div>
           <p class="eyebrow">Build 73 • Product Media / Photo Studio Convergence</p>
           <h2 style="margin-top:0">${esc(product.name || `Product #${productId}`)} photo authority</h2>
-          <p class="small">`product_images` remains the canonical gallery. R2-linked `media_assets`, role assignments and annotations are supporting/recovery evidence. This panel never publishes, copies or deletes R2 media.</p>
+          <p class="small"><code>product_images</code> remains the canonical gallery. R2-linked <code>media_assets</code>, role assignments and annotations are supporting/recovery evidence. This panel never publishes, copies or deletes R2 media.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-product-media-convergence-refresh>Refresh authority</button><a class="btn secondary" href="#productMediaAdminMount">Open photo editor below</a></div>
       </div>
