@@ -15,8 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resultsHomeParent = resultsSection?.parentNode || null;
   const resultsHomeNext = resultsSection?.nextSibling || null;
   let focusedArrivalHandled = false;
+  let lastData = null;
   const initialFocusProducts = new URLSearchParams(window.location.search).get('focus')==='products';
   const SNAPSHOT_KEY = 'dd_shop_snapshot_v3';
+  const BUILD75_LOCAL_PARAMS = ['category', 'availability', 'sort'];
 
   function show(el) { if (el) el.style.display = ""; }
   function hide(el) { if (el) el.style.display = "none"; }
@@ -63,9 +65,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function writeFiltersToUrl() {
+    const currentParams = new URLSearchParams(window.location.search);
     const params = new URLSearchParams();
     const filters = readFilters();
     Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    BUILD75_LOCAL_PARAMS.forEach((key) => {
+      const value = String(currentParams.get(key) || '').trim();
+      if (value && !(key === 'sort' && value === 'featured')) params.set(key, value);
+    });
     const next = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
     window.history.replaceState({}, '', next);
   }
@@ -131,8 +138,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${originCards.map((card) => `<div class="shop-collection-card" data-color-slot="shop.collection.${escapeHtml(card.key)}.color"><strong data-content-slot="shop.collection.${escapeHtml(card.key)}.heading">${escapeHtml(card.title)}</strong><p class="small" data-content-slot="shop.collection.${escapeHtml(card.key)}.body">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse ${escapeHtml(card.key)}</button></div>`).join('')}
         </div>
         <div class="shop-filter-pill-groups">
-          <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No categories yet.'}</div></div>
-          <div><strong>Colours / themes</strong><div class="small" style="margin-top:8px">${colors.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No colour groups yet.'}</div></div>
+          <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<button class="pill build75-filter-pill" type="button" data-build75-collection-filter="category" data-build75-collection-value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</button>`).join(' ') || 'No categories yet.'}</div></div>
+          <div><strong>Colours / themes</strong><div class="small" style="margin-top:8px">${colors.map((row) => `<button class="pill build75-filter-pill" type="button" data-build75-collection-filter="color" data-build75-collection-value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</button>`).join(' ') || 'No colour groups yet.'}</div></div>
           <div><strong>Product types</strong><div class="small" style="margin-top:8px">${types.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No product-type groups yet.'}</div></div>
           <div><strong>Origins</strong><div class="small" style="margin-top:8px">${origins.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No origin groups yet.'}</div></div>
           <div><strong>Sale channels</strong><div class="small" style="margin-top:8px">${channels.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No channel groups yet.'}</div></div>
@@ -282,26 +289,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     });
   }
+  function presentProducts(products, { summaryText = null } = {}) {
+    const rows = Array.isArray(products) ? products : [];
+    if (summaryText != null && summaryEl) summaryEl.textContent = String(summaryText || '');
+    if (!rows.length) {
+      hide(productsEl);
+      show(emptyEl);
+      if (productsEl) productsEl.innerHTML = '';
+      return rows;
+    }
+    hide(emptyEl);
+    renderProducts(rows);
+    show(productsEl);
+    bindCartButtons(rows);
+    return rows;
+  }
   function renderPayload(data, { fromCache = false } = {}) {
     const products = Array.isArray(data?.products) ? data.products : [];
+    lastData = data || null;
     const categoryCount = Array.isArray(data?.filter_groups?.categories) ? data.filter_groups.categories.length : 0;
     const colorCount = Array.isArray(data?.filter_groups?.colors) ? data.filter_groups.colors.length : 0;
-    if (summaryEl) summaryEl.textContent = `${products.length} product(s) found.${categoryCount || colorCount ? ` ${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'} and ${colorCount} colour option${colorCount === 1 ? '' : 's'} in this result set.` : ''}`;
+    const summaryText = `${products.length} product(s) found.${categoryCount || colorCount ? ` ${categoryCount} categor${categoryCount === 1 ? 'y' : 'ies'} and ${colorCount} colour option${colorCount === 1 ? '' : 's'} in this result set.` : ''}`;
     renderCollectionLanding(data?.filter_groups || {});
     renderColorFilter(data?.filter_groups || {});
     renderPolicyFaq();
-    if (!products.length) {
-      hide(productsEl);
-      show(emptyEl);
-    } else {
-      hide(emptyEl);
-      renderProducts(products);
-      show(productsEl);
-      bindCartButtons(products);
-    }
+    presentProducts(products, { summaryText });
     if (data?.warning) setStatus(data.warning, fromCache ? 'warning' : 'info');
     else if (!fromCache) setStatus('');
     return products;
+  }
+  function notifyShopData(data, { fromCache = false } = {}) {
+    try {
+      document.dispatchEvent(new CustomEvent('dd:shop:data', { detail: { data, fromCache } }));
+    } catch {}
   }
   async function loadProducts() {
     placeResultsForIntent();
@@ -316,12 +336,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderPayload(data);
       writeFiltersToUrl();
       placeResultsForIntent();
+      notifyShopData(data, { fromCache: false });
       if(!focusedArrivalHandled && initialFocusProducts){focusedArrivalHandled=true;setTimeout(()=>resultsSection?.scrollIntoView({behavior:'smooth',block:'start'}),30);}
       saveSnapshot(url, { data });
     } catch (error) {
       const cached = loadSnapshot(url);
       if (cached?.data) {
         renderPayload(cached.data, { fromCache: true });
+        writeFiltersToUrl();
+        notifyShopData(cached.data, { fromCache: true });
         setStatus(`Live shop data is unavailable. Showing the last saved snapshot from ${cached.cached_at || 'an earlier visit'}.`, 'warning');
       } else {
         if (errorEl) errorEl.textContent = error.message || 'Failed to load products.';
@@ -343,9 +366,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   try { window.DDRecentlyViewed?.render?.(document.getElementById('shopRecentlyViewedMount'), { limit: 4 }); } catch {}
   document.getElementById('shopSearchButton')?.addEventListener('click', loadProducts);
   document.getElementById('shopResetButton')?.addEventListener('click', () => {
-    ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopColorFilter','shopMinPrice','shopMaxPrice'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
+    ['shopSearchInput','shopTypeFilter','shopOriginFilter','shopChannelFilter','shopColorFilter','shopMaterialFilter','shopProcessFilter','shopLocalityFilter','shopMinPrice','shopMaxPrice','shopSocialReadyFilter','shopProofImageFilter'].forEach((id) => { const el=document.getElementById(id); if (el) el.value=''; });
     const ship=document.getElementById('shopShippingOnly'); if (ship) ship.checked=false; loadProducts();
   });
   applyFiltersFromUrl();
+  window.DDShopRuntime = Object.freeze({
+    getLastData: () => lastData,
+    present: (products, options = {}) => presentProducts(products, options),
+    reload: () => loadProducts(),
+    buildUrl: () => buildUrl(),
+  });
   await loadProducts();
 });
