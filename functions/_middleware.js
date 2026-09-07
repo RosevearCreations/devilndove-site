@@ -63,6 +63,7 @@ function withPlatformClient(response, request) {
           // revision so a repaired bootstrap can never be hidden behind an older
           // release-number cache entry.
           if (isProductsPage) {
+            element.append(`<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`, { html: true });
             element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
             element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
           } else {
