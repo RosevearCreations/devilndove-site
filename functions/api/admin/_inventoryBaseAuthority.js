@@ -1,8 +1,15 @@
 // Release 461: canonical usable/base-unit inventory balance authority.
+// Release 467 Build 70: package/base normalization shares the Inventory unit engine.
 // Purchase-package fields remain on site_item_inventory for receiving/costing compatibility.
 // This module never creates or repairs schema at runtime; migration ownership is mandatory.
 
 import { normalizeText } from '../_lib/adminAudit.js';
+import {
+  normalizeInventoryUnitLabel,
+  normalizeUnitsPerPurchase,
+  purchaseToBase,
+  roundInventoryQuantity,
+} from '../_lib/inventoryUnitConversion.js';
 
 function numeric(value, fallback = 0) {
   const parsed = Number(value);
@@ -14,12 +21,11 @@ function nonNegative(value, fallback = 0) {
 }
 
 function positive(value, fallback = 1) {
-  const parsed = numeric(value, fallback);
-  return parsed > 0 ? parsed : fallback;
+  return normalizeUnitsPerPurchase(value, fallback);
 }
 
 function unit(value, fallback = 'unit') {
-  return normalizeText(value).toLowerCase() || fallback;
+  return normalizeInventoryUnitLabel(normalizeText(value), fallback);
 }
 
 export async function assertInventoryBaseAuthorityReady(db) {
@@ -35,18 +41,18 @@ export async function assertInventoryBaseAuthorityReady(db) {
 }
 
 export function baseBalanceFromInventory(row = {}) {
-  const perPurchase = positive(row.usage_units_per_stock_unit, 1);
+  const perPurchase = normalizeUnitsPerPurchase(row.usage_units_per_stock_unit, 1);
   return {
     site_item_inventory_id: Number(row.site_item_inventory_id || 0),
     purchase_unit_label: unit(row.stock_unit_label, 'unit'),
     base_unit_label: unit(row.usage_unit_label, 'unit'),
     base_units_per_purchase_unit: perPurchase,
     purchase_unit_cost_cents: Math.max(0, Math.round(numeric(row.unit_cost_cents, 0))),
-    base_on_hand_quantity: nonNegative(row.on_hand_quantity) * perPurchase,
-    base_reserved_quantity: nonNegative(row.reserved_quantity) * perPurchase,
-    base_incoming_quantity: nonNegative(row.incoming_quantity) * perPurchase,
-    base_reorder_level: nonNegative(row.reorder_level) * perPurchase,
-    base_preferred_reorder_quantity: nonNegative(row.preferred_reorder_quantity) * perPurchase
+    base_on_hand_quantity: purchaseToBase(nonNegative(row.on_hand_quantity), perPurchase),
+    base_reserved_quantity: purchaseToBase(nonNegative(row.reserved_quantity), perPurchase),
+    base_incoming_quantity: purchaseToBase(nonNegative(row.incoming_quantity), perPurchase),
+    base_reorder_level: purchaseToBase(nonNegative(row.reorder_level), perPurchase),
+    base_preferred_reorder_quantity: purchaseToBase(nonNegative(row.preferred_reorder_quantity), perPurchase)
   };
 }
 
@@ -173,12 +179,12 @@ export function mergeInventoryBaseAuthority(item = {}, balance = null) {
     purchase_unit_cost_cents: Math.max(0, Math.round(numeric(balance.purchase_unit_cost_cents ?? item.unit_cost_cents, 0))),
     base_unit_label: unit(balance.base_unit_label || item.usage_unit_label, 'unit'),
     base_units_per_purchase_unit: perPurchase,
-    base_on_hand_quantity: baseOnHand,
-    base_reserved_quantity: baseReserved,
-    base_incoming_quantity: baseIncoming,
-    base_available_quantity: Math.max(0, baseOnHand - baseReserved),
-    base_reorder_level: nonNegative(balance.base_reorder_level),
-    base_preferred_reorder_quantity: nonNegative(balance.base_preferred_reorder_quantity),
+    base_on_hand_quantity: roundInventoryQuantity(baseOnHand),
+    base_reserved_quantity: roundInventoryQuantity(baseReserved),
+    base_incoming_quantity: roundInventoryQuantity(baseIncoming),
+    base_available_quantity: roundInventoryQuantity(Math.max(0, baseOnHand - baseReserved)),
+    base_reorder_level: roundInventoryQuantity(nonNegative(balance.base_reorder_level)),
+    base_preferred_reorder_quantity: roundInventoryQuantity(nonNegative(balance.base_preferred_reorder_quantity)),
     base_unit_cost_cents: Math.max(0, numeric(balance.purchase_unit_cost_cents ?? item.unit_cost_cents, 0) / perPurchase),
     base_balance_updated_at: balance.updated_at || null
   };
