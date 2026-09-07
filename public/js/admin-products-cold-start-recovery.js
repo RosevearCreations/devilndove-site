@@ -7,7 +7,7 @@
   if (pathname !== '/admin/products') return;
 
   const PRODUCT_SNAPSHOT_KEY = 'dd_admin_products_snapshot_v2';
-  const DEFAULT_CATEGORIES = ['Rings','Necklaces','Bracelets','Earrings','Pendants','CNC Components','3D Printed Items','Laser Engraved Items','Polymer Clay Items','Home Decor','Accessories','Other'];
+  const DEFAULT_CATEGORIES = ['Rings','Necklaces','Bracelets','Earrings','Pendants','CNC Components','3D Printed Items','Laser Engraved Items','Polymer Clay Items','Home Decor','Soap','Candles','Accessories','Other'];
   const DEFAULT_COLOURS = ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'];
   const DEFAULT_SHIPPING = ['standard-jewelry','small-parcel','oversize','pickup-only','digital'];
   let running = false;
@@ -29,6 +29,71 @@
     if (verifiedUser && String(verifiedUser.role || '').toLowerCase() === 'admin') return true;
     const stored = window.DDAuth?.getStoredUser?.() || null;
     return Boolean(window.DDAuth?.isLoggedIn?.() && stored && String(stored.role || '').toLowerCase() === 'admin');
+  }
+
+  function jsonFallbackResponse(payload, status = 200) {
+    return new Response(JSON.stringify(payload), {
+      status,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  function installBoundedProductApiGuard() {
+    if (!window.DDAuth?.apiFetch || window.DDAuth.apiFetch.__ddProductsBounded === true) return false;
+    const original = window.DDAuth.apiFetch.bind(window.DDAuth);
+
+    const boundedApiFetch = async (input, options = {}) => {
+      const method = String(options?.method || 'GET').toUpperCase();
+      if (method !== 'GET') return original(input, options);
+
+      let path = '';
+      try { path = new URL(String(input || ''), window.location.origin).pathname; } catch {}
+
+      let timeoutMs = 0;
+      let fallbackPayload = null;
+      if (path === '/api/admin/product-readiness') {
+        // Readiness is advisory. Never make the Product editor wait indefinitely for it.
+        timeoutMs = 3500;
+        fallbackPayload = { ok: true, products: [], degraded: true, reason: 'readiness_timeout' };
+      } else if (path === '/api/admin/products') {
+        // The main list may fall back to the browser snapshot when the live aggregate stalls.
+        timeoutMs = 8000;
+      } else if (path === '/api/admin/product-mobile-bootstrap') {
+        timeoutMs = 6000;
+      } else if (path === '/api/admin/pending-actions') {
+        // Replay queue status is secondary to editing a Product.
+        timeoutMs = 5000;
+        fallbackPayload = { ok: true, actions: [], degraded: true, reason: 'pending_actions_timeout' };
+      }
+
+      if (!timeoutMs) return original(input, options);
+
+      const controller = new AbortController();
+      const suppliedSignal = options?.signal || null;
+      if (suppliedSignal?.aborted) controller.abort();
+      else if (suppliedSignal?.addEventListener) suppliedSignal.addEventListener('abort', () => controller.abort(), { once: true });
+
+      let timer = null;
+      try {
+        return await Promise.race([
+          original(input, { ...options, signal: controller.signal }),
+          new Promise((resolve, reject) => {
+            timer = window.setTimeout(() => {
+              controller.abort();
+              if (fallbackPayload) resolve(jsonFallbackResponse(fallbackPayload));
+              else reject(new Error(`Product startup request timed out after ${timeoutMs} ms.`));
+            }, timeoutMs);
+          })
+        ]);
+      } finally {
+        if (timer) window.clearTimeout(timer);
+      }
+    };
+
+    boundedApiFetch.__ddProductsBounded = true;
+    boundedApiFetch.__ddProductsOriginal = original;
+    window.DDAuth.apiFetch = boundedApiFetch;
+    return true;
   }
 
   async function readJson(url, timeoutMs = 10000) {
@@ -107,7 +172,7 @@
   }
 
   async function recoverEditorOptions() {
-    const data = await readJson('/api/admin/product-mobile-bootstrap?options_only=1', 8000);
+    const data = await readJson('/api/admin/product-mobile-bootstrap?options_only=1', 6000);
     fillSimpleSelect('create_product_category', data.category_options || DEFAULT_CATEGORIES, 'Select category');
     fillSimpleSelect('create_product_color_name', data.color_options || DEFAULT_COLOURS, 'Select primary colour');
     fillSimpleSelect('create_product_shipping_code', data.shipping_code_options || DEFAULT_SHIPPING, 'Select shipping code');
@@ -139,6 +204,7 @@
   }
 
   async function start(force = false) {
+    installBoundedProductApiGuard();
     if (running || !verifiedAdminAvailable()) return;
     if (!force && Date.now() - lastRunAt < 1200) return;
     running = true;
@@ -159,6 +225,7 @@
   document.addEventListener('dd:auth-changed', (event) => { if (event?.detail?.ok) void start(true); });
 
   const boot = () => {
+    installBoundedProductApiGuard();
     installImmediateFallbacks();
     void start();
     window.setTimeout(() => void start(), 350);
