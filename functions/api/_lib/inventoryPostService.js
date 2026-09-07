@@ -1,11 +1,18 @@
 // Devil n Dove Build 309 — Inventory-owned reviewed Creative material posting authority.
-// This service owns the mutation transaction but is not consumer-enabled until a later cutover.
+// Release 467 Build 70 hardening: package/base conversion, fractional increments and
+// reserved-stock availability are delegated to one shared Inventory unit engine.
+
+import {
+  INVENTORY_QUANTITY_EPSILON,
+  InventoryUnitError,
+  planInventoryUsage,
+} from './inventoryUnitConversion.js';
 
 export const BUILD = 309;
 export const CONTRACT_ID = 'inventory-post';
 export const IMPLEMENTATION_STATE = 'implemented-not-consumer-enabled';
 
-const EPSILON = 1e-9;
+const EPSILON = INVENTORY_QUANTITY_EPSILON;
 const REQUIRED_TABLES = Object.freeze([
   'creative_project_material_reviews',
   'creative_project_inventory_posts',
@@ -40,15 +47,25 @@ function boundedText(value, max = 500) {
   return String(value || '').trim().slice(0, max);
 }
 
-function trackingMode(value, sourceType = '') {
-  const requested = String(value || '').trim().toLowerCase();
-  if (['exact', 'estimated', 'log_only', 'reusable'].includes(requested)) return requested;
-  return String(sourceType || '').trim().toLowerCase() === 'tool' ? 'reusable' : 'exact';
-}
-
 function requestMarker() {
   const id = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `[DD-B309-POST:${id}]`;
+}
+
+function mapUnitError(error) {
+  const codeMap = {
+    inventory_usage_wrong_owner: 'inventory_post_wrong_owner',
+    inventory_usage_tool_do_not_reuse: 'inventory_post_tool_do_not_reuse',
+    inventory_usage_below_minimum_increment: 'inventory_post_below_minimum_increment',
+    inventory_usage_increment_misaligned: 'inventory_post_increment_misaligned',
+    inventory_usage_insufficient_available: 'inventory_post_insufficient_available',
+    inventory_usage_quantity_required: 'inventory_post_request_invalid',
+  };
+  return new InventoryPostError(error.message, {
+    status: Number(error.status || 400),
+    code: codeMap[error.code] || 'inventory_post_unit_conversion_invalid',
+    details: error.details || null,
+  });
 }
 
 async function existingPost(db, reviewId) {
@@ -160,7 +177,8 @@ export async function postCreativeInventoryUsage(db, input = {}) {
     SELECT sii.*,COALESCE(
       siup.usage_tracking_mode,
       CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END
-    ) AS usage_tracking_mode
+    ) AS usage_tracking_mode,
+    COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment
     FROM site_item_inventory sii
     LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
     WHERE sii.site_item_inventory_id=? AND sii.is_active=1
@@ -174,25 +192,24 @@ export async function postCreativeInventoryUsage(db, input = {}) {
     });
   }
 
-  const mode = trackingMode(item.usage_tracking_mode, item.source_type);
-  const perStock = Math.max(0.001, Number(item.usage_units_per_stock_unit || 1) || 1);
-  const stockQuantity = ['log_only', 'reusable'].includes(mode) ? 0 : usageQuantity / perStock;
-  const previousOnHand = Math.max(0, Number(item.on_hand_quantity || 0));
-
-  if (stockQuantity > previousOnHand + EPSILON) {
-    throw new InventoryPostError(`Only ${previousOnHand} ${item.stock_unit_label || 'unit'} are on hand.`, {
-      status: 409,
-      code: 'inventory_post_insufficient_stock',
-      details: { previousOnHand, requestedStockQuantity: stockQuantity },
-    });
+  let plan;
+  try {
+    plan = planInventoryUsage(item, usageQuantity);
+  } catch (error) {
+    if (error instanceof InventoryUnitError) throw mapUnitError(error);
+    throw error;
   }
 
-  const nextOnHand = Math.max(0, previousOnHand - stockQuantity);
-  const reserved = Math.max(0, Number(item.reserved_quantity || 0));
+  const mode = plan.tracking_mode;
+  const perStock = plan.usage_units_per_stock_unit;
+  const stockQuantity = plan.stock_quantity;
+  const previousOnHand = plan.previous_on_hand_quantity;
+  const nextOnHand = plan.new_on_hand_quantity;
+  const reserved = plan.reserved_quantity;
   const incoming = Math.max(0, Number(item.incoming_quantity || 0));
   const marker = requestMarker();
   const postNotes = `${marker}${notes ? ` ${notes}` : ''}`.slice(0, 500);
-  const movementNote = `Creative Project ${projectId}, event ${eventId}. Reviewed usage ${usageQuantity} ${item.usage_unit_label || 'unit'}; tracking ${mode}. ${marker}`;
+  const movementNote = `Creative Project ${projectId}, event ${eventId}. Reviewed usage ${plan.quantity} ${plan.usage_unit_label}; tracking ${mode}. ${marker}`;
   const usageNote = `Creative Project ${projectId}, event ${eventId}. ${marker}`;
 
   const statements = [
@@ -215,6 +232,8 @@ export async function postCreativeInventoryUsage(db, input = {}) {
           SELECT 1 FROM site_item_inventory i
           WHERE i.site_item_inventory_id=? AND i.is_active=1
             AND ABS(COALESCE(i.on_hand_quantity,0)-?)<?
+            AND ABS(COALESCE(i.reserved_quantity,0)-?)<?
+            AND COALESCE(i.on_hand_quantity,0)-COALESCE(i.reserved_quantity,0) >= ?-?
         )
         AND NOT EXISTS(
           SELECT 1 FROM creative_project_inventory_posts p
@@ -222,7 +241,7 @@ export async function postCreativeInventoryUsage(db, input = {}) {
         )
     `).bind(
       projectId,eventId,reviewId,inventoryId,stockQuantity,previousOnHand,nextOnHand,authorizedBy,postNotes,
-      reviewId,projectId,eventId,inventoryId,previousOnHand,EPSILON,reviewId,
+      reviewId,projectId,eventId,inventoryId,previousOnHand,EPSILON,reserved,EPSILON,stockQuantity,EPSILON,reviewId,
     ),
 
     db.prepare(`
@@ -262,8 +281,8 @@ export async function postCreativeInventoryUsage(db, input = {}) {
       FROM creative_project_inventory_posts p
       WHERE p.creative_project_material_review_id=? AND p.notes=?
     `).bind(
-      usageQuantity,item.usage_unit_label || 'unit',stockQuantity,item.stock_unit_label || 'unit',
-      mode,mode === 'estimated' ? 1 : 0,reviewId,postNotes,
+      plan.quantity,plan.usage_unit_label,stockQuantity,plan.stock_unit_label,
+      mode,plan.is_estimated,reviewId,postNotes,
     ),
 
     db.prepare(`
@@ -281,8 +300,8 @@ export async function postCreativeInventoryUsage(db, input = {}) {
       ORDER BY sim.site_inventory_movement_id DESC
       LIMIT 1
     `).bind(
-      inventoryId,-usageQuantity,item.usage_unit_label || 'unit',-stockQuantity,item.stock_unit_label || 'unit',
-      mode,mode === 'estimated' ? 1 : 0,usageNote,authorizedBy,movementNote,reviewId,postNotes,
+      inventoryId,-plan.quantity,plan.usage_unit_label,-stockQuantity,plan.stock_unit_label,
+      mode,plan.is_estimated,usageNote,authorizedBy,movementNote,reviewId,postNotes,
     ),
 
     db.prepare(`
@@ -361,11 +380,13 @@ export async function postCreativeInventoryUsage(db, input = {}) {
     postId: positiveId(post.creative_project_inventory_post_id) || null,
     originalMovementId: positiveId(movement?.site_inventory_movement_id) || null,
     stockQuantityConsumed: stockQuantity,
-    usageQuantityConsumed: usageQuantity,
+    usageQuantityConsumed: plan.quantity,
     previousOnHandQuantity: previousOnHand,
     newOnHandQuantity: nextOnHand,
     trackingMode: mode,
     usageUnitsPerStockUnit: perStock,
-    allocatedCostCents: Math.max(0, Math.round(Number(item.unit_cost_cents || 0) * (usageQuantity / perStock))),
+    minimumUsageIncrement: plan.minimum_usage_increment,
+    availableStockQuantity: plan.available_quantity,
+    allocatedCostCents: plan.allocated_cost_cents,
   });
 }
