@@ -1,8 +1,9 @@
 // Release 467 Build 63 — central D1 read-budget guardrails.
+// Extended in Build 72 for bounded Inventory / Reorder Economics projections.
 // This module exposes source-side caps and operator metadata. It does not claim to
 // replace Cloudflare's provider-side D1 usage metering.
 
-export const D1_READ_BUDGET_VERSION = 'R467B63_V1';
+export const D1_READ_BUDGET_VERSION = 'R467B72_V1';
 
 export const D1_READ_BUDGETS = Object.freeze({
   admin_products: Object.freeze({
@@ -51,9 +52,17 @@ export const D1_READ_BUDGETS = Object.freeze({
   admin_inventory_replenishment: Object.freeze({
     route: '/api/admin/inventory-replenishment',
     risk: 'medium',
-    contract: 'bounded_projection',
-    server_caps: Object.freeze({ inventory: 500, purchase_orders: 120, recent_receipts: 40 }),
-    notes: 'Existing Build 19 projection already has explicit hard row-return caps.'
+    contract: 'bounded_operator_projection',
+    server_caps: Object.freeze({
+      inventory: 500,
+      purchase_orders: 120,
+      recent_receipts: 40,
+      usage_aggregate_items: 500,
+      supplier_landed_cost_groups: 300,
+      product_resource_links: 800
+    }),
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 72 adds recommendation-only stock coverage, received-lot landed-cost comparison and linked-Product resource economics. Every contributing query has an explicit hard cap and this route remains an operator-opened workspace, not admin startup work.'
   }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
