@@ -1,0 +1,29 @@
+/* Products admin records table containment.
+   The records table is intentionally wider than the editor card; keep that width
+   explicit so the shared responsive layer never derives it from max-content. */
+body[data-admin-page="products"] .products-admin-table-wrap{
+  display:block;
+  max-width:100%;
+  max-height:72vh;
+  overflow:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable;
+}
+body[data-admin-page="products"] .products-admin-table{
+  width:1608px!important;
+  min-width:1608px!important;
+  max-width:none!important;
+  table-layout:fixed!important;
+}
+body[data-admin-page="products"] .products-admin-table th,
+body[data-admin-page="products"] .products-admin-table td{
+  vertical-align:top;
+}
+body[data-admin-page="products"] .products-admin-table th:first-child,
+body[data-admin-page="products"] .products-admin-table td:first-child{
+  white-space:nowrap;
+}
+@media(max-width:720px){
+  body[data-admin-page="products"] .products-admin-table-wrap{max-height:68vh}
+}
