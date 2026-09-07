@@ -9,14 +9,19 @@ function json(data, status = 200) {
 function normalizeResults(result) { return Array.isArray(result?.results) ? result.results : []; }
 async function getTableColumnSet(db, tableName) { try { const result = await db.prepare(`PRAGMA table_info(${tableName})`).all(); const rows = Array.isArray(result?.results) ? result.results : []; return new Set(rows.map((row) => String(row?.name || '').trim()).filter(Boolean)); } catch { return new Set(); } }
 
-function isDesktopProductsEditorRequest(request) {
+function shouldLoadResources(request) {
   try {
     const url = new URL(request.url);
-    if (url.searchParams.get('options_only') === '1') return true;
+    if (url.searchParams.get('options_only') === '1') return false;
+    if (url.searchParams.get('include_resources') === '1') return true;
+
+    // Desktop Product editors must remain lightweight even when browser privacy or
+    // proxy behavior strips Referer. Only the actual mobile capture page implicitly
+    // opts into the large resource payload; every other caller gets option data only.
     const referer = String(request.headers.get('Referer') || request.headers.get('Referrer') || '');
     if (!referer) return false;
     const ref = new URL(referer);
-    return ref.pathname === '/admin/products/' || ref.pathname === '/admin/products';
+    return ref.pathname === '/admin/mobile-product/' || ref.pathname === '/admin/mobile-product';
   } catch {
     return false;
   }
@@ -28,20 +33,34 @@ export async function onRequestGet(context) {
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
-  // Decide the lightweight desktop path before touching Inventory schema. The desktop
-  // Product editor needs categories/colours/shipping/tax only; mobile capture owns the
-  // larger resource payload.
-  const optionsOnly = isDesktopProductsEditorRequest(request);
-  const nextProductNumber = await getNextProductNumber(db);
-  const productNumberStart = await getProductNumberStart(db);
+  // Essential desktop editor options must not depend on Inventory/resource schema.
+  // Resource expansion is opt-in for the mobile capture workflow only.
+  const includeResources = shouldLoadResources(request);
+  const optionsOnly = !includeResources;
+
+  let nextProductNumber = 1000;
+  let productNumberStart = 1000;
+  if (includeResources) {
+    [nextProductNumber, productNumberStart] = await Promise.all([
+      getNextProductNumber(db),
+      getProductNumberStart(db),
+    ]);
+  }
+
   const taxClassColumns = await getTableColumnSet(db, 'tax_classes');
   const taxRateExpr = taxClassColumns.has('tax_rate') ? 'tax_rate' : '0';
   const ratePercentExpr = taxClassColumns.has('rate_percent') ? 'rate_percent' : 'NULL';
-  const taxClasses = normalizeResults(await db.prepare(`SELECT tax_class_id, code, name, ${taxRateExpr} AS tax_rate, ${ratePercentExpr} AS rate_percent FROM tax_classes WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(name) ASC`).all().catch(() => ({ results: [] }))).map((row) => { const tax_rate = normalizeTaxRateFraction(row.tax_rate, row.rate_percent); return { ...row, tax_rate, rate_percent: taxRatePercent(tax_rate) }; });
-  const optionSets = await loadCatalogOptionSets(db);
+  const [taxResult, optionSets] = await Promise.all([
+    db.prepare(`SELECT tax_class_id, code, name, ${taxRateExpr} AS tax_rate, ${ratePercentExpr} AS rate_percent FROM tax_classes WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(name) ASC`).all().catch(() => ({ results: [] })),
+    loadCatalogOptionSets(db),
+  ]);
+  const taxClasses = normalizeResults(taxResult).map((row) => {
+    const tax_rate = normalizeTaxRateFraction(row.tax_rate, row.rate_percent);
+    return { ...row, tax_rate, rate_percent: taxRatePercent(tax_rate) };
+  });
 
   let resources = [];
-  if (!optionsOnly) {
+  if (includeResources) {
     const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
     const stockUnitExpr = inventoryColumns.has('stock_unit_label') ? `COALESCE(NULLIF(sii.stock_unit_label,''),'unit')` : `'unit'`;
     const usageLabelExpr = inventoryColumns.has('usage_unit_label') ? `COALESCE(NULLIF(sii.usage_unit_label,''),'unit')` : `'unit'`;
@@ -99,6 +118,7 @@ export async function onRequestGet(context) {
     shipping_code_options: optionSets.shipping_code_options || [],
     tax_classes: taxClasses.map((row) => ({ tax_class_id: Number(row.tax_class_id || 0), code: row.code || '', name: row.name || '', tax_rate: Number(row.tax_rate || 0), rate_percent: Number(row.rate_percent || 0) })),
     resources: resources.map((row) => ({ item_kind: row.item_kind || '', source_key: row.source_key || '', name: row.name || '', image_url: row.image_url || '', category: row.category || '', subcategory: row.subcategory || '', on_hand_quantity: Number(row.on_hand_quantity || 0), incoming_quantity: Number(row.incoming_quantity || 0), reorder_level: Number(row.reorder_level || 0), is_on_reorder_list: Number(row.is_on_reorder_list || 0), do_not_reuse: Number(row.do_not_reuse || 0), stock_unit_label: row.stock_unit_label || 'unit', usage_unit_label: row.usage_unit_label || 'unit', usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1, unit_cost_cents: Number(row.unit_cost_cents || 0), reorder_needed: Number(row.reorder_needed || 0) })),
-    options_only: optionsOnly
+    options_only: optionsOnly,
+    include_resources: includeResources
   });
 }
