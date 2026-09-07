@@ -8,6 +8,7 @@
 // Build 440: Products loads the audited finished-production reversal workspace on demand.
 // Release 461: backend external-information fields receive reusable circled help with provider acquisition steps.
 // Build 56: Products, Product Photography Manager and Packaging Studio load workflow-guidance overlays without changing their underlying write authorities.
+// Hotfix 467: Products must never load the inventory usability MutationObserver; Inventory workflows retain it.
 
 document.addEventListener('DOMContentLoaded', () => {
   const stateEl = document.getElementById('adminAuthState');
@@ -63,8 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
 void import('/public/js/admin-external-help.js?v=461')
   .catch((error) => console.warn('[DD Release 461] external field help unavailable', error));
 
-void import('/public/js/admin-inventory-base-unit-usability.js?v=461')
-  .catch((error) => console.warn('[DD Release 461] inventory base-unit usability overlay unavailable', error));
+if (document.body?.dataset?.adminPage !== 'products') {
+  void import('/public/js/admin-inventory-base-unit-usability.js?v=461')
+    .catch((error) => console.warn('[DD Release 461] inventory base-unit usability overlay unavailable', error));
+}
 
 void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
   .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
