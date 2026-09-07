@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Guard the active System Gate against stale release-specific provenance labels."""
 from pathlib import Path
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,6 +53,22 @@ for historical in (
     'scripts/release465_performance_budget_gate.py',
 ):
     req(historical in text, f'historical regression prerequisite missing: {historical}')
+
+# Current Build 62 reliability contract is part of the release-neutral gate so Product
+# cold-start protections cannot silently regress in later builds.
+build62 = subprocess.run(
+    [sys.executable, str(ROOT / 'scripts/release467_build62_gate.py')],
+    cwd=ROOT,
+    text=True,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    check=False,
+)
+if build62.stdout.strip():
+    print(build62.stdout.strip())
+if build62.returncode != 0:
+    detail = (build62.stderr or build62.stdout or 'Build 62 gate failed').strip()[-2000:]
+    FAIL.append(f'Release 467 Build 62 current reliability contract failed: {detail}')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')

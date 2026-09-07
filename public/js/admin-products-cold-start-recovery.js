@@ -1,7 +1,7 @@
 // Current Products admin cold-start recovery.
-// Essential editor/picker controls become usable independently of readiness analytics
-// and the Product Resource gallery. The recovery path is intentionally D1-light and
-// replaces permanent "Loading…" placeholders with a visible degraded state on failure.
+// Build 62 keeps essential editor/picker controls usable while making the recovery
+// path one-shot and D1-light. GET startup work is bounded and duplicate in-flight
+// reads for the same Product startup authority are coalesced.
 (() => {
   const pathname = String(window.location.pathname || '').replace(/\/+$/, '') || '/';
   if (pathname !== '/admin/products') return;
@@ -10,8 +10,13 @@
   const DEFAULT_CATEGORIES = ['Rings','Necklaces','Bracelets','Earrings','Pendants','CNC Components','3D Printed Items','Laser Engraved Items','Polymer Clay Items','Home Decor','Soap','Candles','Accessories','Other'];
   const DEFAULT_COLOURS = ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'];
   const DEFAULT_SHIPPING = ['standard-jewelry','small-parcel','oversize','pickup-only','digital'];
-  let running = false;
-  let lastRunAt = 0;
+
+  let optionsReady = false;
+  let optionsRunning = false;
+  let pickerReady = false;
+  let pickerFallbackAttempted = false;
+  let pickerFallbackTimer = 0;
+  let optionsRetryTimer = 0;
 
   function clean(value) { return String(value ?? '').trim(); }
   function escapeHtml(value) {
@@ -41,27 +46,28 @@
   function installBoundedProductApiGuard() {
     if (!window.DDAuth?.apiFetch || window.DDAuth.apiFetch.__ddProductsBounded === true) return false;
     const original = window.DDAuth.apiFetch.bind(window.DDAuth);
+    const inflight = new Map();
+    const coalescedPaths = new Set([
+      '/api/admin/products',
+      '/api/admin/product-mobile-bootstrap',
+      '/api/admin/product-resource-bootstrap',
+      '/api/admin/product-readiness',
+      '/api/admin/pending-actions'
+    ]);
 
-    const boundedApiFetch = async (input, options = {}) => {
-      const method = String(options?.method || 'GET').toUpperCase();
-      if (method !== 'GET') return original(input, options);
-
-      let path = '';
-      try { path = new URL(String(input || ''), window.location.origin).pathname; } catch {}
-
+    const executeGet = async (input, options, path) => {
       let timeoutMs = 0;
       let fallbackPayload = null;
       if (path === '/api/admin/product-readiness') {
-        // Readiness is advisory. Never make the Product editor wait indefinitely for it.
         timeoutMs = 3500;
         fallbackPayload = { ok: true, products: [], degraded: true, reason: 'readiness_timeout' };
       } else if (path === '/api/admin/products') {
-        // The main list may fall back to the browser snapshot when the live aggregate stalls.
         timeoutMs = 8000;
       } else if (path === '/api/admin/product-mobile-bootstrap') {
         timeoutMs = 6000;
+      } else if (path === '/api/admin/product-resource-bootstrap') {
+        timeoutMs = 8000;
       } else if (path === '/api/admin/pending-actions') {
-        // Replay queue status is secondary to editing a Product.
         timeoutMs = 5000;
         fallbackPayload = { ok: true, actions: [], degraded: true, reason: 'pending_actions_timeout' };
       }
@@ -73,7 +79,7 @@
       if (suppliedSignal?.aborted) controller.abort();
       else if (suppliedSignal?.addEventListener) suppliedSignal.addEventListener('abort', () => controller.abort(), { once: true });
 
-      let timer = null;
+      let timer = 0;
       try {
         return await Promise.race([
           original(input, { ...options, signal: controller.signal }),
@@ -90,8 +96,28 @@
       }
     };
 
+    const boundedApiFetch = async (input, options = {}) => {
+      const method = String(options?.method || 'GET').toUpperCase();
+      if (method !== 'GET') return original(input, options);
+
+      let url = null;
+      try { url = new URL(String(input || ''), window.location.origin); } catch {}
+      const path = url?.pathname || '';
+      if (!coalescedPaths.has(path)) return original(input, options);
+
+      const key = `${method} ${url.pathname}${url.search}`;
+      if (!inflight.has(key)) {
+        const task = executeGet(input, options, path)
+          .finally(() => inflight.delete(key));
+        inflight.set(key, task);
+      }
+      const response = await inflight.get(key);
+      return response.clone();
+    };
+
     boundedApiFetch.__ddProductsBounded = true;
     boundedApiFetch.__ddProductsOriginal = original;
+    boundedApiFetch.__ddProductsInflight = inflight;
     window.DDAuth.apiFetch = boundedApiFetch;
     return true;
   }
@@ -136,6 +162,13 @@
     if (current && values.some((row) => String(Number(row?.tax_class_id || 0)) === current)) select.value = current;
   }
 
+  function pickerHasRows() {
+    const picker = document.getElementById('existingProductSelect');
+    if (!picker) return false;
+    const text = String(picker.textContent || '');
+    return picker.options.length > 1 && !/loading independently|loading products/i.test(text);
+  }
+
   function installImmediateFallbacks() {
     const category = document.getElementById('create_product_category');
     if (category && /loading/i.test(category.textContent || '')) fillSimpleSelect('create_product_category', DEFAULT_CATEGORIES, 'Select category');
@@ -148,8 +181,10 @@
 
     const snapshot = safeJson(localStorage.getItem(PRODUCT_SNAPSHOT_KEY) || 'null', null);
     const products = Array.isArray(snapshot?.products) ? snapshot.products : [];
-    if (products.length) renderProductPicker(products, `Cached product list from ${snapshot.cached_at || 'an earlier visit'}`);
-    else {
+    if (products.length) {
+      renderProductPicker(products, `Cached product list from ${snapshot.cached_at || 'an earlier visit'}`);
+      pickerReady = true;
+    } else {
       const picker = document.getElementById('existingProductSelect');
       if (picker && /loading/i.test(picker.textContent || '')) picker.innerHTML = '<option value="">Product list loading independently…</option>';
     }
@@ -169,69 +204,89 @@
     if (current && rows.some((product) => String(Number(product?.product_id || 0)) === current)) select.value = current;
     const count = document.getElementById('existingProductCount');
     if (count) count.textContent = `${rows.length} product${rows.length === 1 ? '' : 's'} available${sourceLabel ? ` · ${sourceLabel}` : ''}.`;
+    if (rows.length) pickerReady = true;
   }
 
   async function recoverEditorOptions() {
-    const data = await readJson('/api/admin/product-mobile-bootstrap?options_only=1', 6000);
-    fillSimpleSelect('create_product_category', data.category_options || DEFAULT_CATEGORIES, 'Select category');
-    fillSimpleSelect('create_product_color_name', data.color_options || DEFAULT_COLOURS, 'Select primary colour');
-    fillSimpleSelect('create_product_shipping_code', data.shipping_code_options || DEFAULT_SHIPPING, 'Select shipping code');
-    fillTaxSelect(data.tax_classes || []);
-    document.dispatchEvent(new CustomEvent('dd:catalog-options-recovered', { detail: { source: 'products-cold-start' } }));
-    return true;
+    if (optionsReady || optionsRunning || !verifiedAdminAvailable()) return optionsReady;
+    optionsRunning = true;
+    try {
+      const data = await readJson('/api/admin/product-mobile-bootstrap?options_only=1', 6000);
+      fillSimpleSelect('create_product_category', data.category_options || DEFAULT_CATEGORIES, 'Select category');
+      fillSimpleSelect('create_product_color_name', data.color_options || DEFAULT_COLOURS, 'Select primary colour');
+      fillSimpleSelect('create_product_shipping_code', data.shipping_code_options || DEFAULT_SHIPPING, 'Select shipping code');
+      fillTaxSelect(data.tax_classes || []);
+      optionsReady = true;
+      document.dispatchEvent(new CustomEvent('dd:catalog-options-recovered', { detail: { source: 'products-cold-start' } }));
+      return true;
+    } finally {
+      optionsRunning = false;
+    }
   }
 
-  async function recoverProductPicker() {
-    // Reuse the lightweight Product Resource bootstrap instead of the full Product
-    // analytics rollup. It performs a simple Product identity query and no readiness
-    // aggregation when product_id=0.
+  async function recoverProductPickerOnce() {
+    if (pickerReady || pickerFallbackAttempted || pickerHasRows() || !verifiedAdminAvailable()) {
+      pickerReady = pickerReady || pickerHasRows();
+      return pickerReady;
+    }
+    pickerFallbackAttempted = true;
     const data = await readJson('/api/admin/product-resource-bootstrap?product_id=0', 8000);
     const products = Array.isArray(data.products) ? data.products : [];
-    renderProductPicker(products, 'live lightweight list');
+    renderProductPicker(products, 'live lightweight fallback');
     return true;
   }
 
-  function showRecoveryFailure(results) {
-    const failures = results.filter((result) => result.status === 'rejected').map((result) => result.reason?.message || 'startup request failed');
-    if (!failures.length) return;
+  function showRecoveryFailure(error) {
+    if (!error) return;
     const target = document.getElementById('createProductMessage') || document.getElementById('productsError');
     if (!target) return;
-    target.textContent = `Product startup is in degraded mode. ${failures.join(' ')} Essential controls remain available where cached/default data is safe; saving still requires live database access.`;
+    target.textContent = `Product startup is in degraded mode. ${error.message || 'Startup request failed.'} Essential controls remain available where cached/default data is safe; saving still requires live database access.`;
     target.style.display = '';
     target.classList?.add('is-error');
     const tax = document.getElementById('create_product_tax_class_id');
     if (tax && /loading/i.test(tax.textContent || '')) fillTaxSelect([], 'Tax classes unavailable — retry after database access returns');
   }
 
-  async function start(force = false) {
-    installBoundedProductApiGuard();
-    if (running || !verifiedAdminAvailable()) return;
-    if (!force && Date.now() - lastRunAt < 1200) return;
-    running = true;
-    lastRunAt = Date.now();
-    try {
-      const results = await Promise.allSettled([
-        recoverEditorOptions(),
-        recoverProductPicker(),
-      ]);
-      showRecoveryFailure(results);
-    } finally {
-      running = false;
-    }
+  function scheduleRecovery() {
+    if (pickerFallbackTimer) window.clearTimeout(pickerFallbackTimer);
+    pickerFallbackTimer = window.setTimeout(() => {
+      pickerFallbackTimer = 0;
+      if (pickerHasRows()) {
+        pickerReady = true;
+        return;
+      }
+      void recoverProductPickerOnce().catch(showRecoveryFailure);
+    }, 2200);
+
+    if (optionsRetryTimer) window.clearTimeout(optionsRetryTimer);
+    optionsRetryTimer = window.setTimeout(() => {
+      optionsRetryTimer = 0;
+      if (!optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+    }, 5000);
   }
 
-  document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) void start(true); });
-  document.addEventListener('dd:auth-verified', () => void start(true));
-  document.addEventListener('dd:auth-changed', (event) => { if (event?.detail?.ok) void start(true); });
-
-  const boot = () => {
+  function startEssentialRecovery() {
     installBoundedProductApiGuard();
     installImmediateFallbacks();
-    void start();
-    window.setTimeout(() => void start(), 350);
-    window.setTimeout(() => void start(), 1200);
-    window.setTimeout(() => void start(), 3000);
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+    void recoverEditorOptions().catch(showRecoveryFailure);
+    scheduleRecovery();
+  }
+
+  document.addEventListener('dd:admin-ready', (event) => {
+    if (event?.detail?.ok && !optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+  });
+  document.addEventListener('dd:auth-verified', () => {
+    if (!optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+  });
+  document.addEventListener('dd:auth-changed', (event) => {
+    if (event?.detail?.ok && !optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+  });
+  ['dd:product-created', 'dd:product-updated', 'dd:product-deleted', 'dd:product-archived'].forEach((eventName) => {
+    document.addEventListener(eventName, () => {
+      pickerReady = pickerHasRows();
+    });
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startEssentialRecovery, { once: true });
+  else startEssentialRecovery();
 })();

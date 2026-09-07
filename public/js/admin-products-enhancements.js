@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableWrap = document.querySelector('.products-admin-table-wrap');
   const tableBody = document.getElementById('productsTableBody');
   if (!mount || !tableWrap || !tableBody) return;
+
   const PREF_KEY = 'dd_catalog_table_prefs_v1';
+  const SNAPSHOT_KEY = 'dd_admin_products_snapshot_v2';
+  let dashboardRefreshTimer = 0;
 
   function esc(value) {
     return String(value == null ? '' : value)
@@ -14,11 +17,35 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
+
   function loadPrefs() {
-    try { return { hideSlug: 0, hideSku: 0, hideShipping: 0, hideTax: 0, compactInventory: 1, ...(JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}) }; }
-    catch { return { hideSlug: 0, hideSku: 0, hideShipping: 0, hideTax: 0, compactInventory: 1 }; }
+    try {
+      return {
+        hideSlug: 0,
+        hideSku: 0,
+        hideShipping: 0,
+        hideTax: 0,
+        compactInventory: 1,
+        ...(JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {})
+      };
+    } catch {
+      return { hideSlug: 0, hideSku: 0, hideShipping: 0, hideTax: 0, compactInventory: 1 };
+    }
   }
-  function savePrefs(next) { try { localStorage.setItem(PREF_KEY, JSON.stringify(next || {})); } catch {} }
+
+  function savePrefs(next) {
+    try { localStorage.setItem(PREF_KEY, JSON.stringify(next || {})); } catch {}
+  }
+
+  function readProductSnapshot() {
+    try {
+      const payload = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || 'null');
+      return payload && Array.isArray(payload.products) ? payload : null;
+    } catch {
+      return null;
+    }
+  }
+
   let prefs = loadPrefs();
 
   function applyColumnPrefs() {
@@ -32,11 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (prefs.hideTax) hiddenIndexes.add(9);
     rows.forEach((row) => {
       row.querySelectorAll('th,td').forEach((cell, idx) => {
-        cell.style.display = hiddenIndexes.has(idx) ? 'none' : '';
+        const nextDisplay = hiddenIndexes.has(idx) ? 'none' : '';
+        if (cell.style.display !== nextDisplay) cell.style.display = nextDisplay;
         if (idx === 7) {
           const smalls = cell.querySelectorAll('.small');
           smalls.forEach((el, sIdx) => {
-            el.style.display = prefs.compactInventory && sIdx > 1 ? 'none' : '';
+            const next = prefs.compactInventory && sIdx > 1 ? 'none' : '';
+            if (el.style.display !== next) el.style.display = next;
           });
         }
       });
@@ -51,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
     card.style.marginTop = '16px';
     card.innerHTML = `
       <h3 style="margin-top:0">Catalog dashboard & table preferences</h3>
-      <p class="small">Keep the product table easier to work through by collapsing long columns and watching the biggest cleanup queues first.</p>
+      <p class="small">Keep the Product table easier to work through by collapsing long columns and watching the biggest cleanup queues first.</p>
+      <div id="catalogDashboardSource" class="small" style="margin-bottom:10px">Dashboard summaries reuse the Product list snapshot already loaded by this page; this panel does not issue a second Product database read.</div>
       <div class="grid cols-4" id="catalogDashboardStats" style="gap:10px"></div>
       <div class="grid cols-5" style="gap:8px;margin-top:12px">
         <label class="small"><input type="checkbox" id="prefHideSlug" /> Hide slug</label>
@@ -80,18 +110,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  async function loadDashboard() {
-    const response = await window.DDAuth.apiFetch('/api/admin/products', { method: 'GET' });
-    const data = await response.json().catch(() => null);
-    if (!response.ok || !data?.ok) return;
-    const products = Array.isArray(data.products) ? data.products : [];
+  function renderDashboardFromSnapshot() {
+    const snapshot = readProductSnapshot();
+    const statsEl = document.getElementById('catalogDashboardStats');
+    const sourceEl = document.getElementById('catalogDashboardSource');
+    if (!statsEl) return;
+
+    if (!snapshot?.products?.length) {
+      statsEl.innerHTML = '<div class="small">Waiting for the primary Product list or a saved browser snapshot.</div>';
+      if (sourceEl) sourceEl.textContent = 'Dashboard summaries are waiting for the primary Product list; no extra Product database read is being made.';
+      return;
+    }
+
+    const products = snapshot.products;
     const lowStock = products.filter((row) => Number(row.low_stock_flag || 0) === 1).length;
     const drafts = products.filter((row) => String(row.status || '').toLowerCase() === 'draft').length;
-    const staleDrafts = products.filter((row) => String(row.status || '').toLowerCase() === 'draft' && String(row.updated_at || row.created_at || '') < new Date(Date.now() - 14*24*60*60*1000).toISOString()).length;
+    const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const staleDrafts = products.filter((row) => String(row.status || '').toLowerCase() === 'draft' && String(row.updated_at || row.created_at || '') < cutoff).length;
     const externalListings = products.filter((row) => ['external_only','hybrid'].includes(String(row.sale_channel || '').toLowerCase())).length;
     const missingImages = products.filter((row) => !String(row.featured_image_url || '').trim()).length;
-    const statsEl = document.getElementById('catalogDashboardStats');
-    if (!statsEl) return;
+
     statsEl.innerHTML = [
       ['Low stock', lowStock, 'Needs reorder or reserve review'],
       ['Drafts', drafts, 'Still not live'],
@@ -99,11 +137,28 @@ document.addEventListener('DOMContentLoaded', () => {
       ['External / hybrid', externalListings, 'Marketplace-linked products'],
       ['Missing lead image', missingImages, 'Still missing featured media'],
     ].map(([label, value, note]) => `<div class="card" style="margin:0"><strong>${esc(label)}</strong><div style="font-size:1.25rem;font-weight:700;margin-top:6px">${esc(String(value))}</div><div class="small" style="margin-top:6px">${esc(note)}</div></div>`).join('');
+
+    if (sourceEl) sourceEl.textContent = `Dashboard summaries use ${products.length} Product records from the shared browser snapshot${snapshot.cached_at ? ` saved ${snapshot.cached_at}` : ''}; no duplicate Product API read.`;
+  }
+
+  function scheduleDashboardRefresh(delay = 500) {
+    if (dashboardRefreshTimer) window.clearTimeout(dashboardRefreshTimer);
+    dashboardRefreshTimer = window.setTimeout(() => {
+      dashboardRefreshTimer = 0;
+      renderDashboardFromSnapshot();
+    }, delay);
   }
 
   ensureMount();
   applyColumnPrefs();
+  renderDashboardFromSnapshot();
+  scheduleDashboardRefresh(700);
+  scheduleDashboardRefresh(1800);
+
   const observer = new MutationObserver(() => applyColumnPrefs());
   observer.observe(tableBody, { childList: true, subtree: true });
-  loadDashboard().catch(() => {});
+
+  ['dd:product-created', 'dd:product-updated', 'dd:product-deleted', 'dd:product-archived'].forEach((eventName) => {
+    document.addEventListener(eventName, () => scheduleDashboardRefresh(900));
+  });
 });
