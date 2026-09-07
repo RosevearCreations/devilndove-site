@@ -77,7 +77,8 @@ def run_current_contract(path, label):
 # the single cached Catalog Options authority, Product CRUD / cleanup safety,
 # canonical Inventory package/base conversion and partial-consumption safety,
 # the fail-closed Inventory lifecycle, recommendation-only reorder economics,
-# or the selected-Product Media / Photo Studio convergence boundary.
+# selected-Product Media / Photo Studio convergence, or the buyer-first Storefront
+# Product experience and responsive-performance boundary.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -90,6 +91,7 @@ run_current_contract('scripts/release467_build70_gate.py', 'Release 467 Build 70
 run_current_contract('scripts/release467_build71_gate.py', 'Release 467 Build 71')
 run_current_contract('scripts/release467_build72_gate.py', 'Release 467 Build 72')
 run_current_contract('scripts/release467_build73_gate.py', 'Release 467 Build 73')
+run_current_contract('scripts/release467_build74_gate.py', 'Release 467 Build 74')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
