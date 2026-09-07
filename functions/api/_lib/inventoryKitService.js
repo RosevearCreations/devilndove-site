@@ -1,8 +1,10 @@
 // Devil n Dove Build 440 — purchased-kit opening and component-use authority.
 // Reuses Build 249 kit tables + Build 244 usage ledgers + Build 440 purchase-lot provenance.
+// Release 467 Build 70 converges component consumption on the shared package/base-unit engine.
 // Stock-changing actions are one D1 batch. No request-time DDL, polling, retry, R2 or provider work.
 import { normalizeText } from './adminAudit.js';
 import { EPSILON, loadMaterialLotPlan } from './productLotProvenance.js';
+import { InventoryUnitError, planInventoryUsage } from './inventoryUnitConversion.js';
 
 const MODES = new Set(['exact','estimated','log_only','reusable']);
 const CLASSES = new Set(['raw_material','consumable','packaging','reusable_equipment','kit','component','finished_good','sample','waste','other']);
@@ -24,29 +26,36 @@ export function planKitComponentUsage(row={},requestedUsage=0){
   const modeRaw=text(row.usage_tracking_mode || row.template_usage_tracking_mode,30).toLowerCase();
   const mode=sourceType==='tool'?'reusable':(MODES.has(modeRaw)?modeRaw:'exact');
   if(sourceType==='tool' && Number(row.do_not_reuse||0)===1) throw codedError('inventory_kit_component_do_not_reuse','This Tool is marked do not reuse. Reactivate it through Tool lifecycle controls before recording another use.',409);
-  const minimum=Math.max(0.0001,num(row.minimum_usage_increment,0.001)||0.001);
-  if(quantity+EPSILON<minimum) throw codedError('inventory_kit_component_below_minimum_increment',`Usage must be at least ${minimum} ${text(row.usage_unit_label,40)||'unit'}.`);
-  const perStock=Math.max(0.001,num(row.usage_units_per_stock_unit,1)||1);
-  const previous=Math.max(0,num(row.on_hand_quantity));
-  const reserved=Math.max(0,num(row.reserved_quantity));
-  const available=Math.max(0,previous-reserved);
-  const stockQuantity=['exact','estimated'].includes(mode)?round6(quantity/perStock):0;
-  if(stockQuantity>available+EPSILON) throw codedError('inventory_kit_component_insufficient_available',`Only ${available.toFixed(6)} ${text(row.stock_unit_label,40)||'unit'} is available after reservations; ${stockQuantity.toFixed(6)} is required.`,409,{available_quantity:available,required_stock_quantity:stockQuantity});
-  return {
-    quantity,
-    source_type:sourceType,
-    tracking_mode:mode,
-    is_estimated:mode==='estimated'?1:0,
-    usage_unit_label:text(row.usage_unit_label,40).toLowerCase()||'unit',
-    stock_unit_label:text(row.stock_unit_label,40).toLowerCase()||'unit',
-    usage_units_per_stock_unit:perStock,
-    minimum_usage_increment:minimum,
-    stock_quantity:stockQuantity,
-    previous_on_hand_quantity:previous,
-    new_on_hand_quantity:round6(previous-stockQuantity),
-    reserved_quantity:reserved,
-    available_quantity:available,
-  };
+  try{
+    const plan=planInventoryUsage({...row,usage_tracking_mode:mode},quantity);
+    return {
+      quantity:plan.quantity,
+      source_type:sourceType,
+      tracking_mode:plan.tracking_mode,
+      is_estimated:plan.is_estimated,
+      usage_unit_label:plan.usage_unit_label,
+      stock_unit_label:plan.stock_unit_label,
+      usage_units_per_stock_unit:plan.usage_units_per_stock_unit,
+      minimum_usage_increment:plan.minimum_usage_increment,
+      stock_quantity:plan.stock_quantity,
+      previous_on_hand_quantity:plan.previous_on_hand_quantity,
+      new_on_hand_quantity:plan.new_on_hand_quantity,
+      reserved_quantity:plan.reserved_quantity,
+      available_quantity:plan.available_quantity,
+      available_base_quantity:plan.available_base_quantity,
+    };
+  }catch(error){
+    if(!(error instanceof InventoryUnitError)) throw error;
+    const mapping={
+      inventory_usage_quantity_required:'inventory_kit_component_quantity_required',
+      inventory_usage_wrong_owner:'inventory_kit_component_wrong_owner',
+      inventory_usage_tool_do_not_reuse:'inventory_kit_component_do_not_reuse',
+      inventory_usage_below_minimum_increment:'inventory_kit_component_below_minimum_increment',
+      inventory_usage_increment_misaligned:'inventory_kit_component_increment_misaligned',
+      inventory_usage_insufficient_available:'inventory_kit_component_insufficient_available',
+    };
+    throw codedError(mapping[error.code]||'inventory_kit_component_unit_conversion_invalid',error.message,Number(error.status||400),error.details||{});
+  }
 }
 
 async function ensureComponentItem(db,adminUser,kitTemplateId,component){
@@ -143,6 +152,8 @@ export async function openInventoryKit(db,adminUser,{inventory_kit_template_id,k
     const itemId=id(item.site_item_inventory_id);
     const sourceType=text(item.source_type,20).toLowerCase();
     if(sourceType==='product') throw codedError('inventory_kit_component_wrong_owner','A kit component resolved to Product stock; the opening was blocked.',409);
+    // quantity_per_kit is deliberately a purchase/stock quantity. Downstream use is
+    // always entered in the component's usable/base unit and converted by planInventoryUsage.
     const addQty=round6(Math.max(0,num(component.quantity_per_kit))*quantity);
     const fraction=template.allocation_method==='percentage'?Math.max(0,num(component.cost_share_percent))/100:1/resolved.length;
     let allocated=index===resolved.length-1?kitTotal-allocatedSoFar:Math.round(kitTotal*fraction);
