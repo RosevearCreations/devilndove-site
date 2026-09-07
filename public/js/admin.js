@@ -10,6 +10,7 @@
 // Build 56: Products, Product Photography Manager and Packaging Studio load workflow-guidance overlays without changing their underlying write authorities.
 // Hotfix 467: Products must never load the inventory usability MutationObserver; Inventory workflows retain it.
 // Release 467 Build 65: optional admin panels/services are selector- and viewport-gated instead of starting on every admin page.
+// Release 467 Build 66: Products uses focused presentation workspaces while retaining one Product authority.
 
 const DD_ADMIN_LAZY_VERSION = 'R467B65_V1';
 const ddAdminLazyState = new Map();
@@ -47,6 +48,11 @@ function ddImportOnce(key, importer, label = key) {
 
 function ddElementIsNearViewport(element) {
   if (!element?.getBoundingClientRect) return false;
+  // Build 66 workspaces keep inactive panels in the DOM so their shared Product mounts retain identity.
+  // Hidden/inert workspaces must not be mistaken for near-viewport work by the Build 65 lazy loader.
+  if (element.closest?.('[hidden], [inert]')) return false;
+  const style = typeof window.getComputedStyle === 'function' ? window.getComputedStyle(element) : null;
+  if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
   const rect = element.getBoundingClientRect();
   const height = window.innerHeight || document.documentElement.clientHeight || 0;
   return rect.bottom >= -320 && rect.top <= height + 320;
@@ -149,6 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const adminPage = document.body?.dataset?.adminPage || '';
   if (document.body?.dataset?.adminPage === 'products') {
+    void ddImportOnce(
+      'product-workspace-split',
+      () => import('/public/js/admin-product-workspaces.js?v=66'),
+      'Product workspace split',
+    );
     ddLazyImportWhenVisible({
       key: 'product-production-reversal',
       selector: '.product-production-release',
