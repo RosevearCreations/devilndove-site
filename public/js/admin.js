@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     void ddImportOnce('packaging-onboarding', () => import('/public/js/admin-packaging-onboarding-v56.js?v=56'), 'Packaging walkthrough');
   }
 
-  if (adminPage !== 'products') {
+  if (document.body?.dataset?.adminPage !== 'products') {
     ddLazyImportWhenVisible({
       key: 'inventory-base-unit-usability',
       selector: '#siteInventoryAdminMount',
