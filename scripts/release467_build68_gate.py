@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -79,7 +80,7 @@ for token in (
     req(token in options, f"Build 68 catalog option source missing token: {token}")
 req("SELECT DISTINCT" not in options.upper(), "Build 68 catalog option source must not scan Product distinct values")
 req("FROM PRODUCTS" not in options.upper(), "Build 68 catalog option source must not use Products as a shadow option authority")
-req("PRAGMA" not in options.upper(), "Build 68 catalog option source must not use PRAGMA")
+req(re.search(r"\bPRAGMA\s+", options, re.IGNORECASE) is None, "Build 68 catalog option source must not use PRAGMA")
 
 for token in (
     "CATALOG_AUTHORITY_VERSION = 'R467B68_V1'",
@@ -94,7 +95,7 @@ for token in (
     "pragma_queries: 0",
 ):
     req(token in authority, f"Build 68 shared authority missing token: {token}")
-req("PRAGMA" not in authority.upper(), "Build 68 shared catalog authority must not use PRAGMA")
+req(re.search(r"\bPRAGMA\s+", authority, re.IGNORECASE) is None, "Build 68 shared catalog authority must not use PRAGMA")
 req("FROM PRODUCTS" not in authority.upper(), "Build 68 shared catalog authority must not query Products")
 
 for token in (
