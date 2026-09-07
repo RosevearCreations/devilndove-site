@@ -7,7 +7,7 @@ const BUILD = PRODUCT_MEDIA_AUTHORITY_BUILD;
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 const json = (data, status = 200) => jsonResponse({ release: 467, build: BUILD, ...data }, status, {
   'Cache-Control': 'no-store',
-  ...buildReadBudgetHeaders('admin_product_media_authority', { limit: 20 }),
+  ...buildReadBudgetHeaders('admin_product_media_authority', { limit: 30 }),
 });
 
 async function safeAll(db, sql, bindings = []) {
@@ -87,6 +87,7 @@ export async function onRequestGet(context) {
 
     return json({
       ok: true,
+      response_profile: 'product_media_convergence_v73',
       read_only: true,
       product_owned: true,
       automatic_publish: false,
