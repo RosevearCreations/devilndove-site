@@ -72,9 +72,10 @@ def run_current_contract(path, label):
 
 
 # Current reliability contracts are chained here so later work cannot silently regress
-# Product cold-start protections or the D1 read-budget layer.
+# Product cold-start protections, the D1 read-budget layer, or root-admin authority.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
+run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
