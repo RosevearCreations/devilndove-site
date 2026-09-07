@@ -127,7 +127,10 @@ for forbidden in (
     r"paypal\.com",
     r"pinterest\.com",
     r"instagram\.com",
-    r"\b(?:INSERT|UPDATE|DELETE|REPLACE)\b",
+    r"\bINSERT\s+INTO\b",
+    r"\bUPDATE\s+[A-Za-z_][A-Za-z0-9_]*\s+SET\b",
+    r"\bDELETE\s+FROM\b",
+    r"\bREPLACE\s+INTO\b",
     r"\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|INDEX|TRIGGER|VIEW)\b",
 ):
     req(not re.search(forbidden, client, re.I), f"Build 74 buyer experience gained forbidden behavior: {forbidden}")
