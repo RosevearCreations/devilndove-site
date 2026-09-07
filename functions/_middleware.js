@@ -64,8 +64,10 @@ function withPlatformClient(response, request) {
           // release-number cache entry.
           if (isProductsPage) {
             element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
+            element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
+          } else {
+            element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           }
-          element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${isProductsPage ? PRODUCTS_ASSET_REVISION : 'current'}"></script>`, { html: true });
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/product-media-fallback.js?v=62"></script>', { html: true });
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
