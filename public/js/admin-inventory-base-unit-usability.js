@@ -1,5 +1,6 @@
 // Release 461: inventory usability overlay for purchase-package vs usable/base-unit authority.
 // Presentation only: all inventory mutation remains owned by /api/admin/site-item-inventory.
+// Runtime guard: this overlay must never retrigger itself through its MutationObserver.
 
 const STYLE_ID = 'ddInventoryBaseUnitUsabilityStyle';
 const SUMMARY_ID = 'siteInventoryBaseUnitSummary';
@@ -47,7 +48,7 @@ function injectStyles() {
 
 function setLabel(forId, label) {
   const target = document.querySelector(`label[for="${forId}"]`);
-  if (target) target.textContent = label;
+  if (target && target.textContent !== label) target.textContent = label;
 }
 
 function formValues() {
@@ -84,7 +85,7 @@ function renderFormSummary() {
   const v = formValues();
   const availableBase = Math.max(0, (v.onHand - v.reserved) * v.perPurchase);
   const baseCost = v.purchaseCostCents / v.perPurchase;
-  summary.innerHTML = `
+  const html = `
     <strong>Inventory quantity authority</strong>
     <div class="small dd-inventory-unit-note">Receive and cost by purchase package. Production availability and material use are authoritative in the usable/base unit.</div>
     <div class="dd-inventory-unit-summary-grid">
@@ -96,6 +97,7 @@ function renderFormSummary() {
       <div class="dd-inventory-unit-stat"><span class="small">Reorder threshold</span><strong>${formatQty(v.reorder * v.perPurchase)} ${v.baseLabel}</strong></div>
       <div class="dd-inventory-unit-stat"><span class="small">Preferred reorder</span><strong>${formatQty(v.preferred)} ${v.purchaseLabel}</strong><span class="small">${formatQty(v.preferred * v.perPurchase)} ${v.baseLabel}</span></div>
     </div>`;
+  if (summary.innerHTML !== html) summary.innerHTML = html;
 }
 
 function relabelForm() {
@@ -149,12 +151,14 @@ function decorateRows() {
 
     const receive = row.querySelector('[data-adjust-action="receive"]');
     if (receive) {
-      receive.textContent = `Receive ${purchaseLabel}`;
+      const label = `Receive ${purchaseLabel}`;
+      if (receive.textContent !== label) receive.textContent = label;
       receive.title = `Receiving quantity is entered in ${purchaseLabel}; usable stock is converted to ${baseLabel}.`;
     }
     const use = row.querySelector('[data-adjust-action="consume_usage"]');
     if (use) {
-      use.textContent = `Record ${baseLabel} use`;
+      const label = `Record ${baseLabel} use`;
+      if (use.textContent !== label) use.textContent = label;
       use.title = `Material use is entered in the canonical usable/base unit: ${baseLabel}.`;
     }
   }
@@ -197,18 +201,35 @@ function attachInputListeners() {
 function boot() {
   const mount = document.getElementById('siteInventoryAdminMount');
   if (!mount) return;
-  let queued = false;
+
+  let frame = 0;
+  let observer = null;
+  const observe = () => observer?.observe(mount, { childList: true, subtree: true });
   const run = () => {
-    if (queued) return;
-    queued = true;
-    queueMicrotask(() => {
-      queued = false;
-      refresh();
-      attachInputListeners();
+    if (frame) return;
+    frame = window.requestAnimationFrame(() => {
+      frame = 0;
+      // Prevent this presentation overlay from observing its own DOM writes.
+      observer?.disconnect();
+      try {
+        refresh();
+        attachInputListeners();
+      } finally {
+        observe();
+      }
     });
   };
+
+  observer = new MutationObserver((records) => {
+    const externalChange = records.some((record) => {
+      const target = record.target?.nodeType === Node.ELEMENT_NODE ? record.target : record.target?.parentElement;
+      return !target?.closest?.(`#${SUMMARY_ID}, .dd-inventory-base-readout`);
+    });
+    if (externalChange) run();
+  });
+
+  observe();
   run();
-  new MutationObserver(run).observe(mount, { childList: true, subtree: true });
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
