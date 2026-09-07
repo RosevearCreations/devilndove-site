@@ -76,7 +76,7 @@ for token in (
     "root_it_recovery_grant",
     "business_admin_role_manage",
     "it_role_derived_access_denied",
-    "shared_service_full_access",
+    "sharedServiceFullAccess",
     "authorityMatrix.healthy ? 200 : 503",
     "automatic_repair: false",
     "d1_mutation: false",
