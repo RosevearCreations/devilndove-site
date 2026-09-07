@@ -11,6 +11,7 @@
 // Hotfix 467: Products must never load the inventory usability MutationObserver; Inventory workflows retain it.
 // Release 467 Build 65: optional admin panels/services are selector- and viewport-gated instead of starting on every admin page.
 // Release 467 Build 66: Products uses focused presentation workspaces while retaining one Product authority.
+// Release 467 Build 67: Product Editor adds product-scoped recovery, stale-copy preflight and unsaved-change protection.
 
 const DD_ADMIN_LAZY_VERSION = 'R467B65_V1';
 const ddAdminLazyState = new Map();
@@ -159,6 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
       'product-workspace-split',
       () => import('/public/js/admin-product-workspaces.js?v=66'),
       'Product workspace split',
+    );
+    void ddImportOnce(
+      'product-editor-recovery-autosave',
+      () => import('/public/js/admin-product-editor-recovery.js?v=67'),
+      'Product Editor recovery and autosave guard',
     );
     ddLazyImportWhenVisible({
       key: 'product-production-reversal',
