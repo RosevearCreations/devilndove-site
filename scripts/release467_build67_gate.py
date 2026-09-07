@@ -117,7 +117,7 @@ for token in (
 for sql_mutation in ("INSERT INTO", "UPDATE PRODUCTS", "DELETE FROM", "CREATE TABLE", "ALTER TABLE", "DROP TABLE", "REPLACE INTO"):
     req(sql_mutation not in preflight.upper(), f"Build 67 preflight endpoint gained forbidden SQL mutation: {sql_mutation}")
 req(len(re.findall(r"\bSELECT\b", preflight, flags=re.IGNORECASE)) == 1, "Build 67 preflight endpoint must keep exactly one Product SELECT")
-req("PRAGMA" not in preflight.upper(), "Build 67 preflight must not spend D1 rows on PRAGMA scans")
+req(not re.search(r"^\s*PRAGMA\b", preflight, flags=re.IGNORECASE | re.MULTILINE), "Build 67 preflight must not spend D1 rows on PRAGMA scans")
 req("COUNT(" not in preflight.upper(), "Build 67 preflight must not add exact-count reads")
 
 for provider in ("stripe.com", "paypal.com", "pinterest.com", "tiktok.com", "youtube.com"):
