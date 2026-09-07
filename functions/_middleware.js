@@ -13,6 +13,8 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
+const PRODUCTS_ASSET_REVISION = '467-products-lockup-hotfix';
+
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
 function normalizedPagePath(pathname) {
@@ -48,6 +50,8 @@ function withPlatformClient(response, request) {
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
   if (!contentType.includes('text/html')) return response;
   const pathname = new URL(request.url).pathname;
+  const normalizedPath = normalizedPagePath(pathname);
+  const isProductsPage = normalizedPath === '/admin/products/';
   const productRequest = publicProductRequestInfo(request, pathname);
   try {
     let rewriter = new HTMLRewriter()
@@ -55,13 +59,13 @@ function withPlatformClient(response, request) {
         element(element) {
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
           // Products must establish its essential fallbacks before the large body of
-          // admin scripts registers DOMContentLoaded work. This non-deferred, tiny
-          // bootstrap only applies to the Products route and prevents permanent
-          // Loading… selectors even when D1 or optional analytics are slow.
-          if (normalizedPagePath(pathname) === '/admin/products/') {
-            element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+          // admin scripts registers DOMContentLoaded work. Use a dedicated asset
+          // revision so a repaired bootstrap can never be hidden behind an older
+          // release-number cache entry.
+          if (isProductsPage) {
+            element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
           }
-          element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
+          element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${isProductsPage ? PRODUCTS_ASSET_REVISION : 'current'}"></script>`, { html: true });
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/product-media-fallback.js?v=62"></script>', { html: true });
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
@@ -72,6 +76,15 @@ function withPlatformClient(response, request) {
           if (isStorefrontDiscoveryPath(pathname)) {
             element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${CURRENT_RELEASE}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
+        },
+      })
+      .on('script[src]', {
+        element(element) {
+          if (!isProductsPage) return;
+          const src = String(element.getAttribute('src') || '');
+          if (!src.startsWith('/public/js/') && !src.startsWith('/js/')) return;
+          const clean = src.split('?')[0];
+          element.setAttribute('src', `${clean}?v=${PRODUCTS_ASSET_REVISION}`);
         },
       });
     if (productRequest) {
