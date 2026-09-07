@@ -1,7 +1,6 @@
 import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 import { getNextProductNumber, getProductNumberStart } from "./_product-numbering.js";
-import { loadCatalogOptionSets } from "./_catalog-options.js";
-import { normalizeTaxRateFraction, taxRatePercent } from "./_tax-rate.js";
+import { loadCatalogOptionAuthority } from "./_catalog-option-authority.js";
 
 function json(data, status = 200) {
   return jsonResponse(data, status);
@@ -32,11 +31,14 @@ export async function onRequestGet(context) {
   const db = getDb(env);
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
+  if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
 
   // Essential desktop editor options must not depend on Inventory/resource schema.
-  // Resource expansion is opt-in for the mobile capture workflow only.
+  // Resource expansion is opt-in for the mobile capture workflow only. Build 68
+  // resolves all Product dropdowns from the shared cached catalog authority.
   const includeResources = shouldLoadResources(request);
   const optionsOnly = !includeResources;
+  const authorityPromise = loadCatalogOptionAuthority(db, { includeInactiveTaxClasses: false });
 
   let nextProductNumber = 1000;
   let productNumberStart = 1000;
@@ -46,18 +48,6 @@ export async function onRequestGet(context) {
       getProductNumberStart(db),
     ]);
   }
-
-  const taxClassColumns = await getTableColumnSet(db, 'tax_classes');
-  const taxRateExpr = taxClassColumns.has('tax_rate') ? 'tax_rate' : '0';
-  const ratePercentExpr = taxClassColumns.has('rate_percent') ? 'rate_percent' : 'NULL';
-  const [taxResult, optionSets] = await Promise.all([
-    db.prepare(`SELECT tax_class_id, code, name, ${taxRateExpr} AS tax_rate, ${ratePercentExpr} AS rate_percent FROM tax_classes WHERE COALESCE(is_active,1)=1 ORDER BY LOWER(name) ASC`).all().catch(() => ({ results: [] })),
-    loadCatalogOptionSets(db),
-  ]);
-  const taxClasses = normalizeResults(taxResult).map((row) => {
-    const tax_rate = normalizeTaxRateFraction(row.tax_rate, row.rate_percent);
-    return { ...row, tax_rate, rate_percent: taxRatePercent(tax_rate) };
-  });
 
   let resources = [];
   if (includeResources) {
@@ -106,6 +96,9 @@ export async function onRequestGet(context) {
     `).all().catch(() => ({ results: [] })));
   }
 
+  const authority = await authorityPromise;
+  const optionSets = authority?.option_sets || {};
+  const taxClasses = Array.isArray(authority?.tax_classes) ? authority.tax_classes : [];
   const nextProductNumberValue = Number(nextProductNumber || productNumberStart || 1000);
 
   return json({
@@ -113,10 +106,24 @@ export async function onRequestGet(context) {
     next_product_number: nextProductNumberValue,
     next_product_number_label: `DD${String(nextProductNumberValue).padStart(4, '0')}`,
     product_number_start: Number(productNumberStart || 1000),
+    catalog_authority_version: authority?.authority_version || '',
+    catalog_authority_cache: authority?.cache || null,
     category_options: optionSets.category_options || [],
     color_options: optionSets.color_options || [],
     shipping_code_options: optionSets.shipping_code_options || [],
-    tax_classes: taxClasses.map((row) => ({ tax_class_id: Number(row.tax_class_id || 0), code: row.code || '', name: row.name || '', tax_rate: Number(row.tax_rate || 0), rate_percent: Number(row.rate_percent || 0) })),
+    product_type_options: optionSets.product_type_options || [],
+    product_status_options: optionSets.product_status_options || [],
+    product_review_status_options: optionSets.product_review_status_options || [],
+    merchandise_origin_options: optionSets.merchandise_origin_options || [],
+    sale_channel_options: optionSets.sale_channel_options || [],
+    tax_classes: taxClasses.map((row) => ({
+      tax_class_id: Number(row.tax_class_id || 0),
+      code: row.code || '',
+      name: row.name || '',
+      tax_rate: Number(row.tax_rate || 0),
+      rate_percent: Number(row.rate_percent || 0),
+      is_active: Number(row.is_active ?? 1) === 0 ? 0 : 1,
+    })),
     resources: resources.map((row) => ({ item_kind: row.item_kind || '', source_key: row.source_key || '', name: row.name || '', image_url: row.image_url || '', category: row.category || '', subcategory: row.subcategory || '', on_hand_quantity: Number(row.on_hand_quantity || 0), incoming_quantity: Number(row.incoming_quantity || 0), reorder_level: Number(row.reorder_level || 0), is_on_reorder_list: Number(row.is_on_reorder_list || 0), do_not_reuse: Number(row.do_not_reuse || 0), stock_unit_label: row.stock_unit_label || 'unit', usage_unit_label: row.usage_unit_label || 'unit', usage_units_per_stock_unit: Number(row.usage_units_per_stock_unit || 1) || 1, unit_cost_cents: Number(row.unit_cost_cents || 0), reorder_needed: Number(row.reorder_needed || 0) })),
     options_only: optionsOnly,
     include_resources: includeResources
