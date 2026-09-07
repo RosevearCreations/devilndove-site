@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 
   const adminPage = document.body?.dataset?.adminPage || '';
-  if (adminPage === 'products') {
+  if (document.body?.dataset?.adminPage === 'products') {
     ddLazyImportWhenVisible({
       key: 'product-production-reversal',
       selector: '.product-production-release',

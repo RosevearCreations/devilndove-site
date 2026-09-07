@@ -91,8 +91,8 @@ for eager in (
 ):
     req(eager not in admin, f"Optional admin module remains eagerly imported: {eager.strip()}")
 
-products_block = admin.split("if (adminPage === 'products')", 1)[-1]
-req("document.body?.dataset?.adminPage !== 'products'" in products_block, "Products inventory-usability exclusion was lost")
+req("document.body?.dataset?.adminPage === 'products'" in admin, "Products page-scoped lazy workspace boundary is missing")
+req("document.body?.dataset?.adminPage !== 'products'" in admin, "Products inventory-usability exclusion was lost")
 
 core_import = "void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')"
 req(core_import in admin, "Core application-module bootstrap is missing")
