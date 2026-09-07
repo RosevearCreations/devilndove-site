@@ -76,7 +76,9 @@ const DEFAULT_ROLE_ACCESS = Object.freeze([
   Object.freeze({ module_key: MODULE_KEYS.SOCIALS, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
   Object.freeze({ module_key: MODULE_KEYS.FINANCIALS, role_code: 'member', is_allowed: 0, access_level: 'none' }),
   Object.freeze({ module_key: MODULE_KEYS.FINANCIALS, role_code: 'admin', is_allowed: 1, access_level: 'manage' }),
-  // I.T. is deliberately explicit-user only; role membership alone never grants access.
+  // Non-admin I.T. access remains explicit-user only. Canonical administrators are
+  // guaranteed manage access by evaluateModuleAccess so the administrator can never
+  // be locked out of diagnostics, access controls, recovery, or release tooling.
   Object.freeze({ module_key: MODULE_KEYS.IT_PLATFORM, role_code: 'member', is_allowed: 0, access_level: 'none' }),
   Object.freeze({ module_key: MODULE_KEYS.IT_PLATFORM, role_code: 'admin', is_allowed: 0, access_level: 'none' }),
 ]);
@@ -337,6 +339,14 @@ export function evaluateModuleAccess(config, moduleKey, user = null) {
   if (!user) {
     if (Number(module.requires_login || 0) === 1) return { allowed: false, reason: 'login_required', module, access_level: 'none' };
     return { allowed: true, reason: 'public', module, access_level: 'public' };
+  }
+
+  // Canonical administrators must always be able to operate every enabled module.
+  // This intentionally precedes per-user grants/denials so a stale access row can
+  // never lock the administrator out of I.T., recovery, access-control, or release
+  // surfaces. Non-admin users still follow the explicit/role policies below.
+  if (normalizeText(user?.role).toLowerCase() === 'admin') {
+    return { allowed: true, reason: 'admin_role_full_access', module, access_level: 'manage' };
   }
 
   const explicit = explicitUserAccessFor(user, module.module_key);
