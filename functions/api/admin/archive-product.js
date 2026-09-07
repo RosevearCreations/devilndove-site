@@ -1,4 +1,4 @@
-// Build 221 — audited product archiving with DB/DD_DB compatibility and safe failures.
+// Release 467 Build 69 — audited product archiving with stale-copy protection.
 import {
   auditAdminAction,
   captureRuntimeIncident,
@@ -19,6 +19,10 @@ async function requireAdmin(context) {
   return { adminUser, db };
 }
 
+function cleanReason(value) {
+  return String(value || '').trim().slice(0, 500) || null;
+}
+
 export async function onRequestPost(context) {
   const access = await requireAdmin(context);
   if (access.error) return access.error;
@@ -34,6 +38,8 @@ export async function onRequestPost(context) {
   if (!Number.isInteger(productId) || productId <= 0) {
     return json({ ok: false, error: 'A valid product_id is required.' }, 400);
   }
+  const expectedUpdatedAt = String(body.expected_updated_at || '').trim();
+  const archiveReason = cleanReason(body.archive_reason);
 
   try {
     const existingProduct = await access.db.prepare(`
@@ -46,13 +52,39 @@ export async function onRequestPost(context) {
 
     if (!existingProduct) return json({ ok: false, error: 'Product not found.' }, 404);
 
+    if (expectedUpdatedAt && String(existingProduct.updated_at || '') !== expectedUpdatedAt) {
+      return json({
+        ok: false,
+        code: 'stale_product_copy',
+        error: 'This Product changed after the cleanup list was loaded. Refresh before archiving so a newer edit is not hidden accidentally.',
+        product_id: productId,
+        expected_updated_at: expectedUpdatedAt,
+        current_updated_at: existingProduct.updated_at || null
+      }, 409);
+    }
+
     if (String(existingProduct.status || '').toLowerCase() !== 'archived') {
-      const result = await access.db.prepare(`
-        UPDATE products
-        SET status = 'archived', updated_at = CURRENT_TIMESTAMP
-        WHERE product_id = ?
-      `).bind(productId).run();
+      const statement = expectedUpdatedAt
+        ? access.db.prepare(`
+            UPDATE products
+            SET status = 'archived', updated_at = CURRENT_TIMESTAMP
+            WHERE product_id = ? AND updated_at = ?
+          `).bind(productId, expectedUpdatedAt)
+        : access.db.prepare(`
+            UPDATE products
+            SET status = 'archived', updated_at = CURRENT_TIMESTAMP
+            WHERE product_id = ?
+          `).bind(productId);
+      const result = await statement.run();
       if (Number(result?.meta?.changes || 0) < 1) {
+        if (expectedUpdatedAt) {
+          return json({
+            ok: false,
+            code: 'stale_product_copy',
+            error: 'This Product changed while the archive request was being applied. Refresh and review the current record before trying again.',
+            product_id: productId
+          }, 409);
+        }
         throw new Error('The product status did not change. Refresh and try again.');
       }
     }
@@ -78,6 +110,8 @@ export async function onRequestPost(context) {
         previous_status: existingProduct.status || null,
         new_status: 'archived',
         product_number: existingProduct.product_number || null,
+        archive_reason: archiveReason,
+        stale_guard_applied: expectedUpdatedAt ? 1 : 0,
         cleanup_centre_available: true
       }
     });
@@ -87,6 +121,7 @@ export async function onRequestPost(context) {
       message: String(existingProduct.status || '').toLowerCase() === 'archived'
         ? 'Product is already archived. It can now be reviewed in Draft & Archive Cleanup.'
         : 'Product archived. Open the Archived filter in Draft & Archive Cleanup to check whether permanent removal is safe.',
+      stale_guard_applied: expectedUpdatedAt ? 1 : 0,
       product: archivedProduct || { ...existingProduct, status: 'archived' }
     });
   } catch (error) {

@@ -74,7 +74,7 @@ def run_current_contract(path, label):
 # Current reliability contracts are chained here so later work cannot silently regress
 # Product cold-start protections, the D1 read-budget layer, root-admin authority,
 # bounded lazy-loading, focused Product workspaces, Product editor recovery/autosave safety,
-# or the single cached Catalog Options authority used by Product editors and capture flows.
+# the single cached Catalog Options authority, or Product CRUD / cleanup safety.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -82,6 +82,7 @@ run_current_contract('scripts/release467_build65_gate.py', 'Release 467 Build 65
 run_current_contract('scripts/release467_build66_gate.py', 'Release 467 Build 66')
 run_current_contract('scripts/release467_build67_gate.py', 'Release 467 Build 67')
 run_current_contract('scripts/release467_build68_gate.py', 'Release 467 Build 68')
+run_current_contract('scripts/release467_build69_gate.py', 'Release 467 Build 69')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')

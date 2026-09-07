@@ -1,9 +1,16 @@
-// Build 440 — bounded draft/archive cleanup preflight with Product Delete Reference Inspector.
+// Release 467 Build 69 — bounded cleanup with explicit unused-record classification.
 (() => {
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
   let products = [];
 
   function node(id) { return document.getElementById(id); }
+  function enforceCanonicalCleanupLane() {
+    if (document.getElementById('ddBuild69CanonicalCleanupLane')) return;
+    const style = document.createElement('style');
+    style.id = 'ddBuild69CanonicalCleanupLane';
+    style.textContent = '#productsTableBody [data-draft-cleanup="1"]{display:none!important}';
+    document.head.appendChild(style);
+  }
   async function readApiJson(response, fallbackMessage) {
     if (window.DDAuth?.readApiJson) return window.DDAuth.readApiJson(response, { fallbackMessage });
     const data = await response.json().catch(() => null);
@@ -32,6 +39,32 @@
   function label(product) {
     return [product.name || `Product ${product.product_id}`, product.product_number ? `DD${product.product_number}` : '', product.sku || '']
       .filter(Boolean).join(' · ');
+  }
+  function chooseRemovalReason(product) {
+    const choice = prompt(
+      `Classify why ${label(product || {})} is safe to remove:\n\n` +
+      '1 — Unused duplicate\n' +
+      '2 — Abandoned draft\n' +
+      '3 — Test / acceptance record\n' +
+      '4 — Incorrect record replaced by a corrected Product\n' +
+      '5 — Other unused record\n\n' +
+      'Enter 1, 2, 3, 4, or 5. Cancel leaves the Product unchanged.'
+    );
+    if (choice === null) return null;
+    const key = String(choice || '').trim();
+    const standard = {
+      '1': '[unused_duplicate] Unused duplicate Product record confirmed during cleanup.',
+      '2': '[abandoned_draft] Abandoned draft Product record no longer required.',
+      '3': '[test_record] Test or acceptance Product record no longer required.',
+      '4': '[replaced_incorrect_record] Incorrect Product record replaced by a corrected Product.'
+    };
+    if (standard[key]) return standard[key];
+    if (key !== '5') throw new Error('Choose a cleanup classification from 1 through 5.');
+    const detail = prompt('Describe why this unused Product record can be permanently removed (at least 8 characters).');
+    if (detail === null) return null;
+    const clean = String(detail || '').trim();
+    if (clean.length < 8) throw new Error('The cleanup reason must be at least 8 characters.');
+    return `[other_unused] ${clean.slice(0, 400)}`;
   }
   function render() {
     const mount = node('productCleanupList');
@@ -89,18 +122,19 @@
     const blockers = Array.isArray(data.blocking_references) ? data.blocking_references : [];
     const materials = Array.isArray(data.materials) ? data.materials : [];
     const materialReviewRows = Array.isArray(data.materials_requiring_review) ? data.materials_requiring_review : [];
-    const historyAllowsRemoval = Number(data.deletion_allowed || 0) === 1;
-    const allowed = historyAllowsRemoval && materialReviewRows.length === 0;
+    const historyAllowsRemoval = Number(data.history_allows_removal || 0) === 1;
+    const deletionAllowed = Number(data.deletion_allowed || 0) === 1;
+    const allowed = deletionAllowed && materialReviewRows.length === 0;
     if (result) {
       if (!historyAllowsRemoval) {
-        result.innerHTML = `<span class="status-pill is-error">Archive only</span><p class="small">${blockers.length} protected reference type${blockers.length === 1 ? '' : 's'} found. Open the reference inspector to see why each record is retained and where to review it.</p><button class="btn" type="button" data-cleanup-inspect="${productId}">Inspect protected references</button>`;
+        result.innerHTML = `<span class="status-pill is-error">Archive only</span><p class="small">${blockers.length} protected reference type${blockers.length === 1 ? '' : 's'} found. Orders, accounting, inventory, content, customer, and other retained history keep this Product identity permanent. Open the reference inspector before changing its lifecycle state.</p><button class="btn" type="button" data-cleanup-inspect="${productId}">Inspect protected references</button>`;
       } else if (materialReviewRows.length) {
         result.innerHTML = `<span class="status-pill is-warning">Inventory review required</span><p class="small">${materialReviewRows.length} linked material row(s) may involve reserved stock. Review the quantities before removal.</p><button class="btn" type="button" data-open-product-correction="${productId}">Review linked materials &amp; remove</button>`;
       } else {
         const recipeNote = materials.length
-          ? ` ${materials.length} linked recipe/material row(s) will be discarded with the duplicate; main inventory quantities will not change.`
+          ? ` ${materials.length} linked recipe/material row(s) will be discarded with this unused record; main inventory quantities will not change.`
           : '';
-        result.innerHTML = `<span class="status-pill is-success">Removal allowed</span><p class="small">Product-owned editor rows will be removed and reusable media will be detached in the same reviewed operation.${recipeNote}</p>`;
+        result.innerHTML = `<span class="status-pill is-success">Unused record eligible</span><p class="small">No protected business/history references were found. Classify the record explicitly before permanent removal. Product-owned editor rows will be removed and reusable media will be detached.${recipeNote}</p>`;
       }
     }
     if (deleteButton) deleteButton.disabled = !allowed;
@@ -114,7 +148,9 @@
     const product = products.find((row) => Number(row.product_id) === Number(productId));
     const checked = await preflight(productId);
     if (!checked.allowed) throw new Error((checked.materialReviewRows || []).length ? 'Reserved linked materials require the full Correct / remove panel so inventory actions can be reviewed.' : 'This record has protected history and must remain archived.');
-    if (!confirm(`Permanently remove ${label(product || {})}?\n\nThis removes only the unused record. Product numbers remain retired.`)) return;
+    const deletionReason = chooseRemovalReason(product || checked.data?.product || {});
+    if (!deletionReason) return;
+    if (!confirm(`Permanently remove ${label(product || {})}?\n\n${deletionReason}\n\nThis removes only the unused record. Product numbers remain retired. Protected history would have blocked this operation.`)) return;
     const phrase = prompt('Type DELETE PRODUCT exactly.');
     if (phrase === null) return;
     const password = prompt('Enter your current administrator password.');
@@ -125,9 +161,7 @@
         product_id: Number(productId),
         confirmation_phrase: phrase,
         confirm_password: password,
-        deletion_reason: String(product?.status || '').toLowerCase() === 'archived'
-          ? 'Unused archived duplicate removed from cleanup centre.'
-          : 'Duplicate draft removed from cleanup centre.'
+        deletion_reason: deletionReason
       })
     });
     const data = await readApiJson(response, 'Product could not be removed.');
@@ -136,8 +170,16 @@
     await load();
   }
   async function archive(productId) {
-    if (!confirm('Archive this draft? It will remain available in the Archived cleanup list.')) return;
-    const response = await window.DDAuth.apiFetch('/api/admin/archive-product', { method: 'POST', body: JSON.stringify({ product_id: Number(productId) }) });
+    const product = products.find((row) => Number(row.product_id) === Number(productId));
+    if (!confirm('Archive this draft? It will remain available in the Archived cleanup list and any protected history will remain attached.')) return;
+    const response = await window.DDAuth.apiFetch('/api/admin/archive-product', {
+      method: 'POST',
+      body: JSON.stringify({
+        product_id: Number(productId),
+        expected_updated_at: String(product?.updated_at || ''),
+        archive_reason: 'Archived from Draft & Archive Cleanup during Product correction review.'
+      })
+    });
     const data = await readApiJson(response, 'Product could not be archived.');
     message(data.message || 'Product archived.', 'success');
     document.dispatchEvent(new CustomEvent('dd:product-archived', { detail: { product_id: Number(productId), product: data.product || null } }));
@@ -164,5 +206,5 @@
     document.addEventListener('dd:product-archived', load);
     document.addEventListener('dd:product-deleted', load);
   }
-  document.addEventListener('DOMContentLoaded', () => { bind(); load(); });
+  document.addEventListener('DOMContentLoaded', () => { enforceCanonicalCleanupLane(); bind(); load(); });
 })();
