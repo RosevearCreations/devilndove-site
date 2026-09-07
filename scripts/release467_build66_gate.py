@@ -78,7 +78,7 @@ for token in (
 for token in (
     "R467B66_V1",
     "data-product-workspace-tab",
-    "data-product-workspace-panel",
+    "dataset.productWorkspacePanel",
     "role=\"tablist\"",
     "setAttribute('role', 'tab')",
     "setAttribute('role', 'tabpanel')",
@@ -109,8 +109,9 @@ for workspace_id in ("products", "editor", "inventory", "media", "seo", "cleanup
     req(f"id: '{workspace_id}'" in workspace, f"Product workspace missing: {workspace_id}")
 
 # Build 66 is presentation-only: it may reorganize existing mounts/events but cannot become a data authority.
-for forbidden in ("/api/", "apiFetch(", "fetch(", ".prepare(", ".exec(", "stripe.com", "paypal.com"):
-    req(forbidden not in workspace.lower(), f"Build 66 workspace script gained forbidden data/provider authority token: {forbidden}")
+workspace_lower = workspace.lower()
+for forbidden in ("/api/", "apifetch(", "fetch(", ".prepare(", ".exec(", "stripe.com", "paypal.com"):
+    req(forbidden not in workspace_lower, f"Build 66 workspace script gained forbidden data/provider authority token: {forbidden}")
 
 req("release467_build66_gate.py" in current and "Release 467 Build 66" in current, "Current System Gate does not chain Build 66")
 req("release467_build65_gate.py" in current, "Build 65 carried-forward contract was lost")
