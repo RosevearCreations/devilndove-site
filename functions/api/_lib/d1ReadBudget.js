@@ -3,7 +3,9 @@
 // This module exposes source-side caps and operator metadata. It does not claim to
 // replace Cloudflare's provider-side D1 usage metering.
 
-export const D1_READ_BUDGET_VERSION = 'R467B72_V1';
+// Keep the Build 63 contract version stable: later builds may extend route budgets,
+// but existing clients/gates use this as the compatibility identity of the guardrail layer.
+export const D1_READ_BUDGET_VERSION = 'R467B63_V1';
 
 export const D1_READ_BUDGETS = Object.freeze({
   admin_products: Object.freeze({
