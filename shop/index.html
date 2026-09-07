@@ -32,7 +32,10 @@
 <div><label class="small" for="shopChannelFilter">Sale Channel</label><select id="shopChannelFilter"><option value="">All</option><option value="onsite">On-site</option><option value="hybrid">Hybrid</option><option value="external_only">External only</option></select></div>
 <div><label class="small" for="shopSearchInput">Search</label><input id="shopSearchInput" placeholder="Jewelry, digital, clay, ring..." type="text"></div>
 <div><label class="small" for="shopTypeFilter">Type</label><select id="shopTypeFilter"><option value="">All</option><option value="physical">Physical</option><option value="digital">Digital</option></select></div>
+<div><label class="small" for="shopCategoryFilter">Category</label><select id="shopCategoryFilter"><option value="">All categories</option></select></div>
 <div><label class="small" for="shopColorFilter">Colour</label><select id="shopColorFilter"><option value="">All</option></select></div>
+<div><label class="small" for="shopAvailabilityFilter">Availability</label><select id="shopAvailabilityFilter"><option value="">All availability</option><option value="available">Available now</option><option value="out_of_stock">Out of stock</option><option value="check">Check availability</option></select></div>
+<div><label class="small" for="shopSortFilter">Sort</label><select id="shopSortFilter"><option value="featured">Featured</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option><option value="newest">Newest</option><option value="name">Name A–Z</option></select></div>
 <div><label class="small" for="shopMaterialFilter">Material / proof</label><select id="shopMaterialFilter"><option value="">All</option></select></div>
 <div><label class="small" for="shopProcessFilter">Process</label><select id="shopProcessFilter"><option value="">All</option></select></div>
 <div><label class="small" for="shopLocalityFilter">Locality</label><select id="shopLocalityFilter"><option value="">All</option></select></div>
@@ -45,13 +48,14 @@
 <div aria-label="Quick shop filters" class="shop-quick-chips"><button class="btn secondary" data-shop-quick="handmade" type="button">Handmade</button><button class="btn secondary" data-shop-quick="vintage" type="button">Vintage &amp; finds</button><button class="btn secondary" data-shop-quick="under25" type="button">Under $25</button><button class="btn secondary" data-shop-quick="gifts" type="button">Gift ideas</button><a class="btn secondary" href="/pickup/">Local pickup info</a></div>
 </div>
 
+<div id="shopDiscoveryIntelligence" style="margin-bottom:14px"></div>
 <div class="card" data-media-background-slot="shop.background.available" style="margin-bottom:18px"><h2 data-content-slot="shop.text.available.heading" style="margin-top:0">Available Products</h2><p class="small" data-content-slot="shop.text.available.body" style="margin-bottom:0">Shop reads the public Product system directly. Collections and Collages add discovery paths but do not become independent Product authorities.</p></div>
 <div id="shopRecentlyViewedMount" style="margin-bottom:18px"></div>
 <div id="shopCollectionsMount" style="margin-bottom:18px"></div>
 <div id="shopPolicyFaqMount" style="margin-bottom:18px"></div>
 <div data-gift-card-mode="compact" id="shopGiftCardStorefrontMount" style="margin-bottom:18px"></div>
 
-<section aria-label="Available product results" class="shop-results-section" id="shopResultsSection"><div class="small" id="shopLoading">Loading products...</div><div class="status-note" id="shopStatus" style="display:none"></div><div class="small" id="shopError" style="display:none;color:#b00020"></div><div class="small" id="shopEmpty" style="display:none">No products are available right now.</div><div class="small" id="shopSummary" style="margin-bottom:12px"></div><div class="grid cols-3" id="shopProducts" style="gap:16px"></div></section>
+<section aria-label="Available product results" class="shop-results-section" id="shopResultsSection"><div class="small" id="shopLoading">Loading products...</div><div class="status-note" id="shopStatus" style="display:none"></div><div class="small" id="shopError" style="display:none;color:#b00020"></div><div class="small" id="shopEmpty" style="display:none">No products match the current filters.</div><div id="shopActiveFilters"></div><div class="small" id="shopSummary" style="margin-bottom:12px"></div><div id="shopZeroAssist" style="display:none"></div><div class="grid cols-3" id="shopProducts" style="gap:16px"></div></section>
 
 <section class="card" data-storefront-collage-mount="shop-discovery" style="margin-top:18px;margin-bottom:18px"><h2 style="margin-top:0">Visual Product discovery</h2><p class="small">A live approved Product collage appears here when at least three public images are available. The static Shop remains fully usable if the collage cannot load.</p><a class="btn" href="/collages/">Open Collages</a></section>
 
@@ -68,7 +72,8 @@
 <script src="/public/js/gift-card-storefront.js?v=448"></script>
 <script src="/public/js/recently-viewed-products.js?v=448"></script>
 <script src="/public/js/product-media-fallback.js?v=59"></script>
-<script src="/public/js/shop.js?v=448"></script>
+<script src="/public/js/shop.js?v=467b75"></script>
+<script src="/public/js/storefront-search-collections.js?v=75"></script>
 <script src="/public/js/storefront-merchandising.js?v=448"></script>
 <script src="/public/js/trust-block-context.js?v=448"></script>
 <script defer src="/public/js/media-content-runtime.js?v=448"></script>
