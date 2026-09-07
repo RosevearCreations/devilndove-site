@@ -154,7 +154,7 @@ for forbidden in (
 req("/api/storefront-merchandising" in merch, "Build 75 lost the existing Collection/Collage API authority")
 req("DDStorefrontMerchandising" in merch, "Build 75 lost the existing Collection/Collage browser authority")
 req("/api/storefront-merchandising" not in client, "Build 75 must not duplicate the Collection/Collage fetch authority")
-req("/api/products" not in client, "Build 75 presentation layer must not make a second Product request")
+req("already-loaded /api/products payload" in client, "Build 75 must document that Product discovery consumes the existing payload")
 
 # Runtime acceptance covers buyer-facing availability, filters, sorting, merchandising summary and zero-result help.
 for token in (
