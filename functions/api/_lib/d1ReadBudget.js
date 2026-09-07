@@ -1,5 +1,6 @@
 // Release 467 Build 63 — central D1 read-budget guardrails.
 // Extended in Build 72 for bounded Inventory / Reorder Economics projections.
+// Extended in Build 73 for the bounded Product Media / Photo Studio convergence projection.
 // This module exposes source-side caps and operator metadata. It does not claim to
 // replace Cloudflare's provider-side D1 usage metering.
 
@@ -50,6 +51,23 @@ export const D1_READ_BUDGETS = Object.freeze({
     server_max_limit: 300,
     browser_cache_ms: 30000,
     max_concurrent_identical_gets: 1
+  }),
+  admin_product_media_authority: Object.freeze({
+    route: '/api/admin/product-media-authority',
+    risk: 'medium',
+    contract: 'selected_product_media_convergence_only',
+    server_caps: Object.freeze({
+      product: 1,
+      seo: 1,
+      product_images: 20,
+      media_assets: 30,
+      role_assignments: 20,
+      annotations: 30,
+      quality_reviews: 30,
+      quality_assessments: 30
+    }),
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 73 is loaded only after an operator selects one Product in Catalog Media. The projection is read-only, never performs blank catalog scans, and never copies/deletes R2 objects or publishes to social providers.'
   }),
   admin_inventory_replenishment: Object.freeze({
     route: '/api/admin/inventory-replenishment',
