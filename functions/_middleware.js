@@ -54,6 +54,13 @@ function withPlatformClient(response, request) {
       .on('head', {
         element(element) {
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
+          // Products must establish its essential fallbacks before the large body of
+          // admin scripts registers DOMContentLoaded work. This non-deferred, tiny
+          // bootstrap only applies to the Products route and prevents permanent
+          // Loading… selectors even when D1 or optional analytics are slow.
+          if (normalizedPagePath(pathname) === '/admin/products/') {
+            element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+          }
           element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/product-media-fallback.js?v=62"></script>', { html: true });
