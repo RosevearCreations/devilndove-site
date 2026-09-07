@@ -1,7 +1,7 @@
 // Current Products admin cold-start recovery.
-// Build 62 keeps essential editor/picker controls usable while making the recovery
-// path one-shot and D1-light. GET startup work is bounded and duplicate in-flight
-// reads for the same Product startup authority are coalesced.
+// Build 63 extends the Build 62 one-shot/coalesced startup contract with a short-lived
+// successful-GET response cache and a lightweight Product picker read model. The goal
+// is one useful Product read, not repeated D1-heavy startup work from adjacent panels.
 (() => {
   const pathname = String(window.location.pathname || '').replace(/\/+$/, '') || '/';
   if (pathname !== '/admin/products') return;
@@ -10,6 +10,7 @@
   const DEFAULT_CATEGORIES = ['Rings','Necklaces','Bracelets','Earrings','Pendants','CNC Components','3D Printed Items','Laser Engraved Items','Polymer Clay Items','Home Decor','Soap','Candles','Accessories','Other'];
   const DEFAULT_COLOURS = ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'];
   const DEFAULT_SHIPPING = ['standard-jewelry','small-parcel','oversize','pickup-only','digital'];
+  const MAX_CACHE_BODY_CHARS = 6000000;
 
   let optionsReady = false;
   let optionsRunning = false;
@@ -36,10 +37,10 @@
     return Boolean(window.DDAuth?.isLoggedIn?.() && stored && String(stored.role || '').toLowerCase() === 'admin');
   }
 
-  function jsonFallbackResponse(payload, status = 200) {
+  function jsonFallbackResponse(payload, status = 200, extraHeaders = {}) {
     return new Response(JSON.stringify(payload), {
       status,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extraHeaders }
     });
   }
 
@@ -47,13 +48,62 @@
     if (!window.DDAuth?.apiFetch || window.DDAuth.apiFetch.__ddProductsBounded === true) return false;
     const original = window.DDAuth.apiFetch.bind(window.DDAuth);
     const inflight = new Map();
+    const responseCache = new Map();
     const coalescedPaths = new Set([
       '/api/admin/products',
+      '/api/admin/product-picker',
       '/api/admin/product-mobile-bootstrap',
       '/api/admin/product-resource-bootstrap',
       '/api/admin/product-readiness',
       '/api/admin/pending-actions'
     ]);
+    const cacheTtlByPath = new Map([
+      ['/api/admin/products', 45000],
+      ['/api/admin/product-picker', 60000],
+      ['/api/admin/product-mobile-bootstrap', 60000],
+      ['/api/admin/product-resource-bootstrap', 30000],
+      ['/api/admin/product-readiness', 30000],
+      ['/api/admin/pending-actions', 20000]
+    ]);
+
+    function cloneCachedResponse(entry) {
+      return new Response(entry.body, {
+        status: entry.status,
+        headers: {
+          'Content-Type': entry.contentType || 'application/json',
+          'Cache-Control': 'no-store',
+          'X-DD-Client-Read-Cache': 'hit'
+        }
+      });
+    }
+
+    async function rememberResponse(key, path, response) {
+      const ttl = Number(cacheTtlByPath.get(path) || 0);
+      if (!ttl || !response?.ok) return response;
+      const contentType = String(response.headers?.get?.('content-type') || '');
+      if (!/json/i.test(contentType)) return response;
+      try {
+        const body = await response.clone().text();
+        if (body.length > MAX_CACHE_BODY_CHARS) return response;
+        responseCache.set(key, {
+          body,
+          status: response.status,
+          contentType,
+          expiresAt: Date.now() + ttl
+        });
+      } catch {}
+      return response;
+    }
+
+    function cachedResponse(key) {
+      const entry = responseCache.get(key);
+      if (!entry) return null;
+      if (entry.expiresAt <= Date.now()) {
+        responseCache.delete(key);
+        return null;
+      }
+      return cloneCachedResponse(entry);
+    }
 
     const executeGet = async (input, options, path) => {
       let timeoutMs = 0;
@@ -63,6 +113,9 @@
         fallbackPayload = { ok: true, products: [], degraded: true, reason: 'readiness_timeout' };
       } else if (path === '/api/admin/products') {
         timeoutMs = 8000;
+      } else if (path === '/api/admin/product-picker') {
+        timeoutMs = 5000;
+        fallbackPayload = { ok: true, products: [], degraded: true, reason: 'product_picker_timeout' };
       } else if (path === '/api/admin/product-mobile-bootstrap') {
         timeoutMs = 6000;
       } else if (path === '/api/admin/product-resource-bootstrap') {
@@ -106,8 +159,12 @@
       if (!coalescedPaths.has(path)) return original(input, options);
 
       const key = `${method} ${url.pathname}${url.search}`;
+      const cached = cachedResponse(key);
+      if (cached) return cached;
+
       if (!inflight.has(key)) {
         const task = executeGet(input, options, path)
+          .then((response) => rememberResponse(key, path, response))
           .finally(() => inflight.delete(key));
         inflight.set(key, task);
       }
@@ -115,10 +172,23 @@
       return response.clone();
     };
 
+    function clearReadCache() {
+      responseCache.clear();
+    }
+
     boundedApiFetch.__ddProductsBounded = true;
     boundedApiFetch.__ddProductsOriginal = original;
     boundedApiFetch.__ddProductsInflight = inflight;
+    boundedApiFetch.__ddProductsResponseCache = responseCache;
+    boundedApiFetch.__ddProductsClearReadCache = clearReadCache;
     window.DDAuth.apiFetch = boundedApiFetch;
+    window.DDProductsReadBudget = {
+      version: 'R467B63_V1',
+      clear: clearReadCache,
+      inflight,
+      responseCache,
+      cacheTtlByPath
+    };
     return true;
   }
 
@@ -169,6 +239,23 @@
     return picker.options.length > 1 && !/loading independently|loading products/i.test(text);
   }
 
+  function renderProductPicker(products, sourceLabel = '') {
+    const select = document.getElementById('existingProductSelect');
+    if (!select) return;
+    const rows = Array.isArray(products) ? products : [];
+    const current = clean(select.value);
+    select.innerHTML = '<option value="">Choose an existing product...</option>' + rows.map((product) => {
+      const id = Number(product?.product_id || 0);
+      const name = clean(product?.name) || `Product #${id}`;
+      const suffix = [product?.slug, product?.sku, product?.status].map(clean).filter(Boolean).join(' • ');
+      return `<option value="${id}">#${id} — ${escapeHtml(name)}${suffix ? ` — ${escapeHtml(suffix)}` : ''}</option>`;
+    }).join('');
+    if (current && rows.some((product) => String(Number(product?.product_id || 0)) === current)) select.value = current;
+    const count = document.getElementById('existingProductCount');
+    if (count) count.textContent = `${rows.length} product${rows.length === 1 ? '' : 's'} available${sourceLabel ? ` · ${sourceLabel}` : ''}.`;
+    if (rows.length) pickerReady = true;
+  }
+
   function installImmediateFallbacks() {
     const category = document.getElementById('create_product_category');
     if (category && /loading/i.test(category.textContent || '')) fillSimpleSelect('create_product_category', DEFAULT_CATEGORIES, 'Select category');
@@ -188,23 +275,6 @@
       const picker = document.getElementById('existingProductSelect');
       if (picker && /loading/i.test(picker.textContent || '')) picker.innerHTML = '<option value="">Product list loading independently…</option>';
     }
-  }
-
-  function renderProductPicker(products, sourceLabel = '') {
-    const select = document.getElementById('existingProductSelect');
-    if (!select) return;
-    const rows = Array.isArray(products) ? products : [];
-    const current = clean(select.value);
-    select.innerHTML = '<option value="">Choose an existing product...</option>' + rows.map((product) => {
-      const id = Number(product?.product_id || 0);
-      const name = clean(product?.name) || `Product #${id}`;
-      const suffix = [product?.slug, product?.sku, product?.status].map(clean).filter(Boolean).join(' • ');
-      return `<option value="${id}">#${id} — ${escapeHtml(name)}${suffix ? ` — ${escapeHtml(suffix)}` : ''}</option>`;
-    }).join('');
-    if (current && rows.some((product) => String(Number(product?.product_id || 0)) === current)) select.value = current;
-    const count = document.getElementById('existingProductCount');
-    if (count) count.textContent = `${rows.length} product${rows.length === 1 ? '' : 's'} available${sourceLabel ? ` · ${sourceLabel}` : ''}.`;
-    if (rows.length) pickerReady = true;
   }
 
   async function recoverEditorOptions() {
@@ -230,9 +300,9 @@
       return pickerReady;
     }
     pickerFallbackAttempted = true;
-    const data = await readJson('/api/admin/product-resource-bootstrap?product_id=0', 8000);
+    const data = await readJson('/api/admin/product-picker?limit=120', 5000);
     const products = Array.isArray(data.products) ? data.products : [];
-    renderProductPicker(products, 'live lightweight fallback');
+    renderProductPicker(products, data?.pagination?.has_more ? 'live lightweight fallback · first 120' : 'live lightweight fallback');
     return true;
   }
 
@@ -284,6 +354,7 @@
   ['dd:product-created', 'dd:product-updated', 'dd:product-deleted', 'dd:product-archived'].forEach((eventName) => {
     document.addEventListener(eventName, () => {
       pickerReady = pickerHasRows();
+      window.DDProductsReadBudget?.clear?.();
     });
   });
 

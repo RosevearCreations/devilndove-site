@@ -54,21 +54,27 @@ for historical in (
 ):
     req(historical in text, f'historical regression prerequisite missing: {historical}')
 
-# Current Build 62 reliability contract is part of the release-neutral gate so Product
-# cold-start protections cannot silently regress in later builds.
-build62 = subprocess.run(
-    [sys.executable, str(ROOT / 'scripts/release467_build62_gate.py')],
-    cwd=ROOT,
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    check=False,
-)
-if build62.stdout.strip():
-    print(build62.stdout.strip())
-if build62.returncode != 0:
-    detail = (build62.stderr or build62.stdout or 'Build 62 gate failed').strip()[-2000:]
-    FAIL.append(f'Release 467 Build 62 current reliability contract failed: {detail}')
+
+def run_current_contract(path, label):
+    result = subprocess.run(
+        [sys.executable, str(ROOT / path)],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if result.stdout.strip():
+        print(result.stdout.strip())
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or f'{label} gate failed').strip()[-2000:]
+        FAIL.append(f'{label} current reliability contract failed: {detail}')
+
+
+# Current reliability contracts are chained here so later work cannot silently regress
+# Product cold-start protections or the D1 read-budget layer.
+run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
+run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
