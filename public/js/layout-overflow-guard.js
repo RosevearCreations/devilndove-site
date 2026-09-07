@@ -14,7 +14,10 @@
 
   const wrapTables = (root = document) => {
     root.querySelectorAll?.('table').forEach((table) => {
-      if (table.closest('.dd-table-scroll,[data-table-scroll],.table-scroll,.table-responsive')) return;
+      // Existing admin/table-responsive wrappers already provide bounded horizontal
+      // scrolling. Wrapping them again makes fixed-layout tables inherit the generic
+      // max-content rule and can balloon columns to thousands of pixels wide.
+      if (table.closest('.dd-table-scroll,.admin-table-wrap,[data-table-scroll],.table-scroll,.table-responsive')) return;
       const parent = table.parentElement;
       if (!parent || parent.tagName === 'BODY') return;
       const wrap = document.createElement('div');
