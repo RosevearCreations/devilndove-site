@@ -112,9 +112,7 @@ for forbidden in (
     req(not re.search(forbidden, engine, re.I), f"Build 72 pure economics engine gained forbidden runtime behavior: {forbidden}")
 
 # Existing lifecycle and conversion authorities must remain carried forward.
-for token in ("INVENTORY_LIFECYCLE_BUILD = 71", "reorder request is a planning signal".replace(" ", "_")):
-    if token.startswith("INVENTORY_"):
-        req(token in lifecycle, f"Build 71 lifecycle prerequisite missing: {token}")
+req("INVENTORY_LIFECYCLE_BUILD = 71" in lifecycle, "Build 71 lifecycle prerequisite missing")
 req("planInventoryUsage" in lifecycle and "newIncoming = state.incoming_quantity" in lifecycle, "Build 71 lifecycle reorder/incoming boundary regressed")
 req("baseToPurchase" in conversion and "purchaseToBase" in conversion and "planInventoryUsage" in conversion, "Build 70 conversion prerequisite missing")
 
@@ -161,9 +159,9 @@ for token in (
 req("/api/admin/inventory-replenishment" in client, "Build 72 UI lost replenishment endpoint")
 req("method: 'POST'" not in client and 'method:"POST"' not in client, "Build 72 economics UI must not submit purchases/mutations")
 
-# D1 budget declaration must match every new bounded dataset.
+# Build 63 created the read-budget layer, so its compatibility version stays stable while Build 72 extends its caps.
 for token in (
-    "D1_READ_BUDGET_VERSION = 'R467B72_V1'",
+    "D1_READ_BUDGET_VERSION = 'R467B63_V1'",
     "bounded_operator_projection",
     "usage_aggregate_items: 500",
     "supplier_landed_cost_groups: 300",
