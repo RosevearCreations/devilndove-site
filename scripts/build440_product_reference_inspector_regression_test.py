@@ -58,7 +58,7 @@ def main() -> int:
         ('inspector can refresh the live preflight before any later delete attempt', 'data-dd-product-ref-refresh' in ui and '/api/admin/delete-product?product_id=' in ui and "cache: 'no-store'" in ui),
         ('inspector archive action uses the audited archive endpoint', '/api/admin/archive-product' in ui and "action_type: 'product_archive'" in archive),
         ('cleanup centre reuses the same inspector contract', 'DDProductReferenceInspector?.open' in cleanup and 'Inspect protected references' in cleanup),
-        ('permanent remove stays disabled when history or material review blocks it', 'deleteButton.disabled = !allowed' in cleanup and 'historyAllowsRemoval && materialReviewRows.length === 0' in cleanup),
+        ('permanent remove stays disabled unless server delete authority and material review both allow it', 'deleteButton.disabled = !allowed' in cleanup and 'const historyAllowsRemoval = Number(data.history_allows_removal || 0) === 1' in cleanup and 'const deletionAllowed = Number(data.deletion_allowed || 0) === 1' in cleanup and 'const allowed = deletionAllowed && materialReviewRows.length === 0' in cleanup),
         ('inspector is responsive and keyboard closeable', '@media(max-width:640px)' in ui and "event.key === 'Escape'" in ui and "aria-modal=\"true\"" in ui),
         ('reference inspector performs no request-time schema mutation', all(token not in ui for token in ('CREATE TABLE', 'ALTER TABLE', 'DROP TABLE', 'CREATE INDEX'))),
         ('Build 440 slice does not add provider/background polling behavior', 'setInterval' not in ui and 'setTimeout' not in ui and 'provider_url' not in ui),
