@@ -2,6 +2,7 @@ import { paymentExecutionBoundary, paymentExecutionStatus } from './_lib/payment
 import {
   COMMERCE_POLICY,
   isAllowedCommerceCountry,
+  validateCanadianAddress,
   validateCommerceEnvelope,
 } from '../../public/js/commerce-policy-core.js';
 
@@ -48,6 +49,11 @@ function commercePolicyClosed(result = {}, extra = {}) {
   }, 422);
 }
 
+function hasAnyAddressValue(source = {}, prefix = '') {
+  return ['address1', 'city', 'province', 'postal_code']
+    .some((field) => String(source?.[`${prefix}${field}`] || '').trim());
+}
+
 async function guardPaymentProviderExecution(context) {
   const request = context.request;
   let url;
@@ -91,12 +97,30 @@ async function guardCommercePolicy(context) {
   if (url.pathname === '/api/checkout-create-order') {
     let body = {};
     try { body = await request.clone().json(); } catch { return null; }
-    const result = validateCommerceEnvelope({
+    const envelope = validateCommerceEnvelope({
       currency: body?.currency || 'CAD',
       billing_country: body?.billing_country,
       shipping_country: body?.shipping_country,
     });
-    if (!result.ok) return commercePolicyClosed(result);
+    if (!envelope.ok) return commercePolicyClosed(envelope);
+
+    if (hasAnyAddressValue(body, 'shipping_')) {
+      const shippingAddress = validateCanadianAddress({
+        country: body?.shipping_country,
+        province: body?.shipping_province,
+        postal_code: body?.shipping_postal_code,
+      }, { required: true, label: 'Shipping' });
+      if (!shippingAddress.ok) return commercePolicyClosed(shippingAddress);
+    }
+
+    if (hasAnyAddressValue(body, 'billing_')) {
+      const billingAddress = validateCanadianAddress({
+        country: body?.billing_country,
+        province: body?.billing_province,
+        postal_code: body?.billing_postal_code,
+      }, { required: true, label: 'Billing' });
+      if (!billingAddress.ok) return commercePolicyClosed(billingAddress);
+    }
     return null;
   }
 
@@ -107,27 +131,46 @@ async function guardCommercePolicy(context) {
     const db = context.env?.DB || context.env?.DD_DB;
     if (!db || !Number.isInteger(orderId) || orderId <= 0) return null;
     const order = await db.prepare(`
-      SELECT fulfillment_type, currency, shipping_country, billing_country
+      SELECT fulfillment_type, currency,
+             shipping_address1, shipping_city, shipping_province, shipping_postal_code, shipping_country,
+             billing_address1, billing_city, billing_province, billing_postal_code, billing_country
       FROM orders
       WHERE order_id = ?
       LIMIT 1
     `).bind(orderId).first().catch(() => null);
     if (!order) return null;
 
-    const result = validateCommerceEnvelope({
+    const envelope = validateCommerceEnvelope({
       currency: order.currency || 'CAD',
       billing_country: order.billing_country,
       shipping_country: order.shipping_country,
     });
-    if (!result.ok) return commercePolicyClosed(result, { order_id: orderId });
+    if (!envelope.ok) return commercePolicyClosed(envelope, { order_id: orderId });
 
     const fulfillment = String(order.fulfillment_type || '').trim().toLowerCase();
-    if (['shipping', 'mixed'].includes(fulfillment) && !isAllowedCommerceCountry(order.shipping_country)) {
-      return commercePolicyClosed({
-        code: 'shipping_country_not_supported',
-        error: COMMERCE_POLICY.message,
-        requested_country: order.shipping_country,
-      }, { order_id: orderId });
+    if (['shipping', 'mixed'].includes(fulfillment)) {
+      if (!isAllowedCommerceCountry(order.shipping_country)) {
+        return commercePolicyClosed({
+          code: 'shipping_country_not_supported',
+          error: COMMERCE_POLICY.message,
+          requested_country: order.shipping_country,
+        }, { order_id: orderId });
+      }
+      const shippingAddress = validateCanadianAddress({
+        country: order.shipping_country,
+        province: order.shipping_province,
+        postal_code: order.shipping_postal_code,
+      }, { required: true, label: 'Shipping' });
+      if (!shippingAddress.ok) return commercePolicyClosed(shippingAddress, { order_id: orderId });
+    }
+
+    if (hasAnyAddressValue(order, 'billing_')) {
+      const billingAddress = validateCanadianAddress({
+        country: order.billing_country,
+        province: order.billing_province,
+        postal_code: order.billing_postal_code,
+      }, { required: true, label: 'Billing' });
+      if (!billingAddress.ok) return commercePolicyClosed(billingAddress, { order_id: orderId });
     }
   }
 
