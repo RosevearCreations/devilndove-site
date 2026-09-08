@@ -90,6 +90,12 @@ function apply(data) {
   document.dispatchEvent(new CustomEvent('dd:public-module-visibility-ready', { detail: data }));
 }
 
+const currentPath = String(globalThis.location?.pathname || '/').toLowerCase();
+if (currentPath === '/shop/' || currentPath.startsWith('/shop/') || currentPath === '/cart/' || currentPath.startsWith('/cart/') || currentPath === '/checkout/' || currentPath.startsWith('/checkout/')) {
+  void import('/public/js/commerce-policy-runtime.js?v=77')
+    .catch((error) => console.warn('[DD commerce] Canada-only commerce policy runtime unavailable', error));
+}
+
 try {
   apply(await loadModules());
 } catch (error) {
