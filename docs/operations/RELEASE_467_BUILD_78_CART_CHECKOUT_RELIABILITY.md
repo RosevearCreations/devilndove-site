@@ -14,7 +14,7 @@ Build 78 starts from the exact fully-green Build 77 Production/Development check
 
 ## Purpose
 
-Build 78 hardens the buyer path from Cart through order creation and payment handoff without opening payment-provider acceptance. The build protects cart persistence, checkout retries, stock/price revalidation, shipping versus pickup, browser/server total authority, abandoned-checkout recovery, and duplicate-order prevention.
+Build 78 hardens the buyer path from Cart through order creation and payment handoff without opening payment-provider acceptance. The build protects cart persistence, checkout retries, stock/price revalidation, shipping versus pickup, browser/server total authority, abandoned-checkout recovery, failure handling, and idempotent order creation.
 
 ## Cart persistence
 
