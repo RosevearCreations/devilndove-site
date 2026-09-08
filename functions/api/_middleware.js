@@ -135,11 +135,11 @@ async function guardCommercePolicy(context) {
 }
 
 export async function onRequest(context) {
-  const paymentGuard = await guardPaymentProviderExecution(context);
-  if (paymentGuard) return paymentGuard;
-
   const commerceGuard = await guardCommercePolicy(context);
   if (commerceGuard) return commerceGuard;
+
+  const paymentGuard = await guardPaymentProviderExecution(context);
+  if (paymentGuard) return paymentGuard;
 
   try {
     return await context.next();
