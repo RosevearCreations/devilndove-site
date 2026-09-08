@@ -86,6 +86,21 @@ Build 76 does not create hidden SEO links or keyword stuffing. It verifies that 
 
 Build 76 validates syntax and Schema.org context across indexable source documents. Product structured-data detail remains governed by the retained dynamic Product parity system so price, availability, shipping and other Product facts continue to derive from the same visible buyer facts rather than a separate SEO-only truth.
 
+## Final convergence fixes
+
+The full Build 76 crawl exposed and then closed several previously silent source inconsistencies before promotion:
+
+- Custom Candle and Custom Soap landing pages now carry complete Open Graph identity metadata while preserving their existing approved images and structured data.
+- Custom Request, Events and Pickup now have explicit robots/social metadata parity.
+- Policy surfaces (`Privacy`, `Terms`, `Data Deletion`, `Social Connections`) now expose complete Open Graph/Twitter metadata without changing policy content.
+- Workshop Journal index and three static care/guide articles now have explicit `index,follow`, complete social metadata and sitemap coverage.
+- The dynamic Workshop Journal story template remains outside the static sitemap and uses a dynamic/noindex boundary until a reviewed story supplies its runtime canonical.
+- Four historical `.html` policy aliases are treated as canonical aliases rather than duplicate indexable pages.
+- `/toolshed/` now has a real crawlable inbound path from the Workshop Journal instead of existing only in the sitemap.
+- `sitemap.xml` now matches the intended static indexable route set produced by the crawler.
+
+These fixes are presentation/metadata-only. They add no D1/R2/provider mutation authority and do not alter Product or customer business data.
+
 ## Safety boundary
 
 - D1 schema mutation: **NONE**
