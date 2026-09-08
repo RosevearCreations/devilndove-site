@@ -7,31 +7,22 @@ import {
 } from '../../public/js/commerce-policy-core.js';
 
 // Devil n Dove Release 467 Build 77 — API safety middleware.
-// Keeps carried Product/Inventory conflict mapping, closes remote payment execution unless
-// explicitly opened for Development test/sandbox use, and applies the shared Canada-only
-// commerce policy before order/payment mutation or provider execution.
+// Build 78 carries the Canada-only boundary while allowing explicit local pickup.
 
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
-      'Referrer-Policy': 'strict-origin-when-cross-origin',
-    },
-  });
+  return new Response(JSON.stringify(data), { status, headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+  }});
 }
 
-function errorText(error) {
-  return String(error?.message || error || '');
-}
-
+function errorText(error) { return String(error?.message || error || ''); }
 function normalizePaymentProvider(value) {
   const provider = String(value || '').trim().toLowerCase();
   return ['paypal', 'stripe', 'square', 'manual', 'other'].includes(provider) ? provider : '';
 }
-
 function commercePolicyClosed(result = {}, extra = {}) {
   return json({
     ok: false,
@@ -48,10 +39,11 @@ function commercePolicyClosed(result = {}, extra = {}) {
     ...extra,
   }, 422);
 }
-
 function hasAnyAddressValue(source = {}, prefix = '') {
-  return ['address1', 'city', 'province', 'postal_code']
-    .some((field) => String(source?.[`${prefix}${field}`] || '').trim());
+  return ['address1', 'city', 'province', 'postal_code'].some((field) => String(source?.[`${prefix}${field}`] || '').trim());
+}
+function isPickupRequest(body = {}) {
+  return String(body?.fulfillment_method || '').trim().toLowerCase() === 'pickup';
 }
 
 async function guardPaymentProviderExecution(context) {
@@ -59,15 +51,12 @@ async function guardPaymentProviderExecution(context) {
   let url;
   try { url = new URL(request.url); } catch { return null; }
   if (request.method !== 'POST' || url.pathname !== '/api/checkout-prepare-payment') return null;
-
   let body = {};
   try { body = await request.clone().json(); } catch { return null; }
   const provider = normalizePaymentProvider(body?.provider || body?.payment_method || 'paypal') || 'paypal';
   if (!['paypal', 'stripe'].includes(provider)) return null;
-
   const status = paymentExecutionStatus(request.url, context.env || {}, provider);
   if (status.execution_authorized) return null;
-
   return json({
     ok: false,
     code: status.code,
@@ -104,7 +93,7 @@ async function guardCommercePolicy(context) {
     });
     if (!envelope.ok) return commercePolicyClosed(envelope);
 
-    if (hasAnyAddressValue(body, 'shipping_')) {
+    if (!isPickupRequest(body) && hasAnyAddressValue(body, 'shipping_')) {
       const shippingAddress = validateCanadianAddress({
         country: body?.shipping_country,
         province: body?.shipping_province,
@@ -134,9 +123,7 @@ async function guardCommercePolicy(context) {
       SELECT fulfillment_type, currency,
              shipping_address1, shipping_city, shipping_province, shipping_postal_code, shipping_country,
              billing_address1, billing_city, billing_province, billing_postal_code, billing_country
-      FROM orders
-      WHERE order_id = ?
-      LIMIT 1
+      FROM orders WHERE order_id = ? LIMIT 1
     `).bind(orderId).first().catch(() => null);
     if (!order) return null;
 
@@ -150,11 +137,7 @@ async function guardCommercePolicy(context) {
     const fulfillment = String(order.fulfillment_type || '').trim().toLowerCase();
     if (['shipping', 'mixed'].includes(fulfillment)) {
       if (!isAllowedCommerceCountry(order.shipping_country)) {
-        return commercePolicyClosed({
-          code: 'shipping_country_not_supported',
-          error: COMMERCE_POLICY.message,
-          requested_country: order.shipping_country,
-        }, { order_id: orderId });
+        return commercePolicyClosed({ code: 'shipping_country_not_supported', error: COMMERCE_POLICY.message, requested_country: order.shipping_country }, { order_id: orderId });
       }
       const shippingAddress = validateCanadianAddress({
         country: order.shipping_country,
@@ -173,38 +156,23 @@ async function guardCommercePolicy(context) {
       if (!billingAddress.ok) return commercePolicyClosed(billingAddress, { order_id: orderId });
     }
   }
-
   return null;
 }
 
 export async function onRequest(context) {
   const commerceGuard = await guardCommercePolicy(context);
   if (commerceGuard) return commerceGuard;
-
   const paymentGuard = await guardPaymentProviderExecution(context);
   if (paymentGuard) return paymentGuard;
-
   try {
     return await context.next();
   } catch (error) {
     const raw = errorText(error);
     if (raw.includes('build440_finished_inventory_commitment_exceeds_available')) {
-      return json({
-        ok: false,
-        build: 440,
-        code: 'finished_inventory_commitment_conflict',
-        error: 'Available finished inventory changed while this request was being committed. The incomplete order was cancelled safely; refresh availability and try again.',
-        retry_safe_after_refresh: true,
-      }, 409);
+      return json({ ok: false, build: 440, code: 'finished_inventory_commitment_conflict', error: 'Available finished inventory changed while this request was being committed. The incomplete order was cancelled safely; refresh availability and try again.', retry_safe_after_refresh: true }, 409);
     }
     if (raw.includes('build440_finished_inventory_below_active_commitments')) {
-      return json({
-        ok: false,
-        build: 440,
-        code: 'finished_inventory_below_active_commitments',
-        error: 'Finished inventory cannot be reduced below quantities already committed to active orders. Release or resolve the downstream commitments first.',
-        retry_safe_after_refresh: false,
-      }, 409);
+      return json({ ok: false, build: 440, code: 'finished_inventory_below_active_commitments', error: 'Finished inventory cannot be reduced below quantities already committed to active orders. Release or resolve the downstream commitments first.', retry_safe_after_refresh: false }, 409);
     }
     throw error;
   }
