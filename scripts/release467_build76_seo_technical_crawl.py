@@ -17,9 +17,18 @@ PRODUCTION_ORIGIN = "https://devilndove.com"
 SITEMAP_PATH = ROOT / "sitemap.xml"
 ROBOTS_PATH = ROOT / "robots.txt"
 
-# Product Detail is a dynamic template. Individual slug canonicals are generated at runtime,
-# so the template itself must remain technically sound but is intentionally not a sitemap URL.
-DYNAMIC_TEMPLATE_ROUTES = {"/shop/product/"}
+# Dynamic templates do not belong in the static sitemap. Product Detail becomes a slug-specific
+# Product canonical at runtime. Workshop Journal story is a query-selected publication template
+# and is required to remain source noindex until a reviewed story is loaded.
+DYNAMIC_TEMPLATE_ROUTES = {"/shop/product/", "/workshop-journal/story/"}
+# These checked-in legacy flat-file entry points intentionally canonicalize to their directory
+# equivalents. They are audited as canonical aliases, not separate sitemap/index targets.
+CANONICAL_ALIAS_ROUTES = {
+    "/data-deletion.html": "/data-deletion/",
+    "/privacy.html": "/privacy/",
+    "/social-connections.html": "/social-connections/",
+    "/terms.html": "/terms/",
+}
 REQUIRED_SOCIAL_META = (
     "og:site_name",
     "og:type",
@@ -63,7 +72,8 @@ def route_for(path: Path) -> str:
 
 
 def expected_canonical(route: str) -> str:
-    return f"{PRODUCTION_ORIGIN}{route}"
+    canonical_route = CANONICAL_ALIAS_ROUTES.get(route, route)
+    return f"{PRODUCTION_ORIGIN}{canonical_route}"
 
 
 def normalize_internal_href(source_route: str, href: str) -> str | None:
@@ -154,6 +164,7 @@ class RouteAudit:
     indexable: bool
     noindex: bool
     canonical: str
+    canonical_alias: bool = False
     internal_targets: set[str] = field(default_factory=set)
     jsonld_types: set[str] = field(default_factory=set)
 
@@ -202,7 +213,7 @@ def parse_jsonld(audit: RouteAudit) -> None:
                 audit.jsonld_types.update(clean(item) for item in raw_type if clean(item))
             elif clean(raw_type):
                 audit.jsonld_types.add(clean(raw_type))
-    if audit.indexable:
+    if audit.indexable and not audit.canonical_alias:
         if valid < 1:
             FAIL.append(f"{audit.route}: indexable route missing valid JSON-LD")
         elif not context_seen:
@@ -218,8 +229,9 @@ def audit_route(path: Path) -> RouteAudit:
     noindex = "noindex" in robots
     canonicals = parser.canonical_values()
     canonical = canonicals[0] if len(canonicals) == 1 else ""
+    canonical_alias = route in CANONICAL_ALIAS_ROUTES
     indexable = not noindex and canonical.startswith(f"{PRODUCTION_ORIGIN}/")
-    audit = RouteAudit(path, route, parser, robots, indexable, noindex, canonical)
+    audit = RouteAudit(path, route, parser, robots, indexable, noindex, canonical, canonical_alias)
 
     if parser.h1_count != 1:
         FAIL.append(f"{route}: exactly one source H1 required (found {parser.h1_count})")
@@ -238,7 +250,13 @@ def audit_route(path: Path) -> RouteAudit:
         if (target := normalize_internal_href(route, href)) is not None
     }
 
-    if indexable:
+    if canonical_alias:
+        expected = expected_canonical(route)
+        if canonical != expected:
+            FAIL.append(f"{route}: legacy alias must canonicalize exactly to {expected}; found {canonical or 'missing'}")
+        if "index" not in robots and "noindex" not in robots:
+            FAIL.append(f"{route}: legacy canonical alias needs an explicit index/noindex policy")
+    elif indexable:
         if "index" not in robots or "follow" not in robots:
             FAIL.append(f"{route}: indexable route must explicitly declare index,follow")
         expected = expected_canonical(route)
@@ -257,6 +275,9 @@ def audit_route(path: Path) -> RouteAudit:
             FAIL.append(f"{route}: fewer than two crawlable internal links")
     elif not noindex:
         FAIL.append(f"{route}: public HTML route is neither explicit noindex nor Production-canonical indexable")
+
+    if route == "/workshop-journal/story/" and not noindex:
+        FAIL.append("/workshop-journal/story/: generic query-selected story template must remain source noindex,follow")
 
     parse_jsonld(audit)
     return audit
@@ -282,7 +303,8 @@ def sitemap_urls() -> list[str]:
 def main() -> None:
     paths = public_html_paths()
     audits = [audit_route(path) for path in paths]
-    indexable = {audit.route for audit in audits if audit.indexable}
+    indexable = {audit.route for audit in audits if audit.indexable and not audit.canonical_alias}
+    aliases = {audit.route for audit in audits if audit.canonical_alias}
     noindex = {audit.route for audit in audits if audit.noindex}
 
     sitemap = sitemap_urls()
@@ -302,6 +324,9 @@ def main() -> None:
     leaked_noindex = sorted(sitemap_routes & noindex)
     if leaked_noindex:
         FAIL.append("sitemap.xml includes noindex routes: " + ", ".join(leaked_noindex))
+    leaked_aliases = sorted(sitemap_routes & aliases)
+    if leaked_aliases:
+        FAIL.append("sitemap.xml includes legacy canonical aliases: " + ", ".join(leaked_aliases))
 
     robots = ROBOTS_PATH.read_text(encoding="utf-8", errors="replace") if ROBOTS_PATH.exists() else ""
     if "User-agent: *" not in robots:
@@ -314,7 +339,7 @@ def main() -> None:
     inbound: dict[str, set[str]] = defaultdict(set)
     internal_edges = 0
     for audit in audits:
-        if not audit.indexable:
+        if audit.route not in indexable:
             continue
         for target in audit.internal_targets:
             normalized = target if target.endswith("/") or "." in Path(target).name else target + "/"
@@ -336,17 +361,19 @@ def main() -> None:
     print("RELEASE 467 BUILD 76 SEO TECHNICAL CRAWL")
     print(f"public_html_documents={len(paths)}")
     print(f"indexable_routes={len(indexable)}")
+    print(f"canonical_alias_routes={len(aliases)}")
     print(f"noindex_routes={len(noindex)}")
     print(f"sitemap_routes={len(sitemap_routes)}")
     print(f"internal_indexable_edges={internal_edges}")
     print("one_h1=ENFORCED")
     print("canonical_production_origin=ENFORCED")
+    print("legacy_canonical_aliases=EXPLICIT")
     print("robots_index_noindex=ENFORCED")
     print("sitemap_parity=ENFORCED")
     print("metadata_open_graph_twitter=ENFORCED")
     print("jsonld_schema_context=ENFORCED")
     print("internal_link_coverage=ENFORCED")
-    print("dynamic_product_template_sitemap_exception=EXPLICIT")
+    print("dynamic_template_sitemap_exception=EXPLICIT")
 
     if FAIL:
         print("RELEASE 467 BUILD 76 SEO TECHNICAL CRAWL: FAIL")
