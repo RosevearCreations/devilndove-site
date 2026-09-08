@@ -8,6 +8,7 @@ import {
 } from './commerce-policy-core.js';
 
 // Release 467 Build 77 — public presentation + checkout-address enforcement.
+// Build 78 carries the same Canada-only authority while allowing explicit local pickup.
 // No network request, timer, storage mutation, payment call or commerce write is performed here.
 
 const path = String(globalThis.location?.pathname || '/').toLowerCase();
@@ -27,7 +28,6 @@ function ensurePolicyBanner() {
   const hero = document.querySelector('.hero');
   const container = document.querySelector('.container');
   if (!hero && !container) return;
-
   const banner = document.createElement('section');
   banner.id = 'ddCommercePolicyBanner';
   banner.className = 'card';
@@ -42,7 +42,6 @@ function ensurePolicyBanner() {
       </div>
       <span class="pill">CAD • Canada</span>
     </div>`;
-
   if (hero?.parentNode) hero.insertAdjacentElement('afterend', banner);
   else container?.prepend(banner);
 }
@@ -68,9 +67,7 @@ function lockCountry(id) {
   field.setAttribute('readonly', 'readonly');
   field.setAttribute('aria-readonly', 'true');
   field.dataset.commercePolicyLocked = 'CA';
-  const reset = () => {
-    if (!isAllowedCommerceCountry(field.value)) field.value = 'Canada';
-  };
+  const reset = () => { if (!isAllowedCommerceCountry(field.value)) field.value = 'Canada'; };
   field.addEventListener('change', reset);
   field.addEventListener('input', reset);
 }
@@ -85,18 +82,18 @@ function normalizePostalField(id) {
   if (!field) return;
   field.setAttribute('placeholder', 'A1A 1A1');
   field.setAttribute('inputmode', 'text');
-  field.addEventListener('blur', () => {
-    if (field.value) field.value = normalizeCanadianPostalCode(field.value);
-  });
+  field.addEventListener('blur', () => { if (field.value) field.value = normalizeCanadianPostalCode(field.value); });
 }
 
 function readCartRequiresShipping() {
   try {
     const rows = JSON.parse(localStorage.getItem('dd_cart') || '[]');
     return Array.isArray(rows) && rows.some((item) => Number(item?.requires_shipping || 0) === 1);
-  } catch {
-    return false;
-  }
+  } catch { return false; }
+}
+
+function checkoutUsesPickup() {
+  return String(document.getElementById('fulfillment_method')?.value || '').trim().toLowerCase() === 'pickup';
 }
 
 function showCheckoutPolicyError(message) {
@@ -111,12 +108,10 @@ function showCheckoutPolicyError(message) {
 
 function validateCheckoutPolicy() {
   const billingCountry = String(document.getElementById('billing_country')?.value || '').trim();
-  if (!isAllowedCommerceCountry(billingCountry)) {
-    return { ok: false, error: COMMERCE_POLICY.message };
-  }
+  if (!isAllowedCommerceCountry(billingCountry)) return { ok: false, error: COMMERCE_POLICY.message };
 
   const requiresShipping = readCartRequiresShipping();
-  if (requiresShipping) {
+  if (requiresShipping && !checkoutUsesPickup()) {
     const result = validateCanadianAddress({
       country: document.getElementById('shipping_country')?.value,
       province: document.getElementById('shipping_province')?.value,
@@ -135,7 +130,6 @@ function validateCheckoutPolicy() {
     }, { required: true, label: 'Billing' });
     if (!result.ok) return result;
   }
-
   return { ok: true };
 }
 
@@ -143,7 +137,6 @@ function hardenCheckoutAddressUi() {
   if (!path.startsWith('/checkout/')) return;
   const form = document.getElementById('checkoutForm');
   if (!form) return;
-
   lockCountry('shipping_country');
   lockCountry('billing_country');
   replaceProvinceInput('shipping_province');
@@ -156,7 +149,6 @@ function hardenCheckoutAddressUi() {
   relabel('billing_postal_code', 'Postal Code');
   normalizePostalField('shipping_postal_code');
   normalizePostalField('billing_postal_code');
-
   form.addEventListener('submit', (event) => {
     const result = validateCheckoutPolicy();
     if (result.ok) return;
@@ -164,7 +156,6 @@ function hardenCheckoutAddressUi() {
     event.stopImmediatePropagation();
     showCheckoutPolicyError(result.error || COMMERCE_POLICY.message);
   }, true);
-
   document.documentElement.dataset.ddCommercePolicyCheckout = COMMERCE_POLICY.version;
 }
 
@@ -173,15 +164,13 @@ function start() {
   ensurePolicyBanner();
   hardenCheckoutAddressUi();
   document.documentElement.dataset.ddCommercePolicyVersion = COMMERCE_POLICY.version;
-  document.dispatchEvent(new CustomEvent('dd:commerce-policy-ready', {
-    detail: {
-      version: COMMERCE_POLICY.version,
-      country: COMMERCE_POLICY.selling_country_code,
-      currency: COMMERCE_POLICY.currency,
-      us_sales_enabled: false,
-      us_shipping_enabled: false,
-    },
-  }));
+  document.dispatchEvent(new CustomEvent('dd:commerce-policy-ready', { detail: {
+    version: COMMERCE_POLICY.version,
+    country: COMMERCE_POLICY.selling_country_code,
+    currency: COMMERCE_POLICY.currency,
+    us_sales_enabled: false,
+    us_shipping_enabled: false,
+  }}));
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
