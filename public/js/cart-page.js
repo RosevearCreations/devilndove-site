@@ -1,4 +1,5 @@
 // File: /public/js/cart-page.js
+// Release 467 Build 77: cart trust copy reflects the shared Canada-only commerce boundary.
 
 document.addEventListener("DOMContentLoaded", () => {
   const cartEmptyEl = document.getElementById("cartEmpty");
@@ -39,14 +40,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-
   function renderCartTrust() {
     if (!cartPolicyTrustMount) return;
     cartPolicyTrustMount.innerHTML = `
       <h2 style="margin-top:0">Shipping, timing, and support before checkout</h2>
       <div class="small">We keep a few trust reminders near the cart so buyers do not have to backtrack across product pages to remember the basics.</div>
       <ul class="small" style="margin-top:12px;padding-left:18px">
-        <li>Shipping-required items will need address details during checkout, while no-shipping or digital-style items are identified earlier in the browse flow.</li>
+        <li><strong>Canada-only storefront:</strong> storefront orders currently require a Canadian billing country, physical orders ship within Canada only, and U.S. sales/shipping are unavailable.</li>
+        <li>Storefront totals and payment preparation use CAD.</li>
+        <li>Shipping-required items will need a valid Canadian province/territory and postal code during checkout.</li>
         <li>Custom, personalized, or made-to-order timing should be confirmed before payment so one-off craft work is not confused with ready-to-ship stock.</li>
         <li>Questions about delivery, pickup, fit, finish, or a specific item can be sent through the contact page before checkout if anything needs clarifying.</li>
         <li>Gallery, About, and Creations pages provide more workshop context for shoppers who want process and trust details before placing an order.</li>
