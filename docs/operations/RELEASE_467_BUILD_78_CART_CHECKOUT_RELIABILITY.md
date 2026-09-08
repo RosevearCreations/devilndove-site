@@ -114,9 +114,9 @@ Build 78 is complete only when the exact Development SHA proves:
 17. `main` is promoted only by non-force fast-forward;
 18. exact Production Pages Deploy and Production Live Resource Integrity Proof both succeed.
 
-## Development proof checkpoint
+## Development proof authority
 
-The implementation reached a fully-green Development checkpoint before Production promotion. The release process requires all proofs to be rerun on the exact final SHA whenever this document itself changes, so the current exact-SHA workflow results remain the authority rather than copied run IDs here.
+The implementation must be promoted from an exact fully-green Development SHA. The GitHub Actions records on that exact SHA are the release proof authority; this document deliberately does not embed a mutable final SHA or run-number snapshot that would itself create another source commit and invalidate those exact-SHA proofs.
 
 ## Next planned build
 
