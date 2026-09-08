@@ -33,7 +33,7 @@ def run_python(path: str, label: str) -> None:
     )
     if result.stdout.strip():
         print(result.stdout.strip())
-    req(result.returncode == 0, f"{label} failed: {(result.stderr or result.stdout).strip()[-4000:]}")
+    req(result.returncode == 0, f"{label} failed: {(result.stderr or result.stdout).strip()[-5000:]}")
 
 
 doc = read("docs/operations/RELEASE_467_BUILD_76_SEO_TECHNICAL_CONVERGENCE.md")
@@ -71,16 +71,17 @@ req(not list((ROOT / "migrations/canonical").glob("0005*")), "Build 76 must rema
 for token in (
     "PRODUCTION_ORIGIN = \"https://devilndove.com\"",
     "DYNAMIC_TEMPLATE_ROUTES = {\"/shop/product/\"}",
+    "REQUIRED_SOCIAL_META",
+    '"og:site_name"',
+    '"og:type"',
+    '"og:title"',
+    '"og:description"',
+    '"og:url"',
+    '"og:image"',
+    '"twitter:card"',
     "exactly one source H1 required",
     "indexable route must explicitly declare index,follow",
     "canonical must be exactly",
-    "missing og:site_name",
-    "missing og:type",
-    "missing og:title",
-    "missing og:description",
-    "missing og:url",
-    "missing og:image",
-    "missing twitter:card",
     "indexable route missing valid JSON-LD",
     "sitemap.xml missing indexable routes",
     "sitemap.xml includes noindex routes",
