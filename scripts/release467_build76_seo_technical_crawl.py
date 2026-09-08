@@ -20,6 +20,15 @@ ROBOTS_PATH = ROOT / "robots.txt"
 # Product Detail is a dynamic template. Individual slug canonicals are generated at runtime,
 # so the template itself must remain technically sound but is intentionally not a sitemap URL.
 DYNAMIC_TEMPLATE_ROUTES = {"/shop/product/"}
+REQUIRED_SOCIAL_META = (
+    "og:site_name",
+    "og:type",
+    "og:title",
+    "og:description",
+    "og:url",
+    "og:image",
+    "twitter:card",
+)
 SKIP_TOP_LEVEL = {
     ".git",
     ".github",
@@ -238,8 +247,7 @@ def audit_route(path: Path) -> RouteAudit:
         description = parser.meta_value("description")
         if len(description) < 40:
             FAIL.append(f"{route}: meta description is missing or under 40 characters")
-        required_meta = ("og:site_name", "og:type", "og:title", "og:description", "og:url", "og:image", "twitter:card")
-        for key in required_meta:
+        for key in REQUIRED_SOCIAL_META:
             if not parser.meta_value(key):
                 FAIL.append(f"{route}: missing {key}")
         og_url = parser.meta_value("og:url")
@@ -274,7 +282,6 @@ def sitemap_urls() -> list[str]:
 def main() -> None:
     paths = public_html_paths()
     audits = [audit_route(path) for path in paths]
-    by_route = {audit.route: audit for audit in audits}
     indexable = {audit.route for audit in audits if audit.indexable}
     noindex = {audit.route for audit in audits if audit.noindex}
 
@@ -316,7 +323,7 @@ def main() -> None:
                 internal_edges += 1
     orphaned = sorted(
         route for route in expected_sitemap
-        if route != "/" and not (inbound.get(route) - {route})
+        if route != "/" and not (inbound.get(route, set()) - {route})
     )
     if orphaned:
         FAIL.append("indexable sitemap routes without an inbound link from another indexable page: " + ", ".join(orphaned))
