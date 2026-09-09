@@ -18,7 +18,9 @@ function connectionHealth(row, now = Date.now()) {
   const access = row.access_expires_at ? Date.parse(String(row.access_expires_at)) : NaN;
   const refresh = row.refresh_expires_at ? Date.parse(String(row.refresh_expires_at)) : NaN;
   if (Number.isFinite(refresh) && refresh <= now) return 'reauthorization_required';
-  if (Number.isFinite(access) && access <= now) return row.refresh_token_present ? 'refresh_due' : 'reauthorization_required';
+  if (!Number.isFinite(access)) return 'connected_expiry_unknown';
+  if (access <= now) return row.refresh_token_present ? 'refresh_due' : 'reauthorization_required';
+  if (access - now <= 15 * 60 * 1000) return row.refresh_token_present ? 'refresh_due_soon' : 'reauthorization_due_soon';
   return 'healthy';
 }
 
