@@ -1,12 +1,12 @@
 // Release 460 — secure OAuth callback lifecycle.
-// Remote exchange remains fail-closed unless Development authorization is explicitly opened.
+// Release 467 Build 85 — real callback finalization is restricted to the selected Development social provider.
 import { getDb } from '../../_lib/adminAudit.js';
-import { decryptOAuthSecret, encryptOAuthSecret, oauthRemoteAuthorizationOpen, safeDiagnosticCode, sha256Base64Url } from '../../_lib/oauthSecurity.js';
+import { decryptOAuthSecret, encryptOAuthSecret, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, safeDiagnosticCode, sha256Base64Url } from '../../_lib/oauthSecurity.js';
 import { exchangeAuthorizationCode, getOAuthContract, providerConfiguration, verifyOAuthIdentity } from '../../_lib/oauthProviders.js';
 
 function escapeHtml(value = '') { return String(value).replace(/[&<>'"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function htmlResponse(title,body,status=200){
-  const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)} | Devil n Dove</title><style>body{margin:0;background:#0b0f16;color:#eef2f7;font:16px/1.55 system-ui,sans-serif}.shell{max-width:760px;margin:0 auto;padding:32px 18px}.card{background:#111925;border:1px solid #334155;border-radius:18px;padding:24px}a{color:#f2c66d}.code{font-family:ui-monospace,monospace;overflow-wrap:anywhere;background:#080c12;padding:10px;border-radius:9px}</style></head><body><main class="shell"><section class="card"><h1>${escapeHtml(title)}</h1>${body}<p><a href="/admin/it-integrations/">Return to I.T. Integrations</a></p></section></main></body></html>`;
+  const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)} | Devil n Dove</title><style>body{margin:0;background:#0b0f16;color:#eef2f7;font:16px/1.55 system-ui,sans-serif}.shell{max-width:760px;margin:0 auto;padding:32px 18px}.card{background:#111925;border:1px solid #334155;border-radius:18px;padding:24px}a{color:#f2c66d}.code{font-family:ui-monospace,monospace;overflow-wrap:anywhere;background:#080c12;padding:10px;border-radius:9px}</style></head><body><main class="shell"><section class="card"><h1>${escapeHtml(title)}</h1>${body}<p><a href="/admin/social-publishing/#social-oauth-acceptance">Return to Social Publishing OAuth acceptance</a></p></section></main></body></html>`;
   return new Response(html,{status,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','X-DND-Release':'460'}});
 }
 function expiresAt(seconds){ const n=Number(seconds||0); return n>0?new Date(Date.now()+Math.min(n,315360000)*1000).toISOString():null; }
@@ -28,13 +28,19 @@ export function createOAuthCallback(providerKey){
     const code=url.searchParams.get('code')||'';
     const state=url.searchParams.get('state')||'';
     const cfg=providerConfiguration(contract,env);
+    const selectedProvider=oauthAcceptanceProvider(env);
+    const globalRemoteOpen=oauthRemoteAuthorizationOpen(env,request.url);
+    const selectedRemoteOpen=oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key);
 
     // Plain callback browsing remains a safe readiness surface even while live authorization is closed.
     if(!code&&!state&&!url.searchParams.get('error')){
-      return htmlResponse(`${contract.label} OAuth callback is available`,`<p>This exact HTTPS callback route is deployed for Release 460.</p><p class="code">${escapeHtml(url.origin+url.pathname)}</p><p>Provider configuration: ${cfg.configured?'configured':'not configured yet'}.</p><p>Live provider authorization remains closed until explicitly opened in Development.</p>`);
+      return htmlResponse(`${contract.label} OAuth callback is available`,`<p>This exact HTTPS callback route is deployed for the secure OAuth lifecycle.</p><p class="code">${escapeHtml(url.origin+url.pathname)}</p><p>Provider configuration: ${cfg.configured?'configured':'not configured yet'}.</p><p>Selected Development acceptance provider: ${escapeHtml(selectedProvider||'none')}.</p><p>Build 85 finalizes a real callback only when this route belongs to the explicitly selected Development provider. Provider publication remains closed.</p>`);
     }
-    if(!oauthRemoteAuthorizationOpen(env,request.url)){
-      return htmlResponse(`${contract.label} authorization is closed`,'<p>Release 460 rejected this live authorization response because provider authorization is deliberately closed.</p><p>No authorization code was exchanged, no token was stored, and nothing was published.</p>',423);
+    if(!selectedRemoteOpen){
+      const mismatch=Boolean(globalRemoteOpen&&selectedProvider&&selectedProvider!==contract.key);
+      return htmlResponse(`${contract.label} authorization is closed`, mismatch
+        ? '<p>This OAuth response belongs to a provider that is not selected for the current Development acceptance session.</p><p>No authorization code was exchanged, no token was stored, and nothing was published.</p>'
+        : '<p>Build 85 rejected this live authorization response because the Development operator switch and selected-provider boundary are not both open.</p><p>No authorization code was exchanged, no token was stored, and nothing was published.</p>',423);
     }
     if(!state)return htmlResponse(`${contract.label} connection was rejected safely`,'<p>The required one-time state value was missing.</p><p>No token was stored and nothing was published.</p>',400);
     const db=getDb(env);
@@ -85,7 +91,7 @@ export function createOAuthCallback(providerKey){
       `).bind(contract.key,remoteSubject,accessCipher,refreshCipher,idCipher,String(token.token_type||'Bearer').slice(0,30),JSON.stringify(scopes),accessExpiry,refreshExpiry,tx.created_by_user_id||null).run();
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='complete',completed_at=CURRENT_TIMESTAMP,pkce_verifier_ciphertext=NULL,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(tx.transaction_id).run();
       await securityEvent(db,contract.key,'authorization','complete','intended_account_verified',tx.transaction_id,tx.created_by_user_id);
-      return htmlResponse(`${contract.label} Development connection stored securely`,'<p>The authorization code was consumed once, exchanged server-side, and the intended provider account was verified before encrypted token persistence.</p><p>Provider publication remains disabled.</p>');
+      return htmlResponse(`${contract.label} Development connection stored securely`,'<p>The authorization code was consumed once, exchanged server-side, and the intended provider account was verified before encrypted token persistence.</p><p>Build 85 does not authorize provider publication. Return to Social Publishing to complete human draft review evidence.</p>');
     }catch(error){
       const diagnostic=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'authorization_finalize_failed');
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='failed',pkce_verifier_ciphertext=NULL,diagnostic_code=?,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(diagnostic,tx.transaction_id).run();
