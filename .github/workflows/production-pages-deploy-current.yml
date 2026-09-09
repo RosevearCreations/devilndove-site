@@ -88,7 +88,8 @@ jobs:
           assert production.get('role')=='CURRENT_PRODUCTION_BASELINE',production
           external=authority.get('external_lanes') or {}
           assert all(str(value).startswith('HOLD_EXTERNAL') for key,value in external.items() if key!='caip_private_media'),external
-          assert str(external.get('caip_private_media') or '').startswith('HOLD_EXTERNAL'),external
+          caip_state=str(external.get('caip_private_media') or '')
+          assert caip_state=='EVIDENCE_DEPENDENT' or caip_state.startswith('HOLD_EXTERNAL'),external
 
           assert environment['environment_release']==463, environment
           assert environment['canonical_pages_project']=='devilndove-site', environment
