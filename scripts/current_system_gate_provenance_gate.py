@@ -82,7 +82,8 @@ def run_current_contract(path, label):
 # Cart / Checkout order creation and payment-retry recovery, or the preparation-only
 # Stripe API-version/idempotency contract while real Stripe acceptance remains HOLD,
 # or the preparation-only PayPal sandbox request-id/replay contract while real
-# PayPal acceptance remains HOLD.
+# PayPal acceptance remains HOLD, or the read-only Finance/Accounting monthly
+# convergence with existing write owners preserved.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -102,6 +103,7 @@ run_current_contract('scripts/release467_build77_gate.py', 'Release 467 Build 77
 run_current_contract('scripts/release467_build78_gate.py', 'Release 467 Build 78')
 run_current_contract('scripts/release467_build79_gate.py', 'Release 467 Build 79')
 run_current_contract('scripts/release467_build80_gate.py', 'Release 467 Build 80')
+run_current_contract('scripts/release467_build81_gate.py', 'Release 467 Build 81')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')

@@ -97,6 +97,7 @@ export async function readAccountingExpenses(db, options = {}) {
   if (!db) throw new TypeError('A D1 database binding is required.');
 
   const limit = boundedInt(options.limit);
+  const periodMonth = /^\d{4}-(0[1-9]|1[0-2])$/.test(text(options.month)) ? text(options.month) : '';
   const expenseTableExists = await tableExists(db, AUTHORITY_TABLE);
   if (!expenseTableExists) {
     return basePayload({
@@ -141,7 +142,7 @@ export async function readAccountingExpenses(db, options = {}) {
     ? 'COALESCE(aa.attachment_count, 0) AS attachment_count'
     : '0 AS attachment_count';
 
-  const result = await db.prepare(`
+  const statement = db.prepare(`
     SELECT
       ae.expense_id AS expense_id,
       ae.expense_date AS expense_date,
@@ -160,9 +161,13 @@ export async function readAccountingExpenses(db, options = {}) {
       ae.updated_at AS updated_at
     FROM accounting_expenses ae
     ${attachmentJoin}
+    ${periodMonth ? "WHERE substr(COALESCE(ae.expense_date, ae.created_at, ''), 1, 7) = ?" : ''}
     ORDER BY COALESCE(ae.expense_date, ae.created_at, '1970-01-01') DESC, ae.expense_id DESC
     LIMIT ?
-  `).bind(limit).all();
+  `);
+  const result = periodMonth
+    ? await statement.bind(periodMonth, limit).all()
+    : await statement.bind(limit).all();
 
   const expenses = rows(result).map(shapeExpense);
   return basePayload({
@@ -171,6 +176,7 @@ export async function readAccountingExpenses(db, options = {}) {
     missing_columns: [],
     attachment_table_available: attachmentTableAvailable,
     attachment_join_enabled: attachmentJoinEnabled,
+    period_month: periodMonth || null,
     expenses,
     count: expenses.length,
   });

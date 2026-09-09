@@ -24,6 +24,16 @@
 .accounting-ops-empty{display:grid;gap:4px;padding:14px;border:1px dashed rgba(127,127,127,.4);border-radius:12px}
 .accounting-ops-authority{margin:0}
 #accountingOpsStatus[data-state="error"]{font-weight:700}
+.finance-cockpit-boundary{padding:12px 14px;border-left:4px solid currentColor;border-radius:10px;background:rgba(127,127,127,.08);line-height:1.45}
+.finance-cockpit-stages{display:grid;gap:10px}
+.finance-cockpit-stage{display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;padding:14px;border:1px solid rgba(127,127,127,.28);border-left-width:5px;border-radius:12px}
+.finance-cockpit-stage.state-ready{border-left-color:#237a3b}.finance-cockpit-stage.state-review{border-left-color:#a66b00}.finance-cockpit-stage.state-unavailable{border-left-color:#a12626}
+.finance-cockpit-stage-number{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(127,127,127,.13);font-weight:800}
+.finance-cockpit-stage-body{display:grid;gap:9px;min-width:0}.finance-cockpit-stage-body p{margin:0;line-height:1.45}
+.finance-cockpit-stage-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.finance-cockpit-stage-title h3{margin:0}
+.finance-cockpit-state{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:4px 8px;border:1px solid currentColor;border-radius:999px}
+.finance-cockpit-metrics{display:flex;gap:8px;flex-wrap:wrap}.finance-cockpit-metrics>span{display:grid;gap:2px;min-width:110px;padding:8px 10px;border-radius:8px;background:rgba(127,127,127,.09)}
+.finance-cockpit-metrics small{font-size:.72rem}.finance-cockpit-actions{display:flex;gap:8px;flex-wrap:wrap}
 @media(max-width:900px){
  .accounting-ops-head{display:grid}
  .accounting-ops-summary,.accounting-ops-snapshot{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -34,4 +44,5 @@
  .accounting-ops-summary,.accounting-ops-snapshot{grid-template-columns:1fr}
  .accounting-ops-item{grid-template-columns:1fr;gap:5px}
  .accounting-ops-owner{text-align:left}
+ .finance-cockpit-stage{grid-template-columns:1fr}.finance-cockpit-stage-title{display:grid}
 }

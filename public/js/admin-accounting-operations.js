@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const mount=document.getElementById('accountingOperationsMount')||document.getElementById('financeOperationsMount');
   if(!mount||!window.DDAuth)return;
+  if(mount.id==='financeOperationsMount'&&mount.dataset.financeCockpitBuild==='81')return;
   const RELEASE=457;
   const financeCommandCenter=mount.id==='financeOperationsMount';
   const resolveHref=(href)=>financeCommandCenter&&String(href||'').startsWith('#')?`/admin/accounting/${href}`:href;
