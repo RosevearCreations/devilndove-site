@@ -2,52 +2,59 @@
 
 ## Current Development and Production authority
 
-**Release 467 Build 61 — Production Live Resource Proof Repair** is the current validation-only closure candidate.
+**Release 467 Build 86 — I.T. Operations & Self-Diagnostics** is the current Development closure candidate.
 
-Last fully verified Development is Build 60 — Production Resource Binding & Account/Auth Recovery:
-- `dev` `2f099d88b39a35a3bb8cf73798ba2c30b2b82083`
-- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
-- System `33972673238` SUCCESS
-- Quality `33972673246` SUCCESS
-- I.T. `33972673266` SUCCESS
-- Hygiene `33972673254` SUCCESS
-- exact Preview, canonical Development D1, read-only data authority, bindings, non-secret smoke and regression evidence: SUCCESS.
+Last fully verified Development is Build 85 — Socials & OAuth Acceptance:
+- `dev` `33dc9857e1fada5549181a28ce4ef26c4a919572`
+- tree `b2c6b80401241f1757cd172511d12f9d813bc817`
+- System `34386667094` SUCCESS
+- Quality `34386667361` SUCCESS
+- I.T. `34386667111` SUCCESS
+- Hygiene `34386667194` SUCCESS
+- exact Preview, canonical Development D1, read-only data authority, bindings and non-secret smoke: SUCCESS.
 
-Current Production is Build 60:
-- `main` `732bac55a4a43434a31090bb3b9c6b7b2c5a7939`
-- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
-- Production Pages Deploy `33972781588` SUCCESS.
+Current Production is also Build 85:
+- `main` `33dc9857e1fada5549181a28ce4ef26c4a919572`
+- tree `b2c6b80401241f1757cd172511d12f9d813bc817`
+- Production Pages Deploy `34386848470` SUCCESS
+- Production Live Resource Integrity `34386976511` SUCCESS.
 
-The Build 60 Production workflow proved the exact fully-green Development tree, snapshotted/preserved Production business data, proved canonical Production D1 and isolation/FK integrity, deployed the exact main SHA with live bindings, passed public smoke and preserved promotion proof.
+The Build 85 Production chain proved the exact fully-green Development tree, preserved Production business data, proved canonical Production D1 and isolation/FK integrity, deployed the exact main SHA with live bindings, passed public smoke, and re-proved live account/D1 compatibility plus Product R2/API photography.
 
-## Build 60 incident correction
+## Build 86 scope
 
-Build 60 corrected the live account/session compatibility path used by Create User and password operations, broadened Product-media recovery across current and legacy public R2 prefixes, and injected that recovery site-wide. It added no migration, D1 business-data copy or R2 mutation.
+Build 86 closes the Release 467 Build 62–86 sequence by converging I.T. operational truth and self-diagnostics. `/admin/it/` becomes the first-stop control centre for:
+- deployment environment, branch and runtime SHA evidence;
+- D1 and Product/CAIP R2 binding presence;
+- canonical migration ledger/proofs, schema drift and foreign-key integrity;
+- browser/API/runtime incidents;
+- five-module and root-admin/I.T. authority;
+- provider configuration/HOLDs without secret values;
+- release-gate/exact-SHA promotion evidence;
+- backup, rollback and isolated recovery guidance;
+- prioritized corrective instructions that route to the owning workspace.
 
-## Why Build 61 exists
+Build 86 deliberately does **not** add automatic repair. It adds no new D1 migration, no request-time schema mutation, no D1/R2/binding write, no provider execution/publication, no deployment/restore execution and no Production business-data overwrite.
 
-The new post-deploy `Production Live Resource Integrity Proof` run `33972823412` failed before its first resource assertion. The proof workflow omitted the Cloudflare account context that the successful Production deployment workflow supplies to Wrangler. Therefore that run is a **validation-harness failure**, not evidence that Production D1 or R2 failed.
+## Current external acceptance
 
-Build 61 repairs and strengthens the proof so Production cannot be called fully incident-validated unless it proves:
-- live `users`/`sessions` schema compatibility read-only;
-- a known real R2 Product object through the deployed same-origin media route;
-- nonzero live `/api/products` rows and at least one public Product image URL;
-- real Product image bytes from the public URL or same-origin recovery route;
-- healthy `/api/storefront-merchandising` JSON;
-- Production D1 reachability through the public auth diagnostic.
+These remain independent of source/deployment health:
+- Stripe Development: `HOLD_EXTERNAL`
+- PayPal sandbox: `HOLD_EXTERNAL`
+- Social OAuth selected-provider acceptance: `HOLD_EXTERNAL`
+- CAIP private-media acceptance: evidence-dependent
+- Cloudflare Access service-token acceptance: `HOLD_EXTERNAL`
 
-Build 61 is validation-only: no application runtime change, canonical migration, D1 business-data mutation, R2 mutation, provider execution or Cloudflare Access mutation.
+Configuration booleans are readiness information only; they never imply provider acceptance or execution permission.
 
-## Next sequence
+## Build 86 closure sequence
 
-1. Pass Build 61 exact feature-head System, Quality and I.T. proofs.
-2. Merge the exact tested head to `dev`.
-3. Require exact merged-`dev` System + Quality + I.T. + Hygiene and exact Preview acceptance.
-4. Promote that exact tree to `main` under the user’s explicit incident-validation authorization.
-5. Require the normal Production preservation/D1/FK/binding/smoke proof **and** the repaired live-resource proof.
-6. If the live Product API returns zero products or zero public image URLs, treat that as the next concrete Storefront defect rather than calling the image incident closed.
-7. If live resources are green but authenticated Create User still returns 503, use the structured response detail/Cloudflare Function evidence for the next bounded account-write correction; do not mutate Production schema by guesswork.
+1. Complete the Build 86 source/runtime gate package on the candidate branch.
+2. Fast-forward the exact candidate to `dev`.
+3. Require exact merged-`dev` System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene plus canonical Development D1/binding proof and exact Preview smoke.
+4. Promote the same exact SHA/tree to `main` only when all Development checks are GREEN.
+5. Require Production business-data preservation, canonical Production D1/FK/binding proof, exact Pages deployment, public smoke and promotion proof.
+6. Require Production Live Resource Integrity to re-prove live D1, same-origin Product R2, Product API photography and account diagnostic.
+7. Only then mark Build 86 complete and the Build 62–86 roadmap closed.
 
-After the incident is actually proven closed, resume the separate legacy browser-module naming convergence (`business-administration` → canonical five-module runtime) without weakening root-admin full access.
-
-Canonical migrations remain exactly `0001`–`0004`. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain separate HOLD/evidence-dependent lanes.
+Canonical migrations remain exactly `0001`–`0004`. No Build 87 scope has been started; the next roadmap should be planned only after Build 86 receives its own exact Production closure proof.
