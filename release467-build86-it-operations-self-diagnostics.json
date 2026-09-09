@@ -1,0 +1,72 @@
+{
+  "release": 467,
+  "build": 86,
+  "title": "I.T. Operations & Self-Diagnostics",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build86-it-operations-self-diagnostics",
+  "starting_point": {
+    "development": {
+      "sha": "33dc9857e1fada5549181a28ce4ef26c4a919572",
+      "tree": "b2c6b80401241f1757cd172511d12f9d813bc817",
+      "system_gate_run": 34386667094,
+      "quality_run": 34386667361,
+      "it_admin_runtime_run": 34386667111,
+      "repository_hygiene_run": 34386667194,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "33dc9857e1fada5549181a28ce4ef26c4a919572",
+      "tree_sha": "b2c6b80401241f1757cd172511d12f9d813bc817",
+      "production_pages_deploy_run": 34386848470,
+      "production_live_resource_integrity_run": 34386976511,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "diagnostic_domains": [
+      "deployment",
+      "bindings",
+      "schema",
+      "runtime",
+      "module_authority",
+      "providers",
+      "release_gates",
+      "backup_recovery"
+    ],
+    "corrective_instructions": true,
+    "automatic_repair": false,
+    "read_only_projection": true
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "final_closure": null
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT"
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "deployment_execution_from_diagnostics": false,
+    "restore_execution_from_diagnostics": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
