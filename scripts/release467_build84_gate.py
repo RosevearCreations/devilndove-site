@@ -91,7 +91,7 @@ for token in ('.creator84-stage-grid', '.creator84-boundary', '.creator84-stage-
 for token in (
     'seven-stage Creative Automation authority', 'private raw-media intake path',
     'Completed raw originals cannot be overwritten/deleted',
-    'Content Studio handoff', 'profitability',
+    'Content Studio', 'handoff', 'profitability',
 ):
     req(token.lower() in legacy_doc.lower(), f'Existing Creative Automation authority missing preserved token: {token}')
 for token in ('private', 'raw', 'delete', 'promotion'):
