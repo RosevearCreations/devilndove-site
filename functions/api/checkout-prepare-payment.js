@@ -1,4 +1,5 @@
 import { paymentExecutionStatus } from './_lib/paymentExecution.js';
+import { paypalJsonHeaders, paypalOrderRequestId } from './_lib/paypalDevelopment.js';
 import {
   stripeCheckoutIdempotencyKey,
   stripeIntegrationIdentifier,
@@ -201,10 +202,10 @@ async function createPaypalOrder(request, env, order, paymentRecord) {
 
   const response = await fetch(`${auth.base}/v2/checkout/orders`, {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${auth.access_token}`,
-      "Content-Type": "application/json"
-    },
+    headers: paypalJsonHeaders(
+      auth.access_token,
+      paypalOrderRequestId(paymentRecord.payment_id, order.order_id)
+    ),
     body: JSON.stringify(payload)
   });
 

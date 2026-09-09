@@ -1,5 +1,6 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { paymentExecutionStatus } from "../_lib/paymentExecution.js";
+import { paypalJsonHeaders, paypalRefundRequestId } from "../_lib/paypalDevelopment.js";
 import { stripeRefundIdempotencyKey, stripeRequestHeaders } from "../_lib/stripeDevelopment.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
@@ -105,12 +106,7 @@ async function createPaypalRefund(env, payment, amountCents, note, requestId) {
 
   const response = await fetch(`${auth.base}/v2/payments/captures/${encodeURIComponent(providerPaymentId)}/refund`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${auth.access_token}`,
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation',
-      'PayPal-Request-Id': requestId
-    },
+    headers: paypalJsonHeaders(auth.access_token, paypalRefundRequestId(requestId), { representation: true }),
     body: JSON.stringify(payload)
   });
   const data = await response.json().catch(() => null);
