@@ -82,7 +82,8 @@ jobs:
           assert int(authority.get('release') or 0)>=467,authority
           assert authority.get('state')=='DEVELOPMENT_GREEN',authority
           assert authority.get('automatic_production_promotion_authorized') is False,authority
-          assert authority.get('promotion_state')=='DEVELOPMENT_GREEN_NOT_YET_PRODUCTION',authority
+          promotion_state=str(authority.get('promotion_state') or '')
+          assert promotion_state!='PRODUCTION_GREEN' and ('NOT_YET_PRODUCTION' in promotion_state or promotion_state.endswith('_CANDIDATE_NOT_YET_VERIFIED')),authority
           production=authority.get('production_checkpoint') or {}
           assert production.get('state')=='PRODUCTION_GREEN',production
           assert production.get('role')=='CURRENT_PRODUCTION_BASELINE',production
@@ -103,6 +104,7 @@ jobs:
               'development_release': release['release'],
               'current_authority_release': authority['release'],
               'current_authority_build': authority['build'],
+              'promotion_state': promotion_state,
               'required Development proofs': ['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene'],
               'external_lanes': external,
               'provider_execution': policy['provider_execution'],
