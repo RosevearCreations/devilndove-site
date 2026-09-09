@@ -91,7 +91,10 @@ def run_current_contract(path, label):
 # Inventory, Product, Content Studio, Finance, OAuth/provider and publication owners preserved,
 # or the selected-provider Development Social OAuth acceptance lane requiring intended-account
 # verification plus explicit human-approved draft evidence while Production OAuth and all
-# provider/automatic publication remain fail-closed.
+# provider/automatic publication remain fail-closed, or the Build 86 read-only I.T.
+# Operations & Self-Diagnostics convergence across deployment, bindings, schema/runtime,
+# module authority, provider HOLDs, exact release gates and backup/recovery guidance while
+# automatic repair, provider execution, restore execution and Production writes remain closed.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -116,6 +119,7 @@ run_current_contract('scripts/release467_build82_gate.py', 'Release 467 Build 82
 run_current_contract('scripts/release467_build83_gate.py', 'Release 467 Build 83')
 run_current_contract('scripts/release467_build84_gate.py', 'Release 467 Build 84')
 run_current_contract('scripts/release467_build85_gate.py', 'Release 467 Build 85')
+run_current_contract('scripts/release467_build86_gate.py', 'Release 467 Build 86')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
