@@ -4,48 +4,54 @@
 
 ## Verified Development
 
-Build 60 — Production Resource Binding & Account/Auth Recovery is the last fully verified checkpoint:
-- `dev` `2f099d88b39a35a3bb8cf73798ba2c30b2b82083`
-- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
-- System Gate `33972673238` SUCCESS
-- Current Application Quality `33972673246` SUCCESS
-- I.T. Admin Runtime Proof `33972673266` SUCCESS
-- Repository Branch Hygiene `33972673254` SUCCESS
-- exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
+Build 85 — Socials & OAuth Acceptance is the last fully verified checkpoint:
+- `dev` `33dc9857e1fada5549181a28ce4ef26c4a919572`
+- tree `b2c6b80401241f1757cd172511d12f9d813bc817`
+- System Gate `34386667094` SUCCESS
+- Current Application Quality `34386667361` SUCCESS
+- I.T. Admin Runtime Proof `34386667111` SUCCESS
+- Repository Branch Hygiene `34386667194` SUCCESS
+- exact Preview, canonical Development D1, read-only data authority, Preview bindings and non-secret smoke: SUCCESS.
 
 ## Verified Production
 
-Build 60 is the current standard Production checkpoint:
-- `main` `732bac55a4a43434a31090bb3b9c6b7b2c5a7939`
-- tree `66bbd5b61e815b2bd9f2483eaa5161542c177e9a`
-- Production Pages Deploy `33972781588` SUCCESS.
+Build 85 is the current Production checkpoint:
+- `main` `33dc9857e1fada5549181a28ce4ef26c4a919572`
+- tree `b2c6b80401241f1757cd172511d12f9d813bc817`
+- Production Pages Deploy `34386848470` SUCCESS
+- Production Live Resource Integrity `34386976511` SUCCESS.
 
-The Production workflow proved exact green Development ancestry, Production business-data snapshot/preservation, canonical Production D1, isolation/FK integrity, exact deployment, live bindings, public smoke and promotion proof.
+The Production chain proved exact green Development ancestry, Production business-data preservation, canonical Production D1, isolation/FK integrity, exact deployment, live bindings, public smoke and promotion proof. Live-resource verification separately proved supported account/D1 access, same-origin Product R2 bytes, Product API photography and Production D1 diagnostic reachability.
 
-## Build 61 incident / validation boundary
+## Build 86 operational boundary
 
-Production Live Resource Integrity run `33972823412` failed before its resource assertions because its Wrangler D1 invocation omitted the Cloudflare account context present in the successful Production deployment workflow. That run is not evidence of a live D1 schema failure.
+Build 86 — **I.T. Operations & Self-Diagnostics** is the active Development closure candidate. It converges the current I.T., Reliability and Deployment Preflight truth onto the Build 85 verified baseline and adds one read-only diagnostic view covering:
+- deployment environment, branch and exact runtime SHA when exposed;
+- D1 and Product/CAIP R2 binding presence;
+- canonical migration ledger/proofs, expected five-module authority and foreign-key integrity;
+- runtime incidents and database reachability;
+- root-administrator effective manage authority with explicit I.T. manage grant;
+- Stripe/PayPal/Social OAuth configuration presence without secret values;
+- exact-SHA release-gate requirements and external acceptance separation;
+- backup/rollback/recovery guidance and prioritized corrective instructions.
 
-Subsequent Build 61 read-only diagnostics established the incident boundary:
-- Product rows and Product image metadata remain present in Production D1, while sampled historical Product delivery URLs returned HTML 404s.
-- Movie rows and front/back cover metadata remain present in Production D1, while sampled historical Movie `r2.dev` delivery URLs returned HTML 404s.
-- Production `users` and `sessions` tables are present and schema-compatible.
-- the account writer used 210,000 PBKDF2 iterations, above the Cloudflare Workers WebCrypto PBKDF2 runtime maximum used by this application path.
-- existing Cloudflare deployment credentials do not have R2 inventory/list permission; Build 61 therefore performs no blind R2 object copy or mutation.
-
-Build 61 — **Production Live Resource Proof Repair**:
-- uses 100,000 PBKDF2-HMAC-SHA256 iterations for new password writes while preserving verification of legacy SHA-256 and existing PBKDF2 hashes by their embedded iteration count;
-- maps browser domain groups onto the canonical five modules so `/admin/users/` resolves to `it-platform` instead of retired `business-administration`;
-- extends the read-only same-origin `/api/product-media` authority to historical Product and Movie public URLs and the `movies/` prefix;
-- keeps R2 access read-only (`bucket.get` only; no list/put/delete);
-- strengthens the live-resource proof so Product/Movie metadata cannot be mistaken for proven image-byte availability;
-- preserves canonical migrations exactly `0001`–`0004` and performs no D1 business-data migration.
+Build 86 never repairs automatically. It performs no request-time schema mutation, D1/R2/binding mutation, provider execution/publication, deployment execution, backup restore or Production business-data overwrite.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 61’s first source mutation ingested the exact Build 60 Development and Production closure. Build 61 must pass exact feature-head proofs, then exact merged-`dev` System + Quality + I.T. + Hygiene and Preview acceptance. Only that exact green tree may be promoted to `main` under explicit Production authorization.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 86 ingests the exact Build 85 Development and Production closure. Build 86 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
 
-Production must not be called incident-green merely because Pages deploys. Live account behavior and actual Product/Movie image bytes must be verified separately after the exact Build 61 Production deployment.
+The runtime I.T. diagnostic cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic therefore never substitutes for the exact external release proof.
+
+## Recovery discipline
+
+- Record a current D1 recovery point before a real schema change.
+- Rehearse restore only in a test/copied environment; never overwrite live Production business data as a diagnostic action.
+- Verify representative users, Products, Inventory, Orders, Packaging and readiness records after an isolated D1 restore.
+- Verify R2 inventory/re-link a safe test object without deleting live media.
+- Rehearse Pages rollback and return to the current deployment with smoke evidence.
+- Keep required binding/variable names documented without secret values.
+- Record recovery time and update the runbook when a rehearsal exposes missing steps.
 
 ## Environment boundaries
 
@@ -60,4 +66,4 @@ Production must not be called incident-green merely because Pages deploys. Live 
 - Production CAIP R2: `devilndove-caip-media`
 - Canonical migrations: exactly `0001`–`0004` via `scripts/d1_migrate.py`.
 
-Never overwrite Production business data from Development. External Stripe, PayPal, CAIP private-media, social OAuth and Cloudflare Access remain independent HOLD/evidence-dependent lanes.
+Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains evidence-dependent.
