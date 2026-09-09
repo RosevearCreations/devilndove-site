@@ -4,6 +4,7 @@
 const te = new TextEncoder();
 const td = new TextDecoder();
 const SENSITIVE_KEY = /(access[_-]?token|refresh[_-]?token|id[_-]?token|authorization|client[_-]?secret|shared[_-]?secret|code[_-]?verifier|(^|_)state($|_)|(^|_)code($|_)|password|private[_-]?key|secret|token)/i;
+const SOCIAL_OAUTH_ACCEPTANCE_PROVIDERS = Object.freeze(['pinterest', 'meta', 'x', 'tiktok', 'youtube']);
 
 function bytesToBase64Url(bytes) {
   let binary = '';
@@ -108,6 +109,19 @@ export function oauthRemoteAuthorizationOpen(env, requestUrl) {
   let host = '';
   try { host = new URL(String(requestUrl || '')).hostname; } catch { return false; }
   return mode === 'development-explicit' && isDevelopmentOAuthHost(host, env);
+}
+
+// Release 467 Build 85 adds a second gate on top of the historical Release 460 switch.
+// Exactly one social provider must be selected for a Development acceptance session.
+export function oauthAcceptanceProvider(env = {}) {
+  const key = String(env?.SOCIAL_OAUTH_ACCEPTANCE_PROVIDER || '').trim().toLowerCase();
+  return SOCIAL_OAUTH_ACCEPTANCE_PROVIDERS.includes(key) ? key : '';
+}
+
+export function oauthSelectedProviderAuthorizationOpen(env, requestUrl, providerKey) {
+  const selected = oauthAcceptanceProvider(env);
+  const requested = String(providerKey || '').trim().toLowerCase();
+  return Boolean(selected) && selected === requested && oauthRemoteAuthorizationOpen(env, requestUrl);
 }
 
 export function safeReturnPath(value, fallback = '/admin/it-integrations/') {

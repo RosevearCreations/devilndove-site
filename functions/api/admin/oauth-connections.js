@@ -1,6 +1,7 @@
 // Release 460 — redacted OAuth connection diagnostics plus guarded refresh/disconnect and intended-account lifecycle.
+// Release 467 Build 85 — remote refresh/revoke obey the selected Development social-provider boundary.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction } from '../_lib/adminAudit.js';
-import { decryptOAuthSecret, encryptOAuthSecret, encryptionKeyConfigured, oauthRemoteAuthorizationOpen, safeDiagnosticCode } from '../_lib/oauthSecurity.js';
+import { decryptOAuthSecret, encryptOAuthSecret, encryptionKeyConfigured, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, safeDiagnosticCode } from '../_lib/oauthSecurity.js';
 import { getOAuthContract, listOAuthContracts, providerIdentityExpectation, providerIdentityStatus, refreshOAuthToken, revokeOAuthToken, verifyOAuthIdentity } from '../_lib/oauthProviders.js';
 import { CURRENT_RELEASE } from '../_lib/releaseAuthority.js';
 
@@ -63,9 +64,14 @@ export async function onRequestGet({request,env}){
     ...item,
     intended_account:providerIdentityExpectation(getOAuthContract(item.key),env)
   }));
+  const selectedProvider=oauthAcceptanceProvider(env);
+  const globalRemoteOpen=oauthRemoteAuthorizationOpen(env,request.url);
   return json({
     ok:true,authority:'secure-oauth-lifecycle',environment:'development',development_host_only:true,
-    remote_authorization_open:oauthRemoteAuthorizationOpen(env,request.url),provider_publication_allowed:false,
+    remote_authorization_open:Boolean(globalRemoteOpen&&selectedProvider),
+    global_remote_operator_switch_open:globalRemoteOpen,
+    selected_acceptance_provider:selectedProvider||null,
+    provider_publication_allowed:false,
     encryption_key_configured:encryptionKeyConfigured(env),secret_values_emitted:false,provider_subject_values_emitted:false,
     intended_account_verification_required:true,refresh_health_is_local_only:true,
     pending_authorization_transactions:pending,replay_or_invalid_state_rejections:replayRejects,
@@ -82,7 +88,7 @@ export async function onRequestPost({request,env}){
   const row=await db.prepare(`SELECT * FROM oauth_provider_connections WHERE provider_key=? LIMIT 1`).bind(contract.key).first();
 
   if(action==='refresh'){
-    if(!oauthRemoteAuthorizationOpen(env,request.url))return json({ok:false,code:'oauth_remote_execution_closed',error:'Remote OAuth execution remains closed for Release 460.'},423);
+    if(!oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key))return json({ok:false,code:'oauth_provider_not_selected_for_acceptance',error:'Remote OAuth refresh is closed unless this is the explicitly selected Development acceptance provider.'},423);
     if(!row||row.connection_status==='disconnected'||!row.refresh_token_ciphertext)return json({ok:false,code:'oauth_refresh_token_unavailable'},409);
     try{
       const refresh=await decryptOAuthSecret(env,row.refresh_token_ciphertext,`oauth-token|${contract.key}|refresh`);
@@ -96,8 +102,8 @@ export async function onRequestPost({request,env}){
       const nextScopes=scopes(token.scope,JSON.parse(row.scopes_json||'[]'));
       await db.prepare(`UPDATE oauth_provider_connections SET remote_subject_id=?,access_token_ciphertext=?,refresh_token_ciphertext=?,token_type=?,scopes_json=?,access_expires_at=?,refresh_expires_at=COALESCE(?,refresh_expires_at),connection_status='connected',last_refresh_at=CURRENT_TIMESTAMP,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(String(identity.remoteSubject||'').slice(0,180),accessCipher,nextRefresh,String(token.token_type||row.token_type||'Bearer').slice(0,30),JSON.stringify(nextScopes),expiry(token.expires_in),expiry(token.refresh_expires_in),contract.key).run();
       await event(db,contract.key,'refresh','complete','intended_account_verified',admin.user_id);
-      await auditAdminAction(env,request,admin,{action_type:'oauth_token_refreshed',target_type:'provider',target_key:contract.key,details:{release:460,token_values_logged:false,intended_account_verified:true,provider_subject_logged:false}});
-      return json({ok:true,provider:contract.key,refreshed:true,intended_account_verified:true,token_values_emitted:false,provider_subject_values_emitted:false});
+      await auditAdminAction(env,request,admin,{action_type:'oauth_token_refreshed',target_type:'provider',target_key:contract.key,details:{release:460,build:85,token_values_logged:false,intended_account_verified:true,selected_provider_acceptance:true,provider_subject_logged:false}});
+      return json({ok:true,provider:contract.key,refreshed:true,intended_account_verified:true,selected_provider_acceptance:true,token_values_emitted:false,provider_subject_values_emitted:false});
     }catch(error){
       const code=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'oauth_refresh_failed');
       await db.prepare(`UPDATE oauth_provider_connections SET connection_status='refresh_required',diagnostic_code=?,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(code,contract.key).run();
@@ -108,8 +114,8 @@ export async function onRequestPost({request,env}){
 
   if(action==='disconnect'){
     if(!row||row.connection_status==='disconnected')return json({ok:true,provider:contract.key,already_disconnected:true,remote_revoke_state:row?.remote_revoke_state||'not_attempted'});
-    let remoteState='closed_by_release_boundary';
-    if(oauthRemoteAuthorizationOpen(env,request.url)&&row.access_token_ciphertext){
+    let remoteState='closed_by_selected_provider_boundary';
+    if(oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key)&&row.access_token_ciphertext){
       try{
         const access=await decryptOAuthSecret(env,row.access_token_ciphertext,`oauth-token|${contract.key}|access`);
         const result=await revokeOAuthToken(contract,env,access);
@@ -118,7 +124,7 @@ export async function onRequestPost({request,env}){
     }
     await db.prepare(`UPDATE oauth_provider_connections SET access_token_ciphertext=NULL,refresh_token_ciphertext=NULL,id_token_ciphertext=NULL,connection_status='disconnected',disconnected_at=CURRENT_TIMESTAMP,remote_revoke_state=?,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(remoteState,contract.key).run();
     await event(db,contract.key,'disconnect','complete',remoteState,admin.user_id);
-    await auditAdminAction(env,request,admin,{action_type:'oauth_provider_disconnected',target_type:'provider',target_key:contract.key,details:{release:460,remote_revoke_state:remoteState,local_token_material_destroyed:true}});
+    await auditAdminAction(env,request,admin,{action_type:'oauth_provider_disconnected',target_type:'provider',target_key:contract.key,details:{release:460,build:85,remote_revoke_state:remoteState,local_token_material_destroyed:true}});
     return json({ok:true,provider:contract.key,disconnected:true,local_token_material_destroyed:true,remote_revoke_state:remoteState,token_values_emitted:false});
   }
 
