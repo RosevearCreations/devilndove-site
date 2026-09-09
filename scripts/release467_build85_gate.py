@@ -120,7 +120,7 @@ for token in (
     'provider_execution_allowed: false', 'automatic_publication_allowed: false',
     'provider_contacted: false', 'secret_values_emitted: false',
     'provider_subject_values_emitted: false', 'production_authorization_open: false',
-    'start_authorization_available', 'publication_boundary', 'accepted: false',
+    'connected_expiry_unknown', 'start_authorization_available', 'publication_boundary', 'accepted: false',
 ):
     req(token in endpoint, f'Build 85 read-only acceptance endpoint missing token: {token}')
 req('fetch(' not in endpoint, 'Build 85 acceptance endpoint must not contact a provider')
@@ -155,13 +155,22 @@ for token in (
 ):
     req(token in css, f'Build 85 responsive/current-authority CSS missing token: {token}')
 
-# Existing human queue and secure connection authorities are preserved.
+# Existing human queue and secure connection authorities are preserved and remote lifecycle is selected-provider scoped.
 for token in ('approval_status', 'post_status', 'privacy_status', 'approved_for_public_post', 'publish_platforms'):
     req(token in queue, f'Existing social queue authority unexpectedly lost token: {token}')
 for token in ('approval_status', 'post_status', 'privacy_status', 'approved_for_public_post', "'needs_review', 'draft'", "'review_first'"):
     req(token in product_queue, f'Product-to-social review-first authority unexpectedly lost token: {token}')
-for token in ('provider_subject_emitted:false', 'token_material_present:\'redacted\'', 'intended_account_verification', 'refreshOAuthToken', 'revokeOAuthToken'):
-    req(token in connections, f'Existing secure OAuth connection authority unexpectedly lost token: {token}')
+for token in (
+    'provider_subject_emitted:false', "token_material_present:'redacted'", 'intended_account_verification',
+    'refreshOAuthToken', 'revokeOAuthToken', 'oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key)',
+    'oauth_provider_not_selected_for_acceptance', 'closed_by_selected_provider_boundary',
+):
+    req(token in connections, f'Existing/Build 85 secure OAuth connection authority missing token: {token}')
+try:
+    refresh_guard = connections.index("if(!oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key))")
+    req(refresh_guard < connections.index('decryptOAuthSecret(env,row.refresh_token_ciphertext'), 'OAuth refresh must fail before refresh-token decryption for a non-selected provider')
+except ValueError:
+    req(False, 'OAuth refresh selected-provider guard/order markers missing')
 for token in ('provider_execution: false', 'provider_publication: false', 'network_calls_allowed: false', 'production_mutation: false'):
     req(token in provider_plan, f'Existing non-executing publication planner unexpectedly lost token: {token}')
 
@@ -196,6 +205,7 @@ for path in (
     'functions/api/_lib/oauthSecurity.js',
     'functions/api/admin/oauth-start.js',
     'functions/api/social/oauth/_callback.js',
+    'functions/api/admin/oauth-connections.js',
     'functions/api/admin/social-oauth-acceptance.js',
     'public/js/admin-social-oauth-acceptance-v85.js',
 ):
