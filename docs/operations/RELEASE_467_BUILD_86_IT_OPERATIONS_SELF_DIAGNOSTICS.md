@@ -60,7 +60,7 @@ Build 86 returns corrective instructions and routes to the owning workspace:
 - release gates → Release Control
 - backup/recovery → Operational Continuity.
 
-No correction is executed by the diagnostic endpoint.
+No correction is executed by the diagnostic endpoint. **Automatic repair is explicitly disabled**; every corrective action remains operator-reviewed and owned by its specialist workflow.
 
 ## Safety / mutation boundary
 
@@ -74,6 +74,7 @@ Build 86 adds:
 - no backup/restore execution;
 - no Stripe/PayPal/Social provider call;
 - no provider publication;
+- no automatic repair;
 - no automatic Production promotion;
 - no Development-to-Production business-data overwrite.
 
