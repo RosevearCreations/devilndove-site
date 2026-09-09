@@ -1,0 +1,61 @@
+{
+  "release": 467,
+  "build": 85,
+  "title": "Socials & OAuth Acceptance",
+  "state": "PRODUCTION_GREEN",
+  "authority": "release467-build85-socials-oauth-acceptance",
+  "final_closure": {
+    "dev_sha": "33dc9857e1fada5549181a28ce4ef26c4a919572",
+    "tree_sha": "b2c6b80401241f1757cd172511d12f9d813bc817",
+    "proofs": {
+      "system_gate_run": 34386667094,
+      "current_application_quality_run": 34386667361,
+      "it_admin_runtime_proof_run": 34386667111,
+      "branch_hygiene_run": 34386667194
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true
+  },
+  "production_checkpoint": {
+    "build": 85,
+    "main_sha": "33dc9857e1fada5549181a28ce4ef26c4a919572",
+    "tree_sha": "b2c6b80401241f1757cd172511d12f9d813bc817",
+    "production_pages_deploy_run": 34386848470,
+    "production_live_resource_integrity_run": 34386976511,
+    "state": "PRODUCTION_GREEN",
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  },
+  "scope": {
+    "selected_provider_oauth": "DEVELOPMENT_ONLY",
+    "intended_account_verification": "REQUIRED",
+    "human_draft_approval": "REQUIRED",
+    "provider_publication": "CLOSED",
+    "automatic_publication": "CLOSED",
+    "production_oauth_authorization": "CLOSED"
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT"
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_replacement": false,
+    "r2_mutation": false,
+    "provider_publication": false,
+    "automatic_publication": false,
+    "secret_values_emitted": false
+  }
+}
