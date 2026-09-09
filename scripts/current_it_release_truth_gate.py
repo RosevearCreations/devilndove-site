@@ -6,25 +6,17 @@ import json, re, sys
 ROOT = Path(__file__).resolve().parents[1]
 FAIL = []
 
-
 def req(ok, msg):
-    if not ok:
-        FAIL.append(msg)
-
-
-def load(path):
-    return json.loads((ROOT / path).read_text(encoding='utf-8'))
-
-
-def read(path):
-    return (ROOT / path).read_text(encoding='utf-8')
-
+    if not ok: FAIL.append(msg)
+def load(path): return json.loads((ROOT / path).read_text(encoding='utf-8'))
+def read(path): return (ROOT / path).read_text(encoding='utf-8')
+def js_prop(body, key, value):
+    return bool(re.search(rf"\b{re.escape(key)}\s*:\s*['\"]{re.escape(value)}['\"]", body))
 
 pointer = load('current-development-authority.json')
 api = read('functions/api/admin/it-operations-control-tower.js')
 client = read('public/js/admin-it-control-tower.js')
 page = read('admin/it/index.html')
-
 release = int(pointer.get('release') or 0)
 build = int(pointer.get('build') or 0)
 title = str(pointer.get('title') or '')
@@ -62,12 +54,7 @@ if candidate_mode:
     start_dev = (current_authority.get('starting_point') or {}).get('development') or {}
     req(str(start_dev.get('sha') or '') == accepted_sha, 'candidate starting Development SHA must match current pointer accepted SHA')
     req(str(start_dev.get('tree') or '') == accepted_tree, 'candidate starting Development tree must match current pointer accepted tree')
-    run_map = {
-        'system_gate_run': 'system_gate_run',
-        'current_application_quality_run': 'quality_run',
-        'it_admin_runtime_proof_run': 'it_admin_runtime_run',
-        'branch_hygiene_run': 'repository_hygiene_run',
-    }
+    run_map = {'system_gate_run':'system_gate_run','current_application_quality_run':'quality_run','it_admin_runtime_proof_run':'it_admin_runtime_run','branch_hygiene_run':'repository_hygiene_run'}
     for pointer_key, authority_key in run_map.items():
         req(int(start_dev.get(authority_key) or 0) == int(acceptance.get(pointer_key) or 0), f'candidate starting Development {authority_key} must match pointer {pointer_key}')
 else:
@@ -81,15 +68,14 @@ req(api_build and int(api_build.group(1)) == build, 'I.T. API build must match c
 req(title and title in api, 'I.T. API title must match current-development-authority title')
 req(f'Release 467 Build {build}' in client, 'I.T. client must identify the current build')
 req(f'Release 467 Build {build}' in page, 'I.T. page must identify the current build')
-req("state: 'DEVELOPMENT_GREEN'" in api, 'I.T. API must expose the last verified Development GREEN state separately from candidate state')
+req(js_prop(api, 'state', 'DEVELOPMENT_GREEN'), 'I.T. API must expose the last verified Development GREEN state separately from candidate state')
 
 for value, label in ((accepted_sha, 'accepted Development SHA'), (accepted_tree, 'accepted Development tree')):
     req(value and value in api, f'I.T. API missing {label}')
-for key in ('system_gate_run', 'current_application_quality_run', 'it_admin_runtime_proof_run', 'branch_hygiene_run'):
+for key in ('system_gate_run','current_application_quality_run','it_admin_runtime_proof_run','branch_hygiene_run'):
     value = str(acceptance.get(key) or '')
     req(value and value in api, f'I.T. API missing accepted Development {key}')
-
-for key in ('main_sha', 'tree_sha', 'production_pages_deploy_run'):
+for key in ('main_sha','tree_sha','production_pages_deploy_run'):
     value = str(prod.get(key) or '')
     req(value and value in api, f'I.T. API missing current Production baseline {key}')
 
@@ -100,7 +86,7 @@ req(normalized_prod.get('main_sha') == prod.get('main_sha'), 'Production authori
 req(normalized_prod.get('tree_sha') == prod.get('tree_sha'), 'Production authority tree must match current Production baseline')
 req(normalized_prod.get('production_pages_deploy_run') == prod.get('production_pages_deploy_run'), 'Production authority deploy run must match current Production baseline')
 
-for stale in ('73c852a71dc900a3a70cc84d0b622dfdc0c174fd', '055cbc973c667b35a209c7ea207779089f6fed3a'):
+for stale in ('73c852a71dc900a3a70cc84d0b622dfdc0c174fd','055cbc973c667b35a209c7ea207779089f6fed3a'):
     req(stale not in api, 'stale Build 22/20 release SHA remains in current I.T. API')
     req(stale not in client, 'stale Build 22/20 release SHA remains in current I.T. client')
     req(stale not in page, 'stale Build 22/20 release SHA remains in current I.T. page')
@@ -113,7 +99,6 @@ req('External acceptance policy' in client, 'I.T. client must preserve external 
 
 if FAIL:
     print('CURRENT I.T. RELEASE TRUTH GATE: FAIL')
-    for item in FAIL:
-        print('-', item)
+    for item in FAIL: print('-', item)
     sys.exit(1)
 print('CURRENT I.T. RELEASE TRUTH GATE: PASS')
