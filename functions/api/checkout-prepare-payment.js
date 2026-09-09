@@ -1,4 +1,9 @@
 import { paymentExecutionStatus } from './_lib/paymentExecution.js';
+import {
+  stripeCheckoutIdempotencyKey,
+  stripeIntegrationIdentifier,
+  stripeRequestHeaders,
+} from './_lib/stripeDevelopment.js';
 
 // File: /functions/api/checkout-prepare-payment.js
 // Brief description: Prepares a payment handoff for an existing order. Remote Stripe/PayPal
@@ -307,6 +312,7 @@ async function createStripeCheckoutSession(request, env, order, paymentRecord) {
   params.set("metadata[order_number]", String(order.order_number || ""));
   params.set("payment_intent_data[metadata][order_id]", String(order.order_id || ""));
   params.set("payment_intent_data[metadata][order_number]", String(order.order_number || ""));
+  params.set("integration_identifier", await stripeIntegrationIdentifier(`${paymentRecord.payment_id}:${order.order_id}`));
 
   if (order.shipping_address1 || order.shipping_city || order.shipping_country) {
     params.set("shipping_address_collection[allowed_countries][0]", "CA");
@@ -321,10 +327,10 @@ async function createStripeCheckoutSession(request, env, order, paymentRecord) {
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
+    headers: stripeRequestHeaders(
+      secretKey,
+      stripeCheckoutIdempotencyKey(paymentRecord.payment_id, order.order_id)
+    ),
     body: params.toString()
   });
 

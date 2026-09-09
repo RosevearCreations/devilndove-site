@@ -1,5 +1,6 @@
 import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from "../_lib/adminAudit.js";
 import { paymentExecutionStatus } from "../_lib/paymentExecution.js";
+import { stripeRefundIdempotencyKey, stripeRequestHeaders } from "../_lib/stripeDevelopment.js";
 
 function json(data, status = 200) { return jsonResponse(data, status); }
 
@@ -43,11 +44,7 @@ async function createStripeRefund(env, payment, amountCents, reason, requestId) 
 
   const response = await fetch('https://api.stripe.com/v1/refunds', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Idempotency-Key': requestId
-    },
+    headers: stripeRequestHeaders(secretKey, stripeRefundIdempotencyKey(requestId)),
     body: params.toString()
   });
   const data = await response.json().catch(() => null);
