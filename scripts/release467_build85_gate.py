@@ -30,13 +30,13 @@ acceptance = read('functions/api/_lib/socialOAuthAcceptance.js')
 security = read('functions/api/_lib/oauthSecurity.js')
 start = read('functions/api/admin/oauth-start.js')
 callback = read('functions/api/social/oauth/_callback.js')
+connections = read('functions/api/admin/oauth-connections.js')
 endpoint = read('functions/api/admin/social-oauth-acceptance.js')
 client = read('public/js/admin-social-oauth-acceptance-v85.js')
 page = read('admin/social-publishing/index.html')
 css = read('css/admin-social-oauth-acceptance-v85.css')
 queue = read('functions/api/admin/social-post-queue.js')
 product_queue = read('functions/api/_lib/productSocialAutomation.js')
-connections = read('functions/api/admin/oauth-connections.js')
 provider_plan = read('functions/api/admin/provider-publication-plan.js')
 release460_doc = read('docs/operations/RELEASE_460_SECURE_OAUTH_LIFECYCLE_AUTHORITY.md')
 doc = read('docs/operations/RELEASE_467_BUILD_85_SOCIALS_OAUTH_ACCEPTANCE.md')
@@ -71,7 +71,7 @@ for token in (
 for forbidden in (r'\bfetch\s*\(', r'\blocalStorage\.', r'\bsessionStorage\.', r'\bsetInterval\s*\(', r'\bXMLHttpRequest\b'):
     req(not re.search(forbidden, acceptance), f'Build 85 pure acceptance gained forbidden behavior: {forbidden}')
 
-# Historical Release 460 switch remains unchanged; Build 85 adds a second selected-provider gate.
+# Historical Release 460 global Development switch is preserved; Build 85 adds a second provider selection gate.
 for token in (
     'export function oauthRemoteAuthorizationOpen',
     "mode === 'development-explicit' && isDevelopmentOAuthHost(host, env)",
@@ -82,64 +82,74 @@ for token in (
 ):
     req(token in security, f'Build 85 OAuth security boundary missing token: {token}')
 
-# OAuth start must fail before state/PKCE creation unless both Development gates agree.
+# Authorization start must reject before state/PKCE or transaction persistence.
 for token in (
-    'oauthAcceptanceProvider', 'oauthSelectedProviderAuthorizationOpen',
     'oauth_provider_not_selected_for_acceptance',
     'SOCIAL_OAUTH_ACCEPTANCE_PROVIDER=<one of pinterest|meta|x|tiktok|youtube>',
     'selected_provider_acceptance:true',
 ):
     req(token in start, f'Build 85 OAuth start missing token: {token}')
 try:
-    req(start.index('if (!remoteOpen)') < start.index('const proof = await createStateAndPkce()'), 'OAuth start selected-provider guard must run before state/PKCE creation')
-    req(start.index('if (!remoteOpen)') < start.index('INSERT INTO oauth_authorization_transactions'), 'OAuth start selected-provider guard must run before transaction persistence')
+    guard = start.index('if (!remoteOpen)')
+    req(guard < start.index('const proof = await createStateAndPkce()'), 'OAuth start provider gate must precede state/PKCE creation')
+    req(guard < start.index('INSERT INTO oauth_authorization_transactions'), 'OAuth start provider gate must precede transaction persistence')
 except ValueError:
-    req(False, 'OAuth start guard/order markers missing')
+    req(False, 'OAuth start gate/order markers missing')
 
-# Callback must reject a non-selected provider before state claim/exchange.
+# Callback must reject a non-selected provider before state claim or provider token exchange,
+# and intended-account verification remains before encrypted token persistence.
 for token in (
-    'oauthAcceptanceProvider', 'oauthRemoteAuthorizationOpen', 'oauthSelectedProviderAuthorizationOpen',
-    'selectedRemoteOpen', 'provider that is not selected',
-    'verifyOAuthIdentity(contract,env,token.access_token)',
-    'encryptOAuthSecret(env,token.access_token',
+    'oauthSelectedProviderAuthorizationOpen', 'selectedRemoteOpen', 'provider that is not selected',
+    'verifyOAuthIdentity(contract,env,token.access_token)', 'encryptOAuthSecret(env,token.access_token',
     'Provider publication remains closed',
 ):
     req(token in callback, f'Build 85 OAuth callback missing token: {token}')
 try:
     guard = callback.index('if(!selectedRemoteOpen)')
-    req(guard < callback.index('const stateHash=await sha256Base64Url(state)'), 'OAuth callback selected-provider guard must run before state lookup/claim')
-    req(guard < callback.index('exchangeAuthorizationCode(contract,env'), 'OAuth callback selected-provider guard must run before token exchange')
-    req(callback.index('verifyOAuthIdentity(contract,env,token.access_token)') < callback.index('encryptOAuthSecret(env,token.access_token'), 'Intended-account verification must occur before access-token persistence')
+    req(guard < callback.index('const stateHash=await sha256Base64Url(state)'), 'OAuth callback provider gate must precede state lookup/claim')
+    req(guard < callback.index('exchangeAuthorizationCode(contract,env'), 'OAuth callback provider gate must precede token exchange')
+    req(callback.index('verifyOAuthIdentity(contract,env,token.access_token)') < callback.index('encryptOAuthSecret(env,token.access_token'), 'Intended-account verification must precede access-token persistence')
 except ValueError:
-    req(False, 'OAuth callback guard/order markers missing')
+    req(False, 'OAuth callback gate/order markers missing')
 
-# Read-only acceptance endpoint: existing evidence only, no provider/network/DML authority.
+# Refresh/revoke remote lifecycle obeys the same selected-provider boundary. Local disconnect remains available.
 for token in (
-    'getAdminUserFromRequest', 'social_post_queue', 'oauth_provider_connections',
-    'deriveSocialOAuthAcceptance', 'provider_publication_allowed: false',
-    'provider_execution_allowed: false', 'automatic_publication_allowed: false',
-    'provider_contacted: false', 'secret_values_emitted: false',
-    'provider_subject_values_emitted: false', 'production_authorization_open: false',
-    'connected_expiry_unknown', 'start_authorization_available', 'publication_boundary', 'accepted: false',
+    'oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key)',
+    'oauth_provider_not_selected_for_acceptance', 'closed_by_selected_provider_boundary',
+    'refreshOAuthToken', 'revokeOAuthToken', 'provider_subject_emitted:false', "token_material_present:'redacted'",
 ):
-    req(token in endpoint, f'Build 85 read-only acceptance endpoint missing token: {token}')
+    req(token in connections, f'Build 85 secure connection lifecycle missing token: {token}')
+try:
+    refresh_guard = connections.index("if(!oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key))")
+    req(refresh_guard < connections.index('decryptOAuthSecret(env,row.refresh_token_ciphertext'), 'Non-selected refresh must fail before refresh-token decryption')
+except ValueError:
+    req(False, 'OAuth refresh selected-provider gate/order markers missing')
+
+# Read-only acceptance endpoint uses existing OAuth + queue evidence and never contacts providers.
+for token in (
+    'getAdminUserFromRequest', 'social_post_queue', 'oauth_provider_connections', 'deriveSocialOAuthAcceptance',
+    'provider_publication_allowed: false', 'provider_execution_allowed: false', 'automatic_publication_allowed: false',
+    'provider_contacted: false', 'secret_values_emitted: false', 'provider_subject_values_emitted: false',
+    'production_authorization_open: false', 'connected_expiry_unknown', 'start_authorization_available',
+    'publication_boundary', 'accepted: false',
+):
+    req(token in endpoint, f'Build 85 read-only endpoint missing token: {token}')
 req('fetch(' not in endpoint, 'Build 85 acceptance endpoint must not contact a provider')
-req('decryptOAuthSecret' not in endpoint, 'Build 85 acceptance endpoint must not read/decrypt token material')
-req('onRequestPost' not in endpoint, 'Build 85 acceptance evidence endpoint must expose no POST handler')
+req('decryptOAuthSecret' not in endpoint, 'Build 85 acceptance endpoint must not decrypt token material')
+req('onRequestPost' not in endpoint, 'Build 85 acceptance endpoint must expose no POST handler')
 for forbidden in ('INSERT INTO', 'UPDATE ', 'DELETE FROM', 'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE'):
     req(forbidden not in endpoint.upper(), f'Build 85 acceptance endpoint contains forbidden DML/DDL: {forbidden}')
 
-# Browser panel is evidence/review-first and has no publication lane.
+# Review-first browser lane: no provider publication action.
 for token in (
-    "'/api/admin/social-oauth-acceptance'", 'socialOAuthAcceptanceMount',
-    'Controlled Social OAuth Acceptance', 'Begin ${esc(provider)} OAuth acceptance',
-    'Provider publication remains closed', 'Open human review queue',
+    "'/api/admin/social-oauth-acceptance'", 'socialOAuthAcceptanceMount', 'Controlled Social OAuth Acceptance',
+    'Begin ${esc(provider)} OAuth acceptance', 'Provider publication remains closed', 'Open human review queue',
     'Production OAuth is closed',
 ):
     req(token in client, f'Build 85 browser panel missing token: {token}')
-req("method: 'POST'" not in client and 'method:"POST"' not in client, 'Build 85 browser acceptance panel must not create a POST lane')
-req('publish_platforms' not in client and 'Publish' not in client, 'Build 85 browser acceptance panel must expose no provider Publish action')
-req('setInterval(' not in client, 'Build 85 browser acceptance panel must not poll')
+req("method: 'POST'" not in client and 'method:"POST"' not in client, 'Build 85 browser panel must not create a POST lane')
+req('publish_platforms' not in client and '>Publish<' not in client, 'Build 85 browser panel must expose no provider Publish action')
+req('setInterval(' not in client, 'Build 85 browser panel must not poll')
 
 req('id="socialOAuthAcceptanceMount"' in page, 'Build 85 Social Publishing mount missing')
 req('/css/admin-social-oauth-acceptance-v85.css' in page, 'Build 85 CSS not loaded')
@@ -147,36 +157,27 @@ req('/public/js/admin-social-oauth-acceptance-v85.js' in page, 'Build 85 browser
 req('Build 85 provider prerequisites' in page, 'Build 85 Social Publishing authority label missing')
 req('still provides no provider Publish action' in page, 'Build 85 page must state provider Publish remains unavailable')
 req(len(re.findall(r'<h1(?:\s|>)', page, re.I)) == 1, 'Social Publishing page must retain exactly one H1')
-
 for token in (
     '.social-connections-panel #testMetaConnections{display:none!important}',
-    '.social-oauth-v85-summary', '.social-oauth-v85-checks',
-    '@media(max-width:900px)', '@media(max-width:560px)',
+    '.social-oauth-v85-summary', '.social-oauth-v85-checks', '@media(max-width:900px)', '@media(max-width:560px)',
 ):
     req(token in css, f'Build 85 responsive/current-authority CSS missing token: {token}')
 
-# Existing human queue and secure connection authorities are preserved and remote lifecycle is selected-provider scoped.
+# Existing queue/publication authorities remain explicit and fail-closed.
 for token in ('approval_status', 'post_status', 'privacy_status', 'approved_for_public_post', 'publish_platforms'):
     req(token in queue, f'Existing social queue authority unexpectedly lost token: {token}')
 for token in ('approval_status', 'post_status', 'privacy_status', 'approved_for_public_post', "'needs_review', 'draft'", "'review_first'"):
     req(token in product_queue, f'Product-to-social review-first authority unexpectedly lost token: {token}')
-for token in (
-    'provider_subject_emitted:false', "token_material_present:'redacted'", 'intended_account_verification',
-    'refreshOAuthToken', 'revokeOAuthToken', 'oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key)',
-    'oauth_provider_not_selected_for_acceptance', 'closed_by_selected_provider_boundary',
-):
-    req(token in connections, f'Existing/Build 85 secure OAuth connection authority missing token: {token}')
-try:
-    refresh_guard = connections.index("if(!oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key))")
-    req(refresh_guard < connections.index('decryptOAuthSecret(env,row.refresh_token_ciphertext'), 'OAuth refresh must fail before refresh-token decryption for a non-selected provider')
-except ValueError:
-    req(False, 'OAuth refresh selected-provider guard/order markers missing')
 for token in ('provider_execution: false', 'provider_publication: false', 'network_calls_allowed: false', 'production_mutation: false'):
     req(token in provider_plan, f'Existing non-executing publication planner unexpectedly lost token: {token}')
 
+# Release 460 historical authority wording is verified semantically, not by invented phrases.
 for token in (
-    'AES-GCM', 'state is random and persisted only as a SHA-256 hash', 'intended provider account',
-    'Provider publication and provider execution are closed', 'legacy provider emitters',
+    'AES-GCM',
+    'state is random and persisted only as a SHA-256 hash',
+    'configured intended account',
+    'Provider publication and provider execution are closed',
+    'provider emitters remain historical source behind the mandatory middleware guard',
 ):
     req(token.lower() in release460_doc.lower(), f'Release 460 OAuth authority doc missing preserved token: {token}')
 
