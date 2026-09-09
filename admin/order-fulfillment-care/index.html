@@ -6,19 +6,21 @@
   <title>Order Fulfillment & Customer Care — Devil n Dove Admin</title>
   <meta name="robots" content="noindex,nofollow"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-order-fulfillment-care.css?v=467b18"/>
+  <link rel="stylesheet" href="/css/admin-order-fulfillment-care.css?v=467b82"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
 </head>
 <body data-admin-page="order-fulfillment-care">
   <div class="container admin-shell fulfillment-care-page">
     <div class="nav">
-      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Release 467 Build 18 • Operations</div></div></div>
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800">Devil n Dove</div><div class="small">Release 467 Build 82 • Operations</div></div></div>
       <div class="links"><a href="/admin/">Admin</a><a href="/admin/orders/">Orders</a><a href="/admin/order-inventory-fulfillment-readiness/">Inventory readiness</a><a href="/admin/order-production-release-readiness/">Production readiness</a><a href="/admin/order-finance-settlement-readiness/">Finance readiness</a><a href="/admin/custom-request/">Custom Requests</a><a href="/admin/customers/">Customers</a><button class="btn" data-nav-logout type="button">Logout</button></div>
     </div>
-    <section class="hero fulfillment-care-hero"><div><p class="eyebrow">Release 467 Build 18 • Order Fulfillment &amp; Customer Care Command Center</p><h1>Fulfillment and customer care</h1><p>One read-only operating view for standard orders, custom-order progress, payment/refund attention, shipping-policy exceptions and after-sale follow-up. This workspace never changes an order, sends a message, executes a refund, advances a custom stage or contacts a shipping/payment provider.</p></div></section>
-    <div class="card fulfillment-boundary"><strong>Owner boundary:</strong> Orders, Custom Requests, Customers and Accounting remain the write authorities. This command center ranks attention and links you to those owners. Canada-only shipping and the U.S. sales/shipping suspension remain in force. <a href="/admin/order-inventory-fulfillment-readiness/">Review open-order Inventory readiness</a>. <a href="/admin/order-production-release-readiness/">Review exact-gap Production Release readiness</a>. <a href="/admin/order-finance-settlement-readiness/">Review Order ↔ Finance settlement readiness</a>.</div>
+    <section class="hero fulfillment-care-hero"><div><p class="eyebrow">Release 467 Build 82 • Orders / Fulfilment Workflow</p><h1>Fulfilment and customer care</h1><p>Reviewed order progression from paid through preparing, making or packing, evidence, pickup/shipping readiness and fulfilment, with return recording, copy-only customer updates and existing customer-care attention in one Operations workspace.</p></div></section>
+    <div class="card fulfillment-boundary"><strong>Build 82 boundary:</strong> only reviewed non-financial fulfilment status transitions write to the existing Orders and <code>order_status_history</code> authorities. Customer updates are drafts that we copy deliberately; nothing is sent automatically. Payment, refund, shipping-provider and accounting actions remain in their existing owner workflows. Canada-only shipping and the U.S. sales/shipping suspension remain in force.</div>
+    <section id="orderFulfillmentWorkflowMount" data-order-fulfillment-workflow-build="82" aria-live="polite"><div class="card"><strong>Loading Build 82 fulfilment workflow…</strong></div></section>
+    <section class="card fc-legacy-intro"><h2>Attention and customer-care queue</h2><p class="small">The existing Build 18 read-only queue remains below for payment/refund attention, shipping-policy exceptions, custom-order progress and after-sale follow-up.</p></section>
     <div id="fulfillmentCareMount" aria-live="polite"></div><div class="footer card" style="margin-top:18px"></div>
   </div>
-  <script src="/js/main.js?v=440"></script><script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script><script src="/public/js/site-auth-ui.js?v=440"></script><script src="/public/js/admin-self-protect.js?v=440"></script><script src="/public/js/admin.js?v=440"></script><script src="/public/js/admin-order-fulfillment-care.js?v=467b18"></script>
+  <script src="/js/main.js?v=440"></script><script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script><script src="/public/js/site-auth-ui.js?v=440"></script><script src="/public/js/admin-self-protect.js?v=440"></script><script src="/public/js/admin.js?v=440"></script><script src="/public/js/admin-order-fulfillment-workflow-v82.js?v=467b82"></script><script src="/public/js/admin-order-fulfillment-care.js?v=467b18"></script>
 </body>
 </html>
