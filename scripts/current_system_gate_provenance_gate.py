@@ -86,7 +86,9 @@ def run_current_contract(path, label):
 # convergence with existing write owners preserved, or the reviewed Orders / Fulfilment
 # workflow with copy-only customer communication and provider/refund/accounting owners preserved,
 # or the read-only Labeling / Packaging template-to-reprint release workflow that preserves
-# the mature Packaging write authority and Build 44 production/reuse lane.
+# the mature Packaging write authority and Build 44 production/reuse lane, or the read-only
+# Creators / CAIP project-to-profitability journey that protects private/raw media and keeps
+# Inventory, Product, Content Studio, Finance, OAuth/provider and publication owners preserved.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -109,6 +111,7 @@ run_current_contract('scripts/release467_build80_gate.py', 'Release 467 Build 80
 run_current_contract('scripts/release467_build81_gate.py', 'Release 467 Build 81')
 run_current_contract('scripts/release467_build82_gate.py', 'Release 467 Build 82')
 run_current_contract('scripts/release467_build83_gate.py', 'Release 467 Build 83')
+run_current_contract('scripts/release467_build84_gate.py', 'Release 467 Build 84')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
