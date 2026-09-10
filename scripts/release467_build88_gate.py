@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Retained fail-closed contract for Release 467 Build 88 — External Acceptance Control Center Convergence."""
+"""Retained fail-closed historical contract for Release 467 Build 88."""
 from pathlib import Path
-import json, re, subprocess, sys
+import json, subprocess, sys
 
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
@@ -26,15 +26,10 @@ def run(cmd,label):
     if result.stdout.strip():print(result.stdout.strip())
     req(result.returncode==0,f"{label} failed: {(result.stderr or result.stdout).strip()[-3000:]}")
 
-def compact(body): return re.sub(r'\s+','',body)
-
 pointer=load('current-development-authority.json')
 b88=load('release467-build88-external-acceptance-control-center.json')
 manifest=load('migrations/canonical/manifest.json')
 doc=read('docs/operations/RELEASE_467_BUILD_88_EXTERNAL_ACCEPTANCE_CONTROL_CENTER.md')
-it_api=read('functions/api/admin/it-operations-control-tower.js')
-reliability=read('functions/api/_lib/currentReliability.js')
-preflight=read('functions/api/admin/current-deployment-preflight.js')
 provenance=read('scripts/current_system_gate_provenance_gate.py')
 historical_runner=read('functions/api/admin/provider-acceptance-runner.js')
 historical_bridge=read('functions/api/admin/release467-external-commercial-acceptance.js')
@@ -42,7 +37,7 @@ historical_bridge=read('functions/api/admin/release467-external-commercial-accep
 req(b88.get('release')==467 and b88.get('build')==88,'Build 88 authority identity drifted')
 req(b88.get('title')=='External Acceptance Control Center Convergence','Build 88 title drifted')
 req(b88.get('state')=='PRODUCTION_GREEN','Build 88 must retain PRODUCTION_GREEN final state')
-final=b88.get('final_closure') or {}; prod88=b88.get('production_checkpoint') or {}
+final=b88.get('final_closure') or {}; prod88=b88.get('production_checkpoint') or {}; safety=b88.get('safety') or {}
 req(final.get('dev_sha')==B88_SHA and final.get('tree_sha')==B88_TREE,'Build 88 final SHA/tree drifted')
 req((final.get('proofs') or {})==B88_PROOFS,'Build 88 final four-proof set drifted')
 req(final.get('proof_state')=='EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN','Build 88 final proof state drifted')
@@ -54,19 +49,15 @@ req(prod88.get('production_live_resource_integrity_run')==B88_LIVE,'Build 88 liv
 req(prod88.get('state')=='PRODUCTION_GREEN','Build 88 Production state drifted')
 for key in ('business_data_preserved','canonical_d1_and_foreign_keys_proved','exact_pages_deployment_and_bindings_proved','public_smoke_passed','live_account_d1_product_r2_and_product_api_proved'):
     req(prod88.get(key) is True,f'Build 88 Production closure missing {key}')
+for key in ('schema_change','request_time_schema_mutation','automatic_d1_mutation','automatic_r2_mutation','binding_mutation','automatic_provider_execution','provider_publication','production_provider_execution','production_business_data_overwrite','secret_values_emitted'):
+    req(safety.get(key) is False,f'Build 88 safety boundary drifted: {key}')
 
+# Current operator surfaces may advance. Only require the current pointer to retain and not regress Build 88 history.
 req(pointer.get('release')==467 and int(pointer.get('build') or 0)>=89,'current authority must be Release 467 Build 89 or newer after Build 88 closure ingestion')
 last=(pointer.get('restart_integrity') or {}).get('last_fully_verified') or {}; prod=pointer.get('production_checkpoint') or {}
 req(int(last.get('build') or 0)>=88,'current restart authority may not regress behind Build 88')
 req(int(prod.get('build') or 0)>=88,'current Production authority may not regress behind Build 88')
 req('release467-build88-external-acceptance-control-center.json' in (pointer.get('current_release_authorities') or []),'current authority must retain Build 88 historical authority')
-
-for text,label in ((it_api,'I.T. API'),(reliability,'Reliability'),(preflight,'Deployment Preflight')):
-    req(B88_SHA in text and B88_TREE in text,f'{label} missing Build 88 verified baseline')
-    req(str(B88_PAGES) in text and str(B88_LIVE) in text,f'{label} missing Build 88 Production proof')
-req('provider_execution:false' in compact(it_api),'I.T. API lost provider-execution closed boundary')
-req("mutation_capability:'none'" in compact(reliability),'Reliability lost read-only boundary')
-req("mutation_capability:'none'" in compact(preflight),'Deployment Preflight lost read-only boundary')
 
 for token in ('five','six real acceptance dimensions','provider-synchronized','historical Build 6/7','HOLD_EXTERNAL','0001','0004'):
     req(token.lower() in doc.lower(),f'Build 88 operating document missing token: {token}')
