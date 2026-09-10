@@ -4,42 +4,36 @@
 
 ## Verified Development
 
-Build 85 — Socials & OAuth Acceptance is the last fully verified checkpoint:
-- `dev` `33dc9857e1fada5549181a28ce4ef26c4a919572`
-- tree `b2c6b80401241f1757cd172511d12f9d813bc817`
-- System Gate `34386667094` SUCCESS
-- Current Application Quality `34386667361` SUCCESS
-- I.T. Admin Runtime Proof `34386667111` SUCCESS
-- Repository Branch Hygiene `34386667194` SUCCESS
-- exact Preview, canonical Development D1, read-only data authority, Preview bindings and non-secret smoke: SUCCESS.
+Build 86 — I.T. Operations & Self-Diagnostics is the last fully verified checkpoint:
+- `dev` `5fdbb5346e52f17072671274dc36e4d3527a7905`
+- tree `f9037baf12bc3489b3a0df3df03eef5bdbe85e90`
+- System Gate `34419070653` SUCCESS
+- Current Application Quality `34419070636` SUCCESS
+- I.T. Admin Runtime Proof `34419070642` SUCCESS
+- Repository Branch Hygiene `34419070660` SUCCESS
+- exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 85 is the current Production checkpoint:
-- `main` `33dc9857e1fada5549181a28ce4ef26c4a919572`
-- tree `b2c6b80401241f1757cd172511d12f9d813bc817`
-- Production Pages Deploy `34386848470` SUCCESS
-- Production Live Resource Integrity `34386976511` SUCCESS.
+Build 86 is the current Production checkpoint:
+- `main` `5fdbb5346e52f17072671274dc36e4d3527a7905`
+- tree `f9037baf12bc3489b3a0df3df03eef5bdbe85e90`
+- Production Pages Deploy `34419211512` SUCCESS
+- Production Live Resource Integrity `34419284027` SUCCESS.
 
 The Production chain proved exact green Development ancestry, Production business-data preservation, canonical Production D1, isolation/FK integrity, exact deployment, live bindings, public smoke and promotion proof. Live-resource verification separately proved supported account/D1 access, same-origin Product R2 bytes, Product API photography and Production D1 diagnostic reachability.
 
-## Build 86 operational boundary
+## Build 87 operational boundary
 
-Build 86 — **I.T. Operations & Self-Diagnostics** is the active Development closure candidate. It converges the current I.T., Reliability and Deployment Preflight truth onto the Build 85 verified baseline and adds one read-only diagnostic view covering:
-- deployment environment, branch and exact runtime SHA when exposed;
-- D1 and Product/CAIP R2 binding presence;
-- canonical migration ledger/proofs, expected five-module authority and foreign-key integrity;
-- runtime incidents and database reachability;
-- root-administrator effective manage authority with explicit I.T. manage grant;
-- Stripe/PayPal/Social OAuth configuration presence without secret values;
-- exact-SHA release-gate requirements and external acceptance separation;
-- backup/rollback/recovery guidance and prioritized corrective instructions.
+Build 87 — **Production Authority & Restart Convergence** is the active Development closure candidate. It consumes Build 86's external exact-SHA proof and converges current I.T., Reliability, Deployment Preflight and restart documentation onto that verified baseline.
 
-Build 86 never repairs automatically. It performs no request-time schema mutation, D1/R2/binding mutation, provider execution/publication, deployment execution, backup restore or Production business-data overwrite.
+Build 86 remains the historical feature authority for the eight-domain I.T. self-diagnostics implementation covering deployment identity, D1/R2 bindings, canonical migration/schema integrity, runtime incidents, root-admin/module authority, provider setup/HOLDs, exact-SHA release gates and backup/recovery guidance.
+
+Build 87 never repairs automatically. It performs no request-time schema mutation, D1/R2/binding mutation, provider execution/publication, deployment execution, backup restore or Production business-data overwrite.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 86 ingests the exact Build 85 Development and Production closure. Build 86 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 87 ingests the exact Build 86 Development and Production closure. Build 87 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
 
 The runtime I.T. diagnostic cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic therefore never substitutes for the exact external release proof.
 
