@@ -1,0 +1,77 @@
+{
+  "release": 467,
+  "build": 88,
+  "title": "External Acceptance Control Center Convergence",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build88-external-acceptance-control-center",
+  "starting_point": {
+    "development": {
+      "sha": "646d73710784008617157cf5746a66f053daba83",
+      "tree": "709f802cf7ca24a12f48bd7c8b562a92b306fcae",
+      "system_gate_run": 34421392242,
+      "quality_run": 34421392244,
+      "it_admin_runtime_run": 34421392231,
+      "repository_hygiene_run": 34421392188,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "646d73710784008617157cf5746a66f053daba83",
+      "tree_sha": "709f802cf7ca24a12f48bd7c8b562a92b306fcae",
+      "production_pages_deploy_run": 34421532872,
+      "production_live_resource_integrity_run": 34421613381,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build87_final_closure": true,
+    "current_external_acceptance_control_center": true,
+    "stripe_six_dimension_evidence": true,
+    "paypal_six_dimension_evidence": true,
+    "social_oauth_current_evidence": true,
+    "caip_private_media_current_evidence": true,
+    "cloudflare_access_separate_hold": true,
+    "historical_build6_runner_preserved": true,
+    "historical_build7_commercial_bridge_preserved": true,
+    "stale_operator_labels_removed_from_current_surface": true,
+    "guarded_development_test_actions_preserved": true,
+    "provider_execution_automatic": false,
+    "provider_publication": false,
+    "schema_change": false
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "final_closure": null
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "payment_acceptance_dimensions": {
+    "stripe": ["credentials", "checkout", "webhook-signature", "refund", "reconciliation", "idempotent-replay"],
+    "paypal": ["credentials", "approval-capture", "webhook-verification", "refund", "reconciliation", "idempotent-replay"]
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "automatic_d1_mutation": false,
+    "automatic_r2_mutation": false,
+    "binding_mutation": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "production_provider_execution": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
