@@ -13,7 +13,7 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
-const PRODUCTS_ASSET_REVISION = '467-products-lockup-hotfix';
+const PRODUCTS_ASSET_REVISION = '467-products-b95-context';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -157,7 +157,7 @@ export async function onRequest(context) {
   const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
   context.data.ddModuleAccess = access;
   context.data.ddModuleRelease = CURRENT_RELEASE;
-  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey });
+  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname }), request, { moduleKey });
   if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
     return finish(readOnlyDeniedResponse(access), request, { moduleKey });
   }
