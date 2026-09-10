@@ -1,4 +1,4 @@
-// Current shared layout guard: contains wide tables without changing business data or headings.
+// Current shared layout guard: centers application shells and contains wide data without changing business data or headings.
 (() => {
   // The Products page has several independent admin panels. On a cold Ctrl+F5 the
   // analytics/resource panels must never hold the essential product picker/editor
@@ -12,28 +12,56 @@
     document.head.appendChild(script);
   }
 
+  const normalizeScrollRegion = (region, table) => {
+    if (!region) return;
+    region.classList.add('dd-horizontal-scroll-region');
+    if (!region.hasAttribute('role')) region.setAttribute('role', 'region');
+    if (!region.hasAttribute('tabindex')) region.setAttribute('tabindex', '0');
+    if (!region.hasAttribute('aria-label')) {
+      region.setAttribute('aria-label', table?.getAttribute?.('aria-label') || 'Scrollable data region');
+    }
+  };
+
+  const centerShells = (root = document) => {
+    root.querySelectorAll?.('.container,.admin-shell').forEach((shell) => {
+      shell.classList.add('dd-centered-shell');
+    });
+  };
+
   const wrapTables = (root = document) => {
     root.querySelectorAll?.('table').forEach((table) => {
-      // Existing admin/table-responsive wrappers already provide bounded horizontal
-      // scrolling. Wrapping them again makes fixed-layout tables inherit the generic
-      // max-content rule and can balloon columns to thousands of pixels wide.
-      if (table.closest('.dd-table-scroll,.admin-table-wrap,[data-table-scroll],.table-scroll,.table-responsive')) return;
+      // Existing responsive wrappers already provide bounded horizontal scrolling.
+      // Normalize those wrappers so keyboard users can reach right-side columns too.
+      const existing = table.closest('.dd-table-scroll,.admin-table-wrap,[data-table-scroll],.table-scroll,.table-responsive,.dd-horizontal-scroll-region');
+      if (existing) {
+        normalizeScrollRegion(existing, table);
+        return;
+      }
       const parent = table.parentElement;
       if (!parent || parent.tagName === 'BODY') return;
       const wrap = document.createElement('div');
-      wrap.className = 'dd-table-scroll';
-      wrap.setAttribute('role', 'region');
-      wrap.setAttribute('aria-label', table.getAttribute('aria-label') || 'Scrollable data table');
+      wrap.className = 'dd-table-scroll dd-horizontal-scroll-region';
+      normalizeScrollRegion(wrap, table);
       parent.insertBefore(wrap, table);
       wrap.appendChild(table);
     });
   };
-  const run = () => wrapTables(document);
+
+  const run = () => {
+    centerShells(document);
+    wrapTables(document);
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
   else run();
+
   const observer = new MutationObserver((records) => {
     for (const record of records) {
-      for (const node of record.addedNodes || []) if (node?.nodeType === 1) wrapTables(node);
+      for (const node of record.addedNodes || []) {
+        if (node?.nodeType !== 1) continue;
+        if (node.matches?.('.container,.admin-shell')) node.classList.add('dd-centered-shell');
+        centerShells(node);
+        wrapTables(node);
+      }
     }
   });
   const start = () => document.body && observer.observe(document.body, { childList: true, subtree: true });
