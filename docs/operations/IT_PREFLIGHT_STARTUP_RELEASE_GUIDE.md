@@ -4,38 +4,43 @@
 
 ## Verified Development
 
-Build 86 — I.T. Operations & Self-Diagnostics is the last fully verified checkpoint:
-- `dev` `5fdbb5346e52f17072671274dc36e4d3527a7905`
-- tree `f9037baf12bc3489b3a0df3df03eef5bdbe85e90`
-- System Gate `34419070653` SUCCESS
-- Current Application Quality `34419070636` SUCCESS
-- I.T. Admin Runtime Proof `34419070642` SUCCESS
-- Repository Branch Hygiene `34419070660` SUCCESS
+Build 87 — Production Authority & Restart Convergence is the last fully verified checkpoint:
+- `dev` `646d73710784008617157cf5746a66f053daba83`
+- tree `709f802cf7ca24a12f48bd7c8b562a92b306fcae`
+- System Gate `34421392242` SUCCESS
+- Current Application Quality `34421392244` SUCCESS
+- I.T. Admin Runtime Proof `34421392231` SUCCESS
+- Repository Branch Hygiene `34421392188` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 86 is the current Production checkpoint:
-- `main` `5fdbb5346e52f17072671274dc36e4d3527a7905`
-- tree `f9037baf12bc3489b3a0df3df03eef5bdbe85e90`
-- Production Pages Deploy `34419211512` SUCCESS
-- Production Live Resource Integrity `34419284027` SUCCESS.
+Build 87 is the current Production checkpoint:
+- `main` `646d73710784008617157cf5746a66f053daba83`
+- tree `709f802cf7ca24a12f48bd7c8b562a92b306fcae`
+- Production Pages Deploy `34421532872` SUCCESS
+- Production Live Resource Integrity `34421613381` SUCCESS.
 
 The Production chain proved exact green Development ancestry, Production business-data preservation, canonical Production D1, isolation/FK integrity, exact deployment, live bindings, public smoke and promotion proof. Live-resource verification separately proved supported account/D1 access, same-origin Product R2 bytes, Product API photography and Production D1 diagnostic reachability.
 
-## Build 87 operational boundary
+## Build 88 operational boundary
 
-Build 87 — **Production Authority & Restart Convergence** is the active Development closure candidate. It consumes Build 86's external exact-SHA proof and converges current I.T., Reliability, Deployment Preflight and restart documentation onto that verified baseline.
+Build 88 — **External Acceptance Control Center Convergence** is the active Development closure candidate. It consumes Build 87's external exact-SHA proof and adds a current operator surface for the remaining external acceptance work.
 
-Build 86 remains the historical feature authority for the eight-domain I.T. self-diagnostics implementation covering deployment identity, D1/R2 bindings, canonical migration/schema integrity, runtime incidents, root-admin/module authority, provider setup/HOLDs, exact-SHA release gates and backup/recovery guidance.
+The current control center reports:
+- Stripe Development six-part evidence: credentials, checkout, webhook signature, provider-synchronized refund, reconciliation, idempotent replay;
+- PayPal sandbox six-part evidence: credentials, approval/capture, webhook verification, provider-synchronized refund, reconciliation, idempotent replay;
+- Social OAuth selected-provider evidence with publication closed;
+- CAIP private-media authenticated evidence state;
+- Cloudflare Access service-token acceptance as a separate external proof.
 
-Build 87 never repairs automatically. It performs no request-time schema mutation, D1/R2/binding mutation, provider execution/publication, deployment execution, backup restore or Production business-data overwrite.
+Historical Build 6/7 provider/commercial engines remain preserved as regression/evidence authorities. The current status endpoint is GET-only. Deliberate Stripe/PayPal test actions continue through the retained guarded runner and require Development host, test/sandbox credentials, provider mutation switches and explicit human confirmation. Production provider execution remains closed.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 87 ingests the exact Build 86 Development and Production closure. Build 87 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 88 ingests the exact Build 87 Development and Production closure. Build 88 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
 
-The runtime I.T. diagnostic cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic therefore never substitutes for the exact external release proof.
+The runtime I.T. diagnostic and external acceptance page cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic therefore never substitutes for the exact external release proof.
 
 ## Recovery discipline
 
@@ -60,4 +65,4 @@ The runtime I.T. diagnostic cannot self-attest GitHub/Cloudflare workflow status
 - Production CAIP R2: `devilndove-caip-media`
 - Canonical migrations: exactly `0001`–`0004` via `scripts/d1_migrate.py`.
 
-Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains evidence-dependent.
+Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains evidence-dependent until fresh evidence proves otherwise.
