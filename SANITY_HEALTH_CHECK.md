@@ -1,45 +1,39 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 90 — External Acceptance Evidence Depth & Cross-Lane Guidance is the current Development closure candidate.**
+**Release 467 Build 91 — Prelaunch Authority & Go-Live Decision Convergence is the current Development closure candidate.**
 
-Last fully verified Development is Build 89:
-- SHA `68ac415302bceddb81e6faea15fbbebb3a76f24a`
-- tree `1a7cccf46b29718ea63d532c8c22322bcca98ffd`
-- System Gate `34425720516`: SUCCESS
-- Current Application Quality `34425720539`: SUCCESS
-- I.T. Admin Runtime Proof `34425720559`: SUCCESS
-- Repository Branch Hygiene `34425720537`: SUCCESS
+Last fully verified Development is Build 90:
+- SHA `ab23457370ced9224facc2a09c1cca7b1ff20968`
+- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
+- System Gate `34434124113`: SUCCESS
+- Current Application Quality `34434123999`: SUCCESS
+- I.T. Admin Runtime Proof `34434124058`: SUCCESS
+- Repository Branch Hygiene `34434124046`: SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression evidence: SUCCESS.
 
-Current Production is Build 89:
-- `main` `68ac415302bceddb81e6faea15fbbebb3a76f24a`
-- tree `1a7cccf46b29718ea63d532c8c22322bcca98ffd`
-- Production Pages Deploy `34425875315`: SUCCESS
-- Production Live Resource Integrity `34425949898`: SUCCESS
-- Production business-data preservation, canonical D1/isolation/FK, exact bindings/deploy, public smoke, live account/D1 compatibility, same-origin Product R2 object, Product API photography and Production D1 diagnostic: SUCCESS.
+Current Production is Build 90:
+- `main` `ab23457370ced9224facc2a09c1cca7b1ff20968`
+- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
+- Production Pages Deploy `34434296247`: SUCCESS
+- Production Live Resource Integrity `34434356959`: SUCCESS.
 
-## Current Build 90 boundary
+## Current Build 91 boundary
 
-- `/admin/it/`, Reliability and Deployment Preflight use the Build 89 verified restart/Production truth while Build 90 is tested.
-- `/admin/release-control/external-acceptance/` remains the current acceptance workspace.
-- Build 89 Production read-only environment isolation is preserved.
-- Stripe and PayPal each retain six real evidence dimensions and deliberate Development-only guarded actions.
-- Social OAuth now exposes structured provider-selection, readiness, intended-account, lifecycle and publication-closed checks.
-- CAIP private-media now exposes structured schema, authenticated proxy, ranged-streaming, no-copy and no-cache checks.
-- Cloudflare Access now exposes the external dispatch contract as structured checks without pretending application source can read secret availability or workflow success.
-- All five lanes expose check counts and one next action.
-- Evidence timestamps are shown when available; elapsed time never automatically creates or removes acceptance.
+- `/admin/prelaunch/` is now the current Release 467 prelaunch/go-live decision surface instead of a stale Build 229/230 operator page.
+- Startup Readiness remains the D1-backed status owner and supplies its expected total dynamically; no historical 43-gate total is treated as current truth.
+- Missing/degraded Startup Readiness evidence fails closed.
+- All five external lanes come from the current External Acceptance control center and retain their own evidence authority.
+- Technical Development/Production GREEN never by itself means unrestricted launch-ready.
+- Canada-only commerce remains active: CA/CAD, U.S. sales/shipping disabled, existing local pickup supported.
 
 ## Safety boundary
 
 - Canonical migrations remain exactly `0001`–`0004`.
-- No request-time schema mutation, Development-to-Production business-data overwrite, automatic D1/R2/binding mutation or automatic restore is introduced by Build 90.
-- The current acceptance status endpoint is GET-only and performs no provider call on Production.
-- Deliberate Stripe/PayPal test actions remain gated by Development host, test/sandbox credentials, provider mutation switches and explicit human confirmation; Production provider execution remains closed.
-- Social provider publication remains closed.
-- Cloudflare Access proof remains dispatch-only and external; Build 90 performs no Access policy or service-token mutation.
-- Production resource names remain D1 `devilndove-prod-r462`, Product R2 `devilndove-toolshed-images`, CAIP R2 `devilndove-caip-media`; Development remains isolated.
+- No request-time schema mutation or Development-to-Production business-data overwrite.
+- Prelaunch status composition uses GET-only reads and manual refresh; it does not POST Startup Readiness changes.
+- No automatic provider execution, provider publication, Cloudflare Access mutation or automatic Production promotion.
+- Production provider execution remains closed.
 - Restart integrity remains `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1`.
-- Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains evidence-dependent unless current evidence proves otherwise.
+- Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT` unless its own current evidence proves acceptance.
 
-**Verdict:** Build 89 Development and Production are GREEN. Build 90 is correctly bounded as structured external-evidence depth and must earn its own exact Development and Production proofs before the next build begins.
+**Verdict:** Build 90 Development and Production are GREEN. Build 91 is correctly bounded as current prelaunch/go-live decision convergence and must earn its own exact Development and Production proof before the next build begins.
