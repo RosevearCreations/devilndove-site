@@ -1,4 +1,4 @@
-// Release 467 Build 88 — current external acceptance control center renderer.
+// Release 467 Build 89 — environment-isolated external acceptance renderer.
 document.addEventListener('DOMContentLoaded',()=>{
   const mount=document.getElementById('externalAcceptanceControlCenterMount');if(!mount)return;
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,7 +12,14 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   function checkTable(lane){
     const rows=Array.isArray(lane?.checks)?lane.checks:[];
-    return `<div class="ext-v88-table"><table><thead><tr><th>Acceptance check</th><th>State</th><th>Evidence</th><th>Derived detail</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(row.check_label||row.check_key)}</td><td>${status(row.check_state)}</td><td>${esc(yesNo(row.evidence_present))}</td><td class="small">${esc(row.detail||'')}</td></tr>`).join('')||'<tr><td colspan="4" class="small">No checks returned.</td></tr>'}</tbody></table></div>`;
+    return `<div class="ext-v88-table"><table><thead><tr><th>Acceptance check</th><th>State</th><th>Evidence</th><th>Next evidence detail</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(row.check_label||row.check_key)}</td><td>${status(row.check_state)}</td><td>${esc(yesNo(row.evidence_present))}${row.last_checked_at?`<div class="small">${esc(row.last_checked_at)}</div>`:''}</td><td class="small">${esc(row.detail||row.last_safe_error||'')}</td></tr>`).join('')||'<tr><td colspan="4" class="small">No checks returned.</td></tr>'}</tbody></table></div>`;
+  }
+
+  function nextAction(lane){
+    const next=lane?.next_action||{};
+    if(next.state==='complete')return '<p class="small"><strong>Next action:</strong> no missing evidence in this lane.</p>';
+    const link=next.href?` <a href="${esc(next.href)}">Open required workspace →</a>`:'';
+    return `<p class="small"><strong>Next action:</strong> ${esc(next.label||'Complete the next missing external evidence step.')}${link}</p>`;
   }
 
   function paymentLane(lane){
@@ -20,28 +27,30 @@ document.addEventListener('DOMContentLoaded',()=>{
     const config=lane?.configuration||{},payment=lane?.acceptance_payment||{},refund=lane?.provider_refund||{};
     const name=provider==='stripe'?'Stripe Development':'PayPal sandbox';
     const prepareLabel=provider==='stripe'?'Prepare Stripe test checkout':'Prepare PayPal sandbox approval';
-    const executionReady=config.execution_authorized===true;
-    const settled=['paid','partially_refunded','refunded'].includes(String(payment.payment_status||'').toLowerCase());
-    const canRefund=Boolean(payment.payment_id&&settled&&!lane.refund_accepted&&executionReady);
-    return `<section class="card" style="margin-top:16px"><div class="ext-v88-lane"><header><div><h2 style="margin:0">${esc(name)}</h2><p class="small">${Number(lane.accepted_check_count||0)}/${Number(lane.required_check_count||6)} real acceptance dimensions passed.</p></div>${status(lane.acceptance_state)}</header><p class="small">Configuration ready: ${yesNo(config.configuration_ready)} • Development host: ${yesNo(config.development_host)} • operator switch: ${yesNo(config.operator_switch_set)} • execution authorized now: ${yesNo(executionReady)} • live credential detected: ${yesNo(config.live_credential_detected)}</p><div class="ext-v88-actions"><button class="btn" type="button" data-provider-prepare="${provider}" ${executionReady?'':'disabled'}>${esc(prepareLabel)}</button><button class="btn secondary" type="button" data-provider-refund="${provider}" ${canRefund?'':'disabled'}>Run provider-synchronized test refund</button><button class="btn secondary" type="button" data-refresh-evidence>Refresh evidence</button></div><div id="externalActionLink-${provider}" class="ext-v88-action-note small"></div>${checkTable(lane)}${lane.refund_accepted?`<p class="small"><strong>Refund evidence:</strong> synchronized provider refund is recorded${refund.provider_sync_status?` • ${esc(refund.provider_sync_status)}`:''}.</p>`:'<p class="small"><strong>Refund evidence:</strong> still required.</p>'}</div></section>`;
+    const actionsAvailable=latest?.provider_action_lane?.available===true;
+    const executionReady=actionsAvailable&&config.execution_authorized===true;
+    const paymentSettled=['paid','partially_refunded','refunded'].includes(String(payment.payment_status||'').toLowerCase());
+    const canRefund=Boolean(actionsAvailable&&payment.payment_id&&paymentSettled&&!lane.refund_accepted&&config.execution_authorized===true);
+    return `<section class="card" style="margin-top:16px"><div class="ext-v88-lane"><header><div><h2 style="margin:0">${esc(name)}</h2><p class="small">${Number(lane.accepted_check_count||0)}/${Number(lane.required_check_count||6)} real acceptance dimensions passed.</p></div>${status(lane.acceptance_state)}</header><p class="small">Configuration ready: ${yesNo(config.configuration_ready)} • Development host: ${yesNo(config.development_host)} • operator switch: ${yesNo(config.operator_switch_set)} • guarded action lane available: ${yesNo(actionsAvailable)} • live credential detected: ${yesNo(config.live_credential_detected)}</p>${nextAction(lane)}<div class="ext-v88-actions"><button class="btn" type="button" data-provider-prepare="${provider}" ${executionReady?'':'disabled'}>${esc(prepareLabel)}</button><button class="btn secondary" type="button" data-provider-refund="${provider}" ${canRefund?'':'disabled'}>Run provider-synchronized test refund</button><button class="btn secondary" type="button" data-refresh-evidence ${actionsAvailable?'':'disabled'}>Refresh Development evidence</button></div><div id="externalActionLink-${provider}" class="ext-v88-action-note small"></div>${checkTable(lane)}${lane.refund_accepted?`<p class="small"><strong>Refund evidence:</strong> synchronized provider refund is recorded${refund.provider_sync_status?` • ${esc(refund.provider_sync_status)}`:''}.</p>`:'<p class="small"><strong>Refund evidence:</strong> still required.</p>'}</div></section>`;
   }
 
   function simpleLane(lane){
-    const href=lane?.correction_href||'/admin/it/';
-    return `<article class="ext-v88-lane"><header><strong>${esc(lane?.label||lane?.key||'External lane')}</strong>${status(lane?.acceptance_state)}</header><p class="small">${esc(lane?.policy||lane?.correction_mechanic||'Current external evidence is required before this lane can be accepted.')}</p><a class="small" href="${esc(href)}">Open evidence workspace →</a></article>`;
+    const href=lane?.next_action?.href||lane?.correction_href||'/admin/it/';
+    return `<article class="ext-v88-lane"><header><strong>${esc(lane?.label||lane?.key||'External lane')}</strong>${status(lane?.acceptance_state)}</header><p class="small">${esc(lane?.policy||lane?.correction_mechanic||lane?.next_action?.label||'Current external evidence is required before this lane can be accepted.')}</p>${lane?.accepted===true?'':'<a class="small" href="'+esc(href)+'">Open evidence workspace →</a>'}</article>`;
   }
 
   function render(data){
     latest=data;
-    const lanes=data.lanes||{},summary=data.summary||{},verified=data.verified_development||{},production=data.production||{};
-    mount.innerHTML=`<section class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap"><div><p class="eyebrow">Release 467 Build 88</p><h2 style="margin:0">External Acceptance Control Center Convergence</h2><p class="small">Current operator truth over the retained provider/evidence engines. Source and Production health stay separate from real external acceptance.</p></div>${status(data.state)}</div><div class="ext-v88-summary" style="margin-top:14px"><div><span class="small">Accepted lanes</span><strong>${Number(summary.accepted_lane_count||0)}/${Number(summary.required_lane_count||5)}</strong></div><div><span class="small">Verified Development</span><strong>Build ${verified.build||87}</strong><span class="small">${esc(shortSha(verified.dev_sha))}</span></div><div><span class="small">Production GREEN</span><strong>Build ${production.build||87}</strong><span class="small">${esc(shortSha(production.main_sha))}</span></div><div><span class="small">Provider execution</span><strong>Manual only</strong><span class="small">Development test/sandbox guards required</span></div></div></section>${paymentLane(lanes.stripe_development||{})}${paymentLane(lanes.paypal_sandbox||{})}<section class="card" style="margin-top:16px"><h2 style="margin-top:0">Other external evidence lanes</h2><div class="ext-v88-grid">${simpleLane(lanes.social_oauth||{})}${simpleLane(lanes.caip_private_media||{})}${simpleLane(lanes.cloudflare_access_service_token||{})}</div></section><section class="card" style="margin-top:16px"><h2 style="margin-top:0">Current acceptance truth</h2>${(data.truth_notes||[]).map(note=>`<p class="small">• ${esc(note)}</p>`).join('')}<p id="externalAcceptanceActionNotice" class="small" aria-live="polite"></p></section>`;
+    const lanes=data.lanes||{},summary=data.summary||{},verified=data.verified_development||{},production=data.production||{},runtime=data.runtime||{},runner=data.provider_runner||{};
+    const actionReason=data.provider_action_lane?.availability_reason||'unavailable';
+    mount.innerHTML=`<section class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap"><div><p class="eyebrow">Release 467 Build 89</p><h2 style="margin:0">External Acceptance Environment Isolation &amp; Guided Recovery</h2><p class="small">Current bridge-first acceptance truth. Production stays read-only; the historical provider runner is invoked only on Development and only supplies guarded action/evidence enrichment.</p></div>${status(data.state)}</div><div class="ext-v88-summary" style="margin-top:14px"><div><span class="small">Accepted lanes</span><strong>${Number(summary.accepted_lane_count||0)}/${Number(summary.required_lane_count||5)}</strong></div><div><span class="small">Verified Development</span><strong>Build ${verified.build||88}</strong><span class="small">${esc(shortSha(verified.dev_sha))}</span></div><div><span class="small">Production GREEN</span><strong>Build ${production.build||88}</strong><span class="small">${esc(shortSha(production.main_sha))}</span></div><div><span class="small">Runtime / action lane</span><strong>${esc(String(runtime.environment||'unknown').toUpperCase())}</strong><span class="small">${data.provider_action_lane?.available===true?'Development actions available':esc(actionReason)}</span></div></div><p class="small" style="margin-bottom:0">Provider runner invoked: ${yesNo(runner.invoked)} • available: ${yesNo(runner.available)}${runner.error?` • ${esc(runner.error)}`:''}</p></section>${paymentLane(lanes.stripe_development||{})}${paymentLane(lanes.paypal_sandbox||{})}<section class="card" style="margin-top:16px"><h2 style="margin-top:0">Other external evidence lanes</h2><div class="ext-v88-grid">${simpleLane(lanes.social_oauth||{})}${simpleLane(lanes.caip_private_media||{})}${simpleLane(lanes.cloudflare_access_service_token||{})}</div></section><section class="card" style="margin-top:16px"><h2 style="margin-top:0">Current acceptance truth</h2>${(data.truth_notes||[]).map(note=>`<p class="small">• ${esc(note)}</p>`).join('')}<p id="externalAcceptanceActionNotice" class="small" aria-live="polite"></p></section>`;
     mount.querySelectorAll('[data-refresh-evidence]').forEach(button=>button.addEventListener('click',refreshEvidence));
     mount.querySelectorAll('[data-provider-prepare]').forEach(button=>button.addEventListener('click',()=>prepareProvider(button.dataset.providerPrepare)));
     mount.querySelectorAll('[data-provider-refund]').forEach(button=>button.addEventListener('click',()=>refundProvider(button.dataset.providerRefund)));
   }
 
   async function load(){
-    mount.innerHTML='<section class="card" style="margin-top:18px"><p class="small">Loading Release 467 Build 88 external acceptance evidence…</p></section>';
+    mount.innerHTML='<section class="card" style="margin-top:18px"><p class="small">Loading Release 467 Build 89 environment-isolated external acceptance evidence…</p></section>';
     try{
       const response=await apiFetch('/api/admin/current-external-acceptance-control-center',{method:'GET',cache:'no-store'});
       const data=await response.json().catch(()=>({}));
@@ -51,6 +60,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   async function runnerPost(payload){
+    if(latest?.provider_action_lane?.available!==true)throw new Error('Provider acceptance actions are available only on the canonical Development environment. This view is read-only here.');
     const endpoint=latest?.provider_action_lane?.endpoint||'/api/admin/provider-acceptance-runner';
     const response=await apiFetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Cache-Control':'no-store'},body:JSON.stringify(payload)});
     const data=await response.json().catch(()=>({}));
