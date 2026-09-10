@@ -1,0 +1,91 @@
+// Release 467 Build 88 — current external acceptance control center renderer.
+document.addEventListener('DOMContentLoaded',()=>{
+  const mount=document.getElementById('externalAcceptanceControlCenterMount');if(!mount)return;
+  const esc=(v)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const apiFetch=(...args)=>window.DDAuth?.apiFetch?window.DDAuth.apiFetch(...args):fetch(...args);
+  const stateLabel=(v)=>String(v||'pending').replaceAll('_',' ').toUpperCase();
+  const stateClass=(v)=>String(v||'pending').toLowerCase();
+  const shortSha=(v)=>/^[0-9a-f]{40}$/i.test(String(v||''))?String(v).slice(0,12):(v||'unavailable');
+  const status=(v)=>`<span class="ext-v88-status ${esc(stateClass(v))}">${esc(stateLabel(v))}</span>`;
+  const yesNo=(v)=>v?'YES':'NO';
+  let latest=null;
+
+  function checkTable(lane){
+    const rows=Array.isArray(lane?.checks)?lane.checks:[];
+    return `<div class="ext-v88-table"><table><thead><tr><th>Acceptance check</th><th>State</th><th>Evidence</th><th>Derived detail</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(row.check_label||row.check_key)}</td><td>${status(row.check_state)}</td><td>${esc(yesNo(row.evidence_present))}</td><td class="small">${esc(row.detail||'')}</td></tr>`).join('')||'<tr><td colspan="4" class="small">No checks returned.</td></tr>'}</tbody></table></div>`;
+  }
+
+  function paymentLane(lane){
+    const provider=lane?.key==='stripe_development'?'stripe':'paypal';
+    const config=lane?.configuration||{},payment=lane?.acceptance_payment||{},refund=lane?.provider_refund||{};
+    const name=provider==='stripe'?'Stripe Development':'PayPal sandbox';
+    const prepareLabel=provider==='stripe'?'Prepare Stripe test checkout':'Prepare PayPal sandbox approval';
+    const executionReady=config.execution_authorized===true;
+    const settled=['paid','partially_refunded','refunded'].includes(String(payment.payment_status||'').toLowerCase());
+    const canRefund=Boolean(payment.payment_id&&settled&&!lane.refund_accepted&&executionReady);
+    return `<section class="card" style="margin-top:16px"><div class="ext-v88-lane"><header><div><h2 style="margin:0">${esc(name)}</h2><p class="small">${Number(lane.accepted_check_count||0)}/${Number(lane.required_check_count||6)} real acceptance dimensions passed.</p></div>${status(lane.acceptance_state)}</header><p class="small">Configuration ready: ${yesNo(config.configuration_ready)} • Development host: ${yesNo(config.development_host)} • operator switch: ${yesNo(config.operator_switch_set)} • execution authorized now: ${yesNo(executionReady)} • live credential detected: ${yesNo(config.live_credential_detected)}</p><div class="ext-v88-actions"><button class="btn" type="button" data-provider-prepare="${provider}" ${executionReady?'':'disabled'}>${esc(prepareLabel)}</button><button class="btn secondary" type="button" data-provider-refund="${provider}" ${canRefund?'':'disabled'}>Run provider-synchronized test refund</button><button class="btn secondary" type="button" data-refresh-evidence>Refresh evidence</button></div><div id="externalActionLink-${provider}" class="ext-v88-action-note small"></div>${checkTable(lane)}${lane.refund_accepted?`<p class="small"><strong>Refund evidence:</strong> synchronized provider refund is recorded${refund.provider_sync_status?` • ${esc(refund.provider_sync_status)}`:''}.</p>`:'<p class="small"><strong>Refund evidence:</strong> still required.</p>'}</div></section>`;
+  }
+
+  function simpleLane(lane){
+    const href=lane?.correction_href||'/admin/it/';
+    return `<article class="ext-v88-lane"><header><strong>${esc(lane?.label||lane?.key||'External lane')}</strong>${status(lane?.acceptance_state)}</header><p class="small">${esc(lane?.policy||lane?.correction_mechanic||'Current external evidence is required before this lane can be accepted.')}</p><a class="small" href="${esc(href)}">Open evidence workspace →</a></article>`;
+  }
+
+  function render(data){
+    latest=data;
+    const lanes=data.lanes||{},summary=data.summary||{},verified=data.verified_development||{},production=data.production||{};
+    mount.innerHTML=`<section class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap"><div><p class="eyebrow">Release 467 Build 88</p><h2 style="margin:0">External Acceptance Control Center Convergence</h2><p class="small">Current operator truth over the retained provider/evidence engines. Source and Production health stay separate from real external acceptance.</p></div>${status(data.state)}</div><div class="ext-v88-summary" style="margin-top:14px"><div><span class="small">Accepted lanes</span><strong>${Number(summary.accepted_lane_count||0)}/${Number(summary.required_lane_count||5)}</strong></div><div><span class="small">Verified Development</span><strong>Build ${verified.build||87}</strong><span class="small">${esc(shortSha(verified.dev_sha))}</span></div><div><span class="small">Production GREEN</span><strong>Build ${production.build||87}</strong><span class="small">${esc(shortSha(production.main_sha))}</span></div><div><span class="small">Provider execution</span><strong>Manual only</strong><span class="small">Development test/sandbox guards required</span></div></div></section>${paymentLane(lanes.stripe_development||{})}${paymentLane(lanes.paypal_sandbox||{})}<section class="card" style="margin-top:16px"><h2 style="margin-top:0">Other external evidence lanes</h2><div class="ext-v88-grid">${simpleLane(lanes.social_oauth||{})}${simpleLane(lanes.caip_private_media||{})}${simpleLane(lanes.cloudflare_access_service_token||{})}</div></section><section class="card" style="margin-top:16px"><h2 style="margin-top:0">Current acceptance truth</h2>${(data.truth_notes||[]).map(note=>`<p class="small">• ${esc(note)}</p>`).join('')}<p id="externalAcceptanceActionNotice" class="small" aria-live="polite"></p></section>`;
+    mount.querySelectorAll('[data-refresh-evidence]').forEach(button=>button.addEventListener('click',refreshEvidence));
+    mount.querySelectorAll('[data-provider-prepare]').forEach(button=>button.addEventListener('click',()=>prepareProvider(button.dataset.providerPrepare)));
+    mount.querySelectorAll('[data-provider-refund]').forEach(button=>button.addEventListener('click',()=>refundProvider(button.dataset.providerRefund)));
+  }
+
+  async function load(){
+    mount.innerHTML='<section class="card" style="margin-top:18px"><p class="small">Loading Release 467 Build 88 external acceptance evidence…</p></section>';
+    try{
+      const response=await apiFetch('/api/admin/current-external-acceptance-control-center',{method:'GET',cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||data?.ok!==true)throw new Error(data?.error||`External acceptance control center failed (${response.status}).`);
+      render(data);
+    }catch(error){mount.innerHTML=`<section class="card" style="margin-top:18px"><h2>External acceptance evidence unavailable</h2><p class="small">${esc(error?.message||'Unable to load current external acceptance evidence.')}</p><button class="btn" id="retryExternalAcceptance" type="button">Retry</button></section>`;document.getElementById('retryExternalAcceptance')?.addEventListener('click',load);}
+  }
+
+  async function runnerPost(payload){
+    const endpoint=latest?.provider_action_lane?.endpoint||'/api/admin/provider-acceptance-runner';
+    const response=await apiFetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Cache-Control':'no-store'},body:JSON.stringify(payload)});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||data?.ok!==true)throw new Error(data?.error||`Provider action failed (${response.status}).`);
+    return data;
+  }
+
+  function actionNotice(message){const target=document.getElementById('externalAcceptanceActionNotice');if(target)target.textContent=message||'';}
+
+  async function refreshEvidence(){
+    actionNotice('Refreshing sanitized Development evidence…');
+    try{await runnerPost({action:'refresh_evidence'});actionNotice('Evidence refreshed. No provider network call was made by the refresh action.');await load();}
+    catch(error){actionNotice(error?.message||'Evidence refresh failed.');}
+  }
+
+  async function prepareProvider(provider){
+    const label=provider==='stripe'?'Stripe test checkout':'PayPal sandbox approval';
+    if(!window.confirm(`Prepare a new $1.00 CAD ${label} in Development? This can call the provider test/sandbox API, never Production, and does not mark acceptance complete.`))return;
+    actionNotice(`Preparing ${label}…`);
+    try{
+      const data=await runnerPost({action:'prepare_checkout',provider,confirm_provider_test:true});
+      await load();
+      const link=document.getElementById(`externalActionLink-${provider}`);
+      if(link&&data.redirect_url)link.innerHTML=`<strong>Human completion required:</strong> <a href="${esc(data.redirect_url)}" target="_blank" rel="noopener noreferrer">Open ${esc(label)}</a>, complete the test flow, then return and refresh evidence.`;
+      actionNotice(data.message||`${label} prepared.`);
+    }catch(error){actionNotice(error?.message||`${label} preparation failed.`);}
+  }
+
+  async function refundProvider(provider){
+    const label=provider==='stripe'?'Stripe test':'PayPal sandbox';
+    if(!window.confirm(`Run the provider-synchronized ${label} refund proof for the latest settled Development acceptance payment? Production execution remains forbidden.`))return;
+    actionNotice(`Running ${label} refund proof…`);
+    try{const data=await runnerPost({action:'refund_latest',provider,confirm_provider_test:true});actionNotice(data.message||`${label} refund proof completed.`);await load();}
+    catch(error){actionNotice(error?.message||`${label} refund proof failed.`);}
+  }
+
+  void load();
+});
