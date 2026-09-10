@@ -1,0 +1,69 @@
+{
+  "release": 467,
+  "build": 87,
+  "title": "Production Authority & Restart Convergence",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build87-production-authority-restart-convergence",
+  "starting_point": {
+    "development": {
+      "sha": "5fdbb5346e52f17072671274dc36e4d3527a7905",
+      "tree": "f9037baf12bc3489b3a0df3df03eef5bdbe85e90",
+      "system_gate_run": 34419070653,
+      "quality_run": 34419070636,
+      "it_admin_runtime_run": 34419070642,
+      "repository_hygiene_run": 34419070660,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "5fdbb5346e52f17072671274dc36e4d3527a7905",
+      "tree_sha": "f9037baf12bc3489b3a0df3df03eef5bdbe85e90",
+      "production_pages_deploy_run": 34419211512,
+      "production_live_resource_integrity_run": 34419284027,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build86_final_closure": true,
+    "current_authority_convergence": true,
+    "restart_integrity_convergence": true,
+    "it_control_tower_truth_convergence": true,
+    "reliability_truth_convergence": true,
+    "deployment_preflight_truth_convergence": true,
+    "human_handoff_convergence": true,
+    "schema_change": false,
+    "runtime_business_logic_change": false
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "final_closure": null
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "deployment_execution_from_diagnostics": false,
+    "restore_execution_from_diagnostics": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
