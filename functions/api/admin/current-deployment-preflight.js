@@ -1,34 +1,34 @@
-// Release 467 Build 88 — current Deployment Preflight canonical migration projection.
+// Release 467 Build 89 — current Deployment Preflight canonical migration projection.
 // GET-only. Historical diagnostics are reused read-only; forward schema authority remains canonical.
 import { getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE = 467;
-const BUILD = 88;
-const TITLE = 'External Acceptance Control Center Convergence';
+const BUILD = 89;
+const TITLE = 'External Acceptance Environment Isolation & Guided Recovery';
 const AUTHORITY = 'current-development-authority.json';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release:467,build:87,title:'Production Authority & Restart Convergence',
-  accepted_dev_sha:'646d73710784008617157cf5746a66f053daba83',
-  accepted_dev_tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
-  system_gate_run:34421392242,current_application_quality_run:34421392244,
-  it_admin_runtime_proof_run:34421392231,branch_hygiene_run:34421392188,
+  release:467,build:88,title:'External Acceptance Control Center Convergence',
+  accepted_dev_sha:'9c6d56b887b2aa4bb710e5980608b8942830034c',
+  accepted_dev_tree_sha:'9f7d279ed5c83795682ba763ca150f1fe91a6019',
+  system_gate_run:34423493650,current_application_quality_run:34423493830,
+  it_admin_runtime_proof_run:34423493747,branch_hygiene_run:34423493617,
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release:467,build:87,title:'Production Authority & Restart Convergence',
-  dev_sha:'646d73710784008617157cf5746a66f053daba83',
-  tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
-  system_gate_run:34421392242,current_application_quality_run:34421392244,
-  it_admin_runtime_proof_run:34421392231,branch_hygiene_run:34421392188,
+  release:467,build:88,title:'External Acceptance Control Center Convergence',
+  dev_sha:'9c6d56b887b2aa4bb710e5980608b8942830034c',
+  tree_sha:'9f7d279ed5c83795682ba763ca150f1fe91a6019',
+  system_gate_run:34423493650,current_application_quality_run:34423493830,
+  it_admin_runtime_proof_run:34423493747,branch_hygiene_run:34423493617,
   proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION = Object.freeze({
-  release:467,build:87,state:'PRODUCTION_GREEN',
-  main_sha:'646d73710784008617157cf5746a66f053daba83',
-  tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
-  pages_deploy_run:34421532872,production_pages_deploy_run:34421532872,
-  production_live_resource_integrity_run:34421613381
+  release:467,build:88,state:'PRODUCTION_GREEN',
+  main_sha:'9c6d56b887b2aa4bb710e5980608b8942830034c',
+  tree_sha:'9f7d279ed5c83795682ba763ca150f1fe91a6019',
+  pages_deploy_run:34423649786,production_pages_deploy_run:34423649786,
+  production_live_resource_integrity_run:34423737422
 });
 const REQUIRED_DEVELOPMENT_PROOFS = Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene']);
 const CANONICAL_MIGRATIONS = Object.freeze([
@@ -61,7 +61,7 @@ function currentChecks(truth,expectedSchema){
     check(truth.foreign_key_violations?'fail':'pass','canonical_foreign_keys','D1 foreign-key integrity',truth.foreign_key_violations?`${truth.foreign_key_violations} foreign-key violation(s) returned.`:'PRAGMA foreign_key_check returned zero violations.','',{rows:truth.foreign_key_rows}),
     check(schemaDrift.length?'warn':'pass','current_schema_visibility','Current expected application schema visibility',schemaDrift.length?`${schemaDrift.length} application schema group(s) need review.`:`${expectedSchema.length} current application schema groups are visible.`),
     check('pass','runtime_schema_mutation_boundary','Request-time schema mutation boundary','This current Deployment Preflight endpoint is GET-only and has no schema repair capability.'),
-    check('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Build 87 is the last fully verified Development and Production checkpoint at ${VERIFIED_DEVELOPMENT.dev_sha}. Build 88 is the current closure candidate.`,'Verify the exact Build 88 dev head through all required Development proofs before Production promotion.',{accepted:ACCEPTED_DEVELOPMENT,verified:VERIFIED_DEVELOPMENT,production:PRODUCTION})
+    check('pass','restart_integrity_checkpoint','Restart integrity checkpoint',`Build 88 is the last fully verified Development and Production checkpoint at ${VERIFIED_DEVELOPMENT.dev_sha}. Build 89 is the current closure candidate.`,'Verify the exact Build 89 dev head through all required Development proofs before Production promotion.',{accepted:ACCEPTED_DEVELOPMENT,verified:VERIFIED_DEVELOPMENT,production:PRODUCTION})
   ];
 }
 function summary(checks){const blocker_count=checks.filter(row=>row.status==='fail').length,warning_count=checks.filter(row=>row.status==='warn').length;return {status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter(row=>row.status==='pass').length,check_count:checks.length};}
@@ -79,10 +79,10 @@ export async function onRequestGet(context){
   const data={...historical,ok:true,release:RELEASE,build:BUILD,title:TITLE,build_label:`Release ${RELEASE} Build ${BUILD}`,authority:AUTHORITY,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),checks,summary:summary(checks),ledger:null,expected_schema:expectedSchema,migration_plan:migrationPlan(),canonical_migration_truth:truth,
     release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,accepted_development_checkpoint:ACCEPTED_DEVELOPMENT,verified_development_checkpoint:VERIFIED_DEVELOPMENT,restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',implementation_acceptance_is_distinct_from_final_closure:true,closure_candidate_requires_external_exact_head_proof:true,production:PRODUCTION,rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},
     truth_notes:[
-      'The active Deployment Preflight is the current read-only Release 467 Build 88 projection.',
-      'Build 87 is the last fully verified Development checkpoint at 646d73710784008617157cf5746a66f053daba83 / 709f802cf7ca24a12f48bd7c8b562a92b306fcae with System 34421392242, Quality 34421392244, I.T. 34421392231 and Hygiene 34421392188 plus exact Preview acceptance.',
-      'Build 87 is Production GREEN at the same SHA/tree with Production Pages Deploy 34421532872 and Live Resource Integrity 34421613381 successful.',
-      'Build 88 adds current external acceptance convergence without adding a canonical migration or weakening any provider boundary.',
+      'The active Deployment Preflight is the current read-only Release 467 Build 89 projection.',
+      'Build 88 is the last fully verified Development checkpoint at 9c6d56b887b2aa4bb710e5980608b8942830034c / 9f7d279ed5c83795682ba763ca150f1fe91a6019 with System 34423493650, Quality 34423493830, I.T. 34423493747 and Hygiene 34423493617 plus exact Preview acceptance.',
+      'Build 88 is Production GREEN at the same SHA/tree with Production Pages Deploy 34423649786 and Live Resource Integrity 34423737422 successful.',
+      'Build 89 isolates the current external acceptance view by environment without adding a canonical migration or weakening any provider boundary.',
       'Canonical migrations remain exactly 0001-0004; external HOLD lanes remain separate from deployment health.'
     ],
     safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,provider_execution:false,provider_publication:false,backup_restore_execution:false,main_mutation:false,production_mutation:false,secret_values_emitted:false}};
