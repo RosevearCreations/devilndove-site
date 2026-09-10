@@ -2,7 +2,7 @@
   "release": 467,
   "build": 89,
   "title": "External Acceptance Environment Isolation & Guided Recovery",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build89-external-acceptance-environment-isolation",
   "starting_point": {
     "development": {
@@ -38,12 +38,38 @@
     "provider_publication": false,
     "schema_change": false
   },
+  "final_closure": {
+    "dev_sha": "68ac415302bceddb81e6faea15fbbebb3a76f24a",
+    "tree_sha": "1a7cccf46b29718ea63d532c8c22322bcca98ffd",
+    "proofs": {
+      "system_gate_run": 34425720516,
+      "current_application_quality_run": 34425720539,
+      "it_admin_runtime_proof_run": 34425720559,
+      "branch_hygiene_run": 34425720537
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true
+  },
+  "production_checkpoint": {
+    "build": 89,
+    "main_sha": "68ac415302bceddb81e6faea15fbbebb3a76f24a",
+    "tree_sha": "1a7cccf46b29718ea63d532c8c22322bcca98ffd",
+    "production_pages_deploy_run": 34425875315,
+    "production_live_resource_integrity_run": 34425949898,
+    "state": "PRODUCTION_GREEN",
+    "role": "IMMUTABLE_BUILD89_PRODUCTION_CLOSURE"
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,
     "requires_exact_preview": true,
     "main_promotion_only_after_exact_development_green": true,
-    "final_closure": null
+    "final_closure_ingested_by_build": 90
   },
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
