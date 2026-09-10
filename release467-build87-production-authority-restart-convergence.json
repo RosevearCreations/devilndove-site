@@ -2,25 +2,33 @@
   "release": 467,
   "build": 87,
   "title": "Production Authority & Restart Convergence",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build87-production-authority-restart-convergence",
-  "starting_point": {
-    "development": {
-      "sha": "5fdbb5346e52f17072671274dc36e4d3527a7905",
-      "tree": "f9037baf12bc3489b3a0df3df03eef5bdbe85e90",
-      "system_gate_run": 34419070653,
-      "quality_run": 34419070636,
-      "it_admin_runtime_run": 34419070642,
-      "repository_hygiene_run": 34419070660,
-      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  "final_closure": {
+    "dev_sha": "646d73710784008617157cf5746a66f053daba83",
+    "tree_sha": "709f802cf7ca24a12f48bd7c8b562a92b306fcae",
+    "proofs": {
+      "system_gate_run": 34421392242,
+      "current_application_quality_run": 34421392244,
+      "it_admin_runtime_proof_run": 34421392231,
+      "branch_hygiene_run": 34421392188
     },
-    "production": {
-      "main_sha": "5fdbb5346e52f17072671274dc36e4d3527a7905",
-      "tree_sha": "f9037baf12bc3489b3a0df3df03eef5bdbe85e90",
-      "production_pages_deploy_run": 34419211512,
-      "production_live_resource_integrity_run": 34419284027,
-      "state": "PRODUCTION_GREEN"
-    }
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true
+  },
+  "production_checkpoint": {
+    "build": 87,
+    "main_sha": "646d73710784008617157cf5746a66f053daba83",
+    "tree_sha": "709f802cf7ca24a12f48bd7c8b562a92b306fcae",
+    "production_pages_deploy_run": 34421532872,
+    "production_live_resource_integrity_run": 34421613381,
+    "state": "PRODUCTION_GREEN",
+    "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "scope": {
     "ingest_build86_final_closure": true,
@@ -32,13 +40,6 @@
     "human_handoff_convergence": true,
     "schema_change": false,
     "runtime_business_logic_change": false
-  },
-  "closure_policy": {
-    "candidate_must_not_self_claim_final_proof": true,
-    "requires_exact_dev_head_four_proof": true,
-    "requires_exact_preview": true,
-    "main_promotion_only_after_exact_development_green": true,
-    "final_closure": null
   },
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
