@@ -78,23 +78,14 @@ def run_current_contract(path, label):
 # selected-Product Media / Photo Studio convergence, the buyer-first Storefront Product
 # experience, bounded Storefront search / collection discovery and zero-result recovery,
 # full public-route technical SEO / sitemap / internal-link convergence, the shared
-# Canada-only storefront country/currency/address boundary, or resilient idempotent
-# Cart / Checkout order creation and payment-retry recovery, or the preparation-only
-# Stripe API-version/idempotency contract while real Stripe acceptance remains HOLD,
-# or the preparation-only PayPal sandbox request-id/replay contract while real
-# PayPal acceptance remains HOLD, or the read-only Finance/Accounting monthly
-# convergence with existing write owners preserved, or the reviewed Orders / Fulfilment
-# workflow with copy-only customer communication and provider/refund/accounting owners preserved,
-# or the read-only Labeling / Packaging template-to-reprint release workflow that preserves
-# the mature Packaging write authority and Build 44 production/reuse lane, or the read-only
-# Creators / CAIP project-to-profitability journey that protects private/raw media and keeps
-# Inventory, Product, Content Studio, Finance, OAuth/provider and publication owners preserved,
-# or the selected-provider Development Social OAuth acceptance lane requiring intended-account
-# verification plus explicit human-approved draft evidence while Production OAuth and all
-# provider/automatic publication remain fail-closed, or the Build 86 read-only I.T.
-# Operations & Self-Diagnostics convergence across deployment, bindings, schema/runtime,
-# module authority, provider HOLDs, exact release gates and backup/recovery guidance while
-# automatic repair, provider execution, restore execution and Production writes remain closed.
+# Canada-only storefront country/currency/address boundary, resilient idempotent Cart /
+# Checkout order creation and payment-retry recovery, preparation-only Stripe and PayPal
+# acceptance contracts while their real external lanes remain HOLD, the read-only Finance /
+# Accounting convergence, reviewed Orders / Fulfilment, Labeling / Packaging, Creators / CAIP,
+# selected-provider Development Social OAuth with human approval and publication fail-closed,
+# the Build 86 eight-domain I.T. Operations & Self-Diagnostics implementation, and Build 87
+# Production Authority & Restart Convergence which ingests the externally proven Build 86
+# Development/Production closure without adding schema, provider, restore or business-data writes.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -120,6 +111,7 @@ run_current_contract('scripts/release467_build83_gate.py', 'Release 467 Build 83
 run_current_contract('scripts/release467_build84_gate.py', 'Release 467 Build 84')
 run_current_contract('scripts/release467_build85_gate.py', 'Release 467 Build 85')
 run_current_contract('scripts/release467_build86_gate.py', 'Release 467 Build 86')
+run_current_contract('scripts/release467_build87_gate.py', 'Release 467 Build 87')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
