@@ -4,6 +4,8 @@
 
 Build 88 creates one current operator surface for the remaining external acceptance work after the Build 62–87 reliability, commerce, provider-preparation, Social/OAuth and I.T. convergence sequence. It does **not** replace the mature payment/OAuth/runtime engines and does not pre-declare any external acceptance lane passed.
 
+The current control center converges **five external lanes**: Stripe Development, PayPal sandbox, Social/OAuth, CAIP private media and Cloudflare Access service-token acceptance.
+
 ## Verified starting point
 
 Build 87 — Production Authority & Restart Convergence is the exact verified Development and Production baseline:
