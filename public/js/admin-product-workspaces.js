@@ -1,8 +1,10 @@
-// Release 467 Build 66 — Product Workspace Split
+// Release 467 Build 95 — Product Workspace Current Context & Table Ergonomics
 // Presentation-only organizer for the existing Products authority. No API, D1, R2, or provider calls live here.
 
 (() => {
-  const VERSION = 'R467B66_V1';
+  const RELEASE = 467;
+  const BUILD = 95;
+  const VERSION = 'R467B95_V1';
   const WORKSPACES = Object.freeze([
     { id: 'products', label: 'Products', description: 'Catalog list, QA, pricing, offers, and product-level actions.' },
     { id: 'editor', label: 'Editor', description: 'Create or edit the shared Product record without unrelated panels competing for attention.' },
@@ -73,16 +75,18 @@
     const navCard = document.createElement('section');
     navCard.id = 'productWorkspaceNav';
     navCard.className = 'card product-workspace-nav-card';
+    navCard.dataset.release = String(RELEASE);
+    navCard.dataset.build = String(BUILD);
     navCard.innerHTML = `
       <div class="product-workspace-heading">
         <div>
-          <p class="eyebrow">Release 467 Build 66</p>
+          <p class="eyebrow">Release ${RELEASE} Build ${BUILD}</p>
           <h2 style="margin:0 0 6px">Focused Product workspaces</h2>
           <p class="small" style="margin:0">One Product authority, six focused views. Moving between views never creates a second Product record or a second data authority.</p>
         </div>
         <div class="product-workspace-authority" aria-live="polite">
           <strong>Current Product authority</strong>
-          <div class="small" id="productWorkspaceAuthorityText">No Product is loaded in the editor yet.</div>
+          <div class="small" id="productWorkspaceAuthorityText">No Product is selected yet. Choose a Product or open one in the editor to carry the same Product context across all six workspaces.</div>
         </div>
       </div>
       <div class="product-workspace-tabs" id="productWorkspaceTabs" role="tablist" aria-label="Product workspaces"></div>
@@ -125,7 +129,6 @@
     };
     const moveSelector = (selector, id) => move(document.querySelector(selector), id);
 
-    // Cache the two original large cards before moving their child mounts out to focused workspaces.
     const editorCard = document.getElementById('createProductForm')?.closest('.card') || null;
     const catalogCard = document.getElementById('productsTableBody')?.closest('.card') || null;
 
@@ -133,17 +136,14 @@
     move(editorCard, 'editor');
     move(catalogCard, 'products');
 
-    // Inventory links remain tied to the same Product id; only their presentation location changes.
     moveSelector('#productResourcesAdminMount', 'inventory');
     moveSelector('#siteInventoryAdminMount', 'inventory');
     moveSelector('#productStockReportMount', 'inventory');
 
-    // Media systems share the existing Product media/event authority.
     moveSelector('#productMediaAdminMount', 'media');
     moveSelector('#adminProductImageAnnotationsMount', 'media');
     moveSelector('#mediaLibraryAdminMount', 'media');
 
-    // SEO/publishing systems continue to react to dd:product-editor-target.
     moveSelector('#productStoryNotesAdminMount', 'seo');
     moveSelector('#productSeoAdminMount', 'seo');
     moveSelector('#catalogSyncAdminMount', 'seo');
@@ -151,7 +151,6 @@
     moveSelector('.product-lifecycle-guide', 'cleanup');
     moveSelector('#productCleanupCenter', 'cleanup');
 
-    // Give the existing correction runtime a permanent Cleanup workspace target even if it loads later.
     let correctionMount = document.getElementById('productCorrectionMount');
     if (!correctionMount) {
       correctionMount = document.createElement('section');
@@ -175,7 +174,7 @@
       if (nextName) currentProductName = nextName;
       if (!authorityText) return;
       if (!currentProductId) {
-        authorityText.textContent = 'No Product is loaded in the editor yet.';
+        authorityText.textContent = 'No Product is selected yet. Choose a Product or open one in the editor to carry the same Product context across all six workspaces.';
         return;
       }
       authorityText.textContent = `Product #${currentProductId}${currentProductName ? ` — ${currentProductName}` : ''}. This same Product id is shared by Editor, Inventory Links, Media, SEO / Publishing, and Cleanup / Archive.`;
@@ -225,7 +224,7 @@
       activeWorkspace = next;
       writeWorkspaceToUrl(next, historyMode);
       const row = WORKSPACES.find((item) => item.id === next);
-      if (status && announce) status.textContent = `${row?.label || 'Products'} workspace active.`;
+      if (status && announce) status.textContent = `${row?.label || 'Products'} workspace active${currentProductId ? ` for Product #${currentProductId}` : ''}.`;
       if (focus) navCard.querySelector(`[data-product-workspace-tab="${next}"]`)?.focus();
       if (previous !== next) {
         document.dispatchEvent(new CustomEvent('dd:product-workspace-changed', {
@@ -257,7 +256,6 @@
 
     window.addEventListener('popstate', () => activate(urlWorkspace(), { historyMode: 'none', announce: true }));
 
-    // Direct table actions route the operator to the workspace that owns the visible follow-through.
     document.addEventListener('click', (event) => {
       const correction = event.target.closest('[data-open-product-correction]');
       if (correction) {
@@ -296,10 +294,14 @@
 
     window.DDProductWorkspaces = Object.freeze({
       version: VERSION,
+      release: RELEASE,
+      build: BUILD,
       workspaces: WORKSPACES.map((row) => Object.freeze({ ...row })),
       open: (id) => activate(id, { historyMode: 'push' }),
       snapshot: () => Object.freeze({
         version: VERSION,
+        release: RELEASE,
+        build: BUILD,
         workspace: activeWorkspace,
         product_id: currentProductId || 0,
         product_name: currentProductName || '',
