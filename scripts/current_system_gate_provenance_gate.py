@@ -33,11 +33,12 @@ def run_current_contract(path, label):
 
 # Current reliability contracts are chained here so later work cannot silently regress
 # Product/Inventory/Media/Storefront/SEO/commerce/Finance/Orders/Packaging/Creators flows,
-# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-89 closure,
-# Build 89 environment-isolated external acceptance, and Build 90 structured evidence depth:
-# five lanes with passed/required checks and next actions, detailed Social OAuth and CAIP evidence,
-# a fail-closed Cloudflare Access dispatch checklist, timestamp visibility without automatic age
-# acceptance, preserved six-dimension Stripe/PayPal acceptance, and Production/provider publication closed.
+# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-90 closure,
+# Build 89 environment-isolated external acceptance, Build 90 structured five-lane evidence,
+# and Build 91 current prelaunch/go-live decision convergence: dynamic Startup Readiness totals,
+# fail-closed degraded evidence, five external lane counts/next actions, technical GREEN separated
+# from unrestricted launch readiness, Canada-only commerce/U.S. suspension preserved, and no
+# automatic provider execution/publication or Production promotion.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -67,6 +68,7 @@ run_current_contract('scripts/release467_build87_gate.py', 'Release 467 Build 87
 run_current_contract('scripts/release467_build88_gate.py', 'Release 467 Build 88')
 run_current_contract('scripts/release467_build89_gate.py', 'Release 467 Build 89')
 run_current_contract('scripts/release467_build90_gate.py', 'Release 467 Build 90')
+run_current_contract('scripts/release467_build91_gate.py', 'Release 467 Build 91')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
