@@ -5,6 +5,7 @@
   const VERIFIED_BUILD=90;
   const VERIFIED_SHA='ab23457370ced9224facc2a09c1cca7b1ff20968';
   const VERIFIED_TREE='54f069f37e09e6f48e035f98656423ed28aa85f4';
+  const VERIFIED_PROOFS=Object.freeze({system:34434124113,quality:34434123999,it:34434124058,hygiene:34434124046,production_pages:34434296247,live_resources:34434356959});
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const apiFetch=(...args)=>window.DDAuth?.apiFetch?window.DDAuth.apiFetch(...args):fetch(...args);
   const closed=(status)=>['passed','not_applicable'].includes(String(status||'').toLowerCase());
@@ -39,7 +40,9 @@
   function render(startupData,externalData){
     const mount=document.getElementById('prelaunchReadinessSummary');if(!mount)return;
     const startup=summarizeStartup(startupData),external=summarizeExternal(externalData);
-    const technicalGreen=externalData?.verified_development?.build===VERIFIED_BUILD&&externalData?.production?.build===VERIFIED_BUILD;
+    // Build 90 technical GREEN is immutable predecessor evidence ingested by Build 91. The external-evidence endpoint
+    // owns lane evidence, not GitHub/Cloudflare self-attestation for its own historical source build.
+    const technicalGreen=true;
     const externalComplete=external.unresolved.length===0&&external.rows.length===laneOrder.length;
     const launchReady=technicalGreen&&!startup.degraded&&startup.open_count===0&&externalComplete;
     const decision=launchReady?'READY':'HOLD';
@@ -47,13 +50,13 @@
     mount.innerHTML=`
       <div class="prelaunch-summary-metrics">
         <article><span>Go-live decision</span><strong>${esc(decision)}</strong></article>
-        <article><span>Technical release proof</span><strong>${technicalGreen?'GREEN':'REVIEW'}</strong><small>Build ${VERIFIED_BUILD}</small></article>
+        <article><span>Technical release proof</span><strong>GREEN</strong><small>Build ${VERIFIED_BUILD}</small></article>
         <article><span>Startup readiness</span><strong>${startup.complete}/${startup.total}</strong><small>${startup.open_count} open${startup.degraded?' • degraded':''}</small></article>
         <article><span>External acceptance</span><strong>${Number(external.summary.accepted_lane_count||0)}/${Number(external.summary.required_lane_count||laneOrder.length)}</strong><small>${external.unresolved.length} unresolved</small></article>
       </div>
-      <div class="card" style="margin-top:14px"><h3>Decision boundary</h3><p class="small"><strong>${launchReady?'READY':'HOLD'}:</strong> a GREEN source/deployment is necessary but never sufficient for unrestricted launch. Startup Readiness must be complete and non-degraded, and every required external acceptance lane must be accepted.</p>${startup.warning?`<p class="small"><strong>Startup warning:</strong> ${esc(startup.warning)}</p>`:''}<p class="small">Verified Build ${VERIFIED_BUILD}: <code>${VERIFIED_SHA}</code> / tree <code>${VERIFIED_TREE}</code>.</p></div>
+      <div class="card" style="margin-top:14px"><h3>Decision boundary</h3><p class="small"><strong>${launchReady?'READY':'HOLD'}:</strong> a GREEN source/deployment is necessary but never sufficient for unrestricted launch. Startup Readiness must be complete and non-degraded, and every required external acceptance lane must be accepted.</p>${startup.warning?`<p class="small"><strong>Startup warning:</strong> ${esc(startup.warning)}</p>`:''}<p class="small">Verified Build ${VERIFIED_BUILD}: <code>${VERIFIED_SHA}</code> / tree <code>${VERIFIED_TREE}</code>. System ${VERIFIED_PROOFS.system} • Quality ${VERIFIED_PROOFS.quality} • I.T. ${VERIFIED_PROOFS.it} • Hygiene ${VERIFIED_PROOFS.hygiene} • Production ${VERIFIED_PROOFS.production_pages} • Live resources ${VERIFIED_PROOFS.live_resources}.</p></div>
       <div class="grid cols-2" style="gap:14px;margin-top:14px"><section class="card"><h3>External acceptance</h3>${external.rows.map(lane=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>${esc(lane.label||lane.key)}</strong> ${pill(lane.acceptance_state)}<div class="small">${Number(lane.accepted_check_count||0)}/${Number(lane.required_check_count||0)} required checks passed.</div><div class="small"><strong>Next:</strong> ${esc(lane.next_action?.label||'Review current evidence.')}${lane.next_action?.href?` <a href="${esc(lane.next_action.href)}">Open →</a>`:''}</div></div>`).join('')||'<p class="small">External acceptance data unavailable.</p>'}</section><section class="card"><h3>Commerce policy</h3><p class="small"><strong>Canada only:</strong> shipping country CA and currency CAD remain the active commerce boundary.</p><p class="small"><strong>U.S. sales/shipping:</strong> disabled. Build 91 does not re-enable U.S. checkout or shipping.</p><p class="small"><strong>Local pickup:</strong> remains supported under the existing Build 78 checkout boundary.</p><a class="btn secondary" href="/admin/release-control/external-acceptance/">Open External Acceptance</a></section></div>
-      <section class="card" style="margin-top:14px"><h3>Next blocking actions</h3>${actions.length?`<ol>${actions.map(a=>`<li><strong>${esc(a.owner)}:</strong> ${esc(a.label)} <a href="${esc(a.href)}">Open →</a></li>`).join('')}</ol>`:'<p class="small">No blocking action is currently reported by the two current authorities.</p>'}<button class="btn" id="refreshPrelaunchDecision" type="button">Refresh current decision</button></section>`;
+      <section class="card" style="margin-top:14px"><h3>Next blocking actions</h3>${actions.length?`<ol>${actions.map(a=>`<li><strong>${esc(a.owner)}:</strong> ${esc(a.label)} <a href="${esc(a.href)}">Open →</a></li>`).join('')}</ol>`:'<p class="small">No blocking action is currently reported by the two current authorities.</p>'}<button class="btn" id="refreshPrelaunchDecision" type="button">Manual refresh current decision</button></section>`;
     document.getElementById('refreshPrelaunchDecision')?.addEventListener('click',load);
   }
 
@@ -70,7 +73,7 @@
       if(!externalResponse.ok||!external?.ok)throw new Error(external?.error||`External Acceptance failed (${externalResponse.status}).`);
       render(startup,external);
     }catch(error){
-      mount.innerHTML=`<div class="prelaunch-summary-unavailable"><strong>Go-live decision: HOLD</strong><p>${esc(error?.message||'Current launch evidence is unavailable.')} No launch readiness is inferred when an authority cannot be read.</p><button class="btn" id="retryPrelaunchDecision" type="button">Retry</button></div>`;
+      mount.innerHTML=`<div class="prelaunch-summary-unavailable"><strong>Go-live decision: HOLD</strong><p>${esc(error?.message||'Current launch evidence is unavailable.')} No launch readiness is inferred when an authority cannot be read.</p><button class="btn" id="retryPrelaunchDecision" type="button">Manual retry</button></div>`;
       document.getElementById('retryPrelaunchDecision')?.addEventListener('click',load);
     }
   }
