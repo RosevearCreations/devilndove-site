@@ -1,0 +1,73 @@
+{
+  "release": 467,
+  "build": 89,
+  "title": "External Acceptance Environment Isolation & Guided Recovery",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build89-external-acceptance-environment-isolation",
+  "starting_point": {
+    "development": {
+      "sha": "9c6d56b887b2aa4bb710e5980608b8942830034c",
+      "tree": "9f7d279ed5c83795682ba763ca150f1fe91a6019",
+      "system_gate_run": 34423493650,
+      "quality_run": 34423493830,
+      "it_admin_runtime_run": 34423493747,
+      "repository_hygiene_run": 34423493617,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "9c6d56b887b2aa4bb710e5980608b8942830034c",
+      "tree_sha": "9f7d279ed5c83795682ba763ca150f1fe91a6019",
+      "production_pages_deploy_run": 34423649786,
+      "production_live_resource_integrity_run": 34423737422,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build88_final_closure": true,
+    "production_read_only_acceptance_projection": true,
+    "development_provider_runner_only": true,
+    "production_provider_runner_invocation": false,
+    "bridge_first_acceptance_truth": true,
+    "payment_six_dimension_integrity": true,
+    "guided_next_missing_evidence_action": true,
+    "provider_action_lane_explicit_environment_state": true,
+    "runner_failure_degrades_to_read_only_bridge": true,
+    "historical_build6_runner_preserved": true,
+    "historical_build7_bridge_preserved": true,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "schema_change": false
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "final_closure": null
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "current_status_d1_mutation": false,
+    "current_status_r2_mutation": false,
+    "binding_mutation": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "production_provider_execution": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
