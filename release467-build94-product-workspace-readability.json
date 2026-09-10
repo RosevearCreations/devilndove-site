@@ -1,0 +1,92 @@
+{
+  "release": 467,
+  "build": 94,
+  "title": "Product Workspace Readability & Responsive Navigation",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build94-product-workspace-readability",
+  "starting_point": {
+    "development": {
+      "sha": "be70b37f61574ec7a11bbad445ab30d0f280bbf3",
+      "tree": "a68a11663f02bfa496883220aa9d8940da4c3cbc",
+      "system_gate_run": 34513256032,
+      "quality_run": 34513256105,
+      "it_admin_runtime_run": 34513256055,
+      "repository_hygiene_run": 34513256082,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "be70b37f61574ec7a11bbad445ab30d0f280bbf3",
+      "tree_sha": "a68a11663f02bfa496883220aa9d8940da4c3cbc",
+      "production_pages_deploy_run": 34513466761,
+      "production_live_resource_integrity_run": 34513570740,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build93_final_closure": true,
+    "product_workspace_navigation_readability": true,
+    "workspace_labels_preserve_words": true,
+    "workspace_description_vertical_flow": true,
+    "desktop_three_column_layout": true,
+    "tablet_two_column_layout": true,
+    "phone_single_column_layout": true,
+    "active_workspace_state_visible": true,
+    "keyboard_tab_navigation_preserved": true,
+    "single_product_authority_preserved": true,
+    "build93_centered_shell_preserved": true,
+    "one_h1_rule_unchanged": true,
+    "business_data_change": false,
+    "schema_change": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "workspace_buttons_use_vertical_content_flow": true,
+    "workspace_primary_labels_do_not_fragment": true,
+    "workspace_descriptions_use_full_available_width": true,
+    "workspace_grid_reflows_before_text_becomes_unreadable": true,
+    "mobile_workspace_navigation_remains_fully_reachable": true,
+    "product_workspace_url_routing_preserved": true,
+    "arrow_home_end_keyboard_navigation_preserved": true,
+    "build94_source_gate_required": true
+  },
+  "final_closure": null,
+  "production_checkpoint": null,
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
