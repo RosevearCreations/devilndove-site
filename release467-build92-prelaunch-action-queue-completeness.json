@@ -2,7 +2,7 @@
   "release": 467,
   "build": 92,
   "title": "Prelaunch Action Queue Completeness & Ownership",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build92-prelaunch-action-queue-completeness",
   "starting_point": {
     "development": {
@@ -42,12 +42,43 @@
     "automatic_production_promotion": false,
     "schema_change": false
   },
+  "final_closure": {
+    "dev_sha": "67bca9198c0973ffe2b39818c3b933ec2737cc00",
+    "tree_sha": "f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450",
+    "proofs": {
+      "system_gate_run": 34506095955,
+      "current_application_quality_run": 34506095848,
+      "it_admin_runtime_proof_run": 34506095837,
+      "branch_hygiene_run": 34506095835
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "ingested_by_build": 93
+  },
+  "production_checkpoint": {
+    "build": 92,
+    "main_sha": "67bca9198c0973ffe2b39818c3b933ec2737cc00",
+    "tree_sha": "f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450",
+    "production_pages_deploy_run": 34506354596,
+    "production_live_resource_integrity_run": 34506453451,
+    "state": "PRODUCTION_GREEN",
+    "business_data_preserved": true,
+    "canonical_d1_proven": true,
+    "production_bindings_proven": true,
+    "public_smoke_proven": true,
+    "live_resources_proven": true
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,
     "requires_exact_preview": true,
     "main_promotion_only_after_exact_development_green": true,
-    "final_closure": null
+    "final_closure_ingested_by_build": 93
   },
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
