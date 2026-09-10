@@ -1,28 +1,30 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 91 — Prelaunch Authority & Go-Live Decision Convergence is the current Development closure candidate.**
+**Release 467 Build 92 — Prelaunch Action Queue Completeness & Ownership is the current Development closure candidate.**
 
-Last fully verified Development is Build 90:
-- SHA `ab23457370ced9224facc2a09c1cca7b1ff20968`
-- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
-- System Gate `34434124113`: SUCCESS
-- Current Application Quality `34434123999`: SUCCESS
-- I.T. Admin Runtime Proof `34434124058`: SUCCESS
-- Repository Branch Hygiene `34434124046`: SUCCESS
+Last fully verified Development is Build 91:
+- SHA `1d5519b976d108e7d4a558876863be5559a67e35`
+- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
+- System Gate `34486729268`: SUCCESS
+- Current Application Quality `34486729227`: SUCCESS
+- I.T. Admin Runtime Proof `34486729225`: SUCCESS
+- Repository Branch Hygiene `34486729311`: SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression evidence: SUCCESS.
 
-Current Production is Build 90:
-- `main` `ab23457370ced9224facc2a09c1cca7b1ff20968`
-- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
-- Production Pages Deploy `34434296247`: SUCCESS
-- Production Live Resource Integrity `34434356959`: SUCCESS.
+Current Production is Build 91:
+- `main` `1d5519b976d108e7d4a558876863be5559a67e35`
+- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
+- Production Pages Deploy `34488492622`: SUCCESS
+- Production Live Resource Integrity `34488622668`: SUCCESS.
 
-## Current Build 91 boundary
+## Current Build 92 boundary
 
-- `/admin/prelaunch/` is now the current Release 467 prelaunch/go-live decision surface instead of a stale Build 229/230 operator page.
-- Startup Readiness remains the D1-backed status owner and supplies its expected total dynamically; no historical 43-gate total is treated as current truth.
-- Missing/degraded Startup Readiness evidence fails closed.
-- All five external lanes come from the current External Acceptance control center and retain their own evidence authority.
+- `/admin/prelaunch/` retains Build 91's fail-closed launch decision and now uses the same complete unresolved Startup Readiness set for action routing.
+- `passed` and `not_applicable` are the only closed readiness states; every other returned state remains visible as an action.
+- Blocked/Failed rows rank first, then Needs Review, In Progress, Not Started and other open states.
+- Recorded owner and due date are visible; missing values remain explicitly unassigned/undated.
+- External acceptance remains a separate five-lane queue and is not silently merged with Startup Readiness.
+- Missing/degraded Startup Readiness or external evidence fails closed.
 - Technical Development/Production GREEN never by itself means unrestricted launch-ready.
 - Canada-only commerce remains active: CA/CAD, U.S. sales/shipping disabled, existing local pickup supported.
 
@@ -36,4 +38,4 @@ Current Production is Build 90:
 - Restart integrity remains `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1`.
 - Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT` unless its own current evidence proves acceptance.
 
-**Verdict:** Build 90 Development and Production are GREEN. Build 91 is correctly bounded as current prelaunch/go-live decision convergence and must earn its own exact Development and Production proof before the next build begins.
+**Verdict:** Build 91 Development and Production are GREEN. Build 92 is correctly bounded as launch-action queue completeness/ownership and must earn its own exact Development and Production proof before the next build begins.
