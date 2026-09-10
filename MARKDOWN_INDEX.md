@@ -1,51 +1,51 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Current authority — Release 467 Build 92
+## Current authority — Release 467 Build 93
 
-Build 92 — **Prelaunch Action Queue Completeness & Ownership** is the current Development closure candidate.
+Build 93 — **Centered Application Shell & Overflow Accessibility** is the current Development closure candidate.
 
-Last fully verified Development is Build 91:
-- `dev` `1d5519b976d108e7d4a558876863be5559a67e35`
-- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
-- System `34486729268` SUCCESS
-- Quality `34486729227` SUCCESS
-- I.T. `34486729225` SUCCESS
-- Hygiene `34486729311` SUCCESS.
+Last fully verified Development is Build 92:
+- `dev` `67bca9198c0973ffe2b39818c3b933ec2737cc00`
+- tree `f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450`
+- System `34506095955` SUCCESS
+- Quality `34506095848` SUCCESS
+- I.T. `34506095837` SUCCESS
+- Hygiene `34506095835` SUCCESS.
 
-Current Production is Build 91:
-- `main` `1d5519b976d108e7d4a558876863be5559a67e35`
-- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
-- Production Pages Deploy `34488492622` SUCCESS
-- Production Live Resource Integrity `34488622668` SUCCESS.
+Current Production is Build 92:
+- `main` `67bca9198c0973ffe2b39818c3b933ec2737cc00`
+- tree `f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450`
+- Production Pages Deploy `34506354596` SUCCESS
+- Production Live Resource Integrity `34506453451` SUCCESS.
 
 ## Current reading order
 
 1. `current-development-authority.json`
-2. `release467-build92-prelaunch-action-queue-completeness.json`
-3. `release467-build91-prelaunch-go-live-decision-convergence.json`
-4. `docs/operations/RELEASE_467_BUILD_92_PRELAUNCH_ACTION_QUEUE_COMPLETENESS.md`
-5. `docs/operations/RELEASE_467_BUILD_91_PRELAUNCH_GO_LIVE_DECISION_CONVERGENCE.md`
-6. `release467-build90-external-acceptance-evidence-depth.json`
-7. `docs/operations/RELEASE_467_BUILD_77_CANADA_ONLY_COMMERCE_RULES.md`
-8. `AI_HANDOFF.md`
-9. `PROJECT_STATUS_AND_ROADMAP.md`
-10. `SANITY_HEALTH_CHECK.md`
-11. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
-12. `migrations/canonical/manifest.json`
-13. Earlier Release 467 authorities when investigating historical implementation/provenance.
+2. `release467-build93-centered-application-shell-overflow-accessibility.json`
+3. `release467-build92-prelaunch-action-queue-completeness.json`
+4. `docs/operations/RELEASE_467_BUILD_93_CENTERED_APPLICATION_SHELL_OVERFLOW_ACCESSIBILITY.md`
+5. `docs/operations/RELEASE_467_BUILD_92_PRELAUNCH_ACTION_QUEUE_COMPLETENESS.md`
+6. `release467-build91-prelaunch-go-live-decision-convergence.json`
+7. `release467-build90-external-acceptance-evidence-depth.json`
+8. `docs/operations/RELEASE_467_BUILD_77_CANADA_ONLY_COMMERCE_RULES.md`
+9. `AI_HANDOFF.md`
+10. `PROJECT_STATUS_AND_ROADMAP.md`
+11. `SANITY_HEALTH_CHECK.md`
+12. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
+13. `migrations/canonical/manifest.json`
+14. Earlier Release 467 authorities when investigating historical implementation/provenance.
 
-## Build 92 authority contract
+## Build 93 authority contract
 
-Build 92 consumes the exact Build 91 Development and Production closure and corrects the current prelaunch action queue:
-- every Startup Readiness row not `passed` or `not_applicable` is shown as an unresolved launch action;
-- action ordering uses explicit status priority and then due-date/title ordering;
-- recorded owner and due date are shown without inventing missing values;
-- the queue lists the complete unresolved Startup Readiness set rather than only Blocked/Failed rows;
-- external acceptance remains a separate five-lane queue;
-- degraded/unavailable readiness evidence fails closed;
-- technical release GREEN remains distinct from unrestricted launch readiness;
-- prelaunch status is GET/read-only and manual-refresh only;
+Build 93 consumes the exact Build 92 Development and Production closure and repairs the shared layout boundary:
+- public and admin application shells are centered and width-bounded;
+- root horizontal clipping is forbidden so right-side content remains recoverable;
+- wide tables and data regions use local horizontal scrolling rather than disappearing outside the viewport;
+- those data regions are keyboard focusable and accessibility-labeled;
+- grid/card/form children and long tokens cannot silently force the entire page off-center;
+- phone, tablet, PC/application and wide-web layouts remain supported;
+- the shared layout guard remains presentation-only and does not mutate headings, business data or provider state;
 - Canada-only CA/CAD commerce remains active, U.S. sales/shipping remain disabled, and existing local pickup remains supported;
-- no provider execution/publication, readiness auto-write, Cloudflare Access mutation or automatic Production promotion is introduced.
+- no provider execution/publication, Cloudflare Access mutation, schema mutation or automatic Production promotion is introduced.
 
 Canonical migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT`. `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains active.
