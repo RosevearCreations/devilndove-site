@@ -1,0 +1,92 @@
+{
+  "release": 467,
+  "build": 93,
+  "title": "Centered Application Shell & Overflow Accessibility",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build93-centered-application-shell-overflow-accessibility",
+  "starting_point": {
+    "development": {
+      "sha": "67bca9198c0973ffe2b39818c3b933ec2737cc00",
+      "tree": "f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450",
+      "system_gate_run": 34506095955,
+      "quality_run": 34506095848,
+      "it_admin_runtime_run": 34506095837,
+      "repository_hygiene_run": 34506095835,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "67bca9198c0973ffe2b39818c3b933ec2737cc00",
+      "tree_sha": "f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450",
+      "production_pages_deploy_run": 34506354596,
+      "production_live_resource_integrity_run": 34506453451,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build92_final_closure": true,
+    "center_public_application_shells": true,
+    "center_admin_application_shells": true,
+    "remove_root_horizontal_clipping": true,
+    "preserve_horizontal_reachability": true,
+    "contain_wide_data_regions_locally": true,
+    "keep_tables_scrollable_inside_viewport": true,
+    "prevent_grid_children_forcing_page_width": true,
+    "prevent_long_tokens_forcing_page_width": true,
+    "phone_tablet_desktop_wide_screen_supported": true,
+    "one_h1_rule_unchanged": true,
+    "layout_guard_read_only": true,
+    "business_data_change": false,
+    "schema_change": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "shell_margin_inline_auto": true,
+    "shell_width_bounded_to_viewport": true,
+    "html_overflow_x_clip_forbidden": true,
+    "document_horizontal_scroll_remains_recoverable": true,
+    "admin_cards_do_not_permanently_hide_horizontal_data": true,
+    "table_regions_have_local_horizontal_scroll": true,
+    "dynamic_tables_remain_wrapped": true,
+    "responsive_source_gate_extended": true,
+    "build93_source_gate_required": true
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "final_closure": null
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
