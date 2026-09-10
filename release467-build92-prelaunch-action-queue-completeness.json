@@ -1,0 +1,84 @@
+{
+  "release": 467,
+  "build": 92,
+  "title": "Prelaunch Action Queue Completeness & Ownership",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build92-prelaunch-action-queue-completeness",
+  "starting_point": {
+    "development": {
+      "sha": "1d5519b976d108e7d4a558876863be5559a67e35",
+      "tree": "6a62d01c1be002b78c3c8d05993c40676e41e208",
+      "system_gate_run": 34486729268,
+      "quality_run": 34486729227,
+      "it_admin_runtime_run": 34486729225,
+      "repository_hygiene_run": 34486729311,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "1d5519b976d108e7d4a558876863be5559a67e35",
+      "tree_sha": "6a62d01c1be002b78c3c8d05993c40676e41e208",
+      "production_pages_deploy_run": 34488492622,
+      "production_live_resource_integrity_run": 34488622668,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build91_final_closure": true,
+    "all_unresolved_startup_items_actionable": true,
+    "startup_action_status_priority": true,
+    "startup_action_owner_visible": true,
+    "startup_action_due_date_visible": true,
+    "startup_action_queue_complete_count": true,
+    "startup_action_status_summary": true,
+    "external_actions_separate": true,
+    "no_false_no_blockers_message": true,
+    "startup_readiness_expected_total_dynamic": true,
+    "startup_readiness_degraded_fails_closed": true,
+    "technical_green_distinct_from_launch_ready": true,
+    "manual_refresh_only": true,
+    "read_only_launch_projection": true,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false,
+    "schema_change": false
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "final_closure": null
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "prelaunch_status_d1_mutation": false,
+    "prelaunch_status_r2_mutation": false,
+    "binding_mutation": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "production_provider_execution": false,
+    "automatic_production_promotion": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
