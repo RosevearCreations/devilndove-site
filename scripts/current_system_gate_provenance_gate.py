@@ -70,25 +70,14 @@ def run_current_contract(path, label):
 
 
 # Current reliability contracts are chained here so later work cannot silently regress
-# Product cold-start protections, the D1 read-budget layer, root-admin authority,
-# bounded lazy-loading, focused Product workspaces, Product editor recovery/autosave safety,
-# the single cached Catalog Options authority, Product CRUD / cleanup safety,
-# canonical Inventory package/base conversion and partial-consumption safety,
-# the fail-closed Inventory lifecycle, recommendation-only reorder economics,
-# selected-Product Media / Photo Studio convergence, the buyer-first Storefront Product
-# experience, bounded Storefront search / collection discovery and zero-result recovery,
-# full public-route technical SEO / sitemap / internal-link convergence, the shared
-# Canada-only storefront country/currency/address boundary, resilient idempotent Cart /
-# Checkout order creation and payment-retry recovery, preparation-only Stripe and PayPal
-# acceptance contracts while their real external lanes remain HOLD, the read-only Finance /
-# Accounting convergence, reviewed Orders / Fulfilment, Labeling / Packaging, Creators / CAIP,
-# selected-provider Development Social OAuth with human approval and publication fail-closed,
-# the Build 86 eight-domain I.T. Operations & Self-Diagnostics implementation, Build 87
-# Production Authority & Restart Convergence with immutable exact closure, and Build 88's
-# current external-acceptance control center: five evidence-driven external lanes, six real
-# Stripe/PayPal dimensions including provider-synchronized refund, preserved historical Build
-# 6/7 evidence engines, guarded explicit Development test actions, and automatic/Production
-# provider execution plus provider publication remaining fail-closed.
+# Product cold-start protections, D1 read-budget safeguards, root-admin authority, focused
+# Product/Inventory/Media/Storefront/SEO/commerce/Finance/Orders/Packaging/Creators flows,
+# Development-only selected-provider Social OAuth, the Build 86 read-only I.T. diagnostics,
+# immutable Build 87/88 Development + Production closure evidence, and Build 89's external
+# acceptance environment isolation: bridge-first read-only Production status, Development-only
+# provider-runner enrichment/actions, read-only fallback when that runner is unavailable, six
+# real Stripe/PayPal evidence dimensions with guided next steps, preserved historical Build 6/7
+# evidence engines, and automatic/Production provider execution plus publication fail-closed.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -116,6 +105,7 @@ run_current_contract('scripts/release467_build85_gate.py', 'Release 467 Build 85
 run_current_contract('scripts/release467_build86_gate.py', 'Release 467 Build 86')
 run_current_contract('scripts/release467_build87_gate.py', 'Release 467 Build 87')
 run_current_contract('scripts/release467_build88_gate.py', 'Release 467 Build 88')
+run_current_contract('scripts/release467_build89_gate.py', 'Release 467 Build 89')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
