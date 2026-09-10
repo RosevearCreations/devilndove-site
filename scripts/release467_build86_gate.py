@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed source/runtime contract for Release 467 Build 86."""
+"""Retained fail-closed contract for Release 467 Build 86 — I.T. Operations & Self-Diagnostics."""
 from pathlib import Path
 import json, re, subprocess, sys
 
@@ -24,20 +24,15 @@ def compact(body): return re.sub(r'\s+','',body)
 pure=read('functions/api/_lib/itOperationsSelfDiagnostics.js'); purec=compact(pure)
 endpoint=read('functions/api/admin/it-self-diagnostics.js'); endpointc=compact(endpoint)
 tower=read('functions/api/admin/it-operations-control-tower.js'); towerc=compact(tower)
-client=read('public/js/admin-it-control-tower.js'); clientc=compact(client)
 page=read('admin/it/index.html')
 css=read('css/admin-it-self-diagnostics-v86.css')
-reliability=read('functions/api/_lib/currentReliability.js'); reliabilityc=compact(reliability)
-reliability_page=read('admin/reliability/index.html')
-preflight=read('functions/api/admin/current-deployment-preflight.js'); preflightc=compact(preflight)
-preflight_page=read('admin/deployment-preflight/index.html')
 doc=read('docs/operations/RELEASE_467_BUILD_86_IT_OPERATIONS_SELF_DIAGNOSTICS.md')
 provenance=read('scripts/current_system_gate_provenance_gate.py')
 pointer=load('current-development-authority.json')
-b85=load('release467-build85-socials-oauth-acceptance.json')
 b86=load('release467-build86-it-operations-self-diagnostics.json')
 manifest=load('migrations/canonical/manifest.json')
 
+# Build 86 implementation must remain the eight-domain, read-only diagnostic authority.
 for token in ("'deployment'","'bindings'","'schema'","'runtime'","'module_authority'","'providers'","'release_gates'","'backup_recovery'",'read_only_projection:true','secret_values_emitted:false','request_time_schema_mutation:false','d1_mutation:false','r2_mutation:false','binding_mutation:false','deployment_execution:false','backup_restore_execution:false','provider_execution:false','provider_publication:false','automatic_repair:false','production_business_data_overwrite:false','overall_status:overall','technical_blocker_count','external_hold_count'):
     req(token in purec,f'Build 86 pure diagnostic contract missing token: {token}')
 for forbidden in (r'\bfetch\s*\(',r'\blocalStorage\.',r'\bsessionStorage\.',r'\bsetInterval\s*\(',r'\bXMLHttpRequest\b'):
@@ -52,58 +47,49 @@ req('decryptOAuthSecret' not in endpoint,'Build 86 self-diagnostics must not dec
 for forbidden in ('INSERT INTO','UPDATE ','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','CREATE INDEX','DROP INDEX','CREATE TRIGGER','DROP TRIGGER'):
     req(forbidden not in endpoint.upper(),f'Build 86 endpoint contains forbidden DML/DDL token: {forbidden}')
 
-for token in ('constBUILD=86;',"constTITLE='I.T.Operations&Self-Diagnostics';",'getSelfDiagnostics','33dc9857e1fada5549181a28ce4ef26c4a919572','b2c6b80401241f1757cd172511d12f9d813bc817','34386667094','34386667361','34386667111','34386667194','34386848470','34386976511','self_diagnostics:self','automatic_repair:false','provider_execution:false','provider_publication:false'):
-    req(token in towerc,f'Build 86 current I.T. control tower missing token: {token}')
-req('onRequestPost' not in tower,'Build 86 current I.T. control tower must remain read-only')
-for token in ('Release 467 Build 86','/api/admin/it-operations-control-tower','Production GREEN authority','External acceptance policy','Current diagnostic domains','Corrective instructions'):
-    req(token in client,f'Build 86 I.T. browser layer missing token: {token}')
-req("method:'POST'" not in clientc,'Build 86 I.T. client must not POST')
-req('setInterval(' not in client,'Build 86 I.T. client must not poll')
-req('Release 467 Build 86' in page,'Build 86 I.T. page identity missing')
-req('/css/admin-it-self-diagnostics-v86.css' in page,'Build 86 I.T. CSS not loaded')
-req('/public/js/admin-it-control-tower.js?v=467b86' in page,'Build 86 I.T. client cache identity missing')
-req(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'Build 86 I.T. page must retain exactly one H1')
+# The current control tower may advance, but it must continue to consume Build 86 self-diagnostics read-only.
+for token in ('getSelfDiagnostics','self_diagnostics:self','automatic_repair:false','provider_execution:false','provider_publication:false'):
+    req(token in towerc,f'Current I.T. control tower lost carried Build 86 diagnostic token: {token}')
+req('onRequestPost' not in tower,'Current I.T. control tower must remain read-only')
+req('itControlTowerMount' in page,'Current I.T. page must retain the control-tower mount')
+req('/css/admin-it-self-diagnostics-v86.css' in page,'Build 86 diagnostic CSS must remain loaded')
+req(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'Current I.T. page must retain exactly one H1')
 for token in ('.it-v86-summary','.it-v86-domains','@media(max-width:900px)','@media(max-width:560px)'): req(token in css,f'Build 86 responsive I.T. CSS missing token: {token}')
 
-req(pointer.get('release')==467 and pointer.get('build')==86,'current authority pointer must be Release 467 Build 86')
-req(pointer.get('state')=='DEVELOPMENT_GREEN','current pointer must retain last verified Development GREEN state')
+# Build 86 final external closure is immutable historical evidence.
+B86_SHA='5fdbb5346e52f17072671274dc36e4d3527a7905'
+B86_TREE='f9037baf12bc3489b3a0df3df03eef5bdbe85e90'
+B86_PROOFS={'system_gate_run':34419070653,'current_application_quality_run':34419070636,'it_admin_runtime_proof_run':34419070642,'branch_hygiene_run':34419070660}
+req(b86.get('release')==467 and b86.get('build')==86,'Build 86 authority identity drifted')
+req(b86.get('state')=='PRODUCTION_GREEN','Build 86 authority must retain PRODUCTION_GREEN closure')
+final=b86.get('final_closure') or {}; prod86=b86.get('production_checkpoint') or {}
+req(final.get('dev_sha')==B86_SHA,'Build 86 final closure SHA drifted')
+req(final.get('tree_sha')==B86_TREE,'Build 86 final closure tree drifted')
+req((final.get('proofs') or {})==B86_PROOFS,'Build 86 final four-proof set drifted')
+req(final.get('proof_state')=='EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN','Build 86 final proof state drifted')
+for key in ('exact_preview_deployment','canonical_development_d1_proof','development_data_authority_read_only','preview_bindings_proof','non_secret_preview_smoke'):
+    req(final.get(key) is True,f'Build 86 final closure missing {key}')
+req(prod86.get('build')==86 and prod86.get('main_sha')==B86_SHA,'Build 86 Production SHA drifted')
+req(prod86.get('tree_sha')==B86_TREE,'Build 86 Production tree drifted')
+req(prod86.get('production_pages_deploy_run')==34419211512,'Build 86 Production Pages run drifted')
+req(prod86.get('production_live_resource_integrity_run')==34419284027,'Build 86 live-resource run drifted')
+req(prod86.get('state')=='PRODUCTION_GREEN','Build 86 Production checkpoint must remain GREEN')
+
+# Later pointers may advance, but never behind the verified Build 86 closure.
+req(pointer.get('release')==467 and int(pointer.get('build') or 0)>=87,'current authority must be Release 467 Build 87 or newer after Build 86 closure ingestion')
 last=(pointer.get('restart_integrity') or {}).get('last_fully_verified') or {}; prod=pointer.get('production_checkpoint') or {}
-req(last.get('build')==85,'Build 85 must be the last fully verified restart checkpoint')
-req(last.get('dev_sha')=='33dc9857e1fada5549181a28ce4ef26c4a919572','Build 85 verified SHA drifted')
-req(last.get('tree_sha')=='b2c6b80401241f1757cd172511d12f9d813bc817','Build 85 verified tree drifted')
-expected_proofs={'system_gate_run':34386667094,'current_application_quality_run':34386667361,'it_admin_runtime_proof_run':34386667111,'branch_hygiene_run':34386667194}
-req((last.get('proofs') or {})==expected_proofs,'Build 85 verified proof set drifted')
-req(prod.get('build')==85 and prod.get('main_sha')=='33dc9857e1fada5549181a28ce4ef26c4a919572','Build 85 Production pointer drifted')
-req(prod.get('tree_sha')=='b2c6b80401241f1757cd172511d12f9d813bc817','Build 85 Production tree drifted')
-req(prod.get('production_pages_deploy_run')==34386848470,'Build 85 Production Pages run drifted')
-req(prod.get('production_live_resource_integrity_run')==34386976511,'Build 85 live-resource run drifted')
-req((pointer.get('current_release_authorities') or [])[:2]==['release467-build86-it-operations-self-diagnostics.json','release467-build85-socials-oauth-acceptance.json'],'current authority ordering must start Build 86 candidate -> Build 85 verified')
-req(b85.get('state')=='PRODUCTION_GREEN' and (b85.get('final_closure') or {}).get('dev_sha')==last.get('dev_sha'),'Build 85 final authority missing verified closure')
-req((b85.get('production_checkpoint') or {}).get('production_pages_deploy_run')==34386848470,'Build 85 authority missing Production closure')
-req(b86.get('state')=='DEVELOPMENT_CLOSURE_CANDIDATE','Build 86 authority must remain a closure candidate')
-req(((b86.get('closure_policy') or {}).get('candidate_must_not_self_claim_final_proof')) is True,'Build 86 candidate must not self-claim proof')
-req((b86.get('closure_policy') or {}).get('final_closure') is None,'Build 86 authority must not contain premature final closure')
+req(int(last.get('build') or 0)>=86,'current restart authority may not regress behind verified Build 86')
+req(int(prod.get('build') or 0)>=86,'current Production authority may not regress behind Build 86')
+req('release467-build86-it-operations-self-diagnostics.json' in (pointer.get('current_release_authorities') or []),'current authority must retain Build 86 historical authority')
 
-for token in ('CURRENT_RELIABILITY_BUILD=86','33dc9857e1fada5549181a28ce4ef26c4a919572','b2c6b80401241f1757cd172511d12f9d813bc817','34386667094','34386667361','34386667111','34386667194','34386848470','34386976511',"mutation_capability:'none'"):
-    req(token in reliabilityc,f'Build 86 current Reliability missing token: {token}')
-req('Release 467 • Build 86' in reliability_page,'Build 86 Reliability page identity missing')
-for token in ('constBUILD=86;','33dc9857e1fada5549181a28ce4ef26c4a919572','b2c6b80401241f1757cd172511d12f9d813bc817','34386667094','34386667361','34386667111','34386667194','34386848470','34386976511',"mutation_capability:'none'",'migrations/canonical/manifest.json','scripts/d1_migrate.py'):
-    req(token in preflightc,f'Build 86 current Deployment Preflight missing token: {token}')
-req('Release 467 Build 86' in preflight_page,'Build 86 Deployment Preflight page identity missing')
-
-for path in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'):
-    body=read(path)
-    for token in ('33dc9857e1fada5549181a28ce4ef26c4a919572','b2c6b80401241f1757cd172511d12f9d813bc817','34386667094','34386667361','34386667111','34386667194','34386848470'):
-        req(token in body,f'{path} missing Build 85 verified restart token: {token}')
-
-for token in ('eight diagnostic domains','automatic repair','HOLD_EXTERNAL','0001_release464_migration_authority.sql','0004_release465_storefront_quality.sql','No Build 87 scope has been started'):
+for token in ('eight diagnostic domains','automatic repair','HOLD_EXTERNAL','0001_release464_migration_authority.sql','0004_release465_storefront_quality.sql'):
     req(token.lower() in doc.lower(),f'Build 86 operating document missing token: {token}')
 expected=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql']
 req([row.get('file') for row in manifest.get('migrations',[])]==expected,'Build 86 must keep canonical migrations 0001-0004 exactly')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 86 must remain schema-neutral')
+req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 86 historical boundary expects no later canonical migration yet')
 req("run_current_contract('scripts/release467_build86_gate.py', 'Release 467 Build 86')" in provenance,'Current System Gate does not chain Build 86')
 
-for path in ('functions/api/_lib/itOperationsSelfDiagnostics.js','functions/api/admin/it-self-diagnostics.js','functions/api/admin/it-operations-control-tower.js','public/js/admin-it-control-tower.js','functions/api/_lib/currentReliability.js','functions/api/admin/current-deployment-preflight.js'):
+for path in ('functions/api/_lib/itOperationsSelfDiagnostics.js','functions/api/admin/it-self-diagnostics.js','functions/api/admin/it-operations-control-tower.js'):
     run(['node','--check',path],f'JavaScript syntax {path}')
 run(['node','scripts/release467_build86_it_self_diagnostics_runtime_test.mjs'],'Build 86 runtime proof')
 run(['python3','scripts/current_it_release_truth_gate.py'],'current I.T. release truth')
@@ -117,7 +103,7 @@ if FAIL:
     for item in FAIL: print('-',item)
     sys.exit(1)
 print('RELEASE 467 BUILD 86 I.T. OPERATIONS & SELF-DIAGNOSTICS: PASS')
-print('Diagnostic domains: 8 / READ-ONLY')
-print('Authority pointer: BUILD 86 CANDIDATE / BUILD 85 VERIFIED')
+print('Historical feature authority: EIGHT-DOMAIN READ-ONLY DIAGNOSTICS')
+print('Build 86 final Development + Production closure: RETAINED')
 print('Automatic repair / D1 / R2 / provider / restore execution: NONE')
 print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
