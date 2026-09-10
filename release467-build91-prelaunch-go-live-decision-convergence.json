@@ -1,0 +1,84 @@
+{
+  "release": 467,
+  "build": 91,
+  "title": "Prelaunch Authority & Go-Live Decision Convergence",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build91-prelaunch-go-live-decision-convergence",
+  "starting_point": {
+    "development": {
+      "sha": "ab23457370ced9224facc2a09c1cca7b1ff20968",
+      "tree": "54f069f37e09e6f48e035f98656423ed28aa85f4",
+      "system_gate_run": 34434124113,
+      "quality_run": 34434123999,
+      "it_admin_runtime_run": 34434124058,
+      "repository_hygiene_run": 34434124046,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "ab23457370ced9224facc2a09c1cca7b1ff20968",
+      "tree_sha": "54f069f37e09e6f48e035f98656423ed28aa85f4",
+      "production_pages_deploy_run": 34434296247,
+      "production_live_resource_integrity_run": 34434356959,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build90_final_closure": true,
+    "prelaunch_current_authority_convergence": true,
+    "remove_stale_build229_230_operator_identity": true,
+    "startup_readiness_expected_total_dynamic": true,
+    "startup_readiness_degraded_fails_closed": true,
+    "external_acceptance_five_lane_summary": true,
+    "external_acceptance_next_actions": true,
+    "technical_green_distinct_from_launch_ready": true,
+    "canada_only_commerce_policy_visible": true,
+    "us_sales_shipping_disabled_visible": true,
+    "local_pickup_boundary_visible": true,
+    "manual_refresh_only": true,
+    "read_only_launch_projection": true,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false,
+    "schema_change": false
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "final_closure": null
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true,
+    "authority": "Release 467 Build 77 Canada-Only Commerce Rules carried through Build 78 checkout reliability"
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "prelaunch_status_d1_mutation": false,
+    "prelaunch_status_r2_mutation": false,
+    "binding_mutation": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "production_provider_execution": false,
+    "automatic_production_promotion": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
