@@ -33,12 +33,13 @@ def run_current_contract(path, label):
 
 # Current reliability contracts are chained here so later work cannot silently regress
 # Product/Inventory/Media/Storefront/SEO/commerce/Finance/Orders/Packaging/Creators flows,
-# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-91 closure,
+# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-92 closure,
 # Build 89 environment-isolated external acceptance, Build 90 structured five-lane evidence,
-# Build 91 current prelaunch/go-live decision convergence, and Build 92 complete Startup Readiness
-# action routing: every non-closed row visible, explicit status priority, recorded owner/due date,
-# external acceptance separate, technical GREEN distinct from launch READY, Canada-only commerce
-# preserved, and no automatic provider execution/publication or Production promotion.
+# Build 91 current prelaunch/go-live decision convergence, Build 92 complete Startup Readiness
+# action routing, and Build 93 centered public/admin shells with recoverable horizontal overflow
+# and locally keyboard-scrollable wide data. External acceptance remains separate, technical GREEN
+# remains distinct from launch READY, Canada-only commerce is preserved, and provider execution/
+# publication plus automatic Production promotion remain closed.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -70,6 +71,7 @@ run_current_contract('scripts/release467_build89_gate.py', 'Release 467 Build 89
 run_current_contract('scripts/release467_build90_gate.py', 'Release 467 Build 90')
 run_current_contract('scripts/release467_build91_gate.py', 'Release 467 Build 91')
 run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92')
+run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
