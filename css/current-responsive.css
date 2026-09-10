@@ -1,19 +1,33 @@
 /* Current Devil n Dove responsive convergence layer.
    Additive guardrails shared by public pages, installed/PWA surfaces and admin workspaces. */
-html{box-sizing:border-box;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
+html{box-sizing:border-box;-webkit-text-size-adjust:100%;text-size-adjust:100%;width:100%;min-width:0;overflow-x:auto}
 *,*::before,*::after{box-sizing:inherit}
+body{width:100%;min-width:0;margin-inline:auto;overflow-x:visible}
 body,main,.container,.admin-shell,.card,.hero,.grid,.nav,.nav .links{min-width:0}
+.container,.admin-shell{width:100%;margin-inline:auto!important}
+body>.container,body>main.container,body>.admin-shell{margin-left:auto!important;margin-right:auto!important}
+.container>* ,.admin-shell>*{min-width:0;max-width:100%}
+.admin-shell .card,.admin-shell .admin-panel{min-width:0;max-width:100%;overflow:visible;overflow-wrap:anywhere}
 img,picture,video,svg,canvas,iframe{max-width:100%;height:auto}
 input,select,textarea,button{max-width:100%}
 .nav,.nav .links{flex-wrap:wrap}
-.grid>*{min-width:0}
-.dd-table-scroll{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.dd-table-scroll>table{min-width:max-content;max-width:none}
-pre,code{overflow-wrap:anywhere}
+.grid>*{min-width:0;max-width:100%}
+.dd-table-scroll,.dd-horizontal-scroll-region,.table-wrap,.admin-table-wrap,[data-table-scroll],.table-scroll,.table-responsive{display:block;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
+.dd-table-scroll>table,.dd-horizontal-scroll-region>table{min-width:max-content;max-width:none}
+p,li,dd,dt,td,th,pre,code,a{overflow-wrap:anywhere}
+pre,code{white-space:pre-wrap;word-break:break-word}
+
+/* Build 93 centered-shell accessibility boundary.
+   Never clip the document at the root: if an unknown legacy control still exceeds its
+   container, the user can reach it. Known wide data regions scroll locally instead. */
+.dd-centered-shell,.container.admin-shell{margin-inline:auto!important;inset-inline:auto;transform:none;translate:none}
+.admin-shell :is(.grid,.card,.admin-panel,section,article,form,fieldset){min-width:0;max-width:100%}
+.admin-shell :is(.dd-table-scroll,.dd-horizontal-scroll-region,.table-wrap,.admin-table-wrap,[data-table-scroll],.table-scroll,.table-responsive){overflow-x:auto!important;overflow-y:visible;max-width:100%!important}
+
 @media(max-width:720px){
-  .container,.admin-shell{width:min(100%,100vw);padding-left:12px!important;padding-right:12px!important}
+  .container,.admin-shell{width:min(100%,100vw);padding-left:12px!important;padding-right:12px!important;margin-inline:auto!important}
   .grid.cols-2,.grid.cols-3,.grid.cols-4,.cols-2,.cols-3,.cols-4{grid-template-columns:minmax(0,1fr)!important}
-  .hero,.card{max-width:100%}
+  .hero,.card,.admin-panel{max-width:100%}
   .nav{align-items:flex-start}
   .nav .links{width:100%}
   .nav .links>a,.nav .links>button{max-width:100%}
@@ -28,7 +42,7 @@ pre,code{overflow-wrap:anywhere}
   .nav .links a{display:inline-flex;align-items:center;min-height:44px}
 }
 @media(min-width:1024px){
-  .container,.admin-shell{margin-inline:auto}
+  .container,.admin-shell{margin-inline:auto!important}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -42,10 +56,10 @@ pre,code{overflow-wrap:anywhere}
 }
 
 /* Build 41 — Packaging Studio responsive workspace convergence. */
-body[data-admin-page="packaging-studio"] .packaging-studio-page{width:min(100%,1720px);max-width:1720px}
+body[data-admin-page="packaging-studio"] .packaging-studio-page{width:min(100%,1720px);max-width:1720px;margin-inline:auto}
 body[data-admin-page="packaging-studio"] .packaging-editor-card,
 body[data-admin-page="packaging-studio"] .packaging-studio-main,
-body[data-admin-page="packaging-studio"] .packaging-tab-panel{min-width:0}
+body[data-admin-page="packaging-studio"] .packaging-tab-panel{min-width:0;max-width:100%}
 body[data-admin-page="packaging-studio"] .packaging-tab-list{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
 body[data-admin-page="packaging-studio"] .packaging-tab{white-space:nowrap}
 body[data-admin-page="packaging-studio"] .packaging-svg-preview{max-width:100%;overflow:auto}
