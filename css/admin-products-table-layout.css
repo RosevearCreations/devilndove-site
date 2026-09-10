@@ -1,6 +1,7 @@
-/* Products admin records table containment.
-   The records table is intentionally wider than the editor card; keep that width
-   explicit so the shared responsive layer never derives it from max-content. */
+/* Release 467 Build 95 — Products admin records-table ergonomics.
+   Keep the table deliberately wider than the editor card, but make navigation through
+   that width practical: a sticky header, stable identity columns on desktop, and a
+   visible current-Product row. Presentation only; no Product data is changed here. */
 body[data-admin-page="products"] .products-admin-table-wrap{
   display:block;
   max-width:100%;
@@ -9,21 +10,81 @@ body[data-admin-page="products"] .products-admin-table-wrap{
   overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
   scrollbar-gutter:stable;
+  position:relative;
 }
 body[data-admin-page="products"] .products-admin-table{
   width:1608px!important;
   min-width:1608px!important;
   max-width:none!important;
   table-layout:fixed!important;
+  border-collapse:separate;
+  border-spacing:0;
 }
 body[data-admin-page="products"] .products-admin-table th,
 body[data-admin-page="products"] .products-admin-table td{
   vertical-align:top;
+  background:var(--card,#111923);
+}
+body[data-admin-page="products"] .products-admin-table thead th{
+  position:sticky;
+  top:0;
+  z-index:4;
+  box-shadow:0 1px 0 var(--border,#2b3744);
 }
 body[data-admin-page="products"] .products-admin-table th:first-child,
 body[data-admin-page="products"] .products-admin-table td:first-child{
   white-space:nowrap;
 }
-@media(max-width:720px){
+body[data-admin-page="products"] .products-admin-table tbody tr[data-current-product-row="1"] td{
+  box-shadow:inset 0 2px 0 currentColor,inset 0 -2px 0 currentColor;
+}
+body[data-admin-page="products"] .products-admin-table tbody tr[data-current-product-row="1"] td:first-child{
+  box-shadow:inset 2px 0 0 currentColor,inset 0 2px 0 currentColor,inset 0 -2px 0 currentColor;
+}
+body[data-admin-page="products"] .products-admin-table tbody tr[data-current-product-row="1"] td:last-child{
+  box-shadow:inset -2px 0 0 currentColor,inset 0 2px 0 currentColor,inset 0 -2px 0 currentColor;
+}
+body[data-admin-page="products"] .product-table-current-context{
+  padding:10px 12px;
+  border:1px solid var(--border,#2b3744);
+  border-radius:10px;
+  overflow-wrap:anywhere;
+}
+body[data-admin-page="products"] .product-table-view-actions .btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media(min-width:1000px){
+  body[data-admin-page="products"] .products-admin-table th:nth-child(1),
+  body[data-admin-page="products"] .products-admin-table td:nth-child(1){
+    position:sticky;
+    left:0;
+    z-index:3;
+  }
+  body[data-admin-page="products"] .products-admin-table th:nth-child(2),
+  body[data-admin-page="products"] .products-admin-table td:nth-child(2){
+    position:sticky;
+    left:72px;
+    z-index:3;
+    box-shadow:1px 0 0 var(--border,#2b3744);
+  }
+  body[data-admin-page="products"] .products-admin-table thead th:nth-child(1),
+  body[data-admin-page="products"] .products-admin-table thead th:nth-child(2){
+    z-index:6;
+  }
+  body[data-admin-page="products"] .products-admin-table tbody tr[data-current-product-row="1"] td:nth-child(1),
+  body[data-admin-page="products"] .products-admin-table tbody tr[data-current-product-row="1"] td:nth-child(2){
+    font-weight:700;
+  }
+}
+
+@media(max-width:999px){
   body[data-admin-page="products"] .products-admin-table-wrap{max-height:68vh}
+}
+
+@media(max-width:720px){
+  body[data-admin-page="products"] .products-admin-table-wrap{max-height:64vh}
+  body[data-admin-page="products"] .product-table-view-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+  body[data-admin-page="products"] .product-table-view-actions>.btn{width:100%;justify-content:center}
 }
