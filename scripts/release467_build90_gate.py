@@ -83,9 +83,9 @@ for token in ('Release 467 Build 90',B89_SHA,B89_TREE,str(B89_PAGES),str(B89_LIV
 req(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'external acceptance page must contain exactly one H1')
 for text,label in ((it_api,'I.T. API'),(reliability,'Reliability'),(preflight,'Deployment Preflight')):
  req(B89_SHA in text and B89_TREE in text,f'{label} missing Build 89 verified SHA/tree'); req(str(B89_PAGES) in text and str(B89_LIVE) in text,f'{label} missing Build 89 Production proof')
-req('const BUILD=90;' in compact(it_api),'I.T. API must identify Build 90')
+req('constBUILD=90;' in compact(it_api),'I.T. API must identify Build 90')
 req('CURRENT_RELIABILITY_BUILD = 90' in reliability,'Reliability must identify Build 90')
-req('const BUILD=90;' in compact(preflight),'Deployment Preflight must identify Build 90')
+req('constBUILD=90;' in compact(preflight),'Deployment Preflight must identify Build 90')
 req('Release 467 Build 90' in it_client and 'Release 467 Build 90' in it_page,'I.T. current surfaces must identify Build 90')
 req('Release 467 • Build 90' in reliability_page,'Reliability page must identify Build 90')
 req('Release 467 Build 90' in preflight_page,'Deployment Preflight page must identify Build 90')
