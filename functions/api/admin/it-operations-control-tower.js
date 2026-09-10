@@ -1,43 +1,43 @@
-// Release 467 Build 87 — current I.T. Production Authority & Restart Convergence control tower.
-// Converges the retained readiness/self-diagnostics engine with the externally proven Build 86 Development + Production baseline.
+// Release 467 Build 88 — current I.T. External Acceptance Control Center convergence.
+// Converges the retained readiness/self-diagnostics engine with the externally proven Build 87 Development + Production baseline.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE = 467;
-const BUILD = 87;
-const TITLE = 'Production Authority & Restart Convergence';
+const BUILD = 88;
+const TITLE = 'External Acceptance Control Center Convergence';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release:467,build:86,title:'I.T. Operations & Self-Diagnostics',state:'DEVELOPMENT_GREEN',
-  accepted_sha:'5fdbb5346e52f17072671274dc36e4d3527a7905',
-  accepted_tree_sha:'f9037baf12bc3489b3a0df3df03eef5bdbe85e90',
-  system_gate_run:34419070653,current_application_quality_run:34419070636,
-  it_admin_runtime_proof_run:34419070642,branch_hygiene_run:34419070660,
+  release:467,build:87,title:'Production Authority & Restart Convergence',state:'DEVELOPMENT_GREEN',
+  accepted_sha:'646d73710784008617157cf5746a66f053daba83',
+  accepted_tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
+  system_gate_run:34421392242,current_application_quality_run:34421392244,
+  it_admin_runtime_proof_run:34421392231,branch_hygiene_run:34421392188,
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release:467,build:86,title:'I.T. Operations & Self-Diagnostics',state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
-  dev_sha:'5fdbb5346e52f17072671274dc36e4d3527a7905',
-  tree_sha:'f9037baf12bc3489b3a0df3df03eef5bdbe85e90',
-  system_gate_run:34419070653,current_application_quality_run:34419070636,
-  it_admin_runtime_proof_run:34419070642,branch_hygiene_run:34419070660,
+  release:467,build:87,title:'Production Authority & Restart Convergence',state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  dev_sha:'646d73710784008617157cf5746a66f053daba83',
+  tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
+  system_gate_run:34421392242,current_application_quality_run:34421392244,
+  it_admin_runtime_proof_run:34421392231,branch_hygiene_run:34421392188,
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const PRODUCTION = Object.freeze({
-  release:467,build:86,title:'I.T. Operations & Self-Diagnostics',state:'PRODUCTION_GREEN',
-  main_sha:'5fdbb5346e52f17072671274dc36e4d3527a7905',
-  tree_sha:'f9037baf12bc3489b3a0df3df03eef5bdbe85e90',
-  pages_deploy_run:34419211512,production_pages_deploy_run:34419211512,
-  production_live_resource_integrity_run:34419284027,
+  release:467,build:87,title:'Production Authority & Restart Convergence',state:'PRODUCTION_GREEN',
+  main_sha:'646d73710784008617157cf5746a66f053daba83',
+  tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
+  pages_deploy_run:34421532872,production_pages_deploy_run:34421532872,
+  production_live_resource_integrity_run:34421613381,
   promotion_state:'EXACT_TREE_PRODUCTION_GREEN_STANDARD_CHAIN'
 });
 const CURRENT_GUARDS = Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene']);
 const EXTERNAL_POLICY = Object.freeze([
-  {key:'stripe_development',label:'Stripe Development acceptance',state:'HOLD_EXTERNAL',authority:'real test checkout/webhook/refund/replay evidence required',href:'/admin/release-control/external-commercial-readiness/'},
-  {key:'paypal_sandbox',label:'PayPal sandbox acceptance',state:'HOLD_EXTERNAL',authority:'real sandbox approval/webhook/refund/replay evidence required',href:'/admin/release-control/external-commercial-readiness/'},
-  {key:'social_oauth',label:'Social/OAuth controlled acceptance',state:'HOLD_EXTERNAL',authority:'real selected-provider Development OAuth evidence required',href:'/admin/social-publishing/'},
-  {key:'caip_private_media',label:'CAIP private-media acceptance',state:'EVIDENCE_DEPENDENT',authority:'fresh authenticated runtime evidence required',href:'/admin/release-control/external-commercial-readiness/'},
-  {key:'cloudflare_access_service_token',label:'Cloudflare Access service-token acceptance',state:'HOLD_EXTERNAL',authority:'fresh external acceptance required',href:'/admin/it/'}
+  {key:'stripe_development',label:'Stripe Development acceptance',state:'HOLD_EXTERNAL',authority:'six real dimensions: credentials, checkout, signed webhook, refund, reconciliation and idempotent replay',href:'/admin/release-control/external-acceptance/'},
+  {key:'paypal_sandbox',label:'PayPal sandbox acceptance',state:'HOLD_EXTERNAL',authority:'six real dimensions: credentials, approval/capture, verified webhook, refund, reconciliation and idempotent replay',href:'/admin/release-control/external-acceptance/'},
+  {key:'social_oauth',label:'Social/OAuth controlled acceptance',state:'HOLD_EXTERNAL',authority:'real selected-provider Development OAuth evidence required; publication stays closed',href:'/admin/release-control/external-acceptance/'},
+  {key:'caip_private_media',label:'CAIP private-media acceptance',state:'EVIDENCE_DEPENDENT',authority:'fresh authenticated private review/range-streaming evidence required',href:'/admin/release-control/external-acceptance/'},
+  {key:'cloudflare_access_service_token',label:'Cloudflare Access service-token acceptance',state:'HOLD_EXTERNAL',authority:'dispatch-only external service-token proof required',href:'/admin/release-control/external-acceptance/'}
 ]);
 const clean=(value)=>String(value??'').trim();
 const priority=(state)=>state==='red'?0:state==='amber'?1:2;
@@ -62,11 +62,11 @@ export async function onRequestGet(context){
   const runtimeSha=clean(diagnostic.observations?.deployment?.sha)||clean(subsystems.deployment_ancestry?.runtime_source_sha)||null;
   return jsonResponse({
     release:RELEASE,build:BUILD,title:TITLE,ok:true,
-    authority:'release467-build87-production-authority-restart-convergence',state:'DEVELOPMENT_CLOSURE_CANDIDATE',environment:diagnostic.environment||base.environment||'development',
+    authority:'release467-build88-external-acceptance-control-center',state:'DEVELOPMENT_CLOSURE_CANDIDATE',environment:diagnostic.environment||base.environment||'development',
     release_authority:{
       current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_CLOSURE_CANDIDATE'},
       accepted_development:ACCEPTED_DEVELOPMENT,verified_development:VERIFIED_DEVELOPMENT,production:PRODUCTION,
-      restart_integrity:{protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,current_closure_candidate:{release:467,build:87,title:TITLE,state:'AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF'},candidate_must_not_self_claim_final_proof:true},
+      restart_integrity:{protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,current_closure_candidate:{release:467,build:88,title:TITLE,state:'AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF'},candidate_must_not_self_claim_final_proof:true},
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],production_promotion_required_development_proofs:CURRENT_GUARDS,
       rollback_readiness:'release-neutral-read-only',canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',request_time_schema_mutation:false
     },
@@ -76,10 +76,10 @@ export async function onRequestGet(context){
     diagnostic_observations:diagnostic.observations||{},corrective_links:diagnostic.corrective_links||{},
     external_policy:EXTERNAL_POLICY,recovery_queue:queue,next_action:queue[0]||null,subsystems,
     truth_notes:[
-      'Build 86 is the last fully verified Development checkpoint at 5fdbb5346e52f17072671274dc36e4d3527a7905 / tree f9037baf12bc3489b3a0df3df03eef5bdbe85e90 with System 34419070653, Quality 34419070636, I.T. 34419070642 and Hygiene 34419070660 successful plus exact Preview acceptance.',
-      'Build 86 is Production GREEN at main 5fdbb5346e52f17072671274dc36e4d3527a7905 / tree f9037baf12bc3489b3a0df3df03eef5bdbe85e90 with Production Pages Deploy 34419211512 and Live Resource Integrity 34419284027 successful.',
-      'Build 87 is the current Production Authority & Restart Convergence closure candidate. It consumes external Build 86 proof but cannot self-attest its own later CI/Cloudflare closure.',
-      'Canonical D1 migrations remain exactly 0001-0004. Corrective instructions route the operator to the owning workspace; the diagnostic endpoint performs no automatic repair.',
+      'Build 87 is the last fully verified Development checkpoint at 646d73710784008617157cf5746a66f053daba83 / tree 709f802cf7ca24a12f48bd7c8b562a92b306fcae with System 34421392242, Quality 34421392244, I.T. 34421392231 and Hygiene 34421392188 successful plus exact Preview acceptance.',
+      'Build 87 is Production GREEN at the same SHA/tree with Production Pages Deploy 34421532872 and Live Resource Integrity 34421613381 successful.',
+      'Build 88 is the current External Acceptance Control Center Convergence closure candidate. It modernizes operator truth without claiming any external provider acceptance.',
+      'Canonical D1 migrations remain exactly 0001-0004. Corrective instructions route the operator to the owning workspace; I.T. diagnostics perform no automatic repair.',
       'Stripe, PayPal, Social OAuth, Cloudflare Access and CAIP external acceptance remain separate from source/deployment health.'
     ],
     safety:{read_only_projection:true,automatic_repair:false,schema_change_required:false,request_time_schema_mutation:false,d1_mutation_from_endpoint:false,r2_mutation_from_endpoint:false,binding_mutation:false,deployment_execution:false,backup_restore_execution:false,provider_execution:false,provider_publication:false,production_mutation:false,production_business_data_overwrite:false,secret_values_emitted:false},
