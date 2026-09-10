@@ -4,45 +4,42 @@
 
 ## Verified Development
 
-Build 91 — Prelaunch Authority & Go-Live Decision Convergence is the last fully verified checkpoint:
-- `dev` `1d5519b976d108e7d4a558876863be5559a67e35`
-- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
-- System Gate `34486729268` SUCCESS
-- Current Application Quality `34486729227` SUCCESS
-- I.T. Admin Runtime Proof `34486729225` SUCCESS
-- Repository Branch Hygiene `34486729311` SUCCESS
+Build 92 — Prelaunch Action Queue Completeness & Ownership is the last fully verified checkpoint:
+- `dev` `67bca9198c0973ffe2b39818c3b933ec2737cc00`
+- tree `f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450`
+- System Gate `34506095955` SUCCESS
+- Current Application Quality `34506095848` SUCCESS
+- I.T. Admin Runtime Proof `34506095837` SUCCESS
+- Repository Branch Hygiene `34506095835` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 91 is the current Production checkpoint:
-- `main` `1d5519b976d108e7d4a558876863be5559a67e35`
-- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
-- Production Pages Deploy `34488492622` SUCCESS
-- Production Live Resource Integrity `34488622668` SUCCESS.
+Build 92 is the current Production checkpoint:
+- `main` `67bca9198c0973ffe2b39818c3b933ec2737cc00`
+- tree `f3fa062060cd53eb5e4b7dab42b2ba6d1fae0450`
+- Production Pages Deploy `34506354596` SUCCESS
+- Production Live Resource Integrity `34506453451` SUCCESS.
 
-## Build 92 operational boundary
+## Build 93 operational boundary
 
-Build 92 — **Prelaunch Action Queue Completeness & Ownership** is the active Development closure candidate. It consumes Build 91's exact external closure and keeps the existing `/admin/prelaunch/` decision fail-closed while making its action queue complete.
+Build 93 — **Centered Application Shell & Overflow Accessibility** is the active Development closure candidate. It consumes Build 92's exact external closure and repairs a shared presentation defect where root horizontal clipping plus hidden container overflow could leave important right-side data unreachable.
 
-The current launch-decision rules are:
-- Startup Readiness remains the D1-backed mutable status owner; prelaunch reads it only with GET;
-- `passed` and `not_applicable` are the only closed readiness states;
-- every other returned Startup Readiness row is listed as an unresolved launch action;
-- Blocked/Failed rank first, then Needs Review, In Progress, Not Started and any other open state;
-- recorded owner and due date are displayed; missing fields remain explicitly unassigned/undated;
-- no unresolved item may hold launch while being omitted from the action queue;
-- external acceptance remains a separate five-lane queue with passed/required counts and guided next actions;
-- a degraded or unavailable Startup Readiness or external-acceptance response keeps launch on HOLD;
-- Build 91 technical Development/Production GREEN is necessary but does not imply unrestricted go-live readiness;
-- Canada-only commerce remains active in CAD, U.S. sales/shipping remain disabled, and existing local pickup remains supported;
-- manual refresh is allowed; no polling or automatic corrective action is added.
+The current layout rules are:
+- public and admin `.container` / `.admin-shell` surfaces remain centered with viewport-bounded width;
+- root horizontal clipping is forbidden; unknown legacy overflow stays recoverable rather than disappearing;
+- known table/data wrappers own local horizontal scrolling;
+- dynamic table wrappers are keyboard focusable and accessibility-labeled;
+- grid/card/form children use minimum-width and maximum-width safeguards so a wide child cannot push the entire application off-center;
+- long identifiers and other tokens wrap where possible instead of creating invisible right-side content;
+- phone, tablet, desktop/application and wide-web layouts retain responsive gutters;
+- the layout guard does not alter H1 hierarchy, business data or launch/provider state.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 92 ingests the exact Build 91 Development and Production closure. Build 92 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 93 ingests the exact Build 92 Development and Production closure. Build 93 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
 
-The runtime I.T., preflight, prelaunch and external-acceptance pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
+The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
 ## Recovery discipline
 
@@ -66,4 +63,4 @@ The runtime I.T., preflight, prelaunch and external-acceptance pages cannot self
 - Production CAIP R2: `devilndove-caip-media`
 - Canonical migrations: exactly `0001`–`0004` via `scripts/d1_migrate.py`.
 
-Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains `EVIDENCE_DEPENDENT`. U.S. sales/shipping remain disabled.
+Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains authoritative, U.S. sales/shipping remain disabled, and local pickup remains supported.
