@@ -12,6 +12,7 @@
 // Release 467 Build 65: optional admin panels/services are selector- and viewport-gated instead of starting on every admin page.
 // Release 467 Build 66: Products uses focused presentation workspaces while retaining one Product authority.
 // Release 467 Build 67: Product Editor adds product-scoped recovery, stale-copy preflight and unsaved-change protection.
+// Release 467 Build 95: Products loads the current workspace context bundle instead of the stale Build 66 asset revision.
 
 const DD_ADMIN_LAZY_VERSION = 'R467B65_V1';
 const ddAdminLazyState = new Map();
@@ -49,8 +50,6 @@ function ddImportOnce(key, importer, label = key) {
 
 function ddElementIsNearViewport(element) {
   if (!element?.getBoundingClientRect) return false;
-  // Build 66 workspaces keep inactive panels in the DOM so their shared Product mounts retain identity.
-  // Hidden/inert workspaces must not be mistaken for near-viewport work by the Build 65 lazy loader.
   if (element.closest?.('[hidden], [inert]')) return false;
   const style = typeof window.getComputedStyle === 'function' ? window.getComputedStyle(element) : null;
   if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
@@ -158,8 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.body?.dataset?.adminPage === 'products') {
     void ddImportOnce(
       'product-workspace-split',
-      () => import('/public/js/admin-product-workspaces.js?v=66'),
-      'Product workspace split',
+      () => import('/public/js/admin-product-workspaces.js?v=95'),
+      'Product workspace current context',
     );
     void ddImportOnce(
       'product-editor-recovery-autosave',
@@ -205,7 +204,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Core module authority is intentionally eager: permissions must be known before optional
-// application-module runtimes can activate. Build 65 only defers non-authority enhancements.
 void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
   .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
