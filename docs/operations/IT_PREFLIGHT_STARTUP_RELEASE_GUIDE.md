@@ -4,39 +4,43 @@
 
 ## Verified Development
 
-Build 90 — External Acceptance Evidence Depth & Cross-Lane Guidance is the last fully verified checkpoint:
-- `dev` `ab23457370ced9224facc2a09c1cca7b1ff20968`
-- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
-- System Gate `34434124113` SUCCESS
-- Current Application Quality `34434123999` SUCCESS
-- I.T. Admin Runtime Proof `34434124058` SUCCESS
-- Repository Branch Hygiene `34434124046` SUCCESS
+Build 91 — Prelaunch Authority & Go-Live Decision Convergence is the last fully verified checkpoint:
+- `dev` `1d5519b976d108e7d4a558876863be5559a67e35`
+- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
+- System Gate `34486729268` SUCCESS
+- Current Application Quality `34486729227` SUCCESS
+- I.T. Admin Runtime Proof `34486729225` SUCCESS
+- Repository Branch Hygiene `34486729311` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 90 is the current Production checkpoint:
-- `main` `ab23457370ced9224facc2a09c1cca7b1ff20968`
-- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
-- Production Pages Deploy `34434296247` SUCCESS
-- Production Live Resource Integrity `34434356959` SUCCESS.
+Build 91 is the current Production checkpoint:
+- `main` `1d5519b976d108e7d4a558876863be5559a67e35`
+- tree `6a62d01c1be002b78c3c8d05993c40676e41e208`
+- Production Pages Deploy `34488492622` SUCCESS
+- Production Live Resource Integrity `34488622668` SUCCESS.
 
-## Build 91 operational boundary
+## Build 92 operational boundary
 
-Build 91 — **Prelaunch Authority & Go-Live Decision Convergence** is the active Development closure candidate. It consumes Build 90's external exact-SHA proof and modernizes the existing `/admin/prelaunch/` surface.
+Build 92 — **Prelaunch Action Queue Completeness & Ownership** is the active Development closure candidate. It consumes Build 91's exact external closure and keeps the existing `/admin/prelaunch/` decision fail-closed while making its action queue complete.
 
 The current launch-decision rules are:
 - Startup Readiness remains the D1-backed mutable status owner; prelaunch reads it only with GET;
-- the Startup Readiness API's `expected_total` is authoritative for the current row count, rather than a historical hard-coded 43-gate label;
-- a degraded or unavailable Startup Readiness response keeps the launch decision on HOLD;
-- the current External Acceptance control center supplies all five external lanes, passed/required counts and guided next actions;
-- Build 90 technical Development/Production GREEN is necessary but does not imply unrestricted go-live readiness;
+- `passed` and `not_applicable` are the only closed readiness states;
+- every other returned Startup Readiness row is listed as an unresolved launch action;
+- Blocked/Failed rank first, then Needs Review, In Progress, Not Started and any other open state;
+- recorded owner and due date are displayed; missing fields remain explicitly unassigned/undated;
+- no unresolved item may hold launch while being omitted from the action queue;
+- external acceptance remains a separate five-lane queue with passed/required counts and guided next actions;
+- a degraded or unavailable Startup Readiness or external-acceptance response keeps launch on HOLD;
+- Build 91 technical Development/Production GREEN is necessary but does not imply unrestricted go-live readiness;
 - Canada-only commerce remains active in CAD, U.S. sales/shipping remain disabled, and existing local pickup remains supported;
 - manual refresh is allowed; no polling or automatic corrective action is added.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 91 ingests the exact Build 90 Development and Production closure. Build 91 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 92 ingests the exact Build 91 Development and Production closure. Build 92 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
 
 The runtime I.T., preflight, prelaunch and external-acceptance pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
