@@ -4,46 +4,41 @@
 
 ## Verified Development
 
-Build 89 — External Acceptance Environment Isolation & Guided Recovery is the last fully verified checkpoint:
-- `dev` `68ac415302bceddb81e6faea15fbbebb3a76f24a`
-- tree `1a7cccf46b29718ea63d532c8c22322bcca98ffd`
-- System Gate `34425720516` SUCCESS
-- Current Application Quality `34425720539` SUCCESS
-- I.T. Admin Runtime Proof `34425720559` SUCCESS
-- Repository Branch Hygiene `34425720537` SUCCESS
+Build 90 — External Acceptance Evidence Depth & Cross-Lane Guidance is the last fully verified checkpoint:
+- `dev` `ab23457370ced9224facc2a09c1cca7b1ff20968`
+- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
+- System Gate `34434124113` SUCCESS
+- Current Application Quality `34434123999` SUCCESS
+- I.T. Admin Runtime Proof `34434124058` SUCCESS
+- Repository Branch Hygiene `34434124046` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 89 is the current Production checkpoint:
-- `main` `68ac415302bceddb81e6faea15fbbebb3a76f24a`
-- tree `1a7cccf46b29718ea63d532c8c22322bcca98ffd`
-- Production Pages Deploy `34425875315` SUCCESS
-- Production Live Resource Integrity `34425949898` SUCCESS.
+Build 90 is the current Production checkpoint:
+- `main` `ab23457370ced9224facc2a09c1cca7b1ff20968`
+- tree `54f069f37e09e6f48e035f98656423ed28aa85f4`
+- Production Pages Deploy `34434296247` SUCCESS
+- Production Live Resource Integrity `34434356959` SUCCESS.
 
-The Production chain proved exact green Development ancestry, Production business-data preservation, canonical Production D1, isolation/FK integrity, exact deployment, live bindings, public smoke and promotion proof. Live-resource verification separately proved supported account/D1 access, same-origin Product R2 bytes, Product API photography and Production D1 diagnostic reachability.
+## Build 91 operational boundary
 
-## Build 90 operational boundary
+Build 91 — **Prelaunch Authority & Go-Live Decision Convergence** is the active Development closure candidate. It consumes Build 90's external exact-SHA proof and modernizes the existing `/admin/prelaunch/` surface.
 
-Build 90 — **External Acceptance Evidence Depth & Cross-Lane Guidance** is the active Development closure candidate. It consumes Build 89's external exact-SHA proof and deepens the current acceptance control center without widening execution authority.
-
-The current control center now follows these rules:
-- Build 89 environment isolation remains intact: Production is bridge-first/read-only and the retained provider runner is Development-only;
-- Stripe Development remains six-part evidence: credentials, checkout, webhook signature, provider-synchronized refund, reconciliation, idempotent replay;
-- PayPal sandbox remains six-part evidence: credentials, approval/capture, webhook verification, provider-synchronized refund, reconciliation, idempotent replay;
-- Social OAuth exposes provider-selection, readiness, intended-account, controlled-lifecycle and publication-closed checks;
-- CAIP private-media exposes schema, authenticated review-proxy serve, ranged streaming, no-copy and no-cache checks, with object-key presence informational only;
-- Cloudflare Access exposes source harness, exact reviewed SHA, service-token secret availability, dispatch success and expected application `401` as a five-check contract; only the source harness is locally knowable;
-- all five lanes show passed/required counts and one next action;
-- timestamps are shown when available but the application never silently declares evidence fresh or an external workflow successful.
-
-Historical Build 6/7 provider/commercial engines remain preserved as regression/evidence authorities. Production provider execution and provider publication remain closed.
+The current launch-decision rules are:
+- Startup Readiness remains the D1-backed mutable status owner; prelaunch reads it only with GET;
+- the Startup Readiness API's `expected_total` is authoritative for the current row count, rather than a historical hard-coded 43-gate label;
+- a degraded or unavailable Startup Readiness response keeps the launch decision on HOLD;
+- the current External Acceptance control center supplies all five external lanes, passed/required counts and guided next actions;
+- Build 90 technical Development/Production GREEN is necessary but does not imply unrestricted go-live readiness;
+- Canada-only commerce remains active in CAD, U.S. sales/shipping remain disabled, and existing local pickup remains supported;
+- manual refresh is allowed; no polling or automatic corrective action is added.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 90 ingests the exact Build 89 Development and Production closure. Build 90 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 91 ingests the exact Build 90 Development and Production closure. Build 91 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
 
-The runtime I.T. diagnostic and external acceptance page cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic therefore never substitutes for the exact external release proof.
+The runtime I.T., preflight, prelaunch and external-acceptance pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
 ## Recovery discipline
 
@@ -53,7 +48,6 @@ The runtime I.T. diagnostic and external acceptance page cannot self-attest GitH
 - Verify R2 inventory/re-link a safe test object without deleting live media.
 - Rehearse Pages rollback and return to the current deployment with smoke evidence.
 - Keep required binding/variable names documented without secret values.
-- Record recovery time and update the runbook when a rehearsal exposes missing steps.
 
 ## Environment boundaries
 
@@ -68,4 +62,4 @@ The runtime I.T. diagnostic and external acceptance page cannot self-attest GitH
 - Production CAIP R2: `devilndove-caip-media`
 - Canonical migrations: exactly `0001`–`0004` via `scripts/d1_migrate.py`.
 
-Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains evidence-dependent until current external evidence proves otherwise.
+Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains `EVIDENCE_DEPENDENT`. U.S. sales/shipping remain disabled.
