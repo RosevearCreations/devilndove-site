@@ -157,7 +157,7 @@ export async function onRequest(context) {
   const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
   context.data.ddModuleAccess = access;
   context.data.ddModuleRelease = CURRENT_RELEASE;
-  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname }), request, { moduleKey });
+  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey });
   if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
     return finish(readOnlyDeniedResponse(access), request, { moduleKey });
   }
