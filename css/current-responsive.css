@@ -124,3 +124,65 @@ body[data-admin-page="packaging-studio"] .packaging-safe-area-status li{font-wei
   body[data-admin-page="packaging-studio"] .packaging-project-list{max-height:72vh}
   body[data-admin-page="packaging-studio"] .packaging-editor-card{padding-inline:24px}
 }
+
+/* Build 94 — Product Workspace Readability & Responsive Navigation.
+   Product workspace buttons use vertical content flow so labels never collapse into
+   narrow flex columns beside their descriptions. The grid reflows before readability
+   degrades while preserving the existing tab/URL/keyboard authority. */
+body[data-admin-page="products"] .product-workspace-tabs{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:stretch;
+  overflow:visible!important;
+}
+body[data-admin-page="products"] .product-workspace-tab{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  gap:5px!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:84px!important;
+  padding:12px 14px!important;
+  text-align:left!important;
+  white-space:normal;
+}
+body[data-admin-page="products"] .product-workspace-tab>strong{
+  display:block;
+  width:100%;
+  min-width:0;
+  white-space:nowrap;
+  word-break:normal;
+  overflow-wrap:normal;
+  line-height:1.2;
+}
+body[data-admin-page="products"] .product-workspace-tab>.small{
+  display:block!important;
+  width:100%;
+  min-width:0;
+  margin-top:0!important;
+  line-height:1.4;
+  text-align:left;
+  overflow-wrap:break-word;
+  word-break:normal;
+}
+body[data-admin-page="products"] .product-workspace-tab[aria-selected="true"]{
+  outline:2px solid currentColor;
+  outline-offset:2px;
+}
+@media(min-width:721px) and (max-width:1050px){
+  body[data-admin-page="products"] .product-workspace-tabs{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:720px){
+  body[data-admin-page="products"] .product-workspace-tabs{
+    grid-template-columns:minmax(0,1fr)!important;
+    overflow:visible!important;
+  }
+  body[data-admin-page="products"] .product-workspace-tab{
+    min-height:0!important;
+  }
+}
