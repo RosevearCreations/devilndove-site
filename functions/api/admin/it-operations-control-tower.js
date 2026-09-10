@@ -1,34 +1,34 @@
-// Release 467 Build 88 — current I.T. External Acceptance Control Center convergence.
-// Converges the retained readiness/self-diagnostics engine with the externally proven Build 87 Development + Production baseline.
+// Release 467 Build 89 — current I.T. External Acceptance Environment Isolation & Guided Recovery.
+// Converges the retained readiness/self-diagnostics engine with the externally proven Build 88 Development + Production baseline.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE = 467;
-const BUILD = 88;
-const TITLE = 'External Acceptance Control Center Convergence';
+const BUILD = 89;
+const TITLE = 'External Acceptance Environment Isolation & Guided Recovery';
 const ACCEPTED_DEVELOPMENT = Object.freeze({
-  release:467,build:87,title:'Production Authority & Restart Convergence',state:'DEVELOPMENT_GREEN',
-  accepted_sha:'646d73710784008617157cf5746a66f053daba83',
-  accepted_tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
-  system_gate_run:34421392242,current_application_quality_run:34421392244,
-  it_admin_runtime_proof_run:34421392231,branch_hygiene_run:34421392188,
+  release:467,build:88,title:'External Acceptance Control Center Convergence',state:'DEVELOPMENT_GREEN',
+  accepted_sha:'9c6d56b887b2aa4bb710e5980608b8942830034c',
+  accepted_tree_sha:'9f7d279ed5c83795682ba763ca150f1fe91a6019',
+  system_gate_run:34423493650,current_application_quality_run:34423493830,
+  it_admin_runtime_proof_run:34423493747,branch_hygiene_run:34423493617,
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const VERIFIED_DEVELOPMENT = Object.freeze({
-  release:467,build:87,title:'Production Authority & Restart Convergence',state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
-  dev_sha:'646d73710784008617157cf5746a66f053daba83',
-  tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
-  system_gate_run:34421392242,current_application_quality_run:34421392244,
-  it_admin_runtime_proof_run:34421392231,branch_hygiene_run:34421392188,
+  release:467,build:88,title:'External Acceptance Control Center Convergence',state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  dev_sha:'9c6d56b887b2aa4bb710e5980608b8942830034c',
+  tree_sha:'9f7d279ed5c83795682ba763ca150f1fe91a6019',
+  system_gate_run:34423493650,current_application_quality_run:34423493830,
+  it_admin_runtime_proof_run:34423493747,branch_hygiene_run:34423493617,
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const PRODUCTION = Object.freeze({
-  release:467,build:87,title:'Production Authority & Restart Convergence',state:'PRODUCTION_GREEN',
-  main_sha:'646d73710784008617157cf5746a66f053daba83',
-  tree_sha:'709f802cf7ca24a12f48bd7c8b562a92b306fcae',
-  pages_deploy_run:34421532872,production_pages_deploy_run:34421532872,
-  production_live_resource_integrity_run:34421613381,
+  release:467,build:88,title:'External Acceptance Control Center Convergence',state:'PRODUCTION_GREEN',
+  main_sha:'9c6d56b887b2aa4bb710e5980608b8942830034c',
+  tree_sha:'9f7d279ed5c83795682ba763ca150f1fe91a6019',
+  pages_deploy_run:34423649786,production_pages_deploy_run:34423649786,
+  production_live_resource_integrity_run:34423737422,
   promotion_state:'EXACT_TREE_PRODUCTION_GREEN_STANDARD_CHAIN'
 });
 const CURRENT_GUARDS = Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene']);
@@ -62,11 +62,11 @@ export async function onRequestGet(context){
   const runtimeSha=clean(diagnostic.observations?.deployment?.sha)||clean(subsystems.deployment_ancestry?.runtime_source_sha)||null;
   return jsonResponse({
     release:RELEASE,build:BUILD,title:TITLE,ok:true,
-    authority:'release467-build88-external-acceptance-control-center',state:'DEVELOPMENT_CLOSURE_CANDIDATE',environment:diagnostic.environment||base.environment||'development',
+    authority:'release467-build89-external-acceptance-environment-isolation',state:'DEVELOPMENT_CLOSURE_CANDIDATE',environment:diagnostic.environment||base.environment||'development',
     release_authority:{
       current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_CLOSURE_CANDIDATE'},
       accepted_development:ACCEPTED_DEVELOPMENT,verified_development:VERIFIED_DEVELOPMENT,production:PRODUCTION,
-      restart_integrity:{protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,current_closure_candidate:{release:467,build:88,title:TITLE,state:'AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF'},candidate_must_not_self_claim_final_proof:true},
+      restart_integrity:{protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,current_closure_candidate:{release:467,build:89,title:TITLE,state:'AWAITING_EXTERNAL_EXACT_CLOSURE_HEAD_PROOF'},candidate_must_not_self_claim_final_proof:true},
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],production_promotion_required_development_proofs:CURRENT_GUARDS,
       rollback_readiness:'release-neutral-read-only',canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',request_time_schema_mutation:false
     },
@@ -76,9 +76,9 @@ export async function onRequestGet(context){
     diagnostic_observations:diagnostic.observations||{},corrective_links:diagnostic.corrective_links||{},
     external_policy:EXTERNAL_POLICY,recovery_queue:queue,next_action:queue[0]||null,subsystems,
     truth_notes:[
-      'Build 87 is the last fully verified Development checkpoint at 646d73710784008617157cf5746a66f053daba83 / tree 709f802cf7ca24a12f48bd7c8b562a92b306fcae with System 34421392242, Quality 34421392244, I.T. 34421392231 and Hygiene 34421392188 successful plus exact Preview acceptance.',
-      'Build 87 is Production GREEN at the same SHA/tree with Production Pages Deploy 34421532872 and Live Resource Integrity 34421613381 successful.',
-      'Build 88 is the current External Acceptance Control Center Convergence closure candidate. It modernizes operator truth without claiming any external provider acceptance.',
+      'Build 88 is the last fully verified Development checkpoint at 9c6d56b887b2aa4bb710e5980608b8942830034c / tree 9f7d279ed5c83795682ba763ca150f1fe91a6019 with System 34423493650, Quality 34423493830, I.T. 34423493747 and Hygiene 34423493617 successful plus exact Preview acceptance.',
+      'Build 88 is Production GREEN at the same SHA/tree with Production Pages Deploy 34423649786 and Live Resource Integrity 34423737422 successful.',
+      'Build 89 is the current External Acceptance Environment Isolation & Guided Recovery closure candidate. Production acceptance status remains read-only and never invokes the Development-only provider runner.',
       'Canonical D1 migrations remain exactly 0001-0004. Corrective instructions route the operator to the owning workspace; I.T. diagnostics perform no automatic repair.',
       'Stripe, PayPal, Social OAuth, Cloudflare Access and CAIP external acceptance remain separate from source/deployment health.'
     ],
