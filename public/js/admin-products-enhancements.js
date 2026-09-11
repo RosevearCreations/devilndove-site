@@ -1,4 +1,4 @@
-// Release 467 Build 96 — Product browser search, focus filters, and current Product context.
+// Release 467 Build 97 — Product browser search, readiness work queue, focus filters, and current Product context.
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
   const mount = document.getElementById('productsAdminMount');
@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const PREF_KEY = 'dd_catalog_table_prefs_v1';
   const FILTER_KEY = 'dd_catalog_table_filter_v1';
   const SNAPSHOT_KEY = 'dd_admin_products_snapshot_v2';
+  const FOCUS_VALUES = ['all', 'attention', 'drafts', 'low_stock', 'missing_image', 'readiness_blocked', 'readiness_ready'];
   let dashboardRefreshTimer = 0;
   let currentProductId = Number(window.DDCurrentProductEditorId || 0) || 0;
   let currentProductName = '';
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadFilterState() {
     try {
       const saved = JSON.parse(localStorage.getItem(FILTER_KEY) || '{}') || {};
-      const focus = ['all', 'attention', 'drafts', 'low_stock', 'missing_image'].includes(saved.focus) ? saved.focus : 'all';
+      const focus = FOCUS_VALUES.includes(saved.focus) ? saved.focus : 'all';
       return { query: String(saved.query || '').slice(0, 160), focus };
     } catch {
       return { query: '', focus: 'all' };
@@ -143,7 +144,30 @@ document.addEventListener('DOMContentLoaded', () => {
     ].map((value) => String(value || '').toLowerCase()).join(' ');
   }
 
-  function matchesFocus(product) {
+  function readinessForRow(row) {
+    const node = row?.querySelector?.('.product-readiness-inline');
+    if (!node || node.classList.contains('is-unknown')) {
+      return { known: false, ready: false, blocked: false, score: null, blocker: '', help: '' };
+    }
+    const strongText = String(node.querySelector('strong')?.textContent || '').trim();
+    const scoreMatch = strongText.match(/(\d+(?:\.\d+)?)\s*%/);
+    const ready = /^ready\b/i.test(strongText);
+    const blocked = /^blocked\b/i.test(strongText);
+    const blockerText = String(node.querySelector('span')?.textContent || '').trim();
+    const separator = blockerText.indexOf(':');
+    const blocker = separator >= 0 ? blockerText.slice(0, separator).trim() : blockerText;
+    const help = separator >= 0 ? blockerText.slice(separator + 1).trim() : '';
+    return {
+      known: ready || blocked,
+      ready,
+      blocked,
+      score: scoreMatch ? Number(scoreMatch[1]) : null,
+      blocker,
+      help,
+    };
+  }
+
+  function matchesFocus(product, row) {
     const status = String(product?.status || '').toLowerCase();
     const review = String(product?.review_status || '').toLowerCase();
     const lowStock = Number(product?.low_stock_flag || 0) === 1;
@@ -152,11 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterState.focus === 'low_stock') return lowStock;
     if (filterState.focus === 'missing_image') return missingImage;
     if (filterState.focus === 'attention') return status === 'draft' || lowStock || missingImage || review === 'needs_changes';
+    if (filterState.focus === 'readiness_blocked') return readinessForRow(row).blocked;
+    if (filterState.focus === 'readiness_ready') return readinessForRow(row).ready;
     return true;
   }
 
   function focusCounts() {
-    const counts = { all: snapshotProducts.length, attention: 0, drafts: 0, low_stock: 0, missing_image: 0 };
+    const counts = { all: snapshotProducts.length, attention: 0, drafts: 0, low_stock: 0, missing_image: 0, readiness_blocked: 0, readiness_ready: 0, readiness_unknown: 0 };
     snapshotProducts.forEach((product) => {
       const status = String(product?.status || '').toLowerCase();
       const review = String(product?.review_status || '').toLowerCase();
@@ -166,6 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (lowStock) counts.low_stock += 1;
       if (missingImage) counts.missing_image += 1;
       if (status === 'draft' || lowStock || missingImage || review === 'needs_changes') counts.attention += 1;
+    });
+    tableBody.querySelectorAll('tr').forEach((row) => {
+      const readiness = readinessForRow(row);
+      const id = Number(row.querySelector?.('[data-edit-product-id]')?.dataset?.editProductId || 0) || 0;
+      if (!id) return;
+      if (!readiness.known) counts.readiness_unknown += 1;
+      else if (readiness.ready) counts.readiness_ready += 1;
+      else if (readiness.blocked) counts.readiness_blocked += 1;
     });
     return counts;
   }
@@ -180,6 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
       drafts: 'Drafts',
       low_stock: 'Low stock',
       missing_image: 'Missing lead image',
+      readiness_blocked: 'Readiness blocked',
+      readiness_ready: 'Ready',
     };
     document.querySelectorAll('[data-product-focus-filter]').forEach((button) => {
       const key = button.dataset.productFocusFilter || 'all';
@@ -187,6 +223,55 @@ document.addEventListener('DOMContentLoaded', () => {
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
       button.textContent = `${labels[key] || key} (${Number(counts[key] || 0)})`;
     });
+  }
+
+  function readinessQueueRows() {
+    const rows = [];
+    tableBody.querySelectorAll('tr').forEach((row) => {
+      const product = productForRow(row);
+      const id = Number(product?.product_id || 0) || 0;
+      if (!id) return;
+      const readiness = readinessForRow(row);
+      if (!readiness.known || !readiness.blocked) return;
+      rows.push({ row, product, readiness });
+    });
+    return rows.sort((left, right) => {
+      const leftScore = Number.isFinite(left.readiness.score) ? left.readiness.score : 999;
+      const rightScore = Number.isFinite(right.readiness.score) ? right.readiness.score : 999;
+      return leftScore - rightScore || String(left.product?.name || '').localeCompare(String(right.product?.name || ''), undefined, { sensitivity: 'base' });
+    });
+  }
+
+  function renderReadinessQueue() {
+    const target = document.getElementById('catalogReadinessQueue');
+    const summary = document.getElementById('catalogReadinessSummary');
+    if (!target || !summary) return;
+    const counts = focusCounts();
+    const rows = readinessQueueRows();
+    summary.textContent = `${counts.readiness_blocked} blocked · ${counts.readiness_ready} ready · ${counts.readiness_unknown} readiness unavailable. Queue uses the readiness already rendered by the primary Product load.`;
+    if (!rows.length) {
+      target.innerHTML = counts.readiness_unknown
+        ? '<div class="small">No currently rendered Product is confirmed blocked. Some readiness evidence is unavailable, so those Products are not classified as ready.</div>'
+        : '<div class="small">No blocked Products are waiting in the readiness queue.</div>';
+      return;
+    }
+    target.innerHTML = rows.slice(0, 10).map(({ product, readiness }) => {
+      const id = Number(product?.product_id || 0);
+      const number = product?.product_number || id;
+      const name = product?.name || `Product #${id}`;
+      const score = Number.isFinite(readiness.score) ? `${readiness.score}%` : 'score unavailable';
+      return `<div class="product-readiness-queue-item">
+        <div>
+          <strong>DD${esc(String(number))} — ${esc(name)}</strong>
+          <div class="small">Readiness ${esc(score)}${readiness.blocker ? ` · ${esc(readiness.blocker)}` : ''}</div>
+          ${readiness.help ? `<div class="small product-readiness-queue-help">${esc(readiness.help)}</div>` : ''}
+        </div>
+        <div class="product-readiness-queue-actions">
+          <button class="btn small" type="button" data-open-readiness-blocker="${id}">Open blocker</button>
+          <button class="btn small secondary" type="button" data-show-readiness-product="${id}">Show Product row</button>
+        </div>
+      </div>`;
+    }).join('');
   }
 
   function applyProductFilters() {
@@ -199,11 +284,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const product = productForRow(row);
       if (!Number(product?.product_id || 0)) return;
       total += 1;
-      const visible = matchesFocus(product) && (!query || productSearchText(product, row).includes(query));
+      const visible = matchesFocus(product, row) && (!query || productSearchText(product, row).includes(query));
       row.hidden = !visible;
       if (visible) shown += 1;
     });
     syncFilterControls();
+    renderReadinessQueue();
     const status = document.getElementById('catalogProductFilterStatus');
     if (status) {
       const filterLabel = filterState.focus === 'all' ? 'all products' : String(filterState.focus).replaceAll('_', ' ');
@@ -213,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setFocusFilter(nextFocus) {
-    filterState.focus = ['all', 'attention', 'drafts', 'low_stock', 'missing_image'].includes(nextFocus) ? nextFocus : 'all';
+    filterState.focus = FOCUS_VALUES.includes(nextFocus) ? nextFocus : 'all';
     saveFilterState();
     applyProductFilters();
   }
@@ -270,6 +356,17 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCurrentContext();
   }
 
+  function showProductRow(productId) {
+    filterState = { query: '', focus: 'all' };
+    saveFilterState();
+    applyProductFilters();
+    const button = tableBody.querySelector(`[data-edit-product-id="${Number(productId || 0)}"]`);
+    const row = button?.closest('tr');
+    if (!row) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    button?.focus({ preventScroll: true });
+  }
+
   function ensureMount() {
     if (document.getElementById('catalogEnhancementCard')) return;
     const card = document.createElement('div');
@@ -288,6 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn secondary" type="button" data-product-focus-filter="drafts" aria-pressed="false">Drafts</button>
           <button class="btn secondary" type="button" data-product-focus-filter="low_stock" aria-pressed="false">Low stock</button>
           <button class="btn secondary" type="button" data-product-focus-filter="missing_image" aria-pressed="false">Missing lead image</button>
+          <button class="btn secondary" type="button" data-product-focus-filter="readiness_blocked" aria-pressed="false">Readiness blocked</button>
+          <button class="btn secondary" type="button" data-product-focus-filter="readiness_ready" aria-pressed="false">Ready</button>
           <button class="btn secondary" id="catalogClearProductFilters" type="button">Clear search &amp; filters</button>
         </div>
         <div id="catalogProductFilterStatus" class="small" role="status" aria-live="polite"></div>
@@ -300,6 +399,16 @@ document.addEventListener('DOMContentLoaded', () => {
       <div id="catalogTableViewMessage" class="small" role="status" aria-live="polite" style="margin-top:8px"></div>
       <div id="catalogDashboardSource" class="small" style="margin:12px 0 10px">Dashboard summaries reuse the Product list snapshot already loaded by this page; this panel does not issue a second Product database read.</div>
       <div class="grid cols-4" id="catalogDashboardStats" style="gap:10px"></div>
+      <section class="product-readiness-work-queue" aria-labelledby="catalogReadinessQueueTitle">
+        <div class="product-readiness-queue-heading">
+          <div>
+            <h4 id="catalogReadinessQueueTitle">Readiness work queue</h4>
+            <div id="catalogReadinessSummary" class="small" role="status" aria-live="polite">Waiting for the Product readiness already loaded by this page.</div>
+          </div>
+          <button class="btn small secondary" type="button" data-product-focus-filter="readiness_blocked" aria-pressed="false">Readiness blocked</button>
+        </div>
+        <div id="catalogReadinessQueue" class="product-readiness-queue-list"><div class="small">Waiting for rendered Product readiness.</div></div>
+      </section>
       <details style="margin-top:12px">
         <summary>Fine-tune visible columns</summary>
         <div class="grid cols-5" style="gap:8px;margin-top:10px">
@@ -336,7 +445,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     card.addEventListener('click', (event) => {
       const focusButton = event.target.closest('[data-product-focus-filter]');
-      if (focusButton) setFocusFilter(focusButton.dataset.productFocusFilter || 'all');
+      if (focusButton) {
+        setFocusFilter(focusButton.dataset.productFocusFilter || 'all');
+        return;
+      }
+      const blockerButton = event.target.closest('[data-open-readiness-blocker]');
+      if (blockerButton) {
+        const productId = Number(blockerButton.dataset.openReadinessBlocker || 0);
+        const existing = tableBody.querySelector(`[data-open-first-blocker="${productId}"]`);
+        if (existing) existing.click();
+        else {
+          const message = document.getElementById('catalogTableViewMessage');
+          if (message) message.textContent = `Corrective routing is not available for Product #${productId} in the current rendered table.`;
+        }
+        return;
+      }
+      const showButton = event.target.closest('[data-show-readiness-product]');
+      if (showButton) showProductRow(Number(showButton.dataset.showReadinessProduct || 0));
     });
     document.getElementById('catalogClearProductFilters')?.addEventListener('click', clearFilters);
     document.getElementById('catalogEssentialColumns')?.addEventListener('click', () => applyPreset('essential'));
@@ -364,6 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
       statsEl.innerHTML = '<div class="small">Waiting for the primary Product list or a saved browser snapshot.</div>';
       if (sourceEl) sourceEl.textContent = 'Dashboard summaries are waiting for the primary Product list; no extra Product database read is being made.';
       syncFilterControls();
+      renderReadinessQueue();
       return;
     }
 
@@ -383,7 +509,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ['Missing lead image', missingImages, 'Still missing featured media'],
     ].map(([label, value, note]) => `<div class="card" style="margin:0"><strong>${esc(label)}</strong><div style="font-size:1.25rem;font-weight:700;margin-top:6px">${esc(String(value))}</div><div class="small" style="margin-top:6px">${esc(note)}</div></div>`).join('');
 
-    if (sourceEl) sourceEl.textContent = `Dashboard summaries and Product focus filters use ${products.length} Product records from the shared browser snapshot${snapshot.cached_at ? ` saved ${snapshot.cached_at}` : ''}; no duplicate Product API read.`;
+    if (sourceEl) sourceEl.textContent = `Dashboard summaries and Product focus filters use ${products.length} Product records from the shared browser snapshot${snapshot.cached_at ? ` saved ${snapshot.cached_at}` : ''}; no duplicate Product API read. Readiness focus and queue reuse the readiness badges already rendered by the primary Product load.`;
+    renderReadinessQueue();
   }
 
   function scheduleDashboardRefresh(delay = 500) {
