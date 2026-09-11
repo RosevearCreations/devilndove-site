@@ -65,7 +65,7 @@ run_current_contract('scripts/release467_build91_gate.py', 'Release 467 Build 91
 run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92')
 run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')
 run_current_contract('scripts/release467_build94_gate.py', 'Release 467 Build 94')
-run_current_contract('scripts/release467_build101_gate.py', 'Release 467 Build 101')
+run_current_contract('scripts/release467_build102_gate.py', 'Release 467 Build 102')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
