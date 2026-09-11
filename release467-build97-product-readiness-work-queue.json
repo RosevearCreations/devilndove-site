@@ -25,7 +25,8 @@
   "scope": {
     "ingest_build96_final_closure": true,
     "reuse_existing_product_readiness_preview": true,
-    "shared_readiness_snapshot_event": true,
+    "reuse_existing_rendered_readiness_projection": true,
+    "reuse_existing_first_blocker_action": true,
     "prioritized_blocker_queue": true,
     "first_blocker_corrective_navigation": true,
     "blocked_readiness_focus": true,
@@ -45,10 +46,10 @@
     "automatic_production_promotion": false
   },
   "acceptance": {
-    "readiness_data_is_shared_from_existing_primary_load": true,
+    "readiness_data_reuses_primary_rendered_readiness": true,
     "work_queue_orders_blocked_products_by_lowest_readiness_score": true,
     "queue_shows_product_identity_score_and_first_blocker": true,
-    "queue_corrective_links_use_existing_blocker_target_rules": true,
+    "queue_corrective_links_reuse_existing_product_blocker_action": true,
     "blocked_and_ready_filters_are_operator_selected": true,
     "readiness_filters_coexist_with_build96_text_search": true,
     "readiness_unavailable_is_fail_soft_not_ready": true,
