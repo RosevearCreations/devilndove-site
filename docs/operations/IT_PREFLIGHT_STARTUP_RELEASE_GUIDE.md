@@ -4,42 +4,42 @@
 
 ## Verified Development
 
-Build 96 — Product Browser Search & Focus Filters is the last fully verified checkpoint:
-- `dev` `ba0e2f633d823b90fdcc2cbbbe6be4c50c79b284`
-- tree `76f01771b844f6f610a621cd969d033cfa3d7c9c`
-- System Gate `34546959255` SUCCESS
-- Current Application Quality `34546959190` SUCCESS
-- I.T. Admin Runtime Proof `34546959188` SUCCESS
-- Repository Branch Hygiene `34546959296` SUCCESS
+Build 97 — Product Readiness Work Queue & Blocker Navigation is the last fully verified checkpoint:
+- `dev` `eef3c48a287cc919b1f4d964e8b504d4611e671e`
+- tree `d2714d4e74fd7f85c9ca7efa0b63a366be1c4f63`
+- System Gate `34548442379` SUCCESS
+- Current Application Quality `34548442377` SUCCESS
+- I.T. Admin Runtime Proof `34548442359` SUCCESS
+- Repository Branch Hygiene `34548442374` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 96 is the current Production checkpoint:
-- `main` `ba0e2f633d823b90fdcc2cbbbe6be4c50c79b284`
-- tree `76f01771b844f6f610a621cd969d033cfa3d7c9c`
-- Production Pages Deploy `34547083100` SUCCESS
-- Production Live Resource Integrity `34547157869` SUCCESS.
+Build 97 is the current Production checkpoint:
+- `main` `eef3c48a287cc919b1f4d964e8b504d4611e671e`
+- tree `d2714d4e74fd7f85c9ca7efa0b63a366be1c4f63`
+- Production Pages Deploy `34548574039` SUCCESS
+- Production Live Resource Integrity `34548646961` SUCCESS.
 
-## Build 97 operational boundary
+## Build 98 operational boundary
 
-Build 97 — **Product Readiness Work Queue & Blocker Navigation** is the active Development closure candidate. It consumes Build 96's exact external closure and continues Products & Inventory usability without changing Product authority.
+Build 98 — **Product Readiness Triage & Blocker Groups** is the active Development closure candidate. It consumes Build 97's exact external closure and continues Products & Inventory usability without changing Product authority.
 
 The current Product readiness rules are:
-- readiness data is reused from the readiness badges already rendered by the primary Products loader;
-- Build 97 adds no second Product API/database read and no second readiness API/database read;
-- the readiness work queue lists blocked Products by lowest readiness score first;
-- queue cards show Product identity, score, first blocker and help;
-- **Open blocker** delegates to the existing Product-row blocker action so the existing media / SEO / price / description / readiness routing remains authoritative;
-- **Show Product row** clears browser filters and locates the row only after an explicit operator click;
-- **Readiness blocked** and **Ready** extend Build 96 browser-local search/focus views;
+- readiness data and first-blocker help are reused from the primary Products loader;
+- Build 98 adds no second Product API/database read and no second readiness API/database read;
+- blocker groups are browser-local workflow helpers: Media, SEO, Commerce, Copy / story and Other;
+- group counts and the selected group do not create new business truth;
+- the readiness work queue remains lowest readiness score first inside the selected group;
+- **Open next blocker** delegates to the existing Product-row blocker action;
+- **Show next Product** locates the selected queue's first Product only after an explicit operator click;
 - readiness-unavailable Products are never silently classified as ready;
-- Build 96 Product search/focus, Build 95 current Product/table ergonomics, Build 94 readable 3/2/1 workspace navigation and Build 93 centered-shell/right-side reachability remain in force;
+- Build 97 readiness navigation, Build 96 Product search/focus, Build 95 current Product/table ergonomics, Build 94 readable 3/2/1 workspace navigation and Build 93 centered-shell/right-side reachability remain in force;
 - the presentation layer does not change Product or Inventory business data, H1 hierarchy, provider state or launch authority.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 97 ingests exact Build 96 Development and Production closure. Build 97 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 98 ingests exact Build 97 Development and Production closure. Build 98 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 99 must ingest Build 98's final external closure.
 
 The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
