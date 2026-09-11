@@ -4,41 +4,42 @@
 
 ## Verified Development
 
-Build 99 — Product Work Views & Browser Sort is the last fully verified checkpoint:
-- `dev` `5cb212feda63ce198a12b9fb6ae8ac5cc3e926a2`
-- tree `4a3a6f6e1c187531c254187a08edd4bd4723a937`
-- System Gate `34553759863` SUCCESS
-- Current Application Quality `34553759843` SUCCESS
-- I.T. Admin Runtime Proof `34553759876` SUCCESS
-- Repository Branch Hygiene `34553759871` SUCCESS
+Build 100 — Product Work Session & Progress is the last fully verified checkpoint:
+- `dev` `20400309f3ab450cc256769870e8f963f8d3de3c`
+- tree `3344c8e4d8c177820ea5077f4b429ff1e832d881`
+- System Gate `34598663510` SUCCESS
+- Current Application Quality `34598663549` SUCCESS
+- I.T. Admin Runtime Proof `34598663501` SUCCESS
+- Repository Branch Hygiene `34598663509` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 99 is the current Production checkpoint:
-- `main` `5cb212feda63ce198a12b9fb6ae8ac5cc3e926a2`
-- tree `4a3a6f6e1c187531c254187a08edd4bd4723a937`
-- Production Pages Deploy `34553869891` SUCCESS
-- Production Live Resource Integrity `34553931594` SUCCESS.
+Build 100 is the current Production checkpoint:
+- `main` `20400309f3ab450cc256769870e8f963f8d3de3c`
+- tree `3344c8e4d8c177820ea5077f4b429ff1e832d881`
+- Production Pages Deploy `34598827876` SUCCESS
+- Production Live Resource Integrity `34598920977` SUCCESS.
 
-## Build 100 operational boundary
+## Build 101 operational boundary
 
-Build 100 — **Product Work Session & Progress** is the active Development closure candidate. It consumes Build 99's exact external closure and continues Products & Inventory usability without changing Product authority.
+Build 101 — **Product Work Priority & Next-Action Ordering** is the active Development closure candidate. It consumes Build 100's exact external closure and continues Products & Inventory usability without changing Product authority.
 
 The current Product-browser rules are:
-- the work session is browser-local under `dd_catalog_work_session_v1` and holds at most 60 Product IDs plus completion timestamps;
-- Products may be pinned individually or explicitly added from the current visible Product rows;
-- progress, Locate next Product, Mark done/Undo and clear actions change only browser-local planning state;
-- Open next blocker delegates the existing Product row first-blocker action;
+- the work session remains browser-local under `dd_catalog_work_session_v1` and holds at most 60 Product IDs;
+- each pinned Product may be Urgent, High, Normal or Low priority;
+- existing items without priority default to Normal;
+- session order may be Priority, Blockers, Readiness, Recent or Manual;
+- Locate next Product and Open next blocker follow the selected session order;
+- Blockers/Readiness ordering reuses readiness already rendered by the primary Products loader;
 - hidden Products do not silently clear search, focus, triage or saved-view filters;
-- Build 100 reuses `dd_admin_products_snapshot_v2` and readiness already rendered by the primary Products loader;
-- Build 100 adds no Product/readiness API or database read;
-- Build 99 saved work views/sort, Build 98 readiness triage, Build 97 readiness navigation, Build 96 Product search/focus, Build 95 Product/table ergonomics, Build 94 readable workspace navigation and Build 93 centered-shell/right-side reachability remain in force;
+- Build 101 adds no Product/readiness API or database read;
+- Build 100 work sessions, Build 99 saved work views/sort, Build 98 readiness triage and earlier Product/table/responsive protections remain in force;
 - the presentation layer does not change Product or Inventory business data, H1 hierarchy, provider state or launch authority.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 100 ingests exact Build 99 Development and Production closure. Build 100 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 101 must ingest Build 100's final external closure.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 101 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 102 must ingest Build 101's final external closure.
 
 The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
@@ -64,4 +65,4 @@ The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Clou
 - Production CAIP R2: `devilndove-caip-media`
 - Canonical migrations: exactly `0001`–`0004` via `scripts/d1_migrate.py`.
 
-Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media acceptance remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains authoritative, U.S. sales/shipping remain disabled, and local pickup remains supported.
+Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains authoritative, U.S. sales/shipping remain disabled, and local pickup remains supported.
