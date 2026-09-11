@@ -6,7 +6,7 @@ Build 96 continues the Products & Inventory usability sequence after Build 95. B
 
 ## Product browser controls
 
-The Products page already loads its Product list through the primary Product authority and saves the shared browser snapshot `dd_admin_products_snapshot_v2`. Build 96 reuses that same loaded list and snapshot to add browser-local navigation rather than making another Product request.
+The Products page already loads its Product list through the primary Product authority and saves the shared browser snapshot `dd_admin_products_snapshot_v2`. Build 96 reuses that same loaded list and snapshot to add browser-local navigation rather than making another Product request. **No second Product API** or database read is introduced by these browser controls.
 
 The Product browser now provides:
 
