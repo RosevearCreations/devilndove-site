@@ -2,12 +2,12 @@
 // Build 191 image-role guidance shared by phone and desktop product editors.
 // Release 467 Build 99 uses this already-loaded Products script as the narrow loader
 // for browser-local Product Work Views & Browser Sort.
-// Release 467 Build 101 loads the browser-local Product Work Priority & Next-Action Ordering planner.
+// Release 467 Build 102 loads Product Work Manual Reorder & Accessibility.
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.body?.dataset?.adminPage === 'products') {
     import('/public/js/admin-products-work-views.js?v=467b99').catch(() => {});
-    import('/public/js/admin-products-work-session.js?v=467b101').catch(() => {});
+    import('/public/js/admin-products-work-session.js?v=467b102').catch(() => {});
   }
 
   const form = document.getElementById('mobileProductForm') || document.getElementById('createProductForm');
