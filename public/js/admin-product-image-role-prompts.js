@@ -3,11 +3,13 @@
 // Release 467 Build 99 uses this already-loaded Products script as the narrow loader
 // for browser-local Product Work Views & Browser Sort.
 // Release 467 Build 104 loads Product Work Session Focus Views.
+// Release 467 Build 105 loads Product Work Session Completion & Handoff.
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.body?.dataset?.adminPage === 'products') {
     import('/public/js/admin-products-work-views.js?v=467b99').catch(() => {});
     import('/public/js/admin-products-work-session.js?v=467b104').catch(() => {});
+    import('/public/js/admin-products-work-session-handoff.js?v=467b105').catch(() => {});
   }
 
   const form = document.getElementById('mobileProductForm') || document.getElementById('createProductForm');
