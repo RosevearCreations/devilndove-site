@@ -33,13 +33,14 @@ def run_current_contract(path, label):
 
 # Current reliability contracts are chained here so later work cannot silently regress
 # Product/Inventory/Media/Storefront/SEO/commerce/Finance/Orders/Packaging/Creators flows,
-# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-97 closure,
+# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-98 closure,
 # Build 89 environment-isolated external acceptance, Build 90 structured five-lane evidence,
 # Build 91 current prelaunch/go-live decision convergence, Build 92 complete Startup Readiness
 # action routing, Build 93 centered public/admin shells with recoverable horizontal overflow,
 # Build 94 readable Product workspace navigation, Build 95 current Product context/table ergonomics,
 # Build 96 browser-local Product search/focus, Build 97 read-only Product readiness work queue,
-# and Build 98 browser-local blocker-group triage plus explicit next-blocker navigation.
+# Build 98 browser-local blocker-group triage plus explicit next-blocker navigation,
+# and Build 99 browser-local saved Product work views plus row sorting over the shared Product snapshot.
 # External acceptance remains separate, technical GREEN remains distinct from launch READY,
 # Canada-only commerce is preserved, and provider execution/publication plus automatic
 # Production promotion remain closed.
@@ -76,7 +77,7 @@ run_current_contract('scripts/release467_build91_gate.py', 'Release 467 Build 91
 run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92')
 run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')
 run_current_contract('scripts/release467_build94_gate.py', 'Release 467 Build 94')
-run_current_contract('scripts/release467_build98_gate.py', 'Release 467 Build 98')
+run_current_contract('scripts/release467_build99_gate.py', 'Release 467 Build 99')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
