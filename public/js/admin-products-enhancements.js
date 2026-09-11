@@ -1,4 +1,4 @@
-// Release 467 Build 97 — Product browser search, readiness work queue, focus filters, and current Product context.
+// Release 467 Build 98 — Product browser search, readiness triage/work queue, focus filters, and current Product context.
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
   const mount = document.getElementById('productsAdminMount');
@@ -8,8 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const PREF_KEY = 'dd_catalog_table_prefs_v1';
   const FILTER_KEY = 'dd_catalog_table_filter_v1';
+  const TRIAGE_KEY = 'dd_catalog_readiness_triage_v1';
   const SNAPSHOT_KEY = 'dd_admin_products_snapshot_v2';
   const FOCUS_VALUES = ['all', 'attention', 'drafts', 'low_stock', 'missing_image', 'readiness_blocked', 'readiness_ready'];
+  const TRIAGE_VALUES = ['all', 'media', 'seo', 'commerce', 'copy', 'other'];
   let dashboardRefreshTimer = 0;
   let currentProductId = Number(window.DDCurrentProductEditorId || 0) || 0;
   let currentProductName = '';
@@ -20,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
+      .replace(/\"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
 
@@ -57,6 +59,19 @@ document.addEventListener('DOMContentLoaded', () => {
     try { localStorage.setItem(FILTER_KEY, JSON.stringify(filterState)); } catch {}
   }
 
+  function loadTriageState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(TRIAGE_KEY) || '{}') || {};
+      return { group: TRIAGE_VALUES.includes(saved.group) ? saved.group : 'all' };
+    } catch {
+      return { group: 'all' };
+    }
+  }
+
+  function saveTriageState() {
+    try { localStorage.setItem(TRIAGE_KEY, JSON.stringify(triageState)); } catch {}
+  }
+
   function readProductSnapshot() {
     try {
       const payload = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || 'null');
@@ -68,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let prefs = loadPrefs();
   let filterState = loadFilterState();
+  let triageState = loadTriageState();
 
   function applyColumnPrefs() {
     const table = document.querySelector('.products-admin-table');
@@ -167,6 +183,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  function blockerGroup(readiness) {
+    const text = `${readiness?.blocker || ''} ${readiness?.help || ''}`.toLowerCase();
+    if (/image|photo|media|alt\b|public.?use|og\b|gallery|role/.test(text)) return 'media';
+    if (/seo|meta|canonical|slug|search title|page title|title tag/.test(text)) return 'seo';
+    if (/price|stock|inventory|shipping|tax|cost|sale channel|marketplace|sku/.test(text)) return 'commerce';
+    if (/description|story|copy|name|type|category|material|ingredient|claim/.test(text)) return 'copy';
+    return 'other';
+  }
+
   function matchesFocus(product, row) {
     const status = String(product?.status || '').toLowerCase();
     const review = String(product?.review_status || '').toLowerCase();
@@ -204,6 +229,20 @@ document.addEventListener('DOMContentLoaded', () => {
     return counts;
   }
 
+  function blockerGroupCounts() {
+    const counts = { all: 0, media: 0, seo: 0, commerce: 0, copy: 0, other: 0 };
+    tableBody.querySelectorAll('tr').forEach((row) => {
+      const id = Number(row.querySelector?.('[data-edit-product-id]')?.dataset?.editProductId || 0) || 0;
+      if (!id) return;
+      const readiness = readinessForRow(row);
+      if (!readiness.known || !readiness.blocked) return;
+      const group = blockerGroup(readiness);
+      counts.all += 1;
+      counts[group] += 1;
+    });
+    return counts;
+  }
+
   function syncFilterControls() {
     const input = document.getElementById('catalogProductSearch');
     if (input && input.value !== filterState.query) input.value = filterState.query;
@@ -225,6 +264,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function syncTriageControls() {
+    const counts = blockerGroupCounts();
+    const labels = { all: 'All blockers', media: 'Media', seo: 'SEO', commerce: 'Commerce', copy: 'Copy / story', other: 'Other' };
+    document.querySelectorAll('[data-readiness-triage]').forEach((button) => {
+      const key = button.dataset.readinessTriage || 'all';
+      const active = key === triageState.group;
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      button.textContent = `${labels[key] || key} (${Number(counts[key] || 0)})`;
+    });
+  }
+
   function readinessQueueRows() {
     const rows = [];
     tableBody.querySelectorAll('tr').forEach((row) => {
@@ -233,7 +283,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!id) return;
       const readiness = readinessForRow(row);
       if (!readiness.known || !readiness.blocked) return;
-      rows.push({ row, product, readiness });
+      const group = blockerGroup(readiness);
+      if (triageState.group !== 'all' && group !== triageState.group) return;
+      rows.push({ row, product, readiness, group });
     });
     return rows.sort((left, right) => {
       const leftScore = Number.isFinite(left.readiness.score) ? left.readiness.score : 999;
@@ -247,23 +299,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const summary = document.getElementById('catalogReadinessSummary');
     if (!target || !summary) return;
     const counts = focusCounts();
+    const groupCounts = blockerGroupCounts();
     const rows = readinessQueueRows();
-    summary.textContent = `${counts.readiness_blocked} blocked · ${counts.readiness_ready} ready · ${counts.readiness_unknown} readiness unavailable. Queue uses the readiness already rendered by the primary Product load.`;
+    const groupLabel = { all: 'all blocker groups', media: 'media', seo: 'SEO', commerce: 'commerce', copy: 'copy / story', other: 'other' }[triageState.group] || triageState.group;
+    summary.textContent = `${counts.readiness_blocked} blocked · ${counts.readiness_ready} ready · ${counts.readiness_unknown} readiness unavailable. Triage: ${groupLabel}; ${rows.length} queued.`;
+    syncTriageControls();
+    const nextOpen = document.getElementById('catalogOpenNextReadinessBlocker');
+    const nextShow = document.getElementById('catalogShowNextReadinessProduct');
+    if (nextOpen) nextOpen.disabled = rows.length === 0;
+    if (nextShow) nextShow.disabled = rows.length === 0;
     if (!rows.length) {
-      target.innerHTML = counts.readiness_unknown
-        ? '<div class="small">No currently rendered Product is confirmed blocked. Some readiness evidence is unavailable, so those Products are not classified as ready.</div>'
-        : '<div class="small">No blocked Products are waiting in the readiness queue.</div>';
+      target.innerHTML = groupCounts.all
+        ? `<div class="small">No blocked Product matches the selected ${esc(groupLabel)} triage group. Choose another blocker group to continue.</div>`
+        : counts.readiness_unknown
+          ? '<div class="small">No currently rendered Product is confirmed blocked. Some readiness evidence is unavailable, so those Products are not classified as ready.</div>'
+          : '<div class="small">No blocked Products are waiting in the readiness queue.</div>';
       return;
     }
-    target.innerHTML = rows.slice(0, 10).map(({ product, readiness }) => {
+    target.innerHTML = rows.slice(0, 10).map(({ product, readiness, group }) => {
       const id = Number(product?.product_id || 0);
       const number = product?.product_number || id;
       const name = product?.name || `Product #${id}`;
       const score = Number.isFinite(readiness.score) ? `${readiness.score}%` : 'score unavailable';
-      return `<div class="product-readiness-queue-item">
+      const groupLabelMap = { media: 'Media', seo: 'SEO', commerce: 'Commerce', copy: 'Copy / story', other: 'Other' };
+      return `<div class="product-readiness-queue-item" data-readiness-group="${esc(group)}">
         <div>
           <strong>DD${esc(String(number))} — ${esc(name)}</strong>
-          <div class="small">Readiness ${esc(score)}${readiness.blocker ? ` · ${esc(readiness.blocker)}` : ''}</div>
+          <div class="small">Readiness ${esc(score)} · ${esc(groupLabelMap[group] || group)}${readiness.blocker ? ` · ${esc(readiness.blocker)}` : ''}</div>
           ${readiness.help ? `<div class="small product-readiness-queue-help">${esc(readiness.help)}</div>` : ''}
         </div>
         <div class="product-readiness-queue-actions">
@@ -302,6 +364,12 @@ document.addEventListener('DOMContentLoaded', () => {
     filterState.focus = FOCUS_VALUES.includes(nextFocus) ? nextFocus : 'all';
     saveFilterState();
     applyProductFilters();
+  }
+
+  function setTriageGroup(nextGroup) {
+    triageState.group = TRIAGE_VALUES.includes(nextGroup) ? nextGroup : 'all';
+    saveTriageState();
+    renderReadinessQueue();
   }
 
   function clearFilters() {
@@ -367,6 +435,20 @@ document.addEventListener('DOMContentLoaded', () => {
     button?.focus({ preventScroll: true });
   }
 
+  function openNextReadinessBlocker() {
+    const next = readinessQueueRows()[0];
+    if (!next) return;
+    const productId = Number(next.product?.product_id || 0);
+    const existing = tableBody.querySelector(`[data-open-first-blocker="${productId}"]`);
+    if (existing) existing.click();
+  }
+
+  function showNextReadinessProduct() {
+    const next = readinessQueueRows()[0];
+    if (!next) return;
+    showProductRow(Number(next.product?.product_id || 0));
+  }
+
   function ensureMount() {
     if (document.getElementById('catalogEnhancementCard')) return;
     const card = document.createElement('div');
@@ -406,6 +488,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <div id="catalogReadinessSummary" class="small" role="status" aria-live="polite">Waiting for the Product readiness already loaded by this page.</div>
           </div>
           <button class="btn small secondary" type="button" data-product-focus-filter="readiness_blocked" aria-pressed="false">Readiness blocked</button>
+        </div>
+        <div class="product-readiness-triage" role="group" aria-label="Readiness blocker groups">
+          <button class="btn small secondary" type="button" data-readiness-triage="all" aria-pressed="true">All blockers</button>
+          <button class="btn small secondary" type="button" data-readiness-triage="media" aria-pressed="false">Media</button>
+          <button class="btn small secondary" type="button" data-readiness-triage="seo" aria-pressed="false">SEO</button>
+          <button class="btn small secondary" type="button" data-readiness-triage="commerce" aria-pressed="false">Commerce</button>
+          <button class="btn small secondary" type="button" data-readiness-triage="copy" aria-pressed="false">Copy / story</button>
+          <button class="btn small secondary" type="button" data-readiness-triage="other" aria-pressed="false">Other</button>
+        </div>
+        <div class="product-readiness-next-actions">
+          <button class="btn small" id="catalogOpenNextReadinessBlocker" type="button">Open next blocker</button>
+          <button class="btn small secondary" id="catalogShowNextReadinessProduct" type="button">Show next Product</button>
         </div>
         <div id="catalogReadinessQueue" class="product-readiness-queue-list"><div class="small">Waiting for rendered Product readiness.</div></div>
       </section>
@@ -449,6 +543,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setFocusFilter(focusButton.dataset.productFocusFilter || 'all');
         return;
       }
+      const triageButton = event.target.closest('[data-readiness-triage]');
+      if (triageButton) {
+        setTriageGroup(triageButton.dataset.readinessTriage || 'all');
+        return;
+      }
       const blockerButton = event.target.closest('[data-open-readiness-blocker]');
       if (blockerButton) {
         const productId = Number(blockerButton.dataset.openReadinessBlocker || 0);
@@ -463,6 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const showButton = event.target.closest('[data-show-readiness-product]');
       if (showButton) showProductRow(Number(showButton.dataset.showReadinessProduct || 0));
     });
+    document.getElementById('catalogOpenNextReadinessBlocker')?.addEventListener('click', openNextReadinessBlocker);
+    document.getElementById('catalogShowNextReadinessProduct')?.addEventListener('click', showNextReadinessProduct);
     document.getElementById('catalogClearProductFilters')?.addEventListener('click', clearFilters);
     document.getElementById('catalogEssentialColumns')?.addEventListener('click', () => applyPreset('essential'));
     document.getElementById('catalogFullColumns')?.addEventListener('click', () => applyPreset('full'));
@@ -509,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ['Missing lead image', missingImages, 'Still missing featured media'],
     ].map(([label, value, note]) => `<div class="card" style="margin:0"><strong>${esc(label)}</strong><div style="font-size:1.25rem;font-weight:700;margin-top:6px">${esc(String(value))}</div><div class="small" style="margin-top:6px">${esc(note)}</div></div>`).join('');
 
-    if (sourceEl) sourceEl.textContent = `Dashboard summaries and Product focus filters use ${products.length} Product records from the shared browser snapshot${snapshot.cached_at ? ` saved ${snapshot.cached_at}` : ''}; no duplicate Product API read. Readiness focus and queue reuse the readiness badges already rendered by the primary Product load.`;
+    if (sourceEl) sourceEl.textContent = `Dashboard summaries and Product focus filters use ${products.length} Product records from the shared browser snapshot${snapshot.cached_at ? ` saved ${snapshot.cached_at}` : ''}; no duplicate Product API read. Readiness focus, queue and blocker-group triage reuse the readiness badges already rendered by the primary Product load.`;
     renderReadinessQueue();
   }
 
