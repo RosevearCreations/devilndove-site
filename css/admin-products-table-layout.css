@@ -1,7 +1,6 @@
-/* Release 467 Build 95 — Products admin records-table ergonomics.
-   Keep the table deliberately wider than the editor card, but make navigation through
-   that width practical: a sticky header, stable identity columns on desktop, and a
-   visible current-Product row. Presentation only; no Product data is changed here. */
+/* Release 467 Build 96 — Products admin records-table ergonomics and browser-local focus controls.
+   Build 95 sticky context remains intact. Build 96 adds contained search/focus controls that
+   filter only already-rendered Product rows; Product data and server authority are unchanged. */
 body[data-admin-page="products"] .products-admin-table-wrap{
   display:block;
   max-width:100%;
@@ -35,6 +34,9 @@ body[data-admin-page="products"] .products-admin-table th:first-child,
 body[data-admin-page="products"] .products-admin-table td:first-child{
   white-space:nowrap;
 }
+body[data-admin-page="products"] .products-admin-table tbody tr[hidden]{
+  display:none!important;
+}
 body[data-admin-page="products"] .products-admin-table tbody tr[data-current-product-row="1"] td{
   box-shadow:inset 0 2px 0 currentColor,inset 0 -2px 0 currentColor;
 }
@@ -53,6 +55,33 @@ body[data-admin-page="products"] .product-table-current-context{
 body[data-admin-page="products"] .product-table-view-actions .btn:disabled{
   opacity:.55;
   cursor:not-allowed;
+}
+body[data-admin-page="products"] .product-table-filter-controls{
+  display:grid;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--border,#2b3744);
+  border-radius:12px;
+}
+body[data-admin-page="products"] .product-table-search{
+  display:grid;
+  gap:5px;
+  min-width:0;
+}
+body[data-admin-page="products"] .product-table-focus-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+body[data-admin-page="products"] .product-table-focus-actions .btn[aria-pressed="true"]{
+  font-weight:800;
+  outline:2px solid currentColor;
+  outline-offset:1px;
+}
+body[data-admin-page="products"] #catalogProductFilterStatus{
+  min-height:1.3em;
+  overflow-wrap:anywhere;
 }
 
 @media(min-width:1000px){
@@ -87,4 +116,6 @@ body[data-admin-page="products"] .product-table-view-actions .btn:disabled{
   body[data-admin-page="products"] .products-admin-table-wrap{max-height:64vh}
   body[data-admin-page="products"] .product-table-view-actions{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
   body[data-admin-page="products"] .product-table-view-actions>.btn{width:100%;justify-content:center}
+  body[data-admin-page="products"] .product-table-focus-actions{display:grid;grid-template-columns:minmax(0,1fr)}
+  body[data-admin-page="products"] .product-table-focus-actions>.btn{width:100%;justify-content:center}
 }
