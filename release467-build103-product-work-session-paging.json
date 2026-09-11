@@ -1,0 +1,112 @@
+{
+  "release": 467,
+  "build": 103,
+  "title": "Product Work Session Paging & Full Coverage",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build103-product-work-session-paging",
+  "starting_point": {
+    "development": {
+      "sha": "7325c093f47c29aafaafef0cff3da88f1b273227",
+      "tree": "f7c1e97b1b811af68c2701db985ccc824e11abca",
+      "system_gate_run": 34606547840,
+      "quality_run": 34606547841,
+      "it_admin_runtime_run": 34606547865,
+      "repository_hygiene_run": 34606547882,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "7325c093f47c29aafaafef0cff3da88f1b273227",
+      "tree_sha": "f7c1e97b1b811af68c2701db985ccc824e11abca",
+      "production_pages_deploy_run": 34606720131,
+      "production_live_resource_integrity_run": 34606812380,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build102_final_closure": true,
+    "browser_local_session_paging": true,
+    "page_size": 20,
+    "maximum_session_items": 60,
+    "previous_page_control": true,
+    "next_page_control": true,
+    "page_summary": true,
+    "keyboard_accessible_paging_buttons": true,
+    "all_pinned_products_accessible_from_session_panel": true,
+    "page_clamps_after_session_shrinks": true,
+    "sort_change_returns_to_first_page": true,
+    "manual_reorder_cross_page_follow": true,
+    "next_action_scans_entire_session": true,
+    "reuse_rendered_product_rows": true,
+    "reuse_shared_product_snapshot": true,
+    "reuse_rendered_readiness_projection": true,
+    "build102_manual_reorder_preserved": true,
+    "build101_priority_and_order_preserved": true,
+    "build100_work_session_preserved": true,
+    "single_product_authority_preserved": true,
+    "one_h1_rule_unchanged": true,
+    "business_data_change": false,
+    "schema_change": false,
+    "additional_product_api_read": false,
+    "additional_readiness_api_read": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "up_to_60_pinned_products_can_be_reached_from_session_panel": true,
+    "paging_uses_20_item_pages": true,
+    "previous_disabled_on_first_page": true,
+    "next_disabled_on_last_page": true,
+    "page_summary_reports_range_and_total": true,
+    "paging_controls_are_native_keyboard_accessible_buttons": true,
+    "session_page_is_clamped_after_remove_or_clear_completed": true,
+    "sort_mode_change_returns_to_page_one": true,
+    "manual_move_crossing_page_boundary_keeps_moved_product_visible": true,
+    "locate_next_product_scans_full_ordered_session": true,
+    "open_next_blocker_scans_full_ordered_session": true,
+    "priority_completion_and_blocker_state_are_preserved": true,
+    "shared_product_snapshot_is_reused": true,
+    "rendered_readiness_projection_is_reused": true,
+    "no_product_or_readiness_api_call_added": true,
+    "no_product_or_inventory_mutation": true,
+    "build103_source_gate_required": true
+  },
+  "final_closure": null,
+  "production_checkpoint": null,
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
