@@ -36,7 +36,7 @@ Up to 60 Product IDs are stored only in this browser under `dd_catalog_work_sess
 
 ## Existing authority reuse
 
-Build 100 reuses the already-rendered Product rows, the shared Product snapshot `dd_admin_products_snapshot_v2`, and readiness already rendered by the primary Product loader. The new work-session layer contains no `/api/` call, no `apiFetch`, and no `fetch` call.
+Build 100 reuses the already-rendered Product rows, the shared Product snapshot `dd_admin_products_snapshot_v2`, and readiness already rendered by the primary Product loader. The new work-session layer contains no `/api/` call, no `apiFetch`, and no `fetch` call. **Build 100 adds no Product/readiness API or database read.**
 
 **Open next blocker** delegates the existing row `[data-open-first-blocker]` action rather than inventing another correction path. Hidden Products do not silently clear search/focus/triage controls; locating a hidden Product instead explains that the current Product view must be adjusted explicitly.
 
