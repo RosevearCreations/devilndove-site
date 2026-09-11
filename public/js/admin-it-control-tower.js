@@ -1,7 +1,7 @@
 // Release 467 Build 99 — I.T. Product Work Views & Browser Sort renderer.
 document.addEventListener('DOMContentLoaded',()=>{
   const mount=document.getElementById('itControlTowerMount');if(!mount)return;
-  const esc=(v)=>String(v??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
+  const esc=(v)=>String(v??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const apiFetch=(...args)=>window.DDAuth?.apiFetch?window.DDAuth.apiFetch(...args):fetch(...args);
   const cls=(v)=>{const s=String(v||'review').toLowerCase();return ['green','blocked','review','hold_external'].includes(s)?s:'review'};
   const label=(v)=>String(v||'review').replaceAll('_',' ').toUpperCase();
