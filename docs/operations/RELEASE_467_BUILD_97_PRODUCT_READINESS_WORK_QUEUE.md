@@ -19,22 +19,23 @@ Build 97 ingests that exact closure before changing the Products surface.
 
 ## Readiness work queue
 
-The Products page already loads one Product readiness preview through the primary Product runtime. Build 97 does **not** add another readiness request. Instead, the primary Product script publishes a browser event containing the readiness rows it already fetched. The Product enhancement layer consumes that event and combines it with the already-loaded Product snapshot.
+The Products page already loads one Product readiness preview through the primary Product runtime. Build 97 does **not** add another readiness request. The primary Product script already renders each readiness result and its existing **Open first blocker** action into the Product row. The Product enhancement layer reads that rendered projection and reuses the existing blocker action, so no second Product or readiness API/database read is introduced.
 
 The Product browser now adds a **Readiness work queue** that:
 
-- lists blocked Products using the existing readiness result;
+- lists blocked Products using the existing rendered readiness result;
 - prioritizes the lowest readiness score first so the most incomplete Product is visible first;
 - shows Product number/name, readiness score, first blocker label and help text;
-- provides a direct **Open blocker** corrective link using the same image / SEO / price / description / readiness routing already used by the Product table;
+- provides a direct **Open blocker** action that delegates to the existing Product-row blocker action and therefore retains the same image / SEO / price / description / readiness corrective routing;
+- provides **Show Product row** to clear browser filters and move explicitly to the Product record;
 - stays read-only and never changes Product, Inventory, R2, provider, or publication state.
 
 ## Readiness focus views
 
 Build 96 search/focus behavior remains intact. Build 97 extends the focus set with:
 
-- **Readiness blocked** — Products for which the existing readiness preview reports `ready=false`;
-- **Ready** — Products for which the existing readiness preview reports `ready=true`.
+- **Readiness blocked** — Products for which the existing rendered readiness preview reports `Blocked`;
+- **Ready** — Products for which the existing rendered readiness preview reports `Ready`.
 
 Readiness focus buttons expose live counts, use `aria-pressed`, and combine with Build 96 text search. Products with unavailable readiness evidence are never silently classified as ready.
 
