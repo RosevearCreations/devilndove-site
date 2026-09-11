@@ -46,7 +46,7 @@ The selected sort is browser-local under `dd_catalog_work_sort_v1`. Sorting reus
 
 Build 99 does not replace any existing Product workflow. Build 98 readiness triage, Build 97 readiness queue/navigation, Build 96 search/focus, Build 95 current Product context/sticky table/column controls, Build 94 responsive Product workspace navigation and Build 93 centered-shell/right-side reachability remain active.
 
-The work-view layer adds no `/api/` call, no `apiFetch`, no direct `fetch`, and no Product/readiness database read. It does not edit, approve, publish, archive, delete or otherwise mutate a Product.
+The work-view layer adds no `/api/` call, no `apiFetch`, no direct `fetch`, and no Product/readiness database read. **No additional Product or readiness API/database read is introduced by Build 99.** It does not edit, approve, publish, archive, delete or otherwise mutate a Product.
 
 ## Data and release safety
 
