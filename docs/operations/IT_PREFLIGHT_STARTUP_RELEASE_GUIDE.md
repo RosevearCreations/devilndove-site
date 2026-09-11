@@ -4,42 +4,43 @@
 
 ## Verified Development
 
-Build 100 — Product Work Session & Progress is the last fully verified checkpoint:
-- `dev` `20400309f3ab450cc256769870e8f963f8d3de3c`
-- tree `3344c8e4d8c177820ea5077f4b429ff1e832d881`
-- System Gate `34598663510` SUCCESS
-- Current Application Quality `34598663549` SUCCESS
-- I.T. Admin Runtime Proof `34598663501` SUCCESS
-- Repository Branch Hygiene `34598663509` SUCCESS
+Build 101 — Product Work Priority & Next-Action Ordering is the last fully verified checkpoint:
+- `dev` `73cd0d56071a60c562000d5804f819f6dde10a13`
+- tree `2ef06219e4b1eeb1e525680fc45107eb6ebc5226`
+- System Gate `34603707283` SUCCESS
+- Current Application Quality `34603707270` SUCCESS
+- I.T. Admin Runtime Proof `34603707267` SUCCESS
+- Repository Branch Hygiene `34603707269` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 100 is the current Production checkpoint:
-- `main` `20400309f3ab450cc256769870e8f963f8d3de3c`
-- tree `3344c8e4d8c177820ea5077f4b429ff1e832d881`
-- Production Pages Deploy `34598827876` SUCCESS
-- Production Live Resource Integrity `34598920977` SUCCESS.
+Build 101 is the current Production checkpoint:
+- `main` `73cd0d56071a60c562000d5804f819f6dde10a13`
+- tree `2ef06219e4b1eeb1e525680fc45107eb6ebc5226`
+- Production Pages Deploy `34603913028` SUCCESS
+- Production Live Resource Integrity `34604002146` SUCCESS.
 
-## Build 101 operational boundary
+## Build 102 operational boundary
 
-Build 101 — **Product Work Priority & Next-Action Ordering** is the active Development closure candidate. It consumes Build 100's exact external closure and continues Products & Inventory usability without changing Product authority.
+Build 102 — **Product Work Manual Reorder & Accessibility** is the active Development closure candidate. It consumes Build 101's exact external closure and closes the remaining Manual-order usability gap without changing Product authority.
 
 The current Product-browser rules are:
 - the work session remains browser-local under `dd_catalog_work_session_v1` and holds at most 60 Product IDs;
-- each pinned Product may be Urgent, High, Normal or Low priority;
-- existing items without priority default to Normal;
-- session order may be Priority, Blockers, Readiness, Recent or Manual;
-- Locate next Product and Open next blocker follow the selected session order;
+- Build 101 priorities and ordering modes remain available: Priority, Blockers, Readiness, Recent and Manual;
+- Manual mode exposes keyboard-accessible Move Up and Move Down controls;
+- first-item Move Up and last-item Move Down are disabled, and reorder controls are disabled outside Manual mode;
+- reorder changes only the stored session sequence and preserves each Product's priority/completion state;
+- Locate next Product and Open next blocker follow the reordered manual sequence;
 - Blockers/Readiness ordering reuses readiness already rendered by the primary Products loader;
 - hidden Products do not silently clear search, focus, triage or saved-view filters;
-- Build 101 adds no Product/readiness API or database read;
-- Build 100 work sessions, Build 99 saved work views/sort, Build 98 readiness triage and earlier Product/table/responsive protections remain in force;
+- Build 102 adds no Product/readiness API or database read;
+- Build 101 priority/order, Build 100 work sessions, Build 99 saved work views/sort, Build 98 readiness triage and earlier Product/table/responsive protections remain in force;
 - the presentation layer does not change Product or Inventory business data, H1 hierarchy, provider state or launch authority.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 101 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 102 must ingest Build 101's final external closure.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 102 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 103 must ingest Build 102's final external closure.
 
 The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
