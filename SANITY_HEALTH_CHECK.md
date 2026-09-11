@@ -1,40 +1,38 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 95 — Product Workspace Current Context & Table Ergonomics is the current Development closure candidate.**
+**Release 467 Build 96 — Product Browser Search & Focus Filters is the current Development closure candidate.**
 
-Last fully verified Development is Build 94:
-- SHA `bcafa7bbfbf17793d4b6280195c44c435ff3c68e`
-- tree `f83d850b2b28ef4840463439a8b449ebbe1b9a43`
-- System Gate `34537169571`: SUCCESS
-- Current Application Quality `34537169401`: SUCCESS
-- I.T. Admin Runtime Proof `34537169400`: SUCCESS
-- Repository Branch Hygiene `34537169580`: SUCCESS
+Last fully verified Development is Build 95:
+- SHA `746eb697484aaa7d2506b9025873510c4586c48a`
+- tree `be7f10517a6a0b247d387436d8414f5d22480e32`
+- System Gate `34545373706`: SUCCESS
+- Current Application Quality `34545373640`: SUCCESS
+- I.T. Admin Runtime Proof `34545373627`: SUCCESS
+- Repository Branch Hygiene `34545373651`: SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, bindings, smoke and regression evidence: SUCCESS.
 
-Current Production is Build 94:
-- `main` `bcafa7bbfbf17793d4b6280195c44c435ff3c68e`
-- tree `f83d850b2b28ef4840463439a8b449ebbe1b9a43`
-- Production Pages Deploy `34537326802`: SUCCESS
-- Production Live Resource Integrity `34537397229`: SUCCESS.
+Current Production is Build 95:
+- `main` `746eb697484aaa7d2506b9025873510c4586c48a`
+- tree `be7f10517a6a0b247d387436d8414f5d22480e32`
+- Production Pages Deploy `34545520443`: SUCCESS
+- Production Live Resource Integrity `34545592072`: SUCCESS.
 
-## Current Build 95 boundary
+## Current Build 96 boundary
 
-- Build 94 readable 3/2/1 Product workspace navigation remains authoritative.
-- The workspace surface now identifies Release 467 Build 95 instead of exposing the historical Build 66 implementation label.
-- One Product authority still owns Products, Editor, Inventory Links, Media, SEO / Publishing and Cleanup / Archive.
-- Product table headings remain visible during vertical scrolling.
-- Desktop horizontal scrolling keeps System # and Name visible as identity anchors.
-- The Product loaded into the editor is highlighted when its table row is present.
-- **Locate current Product** scrolls only after an explicit operator click.
-- **Essential columns** and **Full columns** are browser-local display presets; they do not change Product data.
-- Existing fine-grained column preferences remain available.
-- Dashboard summaries continue to reuse the already-loaded Product snapshot rather than issuing a second Product API read.
-- Build 93 centered-shell and right-side data reachability/local-scroll protections remain active.
+- Build 95 current Product context, sticky table header, desktop System # / Name anchors, highlighted current row and browser-local column views remain authoritative.
+- Search filters the Product records already rendered by the primary Products loader.
+- Quick views are **All products**, **Needs attention**, **Drafts**, **Low stock**, and **Missing lead image**.
+- **Needs attention** means draft, low stock, missing featured image, or `needs_changes` review state.
+- Counts are derived from `dd_admin_products_snapshot_v2`; no second Product API/database read is introduced.
+- The shown/rendered count makes active filtering explicit.
+- Search/focus state is browser-local and never edits Product data.
+- If a filter hides the Product loaded in the editor, the context explains it and **Show current Product** only clears filters after an explicit click.
+- Build 94 responsive workspace navigation and Build 93 centered-shell/right-side data reachability remain active.
 
 ## Safety boundary
 
 - Canonical migrations remain exactly `0001`–`0004`.
-- No Product/inventory business-data mutation is introduced by Build 95.
+- No Product/inventory business-data mutation is introduced by Build 96.
 - No request-time schema mutation or Development-to-Production business-data overwrite.
 - No automatic provider execution, provider publication, Cloudflare Access mutation or automatic Production promotion.
 - Production provider execution remains closed.
@@ -42,4 +40,4 @@ Current Production is Build 94:
 - Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT` unless its own current evidence proves acceptance.
 - Canada-only CA/CAD commerce remains active, U.S. sales/shipping remain disabled, and local pickup remains supported.
 
-**Verdict:** Build 94 Development and Production are GREEN. Build 95 is correctly bounded as a Product current-context/table-ergonomics improvement and must earn its own exact Development and Production proof before closure.
+**Verdict:** Build 95 Development and Production are GREEN. Build 96 is correctly bounded as a Product browser navigation improvement and must earn its own exact Development and Production proof before closure.
