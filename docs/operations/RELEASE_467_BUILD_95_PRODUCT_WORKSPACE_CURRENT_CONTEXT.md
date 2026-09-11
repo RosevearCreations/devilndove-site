@@ -23,7 +23,7 @@ The complete records table remains deliberately wide because it carries System #
 - existing fine-grained browser-local column preferences remain available;
 - no Product data is mutated by any table-view preference.
 
-Dashboard summaries continue to consume `dd_admin_products_snapshot_v2`, the Product list snapshot already loaded by the primary Product page. Build 95 does not add a second Product API/database read for those summary cards.
+Dashboard summaries continue to consume `dd_admin_products_snapshot_v2`, the Product list snapshot already loaded by the primary Product page. There is **no additional Product API** or database read for these table-dashboard summaries.
 
 ## Responsive and accessibility boundaries
 
