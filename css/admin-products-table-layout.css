@@ -1,6 +1,6 @@
-/* Release 467 Build 96 — Products admin records-table ergonomics and browser-local focus controls.
-   Build 95 sticky context remains intact. Build 96 adds contained search/focus controls that
-   filter only already-rendered Product rows; Product data and server authority are unchanged. */
+/* Release 467 Build 97 — Products admin records-table ergonomics, browser-local focus controls,
+   and read-only readiness work queue. Build 95 sticky context and Build 96 search/focus behavior
+   remain intact; readiness queue data is reused from the Product readiness already rendered. */
 body[data-admin-page="products"] .products-admin-table-wrap{
   display:block;
   max-width:100%;
@@ -74,7 +74,8 @@ body[data-admin-page="products"] .product-table-focus-actions{
   gap:8px;
   align-items:center;
 }
-body[data-admin-page="products"] .product-table-focus-actions .btn[aria-pressed="true"]{
+body[data-admin-page="products"] .product-table-focus-actions .btn[aria-pressed="true"],
+body[data-admin-page="products"] .product-readiness-queue-heading .btn[aria-pressed="true"]{
   font-weight:800;
   outline:2px solid currentColor;
   outline-offset:1px;
@@ -82,6 +83,53 @@ body[data-admin-page="products"] .product-table-focus-actions .btn[aria-pressed=
 body[data-admin-page="products"] #catalogProductFilterStatus{
   min-height:1.3em;
   overflow-wrap:anywhere;
+}
+body[data-admin-page="products"] .product-readiness-work-queue{
+  display:grid;
+  gap:10px;
+  margin-top:14px;
+  padding:12px;
+  border:1px solid var(--border,#2b3744);
+  border-radius:12px;
+  min-width:0;
+}
+body[data-admin-page="products"] .product-readiness-queue-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+body[data-admin-page="products"] .product-readiness-queue-heading h4{
+  margin:0 0 4px;
+}
+body[data-admin-page="products"] .product-readiness-queue-list{
+  display:grid;
+  gap:8px;
+  min-width:0;
+}
+body[data-admin-page="products"] .product-readiness-queue-item{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:start;
+  padding:10px;
+  border:1px solid var(--border,#2b3744);
+  border-radius:10px;
+  min-width:0;
+}
+body[data-admin-page="products"] .product-readiness-queue-item>div:first-child{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+body[data-admin-page="products"] .product-readiness-queue-help{
+  margin-top:4px;
+}
+body[data-admin-page="products"] .product-readiness-queue-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
 }
 
 @media(min-width:1000px){
@@ -118,4 +166,9 @@ body[data-admin-page="products"] #catalogProductFilterStatus{
   body[data-admin-page="products"] .product-table-view-actions>.btn{width:100%;justify-content:center}
   body[data-admin-page="products"] .product-table-focus-actions{display:grid;grid-template-columns:minmax(0,1fr)}
   body[data-admin-page="products"] .product-table-focus-actions>.btn{width:100%;justify-content:center}
+  body[data-admin-page="products"] .product-readiness-queue-heading{display:grid;grid-template-columns:minmax(0,1fr)}
+  body[data-admin-page="products"] .product-readiness-queue-heading>.btn{width:100%;justify-content:center}
+  body[data-admin-page="products"] .product-readiness-queue-item{grid-template-columns:minmax(0,1fr)}
+  body[data-admin-page="products"] .product-readiness-queue-actions{display:grid;grid-template-columns:minmax(0,1fr)}
+  body[data-admin-page="products"] .product-readiness-queue-actions>.btn{width:100%;justify-content:center}
 }
