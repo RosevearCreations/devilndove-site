@@ -2,7 +2,7 @@
   "release": 467,
   "build": 99,
   "title": "Product Work Views & Browser Sort",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build99-product-work-views-sort",
   "starting_point": {
     "development": {
@@ -57,8 +57,31 @@
     "work_views_are_read_only_and_perform_no_product_mutation": true,
     "build99_source_gate_required": true
   },
-  "final_closure": null,
-  "production_checkpoint": null,
+  "final_closure": {
+    "dev_sha": "5cb212feda63ce198a12b9fb6ae8ac5cc3e926a2",
+    "tree_sha": "4a3a6f6e1c187531c254187a08edd4bd4723a937",
+    "proofs": {
+      "system_gate_run": 34553759863,
+      "current_application_quality_run": 34553759843,
+      "it_admin_runtime_proof_run": 34553759876,
+      "branch_hygiene_run": 34553759871
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "ingested_by_build": 100
+  },
+  "production_checkpoint": {
+    "main_sha": "5cb212feda63ce198a12b9fb6ae8ac5cc3e926a2",
+    "tree_sha": "4a3a6f6e1c187531c254187a08edd4bd4723a937",
+    "production_pages_deploy_run": 34553869891,
+    "production_live_resource_integrity_run": 34553931594,
+    "state": "PRODUCTION_GREEN"
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,
