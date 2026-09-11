@@ -33,15 +33,15 @@ def run_current_contract(path, label):
 
 # Current reliability contracts are chained here so later work cannot silently regress
 # Product/Inventory/Media/Storefront/SEO/commerce/Finance/Orders/Packaging/Creators flows,
-# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-94 closure,
+# selected-provider Social OAuth, read-only I.T. diagnostics, immutable Build 87-95 closure,
 # Build 89 environment-isolated external acceptance, Build 90 structured five-lane evidence,
 # Build 91 current prelaunch/go-live decision convergence, Build 92 complete Startup Readiness
 # action routing, Build 93 centered public/admin shells with recoverable horizontal overflow,
-# Build 94 readable Product workspace navigation, and Build 95 current Product context plus table
-# ergonomics: current-row visibility, manual locate, sticky desktop identity anchors and browser-local
-# essential/full-column views. External acceptance remains separate, technical GREEN remains distinct
-# from launch READY, Canada-only commerce is preserved, and provider execution/publication plus
-# automatic Production promotion remain closed.
+# Build 94 readable Product workspace navigation, Build 95 current Product context/table ergonomics,
+# and Build 96 browser-local Product search plus operator-selected attention/draft/low-stock/missing-image
+# focus views. External acceptance remains separate, technical GREEN remains distinct from launch READY,
+# Canada-only commerce is preserved, and provider execution/publication plus automatic Production
+# promotion remain closed.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
 run_current_contract('scripts/release467_build64_gate.py', 'Release 467 Build 64')
@@ -75,7 +75,7 @@ run_current_contract('scripts/release467_build91_gate.py', 'Release 467 Build 91
 run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92')
 run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')
 run_current_contract('scripts/release467_build94_gate.py', 'Release 467 Build 94')
-run_current_contract('scripts/release467_build95_gate.py', 'Release 467 Build 95')
+run_current_contract('scripts/release467_build96_gate.py', 'Release 467 Build 96')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL')
