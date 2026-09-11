@@ -2,11 +2,11 @@
   "release": 467,
   "build": 103,
   "title": "Product Work Session Paging & Full Coverage",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build103-product-work-session-paging",
   "starting_point": {
     "development": {
-      "sha": "7325c093f47c29aafaafef0cff3da88f1b273227",
+      "sha": "7325c093f47c29aafaef0cff3da88f1b273227",
       "tree": "f7c1e97b1b811af68c2701db985ccc824e11abca",
       "system_gate_run": 34606547840,
       "quality_run": 34606547841,
@@ -15,7 +15,7 @@
       "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
     },
     "production": {
-      "main_sha": "7325c093f47c29aafaafef0cff3da88f1b273227",
+      "main_sha": "7325c093f47c29aafaef0cff3da88f1b273227",
       "tree_sha": "f7c1e97b1b811af68c2701db985ccc824e11abca",
       "production_pages_deploy_run": 34606720131,
       "production_live_resource_integrity_run": 34606812380,
@@ -71,8 +71,31 @@
     "no_product_or_inventory_mutation": true,
     "build103_source_gate_required": true
   },
-  "final_closure": null,
-  "production_checkpoint": null,
+  "final_closure": {
+    "dev_sha": "8c5d73cbf9edbd5e40d1e2e03e3bd350df5b0146",
+    "tree_sha": "f4e7b2071710c50cfdd3b33ca84bbb85650d86ee",
+    "proofs": {
+      "system_gate_run": 34617580379,
+      "current_application_quality_run": 34617580435,
+      "it_admin_runtime_proof_run": 34617580311,
+      "branch_hygiene_run": 34617580348
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "ingested_by_build": 104
+  },
+  "production_checkpoint": {
+    "main_sha": "8c5d73cbf9edbd5e40d1e2e03e3bd350df5b0146",
+    "tree_sha": "f4e7b2071710c50cfdd3b33ca84bbb85650d86ee",
+    "production_pages_deploy_run": 34617779013,
+    "production_live_resource_integrity_run": 34617890313,
+    "state": "PRODUCTION_GREEN"
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,
