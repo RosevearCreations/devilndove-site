@@ -1,11 +1,13 @@
 // File: /public/js/admin-product-image-role-prompts.js
 // Build 191 image-role guidance shared by phone and desktop product editors.
-// Release 467 Build 99 also uses this already-loaded Products script as the narrow loader
-// for the browser-local Product Work Views & Browser Sort enhancement.
+// Release 467 Build 99 uses this already-loaded Products script as the narrow loader
+// for browser-local Product Work Views & Browser Sort.
+// Release 467 Build 100 also loads the browser-local Product Work Session planner.
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.body?.dataset?.adminPage === 'products') {
     import('/public/js/admin-products-work-views.js?v=467b99').catch(() => {});
+    import('/public/js/admin-products-work-session.js?v=467b100').catch(() => {});
   }
 
   const form = document.getElementById('mobileProductForm') || document.getElementById('createProductForm');
