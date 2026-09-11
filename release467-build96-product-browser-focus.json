@@ -1,0 +1,99 @@
+{
+  "release": 467,
+  "build": 96,
+  "title": "Product Browser Search & Focus Filters",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build96-product-browser-focus",
+  "starting_point": {
+    "development": {
+      "sha": "746eb697484aaa7d2506b9025873510c4586c48a",
+      "tree": "be7f10517a6a0b247d387436d8414f5d22480e32",
+      "system_gate_run": 34545373706,
+      "quality_run": 34545373640,
+      "it_admin_runtime_run": 34545373627,
+      "repository_hygiene_run": 34545373651,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "746eb697484aaa7d2506b9025873510c4586c48a",
+      "tree_sha": "be7f10517a6a0b247d387436d8414f5d22480e32",
+      "production_pages_deploy_run": 34545520443,
+      "production_live_resource_integrity_run": 34545592072,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build95_final_closure": true,
+    "loaded_product_search": true,
+    "all_products_focus": true,
+    "needs_attention_focus": true,
+    "draft_focus": true,
+    "low_stock_focus": true,
+    "missing_lead_image_focus": true,
+    "filter_result_count": true,
+    "browser_local_filter_preferences": true,
+    "explicit_show_current_product_clears_filters": true,
+    "build95_current_product_context_preserved": true,
+    "build95_table_ergonomics_preserved": true,
+    "build94_navigation_readability_preserved": true,
+    "single_product_authority_preserved": true,
+    "shared_product_snapshot_reused": true,
+    "one_h1_rule_unchanged": true,
+    "business_data_change": false,
+    "schema_change": false,
+    "additional_product_api_read": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "search_matches_loaded_product_identity_and_workflow_text": true,
+    "quick_focus_filters_are_operator_selected": true,
+    "needs_attention_covers_draft_low_stock_missing_image_and_needs_changes": true,
+    "focus_counts_come_from_shared_snapshot": true,
+    "current_product_hidden_state_is_explained": true,
+    "show_current_product_requires_explicit_click": true,
+    "clearing_filters_restores_all_rendered_rows": true,
+    "filter_state_is_browser_local_only": true,
+    "no_additional_product_api_or_database_read": true,
+    "build96_source_gate_required": true
+  },
+  "final_closure": null,
+  "production_checkpoint": null,
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
