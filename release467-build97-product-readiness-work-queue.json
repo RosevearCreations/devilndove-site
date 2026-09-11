@@ -1,0 +1,97 @@
+{
+  "release": 467,
+  "build": 97,
+  "title": "Product Readiness Work Queue & Blocker Navigation",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build97-product-readiness-work-queue",
+  "starting_point": {
+    "development": {
+      "sha": "ba0e2f633d823b90fdcc2cbbbe6be4c50c79b284",
+      "tree": "76f01771b844f6f610a621cd969d033cfa3d7c9c",
+      "system_gate_run": 34546959255,
+      "quality_run": 34546959190,
+      "it_admin_runtime_run": 34546959188,
+      "repository_hygiene_run": 34546959296,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "ba0e2f633d823b90fdcc2cbbbe6be4c50c79b284",
+      "tree_sha": "76f01771b844f6f610a621cd969d033cfa3d7c9c",
+      "production_pages_deploy_run": 34547083100,
+      "production_live_resource_integrity_run": 34547157869,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build96_final_closure": true,
+    "reuse_existing_product_readiness_preview": true,
+    "shared_readiness_snapshot_event": true,
+    "prioritized_blocker_queue": true,
+    "first_blocker_corrective_navigation": true,
+    "blocked_readiness_focus": true,
+    "ready_readiness_focus": true,
+    "readiness_result_counts": true,
+    "current_product_context_preserved": true,
+    "build96_search_focus_preserved": true,
+    "build95_table_ergonomics_preserved": true,
+    "single_product_authority_preserved": true,
+    "one_h1_rule_unchanged": true,
+    "business_data_change": false,
+    "schema_change": false,
+    "additional_product_api_read": false,
+    "additional_readiness_api_read": false,
+    "automatic_provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "readiness_data_is_shared_from_existing_primary_load": true,
+    "work_queue_orders_blocked_products_by_lowest_readiness_score": true,
+    "queue_shows_product_identity_score_and_first_blocker": true,
+    "queue_corrective_links_use_existing_blocker_target_rules": true,
+    "blocked_and_ready_filters_are_operator_selected": true,
+    "readiness_filters_coexist_with_build96_text_search": true,
+    "readiness_unavailable_is_fail_soft_not_ready": true,
+    "no_product_or_readiness_api_call_added_to_enhancement_layer": true,
+    "queue_is_read_only_and_performs_no_product_mutation": true,
+    "build97_source_gate_required": true
+  },
+  "final_closure": null,
+  "production_checkpoint": null,
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}
