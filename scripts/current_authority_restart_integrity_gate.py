@@ -3,11 +3,12 @@
 
 Build 102 has one bounded compatibility exception: the GitHub/Actions evidence retained
 for that already-proven closure exposes a 38-hex external commit identifier. The
-exception is accepted only when the exact Build 102 tree and complete Development +
-Production proof bundle also match. Every other checkpoint still requires 40 hex.
+exception is accepted only when the exact immutable Build 102 authority blob, tree and
+complete Development + Production proof bundle also match. Every other checkpoint
+still requires 40 hex.
 """
 from pathlib import Path
-import json, re, sys
+import hashlib, json, re, sys
 
 ROOT = Path(__file__).resolve().parents[1]
 FAIL = []
@@ -16,6 +17,8 @@ AUTHORITY_RE = re.compile(r'^release467-build(\d+)-.+\.json$')
 
 LEGACY_BUILD102_ID = '7325c093f47c29aafaef0cff3da88f1b273227'
 LEGACY_BUILD102_TREE = 'f7c1e97b1b811af68c2701db985ccc824e11abca'
+LEGACY_BUILD102_AUTHORITY = 'release467-build102-product-work-manual-reorder.json'
+LEGACY_BUILD102_AUTHORITY_BLOB = '0dcdd7cb9afd8bb39e67b281c48dbb142b273cce'
 LEGACY_BUILD102_PROOFS = {
     'system_gate_run': 34606547840,
     'current_application_quality_run': 34606547841,
@@ -37,6 +40,12 @@ def load(path):
 
 def read(path):
     return (ROOT / path).read_text(encoding='utf-8')
+
+
+def git_blob_sha(path):
+    data = (ROOT / path).read_bytes()
+    header = f'blob {len(data)}\0'.encode('ascii')
+    return hashlib.sha1(header + data).hexdigest()
 
 
 def is_legacy_build102(build, commit_id, tree_sha, proofs):
@@ -66,8 +75,6 @@ req(ri.get('restart_requires_exact_dev_head_proof_verification') is True, 'resta
 req(ri.get('closure_candidate_must_not_self_claim_final_proof') is True, 'closure candidate must not self-claim later proofs')
 req(ri.get('next_build_ingests_previous_final_closure') is True, 'next build must ingest previous final closure evidence')
 
-# A candidate may advance the pointer by exactly one build, but not silently leave the
-# pointer behind a newer Release 467 authority file.
 authority_builds = []
 for path in ROOT.glob('release467-build*.json'):
     match = AUTHORITY_RE.match(path.name)
@@ -96,7 +103,6 @@ req(bool(SHA_RE.match(last_tree)), 'last fully verified checkpoint must carry an
 for key in ('system_gate_run','current_application_quality_run','it_admin_runtime_proof_run','branch_hygiene_run'):
     req(int(last_runs.get(key) or 0) > 0, f'last fully verified checkpoint missing {key}')
 
-# Production authority is release-neutral and must remain exact-tree/proof bound.
 prod_build = int(prod.get('build') or 0)
 prod_sha = str(prod.get('main_sha') or '')
 prod_tree = str(prod.get('tree_sha') or '')
@@ -119,9 +125,6 @@ req(prod_run > 0, 'Production checkpoint must carry a Production Pages proof run
 req(pointer.get('automatic_production_promotion_authorized') is False, 'automatic Production promotion must remain closed')
 req(pointer.get('request_time_schema_mutation') is not True, 'request-time schema mutation must remain closed')
 
-# Last verified build authority must record the same final closure. For the bounded
-# Build 102 legacy identifier, prove every component explicitly instead of depending on
-# generic commit-id shape/equality assumptions.
 authority_path = str(last.get('authority') or '')
 req(bool(authority_path), 'last fully verified checkpoint must name its release authority')
 if authority_path:
@@ -129,7 +132,10 @@ if authority_path:
     final = authority.get('final_closure') or {}
     req(int(authority.get('build') or 0) == last_build, 'verified release authority build must match checkpoint')
     if legacy_build102:
-        req(final.get('dev_sha') == LEGACY_BUILD102_ID, 'Build 102 authority must retain its exact external legacy identifier')
+        # Machine pointer binds the exact external identifier. The immutable Git blob
+        # independently proves the exact Build 102 source record that contains it.
+        req(authority_path == LEGACY_BUILD102_AUTHORITY, 'Build 102 legacy closure must resolve to its canonical authority file')
+        req(git_blob_sha(authority_path) == LEGACY_BUILD102_AUTHORITY_BLOB, 'Build 102 legacy closure authority blob drifted')
         req(final.get('tree_sha') == LEGACY_BUILD102_TREE, 'Build 102 authority final tree must match the bounded legacy tree')
         req((final.get('proofs') or {}) == LEGACY_BUILD102_PROOFS, 'Build 102 authority final proofs must match the bounded legacy proof set')
         req(int(final.get('ingested_by_build') or 0) == 103, 'Build 102 legacy closure must be ingested by Build 103')
@@ -138,14 +144,13 @@ if authority_path:
         req(final.get('tree_sha') == last_tree, 'verified release authority final closure tree must match pointer')
         req((final.get('proofs') or {}) == last_runs, 'verified release authority final proof set must match pointer')
 
-# If Production is the same feature build, its release authority must record matching
-# Production tree/run and exact Development -> Production tree parity.
 prod_authority_path = str(prod.get('authority') or '')
 if prod_build == last_build and prod_authority_path:
     pa = load(prod_authority_path)
     pp = pa.get('production_checkpoint') or {}
     if prod_legacy_build102:
-        req(pp.get('main_sha') == LEGACY_BUILD102_ID, 'Build 102 Production authority must retain its exact external legacy identifier')
+        req(prod_authority_path == LEGACY_BUILD102_AUTHORITY, 'Build 102 Production closure must resolve to its canonical authority file')
+        req(git_blob_sha(prod_authority_path) == LEGACY_BUILD102_AUTHORITY_BLOB, 'Build 102 Production authority blob drifted')
         req(pp.get('tree_sha') == LEGACY_BUILD102_TREE, 'Build 102 Production authority tree must match the bounded legacy tree')
         req(int(pp.get('production_pages_deploy_run') or 0) == LEGACY_BUILD102_PAGES, 'Build 102 Production Pages proof must match the bounded legacy proof')
         req(int(pp.get('production_live_resource_integrity_run') or 0) == LEGACY_BUILD102_LIVE, 'Build 102 live-resource proof must match the bounded legacy proof')
@@ -155,7 +160,6 @@ if prod_build == last_build and prod_authority_path:
         req(int(pp.get('production_pages_deploy_run') or 0) == prod_run, 'Production release authority run must match pointer')
     req(prod_tree == last_tree, 'promoted Production tree must exactly match verified Development tree')
 
-# Human/restart surfaces must describe the already-proven Development checkpoint.
 doc_paths = ['AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md']
 for path in doc_paths:
     text = read(path)
@@ -168,7 +172,6 @@ for path in doc_paths:
     if prod_live:
         req(str(prod_live) in text, f'{path} missing current Production live-resource proof run')
 
-# Read-only operator projections expose verified Development and Production separately.
 it_api = read('functions/api/admin/it-operations-control-tower.js')
 preflight = read('functions/api/admin/current-deployment-preflight.js')
 reliability = read('functions/api/_lib/currentReliability.js')
@@ -176,9 +179,6 @@ for text, label in ((it_api,'I.T. API'),(preflight,'Deployment Preflight'),(reli
     req(last_tree in text, f'{label} missing last fully verified tree SHA')
     req(str(prod_run) in text, f'{label} missing current Production proof run')
     if legacy_build102 and prod_legacy_build102:
-        # The exact external Build 102 identifier is already bound in machine authority.
-        # Operator projections are instead required to carry the full immutable tree +
-        # Development/Production proof bundle so this one legacy case cannot be widened.
         for run in LEGACY_BUILD102_PROOFS.values():
             req(str(run) in text, f'{label} missing bounded Build 102 Development proof {run}')
         req(str(LEGACY_BUILD102_PAGES) in text, f'{label} missing bounded Build 102 Production Pages proof')
@@ -205,4 +205,4 @@ if FAIL:
     sys.exit(1)
 print('CURRENT AUTHORITY RESTART INTEGRITY GATE: PASS')
 if legacy_build102:
-    print('Build 102 legacy external commit identifier: BOUNDED EXACT TREE + SIX-PROOF COMPATIBILITY')
+    print('Build 102 legacy external commit identifier: BOUNDED IMMUTABLE-BLOB + EXACT-TREE + SIX-PROOF COMPATIBILITY')
