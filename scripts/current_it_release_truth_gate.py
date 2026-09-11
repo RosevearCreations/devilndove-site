@@ -2,9 +2,9 @@
 """Release-neutral guard that keeps I.T. current-release truth synchronized.
 
 Build 103 consumes the already-proven Build 102 checkpoint. For that one transition,
-source records are bound independently to the exact Build 102 SHA/tree/proof bundle and
-to immutable authority blobs instead of depending on brittle cross-file parsed-field
-equality. All other candidate transitions retain generic exact-field comparisons.
+source records are bound to the immutable Build 103 pointer, immutable Build 102/103
+authorities, exact Build 102 tree and six proof runs. Generic future transitions retain
+normal exact-field comparisons.
 """
 from pathlib import Path
 import hashlib, json, re, sys
@@ -18,6 +18,7 @@ BUILD102_AUTHORITY = 'release467-build102-product-work-manual-reorder.json'
 BUILD102_AUTHORITY_BLOB = '0dcdd7cb9afd8bb39e67b281c48dbb142b273cce'
 BUILD103_AUTHORITY = 'release467-build103-product-work-session-paging.json'
 BUILD103_AUTHORITY_BLOB = '10d6d70a4eace5687c9117acb69b37342d4ea1e7'
+BUILD103_POINTER_BLOB = '885aabe81c6b64bb402c1d0f088414437a216375'
 BUILD102_PROOFS = {
     'system_gate_run': 34606547840,
     'current_application_quality_run': 34606547841,
@@ -38,6 +39,7 @@ def js_prop(body, key, value):
     return bool(re.search(rf"\b{re.escape(key)}\s*:\s*['\"]{re.escape(value)}['\"]", body))
 
 pointer = load('current-development-authority.json')
+pointer_text = read('current-development-authority.json')
 api = read('functions/api/admin/it-operations-control-tower.js')
 client = read('public/js/admin-it-control-tower.js')
 page = read('admin/it/index.html')
@@ -68,14 +70,14 @@ bounded_build103_from_102 = (
     candidate_mode
     and build == 103
     and last_verified_build == 102
-    and accepted_sha == BUILD102_SHA
     and accepted_tree == BUILD102_TREE
     and acceptance == BUILD102_PROOFS
     and int(prod.get('build') or 0) == 102
-    and str(prod.get('main_sha') or '') == BUILD102_SHA
     and str(prod.get('tree_sha') or '') == BUILD102_TREE
     and int(prod.get('production_pages_deploy_run') or 0) == BUILD102_PAGES
     and int(prod.get('production_live_resource_integrity_run') or 0) == BUILD102_LIVE
+    and git_blob_sha('current-development-authority.json') == BUILD103_POINTER_BLOB
+    and BUILD102_SHA in pointer_text
 )
 
 req(release == 467, 'current pointer must remain Release 467')
@@ -95,6 +97,7 @@ if candidate_mode:
         req(git_blob_sha(current_authority_path) == BUILD103_AUTHORITY_BLOB, 'Build 103 candidate authority blob drifted from the reviewed Build 102 starting point')
         req(str(start_dev.get('tree') or '') == BUILD102_TREE, 'Build 103 starting Development tree must remain the exact Build 102 tree')
         authority_text = read(current_authority_path)
+        req(BUILD102_SHA in authority_text, 'Build 103 authority must retain exact Build 102 SHA text')
         for run in BUILD102_PROOFS.values():
             req(str(run) in authority_text, f'Build 103 authority must retain exact Build 102 Development proof {run}')
     else:
@@ -133,6 +136,7 @@ if bounded_build103_from_102:
     req(git_blob_sha(prod_authority_path) == BUILD102_AUTHORITY_BLOB, 'Build 102 Production authority blob drifted')
     req(normalized_prod.get('tree_sha') == BUILD102_TREE, 'Build 102 Production authority tree must remain exact')
     prod_authority_text = read(prod_authority_path)
+    req(BUILD102_SHA in prod_authority_text, 'Build 102 authority must retain exact Production SHA text')
     req(str(BUILD102_PAGES) in prod_authority_text, 'Build 102 authority must retain exact Production Pages proof')
     req(str(BUILD102_LIVE) in prod_authority_text, 'Build 102 authority must retain exact Production live-resource proof')
 else:
@@ -157,4 +161,4 @@ if FAIL:
     sys.exit(1)
 print('CURRENT I.T. RELEASE TRUTH GATE: PASS')
 if bounded_build103_from_102:
-    print('Build 103 starting checkpoint: EXACT BUILD 102 POINTER PROOF BUNDLE + IMMUTABLE AUTHORITY BLOBS')
+    print('Build 103 starting checkpoint: IMMUTABLE POINTER/AUTHORITY BLOBS + EXACT BUILD 102 TREE/SIX-PROOF BINDING')
