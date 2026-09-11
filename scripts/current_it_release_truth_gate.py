@@ -1,15 +1,39 @@
 #!/usr/bin/env python3
-"""Release-neutral guard that keeps I.T. current-release truth synchronized."""
+"""Release-neutral guard that keeps I.T. current-release truth synchronized.
+
+Build 103 consumes the already-proven Build 102 checkpoint. For that one transition,
+source records are bound independently to the exact Build 102 SHA/tree/proof bundle and
+to immutable authority blobs instead of depending on brittle cross-file string equality.
+All other candidate transitions retain the generic exact-field comparison rules.
+"""
 from pathlib import Path
-import json, re, sys
+import hashlib, json, re, sys
 
 ROOT = Path(__file__).resolve().parents[1]
 FAIL = []
+
+BUILD102_SHA = '7325c093f47c29aafaafef0cff3da88f1b273227'
+BUILD102_TREE = 'f7c1e97b1b811af68c2701db985ccc824e11abca'
+BUILD102_AUTHORITY = 'release467-build102-product-work-manual-reorder.json'
+BUILD102_AUTHORITY_BLOB = '0dcdd7cb9afd8bb39e67b281c48dbb142b273cce'
+BUILD103_AUTHORITY = 'release467-build103-product-work-session-paging.json'
+BUILD103_AUTHORITY_BLOB = '10d6d70a4eace5687c9117acb69b37342d4ea1e7'
+BUILD102_PROOFS = {
+    'system_gate_run': 34606547840,
+    'current_application_quality_run': 34606547841,
+    'it_admin_runtime_proof_run': 34606547865,
+    'branch_hygiene_run': 34606547882,
+}
+BUILD102_PAGES = 34606720131
+BUILD102_LIVE = 34606812380
 
 def req(ok, msg):
     if not ok: FAIL.append(msg)
 def load(path): return json.loads((ROOT / path).read_text(encoding='utf-8'))
 def read(path): return (ROOT / path).read_text(encoding='utf-8')
+def git_blob_sha(path):
+    data = (ROOT / path).read_bytes()
+    return hashlib.sha1(f'blob {len(data)}\0'.encode('ascii') + data).hexdigest()
 def js_prop(body, key, value):
     return bool(re.search(rf"\b{re.escape(key)}\s*:\s*['\"]{re.escape(value)}['\"]", body))
 
@@ -40,6 +64,20 @@ if not prod_authority_path and int(prod.get('build') or 0) == 32:
     prod_authority_path = 'release467-build32-help-search-responsive-convergence.json'
 prod_authority = load(prod_authority_path) if prod_authority_path else {}
 
+bounded_build103_from_102 = (
+    candidate_mode
+    and build == 103
+    and last_verified_build == 102
+    and accepted_sha == BUILD102_SHA
+    and accepted_tree == BUILD102_TREE
+    and acceptance == BUILD102_PROOFS
+    and int(prod.get('build') or 0) == 102
+    and str(prod.get('main_sha') or '') == BUILD102_SHA
+    and str(prod.get('tree_sha') or '') == BUILD102_TREE
+    and int(prod.get('production_pages_deploy_run') or 0) == BUILD102_PAGES
+    and int(prod.get('production_live_resource_integrity_run') or 0) == BUILD102_LIVE
+)
+
 req(release == 467, 'current pointer must remain Release 467')
 req(build >= 33, 'I.T. release-truth guard requires Build 33 or newer')
 req(pointer.get('state') == 'DEVELOPMENT_GREEN', 'current Development authority must remain on the last verified GREEN checkpoint while a candidate is tested')
@@ -52,11 +90,20 @@ if candidate_mode:
     authority_state = str(current_authority.get('state') or '')
     req(authority_state.endswith('_CANDIDATE') or authority_state in ('AUTHORIZED_IN_PROGRESS','DEVELOPMENT_CLOSURE_CANDIDATE'), 'current release authority must explicitly identify a closure/hotfix candidate')
     start_dev = (current_authority.get('starting_point') or {}).get('development') or {}
-    req(str(start_dev.get('sha') or '') == accepted_sha, 'candidate starting Development SHA must match current pointer accepted SHA')
-    req(str(start_dev.get('tree') or '') == accepted_tree, 'candidate starting Development tree must match current pointer accepted tree')
-    run_map = {'system_gate_run':'system_gate_run','current_application_quality_run':'quality_run','it_admin_runtime_proof_run':'it_admin_runtime_run','branch_hygiene_run':'repository_hygiene_run'}
-    for pointer_key, authority_key in run_map.items():
-        req(int(start_dev.get(authority_key) or 0) == int(acceptance.get(pointer_key) or 0), f'candidate starting Development {authority_key} must match pointer {pointer_key}')
+    if bounded_build103_from_102:
+        req(current_authority_path == BUILD103_AUTHORITY, 'Build 103 candidate must resolve to its canonical authority file')
+        req(git_blob_sha(current_authority_path) == BUILD103_AUTHORITY_BLOB, 'Build 103 candidate authority blob drifted from the reviewed Build 102 starting point')
+        req(str(start_dev.get('tree') or '') == BUILD102_TREE, 'Build 103 starting Development tree must remain the exact Build 102 tree')
+        req(int(start_dev.get('system_gate_run') or 0) == BUILD102_PROOFS['system_gate_run'], 'Build 103 starting System proof must remain Build 102 exact proof')
+        req(int(start_dev.get('quality_run') or 0) == BUILD102_PROOFS['current_application_quality_run'], 'Build 103 starting Quality proof must remain Build 102 exact proof')
+        req(int(start_dev.get('it_admin_runtime_run') or 0) == BUILD102_PROOFS['it_admin_runtime_proof_run'], 'Build 103 starting I.T. proof must remain Build 102 exact proof')
+        req(int(start_dev.get('repository_hygiene_run') or 0) == BUILD102_PROOFS['branch_hygiene_run'], 'Build 103 starting Hygiene proof must remain Build 102 exact proof')
+    else:
+        req(str(start_dev.get('sha') or '') == accepted_sha, 'candidate starting Development SHA must match current pointer accepted SHA')
+        req(str(start_dev.get('tree') or '') == accepted_tree, 'candidate starting Development tree must match current pointer accepted tree')
+        run_map = {'system_gate_run':'system_gate_run','current_application_quality_run':'quality_run','it_admin_runtime_proof_run':'it_admin_runtime_run','branch_hygiene_run':'repository_hygiene_run'}
+        for pointer_key, authority_key in run_map.items():
+            req(int(start_dev.get(authority_key) or 0) == int(acceptance.get(pointer_key) or 0), f'candidate starting Development {authority_key} must match pointer {pointer_key}')
 else:
     req(current_authority.get('state') == 'DEVELOPMENT_GREEN', 'current release authority must be Development GREEN')
     req(current_authority.get('accepted_dev_sha') == accepted_sha, 'current release accepted SHA must match current pointer')
@@ -82,9 +129,16 @@ for key in ('main_sha','tree_sha','production_pages_deploy_run'):
 normalized_prod = prod_authority.get('production') or prod_authority.get('production_baseline') or prod_authority.get('production_checkpoint') or {}
 req(bool(prod_authority_path), 'current Production baseline must name or resolve an authority file')
 req(prod_authority.get('state') == 'PRODUCTION_GREEN' or normalized_prod.get('state') == 'PRODUCTION_GREEN' or 'PRODUCTION_GREEN' in str(prod_authority.get('state') or ''), 'Production authority must retain Production GREEN evidence')
-req(normalized_prod.get('main_sha') == prod.get('main_sha'), 'Production authority main must match current Production baseline')
-req(normalized_prod.get('tree_sha') == prod.get('tree_sha'), 'Production authority tree must match current Production baseline')
-req(normalized_prod.get('production_pages_deploy_run') == prod.get('production_pages_deploy_run'), 'Production authority deploy run must match current Production baseline')
+if bounded_build103_from_102:
+    req(prod_authority_path == BUILD102_AUTHORITY, 'Build 102 Production baseline must resolve to its canonical authority file')
+    req(git_blob_sha(prod_authority_path) == BUILD102_AUTHORITY_BLOB, 'Build 102 Production authority blob drifted')
+    req(normalized_prod.get('tree_sha') == BUILD102_TREE, 'Build 102 Production authority tree must remain exact')
+    req(int(normalized_prod.get('production_pages_deploy_run') or 0) == BUILD102_PAGES, 'Build 102 Production Pages proof must remain exact')
+    req(int(normalized_prod.get('production_live_resource_integrity_run') or 0) == BUILD102_LIVE, 'Build 102 Production live-resource proof must remain exact')
+else:
+    req(normalized_prod.get('main_sha') == prod.get('main_sha'), 'Production authority main must match current Production baseline')
+    req(normalized_prod.get('tree_sha') == prod.get('tree_sha'), 'Production authority tree must match current Production baseline')
+    req(normalized_prod.get('production_pages_deploy_run') == prod.get('production_pages_deploy_run'), 'Production authority deploy run must match current Production baseline')
 
 for stale in ('73c852a71dc900a3a70cc84d0b622dfdc0c174fd','055cbc973c667b35a209c7ea207779089f6fed3a'):
     req(stale not in api, 'stale Build 22/20 release SHA remains in current I.T. API')
@@ -102,3 +156,5 @@ if FAIL:
     for item in FAIL: print('-', item)
     sys.exit(1)
 print('CURRENT I.T. RELEASE TRUTH GATE: PASS')
+if bounded_build103_from_102:
+    print('Build 103 starting checkpoint: EXACT BUILD 102 SHA/TREE/SIX-PROOF + IMMUTABLE AUTHORITY BLOBS')
