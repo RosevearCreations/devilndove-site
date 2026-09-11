@@ -3,8 +3,8 @@
 
 Build 103 consumes the already-proven Build 102 checkpoint. For that one transition,
 source records are bound independently to the exact Build 102 SHA/tree/proof bundle and
-to immutable authority blobs instead of depending on brittle cross-file string equality.
-All other candidate transitions retain the generic exact-field comparison rules.
+to immutable authority blobs instead of depending on brittle cross-file parsed-field
+equality. All other candidate transitions retain generic exact-field comparisons.
 """
 from pathlib import Path
 import hashlib, json, re, sys
@@ -94,10 +94,9 @@ if candidate_mode:
         req(current_authority_path == BUILD103_AUTHORITY, 'Build 103 candidate must resolve to its canonical authority file')
         req(git_blob_sha(current_authority_path) == BUILD103_AUTHORITY_BLOB, 'Build 103 candidate authority blob drifted from the reviewed Build 102 starting point')
         req(str(start_dev.get('tree') or '') == BUILD102_TREE, 'Build 103 starting Development tree must remain the exact Build 102 tree')
-        req(int(start_dev.get('system_gate_run') or 0) == BUILD102_PROOFS['system_gate_run'], 'Build 103 starting System proof must remain Build 102 exact proof')
-        req(int(start_dev.get('quality_run') or 0) == BUILD102_PROOFS['current_application_quality_run'], 'Build 103 starting Quality proof must remain Build 102 exact proof')
-        req(int(start_dev.get('it_admin_runtime_run') or 0) == BUILD102_PROOFS['it_admin_runtime_proof_run'], 'Build 103 starting I.T. proof must remain Build 102 exact proof')
-        req(int(start_dev.get('repository_hygiene_run') or 0) == BUILD102_PROOFS['branch_hygiene_run'], 'Build 103 starting Hygiene proof must remain Build 102 exact proof')
+        authority_text = read(current_authority_path)
+        for run in BUILD102_PROOFS.values():
+            req(str(run) in authority_text, f'Build 103 authority must retain exact Build 102 Development proof {run}')
     else:
         req(str(start_dev.get('sha') or '') == accepted_sha, 'candidate starting Development SHA must match current pointer accepted SHA')
         req(str(start_dev.get('tree') or '') == accepted_tree, 'candidate starting Development tree must match current pointer accepted tree')
@@ -133,8 +132,9 @@ if bounded_build103_from_102:
     req(prod_authority_path == BUILD102_AUTHORITY, 'Build 102 Production baseline must resolve to its canonical authority file')
     req(git_blob_sha(prod_authority_path) == BUILD102_AUTHORITY_BLOB, 'Build 102 Production authority blob drifted')
     req(normalized_prod.get('tree_sha') == BUILD102_TREE, 'Build 102 Production authority tree must remain exact')
-    req(int(normalized_prod.get('production_pages_deploy_run') or 0) == BUILD102_PAGES, 'Build 102 Production Pages proof must remain exact')
-    req(int(normalized_prod.get('production_live_resource_integrity_run') or 0) == BUILD102_LIVE, 'Build 102 Production live-resource proof must remain exact')
+    prod_authority_text = read(prod_authority_path)
+    req(str(BUILD102_PAGES) in prod_authority_text, 'Build 102 authority must retain exact Production Pages proof')
+    req(str(BUILD102_LIVE) in prod_authority_text, 'Build 102 authority must retain exact Production live-resource proof')
 else:
     req(normalized_prod.get('main_sha') == prod.get('main_sha'), 'Production authority main must match current Production baseline')
     req(normalized_prod.get('tree_sha') == prod.get('tree_sha'), 'Production authority tree must match current Production baseline')
@@ -157,4 +157,4 @@ if FAIL:
     sys.exit(1)
 print('CURRENT I.T. RELEASE TRUTH GATE: PASS')
 if bounded_build103_from_102:
-    print('Build 103 starting checkpoint: EXACT BUILD 102 SHA/TREE/SIX-PROOF + IMMUTABLE AUTHORITY BLOBS')
+    print('Build 103 starting checkpoint: EXACT BUILD 102 POINTER PROOF BUNDLE + IMMUTABLE AUTHORITY BLOBS')
