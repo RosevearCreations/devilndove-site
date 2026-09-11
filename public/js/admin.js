@@ -204,5 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Build 65 authority remains eager because permissions must be known before optional admin modules are activated.
 void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
   .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
