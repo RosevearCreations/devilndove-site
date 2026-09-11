@@ -13,7 +13,7 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
-const PRODUCTS_ASSET_REVISION = '467-products-b97-readiness-queue';
+const PRODUCTS_ASSET_REVISION = '467-products-b98-readiness-triage';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
