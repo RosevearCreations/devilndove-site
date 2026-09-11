@@ -4,41 +4,44 @@
 
 ## Verified Development
 
-Build 93 — Centered Application Shell & Overflow Accessibility is the last fully verified checkpoint:
-- `dev` `be70b37f61574ec7a11bbad445ab30d0f280bbf3`
-- tree `a68a11663f02bfa496883220aa9d8940da4c3cbc`
-- System Gate `34513256032` SUCCESS
-- Current Application Quality `34513256105` SUCCESS
-- I.T. Admin Runtime Proof `34513256055` SUCCESS
-- Repository Branch Hygiene `34513256082` SUCCESS
+Build 94 — Product Workspace Readability & Responsive Navigation is the last fully verified checkpoint:
+- `dev` `bcafa7bbfbf17793d4b6280195c44c435ff3c68e`
+- tree `f83d850b2b28ef4840463439a8b449ebbe1b9a43`
+- System Gate `34537169571` SUCCESS
+- Current Application Quality `34537169401` SUCCESS
+- I.T. Admin Runtime Proof `34537169400` SUCCESS
+- Repository Branch Hygiene `34537169580` SUCCESS
 - exact Preview, canonical Development D1, read-only data authority, Preview bindings, non-secret smoke and regression evidence: SUCCESS.
 
 ## Verified Production
 
-Build 93 is the current Production checkpoint:
-- `main` `be70b37f61574ec7a11bbad445ab30d0f280bbf3`
-- tree `a68a11663f02bfa496883220aa9d8940da4c3cbc`
-- Production Pages Deploy `34513466761` SUCCESS
-- Production Live Resource Integrity `34513570740` SUCCESS.
+Build 94 is the current Production checkpoint:
+- `main` `bcafa7bbfbf17793d4b6280195c44c435ff3c68e`
+- tree `f83d850b2b28ef4840463439a8b449ebbe1b9a43`
+- Production Pages Deploy `34537326802` SUCCESS
+- Production Live Resource Integrity `34537397229` SUCCESS.
 
-## Build 94 operational boundary
+## Build 95 operational boundary
 
-Build 94 — **Product Workspace Readability & Responsive Navigation** is the active Development closure candidate. It consumes Build 93's exact external closure and repairs the visible Products & Inventory workspace-tab readability problem without changing Product authority.
+Build 95 — **Product Workspace Current Context & Table Ergonomics** is the active Development closure candidate. It consumes Build 94's exact external closure and continues the visible Products & Inventory usability work without changing Product authority.
 
 The current Product workspace rules are:
 - the six focused workspaces remain Products, Editor, Inventory Links, Media, SEO / Publishing and Cleanup / Archive;
-- each workspace control places its primary label above its description;
-- primary labels remain whole and readable rather than being squeezed into narrow letter stacks;
-- descriptions use the full available control width;
-- desktop uses three columns, medium/tablet widths use two, and phone widths use one before text becomes cramped;
-- selected-state outline, tab semantics, URL-addressable workspace routing and Arrow Left/Right/Home/End keyboard navigation remain unchanged;
+- the visible Product-workspace header identifies Release 467 Build 95 instead of historical Build 66;
+- Build 94 vertical label/description controls and 3-column desktop, 2-column tablet, 1-column phone layout remain active;
 - the one shared Product id/event authority remains unchanged;
+- Product table headers stay visible while vertically scrolling;
+- System # and Name stay visible as desktop horizontal-scroll identity anchors;
+- the Product loaded in the editor is highlighted when its row exists;
+- **Locate current Product** is manual only;
+- **Essential columns** and **Full columns** are browser-local table views, with existing fine-tune preferences retained;
+- Product dashboard summaries reuse the already-loaded browser Product snapshot, with no additional Product API read;
 - Build 93 centered-shell, local horizontal scrolling and right-side reachability remain in force;
 - the presentation layer does not change Product or Inventory business data, H1 hierarchy, provider state or launch authority.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 94 ingests the exact Build 93 Development and Production closure. Build 94 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 95 ingests exact Build 94 Development and Production closure. Build 95 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`.
 
 The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
