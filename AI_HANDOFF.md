@@ -2,24 +2,24 @@
 
 ## Current authority
 
-**Release 467 Build 115 — Business Health Review Packs & Owner Handoff** is the current Development closure candidate.
+**Release 467 Build 116 — Business Health Operator Briefs & Export** is the current Development closure candidate.
 
-Build 115 starts from the externally verified Build 114 closure. Build 114 did **not** self-record its later proof; Build 115 ingests it under the restart protocol.
+Build 116 starts from the externally verified Build 115 closure. Build 115 did **not** self-record its later proof; Build 116 ingests it under the restart protocol.
 
-- Exact Build 114 SHA: `5ff61e8391437c5d3369c38f5bf4a1088babc63c`
-- Exact tree: `7d7c0ebf9cfa51452438e9d46fd98b3e3550926f`
-- System Gate: `34697432158`
-- Current Application Quality Proof: `34697432135`
-- I.T. Admin Runtime Proof: `34697432119`
-- Repository Branch Hygiene: `34697432225`
-- Production Pages Deploy: `34697511211`
-- Production Live Resource Integrity: `34697551264`
+- Exact Build 115 SHA: `7cff6e22b273ffb4db40828dfcbf9f0d52b46c60`
+- Exact tree: `f0dffdc1c6c293cde5482cc6a36da2a6ce1614b0`
+- System Gate: `34698543554`
+- Current Application Quality Proof: `34698543577`
+- I.T. Admin Runtime Proof: `34698543545`
+- Repository Branch Hygiene: `34698543556`
+- Production Pages Deploy: `34698623248`
+- Production Live Resource Integrity: `34698665721`
 
-## Build 115 scope
+## Build 116 scope
 
-Build 115 adds read-only Business Health Review Packs over the Build 114 action queue. It groups findings by the existing owner, carries available structured evidence, and provides explicit human review/handoff steps.
+Build 116 adds read-only Business Health Operator Briefs over the proven Build 115 review packs. It creates a deterministic cross-owner review order, concise owner briefs, and export-ready Markdown so a human operator can carry the current evidence into the existing Finance, Month End, Creator/Profitability or I.T. workspace.
 
-The review packs do not persist acknowledgement or resolution state. They never authorize Accounting posting, period close, Inventory or Creative mutation, price changes, provider execution/publication, schema/R2/binding mutation or Production changes.
+Export is read-only. Build 116 does not persist acknowledgement or resolution state, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, alter D1/R2/bindings, or mutate Production.
 
 Canonical D1 migrations remain exactly `0001`–`0004`.
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 115 must not self-record its later external exact-head proof. After Build 115 is externally proven and promoted, **Build 116 must ingest that later closure**.
+Build 116 must not self-record its later external exact-head proof. After Build 116 is externally proven and promoted, **Build 117 must ingest that later closure**.

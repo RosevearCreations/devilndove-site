@@ -2,36 +2,36 @@
 
 ## Current checkpoint
 
-**Release 467 Build 115 — Business Health Review Packs & Owner Handoff** is the active closure candidate.
+**Release 467 Build 116 — Business Health Operator Briefs & Export** is the active closure candidate.
 
-Build 114 is the last fully verified Development + Production checkpoint:
+Build 115 is the last fully verified Development + Production checkpoint:
 
-- SHA `5ff61e8391437c5d3369c38f5bf4a1088babc63c`
-- tree `7d7c0ebf9cfa51452438e9d46fd98b3e3550926f`
-- System Gate `34697432158`
-- Current Application Quality `34697432135`
-- I.T. Admin Runtime `34697432119`
-- Repository Branch Hygiene `34697432225`
-- Production Pages Deploy `34697511211`
-- Production Live Resource Integrity `34697551264`
+- SHA `7cff6e22b273ffb4db40828dfcbf9f0d52b46c60`
+- tree `f0dffdc1c6c293cde5482cc6a36da2a6ce1614b0`
+- System Gate `34698543554`
+- Current Application Quality `34698543577`
+- I.T. Admin Runtime `34698543545`
+- Repository Branch Hygiene `34698543556`
+- Production Pages Deploy `34698623248`
+- Production Live Resource Integrity `34698665721`
 
-The Build 114 closure is recorded by Build 115 ingestion, not a Build 114 self-claim.
+The Build 115 closure is recorded by Build 116 ingestion, not a Build 115 self-claim.
 
-## Build 115 — Business Health Review Packs & Owner Handoff
+## Build 116 — Business Health Operator Briefs & Export
 
-Goal: make the Build 114 prioritized action queue easier for a human operator to work without creating another write authority.
+Goal: make the Build 115 human-review packs portable and easier to work in the right order without introducing another write authority.
 
 Delivered candidate scope:
-1. Pure read-only review-pack classifier over the existing Build 114 action queue.
-2. Authenticated GET-only endpoint reusing Business Health and the queue once per request.
-3. Owner grouping for Finance, Month End, Creator/Profitability and I.T.
-4. Available structured evidence carried with each queued action.
-5. Explicit human review/handoff steps.
-6. Deterministic pack and action ordering.
-7. No acknowledgement/resolution persistence.
-8. Existing owner routes and write authorities remain unchanged.
-9. No schema, D1/R2 business-data, Accounting, Inventory, Creative, pricing, provider or Production mutation.
-10. READY remains informational and never authorizes automatic execution.
+1. Pure read-only operator-brief derivation over Build 115 review packs.
+2. Deterministic cross-owner review order.
+3. Owner brief summaries with top action and evidence-fact counts.
+4. Export-ready Markdown generated from current evidence.
+5. Authenticated GET-only Markdown download.
+6. Existing Finance, Month End, Creator/Profitability and I.T. owner routes remain authoritative.
+7. No acknowledgement or resolution persistence.
+8. No Accounting posting/period close, Inventory/Creative/price mutation, provider action, D1/R2/binding mutation or Production mutation.
+9. READY remains informational and never authorizes automatic execution.
+10. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Release mechanics
 
@@ -41,4 +41,4 @@ Persistent branches remain `main` and `dev`. Canonical migrations remain exactly
 
 ## Next build
 
-Build 116 remains unauthorized until Build 115 receives its later exact Development and Production proof; Build 116 must ingest that closure.
+Build 117 remains unauthorized until Build 116 receives its later exact Development and Production proof; Build 117 must ingest that closure.
