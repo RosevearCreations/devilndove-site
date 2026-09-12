@@ -105,7 +105,7 @@ req(endpoint.count('.prepare(`') == 1, 'Build 111 endpoint must retain one bound
 for token in (
     '/api/admin/order-fulfillment-reconciliation?limit=100', 'data-build111-reconciliation-hold',
     'Build 111 reconciliation requires review before this transition.', 'MutationObserver',
-    'dd:order-updated', 'existing Build 82 transition controls',
+    'dd:order-updated', 'existing Build 82 reviewed transition controls',
 ): req(token in client, f'Build 111 reconciliation UI missing token: {token}')
 for forbidden in ("method:'POST'", 'WRITE_ROUTE', 'queueNotification', 'processNotificationOutbox', 'setInterval('):
     req(forbidden not in client, f'Build 111 reconciliation UI gained forbidden action: {forbidden}')
