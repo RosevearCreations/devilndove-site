@@ -2,32 +2,32 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 126 — Admin Favorites & Quick Launch**.
+Current candidate: **Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return**.
 
-Last fully verified Development + Production checkpoint is Build 125:
+Last fully verified Development + Production checkpoint is Build 126:
 
-- SHA `eca94d1ac4732c561794f914f89a2838af243617`
-- tree `c7b4caf380183cd0b71b79d2f0ba73ccefce0d26`
-- System Gate `34721943588`
-- Current Application Quality `34721943584`
-- I.T. Admin Runtime `34721943615`
-- Repository Branch Hygiene `34721943593`
-- Production Pages Deploy `34722069482`
-- Production Live Resource Integrity `34722116635`
+- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
+- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
+- System Gate `34724580675`
+- Current Application Quality `34724580676`
+- I.T. Admin Runtime `34724580648`
+- Repository Branch Hygiene `34724580646`
+- Production Pages Deploy `34724657853`
+- Production Live Resource Integrity `34724703548`
 
-Result: **Build 125 six-proof closure is ingested by Build 126.**
+Result: **Build 126 six-proof closure is ingested by Build 127.**
 
-## Build 126 safety checks
+## Build 127 safety checks
 
-- Favorite scope: **signed-in Admin user ID + current browser**.
-- Storage: **localStorage convenience state only**.
-- `sessionStorage`: **NOT USED**.
-- Favorites: **non-home Admin routes only**.
-- Favorite count: **bounded to 8**.
-- Admin-home quick launch: **up to 3 favorite links**.
-- Individual remove + clear control: **PRESENT**.
+- Context authority: **existing `data/admin-navigation-modules.json`**.
+- Breadcrumb scope: **Admin routes only**.
+- Breadcrumb count: **one context nav per page**.
+- Nested-tool return: **direct workspace-hub link**.
+- Current route accessibility: **`aria-current="page"`**.
+- Storage: **NONE** (`localStorage` and `sessionStorage` are not used).
 - Server preference endpoint: **NONE**.
-- Network write for favorites: **NONE**.
+- Manifest access: **read-only GET/fetch only**.
+- Network write: **NONE**.
 - Provider execution/publication added: **ZERO**.
 - Accounting posting / period close: **ZERO**.
 - Inventory / Creative / Product / price mutation: **ZERO**.
@@ -39,4 +39,4 @@ Result: **Build 125 six-proof closure is ingested by Build 126.**
 
 ## Restart integrity
 
-Build 126 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 127, not self-written into Build 126.
+Build 127 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 128, not self-written into Build 127.
