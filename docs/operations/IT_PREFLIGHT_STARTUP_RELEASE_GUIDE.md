@@ -15,6 +15,13 @@ The last fully verified Development and Production checkpoint is Build 111:
 - Production Pages Deploy: `34670059768`
 - Production Live Resource Integrity: `34670099134`
 
+## Canonical Development target
+
+- Cloudflare Pages project: `devilndove-site`
+- Development Preview: `https://dev.devilndove-site.pages.dev`
+- Development D1: `devilndove-dev`
+- Retired separate Development Pages project is not an active target.
+
 ## Restart protocol
 
 1. Verify the previous build's exact SHA/tree and all six external proof runs.
