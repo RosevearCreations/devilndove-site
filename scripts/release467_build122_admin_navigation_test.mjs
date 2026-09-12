@@ -7,7 +7,7 @@ const manifest=JSON.parse(read('data/admin-navigation-modules.json'));
 const req=(ok,msg)=>{if(!ok)throw new Error(msg);};
 req(/const BUILD = 122/.test(palette),'palette build identity missing');
 req(palette.includes('/data/admin-navigation-modules.json'),'manifest URL missing');
-for(const token of ['dd-admin-workspace-nav','dd-admin-command-palette','Ctrl/Cmd+K','ArrowDown','ArrowUp','Escape','aria-modal','listbox','aria-current','FALLBACK_MODULES'])req(palette.includes(token),`palette missing ${token}`);
+for(const token of ['dd-admin-workspace-nav','ddAdminCommandPalette','Ctrl/Cmd+K','ArrowDown','ArrowUp','Escape','aria-modal','listbox','aria-current','FALLBACK_MODULES'])req(palette.includes(token),`palette missing ${token}`);
 for(const forbidden of ['localStorage','sessionStorage',"method: 'POST'",'method:"POST"'])req(!palette.includes(forbidden),`palette contains forbidden behavior ${forbidden}`);
 req(auth.includes("import('/public/js/admin-workspace-command-palette-v122.js?v=467b122')"),'shared admin auth loader missing Build 122 palette');
 req(auth.includes("window.location.pathname.startsWith('/admin')"),'admin route guard missing');
