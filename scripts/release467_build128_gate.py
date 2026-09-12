@@ -51,7 +51,7 @@ pp=prior.get('production_checkpoint')or{}
 req(pp.get('main_sha')==B127_SHA and pp.get('tree_sha')==B127_TREE and pp.get('production_pages_deploy_run')==B127_PAGES and pp.get('production_live_resource_integrity_run')==B127_LIVE,'Build 127 Production closure mismatch')
 req(current.get('state')=='DEVELOPMENT_CLOSURE_CANDIDATE','Build 128 must remain closure candidate')
 req(current.get('final_closure') is None and current.get('production_checkpoint') is None,'Build 128 must not self-claim later workflow proof')
-for token in ('const BUILD = 128','Admin navigation help','Alt + Shift + H','Ctrl/Cmd + K','Alt + Shift + F',"role', 'dialog'","aria-modal', 'true'",'ddAdminNavigationHelpTrigger','DDAdminNavigationHelp','dd:admin-navigation-help-ready','MutationObserver',"event.key === 'Escape'","event.key === 'Tab'"):
+for token in ('const BUILD = 128','Admin navigation help','Alt + Shift + H','Ctrl/Cmd + K','Alt + Shift + F',"setAttribute('role', 'dialog')","setAttribute('aria-modal', 'true')",'ddAdminNavigationHelpTrigger','DDAdminNavigationHelp','dd:admin-navigation-help-ready','MutationObserver',"event.key === 'Escape'","event.key === 'Tab'"):
     req(token in help_js,f'Build 128 navigation help missing token: {token}')
 for forbidden in ('localStorage','sessionStorage',"method: 'POST'",'method:"POST"','XMLHttpRequest'):
     req(forbidden not in help_js,f'Build 128 navigation help contains forbidden behavior: {forbidden}')
