@@ -2,31 +2,31 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return**.
+Current candidate: **Release 467 Build 128 — Admin Navigation Help & Keyboard Shortcut Reference**.
 
-Last fully verified Development + Production checkpoint is Build 126:
+Last fully verified Development + Production checkpoint is Build 127:
 
-- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
-- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
-- System Gate `34724580675`
-- Current Application Quality `34724580676`
-- I.T. Admin Runtime `34724580648`
-- Repository Branch Hygiene `34724580646`
-- Production Pages Deploy `34724657853`
-- Production Live Resource Integrity `34724703548`
+- SHA `dead9393e6d8db5fbcbe776c3885da80cbe42163`
+- tree `efff42114b680218c756031fb2f92bc12e541b1c`
+- System Gate `34725275176`
+- Current Application Quality `34725275139`
+- I.T. Admin Runtime `34725275114`
+- Repository Branch Hygiene `34725275193`
+- Production Pages Deploy `34725363163`
+- Production Live Resource Integrity `34725405258`
 
-Result: **Build 126 six-proof closure is ingested by Build 127.**
+Result: **Build 127 six-proof closure is ingested by Build 128.**
 
-## Build 127 safety checks
+## Build 128 safety checks
 
-- Context authority: **existing `data/admin-navigation-modules.json`**.
-- Breadcrumb scope: **Admin routes only**.
-- Breadcrumb count: **one context nav per page**.
-- Nested-tool return: **direct workspace-hub link**.
-- Current route accessibility: **`aria-current="page"`**.
-- Storage: **NONE** (`localStorage` and `sessionStorage` are not used).
+- Help scope: **Admin routes only**.
+- Navigation authority: **existing Build 122 workspace navigation and current runtime contracts**.
+- Help trigger: **Admin workspace nav + `Alt+Shift+H`**.
+- Command palette reference: **`Ctrl/Cmd+K`**.
+- Favorite-toggle reference: **`Alt+Shift+F`**.
+- Accessible dialog: **role/label, Escape close, focus return**.
+- Saved state: **NONE**.
 - Server preference endpoint: **NONE**.
-- Manifest access: **read-only GET/fetch only**.
 - Network write: **NONE**.
 - Provider execution/publication added: **ZERO**.
 - Accounting posting / period close: **ZERO**.
@@ -39,4 +39,4 @@ Result: **Build 126 six-proof closure is ingested by Build 127.**
 
 ## Restart integrity
 
-Build 127 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 128, not self-written into Build 127.
+Build 128 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 129, not self-written into Build 128.
