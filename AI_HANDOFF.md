@@ -2,26 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return** is the current Development closure candidate.
+**Release 467 Build 128 — Admin Navigation Help & Keyboard Shortcut Reference** is the current Development closure candidate.
 
-Build 127 starts by ingesting the externally verified Build 126 closure. Build 126 remains correctly non-self-recording; its six later proof IDs are recorded by Build 127 startup ingestion.
+Build 128 starts by ingesting the externally verified Build 127 closure. Build 127 remains correctly non-self-recording; its six later proof IDs are recorded by Build 128 startup ingestion.
 
-- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
-- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
-- System Gate `34724580675`
-- Current Application Quality `34724580676`
-- I.T. Admin Runtime `34724580648`
-- Repository Branch Hygiene `34724580646`
-- Production Pages Deploy `34724657853`
-- Production Live Resource Integrity `34724703548`
+- SHA `dead9393e6d8db5fbcbe776c3885da80cbe42163`
+- tree `efff42114b680218c756031fb2f92bc12e541b1c`
+- System Gate `34725275176`
+- Current Application Quality `34725275139`
+- I.T. Admin Runtime `34725275114`
+- Repository Branch Hygiene `34725275193`
+- Production Pages Deploy `34725363163`
+- Production Live Resource Integrity `34725405258`
 
-## Build 127 scope
+## Build 128 scope
 
-Build 127 adds a read-only Admin context breadcrumb over the existing Build 122 manifest-backed workspace navigation. The breadcrumb identifies **Admin → workspace → section → current tool** when the current route exists in `data/admin-navigation-modules.json` and exposes a direct **Back to workspace** link for nested tools.
+Build 128 adds an accessible Admin navigation-help dialog over the existing navigation layers. It documents the existing `Ctrl/Cmd+K` command palette, `Alt+Shift+F` favorite toggle, workspace memory/resume behavior, favorites quick launch, breadcrumbs and workspace-return behavior. `Alt+Shift+H` opens the help dialog, and an Admin workspace-nav button provides a pointer-friendly entry point.
 
-The feature is Admin-only and client-only. It does not use `localStorage` or `sessionStorage`, does not create a server preference authority, and performs no network write. A read-only manifest fetch may be used; if the manifest is unavailable the current page still receives a safe Admin/context fallback.
+The feature is Admin-only and client-only. It stores no state, creates no server preference authority, and performs no network write. It does not replace `data/admin-navigation-modules.json` or create another navigation authority.
 
-Build 127 does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. Canonical D1 migrations remain exactly `0001`–`0004`.
+Build 128 does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## External lanes
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 127 must not self-record its later external exact-head proof. After Build 127 is externally proven and promoted, **Build 128 must ingest that later closure**.
+Build 128 must not self-record its later external exact-head proof. After Build 128 is externally proven and promoted, **Build 129 must ingest that later closure**.
