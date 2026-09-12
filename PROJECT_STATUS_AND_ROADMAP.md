@@ -2,39 +2,39 @@
 
 ## Current checkpoint
 
-**Release 467 Build 122 — Admin Workspace Navigation & Command Palette** is the active closure candidate.
+**Release 467 Build 123 — Admin Home Dashboard Refresh** is the active closure candidate.
 
-Build 121 is the last fully verified Development + Production checkpoint:
+Build 122 is the last fully verified Development + Production checkpoint:
 
-- SHA `31492144ecbd2f8c353426531ea301c70aedf8f3`
-- tree `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
-- System Gate `34709444214`
-- Current Application Quality `34709444221`
-- I.T. Admin Runtime `34709444258`
-- Repository Branch Hygiene `34709444255`
-- Production Pages Deploy `34709526481`
-- Production Live Resource Integrity `34709571023`
+- SHA `8ff2df0616a4a9f23c4e1a92bcf5e501a306e0da`
+- tree `e87670bb397cee58ed839813ea33851d799b5823`
+- System Gate `34710867035`
+- Current Application Quality `34710867094`
+- I.T. Admin Runtime `34710867066`
+- Repository Branch Hygiene `34710867072`
+- Production Pages Deploy `34710956842`
+- Production Live Resource Integrity `34710999276`
 
-The Build 121 closure is recorded by Build 122 ingestion, not a Build 121 self-claim.
+The Build 122 closure is recorded by Build 123 ingestion, not a Build 122 self-claim.
 
-## Build 122 — Admin Workspace Navigation & Command Palette
+## Build 123 — Admin Home Dashboard Refresh
 
-Goal: reduce admin navigation friction without creating a second menu authority or saved navigation state.
+Goal: make `/admin/` a useful read-only operator landing page without duplicating task actions, navigation authority, business writes or saved workspace state.
 
 Candidate scope:
-1. Reuse `data/admin-navigation-modules.json` as the single current operational menu authority.
-2. Add an Admin / Storefront / Creator / Finance / I.T. workspace strip with current-workspace highlighting.
-3. Add a visible Jump control and `Ctrl/Cmd+K` command palette.
-4. Search current workspace, section and tool labels from the manifest.
-5. Support Arrow Up/Down, Enter and Escape with accessible dialog/listbox semantics.
-6. Load from the shared Admin auth/UI bootstrap so legacy admin pages receive the same launcher.
-7. Fall back to the four workspace homes if the manifest is temporarily unavailable.
-8. Store no navigation history or preference and perform no POST/write action.
+1. Read the existing Today Tasks read contract for counts and top task groups.
+2. Read the current I.T. control tower for readiness and proven release health.
+3. Reuse `data/admin-navigation-modules.json` for workspace cards, tool counts and quick destinations.
+4. Fail soft with `Promise.allSettled`; one read failure must not blank unrelated dashboard areas.
+5. Provide manual refresh only; no polling.
+6. Keep Done / Ignore / Snooze exclusively in `/admin/today-tasks/`.
+7. Store no recent history or preferences.
+8. Perform no POST/write action.
 9. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Next autonomous QoL sequence
 
-After Build 122 closes: Build 123 Admin Home Dashboard Refresh; Build 124 Consistent Loading/Empty/Error/Retry States; Build 125 User Preferences & Workspace Memory; Build 126 Universal Admin Search; Build 127 Table/List Quality-of-Life Standard; Build 128 Product & Inventory Quick View Drawer.
+After Build 123 closes: Build 124 Consistent Loading/Empty/Error/Retry States; Build 125 User Preferences & Workspace Memory; Build 126 Universal Admin Search; Build 127 Table/List Quality-of-Life Standard; Build 128 Product & Inventory Quick View Drawer.
 
 ## Release mechanics
 

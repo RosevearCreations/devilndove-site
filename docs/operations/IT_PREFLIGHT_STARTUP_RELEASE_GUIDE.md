@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 122 — Admin Workspace Navigation & Command Palette**.
+**Release 467 Build 123 — Admin Home Dashboard Refresh**.
 
-The last fully verified Development and Production checkpoint is Build 121:
+The last fully verified Development and Production checkpoint is Build 122:
 
-- SHA `31492144ecbd2f8c353426531ea301c70aedf8f3`
-- tree `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
-- System Gate `34709444214`
-- Current Application Quality Proof `34709444221`
-- I.T. Admin Runtime Proof `34709444258`
-- Repository Branch Hygiene `34709444255`
-- Production Pages Deploy `34709526481`
-- Production Live Resource Integrity `34709571023`
+- SHA `8ff2df0616a4a9f23c4e1a92bcf5e501a306e0da`
+- tree `e87670bb397cee58ed839813ea33851d799b5823`
+- System Gate `34710867035`
+- Current Application Quality Proof `34710867094`
+- I.T. Admin Runtime Proof `34710867066`
+- Repository Branch Hygiene `34710867072`
+- Production Pages Deploy `34710956842`
+- Production Live Resource Integrity `34710999276`
 
 ## Canonical Development target
 
@@ -31,8 +31,8 @@ The last fully verified Development and Production checkpoint is Build 121:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 122 technical boundary
+## Build 123 technical boundary
 
-Build 122 is a client-only Admin Workspace Navigation & Command Palette quality-of-life improvement. It reuses `data/admin-navigation-modules.json`, adds a shared workspace strip and a `Ctrl/Cmd+K` launcher, and keeps all existing admin URLs stable. Manifest access is GET-only. No search/navigation history or preference is stored. It does not post Accounting, close a period, mutate Inventory or Creative records, change prices, execute providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
+Build 123 is a client-only Admin Home Dashboard Refresh. It reads the existing Today Tasks contract, current I.T. control tower and navigation manifest with GET only; uses fail-soft independent reads; and provides manual refresh without polling. It stores no history/preferences and exposes no Today task mutation controls. It does not post Accounting, close a period, mutate Inventory or Creative records, change prices, execute providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.

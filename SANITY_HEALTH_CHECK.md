@@ -2,30 +2,32 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 122 — Admin Workspace Navigation & Command Palette**.
+Current candidate: **Release 467 Build 123 — Admin Home Dashboard Refresh**.
 
-Last fully verified Development + Production checkpoint is Build 121:
+Last fully verified Development + Production checkpoint is Build 122:
 
-- SHA `31492144ecbd2f8c353426531ea301c70aedf8f3`
-- tree `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
-- System `34709444214`
-- Quality `34709444221`
-- I.T. `34709444258`
-- Hygiene `34709444255`
-- Production Pages `34709526481`
-- Production Live Resource Integrity `34709571023`
+- SHA `8ff2df0616a4a9f23c4e1a92bcf5e501a306e0da`
+- tree `e87670bb397cee58ed839813ea33851d799b5823`
+- System `34710867035`
+- Quality `34710867094`
+- I.T. `34710867066`
+- Hygiene `34710867072`
+- Production Pages `34710956842`
+- Production Live Resource Integrity `34710999276`
 
-Result: **Build 121 six-proof closure is ingested by Build 122.**
+Result: **Build 122 six-proof closure is ingested by Build 123.**
 
-## Build 122 safety checks
+## Build 123 safety checks
 
+- Today Tasks source: existing GET/read contract only.
+- I.T. source: existing GET/read control tower only.
 - Navigation source: existing `data/admin-navigation-modules.json`.
-- Manifest access: GET/read-only.
-- Workspace strip and command palette: client-side only.
-- Existing admin URLs and module ownership: preserved.
+- Partial failure isolation: `Promise.allSettled`.
+- Polling: **ZERO**.
 - Local/session storage: **ZERO**.
-- Navigation history/preference persistence: **ZERO**.
+- Recent history/preference persistence: **ZERO**.
 - POST/write request: **ZERO**.
+- Today task Done/Ignore/Snooze controls on dashboard: **ZERO**.
 - Accounting posting / period close: **ZERO**.
 - Inventory / Creative / price mutation: **ZERO**.
 - Provider execution/publication: **ZERO**.
@@ -37,4 +39,4 @@ Result: **Build 121 six-proof closure is ingested by Build 122.**
 
 ## Restart integrity
 
-Build 122 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 123, not self-written into Build 122.
+Build 123 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 124, not self-written into Build 123.

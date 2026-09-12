@@ -4,90 +4,43 @@
   <meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin — Devil n Dove</title>
+  <title>Admin Dashboard — Devil n Dove</title>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="description" content="Devil n Dove Release 467 Build 11 admin operations command center for today's work and the Storefront, Creator, Finance and I.T. workspaces."/>
-  <link href="/css/styles.css?v=466" rel="stylesheet"/>
+  <meta name="description" content="Devil n Dove Release 467 Build 123 read-only admin home dashboard for today's work, workspace navigation and system health."/>
+  <link href="/css/styles.css?v=467" rel="stylesheet"/>
+  <link href="/css/current-responsive.css?v=467b123" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
 </head>
-<body>
+<body data-admin-page="home">
   <div class="container admin-shell">
     <div class="nav">
-      <div class="brand">
-        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
-        <div>
-          <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Admin • Release 467 Build 11</div>
-        </div>
-      </div>
-      <div class="links">
-        <a href="/">Home</a>
-        <a href="/shop/">Shop</a>
-        <a href="/members/?admin_preview=1">Members</a>
-        <a href="/admin/">Admin</a>
-        <button class="btn" data-nav-logout type="button">Logout</button>
-      </div>
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Admin • Release 467 Build 123</div></div></div>
+      <div class="links"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/members/?admin_preview=1">Members</a><a href="/admin/" aria-current="page">Admin</a><button class="btn" data-nav-logout type="button">Logout</button></div>
     </div>
 
     <div class="hero">
-      <div>
-        <h1>Admin</h1>
-        <p>Start with today's work, then move into four admin workspaces backed by five permission modules. Storefront, Creator, Finance and I.T. remain the operator homes while Socials/CAIP keeps its independent module authority.</p>
-      </div>
+      <div><p class="eyebrow">Release 467 Build 123</p><h1>Admin Dashboard</h1><p>Start with the work that needs attention, then move into Storefront, Creator, Finance or I.T. The home dashboard is read-only: task actions stay in Today Tasks and operational writes stay in their owning workspaces.</p></div>
     </div>
 
     <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
+    <section class="card" style="margin-top:18px"><strong>Current proven baseline:</strong> Build 122 is Development + Production GREEN at SHA <code>8ff2df0616a4a9f23c4e1a92bcf5e501a306e0da</code> / tree <code>e87670bb397cee58ed839813ea33851d799b5823</code>. Build 123 refreshes the Admin home only and adds no new write authority.</section>
 
-    <section aria-labelledby="adminTodayCommandCenterHeading" style="margin-top:18px">
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px">
-        <div>
-          <h2 id="adminTodayCommandCenterHeading" style="margin:0">Today Operations Command Center</h2>
-          <p class="small" style="margin:6px 0 0">One daily queue across product readiness, customer requests, orders, inventory, accounting and runtime health. Done, Ignore and Snooze remain explicit administrator actions through the existing audited Today Tasks authority.</p>
-        </div>
-        <a class="btn" href="/admin/today-tasks/">Open full Today Tasks</a>
-      </div>
-      <div id="desktopTodayTasksMount" aria-live="polite" aria-busy="true"></div>
-    </section>
+    <section class="dd-admin-dashboard-section" aria-labelledby="adminDashboardAtGlance"><div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:10px"><div><h2 id="adminDashboardAtGlance" style="margin:0">At a glance</h2><p class="small" style="margin:6px 0 0">Existing read authorities summarized in one place.</p></div><div id="adminHomeDashboardStatus" aria-live="polite"></div></div><div id="adminHomeDashboardSummary" class="dd-admin-dashboard-grid" aria-live="polite" aria-busy="true"></div></section>
+    <section id="adminHomeDashboardToday" class="dd-admin-dashboard-section" aria-live="polite" aria-busy="true"></section>
+    <section class="dd-admin-dashboard-section" aria-labelledby="adminDashboardWorkspacesHeading"><h2 id="adminDashboardWorkspacesHeading">Workspaces</h2><div id="adminHomeDashboardWorkspaces" aria-live="polite" aria-busy="true"></div></section>
+    <section id="adminHomeDashboardQuickLinks" class="dd-admin-dashboard-section" aria-live="polite" aria-busy="true"></section>
+    <section id="adminHomeDashboardHealth" class="dd-admin-dashboard-section" aria-live="polite" aria-busy="true"></section>
 
-    <main class="department-grid" style="margin-top:18px" aria-label="Admin workspaces">
-      <a class="card department-card startup-highlight-card" data-admin-module-card="storefront" href="/admin/storefront/">
-        <h2>Storefront</h2>
-        <p class="small">Website presentation, merchandising, Carousel, public media, customer programs, SEO, analytics and marketplace channels.</p>
-        <div class="small" data-admin-module-count>Storefront tools</div>
-      </a>
-      <a class="card department-card startup-highlight-card" data-admin-module-card="creator" href="/admin/creator/">
-        <h2>Creator</h2>
-        <p class="small">Product entry, catalog, inventory, tools, packaging, creative projects, CAIP evidence, storytelling, Content Studio and social publishing.</p>
-        <div class="small" data-admin-module-count>Creator tools</div>
-      </a>
-      <a class="card department-card startup-highlight-card" data-admin-module-card="finance" href="/admin/finance/">
-        <h2>Finance</h2>
-        <p class="small">Orders, payments, customer documents, accounting, reconciliation, month-end, business health and financial planning.</p>
-        <div class="small" data-admin-module-count>Finance tools</div>
-      </a>
-      <a class="card department-card startup-highlight-card" data-admin-module-card="it" href="/admin/it/">
-        <h2>I.T.</h2>
-        <p class="small">Settings, users, integrations, Stripe/PayPal configuration, testing, sanity checks, reliability, releases, deployment and recovery.</p>
-        <div class="small" data-admin-module-count>I.T. tools</div>
-      </a>
-    </main>
-
-    <section class="card" style="margin-top:18px">
-      <h2 style="margin-top:0">Four workspaces, five permission modules</h2>
-      <p class="small" style="margin-bottom:0">No operational screen has been removed. Existing admin URLs stay stable. Creator groups Socials/CAIP navigation with creative storytelling while the underlying Socials runtime authority remains independently permissioned.</p>
-    </section>
-
+    <section class="card" style="margin-top:18px"><h2 style="margin-top:0">Dashboard boundary</h2><p class="small" style="margin-bottom:0">This page performs GET-only reads from the current navigation manifest, Today Tasks read contract and I.T. control tower. It stores no recent history or preferences, performs no task completion/snooze/ignore action, and does not post Accounting, mutate Inventory/Creative/prices, execute providers, change schema/D1/R2/bindings, or overwrite Production business data.</p></section>
     <div class="footer card" style="margin-top:18px"></div>
   </div>
-
-  <script src="/js/main.js?v=466"></script>
-  <script src="/public/js/auth.js?v=466"></script>
-  <script src="/public/js/admin-route-usage.js?v=466"></script>
-  <script src="/public/js/site-auth-ui.js?v=466"></script>
-  <script src="/public/js/site-analytics.js?v=466"></script>
-  <script src="/public/js/admin-self-protect.js?v=466"></script>
-  <script src="/public/js/admin.js?v=466"></script>
-  <script src="/public/js/admin-today-tasks.js?v=467b11"></script>
-  <script src="/public/js/admin-module-hub.js?v=466"></script>
+  <script src="/js/main.js?v=467"></script>
+  <script src="/public/js/auth.js?v=467"></script>
+  <script src="/public/js/admin-route-usage.js?v=467"></script>
+  <script src="/public/js/site-auth-ui.js?v=467b122"></script>
+  <script src="/public/js/site-analytics.js?v=467"></script>
+  <script src="/public/js/admin-self-protect.js?v=467"></script>
+  <script src="/public/js/admin.js?v=467"></script>
+  <script src="/public/js/admin-home-dashboard-v123.js?v=467b123"></script>
 </body>
 </html>

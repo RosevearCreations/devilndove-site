@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+const read=(p)=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
+const dashboard=read('public/js/admin-home-dashboard-v123.js');
+const page=read('admin/index.html');
+const manifest=JSON.parse(read('data/admin-navigation-modules.json'));
+const req=(ok,msg)=>{if(!ok)throw new Error(msg);};
+req(/const BUILD = 123/.test(dashboard),'dashboard build identity missing');
+for(const token of ['/data/admin-navigation-modules.json','/api/admin/contracts/operations-today-tasks-read?min_count=1','/api/admin/it-operations-control-tower','Promise.allSettled','adminHomeDashboardSummary','adminHomeDashboardToday','adminHomeDashboardWorkspaces','adminHomeDashboardQuickLinks','adminHomeDashboardHealth','Open full Today Tasks','partial read failure'])req(dashboard.includes(token),`dashboard missing ${token}`);
+for(const forbidden of ['localStorage','sessionStorage',"method: 'POST'",'method:"POST"','setInterval('])req(!dashboard.includes(forbidden),`dashboard contains forbidden behavior ${forbidden}`);
+req((page.match(/<h1(?:\s|>)/gi)||[]).length===1,'Admin home must contain exactly one H1');
+req(page.includes('Release 467 Build 123'),'Admin home Build 123 identity missing');
+req(page.includes('/public/js/admin-home-dashboard-v123.js?v=467b123'),'Admin home dashboard asset missing');
+req(!page.includes('/public/js/admin-today-tasks.js'),'Admin home must not load the writable Today Tasks action UI');
+req(page.includes('/admin/today-tasks/'),'Admin home must link to the authoritative Today Tasks workspace');
+const modules=manifest.modules||[];req(JSON.stringify(modules.map(x=>x.key))===JSON.stringify(['storefront','creator','finance','it']),'workspace module keys drifted');
+const links=modules.flatMap(m=>(m.sections||[]).flatMap(s=>s.links||[]));req(links.length>=50,`expected >=50 current admin tool links, got ${links.length}`);
+for(const label of ['Products','Catalog & Inventory','Accounting','Business Health','Application Sanity Check','Today Tasks'])req(links.some(x=>x.label===label),`current navigation missing ${label}`);
+console.log('RELEASE 467 BUILD 123 ADMIN HOME DASHBOARD TEST: PASS');
+console.log(`Manifest modules: ${modules.length}; current tool links: ${links.length}`);
+console.log('Reads: manifest + Today Tasks + I.T. control tower; writes/persistence: ZERO');
