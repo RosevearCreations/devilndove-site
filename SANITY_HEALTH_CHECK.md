@@ -2,35 +2,36 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 123 — Admin Home Dashboard Refresh**.
+Current candidate: **Release 467 Build 124 — Canada-First Market Controls & U.S. Shipping Pause**.
 
-Last fully verified Development + Production checkpoint is Build 122:
+Last fully verified Development + Production checkpoint is Build 123:
 
-- SHA `8ff2df0616a4a9f23c4e1a92bcf5e501a306e0da`
-- tree `e87670bb397cee58ed839813ea33851d799b5823`
-- System `34710867035`
-- Quality `34710867094`
-- I.T. `34710867066`
-- Hygiene `34710867072`
-- Production Pages `34710956842`
-- Production Live Resource Integrity `34710999276`
+- SHA `d0485a9892331e8da2cec42ed54850893b4a7ab1`
+- tree `e5c15b8c2d1c1a9f091a688b9f525e8b7ce73e20`
+- System `34719387920`
+- Quality `34719387904`
+- I.T. `34719387901`
+- Hygiene `34719387931`
+- Production Pages `34719482161`
+- Production Live Resource Integrity `34719519418`
 
-Result: **Build 122 six-proof closure is ingested by Build 123.**
+Result: **Build 123 six-proof closure is ingested by Build 124.**
 
-## Build 123 safety checks
+## Build 124 safety checks
 
-- Today Tasks source: existing GET/read contract only.
-- I.T. source: existing GET/read control tower only.
-- Navigation source: existing `data/admin-navigation-modules.json`.
-- Partial failure isolation: `Promise.allSettled`.
-- Polling: **ZERO**.
-- Local/session storage: **ZERO**.
-- Recent history/preference persistence: **ZERO**.
-- POST/write request: **ZERO**.
-- Today task Done/Ignore/Snooze controls on dashboard: **ZERO**.
+- Storefront strategy: **CANADA_FIRST**.
+- Billing country allow-list: **CA only**.
+- Physical shipping country allow-list: **CA only**.
+- U.S. sales: **EXPLICITLY BLOCKED**.
+- U.S. shipping: **EXPLICITLY BLOCKED**.
+- U.S. restriction reason: `TEMPORARY_TARIFF_RESTRICTION`.
+- Other markets: **UNSUPPORTED until REVIEW_BEFORE_ENABLE**.
+- Local pickup: **PRESERVED**.
+- Front-page banner: Canada First/U.S. shipping pause message, no additional H1.
+- Shared browser/server policy: **PRESERVED**.
+- Provider execution/publication added: **ZERO**.
 - Accounting posting / period close: **ZERO**.
 - Inventory / Creative / price mutation: **ZERO**.
-- Provider execution/publication: **ZERO**.
 - Request-time schema mutation: **ZERO**.
 - D1 business-data mutation: **ZERO**.
 - R2/binding mutation: **ZERO**.
@@ -39,4 +40,4 @@ Result: **Build 122 six-proof closure is ingested by Build 123.**
 
 ## Restart integrity
 
-Build 123 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 124, not self-written into Build 123.
+Build 124 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 125, not self-written into Build 124.
