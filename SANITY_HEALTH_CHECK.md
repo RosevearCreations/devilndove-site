@@ -2,45 +2,41 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 116 — Business Health Operator Briefs & Export**.
+Current candidate: **Release 467 Build 117 — Business Health Period Comparison & Trend Review**.
 
-Last fully verified Development + Production checkpoint is Build 115:
+Last fully verified Development + Production checkpoint is Build 116:
 
-- SHA `7cff6e22b273ffb4db40828dfcbf9f0d52b46c60`
-- tree `f0dffdc1c6c293cde5482cc6a36da2a6ce1614b0`
-- System `34698543554`
-- Quality `34698543577`
-- I.T. `34698543545`
-- Hygiene `34698543556`
-- Production Pages `34698623248`
-- Production Live Resource Integrity `34698665721`
+- SHA `4661b541df3ad92c70e19c85673560f969cda85b`
+- tree `475d13cd5fda9e9ac694861c8df44c5ede8a5db0`
+- System `34699742783`
+- Quality `34699742812`
+- I.T. `34699742791`
+- Hygiene `34699742779`
+- Production Pages `34699821018`
+- Production Live Resource Integrity `34699867959`
 
-Result: **Build 115 six-proof closure is ingested by Build 116.**
+Result: **Build 116 six-proof closure is ingested by Build 117.**
 
-## Build 116 safety checks
+## Build 117 safety checks
 
-- Operator-brief endpoint: GET-only.
-- Business Health base read: one load per request.
-- Build 114 action queue derivation: one derivation per request.
-- Build 115 review-pack derivation: one derivation per request.
-- Markdown export: read-only response/download.
+- Period-comparison endpoint: GET-only.
+- Current and immediately prior Business Health reads: read-only.
+- Trend classifier: pure/deterministic.
+- Period-specific grading only; profitability and I.T. historical claims: **ZERO**.
 - Server persistence: **ZERO**.
-- Acknowledgement persistence: **ZERO**.
-- Resolution persistence: **ZERO**.
+- Acknowledgement/resolution persistence: **ZERO**.
 - Automatic business action: **ZERO**.
 - Accounting posting / period close: **ZERO**.
-- Inventory mutation: **ZERO**.
-- Creative mutation: **ZERO**.
-- Price mutation: **ZERO**.
+- Inventory / Creative / price mutation: **ZERO**.
 - Provider execution/publication: **ZERO**.
 - Request-time schema mutation: **ZERO**.
 - D1 business-data mutation: **ZERO**.
-- Canonical migrations: exactly `0001`–`0004`.
 - R2/binding mutation: **ZERO**.
+- Canonical migrations: exactly `0001`–`0004`.
 - Production business-data overwrite: **ZERO**.
 
-Operator brief state is deliberately non-executing: `blocked`, `review` and `ready` are human-review/export states only.
+Trend states are human-review signals only and never authorize automatic execution.
 
 ## Restart integrity
 
-Build 116 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 117, not self-written into Build 116.
+Build 117 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 118, not self-written into Build 117.
