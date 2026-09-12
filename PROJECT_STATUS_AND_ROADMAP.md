@@ -2,37 +2,36 @@
 
 ## Current checkpoint
 
-**Release 467 Build 119 — Business Health Escalation Decision Brief & Owner Priority Matrix** is the active closure candidate.
+**Release 467 Build 120 — Business Health Owner Context Transfer & Review Session Packet** is the active closure candidate.
 
-Build 118 is the last fully verified Development + Production checkpoint:
+Build 119 is the last fully verified Development + Production checkpoint:
 
-- SHA `df0953198882e82ca3d7742b614d92528d45dbe3`
-- tree `9c2d8abd7da4a5f1e41c00bdc001cd844458d9ea`
-- System Gate `34703983097`
-- Current Application Quality `34703983106`
-- I.T. Admin Runtime `34703983092`
-- Repository Branch Hygiene `34703983073`
-- Production Pages Deploy `34704076896`
-- Production Live Resource Integrity `34704126081`
+- SHA `9f5f763c277dc5c250cfe72d85e4235dc3e778dd`
+- tree `2fa9a857ce4756c38d746acdd5f21e44e8f1e4f1`
+- System Gate `34705738437`
+- Current Application Quality `34705738429`
+- I.T. Admin Runtime `34705738421`
+- Repository Branch Hygiene `34705738427`
+- Production Pages Deploy `34706136674`
+- Production Live Resource Integrity `34706179149`
 
-The Build 118 closure is recorded by Build 119 ingestion, not a Build 118 self-claim.
+The Build 119 closure is recorded by Build 120 ingestion, not a Build 119 self-claim.
 
-## Build 119 — Business Health Escalation Decision Brief & Owner Priority Matrix
+## Build 120 — Business Health Owner Context Transfer & Review Session Packet
 
-Goal: turn the existing Business Health action/trend evidence into one human review order without creating another queue or any persistent decision workflow.
+Goal: carry an existing human review decision into the correct owner workspace without adding workflow persistence or another action queue.
 
 Delivered candidate scope:
 1. Reuses the Build 114 action queue as the sole current-action authority.
-2. Reuses Build 118 three-period operational-quality trend evidence.
-3. Builds an owner priority matrix across Finance, Creators + Finance and I.T.
-4. Persistent worsening outranks single-period worsening.
-5. Existing blocking, attention and review actions provide current-severity context.
-6. Finance trend context is period-specific operational quality only.
-7. Profitability and I.T. remain current snapshots only.
-8. Markdown decision brief is download-only and causes no write.
-9. No decision/approval/acknowledgement/resolution persistence or automatic business action.
-10. No Accounting posting/period close, Inventory/Creative/price mutation, provider action, schema/D1/R2/binding mutation or Production mutation.
-11. Canonical D1 migrations remain exactly `0001`–`0004`.
+2. Reuses the Build 119 owner priority matrix as the human review-order authority.
+3. Adds URL-only context for selected period, owner, priority, top action and trend counts.
+4. Adds a visible context banner to Finance, Month End, Creator/Profitability and I.T. destinations.
+5. Month End applies a valid transferred accounting period to its existing period selector.
+6. Adds a downloadable Markdown review-session packet.
+7. Normal Business Health page load does not add a second Business Health database read.
+8. No review-session/context/decision/approval/acknowledgement/resolution persistence or automatic business action.
+9. No Accounting posting/period close, Inventory/Creative/price mutation, provider action, schema/D1/R2/binding mutation or Production mutation.
+10. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Release mechanics
 
@@ -42,4 +41,4 @@ Persistent branches remain `main` and `dev`.
 
 ## Next build
 
-Build 120 remains unauthorized until Build 119 receives its later exact Development and Production proof; Build 120 must ingest that closure.
+Build 121 remains unauthorized until Build 120 receives its later exact Development and Production proof; Build 121 must ingest that closure.

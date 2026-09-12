@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 119 — Business Health Escalation Decision Brief & Owner Priority Matrix**.
+**Release 467 Build 120 — Business Health Owner Context Transfer & Review Session Packet**.
 
-The last fully verified Development and Production checkpoint is Build 118:
+The last fully verified Development and Production checkpoint is Build 119:
 
-- SHA `df0953198882e82ca3d7742b614d92528d45dbe3`
-- tree `9c2d8abd7da4a5f1e41c00bdc001cd844458d9ea`
-- System Gate `34703983097`
-- Current Application Quality Proof `34703983106`
-- I.T. Admin Runtime Proof `34703983092`
-- Repository Branch Hygiene `34703983073`
-- Production Pages Deploy `34704076896`
-- Production Live Resource Integrity `34704126081`
+- SHA `9f5f763c277dc5c250cfe72d85e4235dc3e778dd`
+- tree `2fa9a857ce4756c38d746acdd5f21e44e8f1e4f1`
+- System Gate `34705738437`
+- Current Application Quality Proof `34705738429`
+- I.T. Admin Runtime Proof `34705738421`
+- Repository Branch Hygiene `34705738427`
+- Production Pages Deploy `34706136674`
+- Production Live Resource Integrity `34706179149`
 
 ## Canonical Development target
 
@@ -33,8 +33,8 @@ The last fully verified Development and Production checkpoint is Build 118:
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 8. A later build ingests that completed six-proof closure.
 
-## Build 119 technical boundary
+## Build 120 technical boundary
 
-Build 119 is a read-only Business Health Escalation Decision Brief & Owner Priority Matrix. It reuses the existing action queue plus Build 118 rolling trend to prioritize human review. Finance trend context is period-specific operational quality; profitability and I.T. remain current snapshots only. The feature must not create another action queue, persist a decision/approval/acknowledgement/resolution, store trend history, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
+Build 120 is a read-only Business Health Owner Context Transfer & Review Session Packet. It carries the selected period, owner, review priority, top existing action and trend counts through admin-only query parameters into an existing owner workspace and displays them in a destination banner. The Build 114 action queue and Build 119 decision matrix remain authoritative. The feature must not create another action queue, persist review/session/context/decision/approval/acknowledgement/resolution state, store trend history, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.

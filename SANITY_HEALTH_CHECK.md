@@ -2,31 +2,33 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 119 — Business Health Escalation Decision Brief & Owner Priority Matrix**.
+Current candidate: **Release 467 Build 120 — Business Health Owner Context Transfer & Review Session Packet**.
 
-Last fully verified Development + Production checkpoint is Build 118:
+Last fully verified Development + Production checkpoint is Build 119:
 
-- SHA `df0953198882e82ca3d7742b614d92528d45dbe3`
-- tree `9c2d8abd7da4a5f1e41c00bdc001cd844458d9ea`
-- System `34703983097`
-- Quality `34703983106`
-- I.T. `34703983092`
-- Hygiene `34703983073`
-- Production Pages `34704076896`
-- Production Live Resource Integrity `34704126081`
+- SHA `9f5f763c277dc5c250cfe72d85e4235dc3e778dd`
+- tree `2fa9a857ce4756c38d746acdd5f21e44e8f1e4f1`
+- System `34705738437`
+- Quality `34705738429`
+- I.T. `34705738421`
+- Hygiene `34705738427`
+- Production Pages `34706136674`
+- Production Live Resource Integrity `34706179149`
 
-Result: **Build 118 six-proof closure is ingested by Build 119.**
+Result: **Build 119 six-proof closure is ingested by Build 120.**
 
-## Build 119 safety checks
+## Build 120 safety checks
 
-- Decision-brief endpoint: GET-only.
-- Current plus two prior Business Health reads: read-only.
-- Owner-priority synthesis: pure/deterministic.
+- Review-session endpoint: GET-only.
+- Build 119 decision authority: reused read-only.
+- Review-session synthesis: pure/deterministic.
 - Existing Build 114 action queue remains authoritative.
+- Existing Build 119 owner priority matrix remains authoritative.
 - Second action queue created: **NO**.
+- Context transfer: **URL-only**.
+- Review-session/context persistence: **ZERO**.
 - Decision / approval persistence: **ZERO**.
 - Trend-history persistence: **ZERO**.
-- Profitability and I.T. historical claims: **ZERO**.
 - Server persistence: **ZERO**.
 - Acknowledgement/resolution persistence: **ZERO**.
 - Automatic business action: **ZERO**.
@@ -39,8 +41,8 @@ Result: **Build 118 six-proof closure is ingested by Build 119.**
 - Canonical migrations: exactly `0001`–`0004`.
 - Production business-data overwrite: **ZERO**.
 
-Priority states are human-review signals only and never authorize automatic execution.
+Destination banners display human review context only and never authorize automatic execution.
 
 ## Restart integrity
 
-Build 119 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 120, not self-written into Build 119.
+Build 120 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 121, not self-written into Build 120.
