@@ -2,39 +2,39 @@
 
 ## Current checkpoint
 
-**Release 467 Build 123 — Admin Home Dashboard Refresh** is the active closure candidate.
+**Release 467 Build 124 — Canada-First Market Controls & U.S. Shipping Pause** is the active closure candidate.
 
-Build 122 is the last fully verified Development + Production checkpoint:
+Build 123 is the last fully verified Development + Production checkpoint:
 
-- SHA `8ff2df0616a4a9f23c4e1a92bcf5e501a306e0da`
-- tree `e87670bb397cee58ed839813ea33851d799b5823`
-- System Gate `34710867035`
-- Current Application Quality `34710867094`
-- I.T. Admin Runtime `34710867066`
-- Repository Branch Hygiene `34710867072`
-- Production Pages Deploy `34710956842`
-- Production Live Resource Integrity `34710999276`
+- SHA `d0485a9892331e8da2cec42ed54850893b4a7ab1`
+- tree `e5c15b8c2d1c1a9f091a688b9f525e8b7ce73e20`
+- System Gate `34719387920`
+- Current Application Quality `34719387904`
+- I.T. Admin Runtime `34719387901`
+- Repository Branch Hygiene `34719387931`
+- Production Pages Deploy `34719482161`
+- Production Live Resource Integrity `34719519418`
 
-The Build 122 closure is recorded by Build 123 ingestion, not a Build 122 self-claim.
+The Build 123 closure is recorded by Build 124 ingestion, not a Build 123 self-claim.
 
-## Build 123 — Admin Home Dashboard Refresh
+## Build 124 — Canada-First Market Controls & U.S. Shipping Pause
 
-Goal: make `/admin/` a useful read-only operator landing page without duplicating task actions, navigation authority, business writes or saved workspace state.
+Goal: keep Canada as the safe current storefront market, make the temporary U.S. restriction explicit and customer-friendly, and create a deliberate control point for future market expansion.
 
 Candidate scope:
-1. Read the existing Today Tasks read contract for counts and top task groups.
-2. Read the current I.T. control tower for readiness and proven release health.
-3. Reuse `data/admin-navigation-modules.json` for workspace cards, tool counts and quick destinations.
-4. Fail soft with `Promise.allSettled`; one read failure must not blank unrelated dashboard areas.
-5. Provide manual refresh only; no polling.
-6. Keep Done / Ignore / Snooze exclusively in `/admin/today-tasks/`.
-7. Store no recent history or preferences.
-8. Perform no POST/write action.
+1. Preserve Canada-only billing and physical shipping, CAD currency and local pickup.
+2. Explicitly block U.S. sales and U.S. shipping with `TEMPORARY_TARIFF_RESTRICTION`.
+3. Normalize `US`, `USA`, `U.S.` and `United States` to the same blocked country code.
+4. Keep all other non-Canadian countries unsupported until reviewed and explicitly enabled.
+5. Present the front-page **Canada First — U.S. shipping temporarily paused** banner.
+6. Explain that current 50% tariffs cannot viably be absorbed or passed to customers, while expressing the intent to resume serving American customers when conditions allow.
+7. Keep the shared browser/server commerce-policy core authoritative before provider execution.
+8. Add no provider execution, schema migration, D1 business-data mutation, R2/binding mutation or Production business-data overwrite.
 9. Canonical D1 migrations remain exactly `0001`–`0004`.
 
-## Next autonomous QoL sequence
+## Next direction
 
-After Build 123 closes: Build 124 Consistent Loading/Empty/Error/Retry States; Build 125 User Preferences & Workspace Memory; Build 126 Universal Admin Search; Build 127 Table/List Quality-of-Life Standard; Build 128 Product & Inventory Quick View Drawer.
+After Build 124 closes, continue the bounded quality-of-life sequence, with future-country enablement handled as an explicit reviewed commerce-policy build rather than an automatic worldwide expansion.
 
 ## Release mechanics
 
