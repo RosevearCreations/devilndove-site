@@ -66,8 +66,10 @@ req(files==EXPECTED,'canonical D1 migration stream must remain exactly 0001-0004
 req('0005_' not in json.dumps(manifest),'Build 128 must not introduce migration 0005')
 req("run_current_contract('scripts/release467_build128_gate.py','Release 467 Build 128')" in provenance,'active System Gate provenance must call Build 128')
 req('Release 467 Build 128' in doc and 'Navigation Help' in doc and str(B127_PAGES) in doc and str(B127_LIVE) in doc,'Build 128 operating document incomplete')
+req('const RELEASE=467;const BUILD=128;' in it,'I.T. projection missing structural Build 128 identity')
+req('CURRENT_RELIABILITY_BUILD=128' in reliability,'Reliability projection missing structural Build 128 identity')
+req('const RELEASE=467;const BUILD=128;' in preflight,'Deployment Preflight projection missing structural Build 128 identity')
 for body,label in ((it,'I.T. projection'),(reliability,'Reliability projection'),(preflight,'Deployment Preflight projection')):
-    req('Build 128' in body or 'build:128' in body or 'BUILD=128' in body,f'{label} missing Build 128 identity')
     for token in (B127_SHA,B127_TREE,str(B127_PROOFS['system_gate_run']),str(B127_PROOFS['current_application_quality_run']),str(B127_PROOFS['it_admin_runtime_proof_run']),str(B127_PROOFS['branch_hygiene_run']),str(B127_PAGES),str(B127_LIVE)):
         req(token in body,f'{label} missing Build 127 closure token: {token}')
 for path in ('public/js/admin-navigation-help-v128.js','public/js/admin-context-breadcrumbs-v127.js','public/js/admin-favorites-quick-launch-v126.js','public/js/admin-workspace-preferences-v125.js','public/js/site-auth-ui.js','functions/api/admin/it-operations-control-tower.js','functions/api/_lib/currentReliability.js','functions/api/admin/current-deployment-preflight.js','public/js/admin-it-control-tower.js'):
