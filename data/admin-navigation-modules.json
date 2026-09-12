@@ -70,6 +70,7 @@
             {"href": "/admin/catalog/", "label": "Catalog & Inventory"},
             {"href": "/admin/catalog-media/", "label": "Catalog Media"},
             {"href": "/admin/mobile-product/", "label": "Phone Product Capture"},
+            {"href": "/admin/mobile-workshop-assistant/", "label": "Mobile Workshop Assistant"},
             {"href": "/admin/mobile/", "label": "Mobile Creator Workspace"},
             {"href": "/admin/product-image-quality/", "label": "Product Photography Manager"},
             {"href": "/admin/product-lineage/", "label": "Product Material & Tool Lineage"}

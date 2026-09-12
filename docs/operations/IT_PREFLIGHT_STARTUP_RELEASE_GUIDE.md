@@ -4,31 +4,31 @@
 
 ## Verified Development
 
-Build 106 — Marketplace Listing Readiness is the last fully verified checkpoint:
-- `dev` `e22b3f9c7fcb223114b48e52a51e0c537e6da081`
-- tree `334d907d8e39dcbc8a02dc80cfa949abf13bd8c5`
-- System Gate `34655258282` SUCCESS
-- Current Application Quality `34655258284` SUCCESS
-- I.T. Admin Runtime Proof `34655258283` SUCCESS
-- Repository Branch Hygiene `34655258294` SUCCESS.
+Build 107 — Storefront Discovery & Collection Improvements is the last fully verified checkpoint:
+- `dev` `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
+- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
+- System Gate `34662074529` SUCCESS
+- Current Application Quality `34662074545` SUCCESS
+- I.T. Admin Runtime Proof `34662074524` SUCCESS
+- Repository Branch Hygiene `34662074579` SUCCESS.
 
 ## Verified Production
 
-Build 106 is the current Production checkpoint:
-- `main` `e22b3f9c7fcb223114b48e52a51e0c537e6da081`
-- tree `334d907d8e39dcbc8a02dc80cfa949abf13bd8c5`
-- Production Pages Deploy `34655379475` SUCCESS
-- Production Live Resource Integrity `34655438506` SUCCESS.
+Build 107 is the current Production checkpoint:
+- `main` `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
+- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
+- Production Pages Deploy `34662205783` SUCCESS
+- Production Live Resource Integrity `34662253285` SUCCESS.
 
-## Build 107 operational boundary
+## Build 108 operational boundary
 
-Build 107 — **Storefront Discovery & Collection Improvements** is the active Development closure candidate. Shop and Collections now expose permanent links for Under $25, One-of-a-kind, Local pickup, Custom gifts, Vintage finds, Laser engraved, Workshop experiments and Proof-rich Products.
+Build 108 — **Mobile Workshop Assistant** is the active Development closure candidate. It adds a phone-first capture/review path for one workshop image, consent/privacy intent, image role, optional Product association, story note, caption draft and explicit specialist-review handoff.
 
-Under $25 and Vintage use existing Product filters. Evidence-backed `discover=` paths consume only the already-loaded Product payload and require public evidence before a Product is included. The feature adds no Product API/database read, Product/Inventory mutation, canonical migration or provider publication. Build 106 marketplace readiness and earlier Product workflow protections remain active.
+Photo bytes remain in the active browser tab and are not persisted to localStorage or included in the exported JSON. Lightweight metadata/text uses browser-local storage. Product association uses `GET /api/products?limit=100` only. Public-use candidates fail closed unless consent evidence is `owner_no_people` or `explicit_release`. No media upload, Product/Inventory/D1/R2 mutation, canonical migration, provider execution or publication is introduced.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 107 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 108 must ingest Build 107's final external closure.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 108 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 109 must ingest Build 108's final external closure.
 
 The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 

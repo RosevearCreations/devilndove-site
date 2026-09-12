@@ -2,7 +2,7 @@
   "release": 467,
   "build": 107,
   "title": "Storefront Discovery & Collection Improvements",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build107-storefront-discovery-collections",
   "starting_point": {
     "development": {
@@ -63,8 +63,31 @@
     "no_product_mutation": true,
     "build107_source_gate_required": true
   },
-  "final_closure": null,
-  "production_checkpoint": null,
+  "final_closure": {
+    "dev_sha": "943d7af070bc1b01506f2b8d3e8fc36b8aed7750",
+    "tree_sha": "a16e55754b40279050b781ed5bad1892ee62b76c",
+    "proofs": {
+      "system_gate_run": 34662074529,
+      "current_application_quality_run": 34662074545,
+      "it_admin_runtime_proof_run": 34662074524,
+      "branch_hygiene_run": 34662074579
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "ingested_by_build": 108
+  },
+  "production_checkpoint": {
+    "main_sha": "943d7af070bc1b01506f2b8d3e8fc36b8aed7750",
+    "tree_sha": "a16e55754b40279050b781ed5bad1892ee62b76c",
+    "production_pages_deploy_run": 34662205783,
+    "production_live_resource_integrity_run": 34662253285,
+    "state": "PRODUCTION_GREEN"
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,

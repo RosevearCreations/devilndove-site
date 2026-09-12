@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Mobile Workshop Assistant — Devil n Dove</title>
+  <meta name="description" content="Phone-first Devil n Dove workshop capture assistant for photo review, consent/privacy, image role, Product/story notes and caption draft preparation."/>
+  <link rel="stylesheet" href="/css/styles.css?v=467"/>
+  <link rel="stylesheet" href="/css/mobile-workshop-assistant.css?v=467b108"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+</head>
+<body data-admin-page="mobile-workshop-assistant">
+  <div class="container admin-shell mwa-shell">
+    <div class="nav">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Creator / Mobile Workshop Assistant</div></div></div>
+      <div class="links"><a href="/admin/mobile/">Phone Dashboard</a><a href="/admin/creator/">Creator</a><a href="/admin/media-content-studio/">Media Studio</a><button class="btn" data-nav-logout type="button">Logout</button></div>
+    </div>
+
+    <div class="hero compact-hero mwa-hero">
+      <div>
+        <p class="eyebrow">Release 467 • Build 108</p>
+        <h1>Mobile Workshop Assistant</h1>
+        <p>Capture a workshop photo, decide privacy and consent, choose the intended image role, attach an optional Product, record the story while it is fresh, and prepare a caption/review handoff without publishing anything.</p>
+      </div>
+    </div>
+
+    <section class="card mwa-boundary" aria-label="Safety boundary">
+      <strong>Review-first boundary</strong>
+      <p class="small">The captured image stays in this browser tab. Only lightweight session metadata is saved locally. Build 108 does not upload media, change Products or Inventory, write D1/R2, or publish to Social/marketplace providers.</p>
+    </section>
+
+    <div id="mobileWorkshopMessage" class="card small" hidden role="status" aria-live="polite"></div>
+
+    <main class="mwa-grid">
+      <section class="card mwa-step" data-step="capture">
+        <p class="eyebrow">1 • Capture</p>
+        <h2>Workshop photo</h2>
+        <label class="mwa-capture-box">
+          <span><strong>Take or choose one photo</strong><br/><span class="small">Camera hint uses the rear/environment camera on supported phones.</span></span>
+          <input id="mobileWorkshopPhoto" class="input" type="file" accept="image/*" capture="environment"/>
+        </label>
+        <div id="mobileWorkshopPreviewWrap" class="mwa-preview-wrap" hidden>
+          <img id="mobileWorkshopPreview" alt="Local workshop capture preview"/>
+          <div class="small" id="mobileWorkshopPhotoMeta"></div>
+        </div>
+      </section>
+
+      <section class="card mwa-step" data-step="privacy">
+        <p class="eyebrow">2 • Privacy & consent</p>
+        <h2>Who may see this?</h2>
+        <label><span class="small">Privacy intent</span>
+          <select class="input" id="mobileWorkshopPrivacy">
+            <option value="private">Private workshop reference</option>
+            <option value="internal_review">Internal review candidate</option>
+            <option value="public_candidate">Public-use candidate — still requires downstream review</option>
+          </select>
+        </label>
+        <label><span class="small">Consent evidence</span>
+          <select class="input" id="mobileWorkshopConsent">
+            <option value="unknown">Unknown / not reviewed</option>
+            <option value="owner_no_people">Owner-created media with no other identifiable people</option>
+            <option value="explicit_release">Explicit release/consent evidence exists</option>
+            <option value="third_party_hold">Customer/third-party media — hold private until consent is verified</option>
+          </select>
+        </label>
+        <div id="mobileWorkshopConsentState" class="mwa-state small"></div>
+      </section>
+
+      <section class="card mwa-step" data-step="role">
+        <p class="eyebrow">3 • Image role</p>
+        <h2>What is this photo for?</h2>
+        <select class="input" id="mobileWorkshopRole">
+          <option value="process">Process / making step</option>
+          <option value="technique">Technique detail</option>
+          <option value="materials">Materials / supplies evidence</option>
+          <option value="product_gallery">Product gallery candidate</option>
+          <option value="product_hero">Product hero candidate</option>
+          <option value="proof">Proof / evidence candidate</option>
+          <option value="packaging">Packaging / label candidate</option>
+          <option value="social_candidate">Social content candidate — review only</option>
+        </select>
+        <p class="small">The role is a routing hint only. Specialist Product/Media/CAIP screens remain authoritative for final assignment.</p>
+      </section>
+
+      <section class="card mwa-step" data-step="product">
+        <p class="eyebrow">4 • Product</p>
+        <h2>Associate a Product</h2>
+        <div class="mwa-row">
+          <input id="mobileWorkshopProductSearch" class="input" type="search" placeholder="Search Product name, SKU or DD number"/>
+          <button class="btn" id="mobileWorkshopRefreshProducts" type="button">Refresh</button>
+        </div>
+        <select class="input" id="mobileWorkshopProduct"><option value="">No Product — general workshop capture</option></select>
+        <p id="mobileWorkshopProductState" class="small">Product association is optional and read-only.</p>
+      </section>
+
+      <section class="card mwa-step mwa-span-2" data-step="story">
+        <p class="eyebrow">5 • Story note</p>
+        <h2>Record what is happening</h2>
+        <textarea id="mobileWorkshopStory" class="input" rows="5" maxlength="1600" placeholder="What are you making? What changed? Which material, tool, technique, mistake, repair, experiment or finishing step matters in this photo?"></textarea>
+        <div class="small"><span id="mobileWorkshopStoryCount">0</span>/1600 characters • saved browser-locally as you type.</div>
+      </section>
+
+      <section class="card mwa-step mwa-span-2" data-step="caption">
+        <p class="eyebrow">6 • Draft</p>
+        <div class="mwa-heading-row"><div><h2>Caption / content draft</h2><p class="small">Draft preparation only; never auto-published.</p></div><button class="btn" id="mobileWorkshopGenerateCaption" type="button">Generate from story note</button></div>
+        <textarea id="mobileWorkshopCaption" class="input" rows="6" maxlength="2200" placeholder="Draft caption or content notes for later review."></textarea>
+        <div id="mobileWorkshopReadiness" class="mwa-state"></div>
+      </section>
+
+      <section class="card mwa-step mwa-span-2" data-step="handoff">
+        <p class="eyebrow">7 • Review handoff</p>
+        <h2>Package the work without publishing it</h2>
+        <div class="mwa-actions">
+          <button class="btn primary" id="mobileWorkshopCopySummary" type="button">Copy review summary</button>
+          <button class="btn" id="mobileWorkshopDownloadJson" type="button">Download handoff JSON</button>
+          <button class="btn" id="mobileWorkshopClear" type="button">Clear local session</button>
+        </div>
+        <div class="mwa-handoffs">
+          <a class="btn secondary" href="/admin/media-content-studio/">Media Studio</a>
+          <a class="btn secondary" href="/admin/mobile-product/">Product Capture</a>
+          <a class="btn secondary" href="/admin/content-studio/">Content Studio</a>
+          <a class="btn secondary" href="/admin/caip-content-handoff/">CAIP Content Handoff</a>
+          <a class="btn secondary" href="/admin/stage-photo-moderation/">Photo Moderation</a>
+        </div>
+        <p class="small">Use the exported review package as a checklist/reference. The photo file itself is intentionally not embedded in localStorage or the JSON package.</p>
+      </section>
+    </main>
+
+    <div class="footer card" style="margin-top:18px"></div>
+  </div>
+  <script src="/js/main.js?v=467"></script>
+  <script src="/public/js/auth.js?v=467"></script>
+  <script src="/public/js/admin-route-usage.js?v=467"></script>
+  <script src="/public/js/site-auth-ui.js?v=467"></script>
+  <script src="/public/js/admin-self-protect.js?v=467"></script>
+  <script src="/public/js/admin-mobile-workshop-assistant.js?v=467b108"></script>
+</body>
+</html>

@@ -1,37 +1,37 @@
 # Devil n Dove — Markdown / Authority Index
 
-## Current authority — Release 467 Build 107
+## Current authority — Release 467 Build 108
 
-Build 107 — **Storefront Discovery & Collection Improvements** is the current Development closure candidate.
+Build 108 — **Mobile Workshop Assistant** is the current Development closure candidate.
 
-Last fully verified Development is Build 106:
-- `dev` `e22b3f9c7fcb223114b48e52a51e0c537e6da081`
-- tree `334d907d8e39dcbc8a02dc80cfa949abf13bd8c5`
-- System `34655258282` SUCCESS
-- Quality `34655258284` SUCCESS
-- I.T. `34655258283` SUCCESS
-- Hygiene `34655258294` SUCCESS.
+Last fully verified Development is Build 107:
+- `dev` `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
+- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
+- System `34662074529` SUCCESS
+- Quality `34662074545` SUCCESS
+- I.T. `34662074524` SUCCESS
+- Hygiene `34662074579` SUCCESS.
 
-Current Production is Build 106:
-- `main` `e22b3f9c7fcb223114b48e52a51e0c537e6da081`
-- tree `334d907d8e39dcbc8a02dc80cfa949abf13bd8c5`
-- Production Pages Deploy `34655379475` SUCCESS
-- Production Live Resource Integrity `34655438506` SUCCESS.
+Current Production is Build 107:
+- `main` `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
+- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
+- Production Pages Deploy `34662205783` SUCCESS
+- Production Live Resource Integrity `34662253285` SUCCESS.
 
 ## Current reading order
 
 1. `current-development-authority.json`
-2. `release467-build107-storefront-discovery-collections.json`
-3. `release467-build106-marketplace-listing-readiness.json`
-4. `docs/operations/RELEASE_467_BUILD_107_STOREFRONT_DISCOVERY_COLLECTIONS.md`
-5. `PROJECT_STATUS_AND_ROADMAP.md` — includes the autonomous Build 107–113 layout.
+2. `release467-build108-mobile-workshop-assistant.json`
+3. `release467-build107-storefront-discovery-collections.json`
+4. `docs/operations/RELEASE_467_BUILD_108_MOBILE_WORKSHOP_ASSISTANT.md`
+5. `PROJECT_STATUS_AND_ROADMAP.md` — includes the autonomous Build 108–113 layout.
 6. `AI_HANDOFF.md`
 7. `SANITY_HEALTH_CHECK.md`
 8. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 9. `migrations/canonical/manifest.json`
 
-## Build 107 authority contract
+## Build 108 authority contract
 
-Build 107 consumes exact Build 106 Development and Production closure and adds crawlable Shop/Collections discovery paths for Under $25, One-of-a-kind, Local pickup, Custom gifts, Vintage finds, Laser engraved, Workshop experiments and Proof-rich Products. Evidence-backed `discover=` paths reuse the already-loaded Product payload and fail closed when public Product evidence is insufficient. It adds no Product network/database read, performs no Product/Inventory mutation, creates no duplicate catalog and cannot publish to a provider or marketplace.
+Build 108 consumes exact Build 107 Development and Production closure and adds a phone-first review/handoff assistant. The active photo remains tab-local; only lightweight metadata and draft text persist in `dd_mobile_workshop_assistant_v1`. Optional Product association uses the existing Product GET. Public-use candidates require positive consent evidence; unknown/third-party holds fail closed. Exported handoffs include no photo binary and explicitly retain `publication_authorized: false`.
 
-Canonical migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains active, U.S. sales/shipping remain disabled, and local pickup remains supported. `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains active.
+Build 108 performs no media upload, Product/Inventory/D1/R2 mutation, provider execution or provider/Social publication. Canonical migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains active, U.S. sales/shipping remain disabled, and local pickup remains supported. `EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains active.
