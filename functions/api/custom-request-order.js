@@ -1,8 +1,8 @@
 // File: /functions/api/custom-request-order.js
 // Public noindex token endpoint. Schema is Release 461 migration-owned.
-// Release 467 Build 16: return a consolidated customer-safe journey and never expose internal production notes.
+// Release 467 Build 109: return customer-safe stage, proof-consent and fulfilment follow-through without exposing internal production notes.
 import { hasCustomRequestOrderSchema } from './_lib/customRequestCommerceSchemaReadiness.js';
-import { buildCustomerJourney, customerStageMessage } from './_lib/customRequestJourney.js';
+import { buildCustomerJourney, customerStageMessage, customerFollowThrough } from './_lib/customRequestJourney.js';
 
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});}
 function rows(result){return Array.isArray(result?.results)?result.results:[];}
@@ -31,7 +31,8 @@ export async function onRequestGet(context){
 
   const currentStage=customerStageMessage(link.order_stage||'planning');
   const journey=buildCustomerJourney({requestStatus:request?.status||'',quoteStatus:quote?.quote_status||'',orderStage:currentStage.key,orderStatus:order.order_status||''});
-  const proof_consent={status:photos.some(photo=>['product_page_ok','social_ok','all_public_ok'].includes(String(photo.public_use_status||'').toLowerCase()))?'public_photo_permission_available':'private_or_pending',public_ready_count:photos.filter(photo=>['product_page_ok','social_ok','all_public_ok'].includes(String(photo.public_use_status||'').toLowerCase())).length,private_photo_count:photos.filter(photo=>String(photo.public_use_status||'').toLowerCase()==='customer_private').length};
+  const proof_consent={status:photos.some(photo=>['product_page_ok','social_ok','all_public_ok'].includes(String(photo.public_use_status||'').toLowerCase()))?'public_photo_permission_available':photos.some(photo=>String(photo.public_use_status||'').toLowerCase()==='customer_private')?'private_only':'not_recorded',public_ready_count:photos.filter(photo=>['product_page_ok','social_ok','all_public_ok'].includes(String(photo.public_use_status||'').toLowerCase())).length,private_photo_count:photos.filter(photo=>String(photo.public_use_status||'').toLowerCase()==='customer_private').length,publication_authorized:false,moderation_required:true};
+  const follow_through=customerFollowThrough({orderStage:currentStage.key,orderStatus:order.order_status||'',fulfillmentType:order.fulfillment_type||'',proofConsent:proof_consent});
 
   return json({
     ok:true,
@@ -42,9 +43,11 @@ export async function onRequestGet(context){
     photos,
     specs,
     proof_consent,
+    follow_through,
     journey,
     customer_stage:currentStage,
-    fulfillment_message:String(order.fulfillment_type||'').toLowerCase().includes('pickup')?'We will use the reviewed local pickup plan for handoff.':'Shipping remains limited to Canada and follows the reviewed order plan.',
+    fulfillment_message:follow_through.handoff_message,
+    next_step:currentStage.next_step||'',
     link:{link_status:link.link_status||'active',custom_request_id:Number(link.custom_request_id||0)||null,order_stage:currentStage.key,stage_updated_at:link.stage_updated_at||''}
   });
 }

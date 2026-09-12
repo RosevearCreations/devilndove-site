@@ -4,31 +4,31 @@
 
 ## Verified Development
 
-Build 107 — Storefront Discovery & Collection Improvements is the last fully verified checkpoint:
-- `dev` `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
-- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
-- System Gate `34662074529` SUCCESS
-- Current Application Quality `34662074545` SUCCESS
-- I.T. Admin Runtime Proof `34662074524` SUCCESS
-- Repository Branch Hygiene `34662074579` SUCCESS.
+Build 108 — Mobile Workshop Assistant is the last fully verified checkpoint:
+- `dev` `f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8`
+- tree `6d2e524ceb06b90dad9e01e94297cdedde61920c`
+- System Gate `34663299696` SUCCESS
+- Current Application Quality `34663299662` SUCCESS
+- I.T. Admin Runtime Proof `34663299580` SUCCESS
+- Repository Branch Hygiene `34663299597` SUCCESS.
 
 ## Verified Production
 
-Build 107 is the current Production checkpoint:
-- `main` `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
-- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
-- Production Pages Deploy `34662205783` SUCCESS
-- Production Live Resource Integrity `34662253285` SUCCESS.
+Build 108 is the current Production checkpoint:
+- `main` `f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8`
+- tree `6d2e524ceb06b90dad9e01e94297cdedde61920c`
+- Production Pages Deploy `34663390560` SUCCESS
+- Production Live Resource Integrity `34663433029` SUCCESS.
 
-## Build 108 operational boundary
+## Build 109 operational boundary
 
-Build 108 — **Mobile Workshop Assistant** is the active Development closure candidate. It adds a phone-first capture/review path for one workshop image, consent/privacy intent, image role, optional Product association, story note, caption draft and explicit specialist-review handoff.
+Build 109 — **Customer Proof & Fulfilment Follow-through** is the active Development closure candidate. It improves the existing private custom-order status flow with reviewed stage-specific next steps, local-pickup/Canada-shipping follow-through, customer-visible proof-consent status and optional completion review/photo prompts.
 
-Photo bytes remain in the active browser tab and are not persisted to localStorage or included in the exported JSON. Lightweight metadata/text uses browser-local storage. Product association uses `GET /api/products?limit=100` only. Public-use candidates fail closed unless consent evidence is `owner_no_people` or `explicit_release`. No media upload, Product/Inventory/D1/R2 mutation, canonical migration, provider execution or publication is introduced.
+The implementation reuses the existing customer-order status data already loaded by `/api/custom-request-order`; it does not add another database query. Internal production notes remain excluded. Customer-private proof stays private. Public use still requires explicit recorded consent plus moderation, and the private status page cannot grant publication authority. No customer-submission mutation, canonical migration, R2 write, Product/Inventory mutation or provider publication is introduced.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 108 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 109 must ingest Build 108's final external closure.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 109 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 110 must ingest Build 109's final external closure.
 
 The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 

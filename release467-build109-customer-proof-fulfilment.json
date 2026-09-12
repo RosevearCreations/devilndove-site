@@ -1,0 +1,97 @@
+{
+  "release": 467,
+  "build": 109,
+  "title": "Customer Proof & Fulfilment Follow-through",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build109-customer-proof-fulfilment",
+  "starting_point": {
+    "development": {
+      "sha": "f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8",
+      "tree": "6d2e524ceb06b90dad9e01e94297cdedde61920c",
+      "system_gate_run": 34663299696,
+      "current_application_quality_run": 34663299662,
+      "it_admin_runtime_proof_run": 34663299580,
+      "branch_hygiene_run": 34663299597,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8",
+      "tree_sha": "6d2e524ceb06b90dad9e01e94297cdedde61920c",
+      "production_pages_deploy_run": 34663390560,
+      "production_live_resource_integrity_run": 34663433029,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build108_final_closure": true,
+    "customer_safe_stage_specific_progress": true,
+    "customer_safe_next_step": true,
+    "fulfilment_follow_through_summary": true,
+    "completed_order_review_prompt": true,
+    "completed_order_photo_prompt": true,
+    "customer_visible_proof_consent_status": true,
+    "consent_approved_public_count": true,
+    "private_only_photo_count": true,
+    "existing_order_status_data_only": true,
+    "additional_database_reads": false,
+    "customer_submission_mutation": false,
+    "schema_change": false,
+    "d1_schema_mutation": false,
+    "r2_mutation": false,
+    "product_mutation": false,
+    "inventory_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "private_order_page_single_h1": true,
+    "internal_notes_remain_excluded": true,
+    "existing_customer_status_endpoint_retained": true,
+    "review_prompt_only_after_reviewed_completion": true,
+    "photo_prompt_only_after_reviewed_completion": true,
+    "public_use_requires_explicit_consent": true,
+    "publication_authorized_false": true,
+    "moderation_required_true": true,
+    "local_pickup_and_canada_shipping_messages_distinguished": true,
+    "compatibility_renderer_copies_identical": true,
+    "build109_source_gate_required": true
+  },
+  "final_closure": null,
+  "production_checkpoint": null,
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": ["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql","0003_release464_business_growth.sql","0004_release465_storefront_quality.sql"],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "additional_d1_reads": false,
+    "new_d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "product_mutation": false,
+    "inventory_mutation": false,
+    "customer_submission_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}

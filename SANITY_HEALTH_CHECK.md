@@ -1,36 +1,37 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 108 — Mobile Workshop Assistant is the current Development closure candidate.**
+**Release 467 Build 109 — Customer Proof & Fulfilment Follow-through is the current Development closure candidate.**
 
-Last fully verified Development is Build 107:
-- SHA `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
-- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
-- System Gate `34662074529`: SUCCESS
-- Current Application Quality `34662074545`: SUCCESS
-- I.T. Admin Runtime Proof `34662074524`: SUCCESS
-- Repository Branch Hygiene `34662074579`: SUCCESS.
+Last fully verified Development is Build 108:
+- SHA `f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8`
+- tree `6d2e524ceb06b90dad9e01e94297cdedde61920c`
+- System Gate `34663299696`: SUCCESS
+- Current Application Quality `34663299662`: SUCCESS
+- I.T. Admin Runtime Proof `34663299580`: SUCCESS
+- Repository Branch Hygiene `34663299597`: SUCCESS.
 
-Current Production is Build 107:
-- `main` `943d7af070bc1b01506f2b8d3e8fc36b8aed7750`
-- tree `a16e55754b40279050b781ed5bad1892ee62b76c`
-- Production Pages Deploy `34662205783`: SUCCESS
-- Production Live Resource Integrity `34662253285`: SUCCESS.
+Current Production is Build 108:
+- `main` `f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8`
+- tree `6d2e524ceb06b90dad9e01e94297cdedde61920c`
+- Production Pages Deploy `34663390560`: SUCCESS
+- Production Live Resource Integrity `34663433029`: SUCCESS.
 
-## Current Build 108 boundary
+## Current Build 109 boundary
 
-- Mobile Workshop Assistant is phone-first and review-first.
-- Photo input uses the environment/rear-camera hint on supported mobile devices.
-- Photo bytes remain in the active browser tab only; they are not written to localStorage or embedded in the JSON handoff.
-- Lightweight session metadata, privacy/consent choice, image role, Product reference, story note and caption draft persist browser-locally.
-- Optional Product association uses only `GET /api/products?limit=100`.
-- Unknown or held consent fails closed for public-use candidates.
-- Exported review packages hard-code publication authority to false and include no photo binary.
-- Specialist Media Studio, Product Capture, Content Studio, CAIP Handoff and Photo Moderation remain authoritative.
-- No Product/Inventory/D1/R2 mutation, schema change, media upload, provider execution or publication is introduced.
-- Build 107 Storefront discovery and earlier Product protections remain active.
+- Uses the existing private custom-order status endpoint and page; no duplicate order authority is introduced.
+- Stage messaging now includes a customer-safe reviewed next step.
+- Fulfilment messaging distinguishes local pickup from Canada shipping without inventing tracking or handoff facts.
+- Completed orders can show optional review and finished-piece-photo prompts.
+- Photo privacy/consent status is visible as public permission available, private-only, or not recorded.
+- Customer-private proof remains private.
+- Public-use permission never equals publication authority; moderation remains required.
+- The page performs no customer submission or publication action.
+- The API adds no additional database query beyond the existing order/status/stage/photo/spec reads.
+- No Product/Inventory mutation, schema change, R2 write, provider execution or publication is introduced.
+- Build 108 Mobile Workshop Assistant and earlier Storefront/Product protections remain active.
 
 ## Safety boundary
 
 Canonical migrations remain exactly `0001`–`0004`; no request-time schema mutation, Development-to-Production business-data overwrite, automatic provider execution/publication, marketplace/Social publication, Cloudflare Access mutation or automatic Production promotion is introduced. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains active, U.S. sales/shipping remain disabled, and local pickup remains supported.
 
-**Verdict:** Build 107 Development and Production are GREEN. Build 108 is correctly bounded as a browser-local workshop capture/review-handoff improvement and must earn its own exact Development and Production proof before closure.
+**Verdict:** Build 108 Development and Production are GREEN. Build 109 is correctly bounded as customer-safe presentation/follow-through over existing order evidence and must earn its own exact Development and Production proof before closure.

@@ -1,5 +1,5 @@
 // File: /public/js/custom-request-order-status.js
-// Release 467 Build 16: private customer-safe custom request journey/status rendering.
+// Release 467 Build 109: private customer-safe journey, proof-consent and fulfilment follow-through rendering.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('customRequestOrderStatusMount');
@@ -38,8 +38,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderPhotos(photos) {
     const list = Array.isArray(photos) ? photos : [];
-    if (!list.length) return '';
+    if (!list.length) return '<p class="small">No customer-visible reviewed photos are attached to this order yet.</p>';
     return `<section style="margin-top:14px"><h3>Reviewed progress photos</h3><div class="grid cols-3">${list.slice(0, 9).map((photo) => `<figure class="card" style="margin:0"><img src="${esc(photo.image_url || '')}" alt="Reviewed ${esc(human(photo.stage_key || 'custom work'))} progress photo" loading="lazy"/><figcaption class="small">${esc(photo.image_caption || human(photo.stage_key || 'Custom work'))}</figcaption></figure>`).join('')}</div></section>`;
+  }
+
+  function renderConsent(consent = {}) {
+    const status = String(consent.status || 'not_recorded');
+    const publicCount = Number(consent.public_ready_count || 0);
+    const privateCount = Number(consent.private_photo_count || 0);
+    const detail = status === 'public_photo_permission_available'
+      ? `${publicCount} reviewed photo${publicCount === 1 ? '' : 's'} currently have recorded public-use permission. Publication still requires moderation/review.`
+      : status === 'private_only'
+        ? `${privateCount} reviewed photo${privateCount === 1 ? '' : 's'} are customer-private only.`
+        : 'No public-use photo permission is recorded for this order.';
+    return `<section class="card" style="margin-top:14px"><h3 style="margin-top:0">Photo privacy &amp; consent</h3><p><strong>${esc(human(status))}</strong></p><p class="small">${esc(detail)}</p><p class="small" style="margin-bottom:0">Nothing from this order is published automatically. Customer-private proof stays private; public use requires explicit consent and moderation.</p></section>`;
+  }
+
+  function renderFollowThrough(data) {
+    const follow = data.follow_through || {};
+    const stage = data.customer_stage || {};
+    const complete = follow.complete === true;
+    const prompts = [follow.review_prompt, follow.photo_prompt].filter(Boolean);
+    return `<section class="card" style="margin-top:14px"><h3 style="margin-top:0">What happens next</h3><p><strong>${esc(stage.label || human(follow.stage || 'progress'))}:</strong> ${esc(stage.message || '')}</p>${data.next_step ? `<p class="small"><strong>Next step:</strong> ${esc(data.next_step)}</p>` : ''}<p class="small"><strong>Fulfilment:</strong> ${esc(follow.handoff_message || data.fulfillment_message || '')}</p>${complete ? `<div class="grid cols-2" style="margin-top:12px">${prompts.map((prompt) => `<div class="card" style="margin:0"><strong>${esc(prompt.title || '')}</strong><p class="small">${esc(prompt.message || '')}</p><p class="small" style="margin-bottom:0">Use the same contact method already used for your order if you choose to share it.</p></div>`).join('')}</div>` : '<p class="small" style="margin-bottom:0">Review/photo prompts become available after the order reaches a reviewed complete state.</p>'}<p class="small" style="margin-bottom:0">Publication authority: <strong>not granted by this page</strong>.</p></section>`;
   }
 
   function render(data) {
@@ -52,8 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <div><h2 style="margin-top:0">${esc(order.order_number || 'Custom order')}</h2><p class="small">For ${esc(order.customer_name || 'customer')} • ${esc(order.customer_email || '')}</p></div>
         <span class="status-note">${esc(order.order_status || 'pending')} • ${esc(currentStage.label || human(currentStage.key))}</span>
       </div>
-      <section class="card" style="margin:12px 0"><h3 style="margin-top:0">Your custom-request journey</h3>${renderJourney(data.journey)}<p style="margin-bottom:0"><strong>${esc(currentStage.label || '')}:</strong> ${esc(currentStage.message || '')}</p><p class="small" style="margin-bottom:0">${esc(data.fulfillment_message || '')}</p></section>
-      <div class="quote-preview-total"><span>Order total</span><strong>${money(order.total_cents, order.currency || 'CAD')}</strong></div>
+      <section class="card" style="margin:12px 0"><h3 style="margin-top:0">Your custom-request journey</h3>${renderJourney(data.journey)}</section>
+      ${renderFollowThrough(data)}
+      ${renderConsent(data.proof_consent)}
+      <div class="quote-preview-total" style="margin-top:14px"><span>Order total</span><strong>${money(order.total_cents, order.currency || 'CAD')}</strong></div>
       <div class="quote-preview-breakdown small"><div>Payment: <strong>${esc(order.payment_status || 'pending')}</strong></div><div>Method: <strong>${esc(order.payment_method || 'manual')}</strong></div><div>Updated: <strong>${esc(order.updated_at || order.created_at || '')}</strong></div></div>
       <h3>Reviewed stage history</h3>
       <div class="small">${stages.map((stage) => `${esc(stage.created_at || '')} • ${esc(stage.stage_label || human(stage.stage_key || ''))}`).join('<br>') || 'Stage history will appear here after reviewed updates.'}</div>
