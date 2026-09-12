@@ -1,50 +1,45 @@
-# I.T. Preflight / Startup Release Guide — Release 467 Current Authority
+# I.T. Preflight, Startup & Release Guide
 
-`current-development-authority.json` is the machine-readable restart pointer.
+## Current release
 
-## Verified Development
+**Release 467 Build 112 — Inventory & Material-Usage Reconciliation**.
 
-Build 110 — Storefront Evidence & SEO Conversion Audit is the last fully verified checkpoint:
-- `dev` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
-- tree `f92ba677efc109b1748f6892044e3f3c06500315`
-- System Gate `34667564542` SUCCESS
-- Current Application Quality `34667564497` SUCCESS
-- I.T. Admin Runtime Proof `34667564555` SUCCESS
-- Repository Branch Hygiene `34667564565` SUCCESS.
+The last fully verified Development and Production checkpoint is Build 111:
 
-## Verified Production
+- Exact Build 111 Development SHA: `a234b874b6e03442af96c0110d3cc22db074fe34`
+- Exact tree: `4e82696773761595e57bb69eb48c053f95060e2c`
+- System Gate: `34669983965`
+- Current Application Quality Proof: `34669983954`
+- I.T. Admin Runtime Proof: `34669983974`
+- Repository Branch Hygiene: `34669983946`
+- Production Pages Deploy: `34670059768`
+- Production Live Resource Integrity: `34670099134`
 
-Build 110 is the current Production checkpoint:
-- `main` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
-- tree `f92ba677efc109b1748f6892044e3f3c06500315`
-- Production Pages Deploy `34669029532` SUCCESS
-- Production Live Resource Integrity `34669069642` SUCCESS.
+## Restart protocol
 
-## Build 111 operational boundary
+1. Verify the previous build's exact SHA/tree and all six external proof runs.
+2. The **next build** ingests that closure; the previous build does not self-record later proof.
+3. Keep `current-development-authority.json`, I.T., Reliability, Deployment Preflight and human handoff documents synchronized to the inherited checkpoint.
+4. Build the next bounded candidate.
+5. Candidate source must not claim its own later exact-head proof.
+6. Fast-forward the candidate to `dev` only.
+7. Require exact-head System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof and Repository Branch Hygiene, plus canonical Development D1 / bindings / Preview evidence.
+8. Only after Development is exact-head GREEN, non-force promote the identical SHA/tree to `main`.
+9. Require Production Pages Deploy and Production Live Resource Integrity.
+10. A later build ingests that completed six-proof closure.
 
-Build 111 — **Orders-to-Fulfilment Reconciliation** is the active Development closure candidate. It keeps the existing Build 82 Operations-owned fulfilment transition contract as the sole non-financial order-status mutation owner.
+## Build 112 technical boundary
 
-Build 111 adds a GET-only reconciliation over the Build 82 workflow, Build 27 Finance settlement readiness, Build 29 Production readiness (including Build 26 Inventory fulfilment evidence), and one bounded order-item/status-history evidence read. It surfaces contradictions and missing evidence before an operator uses the existing transition controls. Shared Product readiness is never interpreted as an order-specific reservation or production authorization.
+Build 112 is read-only Inventory evidence reconciliation. It must not:
+- change stock or reservations;
+- post or reverse Creative usage;
+- post Product production;
+- open or consume kits;
+- change current cost;
+- create schema;
+- mutate R2/bindings;
+- perform provider or Finance execution.
 
-No second order mutation route, customer-message send, inventory reservation/deduction, production post, payment/refund/accounting execution, canonical migration, R2 mutation or provider action is introduced.
+Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`.
 
-## Restart-integrity protocol
-
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 111 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 112 must ingest Build 111's final external closure.
-
-The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
-
-## Environment boundaries
-
-- Canonical Cloudflare Pages project: `devilndove-site`
-- Development branch / Preview: `dev` / `https://dev.devilndove-site.pages.dev`
-- Development D1: `devilndove-dev` / `dbc1615b-dcbe-4951-973b-b47c99c73bfa`
-- Development Product R2: `devilndove-toolshed-images-dev`
-- Development CAIP R2: `devilndove-caip-media-dev`
-- Production branch / site: `main` / `https://devilndove.com`
-- Production D1: `devilndove-prod-r462` / `f34a741b-0000-45b0-9a96-6be08754d563`
-- Production Product R2: `devilndove-toolshed-images`
-- Production CAIP R2: `devilndove-caip-media`
-- Canonical migrations: exactly `0001`–`0004` via `scripts/d1_migrate.py`.
-
-Never overwrite Production business data from Development. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain independent `HOLD_EXTERNAL` lanes; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains authoritative, U.S. sales/shipping remain disabled, and local pickup remains supported.
+External provider acceptance remains independent of deployment health.

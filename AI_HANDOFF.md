@@ -2,36 +2,52 @@
 
 ## Current authority
 
-Release 467 Build 111 — **Orders-to-Fulfilment Reconciliation** is the active Development closure candidate. It consumes the externally proven Build 110 closure and may not self-claim its own later exact-head acceptance.
+**Release 467 Build 112 — Inventory & Material-Usage Reconciliation** is the current Development closure candidate.
 
-Last fully verified Development is Build 110 — **Storefront Evidence & SEO Conversion Audit**:
-- `dev` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
-- tree `f92ba677efc109b1748f6892044e3f3c06500315`
-- System Gate `34667564542` SUCCESS
-- Current Application Quality `34667564497` SUCCESS
-- I.T. Admin Runtime Proof `34667564555` SUCCESS
-- Repository Branch Hygiene `34667564565` SUCCESS.
+Build 112 starts only from the externally verified Build 111 closure. Build 111 did **not** self-record its later proof; Build 112 ingests that closure under the restart protocol.
 
-Current Production is also Build 110:
-- `main` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
-- tree `f92ba677efc109b1748f6892044e3f3c06500315`
-- Production Pages Deploy `34669029532` SUCCESS
-- Production Live Resource Integrity `34669069642` SUCCESS.
+- Exact Build 111 Development SHA: `a234b874b6e03442af96c0110d3cc22db074fe34`
+- Exact tree: `4e82696773761595e57bb69eb48c053f95060e2c`
+- System Gate: `34669983965`
+- Current Application Quality Proof: `34669983954`
+- I.T. Admin Runtime Proof: `34669983974`
+- Repository Branch Hygiene: `34669983946`
+- Production Pages Deploy: `34670059768`
+- Production Live Resource Integrity: `34670099134`
 
-## Build 111 scope
+Build 111 is therefore the last fully verified Development and Production checkpoint. `dev` and `main` were both exactly `a234b874b6e03442af96c0110d3cc22db074fe34` / tree `4e82696773761595e57bb69eb48c053f95060e2c` before Build 112 began.
 
-Build 111 extends the existing Build 82 fulfilment operating workspace without creating a second Orders workflow. The Build 82 Operations-owned transition contract remains the only non-financial status mutation owner. A new GET-only reconciliation consumes the existing Build 82 workflow, Build 27 Finance settlement readiness, Build 29 Production readiness (including Build 26 Inventory evidence), and one bounded order-item/status-history evidence query.
+## Build 112 scope
 
-It surfaces status-history drift, financial contradictions, fulfilment-mode mismatches, unresolved Product references, shared Product readiness shortages/uncertainty, missing evidence-review history and incomplete return evidence. Shared Product readiness is evidence only, not an order-specific reservation or production authorization. The Build 111 UI can hold existing Build 82 transition buttons when reconciliation is blocked or still requires review.
+Build 112 adds a **read-only** reconciliation surface to the existing Inventory Operations workspace. It reads and cross-checks:
 
-Build 111 adds no second order mutation route, no customer-message send, no inventory reservation/deduction, no production post, no payment/refund/accounting execution, no schema/R2 change and no provider execution/publication.
+- Product material plans from `product_resource_links`.
+- Finished Product production material evidence from existing Build 440 run/material records.
+- Reviewed Creative material usage from the Inventory-owned Build 309 post evidence.
+- Aggregate reservation truth from `site_item_inventory.reserved_quantity` and the Build 71 reserve/release movement ledger.
+- Purchased-kit opening/component provenance and current child Inventory balances as **aggregate remnant evidence**, never invented origin attribution.
+- Current cost authority from `site_item_inventory.unit_cost_cents`; cost history remains optional evidence only.
+- Shortages, missing links and contradictory consumption/reservation evidence.
 
-## Autonomous direction after Build 111
+Build 112 creates **no** reserve/release action, no Inventory post/reverse action, no Product production action, no kit open/use action, no Creative mutation, no Finance posting, no synthetic stock movement, no request-time DDL, no R2 mutation and no provider action.
 
-Build 112 = Inventory & Material-Usage Reconciliation; Build 113 = Accountant & Month-End Evidence Depth.
+## Existing write owners preserved
+
+- Build 71 Inventory lifecycle remains reservation/release owner.
+- Build 309 Inventory post and the existing Inventory reversal authority remain reviewed Creative consumption owners.
+- Build 440 Product production remains Product material-consumption owner.
+- Build 440 Inventory kit service remains kit-opening/component-use owner.
+
+## Canonical database boundary
+
+Forward D1 authority remains `migrations/canonical/manifest.json` through `scripts/d1_migrate.py`. Canonical migrations remain exactly `0001`–`0004`; Build 112 adds no migration.
+
+## External lanes
+
+Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-token acceptance remain `HOLD_EXTERNAL`. CAIP private-media acceptance remains `EVIDENCE_DEPENDENT`.
+
+Canada-only commerce remains authoritative: CAD, U.S. sales/shipping disabled, local pickup supported.
 
 ## Restart rule
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 111 must pass exact merged-`dev` System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene plus canonical Development D1/bindings proof and exact Preview smoke before any `main` promotion. Build 112 must ingest Build 111's final external Development + Production closure.
-
-Canonical migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CAD commerce remains authoritative, U.S. sales/shipping remain disabled, and local pickup remains supported.
+Build 112 must not self-record its later external exact-head proof. After Build 112 is merged and externally proven, **Build 113 must ingest that later closure**. Until then, the restart authority is the exact Build 111 proof bundle above.

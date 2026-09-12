@@ -1,0 +1,111 @@
+{
+  "release": 467,
+  "build": 112,
+  "title": "Inventory & Material-Usage Reconciliation",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build112-inventory-material-usage-reconciliation",
+  "starting_point": {
+    "development": {
+      "sha": "a234b874b6e03442af96c0110d3cc22db074fe34",
+      "tree": "4e82696773761595e57bb69eb48c053f95060e2c",
+      "system_gate_run": 34669983965,
+      "quality_run": 34669983954,
+      "it_admin_runtime_run": 34669983974,
+      "repository_hygiene_run": 34669983946,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "a234b874b6e03442af96c0110d3cc22db074fe34",
+      "tree_sha": "4e82696773761595e57bb69eb48c053f95060e2c",
+      "production_pages_deploy_run": 34670059768,
+      "production_live_resource_integrity_run": 34670099134,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "ingest_build111_final_closure": true,
+    "inventory_and_material_usage_reconciliation": true,
+    "product_material_plan_read": true,
+    "product_production_material_evidence_read": true,
+    "creative_reviewed_consumption_evidence_read": true,
+    "aggregate_reservation_reconciliation": true,
+    "kit_component_remnant_evidence": true,
+    "shortage_detection": true,
+    "current_cost_authority_reconciliation": true,
+    "reservation_attribution_synthesis": false,
+    "synthetic_stock_movement": false,
+    "new_inventory_mutation": false,
+    "new_product_mutation": false,
+    "new_creative_mutation": false,
+    "existing_inventory_post_reverse_authorities_unchanged": true,
+    "existing_build71_reservation_authority_unchanged": true,
+    "existing_build440_product_production_authority_unchanged": true,
+    "existing_build440_kit_authority_unchanged": true,
+    "accounting_posting": false,
+    "schema_change": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "reconciliation_endpoint_get_only": true,
+    "missing_or_conflicting_inventory_evidence_fails_closed_or_review": true,
+    "aggregate_reservations_never_invent_product_ownership": true,
+    "creative_consumed_without_post_is_blocked": true,
+    "reusable_or_log_only_depletion_is_blocked": true,
+    "planned_product_shortage_is_blocked": true,
+    "kit_open_without_component_evidence_is_blocked": true,
+    "kit_child_balance_is_aggregate_remnant_evidence": true,
+    "current_cost_authority_is_site_item_inventory_unit_cost_cents": true,
+    "cost_history_is_optional_evidence_only": true,
+    "canonical_migrations_0001_0004_only": true,
+    "build112_source_gate_required": true
+  },
+  "final_closure": null,
+  "production_checkpoint": null,
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_four_proof": true,
+    "requires_exact_preview": true,
+    "main_promotion_only_after_exact_development_green": true,
+    "build113_must_ingest_build112_later_external_closure": true
+  },
+  "external_lanes": {
+    "stripe_development": "HOLD_EXTERNAL",
+    "paypal_sandbox": "HOLD_EXTERNAL",
+    "social_oauth": "HOLD_EXTERNAL",
+    "caip_private_media": "EVIDENCE_DEPENDENT",
+    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+  },
+  "commerce_policy": {
+    "shipping_country": "CA",
+    "currency": "CAD",
+    "us_sales_shipping_enabled": false,
+    "local_pickup_supported": true
+  },
+  "safety": {
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "new_d1_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "inventory_mutation": false,
+    "product_mutation": false,
+    "creative_mutation": false,
+    "production_execution": false,
+    "payment_execution": false,
+    "refund_execution": false,
+    "accounting_posting": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_business_data_overwrite": false,
+    "secret_values_emitted": false
+  }
+}

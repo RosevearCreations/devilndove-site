@@ -2,7 +2,7 @@
   "release": 467,
   "build": 111,
   "title": "Orders-to-Fulfilment Reconciliation",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build111-orders-fulfilment-reconciliation",
   "starting_point": {
     "development": {
@@ -62,8 +62,33 @@
     "canonical_migrations_0001_0004_only": true,
     "build111_source_gate_required": true
   },
-  "final_closure": null,
-  "production_checkpoint": null,
+  "final_closure": {
+    "dev_sha": "a234b874b6e03442af96c0110d3cc22db074fe34",
+    "tree_sha": "4e82696773761595e57bb69eb48c053f95060e2c",
+    "proofs": {
+      "system_gate_run": 34669983965,
+      "current_application_quality_run": 34669983954,
+      "it_admin_runtime_proof_run": 34669983974,
+      "branch_hygiene_run": 34669983946
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "ingested_by_build": 112,
+    "recorded_by": "Build 112 restart ingestion; not self-recorded by Build 111"
+  },
+  "production_checkpoint": {
+    "main_sha": "a234b874b6e03442af96c0110d3cc22db074fe34",
+    "tree_sha": "4e82696773761595e57bb69eb48c053f95060e2c",
+    "production_pages_deploy_run": 34670059768,
+    "production_live_resource_integrity_run": 34670099134,
+    "state": "PRODUCTION_GREEN",
+    "ingested_by_build": 112
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,
@@ -84,7 +109,12 @@
     "local_pickup_supported": true
   },
   "safety": {
-    "canonical_d1_migrations": ["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql","0003_release464_business_growth.sql","0004_release465_storefront_quality.sql"],
+    "canonical_d1_migrations": [
+      "0001_release464_migration_authority.sql",
+      "0002_release464_operational_acceptance.sql",
+      "0003_release464_business_growth.sql",
+      "0004_release465_storefront_quality.sql"
+    ],
     "schema_change": false,
     "request_time_schema_mutation": false,
     "new_d1_mutation": false,
