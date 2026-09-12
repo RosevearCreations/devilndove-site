@@ -2,26 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 126 — Admin Favorites & Quick Launch** is the current Development closure candidate.
+**Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return** is the current Development closure candidate.
 
-Build 126 starts by ingesting the externally verified Build 125 closure. Build 125 remains correctly non-self-recording; its six later proof IDs are recorded by Build 126 startup ingestion.
+Build 127 starts by ingesting the externally verified Build 126 closure. Build 126 remains correctly non-self-recording; its six later proof IDs are recorded by Build 127 startup ingestion.
 
-- SHA `eca94d1ac4732c561794f914f89a2838af243617`
-- tree `c7b4caf380183cd0b71b79d2f0ba73ccefce0d26`
-- System Gate `34721943588`
-- Current Application Quality `34721943584`
-- I.T. Admin Runtime `34721943615`
-- Repository Branch Hygiene `34721943593`
-- Production Pages Deploy `34722069482`
-- Production Live Resource Integrity `34722116635`
+- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
+- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
+- System Gate `34724580675`
+- Current Application Quality `34724580676`
+- I.T. Admin Runtime `34724580648`
+- Repository Branch Hygiene `34724580646`
+- Production Pages Deploy `34724657853`
+- Production Live Resource Integrity `34724703548`
 
-## Build 126 scope
+## Build 127 scope
 
-Build 126 adds admin-only browser favorites over the existing Build 122 workspace navigation and Build 125 workspace memory. Favorites are scoped by signed-in Admin user ID and stay in browser `localStorage`.
+Build 127 adds a read-only Admin context breadcrumb over the existing Build 122 manifest-backed workspace navigation. The breadcrumb identifies **Admin → workspace → section → current tool** when the current route exists in `data/admin-navigation-modules.json` and exposes a direct **Back to workspace** link for nested tools.
 
-The feature can favorite any non-home Admin route, stores at most eight favorites, provides a **Favorites** quick-launch dialog, shows up to three favorite shortcuts from Admin home, supports individual removal and **Clear favorites**, and provides `Alt+Shift+F` as an optional current-page toggle.
+The feature is Admin-only and client-only. It does not use `localStorage` or `sessionStorage`, does not create a server preference authority, and performs no network write. A read-only manifest fetch may be used; if the manifest is unavailable the current page still receives a safe Admin/context fallback.
 
-This is convenience state only. It does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. `sessionStorage` is not used and no network write is introduced. Canonical D1 migrations remain exactly `0001`–`0004`.
+Build 127 does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## External lanes
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 126 must not self-record its later external exact-head proof. After Build 126 is externally proven and promoted, **Build 127 must ingest that later closure**.
+Build 127 must not self-record its later external exact-head proof. After Build 127 is externally proven and promoted, **Build 128 must ingest that later closure**.
