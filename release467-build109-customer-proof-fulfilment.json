@@ -9,9 +9,9 @@
       "sha": "f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8",
       "tree": "6d2e524ceb06b90dad9e01e94297cdedde61920c",
       "system_gate_run": 34663299696,
-      "current_application_quality_run": 34663299662,
-      "it_admin_runtime_proof_run": 34663299580,
-      "branch_hygiene_run": 34663299597,
+      "quality_run": 34663299662,
+      "it_admin_runtime_run": 34663299580,
+      "repository_hygiene_run": 34663299597,
       "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
     },
     "production": {
