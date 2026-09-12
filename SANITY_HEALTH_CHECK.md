@@ -2,34 +2,30 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 121 — Business Health Review Context Polish & Return Navigation**.
+Current candidate: **Release 467 Build 122 — Admin Workspace Navigation & Command Palette**.
 
-Last fully verified Development + Production checkpoint is Build 120:
+Last fully verified Development + Production checkpoint is Build 121:
 
-- SHA `25ba9858d8926fed1fb740bd79fa41b8a0e4104a`
-- tree `25a86af30faf1f7632a008e687a67f93f4bb98ce`
-- System `34708100872`
-- Quality `34708100889`
-- I.T. `34708100890`
-- Hygiene `34708100871`
-- Production Pages `34708208709`
-- Production Live Resource Integrity `34708253961`
+- SHA `31492144ecbd2f8c353426531ea301c70aedf8f3`
+- tree `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
+- System `34709444214`
+- Quality `34709444221`
+- I.T. `34709444258`
+- Hygiene `34709444255`
+- Production Pages `34709526481`
+- Production Live Resource Integrity `34709571023`
 
-Result: **Build 120 six-proof closure is ingested by Build 121.**
+Result: **Build 121 six-proof closure is ingested by Build 122.**
 
-## Build 121 safety checks
+## Build 122 safety checks
 
-- Destination context implementation: client-side only.
-- Existing Build 120 review-session authority: reused.
-- Existing Build 114 action queue remains authoritative.
-- Existing Build 119 owner priority matrix remains authoritative.
-- Second action queue created: **NO**.
-- Context transfer: **URL-only**.
-- Copy action: **browser clipboard only**.
+- Navigation source: existing `data/admin-navigation-modules.json`.
+- Manifest access: GET/read-only.
+- Workspace strip and command palette: client-side only.
+- Existing admin URLs and module ownership: preserved.
 - Local/session storage: **ZERO**.
+- Navigation history/preference persistence: **ZERO**.
 - POST/write request: **ZERO**.
-- Review-session/context persistence: **ZERO**.
-- Decision/approval/acknowledgement/resolution persistence: **ZERO**.
 - Accounting posting / period close: **ZERO**.
 - Inventory / Creative / price mutation: **ZERO**.
 - Provider execution/publication: **ZERO**.
@@ -41,4 +37,4 @@ Result: **Build 120 six-proof closure is ingested by Build 121.**
 
 ## Restart integrity
 
-Build 121 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 122, not self-written into Build 121.
+Build 122 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 123, not self-written into Build 122.

@@ -2,38 +2,39 @@
 
 ## Current checkpoint
 
-**Release 467 Build 121 — Business Health Review Context Polish & Return Navigation** is the active closure candidate.
+**Release 467 Build 122 — Admin Workspace Navigation & Command Palette** is the active closure candidate.
 
-Build 120 is the last fully verified Development + Production checkpoint:
+Build 121 is the last fully verified Development + Production checkpoint:
 
-- SHA `25ba9858d8926fed1fb740bd79fa41b8a0e4104a`
-- tree `25a86af30faf1f7632a008e687a67f93f4bb98ce`
-- System Gate `34708100872`
-- Current Application Quality `34708100889`
-- I.T. Admin Runtime `34708100890`
-- Repository Branch Hygiene `34708100871`
-- Production Pages Deploy `34708208709`
-- Production Live Resource Integrity `34708253961`
+- SHA `31492144ecbd2f8c353426531ea301c70aedf8f3`
+- tree `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
+- System Gate `34709444214`
+- Current Application Quality `34709444221`
+- I.T. Admin Runtime `34709444258`
+- Repository Branch Hygiene `34709444255`
+- Production Pages Deploy `34709526481`
+- Production Live Resource Integrity `34709571023`
 
-The Build 120 closure is recorded by Build 121 ingestion, not a Build 120 self-claim.
+The Build 121 closure is recorded by Build 122 ingestion, not a Build 121 self-claim.
 
-## Build 121 — Business Health Review Context Polish & Return Navigation
+## Build 122 — Admin Workspace Navigation & Command Palette
 
-Goal: make the existing Business Health owner handoff faster and clearer without adding persistence.
+Goal: reduce admin navigation friction without creating a second menu authority or saved navigation state.
 
 Candidate scope:
-1. Compact source/period/owner/priority display on the existing destination banner.
-2. Return to Business Health while retaining a valid selected accounting period.
-3. Copy review context using the browser clipboard with a non-persistent fallback.
-4. Keep valid Month End period transfer and refresh behavior.
-5. Allow the context banner to be hidden for the current view without storing a preference.
-6. Keep Finance, Month End, Creator/Profitability and I.T. on the same common handoff client.
-7. No new database reads, second queue, saved workflow state or schema change.
-8. Canonical D1 migrations remain exactly `0001`–`0004`.
+1. Reuse `data/admin-navigation-modules.json` as the single current operational menu authority.
+2. Add an Admin / Storefront / Creator / Finance / I.T. workspace strip with current-workspace highlighting.
+3. Add a visible Jump control and `Ctrl/Cmd+K` command palette.
+4. Search current workspace, section and tool labels from the manifest.
+5. Support Arrow Up/Down, Enter and Escape with accessible dialog/listbox semantics.
+6. Load from the shared Admin auth/UI bootstrap so legacy admin pages receive the same launcher.
+7. Fall back to the four workspace homes if the manifest is temporarily unavailable.
+8. Store no navigation history or preference and perform no POST/write action.
+9. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Next autonomous QoL sequence
 
-After Build 121 closes, the planned sequence remains: Build 122 Admin Workspace Navigation & Command Palette; Build 123 Admin Home Dashboard Refresh; Build 124 Consistent Loading/Empty/Error/Retry States; Build 125 User Preferences & Workspace Memory; Build 126 Universal Admin Search; Build 127 Table/List Quality-of-Life Standard; Build 128 Product & Inventory Quick View Drawer.
+After Build 122 closes: Build 123 Admin Home Dashboard Refresh; Build 124 Consistent Loading/Empty/Error/Retry States; Build 125 User Preferences & Workspace Memory; Build 126 Universal Admin Search; Build 127 Table/List Quality-of-Life Standard; Build 128 Product & Inventory Quick View Drawer.
 
 ## Release mechanics
 

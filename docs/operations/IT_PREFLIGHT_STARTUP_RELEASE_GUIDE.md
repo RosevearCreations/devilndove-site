@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 121 — Business Health Review Context Polish & Return Navigation**.
+**Release 467 Build 122 — Admin Workspace Navigation & Command Palette**.
 
-The last fully verified Development and Production checkpoint is Build 120:
+The last fully verified Development and Production checkpoint is Build 121:
 
-- SHA `25ba9858d8926fed1fb740bd79fa41b8a0e4104a`
-- tree `25a86af30faf1f7632a008e687a67f93f4bb98ce`
-- System Gate `34708100872`
-- Current Application Quality Proof `34708100889`
-- I.T. Admin Runtime Proof `34708100890`
-- Repository Branch Hygiene `34708100871`
-- Production Pages Deploy `34708208709`
-- Production Live Resource Integrity `34708253961`
+- SHA `31492144ecbd2f8c353426531ea301c70aedf8f3`
+- tree `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
+- System Gate `34709444214`
+- Current Application Quality Proof `34709444221`
+- I.T. Admin Runtime Proof `34709444258`
+- Repository Branch Hygiene `34709444255`
+- Production Pages Deploy `34709526481`
+- Production Live Resource Integrity `34709571023`
 
 ## Canonical Development target
 
@@ -31,8 +31,8 @@ The last fully verified Development and Production checkpoint is Build 120:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 121 technical boundary
+## Build 122 technical boundary
 
-Build 121 is a client-side quality-of-life polish of the Build 120 Business Health owner handoff. It adds a compact destination banner, Return to Business Health with period preservation, Copy review context with a browser fallback, and current-view dismissal. It does not create another action queue, persist review/session/context/decision/approval/acknowledgement/resolution state, store browser preferences, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
+Build 122 is a client-only Admin Workspace Navigation & Command Palette quality-of-life improvement. It reuses `data/admin-navigation-modules.json`, adds a shared workspace strip and a `Ctrl/Cmd+K` launcher, and keeps all existing admin URLs stable. Manifest access is GET-only. No search/navigation history or preference is stored. It does not post Accounting, close a period, mutate Inventory or Creative records, change prices, execute providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.

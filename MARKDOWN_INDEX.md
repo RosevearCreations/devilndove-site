@@ -2,26 +2,26 @@
 
 ## Current operating authority
 
-Current candidate: **Release 467 Build 121 — Business Health Review Context Polish & Return Navigation**.
+Current candidate: **Release 467 Build 122 — Admin Workspace Navigation & Command Palette**.
 
-- `AI_HANDOFF.md` — restart authority and exact Build 120 closure ingested by Build 121.
-- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 121 scope and autonomous QoL sequence.
+- `AI_HANDOFF.md` — restart authority and exact Build 121 closure ingested by Build 122.
+- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 122 scope and autonomous QoL sequence.
 - `SANITY_HEALTH_CHECK.md` — current safety and mutation boundary.
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — I.T./preflight/restart procedure.
-- `docs/operations/RELEASE_467_BUILD_121_BUSINESS_HEALTH_REVIEW_CONTEXT_POLISH.md` — Build 121 design/evidence contract.
-- `release467-build121-business-health-review-context-polish.json` — machine authority for current closure candidate.
-- `release467-build120-business-health-review-session.json` — ingested Build 120 six-proof closure.
+- `docs/operations/RELEASE_467_BUILD_122_ADMIN_WORKSPACE_NAVIGATION_COMMAND_PALETTE.md` — Build 122 design/evidence contract.
+- `release467-build122-admin-workspace-navigation-command-palette.json` — machine authority for current closure candidate.
+- `release467-build121-business-health-review-context-polish.json` — ingested Build 121 six-proof closure.
 - `current-development-authority.json` — current release pointer.
 
 ## Current inherited proof
 
-- SHA `25ba9858d8926fed1fb740bd79fa41b8a0e4104a`
-- tree `25a86af30faf1f7632a008e687a67f93f4bb98ce`
-- System `34708100872`
-- Quality `34708100889`
-- I.T. `34708100890`
-- Hygiene `34708100871`
-- Production Pages `34708208709`
-- Production Live Resource Integrity `34708253961`
+- SHA `31492144ecbd2f8c353426531ea301c70aedf8f3`
+- tree `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
+- System `34709444214`
+- Quality `34709444221`
+- I.T. `34709444258`
+- Hygiene `34709444255`
+- Production Pages `34709526481`
+- Production Live Resource Integrity `34709571023`
 
-Build 120's proof is recorded by Build 121 restart ingestion. Build 121 may not self-record its later external closure.
+Build 121's proof is recorded by Build 122 restart ingestion. Build 122 may not self-record its later external closure.

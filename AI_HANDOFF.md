@@ -2,26 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 121 — Business Health Review Context Polish & Return Navigation** is the current Development closure candidate.
+**Release 467 Build 122 — Admin Workspace Navigation & Command Palette** is the current Development closure candidate.
 
-Build 121 starts from the externally verified Build 120 closure. Build 120 did **not** self-record its later proof; Build 121 ingests it under the restart protocol.
+Build 122 starts from the externally verified Build 121 closure. Build 121 did **not** self-record its later proof; Build 122 ingests it under the restart protocol.
 
-- Exact Build 120 SHA: `25ba9858d8926fed1fb740bd79fa41b8a0e4104a`
-- Exact tree: `25a86af30faf1f7632a008e687a67f93f4bb98ce`
-- System Gate: `34708100872`
-- Current Application Quality Proof: `34708100889`
-- I.T. Admin Runtime Proof: `34708100890`
-- Repository Branch Hygiene: `34708100871`
-- Production Pages Deploy: `34708208709`
-- Production Live Resource Integrity: `34708253961`
+- Exact Build 121 SHA: `31492144ecbd2f8c353426531ea301c70aedf8f3`
+- Exact tree: `078d5ba5c71ee160861e0a31bcca640bb89a3cdc`
+- System Gate: `34709444214`
+- Current Application Quality Proof: `34709444221`
+- I.T. Admin Runtime Proof: `34709444258`
+- Repository Branch Hygiene: `34709444255`
+- Production Pages Deploy: `34709526481`
+- Production Live Resource Integrity: `34709571023`
 
-## Build 121 scope
+## Build 122 scope
 
-Build 121 polishes the existing Build 120 URL-only owner handoff. Destination banners now show source, period, owner and priority compactly; provide a reliable Return to Business Health action that preserves a valid accounting period; provide Copy review context with a browser clipboard fallback; allow the banner to be hidden for the current page view; and continue applying a valid transferred period to Month End.
+Build 122 adds a common Admin / Storefront / Creator / Finance / I.T. workspace strip and a keyboard-accessible command palette over the existing `data/admin-navigation-modules.json` navigation authority. `Ctrl/Cmd+K` opens the launcher; Arrow keys select; Enter opens; Escape closes. Existing admin URLs and module ownership remain unchanged.
 
-The Build 114 action queue, Build 119 decision matrix and Build 120 review-session packet remain authoritative. Build 121 creates no new queue or workflow state. Copying context is a browser-only convenience and is not persistence.
+The launcher is client-only. It reads the existing manifest with GET, provides four workspace fallbacks if that read is unavailable, and stores no recent history, preference, search, or navigation state.
 
-No review-session, context, decision, approval, acknowledgement or resolution state is persisted. No Accounting posting, period close, Inventory/Creative/price mutation, provider execution/publication, schema/D1/R2/binding mutation or Production business-data change is authorized. Canonical D1 migrations remain exactly `0001`–`0004`.
+No Accounting posting, period close, Inventory/Creative/price mutation, provider execution/publication, schema/D1/R2/binding mutation or Production business-data change is authorized. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## External lanes
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 121 must not self-record its later external exact-head proof. After Build 121 is externally proven and promoted, **Build 122 must ingest that later closure**.
+Build 122 must not self-record its later external exact-head proof. After Build 122 is externally proven and promoted, **Build 123 must ingest that later closure**.

@@ -4,6 +4,7 @@
 // Build 438: public/member navigation receives one bounded module-availability read; Admin has its own richer bootstrap.
 // The Application Modules recovery link remains visible to a verified/cached Admin even if Business Administration is disabled.
 // Forward enhancement: admin routes bootstrap the shared accessible contextual-help layer.
+// Release 467 Build 122: admin routes also bootstrap the manifest-backed workspace navigation and command palette.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
@@ -171,6 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
 if (window.location.pathname.startsWith('/admin')) {
   void import('/public/js/admin-context-help.js?v=448-context-help')
     .catch((error) => console.warn('[DD admin help] contextual help unavailable', error));
+  void import('/public/js/admin-workspace-command-palette-v122.js?v=467b122')
+    .catch((error) => console.warn('[DD Build 122] admin workspace navigation unavailable', error));
 } else {
   void import('/public/js/core/dd-public-module-visibility.mjs?v=440')
     .catch((error) => console.warn('[DD modules] public navigation module visibility unavailable', error));
