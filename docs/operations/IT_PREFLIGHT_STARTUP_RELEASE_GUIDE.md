@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 124 — Canada-First Market Controls & U.S. Shipping Pause**.
+**Release 467 Build 125 — User Preferences & Workspace Memory**.
 
-The last fully verified Development and Production checkpoint is Build 123:
+The last fully verified Development and Production checkpoint is Build 124:
 
-- SHA `d0485a9892331e8da2cec42ed54850893b4a7ab1`
-- tree `e5c15b8c2d1c1a9f091a688b9f525e8b7ce73e20`
-- System Gate `34719387920`
-- Current Application Quality Proof `34719387904`
-- I.T. Admin Runtime Proof `34719387901`
-- Repository Branch Hygiene `34719387931`
-- Production Pages Deploy `34719482161`
-- Production Live Resource Integrity `34719519418`
+- SHA `fbcc55051b899719d2fb2cdf90343852cf5abe70`
+- tree `7476f4843f8209c230189a03449d7c172da5de8a`
+- System Gate `34720625518`
+- Current Application Quality `34720625496`
+- I.T. Admin Runtime `34720625502`
+- Repository Branch Hygiene `34720625515`
+- Production Pages Deploy `34720717741`
+- Production Live Resource Integrity `34720757007`
 
 ## Canonical Development target
 
@@ -31,12 +31,12 @@ The last fully verified Development and Production checkpoint is Build 123:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 124 technical boundary
+## Build 125 technical boundary
 
-Build 124 preserves the established Canada-only checkout: Canadian billing, Canadian physical shipping, CAD currency and local pickup. It adds an explicit U.S. sales/shipping block with `TEMPORARY_TARIFF_RESTRICTION`, presents the Canada First public banner, and marks future market expansion as `REVIEW_BEFORE_ENABLE`. Other countries remain unsupported until a future reviewed build explicitly adds them to allowed-country authority.
+Build 125 adds admin-only browser workspace preferences on top of the existing manifest-backed Build 122 navigation. It remembers the last non-home Admin workspace, optional recent Admin tools and a 3/5/8 recent limit. It provides a local clear control and fails soft when browser storage is unavailable.
 
-The commerce core is shared by browser presentation and server middleware, which evaluates it before payment-provider execution. The banner therefore reflects the same fail-closed policy used by checkout rather than replacing enforcement.
+Preference and memory keys are scoped by signed-in Admin user ID. The feature uses `localStorage` only; no `sessionStorage`, server preference endpoint or network write is introduced.
 
-Build 124 adds no Accounting posting, period close, Inventory/Creative/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
+Build 125 adds no Accounting posting, period close, Inventory/Creative/Product/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.

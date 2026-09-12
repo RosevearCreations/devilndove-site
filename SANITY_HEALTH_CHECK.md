@@ -2,36 +2,34 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 124 — Canada-First Market Controls & U.S. Shipping Pause**.
+Current candidate: **Release 467 Build 125 — User Preferences & Workspace Memory**.
 
-Last fully verified Development + Production checkpoint is Build 123:
+Last fully verified Development + Production checkpoint is Build 124:
 
-- SHA `d0485a9892331e8da2cec42ed54850893b4a7ab1`
-- tree `e5c15b8c2d1c1a9f091a688b9f525e8b7ce73e20`
-- System `34719387920`
-- Quality `34719387904`
-- I.T. `34719387901`
-- Hygiene `34719387931`
-- Production Pages `34719482161`
-- Production Live Resource Integrity `34719519418`
+- SHA `fbcc55051b899719d2fb2cdf90343852cf5abe70`
+- tree `7476f4843f8209c230189a03449d7c172da5de8a`
+- System Gate `34720625518`
+- Current Application Quality `34720625496`
+- I.T. Admin Runtime `34720625502`
+- Repository Branch Hygiene `34720625515`
+- Production Pages Deploy `34720717741`
+- Production Live Resource Integrity `34720757007`
 
-Result: **Build 123 six-proof closure is ingested by Build 124.**
+Result: **Build 124 six-proof closure is ingested by Build 125.**
 
-## Build 124 safety checks
+## Build 125 safety checks
 
-- Storefront strategy: **CANADA_FIRST**.
-- Billing country allow-list: **CA only**.
-- Physical shipping country allow-list: **CA only**.
-- U.S. sales: **EXPLICITLY BLOCKED**.
-- U.S. shipping: **EXPLICITLY BLOCKED**.
-- U.S. restriction reason: `TEMPORARY_TARIFF_RESTRICTION`.
-- Other markets: **UNSUPPORTED until REVIEW_BEFORE_ENABLE**.
-- Local pickup: **PRESERVED**.
-- Front-page banner: Canada First/U.S. shipping pause message, no additional H1.
-- Shared browser/server policy: **PRESERVED**.
+- Preference scope: **signed-in Admin user ID + current browser**.
+- Storage: **localStorage convenience state only**.
+- `sessionStorage`: **NOT USED**.
+- Last workspace memory: **non-home Admin routes only**.
+- Recent Admin tools: **optional, bounded to 3/5/8 visible items**.
+- Clear workspace memory control: **PRESENT**.
+- Server preference endpoint: **NONE**.
+- Network write for workspace memory: **NONE**.
 - Provider execution/publication added: **ZERO**.
 - Accounting posting / period close: **ZERO**.
-- Inventory / Creative / price mutation: **ZERO**.
+- Inventory / Creative / Product / price mutation: **ZERO**.
 - Request-time schema mutation: **ZERO**.
 - D1 business-data mutation: **ZERO**.
 - R2/binding mutation: **ZERO**.
@@ -40,4 +38,4 @@ Result: **Build 123 six-proof closure is ingested by Build 124.**
 
 ## Restart integrity
 
-Build 124 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 125, not self-written into Build 124.
+Build 125 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 126, not self-written into Build 125.

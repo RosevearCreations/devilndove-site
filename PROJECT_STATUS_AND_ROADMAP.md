@@ -2,39 +2,40 @@
 
 ## Current checkpoint
 
-**Release 467 Build 124 — Canada-First Market Controls & U.S. Shipping Pause** is the active closure candidate.
+**Release 467 Build 125 — User Preferences & Workspace Memory** is the active closure candidate.
 
-Build 123 is the last fully verified Development + Production checkpoint:
+Build 124 is the last fully verified Development + Production checkpoint:
 
-- SHA `d0485a9892331e8da2cec42ed54850893b4a7ab1`
-- tree `e5c15b8c2d1c1a9f091a688b9f525e8b7ce73e20`
-- System Gate `34719387920`
-- Current Application Quality `34719387904`
-- I.T. Admin Runtime `34719387901`
-- Repository Branch Hygiene `34719387931`
-- Production Pages Deploy `34719482161`
-- Production Live Resource Integrity `34719519418`
+- SHA `fbcc55051b899719d2fb2cdf90343852cf5abe70`
+- tree `7476f4843f8209c230189a03449d7c172da5de8a`
+- System Gate `34720625518`
+- Current Application Quality `34720625496`
+- I.T. Admin Runtime `34720625502`
+- Repository Branch Hygiene `34720625515`
+- Production Pages Deploy `34720717741`
+- Production Live Resource Integrity `34720757007`
 
-The Build 123 closure is recorded by Build 124 ingestion, not a Build 123 self-claim.
+The Build 124 closure is recorded by Build 125 startup ingestion, not a Build 124 self-claim.
 
-## Build 124 — Canada-First Market Controls & U.S. Shipping Pause
+## Build 125 — User Preferences & Workspace Memory
 
-Goal: keep Canada as the safe current storefront market, make the temporary U.S. restriction explicit and customer-friendly, and create a deliberate control point for future market expansion.
+Goal: make Admin navigation remember useful operator context without creating another server-side settings or business-data authority.
 
 Candidate scope:
-1. Preserve Canada-only billing and physical shipping, CAD currency and local pickup.
-2. Explicitly block U.S. sales and U.S. shipping with `TEMPORARY_TARIFF_RESTRICTION`.
-3. Normalize `US`, `USA`, `U.S.` and `United States` to the same blocked country code.
-4. Keep all other non-Canadian countries unsupported until reviewed and explicitly enabled.
-5. Present the front-page **Canada First — U.S. shipping temporarily paused** banner.
-6. Explain that current 50% tariffs cannot viably be absorbed or passed to customers, while expressing the intent to resume serving American customers when conditions allow.
-7. Keep the shared browser/server commerce-policy core authoritative before provider execution.
-8. Add no provider execution, schema migration, D1 business-data mutation, R2/binding mutation or Production business-data overwrite.
-9. Canonical D1 migrations remain exactly `0001`–`0004`.
+1. Scope browser preferences to the signed-in Admin user ID.
+2. Remember the last non-home Admin workspace.
+3. Offer a **Resume** link from Admin home.
+4. Maintain an optional recent-tools list.
+5. Let the operator choose 3, 5 or 8 visible recent tools.
+6. Provide a clear, reversible **Clear workspace memory** control.
+7. Fail soft when browser storage is unavailable.
+8. Keep Build 122 command-palette navigation intact.
+9. Add no server persistence, D1/R2/binding mutation, provider execution or Production business-data overwrite.
+10. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Next direction
 
-After Build 124 closes, continue the bounded quality-of-life sequence, with future-country enablement handled as an explicit reviewed commerce-policy build rather than an automatic worldwide expansion.
+After Build 125 closes, continue the bounded admin quality-of-life sequence. Build 126 must first ingest Build 125's later external closure before beginning its own changes.
 
 ## Release mechanics
 
