@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { buildBusinessHealthDecisionBrief } from '../functions/api/_lib/businessHealthDecisionBrief.js';
+const health={period_month:'2026-09'};
+const empty=buildBusinessHealthDecisionBrief(health,{actions:[]},{packs:[]},{briefs:[]},{signals:[],state:'stable'});
+assert.equal(empty.state,'ready');assert.equal(empty.summary.action_count,0);assert.equal(empty.boundaries.second_action_queue_created,false);
+const financeAction={key:'month-end:no_outstanding_balance',state:'blocking',owner_module:'finance',owner_label:'Finance & Accounting',label:'Outstanding balance must be cleared',href:'/admin/month-end/'};
+const persistent={key:'outstanding_balance_cents',label:'Outstanding balance (cents)',state:'persistent_worsening'};
+const finance=buildBusinessHealthDecisionBrief(health,{actions:[financeAction]},{packs:[]},{briefs:[]},{signals:[persistent],state:'persistent_worsening'});
+assert.equal(finance.state,'priority_review');assert.equal(finance.owner_priority_matrix[0].owner_module,'finance');assert.equal(finance.owner_priority_matrix[0].decision_state,'priority_review');assert.equal(finance.owner_priority_matrix[0].trend_scope,'period_specific_operational_quality');assert.deepEqual(finance.owner_priority_matrix[0].action_keys,['month-end:no_outstanding_balance']);
+const creatorAction={key:'profitability:7',state:'blocking',owner_module:'creator_finance',owner_label:'Creators + Finance',label:'Project loss',href:'/admin/project-profitability-reconciliation/'};
+const creator=buildBusinessHealthDecisionBrief(health,{actions:[creatorAction]},{packs:[]},{briefs:[]},{signals:[],state:'stable'});
+assert.equal(creator.owner_priority_matrix[0].decision_state,'blocking_review');assert.equal(creator.owner_priority_matrix[0].trend_scope,'current_snapshot_only');assert.equal(creator.owner_priority_matrix[0].historical_claim,'none');
+const itAction={key:'it:foreign_keys',state:'attention',owner_module:'it',owner_label:'I.T.',label:'Foreign keys',href:'/admin/it/'};
+const it=buildBusinessHealthDecisionBrief(health,{actions:[itAction]},{packs:[]},{briefs:[]},{signals:[],state:'stable'});
+assert.equal(it.state,'review');assert.equal(it.owner_priority_matrix[0].owner_module,'it');assert.equal(it.owner_priority_matrix[0].summary.attention_count,1);
+assert.equal(it.boundaries.mutation_capability,'none');assert.equal(it.boundaries.decision_persistence,false);assert.equal(it.boundaries.approval_persistence,false);assert.equal(it.boundaries.accounting_posting,false);assert.equal(it.boundaries.provider_execution,false);
+console.log('Release 467 Build 119 Business Health decision brief runtime proof: PASS');

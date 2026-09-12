@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 118 — Business Health Rolling Trend & Escalation Review**.
+**Release 467 Build 119 — Business Health Escalation Decision Brief & Owner Priority Matrix**.
 
-The last fully verified Development and Production checkpoint is Build 117:
+The last fully verified Development and Production checkpoint is Build 118:
 
-- SHA `98ca6ee1a501d7ba8484f1b5ea31be696c907034`
-- tree `e06d666285f654baded4f0948eff6984b38fc41b`
-- System Gate `34700359583`
-- Current Application Quality Proof `34700359610`
-- I.T. Admin Runtime Proof `34700359586`
-- Repository Branch Hygiene `34700359581`
-- Production Pages Deploy `34700443075`
-- Production Live Resource Integrity `34700490013`
+- SHA `df0953198882e82ca3d7742b614d92528d45dbe3`
+- tree `9c2d8abd7da4a5f1e41c00bdc001cd844458d9ea`
+- System Gate `34703983097`
+- Current Application Quality Proof `34703983106`
+- I.T. Admin Runtime Proof `34703983092`
+- Repository Branch Hygiene `34703983073`
+- Production Pages Deploy `34704076896`
+- Production Live Resource Integrity `34704126081`
 
 ## Canonical Development target
 
@@ -33,8 +33,8 @@ The last fully verified Development and Production checkpoint is Build 117:
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 8. A later build ingests that completed six-proof closure.
 
-## Build 118 technical boundary
+## Build 119 technical boundary
 
-Build 118 is a read-only three-period Business Health Rolling Trend & Escalation Review. It recomputes current and two prior period-specific operational-quality snapshots and distinguishes persistent worsening from new worsening and recovery. Profitability and I.T. remain current snapshots only. Escalation means human review only. The feature must not create trend-history storage, persist acknowledgement/resolution, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
+Build 119 is a read-only Business Health Escalation Decision Brief & Owner Priority Matrix. It reuses the existing action queue plus Build 118 rolling trend to prioritize human review. Finance trend context is period-specific operational quality; profitability and I.T. remain current snapshots only. The feature must not create another action queue, persist a decision/approval/acknowledgement/resolution, store trend history, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.

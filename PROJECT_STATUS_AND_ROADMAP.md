@@ -2,36 +2,37 @@
 
 ## Current checkpoint
 
-**Release 467 Build 118 — Business Health Rolling Trend & Escalation Review** is the active closure candidate.
+**Release 467 Build 119 — Business Health Escalation Decision Brief & Owner Priority Matrix** is the active closure candidate.
 
-Build 117 is the last fully verified Development + Production checkpoint:
+Build 118 is the last fully verified Development + Production checkpoint:
 
-- SHA `98ca6ee1a501d7ba8484f1b5ea31be696c907034`
-- tree `e06d666285f654baded4f0948eff6984b38fc41b`
-- System Gate `34700359583`
-- Current Application Quality `34700359610`
-- I.T. Admin Runtime `34700359586`
-- Repository Branch Hygiene `34700359581`
-- Production Pages Deploy `34700443075`
-- Production Live Resource Integrity `34700490013`
+- SHA `df0953198882e82ca3d7742b614d92528d45dbe3`
+- tree `9c2d8abd7da4a5f1e41c00bdc001cd844458d9ea`
+- System Gate `34703983097`
+- Current Application Quality `34703983106`
+- I.T. Admin Runtime `34703983092`
+- Repository Branch Hygiene `34703983073`
+- Production Pages Deploy `34704076896`
+- Production Live Resource Integrity `34704126081`
 
-The Build 117 closure is recorded by Build 118 ingestion, not a Build 117 self-claim.
+The Build 118 closure is recorded by Build 119 ingestion, not a Build 118 self-claim.
 
-## Build 118 — Business Health Rolling Trend & Escalation Review
+## Build 119 — Business Health Escalation Decision Brief & Owner Priority Matrix
 
-Goal: separate persistent deterioration from single-period noise without adding a historical write model.
+Goal: turn the existing Business Health action/trend evidence into one human review order without creating another queue or any persistent decision workflow.
 
 Delivered candidate scope:
-1. Current accounting month plus the two immediately preceding months.
-2. Reuses Build 117 period-specific operational-quality metrics only.
-3. Classifies persistent worsening, reversal/new worsening, recovery, stabilization and sustained improvement.
-4. Persistent worsening sorts first for human escalation review.
-5. Existing current-period action queue, owner review packs and operator briefs remain authoritative.
-6. Markdown export combines current operator briefing, latest period comparison and rolling trend evidence.
+1. Reuses the Build 114 action queue as the sole current-action authority.
+2. Reuses Build 118 three-period operational-quality trend evidence.
+3. Builds an owner priority matrix across Finance, Creators + Finance and I.T.
+4. Persistent worsening outranks single-period worsening.
+5. Existing blocking, attention and review actions provide current-severity context.
+6. Finance trend context is period-specific operational quality only.
 7. Profitability and I.T. remain current snapshots only.
-8. No trend-history table, acknowledgement/resolution persistence or automatic business action.
-9. No Accounting posting/period close, Inventory/Creative/price mutation, provider action, schema/D1/R2/binding mutation or Production mutation.
-10. Canonical D1 migrations remain exactly `0001`–`0004`.
+8. Markdown decision brief is download-only and causes no write.
+9. No decision/approval/acknowledgement/resolution persistence or automatic business action.
+10. No Accounting posting/period close, Inventory/Creative/price mutation, provider action, schema/D1/R2/binding mutation or Production mutation.
+11. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Release mechanics
 
@@ -41,4 +42,4 @@ Persistent branches remain `main` and `dev`.
 
 ## Next build
 
-Build 119 remains unauthorized until Build 118 receives its later exact Development and Production proof; Build 119 must ingest that closure.
+Build 120 remains unauthorized until Build 119 receives its later exact Development and Production proof; Build 120 must ingest that closure.
