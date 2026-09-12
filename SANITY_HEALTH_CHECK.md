@@ -2,41 +2,37 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 112 — Inventory & Material-Usage Reconciliation**.
+Current candidate: **Release 467 Build 113 — Accountant & Month-End Evidence Depth**.
 
-Last fully verified Development + Production checkpoint:
+Last fully verified Development + Production checkpoint is Build 112:
 
-- Exact Build 111 Development SHA: `a234b874b6e03442af96c0110d3cc22db074fe34`
-- Exact tree: `4e82696773761595e57bb69eb48c053f95060e2c`
-- System Gate: `34669983965`
-- Current Application Quality Proof: `34669983954`
-- I.T. Admin Runtime Proof: `34669983974`
-- Repository Branch Hygiene: `34669983946`
-- Production Pages Deploy: `34670059768`
-- Production Live Resource Integrity: `34670099134`
+- SHA `959f376b5e430c5d142376097291d65c48c8c49b`
+- tree `506ac4dc790d88978d3f6c1ffee5435b5042dc5c`
+- System `34695751247`
+- Quality `34695751252`
+- I.T. `34695751279`
+- Hygiene `34695751249`
+- Production Pages `34695830846`
+- Production Live Resource Integrity `34695871530`
 
-Result: **Build 111 six-proof closure is ingested by Build 112.**
+Result: **Build 112 six-proof closure is ingested by Build 113.**
 
-## Build 112 safety checks
+## Build 113 safety checks
 
-- Reconciliation endpoint: GET-only.
-- Synthetic stock movement: **ZERO**.
-- New reserve/release owner: **ZERO**.
-- New Inventory post/reverse owner: **ZERO**.
-- New Product production owner: **ZERO**.
-- New kit open/component-use owner: **ZERO**.
-- New Creative mutation: **ZERO**.
-- Finance/accounting posting: **ZERO**.
+- Evidence-depth endpoint: GET-only.
+- Accounting posting: **ZERO**.
+- Automatic period close: **ZERO**.
+- Evidence mutation: **ZERO**.
+- Automatic accountant export: **ZERO**.
+- Payment/refund execution: **ZERO**.
 - Request-time schema mutation: **ZERO**.
 - Canonical migrations: exactly `0001`–`0004`.
-- R2 mutation: **ZERO**.
+- R2/binding mutation: **ZERO**.
 - Provider execution/publication: **ZERO**.
 - Production business-data overwrite: **ZERO**.
 
-Reservation reconciliation is deliberately aggregate and fail-closed: when the movement ledger cannot explain current `reserved_quantity`, Build 112 flags review rather than inventing Product ownership.
-
-Kit child balances are deliberately shown as aggregate remnant evidence, not guaranteed source-kit attribution.
+Readiness is deliberately fail-closed: outstanding balances and existing close blockers prevent a ready state; incomplete tax/receipt/attachment/export evidence is surfaced for review rather than silently inferred complete.
 
 ## Restart integrity
 
-Build 112 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 113, not self-written into Build 112.
+Build 113 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 114, not self-written into Build 113.

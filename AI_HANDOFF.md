@@ -2,52 +2,31 @@
 
 ## Current authority
 
-**Release 467 Build 112 — Inventory & Material-Usage Reconciliation** is the current Development closure candidate.
+**Release 467 Build 113 — Accountant & Month-End Evidence Depth** is the current Development closure candidate.
 
-Build 112 starts only from the externally verified Build 111 closure. Build 111 did **not** self-record its later proof; Build 112 ingests that closure under the restart protocol.
+Build 113 starts from the externally verified Build 112 closure. Build 112 did **not** self-record its later proof; Build 113 ingests it under the restart protocol.
 
-- Exact Build 111 Development SHA: `a234b874b6e03442af96c0110d3cc22db074fe34`
-- Exact tree: `4e82696773761595e57bb69eb48c053f95060e2c`
-- System Gate: `34669983965`
-- Current Application Quality Proof: `34669983954`
-- I.T. Admin Runtime Proof: `34669983974`
-- Repository Branch Hygiene: `34669983946`
-- Production Pages Deploy: `34670059768`
-- Production Live Resource Integrity: `34670099134`
+- Exact Build 112 SHA: `959f376b5e430c5d142376097291d65c48c8c49b`
+- Exact tree: `506ac4dc790d88978d3f6c1ffee5435b5042dc5c`
+- System Gate: `34695751247`
+- Current Application Quality Proof: `34695751252`
+- I.T. Admin Runtime Proof: `34695751279`
+- Repository Branch Hygiene: `34695751249`
+- Production Pages Deploy: `34695830846`
+- Production Live Resource Integrity: `34695871530`
 
-Build 111 is therefore the last fully verified Development and Production checkpoint. `dev` and `main` were both exactly `a234b874b6e03442af96c0110d3cc22db074fe34` / tree `4e82696773761595e57bb69eb48c053f95060e2c` before Build 112 began.
+## Build 113 scope
 
-## Build 112 scope
+Build 113 adds a GET-only Finance surface that deepens the existing Accounting close evidence. It classifies bank reconciliation, HST/GST review/remittance evidence, receipt/bill support, GIFI and Schedule 141 review, accountant follow-up, outstanding receivables, attachment metadata integrity, existing export-package records and existing close-readiness blockers.
 
-Build 112 adds a **read-only** reconciliation surface to the existing Inventory Operations workspace. It reads and cross-checks:
+READY means **ready for accountant review only**. It never authorizes posting, period close, evidence mutation, payment/refund execution or accountant export. Existing Accounting and Month-End services retain all write ownership.
 
-- Product material plans from `product_resource_links`.
-- Finished Product production material evidence from existing Build 440 run/material records.
-- Reviewed Creative material usage from the Inventory-owned Build 309 post evidence.
-- Aggregate reservation truth from `site_item_inventory.reserved_quantity` and the Build 71 reserve/release movement ledger.
-- Purchased-kit opening/component provenance and current child Inventory balances as **aggregate remnant evidence**, never invented origin attribution.
-- Current cost authority from `site_item_inventory.unit_cost_cents`; cost history remains optional evidence only.
-- Shortages, missing links and contradictory consumption/reservation evidence.
-
-Build 112 creates **no** reserve/release action, no Inventory post/reverse action, no Product production action, no kit open/use action, no Creative mutation, no Finance posting, no synthetic stock movement, no request-time DDL, no R2 mutation and no provider action.
-
-## Existing write owners preserved
-
-- Build 71 Inventory lifecycle remains reservation/release owner.
-- Build 309 Inventory post and the existing Inventory reversal authority remain reviewed Creative consumption owners.
-- Build 440 Product production remains Product material-consumption owner.
-- Build 440 Inventory kit service remains kit-opening/component-use owner.
-
-## Canonical database boundary
-
-Forward D1 authority remains `migrations/canonical/manifest.json` through `scripts/d1_migrate.py`. Canonical migrations remain exactly `0001`–`0004`; Build 112 adds no migration.
+Canonical D1 migrations remain exactly `0001`–`0004`; no new schema/R2/provider mutation is introduced.
 
 ## External lanes
 
-Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-token acceptance remain `HOLD_EXTERNAL`. CAIP private-media acceptance remains `EVIDENCE_DEPENDENT`.
-
-Canada-only commerce remains authoritative: CAD, U.S. sales/shipping disabled, local pickup supported.
+Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-token acceptance remain `HOLD_EXTERNAL`. CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CAD commerce remains authoritative; U.S. sales/shipping remain disabled and local pickup remains supported.
 
 ## Restart rule
 
-Build 112 must not self-record its later external exact-head proof. After Build 112 is merged and externally proven, **Build 113 must ingest that later closure**. Until then, the restart authority is the exact Build 111 proof bundle above.
+Build 113 must not self-record its later external exact-head proof. After Build 113 is externally proven and promoted, **Build 114 must ingest that later closure**.
