@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 126 — Admin Favorites & Quick Launch**.
+**Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return**.
 
-The last fully verified Development and Production checkpoint is Build 125:
+The last fully verified Development and Production checkpoint is Build 126:
 
-- SHA `eca94d1ac4732c561794f914f89a2838af243617`
-- tree `c7b4caf380183cd0b71b79d2f0ba73ccefce0d26`
-- System Gate `34721943588`
-- Current Application Quality `34721943584`
-- I.T. Admin Runtime `34721943615`
-- Repository Branch Hygiene `34721943593`
-- Production Pages Deploy `34722069482`
-- Production Live Resource Integrity `34722116635`
+- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
+- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
+- System Gate `34724580675`
+- Current Application Quality `34724580676`
+- I.T. Admin Runtime `34724580648`
+- Repository Branch Hygiene `34724580646`
+- Production Pages Deploy `34724657853`
+- Production Live Resource Integrity `34724703548`
 
 ## Canonical Development target
 
@@ -31,12 +31,12 @@ The last fully verified Development and Production checkpoint is Build 125:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 126 technical boundary
+## Build 127 technical boundary
 
-Build 126 adds admin-only browser favorites on top of Build 122 manifest-backed navigation and Build 125 workspace memory. Any non-home Admin route can be favorited, with at most eight favorites retained. The Favorites quick-launch dialog supports open/remove/clear, Admin home exposes up to three favorite shortcuts, and `Alt+Shift+F` can toggle the current route.
+Build 127 adds one accessible Admin context breadcrumb using the existing `data/admin-navigation-modules.json` authority. When the current route resolves, the breadcrumb presents Admin, workspace, section and current tool context and gives nested tools a direct **Back to workspace** path.
 
-Favorite keys are scoped by signed-in Admin user ID. The feature uses `localStorage` only; no `sessionStorage`, server preference endpoint or network write is introduced.
+The breadcrumb module is Admin-only and client-only. It stores no preferences or history, uses neither `localStorage` nor `sessionStorage`, and introduces no network write. The only new network behavior is a read-only manifest fetch; if it fails the module renders a safe Admin/current-page fallback.
 
-Build 126 adds no Accounting posting, period close, Inventory/Creative/Product/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
+Build 127 adds no Accounting posting, period close, Inventory/Creative/Product/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
