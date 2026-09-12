@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 123 — Admin Home Dashboard Refresh**.
+**Release 467 Build 124 — Canada-First Market Controls & U.S. Shipping Pause**.
 
-The last fully verified Development and Production checkpoint is Build 122:
+The last fully verified Development and Production checkpoint is Build 123:
 
-- SHA `8ff2df0616a4a9f23c4e1a92bcf5e501a306e0da`
-- tree `e87670bb397cee58ed839813ea33851d799b5823`
-- System Gate `34710867035`
-- Current Application Quality Proof `34710867094`
-- I.T. Admin Runtime Proof `34710867066`
-- Repository Branch Hygiene `34710867072`
-- Production Pages Deploy `34710956842`
-- Production Live Resource Integrity `34710999276`
+- SHA `d0485a9892331e8da2cec42ed54850893b4a7ab1`
+- tree `e5c15b8c2d1c1a9f091a688b9f525e8b7ce73e20`
+- System Gate `34719387920`
+- Current Application Quality Proof `34719387904`
+- I.T. Admin Runtime Proof `34719387901`
+- Repository Branch Hygiene `34719387931`
+- Production Pages Deploy `34719482161`
+- Production Live Resource Integrity `34719519418`
 
 ## Canonical Development target
 
@@ -31,8 +31,12 @@ The last fully verified Development and Production checkpoint is Build 122:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 123 technical boundary
+## Build 124 technical boundary
 
-Build 123 is a client-only Admin Home Dashboard Refresh. It reads the existing Today Tasks contract, current I.T. control tower and navigation manifest with GET only; uses fail-soft independent reads; and provides manual refresh without polling. It stores no history/preferences and exposes no Today task mutation controls. It does not post Accounting, close a period, mutate Inventory or Creative records, change prices, execute providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
+Build 124 preserves the established Canada-only checkout: Canadian billing, Canadian physical shipping, CAD currency and local pickup. It adds an explicit U.S. sales/shipping block with `TEMPORARY_TARIFF_RESTRICTION`, presents the Canada First public banner, and marks future market expansion as `REVIEW_BEFORE_ENABLE`. Other countries remain unsupported until a future reviewed build explicitly adds them to allowed-country authority.
+
+The commerce core is shared by browser presentation and server middleware, which evaluates it before payment-provider execution. The banner therefore reflects the same fail-closed policy used by checkout rather than replacing enforcement.
+
+Build 124 adds no Accounting posting, period close, Inventory/Creative/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
