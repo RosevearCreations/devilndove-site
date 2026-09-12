@@ -2,8 +2,10 @@
 
 ## Current operating authority
 
+Current candidate: **Release 467 Build 115 — Business Health Review Packs & Owner Handoff**.
+
 - `AI_HANDOFF.md` — restart authority and exact Build 114 closure ingested by Build 115.
-- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 115 scope and release sequence.
+- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 115 Business Health Review Packs & Owner Handoff scope and release sequence.
 - `SANITY_HEALTH_CHECK.md` — current safety and mutation boundary.
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — I.T./preflight/restart procedure.
 - `docs/operations/RELEASE_467_BUILD_115_BUSINESS_HEALTH_REVIEW_PACKS.md` — Build 115 design/evidence contract.
