@@ -2,30 +2,30 @@
 
 ## Current operating authority
 
-Current candidate: **Release 467 Build 126 — Admin Favorites & Quick Launch**.
+Current candidate: **Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return**.
 
-- `AI_HANDOFF.md` — restart authority and exact Build 125 closure ingested by Build 126.
-- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 126 scope and next direction.
+- `AI_HANDOFF.md` — restart authority and exact Build 126 closure ingested by Build 127.
+- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 127 scope and next direction.
 - `SANITY_HEALTH_CHECK.md` — current safety and mutation boundary.
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — I.T./preflight/restart procedure.
-- `docs/operations/RELEASE_467_BUILD_126_ADMIN_FAVORITES_QUICK_LAUNCH.md` — Build 126 browser-favorites contract.
-- `release467-build126-admin-favorites-quick-launch.json` — machine authority for current closure candidate.
-- `release467-build125-user-preferences-workspace-memory.json` — ingested Build 125 six-proof closure.
+- `docs/operations/RELEASE_467_BUILD_127_ADMIN_CONTEXT_BREADCRUMBS_WORKSPACE_RETURN.md` — Build 127 Admin-context contract.
+- `release467-build127-admin-context-breadcrumbs-workspace-return.json` — machine authority for current closure candidate.
+- `release467-build126-admin-favorites-quick-launch.json` — ingested Build 126 six-proof closure.
 - `current-development-authority.json` — current release pointer.
 
 ## Current inherited proof
 
-- SHA `eca94d1ac4732c561794f914f89a2838af243617`
-- tree `c7b4caf380183cd0b71b79d2f0ba73ccefce0d26`
-- System Gate `34721943588`
-- Current Application Quality `34721943584`
-- I.T. Admin Runtime `34721943615`
-- Repository Branch Hygiene `34721943593`
-- Production Pages Deploy `34722069482`
-- Production Live Resource Integrity `34722116635`
+- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
+- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
+- System Gate `34724580675`
+- Current Application Quality `34724580676`
+- I.T. Admin Runtime `34724580648`
+- Repository Branch Hygiene `34724580646`
+- Production Pages Deploy `34724657853`
+- Production Live Resource Integrity `34724703548`
 
-Build 125's proof is recorded by Build 126 restart ingestion. Build 126 may not self-record its later external closure.
+Build 126's proof is recorded by Build 127 restart ingestion. Build 127 may not self-record its later external closure.
 
 ## Admin convenience-state note
 
-Workspace memory and favorites are browser-local convenience state scoped to the signed-in Admin user ID. They do not create a server-side preference authority and do not mutate business records.
+Workspace memory and favorites remain browser-local convenience state scoped to the signed-in Admin user ID. Build 127's breadcrumbs add no saved state at all; they read the existing Admin navigation manifest and current route only.
