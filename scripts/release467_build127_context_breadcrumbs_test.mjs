@@ -8,7 +8,7 @@ for(const token of [
   "const MANIFEST_URL = '/data/admin-navigation-modules.json'",
   "method: 'GET'",
   "aria-label', 'Admin context'",
-  'data-dd-admin-context-breadcrumbs',
+  'ddAdminContextBreadcrumbs',
   'ddAdminWorkspaceReturn',
   'Back to ${context.module.label}',
   "aria-current', 'page'",
