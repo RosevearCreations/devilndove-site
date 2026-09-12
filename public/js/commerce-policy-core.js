@@ -139,10 +139,10 @@ export function validateCanadianAddress({ country, province, postal_code } = {},
   }
   const blocked = commerceCountryRestriction(countryCode, { purpose: label.toLowerCase().startsWith('bill') ? 'billing' : 'shipping' });
   if (blocked) {
-    return { ok: false, code: 'commerce_country_blocked', error: blocked.message, requested_country: clean(country), requested_country_code: countryCode, restriction_reason: blocked.reason, temporary: blocked.temporary, allowed_countries: ['CA'] };
+    return { ok: false, code: 'commerce_country_not_supported', error: blocked.message, requested_country: clean(country), requested_country_code: countryCode, restriction_reason: blocked.reason, temporary: blocked.temporary, allowed_countries: ['CA'] };
   }
   if (countryCode !== 'CA') {
-    return { ok: false, code: 'commerce_country_not_supported', error: COMMERCE_POLICY.message, requested_country: clean(country), allowed_countries: ['CA'] };
+    return { ok: false, code: 'commerce_country_not_supported', error: COMMERCE_POLICY.message, requested_country: clean(country), requested_country_code: countryCode, allowed_countries: ['CA'] };
   }
   if (!provinceCode) {
     return { ok: false, code: 'canadian_province_required', error: `${label} province or territory must be a valid Canadian province or territory.` };
@@ -166,7 +166,7 @@ export function validateCommerceEnvelope({ currency, billing_country, shipping_c
   }
   const billingBlocked = commerceCountryRestriction(billing_country, { purpose: 'billing' });
   if (billingBlocked) {
-    return { ok: false, code: 'billing_country_blocked', error: billingBlocked.message, requested_country: clean(billing_country) || null, requested_country_code: billingBlocked.country_code, restriction_reason: billingBlocked.reason, temporary: billingBlocked.temporary, allowed_countries: ['CA'] };
+    return { ok: false, code: 'billing_country_not_supported', error: billingBlocked.message, requested_country: clean(billing_country) || null, requested_country_code: billingBlocked.country_code, restriction_reason: billingBlocked.reason, temporary: billingBlocked.temporary, allowed_countries: ['CA'] };
   }
   if (!isAllowedCommerceCountry(billing_country)) {
     return {
@@ -174,12 +174,13 @@ export function validateCommerceEnvelope({ currency, billing_country, shipping_c
       code: 'billing_country_not_supported',
       error: COMMERCE_POLICY.message,
       requested_country: clean(billing_country) || null,
+      requested_country_code: normalizeCountryCode(billing_country) || null,
       allowed_countries: ['CA'],
     };
   }
   const shippingBlocked = clean(shipping_country) ? commerceCountryRestriction(shipping_country, { purpose: 'shipping' }) : null;
   if (shippingBlocked) {
-    return { ok: false, code: 'shipping_country_blocked', error: shippingBlocked.message, requested_country: clean(shipping_country), requested_country_code: shippingBlocked.country_code, restriction_reason: shippingBlocked.reason, temporary: shippingBlocked.temporary, allowed_countries: ['CA'] };
+    return { ok: false, code: 'shipping_country_not_supported', error: shippingBlocked.message, requested_country: clean(shipping_country), requested_country_code: shippingBlocked.country_code, restriction_reason: shippingBlocked.reason, temporary: shippingBlocked.temporary, allowed_countries: ['CA'] };
   }
   if (clean(shipping_country) && !isAllowedCommerceCountry(shipping_country)) {
     return {
@@ -187,6 +188,7 @@ export function validateCommerceEnvelope({ currency, billing_country, shipping_c
       code: 'shipping_country_not_supported',
       error: COMMERCE_POLICY.message,
       requested_country: clean(shipping_country),
+      requested_country_code: normalizeCountryCode(shipping_country) || null,
       allowed_countries: ['CA'],
     };
   }
