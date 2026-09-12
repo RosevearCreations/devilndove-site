@@ -3,8 +3,46 @@ import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit
 import { loadRelease465BusinessHealth } from '../_lib/release465BusinessHealth.js';
 import { buildBusinessHealthActionQueue, BUSINESS_HEALTH_ACTION_QUEUE_BUILD, BUSINESS_HEALTH_ACTION_QUEUE_TITLE } from '../_lib/businessHealthActionQueue.js';
 const json=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store'});
+const SAFETY=Object.freeze({
+  mutation_capability:'none',
+  automatic_business_action:false,
+  accounting_posting:false,
+  inventory_mutation:false,
+  creative_mutation:false,
+  provider_execution:false,
+  provider_publication:false,
+  request_time_schema_mutation:false,
+  r2_mutation:false,
+  production_mutation:false
+});
 export async function onRequestGet(context){
-  const adminUser=await getAdminUserFromRequest(context.request,context.env);if(!adminUser)return json({ok:false,release:467,build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,error:'Admin access required.'},401);
-  const db=getDb(context.env);if(!db)return json({ok:false,release:467,build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,error:'Database binding is not configured.'},503);
-  try{const url=new URL(context.request.url);const health=await loadRelease465BusinessHealth(db,context.env,{periodMonth:url.searchParams.get('period_month')||''});const business_action_queue=buildBusinessHealthActionQueue(health);return json({ok:true,release:467,build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,title:BUSINESS_HEALTH_ACTION_QUEUE_TITLE,role:'read_only_business_health_action_queue',authority:'release467-build114-business-health-action-queue',...health,business_action_queue,safety:business_action_queue.boundaries});}catch(error){return json({ok:false,release:467,build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,error:error?.message||'Business Health Action Queue could not load.',role:'read_only_business_health_action_queue',safety:{mutation_capability:'none',accounting_posting:false,inventory_mutation:false,creative_mutation:false,provider_execution:false,request_time_schema_mutation:false}},500);}
+  const adminUser=await getAdminUserFromRequest(context.request,context.env);
+  if(!adminUser)return json({ok:false,release:467,build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,error:'Admin access required.',safety:SAFETY},401);
+  const db=getDb(context.env);
+  if(!db)return json({ok:false,release:467,build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,error:'Database binding is not configured.',safety:SAFETY},503);
+  try{
+    const url=new URL(context.request.url);
+    const health=await loadRelease465BusinessHealth(db,context.env,{periodMonth:url.searchParams.get('period_month')||''});
+    const business_action_queue=buildBusinessHealthActionQueue(health);
+    return json({
+      ok:true,
+      release:467,
+      build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,
+      title:BUSINESS_HEALTH_ACTION_QUEUE_TITLE,
+      role:'read_only_business_health_action_queue',
+      authority:'release467-build114-business-health-action-queue',
+      ...health,
+      business_action_queue,
+      safety:{...SAFETY,...business_action_queue.boundaries,automatic_business_action:false,accounting_posting:false,inventory_mutation:false,creative_mutation:false,provider_execution:false,request_time_schema_mutation:false}
+    });
+  }catch(error){
+    return json({
+      ok:false,
+      release:467,
+      build:BUSINESS_HEALTH_ACTION_QUEUE_BUILD,
+      error:error?.message||'Business Health Action Queue could not load.',
+      role:'read_only_business_health_action_queue',
+      safety:{...SAFETY,automatic_business_action:false,accounting_posting:false,inventory_mutation:false,creative_mutation:false,provider_execution:false,request_time_schema_mutation:false}
+    },500);
+  }
 }
