@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 113 — Accountant & Month-End Evidence Depth**.
+**Release 467 Build 114 — Business Health Action Queue & Owner Routing**.
 
-The last fully verified Development and Production checkpoint is Build 112:
+The last fully verified Development and Production checkpoint is Build 113:
 
-- SHA `959f376b5e430c5d142376097291d65c48c8c49b`
-- tree `506ac4dc790d88978d3f6c1ffee5435b5042dc5c`
-- System Gate `34695751247`
-- Current Application Quality Proof `34695751252`
-- I.T. Admin Runtime Proof `34695751279`
-- Repository Branch Hygiene `34695751249`
-- Production Pages Deploy `34695830846`
-- Production Live Resource Integrity `34695871530`
+- SHA `9dca8383a1507838539820fb667aaea192ed4098`
+- tree `36f473d66011c1138426346bcb0c553bfd2a69b1`
+- System Gate `34696252402`
+- Current Application Quality Proof `34696252394`
+- I.T. Admin Runtime Proof `34696252388`
+- Repository Branch Hygiene `34696252396`
+- Production Pages Deploy `34696344689`
+- Production Live Resource Integrity `34696386137`
 
 ## Canonical Development target
 
@@ -33,8 +33,8 @@ The last fully verified Development and Production checkpoint is Build 112:
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 8. A later build ingests that completed six-proof closure.
 
-## Build 113 technical boundary
+## Build 114 technical boundary
 
-Build 113 is read-only month-end/accountant evidence depth. It must not post Accounting entries, close periods, mutate evidence, execute accountant exports, pay/refund, create schema, mutate R2/bindings, or execute providers. Existing Accounting and Month-End services remain the action owners.
+Build 114 is a read-only Business Health action queue and owner-routing layer. It must not post Accounting, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate R2/bindings, restore business data or mutate Production. Existing module services remain the action owners.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.

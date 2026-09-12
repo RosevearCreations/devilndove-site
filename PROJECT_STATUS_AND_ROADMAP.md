@@ -2,43 +2,43 @@
 
 ## Current checkpoint
 
-**Release 467 Build 113 — Accountant & Month-End Evidence Depth** is the active closure candidate.
+**Release 467 Build 114 — Business Health Action Queue & Owner Routing** is the active closure candidate.
 
-Build 112 is the last fully verified Development + Production checkpoint:
+Build 113 is the last fully verified Development + Production checkpoint:
 
-- SHA `959f376b5e430c5d142376097291d65c48c8c49b`
-- tree `506ac4dc790d88978d3f6c1ffee5435b5042dc5c`
-- System Gate `34695751247`
-- Current Application Quality `34695751252`
-- I.T. Admin Runtime `34695751279`
-- Repository Branch Hygiene `34695751249`
-- Production Pages Deploy `34695830846`
-- Production Live Resource Integrity `34695871530`
+- SHA `9dca8383a1507838539820fb667aaea192ed4098`
+- tree `36f473d66011c1138426346bcb0c553bfd2a69b1`
+- System Gate `34696252402`
+- Current Application Quality `34696252394`
+- I.T. Admin Runtime `34696252388`
+- Repository Branch Hygiene `34696252396`
+- Production Pages Deploy `34696344689`
+- Production Live Resource Integrity `34696386137`
 
-The Build 112 closure is recorded by Build 113 ingestion, not a Build 112 self-claim.
+The Build 113 closure is recorded by Build 114 ingestion, not a Build 113 self-claim.
 
-## Build 113 — Accountant & Month-End Evidence Depth
+## Build 114 — Business Health Action Queue & Owner Routing
 
-Goal: deepen month-end review, evidence attachment integrity, reconciliation and accountant-export readiness while keeping Accounting posting/close/export explicit and reviewable.
+Goal: make existing cross-business evidence immediately actionable for a human operator without adding a second write authority.
 
 Delivered candidate scope:
-1. Pure read-only evidence-depth classifier.
-2. Authenticated GET-only endpoint over the existing Accounting close read service.
-3. Finance UI with selected-month evidence checks and owner routing.
-4. Bank and HST/GST evidence visibility.
-5. Receipt/bill, GIFI and Schedule 141 evidence visibility.
-6. Outstanding-payment blockers and accountant follow-up visibility.
-7. Attachment metadata integrity review.
-8. Existing accountant-export package evidence without automatic export.
-9. Existing Accounting/Month-End mutation owners preserved.
-10. No schema, D1/R2 business-data, provider, posting, close or payment/refund mutation.
+1. Pure read-only queue classifier.
+2. Authenticated GET-only endpoint reusing the existing Business Health engine once per request.
+3. Deterministic blocking/attention/review sorting.
+4. Stable action deduplication.
+5. Finance anomaly routing.
+6. Month-end incomplete-check routing.
+7. Creator/Finance profitability-risk routing.
+8. I.T. health routing.
+9. Unified Business Health page with existing evidence plus owner queue.
+10. No schema, D1/R2 business-data, Accounting, Inventory, Creative, provider or Production mutation.
 
 ## Release mechanics
 
-Every new build ingests the previous build's later external closure, implements a bounded candidate, proves the exact `dev` head through System/Quality/I.T./Hygiene plus Preview/D1/bindings, then non-force promotes the identical SHA/tree to `main` and requires Production Pages + Live Resource proofs. The candidate never self-records its own later proof.
+Every new build ingests the previous build's later external closure, implements one bounded candidate, proves the exact `dev` head through System/Quality/I.T./Hygiene plus Preview/D1/bindings, then non-force promotes the identical SHA/tree to `main` and requires Production Pages + Live Resource proofs. The candidate never self-records its own later proof.
 
 Persistent branches remain `main` and `dev`. Canonical migrations remain exactly `0001`–`0004`.
 
 ## Next build
 
-Build 114 remains unauthorized until Build 113 receives its later exact Development and Production proof; Build 114 must ingest that closure.
+Build 115 remains unauthorized until Build 114 receives its later exact Development and Production proof; Build 115 must ingest that closure.

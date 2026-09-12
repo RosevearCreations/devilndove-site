@@ -2,37 +2,37 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 113 — Accountant & Month-End Evidence Depth**.
+Current candidate: **Release 467 Build 114 — Business Health Action Queue & Owner Routing**.
 
-Last fully verified Development + Production checkpoint is Build 112:
+Last fully verified Development + Production checkpoint is Build 113:
 
-- SHA `959f376b5e430c5d142376097291d65c48c8c49b`
-- tree `506ac4dc790d88978d3f6c1ffee5435b5042dc5c`
-- System `34695751247`
-- Quality `34695751252`
-- I.T. `34695751279`
-- Hygiene `34695751249`
-- Production Pages `34695830846`
-- Production Live Resource Integrity `34695871530`
+- SHA `9dca8383a1507838539820fb667aaea192ed4098`
+- tree `36f473d66011c1138426346bcb0c553bfd2a69b1`
+- System `34696252402`
+- Quality `34696252394`
+- I.T. `34696252388`
+- Hygiene `34696252396`
+- Production Pages `34696344689`
+- Production Live Resource Integrity `34696386137`
 
-Result: **Build 112 six-proof closure is ingested by Build 113.**
+Result: **Build 113 six-proof closure is ingested by Build 114.**
 
-## Build 113 safety checks
+## Build 114 safety checks
 
-- Evidence-depth endpoint: GET-only.
+- Action-queue endpoint: GET-only.
+- Base Business Health read: one load per request.
+- Automatic business action: **ZERO**.
 - Accounting posting: **ZERO**.
-- Automatic period close: **ZERO**.
-- Evidence mutation: **ZERO**.
-- Automatic accountant export: **ZERO**.
-- Payment/refund execution: **ZERO**.
+- Inventory mutation: **ZERO**.
+- Creative mutation: **ZERO**.
+- Provider execution/publication: **ZERO**.
 - Request-time schema mutation: **ZERO**.
 - Canonical migrations: exactly `0001`–`0004`.
 - R2/binding mutation: **ZERO**.
-- Provider execution/publication: **ZERO**.
 - Production business-data overwrite: **ZERO**.
 
-Readiness is deliberately fail-closed: outstanding balances and existing close blockers prevent a ready state; incomplete tax/receipt/attachment/export evidence is surfaced for review rather than silently inferred complete.
+Queue state is deliberately non-executing: `blocking`, `attention`, `review` and `ready` are operator-routing states only.
 
 ## Restart integrity
 
-Build 113 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 114, not self-written into Build 113.
+Build 114 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 115, not self-written into Build 114.

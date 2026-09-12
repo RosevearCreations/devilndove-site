@@ -2,26 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 113 — Accountant & Month-End Evidence Depth** is the current Development closure candidate.
+**Release 467 Build 114 — Business Health Action Queue & Owner Routing** is the current Development closure candidate.
 
-Build 113 starts from the externally verified Build 112 closure. Build 112 did **not** self-record its later proof; Build 113 ingests it under the restart protocol.
+Build 114 starts from the externally verified Build 113 closure. Build 113 did **not** self-record its later proof; Build 114 ingests it under the restart protocol.
 
-- Exact Build 112 SHA: `959f376b5e430c5d142376097291d65c48c8c49b`
-- Exact tree: `506ac4dc790d88978d3f6c1ffee5435b5042dc5c`
-- System Gate: `34695751247`
-- Current Application Quality Proof: `34695751252`
-- I.T. Admin Runtime Proof: `34695751279`
-- Repository Branch Hygiene: `34695751249`
-- Production Pages Deploy: `34695830846`
-- Production Live Resource Integrity: `34695871530`
+- Exact Build 113 SHA: `9dca8383a1507838539820fb667aaea192ed4098`
+- Exact tree: `36f473d66011c1138426346bcb0c553bfd2a69b1`
+- System Gate: `34696252402`
+- Current Application Quality Proof: `34696252394`
+- I.T. Admin Runtime Proof: `34696252388`
+- Repository Branch Hygiene: `34696252396`
+- Production Pages Deploy: `34696344689`
+- Production Live Resource Integrity: `34696386137`
 
-## Build 113 scope
+## Build 114 scope
 
-Build 113 adds a GET-only Finance surface that deepens the existing Accounting close evidence. It classifies bank reconciliation, HST/GST review/remittance evidence, receipt/bill support, GIFI and Schedule 141 review, accountant follow-up, outstanding receivables, attachment metadata integrity, existing export-package records and existing close-readiness blockers.
+Build 114 adds a read-only Business Health action queue over the existing Business Health engine. It prioritizes existing Finance anomalies, incomplete month-end checks, Creative profitability risks and I.T. health findings, then routes each item to the existing owning workspace.
 
-READY means **ready for accountant review only**. It never authorizes posting, period close, evidence mutation, payment/refund execution or accountant export. Existing Accounting and Month-End services retain all write ownership.
+The queue is review-only. It never authorizes Accounting posting, Inventory or Creative mutation, price changes, provider execution/publication, schema/R2/binding mutation or Production changes.
 
-Canonical D1 migrations remain exactly `0001`–`0004`; no new schema/R2/provider mutation is introduced.
+Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## External lanes
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 113 must not self-record its later external exact-head proof. After Build 113 is externally proven and promoted, **Build 114 must ingest that later closure**.
+Build 114 must not self-record its later external exact-head proof. After Build 114 is externally proven and promoted, **Build 115 must ingest that later closure**.
