@@ -2,40 +2,41 @@
 
 ## Current checkpoint
 
-**Release 467 Build 125 — User Preferences & Workspace Memory** is the active closure candidate.
+**Release 467 Build 126 — Admin Favorites & Quick Launch** is the active closure candidate.
 
-Build 124 is the last fully verified Development + Production checkpoint:
+Build 125 is the last fully verified Development + Production checkpoint:
 
-- SHA `fbcc55051b899719d2fb2cdf90343852cf5abe70`
-- tree `7476f4843f8209c230189a03449d7c172da5de8a`
-- System Gate `34720625518`
-- Current Application Quality `34720625496`
-- I.T. Admin Runtime `34720625502`
-- Repository Branch Hygiene `34720625515`
-- Production Pages Deploy `34720717741`
-- Production Live Resource Integrity `34720757007`
+- SHA `eca94d1ac4732c561794f914f89a2838af243617`
+- tree `c7b4caf380183cd0b71b79d2f0ba73ccefce0d26`
+- System Gate `34721943588`
+- Current Application Quality `34721943584`
+- I.T. Admin Runtime `34721943615`
+- Repository Branch Hygiene `34721943593`
+- Production Pages Deploy `34722069482`
+- Production Live Resource Integrity `34722116635`
 
-The Build 124 closure is recorded by Build 125 startup ingestion, not a Build 124 self-claim.
+The Build 125 closure is recorded by Build 126 startup ingestion, not a Build 125 self-claim.
 
-## Build 125 — User Preferences & Workspace Memory
+## Build 126 — Admin Favorites & Quick Launch
 
-Goal: make Admin navigation remember useful operator context without creating another server-side settings or business-data authority.
+Goal: make frequent Admin destinations faster to reach without creating a server-side settings authority.
 
 Candidate scope:
-1. Scope browser preferences to the signed-in Admin user ID.
-2. Remember the last non-home Admin workspace.
-3. Offer a **Resume** link from Admin home.
-4. Maintain an optional recent-tools list.
-5. Let the operator choose 3, 5 or 8 visible recent tools.
-6. Provide a clear, reversible **Clear workspace memory** control.
-7. Fail soft when browser storage is unavailable.
-8. Keep Build 122 command-palette navigation intact.
-9. Add no server persistence, D1/R2/binding mutation, provider execution or Production business-data overwrite.
-10. Canonical D1 migrations remain exactly `0001`–`0004`.
+1. Scope favorites to the signed-in Admin user ID.
+2. Favorite/unfavorite the current non-home Admin route.
+3. Keep at most eight favorites.
+4. Add a Favorites quick-launch dialog.
+5. Show up to three favorite shortcuts on Admin home.
+6. Allow individual removal and full clear.
+7. Add optional `Alt+Shift+F` current-page toggle.
+8. Fail soft when browser storage is unavailable.
+9. Preserve Build 122 command-palette and Build 125 workspace-memory behavior.
+10. Add no server persistence, D1/R2/binding mutation, provider execution or Production business-data overwrite.
+11. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Next direction
 
-After Build 125 closes, continue the bounded admin quality-of-life sequence. Build 126 must first ingest Build 125's later external closure before beginning its own changes.
+After Build 126 closes, continue the bounded Admin quality-of-life sequence. Build 127 must first ingest Build 126's later external closure before beginning its own changes.
 
 ## Release mechanics
 

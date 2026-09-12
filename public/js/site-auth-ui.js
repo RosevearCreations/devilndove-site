@@ -6,6 +6,7 @@
 // Forward enhancement: admin routes bootstrap the shared accessible contextual-help layer.
 // Release 467 Build 122: admin routes also bootstrap the manifest-backed workspace navigation and command palette.
 // Release 467 Build 125: admin routes bootstrap user-scoped browser workspace preferences and memory.
+// Release 467 Build 126: admin routes bootstrap user-scoped browser favorites and quick launch.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
@@ -177,6 +178,8 @@ if (window.location.pathname.startsWith('/admin')) {
     .catch((error) => console.warn('[DD Build 122] admin workspace navigation unavailable', error));
   void import('/public/js/admin-workspace-preferences-v125.js?v=467b125')
     .catch((error) => console.warn('[DD Build 125] admin workspace memory unavailable', error));
+  void import('/public/js/admin-favorites-quick-launch-v126.js?v=467b126')
+    .catch((error) => console.warn('[DD Build 126] admin favorites unavailable', error));
 } else {
   void import('/public/js/core/dd-public-module-visibility.mjs?v=440')
     .catch((error) => console.warn('[DD modules] public navigation module visibility unavailable', error));

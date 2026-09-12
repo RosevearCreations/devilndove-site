@@ -2,26 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 125 — User Preferences & Workspace Memory** is the current Development closure candidate.
+**Release 467 Build 126 — Admin Favorites & Quick Launch** is the current Development closure candidate.
 
-Build 125 starts by ingesting the externally verified Build 124 closure. Build 124 remains correctly non-self-recording; its six later proof IDs are recorded by Build 125 startup ingestion.
+Build 126 starts by ingesting the externally verified Build 125 closure. Build 125 remains correctly non-self-recording; its six later proof IDs are recorded by Build 126 startup ingestion.
 
-- SHA `fbcc55051b899719d2fb2cdf90343852cf5abe70`
-- tree `7476f4843f8209c230189a03449d7c172da5de8a`
-- System Gate `34720625518`
-- Current Application Quality `34720625496`
-- I.T. Admin Runtime `34720625502`
-- Repository Branch Hygiene `34720625515`
-- Production Pages Deploy `34720717741`
-- Production Live Resource Integrity `34720757007`
+- SHA `eca94d1ac4732c561794f914f89a2838af243617`
+- tree `c7b4caf380183cd0b71b79d2f0ba73ccefce0d26`
+- System Gate `34721943588`
+- Current Application Quality `34721943584`
+- I.T. Admin Runtime `34721943615`
+- Repository Branch Hygiene `34721943593`
+- Production Pages Deploy `34722069482`
+- Production Live Resource Integrity `34722116635`
 
-## Build 125 scope
+## Build 126 scope
 
-Build 125 adds a small admin-only browser preference layer over the existing Build 122 workspace navigation. Preferences are scoped by signed-in admin user ID and stay in browser `localStorage`.
+Build 126 adds admin-only browser favorites over the existing Build 122 workspace navigation and Build 125 workspace memory. Favorites are scoped by signed-in Admin user ID and stay in browser `localStorage`.
 
-The feature remembers the last non-home Admin workspace, can show recent Admin tools, allows a 3/5/8 recent limit, exposes a **Workspace memory** control, and provides **Clear workspace memory**. The Admin home can present a **Resume** link back to the last remembered workspace.
+The feature can favorite any non-home Admin route, stores at most eight favorites, provides a **Favorites** quick-launch dialog, shows up to three favorite shortcuts from Admin home, supports individual removal and **Clear favorites**, and provides `Alt+Shift+F` as an optional current-page toggle.
 
-This is convenience state only. It does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/product data, prices, payment/provider state, or Production business data. `sessionStorage` is not used. Canonical D1 migrations remain exactly `0001`–`0004`.
+This is convenience state only. It does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. `sessionStorage` is not used and no network write is introduced. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## External lanes
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 125 must not self-record its later external exact-head proof. After Build 125 is externally proven and promoted, **Build 126 must ingest that later closure**.
+Build 126 must not self-record its later external exact-head proof. After Build 126 is externally proven and promoted, **Build 127 must ingest that later closure**.
