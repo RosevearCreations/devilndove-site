@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';
+import { buildBusinessHealthRollingTrend, BUSINESS_HEALTH_ROLLING_TREND_BUILD } from '../functions/api/_lib/businessHealthRollingTrend.js';
+assert.equal(BUSINESS_HEALTH_ROLLING_TREND_BUILD,118);
+const health=(period,{score=80,blockers=2,high=1,total=3,outstanding=1000,orders=2,attachments=0,exports=0}={})=>({period_month:period,month_end_readiness:{score,blockers:Array.from({length:blockers},(_,i)=>`b${i}`)},financial_anomalies:{summary:{high,total}},close_workflow:{payment:{summary:{outstanding_cents:outstanding,order_count:orders}},evidence_bundle_summary:{total_attachments:attachments},export_packages:Array.from({length:exports},(_,i)=>({id:i}))},profitability:{summary:{projects:4,high:1}},it_health:{score:95,status:'green'}});
+const older=health('2026-07',{score:95,blockers:0,high:0,total:1,outstanding:0,attachments:2,exports:1});
+const prior=health('2026-08',{score:75,blockers:2,high:1,total:3,outstanding:1000,attachments:0,exports:0});
+const current=health('2026-09',{score:55,blockers:4,high:2,total:5,outstanding:2500,attachments:0,exports:0});
+const persistent=buildBusinessHealthRollingTrend(current,prior,older);assert.equal(persistent.state,'persistent_worsening');assert.ok(persistent.summary.persistent_worsening_count>=4);assert.equal(persistent.review_items[0].human_review_required,true);assert.equal(persistent.boundaries.trend_history_persistence,false);assert.equal(persistent.boundaries.mutation_capability,'none');assert.ok(persistent.markdown.includes('Three-period operational-quality signals'));
+const recovered=buildBusinessHealthRollingTrend(health('2026-09',{score:95,blockers:0,high:0,total:1,outstanding:0,attachments:2,exports:1}),prior,older);assert.ok(recovered.summary.recovering_count>=4);assert.equal(recovered.current_snapshots.it_health.note.includes('not graded'),true);console.log('Release 467 Build 118 Business Health Rolling Trend runtime proof: PASS');

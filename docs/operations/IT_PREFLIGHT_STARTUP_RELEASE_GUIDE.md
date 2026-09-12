@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 117 — Business Health Period Comparison & Trend Review**.
+**Release 467 Build 118 — Business Health Rolling Trend & Escalation Review**.
 
-The last fully verified Development and Production checkpoint is Build 116:
+The last fully verified Development and Production checkpoint is Build 117:
 
-- SHA `4661b541df3ad92c70e19c85673560f969cda85b`
-- tree `475d13cd5fda9e9ac694861c8df44c5ede8a5db0`
-- System Gate `34699742783`
-- Current Application Quality Proof `34699742812`
-- I.T. Admin Runtime Proof `34699742791`
-- Repository Branch Hygiene `34699742779`
-- Production Pages Deploy `34699821018`
-- Production Live Resource Integrity `34699867959`
+- SHA `98ca6ee1a501d7ba8484f1b5ea31be696c907034`
+- tree `e06d666285f654baded4f0948eff6984b38fc41b`
+- System Gate `34700359583`
+- Current Application Quality Proof `34700359610`
+- I.T. Admin Runtime Proof `34700359586`
+- Repository Branch Hygiene `34700359581`
+- Production Pages Deploy `34700443075`
+- Production Live Resource Integrity `34700490013`
 
 ## Canonical Development target
 
@@ -33,8 +33,8 @@ The last fully verified Development and Production checkpoint is Build 116:
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 8. A later build ingests that completed six-proof closure.
 
-## Build 117 technical boundary
+## Build 118 technical boundary
 
-Build 117 is a read-only selected-period versus prior-period Business Health comparison. Only period-specific operational-quality evidence is graded. Profitability and I.T. are current snapshots only. Worsening signals are review guidance, not action authority. The feature must not persist acknowledgement/resolution, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
+Build 118 is a read-only three-period Business Health Rolling Trend & Escalation Review. It recomputes current and two prior period-specific operational-quality snapshots and distinguishes persistent worsening from new worsening and recovery. Profitability and I.T. remain current snapshots only. Escalation means human review only. The feature must not create trend-history storage, persist acknowledgement/resolution, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate D1 business data/R2/bindings, restore business data or mutate Production.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.

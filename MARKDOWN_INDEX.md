@@ -2,26 +2,26 @@
 
 ## Current operating authority
 
-Current candidate: **Release 467 Build 117 — Business Health Period Comparison & Trend Review**.
+Current candidate: **Release 467 Build 118 — Business Health Rolling Trend & Escalation Review**.
 
-- `AI_HANDOFF.md` — restart authority and exact Build 116 closure ingested by Build 117.
-- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 117 scope and release sequence.
+- `AI_HANDOFF.md` — restart authority and exact Build 117 closure ingested by Build 118.
+- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 118 scope and release sequence.
 - `SANITY_HEALTH_CHECK.md` — current safety and mutation boundary.
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — I.T./preflight/restart procedure.
-- `docs/operations/RELEASE_467_BUILD_117_BUSINESS_HEALTH_PERIOD_COMPARISON.md` — Build 117 design/evidence contract.
-- `release467-build117-business-health-period-comparison.json` — machine authority for current closure candidate.
-- `release467-build116-business-health-operator-briefs.json` — ingested Build 116 six-proof closure.
+- `docs/operations/RELEASE_467_BUILD_118_BUSINESS_HEALTH_ROLLING_TREND.md` — Build 118 design/evidence contract.
+- `release467-build118-business-health-rolling-trend.json` — machine authority for current closure candidate.
+- `release467-build117-business-health-period-comparison.json` — ingested Build 117 six-proof closure.
 - `current-development-authority.json` — current release pointer.
 
 ## Current inherited proof
 
-- SHA `4661b541df3ad92c70e19c85673560f969cda85b`
-- tree `475d13cd5fda9e9ac694861c8df44c5ede8a5db0`
-- System `34699742783`
-- Quality `34699742812`
-- I.T. `34699742791`
-- Hygiene `34699742779`
-- Production Pages `34699821018`
-- Production Live Resource Integrity `34699867959`
+- SHA `98ca6ee1a501d7ba8484f1b5ea31be696c907034`
+- tree `e06d666285f654baded4f0948eff6984b38fc41b`
+- System `34700359583`
+- Quality `34700359610`
+- I.T. `34700359586`
+- Hygiene `34700359581`
+- Production Pages `34700443075`
+- Production Live Resource Integrity `34700490013`
 
-Build 116's proof is recorded by Build 117 restart ingestion. Build 117 may not self-record its later external closure.
+Build 117's proof is recorded by Build 118 restart ingestion. Build 118 may not self-record its later external closure.

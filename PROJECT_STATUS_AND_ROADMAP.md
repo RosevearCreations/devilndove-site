@@ -2,35 +2,36 @@
 
 ## Current checkpoint
 
-**Release 467 Build 117 — Business Health Period Comparison & Trend Review** is the active closure candidate.
+**Release 467 Build 118 — Business Health Rolling Trend & Escalation Review** is the active closure candidate.
 
-Build 116 is the last fully verified Development + Production checkpoint:
+Build 117 is the last fully verified Development + Production checkpoint:
 
-- SHA `4661b541df3ad92c70e19c85673560f969cda85b`
-- tree `475d13cd5fda9e9ac694861c8df44c5ede8a5db0`
-- System Gate `34699742783`
-- Current Application Quality `34699742812`
-- I.T. Admin Runtime `34699742791`
-- Repository Branch Hygiene `34699742779`
-- Production Pages Deploy `34699821018`
-- Production Live Resource Integrity `34699867959`
+- SHA `98ca6ee1a501d7ba8484f1b5ea31be696c907034`
+- tree `e06d666285f654baded4f0948eff6984b38fc41b`
+- System Gate `34700359583`
+- Current Application Quality `34700359610`
+- I.T. Admin Runtime `34700359586`
+- Repository Branch Hygiene `34700359581`
+- Production Pages Deploy `34700443075`
+- Production Live Resource Integrity `34700490013`
 
-The Build 116 closure is recorded by Build 117 ingestion, not a Build 116 self-claim.
+The Build 117 closure is recorded by Build 118 ingestion, not a Build 117 self-claim.
 
-## Build 117 — Business Health Period Comparison & Trend Review
+## Build 118 — Business Health Rolling Trend & Escalation Review
 
-Goal: add useful month-over-month review context without inventing history or creating another write authority.
+Goal: separate persistent deterioration from single-period noise without adding a historical write model.
 
 Delivered candidate scope:
-1. Selected accounting month versus immediately preceding month.
-2. Period-specific trend metrics for month-end readiness, blockers, financial anomalies, outstanding balance, evidence gap and accountant-export gap.
-3. Worsening signals sort ahead of improving signals for human review.
-4. Build 116 operator briefing remains available and is combined into the exported Markdown handoff.
-5. Profitability and I.T. remain current snapshots only because their current authorities are not monthly historical ledgers.
-6. Existing Finance, Month End, Creator/Profitability and I.T. owner routes remain authoritative.
-7. No acknowledgement/resolution persistence or automatic business action.
-8. No Accounting posting/period close, Inventory/Creative/price mutation, provider action, schema/D1/R2/binding mutation or Production mutation.
-9. Canonical D1 migrations remain exactly `0001`–`0004`.
+1. Current accounting month plus the two immediately preceding months.
+2. Reuses Build 117 period-specific operational-quality metrics only.
+3. Classifies persistent worsening, reversal/new worsening, recovery, stabilization and sustained improvement.
+4. Persistent worsening sorts first for human escalation review.
+5. Existing current-period action queue, owner review packs and operator briefs remain authoritative.
+6. Markdown export combines current operator briefing, latest period comparison and rolling trend evidence.
+7. Profitability and I.T. remain current snapshots only.
+8. No trend-history table, acknowledgement/resolution persistence or automatic business action.
+9. No Accounting posting/period close, Inventory/Creative/price mutation, provider action, schema/D1/R2/binding mutation or Production mutation.
+10. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Release mechanics
 
@@ -40,4 +41,4 @@ Persistent branches remain `main` and `dev`.
 
 ## Next build
 
-Build 118 remains unauthorized until Build 117 receives its later exact Development and Production proof; Build 118 must ingest that closure.
+Build 119 remains unauthorized until Build 118 receives its later exact Development and Production proof; Build 119 must ingest that closure.
