@@ -8,6 +8,7 @@
 // Release 467 Build 125: admin routes bootstrap user-scoped browser workspace preferences and memory.
 // Release 467 Build 126: admin routes bootstrap user-scoped browser favorites and quick launch.
 // Release 467 Build 127: admin routes bootstrap manifest-backed context breadcrumbs and workspace return.
+// Release 467 Build 128: admin routes bootstrap read-only navigation help and keyboard shortcut reference.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
@@ -183,6 +184,8 @@ if (window.location.pathname.startsWith('/admin')) {
     .catch((error) => console.warn('[DD Build 126] admin favorites unavailable', error));
   void import('/public/js/admin-context-breadcrumbs-v127.js?v=467b127')
     .catch((error) => console.warn('[DD Build 127] admin context breadcrumbs unavailable', error));
+  void import('/public/js/admin-navigation-help-v128.js?v=467b128')
+    .catch((error) => console.warn('[DD Build 128] admin navigation help unavailable', error));
 } else {
   void import('/public/js/core/dd-public-module-visibility.mjs?v=440')
     .catch((error) => console.warn('[DD modules] public navigation module visibility unavailable', error));
