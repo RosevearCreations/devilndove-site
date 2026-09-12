@@ -4,6 +4,7 @@
   "title": "Customer Proof & Fulfilment Follow-through",
   "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
   "authority": "release467-build109-customer-proof-fulfilment",
+  "repair_note": "Candidate starting-point proof keys use the established generic release-truth names quality_run, it_admin_runtime_run and repository_hygiene_run; runtime feature scope is unchanged.",
   "starting_point": {
     "development": {
       "sha": "f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8",
