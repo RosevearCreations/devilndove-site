@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return**.
+**Release 467 Build 128 — Admin Navigation Help & Keyboard Shortcut Reference**.
 
-The last fully verified Development and Production checkpoint is Build 126:
+The last fully verified Development and Production checkpoint is Build 127:
 
-- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
-- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
-- System Gate `34724580675`
-- Current Application Quality `34724580676`
-- I.T. Admin Runtime `34724580648`
-- Repository Branch Hygiene `34724580646`
-- Production Pages Deploy `34724657853`
-- Production Live Resource Integrity `34724703548`
+- SHA `dead9393e6d8db5fbcbe776c3885da80cbe42163`
+- tree `efff42114b680218c756031fb2f92bc12e541b1c`
+- System Gate `34725275176`
+- Current Application Quality `34725275139`
+- I.T. Admin Runtime `34725275114`
+- Repository Branch Hygiene `34725275193`
+- Production Pages Deploy `34725363163`
+- Production Live Resource Integrity `34725405258`
 
 ## Canonical Development target
 
@@ -31,12 +31,12 @@ The last fully verified Development and Production checkpoint is Build 126:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 127 technical boundary
+## Build 128 technical boundary
 
-Build 127 adds one accessible Admin context breadcrumb using the existing `data/admin-navigation-modules.json` authority. When the current route resolves, the breadcrumb presents Admin, workspace, section and current tool context and gives nested tools a direct **Back to workspace** path.
+Build 128 adds one accessible Admin navigation-help dialog. It documents the existing navigation features rather than creating another navigation authority: `Ctrl/Cmd+K` for the Build 122 command palette, `Alt+Shift+F` for the Build 126 current-page favorite toggle, workspace memory/resume from Build 125, and Build 127 breadcrumbs/workspace return. `Alt+Shift+H` opens the help dialog and a visible Admin workspace-nav button offers the same action.
 
-The breadcrumb module is Admin-only and client-only. It stores no preferences or history, uses neither `localStorage` nor `sessionStorage`, and introduces no network write. The only new network behavior is a read-only manifest fetch; if it fails the module renders a safe Admin/current-page fallback.
+The help module is Admin-only and client-only. It stores no state, creates no server preference authority and introduces no network write. The dialog closes with Escape and returns focus to its opener.
 
-Build 127 adds no Accounting posting, period close, Inventory/Creative/Product/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
+Build 128 adds no Accounting posting, period close, Inventory/Creative/Product/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
