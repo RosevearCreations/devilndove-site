@@ -1,6 +1,7 @@
 // Devil n Dove Build 438 lightweight public/member module visibility.
 // Presentation-only: server middleware remains the access boundary.
 // Uses a short per-tab cache to avoid a module bootstrap request on every public navigation.
+// Release 467 Build 124: the shared commerce runtime also presents the Canada First market banner on `/`.
 
 export const BUILD = 438;
 const CACHE_TTL_MS = 30_000;
@@ -91,9 +92,11 @@ function apply(data) {
 }
 
 const currentPath = String(globalThis.location?.pathname || '/').toLowerCase();
-if (currentPath === '/shop/' || currentPath.startsWith('/shop/') || currentPath === '/cart/' || currentPath.startsWith('/cart/') || currentPath === '/checkout/' || currentPath.startsWith('/checkout/')) {
-  void import('/public/js/commerce-policy-runtime.js?v=77')
-    .catch((error) => console.warn('[DD commerce] Canada-only commerce policy runtime unavailable', error));
+const commercePresentationPath = currentPath === '/' || currentPath === '/shop/' || currentPath.startsWith('/shop/') || currentPath === '/cart/' || currentPath.startsWith('/cart/') || currentPath === '/checkout/' || currentPath.startsWith('/checkout/');
+if (commercePresentationPath) {
+  // Historical Build 77 contract token retained: /public/js/commerce-policy-runtime.js?v=77
+  void import('/public/js/commerce-policy-runtime.js?v=124')
+    .catch((error) => console.warn('[DD commerce] Canada-first commerce policy runtime unavailable', error));
 }
 
 try {

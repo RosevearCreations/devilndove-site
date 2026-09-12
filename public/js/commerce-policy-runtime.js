@@ -9,10 +9,13 @@ import {
 
 // Release 467 Build 77 — public presentation + checkout-address enforcement.
 // Build 78 carries the same Canada-only authority while allowing explicit local pickup.
+// Release 467 Build 124 adds a front-page Canada First banner and explicit U.S. pause metadata.
 // No network request, timer, storage mutation, payment call or commerce write is performed here.
 
 const path = String(globalThis.location?.pathname || '/').toLowerCase();
+const HOME_PATH = path === '/';
 const COMMERCE_PATH = path === '/shop/' || path.startsWith('/shop/') || path === '/cart/' || path.startsWith('/cart/') || path === '/checkout/' || path.startsWith('/checkout/');
+const POLICY_PRESENTATION_PATH = HOME_PATH || COMMERCE_PATH;
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -24,25 +27,40 @@ function escapeHtml(value) {
 }
 
 function ensurePolicyBanner() {
-  if (!COMMERCE_PATH || document.getElementById('ddCommercePolicyBanner')) return;
+  if (!POLICY_PRESENTATION_PATH || document.getElementById('ddCommercePolicyBanner')) return;
   const hero = document.querySelector('.hero');
   const container = document.querySelector('.container');
   if (!hero && !container) return;
   const banner = document.createElement('section');
   banner.id = 'ddCommercePolicyBanner';
   banner.className = 'card';
-  banner.setAttribute('aria-label', 'Storefront country policy');
+  banner.setAttribute('aria-label', HOME_PATH ? 'Canada First and U.S. shipping update' : 'Storefront country policy');
   banner.style.marginBottom = '18px';
+  banner.style.borderWidth = '2px';
   banner.dataset.commercePolicyVersion = COMMERCE_POLICY.version;
-  banner.innerHTML = `
-    <div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
-      <div style="max-width:860px">
-        <strong>Canada-only storefront</strong>
-        <div class="small" style="margin-top:6px">${escapeHtml(COMMERCE_POLICY.message)}</div>
-      </div>
-      <span class="pill">CAD • Canada</span>
-    </div>`;
-  if (hero?.parentNode) hero.insertAdjacentElement('afterend', banner);
+  banner.dataset.commerceCountryRestrictionsVersion = COMMERCE_POLICY.country_restrictions_version;
+  if (HOME_PATH) {
+    banner.dataset.canadaFirstMarketBanner = '1';
+    banner.innerHTML = `
+      <div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+        <div style="max-width:920px">
+          <strong>${escapeHtml(COMMERCE_POLICY.canada_first_banner_heading)}</strong>
+          <div class="small" style="margin-top:6px">${escapeHtml(COMMERCE_POLICY.canada_first_banner_message)}</div>
+        </div>
+        <span class="pill">Canada First</span>
+      </div>`;
+  } else {
+    banner.innerHTML = `
+      <div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+        <div style="max-width:860px">
+          <strong>Canada-only storefront</strong>
+          <div class="small" style="margin-top:6px">${escapeHtml(COMMERCE_POLICY.message)}</div>
+        </div>
+        <span class="pill">CAD • Canada</span>
+      </div>`;
+  }
+  if (HOME_PATH && hero?.parentNode) hero.insertAdjacentElement('beforebegin', banner);
+  else if (hero?.parentNode) hero.insertAdjacentElement('afterend', banner);
   else container?.prepend(banner);
 }
 
@@ -160,14 +178,19 @@ function hardenCheckoutAddressUi() {
 }
 
 function start() {
-  if (!COMMERCE_PATH) return;
+  if (!POLICY_PRESENTATION_PATH) return;
   ensurePolicyBanner();
   hardenCheckoutAddressUi();
   document.documentElement.dataset.ddCommercePolicyVersion = COMMERCE_POLICY.version;
+  document.documentElement.dataset.ddCommerceCountryRestrictionsVersion = COMMERCE_POLICY.country_restrictions_version;
   document.dispatchEvent(new CustomEvent('dd:commerce-policy-ready', { detail: {
     version: COMMERCE_POLICY.version,
+    country_restrictions_version: COMMERCE_POLICY.country_restrictions_version,
     country: COMMERCE_POLICY.selling_country_code,
     currency: COMMERCE_POLICY.currency,
+    market_strategy: COMMERCE_POLICY.market_strategy,
+    blocked_sales_country_codes: [...COMMERCE_POLICY.blocked_sales_country_codes],
+    blocked_shipping_country_codes: [...COMMERCE_POLICY.blocked_shipping_country_codes],
     us_sales_enabled: false,
     us_shipping_enabled: false,
   }}));
@@ -177,4 +200,5 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 else start();
 
 export const BUILD = 77;
+export const COUNTRY_RESTRICTIONS_BUILD = 124;
 export const CONTRACT = 'canada-only-commerce-runtime';
