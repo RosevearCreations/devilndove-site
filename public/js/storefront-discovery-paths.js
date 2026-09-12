@@ -2,6 +2,7 @@
 // Uses only the already-loaded /api/products payload. No Product request, mutation, provider call, or publication action is added.
 (() => {
   'use strict';
+  const build110AuditReady = import('/public/js/storefront-evidence-conversion-audit.js?v=467b110').catch(() => null);
 
   const BUILD = 107;
   const CONTRACT = 'storefront-discovery-paths';
@@ -107,6 +108,7 @@
   document.addEventListener('dd:shop:data', (event) => {
     sourcePayload = event.detail?.data || null;
     if (!sourcePayload) return;
+    void build110AuditReady.then(() => globalThis.DDStorefrontEvidenceConversionAudit?.renderShopAudit?.(sourcePayload));
     applyDiscovery();
   });
 

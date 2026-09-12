@@ -1,37 +1,37 @@
 # Devil n Dove — Sanity / Health Check
 
-**Release 467 Build 109 — Customer Proof & Fulfilment Follow-through is the current Development closure candidate.**
+**Release 467 Build 110 — Storefront Evidence & SEO Conversion Audit is the current Development closure candidate.**
 
-Last fully verified Development is Build 108:
-- SHA `f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8`
-- tree `6d2e524ceb06b90dad9e01e94297cdedde61920c`
-- System Gate `34663299696`: SUCCESS
-- Current Application Quality `34663299662`: SUCCESS
-- I.T. Admin Runtime Proof `34663299580`: SUCCESS
-- Repository Branch Hygiene `34663299597`: SUCCESS.
+Last fully verified Development is Build 109:
+- SHA `fe9d80dc8ace5dd5ac52f877ea16badf47b27c66`
+- tree `a8b8c6e0910cb840c78afa468701929d733875d2`
+- System Gate `34666034487`: SUCCESS
+- Current Application Quality `34666034490`: SUCCESS
+- I.T. Admin Runtime Proof `34666034497`: SUCCESS
+- Repository Branch Hygiene `34666034518`: SUCCESS.
 
-Current Production is Build 108:
-- `main` `f9d68ea87a8c2622e8ec05e09e64f3a0672ba2b8`
-- tree `6d2e524ceb06b90dad9e01e94297cdedde61920c`
-- Production Pages Deploy `34663390560`: SUCCESS
-- Production Live Resource Integrity `34663433029`: SUCCESS.
+Current Production is Build 109:
+- `main` `fe9d80dc8ace5dd5ac52f877ea16badf47b27c66`
+- tree `a8b8c6e0910cb840c78afa468701929d733875d2`
+- Production Pages Deploy `34666119275`: SUCCESS
+- Production Live Resource Integrity `34666156495`: SUCCESS.
 
-## Current Build 109 boundary
+## Current Build 110 boundary
 
-- Uses the existing private custom-order status endpoint and page; no duplicate order authority is introduced.
-- Stage messaging now includes a customer-safe reviewed next step.
-- Fulfilment messaging distinguishes local pickup from Canada shipping without inventing tracking or handoff facts.
-- Completed orders can show optional review and finished-piece-photo prompts.
-- Photo privacy/consent status is visible as public permission available, private-only, or not recorded.
-- Customer-private proof remains private.
-- Public-use permission never equals publication authority; moderation remains required.
-- The page performs no customer submission or publication action.
-- The API adds no additional database query beyond the existing order/status/stage/photo/spec reads.
-- No Product/Inventory mutation, schema change, R2 write, provider execution or publication is introduced.
-- Build 108 Mobile Workshop Assistant and earlier Storefront/Product protections remain active.
+- Shop audits the Product payload it already loaded; no second Product request is introduced.
+- Product detail audits the facts already rendered to the buyer rather than adding a second Product authority.
+- Placeholder media is explicitly excluded from evidence counts and Product image schema.
+- Shop ItemList schema is derived from current public Products with real slugs/facts only.
+- Product structured data is aligned to buyer-visible Product facts and existing canonical/offer truth.
+- Collections ItemList schema mirrors its visible permanent discovery cards and crawlable links.
+- Custom Request exposes Service schema matching the visible reviewed-request service in Ontario, Canada.
+- Crawlable links connect proof-rich Products, collections, custom requests and local pickup without claiming unsupported Product customization.
+- Exactly one H1 remains preserved on the audited public/operator surfaces.
+- No Product/Inventory mutation, schema change, additional database read, R2 write, provider execution or provider publication is introduced.
+- Build 109 customer proof/fulfilment and earlier Storefront/Product protections remain active.
 
 ## Safety boundary
 
 Canonical migrations remain exactly `0001`–`0004`; no request-time schema mutation, Development-to-Production business-data overwrite, automatic provider execution/publication, marketplace/Social publication, Cloudflare Access mutation or automatic Production promotion is introduced. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CA/CAD commerce remains active, U.S. sales/shipping remain disabled, and local pickup remains supported.
 
-**Verdict:** Build 108 Development and Production are GREEN. Build 109 is correctly bounded as customer-safe presentation/follow-through over existing order evidence and must earn its own exact Development and Production proof before closure.
+**Verdict:** Build 109 Development and Production are GREEN. Build 110 is correctly bounded as a Storefront evidence/SEO/conversion audit over existing public facts and must earn its own exact Development and Production proof before closure.

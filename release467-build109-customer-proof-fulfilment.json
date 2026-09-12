@@ -2,7 +2,7 @@
   "release": 467,
   "build": 109,
   "title": "Customer Proof & Fulfilment Follow-through",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build109-customer-proof-fulfilment",
   "repair_note": "Candidate starting-point proof keys use the established generic release-truth names quality_run, it_admin_runtime_run and repository_hygiene_run; runtime feature scope is unchanged.",
   "starting_point": {
@@ -58,8 +58,31 @@
     "compatibility_renderer_copies_identical": true,
     "build109_source_gate_required": true
   },
-  "final_closure": null,
-  "production_checkpoint": null,
+  "final_closure": {
+    "dev_sha": "fe9d80dc8ace5dd5ac52f877ea16badf47b27c66",
+    "tree_sha": "a8b8c6e0910cb840c78afa468701929d733875d2",
+    "proofs": {
+      "system_gate_run": 34666034487,
+      "current_application_quality_run": 34666034490,
+      "it_admin_runtime_proof_run": 34666034497,
+      "branch_hygiene_run": 34666034518
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "ingested_by_build": 110
+  },
+  "production_checkpoint": {
+    "main_sha": "fe9d80dc8ace5dd5ac52f877ea16badf47b27c66",
+    "tree_sha": "a8b8c6e0910cb840c78afa468701929d733875d2",
+    "production_pages_deploy_run": 34666119275,
+    "production_live_resource_integrity_run": 34666156495,
+    "state": "PRODUCTION_GREEN"
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,
