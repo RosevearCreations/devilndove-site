@@ -2,34 +2,36 @@
 
 ## Current authority
 
-Release 467 Build 110 — **Storefront Evidence & SEO Conversion Audit** is the active Development closure candidate. It consumes the externally proven Build 109 closure and may not self-claim its own later exact-head acceptance.
+Release 467 Build 111 — **Orders-to-Fulfilment Reconciliation** is the active Development closure candidate. It consumes the externally proven Build 110 closure and may not self-claim its own later exact-head acceptance.
 
-Last fully verified Development is Build 109 — **Customer Proof & Fulfilment Follow-through**:
-- `dev` `fe9d80dc8ace5dd5ac52f877ea16badf47b27c66`
-- tree `a8b8c6e0910cb840c78afa468701929d733875d2`
-- System Gate `34666034487` SUCCESS
-- Current Application Quality `34666034490` SUCCESS
-- I.T. Admin Runtime Proof `34666034497` SUCCESS
-- Repository Branch Hygiene `34666034518` SUCCESS.
+Last fully verified Development is Build 110 — **Storefront Evidence & SEO Conversion Audit**:
+- `dev` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
+- tree `f92ba677efc109b1748f6892044e3f3c06500315`
+- System Gate `34667564542` SUCCESS
+- Current Application Quality `34667564497` SUCCESS
+- I.T. Admin Runtime Proof `34667564555` SUCCESS
+- Repository Branch Hygiene `34667564565` SUCCESS.
 
-Current Production is also Build 109:
-- `main` `fe9d80dc8ace5dd5ac52f877ea16badf47b27c66`
-- tree `a8b8c6e0910cb840c78afa468701929d733875d2`
-- Production Pages Deploy `34666119275` SUCCESS
-- Production Live Resource Integrity `34666156495` SUCCESS.
+Current Production is also Build 110:
+- `main` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
+- tree `f92ba677efc109b1748f6892044e3f3c06500315`
+- Production Pages Deploy `34669029532` SUCCESS
+- Production Live Resource Integrity `34669069642` SUCCESS.
 
-## Build 110 scope
+## Build 111 scope
 
-Build 110 audits the existing public Storefront rather than creating a second Product, media or SEO system. Shop derives evidence counts and ItemList structured data from its already-loaded Product payload. Product detail derives buyer-evidence guidance from already-rendered facts and removes placeholder media from Product schema. Collections structured data mirrors its visible permanent buyer paths, and Custom Request exposes a Service schema plus crawlable paths back to real Storefront evidence.
+Build 111 extends the existing Build 82 fulfilment operating workspace without creating a second Orders workflow. The Build 82 Operations-owned transition contract remains the only non-financial status mutation owner. A new GET-only reconciliation consumes the existing Build 82 workflow, Build 27 Finance settlement readiness, Build 29 Production readiness (including Build 26 Inventory evidence), and one bounded order-item/status-history evidence query.
 
-Build 110 adds no Product API request, no additional database query, no new schema, no R2 write, no Product/Inventory mutation and no provider-publication action. Missing facts remain missing; placeholder media is not treated as proof; visible buyer facts and structured data must agree.
+It surfaces status-history drift, financial contradictions, fulfilment-mode mismatches, unresolved Product references, shared Product readiness shortages/uncertainty, missing evidence-review history and incomplete return evidence. Shared Product readiness is evidence only, not an order-specific reservation or production authorization. The Build 111 UI can hold existing Build 82 transition buttons when reconciliation is blocked or still requires review.
 
-## Autonomous direction after Build 110
+Build 111 adds no second order mutation route, no customer-message send, no inventory reservation/deduction, no production post, no payment/refund/accounting execution, no schema/R2 change and no provider execution/publication.
 
-Build 111 = Orders-to-Fulfilment Reconciliation; Build 112 = Inventory/Material-Usage Reconciliation; Build 113 = Accountant/Month-End Evidence Depth.
+## Autonomous direction after Build 111
+
+Build 112 = Inventory & Material-Usage Reconciliation; Build 113 = Accountant & Month-End Evidence Depth.
 
 ## Restart rule
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 110 must pass exact merged-`dev` System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene plus canonical Development D1/bindings proof and exact Preview smoke before any `main` promotion. Build 111 must ingest Build 110's final external Development + Production closure.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 111 must pass exact merged-`dev` System Gate, Current Application Quality, I.T. Admin Runtime Proof and Repository Branch Hygiene plus canonical Development D1/bindings proof and exact Preview smoke before any `main` promotion. Build 112 must ingest Build 111's final external Development + Production closure.
 
 Canonical migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private-media remains `EVIDENCE_DEPENDENT`. Canada-only CAD commerce remains authoritative, U.S. sales/shipping remain disabled, and local pickup remains supported.

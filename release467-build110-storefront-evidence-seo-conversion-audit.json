@@ -2,7 +2,7 @@
   "release": 467,
   "build": 110,
   "title": "Storefront Evidence & SEO Conversion Audit",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build110-storefront-evidence-seo-conversion-audit",
   "starting_point": {
     "development": {
@@ -56,8 +56,31 @@
     "canada_only_commerce_preserved": true,
     "build110_source_gate_required": true
   },
-  "final_closure": null,
-  "production_checkpoint": null,
+  "final_closure": {
+    "dev_sha": "a881a7d6c6f38a297511b0446e780c9f28574c9d",
+    "tree_sha": "f92ba677efc109b1748f6892044e3f3c06500315",
+    "proofs": {
+      "system_gate_run": 34667564542,
+      "current_application_quality_run": 34667564497,
+      "it_admin_runtime_proof_run": 34667564555,
+      "branch_hygiene_run": 34667564565
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "canonical_development_d1_proof": true,
+    "development_data_authority_read_only": true,
+    "preview_bindings_proof": true,
+    "non_secret_preview_smoke": true,
+    "regression_evidence": true,
+    "ingested_by_build": 111
+  },
+  "production_checkpoint": {
+    "main_sha": "a881a7d6c6f38a297511b0446e780c9f28574c9d",
+    "tree_sha": "f92ba677efc109b1748f6892044e3f3c06500315",
+    "production_pages_deploy_run": 34669029532,
+    "production_live_resource_integrity_run": 34669069642,
+    "state": "PRODUCTION_GREEN"
+  },
   "closure_policy": {
     "candidate_must_not_self_claim_final_proof": true,
     "requires_exact_dev_head_four_proof": true,

@@ -4,31 +4,33 @@
 
 ## Verified Development
 
-Build 109 — Customer Proof & Fulfilment Follow-through is the last fully verified checkpoint:
-- `dev` `fe9d80dc8ace5dd5ac52f877ea16badf47b27c66`
-- tree `a8b8c6e0910cb840c78afa468701929d733875d2`
-- System Gate `34666034487` SUCCESS
-- Current Application Quality `34666034490` SUCCESS
-- I.T. Admin Runtime Proof `34666034497` SUCCESS
-- Repository Branch Hygiene `34666034518` SUCCESS.
+Build 110 — Storefront Evidence & SEO Conversion Audit is the last fully verified checkpoint:
+- `dev` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
+- tree `f92ba677efc109b1748f6892044e3f3c06500315`
+- System Gate `34667564542` SUCCESS
+- Current Application Quality `34667564497` SUCCESS
+- I.T. Admin Runtime Proof `34667564555` SUCCESS
+- Repository Branch Hygiene `34667564565` SUCCESS.
 
 ## Verified Production
 
-Build 109 is the current Production checkpoint:
-- `main` `fe9d80dc8ace5dd5ac52f877ea16badf47b27c66`
-- tree `a8b8c6e0910cb840c78afa468701929d733875d2`
-- Production Pages Deploy `34666119275` SUCCESS
-- Production Live Resource Integrity `34666156495` SUCCESS.
+Build 110 is the current Production checkpoint:
+- `main` `a881a7d6c6f38a297511b0446e780c9f28574c9d`
+- tree `f92ba677efc109b1748f6892044e3f3c06500315`
+- Production Pages Deploy `34669029532` SUCCESS
+- Production Live Resource Integrity `34669069642` SUCCESS.
 
-## Build 110 operational boundary
+## Build 111 operational boundary
 
-Build 110 — **Storefront Evidence & SEO Conversion Audit** is the active Development closure candidate. It audits existing Storefront Product facts, buyer-visible Product detail, Collections paths and the Custom Request service without adding a second Product/media/SEO authority.
+Build 111 — **Orders-to-Fulfilment Reconciliation** is the active Development closure candidate. It keeps the existing Build 82 Operations-owned fulfilment transition contract as the sole non-financial order-status mutation owner.
 
-Shop uses the Product payload it already loaded. Product detail uses already-rendered buyer facts. Placeholder media is excluded from evidence and Product schema. Collections structured data mirrors visible permanent discovery paths, and Custom Request Service schema mirrors the visible reviewed custom-request service in Ontario, Canada. No additional Product API request, database query, canonical migration, R2 write, Product/Inventory mutation or provider publication is introduced.
+Build 111 adds a GET-only reconciliation over the Build 82 workflow, Build 27 Finance settlement readiness, Build 29 Production readiness (including Build 26 Inventory fulfilment evidence), and one bounded order-item/status-history evidence read. It surfaces contradictions and missing evidence before an operator uses the existing transition controls. Shared Product readiness is never interpreted as an order-specific reservation or production authorization.
+
+No second order mutation route, customer-message send, inventory reservation/deduction, production post, payment/refund/accounting execution, canonical migration, R2 mutation or provider action is introduced.
 
 ## Restart-integrity protocol
 
-`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 110 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 111 must ingest Build 110's final external closure.
+`EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1` remains authoritative. Build 111 must pass exact merged-`dev` System Gate + Current Application Quality + I.T. Admin Runtime Proof + Repository Branch Hygiene, canonical Development D1/binding proof and exact Preview smoke. Only that exact green tree may be promoted to `main`. Build 112 must ingest Build 111's final external closure.
 
 The runtime I.T., preflight and reliability pages cannot self-attest GitHub/Cloudflare workflow status. A local GREEN diagnostic never substitutes for exact external release proof.
 
