@@ -2,30 +2,30 @@
 
 ## Current operating authority
 
-Current candidate: **Release 467 Build 127 — Admin Context Breadcrumbs & Workspace Return**.
+Current candidate: **Release 467 Build 128 — Admin Navigation Help & Keyboard Shortcut Reference**.
 
-- `AI_HANDOFF.md` — restart authority and exact Build 126 closure ingested by Build 127.
-- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 127 scope and next direction.
+- `AI_HANDOFF.md` — restart authority and exact Build 127 closure ingested by Build 128.
+- `PROJECT_STATUS_AND_ROADMAP.md` — current Build 128 scope and next direction.
 - `SANITY_HEALTH_CHECK.md` — current safety and mutation boundary.
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md` — I.T./preflight/restart procedure.
-- `docs/operations/RELEASE_467_BUILD_127_ADMIN_CONTEXT_BREADCRUMBS_WORKSPACE_RETURN.md` — Build 127 Admin-context contract.
-- `release467-build127-admin-context-breadcrumbs-workspace-return.json` — machine authority for current closure candidate.
-- `release467-build126-admin-favorites-quick-launch.json` — ingested Build 126 six-proof closure.
+- `docs/operations/RELEASE_467_BUILD_128_ADMIN_NAVIGATION_HELP_KEYBOARD_SHORTCUT_REFERENCE.md` — Build 128 navigation-help contract.
+- `release467-build128-admin-navigation-help-keyboard-shortcut-reference.json` — machine authority for current closure candidate.
+- `release467-build127-admin-context-breadcrumbs-workspace-return.json` — ingested Build 127 six-proof closure.
 - `current-development-authority.json` — current release pointer.
 
 ## Current inherited proof
 
-- SHA `af4dec5acdaf2b01a35d52731863786bee197315`
-- tree `b8e410f0c517d3b0d59d48cf4dd7f2acfe6e21a3`
-- System Gate `34724580675`
-- Current Application Quality `34724580676`
-- I.T. Admin Runtime `34724580648`
-- Repository Branch Hygiene `34724580646`
-- Production Pages Deploy `34724657853`
-- Production Live Resource Integrity `34724703548`
+- SHA `dead9393e6d8db5fbcbe776c3885da80cbe42163`
+- tree `efff42114b680218c756031fb2f92bc12e541b1c`
+- System Gate `34725275176`
+- Current Application Quality `34725275139`
+- I.T. Admin Runtime `34725275114`
+- Repository Branch Hygiene `34725275193`
+- Production Pages Deploy `34725363163`
+- Production Live Resource Integrity `34725405258`
 
-Build 126's proof is recorded by Build 127 restart ingestion. Build 127 may not self-record its later external closure.
+Build 127's proof is recorded by Build 128 restart ingestion. Build 128 may not self-record its later external closure.
 
-## Admin convenience-state note
+## Admin navigation note
 
-Workspace memory and favorites remain browser-local convenience state scoped to the signed-in Admin user ID. Build 127's breadcrumbs add no saved state at all; they read the existing Admin navigation manifest and current route only.
+The Build 122 command palette, Build 125 workspace memory, Build 126 favorites and Build 127 context breadcrumbs remain separate runtime contracts. Build 128 only provides an accessible help/reference layer over those existing features and adds no saved state or navigation authority.
