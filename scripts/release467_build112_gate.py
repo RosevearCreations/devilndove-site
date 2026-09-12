@@ -118,7 +118,7 @@ for body,label,tokens in (
 for body,label in ((it_api,'I.T. API'),(reliability,'Reliability'),(preflight,'Deployment Preflight')):
     req('Build 112' in body or 'build:112' in re.sub(r'\s+','',body),f'{label} must identify Build 112')
     req(B111_SHA in body and B111_TREE in body and str(B111_PAGES) in body and str(B111_LIVE) in body,f'{label} must retain exact Build 111 six-proof baseline')
-    for run in B111_PROOFS.values(): req(str(run) in body,f'{label} missing Build 111 proof {run}')
+    for proof_run in B111_PROOFS.values(): req(str(proof_run) in body,f'{label} missing Build 111 proof {proof_run}')
 for value in (B111_SHA,B111_TREE,*map(str,B111_PROOFS.values()),str(B111_PAGES),str(B111_LIVE)):
     req(value in release_doc,f'Build 112 release document missing Build 111 closure evidence: {value}')
 
