@@ -2,36 +2,36 @@
 
 ## Current checkpoint
 
-**Release 467 Build 114 — Business Health Action Queue & Owner Routing** is the active closure candidate.
+**Release 467 Build 115 — Business Health Review Packs & Owner Handoff** is the active closure candidate.
 
-Build 113 is the last fully verified Development + Production checkpoint:
+Build 114 is the last fully verified Development + Production checkpoint:
 
-- SHA `9dca8383a1507838539820fb667aaea192ed4098`
-- tree `36f473d66011c1138426346bcb0c553bfd2a69b1`
-- System Gate `34696252402`
-- Current Application Quality `34696252394`
-- I.T. Admin Runtime `34696252388`
-- Repository Branch Hygiene `34696252396`
-- Production Pages Deploy `34696344689`
-- Production Live Resource Integrity `34696386137`
+- SHA `5ff61e8391437c5d3369c38f5bf4a1088babc63c`
+- tree `7d7c0ebf9cfa51452438e9d46fd98b3e3550926f`
+- System Gate `34697432158`
+- Current Application Quality `34697432135`
+- I.T. Admin Runtime `34697432119`
+- Repository Branch Hygiene `34697432225`
+- Production Pages Deploy `34697511211`
+- Production Live Resource Integrity `34697551264`
 
-The Build 113 closure is recorded by Build 114 ingestion, not a Build 113 self-claim.
+The Build 114 closure is recorded by Build 115 ingestion, not a Build 114 self-claim.
 
-## Build 114 — Business Health Action Queue & Owner Routing
+## Build 115 — Business Health Review Packs & Owner Handoff
 
-Goal: make existing cross-business evidence immediately actionable for a human operator without adding a second write authority.
+Goal: make the Build 114 prioritized action queue easier for a human operator to work without creating another write authority.
 
 Delivered candidate scope:
-1. Pure read-only queue classifier.
-2. Authenticated GET-only endpoint reusing the existing Business Health engine once per request.
-3. Deterministic blocking/attention/review sorting.
-4. Stable action deduplication.
-5. Finance anomaly routing.
-6. Month-end incomplete-check routing.
-7. Creator/Finance profitability-risk routing.
-8. I.T. health routing.
-9. Unified Business Health page with existing evidence plus owner queue.
-10. No schema, D1/R2 business-data, Accounting, Inventory, Creative, provider or Production mutation.
+1. Pure read-only review-pack classifier over the existing Build 114 action queue.
+2. Authenticated GET-only endpoint reusing Business Health and the queue once per request.
+3. Owner grouping for Finance, Month End, Creator/Profitability and I.T.
+4. Available structured evidence carried with each queued action.
+5. Explicit human review/handoff steps.
+6. Deterministic pack and action ordering.
+7. No acknowledgement/resolution persistence.
+8. Existing owner routes and write authorities remain unchanged.
+9. No schema, D1/R2 business-data, Accounting, Inventory, Creative, pricing, provider or Production mutation.
+10. READY remains informational and never authorizes automatic execution.
 
 ## Release mechanics
 
@@ -41,4 +41,4 @@ Persistent branches remain `main` and `dev`. Canonical migrations remain exactly
 
 ## Next build
 
-Build 115 remains unauthorized until Build 114 receives its later exact Development and Production proof; Build 115 must ingest that closure.
+Build 116 remains unauthorized until Build 115 receives its later exact Development and Production proof; Build 116 must ingest that closure.

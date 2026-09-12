@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 114 — Business Health Action Queue & Owner Routing**.
+**Release 467 Build 115 — Business Health Review Packs & Owner Handoff**.
 
-The last fully verified Development and Production checkpoint is Build 113:
+The last fully verified Development and Production checkpoint is Build 114:
 
-- SHA `9dca8383a1507838539820fb667aaea192ed4098`
-- tree `36f473d66011c1138426346bcb0c553bfd2a69b1`
-- System Gate `34696252402`
-- Current Application Quality Proof `34696252394`
-- I.T. Admin Runtime Proof `34696252388`
-- Repository Branch Hygiene `34696252396`
-- Production Pages Deploy `34696344689`
-- Production Live Resource Integrity `34696386137`
+- SHA `5ff61e8391437c5d3369c38f5bf4a1088babc63c`
+- tree `7d7c0ebf9cfa51452438e9d46fd98b3e3550926f`
+- System Gate `34697432158`
+- Current Application Quality Proof `34697432135`
+- I.T. Admin Runtime Proof `34697432119`
+- Repository Branch Hygiene `34697432225`
+- Production Pages Deploy `34697511211`
+- Production Live Resource Integrity `34697551264`
 
 ## Canonical Development target
 
@@ -33,8 +33,8 @@ The last fully verified Development and Production checkpoint is Build 113:
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 8. A later build ingests that completed six-proof closure.
 
-## Build 114 technical boundary
+## Build 115 technical boundary
 
-Build 114 is a read-only Business Health action queue and owner-routing layer. It must not post Accounting, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate R2/bindings, restore business data or mutate Production. Existing module services remain the action owners.
+Build 115 is a read-only Business Health Review Packs and human owner-handoff layer over the proven Build 114 action queue. It may carry evidence and review steps, but it must not persist acknowledgement/resolution, post Accounting, close a period, mutate Inventory or Creative records, change prices, execute/publish providers, create schema, mutate R2/bindings, restore business data or mutate Production. Existing module services remain the action owners.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
