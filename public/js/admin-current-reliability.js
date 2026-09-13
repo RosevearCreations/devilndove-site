@@ -11,10 +11,17 @@
   }
 
   function renderGovernance(r) {
-    const g = r.governance || {}, rec = r.recovery || {}, drift = r.drift || {}, provenance = r.provenance || {};
+    const g = r.governance || {}, rec = r.recovery || {}, drift = r.drift || {}, provenance = r.provenance || {}, transport = provenance.production_proof_transport_policy || {}, production = provenance.current_production || {};
     document.getElementById('reliabilityGovernance').innerHTML = `
       <div class="rel-check"><span>Current release authority</span><span>${esc(g.current_release_authority || provenance.current_operator_authority || 'unknown')}</span></div>
       <div class="rel-check"><span>Production promotion proofs</span><span>${esc(g.production_promotion_proof_count ?? 'unknown')}</span></div>
+      <div class="rel-check"><span>Production closure proofs</span><span>${esc(g.production_closure_proof_count ?? 'unknown')}</span></div>
+      <div class="rel-check"><span>Production baseline</span><span>Build ${esc(production.build ?? 'unknown')}</span></div>
+      <div class="rel-check"><span>Production Pages proof</span><span>${esc(production.production_pages_deploy_run ?? 'unknown')}</span></div>
+      <div class="rel-check"><span>Live-resource proof</span><span>${esc(production.production_live_resource_integrity_run ?? 'unknown')}</span></div>
+      <div class="rel-check"><span>Live-resource retry attempts</span><span>${esc(transport.max_attempts ?? 'unknown')}</span></div>
+      <div class="rel-check"><span>Permanent 4xx fail closed</span><span>${transport.permanent_4xx_fail_closed === true ? 'YES' : 'REVIEW'}</span></div>
+      <div class="rel-check"><span>Resource correctness fail closed</span><span>${transport.resource_correctness_fail_closed === true ? 'YES' : 'REVIEW'}</span></div>
       <div class="rel-check"><span>Rollback readiness</span><span>${esc(g.rollback_readiness || 'unknown')}</span></div>
       <div class="rel-check"><span>Native GitHub ruleset</span><span>${esc(g.native_github_ruleset || 'unknown')}</span></div>
       <div class="rel-check"><span>Required status context</span><span>${esc(g.required_status_context || '')}</span></div>
