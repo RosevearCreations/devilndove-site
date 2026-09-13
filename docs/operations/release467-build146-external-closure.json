@@ -1,0 +1,20 @@
+{
+  "release": 467,
+  "build": 146,
+  "title": "Resilient Cart, Guest Checkout & Payment Recovery",
+  "state": "PRODUCTION_GREEN",
+  "dev_sha": "d0ae95999e920125e5e7cdf0b0764a07e303b082",
+  "tree_sha": "6f682c80af77d18a46f31cfdc162846c002ee6c1",
+  "development_proofs": {
+    "system_gate": 34769450462,
+    "current_application_quality": 34769450571,
+    "it_admin_runtime": 34769450487,
+    "repository_branch_hygiene": 34769450546
+  },
+  "production_proofs": {
+    "production_pages": 34769541728,
+    "production_live_resources": 34769586008
+  },
+  "ingested_by_build": 147,
+  "note": "Build 147 startup ingested the later external Build 146 six-proof closure; Build 146 did not self-record future proof."
+}
